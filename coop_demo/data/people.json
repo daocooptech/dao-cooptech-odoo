@@ -3,7 +3,6 @@
   "name": "Дашкевич Данил Игоревич",
   "city": "Сочи",
   "category": "Рабочий персонал",
-  "profession": "Электромонтажник, электромонтер, техник-электрик",
   "trust": 92,
   "skills": [
    "Электромонтаж",
@@ -13,858 +12,858 @@
   ],
   "avatar": "avatars/52.jpg",
   "verified": true,
-  "age": 39
+  "age": 39,
+  "specialization": "Электромонтажник, электромонтер, техник-электрик"
  },
  {
   "name": "Иванова Мария Петровна",
   "city": "Красноярск",
   "category": "Рабочий персонал",
-  "profession": "Бетонщик, арматурщик, каменщик",
   "trust": 78,
   "skills": [
    "Кирпичная кладка"
   ],
   "avatar": "avatars/48.jpg",
   "verified": false,
-  "age": 34
+  "age": 34,
+  "specialization": "Бетонщик, арматурщик, каменщик"
  },
  {
   "name": "Петров Сергей Викторович",
   "city": "Москва",
   "category": "Информационные технологии",
-  "profession": "Программирование, Разработка",
   "trust": 65,
   "skills": [
    "Программирование"
   ],
   "avatar": "avatars/60.jpg",
   "verified": false,
-  "age": 29
+  "age": 29,
+  "specialization": "Программирование, Разработка"
  },
  {
   "name": "Козлов Артём Викторович",
   "city": "Новосибирск",
   "category": "Рабочий персонал",
-  "profession": "Сварщик",
   "trust": 70,
   "skills": [
    "Сварка"
   ],
   "avatar": "avatars/34.jpg",
   "verified": false,
-  "age": 24
+  "age": 24,
+  "specialization": "Сварщик"
  },
  {
   "name": "Смирнова Екатерина Андреевна",
   "city": "Санкт-Петербург",
   "category": "Финансы, бухгалтерия",
-  "profession": "Бухгалтерия",
   "trust": 88,
   "skills": [
    "Бухгалтерия"
   ],
   "avatar": "avatars/51.jpg",
   "verified": false,
-  "age": 31
+  "age": 31,
+  "specialization": "Бухгалтерия"
  },
  {
   "name": "Волков Игорь Николаевич",
   "city": "Екатеринбург",
   "category": "Автомобильный бизнес",
-  "profession": "Автослесарь, автомеханик",
   "trust": 95,
   "skills": [
    "Автомеханика"
   ],
   "avatar": "avatars/68.jpg",
   "verified": false,
-  "age": 45
+  "age": 45,
+  "specialization": "Автослесарь, автомеханик"
  },
  {
   "name": "Морозова Анна Сергеевна",
   "city": "Казань",
   "category": "Строительство, недвижимость",
-  "profession": "Дизайнер, художник",
   "trust": 73,
   "skills": [
    "Дизайн интерьера"
   ],
   "avatar": "avatars/25.jpg",
   "verified": false,
-  "age": 27
+  "age": 27,
+  "specialization": "Дизайнер, художник"
  },
  {
   "name": "Соколов Павел Дмитриевич",
   "city": "Ростов-на-Дону",
   "category": "Транспорт, логистика, перевозки",
-  "profession": "Логистика, ВЭД",
   "trust": 81,
   "skills": [
    "Логистика"
   ],
   "avatar": "avatars/8.jpg",
   "verified": false,
-  "age": 38
+  "age": 38,
+  "specialization": "Логистика, ВЭД"
  },
  {
   "name": "Лебедева Ольга Игоревна",
   "city": "Пермь",
   "category": "Искусство, развлечения, массмедиа",
-  "profession": "Флорист, декоратор",
   "trust": 90,
   "skills": [
    "Флористика"
   ],
   "avatar": "avatars/49.jpg",
   "verified": false,
-  "age": 52
+  "age": 52,
+  "specialization": "Флорист, декоратор"
  },
  {
   "name": "Новиков Максим Олегович",
   "city": "Владивосток",
   "category": "Искусство, развлечения, массмедиа",
-  "profession": "Фото, видео, звукооператоры",
   "trust": 60,
   "skills": [
    "Фотография"
   ],
   "avatar": "avatars/29.jpg",
   "verified": false,
-  "age": 22
+  "age": 22,
+  "specialization": "Фото, видео, звукооператоры"
  },
  {
   "name": "Кузнецова Дарья Викторовна",
   "city": "Воронеж",
   "category": "Производство, сервисное обслуживание",
-  "profession": "Швея, закройщик",
   "trust": 77,
   "skills": [
    "Швея"
   ],
   "avatar": "avatars/53.jpg",
   "verified": false,
-  "age": 29
+  "age": 29,
+  "specialization": "Швея, закройщик"
  },
  {
   "name": "Попов Артур Русланович",
   "city": "Уфа",
   "category": "Рабочий персонал",
-  "profession": "Слесарь, сантехник",
   "trust": 84,
   "skills": [
    "Сантехника"
   ],
   "avatar": "avatars/3.jpg",
   "verified": false,
-  "age": 35
+  "age": 35,
+  "specialization": "Слесарь, сантехник"
  },
  {
   "name": "Васильева Татьяна Михайловна",
   "city": "Самара",
   "category": "Юристы",
-  "profession": "Юрисконсульт",
   "trust": 92,
   "skills": [
    "Юриспруденция"
   ],
   "avatar": "avatars/43.jpg",
   "verified": false,
-  "age": 41
+  "age": 41,
+  "specialization": "Юрисконсульт"
  },
  {
   "name": "Зайцев Роман Сергеевич",
   "city": "Омск",
   "category": "Рабочий персонал",
-  "profession": "Столяр, плотник",
   "trust": 68,
   "skills": [
    "Плотницкие работы"
   ],
   "avatar": "avatars/41.jpg",
   "verified": false,
-  "age": 26
+  "age": 26,
+  "specialization": "Столяр, плотник"
  },
  {
   "name": "Павлова Виктория Андреевна",
   "city": "Челябинск",
   "category": "Маркетинг, реклама, PR",
-  "profession": "Маркетинг",
   "trust": 79,
   "skills": [
    "Маркетинг"
   ],
   "avatar": "avatars/59.jpg",
   "verified": false,
-  "age": 33
+  "age": 33,
+  "specialization": "Маркетинг"
  },
  {
   "name": "Семёнов Николай Петрович",
   "city": "Нижний Новгород",
   "category": "Сельское хозяйство",
-  "profession": "Пчеловодство, животноводство",
   "trust": 97,
   "skills": [
    "Пчеловодство"
   ],
   "avatar": "avatars/39.jpg",
   "verified": false,
-  "age": 58
+  "age": 58,
+  "specialization": "Пчеловодство, животноводство"
  },
  {
   "name": "Голубева Мария Александровна",
   "city": "Волгоград",
   "category": "Туризм, гостиницы, рестораны",
-  "profession": "Повар, кондитер",
   "trust": 55,
   "skills": [
    "Кулинария"
   ],
   "avatar": "avatars/7.jpg",
   "verified": false,
-  "age": 20
+  "age": 20,
+  "specialization": "Повар, кондитер"
  },
  {
   "name": "Виноградов Денис Игоревич",
   "city": "Краснодар",
   "category": "Производство, сервисное обслуживание",
-  "profession": "Швея, закройщик",
   "trust": 89,
   "skills": [
    "Кройка и шитьё"
   ],
   "avatar": "avatars/21.jpg",
   "verified": false,
-  "age": 47
+  "age": 47,
+  "specialization": "Швея, закройщик"
  },
  {
   "name": "Медведева Юлия Олеговна",
   "city": "Тюмень",
   "category": "Информационные технологии",
-  "profession": "Аналитика, Data Science",
   "trust": 83,
   "skills": [
    "Веб-аналитика"
   ],
   "avatar": "avatars/17.jpg",
   "verified": false,
-  "age": 36
+  "age": 36,
+  "specialization": "Аналитика, Data Science"
  },
  {
   "name": "Богданов Тимур Асланович",
   "city": "Иркутск",
   "category": "Наука, образование",
-  "profession": "Переводчик",
   "trust": 71,
   "skills": [
    "Переводчик (англ.)"
   ],
   "avatar": "avatars/37.jpg",
   "verified": false,
-  "age": 30
+  "age": 30,
+  "specialization": "Переводчик"
  },
  {
   "name": "Орлова Светлана Викторовна",
   "city": "Хабаровск",
   "category": "Спортивные клубы, фитнес, салоны красоты",
-  "profession": "Массажист, косметолог",
   "trust": 86,
   "skills": [
    "Массаж"
   ],
   "avatar": "avatars/42.jpg",
   "verified": false,
-  "age": 44
+  "age": 44,
+  "specialization": "Массажист, косметолог"
  },
  {
   "name": "Фёдоров Алексей Дмитриевич",
   "city": "Калининград",
   "category": "Сельское хозяйство",
-  "profession": "Ветеринар",
   "trust": 94,
   "skills": [
    "Ветеринария"
   ],
   "avatar": "avatars/67.jpg",
   "verified": false,
-  "age": 61
+  "age": 61,
+  "specialization": "Ветеринар"
  },
  {
   "name": "Никитина Полина Романовна",
   "city": "Ярославль",
   "category": "Рабочий персонал",
-  "profession": "Столяр, плотник",
   "trust": 66,
   "skills": [
    "Столярное дело"
   ],
   "avatar": "avatars/58.jpg",
   "verified": false,
-  "age": 25
+  "age": 25,
+  "specialization": "Столяр, плотник"
  },
  {
   "name": "Белова Инна Сергеевна",
   "city": "Москва",
   "category": "Административный персонал",
-  "profession": "Офис-менеджер, ассистент",
   "trust": 88,
   "skills": [
    "Офисное администрирование"
   ],
   "avatar": "avatars/6.jpg",
   "verified": false,
-  "age": 34
+  "age": 34,
+  "specialization": "Офис-менеджер, ассистент"
  },
  {
   "name": "Гришин Олег Валентинович",
   "city": "Екатеринбург",
   "category": "Безопасность",
-  "profession": "Охранник, контролёр",
   "trust": 91,
   "skills": [
    "Охрана объектов"
   ],
   "avatar": "avatars/38.jpg",
   "verified": false,
-  "age": 45
+  "age": 45,
+  "specialization": "Охранник, контролёр"
  },
  {
   "name": "Дмитриева Елена Игоревна",
   "city": "Санкт-Петербург",
   "category": "Высший и средний менеджмент",
-  "profession": "Руководитель проектов",
   "trust": 85,
   "skills": [
    "Управление проектами"
   ],
   "avatar": "avatars/16.jpg",
   "verified": false,
-  "age": 38
+  "age": 38,
+  "specialization": "Руководитель проектов"
  },
  {
   "name": "Ерёмин Станислав Петрович",
   "city": "Кемерово",
   "category": "Добыча сырья",
-  "profession": "Горный инженер",
   "trust": 77,
   "skills": [
    "Горное дело"
   ],
   "avatar": "avatars/24.jpg",
   "verified": false,
-  "age": 41
+  "age": 41,
+  "specialization": "Горный инженер"
  },
  {
   "name": "Жукова Наталья Александровна",
   "city": "Москва",
   "category": "Домашний, обслуживающий персонал",
-  "profession": "Домработница, няня",
   "trust": 93,
   "skills": [
    "Домашний персонал"
   ],
   "avatar": "avatars/62.jpg",
   "verified": false,
-  "age": 50
+  "age": 50,
+  "specialization": "Домработница, няня"
  },
  {
   "name": "Зимин Кирилл Дмитриевич",
   "city": "Новосибирск",
   "category": "Закупки",
-  "profession": "Менеджер по закупкам",
   "trust": 80,
   "skills": [
    "Снабжение"
   ],
   "avatar": "avatars/33.jpg",
   "verified": false,
-  "age": 29
+  "age": 29,
+  "specialization": "Менеджер по закупкам"
  },
  {
   "name": "Игнатьева Оксана Романовна",
   "city": "Красноярск",
   "category": "Медицина, фармацевтика",
-  "profession": "Медсестра, фельдшер",
   "trust": 96,
   "skills": [
    "Медицинский уход"
   ],
   "avatar": "avatars/26.jpg",
   "verified": false,
-  "age": 33
+  "age": 33,
+  "specialization": "Медсестра, фельдшер"
  },
  {
   "name": "Крылов Виталий Андреевич",
   "city": "Воронеж",
   "category": "Продажи, обслуживание клиентов",
-  "profession": "Менеджер по продажам",
   "trust": 72,
   "skills": [
    "Продажи"
   ],
   "avatar": "avatars/22.jpg",
   "verified": false,
-  "age": 27
+  "age": 27,
+  "specialization": "Менеджер по продажам"
  },
  {
   "name": "Лаврова Светлана Игоревна",
   "city": "Уфа",
   "category": "Розничная торговля",
-  "profession": "Продавец",
   "trust": 87,
   "skills": [
    "Розничные продажи"
   ],
   "avatar": "avatars/28.jpg",
   "verified": false,
-  "age": 44
+  "age": 44,
+  "specialization": "Продавец"
  },
  {
   "name": "Мельников Григорий Олегович",
   "city": "Пермь",
   "category": "Управление персоналом, тренинги",
-  "profession": "HR-менеджер",
   "trust": 82,
   "skills": [
    "Подбор персонала"
   ],
   "avatar": "avatars/36.jpg",
   "verified": false,
-  "age": 36
+  "age": 36,
+  "specialization": "HR-менеджер"
  },
  {
   "name": "Ильина Полина Петровна",
   "city": "Челябинск",
   "category": "Транспорт, логистика, перевозки",
-  "profession": "Логистика, ВЭД",
   "trust": 69,
   "skills": [
    "Логистика"
   ],
   "avatar": "avatars/10.jpg",
   "verified": false,
-  "age": 60
+  "age": 60,
+  "specialization": "Логистика, ВЭД"
  },
  {
   "name": "Панов Илья Юрьевич",
   "city": "Москва",
   "category": "Добыча сырья",
-  "profession": "Горный инженер",
   "trust": 70,
   "skills": [
    "Горное дело"
   ],
   "avatar": "avatars/23.jpg",
   "verified": false,
-  "age": 60
+  "age": 60,
+  "specialization": "Горный инженер"
  },
  {
   "name": "Лебедева Светлана Ивановна",
   "city": "Уфа",
   "category": "Транспорт, логистика, перевозки",
-  "profession": "Логистика, ВЭД",
   "trust": 98,
   "skills": [
    "Логистика"
   ],
   "avatar": "avatars/20.jpg",
   "verified": false,
-  "age": 64
+  "age": 64,
+  "specialization": "Логистика, ВЭД"
  },
  {
   "name": "Киселёва Ирина Алексеевна",
   "city": "Сочи",
   "category": "Рабочий персонал",
-  "profession": "Столяр, плотник",
   "trust": 87,
   "skills": [
    "Плотницкие работы"
   ],
   "avatar": "avatars/54.jpg",
   "verified": false,
-  "age": 42
+  "age": 42,
+  "specialization": "Столяр, плотник"
  },
  {
   "name": "Никитина Полина Юрьевна",
   "city": "Калининград",
   "category": "Информационные технологии",
-  "profession": "Аналитика, Data Science",
   "trust": 56,
   "skills": [
    "Веб-аналитика"
   ],
   "avatar": "avatars/12.jpg",
   "verified": false,
-  "age": 44
+  "age": 44,
+  "specialization": "Аналитика, Data Science"
  },
  {
   "name": "Родионова Екатерина Михайловна",
   "city": "Хабаровск",
   "category": "Домашний, обслуживающий персонал",
-  "profession": "Домработница, няня",
   "trust": 62,
   "skills": [
    "Домашний персонал"
   ],
   "avatar": "avatars/13.jpg",
   "verified": false,
-  "age": 53
+  "age": 53,
+  "specialization": "Домработница, няня"
  },
  {
   "name": "Ильина Татьяна Алексеевна",
   "city": "Омск",
   "category": "Розничная торговля",
-  "profession": "Продавец",
   "trust": 85,
   "skills": [
    "Розничные продажи"
   ],
   "avatar": "avatars/4.jpg",
   "verified": false,
-  "age": 54
+  "age": 54,
+  "specialization": "Продавец"
  },
  {
   "name": "Щербаков Пётр Викторович",
   "city": "Челябинск",
   "category": "Маркетинг, реклама, PR",
-  "profession": "Маркетинг",
   "trust": 97,
   "skills": [
    "Маркетинг"
   ],
   "avatar": "avatars/1.jpg",
   "verified": false,
-  "age": 60
+  "age": 60,
+  "specialization": "Маркетинг"
  },
  {
   "name": "Беляева Вера Петровна",
   "city": "Ростов-на-Дону",
   "category": "Продажи, обслуживание клиентов",
-  "profession": "Менеджер по продажам",
   "trust": 99,
   "skills": [
    "Продажи"
   ],
   "avatar": "avatars/57.jpg",
   "verified": false,
-  "age": 64
+  "age": 64,
+  "specialization": "Менеджер по продажам"
  },
  {
   "name": "Савельев Артём Викторович",
   "city": "Тюмень",
   "category": "Туризм, гостиницы, рестораны",
-  "profession": "Повар, кондитер",
   "trust": 96,
   "skills": [
    "Кулинария"
   ],
   "avatar": "avatars/19.jpg",
   "verified": false,
-  "age": 51
+  "age": 51,
+  "specialization": "Повар, кондитер"
  },
  {
   "name": "Щербакова Татьяна Ивановна",
   "city": "Владивосток",
   "category": "Домашний, обслуживающий персонал",
-  "profession": "Домработница, няня",
   "trust": 64,
   "skills": [
    "Домашний персонал"
   ],
   "avatar": "avatars/50.jpg",
   "verified": false,
-  "age": 50
+  "age": 50,
+  "specialization": "Домработница, няня"
  },
  {
   "name": "Гусева Татьяна Михайловна",
   "city": "Москва",
   "category": "Розничная торговля",
-  "profession": "Продавец",
   "trust": 87,
   "skills": [
    "Розничные продажи"
   ],
   "avatar": "avatars/65.jpg",
   "verified": false,
-  "age": 48
+  "age": 48,
+  "specialization": "Продавец"
  },
  {
   "name": "Орлов Юрий Петрович",
   "city": "Москва",
   "category": "Информационные технологии",
-  "profession": "Программирование, Разработка",
   "trust": 99,
   "skills": [
    "Программирование"
   ],
   "avatar": "avatars/47.jpg",
   "verified": false,
-  "age": 37
+  "age": 37,
+  "specialization": "Программирование, Разработка"
  },
  {
   "name": "Щербаков Илья Петрович",
   "city": "Ростов-на-Дону",
   "category": "Рабочий персонал",
-  "profession": "Слесарь, сантехник",
   "trust": 72,
   "skills": [
    "Сантехника"
   ],
   "avatar": "avatars/70.jpg",
   "verified": false,
-  "age": 44
+  "age": 44,
+  "specialization": "Слесарь, сантехник"
  },
  {
   "name": "Логинов Михаил Михайлович",
   "city": "Ярославль",
   "category": "Юристы",
-  "profession": "Юрисконсульт",
   "trust": 55,
   "skills": [
    "Юриспруденция"
   ],
   "avatar": "avatars/32.jpg",
   "verified": false,
-  "age": 41
+  "age": 41,
+  "specialization": "Юрисконсульт"
  },
  {
   "name": "Щербаков Игорь Юрьевич",
   "city": "Тюмень",
   "category": "Закупки",
-  "profession": "Менеджер по закупкам",
   "trust": 67,
   "skills": [
    "Снабжение"
   ],
   "avatar": "avatars/44.jpg",
   "verified": false,
-  "age": 28
+  "age": 28,
+  "specialization": "Менеджер по закупкам"
  },
  {
   "name": "Тарасов Егор Сергеевич",
   "city": "Архангельск",
   "category": "Информационные технологии",
-  "profession": "Программирование, Разработка",
   "trust": 75,
   "skills": [
    "Программирование"
   ],
   "avatar": "avatars/11.jpg",
   "verified": false,
-  "age": 57
+  "age": 57,
+  "specialization": "Программирование, Разработка"
  },
  {
   "name": "Шестаков Михаил Юрьевич",
   "city": "Челябинск",
   "category": "Искусство, развлечения, массмедиа",
-  "profession": "Флорист, декоратор",
   "trust": 99,
   "skills": [
    "Флористика"
   ],
   "avatar": "avatars/66.jpg",
   "verified": false,
-  "age": 39
+  "age": 39,
+  "specialization": "Флорист, декоратор"
  },
  {
   "name": "Никитин Артём Викторович",
   "city": "Магнитогорск",
   "category": "Добыча сырья",
-  "profession": "Горный инженер",
   "trust": 79,
   "skills": [
    "Горное дело"
   ],
   "avatar": "avatars/5.jpg",
   "verified": false,
-  "age": 54
+  "age": 54,
+  "specialization": "Горный инженер"
  },
  {
   "name": "Лебедева Наталья Петровна",
   "city": "Владивосток",
   "category": "Безопасность",
-  "profession": "Охранник, контролёр",
   "trust": 77,
   "skills": [
    "Охрана объектов"
   ],
   "avatar": "avatars/56.jpg",
   "verified": false,
-  "age": 22
+  "age": 22,
+  "specialization": "Охранник, контролёр"
  },
  {
   "name": "Савельев Артём Михайлович",
   "city": "Кемерово",
   "category": "Управление персоналом, тренинги",
-  "profession": "HR-менеджер",
   "trust": 62,
   "skills": [
    "Подбор персонала"
   ],
   "avatar": "avatars/40.jpg",
   "verified": false,
-  "age": 50
+  "age": 50,
+  "specialization": "HR-менеджер"
  },
  {
   "name": "Ильина Анна Алексеевна",
   "city": "Пермь",
   "category": "Производство, сервисное обслуживание",
-  "profession": "Швея, закройщик",
   "trust": 76,
   "skills": [
    "Швея"
   ],
   "avatar": "avatars/14.jpg",
   "verified": false,
-  "age": 59
+  "age": 59,
+  "specialization": "Швея, закройщик"
  },
  {
   "name": "Зайцев Дмитрий Сергеевич",
   "city": "Владивосток",
   "category": "Финансы, бухгалтерия",
-  "profession": "Бухгалтерия",
   "trust": 96,
   "skills": [
    "Бухгалтерия"
   ],
   "avatar": "avatars/18.jpg",
   "verified": false,
-  "age": 31
+  "age": 31,
+  "specialization": "Бухгалтерия"
  },
  {
   "name": "Мельник Дмитрий Михайлович",
   "city": "Санкт-Петербург",
   "category": "Закупки",
-  "profession": "Менеджер по закупкам",
   "trust": 98,
   "skills": [
    "Снабжение"
   ],
   "avatar": "avatars/27.jpg",
   "verified": false,
-  "age": 29
+  "age": 29,
+  "specialization": "Менеджер по закупкам"
  },
  {
   "name": "Ильин Михаил Сергеевич",
   "city": "Самара",
   "category": "Рабочий персонал",
-  "profession": "Столяр, плотник",
   "trust": 66,
   "skills": [
    "Плотницкие работы"
   ],
   "avatar": "avatars/35.jpg",
   "verified": false,
-  "age": 38
+  "age": 38,
+  "specialization": "Столяр, плотник"
  },
  {
   "name": "Макаров Артём Сергеевич",
   "city": "Краснодар",
   "category": "Добыча сырья",
-  "profession": "Горный инженер",
   "trust": 66,
   "skills": [
    "Горное дело"
   ],
   "avatar": "avatars/15.jpg",
   "verified": false,
-  "age": 50
+  "age": 50,
+  "specialization": "Горный инженер"
  },
  {
   "name": "Соколова Ирина Викторовна",
   "city": "Нижний Новгород",
   "category": "Добыча сырья",
-  "profession": "Горный инженер",
   "trust": 83,
   "skills": [
    "Горное дело"
   ],
   "avatar": "avatars/2.jpg",
   "verified": false,
-  "age": 54
+  "age": 54,
+  "specialization": "Горный инженер"
  },
  {
   "name": "Токарев Дмитрий Николаевич",
   "city": "Архангельск",
   "category": "Производство, сервисное обслуживание",
-  "profession": "Швея, закройщик",
   "trust": 60,
   "skills": [
    "Кройка и шитьё"
   ],
   "avatar": "avatars/55.jpg",
   "verified": false,
-  "age": 62
+  "age": 62,
+  "specialization": "Швея, закройщик"
  },
  {
   "name": "Щербаков Андрей Иванович",
   "city": "Краснодар",
   "category": "Добыча сырья",
-  "profession": "Горный инженер",
   "trust": 65,
   "skills": [
    "Горное дело"
   ],
   "avatar": "avatars/45.jpg",
   "verified": false,
-  "age": 56
+  "age": 56,
+  "specialization": "Горный инженер"
  },
  {
   "name": "Ефимова Татьяна Викторовна",
   "city": "Тобольск",
   "category": "Рабочий персонал",
-  "profession": "Столяр, плотник",
   "trust": 91,
   "skills": [
    "Плотницкие работы"
   ],
   "avatar": "avatars/46.jpg",
   "verified": false,
-  "age": 57
+  "age": 57,
+  "specialization": "Столяр, плотник"
  },
  {
   "name": "Никитин Сергей Андреевич",
   "city": "Вологда",
   "category": "Производство, сервисное обслуживание",
-  "profession": "Швея, закройщик",
   "trust": 82,
   "skills": [
    "Кройка и шитьё"
   ],
   "avatar": "avatars/64.jpg",
   "verified": false,
-  "age": 27
+  "age": 27,
+  "specialization": "Швея, закройщик"
  },
  {
   "name": "Комаров Андрей Петрович",
   "city": "Нижний Тагил",
   "category": "Рабочий персонал",
-  "profession": "Сварщик",
   "trust": 75,
   "skills": [
    "Сварка"
   ],
   "avatar": "avatars/30.jpg",
   "verified": false,
-  "age": 58
+  "age": 58,
+  "specialization": "Сварщик"
  },
  {
   "name": "Соколов Владимир Андреевич",
   "city": "Волгоград",
   "category": "Информационные технологии",
-  "profession": "Аналитика, Data Science",
   "trust": 55,
   "skills": [
    "Веб-аналитика"
   ],
   "avatar": "avatars/31.jpg",
   "verified": false,
-  "age": 37
+  "age": 37,
+  "specialization": "Аналитика, Data Science"
  },
  {
   "name": "Беляева Мария Андреевна",
   "city": "Вологда",
   "category": "Рабочий персонал",
-  "profession": "Электромонтажник, электромонтер, техник-электрик",
   "trust": 61,
   "skills": [
    "Электромонтаж",
@@ -874,130 +873,130 @@
   ],
   "avatar": "avatars/69.jpg",
   "verified": true,
-  "age": 57
+  "age": 57,
+  "specialization": "Электромонтажник, электромонтер, техник-электрик"
  },
  {
   "name": "Юдин Пётр Алексеевич",
   "city": "Кемерово",
   "category": "Спортивные клубы, фитнес, салоны красоты",
-  "profession": "Массажист, косметолог",
   "trust": 93,
   "skills": [
    "Массаж"
   ],
   "avatar": "avatars/9.jpg",
   "verified": false,
-  "age": 59
+  "age": 59,
+  "specialization": "Массажист, косметолог"
  },
  {
   "name": "Лебедев Егор Викторович",
   "city": "Самара",
   "category": "Домашний, обслуживающий персонал",
-  "profession": "Домработница, няня",
   "trust": 71,
   "skills": [
    "Домашний персонал"
   ],
   "avatar": "avatars/63.jpg",
   "verified": false,
-  "age": 39
+  "age": 39,
+  "specialization": "Домработница, няня"
  },
  {
   "name": "Логинов Алексей Андреевич",
   "city": "Санкт-Петербург",
   "category": "Рабочий персонал",
-  "profession": "Сварщик",
   "trust": 76,
   "skills": [
    "Сварка"
   ],
   "avatar": "avatars/61.jpg",
   "verified": false,
-  "age": 28
+  "age": 28,
+  "specialization": "Сварщик"
  },
  {
   "name": "Ковалёва Екатерина Дмитриевна",
   "city": "Екатеринбург",
   "category": "Добыча сырья",
-  "profession": "Горный инженер",
   "trust": 90,
   "skills": [
    "Горное дело"
   ],
   "avatar": "avatars/52.jpg",
   "verified": false,
-  "age": 28
+  "age": 28,
+  "specialization": "Горный инженер"
  },
  {
   "name": "Никитина Екатерина Дмитриевна",
   "city": "Пермь",
   "category": "Транспорт, логистика, перевозки",
-  "profession": "Логистика, ВЭД",
   "trust": 96,
   "skills": [
    "Логистика"
   ],
   "avatar": "avatars/48.jpg",
   "verified": false,
-  "age": 22
+  "age": 22,
+  "specialization": "Логистика, ВЭД"
  },
  {
   "name": "Макарова Наталья Николаевна",
   "city": "Тобольск",
   "category": "Искусство, развлечения, массмедиа",
-  "profession": "Флорист, декоратор",
   "trust": 81,
   "skills": [
    "Флористика"
   ],
   "avatar": "avatars/60.jpg",
   "verified": false,
-  "age": 29
+  "age": 29,
+  "specialization": "Флорист, декоратор"
  },
  {
   "name": "Панов Виктор Андреевич",
   "city": "Тюмень",
   "category": "Рабочий персонал",
-  "profession": "Бетонщик, арматурщик, каменщик",
   "trust": 64,
   "skills": [
    "Кирпичная кладка"
   ],
   "avatar": "avatars/34.jpg",
   "verified": false,
-  "age": 22
+  "age": 22,
+  "specialization": "Бетонщик, арматурщик, каменщик"
  },
  {
   "name": "Логинов Владимир Дмитриевич",
   "city": "Воронеж",
   "category": "Производство, сервисное обслуживание",
-  "profession": "Швея, закройщик",
   "trust": 95,
   "skills": [
    "Кройка и шитьё"
   ],
   "avatar": "avatars/51.jpg",
   "verified": false,
-  "age": 26
+  "age": 26,
+  "specialization": "Швея, закройщик"
  },
  {
   "name": "Щербаков Владимир Дмитриевич",
   "city": "Ростов-на-Дону",
   "category": "Информационные технологии",
-  "profession": "Программирование, Разработка",
   "trust": 88,
   "skills": [
    "Программирование"
   ],
   "avatar": "avatars/68.jpg",
   "verified": false,
-  "age": 24
+  "age": 24,
+  "specialization": "Программирование, Разработка"
  },
  {
   "name": "Беляев Илья Иванович",
   "city": "Ишим",
   "category": "Рабочий персонал",
-  "profession": "Электромонтажник, электромонтер, техник-электрик",
   "trust": 98,
   "skills": [
    "Электромонтаж",
@@ -1007,39 +1006,39 @@
   ],
   "avatar": "avatars/25.jpg",
   "verified": true,
-  "age": 30
+  "age": 30,
+  "specialization": "Электромонтажник, электромонтер, техник-электрик"
  },
  {
   "name": "Беляев Владимир Дмитриевич",
   "city": "Хабаровск",
   "category": "Административный персонал",
-  "profession": "Офис-менеджер, ассистент",
   "trust": 67,
   "skills": [
    "Офисное администрирование"
   ],
   "avatar": "avatars/8.jpg",
   "verified": false,
-  "age": 43
+  "age": 43,
+  "specialization": "Офис-менеджер, ассистент"
  },
  {
   "name": "Шестаков Артём Николаевич",
   "city": "Дербент",
   "category": "Медицина, фармацевтика",
-  "profession": "Медсестра, фельдшер",
   "trust": 95,
   "skills": [
    "Медицинский уход"
   ],
   "avatar": "avatars/49.jpg",
   "verified": false,
-  "age": 30
+  "age": 30,
+  "specialization": "Медсестра, фельдшер"
  },
  {
   "name": "Щербаков Тимур Иванович",
   "city": "Ростов-на-Дону",
   "category": "Рабочий персонал",
-  "profession": "Электромонтажник, электромонтер, техник-электрик",
   "trust": 66,
   "skills": [
    "Электромонтаж",
@@ -1049,266 +1048,267 @@
   ],
   "avatar": "avatars/29.jpg",
   "verified": true,
-  "age": 40
+  "age": 40,
+  "specialization": "Электромонтажник, электромонтер, техник-электрик"
  },
  {
   "name": "Комарова Ольга Ивановна",
   "city": "Новосибирск",
   "category": "Туризм, гостиницы, рестораны",
-  "profession": "Повар, кондитер",
   "trust": 68,
   "skills": [
    "Кулинария"
   ],
   "avatar": "avatars/53.jpg",
   "verified": false,
-  "age": 40
+  "age": 40,
+  "specialization": "Повар, кондитер"
  },
  {
   "name": "Макаров Андрей Викторович",
   "city": "Вологда",
   "category": "Информационные технологии",
-  "profession": "Программирование, Разработка",
   "trust": 60,
   "skills": [
    "Программирование"
   ],
   "avatar": "avatars/3.jpg",
   "verified": false,
-  "age": 45
+  "age": 45,
+  "specialization": "Программирование, Разработка"
  },
  {
   "name": "Комарова Юлия Николаевна",
   "city": "Дербент",
   "category": "Туризм, гостиницы, рестораны",
-  "profession": "Повар, кондитер",
   "trust": 73,
   "skills": [
    "Кулинария"
   ],
   "avatar": "avatars/43.jpg",
   "verified": false,
-  "age": 55
+  "age": 55,
+  "specialization": "Повар, кондитер"
  },
  {
   "name": "Макарова Анна Ивановна",
   "city": "Хабаровск",
   "category": "Рабочий персонал",
-  "profession": "Столяр, плотник",
   "trust": 93,
   "skills": [
    "Столярное дело"
   ],
   "avatar": "avatars/41.jpg",
   "verified": false,
-  "age": 48
+  "age": 48,
+  "specialization": "Столяр, плотник"
  },
  {
   "name": "Ковалёв Андрей Дмитриевич",
   "city": "Новосибирск",
   "category": "Производство, сервисное обслуживание",
-  "profession": "Швея, закройщик",
   "trust": 64,
   "skills": [
    "Швея"
   ],
   "avatar": "avatars/59.jpg",
   "verified": false,
-  "age": 22
+  "age": 22,
+  "specialization": "Швея, закройщик"
  },
  {
   "name": "Ефимов Алексей Дмитриевич",
   "city": "Волгоград",
   "category": "Управление персоналом, тренинги",
-  "profession": "HR-менеджер",
   "trust": 78,
   "skills": [
    "Подбор персонала"
   ],
   "avatar": "avatars/39.jpg",
   "verified": false,
-  "age": 34
+  "age": 34,
+  "specialization": "HR-менеджер"
  },
  {
   "name": "Беляев Михаил Петрович",
   "city": "Кемерово",
   "category": "Искусство, развлечения, массмедиа",
-  "profession": "Фото, видео, звукооператоры",
   "trust": 86,
   "skills": [
    "Фотография"
   ],
   "avatar": "avatars/7.jpg",
   "verified": false,
-  "age": 25
+  "age": 25,
+  "specialization": "Фото, видео, звукооператоры"
  },
  {
   "name": "Мельник Сергей Дмитриевич",
   "city": "Нижний Новгород",
   "category": "Туризм, гостиницы, рестораны",
-  "profession": "Повар, кондитер",
   "trust": 86,
   "skills": [
    "Кулинария"
   ],
   "avatar": "avatars/21.jpg",
   "verified": false,
-  "age": 56
+  "age": 56,
+  "specialization": "Повар, кондитер"
  },
  {
   "name": "Савельев Юрий Юрьевич",
   "city": "Краснодар",
   "category": "Сельское хозяйство",
-  "profession": "Пчеловодство, животноводство",
   "trust": 60,
   "skills": [
    "Пчеловодство"
   ],
   "avatar": "avatars/17.jpg",
   "verified": false,
-  "age": 26
+  "age": 26,
+  "specialization": "Пчеловодство, животноводство"
  },
  {
   "name": "Савельева Анна Сергеевна",
   "city": "Кемерово",
   "category": "Наука, образование",
-  "profession": "Переводчик",
   "trust": 82,
   "skills": [
    "Переводчик (англ.)"
   ],
   "avatar": "avatars/37.jpg",
   "verified": false,
-  "age": 56
+  "age": 56,
+  "specialization": "Переводчик"
  },
  {
   "name": "Комаров Илья Алексеевич",
   "city": "Кемерово",
   "category": "Спортивные клубы, фитнес, салоны красоты",
-  "profession": "Массажист, косметолог",
   "trust": 66,
   "skills": [
    "Массаж"
   ],
   "avatar": "avatars/42.jpg",
   "verified": false,
-  "age": 50
+  "age": 50,
+  "specialization": "Массажист, косметолог"
  },
  {
   "name": "Киселёв Тимур Юрьевич",
   "city": "Красноярск",
   "category": "Рабочий персонал",
-  "profession": "Столяр, плотник",
   "trust": 68,
   "skills": [
    "Столярное дело"
   ],
   "avatar": "avatars/67.jpg",
   "verified": false,
-  "age": 49
+  "age": 49,
+  "specialization": "Столяр, плотник"
  },
  {
   "name": "Орлова Вера Петровна",
   "city": "Кемерово",
   "category": "Искусство, развлечения, массмедиа",
-  "profession": "Флорист, декоратор",
   "trust": 72,
   "skills": [
    "Флористика"
   ],
   "avatar": "avatars/58.jpg",
   "verified": false,
-  "age": 37
+  "age": 37,
+  "specialization": "Флорист, декоратор"
  },
  {
   "name": "Никитина Екатерина Петровна",
   "city": "Казань",
   "category": "Производство, сервисное обслуживание",
-  "profession": "Швея, закройщик",
   "trust": 73,
   "skills": [
    "Кройка и шитьё"
   ],
   "avatar": "avatars/6.jpg",
   "verified": false,
-  "age": 50
+  "age": 50,
+  "specialization": "Швея, закройщик"
  },
  {
   "name": "Панова Дарья Дмитриевна",
   "city": "Самара",
   "category": "Высший и средний менеджмент",
-  "profession": "Руководитель проектов",
   "trust": 81,
   "skills": [
    "Управление проектами"
   ],
   "avatar": "avatars/38.jpg",
   "verified": false,
-  "age": 27
+  "age": 27,
+  "specialization": "Руководитель проектов"
  },
  {
   "name": "Токарев Дмитрий Алексеевич",
   "city": "Краснодар",
   "category": "Розничная торговля",
-  "profession": "Продавец",
   "trust": 96,
   "skills": [
    "Розничные продажи"
   ],
   "avatar": "avatars/16.jpg",
   "verified": false,
-  "age": 24
+  "age": 24,
+  "specialization": "Продавец"
  },
  {
   "name": "Панова Дарья Андреевна",
   "city": "Воронеж",
   "category": "Рабочий персонал",
-  "profession": "Слесарь, сантехник",
   "trust": 76,
   "skills": [
    "Сантехника"
   ],
   "avatar": "avatars/24.jpg",
   "verified": false,
-  "age": 62
+  "age": 62,
+  "specialization": "Слесарь, сантехник"
  },
  {
   "name": "Носов Илья Михайлович",
   "city": "Кемерово",
   "category": "Добыча сырья",
-  "profession": "Горный инженер",
   "trust": 55,
   "skills": [
    "Горное дело"
   ],
   "avatar": "avatars/62.jpg",
   "verified": false,
-  "age": 35
+  "age": 35,
+  "specialization": "Горный инженер"
  },
  {
   "name": "Тарасов Роман Иванович",
   "city": "Тобольск",
   "category": "Транспорт, логистика, перевозки",
-  "profession": "Логистика, ВЭД",
   "trust": 68,
   "skills": [
    "Логистика"
   ],
   "avatar": "avatars/33.jpg",
   "verified": false,
-  "age": 53
+  "age": 53,
+  "specialization": "Логистика, ВЭД"
  },
  {
   "name": "Ефимова Анна Викторовна",
   "city": "Тобольск",
   "category": "Административный персонал",
-  "profession": "Офис-менеджер, ассистент",
   "trust": 55,
   "skills": [
    "Офисное администрирование"
   ],
   "avatar": "avatars/26.jpg",
   "verified": false,
-  "age": 30
+  "age": 30,
+  "specialization": "Офис-менеджер, ассистент"
  }
 ]

@@ -1,6 +1,2 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_coop_profession_category_user,Категории специализаций — чтение,model_coop_profession_category,base.group_user,1,0,0,0
-access_coop_profession_user,Профессии — чтение,model_coop_profession,base.group_user,1,0,0,0
-access_coop_profession_category_admin,Категории специализаций — ведение,model_coop_profession_category,coop_base.group_coop_platform,1,1,1,1
-access_coop_profession_admin,Профессии — ведение,model_coop_profession,coop_base.group_coop_platform,1,1,1,1
 access_coop_friendship_user,Дружба — участник,model_coop_friendship,base.group_user,1,1,1,1

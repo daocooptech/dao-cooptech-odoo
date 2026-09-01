@@ -1,0 +1,902 @@
+[
+ {
+  "name": "ООО «Мириталь»",
+  "city": "Москва",
+  "category": "Строительство, недвижимость",
+  "specialization": "Прораб, мастер СМР",
+  "trust": 92,
+  "logo": "img/org-logos/pochta.png",
+  "legal_form_code": "ooo"
+ },
+ {
+  "name": "Кооператив «Борозда»",
+  "city": "Москва",
+  "category": "Строительство, недвижимость",
+  "specialization": "Прораб, мастер СМР",
+  "trust": 76,
+  "logo": "",
+  "legal_form_code": "po"
+ },
+ {
+  "name": "Кооператив «Покос»",
+  "city": "Москва",
+  "category": "Строительство, недвижимость",
+  "specialization": "Прораб, мастер СМР",
+  "trust": 80,
+  "logo": "",
+  "legal_form_code": "po"
+ },
+ {
+  "name": "Фонд «Территория 2020»",
+  "city": "Красноярск",
+  "category": "Стратегия, инвестиции, консалтинг",
+  "specialization": "Бизнес-консультант",
+  "trust": 81,
+  "logo": "",
+  "legal_form_code": "fond"
+ },
+ {
+  "name": "Кооператив «Шукты»",
+  "city": "Дербент",
+  "category": "Сельское хозяйство",
+  "specialization": "Агроном, зоотехник",
+  "trust": 88,
+  "logo": "",
+  "legal_form_code": "po"
+ },
+ {
+  "name": "ДАО КООПЕХ",
+  "city": "",
+  "category": "Информационные технологии",
+  "specialization": "Программирование, Разработка",
+  "trust": 95,
+  "logo": "img/org-logos/nlmk.png",
+  "legal_form_code": "dao"
+ },
+ {
+  "name": "Артель «Северный лес»",
+  "city": "Красноярск",
+  "category": "Производство, сервисное обслуживание",
+  "specialization": "Инженер-технолог",
+  "trust": 79,
+  "logo": "",
+  "legal_form_code": "artel"
+ },
+ {
+  "name": "ЗАО «СтройТехно»",
+  "city": "Новосибирск",
+  "category": "Строительство, недвижимость",
+  "specialization": "Инженер строительного контроля",
+  "trust": 84,
+  "logo": "img/org-logos/sberbank.png",
+  "legal_form_code": "zao"
+ },
+ {
+  "name": "Благотворительный фонд «Добрый дом»",
+  "city": "Екатеринбург",
+  "category": "Другое",
+  "specialization": "Разное",
+  "trust": 91,
+  "logo": "",
+  "legal_form_code": "fond"
+ },
+ {
+  "name": "ДАО «ОткрытыйГород»",
+  "city": "",
+  "category": "Строительство, недвижимость",
+  "specialization": "Архитектор",
+  "trust": 87,
+  "logo": "",
+  "legal_form_code": "dao"
+ },
+ {
+  "name": "Кооператив «Плодородие»",
+  "city": "Краснодар",
+  "category": "Сельское хозяйство",
+  "specialization": "Агроном, зоотехник",
+  "trust": 76,
+  "logo": "",
+  "legal_form_code": "po"
+ },
+ {
+  "name": "ОАО «Вектор Инжиниринг»",
+  "city": "Казань",
+  "category": "Строительство, недвижимость",
+  "specialization": "Инженер строительного контроля",
+  "trust": 90,
+  "logo": "",
+  "legal_form_code": "oao"
+ },
+ {
+  "name": "АНО «Мастерская будущего»",
+  "city": "Пермь",
+  "category": "Наука, образование",
+  "specialization": "Преподаватель, репетитор",
+  "trust": 83,
+  "logo": "",
+  "legal_form_code": "ano"
+ },
+ {
+  "name": "Артель «Уральские мастера»",
+  "city": "Челябинск",
+  "category": "Искусство, развлечения, массмедиа",
+  "specialization": "Народные промыслы, ремёсла",
+  "trust": 80,
+  "logo": "",
+  "legal_form_code": "artel"
+ },
+ {
+  "name": "ООО «ЭкоПласт»",
+  "city": "Воронеж",
+  "category": "Производство, сервисное обслуживание",
+  "specialization": "Инженер-технолог",
+  "trust": 77,
+  "logo": "img/org-logos/nornickel.png",
+  "legal_form_code": "ooo"
+ },
+ {
+  "name": "Фонд поддержки волонтёров «Вместе»",
+  "city": "Самара",
+  "category": "Управление персоналом, тренинги",
+  "specialization": "HR-менеджер",
+  "trust": 94,
+  "logo": "",
+  "legal_form_code": "fond"
+ },
+ {
+  "name": "ДАО «Цифровой кооператив»",
+  "city": "",
+  "category": "Информационные технологии",
+  "specialization": "Программирование, Разработка",
+  "trust": 92,
+  "logo": "",
+  "legal_form_code": "dao"
+ },
+ {
+  "name": "Кооператив «Речной порт»",
+  "city": "Хабаровск",
+  "category": "Транспорт, логистика, перевозки",
+  "specialization": "Логистика, ВЭД",
+  "trust": 85,
+  "logo": "",
+  "legal_form_code": "po"
+ },
+ {
+  "name": "ООО «АгроСтрой»",
+  "city": "Ростов-на-Дону",
+  "category": "Сельское хозяйство",
+  "specialization": "Агроном, зоотехник",
+  "trust": 82,
+  "logo": "img/org-logos/gazprom.png",
+  "legal_form_code": "ooo"
+ },
+ {
+  "name": "АНО «Чистый город»",
+  "city": "Тюмень",
+  "category": "Другое",
+  "specialization": "Разное",
+  "trust": 88,
+  "logo": "",
+  "legal_form_code": "ano"
+ },
+ {
+  "name": "Артель «Байкальский промысел»",
+  "city": "Иркутск",
+  "category": "Сельское хозяйство",
+  "specialization": "Пчеловодство, животноводство",
+  "trust": 73,
+  "logo": "",
+  "legal_form_code": "artel"
+ },
+ {
+  "name": "ПАО «СеверТранс»",
+  "city": "Владивосток",
+  "category": "Транспорт, логистика, перевозки",
+  "specialization": "Логистика, ВЭД",
+  "trust": 86,
+  "logo": "img/org-logos/wildberries.png",
+  "legal_form_code": "pao"
+ },
+ {
+  "name": "Кредитный кооператив «Взаимопомощь»",
+  "city": "Москва",
+  "category": "Финансы, бухгалтерия",
+  "specialization": "Бухгалтерия",
+  "trust": 90,
+  "logo": "",
+  "legal_form_code": "kpk"
+ },
+ {
+  "name": "Юридическое бюро «Право и дело»",
+  "city": "Санкт-Петербург",
+  "category": "Юристы",
+  "specialization": "Юрисконсульт",
+  "trust": 85,
+  "logo": "",
+  "legal_form_code": "ooo"
+ },
+ {
+  "name": "АНО «Здоровье для всех»",
+  "city": "Новосибирск",
+  "category": "Медицина, фармацевтика",
+  "specialization": "Медсестра, фельдшер",
+  "trust": 93,
+  "logo": "",
+  "legal_form_code": "ano"
+ },
+ {
+  "name": "ООО «Кооп-Маркет»",
+  "city": "Краснодар",
+  "category": "Розничная торговля",
+  "specialization": "Продавец",
+  "trust": 81,
+  "logo": "img/org-logos/alfabank.png",
+  "legal_form_code": "ooo"
+ },
+ {
+  "name": "Кооператив «Гостевой двор»",
+  "city": "Сочи",
+  "category": "Туризм, гостиницы, рестораны",
+  "specialization": "Администратор гостиницы",
+  "trust": 88,
+  "logo": "",
+  "legal_form_code": "po"
+ },
+ {
+  "name": "ИП «Медиа Крафт»",
+  "city": "Екатеринбург",
+  "category": "Маркетинг, реклама, PR",
+  "specialization": "Маркетинг",
+  "trust": 76,
+  "logo": "",
+  "legal_form_code": "ip"
+ },
+ {
+  "name": "Артель «Автосервис Плюс»",
+  "city": "Тюмень",
+  "category": "Автомобильный бизнес",
+  "specialization": "Автосервис, автомойка",
+  "trust": 79,
+  "logo": "",
+  "legal_form_code": "artel"
+ },
+ {
+  "name": "АНО «Спортивный двор»",
+  "city": "Казань",
+  "category": "Спортивные клубы, фитнес, салоны красоты",
+  "specialization": "Тренер",
+  "trust": 87,
+  "logo": "",
+  "legal_form_code": "ano"
+ },
+ {
+  "name": "ЖСК «Соседи»",
+  "city": "Екатеринбург",
+  "category": "Строительство, недвижимость",
+  "specialization": "Агент по недвижимости",
+  "trust": 89,
+  "logo": "",
+  "legal_form_code": "zhsk"
+ },
+ {
+  "name": "Энергокооператив «СветСвои»",
+  "city": "Пермь",
+  "category": "Производство, сервисное обслуживание",
+  "specialization": "Инженер-технолог",
+  "trust": 84,
+  "logo": "",
+  "legal_form_code": "po"
+ },
+ {
+  "name": "Содружество кооперативов «Эмилия»",
+  "city": "Ярославль",
+  "category": "Другое",
+  "specialization": "Разное",
+  "trust": 83,
+  "logo": "",
+  "legal_form_code": "union"
+ },
+ {
+  "name": "ТСЖ «Камень»",
+  "city": "Санкт-Петербург",
+  "category": "Производство, сервисное обслуживание",
+  "specialization": "Инженер-технолог",
+  "trust": 89,
+  "logo": "",
+  "legal_form_code": "tszh"
+ },
+ {
+  "name": "АО «Кедр»",
+  "city": "Санкт-Петербург",
+  "category": "Другое",
+  "specialization": "Разное",
+  "trust": 85,
+  "logo": "img/org-logos/tinkoff.png",
+  "legal_form_code": "ao"
+ },
+ {
+  "name": "АО «Покос»",
+  "city": "Кемерово",
+  "category": "Стратегия, инвестиции, консалтинг",
+  "specialization": "Бизнес-консультант",
+  "trust": 81,
+  "logo": "img/org-logos/x5.png",
+  "legal_form_code": "ao"
+ },
+ {
+  "name": "ООО «Поморье»",
+  "city": "Новосибирск",
+  "category": "Другое",
+  "specialization": "Разное",
+  "trust": 63,
+  "logo": "img/org-logos/severstal.png",
+  "legal_form_code": "ooo"
+ },
+ {
+  "name": "АО «Взаимопомощь»",
+  "city": "Магнитогорск",
+  "category": "Юристы",
+  "specialization": "Юрисконсульт",
+  "trust": 87,
+  "logo": "img/org-logos/avito.png",
+  "legal_form_code": "ao"
+ },
+ {
+  "name": "АО «Речной порт»",
+  "city": "Ростов-на-Дону",
+  "category": "Другое",
+  "specialization": "Разное",
+  "trust": 96,
+  "logo": "img/org-logos/rusal.png",
+  "legal_form_code": "ao"
+ },
+ {
+  "name": "ПК «Сыродел»",
+  "city": "Хабаровск",
+  "category": "Стратегия, инвестиции, консалтинг",
+  "specialization": "Бизнес-консультант",
+  "trust": 88,
+  "logo": "",
+  "legal_form_code": "pk"
+ },
+ {
+  "name": "Кооператив «Покос»",
+  "city": "Хабаровск",
+  "category": "Управление персоналом, тренинги",
+  "specialization": "HR-менеджер",
+  "trust": 80,
+  "logo": "",
+  "legal_form_code": "po"
+ },
+ {
+  "name": "АО «Родник»",
+  "city": "Казань",
+  "category": "Сельское хозяйство",
+  "specialization": "Агроном, зоотехник",
+  "trust": 71,
+  "logo": "img/org-logos/s7.png",
+  "legal_form_code": "ao"
+ },
+ {
+  "name": "АО «Шукты»",
+  "city": "Вологда",
+  "category": "Транспорт, логистика, перевозки",
+  "specialization": "Логистика, ВЭД",
+  "trust": 60,
+  "logo": "img/org-logos/rzd.png",
+  "legal_form_code": "ao"
+ },
+ {
+  "name": "Фонд «Табун»",
+  "city": "Краснодар",
+  "category": "Туризм, гостиницы, рестораны",
+  "specialization": "Администратор гостиницы",
+  "trust": 69,
+  "logo": "",
+  "legal_form_code": "fond"
+ },
+ {
+  "name": "ТСЖ «Покос»",
+  "city": "Воронеж",
+  "category": "Управление персоналом, тренинги",
+  "specialization": "HR-менеджер",
+  "trust": 70,
+  "logo": "",
+  "legal_form_code": "tszh"
+ },
+ {
+  "name": "Фонд «Кузница»",
+  "city": "Дербент",
+  "category": "Розничная торговля",
+  "specialization": "Продавец",
+  "trust": 77,
+  "logo": "",
+  "legal_form_code": "fond"
+ },
+ {
+  "name": "ПК «Ткач»",
+  "city": "Магнитогорск",
+  "category": "Маркетинг, реклама, PR",
+  "specialization": "Маркетинг",
+  "trust": 85,
+  "logo": "",
+  "legal_form_code": "pk"
+ },
+ {
+  "name": "ПК «Лесное»",
+  "city": "Волгоград",
+  "category": "Сельское хозяйство",
+  "specialization": "Пчеловодство, животноводство",
+  "trust": 83,
+  "logo": "",
+  "legal_form_code": "pk"
+ },
+ {
+  "name": "ТСЖ «Горный»",
+  "city": "Хабаровск",
+  "category": "Управление персоналом, тренинги",
+  "specialization": "HR-менеджер",
+  "trust": 71,
+  "logo": "",
+  "legal_form_code": "tszh"
+ },
+ {
+  "name": "Фонд «Двор»",
+  "city": "Омск",
+  "category": "Финансы, бухгалтерия",
+  "specialization": "Бухгалтерия",
+  "trust": 89,
+  "logo": "",
+  "legal_form_code": "fond"
+ },
+ {
+  "name": "ТСЖ «Плотник»",
+  "city": "Санкт-Петербург",
+  "category": "Строительство, недвижимость",
+  "specialization": "Инженер строительного контроля",
+  "trust": 73,
+  "logo": "",
+  "legal_form_code": "tszh"
+ },
+ {
+  "name": "ТСЖ «Зерно»",
+  "city": "Новосибирск",
+  "category": "Туризм, гостиницы, рестораны",
+  "specialization": "Администратор гостиницы",
+  "trust": 63,
+  "logo": "",
+  "legal_form_code": "tszh"
+ },
+ {
+  "name": "СПК «Пасека»",
+  "city": "Дербент",
+  "category": "Строительство, недвижимость",
+  "specialization": "Агент по недвижимости",
+  "trust": 63,
+  "logo": "",
+  "legal_form_code": "spk"
+ },
+ {
+  "name": "СПК «Артель»",
+  "city": "Сочи",
+  "category": "Транспорт, логистика, перевозки",
+  "specialization": "Логистика, ВЭД",
+  "trust": 72,
+  "logo": "",
+  "legal_form_code": "spk"
+ },
+ {
+  "name": "ООО «Улей»",
+  "city": "Магнитогорск",
+  "category": "Другое",
+  "specialization": "Разное",
+  "trust": 87,
+  "logo": "img/org-logos/ozon.png",
+  "legal_form_code": "ooo"
+ },
+ {
+  "name": "ПК «СветСвои»",
+  "city": "Казань",
+  "category": "Спортивные клубы, фитнес, салоны красоты",
+  "specialization": "Тренер",
+  "trust": 76,
+  "logo": "",
+  "legal_form_code": "pk"
+ },
+ {
+  "name": "Кооператив «Борозда»",
+  "city": "Владивосток",
+  "category": "Розничная торговля",
+  "specialization": "Продавец",
+  "trust": 75,
+  "logo": "",
+  "legal_form_code": "po"
+ },
+ {
+  "name": "ТСЖ «Мельница»",
+  "city": "Кемерово",
+  "category": "Спортивные клубы, фитнес, салоны красоты",
+  "specialization": "Тренер",
+  "trust": 62,
+  "logo": "",
+  "legal_form_code": "tszh"
+ },
+ {
+  "name": "ПК «Хмель»",
+  "city": "Нижний Тагил",
+  "category": "Маркетинг, реклама, PR",
+  "specialization": "Маркетинг",
+  "trust": 85,
+  "logo": "",
+  "legal_form_code": "pk"
+ },
+ {
+  "name": "ООО «Тайга»",
+  "city": "Волгоград",
+  "category": "Туризм, гостиницы, рестораны",
+  "specialization": "Администратор гостиницы",
+  "trust": 65,
+  "logo": "img/org-logos/aeroflot.png",
+  "legal_form_code": "ooo"
+ },
+ {
+  "name": "АО «Пасека»",
+  "city": "Вологда",
+  "category": "Розничная торговля",
+  "specialization": "Продавец",
+  "trust": 61,
+  "logo": "img/org-logos/rostec.png",
+  "legal_form_code": "ao"
+ },
+ {
+  "name": "ТСЖ «Тёплый край»",
+  "city": "Ишим",
+  "category": "Другое",
+  "specialization": "Разное",
+  "trust": 78,
+  "logo": "",
+  "legal_form_code": "tszh"
+ },
+ {
+  "name": "Фонд «Плотник»",
+  "city": "Ишим",
+  "category": "Автомобильный бизнес",
+  "specialization": "Автосервис, автомойка",
+  "trust": 74,
+  "logo": "",
+  "legal_form_code": "fond"
+ },
+ {
+  "name": "АО «Пасека»",
+  "city": "Архангельск",
+  "category": "Финансы, бухгалтерия",
+  "specialization": "Бухгалтерия",
+  "trust": 76,
+  "logo": "img/org-logos/dao-cooptech.svg",
+  "legal_form_code": "ao"
+ },
+ {
+  "name": "СПК «Камень»",
+  "city": "Ярославль",
+  "category": "Другое",
+  "specialization": "Разное",
+  "trust": 75,
+  "logo": "",
+  "legal_form_code": "spk"
+ },
+ {
+  "name": "ПК «Пасека»",
+  "city": "Москва",
+  "category": "Маркетинг, реклама, PR",
+  "specialization": "Маркетинг",
+  "trust": 91,
+  "logo": "",
+  "legal_form_code": "pk"
+ },
+ {
+  "name": "АО «Гостевой двор»",
+  "city": "Тобольск",
+  "category": "Маркетинг, реклама, PR",
+  "specialization": "Маркетинг",
+  "trust": 93,
+  "logo": "img/org-logos/vk.png",
+  "legal_form_code": "ao"
+ },
+ {
+  "name": "ООО «Пасека»",
+  "city": "Красноярск",
+  "category": "Строительство, недвижимость",
+  "specialization": "Инженер строительного контроля",
+  "trust": 58,
+  "logo": "img/org-logos/rostelecom.png",
+  "legal_form_code": "ooo"
+ },
+ {
+  "name": "ПК «Заря»",
+  "city": "Пермь",
+  "category": "Другое",
+  "specialization": "Разное",
+  "trust": 81,
+  "logo": "",
+  "legal_form_code": "pk"
+ },
+ {
+  "name": "ТСЖ «Соль»",
+  "city": "Санкт-Петербург",
+  "category": "Управление персоналом, тренинги",
+  "specialization": "HR-менеджер",
+  "trust": 58,
+  "logo": "",
+  "legal_form_code": "tszh"
+ },
+ {
+  "name": "Фонд «Шукты»",
+  "city": "Волгоград",
+  "category": "Туризм, гостиницы, рестораны",
+  "specialization": "Администратор гостиницы",
+  "trust": 61,
+  "logo": "",
+  "legal_form_code": "fond"
+ },
+ {
+  "name": "Кооператив «СветСвои»",
+  "city": "Ростов-на-Дону",
+  "category": "Производство, сервисное обслуживание",
+  "specialization": "Инженер-технолог",
+  "trust": 78,
+  "logo": "",
+  "legal_form_code": "po"
+ },
+ {
+  "name": "СПК «Взаимопомощь»",
+  "city": "Архангельск",
+  "category": "Юристы",
+  "specialization": "Юрисконсульт",
+  "trust": 89,
+  "logo": "",
+  "legal_form_code": "spk"
+ },
+ {
+  "name": "ТСЖ «Взаимопомощь»",
+  "city": "Омск",
+  "category": "Стратегия, инвестиции, консалтинг",
+  "specialization": "Бизнес-консультант",
+  "trust": 64,
+  "logo": "",
+  "legal_form_code": "tszh"
+ },
+ {
+  "name": "ТСЖ «Речной порт»",
+  "city": "Екатеринбург",
+  "category": "Транспорт, логистика, перевозки",
+  "specialization": "Логистика, ВЭД",
+  "trust": 96,
+  "logo": "",
+  "legal_form_code": "tszh"
+ },
+ {
+  "name": "ПК «Лесное»",
+  "city": "Ишим",
+  "category": "Строительство, недвижимость",
+  "specialization": "Инженер строительного контроля",
+  "trust": 60,
+  "logo": "",
+  "legal_form_code": "pk"
+ },
+ {
+  "name": "ПК «СветСвои»",
+  "city": "Екатеринбург",
+  "category": "Производство, сервисное обслуживание",
+  "specialization": "Инженер-технолог",
+  "trust": 60,
+  "logo": "",
+  "legal_form_code": "pk"
+ },
+ {
+  "name": "Фонд «Ягода»",
+  "city": "Нижний Новгород",
+  "category": "Наука, образование",
+  "specialization": "Преподаватель, репетитор",
+  "trust": 86,
+  "logo": "",
+  "legal_form_code": "fond"
+ },
+ {
+  "name": "Фонд «Колос»",
+  "city": "Челябинск",
+  "category": "Розничная торговля",
+  "specialization": "Продавец",
+  "trust": 84,
+  "logo": "",
+  "legal_form_code": "fond"
+ },
+ {
+  "name": "ПК «Гостевой двор»",
+  "city": "Челябинск",
+  "category": "Розничная торговля",
+  "specialization": "Продавец",
+  "trust": 64,
+  "logo": "",
+  "legal_form_code": "pk"
+ },
+ {
+  "name": "ПК «Молочный путь»",
+  "city": "Краснодар",
+  "category": "Наука, образование",
+  "specialization": "Преподаватель, репетитор",
+  "trust": 63,
+  "logo": "",
+  "legal_form_code": "pk"
+ },
+ {
+  "name": "Кооператив «Гончар»",
+  "city": "Архангельск",
+  "category": "Сельское хозяйство",
+  "specialization": "Агроном, зоотехник",
+  "trust": 73,
+  "logo": "",
+  "legal_form_code": "po"
+ },
+ {
+  "name": "СПК «СветСвои»",
+  "city": "Владивосток",
+  "category": "Другое",
+  "specialization": "Разное",
+  "trust": 77,
+  "logo": "",
+  "legal_form_code": "spk"
+ },
+ {
+  "name": "АО «Родник»",
+  "city": "Архангельск",
+  "category": "Строительство, недвижимость",
+  "specialization": "Прораб, мастер СМР",
+  "trust": 58,
+  "logo": "img/org-logos/rosneft.png",
+  "legal_form_code": "ao"
+ },
+ {
+  "name": "СПК «Степь»",
+  "city": "Екатеринбург",
+  "category": "Наука, образование",
+  "specialization": "Преподаватель, репетитор",
+  "trust": 86,
+  "logo": "",
+  "legal_form_code": "spk"
+ },
+ {
+  "name": "ПК «Кедр»",
+  "city": "Вологда",
+  "category": "Сельское хозяйство",
+  "specialization": "Агроном, зоотехник",
+  "trust": 79,
+  "logo": "",
+  "legal_form_code": "pk"
+ },
+ {
+  "name": "ООО «Гончар»",
+  "city": "Уфа",
+  "category": "Другое",
+  "specialization": "Разное",
+  "trust": 95,
+  "logo": "img/org-logos/megafon.png",
+  "legal_form_code": "ooo"
+ },
+ {
+  "name": "Кооператив «Заря»",
+  "city": "Челябинск",
+  "category": "Сельское хозяйство",
+  "specialization": "Агроном, зоотехник",
+  "trust": 66,
+  "logo": "",
+  "legal_form_code": "po"
+ },
+ {
+  "name": "СПК «Двор»",
+  "city": "Хабаровск",
+  "category": "Автомобильный бизнес",
+  "specialization": "Автосервис, автомойка",
+  "trust": 86,
+  "logo": "",
+  "legal_form_code": "spk"
+ },
+ {
+  "name": "Кооператив «Зерно»",
+  "city": "Тюмень",
+  "category": "Сельское хозяйство",
+  "specialization": "Агроном, зоотехник",
+  "trust": 89,
+  "logo": "",
+  "legal_form_code": "po"
+ },
+ {
+  "name": "АО «Гончар»",
+  "city": "Омск",
+  "category": "Финансы, бухгалтерия",
+  "specialization": "Бухгалтерия",
+  "trust": 97,
+  "logo": "img/org-logos/beeline.png",
+  "legal_form_code": "ao"
+ },
+ {
+  "name": "СПК «Двор»",
+  "city": "Хабаровск",
+  "category": "Другое",
+  "specialization": "Разное",
+  "trust": 90,
+  "logo": "",
+  "legal_form_code": "spk"
+ },
+ {
+  "name": "АО «Лесное»",
+  "city": "Екатеринбург",
+  "category": "Сельское хозяйство",
+  "specialization": "Агроном, зоотехник",
+  "trust": 89,
+  "logo": "img/org-logos/yandex.png",
+  "legal_form_code": "ao"
+ },
+ {
+  "name": "ТСЖ «Тёплый край»",
+  "city": "Нижний Новгород",
+  "category": "Стратегия, инвестиции, консалтинг",
+  "specialization": "Бизнес-консультант",
+  "trust": 64,
+  "logo": "",
+  "legal_form_code": "tszh"
+ },
+ {
+  "name": "ПК «Северный лён»",
+  "city": "Краснодар",
+  "category": "Другое",
+  "specialization": "Разное",
+  "trust": 93,
+  "logo": "",
+  "legal_form_code": "pk"
+ },
+ {
+  "name": "Кооператив «Тёплый край»",
+  "city": "Уфа",
+  "category": "Строительство, недвижимость",
+  "specialization": "Агент по недвижимости",
+  "trust": 95,
+  "logo": "",
+  "legal_form_code": "po"
+ },
+ {
+  "name": "Фонд «Двор»",
+  "city": "Вологда",
+  "category": "Строительство, недвижимость",
+  "specialization": "Агент по недвижимости",
+  "trust": 76,
+  "logo": "",
+  "legal_form_code": "fond"
+ },
+ {
+  "name": "Кооператив «Поморье»",
+  "city": "Нижний Новгород",
+  "category": "Сельское хозяйство",
+  "specialization": "Агроном, зоотехник",
+  "trust": 79,
+  "logo": "",
+  "legal_form_code": "po"
+ },
+ {
+  "name": "ООО «Рыбак»",
+  "city": "Челябинск",
+  "category": "Искусство, развлечения, массмедиа",
+  "specialization": "Народные промыслы, ремёсла",
+  "trust": 78,
+  "logo": "img/org-logos/lukoil.png",
+  "legal_form_code": "ooo"
+ },
+ {
+  "name": "ПК «Поморье»",
+  "city": "Ишим",
+  "category": "Стратегия, инвестиции, консалтинг",
+  "specialization": "Бизнес-консультант",
+  "trust": 79,
+  "logo": "",
+  "legal_form_code": "pk"
+ }
+]

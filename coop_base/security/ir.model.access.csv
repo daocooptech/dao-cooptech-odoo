@@ -2,3 +2,11 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_coop_membership_member,coop.membership member,model_coop_membership,coop_base.group_coop_member,1,0,0,0
 access_coop_membership_audit,coop.membership audit,model_coop_membership,coop_base.group_coop_audit,1,0,0,0
 access_coop_membership_board,coop.membership board,model_coop_membership,coop_base.group_coop_board,1,1,1,0
+access_coop_legal_form_group_user,Группы правовых форм — чтение,model_coop_legal_form_group,base.group_user,1,0,0,0
+access_coop_legal_form_user,Правовые формы — чтение,model_coop_legal_form,base.group_user,1,0,0,0
+access_coop_legal_form_group_admin,Группы правовых форм — ведение,model_coop_legal_form_group,coop_base.group_coop_platform,1,1,1,1
+access_coop_legal_form_admin,Правовые формы — ведение,model_coop_legal_form,coop_base.group_coop_platform,1,1,1,1
+access_coop_specialization_category_user,Сферы деятельности — чтение,model_coop_specialization_category,base.group_user,1,0,0,0
+access_coop_specialization_user,Специализации — чтение,model_coop_specialization,base.group_user,1,0,0,0
+access_coop_specialization_category_admin,Сферы деятельности — ведение,model_coop_specialization_category,coop_base.group_coop_platform,1,1,1,1
+access_coop_specialization_admin,Специализации — ведение,model_coop_specialization,coop_base.group_coop_platform,1,1,1,1

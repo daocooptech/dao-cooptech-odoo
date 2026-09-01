@@ -1,0 +1,121 @@
+// Плитка организации — как в макете.
+//
+// Скупее людской намеренно: логотип, полоса города, название. Ничего
+// больше, потому что с карточки организации ничего не делают — её
+// открывают.
+
+.o_coop_orgs {
+
+  // Пустые плитки-распорки, которыми Odoo дотягивает последний ряд до
+  // ширины сетки. Рамку и фон им давать нельзя: получается ряд пустых
+  // карточек, и читается он как «данные не загрузились».
+  .o_kanban_record.o_kanban_ghost {
+    border: 0;
+    background: none;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .o_kanban_record {
+    background: var(--coop-white, #fff);
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(20, 23, 26, .05);
+    padding: 0;
+    overflow: hidden;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+
+    &:hover {
+      border-color: var(--coop-teal, #146b64);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(20, 23, 26, .06), 0 14px 28px rgba(20, 23, 26, .1);
+    }
+  }
+
+  .o_coop_org {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .o_coop_org_logo {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1.2;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 0;
+    }
+
+    > .o_field_image,
+    > .o_field_widget {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  }
+
+  // Своя картинка вписывается целиком и с полями: логотип, обрезанный по
+  // краям, перестаёт быть логотипом. Нижнее поле больше остальных —
+  // под ним проходит полоса города, и она не должна ложиться на знак.
+  .o_coop_org_logo_image {
+    background: var(--coop-white, #fff);
+
+    img {
+      object-fit: contain;
+      object-position: center;
+      padding: 14% 16% 32%;
+      box-sizing: border-box;
+    }
+  }
+
+  // Монограмма заливает плитку целиком: буква на фирменной подложке — это
+  // и есть фон карточки, а не значок, налепленный поверх пустоты.
+  .o_coop_org_logo_mono img {
+    object-fit: cover;
+  }
+
+  .o_coop_locbar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(20, 23, 26, .72);
+    color: #fff;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 7px 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    .fa {
+      font-size: 11px;
+      flex: none;
+    }
+  }
+
+  .o_coop_org_name {
+    font: 700 14px/1.35 'Manrope', sans-serif;
+    color: var(--coop-ink, #14171a);
+    padding: 12px 14px 14px;
+  }
+}
+
+// Профиль организации: аватар в шапке — знак, а не фотография, и обрезать
+// его по кругу нельзя.
+.o_coop_org_form .oe_avatar > img {
+  object-fit: contain;
+  background: var(--coop-white, #fff);
+  border: 1px solid var(--coop-line, #e6e6e1);
+  border-radius: 10px;
+  padding: 6px;
+}

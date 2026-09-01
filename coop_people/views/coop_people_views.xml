@@ -92,8 +92,8 @@
       <list string="Люди">
         <field name="name"/>
         <field name="city"/>
-        <field name="coop_profession_id" string="Профессия" optional="show"/>
-        <field name="coop_profession_category_id" string="Категория" optional="hide"/>
+        <field name="coop_specialization_id" string="Специализация" optional="show"/>
+        <field name="coop_specialization_category_id" string="Сфера деятельности" optional="hide"/>
         <field name="coop_age" string="Возраст"/>
         <field name="coop_skill_ids" widget="many2many_tags" optional="show"/>
         <field name="coop_membership_count" string="Кооперативов"/>
@@ -110,7 +110,7 @@
       <search string="Люди">
         <field name="name"/>
         <field name="city"/>
-        <field name="coop_profession_id"/>
+        <field name="coop_specialization_id"/>
         <field name="coop_skill_ids"/>
         <filter name="verified" string="С подтверждённой личностью"
                 domain="[('coop_verified', '=', True)]"/>
@@ -120,10 +120,10 @@
         <filter name="trust_high" string="Доверие от 80%"
                 domain="[('coop_trust', '>=', 80)]"/>
         <group>
-          <filter name="by_category" string="По категории специализации"
-                  context="{'group_by': 'coop_profession_category_id'}"/>
-          <filter name="by_profession" string="По профессии"
-                  context="{'group_by': 'coop_profession_id'}"/>
+          <filter name="by_area" string="По сфере деятельности"
+                  context="{'group_by': 'coop_specialization_category_id'}"/>
+          <filter name="by_specialization" string="По специализации"
+                  context="{'group_by': 'coop_specialization_id'}"/>
           <filter name="by_city" string="По городу" context="{'group_by': 'city'}"/>
         </group>
       </search>
@@ -152,52 +152,8 @@
     </field>
   </record>
 
-  <!-- Справочник специализаций: каталог людей в макете открывается
-       перечнем специализаций, а не списком из ста фамилий. -->
-  <record id="view_coop_profession_list" model="ir.ui.view">
-    <field name="name">coop.profession.list</field>
-    <field name="model">coop.profession</field>
-    <field name="arch" type="xml">
-      <list string="Профессии">
-        <field name="category_id"/>
-        <field name="name"/>
-        <field name="partner_count" string="Людей"/>
-      </list>
-    </field>
-  </record>
-
-  <record id="view_coop_profession_category_list" model="ir.ui.view">
-    <field name="name">coop.profession.category.list</field>
-    <field name="model">coop.profession.category</field>
-    <field name="arch" type="xml">
-      <list string="Категории специализаций">
-        <field name="name"/>
-        <field name="profession_count" string="Профессий"/>
-        <field name="partner_count" string="Людей"/>
-      </list>
-    </field>
-  </record>
-
-  <record id="action_coop_profession" model="ir.actions.act_window">
-    <field name="name">Специализации</field>
-    <field name="res_model">coop.profession</field>
-    <field name="view_mode">list,form</field>
-  </record>
-
-  <record id="action_coop_profession_category" model="ir.actions.act_window">
-    <field name="name">Категории специализаций</field>
-    <field name="res_model">coop.profession.category</field>
-    <field name="view_mode">list,form</field>
-  </record>
-
-  <menuitem id="menu_coop_people_root" name="Люди" sequence="12"/>
+  <menuitem id="menu_coop_people_root" name="Люди" sequence="30"/>
   <menuitem id="menu_coop_people" name="Каталог людей"
             parent="menu_coop_people_root" action="action_coop_people" sequence="10"/>
-  <menuitem id="menu_coop_people_config" name="Справочники"
-            parent="menu_coop_people_root" sequence="90"/>
-  <menuitem id="menu_coop_profession" name="Специализации"
-            parent="menu_coop_people_config" action="action_coop_profession" sequence="10"/>
-  <menuitem id="menu_coop_profession_category" name="Категории специализаций"
-            parent="menu_coop_people_config" action="action_coop_profession_category" sequence="20"/>
 
 </odoo>

@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Плитка организации повторяет макет и намеренно скупее людской: логотип,
+    полоса города, название. Ни доверия, ни чипов, ни кнопок.
+
+    Так и в прототипе, и причина понятна: у человека с карточки нужно
+    что-то сделать прямо сейчас — написать, подписаться, позвать в друзья.
+    Организацию сначала открывают.
+  -->
+  <record id="view_coop_orgs_kanban" model="ir.ui.view">
+    <field name="name">coop.orgs.kanban</field>
+    <field name="model">res.partner</field>
+    <field name="arch" type="xml">
+      <kanban class="o_coop_orgs" quick_create="false">
+        <field name="avatar_128"/>
+        <field name="city"/>
+        <field name="coop_has_own_logo"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_org">
+              <div class="o_coop_org_logo"
+                   t-att-class="record.coop_has_own_logo.raw_value ? 'o_coop_org_logo o_coop_org_logo_image' : 'o_coop_org_logo o_coop_org_logo_mono'">
+                <field name="avatar_128" widget="image"/>
+                <span class="o_coop_locbar" t-if="record.city.raw_value">
+                  <i class="fa fa-map-marker" role="img" aria-label="Город"/>
+                  <field name="city"/>
+                </span>
+              </div>
+              <div class="o_coop_org_name">
+                <field name="name"/>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="view_coop_orgs_list" model="ir.ui.view">
+    <field name="name">coop.orgs.list</field>
+    <field name="model">res.partner</field>
+    <field name="arch" type="xml">
+      <list string="Организации">
+        <field name="name"/>
+        <field name="coop_legal_form_id" string="Форма"/>
+        <field name="city"/>
+        <field name="coop_specialization_id" string="Специализация" optional="show"/>
+        <field name="coop_specialization_category_id" string="Сфера деятельности" optional="hide"/>
+        <field name="coop_member_count" string="Участников"/>
+        <field name="coop_trust" string="Доверие, %"/>
+        <field name="coop_inn" string="ИНН" optional="hide"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_orgs_search" model="ir.ui.view">
+    <field name="name">coop.orgs.search</field>
+    <field name="model">res.partner</field>
+    <field name="arch" type="xml">
+      <search string="Организации">
+        <field name="name"/>
+        <field name="city"/>
+        <field name="coop_specialization_id"/>
+        <field name="coop_inn"/>
+        <filter name="cooperative" string="Кооперативные"
+                domain="[('coop_is_cooperative', '=', True)]"/>
+        <filter name="with_members" string="С членством"
+                domain="[('coop_member_count', '>', 0)]"/>
+        <separator/>
+        <filter name="trust_high" string="Доверие от 80%"
+                domain="[('coop_trust', '>=', 80)]"/>
+        <group>
+          <filter name="by_form_group" string="По группе форм"
+                  context="{'group_by': 'coop_legal_form_group_id'}"/>
+          <filter name="by_form" string="По правовой форме"
+                  context="{'group_by': 'coop_legal_form_id'}"/>
+          <filter name="by_area" string="По сфере деятельности"
+                  context="{'group_by': 'coop_specialization_category_id'}"/>
+          <filter name="by_city" string="По городу" context="{'group_by': 'city'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <!--
+    Профиль организации. Реквизиты вынесены вперёд, потому что с
+    организацией имеют дело как с юридическим лицом: прежде чем
+    договариваться, смотрят, кто это по документам.
+
+    Состав показывается только там, где членство вообще бывает. У фонда и
+    АНО его нет по закону, и пустая вкладка «Состав» на карточке фонда
+    читалась бы как «участников пока не добавили», хотя добавлять их туда
+    не следует вовсе.
+  -->
+  <record id="view_coop_orgs_form" model="ir.ui.view">
+    <field name="name">coop.orgs.form</field>
+    <field name="model">res.partner</field>
+    <field name="arch" type="xml">
+      <form string="Организация" class="o_coop_org_form">
+        <header>
+          <button name="action_coop_org_message" type="object"
+                  string="Написать" class="btn-primary"/>
+          <button name="action_coop_org_follow" type="object"
+                  string="Подписаться" invisible="coop_org_is_following"/>
+          <button name="action_coop_org_follow" type="object"
+                  string="Вы подписаны" invisible="not coop_org_is_following"/>
+        </header>
+        <sheet>
+          <div class="oe_button_box" name="button_box">
+            <!-- Кнопка и вкладка состава — только тем, кто вправе его
+                 читать. Администратор платформы не пайщик и поимённый
+                 состав чужого кооператива не видит; без groups форма у
+                 него не открывалась бы вовсе. -->
+            <button name="action_coop_members" type="object"
+                    class="oe_stat_button" icon="fa-users"
+                    groups="coop_base.group_coop_member,coop_base.group_coop_board,coop_base.group_coop_audit"
+                    invisible="not coop_has_members">
+              <field name="coop_member_count" widget="statinfo" string="Участников"/>
+            </button>
+          </div>
+
+          <field name="avatar_128" widget="image" class="oe_avatar"/>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Название организации"/></h1>
+            <h3 class="text-muted"><field name="coop_legal_form_id"
+                                          options="{'no_create': True}"
+                                          placeholder="Правовая форма"/></h3>
+          </div>
+
+          <group>
+            <group string="Реквизиты">
+              <field name="coop_inn"/>
+              <field name="coop_kpp"/>
+              <field name="coop_ogrn"/>
+              <field name="coop_registered_on"/>
+              <field name="coop_charter_url" widget="url"/>
+            </group>
+            <group string="На платформе">
+              <field name="coop_is_participant"/>
+              <field name="coop_specialization_id" options="{'no_create': True}"/>
+              <field name="coop_specialization_category_id" readonly="1"/>
+              <field name="coop_trust"/>
+              <field name="coop_is_cooperative" readonly="1"/>
+              <field name="coop_has_members" invisible="1"/>
+              <field name="coop_org_is_following" invisible="1"/>
+              <field name="coop_has_own_logo" invisible="1"/>
+            </group>
+          </group>
+
+          <group string="Где находится">
+            <group>
+              <field name="street" placeholder="Улица, дом"/>
+              <field name="city"/>
+              <field name="zip"/>
+              <field name="country_id" options="{'no_create': True}"/>
+            </group>
+            <group>
+              <field name="phone" widget="phone"/>
+              <field name="email" widget="email"/>
+              <field name="website" widget="url"/>
+            </group>
+          </group>
+
+          <notebook>
+            <page string="Состав" name="members" groups="coop_base.group_coop_member,coop_base.group_coop_board,coop_base.group_coop_audit"
+                  invisible="not coop_has_members">
+              <field name="coop_member_ids" nolabel="1">
+                <list>
+                  <field name="partner_id" string="Участник"/>
+                  <field name="role"/>
+                  <field name="state"/>
+                  <field name="joined_on"/>
+                  <field name="has_vote" string="Право голоса"/>
+                </list>
+              </field>
+            </page>
+            <!-- Ресурсы организации появятся вместе с разделом «Ресурсы»:
+                 связывать здесь пока не с чем, а вкладка-заглушка обещала
+                 бы то, чего нет. -->
+          </notebook>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_coop_orgs" model="ir.actions.act_window">
+    <field name="name">Организации</field>
+    <field name="res_model">res.partner</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="domain">[('coop_is_participant', '=', True), ('is_company', '=', True)]</field>
+    <field name="context">{'default_coop_is_participant': True, 'default_is_company': True}</field>
+    <field name="search_view_id" ref="view_coop_orgs_search"/>
+    <field name="view_ids" eval="[(5, 0, 0),
+           (0, 0, {'sequence': 10, 'view_mode': 'kanban', 'view_id': ref('view_coop_orgs_kanban')}),
+           (0, 0, {'sequence': 20, 'view_mode': 'list', 'view_id': ref('view_coop_orgs_list')}),
+           (0, 0, {'sequence': 30, 'view_mode': 'form', 'view_id': ref('view_coop_orgs_form')})]"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">В каталоге пока нет организаций</p>
+      <p>Сюда попадают кооперативы, товарищества, фонды и компании —
+         участники платформы. Обычный контакт-организация в каталог не
+         попадает: для этого у него должен стоять признак участника.</p>
+    </field>
+  </record>
+
+  <!-- Справочники — общие, поэтому живут в разделе организаций рядом с
+       формами, а не в разделе людей, где были заведены. -->
+  <record id="view_coop_legal_form_list" model="ir.ui.view">
+    <field name="name">coop.legal.form.list</field>
+    <field name="model">coop.legal.form</field>
+    <field name="arch" type="xml">
+      <list string="Правовые формы">
+        <field name="sequence" widget="handle"/>
+        <field name="group_id"/>
+        <field name="short_name" string="Сокращение"/>
+        <field name="name"/>
+        <field name="law" string="Основание"/>
+        <field name="has_members" string="Членство"/>
+        <field name="is_cooperative" string="Кооперативная"/>
+        <field name="is_russian" string="Форма по праву РФ"/>
+        <field name="partner_count" string="Организаций"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_specialization_list" model="ir.ui.view">
+    <field name="name">coop.specialization.list</field>
+    <field name="model">coop.specialization</field>
+    <field name="arch" type="xml">
+      <list string="Специализации">
+        <field name="category_id"/>
+        <field name="name"/>
+        <field name="partner_count" string="Записей"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_specialization_category_list" model="ir.ui.view">
+    <field name="name">coop.specialization.category.list</field>
+    <field name="model">coop.specialization.category</field>
+    <field name="arch" type="xml">
+      <list string="Сферы деятельности">
+        <field name="name"/>
+        <field name="specialization_count" string="Специализаций"/>
+        <field name="partner_count" string="Записей"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="action_coop_legal_form" model="ir.actions.act_window">
+    <field name="name">Правовые формы</field>
+    <field name="res_model">coop.legal.form</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <record id="action_coop_specialization" model="ir.actions.act_window">
+    <field name="name">Специализации</field>
+    <field name="res_model">coop.specialization</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <record id="action_coop_specialization_category" model="ir.actions.act_window">
+    <field name="name">Сферы деятельности</field>
+    <field name="res_model">coop.specialization.category</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <menuitem id="menu_coop_orgs_root" name="Организации" sequence="80"/>
+  <menuitem id="menu_coop_orgs" name="Каталог организаций"
+            parent="menu_coop_orgs_root" action="action_coop_orgs" sequence="10"/>
+  <menuitem id="menu_coop_orgs_config" name="Справочники"
+            parent="menu_coop_orgs_root" sequence="90"/>
+  <menuitem id="menu_coop_legal_form" name="Правовые формы"
+            parent="menu_coop_orgs_config" action="action_coop_legal_form" sequence="10"/>
+  <menuitem id="menu_coop_specialization" name="Специализации"
+            parent="menu_coop_orgs_config" action="action_coop_specialization" sequence="20"/>
+  <menuitem id="menu_coop_specialization_category" name="Сферы деятельности"
+            parent="menu_coop_orgs_config" action="action_coop_specialization_category" sequence="30"/>
+
+</odoo>

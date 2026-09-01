@@ -63,30 +63,18 @@ def _birthdate(age, seed):
     return date(year, month, day)
 
 
-def load_people(env):
+def load_people(env, specializations):
     path = os.path.join(HERE, 'people.json')
     with open(path, encoding='utf-8') as fh:
         people = json.load(fh)
 
     skill_type = env.ref('coop_demo.skill_type_craft')
 
-    # Справочники создаются по факту встречаемости: список профессий и
-    # навыков задан макетом, дублировать его отдельным файлом значит
+    # Специализации приходят из общего справочника: он один на людей,
+    # организации, вакансии и навыки, и строить его здесь заново значит
     # завести второй источник правды, который разойдётся с первым.
-    categories, professions, skills = {}, {}, {}
-
+    skills = {}
     for person in people:
-        name = person['category']
-        if name and name not in categories:
-            categories[name] = _upsert(
-                env, 'coop.profession.category', {'name': name}, {})
-
-        name = person['profession']
-        if name and name not in professions:
-            professions[name] = _upsert(
-                env, 'coop.profession', {'name': name},
-                {'category_id': categories[person['category']].id})
-
         for name in person['skills']:
             if name not in skills:
                 skills[name] = _upsert(
@@ -105,7 +93,7 @@ def load_people(env):
             'coop_verified': person['verified'],
             'coop_trust': person['trust'],
             'coop_birthdate': _birthdate(person['age'], index + 1),
-            'coop_profession_id': professions[person['profession']].id,
+            'coop_specialization_id': specializations[person['specialization']].id,
             'coop_skill_ids': [(6, 0, [skills[s].id for s in person['skills']])],
         }
 
@@ -133,16 +121,15 @@ def load_people(env):
     # задано» и выглядят как недозаполненные записи. Специализации взяты
     # из того же списка, что и у остальных: заводить ради троих отдельные
     # названия значит развести справочник на пустом месте.
-    for name, profession in (
+    for name, specialization in (
         ('Водянов Алексей Петрович', 'Сварщик'),
         ('Гончаров Пётр Ильич', 'Сварщик'),
         ('Ковалёв Игорь Степанович', 'Повар, кондитер'),
     ):
         partner = env['res.partner'].search([
             ('name', '=', name), ('is_company', '=', False)], limit=1)
-        if partner and not partner.coop_profession_id and profession in professions:
-            partner.coop_profession_id = professions[profession].id
+        if partner and not partner.coop_specialization_id and specialization in specializations:
+            partner.coop_specialization_id = specializations[specialization].id
 
-    _logger.info(
-        'Каталог людей: %s человек, %s профессий в %s категориях, %s навыков',
-        len(people), len(professions), len(categories), len(skills))
+    _logger.info('Каталог людей: %s человек, %s навыков',
+                 len(people), len(skills))

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from odoo import api, models
 
-from ..data import load_people
+from ..data import load_org_profiles, load_orgs, load_people, load_reference
 
 
 class CoopDemoLoader(models.AbstractModel):
@@ -17,5 +17,11 @@ class CoopDemoLoader(models.AbstractModel):
 
     @api.model
     def load_all(self):
-        load_people.load_people(self.env)
+        # Порядок важен: справочник специализаций общий, и каталоги на
+        # него ссылаются. Строить его внутри каждого загрузчика значит
+        # получить два дерева, которые разойдутся при первой же правке.
+        _categories, specializations = load_reference.load_specializations(self.env)
+        load_people.load_people(self.env, specializations)
+        load_orgs.load_organizations(self.env, specializations)
+        load_org_profiles.load_org_profiles(self.env, specializations)
         return True

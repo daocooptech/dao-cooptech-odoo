@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-  <menuitem id="menu_coop_extensions_root" name="Расширения" sequence="16"/>
+  <menuitem id="menu_coop_extensions_root" name="Расширения" sequence="150"/>
 
   <!-- Порядок пунктов не случаен: сначала «что у меня стоит», потом «что
        вообще есть». Человек чаще возвращается к своему, чем ходит за новым. -->

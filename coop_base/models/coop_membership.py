@@ -49,11 +49,14 @@ class CoopMembership(models.Model):
              'пайщика, правление и ревизию, и его среди них нет.')
 
     # Организация бывает не только кооперативом: рабочая группа платформы,
-    # НКО, коммерческая компания. Тип нужен, чтобы не выдавать кооперативные
-    # права там, где кооператива нет.
-    org_type = fields.Selection(
-        related='organization_id.coop_org_type', store=True, readonly=True,
-        string='Тип организации')
+    # НКО, коммерческая компания. Группа формы нужна, чтобы не выдавать
+    # кооперативные права там, где кооператива нет.
+    org_group_id = fields.Many2one(
+        related='organization_id.coop_legal_form_group_id', store=True,
+        readonly=True, string='Группа форм организации')
+    org_is_cooperative = fields.Boolean(
+        related='organization_id.coop_is_cooperative', store=True,
+        readonly=True, string='Кооперативная организация')
 
     state = fields.Selection([
         ('applied', 'Подано заявление'),

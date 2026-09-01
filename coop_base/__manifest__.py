@@ -24,9 +24,11 @@
     ],
     'data': [
         'security/coop_groups.xml',
+        'data/coop_legal_forms.xml',
         'security/ir.model.access.csv',
         'views/coop_membership_views.xml',
         'views/coop_menus.xml',
+        'data/coop_menu_order.xml',
     ],
     'installable': True,
     'application': True,

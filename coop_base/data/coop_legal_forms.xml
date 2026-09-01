@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data noupdate="1">
+
+    <!--
+      Справочник правовых форм. Не демо-данные: это рабочий справочник
+      платформы, он нужен и в боевой базе. noupdate="1" — чтобы правки
+      юриста в конкретной записи не затирались при обновлении модуля.
+
+      Флаги has_members и is_cooperative проставлены по существу формы, а
+      не по названию: у ТСЖ и у потребкооператива есть члены со взносами,
+      у фонда и АНО членства нет вовсе, у АО есть акционеры — но это доли
+      в капитале, а не паи, и голосуют они по-другому.
+    -->
+
+    <record id="legal_group_commercial" model="coop.legal.form.group">
+      <field name="name">Коммерческие организации</field>
+      <field name="code">commercial</field>
+      <field name="sequence">10</field>
+    </record>
+
+    <record id="legal_group_cooperative" model="coop.legal.form.group">
+      <field name="name">Кооперативные организации</field>
+      <field name="code">cooperative</field>
+      <field name="sequence">20</field>
+    </record>
+
+    <record id="legal_group_nonprofit" model="coop.legal.form.group">
+      <field name="name">Некоммерческие организации</field>
+      <field name="code">nonprofit</field>
+      <field name="sequence">30</field>
+    </record>
+
+    <!-- Отдельная группа, потому что это не организационно-правовая форма
+         в смысле ГК: ДАО в российском праве не существует. Организация в
+         сети быть может, но правила о паях и расчётах к ней неприменимы —
+         это и отмечено снятым признаком is_russian. -->
+    <record id="legal_group_decentralized" model="coop.legal.form.group">
+      <field name="name">Децентрализованные</field>
+      <field name="code">decentralized</field>
+      <field name="sequence">40</field>
+    </record>
+
+    <!-- ── Коммерческие ─────────────────────────────────────────────── -->
+    <record id="legal_form_ooo" model="coop.legal.form">
+      <field name="name">Общество с ограниченной ответственностью</field>
+      <field name="short_name">ООО</field>
+      <field name="code">ooo</field>
+      <field name="group_id" ref="legal_group_commercial"/>
+      <field name="law">ФЗ от 08.02.1998 № 14-ФЗ</field>
+      <field name="sequence">10</field>
+    </record>
+
+    <record id="legal_form_ao" model="coop.legal.form">
+      <field name="name">Акционерное общество</field>
+      <field name="short_name">АО</field>
+      <field name="code">ao</field>
+      <field name="group_id" ref="legal_group_commercial"/>
+      <field name="law">ФЗ от 26.12.1995 № 208-ФЗ</field>
+      <field name="sequence">20</field>
+    </record>
+
+    <record id="legal_form_pao" model="coop.legal.form">
+      <field name="name">Публичное акционерное общество</field>
+      <field name="short_name">ПАО</field>
+      <field name="code">pao</field>
+      <field name="group_id" ref="legal_group_commercial"/>
+      <field name="law">ФЗ от 26.12.1995 № 208-ФЗ</field>
+      <field name="sequence">30</field>
+    </record>
+
+    <!-- ЗАО и ОАО с 2014 года не создаются, но существующие организации
+         этих форм никуда не делись и в каталоге встречаются. -->
+    <record id="legal_form_zao" model="coop.legal.form">
+      <field name="name">Закрытое акционерное общество</field>
+      <field name="short_name">ЗАО</field>
+      <field name="code">zao</field>
+      <field name="group_id" ref="legal_group_commercial"/>
+      <field name="law">ФЗ от 26.12.1995 № 208-ФЗ, в редакции до 01.09.2014</field>
+      <field name="sequence">40</field>
+    </record>
+
+    <record id="legal_form_oao" model="coop.legal.form">
+      <field name="name">Открытое акционерное общество</field>
+      <field name="short_name">ОАО</field>
+      <field name="code">oao</field>
+      <field name="group_id" ref="legal_group_commercial"/>
+      <field name="law">ФЗ от 26.12.1995 № 208-ФЗ, в редакции до 01.09.2014</field>
+      <field name="sequence">50</field>
+    </record>
+
+    <record id="legal_form_ip" model="coop.legal.form">
+      <field name="name">Индивидуальный предприниматель</field>
+      <field name="short_name">ИП</field>
+      <field name="code">ip</field>
+      <field name="group_id" ref="legal_group_commercial"/>
+      <field name="law">ст. 23 ГК РФ</field>
+      <field name="sequence">60</field>
+    </record>
+
+    <record id="legal_form_kfh" model="coop.legal.form">
+      <field name="name">Крестьянское (фермерское) хозяйство</field>
+      <field name="short_name">КФХ</field>
+      <field name="code">kfh</field>
+      <field name="group_id" ref="legal_group_commercial"/>
+      <field name="law">ФЗ от 11.06.2003 № 74-ФЗ</field>
+      <field name="has_members" eval="True"/>
+      <field name="sequence">70</field>
+    </record>
+
+    <record id="legal_form_hoz_part" model="coop.legal.form">
+      <field name="name">Хозяйственное партнёрство</field>
+      <field name="short_name">ХП</field>
+      <field name="code">hoz_part</field>
+      <field name="group_id" ref="legal_group_commercial"/>
+      <field name="law">ФЗ от 03.12.2011 № 380-ФЗ</field>
+      <field name="has_members" eval="True"/>
+      <field name="sequence">80</field>
+    </record>
+
+    <!-- ── Кооперативные ────────────────────────────────────────────── -->
+    <record id="legal_form_po" model="coop.legal.form">
+      <field name="name">Потребительский кооператив (потребительское общество)</field>
+      <field name="short_name">ПО</field>
+      <field name="code">po</field>
+      <field name="group_id" ref="legal_group_cooperative"/>
+      <field name="law">Закон РФ от 19.06.1992 № 3085-1</field>
+      <field name="has_members" eval="True"/>
+      <field name="is_cooperative" eval="True"/>
+      <field name="sequence">10</field>
+    </record>
+
+    <record id="legal_form_pk" model="coop.legal.form">
+      <field name="name">Производственный кооператив</field>
+      <field name="short_name">ПК</field>
+      <field name="code">pk</field>
+      <field name="group_id" ref="legal_group_cooperative"/>
+      <field name="law">ФЗ от 08.05.1996 № 41-ФЗ</field>
+      <field name="has_members" eval="True"/>
+      <field name="is_cooperative" eval="True"/>
+      <field name="sequence">20</field>
+    </record>
+
+    <record id="legal_form_spk" model="coop.legal.form">
+      <field name="name">Сельскохозяйственный производственный кооператив</field>
+      <field name="short_name">СПК</field>
+      <field name="code">spk</field>
+      <field name="group_id" ref="legal_group_cooperative"/>
+      <field name="law">ФЗ от 08.12.1995 № 193-ФЗ</field>
+      <field name="has_members" eval="True"/>
+      <field name="is_cooperative" eval="True"/>
+      <field name="sequence">30</field>
+    </record>
+
+    <!-- Артель — не отдельная форма по ГК, а исторически принятое
+         самоназвание производственного кооператива, прямо упомянутое в
+         ст. 106.1 ГК. Держим отдельной записью, потому что организации
+         так себя называют, а группа и правила у неё те же. -->
+    <record id="legal_form_artel" model="coop.legal.form">
+      <field name="name">Артель (производственный кооператив)</field>
+      <field name="short_name">Артель</field>
+      <field name="code">artel</field>
+      <field name="group_id" ref="legal_group_cooperative"/>
+      <field name="law">ст. 106.1 ГК РФ, ФЗ от 08.05.1996 № 41-ФЗ</field>
+      <field name="has_members" eval="True"/>
+      <field name="is_cooperative" eval="True"/>
+      <field name="sequence">40</field>
+    </record>
+
+    <record id="legal_form_kpk" model="coop.legal.form">
+      <field name="name">Кредитный потребительский кооператив</field>
+      <field name="short_name">КПК</field>
+      <field name="code">kpk</field>
+      <field name="group_id" ref="legal_group_cooperative"/>
+      <field name="law">ФЗ от 18.07.2009 № 190-ФЗ</field>
+      <field name="has_members" eval="True"/>
+      <field name="is_cooperative" eval="True"/>
+      <field name="sequence">50</field>
+    </record>
+
+    <record id="legal_form_zhsk" model="coop.legal.form">
+      <field name="name">Жилищно-строительный кооператив</field>
+      <field name="short_name">ЖСК</field>
+      <field name="code">zhsk</field>
+      <field name="group_id" ref="legal_group_cooperative"/>
+      <field name="law">раздел V ЖК РФ</field>
+      <field name="has_members" eval="True"/>
+      <field name="is_cooperative" eval="True"/>
+      <field name="sequence">60</field>
+    </record>
+
+    <record id="legal_form_union" model="coop.legal.form">
+      <field name="name">Союз (содружество) кооперативов</field>
+      <field name="short_name">Союз</field>
+      <field name="code">union</field>
+      <field name="group_id" ref="legal_group_cooperative"/>
+      <field name="law">ст. 123.8 ГК РФ, ст. 31 Закона РФ № 3085-1</field>
+      <field name="has_members" eval="True"/>
+      <field name="is_cooperative" eval="True"/>
+      <field name="sequence">70</field>
+    </record>
+
+    <record id="legal_form_gsk" model="coop.legal.form">
+      <field name="name">Гаражный (гаражно-строительный) кооператив</field>
+      <field name="short_name">ГСК</field>
+      <field name="code">gsk</field>
+      <field name="group_id" ref="legal_group_cooperative"/>
+      <field name="law">ст. 123.2 ГК РФ</field>
+      <field name="has_members" eval="True"/>
+      <field name="is_cooperative" eval="True"/>
+      <field name="sequence">80</field>
+    </record>
+
+    <!-- Дачные кооперативы с 2019 года по 217-ФЗ преобразованы в СНТ, но
+         сама форма садоводческого потребительского кооператива никуда не
+         делась и в каталоге встречается. -->
+    <record id="legal_form_snt" model="coop.legal.form">
+      <field name="name">Садоводческое (дачное) некоммерческое товарищество</field>
+      <field name="short_name">СНТ</field>
+      <field name="code">snt</field>
+      <field name="group_id" ref="legal_group_cooperative"/>
+      <field name="law">ФЗ от 29.07.2017 № 217-ФЗ</field>
+      <field name="has_members" eval="True"/>
+      <field name="is_cooperative" eval="True"/>
+      <field name="sequence">90</field>
+    </record>
+
+    <record id="legal_form_skpk" model="coop.legal.form">
+      <field name="name">Сельскохозяйственный кредитный потребительский кооператив</field>
+      <field name="short_name">СКПК</field>
+      <field name="code">skpk</field>
+      <field name="group_id" ref="legal_group_cooperative"/>
+      <field name="law">ФЗ от 08.12.1995 № 193-ФЗ, ФЗ от 18.07.2009 № 190-ФЗ</field>
+      <field name="has_members" eval="True"/>
+      <field name="is_cooperative" eval="True"/>
+      <field name="sequence">100</field>
+    </record>
+
+    <record id="legal_form_sppk" model="coop.legal.form">
+      <field name="name">Сельскохозяйственный потребительский кооператив</field>
+      <field name="short_name">СПоК</field>
+      <field name="code">sppk</field>
+      <field name="group_id" ref="legal_group_cooperative"/>
+      <field name="law">ФЗ от 08.12.1995 № 193-ФЗ</field>
+      <field name="has_members" eval="True"/>
+      <field name="is_cooperative" eval="True"/>
+      <field name="sequence">110</field>
+    </record>
+
+    <!-- ── Некоммерческие ───────────────────────────────────────────── -->
+    <record id="legal_form_tszh" model="coop.legal.form">
+      <field name="name">Товарищество собственников жилья</field>
+      <field name="short_name">ТСЖ</field>
+      <field name="code">tszh</field>
+      <field name="group_id" ref="legal_group_nonprofit"/>
+      <field name="law">раздел VI ЖК РФ</field>
+      <field name="has_members" eval="True"/>
+      <field name="sequence">10</field>
+    </record>
+
+    <record id="legal_form_ano" model="coop.legal.form">
+      <field name="name">Автономная некоммерческая организация</field>
+      <field name="short_name">АНО</field>
+      <field name="code">ano</field>
+      <field name="group_id" ref="legal_group_nonprofit"/>
+      <field name="law">ст. 123.24 ГК РФ, ФЗ от 12.01.1996 № 7-ФЗ</field>
+      <field name="sequence">20</field>
+    </record>
+
+    <record id="legal_form_fond" model="coop.legal.form">
+      <field name="name">Фонд</field>
+      <field name="short_name">Фонд</field>
+      <field name="code">fond</field>
+      <field name="group_id" ref="legal_group_nonprofit"/>
+      <field name="law">ст. 123.17 ГК РФ, ФЗ от 12.01.1996 № 7-ФЗ</field>
+      <field name="sequence">30</field>
+    </record>
+
+    <record id="legal_form_association" model="coop.legal.form">
+      <field name="name">Ассоциация</field>
+      <field name="short_name">Ассоциация</field>
+      <field name="code">association</field>
+      <field name="group_id" ref="legal_group_nonprofit"/>
+      <field name="law">ст. 123.8 ГК РФ</field>
+      <field name="has_members" eval="True"/>
+      <field name="sequence">40</field>
+    </record>
+
+    <!-- Союз в некоммерческой группе — это объединение юридических лиц по
+         ст. 123.8 ГК, не то же самое, что союз кооперативов по Закону
+         3085-1: у последнего членами могут быть только кооперативы, и
+         правила распределения у него кооперативные. -->
+    <record id="legal_form_soyuz" model="coop.legal.form">
+      <field name="name">Союз (объединение юридических лиц)</field>
+      <field name="short_name">Союз</field>
+      <field name="code">soyuz</field>
+      <field name="group_id" ref="legal_group_nonprofit"/>
+      <field name="law">ст. 123.8 ГК РФ</field>
+      <field name="has_members" eval="True"/>
+      <field name="sequence">50</field>
+    </record>
+
+    <record id="legal_form_oo" model="coop.legal.form">
+      <field name="name">Общественная организация (объединение)</field>
+      <field name="short_name">ОО</field>
+      <field name="code">oo</field>
+      <field name="group_id" ref="legal_group_nonprofit"/>
+      <field name="law">ст. 123.4 ГК РФ, ФЗ от 19.05.1995 № 82-ФЗ</field>
+      <field name="has_members" eval="True"/>
+      <field name="sequence">60</field>
+    </record>
+
+    <record id="legal_form_tsn" model="coop.legal.form">
+      <field name="name">Товарищество собственников недвижимости</field>
+      <field name="short_name">ТСН</field>
+      <field name="code">tsn</field>
+      <field name="group_id" ref="legal_group_nonprofit"/>
+      <field name="law">ст. 123.12 ГК РФ</field>
+      <field name="has_members" eval="True"/>
+      <field name="sequence">70</field>
+    </record>
+
+    <record id="legal_form_nko_uchr" model="coop.legal.form">
+      <field name="name">Частное учреждение</field>
+      <field name="short_name">Учреждение</field>
+      <field name="code">uchrezhdenie</field>
+      <field name="group_id" ref="legal_group_nonprofit"/>
+      <field name="law">ст. 123.23 ГК РФ</field>
+      <field name="sequence">80</field>
+    </record>
+
+    <!-- ── Децентрализованные ───────────────────────────────────────── -->
+    <record id="legal_form_dao" model="coop.legal.form">
+      <field name="name">Децентрализованная автономная организация</field>
+      <field name="short_name">ДАО</field>
+      <field name="code">dao</field>
+      <field name="group_id" ref="legal_group_decentralized"/>
+      <field name="law">формы нет в праве РФ</field>
+      <field name="has_members" eval="True"/>
+      <field name="is_cooperative" eval="True"/>
+      <field name="is_russian" eval="False"/>
+      <field name="sequence">10</field>
+    </record>
+
+    <!-- Рабочая группа самой платформы. Отдельная запись нужна потому,
+         что платформа не сторона отношений участников: она не пайщик, не
+         продавец и не покупатель, и её карточка не должна попадать в
+         каталог наравне с кооперативами. -->
+    <record id="legal_form_platform" model="coop.legal.form">
+      <field name="name">Рабочая группа платформы</field>
+      <field name="short_name">Платформа</field>
+      <field name="code">platform</field>
+      <field name="group_id" ref="legal_group_decentralized"/>
+      <field name="law">не является стороной отношений участников</field>
+      <field name="is_russian" eval="False"/>
+      <field name="sequence">20</field>
+    </record>
+
+  </data>
+</odoo>

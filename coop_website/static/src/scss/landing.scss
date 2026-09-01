@@ -1,0 +1,561 @@
+// Лендинг платформы — стили перенесены из прототипа (`index.html`).
+//
+// Правила отобраны по классам разметки лендинга: шапка, hero, полоса
+// цифр, сетка разделов, сценарии, принципы, призыв к действию, кнопки и
+// чипы. Мобильные блоки перенесены вместе с ними: лендинг чаще открывают
+// с телефона, чем сам кабинет.
+
+// Имена токенов прототипа. Значения те же, что у токенов темы в
+// coop_theme, — но имена другие, и переписывать ради этого триста строк
+// перенесённых правил значит нажить расхождение с прототипом при первой
+// же правке макета. Дешевле объявить синонимы здесь.
+:root {
+  --ink: #14171a;
+  --ink-2: #4a4a44;
+  --paper: #fbfbf9;
+  --white: #ffffff;
+  --surface-2: #f2f2ee;
+  --teal: #146b64;
+  --teal-dark: #0e4f4a;
+  --teal-tint: #e3efed;
+  --gold: #c98a2b;
+  --gold-tint: #f7ecd9;
+  --gold-text: #8a5c14;
+  --line: #e6e6e1;
+  --slate: #4a4a44;
+  --slate-light: #8f8f88;
+  --btn-bg: #14171a;
+  --btn-fg: #ffffff;
+  --radius: 10px;
+  --radius-sm: 7px;
+  --shadow: 0 1px 2px rgba(20, 23, 26, .05);
+  --focus: #0e4f4a;
+}
+
+// Страница лендинга целиком: шрифты и базовый цвет текста. Odoo рисует
+// публичную часть на Bootstrap, и без этого лендинг съезжает на его
+// системный шрифт.
+.coop-landing {
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+
+  h1, h2, h3 { font-family: 'Manrope', 'Inter', sans-serif; }
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo .mark {
+  width: 22px; height: 22px;
+  background: linear-gradient(135deg, var(--teal) 0%, var(--gold) 100%);
+  display: inline-block;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .15s ease;
+}
+
+.button:hover { background: var(--teal-dark); text-decoration: none; }
+
+.button.secondary { padding: 8.5px 18px; }
+
+.button.secondary:hover { background: var(--teal-tint); }
+
+.button.ghost { padding: 8.5px 18px; }
+
+.button.secondary.active:hover, .button.ghost.active:hover { background: var(--teal-dark); }
+
+.chip {
+  display: inline-block;
+  font-size: 12.5px;
+  font-weight: 500;
+  margin: 0 8px 8px 0;
+}
+
+a.chip:hover { border-color: var(--teal); color: var(--teal-dark); text-decoration: none; background: var(--teal-tint); }
+
+.logo-square {
+  display: flex; align-items: center; justify-content: center; border-radius: 10px;
+  font-weight: 700; font-family: 'Manrope', sans-serif; flex: none;
+}
+
+.action-stack .button { white-space: nowrap; }
+
+.logo-img { display: block; }
+
+.site-footer {
+  display: flex; justify-content: center;
+  padding: 24px 0 8px; color: var(--slate); font-size: 12.5px;
+}
+
+/* ============================================================
+   Публичный лендинг (index.html)
+   ============================================================ */
+.public-header {
+  background: var(--ink); color: var(--white); padding: 0 28px; height: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 2px solid var(--teal);
+}
+
+.public-header .auth-actions { display: flex; gap: 10px; align-items: center; }
+
+.public-header .auth-actions a.button.ghost { color: #cfd3d1; border-color: rgba(255,255,255,.25); }
+
+.hero { max-width: 1160px; margin: 0 auto; padding: 64px 40px 40px; display: flex; gap: 48px; align-items: center; }
+
+.hero-text { flex: 1; }
+
+.hero-text .eyebrow { color: var(--teal-dark); font-weight: 700; font-size: 12.5px; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 12px; }
+
+.hero-text h1 { font-size: 38px; line-height: 1.15; margin: 0 0 18px; max-width: 560px; }
+
+.hero-text p { color: var(--slate); font-size: 15px; max-width: 520px; margin: 0 0 26px; }
+
+.hero-actions { display: flex; gap: 12px; }
+
+/* Landing-only полировка кнопок (hero + cta-band) — точечно через .hero-actions,
+   этот класс больше нигде в проекте не используется (проверено grep), поэтому
+   не задевает обычные .button/.button.secondary в остальном приложении. */
+.hero-actions .button {
+  padding: 13px 26px; font-size: 14px;
+  box-shadow: 0 10px 24px -8px rgba(14, 79, 74, .5);
+  transition: background .15s ease, transform .15s ease, box-shadow .15s ease;
+}
+
+.hero-actions .button:hover { transform: translateY(-2px); box-shadow: 0 14px 28px -8px rgba(14, 79, 74, .55); }
+
+.hero-actions .button:active { transform: translateY(0); }
+
+.hero-actions .button.secondary {
+  padding: 11.5px 24px; background: var(--white);
+  box-shadow: 0 6px 16px -8px rgba(20, 23, 26, .18);
+}
+
+.hero-actions .button.secondary:hover { background: var(--teal-tint); transform: translateY(-2px); box-shadow: 0 10px 22px -8px rgba(20, 23, 26, .22); }
+
+.cta-band .button.secondary { background: transparent; box-shadow: none; }
+
+.cta-band .button.secondary:hover { background: #fff; color: var(--teal-dark); border-color: #fff; box-shadow: 0 10px 22px -8px rgba(0, 0, 0, .35); }
+
+.hero-illustration { width: 400px; flex: none; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); box-shadow: var(--shadow); }
+
+.hero-illustration svg { display: block; width: 100%; height: 100%; }
+
+.hero-jump { display: inline-block; margin-top: 4px; color: var(--teal-dark); font-size: 12.5px; font-weight: 600; }
+
+.hero-jump:hover { color: var(--teal); }
+
+.stats-strip { max-width: 1160px; margin: 0 auto; padding: 0 40px 8px; }
+
+.stats-strip-inner {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+  background: var(--white); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 22px 24px;
+}
+
+.stat-block { text-align: center; padding: 0 8px; border-left: 1px solid var(--line); }
+
+.stat-block:first-child { border-left: none; }
+
+.stat-num { font-size: 30px; color: var(--teal-dark); line-height: 1; margin-bottom: 8px; }
+
+.stat-label { color: var(--slate); font-size: 12px; line-height: 1.4; }
+
+.stats-strip-note { color: var(--slate-light); font-size: 11.5px; margin: 10px 4px 0; }
+
+.landing-section { max-width: 1160px; margin: 0 auto; padding: 40px 40px; }
+
+.landing-section h2 { font-size: 22px; margin: 0 0 8px; }
+
+.landing-section .section-sub { color: var(--slate); font-size: 13.5px; margin: 0 0 26px; max-width: 640px; }
+
+.feature-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+.feature-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; }
+
+.feature-card .f-icon { width: 34px; height: 34px; border-radius: 9px; background: var(--teal-tint); color: var(--teal-dark); display: flex; align-items: center; justify-content: center; font-size: 16px; margin-bottom: 12px; }
+
+.feature-card .f-title { font-weight: 600; font-size: 13.5px; margin-bottom: 5px; }
+
+.feature-card .f-desc { color: var(--slate); font-size: 12px; line-height: 1.55; }
+
+.extensions-chips { display: flex; flex-wrap: wrap; }
+
+/* Юзеркейсы — сторителлинг-карточки с чередующейся раскладкой изображение/текст */
+.usecase-list { display: flex; flex-direction: column; gap: 20px; }
+
+.usecase-row {
+  display: flex; align-items: stretch; gap: 0;
+  background: var(--white); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); overflow: hidden;
+}
+
+.usecase-row.reverse { flex-direction: row-reverse; }
+
+.usecase-media { flex: 0 0 300px; min-height: 260px; background: var(--teal-tint); }
+
+.usecase-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+.usecase-body { flex: 1; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; justify-content: center; }
+
+.usecase-kicker { color: var(--teal-dark); font-weight: 700; font-size: 11.5px; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 10px; }
+
+.usecase-body h3 { font-size: 19px; margin: 0 0 10px; line-height: 1.3; }
+
+.usecase-body p { color: var(--slate); font-size: 13.5px; line-height: 1.65; margin: 0 0 16px; max-width: 660px; }
+
+.usecase-stats { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-bottom: 16px; }
+
+.usecase-stat { color: var(--slate); font-size: 12px; }
+
+.usecase-stat b { font-family: 'Manrope', sans-serif; color: var(--ink); font-size: 13.5px; }
+
+.usecase-path { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+.usecase-path a {
+  color: var(--teal-dark); background: var(--teal-tint); border-radius: 999px;
+  padding: 6px 12px; font-size: 12px; font-weight: 600; white-space: nowrap;
+}
+
+.usecase-path a:hover { background: var(--teal); color: var(--white); text-decoration: none; }
+
+.usecase-arrow { color: var(--slate-light); font-size: 13px; }
+
+.principles-row { display: flex; gap: 16px; flex-wrap: wrap; }
+
+.principle { flex: 1 1 220px; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; }
+
+.principle .p-num { font-family: 'Manrope', sans-serif; font-weight: 700; color: var(--gold); font-size: 13px; margin-bottom: 8px; }
+
+.principle .p-title { font-weight: 600; font-size: 13.5px; margin-bottom: 6px; }
+
+.principle .p-desc { color: var(--slate); font-size: 12px; line-height: 1.55; }
+
+.cta-band { background: var(--ink); border-radius: var(--radius); max-width: 1080px; margin: 0 auto 60px; padding: 36px 40px; display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+
+.cta-band h2 { color: #fff; margin: 0 0 6px; font-size: 20px; }
+
+.cta-band p { color: var(--slate-light); margin: 0; font-size: 13px; }
+
+.cta-band .button.secondary { color: #fff; border-color: rgba(255,255,255,.4); }
+
+@media (max-width: 900px) {
+  .hero { flex-direction: column; padding: 36px 24px 8px; gap: 28px; }
+  .hero-text h1 { font-size: 30px; }
+  .hero-text, .hero-text p, .hero-text h1 { max-width: 100%; }
+  .hero-illustration { width: 100%; height: 220px; }
+  .stats-strip { padding: 0 24px 8px; }
+  .stats-strip-inner { grid-template-columns: repeat(2, 1fr); gap: 20px 12px; }
+  .stat-block:nth-child(3) { border-left: none; }
+  .landing-section { padding: 32px 24px; }
+  .feature-grid { grid-template-columns: repeat(2, 1fr); }
+  .usecase-row, .usecase-row.reverse { flex-direction: column; }
+  .usecase-media { flex: none; width: 100%; height: 180px; min-height: 0; }
+  .usecase-body { padding: 22px 20px; }
+  .cta-band { flex-direction: column; align-items: flex-start; margin: 0 24px 40px; }
+}
+
+@media (max-width: 560px) {
+  .stats-strip-inner { grid-template-columns: 1fr 1fr; }
+}
+
+.modal-actions .button { flex: 1; }
+
+/* Композер в одну строку: вложения/эмодзи/таймер, поле ввода и кнопка.
+   Поле растёт под текст до 5 строк, дальше прокручивается внутри себя. */
+.composer-toolbar .attach-wrap, .composer-toolbar .button { flex: none; }
+
+.vacancy-list.tile-mode .img-wrap > img.avatar,
+.vacancy-list.tile-mode .img-wrap > img.card-photo,
+.vacancy-list.tile-mode .img-wrap > .logo-square,
+.vacancy-list.tile-mode .img-wrap > .org-mini-logo {
+  width: 100% !important; height: 100% !important; flex: none;
+  border-radius: 0 !important; box-sizing: border-box;
+}
+
+.vacancy-list.tile-mode .img-wrap > .logo-square { font-size: 38px !important; }
+
+.vacancy-list.tile-mode .vacancy-footer .button {
+  flex: 1 1 auto; width: auto !important; min-width: 0;
+  box-sizing: border-box; text-align: center;
+  padding: 7px 10px !important; font-size: 11.5px !important;
+}
+
+@media (max-width: 560px) {
+  .feature-grid { grid-template-columns: 1fr; }
+  .principles-row { flex-direction: column; }
+  .public-header { flex-wrap: wrap; height: auto; padding: 12px 16px; gap: 10px; }
+  .form-two-col { grid-template-columns: 1fr; }
+  .modal.wide { width: 100%; }
+  .method-detail-row { flex-wrap: wrap; }
+  .method-detail-row .mdr-label { width: 100%; }
+  .track-parties { font-size: 12.5px; }
+  .review-summary { flex-direction: column; gap: 18px; padding: 18px; }
+  .review-score { flex: none; }
+  .review-histogram { width: 100%; }
+  .review-toolbar { flex-direction: column; align-items: flex-start; }
+  .review-head { flex-direction: column; gap: 4px; }
+}
+
+.wh-zone-editor .button.ghost { padding: 6px 9px; font-size: 12px; }
+
+.listing-actions .button { padding: 6px 14px; font-size: 12px; }
+
+.set-row .button { padding: 6px 14px; font-size: 12px; flex: none; }
+
+.notice-actions .button { padding: 6px 12px; font-size: 12px; }
+
+/* Кнопка в работе: подпись остаётся в разметке (её читает программа чтения
+   с экрана), визуально прячется цветом. Ширина не меняется — ничего не прыгает. */
+.button[aria-busy="true"] { position: relative; color: transparent; pointer-events: none; }
+
+.button[aria-busy="true"]::after {
+  content: ''; position: absolute; left: 50%; top: 50%;
+  width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; }
+  .button[aria-busy="true"]::after { animation: none; }
+}
+
+.logo { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 15px; letter-spacing: -.02em; }
+
+.logo .mark { border-radius: 7px; }
+
+.logo-img { height: 22px; width: auto; border-radius: 3px; }
+
+.platform-name { color: var(--slate-light); font-weight: 600; font-size: 12.5px; }
+
+.button {
+  background: var(--btn-bg); color: var(--btn-fg);
+  border: none; border-radius: var(--radius-sm);
+  padding: 10px 15px;
+  font: 700 12.5px/1 'Manrope', sans-serif;
+}
+
+.button:hover { filter: brightness(1.08); }
+
+.button.secondary, .button.ghost {
+  background: var(--white); color: var(--slate);
+  border: 1px solid var(--line);
+}
+
+.button.secondary:hover, .button.ghost:hover { border-color: var(--teal); color: var(--teal); }
+
+.button.secondary.active, .button.ghost.active {
+  background: var(--teal-tint); border-color: var(--teal); color: var(--teal-dark);
+}
+
+/* Моно-цифры для денег и метрик */
+.price-main, .stat .value, .stat-num, .vacancy-salary, .resume-salary,
+.ring-stat .ring-value, .track-hash, .gb-progress-label b {
+  font-family: 'JetBrains Mono', monospace; font-weight: 500; letter-spacing: -.01em;
+}
+
+/* На детальной странице сердечко — обычная кнопка .button.secondary,
+   в избранном она заливается так же, как #fav-toggle на ресурсе. */
+.button.secondary[data-fav].active { background: var(--ink); color: var(--white); border-color: var(--ink); }
+
+/* Иконка вместо эмодзи в строках метаданных */
+.loc-bar .ico, .type-badge .ico, .promo-badge .ico,
+.saved-search-badge .ico, .chip .ico, .badge .ico {
+  display: inline-flex; vertical-align: -2px; margin-right: 4px;
+}
+
+/* ── Футер ────────────────────────────────────────────────── */
+.site-footer {
+  gap: 18px; margin-top: 32px; padding-top: 16px;
+  border-top: 1px solid var(--line); border-bottom: none;
+}
+
+.site-footer a { color: var(--slate-light); font: 500 12px/1 'Manrope', sans-serif; }
+
+.site-footer a:hover { color: var(--teal); }
+
+@media (max-width: 900px) {
+  /* Мои объявления: метрики карточек и легенда — плотнее на узком экране. */
+  .metric-row { gap: 12px 18px; }
+  .metric { min-width: 68px; }
+  .share-legend { gap: 8px 14px; }
+  .topbar { padding: 0 14px; gap: 10px; }
+  /* Название платформы занимало в шапке три строки и на узких экранах (320px)
+     выдавливало кнопки вправо за край. Ужимаем его в одну строку с многоточием,
+     вместо того чтобы прятать совсем. */
+  .topbar-left { min-width: 0; }
+  .platform-name {
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+  }
+  .topbar-search { display: none; }
+  .topbar-right a { display: none; }
+  /* колокольчик нужен и с телефона */
+  .topbar-right a.topbar-bell { display: inline-flex; }
+  /* Замена скрытым поиску и ссылкам аккаунта (см. app.js, блок 3.1):
+     поиск раскрывается строкой под шапкой, «настройки»/«выйти» — в меню. */
+  .search-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; flex: none; border: none; border-radius: 8px;
+    background: none; color: var(--ink-2); cursor: pointer;
+  }
+  html.search-open .topbar-search {
+    display: block; position: fixed; top: 56px; left: 0; right: 0; z-index: 58;
+    width: auto; border: none; border-bottom: 1px solid var(--line);
+    border-radius: 0; background: var(--white); padding: 13px 14px;
+    font-size: 16px; /* меньше 16px iOS зумит страницу при фокусе */
+  }
+  .sidebar-account { display: block; }
+  .sidebar {
+    position: fixed; left: 0; top: 56px; bottom: 0; z-index: 60;
+    height: auto; transform: translateX(-100%);
+    transition: transform .22s ease; box-shadow: 0 12px 40px rgba(0,0,0,.28);
+  }
+  html.sidebar-open .sidebar { transform: none; }
+  html.sidebar-open .sidebar-scrim {
+    display: block; position: fixed; inset: 56px 0 0; z-index: 55;
+    background: rgba(10,14,13,.45);
+  }
+  .main { padding: 16px 14px 84px; }
+  /* Шапка каталога не помещается в 375px одной строкой (поиск + «Добавить…» +
+     виджеты + переключатель вида + кнопка фильтров ≈ 520px) и распирала вьюпорт,
+     обрезая цены на карточках. Раскладываем в две строки: поиск во всю ширину,
+     кнопки под ним. margin-left:auto у последнего элемента при этом продолжает
+     работать — прижимает его вправо уже внутри своей строки. */
+  .search-row { flex-wrap: wrap; row-gap: 10px; }
+  .search-row .input { flex: 1 1 100%; max-width: none; }
+  .content-with-filter { flex-direction: column; }
+  .filter-panel {
+    order: 0; width: auto; flex: none;
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 61;
+    max-height: 82vh; overflow: auto;
+    border-radius: 16px 16px 0 0; border: none; border-top: 1px solid var(--line);
+    box-shadow: 0 -8px 32px rgba(0,0,0,.22);
+    transform: translateY(100%); transition: transform .22s ease;
+  }
+  html.filters-open .filter-panel { transform: none; }
+  html.filters-open .filter-scrim {
+    display: block; position: fixed; inset: 0; z-index: 60; background: rgba(10,14,13,.45);
+  }
+  .filter-sheet-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--white); border: 1px solid var(--line); color: var(--slate);
+    border-radius: 6px; padding: 9px 13px; cursor: pointer;
+    font: 700 12.5px/1 'Manrope', sans-serif;
+  }
+  .mobile-tabbar {
+    display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+    background: var(--white); border-top: 1px solid var(--line); padding: 2px 4px 6px;
+  }
+  .mobile-tabbar a {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 7px 0 9px; color: var(--slate-light); text-decoration: none;
+    font: 600 9px/1.5 'Manrope', sans-serif;
+  }
+  .mobile-tabbar a.active { color: var(--teal-dark); }
+  .burger {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; border: none; border-radius: 8px;
+    background: none; color: var(--ink-2); cursor: pointer;
+  }
+  /* Из перечисленных контейнеров grid-раскладку имеет только .mutual-review-grid;
+     .profile-layout / .split / .ar-layout / .messages-body — это flex, и
+     grid-template-columns на них не действовал. Из-за этого сайдбар профиля
+     (300px) и список диалогов (230px) оставались фиксированными и выдавливали
+     основную колонку: на my-page.html она сжималась до 19px, на messages.html
+     чат уезжал за правый край экрана. */
+  .mutual-review-grid { grid-template-columns: 1fr; }
+  /* Каталоги на телефоне — две плитки в ряд: одна во всю ширину экрана
+     превращает каталог в бесконечную ленту огромных карточек. */
+  .ptile-grid, .vacancy-list.tile-mode {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;
+  }
+  .ptile-grid.list-mode { grid-template-columns: 1fr; }
+  .vacancy-list.tile-mode .img-wrap > .logo-square { font-size: 30px !important; }
+  /* На узком экране плитка вдвое уже — теги ужимаем ещё, иначе одно длинное
+     слово («Электробезопасность») распирает карточку. */
+  .vacancy-list.tile-mode.tags-wrap .vacancy-tags .chip { font-size: 10.5px; padding: 3px 7px; }
+  .profile-layout, .split, .ar-layout, .messages-body {
+    flex-direction: column; align-items: stretch;
+  }
+  .profile-side { width: auto; }
+  .thread-list { width: auto; border-right: 1px solid var(--line); }
+  /* На телефоне список диалогов и чат встают друг под друга, и страница снова
+     прокручивается целиком: раскладка «раздел ровно в один экран» здесь только
+     мешала бы — чат сжимался бы до нескольких строк. */
+  .messages-page { height: auto; min-height: 0; }
+  .messages-body { flex: none; min-height: 620px; }
+  /* Шапки детальных страниц: «заголовок + стек кнопок» и «галерея 340px + текст»
+     стояли одной неразрывной строкой и вылезали за экран. Перенос по строкам
+     решает оба случая, не трогая инлайновые flex-basis в разметке. */
+  .detail-head, .name-row, .stats-row { flex-wrap: wrap; }
+  /* Шапка карточки сделки/актива и её кнопки — тоже неразрывные ряды */
+  .deal-head, .deal-head-actions { flex-wrap: wrap; }
+  .deal-head-side { align-items: flex-start; text-align: left; }
+  /* Группа кнопок внутри .name-row («Написать / Позвонить / Подписаться») —
+     инлайновый display:flex в разметке, переносим её содержимое по строкам. */
+  /* flex-shrink переопределяем через !important сознательно: у групп кнопок в
+     .name-row стоит инлайновый flex:none прямо в разметке (нужен на десктопе,
+     чтобы кнопки не сжимались), а инлайновый стиль иначе не перебить. */
+  .name-row > div { flex-wrap: wrap; min-width: 0; flex-shrink: 1 !important; }
+  .name-row > :first-child { min-width: 0; }
+  .task-sub { flex-wrap: wrap; }
+  /* Кнопки призыва на лендинге и ссылки футера — на 360px (частая ширина
+     Android) не помещались в строку. */
+  .hero-actions, .site-footer { flex-wrap: wrap; }
+  /* Строки-«таблицы» на карточке проекта и шапка резюме — тоже неразрывные ряды. */
+  .res-row, .resume-header { flex-wrap: wrap; }
+  /* Ряд кнопок в карточке каталога («Написать» / «Подписаться» /
+     «Добавить в друзья») в одну строку на 375px не помещается. */
+  .vacancy-footer { flex-wrap: wrap; row-gap: 8px; }
+  .cat-nav { display: none; }
+  /* Сделки: сводка доверия и шапка карточки в один столбец */
+  .trust-summary { flex-direction: column; align-items: stretch; gap: 18px; padding: 18px; }
+  .trust-score, .trust-bars, .trust-facts { flex: none; }
+  .trust-facts { gap: 10px 22px; }
+  .deal-side { align-items: flex-start; text-align: left; }
+  .deal-party, .deal-foot { row-gap: 8px; }
+  .deal-strip a { margin-left: 0; }
+  .pager-info { margin-left: 0; flex: 1 1 100%; }
+  .trust-row .t-label { width: 96px; }
+  /* Состояния на узком экране. Тост стоял на 26px от низа и уходил под
+     нижнюю панель вкладок — поднимаем над ней и растягиваем по ширине. */
+  .toast { left: 12px; right: 12px; bottom: 74px; justify-content: space-between; }
+  .notice-actions .button,
+  .empty-actions .button { flex: 1 1 100%; }
+  /* Диалог — нижней шторкой, тем же приёмом, что уже применён к фильтрам. */
+  .modal-overlay { align-items: flex-end; }
+  .modal { width: 100%; max-width: none; border-radius: 16px 16px 0 0; max-height: 88vh; overflow-y: auto; }
+}
+
+/* Ссылка «Перейти к содержимому»: не видна, пока не получит фокус с Tab. */
+.skip-link {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--white); color: var(--ink);
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  padding: 9px 14px; font: 700 12.5px/1 'Manrope', sans-serif; z-index: 100;
+}
+
+.skip-link:focus { left: 12px; top: 10px; }
+
+.button[aria-busy="true"]::after { border: 2px solid rgba(255,255,255,.3); border-top-color: var(--btn-fg); }
+
+.button.secondary[aria-busy="true"]::after,
+.button.ghost[aria-busy="true"]::after { border-color: var(--line); border-top-color: var(--teal); }
+
+/* Необратимое действие обязано выглядеть иначе, чем «Отмена» рядом с ним. */
+.button.danger { background: var(--error); color: #fff; border-color: var(--error); }
+
+.button.danger:hover { background: var(--error-text); border-color: var(--error-text); }
+
