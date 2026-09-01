@@ -25,6 +25,10 @@
   --coop-gold: #c98a2b;
   --coop-gold-tint: #f7ecd9;
   --coop-gold-text: #8a5c14;
+  --coop-error: #b3413a;
+  --coop-error-tint: #f7e7e6;
+  --coop-error-text: #8e2f2a;
+  --coop-focus: #0e4f4a;
 
   // Заголовки — Manrope, как в прототипе. Заголовок должен читаться
   // заголовком, а не текстом покрупнее.
@@ -93,4 +97,87 @@
   --coop-gold: #e0b061;
   --coop-gold-tint: #221c11;
   --coop-gold-text: #e0b061;
+}
+
+// ── Шапка кабинета ──────────────────────────────────────────────────────
+//
+// Светлая, а не чернильная. Чернильная шапка в прототипе — у публичного
+// лендинга; у авторизованного кабинета она белая, 56px, с тонкой линией
+// снизу. Носить в бэкофисе оформление витрины значит выдавать одно за
+// другое.
+.o_web_client .o_main_navbar {
+  background-color: var(--coop-white, #fff);
+  color: var(--coop-ink, #14171a);
+  min-height: 56px;
+  border-bottom: 1px solid var(--coop-line, #e6e6e1);
+
+  .o_menu_brand,
+  .o_menu_brand:hover,
+  .o_nav_entry,
+  .dropdown-toggle,
+  .o_menu_toggle {
+    color: var(--coop-ink, #14171a);
+  }
+
+  .o_nav_entry:hover,
+  .dropdown-toggle:hover,
+  .o_menu_toggle:hover {
+    background-color: var(--coop-surface, #f2f2ee);
+    color: var(--coop-teal-dark, #0e4f4a);
+  }
+
+  // Активный пункт раздела. Без переопределения он остаётся чернильной
+  // плашкой из тёмной шапки Odoo — на светлой шапке это читается как
+  // недокрашенный кусок.
+  .o_menu_sections .o_nav_entry.active,
+  .o_menu_sections .o_nav_entry.focus,
+  .o_menu_sections .dropdown-item.o_nav_entry,
+  .o_menu_sections .dropdown-toggle.show {
+    background-color: var(--coop-teal-tint, #e3efed) !important;
+    color: var(--coop-teal-dark, #0e4f4a) !important;
+  }
+}
+
+// Блок бренда и переключатель приложений — на светлом фоне шапки. Без
+// этого они остаются тёмными плашками, будто шапку перекрасили не до
+// конца.
+.o_web_client .o_main_navbar {
+  .o_menu_toggle,
+  .o_menu_brand,
+  .o_menu_apps .dropdown-toggle {
+    background-color: transparent;
+  }
+
+  .o_menu_brand {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+  }
+}
+
+// Основная кнопка в прототипе чернильная, а не бирюзовая: бирюзовый там
+// — цвет связей и состояний, а действие набрано чернилами. Бирюзовая
+// кнопка на каждой карточке делала интерфейс пёстрым.
+.o_web_client {
+  .btn-primary {
+    background-color: var(--coop-ink, #14171a);
+    border-color: var(--coop-ink, #14171a);
+    color: var(--coop-white, #fff);
+
+    &:hover, &:focus, &:active {
+      background-color: #000;
+      border-color: #000;
+      color: var(--coop-white, #fff);
+    }
+  }
+
+  // Числа — моноширинным: цены, ставки, суммы, метрики. Сравнивать
+  // величины в колонке цифр разной ширины глаз не умеет.
+  .o_field_monetary input,
+  .o_field_monetary span,
+  .o_field_float input,
+  .o_field_integer input,
+  .oe_stat_button .o_stat_value {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-weight: 500;
+  }
 }

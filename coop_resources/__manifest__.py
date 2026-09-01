@@ -21,6 +21,7 @@
     'depends': ['coop_base', 'coop_tokens', 'coop_theme', 'mail'],
     'data': [
         'security/ir.model.access.csv',
+        'security/coop_resource_rules.xml',
         'data/coop_resource_methods.xml',
         'data/coop_promotion_setup.xml',
         'data/coop_resource_cron.xml',

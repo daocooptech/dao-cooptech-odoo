@@ -45,17 +45,30 @@
     aspect-ratio: 1.2;
     overflow: hidden;
 
-    img {
-      width: 100%;
-      height: 100%;
-      display: block;
-      border-radius: 0;
-    }
-
+    // Поле-картинка Odoo оборачивает изображение во вложенный
+    // inline-block без собственной высоты, и «height: 100%» у картинки
+    // схлопывается в ноль. Растягиваем absolute-ом от самой колонки.
     > .o_field_image,
     > .o_field_widget {
+      position: absolute;
+      inset: 0;
+      width: auto;
+      height: auto;
+      display: block;
+    }
+
+    > .o_field_image > div,
+    > .o_field_widget > div {
+      position: absolute;
+      inset: 0;
+    }
+
+    > .o_field_image img,
+    > .o_field_widget img,
+    > img {
       width: 100%;
       height: 100%;
+      object-fit: cover;
       display: block;
     }
   }
@@ -91,10 +104,18 @@
     }
   }
 
+  // Две строки с нижней границей высоты: иначе ряд плиток разъезжается —
+  // «АО «Кедр»» в строку, «Союз потребительских обществ Урала» в три.
   .o_coop_org_name {
     font: 700 14px/1.35 'Manrope', sans-serif;
     color: var(--coop-ink, #14171a);
-    padding: 12px 14px 14px;
+    padding: 11px 12px 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: calc(2 * 1.35em);
   }
 }
 
@@ -111,6 +132,27 @@
 // ── Строчный вид ──────────────────────────────────────────────────────
 .o_coop_rows .o_coop_orgs,
 .o_coop_rows.o_coop_orgs {
+  // Колонка фотографии в строке тянется по высоте карточки, а собственной
+  // высоты у неё нет — картинку внутри растягиваем absolute-ом. Иначе
+  // «height: 100%» схлопывается в ноль, и на месте фото остаётся пустая
+  // подложка.
+  .o_coop_org_logo {
+    > .o_field_image,
+    > .o_field_widget {
+      position: absolute;
+      inset: 0;
+      display: block;
+    }
+
+    > .o_field_image img,
+    > .o_field_widget img,
+    > img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
 
   .o_coop_org {
     flex-direction: row;

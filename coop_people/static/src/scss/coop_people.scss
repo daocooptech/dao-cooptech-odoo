@@ -47,21 +47,30 @@
     overflow: hidden;
     background: var(--coop-surface, #f2f2ee);
 
-    img,
-    .o_coop_photo_img img {
+    // Поле-картинка Odoo оборачивает изображение во вложенный
+    // inline-block без собственной высоты, и «height: 100%» у картинки
+    // схлопывается в ноль. Растягиваем absolute-ом от самой колонки.
+    > .o_field_image,
+    > .o_field_widget {
+      position: absolute;
+      inset: 0;
+      width: auto;
+      height: auto;
+      display: block;
+    }
+
+    > .o_field_image > div,
+    > .o_field_widget > div {
+      position: absolute;
+      inset: 0;
+    }
+
+    > .o_field_image img,
+    > .o_field_widget img,
+    > img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      display: block;
-      border-radius: 0;
-    }
-
-    // Поле-картинка Odoo оборачивает изображение в свой контейнер с
-    // собственными размерами — без этого фото сжимается до миниатюры.
-    > .o_field_image,
-    > .o_field_widget {
-      width: 100%;
-      height: 100%;
       display: block;
     }
   }
@@ -100,14 +109,18 @@
     padding: 12px 14px 14px;
   }
 
+  // Имя занимает ровно две строки. Без нижней границы высоты ряд плиток
+  // разъезжается: у одного человека имя в строку, у другого в две, и
+  // кнопки под ними стоят на разных уровнях.
   .o_coop_name {
     font: 700 14px/1.35 'Manrope', sans-serif;
     color: var(--coop-ink, #14171a);
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 6px;
     flex-wrap: wrap;
     margin-bottom: 5px;
+    min-height: calc(2 * 1.35em);
   }
 
   .o_coop_meta {
@@ -120,10 +133,19 @@
     font-style: italic;
   }
 
-  // Чипы навыков переносятся по строкам, а не обрезаются. Умения человека —
-  // главное, ради чего смотрят карточку, прятать их за многоточием нельзя.
+  // Чипы у людей — одна строка с обрезкой по краю, как в макете. Перенос
+  // здесь распирает плитку: умений у человека бывает восемь, а плитка
+  // шириной в 200 пикселей. Полный список — на карточке человека.
   .o_coop_chips {
     margin-bottom: 10px;
+    overflow: hidden;
+
+    // Перенос задаёт вложенный контейнер виджета тегов, а не наш блок —
+    // его и надо выпрямлять, иначе правило не действует вовсе.
+    .o_field_many2many_tags > div {
+      flex-wrap: nowrap !important;
+      overflow: hidden;
+    }
 
     .o_tag,
     .badge {
@@ -138,12 +160,23 @@
 
   // Действия прижаты к низу: в ряду плиток кнопки должны стоять на одной
   // линии независимо от того, сколько строк заняли имя и навыки.
+  // Кнопки прижаты влево, растягиваются и переносятся. В плитке шириной
+  // 200 пикселей три кнопки в строку не помещаются, а прижатые вправо
+  // они выглядят как хвост карточки, а не как действия.
   .o_coop_actions {
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: 8px;
+    justify-content: flex-start;
+    gap: 6px;
     margin-top: auto;
+    padding-top: 12px;
+  }
+
+  .o_coop_actions .btn,
+  .o_coop_actions .o_coop_btn {
+    flex: 1 1 auto;
+    padding: 7px 10px;
+    font-size: 11.5px;
   }
 
   .o_coop_badge {
@@ -216,6 +249,27 @@
 // запоминается на все каталоги — как в прототипе.
 .o_coop_rows .o_coop_people,
 .o_coop_rows.o_coop_people {
+  // Колонка фотографии в строке тянется по высоте карточки, а собственной
+  // высоты у неё нет — картинку внутри растягиваем absolute-ом. Иначе
+  // «height: 100%» схлопывается в ноль, и на месте фото остаётся пустая
+  // подложка.
+  .o_coop_photo {
+    > .o_field_image,
+    > .o_field_widget {
+      position: absolute;
+      inset: 0;
+      display: block;
+    }
+
+    > .o_field_image img,
+    > .o_field_widget img,
+    > img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
 
   .o_coop_person {
     flex-direction: row;

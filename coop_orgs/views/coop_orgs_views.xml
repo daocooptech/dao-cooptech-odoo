@@ -14,13 +14,13 @@
     <field name="model">res.partner</field>
     <field name="arch" type="xml">
       <kanban class="o_coop_orgs" quick_create="false" js_class="coop_catalog_kanban">
-        <field name="avatar_128"/>
+        <field name="avatar_256"/>
         <field name="city"/>
         <templates>
           <t t-name="card">
             <div class="o_coop_org">
               <div class="o_coop_org_logo">
-                <field name="avatar_128" widget="image"/>
+                <field name="avatar_256" widget="image"/>
                 <span class="o_coop_locbar" t-if="record.city.raw_value">
                   <i class="fa fa-map-marker" role="img" aria-label="Город"/>
                   <field name="city"/>
@@ -119,7 +119,7 @@
             </button>
           </div>
 
-          <field name="avatar_128" widget="image" class="oe_avatar"/>
+          <field name="avatar_256" widget="image" class="oe_avatar"/>
           <div class="oe_title">
             <h1><field name="name" placeholder="Название организации"/></h1>
             <h3 class="text-muted"><field name="coop_legal_form_id"

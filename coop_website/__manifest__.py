@@ -15,7 +15,11 @@
     'category': 'Cooperative',
     'version': '19.0.1.0.0',
     'license': 'LGPL-3',
-    'depends': ['website', 'coop_theme'],
+    # Лендинг считает живые цифры по участникам, специализациям и
+    # правовым формам и ведёт в каталоги людей и организаций.
+    # Без этих зависимостей главная падает при отдельной установке.
+    'depends': ['website', 'coop_theme', 'coop_base',
+                'coop_people', 'coop_orgs'],
     'data': [
         'views/coop_landing.xml',
     ],

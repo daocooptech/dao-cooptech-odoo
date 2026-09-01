@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Карточка вакансии в двух видах, как и остальные каталоги: плиткой по
+    умолчанию, строкой по кнопке. Разметка одна, раскладку задаёт класс на
+    корне представления.
+
+    Вознаграждение стоит сразу под заголовком и набрано крупно: это первое,
+    на что смотрят, и прятать его в мета-строку значит заставлять открывать
+    каждую карточку.
+  -->
+  <record id="view_coop_vacancy_kanban" model="ir.ui.view">
+    <field name="name">coop.vacancy.kanban</field>
+    <field name="model">coop.vacancy</field>
+    <field name="arch" type="xml">
+      <kanban class="o_coop_vacancies" quick_create="false" js_class="coop_catalog_kanban">
+        <field name="image_512"/>
+        <field name="city"/>
+        <field name="reward_display"/>
+        <field name="reward_kind"/>
+        <field name="employment"/>
+        <field name="partner_id"/>
+        <field name="my_application_state"/>
+        <field name="is_mine"/>
+        <field name="application_count"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_vacancy">
+              <div class="o_coop_vac_photo">
+                <field name="image_512" widget="image"/>
+                <img class="o_coop_vac_owner"
+                     t-attf-src="/web/image/res.partner/#{record.partner_id.raw_value}/avatar_128"
+                     t-att-title="record.partner_id.value" t-att-alt="record.partner_id.value"/>
+                <!-- Вид вознаграждения помечается на фотографии: доля в
+                     проекте и волонтёрство — это принципиально другое
+                     предложение, чем зарплата, и человек должен видеть
+                     разницу до того, как прочитал строку. -->
+                <span class="o_coop_vac_kind"
+                      t-attf-class="o_coop_vac_kind o_coop_vac_kind_#{record.reward_kind.raw_value}"
+                      t-if="record.reward_kind.raw_value != 'money'">
+                  <field name="reward_kind"/>
+                </span>
+                <span class="o_coop_locbar" t-if="record.city.raw_value">
+                  <i class="fa fa-map-marker" role="img" aria-label="Город"/>
+                  <field name="city"/>
+                </span>
+              </div>
+
+              <div class="o_coop_vac_body">
+                <div class="o_coop_vac_name"><field name="name"/></div>
+                <div class="o_coop_vac_reward"><field name="reward_display"/></div>
+                <div class="o_coop_vac_meta">
+                  <field name="partner_id"/>
+                  <span> · </span>
+                  <field name="employment"/>
+                </div>
+                <div class="o_coop_vac_desc">
+                  <field name="description" widget="html"/>
+                </div>
+                <div class="o_coop_vac_chips">
+                  <field name="skill_ids" widget="many2many_tags"/>
+                </div>
+                <div class="o_coop_vac_foot">
+                  <span class="o_coop_vac_applications"
+                        t-if="record.is_mine.raw_value and record.application_count.raw_value">
+                    Откликов: <field name="application_count"/>
+                  </span>
+                  <div class="o_coop_vac_actions">
+                    <button name="action_apply" type="object"
+                            class="btn o_coop_vac_btn"
+                            t-if="!record.is_mine.raw_value and record.my_application_state.raw_value == 'none'">Откликнуться</button>
+                    <span class="o_coop_vac_state"
+                          t-if="record.my_application_state.raw_value == 'applied'">Вы откликнулись</span>
+                    <span class="o_coop_vac_state o_coop_vac_state_on"
+                          t-if="record.my_application_state.raw_value == 'invited'">Вас пригласили</span>
+                    <button name="action_open_applications" type="object"
+                            class="btn o_coop_vac_btn"
+                            t-if="record.is_mine.raw_value">Смотреть отклики</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="view_coop_vacancy_list" model="ir.ui.view">
+    <field name="name">coop.vacancy.list</field>
+    <field name="model">coop.vacancy</field>
+    <field name="arch" type="xml">
+      <list string="Вакансии">
+        <field name="name"/>
+        <field name="partner_id" string="Кто ищет"/>
+        <field name="project_id" optional="hide"/>
+        <field name="coop_specialization_id" optional="show"/>
+        <field name="city"/>
+        <field name="employment"/>
+        <field name="experience_level" string="Опыт"/>
+        <field name="reward_kind" string="Вознаграждение"/>
+        <!-- Числа, а не строка: по вычисляемому виду сортировка идёт по
+             алфавиту, и «120 000» встаёт выше «60 000». -->
+        <field name="pay_from" string="Оплата от" optional="show"/>
+        <field name="share_percent" string="Доля, %" optional="hide"/>
+        <field name="application_count" string="Откликов"/>
+        <field name="state" widget="badge"
+               decoration-success="state == 'published'"
+               decoration-muted="state != 'published'"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_vacancy_form" model="ir.ui.view">
+    <field name="name">coop.vacancy.form</field>
+    <field name="model">coop.vacancy</field>
+    <field name="arch" type="xml">
+      <form string="Вакансия">
+        <header>
+          <button name="action_publish" type="object" string="Опубликовать"
+                  class="btn-primary" invisible="state == 'published'"/>
+          <button name="action_apply" type="object" string="Откликнуться"
+                  class="btn-primary"
+                  invisible="state != 'published' or is_mine or my_application_state != 'none'"/>
+          <button name="action_to_recruitment" type="object"
+                  string="Перенести в набор персонала"
+                  invisible="not is_mine or hr_job_id"
+                  help="Для организаций, оформляющих человека по трудовому договору: в модуле «Найм» есть этапы отбора и переход в сотрудника."/>
+          <button name="action_close" type="object" string="Закрыть"
+                  invisible="state == 'closed'"/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="draft,published,closed"/>
+        </header>
+        <sheet>
+          <div class="oe_button_box" name="button_box">
+            <button name="action_open_applications" type="object"
+                    class="oe_stat_button" icon="fa-users">
+              <field name="application_count" widget="statinfo" string="Откликов"/>
+            </button>
+          </div>
+
+          <field name="image_1920" widget="image" class="oe_avatar"/>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Кто нужен"/></h1>
+          </div>
+
+          <group>
+            <group string="Кто ищет">
+              <field name="partner_id"/>
+              <field name="author_id"/>
+              <field name="project_id" options="{'no_create': True}"/>
+              <field name="city"/>
+              <field name="coop_specialization_id" options="{'no_create': True}"/>
+              <field name="coop_specialization_category_id" readonly="1"/>
+            </group>
+            <group string="Условия">
+              <field name="employment"/>
+              <field name="experience_level"/>
+              <field name="reward_kind"/>
+              <label for="pay_from" string="Оплата"
+                     invisible="reward_kind in ('barter', 'volunteer')"/>
+              <div class="o_row" invisible="reward_kind in ('barter', 'volunteer')">
+                <field name="pay_from"/>
+                <span>–</span>
+                <field name="pay_to"/>
+                <field name="pay_period"/>
+              </div>
+              <field name="currency_id" invisible="1"/>
+              <!-- Доля вводится оценкой вклада, а не процентом: процент
+                   считается от суммы вкладов проекта и меняется, когда в
+                   проект вносят что-то ещё. -->
+              <field name="contribution_value" invisible="reward_kind != 'share'"/>
+              <field name="share_percent" readonly="1" invisible="reward_kind != 'share'"/>
+              <field name="reward_note"/>
+              <field name="reward_display" readonly="1" string="В каталоге"/>
+              <field name="is_mine" invisible="1"/>
+              <field name="my_application_state" invisible="1"/>
+              <field name="hr_job_id" readonly="1" invisible="not hr_job_id"/>
+            </group>
+          </group>
+
+          <group string="Что потребуется">
+            <field name="skill_ids" widget="many2many_tags" nolabel="1"
+                   options="{'no_create_edit': True, 'no_create': True}"/>
+          </group>
+
+          <notebook>
+            <page string="Что делать" name="description">
+              <field name="description"
+                     placeholder="Задача и условия. Конкретнее, чем «работа в дружном коллективе»."/>
+            </page>
+            <page string="Отклики" name="applications" invisible="not is_mine">
+              <field name="application_ids" nolabel="1" readonly="1">
+                <list>
+                  <field name="create_date" string="Когда"/>
+                  <field name="partner_id"/>
+                  <field name="message"/>
+                  <field name="state"/>
+                  <button name="action_invite" type="object" string="Пригласить"
+                          icon="fa-check" invisible="state == 'invited'"/>
+                  <button name="action_decline" type="object" string="Отклонить"
+                          icon="fa-times" invisible="state == 'declined'"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_vacancy_search" model="ir.ui.view">
+    <field name="name">coop.vacancy.search</field>
+    <field name="model">coop.vacancy</field>
+    <field name="arch" type="xml">
+      <search string="Вакансии">
+        <field name="name"/>
+        <field name="partner_id"/>
+        <field name="city"/>
+        <field name="coop_specialization_id"/>
+        <field name="skill_ids"/>
+        <filter name="money" string="За деньги"
+                domain="[('reward_kind', '=', 'money')]"/>
+        <filter name="share" string="За долю в проекте"
+                domain="[('reward_kind', '=', 'share')]"/>
+        <filter name="barter" string="Обменом услугами"
+                domain="[('reward_kind', '=', 'barter')]"/>
+        <filter name="volunteer" string="Волонтёрство"
+                domain="[('reward_kind', '=', 'volunteer')]"/>
+        <separator/>
+        <filter name="full" string="Полная занятость"
+                domain="[('employment', '=', 'full')]"/>
+        <filter name="project_work" string="Проектная работа"
+                domain="[('employment', '=', 'project')]"/>
+        <filter name="no_experience" string="Без опыта"
+                domain="[('experience_level', '=', 'none')]"/>
+        <separator/>
+        <filter name="mine" string="Мои вакансии"
+                domain="[('partner_id', '=', uid)]"/>
+        <group>
+          <filter name="by_reward" string="По виду вознаграждения"
+                  context="{'group_by': 'reward_kind'}"/>
+          <filter name="by_employment" string="По занятости"
+                  context="{'group_by': 'employment'}"/>
+          <filter name="by_area" string="По сфере деятельности"
+                  context="{'group_by': 'coop_specialization_category_id'}"/>
+          <filter name="by_city" string="По городу" context="{'group_by': 'city'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_vacancies" model="ir.actions.act_window">
+    <field name="name">Вакансии</field>
+    <field name="res_model">coop.vacancy</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="domain">[('state', '=', 'published')]</field>
+    <field name="search_view_id" ref="view_coop_vacancy_search"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Открытых вакансий пока нет</p>
+      <p>Здесь участники ищут тех, кто сделает работу. Вознаграждение
+         бывает не только деньгами: долей в проекте, обменом услугами или
+         волонтёрством.</p>
+    </field>
+  </record>
+
+  <record id="action_coop_my_vacancies" model="ir.actions.act_window">
+    <field name="name">Мои вакансии</field>
+    <field name="res_model">coop.vacancy</field>
+    <field name="view_mode">list,kanban,form</field>
+    <field name="domain">[('partner_id', '=', uid)]</field>
+    <field name="search_view_id" ref="view_coop_vacancy_search"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Вы пока никого не ищете</p>
+      <p>Закрытая или черновая вакансия из каталога уходит, но остаётся
+         здесь.</p>
+    </field>
+  </record>
+
+  <record id="action_coop_vacancy_application" model="ir.actions.act_window">
+    <field name="name">Мои отклики</field>
+    <field name="res_model">coop.vacancy.application</field>
+    <field name="view_mode">list,form</field>
+    <field name="domain">[('partner_id', '=', uid)]</field>
+  </record>
+
+  <menuitem id="menu_coop_vacancies_root" name="Вакансии" sequence="50"/>
+  <menuitem id="menu_coop_vacancies" name="Каталог вакансий"
+            parent="menu_coop_vacancies_root" action="action_coop_vacancies" sequence="10"/>
+  <menuitem id="menu_coop_my_vacancies" name="Мои вакансии"
+            parent="menu_coop_vacancies_root" action="action_coop_my_vacancies" sequence="20"/>
+  <menuitem id="menu_coop_vacancy_application" name="Мои отклики"
+            parent="menu_coop_vacancies_root" action="action_coop_vacancy_application"
+            sequence="30"/>
+
+</odoo>

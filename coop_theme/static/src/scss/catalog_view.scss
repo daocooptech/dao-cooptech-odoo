@@ -14,6 +14,24 @@
   }
 }
 
+// Плотность плиток. Без этого работает значение Odoo — 320px, — и
+// каталог идёт плитками в полтора раза крупнее макета: на экране 1440 в
+// прототипе помещается четыре плитки по ~220px с фотографией ~184px, а у
+// нас было четыре по ~340px с фотографией ~283px. Ритм каталога глаз
+// читает раньше цвета и раньше шрифта.
+.o_coop_tiles .o_kanban_renderer {
+  --KanbanRecord-width: 200px;
+  --KanbanRecord-margin-h: 8px;
+  --KanbanRecord-margin-v: 8px;
+}
+
+@media (max-width: 900px) {
+  .o_coop_tiles .o_kanban_renderer {
+    --KanbanRecord-width: 150px;
+    --KanbanRecord-margin-h: 5px;
+  }
+}
+
 // В строчном виде карточка занимает всю ширину: описание и мета-строка
 // читаются в строку, а не в столбик шириной в треть экрана.
 .o_coop_rows .o_kanban_renderer .o_kanban_record {

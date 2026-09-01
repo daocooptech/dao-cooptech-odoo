@@ -147,6 +147,11 @@
     max-height: 26px;
     overflow: hidden;
 
+    // Перенос задаёт вложенный контейнер виджета тегов.
+    .o_field_many2many_tags > div {
+      flex-wrap: nowrap !important;
+    }
+
     .o_tag,
     .badge {
       background: var(--coop-surface, #f2f2ee);

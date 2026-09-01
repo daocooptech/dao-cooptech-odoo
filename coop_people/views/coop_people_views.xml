@@ -16,7 +16,7 @@
     <field name="model">res.partner</field>
     <field name="arch" type="xml">
       <kanban class="o_coop_people" quick_create="false" js_class="coop_catalog_kanban">
-        <field name="avatar_128"/>
+        <field name="avatar_256"/>
         <field name="city"/>
         <field name="coop_age"/>
         <field name="coop_trust"/>
@@ -28,7 +28,7 @@
           <t t-name="card">
             <div class="o_coop_person">
               <div class="o_coop_photo">
-                <field name="avatar_128" widget="image" class="o_coop_photo_img"/>
+                <field name="avatar_256" widget="image" class="o_coop_photo_img"/>
                 <span class="o_coop_locbar" t-if="record.city.raw_value">
                   <i class="fa fa-map-marker" role="img" aria-label="Город"/>
                   <field name="city"/>

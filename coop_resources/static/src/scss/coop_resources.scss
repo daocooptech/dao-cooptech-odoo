@@ -40,18 +40,30 @@
     overflow: hidden;
     background: var(--coop-surface, #f2f2ee);
 
-    img {
+    // Поле-картинка Odoo оборачивает изображение во вложенный
+    // inline-block без собственной высоты, и «height: 100%» у картинки
+    // схлопывается в ноль. Растягиваем absolute-ом от самой колонки.
+    > .o_field_image,
+    > .o_field_widget {
+      position: absolute;
+      inset: 0;
+      width: auto;
+      height: auto;
+      display: block;
+    }
+
+    > .o_field_image > div,
+    > .o_field_widget > div {
+      position: absolute;
+      inset: 0;
+    }
+
+    > .o_field_image img,
+    > .o_field_widget img,
+    > img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      display: block;
-      border-radius: 0;
-    }
-
-    > .o_field_image,
-    > .o_field_widget {
-      width: 100%;
-      height: 100%;
       display: block;
     }
   }
@@ -59,32 +71,46 @@
   // Метка вида объявления. У спроса она другого цвета: «ищу» и «продаю» —
   // противоположные вещи, и различать их по мелкому тексту в углу
   // читатель не должен.
+  // Метка вида — светлый бейдж с рамкой, как в макете, а не сплошная
+  // пилюля: сплошные заливки делают каталог пёстрым, будто это витрина
+  // распродажи.
   .o_coop_res_type {
     position: absolute;
     top: 10px;
     left: 10px;
-    background: var(--coop-teal, #146b64);
-    color: #fff;
-    font: 600 11px/1 'Manrope', sans-serif;
-    padding: 5px 9px;
-    border-radius: 999px;
+    background: var(--coop-teal-tint, #e3efed);
+    color: var(--coop-teal-dark, #0e4f4a);
+    border: 1px solid var(--coop-teal, #146b64);
+    font: 600 10px/1 'Manrope', sans-serif;
+    padding: 3px 9px;
+    border-radius: 4px;
+    max-width: calc(100% - 20px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
+  // Спрос — не золотой, а красной рамкой на белом: «ищу» и «продаю» надо
+  // различать с первого взгляда, и золотой у нас уже занят продвижением.
   .o_coop_res_request {
-    background: var(--coop-gold, #c98a2b);
+    background: var(--coop-white, #fff);
+    color: var(--coop-error, #b3413a);
+    border-color: var(--coop-error, #b3413a);
   }
 
   // Отметка о продвижении. Обязательна и убирать её нельзя: объявление
   // наверху не потому, что оно лучше, а потому что за него заплачено, и
   // читатель имеет право это знать.
+  // Отметка о продвижении — под меткой вида, золотой заливкой, как в
+  // макете. Правый верхний угол оставлен под избранное.
   .o_coop_res_promo {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    background: rgba(20, 23, 26, .78);
+    top: 34px;
+    left: 10px;
+    background: var(--coop-gold, #c98a2b);
     color: #fff;
-    font: 600 10.5px/1 'Manrope', sans-serif;
-    padding: 5px 9px;
+    font: 600 10px/1 'Manrope', sans-serif;
+    padding: 3px 9px;
     border-radius: 999px;
   }
 
@@ -118,18 +144,48 @@
   .o_coop_res_name {
     font: 700 14px/1.35 'Manrope', sans-serif;
     color: var(--coop-ink, #14171a);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: calc(2 * 1.35em);
   }
 
+  // Цена — моноширинным и цветом текста, а не акцентом. Бирюзовая цена
+  // читается как ссылка, а в колонке цифр разной ширины нельзя сравнить
+  // величины — ровно то, ради чего в каталог и приходят.
   .o_coop_res_price {
-    color: var(--coop-teal-dark, #0e4f4a);
-    font: 600 13px/1.3 'Manrope', sans-serif;
-    margin-top: 5px;
+    color: var(--coop-ink, #14171a);
+    font: 500 14px/1.3 'JetBrains Mono', ui-monospace, monospace;
+    margin-top: 6px;
   }
 }
 
 // ── Строчный вид ──────────────────────────────────────────────────────
 .o_coop_rows .o_coop_resources,
 .o_coop_rows.o_coop_resources {
+  // Колонка фотографии в строке тянется по высоте карточки, а собственной
+  // высоты у неё нет — картинку внутри растягиваем absolute-ом. Иначе
+  // «height: 100%» схлопывается в ноль, и на месте фото остаётся пустая
+  // подложка.
+  .o_coop_res_photo {
+    > .o_field_image,
+    > .o_field_widget {
+      position: absolute;
+      inset: 0;
+      display: block;
+    }
+
+    > .o_field_image img,
+    > .o_field_widget img,
+    > img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
 
   .o_coop_resource {
     flex-direction: row;

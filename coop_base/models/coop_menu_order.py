@@ -26,7 +26,7 @@ MOCKUP_ORDER = [
     (20, 'mail.menu_root_discuss', 'Сообщения'),
     (30, 'coop_people.menu_coop_people_root', 'Люди'),
     (40, 'coop_skills.menu_coop_skills_root', None),
-    (50, 'hr_recruitment.menu_hr_recruitment_root', 'Вакансии'),
+    (50, 'coop_vacancies.menu_coop_vacancies_root', None),
     (60, 'coop_resources.menu_coop_resources_root', None),
     (70, 'project.menu_main_pm', 'Проекты'),
     (80, 'coop_orgs.menu_coop_orgs_root', 'Организации'),
@@ -56,6 +56,10 @@ MOCKUP_ORDER = [
 # администрирование.
 BELOW_ORDER = [
     'contacts.menu_contacts',
+    # Штатный «Найм» уходит вниз: его место в макете занимает наш раздел
+    # вакансий. Сам модуль остаётся — вакансию организации можно
+    # перенести туда кнопкой, когда дело доходит до оформления.
+    'hr_recruitment.menu_hr_recruitment_root',
     'coop_base.menu_coop_root',
     'sale.sale_menu_root',
     'purchase.menu_purchase_root',

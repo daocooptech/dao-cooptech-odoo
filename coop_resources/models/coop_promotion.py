@@ -7,14 +7,10 @@ from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
-# Сколько платных мест в блоке наверху страницы. Четыре — решение
-# владельца, по образцу контекстной выдачи. Больше означало бы, что
-# первый экран целиком куплен, и каталог перестаёт быть каталогом.
-SLOTS_PER_PAGE = 4
-
-# На сколько страниц вперёд продаются места. Дальше пятой продвижение
-# теряет смысл: туда не доходят.
-PROMOTED_PAGES = 5
+# Сколько мест в блоке и на сколько страниц они продаются — объявлено
+# один раз, в наборе мест. Два объявления этих чисел разошлись бы при
+# первой же правке, и места перестали бы соответствовать выдаче.
+from ..data.coop_promotion_slots import PROMOTED_PAGES, SLOTS_PER_PAGE  # noqa: F401
 
 
 class CoopPromotionSlot(models.Model):
@@ -145,6 +141,16 @@ class CoopPromotion(models.Model):
         days = int(days)
         if days <= 0:
             raise UserError(_('Срок должен быть больше нуля.'))
+
+        # Продвигать можно только своё объявление. Проверка здесь, а не
+        # только в интерфейсе: списываются токены владельца объявления, и
+        # без неё любой участник мог потратить чужой баланс.
+        user = self.env.user
+        if (resource.owner_id != user.partner_id
+                and not user.has_group('base.group_system')):
+            raise UserError(_(
+                'Продвинуть можно только своё объявление. «%(name)s» '
+                'принадлежит другому участнику.', name=resource.name))
 
         now = fields.Datetime.now()
         busy = self.search([

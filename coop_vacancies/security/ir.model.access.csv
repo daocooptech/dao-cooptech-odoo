@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_vacancy_user,Вакансии — участник,model_coop_vacancy,base.group_user,1,1,1,1
+access_vacancy_application_user,Отклики — участник,model_coop_vacancy_application,base.group_user,1,1,1,1

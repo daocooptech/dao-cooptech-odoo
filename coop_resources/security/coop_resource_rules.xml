@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data noupdate="1">
+
+    <!--
+      Читать опубликованные объявления может любой участник, править —
+      только свои. Без этих правил участник мог переписать и удалить чужое
+      объявление, включая оплаченное продвижением: права на модель были
+      выданы, а правил записи не было вовсе.
+    -->
+    <record id="rule_resource_read" model="ir.rule">
+      <field name="name">Участник видит опубликованные объявления и свои</field>
+      <field name="model_id" ref="model_coop_resource"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">
+        ['|', ('state', '=', 'published'), ('owner_id', '=', user.partner_id.id)]
+      </field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="False"/>
+      <field name="perm_create" eval="False"/>
+      <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_resource_own" model="ir.rule">
+      <field name="name">Править можно только своё объявление</field>
+      <field name="model_id" ref="model_coop_resource"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[('owner_id', '=', user.partner_id.id)]</field>
+      <field name="perm_read" eval="False"/>
+      <field name="perm_write" eval="True"/>
+      <field name="perm_create" eval="True"/>
+      <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <record id="rule_resource_system" model="ir.rule">
+      <field name="name">Администратор узла ведёт все объявления</field>
+      <field name="model_id" ref="model_coop_resource"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <!--
+      Продвижение заводится только через покупку места: там списываются
+      токены и проверяется, свободно ли место. Прямое создание записи
+      означало бы занятое место без оплаты, поэтому создавать её участник
+      не может — только читать своё.
+    -->
+    <record id="rule_promotion_own" model="ir.rule">
+      <field name="name">Своё продвижение</field>
+      <field name="model_id" ref="model_coop_promotion"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+    </record>
+
+    <record id="rule_promotion_system" model="ir.rule">
+      <field name="name">Администратор узла видит всё продвижение</field>
+      <field name="model_id" ref="model_coop_promotion"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+  </data>
+</odoo>
