@@ -8,9 +8,19 @@
       нарисовано, и тем, что работает, видно сразу.
     -->
 
+    <!-- Рабочая группа платформы — не кооператив. Она обслуживает сеть, и
+         членство в ней не даёт никаких прав в чужих кооперативах. -->
+    <record id="org_platform" model="res.partner">
+      <field name="name">ДАО КООПЕХ — рабочая группа</field>
+      <field name="is_company" eval="True"/>
+      <field name="coop_org_type">platform</field>
+      <field name="comment">Оператор платформы. Стороной обязательств участников не является.</field>
+    </record>
+
     <record id="org_shukty" model="res.partner">
       <field name="name">Кооператив «Шукты»</field>
       <field name="is_company" eval="True"/>
+      <field name="coop_org_type">consumer_coop</field>
       <field name="city">Дербент</field>
       <field name="comment">Овцеводческий потребительский кооператив.</field>
     </record>
@@ -18,12 +28,14 @@
     <record id="org_borozda" model="res.partner">
       <field name="name">Кооператив «Борозда»</field>
       <field name="is_company" eval="True"/>
+      <field name="coop_org_type">consumer_coop</field>
       <field name="city">Тюмень</field>
     </record>
 
     <record id="org_vzaimo" model="res.partner">
       <field name="name">Кооператив «Взаимопомощь»</field>
       <field name="is_company" eval="True"/>
+      <field name="coop_org_type">consumer_coop</field>
       <field name="city">Пермь</field>
     </record>
 
@@ -93,8 +105,20 @@
       <field name="admission_basis">Приказ № 12 от 01.09.2025</field>
     </record>
 
-    <!-- Заявление, по которому решения ещё нет: состояние, в котором
-         членства фактически нет, но заявление уже подано. -->
+    <!-- Администратор платформы состоит в рабочей группе, а не в кооперативе.
+         Голоса не имеет: платформа обслуживает сеть, а не участвует в ней. -->
+    <record id="membership_admin_platform" model="coop.membership">
+      <field name="partner_id" ref="base.partner_admin"/>
+      <field name="organization_id" ref="org_platform"/>
+      <field name="role">platform</field>
+      <field name="state">active</field>
+      <field name="joined_on">2026-01-15</field>
+      <field name="has_vote" eval="False"/>
+      <field name="admission_basis">Решение рабочей группы от 15.01.2026</field>
+    </record>
+
+    <!-- Заявление, по которому решения ещё нет: членства фактически нет,
+         но заявление уже подано. -->
     <record id="membership_dashkevich_borozda" model="coop.membership">
       <field name="partner_id" ref="person_dashkevich"/>
       <field name="organization_id" ref="org_borozda"/>
