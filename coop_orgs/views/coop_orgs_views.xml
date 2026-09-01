@@ -16,12 +16,10 @@
       <kanban class="o_coop_orgs" quick_create="false">
         <field name="avatar_128"/>
         <field name="city"/>
-        <field name="coop_has_own_logo"/>
         <templates>
           <t t-name="card">
             <div class="o_coop_org">
-              <div class="o_coop_org_logo"
-                   t-att-class="record.coop_has_own_logo.raw_value ? 'o_coop_org_logo o_coop_org_logo_image' : 'o_coop_org_logo o_coop_org_logo_mono'">
+              <div class="o_coop_org_logo">
                 <field name="avatar_128" widget="image"/>
                 <span class="o_coop_locbar" t-if="record.city.raw_value">
                   <i class="fa fa-map-marker" role="img" aria-label="Город"/>
@@ -145,7 +143,7 @@
               <field name="coop_is_cooperative" readonly="1"/>
               <field name="coop_has_members" invisible="1"/>
               <field name="coop_org_is_following" invisible="1"/>
-              <field name="coop_has_own_logo" invisible="1"/>
+              <field name="coop_symbol_mark" invisible="1"/>
             </group>
           </group>
 

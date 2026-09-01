@@ -1,0 +1,1535 @@
+[
+ {
+  "name": "Пельмени домашней лепки",
+  "city": "Тюмень",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Обмен",
+   "Безвозмездно",
+   "Участие в проекте"
+  ],
+  "listing": "Предложение",
+  "category": "Продовольственные товары",
+  "subcategory": "Мясная и молочная продукция",
+  "price": "450",
+  "promoted": true,
+  "price_line": "от 450 ₽/кг",
+  "image": "photos/pelmeni-making.jpg"
+ },
+ {
+  "name": "Цемент",
+  "city": "Красноярск",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Обмен"
+  ],
+  "listing": "Предложение",
+  "category": "Для дома и дачи",
+  "subcategory": "Ремонт и стройматериалы",
+  "price": "380",
+  "promoted": false,
+  "price_line": "от 380 ₽/тонна",
+  "image": "photos/cement-bag.jpg"
+ },
+ {
+  "name": "Брус 20×20",
+  "city": "Москва",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Обмен",
+   "Рассрочка"
+  ],
+  "listing": "Предложение",
+  "category": "Для дома и дачи",
+  "subcategory": "Ремонт и стройматериалы",
+  "price": "620",
+  "promoted": false,
+  "price_line": "от 620 ₽/м.",
+  "image": "photos/timber-beam.jpg"
+ },
+ {
+  "name": "Арматура А1-8",
+  "city": "Москва",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Обмен"
+  ],
+  "listing": "Предложение",
+  "category": "Для дома и дачи",
+  "subcategory": "Ремонт и стройматериалы",
+  "price": "58",
+  "promoted": false,
+  "price_line": "от 58 ₽/шт.",
+  "image": "photos/rebar-steel.jpg"
+ },
+ {
+  "name": "Бетономешалка",
+  "city": "Красноярск",
+  "type": "Оборудование",
+  "methods": [
+   "Аренда",
+   "Безвозмездно"
+  ],
+  "listing": "Предложение",
+  "category": "Бизнес и оборудование",
+  "subcategory": "Оборудование для бизнеса",
+  "price": "1800",
+  "promoted": false,
+  "price_line": "от 1 800 ₽/сутки",
+  "image": "photos/concrete-mixer.jpg"
+ },
+ {
+  "name": "Микрозайм на закупку материалов",
+  "city": "Сочи",
+  "type": "Финансовый",
+  "methods": [
+   "Участие в проекте"
+  ],
+  "listing": "Предложение",
+  "category": "Бизнес и оборудование",
+  "subcategory": "Финансирование",
+  "price": "500000",
+  "promoted": false,
+  "price_line": "до 500 000 ₽",
+  "image": "photos/finance-money.jpg"
+ },
+ {
+  "name": "Экскаватор-погрузчик",
+  "city": "Новосибирск",
+  "type": "Оборудование",
+  "methods": [
+   "Аренда",
+   "Лизинг"
+  ],
+  "listing": "Предложение",
+  "category": "Транспорт",
+  "subcategory": "Грузовики и спецтехника",
+  "price": "12000",
+  "promoted": false,
+  "price_line": "от 12 000 ₽/сутки",
+  "image": "photos/excavator-work.jpg"
+ },
+ {
+  "name": "Доски обрезные 40×150",
+  "city": "Екатеринбург",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Обмен"
+  ],
+  "listing": "Предложение",
+  "category": "Для дома и дачи",
+  "subcategory": "Ремонт и стройматериалы",
+  "price": "890",
+  "promoted": false,
+  "price_line": "от 890 ₽/м³",
+  "image": "photos/wood-planks.jpg"
+ },
+ {
+  "name": "Сварочный аппарат инверторный",
+  "city": "Казань",
+  "type": "Оборудование",
+  "methods": [
+   "Аренда",
+   "Продажа"
+  ],
+  "listing": "Предложение",
+  "category": "Бизнес и оборудование",
+  "subcategory": "Оборудование для бизнеса",
+  "price": "14500",
+  "promoted": false,
+  "price_line": "от 14 500 ₽",
+  "image": "photos/welding-machine.jpg"
+ },
+ {
+  "name": "Кирпич керамический М150",
+  "city": "Ростов-на-Дону",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Рассрочка"
+  ],
+  "listing": "Предложение",
+  "category": "Для дома и дачи",
+  "subcategory": "Ремонт и стройматериалы",
+  "price": "11",
+  "promoted": false,
+  "price_line": "от 11 ₽/шт.",
+  "image": "photos/brick-stack.jpg"
+ },
+ {
+  "name": "Грант на развитие ремесленного цеха",
+  "city": "Пермь",
+  "type": "Финансовый",
+  "methods": [
+   "Участие в проекте"
+  ],
+  "listing": "Предложение",
+  "category": "Бизнес и оборудование",
+  "subcategory": "Финансирование",
+  "price": "300000",
+  "promoted": false,
+  "price_line": "до 300 000 ₽",
+  "image": "photos/craft-workshop.jpg"
+ },
+ {
+  "name": "Бетон товарный М300",
+  "city": "Уфа",
+  "type": "Материальный",
+  "methods": [
+   "Продажа"
+  ],
+  "listing": "Предложение",
+  "category": "Для дома и дачи",
+  "subcategory": "Ремонт и стройматериалы",
+  "price": "4900",
+  "promoted": false,
+  "price_line": "от 4 900 ₽/м³",
+  "image": "photos/concrete-truck.jpg"
+ },
+ {
+  "name": "Строительные леса",
+  "city": "Самара",
+  "type": "Оборудование",
+  "methods": [
+   "Аренда",
+   "Безвозмездно"
+  ],
+  "listing": "Предложение",
+  "category": "Бизнес и оборудование",
+  "subcategory": "Оборудование для бизнеса",
+  "price": "350",
+  "promoted": false,
+  "price_line": "от 350 ₽/сутки",
+  "image": "photos/scaffolding.jpg"
+ },
+ {
+  "name": "Утеплитель минеральная вата",
+  "city": "Омск",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Обмен"
+  ],
+  "listing": "Предложение",
+  "category": "Для дома и дачи",
+  "subcategory": "Ремонт и стройматериалы",
+  "price": "620",
+  "promoted": false,
+  "price_line": "от 620 ₽/м²",
+  "image": "photos/mineral-wool.jpg"
+ },
+ {
+  "name": "Кредитная линия для малого бизнеса",
+  "city": "Челябинск",
+  "type": "Финансовый",
+  "methods": [
+   "Участие в проекте"
+  ],
+  "listing": "Предложение",
+  "category": "Бизнес и оборудование",
+  "subcategory": "Финансирование",
+  "price": "2",
+  "promoted": false,
+  "price_line": "до 2 млн ₽",
+  "image": "photos/open-source-crm.jpg"
+ },
+ {
+  "name": "Генератор дизельный 10кВт",
+  "city": "Нижний Новгород",
+  "type": "Оборудование",
+  "methods": [
+   "Аренда",
+   "Безвозмездно"
+  ],
+  "listing": "Предложение",
+  "category": "Бизнес и оборудование",
+  "subcategory": "Оборудование для бизнеса",
+  "price": "2500",
+  "promoted": false,
+  "price_line": "от 2 500 ₽/сутки",
+  "image": "photos/diesel-generator.jpg"
+ },
+ {
+  "name": "Металлочерепица",
+  "city": "Волгоград",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Обмен"
+  ],
+  "listing": "Предложение",
+  "category": "Для дома и дачи",
+  "subcategory": "Ремонт и стройматериалы",
+  "price": "450",
+  "promoted": false,
+  "price_line": "от 450 ₽/м²",
+  "image": "photos/welding-work.jpg"
+ },
+ {
+  "name": "Бетономешалка передвижная",
+  "city": "Краснодар",
+  "type": "Оборудование",
+  "methods": [
+   "Аренда",
+   "Лизинг"
+  ],
+  "listing": "Предложение",
+  "category": "Бизнес и оборудование",
+  "subcategory": "Оборудование для бизнеса",
+  "price": "1600",
+  "promoted": false,
+  "price_line": "от 1 600 ₽/сутки",
+  "image": "photos/apiary-hives.jpg"
+ },
+ {
+  "name": "Инвестиции в кооперативный склад",
+  "city": "Тюмень",
+  "type": "Финансовый",
+  "methods": [
+   "Участие в проекте"
+  ],
+  "listing": "Предложение",
+  "category": "Бизнес и оборудование",
+  "subcategory": "Финансирование",
+  "price": "5",
+  "promoted": false,
+  "price_line": "до 5 млн ₽",
+  "image": "photos/warehouse-shelves.jpg"
+ },
+ {
+  "name": "Профильная труба стальная",
+  "city": "Иркутск",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Рассрочка"
+  ],
+  "listing": "Предложение",
+  "category": "Для дома и дачи",
+  "subcategory": "Ремонт и стройматериалы",
+  "price": "210",
+  "promoted": false,
+  "price_line": "от 210 ₽/м.",
+  "image": "photos/metal-roof.jpg"
+ },
+ {
+  "name": "Гараж на продажу",
+  "city": "Волгоград",
+  "type": "Материальный",
+  "methods": [
+   "Продажа"
+  ],
+  "listing": "Предложение",
+  "category": "Недвижимость",
+  "subcategory": "Гаражи и машиноместа",
+  "price": "350000",
+  "promoted": false,
+  "price_line": "от 350 000 ₽",
+  "image": "photos/garage-building.jpg"
+ },
+ {
+  "name": "Складское помещение 200 м² в аренду",
+  "city": "Пермь",
+  "type": "Материальный",
+  "methods": [
+   "Аренда"
+  ],
+  "listing": "Предложение",
+  "category": "Недвижимость",
+  "subcategory": "Склады и коммерческая недвижимость",
+  "price": "45000",
+  "promoted": false,
+  "price_line": "от 45 000 ₽/мес",
+  "image": "photos/office-rent.jpg"
+ },
+ {
+  "name": "Ноутбук для удалённой работы",
+  "city": "Москва",
+  "type": "Оборудование",
+  "methods": [
+   "Аренда",
+   "Продажа"
+  ],
+  "listing": "Предложение",
+  "category": "Электроника",
+  "subcategory": "Ноутбуки и компьютеры",
+  "price": "1500",
+  "promoted": false,
+  "price_line": "от 1 500 ₽/сутки",
+  "image": "photos/apple-orchard.jpg"
+ },
+ {
+  "name": "Комплект видеонаблюдения для склада",
+  "city": "Екатеринбург",
+  "type": "Оборудование",
+  "methods": [
+   "Продажа",
+   "Рассрочка"
+  ],
+  "listing": "Предложение",
+  "category": "Электроника",
+  "subcategory": "Видео и аудио",
+  "price": "18000",
+  "promoted": false,
+  "price_line": "от 18 000 ₽",
+  "image": "photos/cctv-camera.jpg"
+ },
+ {
+  "name": "Ящик с ручным инструментом",
+  "city": "Казань",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Обмен",
+   "Безвозмездно"
+  ],
+  "listing": "Предложение",
+  "category": "Для дома и дачи",
+  "subcategory": "Инструменты",
+  "price": "3500",
+  "promoted": false,
+  "price_line": "от 3 500 ₽",
+  "image": "photos/toolbox.jpg"
+ },
+ {
+  "name": "Велосипед грузовой для доставки",
+  "city": "Ростов-на-Дону",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Обмен"
+  ],
+  "listing": "Предложение",
+  "category": "Хобби и отдых",
+  "subcategory": "Велосипеды",
+  "price": "42000",
+  "promoted": false,
+  "price_line": "от 42 000 ₽",
+  "image": "photos/cargo-bike.jpg"
+ },
+ {
+  "name": "Легковой автомобиль в аренду",
+  "city": "Казань",
+  "type": "Оборудование",
+  "methods": [
+   "Аренда",
+   "Лизинг"
+  ],
+  "listing": "Предложение",
+  "category": "Транспорт",
+  "subcategory": "Легковые автомобили",
+  "price": "3200",
+  "promoted": false,
+  "price_line": "от 3 200 ₽/сутки",
+  "image": "photos/car-rental.jpg"
+ },
+ {
+  "name": "Мини-трактор для участка",
+  "city": "Омск",
+  "type": "Оборудование",
+  "methods": [
+   "Аренда",
+   "Продажа"
+  ],
+  "listing": "Предложение",
+  "category": "Транспорт",
+  "subcategory": "Аренда спецтехники",
+  "price": "1800",
+  "promoted": false,
+  "price_line": "от 1 800 ₽/сутки",
+  "image": "photos/excavator.jpg"
+ },
+ {
+  "name": "Офис в бизнес-центре в аренду",
+  "city": "Санкт-Петербург",
+  "type": "Материальный",
+  "methods": [
+   "Аренда"
+  ],
+  "listing": "Предложение",
+  "category": "Недвижимость",
+  "subcategory": "Склады и коммерческая недвижимость",
+  "price": "950",
+  "promoted": false,
+  "price_line": "от 950 ₽/м² в год",
+  "image": "photos/office-desk.jpg"
+ },
+ {
+  "name": "Земельный участок под застройку",
+  "city": "Тюмень",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Обмен"
+  ],
+  "listing": "Предложение",
+  "category": "Недвижимость",
+  "subcategory": "Земельные участки",
+  "price": "65000",
+  "promoted": false,
+  "price_line": "от 65 000 ₽/сотка",
+  "image": "photos/land-plot.jpg"
+ },
+ {
+  "name": "МФУ (принтер-сканер) для офиса",
+  "city": "Челябинск",
+  "type": "Оборудование",
+  "methods": [
+   "Продажа",
+   "Аренда"
+  ],
+  "listing": "Предложение",
+  "category": "Электроника",
+  "subcategory": "Оргтехника",
+  "price": "14500",
+  "promoted": false,
+  "price_line": "от 14 500 ₽",
+  "image": "photos/printer3d-arm.jpg"
+ },
+ {
+  "name": "Комплект раций для стройплощадки",
+  "city": "Иркутск",
+  "type": "Оборудование",
+  "methods": [
+   "Аренда",
+   "Продажа"
+  ],
+  "listing": "Предложение",
+  "category": "Электроника",
+  "subcategory": "Видео и аудио",
+  "price": "6900",
+  "promoted": false,
+  "price_line": "от 6 900 ₽/комплект",
+  "image": "photos/playground.jpg"
+ },
+ {
+  "name": "Комплект спецодежды и СИЗ",
+  "city": "Краснодар",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Безвозмездно"
+  ],
+  "listing": "Предложение",
+  "category": "Личные вещи",
+  "subcategory": "Одежда, обувь, аксессуары",
+  "price": "2400",
+  "promoted": false,
+  "price_line": "от 2 400 ₽/комплект",
+  "image": "photos/workwear-ppe.jpg"
+ },
+ {
+  "name": "Палатка туристическая для командировок",
+  "city": "Нижний Новгород",
+  "type": "Материальный",
+  "methods": [
+   "Аренда",
+   "Продажа"
+  ],
+  "listing": "Предложение",
+  "category": "Личные вещи",
+  "subcategory": "Одежда, обувь, аксессуары",
+  "price": "3100",
+  "promoted": false,
+  "price_line": "от 3 100 ₽",
+  "image": "photos/camping-tent.jpg"
+ },
+ {
+  "name": "Картофель урожая этого года",
+  "city": "Краснодар",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Обмен"
+  ],
+  "listing": "Предложение",
+  "category": "Продовольственные товары",
+  "subcategory": "Овощи и фрукты",
+  "price": "28",
+  "promoted": false,
+  "price_line": "от 28 ₽/кг",
+  "image": "photos/potato-crate.jpg"
+ },
+ {
+  "name": "Мёд натуральный липовый",
+  "city": "Алтайский край",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Обмен",
+   "Безвозмездно"
+  ],
+  "listing": "Предложение",
+  "category": "Продовольственные товары",
+  "subcategory": "Мёд и продукты пчеловодства",
+  "price": "650",
+  "promoted": false,
+  "price_line": "от 650 ₽/кг",
+  "image": "photos/honey-extraction.jpg"
+ },
+ {
+  "name": "Мука пшеничная высшего сорта",
+  "city": "Воронеж",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Рассрочка"
+  ],
+  "listing": "Предложение",
+  "category": "Продовольственные товары",
+  "subcategory": "Крупы, мука и бакалея",
+  "price": "32000",
+  "promoted": false,
+  "price_line": "от 32 000 ₽/тонна",
+  "image": "photos/grain-silo.jpg"
+ },
+ {
+  "name": "Молоко фермерское",
+  "city": "Вологда",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Обмен"
+  ],
+  "listing": "Предложение",
+  "category": "Продовольственные товары",
+  "subcategory": "Мясная и молочная продукция",
+  "price": "95",
+  "promoted": false,
+  "price_line": "от 95 ₽/л",
+  "image": "photos/milk-bottles.jpg"
+ },
+ {
+  "name": "Дом «Эко-Купол» · 42 м² · проект «Строительный 3д принтер»",
+  "city": "Москва",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Участие в проекте"
+  ],
+  "listing": "Предложение",
+  "category": "Недвижимость",
+  "subcategory": "Дома, дачи, коттеджи",
+  "price": "1850000",
+  "promoted": false,
+  "price_line": "от 1 850 000 ₽",
+  "image": "photos/printer3d-construction.jpg"
+ },
+ {
+  "name": "Дом «Аркада» · 27 м² · проект «Строительный 3д принтер»",
+  "city": "Москва",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Участие в проекте"
+  ],
+  "listing": "Предложение",
+  "category": "Недвижимость",
+  "subcategory": "Дома, дачи, коттеджи",
+  "price": "1400000",
+  "promoted": false,
+  "price_line": "от 1 400 000 ₽",
+  "image": "photos/printer3d-nozzle.jpg"
+ },
+ {
+  "name": "Дом «Сфера» · 14 м² · проект «Строительный 3д принтер»",
+  "city": "Москва",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Участие в проекте"
+  ],
+  "listing": "Предложение",
+  "category": "Недвижимость",
+  "subcategory": "Дома, дачи, коттеджи",
+  "price": "690000",
+  "promoted": false,
+  "price_line": "от 690 000 ₽",
+  "image": "photos/house-amie.jpg"
+ },
+ {
+  "name": "Коробка «Мини» · зелень и овощи · проект «Круглогодичная теплица»",
+  "city": "Пермь",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Участие в проекте"
+  ],
+  "listing": "Предложение",
+  "category": "Продовольственные товары",
+  "subcategory": "Овощи и фрукты",
+  "price": "1200",
+  "promoted": false,
+  "price_line": "от 1 200 ₽/нед.",
+  "image": "photos/vegbox-csa.jpg"
+ },
+ {
+  "name": "Коробка «Стандарт» · зелень и овощи · проект «Круглогодичная теплица»",
+  "city": "Пермь",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Участие в проекте"
+  ],
+  "listing": "Предложение",
+  "category": "Продовольственные товары",
+  "subcategory": "Овощи и фрукты",
+  "price": "2100",
+  "promoted": false,
+  "price_line": "от 2 100 ₽/нед.",
+  "image": "photos/greenhouse-interior.jpg"
+ },
+ {
+  "name": "Коробка «Семейная» · зелень и овощи · проект «Круглогодичная теплица»",
+  "city": "Пермь",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Участие в проекте"
+  ],
+  "listing": "Предложение",
+  "category": "Продовольственные товары",
+  "subcategory": "Овощи и фрукты",
+  "price": "3400",
+  "promoted": false,
+  "price_line": "от 3 400 ₽/нед.",
+  "image": "photos/greenhouse-lettuce.jpg"
+ },
+ {
+  "name": "Ищу партию мёда оптом для магазина",
+  "city": "Москва",
+  "type": "Материальный",
+  "methods": [
+   "Продажа"
+  ],
+  "listing": "Спрос",
+  "category": "Продовольственные товары",
+  "subcategory": "Мёд и продукты пчеловодства",
+  "price": "60000",
+  "promoted": false,
+  "price_line": "бюджет до 60 000 ₽",
+  "image": "photos/central-market.jpg"
+ },
+ {
+  "name": "Куплю промышленную мешалку б/у для цеха",
+  "city": "Новосибирск",
+  "type": "Оборудование",
+  "methods": [
+   "Продажа"
+  ],
+  "listing": "Спрос",
+  "category": "Бизнес и оборудование",
+  "subcategory": "Оборудование для бизнеса",
+  "price": "90000",
+  "promoted": false,
+  "price_line": "бюджет до 90 000 ₽",
+  "image": "photos/apiary-hives.jpg"
+ },
+ {
+  "name": "Ищу инвестора в открытие цеха по переработке",
+  "city": "Казань",
+  "type": "Финансовый",
+  "methods": [
+   "Участие в проекте"
+  ],
+  "listing": "Спрос",
+  "category": "Бизнес и оборудование",
+  "subcategory": "Финансирование",
+  "price": "500000",
+  "promoted": false,
+  "price_line": "нужно 500 000 ₽",
+  "image": "photos/plastic-recycling.jpg"
+ },
+ {
+  "name": "Ищу морковь для дома · Дашкевич Данил Игоревич",
+  "city": "Сочи",
+  "type": "Материальный",
+  "methods": [],
+  "listing": "Спрос",
+  "category": "Продовольственные товары",
+  "subcategory": "Овощи и фрукты",
+  "price": "",
+  "promoted": false,
+  "price_line": "нужно немного, для дома",
+  "image": "photos/carrot.jpg"
+ },
+ {
+  "name": "Ищу программиста · Дашкевич Данил Игоревич",
+  "city": "Сочи",
+  "type": "Труд",
+  "methods": [],
+  "listing": "Спрос",
+  "category": "Услуги",
+  "subcategory": "Деловые услуги",
+  "price": "",
+  "promoted": false,
+  "price_line": "оплата по договорённости",
+  "image": "photos/programmer.jpg"
+ },
+ {
+  "name": "Ищу экскаватор-погрузчик в аренду · ООО «Мириталь»",
+  "city": "Москва",
+  "type": "Оборудование",
+  "methods": [],
+  "listing": "Спрос",
+  "category": "Транспорт",
+  "subcategory": "Аренда спецтехники",
+  "price": "12000",
+  "promoted": false,
+  "price_line": "бюджет до 12 000 ₽/сутки",
+  "image": "photos/excavator-work.jpg"
+ },
+ {
+  "name": "Ищу инвестиции в расширение склада · ООО «Мириталь»",
+  "city": "Москва",
+  "type": "Финансовый",
+  "methods": [],
+  "listing": "Спрос",
+  "category": "Бизнес и оборудование",
+  "subcategory": "Финансирование",
+  "price": "1200000",
+  "promoted": false,
+  "price_line": "нужно 1 200 000 ₽",
+  "image": "photos/warehouse-shelves.jpg"
+ },
+ {
+  "name": "Ищу пастуха на летний период · Кооператив «Шукты»",
+  "city": "Дербент",
+  "type": "Труд",
+  "methods": [],
+  "listing": "Спрос",
+  "category": "Услуги",
+  "subcategory": "Деловые услуги",
+  "price": "",
+  "promoted": false,
+  "price_line": "оплата по договорённости",
+  "image": "photos/apple-orchard.jpg"
+ },
+ {
+  "name": "Ищу мини-трактор в аренду · Кооператив «Шукты»",
+  "city": "Дербент",
+  "type": "Оборудование",
+  "methods": [],
+  "listing": "Спрос",
+  "category": "Транспорт",
+  "subcategory": "Аренда спецтехники",
+  "price": "1800",
+  "promoted": false,
+  "price_line": "бюджет до 1 800 ₽/сутки",
+  "image": "photos/excavator.jpg"
+ },
+ {
+  "name": "Ищу инвестиции в модернизацию сыроварни · Кооператив «Шукты»",
+  "city": "Дербент",
+  "type": "Финансовый",
+  "methods": [],
+  "listing": "Спрос",
+  "category": "Бизнес и оборудование",
+  "subcategory": "Финансирование",
+  "price": "1000000",
+  "promoted": false,
+  "price_line": "нужно 1 000 000 ₽",
+  "image": "photos/cheese-making.jpg"
+ },
+ {
+  "name": "Ищу волонтёра-координатора мероприятий · Фонд «Территория 2020»",
+  "city": "Красноярск",
+  "type": "Труд",
+  "methods": [],
+  "listing": "Спрос",
+  "category": "Услуги",
+  "subcategory": "Деловые услуги",
+  "price": "",
+  "promoted": false,
+  "price_line": "волонтёрская позиция",
+  "image": "photos/open-source-crm.jpg"
+ },
+ {
+  "name": "Нужны ноутбуки для проектного офиса · Фонд «Территория 2020»",
+  "city": "Красноярск",
+  "type": "Оборудование",
+  "methods": [],
+  "listing": "Спрос",
+  "category": "Электроника",
+  "subcategory": "Ноутбуки и компьютеры",
+  "price": "90000",
+  "promoted": false,
+  "price_line": "бюджет до 90 000 ₽",
+  "image": "photos/office-rent.jpg"
+ },
+ {
+  "name": "Собираем пожертвования на грантовую программу · Фонд «Территория 2020»",
+  "city": "Красноярск",
+  "type": "Финансовый",
+  "methods": [],
+  "listing": "Спрос",
+  "category": "Бизнес и оборудование",
+  "subcategory": "Финансирование",
+  "price": "",
+  "promoted": false,
+  "price_line": "принимаем пожертвования",
+  "image": "photos/laptop-desk.jpg"
+ },
+ {
+  "name": "Ищу агронома-консультанта на сезон · программа «Урожай сообща»",
+  "city": "Дербент",
+  "type": "Труд",
+  "methods": [],
+  "listing": "Спрос",
+  "category": "Услуги",
+  "subcategory": "Деловые услуги",
+  "price": "",
+  "promoted": false,
+  "price_line": "оплата по договорённости",
+  "image": "photos/server-rack.jpg"
+ },
+ {
+  "name": "Нужен ещё один мини-трактор в лизинг · программа «Урожай сообща»",
+  "city": "Дербент",
+  "type": "Оборудование",
+  "methods": [],
+  "listing": "Спрос",
+  "category": "Транспорт",
+  "subcategory": "Аренда спецтехники",
+  "price": "900000",
+  "promoted": false,
+  "price_line": "бюджет до 900 000 ₽",
+  "image": "photos/coding-class.jpg"
+ },
+ {
+  "name": "Ищу инвестиции в расширение склада · программа «Урожай сообща»",
+  "city": "Дербент",
+  "type": "Финансовый",
+  "methods": [],
+  "listing": "Спрос",
+  "category": "Бизнес и оборудование",
+  "subcategory": "Финансирование",
+  "price": "800000",
+  "promoted": false,
+  "price_line": "нужно 800 000 ₽",
+  "image": "photos/warehouse.jpg"
+ },
+ {
+  "name": "Нужен цемент, 50 тонн · проект «Строительный 3д принтер»",
+  "city": "Москва",
+  "type": "Материальный",
+  "methods": [],
+  "listing": "Спрос",
+  "category": "Для дома и дачи",
+  "subcategory": "Ремонт и стройматериалы",
+  "price": "50",
+  "promoted": false,
+  "price_line": "нужно 50 тонн · бюджет 500 000 ₽",
+  "image": "photos/printer3d-arm.jpg"
+ },
+ {
+  "name": "Ищу инженера-технолога · проект «Строительный 3д принтер»",
+  "city": "Москва",
+  "type": "Труд",
+  "methods": [],
+  "listing": "Спрос",
+  "category": "Услуги",
+  "subcategory": "Деловые услуги",
+  "price": "50000",
+  "promoted": false,
+  "price_line": "бюджет 50 000 ₽",
+  "image": "photos/bakery-bread.jpg"
+ },
+ {
+  "name": "Нужны поликарбонатные панели (обшивка) · проект «Круглогодичная теплица»",
+  "city": "Пермь",
+  "type": "Материальный",
+  "methods": [],
+  "listing": "Спрос",
+  "category": "Для дома и дачи",
+  "subcategory": "Ремонт и стройматериалы",
+  "price": "850",
+  "promoted": false,
+  "price_line": "нужно 850 м² · бюджет 1 100 000 ₽",
+  "image": "photos/greenhouse-tomato.jpg"
+ },
+ {
+  "name": "Ищу агронома · проект «Круглогодичная теплица»",
+  "city": "Пермь",
+  "type": "Труд",
+  "methods": [],
+  "listing": "Спрос",
+  "category": "Услуги",
+  "subcategory": "Деловые услуги",
+  "price": "200000",
+  "promoted": false,
+  "price_line": "бюджет 200 000 ₽",
+  "image": "photos/greenhouse.jpg"
+ },
+ {
+  "name": "Холодильная камера",
+  "city": "Нижний Новгород",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Обмен"
+  ],
+  "listing": "Предложение",
+  "category": "Для дома и дачи",
+  "subcategory": "Ремонт и стройматериалы",
+  "price": "1400",
+  "promoted": false,
+  "price_line": "от 1 400 ₽/м³",
+  "image": "photos/cold-storage.jpg"
+ },
+ {
+  "name": "Сварочный аппарат",
+  "city": "Челябинск",
+  "type": "Труд",
+  "methods": [],
+  "listing": "Спрос",
+  "category": "Услуги",
+  "subcategory": "Деловые услуги",
+  "price": "",
+  "promoted": false,
+  "price_line": "оплата по договорённости",
+  "image": "photos/welding-machine.jpg"
+ },
+ {
+  "name": "Гончарный круг",
+  "city": "Екатеринбург",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Участие в проекте"
+  ],
+  "listing": "Предложение",
+  "category": "Недвижимость",
+  "subcategory": "Дома, дачи, коттеджи",
+  "price": "620",
+  "promoted": false,
+  "price_line": "от 620 ₽",
+  "image": "photos/pottery-wheel.jpg"
+ },
+ {
+  "name": "Инкубатор на 500 яиц",
+  "city": "Воронеж",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Рассрочка"
+  ],
+  "listing": "Предложение",
+  "category": "Продовольственные товары",
+  "subcategory": "Крупы, мука и бакалея",
+  "price": "620",
+  "promoted": false,
+  "price_line": "от 620 ₽/тонна",
+  "image": "photos/poultry-house.jpg"
+ },
+ {
+  "name": "Гончарный круг",
+  "city": "Челябинск",
+  "type": "Оборудование",
+  "methods": [
+   "Аренда",
+   "Продажа"
+  ],
+  "listing": "Предложение",
+  "category": "Бизнес и оборудование",
+  "subcategory": "Оборудование для бизнеса",
+  "price": "18000",
+  "promoted": false,
+  "price_line": "от 18 000 ₽",
+  "image": "photos/bakery.jpg"
+ },
+ {
+  "name": "Леса строительные",
+  "city": "Красноярск",
+  "type": "Материальный",
+  "methods": [
+   "Продажа"
+  ],
+  "listing": "Спрос",
+  "category": "Продовольственные товары",
+  "subcategory": "Мёд и продукты пчеловодства",
+  "price": "620",
+  "promoted": false,
+  "price_line": "бюджет до 60 000 ₽",
+  "image": "photos/scaffolding.jpg"
+ },
+ {
+  "name": "Прицеп самосвальный",
+  "city": "Красноярск",
+  "type": "Оборудование",
+  "methods": [
+   "Аренда",
+   "Безвозмездно"
+  ],
+  "listing": "Предложение",
+  "category": "Бизнес и оборудование",
+  "subcategory": "Оборудование для бизнеса",
+  "price": "380",
+  "promoted": false,
+  "price_line": "от 380 ₽/сутки",
+  "image": "photos/apiary-hives.jpg"
+ },
+ {
+  "name": "Леса строительные",
+  "city": "Омск",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Обмен"
+  ],
+  "listing": "Предложение",
+  "category": "Продовольственные товары",
+  "subcategory": "Овощи и фрукты",
+  "price": "120",
+  "promoted": false,
+  "price_line": "от 120 ₽/кг",
+  "image": "photos/beef-meat.jpg"
+ },
+ {
+  "name": "Опалубка",
+  "city": "Архангельск",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Участие в проекте"
+  ],
+  "listing": "Предложение",
+  "category": "Продовольственные товары",
+  "subcategory": "Овощи и фрукты",
+  "price": "4800",
+  "promoted": false,
+  "price_line": "от 4 800 ₽/нед.",
+  "image": "photos/berry-harvest.jpg"
+ },
+ {
+  "name": "Бетономешалка 180 л",
+  "city": "Санкт-Петербург",
+  "type": "Материальный",
+  "methods": [],
+  "listing": "Спрос",
+  "category": "Продовольственные товары",
+  "subcategory": "Овощи и фрукты",
+  "price": "",
+  "promoted": false,
+  "price_line": "нужно немного, для дома",
+  "image": "photos/concrete-mixer.jpg"
+ },
+ {
+  "name": "Сварочный аппарат",
+  "city": "Ростов-на-Дону",
+  "type": "Материальный",
+  "methods": [
+   "Продажа"
+  ],
+  "listing": "Предложение",
+  "category": "Недвижимость",
+  "subcategory": "Гаражи и машиноместа",
+  "price": "380",
+  "promoted": false,
+  "price_line": "от 380 ₽",
+  "image": "photos/welding-work.jpg"
+ },
+ {
+  "name": "Молоко фермерское",
+  "city": "Воронеж",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Обмен"
+  ],
+  "listing": "Предложение",
+  "category": "Для дома и дачи",
+  "subcategory": "Ремонт и стройматериалы",
+  "price": "1400",
+  "promoted": false,
+  "price_line": "от 1 400 ₽/тонна",
+  "image": "photos/milk-bottles.jpg"
+ },
+ {
+  "name": "Утеплитель минеральный",
+  "city": "Москва",
+  "type": "Материальный",
+  "methods": [
+   "Продажа"
+  ],
+  "listing": "Предложение",
+  "category": "Для дома и дачи",
+  "subcategory": "Ремонт и стройматериалы",
+  "price": "42000",
+  "promoted": false,
+  "price_line": "от 42 000 ₽/м³",
+  "image": "photos/mineral-wool.jpg"
+ },
+ {
+  "name": "Сеялка точного высева",
+  "city": "Тюмень",
+  "type": "Труд",
+  "methods": [],
+  "listing": "Спрос",
+  "category": "Услуги",
+  "subcategory": "Деловые услуги",
+  "price": "18000",
+  "promoted": false,
+  "price_line": "бюджет 200 000 ₽",
+  "image": "photos/apple-orchard.jpg"
+ },
+ {
+  "name": "Сено в рулонах",
+  "city": "Владивосток",
+  "type": "Оборудование",
+  "methods": [],
+  "listing": "Спрос",
+  "category": "Транспорт",
+  "subcategory": "Аренда спецтехники",
+  "price": "1400",
+  "promoted": false,
+  "price_line": "бюджет до 1 800 ₽/сутки",
+  "image": "photos/land-plot.jpg"
+ },
+ {
+  "name": "Мотоблок",
+  "city": "Новосибирск",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Обмен"
+  ],
+  "listing": "Предложение",
+  "category": "Для дома и дачи",
+  "subcategory": "Ремонт и стройматериалы",
+  "price": "4800",
+  "promoted": false,
+  "price_line": "от 4 800 ₽/шт.",
+  "image": "photos/bicycle-repair.jpg"
+ },
+ {
+  "name": "Мобильная пилорама",
+  "city": "Архангельск",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Участие в проекте"
+  ],
+  "listing": "Предложение",
+  "category": "Недвижимость",
+  "subcategory": "Дома, дачи, коттеджи",
+  "price": "620",
+  "promoted": false,
+  "price_line": "от 620 ₽",
+  "image": "photos/brick-stack.jpg"
+ },
+ {
+  "name": "Шерсть овечья мытая",
+  "city": "Вологда",
+  "type": "Оборудование",
+  "methods": [
+   "Аренда",
+   "Продажа"
+  ],
+  "listing": "Предложение",
+  "category": "Бизнес и оборудование",
+  "subcategory": "Оборудование для бизнеса",
+  "price": "2600",
+  "promoted": false,
+  "price_line": "от 2 600 ₽",
+  "image": "photos/sheep-flock.jpg"
+ },
+ {
+  "name": "Молоковоз",
+  "city": "Уфа",
+  "type": "Финансовый",
+  "methods": [],
+  "listing": "Спрос",
+  "category": "Бизнес и оборудование",
+  "subcategory": "Финансирование",
+  "price": "250",
+  "promoted": false,
+  "price_line": "нужно 800 000 ₽",
+  "image": "photos/milk-tank.jpg"
+ },
+ {
+  "name": "Утеплитель минеральный",
+  "city": "Сочи",
+  "type": "Оборудование",
+  "methods": [
+   "Аренда",
+   "Безвозмездно"
+  ],
+  "listing": "Предложение",
+  "category": "Бизнес и оборудование",
+  "subcategory": "Оборудование для бизнеса",
+  "price": "18000",
+  "promoted": false,
+  "price_line": "от 18 000 ₽/сутки",
+  "image": "photos/open-source-crm.jpg"
+ },
+ {
+  "name": "Саженцы яблони",
+  "city": "Хабаровск",
+  "type": "Финансовый",
+  "methods": [
+   "Участие в проекте"
+  ],
+  "listing": "Предложение",
+  "category": "Бизнес и оборудование",
+  "subcategory": "Финансирование",
+  "price": "380",
+  "promoted": false,
+  "price_line": "до 300 000 ₽",
+  "image": "photos/nursery-seedlings.jpg"
+ },
+ {
+  "name": "Сено в рулонах",
+  "city": "Челябинск",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Обмен"
+  ],
+  "listing": "Предложение",
+  "category": "Хобби и отдых",
+  "subcategory": "Велосипеды",
+  "price": "42000",
+  "promoted": false,
+  "price_line": "от 42 000 ₽",
+  "image": "photos/hay-bales.jpg"
+ },
+ {
+  "name": "Пиломатериал обрезной",
+  "city": "Ростов-на-Дону",
+  "type": "Материальный",
+  "methods": [
+   "Аренда"
+  ],
+  "listing": "Предложение",
+  "category": "Недвижимость",
+  "subcategory": "Склады и коммерческая недвижимость",
+  "price": "2600",
+  "promoted": false,
+  "price_line": "от 2 600 ₽/м² в год",
+  "image": "photos/timber-beam.jpg"
+ },
+ {
+  "name": "Бетономешалка 180 л",
+  "city": "Ярославль",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Обмен"
+  ],
+  "listing": "Предложение",
+  "category": "Продовольственные товары",
+  "subcategory": "Овощи и фрукты",
+  "price": "2600",
+  "promoted": false,
+  "price_line": "от 2 600 ₽/кг",
+  "image": "photos/concrete-truck.jpg"
+ },
+ {
+  "name": "Пресс-подборщик",
+  "city": "Ростов-на-Дону",
+  "type": "Оборудование",
+  "methods": [
+   "Аренда",
+   "Лизинг"
+  ],
+  "listing": "Предложение",
+  "category": "Транспорт",
+  "subcategory": "Легковые автомобили",
+  "price": "4800",
+  "promoted": false,
+  "price_line": "от 4 800 ₽/сутки",
+  "image": "photos/bakery-bread.jpg"
+ },
+ {
+  "name": "Доильный аппарат",
+  "city": "Санкт-Петербург",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Рассрочка"
+  ],
+  "listing": "Предложение",
+  "category": "Для дома и дачи",
+  "subcategory": "Ремонт и стройматериалы",
+  "price": "9500",
+  "promoted": false,
+  "price_line": "от 9 500 ₽/шт.",
+  "image": "photos/cheese-making.jpg"
+ },
+ {
+  "name": "Доильный аппарат",
+  "city": "Дербент",
+  "type": "Оборудование",
+  "methods": [
+   "Аренда",
+   "Лизинг"
+  ],
+  "listing": "Предложение",
+  "category": "Транспорт",
+  "subcategory": "Легковые автомобили",
+  "price": "250",
+  "promoted": false,
+  "price_line": "от 250 ₽/сутки",
+  "image": "photos/cattle-barn.jpg"
+ },
+ {
+  "name": "Комбикорм",
+  "city": "Красноярск",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Обмен"
+  ],
+  "listing": "Предложение",
+  "category": "Для дома и дачи",
+  "subcategory": "Ремонт и стройматериалы",
+  "price": "120",
+  "promoted": false,
+  "price_line": "от 120 ₽/м²",
+  "image": "photos/bridge-repair.jpg"
+ },
+ {
+  "name": "Пресс-подборщик",
+  "city": "Архангельск",
+  "type": "Оборудование",
+  "methods": [
+   "Продажа",
+   "Аренда"
+  ],
+  "listing": "Предложение",
+  "category": "Электроника",
+  "subcategory": "Оргтехника",
+  "price": "380",
+  "promoted": false,
+  "price_line": "от 380 ₽",
+  "image": "photos/bakery.jpg"
+ },
+ {
+  "name": "Цемент М500",
+  "city": "Новосибирск",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Рассрочка"
+  ],
+  "listing": "Предложение",
+  "category": "Для дома и дачи",
+  "subcategory": "Ремонт и стройматериалы",
+  "price": "1400",
+  "promoted": false,
+  "price_line": "от 1 400 ₽/шт.",
+  "image": "photos/cement-bag.jpg"
+ },
+ {
+  "name": "Холодильная камера",
+  "city": "Пермь",
+  "type": "Оборудование",
+  "methods": [],
+  "listing": "Спрос",
+  "category": "Транспорт",
+  "subcategory": "Аренда спецтехники",
+  "price": "900",
+  "promoted": false,
+  "price_line": "бюджет до 12 000 ₽/сутки",
+  "image": "photos/warehouse-shelves.jpg"
+ },
+ {
+  "name": "Мёд разнотравье",
+  "city": "Ишим",
+  "type": "Финансовый",
+  "methods": [
+   "Участие в проекте"
+  ],
+  "listing": "Предложение",
+  "category": "Бизнес и оборудование",
+  "subcategory": "Финансирование",
+  "price": "380",
+  "promoted": false,
+  "price_line": "до 2 млн ₽",
+  "image": "photos/herb-drying.jpg"
+ },
+ {
+  "name": "Молоко фермерское",
+  "city": "Тобольск",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Безвозмездно"
+  ],
+  "listing": "Предложение",
+  "category": "Личные вещи",
+  "subcategory": "Одежда, обувь, аксессуары",
+  "price": "1400",
+  "promoted": false,
+  "price_line": "от 1 400 ₽/комплект",
+  "image": "photos/goat-farm.jpg"
+ },
+ {
+  "name": "Шерсть овечья мытая",
+  "city": "Хабаровск",
+  "type": "Финансовый",
+  "methods": [],
+  "listing": "Спрос",
+  "category": "Бизнес и оборудование",
+  "subcategory": "Финансирование",
+  "price": "",
+  "promoted": false,
+  "price_line": "принимаем пожертвования",
+  "image": "photos/apiary-hives.jpg"
+ },
+ {
+  "name": "Сушилка для зерна",
+  "city": "Екатеринбург",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Обмен",
+   "Рассрочка"
+  ],
+  "listing": "Предложение",
+  "category": "Для дома и дачи",
+  "subcategory": "Ремонт и стройматериалы",
+  "price": "42000",
+  "promoted": false,
+  "price_line": "от 42 000 ₽/м.",
+  "image": "photos/grain-silo.jpg"
+ },
+ {
+  "name": "Мотоблок",
+  "city": "Владивосток",
+  "type": "Материальный",
+  "methods": [
+   "Продажа",
+   "Обмен",
+   "Безвозмездно"
+  ],
+  "listing": "Предложение",
+  "category": "Для дома и дачи",
+  "subcategory": "Инструменты",
+  "price": "42000",
+  "promoted": false,
+  "price_line": "от 42 000 ₽",
+  "image": "photos/beef-meat.jpg"
+ },
+ {
+  "name": "Молоковоз",
+  "city": "Магнитогорск",
+  "type": "Финансовый",
+  "methods": [
+   "Участие в проекте"
+  ],
+  "listing": "Спрос",
+  "category": "Бизнес и оборудование",
+  "subcategory": "Финансирование",
+  "price": "450",
+  "promoted": false,
+  "price_line": "нужно 500 000 ₽",
+  "image": "photos/milk-bottles.jpg"
+ }
+]

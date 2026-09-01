@@ -4,6 +4,12 @@
 Сто организаций из `organizations.html`: название, город, правовая форма,
 специализация, уровень доверия и логотип.
 
+Логотипы настоящих компаний из макета не переносятся: вместо них
+рисуются собственные знаки (см. `emblems.py`). Организации, у которых в
+макете была картинка, получают геометрическую эмблему, остальные —
+букву названия; так сохраняется разнообразие каталога без чужих товарных
+знаков.
+
 Правовая форма выведена из названия, а не из атрибута `data-legal-group`
 макета. В макете группа у заполняющих записей проставлена случайно и прямо
 противоречит названию — есть «АО «Кедр»» в кооперативных и «ООО «Поморье»»
@@ -15,43 +21,14 @@ import base64
 import json
 import logging
 import os
-import re
+
+from . import emblems
 from datetime import date
 
 _logger = logging.getLogger(__name__)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 LOGO_DIR = os.path.join(os.path.dirname(HERE), 'static', 'img')
-
-# Цвета монограммы: у трёх четвертей организаций в макете нет картинки, и
-# вместо неё стоит буква на подложке фирменного оттенка. Повторяем это, а
-# не подставляем серую заглушку «нет изображения»: в каталоге из ста плиток
-# сотня одинаковых заглушек хуже, чем сотня разных букв.
-MONOGRAM_BG = '#e3efed'
-MONOGRAM_FG = '#0e4f4a'
-
-
-def _monogram(name):
-    """Логотип-монограмма: первая буква названия на светлой подложке.
-
-    Буква берётся из собственного имени организации, а не из формы: у
-    «ООО «Мириталь»» это «М», иначе половина каталога оказалась бы под
-    буквой «О», а вторая половина под «П».
-
-    Кегль подобран по макету: там буква занимает около седьмой части
-    ширины плитки. Крупнее — и плитка читается как обложка, а не как
-    карточка организации.
-    """
-    quoted = re.search(r'[«"]\s*(\S)', name)
-    letter = (quoted.group(1) if quoted else name.strip()[:1]).upper()
-    svg = (
-        '<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256">'
-        '<rect width="256" height="256" fill="%s"/>'
-        '<text x="50%%" y="50%%" fill="%s" font-family="Manrope, sans-serif" '
-        'font-size="38" font-weight="700" text-anchor="middle" '
-        'dominant-baseline="central">%s</text></svg>'
-    ) % (MONOGRAM_BG, MONOGRAM_FG, letter)
-    return base64.b64encode(svg.encode('utf-8'))
 
 
 def _registered_on(seed):
@@ -68,7 +45,7 @@ def _registered_on(seed):
     return date(year, month, day)
 
 
-def load_organizations(env, specializations):
+def load_organizations(env, specializations, marks):
     with open(os.path.join(HERE, 'organizations.json'), encoding='utf-8') as fh:
         orgs = json.load(fh)
 
@@ -101,19 +78,19 @@ def load_organizations(env, specializations):
         if specialization:
             values['coop_specialization_id'] = specialization.id
 
-        # В макете путь пишется от корня прототипа («img/org-logos/…»), а
-        # в модуле логотипы лежат в static/img/org-logos. Ведущий «img/»
-        # снимаем, иначе получится «static/img/img/…» и все сто плиток
-        # молча уедут на монограммы.
-        relative = re.sub(r'^(images?|img)/', '', org['logo']) if org['logo'] else ''
-        logo = os.path.join(LOGO_DIR, relative.replace('/', os.sep)) if relative else ''
-        if logo and os.path.exists(logo):
-            with open(logo, 'rb') as fh:
+        # Настоящая эмблема из свободного набора, пока он не кончится.
+        # Набор конечный, поэтому остальным достаётся знак-буква с
+        # символом рода занятий — каталог от этого не разъезжается: в
+        # макете было ровно так же, часть плиток с картинкой, часть с
+        # буквой.
+        mark = marks.next()
+        if mark:
+            with open(mark, 'rb') as fh:
                 values['image_1920'] = base64.b64encode(fh.read())
-            values['coop_has_own_logo'] = True
+            values['coop_symbol_mark'] = True
         else:
-            values['image_1920'] = _monogram(org['name'])
-            values['coop_has_own_logo'] = False
+            values['image_1920'] = emblems.monogram(org['name'], org['specialization'])
+            values['coop_symbol_mark'] = False
 
         # Ключ — название вместе с городом, а не одно название. В макете
         # девять названий повторяются, и восемь из девяти пар стоят в
@@ -156,9 +133,11 @@ def load_organizations(env, specializations):
         if not partner.coop_legal_form_id:
             values['coop_legal_form_id'] = forms['po'].id
         if not partner.image_1920:
-            values['image_1920'] = _monogram(partner.name)
-            values['coop_has_own_logo'] = False
+            values['image_1920'] = emblems.monogram(
+                partner.name, partner.coop_specialization_id.name)
+            values['coop_symbol_mark'] = False
         partner.write(values)
 
-    _logger.info('Каталог организаций: %s записей, из них создано %s',
-                 len(orgs), created)
+    _logger.info('Каталог организаций: %s записей, создано %s, настоящих '
+                 'эмблем роздано %s из %s', len(orgs), created,
+                 marks.used, marks.total)

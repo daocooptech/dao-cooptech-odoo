@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from odoo import api, models
 
-from ..data import load_org_profiles, load_orgs, load_people, load_reference
+from ..data import emblems, load_org_profiles, load_orgs, load_people, load_reference
 
 
 class CoopDemoLoader(models.AbstractModel):
@@ -22,6 +22,9 @@ class CoopDemoLoader(models.AbstractModel):
         # получить два дерева, которые разойдутся при первой же правке.
         _categories, specializations = load_reference.load_specializations(self.env)
         load_people.load_people(self.env, specializations)
-        load_orgs.load_organizations(self.env, specializations)
-        load_org_profiles.load_org_profiles(self.env, specializations)
+        # Один раздатчик знаков на весь прогон: иначе каталог и
+        # заполненные карточки разберут одни и те же файлы дважды.
+        marks = emblems.MarkAllocator()
+        load_orgs.load_organizations(self.env, specializations, marks)
+        load_org_profiles.load_org_profiles(self.env, specializations, marks)
         return True

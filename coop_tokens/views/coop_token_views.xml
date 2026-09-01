@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="view_coop_token_list" model="ir.ui.view">
+    <field name="name">coop.token.transaction.list</field>
+    <field name="model">coop.token.transaction</field>
+    <field name="arch" type="xml">
+      <list string="Движения токенов">
+        <field name="create_date" string="Когда"/>
+        <field name="partner_id"/>
+        <field name="kind"/>
+        <field name="amount" sum="Итого"/>
+        <field name="description"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_token_search" model="ir.ui.view">
+    <field name="name">coop.token.transaction.search</field>
+    <field name="model">coop.token.transaction</field>
+    <field name="arch" type="xml">
+      <search string="Движения токенов">
+        <field name="partner_id"/>
+        <filter name="spent" string="Списания" domain="[('amount', '&lt;', 0)]"/>
+        <filter name="earned" string="Начисления" domain="[('amount', '&gt;', 0)]"/>
+        <group>
+          <filter name="by_partner" string="По участнику"
+                  context="{'group_by': 'partner_id'}"/>
+          <filter name="by_kind" string="По основанию"
+                  context="{'group_by': 'kind'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_token" model="ir.actions.act_window">
+    <field name="name">Движения токенов</field>
+    <field name="res_model">coop.token.transaction</field>
+    <field name="view_mode">list,form</field>
+    <field name="search_view_id" ref="view_coop_token_search"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Движений пока нет</p>
+      <p>Токены начисляются за вклад или пополнением и списываются за
+         услуги платформы. Между участниками они не переводятся и в деньги
+         обратно не превращаются — это внутренняя единица, а не средство
+         расчёта.</p>
+    </field>
+  </record>
+
+  <menuitem id="menu_coop_tokens" name="Токены платформы"
+            parent="coop_base.menu_coop_root" action="action_coop_token" sequence="60"/>
+
+</odoo>

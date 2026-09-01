@@ -18,9 +18,11 @@
 настоящих компаний, и номер с настоящим кодом региона рядом с их знаком
 превратил бы демонстрационную запись в подобие выписки из реестра.
 """
+import base64
 import logging
+import os
 
-from . import load_orgs
+from . import emblems
 
 _logger = logging.getLogger(__name__)
 
@@ -175,7 +177,7 @@ def _domain(name, seed):
     return 'https://coop-%03d.example' % seed
 
 
-def load_org_profiles(env, specializations):
+def load_org_profiles(env, specializations, marks):
     forms = {form.code: form for form in env['coop.legal.form'].search([])}
     country_ru = env['res.country'].search([('code', '=', 'RU')], limit=1)
     Partner = env['res.partner']
@@ -212,7 +214,7 @@ def load_org_profiles(env, specializations):
                 'email': 'info@coop-%03d.example' % seed,
                 'website': _domain(name, seed),
                 'coop_trust': 55 + (seed * 13) % 45,
-                'coop_has_own_logo': False,
+                'coop_symbol_mark': True,
             }
             specialization = specializations.get(specialization_name)
             if specialization:
@@ -227,7 +229,12 @@ def load_org_profiles(env, specializations):
                 existing.write(values)
                 filled += 1
             else:
-                values['image_1920'] = load_orgs._monogram(name)
+                mark = marks.next()
+                if mark:
+                    with open(mark, 'rb') as fh:
+                        values['image_1920'] = base64.b64encode(fh.read())
+                else:
+                    values['image_1920'] = emblems.emblem(name, specialization_name)
                 Partner.create(dict(values, name=name))
                 created += 1
 
