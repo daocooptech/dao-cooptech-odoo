@@ -15,6 +15,9 @@
     'version': '19.0.1.0.0',
     'license': 'LGPL-3',
     'depends': ['coop_base', 'product', 'project', 'hr_skills', 'sale_management'],
-    'demo': ['demo/coop_demo_data.xml'],
+    'data': [
+        'data/coop_reference_data.xml',
+        'data/coop_demo_data.xml',
+    ],
     'installable': True,
 }

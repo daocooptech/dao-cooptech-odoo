@@ -56,7 +56,7 @@
     <!-- ── Проект ──────────────────────────────────────────────────── -->
     <record id="project_greenhouse" model="project.project">
       <field name="name">Круглогодичная теплица</field>
-      <field name="partner_id" ref="coop_base.org_shukty"/>
+      <field name="partner_id" ref="coop_demo.org_shukty"/>
       <field name="description">Зимняя теплица на подсветке: зелень и рассада круглый год, отопление на щепе. Собираемся вскладчину — деньгами, техникой, материалами или трудом.</field>
     </record>
 
@@ -118,7 +118,7 @@
 
     <!-- ── Сделка ──────────────────────────────────────────────────── -->
     <record id="deal_pelmeni" model="sale.order">
-      <field name="partner_id" ref="coop_base.person_semyonov"/>
+      <field name="partner_id" ref="coop_demo.person_semyonov"/>
       <field name="note">Поставка пельменей в лавку кооператива. Приёмка по акту с подтверждением обеих сторон.</field>
     </record>
 

@@ -1,0 +1,96 @@
+// Доводка интерфейса под дизайн-систему платформы.
+//
+// Основное сделано переменными (primary_variables.scss) — там цвета,
+// скругления и шрифты, из которых Odoo собирает интерфейс. Здесь остаётся
+// то, что переменными не выражается: заголовки другим шрифтом, полоса под
+// шапкой, вид ссылок.
+//
+// Правило одно: трогаем оформление, не трогаем раскладку. Переставлять
+// местами элементы чужого интерфейса — значит ломать привычки тех, кто уже
+// работает в Odoo, и брать на себя починку после каждого обновления.
+
+.o_web_client {
+  // Токены прототипа доступны всему интерфейсу — чтобы наши модули не
+  // объявляли их у себя заново и не разъезжались при смене палитры.
+  --coop-ink: #14171a;
+  --coop-slate: #4a4a44;
+  --coop-slate-light: #8f8f88;
+  --coop-line: #e6e6e1;
+  --coop-surface: #f2f2ee;
+  --coop-paper: #fbfbf9;
+  --coop-white: #ffffff;
+  --coop-teal: #146b64;
+  --coop-teal-dark: #0e4f4a;
+  --coop-teal-tint: #e3efed;
+  --coop-gold: #c98a2b;
+  --coop-gold-tint: #f7ecd9;
+  --coop-gold-text: #8a5c14;
+
+  // Заголовки — Manrope, как в прототипе. Заголовок должен читаться
+  // заголовком, а не текстом покрупнее.
+  h1, h2, h3, h4,
+  .o_form_view .oe_title h1,
+  .o_kanban_record_title,
+  .o_form_sheet .oe_title input {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    color: var(--coop-ink);
+  }
+
+  // Полоса-акцент под чёрной шапкой — та же деталь, что в прототипе.
+  // Единственный элемент, который мы добавляем к чужому интерфейсу, и он
+  // не занимает места и ничего не сдвигает.
+  .o_main_navbar {
+    border-bottom: 2px solid var(--coop-teal);
+  }
+
+  // Активный пункт меню: подложка вместо заливки целиком — так спокойнее
+  // и совпадает с сайдбаром прототипа.
+  .o_menu_sections .dropdown-item.active,
+  .o_menu_sections .o_nav_entry.active {
+    background-color: var(--coop-teal-tint);
+    color: var(--coop-teal-dark);
+    font-weight: 600;
+  }
+
+  // Обводка фокуса с клавиатуры — видимая. В прототипе для этого есть
+  // отдельный токен, и на доступность это влияет сильнее, чем цвет кнопок.
+  :focus-visible {
+    outline: 2px solid var(--coop-teal);
+    outline-offset: 2px;
+  }
+
+  .o_form_view .o_field_widget .o_input:focus,
+  .o_searchview.o_searchview_focused {
+    border-color: var(--coop-teal);
+    box-shadow: 0 0 0 3px var(--coop-teal-tint);
+  }
+
+  a:not(.btn) {
+    color: var(--coop-teal);
+
+    &:hover {
+      color: var(--coop-teal-dark);
+    }
+  }
+}
+
+// Тёмная тема: токены переопределяются, разметка не трогается. Значения —
+// из тёмной палитры прототипа, чтобы человек, переключивший тему, попадал
+// в тот же продукт, а не в другой.
+.o_web_client.o_dark_mode,
+[data-bs-theme="dark"] .o_web_client {
+  --coop-ink: #eef2f0;
+  --coop-slate: #c3cec9;
+  --coop-slate-light: #7f8d89;
+  --coop-line: #242b29;
+  --coop-surface: #1b2422;
+  --coop-paper: #0e1211;
+  --coop-white: #121716;
+  --coop-teal: #2ba79a;
+  --coop-teal-dark: #7fd8cd;
+  --coop-teal-tint: #1b2422;
+  --coop-gold: #e0b061;
+  --coop-gold-tint: #221c11;
+  --coop-gold-text: #e0b061;
+}
