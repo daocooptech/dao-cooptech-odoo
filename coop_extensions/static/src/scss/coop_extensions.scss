@@ -1,0 +1,178 @@
+// Оформление каталога расширений в палитре платформы.
+//
+// Odoo не даёт перекрасить весь бэкофис без темы, да это и не нужно:
+// перекрашивать чужой интерфейс целиком — значит ломать привычки тех, кто
+// уже работает в Odoo. Стилизуется ровно то, что наше, — карточки каталога.
+// Всё остальное остаётся штатным.
+//
+// Шрифты локальные, лежат в модуле. Внешних загрузок нет: узел кооператива
+// может стоять в сети без выхода наружу, и интерфейс не должен от этого
+// разъезжаться.
+
+@font-face {
+  font-family: 'Manrope';
+  src: url('/coop_extensions/static/src/fonts/manrope-600-cyrillic.woff2') format('woff2');
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Manrope';
+  src: url('/coop_extensions/static/src/fonts/manrope-600-latin.woff2') format('woff2');
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Manrope';
+  src: url('/coop_extensions/static/src/fonts/manrope-700-cyrillic.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+.o_coop_ext {
+  // Токены те же, что в прототипе: один и тот же продукт не должен
+  // выглядеть как два разных.
+  --coop-ink: #14171a;
+  --coop-slate: #4a4a44;
+  --coop-slate-light: #8f8f88;
+  --coop-line: #e6e6e1;
+  --coop-surface: #f2f2ee;
+  --coop-white: #ffffff;
+  --coop-teal: #146b64;
+  --coop-teal-dark: #0e4f4a;
+  --coop-teal-tint: #e3efed;
+  --coop-gold: #c98a2b;
+  --coop-gold-tint: #f7ecd9;
+  --coop-gold-text: #8a5c14;
+  --coop-radius: 10px;
+
+  .o_kanban_record {
+    background: var(--coop-white);
+    border: 1px solid var(--coop-line);
+    border-radius: var(--coop-radius);
+    box-shadow: 0 1px 2px rgba(20, 23, 26, .05);
+    padding: 16px 18px;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+
+    &:hover {
+      border-color: var(--coop-teal);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(20, 23, 26, .06), 0 14px 28px rgba(20, 23, 26, .1);
+    }
+  }
+
+  .o_coop_ext_title {
+    font: 700 15px/1.3 'Manrope', sans-serif;
+    color: var(--coop-ink);
+    margin-bottom: 6px;
+  }
+
+  .o_coop_ext_summary {
+    color: var(--coop-slate);
+    font-size: 12.5px;
+    line-height: 1.5;
+    // Ровно три строки: иначе карточки в ряду разъезжаются по высоте, а
+    // каталог из-за этого выглядит неопрятно.
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: calc(3 * 1.5em);
+  }
+
+  .o_coop_ext_foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--coop-line);
+  }
+
+  .o_coop_ext_price {
+    font: 700 12.5px/1 'Manrope', sans-serif;
+    color: var(--coop-ink);
+    white-space: nowrap;
+  }
+
+  .o_coop_ext_price.o_coop_free {
+    color: var(--coop-teal-dark);
+  }
+
+  // Значки состояния. Цвет здесь не единственный носитель смысла: рядом
+  // всегда есть слово, иначе подключённое и платное не различить тем, кто
+  // не различает цвета.
+  .o_coop_badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .o_coop_badge.o_coop_on {
+    background: var(--coop-teal-tint);
+    color: var(--coop-teal-dark);
+  }
+
+  .o_coop_badge.o_coop_off {
+    background: var(--coop-surface);
+    color: var(--coop-slate);
+  }
+
+  .o_coop_badge.o_coop_paid {
+    background: var(--coop-gold-tint);
+    color: var(--coop-gold-text);
+  }
+
+  .o_coop_badge.o_coop_third {
+    background: var(--coop-surface);
+    color: var(--coop-slate-light);
+  }
+
+  .o_coop_ext_cat {
+    font-size: 11px;
+    color: var(--coop-slate-light);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-bottom: 8px;
+  }
+
+  .btn.o_coop_action {
+    background: var(--coop-teal);
+    border-color: var(--coop-teal);
+    color: #fff;
+    font-weight: 600;
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: 7px;
+
+    &:hover {
+      background: var(--coop-teal-dark);
+      border-color: var(--coop-teal-dark);
+    }
+  }
+}
+
+// Тёмная тема Odoo: карточки не должны светиться белым посреди тёмного
+// экрана. Токены переопределяются, разметка не трогается.
+.o_web_client.o_dark_mode .o_coop_ext,
+[data-bs-theme="dark"] .o_coop_ext {
+  --coop-ink: #eef2f0;
+  --coop-slate: #c3cec9;
+  --coop-slate-light: #7f8d89;
+  --coop-line: #242b29;
+  --coop-surface: #1b2422;
+  --coop-white: #121716;
+  --coop-teal: #2ba79a;
+  --coop-teal-dark: #7fd8cd;
+  --coop-teal-tint: #1b2422;
+  --coop-gold: #e0b061;
+  --coop-gold-tint: #221c11;
+  --coop-gold-text: #e0b061;
+}

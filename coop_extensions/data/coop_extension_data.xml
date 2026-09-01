@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data noupdate="1">
+
+    <!--
+      Двадцать расширений из прототипа. Описания переписаны с языка
+      разработчика на язык кооператора: не «модуль учёта складских
+      остатков», а «видно, сколько ресурса свободно, а сколько уже обещано
+      по сделкам».
+
+      Где есть настоящий модуль Odoo или Rudoo — он указан, и кнопка
+      «Подключить» ставит именно его. Где модуля пока нет, расширение
+      показано заявленным: обещать кнопку, которая ничего не делает, хуже,
+      чем честно сказать, что этого ещё нет.
+    -->
+
+    <record id="ext_stock" model="coop.extension">
+      <field name="name">Склад</field>
+      <field name="summary">Видно, сколько ресурса свободно, а сколько уже обещано по сделкам. Партии и сроки годности — тоже здесь.</field>
+      <field name="category">accounting</field>
+      <field name="module_name">stock</field>
+      <field name="is_official" eval="True"/>
+      <field name="pricing">free</field>
+      <field name="publication_state">published</field>
+      <field name="sequence">10</field>
+    </record>
+
+    <record id="ext_docs" model="coop.extension">
+      <field name="name">Документы и ЭДО</field>
+      <field name="summary">Договоры, счета и акты из сделок в одном месте, с номерами и датами. Подписывают обе стороны.</field>
+      <field name="category">accounting</field>
+      <field name="module_name">dms</field>
+      <field name="is_official" eval="True"/>
+      <field name="pricing">free</field>
+      <field name="publication_state">published</field>
+      <field name="sequence">20</field>
+    </record>
+
+    <record id="ext_approve" model="coop.extension">
+      <field name="name">Согласования</field>
+      <field name="summary">Маршруты решений: приём в пайщики, выделение техники, выплаты. Видно, кто высказался и кто следующий.</field>
+      <field name="category">process</field>
+      <field name="module_name">base_tier_validation</field>
+      <field name="is_official" eval="True"/>
+      <field name="pricing">free</field>
+      <field name="publication_state">published</field>
+      <field name="sequence">30</field>
+    </record>
+
+    <record id="ext_rights" model="coop.extension">
+      <field name="name">Права и роли</field>
+      <field name="summary">Кто что видит и может менять: пайщик, правление, ревизионная комиссия, наёмный сотрудник.</field>
+      <field name="category">process</field>
+      <field name="module_name">base_user_role</field>
+      <field name="is_official" eval="True"/>
+      <field name="pricing">free</field>
+      <field name="publication_state">published</field>
+      <field name="sequence">40</field>
+    </record>
+
+    <record id="ext_reports" model="coop.extension">
+      <field name="name">Отчёты</field>
+      <field name="summary">Обороты по ресурсам, участникам и проектам за период. Выгрузка в таблицу и печать без сторонних программ.</field>
+      <field name="category">accounting</field>
+      <field name="module_name">report_weasyprint</field>
+      <field name="is_official" eval="True"/>
+      <field name="pricing">free</field>
+      <field name="publication_state">published</field>
+      <field name="sequence">50</field>
+    </record>
+
+    <record id="ext_projects" model="coop.extension">
+      <field name="name">Проекты и смены</field>
+      <field name="summary">Задачи, чек-листы и отработанные смены. Из смен потом считается вклад участника в общий результат.</field>
+      <field name="category">process</field>
+      <field name="module_name">project</field>
+      <field name="is_official" eval="True"/>
+      <field name="pricing">free</field>
+      <field name="publication_state">published</field>
+      <field name="sequence">60</field>
+    </record>
+
+    <record id="ext_buying" model="coop.extension">
+      <field name="name">Совместные закупки</field>
+      <field name="summary">Общая закупка нескольких участников: чем больше объём, тем ниже цена за единицу.</field>
+      <field name="category">sales</field>
+      <field name="module_name">purchase_requisition</field>
+      <field name="is_official" eval="True"/>
+      <field name="pricing">free</field>
+      <field name="publication_state">published</field>
+      <field name="sequence">70</field>
+    </record>
+
+    <record id="ext_events" model="coop.extension">
+      <field name="name">События</field>
+      <field name="summary">Встречи, ярмарки, общие собрания: анонс, запись участников, напоминания.</field>
+      <field name="category">community</field>
+      <field name="module_name">event</field>
+      <field name="pricing">free</field>
+      <field name="is_official" eval="True"/>
+      <field name="publication_state">published</field>
+      <field name="sequence">80</field>
+    </record>
+
+    <record id="ext_edu" model="coop.extension">
+      <field name="name">Образование</field>
+      <field name="summary">Курсы для участников. Пройденное засчитывается в навыки профиля, а не остаётся справкой в столе.</field>
+      <field name="category">community</field>
+      <field name="module_name">website_slides</field>
+      <field name="is_official" eval="True"/>
+      <field name="pricing">free</field>
+      <field name="publication_state">published</field>
+      <field name="sequence">90</field>
+    </record>
+
+    <record id="ext_kb" model="coop.extension">
+      <field name="name">База знаний</field>
+      <field name="summary">Устав, регламенты и инструкции с версиями и поиском. Видно, какая редакция действует сейчас.</field>
+      <field name="category">community</field>
+      <field name="module_name">website_forum</field>
+      <field name="is_official" eval="True"/>
+      <field name="pricing">free</field>
+      <field name="publication_state">published</field>
+      <field name="sequence">100</field>
+    </record>
+
+    <record id="ext_exchange" model="coop.extension">
+      <field name="name">Обмен с 1С</field>
+      <field name="summary">Номенклатура, контрагенты и документы ходят между платформой и 1С. Бухгалтерия остаётся там, где привыкли.</field>
+      <field name="category">integration</field>
+      <field name="module_name">account_bank_statement_1c_import</field>
+      <field name="is_official" eval="True"/>
+      <field name="pricing">free</field>
+      <field name="publication_state">published</field>
+      <field name="sequence">110</field>
+    </record>
+
+    <record id="ext_dadata" model="coop.extension">
+      <field name="name">Реквизиты по ИНН</field>
+      <field name="summary">Ввели ИНН — подтянулись название, адрес и реквизиты. Меньше ручного ввода и меньше опечаток в договорах.</field>
+      <field name="category">integration</field>
+      <field name="module_name">dadata_connector</field>
+      <field name="is_official" eval="True"/>
+      <field name="pricing">free</field>
+      <field name="publication_state">published</field>
+      <field name="sequence">120</field>
+    </record>
+
+    <record id="ext_token" model="coop.extension">
+      <field name="name">Токеномика</field>
+      <field name="summary">Взаимные обязательства, уступка требований и реестр нематериальных активов. Ничего не эмитирует: ведёт учёт.</field>
+      <field name="category">finance</field>
+      <field name="is_official" eval="True"/>
+      <field name="pricing">free</field>
+      <field name="publication_state">published</field>
+      <field name="sequence">130</field>
+    </record>
+
+    <record id="ext_programs" model="coop.extension">
+      <field name="name">Целевые программы ПК</field>
+      <field name="summary">Программы потребкооперации: участие, отчётность, распределение между участниками.</field>
+      <field name="category">sales</field>
+      <field name="is_official" eval="True"/>
+      <field name="pricing">free</field>
+      <field name="publication_state">published</field>
+      <field name="sequence">140</field>
+    </record>
+
+    <record id="ext_booking" model="coop.extension">
+      <field name="name">Бронирование ресурсов</field>
+      <field name="summary">Календарь общей техники и помещений: трактор, цех, переговорная — без пересечений и споров.</field>
+      <field name="category">process</field>
+      <field name="is_official" eval="True"/>
+      <field name="pricing">free</field>
+      <field name="publication_state">published</field>
+      <field name="sequence">150</field>
+    </record>
+
+    <!--
+      Сторонние расширения. Условия назначает автор, а не платформа: плата
+      за расширение — это его отношения с участником. Платформа стороной
+      этих отношений не становится и доли по умолчанию не берёт.
+    -->
+    <record id="ext_auction" model="coop.extension">
+      <field name="name">Аукционы</field>
+      <field name="summary">Продажа ресурсов на повышение и на понижение — когда цена неочевидна и её лучше выяснить торгом.</field>
+      <field name="category">sales</field>
+      <field name="is_official" eval="False"/>
+      <field name="pricing">month</field>
+      <field name="price">1500</field>
+      <field name="publication_state">published</field>
+      <field name="sequence">200</field>
+    </record>
+
+    <record id="ext_library" model="coop.extension">
+      <field name="name">Библиотеки инструментов</field>
+      <field name="summary">Общий фонд инструмента: берёшь под залог смены, возвращаешь в порядке. Очередь и залог считаются сами.</field>
+      <field name="category">community</field>
+      <field name="is_official" eval="False"/>
+      <field name="pricing">once</field>
+      <field name="price">12000</field>
+      <field name="publication_state">published</field>
+      <field name="sequence">210</field>
+    </record>
+
+    <record id="ext_drive" model="coop.extension">
+      <field name="name">Диск</field>
+      <field name="summary">Общие файлы организации и проектов с версиями. Видно, кто и когда менял.</field>
+      <field name="category">community</field>
+      <field name="is_official" eval="False"/>
+      <field name="pricing">year</field>
+      <field name="price">9600</field>
+      <field name="publication_state">published</field>
+      <field name="sequence">220</field>
+    </record>
+
+    <record id="ext_health" model="coop.extension">
+      <field name="name">Здоровье</field>
+      <field name="summary">Медосмотры, страхование и касса взаимопомощи участников.</field>
+      <field name="category">community</field>
+      <field name="is_official" eval="False"/>
+      <field name="pricing">month</field>
+      <field name="price">900</field>
+      <field name="publication_state">published</field>
+      <field name="sequence">230</field>
+    </record>
+
+    <record id="ext_api" model="coop.extension">
+      <field name="name">API и вебхуки</field>
+      <field name="summary">Открытый доступ к своим данным и уведомления во внешние системы кооператива.</field>
+      <field name="category">integration</field>
+      <field name="is_official" eval="False"/>
+      <field name="pricing">free</field>
+      <field name="publication_state">published</field>
+      <field name="sequence">240</field>
+    </record>
+
+  </data>
+</odoo>

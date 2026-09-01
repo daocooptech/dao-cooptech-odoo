@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Каталог карточками. Штатный список приложений Odoo говорит на языке
+    разработчика: технические имена, зависимости, версии. Кооператору нужно
+    другое — что он получит и во сколько это обойдётся, поэтому на карточке
+    сначала польза и условия, а технический модуль спрятан в форму.
+  -->
+  <record id="view_coop_extension_kanban" model="ir.ui.view">
+    <field name="name">coop.extension.kanban</field>
+    <field name="model">coop.extension</field>
+    <field name="arch" type="xml">
+      <kanban class="o_coop_ext" default_group_by="category" quick_create="false">
+        <!-- Поля, которые участвуют только в условиях шаблона, всё равно
+             надо объявить: иначе Odoo их не подгрузит, и карточка упадёт
+             на чтении undefined. -->
+        <field name="is_installed"/>
+        <field name="module_id"/>
+        <field name="is_official"/>
+        <field name="pricing"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_ext_cat">
+              <field name="category"/>
+            </div>
+            <div class="o_coop_ext_title">
+              <field name="name"/>
+            </div>
+            <div class="o_coop_ext_summary">
+              <field name="summary"/>
+            </div>
+            <div class="o_coop_ext_foot">
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span t-if="record.is_installed.raw_value"
+                      class="o_coop_badge o_coop_on">✓ Подключено</span>
+                <span t-if="!record.is_installed.raw_value and record.module_id.raw_value"
+                      class="o_coop_badge o_coop_off">Не подключено</span>
+                <span t-if="!record.module_id.raw_value"
+                      class="o_coop_badge o_coop_off">Заявлено</span>
+                <span t-if="!record.is_official.raw_value"
+                      class="o_coop_badge o_coop_third">Стороннее</span>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <span class="o_coop_ext_price"
+                      t-attf-class="o_coop_ext_price {{ record.pricing.raw_value == 'free' ? 'o_coop_free' : '' }}">
+                  <field name="price_label"/>
+                </span>
+                <button t-if="!record.is_installed.raw_value and record.module_id.raw_value"
+                        name="action_install" type="object"
+                        class="btn o_coop_action"
+                        confirm="Подключить расширение? Модуль будет установлен в вашу
+базу, в интерфейсе появятся его разделы. Отключение делается там же, в каталоге.">
+                  Подключить
+                </button>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="view_coop_extension_list" model="ir.ui.view">
+    <field name="name">coop.extension.list</field>
+    <field name="model">coop.extension</field>
+    <field name="arch" type="xml">
+      <list string="Расширения">
+        <field name="name"/>
+        <field name="category"/>
+        <field name="summary" optional="show"/>
+        <field name="author_id" optional="hide"/>
+        <field name="price_label" string="Стоимость"/>
+        <field name="is_installed" widget="boolean_toggle" readonly="1"
+               string="Подключено"/>
+        <field name="publication_state" widget="badge"
+               decoration-success="publication_state == 'published'"
+               decoration-warning="publication_state == 'review'"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_extension_form" model="ir.ui.view">
+    <field name="name">coop.extension.form</field>
+    <field name="model">coop.extension</field>
+    <field name="arch" type="xml">
+      <form string="Расширение">
+        <header>
+          <button name="action_install" type="object" string="Подключить"
+                  class="btn-primary" invisible="is_installed or not module_id"
+                  confirm="Подключить расширение? Модуль будет установлен в вашу базу."/>
+          <button name="action_publish" type="object" string="Опубликовать в каталоге"
+                  invisible="publication_state == 'published'"/>
+          <button name="action_archive_listing" type="object" string="Снять с публикации"
+                  invisible="publication_state != 'published'"/>
+          <field name="publication_state" widget="statusbar"
+                 statusbar_visible="draft,review,published"/>
+        </header>
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Название расширения"/></h1>
+            <h3><field name="summary"
+                       placeholder="Одна фраза: что это даёт участнику"/></h3>
+          </div>
+          <group>
+            <group string="Что это">
+              <field name="category"/>
+              <field name="author_id"/>
+              <field name="is_official"/>
+            </group>
+            <group string="Условия">
+              <field name="pricing"/>
+              <field name="price" invisible="pricing == 'free'"/>
+              <field name="currency_id" invisible="pricing == 'free'"/>
+              <field name="price_label" readonly="1"/>
+            </group>
+          </group>
+          <group string="Технический модуль">
+            <field name="module_name"
+                   placeholder="stock, dms, base_tier_validation…"/>
+            <field name="module_id" readonly="1"/>
+            <field name="module_state" readonly="1"/>
+            <field name="is_installed" readonly="1"/>
+          </group>
+          <div class="alert alert-info" role="status">
+            Расширение — это обычный модуль Odoo, и «Подключить» ставит именно его.
+            Витрина нужна затем, что штатный список приложений говорит на языке
+            разработчика, а участнику надо понимать, что он получит и во сколько
+            это обойдётся. Условия назначает автор: плата за расширение — это его
+            отношения с участником, платформа стороной не становится.
+          </div>
+          <notebook>
+            <page string="Описание">
+              <field name="description" placeholder="Подробно: что делает, кому нужно, чего не делает"/>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_extension_search" model="ir.ui.view">
+    <field name="name">coop.extension.search</field>
+    <field name="model">coop.extension</field>
+    <field name="arch" type="xml">
+      <search string="Расширения">
+        <field name="name"/>
+        <field name="summary"/>
+        <field name="author_id"/>
+        <filter name="installed" string="Подключённые" domain="[('is_installed', '=', True)]"/>
+        <filter name="available" string="Доступные" domain="[('is_installed', '=', False)]"/>
+        <separator/>
+        <filter name="free" string="Бесплатные" domain="[('pricing', '=', 'free')]"/>
+        <filter name="official" string="Расширения платформы" domain="[('is_official', '=', True)]"/>
+        <filter name="third" string="Сторонние" domain="[('is_official', '=', False)]"/>
+        <group>
+          <filter name="by_cat" string="По разделу" context="{'group_by': 'category'}"/>
+          <filter name="by_price" string="По условиям" context="{'group_by': 'pricing'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <!-- Два раздела каталога — это два действия с разным набором по умолчанию,
+       а не один список с фильтром: «что у меня стоит» и «что вообще есть» —
+       разные вопросы, и человек задаёт их в разные моменты. -->
+  <record id="action_coop_extension_installed" model="ir.actions.act_window">
+    <field name="name">Установленные</field>
+    <field name="res_model">coop.extension</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="domain">[('is_installed', '=', True)]</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Пока ничего не подключено</p>
+      <p>Загляните в общий каталог: там расширения платформы и сторонние
+         разработки — склад, документооборот, согласования, обмен с 1С.</p>
+    </field>
+  </record>
+
+  <record id="action_coop_extension_catalog" model="ir.actions.act_window">
+    <field name="name">Общий каталог</field>
+    <field name="res_model">coop.extension</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="domain">[('publication_state', '=', 'published')]</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">В каталоге пока пусто</p>
+      <p>Своё расширение может опубликовать любой участник и сам назначить
+         условия: бесплатно, помесячно, за год или единовременно навсегда.</p>
+    </field>
+  </record>
+
+  <record id="action_coop_extension_mine" model="ir.actions.act_window">
+    <field name="name">Мои публикации</field>
+    <field name="res_model">coop.extension</field>
+    <field name="view_mode">list,kanban,form</field>
+    <field name="domain">[('author_id', '=', uid)]</field>
+    <field name="context">{'default_publication_state': 'draft'}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Вы ещё ничего не публиковали</p>
+      <p>Расширение — обычный модуль Odoo. Опишите, что он даёт участнику,
+         назначьте условия и отправьте в каталог.</p>
+    </field>
+  </record>
+
+</odoo>

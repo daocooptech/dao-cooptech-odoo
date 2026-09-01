@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <menuitem id="menu_coop_extensions_root" name="Расширения" sequence="16"/>
+
+  <!-- Порядок пунктов не случаен: сначала «что у меня стоит», потом «что
+       вообще есть». Человек чаще возвращается к своему, чем ходит за новым. -->
+  <menuitem id="menu_coop_extensions_installed" name="Установленные"
+            parent="menu_coop_extensions_root"
+            action="action_coop_extension_installed" sequence="10"/>
+
+  <menuitem id="menu_coop_extensions_catalog" name="Общий каталог"
+            parent="menu_coop_extensions_root"
+            action="action_coop_extension_catalog" sequence="20"/>
+
+  <menuitem id="menu_coop_extensions_mine" name="Мои публикации"
+            parent="menu_coop_extensions_root"
+            action="action_coop_extension_mine" sequence="30"/>
+
+  <!-- Штатный список приложений оставлен рядом и не спрятан: витрина
+       объясняет, а список приложений остаётся источником правды о том, что
+       установлено на самом деле. Прятать его — значит делать вид, что
+       расширения это не модули Odoo. -->
+  <menuitem id="menu_coop_extensions_apps" name="Все модули Odoo"
+            parent="menu_coop_extensions_root"
+            action="base.open_module_tree" sequence="90"
+            groups="base.group_system"/>
+
+</odoo>

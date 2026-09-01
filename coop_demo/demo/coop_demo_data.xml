@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <!--
+      Немного данных в разделы МВП. Взяты из прототипа: стенд и макет
+      должны говорить об одних и тех же вещах, иначе расхождение между
+      нарисованным и работающим замечают поздно и дорого.
+    -->
+
+    <!-- ── Ресурсы ─────────────────────────────────────────────────── -->
+    <record id="cat_food" model="product.category">
+      <field name="name">Продовольственные товары</field>
+    </record>
+
+    <record id="cat_build" model="product.category">
+      <field name="name">Строительные материалы</field>
+    </record>
+
+    <record id="cat_tech" model="product.category">
+      <field name="name">Техника и оборудование</field>
+    </record>
+
+    <record id="res_pelmeni" model="product.product">
+      <field name="name">Пельмени домашней лепки</field>
+      <field name="categ_id" ref="cat_food"/>
+      <field name="list_price">450</field>
+      <field name="is_storable" eval="True"/>
+      <field name="description_sale">Ручная лепка из говядины и свинины, без добавок и консервантов. Производятся в собственном цехе кооператива.</field>
+    </record>
+
+    <record id="res_brus" model="product.product">
+      <field name="name">Брус 20×20</field>
+      <field name="categ_id" ref="cat_build"/>
+      <field name="list_price">17800</field>
+      <field name="is_storable" eval="True"/>
+      <field name="description_sale">Хвоя, естественной влажности. Отгрузка от кубометра.</field>
+    </record>
+
+    <record id="res_excavator" model="product.product">
+      <field name="name">Экскаватор-погрузчик, аренда</field>
+      <field name="categ_id" ref="cat_tech"/>
+      <field name="list_price">12000</field>
+      <field name="type">service</field>
+      <field name="description_sale">Смена восемь часов с оператором. Топливо считается отдельно по факту.</field>
+    </record>
+
+    <record id="res_electric" model="product.product">
+      <field name="name">Электромонтаж, работы</field>
+      <field name="categ_id" ref="cat_tech"/>
+      <field name="list_price">1600</field>
+      <field name="type">service</field>
+      <field name="description_sale">Час работы электрика с допуском. Материалы заказчика.</field>
+    </record>
+
+    <!-- ── Проект ──────────────────────────────────────────────────── -->
+    <record id="project_greenhouse" model="project.project">
+      <field name="name">Круглогодичная теплица</field>
+      <field name="partner_id" ref="coop_base.org_shukty"/>
+      <field name="description">Зимняя теплица на подсветке: зелень и рассада круглый год, отопление на щепе. Собираемся вскладчину — деньгами, техникой, материалами или трудом.</field>
+    </record>
+
+    <record id="task_foundation" model="project.task">
+      <field name="name">Фундамент и обвязка</field>
+      <field name="project_id" ref="project_greenhouse"/>
+      <field name="description">Разметка, буронабивные сваи, обвязка бруса. Работы ведут сами пайщики.</field>
+    </record>
+
+    <record id="task_frame" model="project.task">
+      <field name="name">Каркас и поликарбонат</field>
+      <field name="project_id" ref="project_greenhouse"/>
+    </record>
+
+    <record id="task_heating" model="project.task">
+      <field name="name">Отопление на щепе</field>
+      <field name="project_id" ref="project_greenhouse"/>
+      <field name="description">Котёл, теплоаккумулятор, контур. Подрядчик привлекается только на обвязку котла.</field>
+    </record>
+
+    <!-- ── Навыки ──────────────────────────────────────────────────── -->
+    <record id="skill_type_craft" model="hr.skill.type">
+      <field name="name">Ремёсла и работы</field>
+    </record>
+
+    <record id="skill_level_basic" model="hr.skill.level">
+      <field name="name">Начальный</field>
+      <field name="skill_type_id" ref="skill_type_craft"/>
+      <field name="level_progress">30</field>
+    </record>
+
+    <record id="skill_level_confident" model="hr.skill.level">
+      <field name="name">Уверенный</field>
+      <field name="skill_type_id" ref="skill_type_craft"/>
+      <field name="level_progress">65</field>
+    </record>
+
+    <record id="skill_level_master" model="hr.skill.level">
+      <field name="name">Мастер</field>
+      <field name="skill_type_id" ref="skill_type_craft"/>
+      <field name="level_progress">100</field>
+      <field name="default_level" eval="False"/>
+    </record>
+
+    <record id="skill_welding" model="hr.skill">
+      <field name="name">Сварочные работы</field>
+      <field name="skill_type_id" ref="skill_type_craft"/>
+    </record>
+
+    <record id="skill_electric" model="hr.skill">
+      <field name="name">Электромонтаж</field>
+      <field name="skill_type_id" ref="skill_type_craft"/>
+    </record>
+
+    <record id="skill_cheese" model="hr.skill">
+      <field name="name">Сыроварение</field>
+      <field name="skill_type_id" ref="skill_type_craft"/>
+    </record>
+
+    <!-- ── Сделка ──────────────────────────────────────────────────── -->
+    <record id="deal_pelmeni" model="sale.order">
+      <field name="partner_id" ref="coop_base.person_semyonov"/>
+      <field name="note">Поставка пельменей в лавку кооператива. Приёмка по акту с подтверждением обеих сторон.</field>
+    </record>
+
+    <record id="deal_pelmeni_line" model="sale.order.line">
+      <field name="order_id" ref="deal_pelmeni"/>
+      <field name="product_id" ref="res_pelmeni"/>
+      <field name="product_uom_qty">200</field>
+    </record>
+
+  </data>
+</odoo>

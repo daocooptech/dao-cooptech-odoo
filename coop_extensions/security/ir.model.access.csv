@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_coop_extension_user,coop.extension user,model_coop_extension,base.group_user,1,0,0,0
+access_coop_extension_board,coop.extension board,model_coop_extension,coop_base.group_coop_board,1,1,1,0
+access_coop_extension_platform,coop.extension platform,model_coop_extension,coop_base.group_coop_platform,1,1,1,1
