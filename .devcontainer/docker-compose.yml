@@ -1,0 +1,41 @@
+# Стенд ДАО КООПЕХ в Codespaces.
+#
+# Ядро Odoo берётся готовым образом, а не клонированием репозитория: клон
+# весит полтора гигабайта и качается минут сорок, образ поднимается за
+# минуту. На стенде важна скорость запуска, а не возможность править ядро —
+# правим мы свои модули и форки в vendor/.
+services:
+  odoo:
+    image: odoo:19.0
+    user: root
+    # Штатная точка входа сразу запускает Odoo, а в Codespaces сначала нужна
+    # оболочка: подтянуть модули Rudoo, поставить зависимости, собрать базу.
+    entrypoint: /bin/bash
+    command: -c "sleep infinity"
+    volumes:
+      - ..:/workspace:cached
+      - odoo-filestore:/var/lib/odoo
+      - stand-cache:/stand
+    environment:
+      HOST: db
+      USER: odoo
+      PASSWORD: odoo
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: odoo
+      POSTGRES_DB: postgres
+      # Кодировка и сортировка задаются явно: с локалью по умолчанию русские
+      # названия в базе сортируются не по алфавиту, и это замечают поздно.
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+
+volumes:
+  odoo-filestore:
+  pg-data:
+  stand-cache:

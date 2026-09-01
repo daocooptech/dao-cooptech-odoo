@@ -1,0 +1,30 @@
+{
+  "name": "ДАО КООПЕХ — стенд",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "odoo",
+  "workspaceFolder": "/workspace",
+
+  // Порт открыт всем по решению владельца: стенд показывается кому угодно
+  // по ссылке. На нём нет и не должно быть ничего настоящего — только
+  // выдуманные кооперативы и выдуманные люди.
+  "forwardPorts": [8069],
+  "portsAttributes": {
+    "8069": {
+      "label": "ДАО КООПЕХ",
+      "onAutoForward": "openBrowser",
+      "visibility": "public"
+    }
+  },
+
+  // Сборка идёт один раз при создании: качаются модули Rudoo, ставятся
+  // зависимости, собирается база с рублём и планом счетов. Минут десять.
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  // При каждом открытии — просто запуск, база уже собрана.
+  "postAttachCommand": "bash .devcontainer/start.sh",
+
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python"]
+    }
+  }
+}
