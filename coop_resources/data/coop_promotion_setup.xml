@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Места в выдаче: цена и охват считаются по формуле, см.
+       data/coop_promotion_slots.py. -->
+  <function model="coop.promotion.setup" name="apply"/>
+</odoo>

@@ -34,5 +34,6 @@ class CoopDemoLoader(models.AbstractModel):
         load_skills.load_skills(self.env)
         # Задачи и токены последними: исполнителей берём из уже
         # загруженного каталога людей.
+        load_bounty.grant_admin_roles(self.env)
         load_bounty.load_bounty(self.env)
         return True

@@ -57,6 +57,36 @@ TASKS = [
 ]
 
 
+def grant_admin_roles(env):
+    """Выдать администратору стенда все роли платформы.
+
+    Решение владельца 137. Через XML это не работает: запись
+    `base.user_admin` объявлена в базовом модуле с защитой от обновления,
+    и наше переопределение загрузчик молча пропускает — ровно как было со
+    знаком рубля и с reference-данными. На стенде это выглядело так:
+    роли в файле есть, а администратор не может завести движение токенов.
+
+    Само правило «платформа не сторона отношений участников» это не
+    нарушает: сквозное правило доступа к членству живёт в этом же
+    демонстрационном модуле, и на узле без него строгая модель остаётся.
+    """
+    admin = env.ref('base.user_admin', raise_if_not_found=False)
+    if not admin:
+        return
+    groups = [env.ref(xmlid, raise_if_not_found=False) for xmlid in (
+        'coop_base.group_coop_platform',
+        'coop_base.group_coop_member',
+        'coop_base.group_coop_board',
+        'coop_base.group_coop_audit',
+        'coop_bounty.group_coop_community_manager',
+    )]
+    missing = [g for g in groups if g and g not in admin.group_ids]
+    if missing:
+        admin.sudo().write({'group_ids': [(4, g.id) for g in missing]})
+        _logger.info('Администратору выданы роли: %s',
+                     ', '.join(g.name for g in missing))
+
+
 def load_bounty(env):
     # Через sudo: загрузчик вызывается при обновлении модуля, и права
     # текущего пользователя к демонстрационным данным отношения не

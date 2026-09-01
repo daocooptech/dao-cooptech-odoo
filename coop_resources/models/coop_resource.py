@@ -6,6 +6,11 @@ from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
+# Сколько объявлений на странице каталога. От этого зависит, какой
+# сквозной номер получает «строка 3 страницы 5», поэтому число одно и то
+# же в модели и в действии, а не подобрано на глаз в каждом месте.
+PAGE_SIZE = 20
+
 
 class CoopResourceCategory(models.Model):
     """Товарная категория ресурса.
@@ -101,11 +106,11 @@ class CoopResource(models.Model):
     _name = 'coop.resource'
     _description = 'Ресурс'
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    # Порядок: сначала продвигаемые по убыванию ставки, потом
-    # остальные по свежести. Сортировать по сроку показа нельзя —
-    # объявление с истёкшим продвижением так и осталось бы выше
-    # тех, кто вообще не платил.
-    _order = 'promotion_bid desc, create_date desc'
+    # Порядок в каталоге считается заранее и хранится числом: платное
+    # объявление стоит не «выше всех», а на конкретной строке конкретной
+    # страницы, и выразить это одним сравнением полей нельзя. Как
+    # считается — см. _recompute_catalog_rank.
+    _order = 'catalog_rank, id desc'
 
     name = fields.Char(string='Название', required=True, tracking=True)
     description = fields.Html(string='Описание')
@@ -171,9 +176,14 @@ class CoopResource(models.Model):
         help='Пока дата не прошла, объявление показывается выше остальных.')
     is_promoted = fields.Boolean(
         string='Продвигается', compute='_compute_is_promoted', search='_search_is_promoted')
-    promotion_bid = fields.Integer(
-        string='Ставка, токенов в сутки', readonly=True,
-        help='Чем выше ставка, тем выше объявление среди продвигаемых.')
+    promotion_slot_id = fields.Many2one(
+        'coop.promotion.slot', string='Место в выдаче', readonly=True,
+        help='Страница и строка, на которых показывается объявление, пока '
+             'оплачен срок.')
+    catalog_rank = fields.Integer(
+        string='Место в каталоге', index=True, readonly=True, default=0,
+        help='Служебное поле: порядковый номер объявления в общей выдаче. '
+             'Пересчитывается при изменении продвижения.')
 
     state = fields.Selection([
         ('draft', 'Черновик'),
@@ -194,11 +204,13 @@ class CoopResource(models.Model):
             record.price_display = '%s%s %s%s' % (
                 prefix.get(record.price_kind, ''), amount, symbol, unit)
 
-    @api.depends('promoted_until')
+    @api.depends('promoted_until', 'promotion_slot_id')
     def _compute_is_promoted(self):
         now = fields.Datetime.now()
         for record in self:
-            record.is_promoted = bool(record.promoted_until and record.promoted_until > now)
+            record.is_promoted = bool(
+                record.promotion_slot_id
+                and record.promoted_until and record.promoted_until > now)
 
     def _search_is_promoted(self, operator, value):
         now = fields.Datetime.now()
@@ -229,20 +241,76 @@ class CoopResource(models.Model):
 
     @api.model
     def _cron_expire_promotions(self):
-        """Погасить ставки у объявлений, чей срок продвижения истёк.
+        """Освободить места, срок показа на которых истёк.
 
-        Ставка обнуляется, а дата остаётся: по ней видно, что объявление
-        продвигалось и когда. Без этого задания истёкшее продвижение
-        держало бы объявление наверху вечно — порядок выдачи считается
-        именно по ставке.
+        Место освобождается, а дата остаётся: по ней видно, что
+        объявление продвигалось и когда. Без этого задания истёкшее
+        продвижение держало бы место занятым вечно, и купить его никто бы
+        не смог.
         """
         expired = self.search([
-            ('promotion_bid', '>', 0),
+            ('promotion_slot_id', '!=', False),
             ('promoted_until', '<=', fields.Datetime.now()),
         ])
         if expired:
-            expired.write({'promotion_bid': 0})
+            expired.write({'promotion_slot_id': False})
             _logger.info('Продвижение истекло у %s объявлений', len(expired))
+        self._recompute_catalog_rank()
+        return True
+
+    @api.model
+    def _recompute_catalog_rank(self):
+        """Разложить каталог по местам: платные — на свои, остальные — между.
+
+        Считается целиком и заранее, потому что выразить это порядком по
+        полям нельзя. Объявление, купившее третью строку пятой страницы,
+        должно стоять именно там: не выше — иначе платное место теряет
+        смысл, и не ниже — иначе его обманули. Значит нужен сквозной
+        номер по всему каталогу, а он зависит от того, какие места
+        выкуплены прямо сейчас.
+
+        Обычные объявления заполняют оставшиеся номера в своём порядке —
+        по свежести. Пересчёт идёт по опубликованным: черновики и
+        закрытые в выдаче не участвуют.
+        """
+        now = fields.Datetime.now()
+        promoted = self.search([
+            ('state', '=', 'published'),
+            ('promotion_slot_id', '!=', False),
+            ('promoted_until', '>', now),
+        ])
+
+        page_size = int(self.env['ir.config_parameter'].sudo().get_param(
+            'coop_resources.page_size', PAGE_SIZE))
+
+        taken = {}
+        for record in promoted:
+            slot = record.promotion_slot_id
+            index = (slot.page - 1) * page_size + slot.position
+            # Если два объявления претендуют на одно место — а такого не
+            # должно быть, — побеждает то, чей срок кончается позже.
+            current = taken.get(index)
+            if not current or (record.promoted_until or now) > (current.promoted_until or now):
+                taken[index] = record
+
+        rest = self.search([('state', '=', 'published')],
+                           order='create_date desc, id desc') - promoted
+
+        values = {record.id: index for index, record in taken.items()}
+        cursor = 1
+        for record in rest:
+            while cursor in taken:
+                cursor += 1
+            values[record.id] = cursor
+            cursor += 1
+
+        # Записываем только изменившееся: каталог пересчитывается при
+        # каждой покупке места, и переписывать две сотни строк целиком
+        # незачем.
+        for record in promoted | rest:
+            rank = values.get(record.id, 0)
+            if record.catalog_rank != rank:
+                record.catalog_rank = rank
         return True
 
     def action_publish(self):

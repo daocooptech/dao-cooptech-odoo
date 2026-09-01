@@ -22,6 +22,7 @@
     'data': [
         'security/ir.model.access.csv',
         'data/coop_resource_methods.xml',
+        'data/coop_promotion_setup.xml',
         'data/coop_resource_cron.xml',
         'views/coop_resource_views.xml',
     ],

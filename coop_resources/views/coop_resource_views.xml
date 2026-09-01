@@ -73,17 +73,21 @@
     <field name="arch" type="xml">
       <form string="Продвинуть объявление">
         <p class="text-muted">
-          Место в выдаче никто не назначает: среди продвигаемых объявления
-          показываются по убыванию ставки. Токены списываются вперёд за
-          весь срок.
+          Наверху каждой страницы каталога четыре платных места. Цена
+          зависит от охвата: до первой строки первой страницы доходят все,
+          до пятой страницы — единицы. Токены списываются вперёд за весь
+          срок, место занимается целиком.
         </p>
         <group>
           <field name="resource_id" readonly="1"/>
-          <field name="bid"/>
+          <field name="slot_id" options="{'no_create': True}"/>
+          <field name="price_per_day" readonly="1"/>
+          <field name="reach_share" readonly="1"
+                 help="Оценка доли смотрящих каталог, которые доходят до этого места."/>
           <field name="days"/>
           <field name="total_tokens" readonly="1"/>
           <field name="balance" readonly="1"/>
-          <field name="competing_bid" readonly="1"/>
+          <field name="free_slots" readonly="1"/>
         </group>
         <footer>
           <button name="action_promote" type="object" string="Продвинуть"
@@ -151,8 +155,9 @@
               <field name="is_promoted" readonly="1"/>
               <field name="promoted_until" readonly="1"
                      invisible="not promoted_until"/>
-              <field name="promotion_bid" readonly="1"
+              <field name="promotion_slot_id" readonly="1"
                      invisible="not promoted_until"/>
+              <field name="catalog_rank" readonly="1" groups="base.group_no_one"/>
             </group>
           </group>
           <notebook>
@@ -209,6 +214,10 @@
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('state', '=', 'published')]</field>
     <field name="search_view_id" ref="view_coop_resource_search"/>
+    <!-- Двадцать на страницу — то же число, из которого считается
+         сквозной номер платного места. Разойдутся — и объявление,
+         купившее третью строку пятой страницы, окажется не там. -->
+    <field name="limit">20</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">В каталоге пока пусто</p>
       <p>Сюда попадает то, что участники предлагают и что ищут: материалы,
@@ -253,6 +262,35 @@
     <field name="view_mode">list,form</field>
   </record>
 
+  <record id="view_coop_promotion_slot_list" model="ir.ui.view">
+    <field name="name">coop.promotion.slot.list</field>
+    <field name="model">coop.promotion.slot</field>
+    <field name="arch" type="xml">
+      <list string="Места в выдаче" create="false">
+        <field name="name"/>
+        <field name="page"/>
+        <field name="position" string="Строка"/>
+        <field name="price_per_day" string="Цена, токенов в сутки"/>
+        <field name="reach_share" string="Доля просмотров, %"/>
+        <field name="is_taken" string="Занято"/>
+        <field name="resource_id" string="Сейчас показывается"/>
+        <field name="occupied_until" string="Занято до"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="action_coop_promotion_slot" model="ir.actions.act_window">
+    <field name="name">Места в выдаче</field>
+    <field name="res_model">coop.promotion.slot</field>
+    <field name="view_mode">list,form</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Мест пока нет</p>
+      <p>Наверху каждой страницы каталога четыре платных места. Цена
+         каждого выведена из охвата: сколько смотрящих каталог до него
+         доходит.</p>
+    </field>
+  </record>
+
   <record id="action_coop_promotion" model="ir.actions.act_window">
     <field name="name">Продвижение</field>
     <field name="res_model">coop.promotion</field>
@@ -264,6 +302,9 @@
             parent="menu_coop_resources_root" action="action_coop_resources" sequence="10"/>
   <menuitem id="menu_coop_promotion" name="Продвижение"
             parent="menu_coop_resources_root" action="action_coop_promotion" sequence="20"/>
+  <menuitem id="menu_coop_promotion_slot" name="Места в выдаче"
+            parent="menu_coop_resources_root" action="action_coop_promotion_slot"
+            sequence="30"/>
   <menuitem id="menu_coop_resources_config" name="Справочники"
             parent="menu_coop_resources_root" sequence="90"/>
   <menuitem id="menu_coop_resource_category" name="Категории ресурсов"
