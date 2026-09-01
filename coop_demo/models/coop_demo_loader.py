@@ -2,7 +2,7 @@
 from odoo import api, models
 
 from ..data import (emblems, load_bounty, load_org_profiles, load_orgs,
-                    load_people, load_reference, load_resources)
+                    load_people, load_reference, load_resources, load_skills)
 
 
 class CoopDemoLoader(models.AbstractModel):
@@ -31,6 +31,7 @@ class CoopDemoLoader(models.AbstractModel):
         # Ресурсы последними: им нужны владельцы, а владельцы — это
         # люди и организации, загруженные выше.
         load_resources.load_resources(self.env)
+        load_skills.load_skills(self.env)
         # Задачи и токены последними: исполнителей берём из уже
         # загруженного каталога людей.
         load_bounty.load_bounty(self.env)

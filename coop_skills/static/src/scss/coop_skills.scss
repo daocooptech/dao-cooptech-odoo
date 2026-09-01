@@ -1,0 +1,237 @@
+// Карточка навыка — строкой, как в макете: слева фотография работы с
+// аватаром мастера в углу, справа заголовок, ставка, мета, описание и
+// чипы умений.
+//
+// Строка, а не плитка, потому что навык выбирают по описанию: что именно
+// человек делает и с каким допуском. В плитке описание пришлось бы
+// обрезать, а обрезанное оно бесполезно.
+
+.o_coop_skills {
+
+  .o_kanban_record.o_kanban_ghost {
+    border: 0;
+    background: none;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  // Одна карточка в ряд: ширина нужна описанию, а не картинке.
+  .o_kanban_record {
+    width: 100%;
+    max-width: 100%;
+    flex: 1 1 100%;
+    background: var(--coop-white, #fff);
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(20, 23, 26, .05);
+    padding: 0;
+    overflow: hidden;
+    transition: border-color .15s ease, box-shadow .15s ease;
+
+    &:hover {
+      border-color: var(--coop-teal, #146b64);
+      box-shadow: 0 4px 8px rgba(20, 23, 26, .06);
+    }
+  }
+
+  .o_coop_skill {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  // Фотография занимает всю высоту строки. Высоту задаёт правая часть —
+  // заголовок, описание и чипы, — поэтому изображение растягивается
+  // absolute-ом: у колонки собственной высоты нет, и «height: 100%» у
+  // картинки внутри неё схлопывается в ноль.
+  .o_coop_skill_photo {
+    position: relative;
+    flex: none;
+    width: 220px;
+    min-height: 150px;
+    align-self: stretch;
+    overflow: hidden;
+    background: var(--coop-surface, #f2f2ee);
+
+    > .o_field_image,
+    > .o_field_widget {
+      position: absolute;
+      inset: 0;
+      display: block;
+    }
+
+    > .o_field_image img,
+    > .o_field_widget img,
+    > img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  // Аватар мастера поверх фотографии работы. Нужен потому, что на снимке
+  // видно ремесло, но не человека, а договариваются с человеком.
+  .o_coop_skill_owner {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 50%;
+    border: 2px solid var(--coop-white, #fff);
+    object-fit: cover;
+    box-shadow: 0 1px 3px rgba(20, 23, 26, .25);
+  }
+
+  .o_coop_locbar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(20, 23, 26, .72);
+    color: #fff;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    .fa {
+      font-size: 11px;
+      flex: none;
+    }
+  }
+
+  .o_coop_skill_body {
+    flex: 1;
+    min-width: 0;
+    padding: 14px 16px 14px 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .o_coop_skill_name {
+    font: 700 15px/1.3 'Manrope', sans-serif;
+    color: var(--coop-ink, #14171a);
+  }
+
+  .o_coop_skill_rate {
+    font: 700 14px/1.3 'Manrope', sans-serif;
+    color: var(--coop-teal-dark, #0e4f4a);
+    margin-top: 3px;
+  }
+
+  .o_coop_skill_meta {
+    color: var(--coop-slate-light, #8f8f88);
+    font-size: 12px;
+    margin-top: 4px;
+  }
+
+  .o_coop_skill_desc {
+    color: var(--coop-slate, #4a4a44);
+    font-size: 13px;
+    margin-top: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+    p { margin: 0 0 4px; }
+  }
+
+  .o_coop_skill_chips {
+    margin-top: 8px;
+    max-height: 26px;
+    overflow: hidden;
+
+    .o_tag,
+    .badge {
+      background: var(--coop-surface, #f2f2ee);
+      color: var(--coop-slate, #4a4a44);
+      font: 600 11px/1.3 'Manrope', sans-serif;
+      border-radius: 6px;
+      padding: 4px 8px;
+      border: 1px solid transparent;
+    }
+  }
+
+  .o_coop_skill_foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: auto;
+    padding-top: 10px;
+  }
+
+  .o_coop_skill_actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  // Свежесть предложения. Мастер, обновлявший карточку на этой неделе,
+  // скорее всего ещё ищет заказ; запись годовой давности ничего не
+  // обещает — и это надо видеть, не открывая карточку.
+  .o_coop_skill_updated {
+    color: var(--coop-slate-light, #8f8f88);
+    font-size: 11.5px;
+  }
+
+  .o_coop_skill_muted {
+    font-style: italic;
+  }
+
+  // Переход к другим предложениям автора — ссылкой, а не кнопкой: это
+  // навигация, а не действие, и спорить за внимание с «Написать» она не
+  // должна.
+  .btn.o_coop_skill_link {
+    background: none;
+    border: 0;
+    color: var(--coop-teal-dark, #0e4f4a);
+    font-weight: 600;
+    font-size: 12px;
+    padding: 6px 4px;
+
+    &:hover {
+      text-decoration: underline;
+      background: none;
+    }
+  }
+
+  .btn.o_coop_skill_btn {
+    background: var(--coop-teal, #146b64);
+    border-color: var(--coop-teal, #146b64);
+    color: #fff;
+    font-weight: 600;
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: 7px;
+
+    &:hover {
+      background: var(--coop-teal-dark, #0e4f4a);
+      border-color: var(--coop-teal-dark, #0e4f4a);
+      color: #fff;
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .o_coop_skills {
+    .o_coop_skill { flex-direction: column; }
+
+    .o_coop_skill_photo {
+      width: 100%;
+      aspect-ratio: 1.6;
+    }
+
+    .o_coop_skill_body { padding: 12px 14px 14px; }
+  }
+}

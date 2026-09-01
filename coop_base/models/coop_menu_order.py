@@ -25,7 +25,7 @@ MOCKUP_ORDER = [
     # (10, 'Моя страница')            — раздел ещё не перенесён
     (20, 'mail.menu_root_discuss', 'Сообщения'),
     (30, 'coop_people.menu_coop_people_root', 'Люди'),
-    # (40, 'Навыки')                  — раздел ещё не перенесён
+    (40, 'coop_skills.menu_coop_skills_root', None),
     (50, 'hr_recruitment.menu_hr_recruitment_root', 'Вакансии'),
     (60, 'coop_resources.menu_coop_resources_root', None),
     (70, 'project.menu_main_pm', 'Проекты'),

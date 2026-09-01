@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Карточка навыка: слева фотография работы с аватаром мастера в углу,
+    справа заголовок, ставка, мета-строка, описание и чипы умений.
+
+    Уточнение к прежней записи здесь: в макете у каталога **два** вида —
+    по умолчанию плиточный, строка включается переключателем, и выбор
+    запоминается на все каталоги сразу. Строкой сделан вид по умолчанию
+    осознанно: навык выбирают по описанию, а в плитке описание живёт
+    двумя словами и многоточием. Плиточный вид и переключатель к нему —
+    незакрытый долг переноса, он записан в открытые вопросы.
+  -->
+  <record id="view_coop_skill_kanban" model="ir.ui.view">
+    <field name="name">coop.skill.offer.kanban</field>
+    <field name="model">coop.skill.offer</field>
+    <field name="arch" type="xml">
+      <kanban class="o_coop_skills" quick_create="false">
+        <field name="image_512"/>
+        <field name="city"/>
+        <field name="rate_display"/>
+        <field name="experience_display"/>
+        <field name="ready_to_travel"/>
+        <field name="partner_id"/>
+        <field name="partner_trust"/>
+        <field name="updated_display"/>
+        <field name="partner_offer_count"/>
+        <field name="state"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_skill">
+              <div class="o_coop_skill_photo">
+                <field name="image_512" widget="image"/>
+                <!-- Аватар владельца адресом изображения: помощника
+                     kanban_image в Odoo 19 больше нет. -->
+                <img class="o_coop_skill_owner"
+                     t-attf-src="/web/image/res.partner/#{record.partner_id.raw_value}/avatar_128"
+                     t-att-title="record.partner_id.value" t-att-alt="record.partner_id.value"/>
+                <span class="o_coop_locbar" t-if="record.city.raw_value">
+                  <i class="fa fa-map-marker" role="img" aria-label="Город"/>
+                  <field name="city"/>
+                </span>
+              </div>
+
+              <div class="o_coop_skill_body">
+                <div class="o_coop_skill_name"><field name="name"/></div>
+                <div class="o_coop_skill_rate"><field name="rate_display"/></div>
+                <div class="o_coop_skill_meta">
+                  <field name="partner_id"/>
+                  <span t-if="record.ready_to_travel.raw_value">, готов к командировкам</span>
+                  <span> · </span>
+                  <field name="experience_display"/>
+                  <!-- Доверие владельца — главный собственный сигнал
+                       платформы, и в каталоге, где выбирают исполнителя,
+                       прятать его нельзя. У новичка это не «ноль
+                       процентов», а «пока не считается»: ноль читался бы
+                       как плохая репутация. -->
+                  <span t-if="record.partner_trust.raw_value"> · Доверие <field name="partner_trust"/>%</span>
+                  <span t-if="!record.partner_trust.raw_value" class="o_coop_skill_muted"> · доверие пока не считается</span>
+                </div>
+                <div class="o_coop_skill_desc">
+                  <field name="description" widget="html"/>
+                </div>
+                <div class="o_coop_skill_chips">
+                  <field name="skill_ids" widget="many2many_tags"/>
+                </div>
+                <div class="o_coop_skill_foot">
+                  <span class="o_coop_skill_updated"><field name="updated_display"/></span>
+                  <div class="o_coop_skill_actions">
+                    <button name="action_partner_offers" type="object"
+                            class="btn o_coop_skill_link"
+                            t-if="record.partner_offer_count.raw_value">
+                      Ещё <field name="partner_offer_count"/> у автора
+                    </button>
+                    <button name="action_message_owner" type="object"
+                            class="btn o_coop_skill_btn">Написать</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="view_coop_skill_list" model="ir.ui.view">
+    <field name="name">coop.skill.offer.list</field>
+    <field name="model">coop.skill.offer</field>
+    <field name="arch" type="xml">
+      <list string="Навыки">
+        <field name="name"/>
+        <field name="partner_id"/>
+        <field name="coop_specialization_id" optional="show"/>
+        <field name="city"/>
+        <!-- Числа, а не их словесная запись: по вычисляемой строке
+             сортировка идёт по алфавиту, и «от 100 000» встаёт выше
+             «от 70 000». Словесный вид остаётся карточке. -->
+        <field name="experience_months" string="Опыт, мес."/>
+        <field name="rate" string="Ставка" optional="show"/>
+        <field name="rate_kind" string="Уточнение" optional="hide"/>
+        <field name="skill_ids" widget="many2many_tags" optional="hide"/>
+        <field name="partner_trust" string="Доверие, %"/>
+        <field name="write_date" string="Обновлено"/>
+        <field name="state" widget="badge"
+               decoration-success="state == 'published'"
+               decoration-muted="state != 'published'"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_skill_form" model="ir.ui.view">
+    <field name="name">coop.skill.offer.form</field>
+    <field name="model">coop.skill.offer</field>
+    <field name="arch" type="xml">
+      <form string="Предложение навыка">
+        <header>
+          <button name="action_publish" type="object" string="Опубликовать"
+                  class="btn-primary" invisible="state == 'published'"/>
+          <button name="action_pause" type="object" string="Приостановить"
+                  invisible="state != 'published'"/>
+          <button name="action_message_owner" type="object" string="Написать"/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="draft,published,paused"/>
+        </header>
+        <sheet>
+          <field name="image_1920" widget="image" class="oe_avatar"/>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Чем занимаетесь"/></h1>
+          </div>
+          <group>
+            <group string="Кто и где">
+              <field name="partner_id"/>
+              <field name="city"/>
+              <field name="ready_to_travel"/>
+              <field name="coop_specialization_id" options="{'no_create': True}"/>
+              <field name="coop_specialization_category_id" readonly="1"/>
+            </group>
+            <group string="Условия">
+              <field name="rate_kind"/>
+              <label for="rate"/>
+              <div class="o_row">
+                <field name="rate" readonly="rate_kind == 'piece'"/>
+                <field name="rate_period" readonly="rate_kind == 'piece'"/>
+              </div>
+              <field name="currency_id" invisible="1"/>
+              <field name="rate_display" readonly="1" string="В каталоге"/>
+              <field name="experience_months"
+                     help="Полных месяцев работы по этому направлению. Ниже видно, как это будет написано в каталоге."/>
+              <field name="experience_display" readonly="1" string="В каталоге"/>
+            </group>
+          </group>
+          <group string="Умения">
+            <!-- Без создания на лету: умение в Odoo обязано принадлежать
+                 типу, а из тега на форме тип не задать — получится запись
+                 мимо справочника. -->
+            <field name="skill_ids" widget="many2many_tags" nolabel="1"
+                   options="{'no_create_edit': True, 'no_create': True}"/>
+          </group>
+          <notebook>
+            <page string="Описание" name="description">
+              <field name="description"
+                     placeholder="Что именно готовы делать, с каким оборудованием, какие есть допуски."/>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_skill_search" model="ir.ui.view">
+    <field name="name">coop.skill.offer.search</field>
+    <field name="model">coop.skill.offer</field>
+    <field name="arch" type="xml">
+      <search string="Навыки">
+        <field name="name"/>
+        <field name="partner_id"/>
+        <field name="city"/>
+        <field name="coop_specialization_id"/>
+        <field name="skill_ids"/>
+        <filter name="senior" string="Опыт от трёх лет"
+                domain="[('experience_level', '=', 'senior')]"/>
+        <filter name="junior" string="Опыт от года"
+                domain="[('experience_level', 'in', ('junior', 'senior'))]"/>
+        <filter name="no_experience" string="Без опыта"
+                domain="[('experience_level', '=', 'none')]"/>
+        <filter name="travel" string="Готовы к командировкам"
+                domain="[('ready_to_travel', '=', True)]"/>
+        <separator/>
+        <filter name="mine" string="Мои предложения"
+                domain="[('partner_id', '=', uid)]"/>
+        <filter name="paused" string="Приостановленные"
+                domain="[('state', '=', 'paused')]"/>
+        <separator/>
+        <filter name="trusted" string="Доверие владельца от 80%"
+                domain="[('partner_trust', '>=', 80)]"/>
+        <group>
+          <filter name="by_area" string="По сфере деятельности"
+                  context="{'group_by': 'coop_specialization_category_id'}"/>
+          <filter name="by_specialization" string="По специализации"
+                  context="{'group_by': 'coop_specialization_id'}"/>
+          <filter name="by_city" string="По городу" context="{'group_by': 'city'}"/>
+          <filter name="by_level" string="По опыту"
+                  context="{'group_by': 'experience_level'}"/>
+          <filter name="by_state" string="По состоянию"
+                  context="{'group_by': 'state'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_skills" model="ir.actions.act_window">
+    <field name="name">Навыки</field>
+    <field name="res_model">coop.skill.offer</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="domain">[('state', '=', 'published')]</field>
+    <field name="search_view_id" ref="view_coop_skill_search"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Предложений навыка пока нет</p>
+      <p>Здесь участники показывают, что умеют делать и на каких условиях.
+         У одного человека предложений может быть несколько — по числу
+         специализаций.</p>
+    </field>
+  </record>
+
+  <!--
+    Свои предложения — отдельным экраном и без отбора по состоянию.
+    Каталог показывает только опубликованное, и без этого экрана владелец,
+    нажав «Приостановить», терял бы своё предложение отовсюду: пауза
+    означает «занят», а не «удалить».
+  -->
+  <record id="action_coop_my_skills" model="ir.actions.act_window">
+    <field name="name">Мои предложения</field>
+    <field name="res_model">coop.skill.offer</field>
+    <field name="view_mode">list,kanban,form</field>
+    <field name="domain">[('partner_id', '=', uid)]</field>
+    <field name="search_view_id" ref="view_coop_skill_search"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Вы пока ничего не предложили</p>
+      <p>Расскажите, что умеете делать и на каких условиях. Предложений
+         может быть несколько — по числу занятий.</p>
+    </field>
+  </record>
+
+  <menuitem id="menu_coop_skills_root" name="Навыки" sequence="40"/>
+  <menuitem id="menu_coop_skills" name="Каталог навыков"
+            parent="menu_coop_skills_root" action="action_coop_skills" sequence="10"/>
+  <menuitem id="menu_coop_my_skills" name="Мои предложения"
+            parent="menu_coop_skills_root" action="action_coop_my_skills" sequence="20"/>
+
+</odoo>

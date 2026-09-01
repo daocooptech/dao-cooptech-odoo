@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data noupdate="1">
+
+    <!--
+      Читать опубликованные предложения может любой участник — это
+      каталог. Править — только своё.
+
+      Без этого правила любой участник мог переписать чужое предложение и
+      даже сменить у него владельца: права на модель выданы группе
+      «Пользователь», а правил записи не было вовсе. В каталоге, где по
+      карточке решают, с кем работать, это не мелочь.
+    -->
+    <record id="rule_skill_offer_read" model="ir.rule">
+      <field name="name">Участник видит опубликованные предложения и свои</field>
+      <field name="model_id" ref="model_coop_skill_offer"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">
+        ['|', ('state', '=', 'published'), ('partner_id', '=', user.partner_id.id)]
+      </field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="False"/>
+      <field name="perm_create" eval="False"/>
+      <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_skill_offer_own" model="ir.rule">
+      <field name="name">Править можно только своё предложение</field>
+      <field name="model_id" ref="model_coop_skill_offer"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+      <field name="perm_read" eval="False"/>
+      <field name="perm_write" eval="True"/>
+      <field name="perm_create" eval="True"/>
+      <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- Администратор узла ведёт каталог целиком: чинит опечатки, снимает
+         спорные записи. На боевом узле это тот же администратор, что
+         отвечает за платформу. -->
+    <record id="rule_skill_offer_system" model="ir.rule">
+      <field name="name">Администратор узла ведёт все предложения</field>
+      <field name="model_id" ref="model_coop_skill_offer"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+  </data>
+</odoo>
