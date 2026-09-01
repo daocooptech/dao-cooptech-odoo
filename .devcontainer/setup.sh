@@ -81,7 +81,7 @@ $ODOO -d "$DB" --without-demo=all --stop-after-init \
 
 echo "== 6. Наши модули =="
 $ODOO -d "$DB" --without-demo=all --stop-after-init \
-  -i coop_theme,coop_base,coop_people,coop_orgs,coop_tokens,coop_website,coop_extensions,coop_demo
+  -i coop_theme,coop_base,coop_people,coop_orgs,coop_resources,coop_tokens,coop_bounty,coop_website,coop_extensions,coop_demo
 
 echo "== 7. Русский язык =="
 $ODOO -d "$DB" --load-language=ru_RU -i translation_helper --stop-after-init

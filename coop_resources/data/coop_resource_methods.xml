@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data noupdate="1">
+
+    <!--
+      Способы передачи из макета. Признак «требует денежной оценки»
+      проставлен по существу: продажа и участие в проекте без суммы
+      бессмысленны — в первом случае нечего платить, во втором не от чего
+      считать долю. Обмен и безвозмездная передача обходятся без неё.
+    -->
+    <record id="method_sale" model="coop.resource.method">
+      <field name="name">Продажа</field>
+      <field name="code">sale</field>
+      <field name="sequence">10</field>
+      <field name="requires_price" eval="True"/>
+      <field name="is_monetary" eval="True"/>
+    </record>
+
+    <record id="method_rent" model="coop.resource.method">
+      <field name="name">Аренда</field>
+      <field name="code">rent</field>
+      <field name="sequence">20</field>
+      <field name="requires_price" eval="True"/>
+      <field name="is_monetary" eval="True"/>
+    </record>
+
+    <record id="method_installment" model="coop.resource.method">
+      <field name="name">Рассрочка</field>
+      <field name="code">installment</field>
+      <field name="sequence">30</field>
+      <field name="requires_price" eval="True"/>
+      <field name="is_monetary" eval="True"/>
+    </record>
+
+    <record id="method_leasing" model="coop.resource.method">
+      <field name="name">Лизинг</field>
+      <field name="code">leasing</field>
+      <field name="sequence">40</field>
+      <field name="requires_price" eval="True"/>
+      <field name="is_monetary" eval="True"/>
+    </record>
+
+    <!-- Участие в проекте: расчёт не деньгами, но оценка обязательна —
+         доля участника считается от денежной оценки вклада, а не «на
+         глаз». Это решение владельца, зафиксированное ещё в макете. -->
+    <record id="method_project" model="coop.resource.method">
+      <field name="name">Участие в проекте</field>
+      <field name="code">project</field>
+      <field name="sequence">50</field>
+      <field name="requires_price" eval="True"/>
+      <field name="is_monetary" eval="False"/>
+    </record>
+
+    <record id="method_barter" model="coop.resource.method">
+      <field name="name">Обмен</field>
+      <field name="code">barter</field>
+      <field name="sequence">60</field>
+      <field name="requires_price" eval="False"/>
+      <field name="is_monetary" eval="False"/>
+    </record>
+
+    <record id="method_free" model="coop.resource.method">
+      <field name="name">Безвозмездно</field>
+      <field name="code">free</field>
+      <field name="sequence">70</field>
+      <field name="requires_price" eval="False"/>
+      <field name="is_monetary" eval="False"/>
+    </record>
+
+  </data>
+</odoo>

@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="view_coop_bounty_task_form" model="ir.ui.view">
+    <field name="name">coop.bounty.task.form</field>
+    <field name="model">coop.bounty.task</field>
+    <field name="arch" type="xml">
+      <form string="Задача">
+        <header>
+          <!-- Действия менеджера сообщества. Кнопки показываются по
+               состоянию: набор «опубликовать / принять / вернуть» на
+               черновике только сбивал бы с толку. -->
+          <button name="action_publish" type="object" string="Опубликовать"
+                  class="btn-primary" invisible="state != 'draft'"
+                  groups="coop_bounty.group_coop_community_manager"/>
+          <button name="action_accept" type="object" string="Принять работу"
+                  class="btn-primary" invisible="state != 'submitted'"
+                  groups="coop_bounty.group_coop_community_manager"/>
+          <button name="action_return_for_revision" type="object"
+                  string="Вернуть на доработку" invisible="state != 'submitted'"
+                  groups="coop_bounty.group_coop_community_manager"/>
+          <button name="action_cancel" type="object" string="Отменить"
+                  invisible="state in ('accepted', 'cancelled')"
+                  groups="coop_bounty.group_coop_community_manager"/>
+          <button name="action_reset_to_draft" type="object" string="В черновик"
+                  invisible="state != 'cancelled'"
+                  groups="coop_bounty.group_coop_community_manager"/>
+
+          <!-- Действия участника. -->
+          <button name="action_apply" type="object" string="Взять задачу"
+                  class="btn-primary"
+                  invisible="state != 'published' or my_application_state != 'none'"/>
+          <button name="action_submit" type="object" string="Сдать работу"
+                  class="btn-primary"
+                  invisible="state != 'assigned' or not is_mine"/>
+
+          <field name="state" widget="statusbar"
+                 statusbar_visible="draft,published,assigned,submitted,accepted"/>
+        </header>
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Что нужно сделать"/></h1>
+          </div>
+          <group>
+            <group>
+              <field name="reward_tokens"/>
+              <field name="coop_specialization_id" options="{'no_create': True}"/>
+              <field name="deadline"/>
+            </group>
+            <group>
+              <field name="manager_id" readonly="1"/>
+              <field name="assignee_id" readonly="1"/>
+              <field name="accepted_on" readonly="1" invisible="state != 'accepted'"/>
+              <field name="reward_transaction_id" readonly="1"
+                     invisible="state != 'accepted'"/>
+              <field name="my_application_state" invisible="1"/>
+              <field name="is_mine" invisible="1"/>
+            </group>
+          </group>
+          <notebook>
+            <page string="Описание" name="description">
+              <field name="description" placeholder="Опишите результат, а не процесс: по этому тексту исполнитель поймёт, когда работа считается выполненной."/>
+            </page>
+            <page string="Заявки" name="applications">
+              <field name="application_ids" nolabel="1" readonly="1">
+                <list>
+                  <field name="create_date" string="Когда"/>
+                  <field name="partner_id"/>
+                  <field name="message"/>
+                  <field name="state"/>
+                  <button name="action_approve" type="object" string="Утвердить"
+                          icon="fa-check" invisible="state != 'applied'"
+                          groups="coop_bounty.group_coop_community_manager"/>
+                  <button name="action_reject" type="object" string="Отклонить"
+                          icon="fa-times" invisible="state == 'rejected'"
+                          groups="coop_bounty.group_coop_community_manager"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_bounty_task_list" model="ir.ui.view">
+    <field name="name">coop.bounty.task.list</field>
+    <field name="model">coop.bounty.task</field>
+    <field name="arch" type="xml">
+      <list string="Задачи">
+        <field name="name"/>
+        <field name="coop_specialization_id" optional="show"/>
+        <field name="reward_tokens" sum="Всего токенов"/>
+        <field name="deadline"/>
+        <field name="assignee_id"/>
+        <field name="application_count" string="Заявок"/>
+        <field name="state" widget="badge"
+               decoration-success="state == 'accepted'"
+               decoration-info="state == 'published'"
+               decoration-warning="state == 'submitted'"
+               decoration-muted="state in ('draft', 'cancelled')"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_bounty_task_kanban" model="ir.ui.view">
+    <field name="name">coop.bounty.task.kanban</field>
+    <field name="model">coop.bounty.task</field>
+    <field name="arch" type="xml">
+      <kanban default_group_by="state" quick_create="false">
+        <field name="state"/>
+        <field name="reward_tokens"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_bounty_card">
+              <div class="fw-bold"><field name="name"/></div>
+              <div class="text-muted small mt-1">
+                <field name="coop_specialization_id"/>
+              </div>
+              <div class="mt-2 d-flex justify-content-between align-items-center">
+                <span class="o_coop_bounty_reward">
+                  <field name="reward_tokens"/> токенов
+                </span>
+                <field name="assignee_id" widget="many2one_avatar_user"/>
+              </div>
+              <div class="text-muted small mt-1" t-if="record.deadline.raw_value">
+                до <field name="deadline"/>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="view_coop_bounty_task_search" model="ir.ui.view">
+    <field name="name">coop.bounty.task.search</field>
+    <field name="model">coop.bounty.task</field>
+    <field name="arch" type="xml">
+      <search string="Задачи">
+        <field name="name"/>
+        <field name="coop_specialization_id"/>
+        <field name="assignee_id"/>
+        <filter name="open" string="Открытые" domain="[('state', '=', 'published')]"/>
+        <filter name="in_progress" string="В работе"
+                domain="[('state', 'in', ('assigned', 'submitted'))]"/>
+        <filter name="mine" string="Мои задачи"
+                domain="[('assignee_id', '=', uid)]"/>
+        <separator/>
+        <filter name="overdue" string="Просроченные"
+                domain="[('deadline', '&lt;', context_today().strftime('%Y-%m-%d')),
+                         ('state', 'in', ('published', 'assigned', 'submitted'))]"/>
+        <group>
+          <filter name="by_state" string="По состоянию" context="{'group_by': 'state'}"/>
+          <filter name="by_specialization" string="По специализации"
+                  context="{'group_by': 'coop_specialization_id'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_bounty_task" model="ir.actions.act_window">
+    <field name="name">Задачи рабочей группы</field>
+    <field name="res_model">coop.bounty.task</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="search_view_id" ref="view_coop_bounty_task_search"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Задач пока нет</p>
+      <p>Здесь рабочая группа размещает то, чем можно помочь проекту.
+         Участник берёт задачу, менеджер сообщества утверждает исполнителя
+         и принимает работу — после приёмки вознаграждение зачисляется
+         токенами в кошелёк.</p>
+    </field>
+  </record>
+
+  <record id="action_coop_bounty_application" model="ir.actions.act_window">
+    <field name="name">Заявки на задачи</field>
+    <field name="res_model">coop.bounty.application</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <menuitem id="menu_coop_bounty_root" name="Помощь проекту" sequence="145"/>
+  <menuitem id="menu_coop_bounty_task" name="Задачи"
+            parent="menu_coop_bounty_root" action="action_coop_bounty_task" sequence="10"/>
+  <menuitem id="menu_coop_bounty_application" name="Заявки"
+            parent="menu_coop_bounty_root" action="action_coop_bounty_application"
+            sequence="20" groups="coop_bounty.group_coop_community_manager"/>
+
+</odoo>

@@ -1,0 +1,128 @@
+// Плитка ресурса — как в макете: фотография во всю ширину, метки поверх
+// неё, ниже название и цена.
+
+.o_coop_resources {
+
+  .o_kanban_record.o_kanban_ghost {
+    border: 0;
+    background: none;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .o_kanban_record {
+    background: var(--coop-white, #fff);
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(20, 23, 26, .05);
+    padding: 0;
+    overflow: hidden;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+
+    &:hover {
+      border-color: var(--coop-teal, #146b64);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(20, 23, 26, .06), 0 14px 28px rgba(20, 23, 26, .1);
+    }
+  }
+
+  .o_coop_resource {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .o_coop_res_photo {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1.2;
+    overflow: hidden;
+    background: var(--coop-surface, #f2f2ee);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: 0;
+    }
+
+    > .o_field_image,
+    > .o_field_widget {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  }
+
+  // Метка вида объявления. У спроса она другого цвета: «ищу» и «продаю» —
+  // противоположные вещи, и различать их по мелкому тексту в углу
+  // читатель не должен.
+  .o_coop_res_type {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: var(--coop-teal, #146b64);
+    color: #fff;
+    font: 600 11px/1 'Manrope', sans-serif;
+    padding: 5px 9px;
+    border-radius: 999px;
+  }
+
+  .o_coop_res_request {
+    background: var(--coop-gold, #c98a2b);
+  }
+
+  // Отметка о продвижении. Обязательна и убирать её нельзя: объявление
+  // наверху не потому, что оно лучше, а потому что за него заплачено, и
+  // читатель имеет право это знать.
+  .o_coop_res_promo {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(20, 23, 26, .78);
+    color: #fff;
+    font: 600 10.5px/1 'Manrope', sans-serif;
+    padding: 5px 9px;
+    border-radius: 999px;
+  }
+
+  .o_coop_locbar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(20, 23, 26, .72);
+    color: #fff;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 7px 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    .fa {
+      font-size: 11px;
+      flex: none;
+    }
+  }
+
+  .o_coop_res_body {
+    padding: 12px 14px 14px;
+  }
+
+  .o_coop_res_name {
+    font: 700 14px/1.35 'Manrope', sans-serif;
+    color: var(--coop-ink, #14171a);
+  }
+
+  .o_coop_res_price {
+    color: var(--coop-teal-dark, #0e4f4a);
+    font: 600 13px/1.3 'Manrope', sans-serif;
+    margin-top: 5px;
+  }
+}

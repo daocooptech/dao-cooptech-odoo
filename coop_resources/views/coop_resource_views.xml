@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Плитка ресурса повторяет макет: фотография во всю ширину, поверх неё
+    метка вида объявления и полоса города, ниже название и цена.
+
+    Продвигаемое объявление помечено отдельно и подписано тем, за счёт
+    чего оно наверху. Скрывать это нельзя: непомеченное продвижение — это
+    обман читателя, который думает, что видит лучшее предложение.
+  -->
+  <record id="view_coop_resource_kanban" model="ir.ui.view">
+    <field name="name">coop.resource.kanban</field>
+    <field name="model">coop.resource</field>
+    <field name="arch" type="xml">
+      <kanban class="o_coop_resources" quick_create="false">
+        <field name="image_512"/>
+        <field name="city"/>
+        <field name="listing_type"/>
+        <field name="price_display"/>
+        <field name="is_promoted"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_resource">
+              <div class="o_coop_res_photo">
+                <field name="image_512" widget="image"/>
+                <span class="o_coop_res_type"
+                      t-attf-class="o_coop_res_type #{record.listing_type.raw_value == 'request' ? 'o_coop_res_request' : ''}">
+                  <field name="listing_type"/>
+                </span>
+                <span class="o_coop_res_promo" t-if="record.is_promoted.raw_value"
+                      title="Объявление продвигается владельцем за токены платформы, а не показано выше по качеству">Продвигается</span>
+                <span class="o_coop_locbar" t-if="record.city.raw_value">
+                  <i class="fa fa-map-marker" role="img" aria-label="Город"/>
+                  <field name="city"/>
+                </span>
+              </div>
+              <div class="o_coop_res_body">
+                <div class="o_coop_res_name"><field name="name"/></div>
+                <div class="o_coop_res_price"><field name="price_display"/></div>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="view_coop_resource_list" model="ir.ui.view">
+    <field name="name">coop.resource.list</field>
+    <field name="model">coop.resource</field>
+    <field name="arch" type="xml">
+      <list string="Ресурсы">
+        <field name="name"/>
+        <field name="listing_type"/>
+        <field name="resource_type"/>
+        <field name="category_id" optional="show"/>
+        <field name="method_ids" widget="many2many_tags" optional="show"/>
+        <field name="owner_id"/>
+        <field name="city"/>
+        <field name="price_display" string="Цена"/>
+        <field name="is_promoted" string="Продвигается" optional="hide"/>
+        <field name="state" widget="badge"
+               decoration-success="state == 'published'"
+               decoration-muted="state != 'published'"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_resource_promote_form" model="ir.ui.view">
+    <field name="name">coop.resource.promote.form</field>
+    <field name="model">coop.resource.promote</field>
+    <field name="arch" type="xml">
+      <form string="Продвинуть объявление">
+        <p class="text-muted">
+          Место в выдаче никто не назначает: среди продвигаемых объявления
+          показываются по убыванию ставки. Токены списываются вперёд за
+          весь срок.
+        </p>
+        <group>
+          <field name="resource_id" readonly="1"/>
+          <field name="bid"/>
+          <field name="days"/>
+          <field name="total_tokens" readonly="1"/>
+          <field name="balance" readonly="1"/>
+          <field name="competing_bid" readonly="1"/>
+        </group>
+        <footer>
+          <button name="action_promote" type="object" string="Продвинуть"
+                  class="btn-primary"/>
+          <button string="Отмена" class="btn-secondary" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_coop_resource_promote" model="ir.actions.act_window">
+    <field name="name">Продвинуть объявление</field>
+    <field name="res_model">coop.resource.promote</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+  </record>
+
+  <record id="view_coop_resource_form" model="ir.ui.view">
+    <field name="name">coop.resource.form</field>
+    <field name="model">coop.resource</field>
+    <field name="arch" type="xml">
+      <form string="Ресурс">
+        <header>
+          <button name="action_publish" type="object" string="Опубликовать"
+                  class="btn-primary" invisible="state == 'published'"/>
+          <button name="%(action_coop_resource_promote)d" type="action"
+                  string="Продвинуть" invisible="state != 'published'"
+                  context="{'default_resource_id': id}"/>
+          <button name="action_close" type="object" string="Закрыть"
+                  invisible="state == 'closed'"/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="draft,published,closed"/>
+        </header>
+        <sheet>
+          <field name="image_1920" widget="image" class="oe_avatar"/>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Что предлагаете или ищете"/></h1>
+          </div>
+          <group>
+            <group string="Что это">
+              <field name="listing_type" widget="radio" options="{'horizontal': True}"/>
+              <field name="resource_type"/>
+              <field name="category_id" options="{'no_create': True}"/>
+              <field name="method_ids" widget="many2many_tags"
+                     options="{'no_create': True}"/>
+            </group>
+            <group string="Условия">
+              <field name="price_kind"/>
+              <label for="price"/>
+              <div class="o_row">
+                <field name="price" readonly="price_kind == 'none'"/>
+                <field name="price_unit_label" placeholder="кг, шт., сутки"
+                       readonly="price_kind == 'none'"/>
+              </div>
+              <field name="currency_id" invisible="1"/>
+              <field name="price_display" readonly="1"/>
+            </group>
+          </group>
+          <group>
+            <group string="Кто и где">
+              <field name="owner_id"/>
+              <field name="city"/>
+            </group>
+            <group string="Продвижение">
+              <field name="is_promoted" readonly="1"/>
+              <field name="promoted_until" readonly="1"
+                     invisible="not promoted_until"/>
+              <field name="promotion_bid" readonly="1"
+                     invisible="not promoted_until"/>
+            </group>
+          </group>
+          <notebook>
+            <page string="Описание" name="description">
+              <field name="description"
+                     placeholder="Что это, в каком состоянии, на каких условиях."/>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_resource_search" model="ir.ui.view">
+    <field name="name">coop.resource.search</field>
+    <field name="model">coop.resource</field>
+    <field name="arch" type="xml">
+      <search string="Ресурсы">
+        <field name="name"/>
+        <field name="city"/>
+        <field name="category_id"/>
+        <field name="owner_id"/>
+        <filter name="offers" string="Предложения"
+                domain="[('listing_type', '=', 'offer')]"/>
+        <filter name="requests" string="Спрос"
+                domain="[('listing_type', '=', 'request')]"/>
+        <separator/>
+        <filter name="free" string="Отдают даром"
+                domain="[('method_ids.code', '=', 'free')]"/>
+        <filter name="barter" string="Готовы к обмену"
+                domain="[('method_ids.code', '=', 'barter')]"/>
+        <filter name="project" string="Можно внести в проект"
+                domain="[('method_ids.code', '=', 'project')]"/>
+        <separator/>
+        <filter name="promoted" string="Продвигаемые"
+                domain="[('is_promoted', '=', True)]"/>
+        <group>
+          <filter name="by_type" string="По типу ресурса"
+                  context="{'group_by': 'resource_type'}"/>
+          <filter name="by_category" string="По категории"
+                  context="{'group_by': 'category_id'}"/>
+          <filter name="by_city" string="По городу" context="{'group_by': 'city'}"/>
+          <filter name="by_listing" string="По виду объявления"
+                  context="{'group_by': 'listing_type'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_resources" model="ir.actions.act_window">
+    <field name="name">Ресурсы</field>
+    <field name="res_model">coop.resource</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="domain">[('state', '=', 'published')]</field>
+    <field name="search_view_id" ref="view_coop_resource_search"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">В каталоге пока пусто</p>
+      <p>Сюда попадает то, что участники предлагают и что ищут: материалы,
+         оборудование, финансы и труд. Продать, сдать, обменять, отдать
+         даром или внести в проект — способ выбирает владелец.</p>
+    </field>
+  </record>
+
+  <record id="view_coop_resource_category_list" model="ir.ui.view">
+    <field name="name">coop.resource.category.list</field>
+    <field name="model">coop.resource.category</field>
+    <field name="arch" type="xml">
+      <list string="Категории ресурсов">
+        <field name="complete_name" string="Категория"/>
+        <field name="resource_count" string="Ресурсов"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_resource_method_list" model="ir.ui.view">
+    <field name="name">coop.resource.method.list</field>
+    <field name="model">coop.resource.method</field>
+    <field name="arch" type="xml">
+      <list string="Способы передачи">
+        <field name="sequence" widget="handle"/>
+        <field name="name"/>
+        <field name="requires_price" string="Нужна оценка"/>
+        <field name="is_monetary" string="Денежный расчёт"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="action_coop_resource_category" model="ir.actions.act_window">
+    <field name="name">Категории ресурсов</field>
+    <field name="res_model">coop.resource.category</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <record id="action_coop_resource_method" model="ir.actions.act_window">
+    <field name="name">Способы передачи</field>
+    <field name="res_model">coop.resource.method</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <record id="action_coop_promotion" model="ir.actions.act_window">
+    <field name="name">Продвижение</field>
+    <field name="res_model">coop.promotion</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <menuitem id="menu_coop_resources_root" name="Ресурсы" sequence="60"/>
+  <menuitem id="menu_coop_resources" name="Каталог ресурсов"
+            parent="menu_coop_resources_root" action="action_coop_resources" sequence="10"/>
+  <menuitem id="menu_coop_promotion" name="Продвижение"
+            parent="menu_coop_resources_root" action="action_coop_promotion" sequence="20"/>
+  <menuitem id="menu_coop_resources_config" name="Справочники"
+            parent="menu_coop_resources_root" sequence="90"/>
+  <menuitem id="menu_coop_resource_category" name="Категории ресурсов"
+            parent="menu_coop_resources_config" action="action_coop_resource_category"
+            sequence="10"/>
+  <menuitem id="menu_coop_resource_method" name="Способы передачи"
+            parent="menu_coop_resources_config" action="action_coop_resource_method"
+            sequence="20"/>
+
+</odoo>

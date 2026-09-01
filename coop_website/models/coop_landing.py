@@ -27,12 +27,21 @@ LOGO = os.path.join(os.path.dirname(HERE), 'static', 'src', 'img', 'cooptech-log
 # Меню сайта — разделы платформы в том же порядке, что в макете. Пункты
 # ведут в разделы, которые уже работают: обещать с публичной страницы
 # то, чего нет, хуже, чем показать короткое меню.
+# Заглушки установщика Odoo: пункты, которых на платформе быть не должно.
+# Список закрытый — всё остальное считается добавленным осознанно.
+INSTALLER_MENUS = {'/', '/shop', '/blog', '/aboutus', '/pricing', '/contactus',
+                   '/event', '/appointment', '/library'}
+
 SITE_MENU = [
     ('Люди', '/odoo/action-coop_people.action_coop_people'),
     ('Организации', '/odoo/action-coop_orgs.action_coop_orgs'),
     ('Вакансии', '/jobs'),
     ('Обучение', '/slides'),
     ('Сообщество', '/forum'),
+    # Страница живёт в модуле coop_bounty, но место в меню задаётся здесь:
+    # порядок пунктов — свойство сайта целиком, и собирать его из
+    # разрозненных записей значит получить случайную последовательность.
+    ('Помощь проекту', '/help-project'),
 ]
 
 
@@ -103,18 +112,37 @@ class CoopWebsiteLanding(models.AbstractModel):
         if not root:
             return True
 
-        # Существующие пункты меню сносим и собираем заново: иначе к
-        # разделам платформы добавляются «Home», «Shop» и прочие пункты
-        # установщика, а порядок оказывается случайным.
-        Menu.search([('parent_id', '=', root.id)]).unlink()
+        # Сносятся заглушки установщика Odoo — по закрытому списку
+        # адресов. Раньше здесь удалялись все пункты подряд, и это стирало
+        # меню, добавленные другими нашими модулями: «Помощь проекту»
+        # исчезала при каждом обновлении сайта, а причина по коду не
+        # читалась.
+        Menu.search([('parent_id', '=', root.id),
+                     ('url', 'in', list(INSTALLER_MENUS))]).unlink()
+
+        # Схлопывание по адресу. Установщик и наши модули заводят пункты с
+        # одним и тем же адресом под разными названиями — «Курсы» и
+        # «Обучение» оба ведут на /slides, — и в шапке они стоят рядом
+        # как два разных раздела.
+        seen = {}
+        for menu in Menu.search([('parent_id', '=', root.id)], order='sequence, id'):
+            if menu.url in seen:
+                menu.unlink()
+            else:
+                seen[menu.url] = menu
+
         for sequence, (name, url) in enumerate(SITE_MENU, start=1):
-            Menu.create({
-                'name': name,
-                'url': url,
-                'parent_id': root.id,
-                'sequence': sequence * 10,
-                'website_id': website.id,
-            })
+            menu = seen.get(url)
+            if menu:
+                menu.write({'name': name, 'sequence': sequence * 10})
+            else:
+                Menu.create({
+                    'name': name,
+                    'url': url,
+                    'parent_id': root.id,
+                    'sequence': sequence * 10,
+                    'website_id': website.id,
+                })
 
         _logger.info('Публичная часть: сайт «%s», пунктов меню %s',
                      website.name, len(SITE_MENU))

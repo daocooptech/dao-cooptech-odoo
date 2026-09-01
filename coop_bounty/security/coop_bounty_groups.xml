@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data noupdate="1">
+
+    <!--
+      Менеджер сообщества — роль рабочей группы, а не кооператива. Он
+      размещает задачи, утверждает исполнителей и принимает работу, но
+      никаких прав в кооперативах при этом не получает: платформа не
+      сторона отношений участников, и роль в ней членством не является.
+    -->
+    <record id="group_coop_community_manager" model="res.groups">
+      <field name="name">Менеджер сообщества</field>
+      <field name="privilege_id" ref="coop_base.privilege_coop_role"/>
+      <field name="comment">Размещает задачи рабочей группы, утверждает исполнителей и принимает работу. Прав в кооперативах не даёт.</field>
+    </record>
+
+    <!--
+      Задачу видно всем участникам платформы, кроме черновиков и
+      отменённых: черновик — это ещё не предложение, а отменённая задача
+      только сбивает с толку тех, кто ищет, чем помочь.
+    -->
+    <record id="rule_bounty_task_user" model="ir.rule">
+      <field name="name">Участник видит опубликованные задачи</field>
+      <field name="model_id" ref="model_coop_bounty_task"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[('state', 'not in', ('draft', 'cancelled'))]</field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="False"/>
+      <field name="perm_create" eval="False"/>
+      <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_bounty_task_manager" model="ir.rule">
+      <field name="name">Менеджер сообщества ведёт все задачи</field>
+      <field name="model_id" ref="model_coop_bounty_task"/>
+      <field name="groups" eval="[(4, ref('group_coop_community_manager'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+  </data>
+</odoo>

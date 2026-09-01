@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from odoo import api, models
 
-from ..data import emblems, load_org_profiles, load_orgs, load_people, load_reference
+from ..data import (emblems, load_bounty, load_org_profiles, load_orgs,
+                    load_people, load_reference, load_resources)
 
 
 class CoopDemoLoader(models.AbstractModel):
@@ -27,4 +28,10 @@ class CoopDemoLoader(models.AbstractModel):
         marks = emblems.MarkAllocator()
         load_orgs.load_organizations(self.env, specializations, marks)
         load_org_profiles.load_org_profiles(self.env, specializations, marks)
+        # Ресурсы последними: им нужны владельцы, а владельцы — это
+        # люди и организации, загруженные выше.
+        load_resources.load_resources(self.env)
+        # Задачи и токены последними: исполнителей берём из уже
+        # загруженного каталога людей.
+        load_bounty.load_bounty(self.env)
         return True

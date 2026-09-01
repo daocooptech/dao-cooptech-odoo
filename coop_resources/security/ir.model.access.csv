@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_resource_category_user,Категории ресурсов — чтение,model_coop_resource_category,base.group_user,1,0,0,0
+access_resource_category_admin,Категории ресурсов — ведение,model_coop_resource_category,coop_base.group_coop_platform,1,1,1,1
+access_resource_method_user,Способы передачи — чтение,model_coop_resource_method,base.group_user,1,0,0,0
+access_resource_method_admin,Способы передачи — ведение,model_coop_resource_method,coop_base.group_coop_platform,1,1,1,1
+access_resource_user,Ресурсы — участник,model_coop_resource,base.group_user,1,1,1,1
+access_promotion_user,Продвижение — участник,model_coop_promotion,base.group_user,1,0,1,0
+access_promotion_admin,Продвижение — платформа,model_coop_promotion,coop_base.group_coop_platform,1,1,1,1
+access_resource_promote_user,Окно продвижения,model_coop_resource_promote,base.group_user,1,1,1,1

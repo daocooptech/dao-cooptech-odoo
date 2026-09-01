@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data noupdate="1">
+
+    <!--
+      Раз в час: гасит ставки у объявлений с истёкшим сроком продвижения.
+      Час, а не сутки, потому что порядок выдачи считается по ставке —
+      сутки означали бы, что оплаченное место держится ещё день после
+      окончания оплаты.
+    -->
+    <record id="cron_expire_promotions" model="ir.cron">
+      <field name="name">Ресурсы: погасить истёкшее продвижение</field>
+      <field name="model_id" ref="model_coop_resource"/>
+      <field name="state">code</field>
+      <field name="code">model._cron_expire_promotions()</field>
+      <field name="interval_number">1</field>
+      <field name="interval_type">hours</field>
+      <field name="active" eval="True"/>
+    </record>
+
+  </data>
+</odoo>

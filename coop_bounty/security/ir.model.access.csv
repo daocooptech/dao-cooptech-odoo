@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_bounty_task_user,Задачи — участник,model_coop_bounty_task,base.group_user,1,0,0,0
+access_bounty_task_manager,Задачи — менеджер сообщества,model_coop_bounty_task,coop_bounty.group_coop_community_manager,1,1,1,1
+access_bounty_application_user,Заявки — участник,model_coop_bounty_application,base.group_user,1,0,1,0
+access_bounty_application_manager,Заявки — менеджер сообщества,model_coop_bounty_application,coop_bounty.group_coop_community_manager,1,1,1,1

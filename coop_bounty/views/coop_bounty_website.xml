@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    «Помощь проекту» — публичная страница с двумя способами помочь:
+    деньгами и делом. Разведены по вкладкам намеренно: это разные решения
+    и разные люди. Тому, кто готов перевести деньги, список задач мешает,
+    а тому, кто хочет взяться за работу, реквизиты ничего не говорят.
+  -->
+  <template id="coop_help_page" name="Помощь проекту">
+    <t t-call="website.layout">
+      <div id="wrap" class="coop-landing coop-help">
+        <div class="oe_structure" id="coop_help_intro">
+          <section class="landing-section">
+            <h2>Помощь проекту</h2>
+            <p class="section-sub">
+              ДАО КООПЕХ — некоммерческий проект с открытым исходным кодом.
+              Помочь ему можно двумя способами: деньгами на разработку или
+              собственной работой. Второе для нас важнее: платформу для
+              кооперации логично строить кооперативно.
+            </p>
+          </section>
+        </div>
+
+        <section class="landing-section coop-help-tabs">
+          <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <a class="nav-link active" data-bs-toggle="tab" href="#help-tasks"
+                 role="tab">Взять задачу</a>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a class="nav-link" data-bs-toggle="tab" href="#help-donate"
+                 role="tab">Поддержать деньгами</a>
+            </li>
+          </ul>
+
+          <div class="tab-content">
+            <!-- ── Краудсорсинг ──────────────────────────────────────── -->
+            <div class="tab-pane fade show active" id="help-tasks" role="tabpanel">
+              <p class="section-sub" style="margin:20px 0 16px">
+                Задачи размещает рабочая группа. Возьмите ту, что вам по силам:
+                менеджер сообщества утвердит вас исполнителем, а после приёмки
+                работы вознаграждение зачислится токенами платформы в ваш
+                кошелёк. Токенами оплачиваются услуги платформы — например,
+                продвижение объявления в каталоге.
+              </p>
+
+              <t t-set="tasks" t-value="request.env['coop.bounty.task'].sudo().search([('state', '=', 'published')], order='deadline asc, id desc', limit=30)"/>
+
+              <div class="coop-task-list" t-if="tasks">
+                <article class="coop-task" t-foreach="tasks" t-as="task">
+                  <div class="coop-task-main">
+                    <div class="coop-task-name"><t t-esc="task.name"/></div>
+                    <div class="coop-task-meta">
+                      <span t-if="task.coop_specialization_id">
+                        <t t-esc="task.coop_specialization_id.name"/> ·
+                      </span>
+                      <span t-if="task.deadline">до <t t-esc="task.deadline"/></span>
+                      <span t-if="not task.deadline">без срока</span>
+                    </div>
+                    <div class="coop-task-desc" t-if="task.description">
+                      <t t-out="task.description"/>
+                    </div>
+                  </div>
+                  <div class="coop-task-side">
+                    <div class="coop-task-reward">
+                      <t t-esc="task.reward_tokens"/>
+                      <span class="coop-task-unit">токенов</span>
+                    </div>
+                    <!-- Ссылка ведёт в кабинет: взять задачу может только
+                         участник платформы, и предлагать кнопку гостю
+                         значит обещать то, что не сработает. -->
+                    <a class="button" t-attf-href="/odoo/action-coop_bounty.action_coop_bounty_task/#{task.id}">Взять задачу</a>
+                  </div>
+                </article>
+              </div>
+
+              <div class="coop-help-empty" t-if="not tasks">
+                <p>Открытых задач сейчас нет. Загляните позже — рабочая группа
+                   выкладывает их по мере появления.</p>
+              </div>
+            </div>
+
+            <!-- ── Пожертвования ─────────────────────────────────────── -->
+            <div class="tab-pane fade" id="help-donate" role="tabpanel">
+              <div class="oe_structure" id="coop_help_donate">
+                <p class="section-sub" style="margin:20px 0 16px">
+                  Пожертвование идёт на разработку платформы: серверы, работу
+                  над кодом и правовое сопровождение. Платформа некоммерческая
+                  и комиссию с ваших сделок не берёт — расходы на неё
+                  покрываются иначе.
+                </p>
+                <div class="coop-donate-note">
+                  <p><b>Реквизиты появятся здесь после регистрации юридического
+                     лица.</b></p>
+                  <p>Приём пожертвований — это получение дохода, и вести его
+                     нужно от лица организации, а не от проекта. Учредителем
+                     выступит потребительский кооператив ДАО КООПТЕХ. До тех
+                     пор мы не собираем деньги: обещать перевод на счёт,
+                     которого нет, нечестно.</p>
+                  <p>Если хотите помочь прямо сейчас — возьмите задачу на
+                     соседней вкладке. Это ровно та же помощь, только делом.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </t>
+  </template>
+
+  <record id="coop_help_page_record" model="website.page">
+    <field name="name">Помощь проекту</field>
+    <field name="url">/help-project</field>
+    <field name="view_id" ref="coop_help_page"/>
+    <field name="is_published" eval="True"/>
+  </record>
+
+  <!-- Пункт меню сайта здесь не заводится: порядок пунктов задаёт
+       настройщик публичной части в coop_website. Две записи об одном
+       адресе давали в шапке два одинаковых пункта. -->
+
+</odoo>

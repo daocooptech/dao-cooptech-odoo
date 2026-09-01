@@ -1,0 +1,129 @@
+// Страница «Помощь проекту» и карточка задачи.
+//
+// Опирается на стили лендинга из coop_website: landing-section, кнопки и
+// токены объявлены там, и повторять их здесь значит завести вторую копию,
+// которая разойдётся с первой.
+
+.coop-help-tabs {
+  .nav-tabs {
+    border-bottom: 1px solid var(--line, #e6e6e1);
+    gap: 4px;
+  }
+
+  .nav-link {
+    color: var(--slate, #4a4a44);
+    font: 600 14px/1.3 'Manrope', sans-serif;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    padding: 10px 16px;
+
+    &:hover {
+      color: var(--teal-dark, #0e4f4a);
+    }
+
+    &.active {
+      color: var(--teal-dark, #0e4f4a);
+      background: none;
+      border-bottom-color: var(--teal, #146b64);
+    }
+  }
+}
+
+.coop-task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+// Задача — строка, а не плитка. У задачи главное текст: что сделать и за
+// сколько. В плитке описание пришлось бы обрезать, а по обрезанному
+// описанию решение «берусь или нет» не принимают.
+.coop-task {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  background: var(--white, #fff);
+  border: 1px solid var(--line, #e6e6e1);
+  border-radius: var(--radius, 10px);
+  padding: 16px 18px;
+  transition: border-color .15s ease, box-shadow .15s ease;
+
+  &:hover {
+    border-color: var(--teal, #146b64);
+    box-shadow: 0 4px 8px rgba(20, 23, 26, .06);
+  }
+}
+
+.coop-task-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.coop-task-name {
+  font: 700 15px/1.35 'Manrope', sans-serif;
+  color: var(--ink, #14171a);
+}
+
+.coop-task-meta {
+  color: var(--slate-light, #8f8f88);
+  font-size: 12.5px;
+  margin-top: 3px;
+}
+
+.coop-task-desc {
+  color: var(--slate, #4a4a44);
+  font-size: 13.5px;
+  margin-top: 8px;
+
+  p { margin: 0 0 6px; }
+}
+
+.coop-task-side {
+  flex: none;
+  width: 170px;
+  text-align: right;
+}
+
+.coop-task-reward {
+  font: 700 20px/1 'Manrope', sans-serif;
+  color: var(--teal-dark, #0e4f4a);
+  margin-bottom: 10px;
+}
+
+.coop-task-unit {
+  display: block;
+  font: 500 11.5px/1.3 'Inter', sans-serif;
+  color: var(--slate-light, #8f8f88);
+  margin-top: 3px;
+}
+
+// Пояснение вместо реквизитов. Рамка нужна: без неё текст читается как
+// обычный абзац, а это предупреждение — денег мы пока не собираем.
+.coop-donate-note {
+  background: var(--gold-tint, #f7ecd9);
+  border-radius: var(--radius, 10px);
+  padding: 18px 20px;
+  color: var(--slate, #4a4a44);
+  font-size: 13.5px;
+  max-width: 640px;
+
+  p { margin: 0 0 10px; }
+  p:last-child { margin-bottom: 0; }
+}
+
+.coop-help-empty {
+  color: var(--slate-light, #8f8f88);
+  padding: 24px 0;
+}
+
+@media (max-width: 700px) {
+  .coop-task {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .coop-task-side {
+    width: 100%;
+    text-align: left;
+  }
+}

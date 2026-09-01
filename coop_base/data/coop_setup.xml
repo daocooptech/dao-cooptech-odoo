@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Разовые настройки платформы. Почему кодом, а не данными —
+       в models/coop_setup.py. -->
+  <function model="coop.setup" name="apply"/>
+</odoo>

@@ -25,6 +25,7 @@
     'data': [
         'security/coop_groups.xml',
         'data/coop_legal_forms.xml',
+        'data/coop_setup.xml',
         'security/ir.model.access.csv',
         'views/coop_membership_views.xml',
         'views/coop_menus.xml',
