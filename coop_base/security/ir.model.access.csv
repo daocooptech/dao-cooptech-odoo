@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_coop_membership_member,coop.membership member,model_coop_membership,coop_base.group_coop_member,1,0,0,0
+access_coop_membership_audit,coop.membership audit,model_coop_membership,coop_base.group_coop_audit,1,0,0,0
+access_coop_membership_board,coop.membership board,model_coop_membership,coop_base.group_coop_board,1,1,1,0

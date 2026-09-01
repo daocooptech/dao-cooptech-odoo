@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data noupdate="1">
+
+    <!--
+      Роли в кооперативе — не иерархия подчинения, а разные основания
+      доступа. Правление ведёт дела, ревизионная комиссия проверяет
+      правление и потому не может от него зависеть, пайщик видит общее и
+      своё. Поэтому наследование здесь не сплошная лестница: ревизионная
+      комиссия наследует пайщика, а не правление.
+    -->
+
+    <record id="module_category_coop" model="ir.module.category">
+      <field name="name">ДАО КООПЕХ</field>
+      <field name="description">Роли участников кооператива</field>
+      <field name="sequence">20</field>
+    </record>
+
+    <record id="group_coop_member" model="res.groups">
+      <field name="name">Пайщик</field>
+      <field name="category_id" ref="module_category_coop"/>
+      <field name="comment">Видит общие сведения кооператива и свои данные.
+Личные данные других участников и платёжные реквизиты — не видит.</field>
+    </record>
+
+    <record id="group_coop_audit" model="res.groups">
+      <field name="name">Ревизионная комиссия</field>
+      <field name="category_id" ref="module_category_coop"/>
+      <field name="implied_ids" eval="[(4, ref('group_coop_member'))]"/>
+      <field name="comment">Видит всё для проверки, но ничего не меняет.
+Права на запись у ревизии нет намеренно: проверяющий, который может
+править проверяемое, — это не проверка.</field>
+    </record>
+
+    <record id="group_coop_board" model="res.groups">
+      <field name="name">Правление</field>
+      <field name="category_id" ref="module_category_coop"/>
+      <field name="implied_ids" eval="[(4, ref('group_coop_member'))]"/>
+      <field name="comment">Ведёт дела кооператива: принимает и прекращает членство,
+оформляет решения собрания. Удалять записи членства не может — членство
+прекращается, а не стирается.</field>
+    </record>
+
+    <!--
+      Пайщик видит только действующие членства своей организации, и всегда
+      своё собственное. Правило на уровне записи, а не на уровне модели:
+      скрывать целиком нельзя — состав кооператива его законный интерес.
+    -->
+    <record id="rule_membership_member" model="ir.rule">
+      <field name="name">Пайщик видит состав своих организаций</field>
+      <field name="model_id" ref="model_coop_membership"/>
+      <field name="groups" eval="[(4, ref('group_coop_member'))]"/>
+      <field name="domain_force">
+        ['|',
+          ('partner_id', '=', user.partner_id.id),
+          ('organization_id', 'in',
+             [m.organization_id.id for m in
+              user.env['coop.membership'].sudo().search(
+                  [('partner_id', '=', user.partner_id.id),
+                   ('state', '=', 'active')])])]
+      </field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="False"/>
+      <field name="perm_create" eval="False"/>
+      <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!--
+      Правление работает только со своей организацией. Без этого правила
+      член правления одного кооператива правил бы членство в чужом — в
+      федеративной сети это не теоретический риск.
+    -->
+    <record id="rule_membership_board" model="ir.rule">
+      <field name="name">Правление ведёт членство только своей организации</field>
+      <field name="model_id" ref="model_coop_membership"/>
+      <field name="groups" eval="[(4, ref('group_coop_board'))]"/>
+      <field name="domain_force">
+        [('organization_id', 'in',
+            [m.organization_id.id for m in
+             user.env['coop.membership'].sudo().search(
+                 [('partner_id', '=', user.partner_id.id),
+                  ('role', '=', 'board'),
+                  ('state', '=', 'active')])])]
+      </field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="True"/>
+      <field name="perm_create" eval="True"/>
+      <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_membership_audit" model="ir.rule">
+      <field name="name">Ревизия видит состав проверяемой организации</field>
+      <field name="model_id" ref="model_coop_membership"/>
+      <field name="groups" eval="[(4, ref('group_coop_audit'))]"/>
+      <field name="domain_force">
+        [('organization_id', 'in',
+            [m.organization_id.id for m in
+             user.env['coop.membership'].sudo().search(
+                 [('partner_id', '=', user.partner_id.id),
+                  ('role', '=', 'audit'),
+                  ('state', '=', 'active')])])]
+      </field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="False"/>
+      <field name="perm_create" eval="False"/>
+      <field name="perm_unlink" eval="False"/>
+    </record>
+
+  </data>
+</odoo>

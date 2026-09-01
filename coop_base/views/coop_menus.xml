@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <menuitem id="menu_coop_root" name="Кооператив" sequence="15"
+            web_icon="coop_base,static/description/icon.png"/>
+
+  <menuitem id="menu_coop_membership" name="Членство"
+            parent="menu_coop_root" action="action_coop_membership" sequence="10"
+            groups="coop_base.group_coop_member"/>
+
+</odoo>
