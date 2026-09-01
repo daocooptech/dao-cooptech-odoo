@@ -126,3 +126,41 @@
     margin-top: 5px;
   }
 }
+
+// ── Строчный вид ──────────────────────────────────────────────────────
+.o_coop_rows .o_coop_resources,
+.o_coop_rows.o_coop_resources {
+
+  .o_coop_resource {
+    flex-direction: row;
+    gap: 16px;
+  }
+
+  .o_coop_res_photo {
+    flex: none;
+    width: 200px;
+    aspect-ratio: auto;
+    align-self: stretch;
+    min-height: 120px;
+  }
+
+  .o_coop_res_body {
+    padding: 14px 16px 14px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 900px) {
+  .o_coop_rows .o_coop_resources .o_coop_resource,
+  .o_coop_rows.o_coop_resources .o_coop_resource {
+    flex-direction: column;
+  }
+
+  .o_coop_rows .o_coop_resources .o_coop_res_photo,
+  .o_coop_rows.o_coop_resources .o_coop_res_photo {
+    width: 100%;
+    aspect-ratio: 1.2;
+  }
+}

@@ -16,7 +16,7 @@
     <field name="name">coop.skill.offer.kanban</field>
     <field name="model">coop.skill.offer</field>
     <field name="arch" type="xml">
-      <kanban class="o_coop_skills" quick_create="false">
+      <kanban class="o_coop_skills" quick_create="false" js_class="coop_catalog_kanban">
         <field name="image_512"/>
         <field name="city"/>
         <field name="rate_display"/>

@@ -107,3 +107,24 @@
   border-radius: 10px;
   padding: 6px;
 }
+
+// ── Строчный вид ──────────────────────────────────────────────────────
+.o_coop_rows .o_coop_orgs,
+.o_coop_rows.o_coop_orgs {
+
+  .o_coop_org {
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .o_coop_org_logo {
+    flex: none;
+    width: 140px;
+    aspect-ratio: 1.2;
+  }
+
+  .o_coop_org_name {
+    padding: 14px 16px 14px 0;
+  }
+}

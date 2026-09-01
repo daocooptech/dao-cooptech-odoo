@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!--
+    Кнопки вида ставятся рядом с собственными кнопками представления, а
+    класс вида — на корень: карточка одна и та же, меняется только её
+    раскладка. Так же устроен прототип, где переключался класс `tile-mode`.
+  -->
+  <t t-name="coop_theme.CatalogKanbanView" t-inherit="web.KanbanView" t-inherit-mode="primary">
+    <xpath expr="//div[@t-ref='root']" position="attributes">
+      <attribute name="t-attf-class">{{ className }} {{ hasSelectedRecords ? 'o_kanban_selection_active' : 'o_kanban_selection_available' }} {{ coopLayout.rows ? 'o_coop_rows' : 'o_coop_tiles' }}</attribute>
+    </xpath>
+
+    <xpath expr="//t[@t-set-slot='layout-buttons']" position="inside">
+      <div class="btn-group o_coop_view_toggle ms-2" role="group" aria-label="Вид каталога">
+        <button type="button" class="btn btn-secondary"
+                t-att-class="{ 'active': !coopLayout.rows }"
+                title="Плиткой" aria-label="Плиткой"
+                t-on-click="() => this.setCoopLayout(false)">
+          <i class="oi oi-view-kanban" role="img"/>
+        </button>
+        <button type="button" class="btn btn-secondary"
+                t-att-class="{ 'active': coopLayout.rows }"
+                title="Строками" aria-label="Строками"
+                t-on-click="() => this.setCoopLayout(true)">
+          <i class="fa fa-align-justify" role="img"/>
+        </button>
+      </div>
+    </xpath>
+  </t>
+
+</templates>

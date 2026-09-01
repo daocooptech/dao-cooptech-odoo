@@ -13,7 +13,7 @@
     <field name="name">coop.resource.kanban</field>
     <field name="model">coop.resource</field>
     <field name="arch" type="xml">
-      <kanban class="o_coop_resources" quick_create="false">
+      <kanban class="o_coop_resources" quick_create="false" js_class="coop_catalog_kanban">
         <field name="image_512"/>
         <field name="city"/>
         <field name="listing_type"/>

@@ -1,10 +1,10 @@
-// Карточка навыка — строкой, как в макете: слева фотография работы с
-// аватаром мастера в углу, справа заголовок, ставка, мета, описание и
-// чипы умений.
+// Карточка навыка в двух видах: плиткой по умолчанию и строкой по
+// кнопке — как в макете, где переключался класс `tile-mode`.
 //
-// Строка, а не плитка, потому что навык выбирают по описанию: что именно
-// человек делает и с каким допуском. В плитке описание пришлось бы
-// обрезать, а обрезанное оно бесполезно.
+// В плитке фотография работы сверху во всю ширину, аватар мастера в
+// углу; в строке фотография уходит влево узкой колонкой, и описанию
+// достаётся вся ширина. Второй вид нужен именно из-за описания: навык
+// выбирают по нему, а в плитке оно живёт тремя строками.
 
 .o_coop_skills {
 
@@ -15,11 +15,7 @@
     padding: 0;
   }
 
-  // Одна карточка в ряд: ширина нужна описанию, а не картинке.
   .o_kanban_record {
-    width: 100%;
-    max-width: 100%;
-    flex: 1 1 100%;
     background: var(--coop-white, #fff);
     border: 1px solid var(--coop-line, #e6e6e1);
     border-radius: 10px;
@@ -36,7 +32,7 @@
 
   .o_coop_skill {
     display: flex;
-    gap: 16px;
+    flex-direction: column;
     width: 100%;
     min-width: 0;
   }
@@ -111,7 +107,7 @@
   .o_coop_skill_body {
     flex: 1;
     min-width: 0;
-    padding: 14px 16px 14px 0;
+    padding: 12px 14px 14px;
     display: flex;
     flex-direction: column;
   }
@@ -223,15 +219,58 @@
   }
 }
 
+
+// ── Строчный вид ──────────────────────────────────────────────────────
+//
+// Фотография уходит влево узкой колонкой, описание получает всю ширину и
+// перестаёт обрезаться. Ради этого вид и нужен.
+.o_coop_rows .o_coop_skills,
+.o_coop_rows.o_coop_skills {
+
+  .o_coop_skill {
+    flex-direction: row;
+    gap: 16px;
+  }
+
+  .o_coop_skill_photo {
+    flex: none;
+    width: 220px;
+    aspect-ratio: auto;
+    align-self: stretch;
+    min-height: 150px;
+  }
+
+  .o_coop_skill_body {
+    padding: 14px 16px 14px 0;
+  }
+
+  // В строке места хватает: описание показывается целиком, чипы не
+  // обрезаются.
+  .o_coop_skill_desc {
+    -webkit-line-clamp: none;
+    line-clamp: none;
+    display: block;
+  }
+
+  .o_coop_skill_chips {
+    max-height: none;
+  }
+}
+
 @media (max-width: 900px) {
-  .o_coop_skills {
-    .o_coop_skill { flex-direction: column; }
+  .o_coop_rows .o_coop_skills .o_coop_skill,
+  .o_coop_rows.o_coop_skills .o_coop_skill {
+    flex-direction: column;
+  }
 
-    .o_coop_skill_photo {
-      width: 100%;
-      aspect-ratio: 1.6;
-    }
+  .o_coop_rows .o_coop_skills .o_coop_skill_photo,
+  .o_coop_rows.o_coop_skills .o_coop_skill_photo {
+    width: 100%;
+    aspect-ratio: 1.6;
+  }
 
-    .o_coop_skill_body { padding: 12px 14px 14px; }
+  .o_coop_rows .o_coop_skills .o_coop_skill_body,
+  .o_coop_rows.o_coop_skills .o_coop_skill_body {
+    padding: 12px 14px 14px;
   }
 }

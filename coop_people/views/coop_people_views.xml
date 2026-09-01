@@ -15,7 +15,7 @@
     <field name="name">coop.people.kanban</field>
     <field name="model">res.partner</field>
     <field name="arch" type="xml">
-      <kanban class="o_coop_people" quick_create="false">
+      <kanban class="o_coop_people" quick_create="false" js_class="coop_catalog_kanban">
         <field name="avatar_128"/>
         <field name="city"/>
         <field name="coop_age"/>

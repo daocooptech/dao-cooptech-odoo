@@ -28,6 +28,9 @@
         'web.assets_backend': [
             'coop_theme/static/src/scss/fonts.scss',
             'coop_theme/static/src/scss/backend.scss',
+            'coop_theme/static/src/scss/catalog_view.scss',
+            'coop_theme/static/src/js/catalog_view.js',
+            'coop_theme/static/src/xml/catalog_view.xml',
         ],
         'web.assets_frontend': [
             'coop_theme/static/src/scss/fonts.scss',
