@@ -82,7 +82,7 @@
         <filter name="members" string="Пайщики" domain="[('role', '=', 'member')]"/>
         <filter name="board" string="Правление" domain="[('role', '=', 'board')]"/>
         <filter name="audit" string="Ревизионная комиссия" domain="[('role', '=', 'audit')]"/>
-        <group expand="0" string="Группировать">
+        <group>
           <filter name="by_org" string="По организации"
                   context="{'group_by': 'organization_id'}"/>
           <filter name="by_role" string="По роли" context="{'group_by': 'role'}"/>

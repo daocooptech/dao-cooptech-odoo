@@ -28,6 +28,9 @@
         'views/coop_membership_views.xml',
         'views/coop_menus.xml',
     ],
+    'demo': [
+        'demo/coop_demo.xml',
+    ],
     'installable': True,
     'application': True,
 }

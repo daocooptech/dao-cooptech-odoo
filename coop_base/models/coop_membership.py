@@ -147,6 +147,37 @@ class CoopMembership(models.Model):
                     'Чтобы членство стало действующим, укажите основание приёма: '
                     'решение общего собрания или правления.')
 
+    # ── Сброс кэша правил доступа ───────────────────────────────────────
+    #
+    # Правила уровня записи здесь опираются на состав членства: «правление
+    # ведёт членство своей организации» — значит домен правила зависит от
+    # того, где человек состоит. Odoo вычисляет домен один раз и кэширует по
+    # пользователю, а сбрасывает кэш при изменении правил и групп — но не
+    # при изменении наших записей.
+    #
+    # Без этого сброса принятый сегодня пайщик не увидит свой кооператив до
+    # перезапуска сервера, а исключённый продолжит видеть чужие данные —
+    # второе хуже первого. Поэтому любое изменение членства сбрасывает кэш.
+
+    def _invalidate_rule_cache(self):
+        self.env.registry.clear_cache()
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        records._invalidate_rule_cache()
+        return records
+
+    def write(self, vals):
+        result = super().write(vals)
+        if {'partner_id', 'organization_id', 'role', 'state'} & set(vals):
+            self._invalidate_rule_cache()
+        return result
+
+    def unlink(self):
+        self._invalidate_rule_cache()
+        return super().unlink()
+
     def action_admit(self):
         self.write({'state': 'active',
                     'joined_on': fields.Date.context_today(self)})

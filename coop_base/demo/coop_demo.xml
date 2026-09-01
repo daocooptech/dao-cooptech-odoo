@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <!--
+      Демо-состав взят из прототипа, чтобы стенд и макет говорили об одних
+      и тех же людях и кооперативах: так расхождения между тем, что
+      нарисовано, и тем, что работает, видно сразу.
+    -->
+
+    <record id="org_shukty" model="res.partner">
+      <field name="name">Кооператив «Шукты»</field>
+      <field name="is_company" eval="True"/>
+      <field name="city">Дербент</field>
+      <field name="comment">Овцеводческий потребительский кооператив.</field>
+    </record>
+
+    <record id="org_borozda" model="res.partner">
+      <field name="name">Кооператив «Борозда»</field>
+      <field name="is_company" eval="True"/>
+      <field name="city">Тюмень</field>
+    </record>
+
+    <record id="org_vzaimo" model="res.partner">
+      <field name="name">Кооператив «Взаимопомощь»</field>
+      <field name="is_company" eval="True"/>
+      <field name="city">Пермь</field>
+    </record>
+
+    <record id="person_vodyanov" model="res.partner">
+      <field name="name">Водянов Алексей Петрович</field>
+      <field name="is_company" eval="False"/>
+      <field name="city">Дербент</field>
+    </record>
+
+    <record id="person_dashkevich" model="res.partner">
+      <field name="name">Дашкевич Данил Игоревич</field>
+      <field name="is_company" eval="False"/>
+      <field name="city">Тюмень</field>
+    </record>
+
+    <record id="person_kovalev" model="res.partner">
+      <field name="name">Ковалёв Игорь Степанович</field>
+      <field name="is_company" eval="False"/>
+      <field name="city">Дербент</field>
+    </record>
+
+    <record id="person_semyonov" model="res.partner">
+      <field name="name">Семёнов Николай Петрович</field>
+      <field name="is_company" eval="False"/>
+      <field name="city">Нижний Новгород</field>
+    </record>
+
+    <!-- Множественное членство: у Водянова оно сразу в двух кооперативах,
+         и в одном он в правлении, а в другом обычный пайщик. Это и есть
+         случай, ради которого членство вынесено в отдельную модель. -->
+    <record id="membership_vodyanov_shukty" model="coop.membership">
+      <field name="partner_id" ref="person_vodyanov"/>
+      <field name="organization_id" ref="org_shukty"/>
+      <field name="role">board</field>
+      <field name="state">active</field>
+      <field name="joined_on">2024-03-18</field>
+      <field name="admission_basis">Протокол общего собрания № 4 от 18.03.2024</field>
+    </record>
+
+    <record id="membership_vodyanov_vzaimo" model="coop.membership">
+      <field name="partner_id" ref="person_vodyanov"/>
+      <field name="organization_id" ref="org_vzaimo"/>
+      <field name="role">member</field>
+      <field name="state">active</field>
+      <field name="joined_on">2025-06-02</field>
+      <field name="admission_basis">Протокол общего собрания № 9 от 02.06.2025</field>
+    </record>
+
+    <record id="membership_kovalev_shukty" model="coop.membership">
+      <field name="partner_id" ref="person_kovalev"/>
+      <field name="organization_id" ref="org_shukty"/>
+      <field name="role">audit</field>
+      <field name="state">active</field>
+      <field name="joined_on">2024-03-18</field>
+      <field name="admission_basis">Протокол общего собрания № 4 от 18.03.2024</field>
+    </record>
+
+    <!-- Наёмный сотрудник состоит в организации, но голоса не имеет:
+         он не пайщик, а работник по трудовому договору. -->
+    <record id="membership_semyonov_shukty" model="coop.membership">
+      <field name="partner_id" ref="person_semyonov"/>
+      <field name="organization_id" ref="org_shukty"/>
+      <field name="role">staff</field>
+      <field name="state">active</field>
+      <field name="joined_on">2025-09-01</field>
+      <field name="has_vote" eval="False"/>
+      <field name="admission_basis">Приказ № 12 от 01.09.2025</field>
+    </record>
+
+    <!-- Заявление, по которому решения ещё нет: состояние, в котором
+         членства фактически нет, но заявление уже подано. -->
+    <record id="membership_dashkevich_borozda" model="coop.membership">
+      <field name="partner_id" ref="person_dashkevich"/>
+      <field name="organization_id" ref="org_borozda"/>
+      <field name="role">member</field>
+      <field name="state">applied</field>
+    </record>
+
+  </data>
+</odoo>
