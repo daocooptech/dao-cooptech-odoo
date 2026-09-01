@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models
+from odoo import api, fields, models, tools
 from odoo.exceptions import ValidationError
 
 
@@ -71,12 +71,21 @@ class CoopMembership(models.Model):
 
     display_name = fields.Char(compute='_compute_display_name', store=True)
 
-    _sql_constraints = [
-        ('unique_active_membership',
-         'EXCLUDE (partner_id WITH =, organization_id WITH =) '
-         'WHERE (state IN (\'applied\', \'active\', \'leaving\'))',
-         'У человека может быть только одно действующее членство в одной организации.'),
-    ]
+    def _auto_init(self):
+        """Одно незакрытое членство на пару «человек — организация».
+
+        Ограничение частичное: прекращённая запись не мешает вступить
+        заново, а вступить дважды одновременно нельзя. Сделано индексом, а
+        не EXCLUDE-ограничением: EXCLUDE на равенство целых требует
+        расширения btree_gist, которого в базе может не оказаться, и тогда
+        модуль просто не установится.
+        """
+        res = super()._auto_init()
+        tools.create_index(
+            self.env.cr, 'coop_membership_open_uniq', self._table,
+            ['partner_id', 'organization_id'], unique=True,
+            where="state IN ('applied', 'active', 'leaving')")
+        return res
 
     @api.depends('partner_id', 'organization_id', 'role')
     def _compute_display_name(self):
@@ -100,6 +109,29 @@ class CoopMembership(models.Model):
         for record in self:
             if record.joined_on and record.left_on and record.left_on < record.joined_on:
                 raise ValidationError('Дата выбытия раньше даты приёма.')
+
+    @api.constrains('partner_id', 'organization_id', 'state')
+    def _check_single_open_membership(self):
+        """Понятное сообщение вместо ошибки базы.
+
+        Индекс защищает от гонки двух одновременных записей, а эта
+        проверка объясняет человеку, что произошло.
+        """
+        open_states = ('applied', 'active', 'leaving')
+        for record in self:
+            if record.state not in open_states:
+                continue
+            twin = self.search([
+                ('id', '!=', record.id),
+                ('partner_id', '=', record.partner_id.id),
+                ('organization_id', '=', record.organization_id.id),
+                ('state', 'in', open_states),
+            ], limit=1)
+            if twin:
+                raise ValidationError(
+                    'У %s уже есть незакрытое членство в «%s». Прекратите прежнее, '
+                    'прежде чем заводить новое.'
+                    % (record.partner_id.name, record.organization_id.name))
 
     @api.constrains('state', 'admission_basis')
     def _check_admission_basis(self):
