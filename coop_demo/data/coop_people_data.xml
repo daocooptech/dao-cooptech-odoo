@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <!--
+      Люди из макета: те же имена, города и навыки. Числа доверия проставлены
+      руками — формула ещё согласуется, и ставить сюда вычисленное значение
+      до её утверждения значит потом переписывать данные, а не только код.
+
+      У одного человека личность подтверждена, а доверие ниже, чем у
+      неподтверждённого: так на экране сразу видно, что это разные вещи.
+    -->
+
+    <record id="person_vodyanov" model="res.partner">
+      <field name="coop_is_participant" eval="True"/>
+      <field name="coop_birthdate">1981-04-12</field>
+      <field name="coop_trust">94</field>
+      <field name="coop_deals_done">31</field>
+      <field name="coop_deals_rated">29</field>
+      <field name="coop_verified" eval="True"/>
+      <field name="coop_skill_ids" eval="[(6, 0, [ref('coop_demo.skill_welding'), ref('coop_demo.skill_electric')])]"/>
+    </record>
+
+    <record id="person_dashkevich" model="res.partner">
+      <field name="coop_is_participant" eval="True"/>
+      <field name="city">Тюмень</field>
+      <field name="coop_birthdate">1987-09-03</field>
+      <field name="coop_trust">92</field>
+      <field name="coop_deals_done">18</field>
+      <field name="coop_deals_rated">17</field>
+      <field name="coop_verified" eval="True"/>
+      <field name="coop_skill_ids" eval="[(6, 0, [ref('coop_demo.skill_electric')])]"/>
+    </record>
+
+    <record id="person_kovalev" model="res.partner">
+      <field name="coop_is_participant" eval="True"/>
+      <field name="coop_birthdate">1975-01-27</field>
+      <field name="coop_trust">88</field>
+      <field name="coop_deals_done">12</field>
+      <field name="coop_deals_rated">10</field>
+      <field name="coop_verified" eval="False"/>
+      <field name="coop_skill_ids" eval="[(6, 0, [ref('coop_demo.skill_cheese')])]"/>
+    </record>
+
+    <record id="person_semyonov" model="res.partner">
+      <field name="coop_is_participant" eval="True"/>
+      <field name="coop_birthdate">1990-06-15</field>
+      <field name="coop_trust">76</field>
+      <field name="coop_deals_done">7</field>
+      <field name="coop_deals_rated">5</field>
+      <field name="coop_verified" eval="True"/>
+      <field name="coop_skill_ids" eval="[(6, 0, [ref('coop_demo.skill_welding')])]"/>
+    </record>
+
+    <!-- Новичок: сделок ещё нет, и доверие не «ноль процентов», а
+         «пока не считается». Ноль читался бы как плохая репутация, хотя
+         человек просто ничего ещё не делал. -->
+    <record id="person_ivanova" model="res.partner">
+      <field name="name">Иванова Мария Петровна</field>
+      <field name="is_company" eval="False"/>
+      <field name="city">Красноярск</field>
+      <field name="coop_is_participant" eval="True"/>
+      <field name="coop_birthdate">1992-11-08</field>
+      <field name="coop_trust">0</field>
+      <field name="coop_deals_done">0</field>
+      <field name="coop_deals_rated">0</field>
+      <field name="coop_verified" eval="False"/>
+      <field name="coop_skill_ids" eval="[(6, 0, [ref('coop_demo.skill_cheese')])]"/>
+    </record>
+
+    <record id="person_gonchar" model="res.partner">
+      <field name="name">Гончаров Пётр Ильич</field>
+      <field name="is_company" eval="False"/>
+      <field name="city">Дербент</field>
+      <field name="coop_is_participant" eval="True"/>
+      <field name="coop_birthdate">1968-03-21</field>
+      <field name="coop_trust">97</field>
+      <field name="coop_deals_done">64</field>
+      <field name="coop_deals_rated">61</field>
+      <field name="coop_verified" eval="True"/>
+      <field name="coop_skill_ids" eval="[(6, 0, [ref('coop_demo.skill_welding'), ref('coop_demo.skill_cheese')])]"/>
+    </record>
+
+  </data>
+</odoo>

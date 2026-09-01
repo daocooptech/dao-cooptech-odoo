@@ -14,10 +14,12 @@
     'category': 'Cooperative',
     'version': '19.0.1.0.0',
     'license': 'LGPL-3',
-    'depends': ['coop_base', 'product', 'project', 'hr_skills', 'sale_management'],
+    'depends': ['coop_base', 'coop_people', 'product', 'project', 'hr_skills', 'sale_management'],
     'data': [
         'data/coop_reference_data.xml',
         'data/coop_demo_data.xml',
+        'data/coop_people_data.xml',
+        'data/coop_load.xml',
     ],
     'installable': True,
 }

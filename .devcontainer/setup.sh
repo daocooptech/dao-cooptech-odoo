@@ -35,7 +35,7 @@ cat > "$STAND/odoo.conf" <<EOF
 [options]
 ; Порядок важен: сначала наши модули, потом форки, потом Rudoo, потом ядро.
 ; При совпадении имён наше перекрывает чужое, а не наоборот.
-addons_path = $WS,$WS/vendor,$STAND/rudoo-addons,/usr/lib/python3/dist-packages/odoo/addons
+addons_path = $WS,$WS/forks,$STAND/rudoo-addons,/usr/lib/python3/dist-packages/odoo/addons
 data_dir = /var/lib/odoo
 db_host = db
 db_port = 5432
@@ -81,7 +81,7 @@ $ODOO -d "$DB" --without-demo=all --stop-after-init \
 
 echo "== 6. Наши модули =="
 $ODOO -d "$DB" --without-demo=all --stop-after-init \
-  -i coop_theme,coop_base,coop_extensions,coop_demo
+  -i coop_theme,coop_base,coop_people,coop_extensions,coop_demo
 
 echo "== 7. Русский язык =="
 $ODOO -d "$DB" --load-language=ru_RU -i translation_helper --stop-after-init

@@ -1,0 +1,210 @@
+// Плитка человека — как в макете.
+//
+// Токены объявлены в coop_theme и доступны всему интерфейсу, поэтому здесь
+// только раскладка плитки и то, что от неё зависит.
+
+.o_coop_people {
+
+  // Пустые плитки-распорки, которыми Odoo дотягивает последний ряд до
+  // ширины сетки. Рамку и фон им давать нельзя: получается ряд пустых
+  // карточек, и читается он как «данные не загрузились».
+  .o_kanban_record.o_kanban_ghost {
+    border: 0;
+    background: none;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .o_kanban_record {
+    background: var(--coop-white, #fff);
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(20, 23, 26, .05);
+    padding: 0;
+    overflow: hidden;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+
+    &:hover {
+      border-color: var(--coop-teal, #146b64);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(20, 23, 26, .06), 0 14px 28px rgba(20, 23, 26, .1);
+    }
+  }
+
+  .o_coop_person {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+  }
+
+  // Фото во всю ширину плитки. Пропорция та же, что в макете: чуть шире
+  // квадрата, чтобы в ряду помещалось лицо, а не поясной портрет.
+  .o_coop_photo {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1.2;
+    overflow: hidden;
+    background: var(--coop-surface, #f2f2ee);
+
+    img,
+    .o_coop_photo_img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: 0;
+    }
+
+    // Поле-картинка Odoo оборачивает изображение в свой контейнер с
+    // собственными размерами — без этого фото сжимается до миниатюры.
+    > .o_field_image,
+    > .o_field_widget {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  }
+
+  // Полоса города поверх нижнего края фото. Тёмная подложка нужна, потому
+  // что снизу у фотографии может оказаться что угодно — от снега до
+  // тёмной куртки, и белый текст без подложки читается через раз.
+  .o_coop_locbar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(20, 23, 26, .72);
+    color: #fff;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 7px 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    .fa {
+      font-size: 11px;
+      flex: none;
+    }
+  }
+
+  .o_coop_body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    padding: 12px 14px 14px;
+  }
+
+  .o_coop_name {
+    font: 700 14px/1.35 'Manrope', sans-serif;
+    color: var(--coop-ink, #14171a);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 5px;
+  }
+
+  .o_coop_meta {
+    color: var(--coop-slate-light, #8f8f88);
+    font-size: 11.5px;
+    margin-bottom: 8px;
+  }
+
+  .o_coop_muted {
+    font-style: italic;
+  }
+
+  // Чипы навыков переносятся по строкам, а не обрезаются. Умения человека —
+  // главное, ради чего смотрят карточку, прятать их за многоточием нельзя.
+  .o_coop_chips {
+    margin-bottom: 10px;
+
+    .o_tag,
+    .badge {
+      background: var(--coop-surface, #f2f2ee);
+      color: var(--coop-slate, #4a4a44);
+      font: 600 11px/1.3 'Manrope', sans-serif;
+      border-radius: 6px;
+      padding: 4px 8px;
+      border: 1px solid transparent;
+    }
+  }
+
+  // Действия прижаты к низу: в ряду плиток кнопки должны стоять на одной
+  // линии независимо от того, сколько строк заняли имя и навыки.
+  .o_coop_actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: auto;
+  }
+
+  .o_coop_badge {
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  // Отметка о проверке личности — в оттенке бренда, как в макете, но не
+  // зелёная «галочка достижения»: проверка паспорта ничего не говорит о
+  // том, как человек исполняет обязательства.
+  .o_coop_verified {
+    background: var(--coop-teal-tint, #e3efed);
+    color: var(--coop-teal-dark, #0e4f4a);
+  }
+
+  .o_coop_btn {
+    font-weight: 600;
+    font-size: 12px;
+    padding: 6px 13px;
+    border-radius: 7px;
+    border: 1px solid var(--coop-line, #e6e6e1);
+    background: var(--coop-white, #fff);
+    color: var(--coop-ink, #14171a);
+    white-space: nowrap;
+
+    &:hover {
+      border-color: var(--coop-teal, #146b64);
+      color: var(--coop-teal-dark, #0e4f4a);
+    }
+  }
+
+  .btn.o_coop_btn_primary {
+    background: var(--coop-teal, #146b64);
+    border-color: var(--coop-teal, #146b64);
+    color: #fff;
+
+    &:hover {
+      background: var(--coop-teal-dark, #0e4f4a);
+      border-color: var(--coop-teal-dark, #0e4f4a);
+      color: #fff;
+    }
+  }
+
+  // Состояние «уже сделано» — подписка оформлена, дружба принята.
+  .btn.o_coop_btn_on {
+    background: var(--coop-teal-tint, #e3efed);
+    border-color: var(--coop-teal-tint, #e3efed);
+    color: var(--coop-teal-dark, #0e4f4a);
+  }
+
+  // Не кнопка, а надпись о состоянии: нажимать нечего, пока вторая
+  // сторона не ответила.
+  .o_coop_btn_muted {
+    background: var(--coop-surface, #f2f2ee);
+    border-color: transparent;
+    color: var(--coop-slate-light, #8f8f88);
+    cursor: default;
+    display: inline-flex;
+    align-items: center;
+  }
+}
