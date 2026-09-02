@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Без noupdate. Правила доступа — код платформы: их правка обязана
+  доехать до узла обновлением модуля. Пометка «не обновлять»
+  запоминается в ir_model_data при первой загрузке и переживает удаление
+  из XML — на этом обжигались пять раз, и исправленные домены просто не
+  доезжали до базы. coop_base при обновлении вызывает
+  coop.security.unfreeze и снимает флаг с записей модулей coop_*.
+-->
+<odoo>
+  <data>
+
+    <!--
+      Карточку закрытого сообщества видно всем: иначе в него не попасть
+      иначе как по прямой ссылке, и раздел разваливается на «видимый» и
+      настоящий. Скрыты состав и обсуждение, а не сама запись.
+      Черновик виден только владельцу.
+    -->
+    <record id="rule_community_read" model="ir.rule">
+      <field name="name">Каталог сообществ</field>
+      <field name="model_id" ref="model_coop_community"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">
+        ['|', '|',
+          ('state', 'in', ('published', 'frozen', 'archived')),
+          ('partner_id', 'in', user.coop_actor_partner_ids.ids),
+          ('member_ids', 'any', [('partner_id', '=', user.partner_id.id),
+                                 ('state', '=', 'active')])]
+      </field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="False"/>
+      <field name="perm_create" eval="False"/>
+      <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- Править карточку: ведущий, модератор, владелец-организация. -->
+    <record id="rule_community_manage" model="ir.rule">
+      <field name="name">Править сообщество может ведущий или модератор</field>
+      <field name="model_id" ref="model_coop_community"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">
+        ['|',
+          ('partner_id', 'in', user.coop_publisher_partner_ids.ids),
+          ('member_ids', 'any', [('partner_id', '=', user.partner_id.id),
+                                 ('state', '=', 'active'),
+                                 ('role', 'in', ('owner', 'moderator'))])]
+      </field>
+      <field name="perm_read" eval="False"/>
+      <field name="perm_write" eval="True"/>
+      <field name="perm_create" eval="True"/>
+      <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!--
+      Состав закрытого сообщества виден только его участникам. Своё
+      участие человек видит всегда — иначе он не поймёт, почему кнопка
+      «Вступить» ничего не делает.
+    -->
+    <record id="rule_community_member_read" model="ir.rule">
+      <field name="name">Состав сообщества</field>
+      <field name="model_id" ref="model_coop_community_member"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">
+        ['|', '|',
+          ('partner_id', '=', user.partner_id.id),
+          '&amp;', ('community_id.access', 'in', ('public', 'request')),
+                   ('state', '=', 'active'),
+          ('community_id.member_ids', 'any', [('partner_id', '=', user.partner_id.id),
+                                              ('state', '=', 'active')])]
+      </field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="False"/>
+      <field name="perm_create" eval="False"/>
+      <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- Заводить, менять и отзывать можно только собственное участие. -->
+    <record id="rule_community_member_own" model="ir.rule">
+      <field name="name">Своё участие</field>
+      <field name="model_id" ref="model_coop_community_member"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+      <field name="perm_read" eval="False"/>
+      <field name="perm_write" eval="True"/>
+      <field name="perm_create" eval="True"/>
+      <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- Модератор ведёт состав своего сообщества. Удалять — не может:
+         исключение оставляет запись, иначе исключённый вступает обратно
+         через секунду. -->
+    <record id="rule_community_member_moderate" model="ir.rule">
+      <field name="name">Модератор ведёт состав своего сообщества</field>
+      <field name="model_id" ref="model_coop_community_member"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">
+        [('community_id.member_ids', 'any', [('partner_id', '=', user.partner_id.id),
+                                             ('state', '=', 'active'),
+                                             ('role', 'in', ('owner', 'moderator'))])]
+      </field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="True"/>
+      <field name="perm_create" eval="True"/>
+      <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_community_admin" model="ir.rule">
+      <field name="name">Администратор узла ведёт все сообщества</field>
+      <field name="model_id" ref="model_coop_community"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <record id="rule_community_member_admin" model="ir.rule">
+      <field name="name">Администратор узла ведёт весь состав</field>
+      <field name="model_id" ref="model_coop_community_member"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+  </data>
+</odoo>

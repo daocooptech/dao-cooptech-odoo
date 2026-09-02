@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from odoo import api, models
 
-from ..data import (emblems, load_bounty, load_deals, load_examples,
-                    load_memberships,
+from ..data import (emblems, load_bounty, load_communities, load_deals,
+                    load_examples, load_memberships,
                     load_org_profiles, load_orgs, load_people, load_projects,
                     load_reference, load_resources, load_skills,
                     load_vacancies, load_verification, load_wallets)
@@ -41,6 +41,9 @@ class CoopDemoLoader(models.AbstractModel):
         load_skills.load_skills(self.env)
         load_projects.load_projects(self.env)
         load_vacancies.load_vacancies(self.env)
+        # Сообщества после каталогов: часть из них привязана к проектам,
+        # а состав набирается из уже загруженных людей.
+        load_communities.load_communities(self.env)
         # Задачи и токены последними: исполнителей берём из уже
         # загруженного каталога людей.
         # Ступени верификации — после каталогов: загрузчик снимает с

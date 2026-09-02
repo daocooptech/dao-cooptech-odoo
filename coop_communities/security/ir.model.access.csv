@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_coop_community_user,Сообщества — участник,model_coop_community,base.group_user,1,1,1,0
+access_coop_community_system,Сообщества — администратор,model_coop_community,base.group_system,1,1,1,1
+access_coop_community_member_user,Участие — участник,model_coop_community_member,base.group_user,1,1,1,1
+access_coop_community_member_system,Участие — администратор,model_coop_community_member,base.group_system,1,1,1,1

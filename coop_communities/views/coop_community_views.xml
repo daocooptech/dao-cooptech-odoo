@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ── Каталог сообществ ─────────────────────────────────────────── -->
+  <record id="view_coop_community_kanban" model="ir.ui.view">
+    <field name="name">coop.community.kanban</field>
+    <field name="model">coop.community</field>
+    <field name="arch" type="xml">
+      <kanban js_class="coop_catalog_kanban" class="o_coop_communities"
+              default_order="member_count desc, id desc">
+        <field name="image_512"/>
+        <field name="city"/>
+        <field name="kind"/>
+        <field name="access"/>
+        <field name="state"/>
+        <field name="summary"/>
+        <field name="member_count"/>
+        <field name="icon"/>
+        <field name="coop_member_state"/>
+        <field name="coop_is_subscribed"/>
+        <field name="project_id"/>
+        <field name="organization_id"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_tile"
+                 t-att-class="record.state.raw_value == 'archived' ? 'o_coop_tile_muted' : ''">
+              <div class="o_coop_cover o_coop_media">
+                <!--
+                  Адрес складывается из строк: шаблон карточки
+                  компилируется в JavaScript, где «%» — остаток от
+                  деления, и питоновское форматирование давало NaN.
+                -->
+                <img t-if="record.image_512.raw_value"
+                     t-att-src="'/web/image/coop.community/' + record.id.raw_value + '/image_512'"
+                     t-att-alt="record.name.value" loading="lazy"/>
+                <!-- Обложки нет — вместо битой плитки значок на подложке.
+                     Геометрия та же, ряд не разъезжается. -->
+                <div t-else="" class="o_coop_cover_icon">
+                  <t t-esc="record.icon.raw_value or '👥'"/>
+                </div>
+                <span class="o_coop_badge"
+                      t-att-class="'o_coop_kind_' + record.kind.raw_value">
+                  <t t-esc="record.kind.value"/>
+                </span>
+                <span class="o_coop_badge o_coop_badge_right">
+                  <i class="fa fa-users" aria-hidden="true"/>
+                  <t t-esc="record.member_count.value"/>
+                </span>
+                <span class="o_coop_loc" t-if="record.city.raw_value">
+                  <i class="fa fa-map-marker" aria-hidden="true"/>
+                  <t t-esc="record.city.value"/>
+                </span>
+              </div>
+              <div class="o_coop_tile_body">
+                <div class="o_coop_tile_name"><field name="name"/></div>
+                <div class="o_coop_tile_desc"><field name="summary"/></div>
+                <div class="o_coop_tile_link" t-if="record.project_id.raw_value">
+                  При проекте «<t t-esc="record.project_id.value"/>»
+                </div>
+                <div class="o_coop_tile_link" t-elif="record.organization_id.raw_value">
+                  Сообщество организации «<t t-esc="record.organization_id.value"/>»
+                </div>
+                <!--
+                  Участие показывается состоянием, действие — кнопкой.
+                  Раньше и то и другое было кнопкой, и «Вы участник»
+                  молча выводил из сообщества по клику.
+                -->
+                <div class="o_coop_tile_actions">
+                  <button t-if="record.coop_member_state.raw_value == 'none'
+                                and record.state.raw_value == 'published'"
+                          name="action_join" type="object"
+                          class="btn btn-primary btn-sm o_coop_join">
+                    <t t-if="record.access.raw_value == 'public'">Вступить</t>
+                    <t t-else="">Подать заявку</t>
+                  </button>
+                  <span t-elif="record.coop_member_state.raw_value == 'pending'"
+                        class="o_coop_state o_coop_state_wait">Заявка на рассмотрении</span>
+                  <span t-elif="record.coop_member_state.raw_value == 'moderator'"
+                        class="o_coop_state">Вы модератор</span>
+                  <span t-elif="record.coop_member_state.raw_value == 'active'"
+                        class="o_coop_state">Вы участник</span>
+                  <span t-elif="record.coop_member_state.raw_value == 'rejected'"
+                        class="o_coop_state o_coop_state_off">Заявку отклонили</span>
+                  <span t-elif="record.coop_member_state.raw_value == 'banned'"
+                        class="o_coop_state o_coop_state_off">Вы исключены</span>
+                  <span t-elif="record.state.raw_value == 'archived'"
+                        class="o_coop_state o_coop_state_off">Сообщество закрыто</span>
+
+                  <!-- Подписка — иконкой, а не второй серой кнопкой:
+                       она меняет только мою ленту, а не отношения. -->
+                  <button name="action_toggle_subscription" type="object"
+                          class="btn btn-link btn-sm o_coop_bell"
+                          t-att-class="record.coop_is_subscribed.raw_value ? 'o_coop_bell_on' : ''"
+                          aria-label="Показывать новости в ленте"
+                          title="Показывать новости в ленте">
+                    <i class="fa" aria-hidden="true"
+                       t-att-class="record.coop_is_subscribed.raw_value ? 'fa-bell' : 'fa-bell-o'"/>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="view_coop_community_list" model="ir.ui.view">
+    <field name="name">coop.community.list</field>
+    <field name="model">coop.community</field>
+    <field name="arch" type="xml">
+      <list string="Сообщества" decoration-muted="state == 'archived'">
+        <field name="name"/>
+        <field name="kind"/>
+        <field name="city"/>
+        <field name="access"/>
+        <field name="member_count"/>
+        <field name="partner_id" optional="show"/>
+        <field name="project_id" optional="hide"/>
+        <field name="organization_id" optional="hide"/>
+        <field name="state" widget="badge"
+               decoration-success="state == 'published'"
+               decoration-warning="state == 'frozen'"
+               decoration-muted="state == 'archived'"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_community_form" model="ir.ui.view">
+    <field name="name">coop.community.form</field>
+    <field name="model">coop.community</field>
+    <field name="arch" type="xml">
+      <form string="Сообщество">
+        <header>
+          <button name="action_publish" type="object" string="Открыть сообщество"
+                  class="btn-primary" invisible="state != 'draft'"/>
+          <button name="action_join" type="object" string="Вступить"
+                  class="btn-primary"
+                  invisible="state != 'published' or coop_member_state != 'none' or access != 'public'"/>
+          <button name="action_join" type="object" string="Подать заявку"
+                  class="btn-primary"
+                  invisible="state != 'published' or coop_member_state != 'none' or access == 'public'"/>
+          <button name="action_leave" type="object" string="Покинуть сообщество"
+                  invisible="coop_member_state not in ('active', 'pending', 'moderator')"
+                  confirm="Выйти из сообщества? В закрытое обратно придётся подавать заявку."/>
+          <button name="action_toggle_subscription" type="object"
+                  string="Новости в ленте"/>
+          <button name="action_freeze" type="object" string="Заморозить"
+                  invisible="state != 'published'"
+                  groups="base.group_system"/>
+          <button name="action_archive_community" type="object" string="Закрыть"
+                  invisible="state == 'archived'" groups="base.group_system"
+                  confirm="Закрыть сообщество? Оно останется в каталоге и в истории участников, но принимать новых перестанет."/>
+          <button name="action_resync_channel" type="object"
+                  string="Свести состав с каналом" invisible="not channel_id"/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="draft,published,archived"/>
+        </header>
+        <sheet>
+          <field name="image_1920" widget="image" class="oe_avatar"/>
+          <div class="oe_button_box" name="button_box">
+            <button name="action_open_applications" type="object"
+                    class="oe_stat_button" icon="fa-user-plus"
+                    invisible="coop_member_state != 'moderator'">
+              <span class="o_stat_text">Заявки</span>
+            </button>
+          </div>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Название сообщества"/></h1>
+            <field name="summary" placeholder="Чем сообщество занято — одной строкой"/>
+          </div>
+          <group>
+            <group>
+              <field name="kind"/>
+              <field name="city" placeholder="Город или «Удалённо»"/>
+              <field name="icon" placeholder="👥"/>
+              <field name="access"/>
+            </group>
+            <group>
+              <field name="partner_id"/>
+              <field name="member_count"/>
+              <field name="project_id"/>
+              <field name="organization_id"/>
+              <field name="channel_id" readonly="1"/>
+            </group>
+          </group>
+          <notebook>
+            <page string="О сообществе" name="about">
+              <field name="description" placeholder="Подробное описание"/>
+            </page>
+            <page string="Правила" name="rules">
+              <field name="rules"
+                     placeholder="С чем соглашается человек, подавая заявку"/>
+            </page>
+            <page string="Участники" name="members">
+              <field name="member_ids" readonly="1">
+                <list>
+                  <field name="partner_id"/>
+                  <field name="role"/>
+                  <field name="joined_on"/>
+                  <field name="state" widget="badge"
+                         decoration-success="state == 'active'"
+                         decoration-warning="state == 'pending'"
+                         decoration-muted="state in ('left', 'rejected', 'banned')"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_community_search" model="ir.ui.view">
+    <field name="name">coop.community.search</field>
+    <field name="model">coop.community</field>
+    <field name="arch" type="xml">
+      <search string="Сообщества">
+        <field name="name"/>
+        <field name="city"/>
+        <field name="summary"/>
+        <!--
+          Фильтры идут по связям, а не по вычисляемым полям карточки:
+          «моё участие» и «новости приходят» считаются на лету и по ним
+          нельзя искать. Подписка — штатный признак mail.thread.
+        -->
+        <filter name="mine" string="Где я состою"
+                domain="[('member_ids', 'any', [('partner_id.user_ids', 'in', [uid]),
+                                                ('state', '=', 'active')])]"/>
+        <filter name="applied" string="Куда подал заявку"
+                domain="[('member_ids', 'any', [('partner_id.user_ids', 'in', [uid]),
+                                                ('state', '=', 'pending')])]"/>
+        <filter name="subscribed" string="На которые подписан"
+                domain="[('message_is_follower', '=', True)]"/>
+        <separator/>
+        <filter name="neighbourhood" string="Соседские"
+                domain="[('kind', '=', 'neighbourhood')]"/>
+        <filter name="professional" string="Профессиональные"
+                domain="[('kind', '=', 'professional')]"/>
+        <filter name="financial" string="Финансовые"
+                domain="[('kind', '=', 'financial')]"/>
+        <separator/>
+        <filter name="open" string="Открытые" domain="[('access', '=', 'public')]"/>
+        <filter name="archived_state" string="Закрытые"
+                domain="[('state', '=', 'archived')]"/>
+        <group>
+          <filter name="by_kind" string="По типу" context="{'group_by': 'kind'}"/>
+          <filter name="by_city" string="По городу" context="{'group_by': 'city'}"/>
+          <filter name="by_access" string="По входу" context="{'group_by': 'access'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_communities" model="ir.actions.act_window">
+    <field name="name">Сообщества</field>
+    <field name="res_model">coop.community</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="context">{'coop_catalog': True}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Сообществ пока нет</p>
+      <p>
+        Первое обычно заводят вокруг соседства, ремесла или общей закупки:
+        не ради разговора, а ради дела, которое в одиночку не тянется.
+      </p>
+    </field>
+  </record>
+
+  <!-- ── Участие ───────────────────────────────────────────────────── -->
+  <record id="view_coop_community_member_list" model="ir.ui.view">
+    <field name="name">coop.community.member.list</field>
+    <field name="model">coop.community.member</field>
+    <field name="arch" type="xml">
+      <list string="Участие" decoration-muted="state in ('left', 'rejected', 'banned')">
+        <field name="community_id"/>
+        <field name="partner_id"/>
+        <field name="role"/>
+        <field name="applied_on" optional="show"/>
+        <field name="joined_on" optional="show"/>
+        <field name="decision_reason" optional="hide"/>
+        <field name="state" widget="badge"
+               decoration-success="state == 'active'"
+               decoration-warning="state == 'pending'"/>
+        <button name="action_admit" type="object" string="Принять"
+                class="btn-link" invisible="state != 'pending'"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_community_member_form" model="ir.ui.view">
+    <field name="name">coop.community.member.form</field>
+    <field name="model">coop.community.member</field>
+    <field name="arch" type="xml">
+      <form string="Участие">
+        <header>
+          <button name="action_admit" type="object" string="Принять"
+                  class="btn-primary" invisible="state != 'pending'"/>
+          <button name="action_reject" type="object" string="Отклонить"
+                  invisible="state != 'pending'"/>
+          <button name="action_ban" type="object" string="Исключить"
+                  invisible="state != 'active'"
+                  confirm="Исключить участника? Его сообщения в обсуждении останутся — исключение отбирает доступ, а не текст."/>
+          <field name="state" widget="statusbar"/>
+        </header>
+        <sheet>
+          <group>
+            <group>
+              <field name="community_id"/>
+              <field name="partner_id"/>
+              <field name="role"/>
+            </group>
+            <group>
+              <field name="applied_on"/>
+              <field name="joined_on"/>
+              <field name="left_on"/>
+              <field name="decided_by_id"/>
+              <field name="decided_on"/>
+            </group>
+          </group>
+          <group>
+            <field name="application_note" placeholder="Что человек написал в заявке"/>
+            <field name="decision_reason"
+                   placeholder="Почему приняли, отклонили или исключили"/>
+          </group>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_coop_community_members" model="ir.actions.act_window">
+    <field name="name">Участие в сообществах</field>
+    <field name="res_model">coop.community.member</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <!-- ── Меню ──────────────────────────────────────────────────────── -->
+  <menuitem id="menu_coop_communities_root" name="Сообщества" sequence="55"/>
+  <menuitem id="menu_coop_communities" name="Каталог сообществ"
+            parent="menu_coop_communities_root" action="action_coop_communities"
+            sequence="10"/>
+  <menuitem id="menu_coop_community_members" name="Участие"
+            parent="menu_coop_communities_root" action="action_coop_community_members"
+            sequence="90" groups="coop_base.group_coop_platform"/>
+
+</odoo>

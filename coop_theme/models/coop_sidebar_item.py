@@ -21,7 +21,7 @@ MAIN_ITEMS = [
     ('Ресурсы', 'fa-cube', 'coop_resources.action_coop_resources'),
     ('Проекты', 'fa-rocket', 'coop_projects.action_coop_projects'),
     ('Организации', 'fa-university', 'coop_orgs.action_coop_orgs'),
-    ('Сообщества', 'fa-comments', None),
+    ('Сообщества', 'fa-comments', 'coop_communities.action_coop_communities'),
     ('Кошелёк', 'fa-credit-card', 'coop_wallet.action_coop_my_wallet'),
     ('Сделки', 'fa-handshake-o', 'coop_deals.action_coop_deals'),
 ]

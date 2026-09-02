@@ -1,0 +1,226 @@
+// Плитка сообщества.
+//
+// Геометрия медиа-колонки общая для всех каталогов и задана в теме
+// (`catalog_view.scss`, класс `o_coop_media`). Здесь — только то, что у
+// сообщества действительно своё: значок вместо обложки, счётчик
+// участников, состояние участия и колокольчик подписки.
+
+.o_coop_communities {
+
+  .o_kanban_record.o_kanban_ghost {
+    border: 0;
+    background: none;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .o_kanban_record {
+    background: var(--coop-white, #fff);
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(20, 23, 26, .05);
+    padding: 0;
+    overflow: hidden;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+
+    &:hover {
+      border-color: var(--coop-teal, #146b64);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(20, 23, 26, .06), 0 14px 28px rgba(20, 23, 26, .1);
+    }
+  }
+
+  .o_coop_tile {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+  }
+
+  // Закрытое сообщество остаётся в каталоге и в истории участников, но
+  // читается приглушённо — как отменённая сделка в списке.
+  .o_coop_tile_muted {
+    opacity: .62;
+  }
+
+  .o_coop_cover {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1.2;
+    overflow: hidden;
+    background: var(--coop-surface, #f2f2ee);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  // Значок на подложке — запасной вариант, а не основной: в колонке
+  // 200 пикселей эмодзи 48×48 оставил бы пустую полосу, и ряд
+  // сообществ перестал бы совпадать по высоте с остальными каталогами.
+  .o_coop_cover_icon {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 44px;
+    line-height: 1;
+    background: var(--coop-teal-tint, #e3efed);
+  }
+
+  .o_coop_badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font: 600 10.5px/1.3 'Manrope', sans-serif;
+    background: var(--coop-white, #fff);
+    color: var(--coop-ink, #14171a);
+  }
+
+  .o_coop_badge_right {
+    left: auto;
+    right: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, .92);
+  }
+
+  // Тип сообщества различается цветом — так же, как вид у проекта.
+  .o_coop_kind_neighbourhood {
+    background: var(--coop-teal, #146b64);
+    color: #fff;
+  }
+  .o_coop_kind_professional {
+    background: var(--coop-gold, #c98a2b);
+    color: #fff;
+  }
+  .o_coop_kind_interest {
+    background: var(--coop-white, #fff);
+    color: var(--coop-slate, #4a4a44);
+    box-shadow: inset 0 0 0 1px var(--coop-line, #e6e6e1);
+  }
+  .o_coop_kind_financial {
+    background: var(--coop-ink, #14171a);
+    color: #fff;
+  }
+  .o_coop_kind_local {
+    background: var(--coop-teal-tint, #e3efed);
+    color: var(--coop-teal-dark, #0f4f4a);
+  }
+
+  .o_coop_loc {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 5px 9px;
+    background: rgba(20, 23, 26, .62);
+    color: #fff;
+    font: 600 11px/1.3 'Manrope', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .o_coop_tile_body {
+    padding: 10px 11px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .o_coop_tile_name {
+    font: 700 13.5px/1.35 'Manrope', sans-serif;
+    color: var(--coop-ink, #14171a);
+  }
+
+  .o_coop_tile_desc {
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--coop-slate, #4a4a44);
+    // Три строки: описания разной длины, иначе плитки в ряду
+    // разъезжаются по высоте.
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .o_coop_tile_link {
+    font-size: 11.5px;
+    color: var(--coop-teal, #146b64);
+  }
+
+  .o_coop_tile_actions {
+    margin-top: auto;
+    padding-top: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .o_coop_join {
+    padding: 4px 14px;
+    font-size: 12px;
+  }
+
+  // Состояние участия — надпись, а не кнопка. Кнопкой оно приглашало
+  // нажать, и один клик молча выводил человека из сообщества.
+  .o_coop_state {
+    font: 600 11.5px/1.3 'Manrope', sans-serif;
+    color: var(--coop-teal-dark, #0f4f4a);
+  }
+
+  .o_coop_state_wait {
+    color: var(--coop-gold-text, #8a5f1c);
+  }
+
+  .o_coop_state_off {
+    color: var(--coop-slate, #4a4a44);
+  }
+
+  .o_coop_bell {
+    flex: none;
+    padding: 2px 4px;
+    color: var(--coop-slate, #4a4a44);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--coop-teal, #146b64);
+    }
+  }
+
+  .o_coop_bell_on {
+    color: var(--coop-gold, #c98a2b);
+  }
+}
+
+// Строчный вид: снимок слева, всё остальное в строку. Ширина и
+// пропорция снимка — из общего слоя, здесь только раскладка карточки.
+.o_coop_rows .o_coop_communities,
+.o_coop_communities.o_coop_rows {
+
+  .o_coop_tile {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .o_coop_tile_body {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .o_coop_tile_desc {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+}
