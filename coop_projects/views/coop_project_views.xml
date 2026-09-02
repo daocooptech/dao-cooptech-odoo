@@ -17,8 +17,15 @@
           <t t-name="card">
             <div class="o_coop_tile">
               <div class="o_coop_tile_image">
-                <img t-att-src="'/web/image/coop.project/%s/image_512' % record.id.raw_value"
-                     alt="" loading="lazy"/>
+                <!--
+                  Адрес собирается сложением строк. Питоновское
+                  форматирование через «%» здесь не работает: шаблон
+                  карточки компилируется в JavaScript, где «%» — остаток
+                  от деления, и адрес выходил равным NaN. Картинки при
+                  этом не ломались с ошибкой, а просто не появлялись.
+                -->
+                <img t-att-src="'/web/image/coop.project/' + record.id.raw_value + '/image_512'"
+                     t-att-alt="record.name.value" loading="lazy"/>
                 <span class="o_coop_badge o_coop_kind"
                       t-att-class="'o_coop_kind_' + record.kind.raw_value">
                   <t t-esc="record.kind.value"/>
