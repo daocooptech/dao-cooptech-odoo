@@ -1,0 +1,81 @@
+// Переключатель административных полномочий в шапке.
+//
+// Выглядит как тумблер, а не как кнопка: у кнопки нет состояния, а здесь
+// оно главное — включено или нет.
+
+.o_coop_admin_switch {
+  display: flex;
+  align-items: center;
+  margin-right: 8px;
+}
+
+.o_coop_admin_label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  cursor: pointer;
+  user-select: none;
+
+  input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+}
+
+.o_coop_admin_track {
+  position: relative;
+  width: 34px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--coop-line, #e6e6e1);
+  transition: background .15s ease;
+  flex: none;
+}
+
+.o_coop_admin_knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--coop-white, #fff);
+  box-shadow: 0 1px 2px rgba(20, 23, 26, .25);
+  transition: transform .15s ease;
+}
+
+.o_coop_admin_text {
+  font: 600 11.5px/1.4 'Manrope', sans-serif;
+  color: var(--coop-slate, #4a4a44);
+  white-space: nowrap;
+}
+
+// Включённый режим виден издалека: человек должен понимать, что каждое
+// его действие сейчас административное.
+.o_coop_admin_on {
+  .o_coop_admin_track {
+    background: var(--coop-gold, #c98a2b);
+  }
+
+  .o_coop_admin_knob {
+    transform: translateX(16px);
+  }
+
+  .o_coop_admin_text {
+    color: var(--coop-gold-text, #8a5f1c);
+  }
+}
+
+.o_coop_admin_title {
+  color: var(--coop-gold-text, #8a5f1c);
+}
+
+// На узком экране подпись убирается — остаётся тумблер.
+@media (max-width: 900px) {
+  .o_coop_admin_text {
+    display: none;
+  }
+}

@@ -27,7 +27,7 @@ export class CoopSidebar extends Component {
         this.action = useService("action");
         this.orm = useService("orm");
         this.state = useState({
-            main: [], extensions: [], current: null, open: false,
+            main: [], extensions: [], admin: [], current: null, open: false,
             acting: null, actors: [],
         });
 
@@ -77,6 +77,9 @@ export class CoopSidebar extends Component {
         }
         this.state.main = items.filter((item) => item.section === "main");
         this.state.extensions = items.filter((item) => item.section === "ext");
+        // Административные разделы приходят только при включённом режиме
+        // полномочий и не хранятся в меню участника.
+        this.state.admin = items.filter((item) => item.section === "admin");
         await this.loadActors();
         if (this.settingsId === undefined) {
             const resolved = await this._settingsAction();

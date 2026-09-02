@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="view_coop_admin_grant_list" model="ir.ui.view">
+    <field name="name">coop.admin.grant.list</field>
+    <field name="model">coop.admin.grant</field>
+    <field name="arch" type="xml">
+      <list string="Полномочия" decoration-muted="state in ('revoked', 'rejected')">
+        <field name="partner_id"/>
+        <field name="user_id" optional="show"/>
+        <field name="votes_for"/>
+        <field name="votes_against"/>
+        <field name="decided_on"/>
+        <field name="revoked_on" optional="hide"/>
+        <field name="chain_tx" optional="hide"/>
+        <field name="state" widget="badge"
+               decoration-success="state == 'granted'"
+               decoration-warning="state == 'proposed'"
+               decoration-muted="state in ('revoked', 'rejected')"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_admin_grant_form" model="ir.ui.view">
+    <field name="name">coop.admin.grant.form</field>
+    <field name="model">coop.admin.grant</field>
+    <field name="arch" type="xml">
+      <form string="Полномочия администратора">
+        <header>
+          <button name="action_grant" type="object" string="Выдать полномочия"
+                  class="btn-primary" invisible="state != 'proposed'"
+                  confirm="Выдать полномочия? У человека появится переключатель, включающий полный доступ."/>
+          <button name="action_reject" type="object" string="Отклонить"
+                  invisible="state != 'proposed'"/>
+          <button name="action_revoke" type="object" string="Отозвать"
+                  invisible="state != 'granted'"
+                  confirm="Отозвать полномочия? Включённый режим погаснет сразу."/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="proposed,granted,revoked"/>
+        </header>
+        <sheet>
+          <div class="oe_title">
+            <label for="partner_id" string="Кому"/>
+            <h1><field name="partner_id" placeholder="Участник"/></h1>
+          </div>
+          <group>
+            <group string="Голосование">
+              <field name="votes_for"/>
+              <field name="votes_against"/>
+              <field name="decided_on"/>
+              <field name="revoked_on" invisible="state != 'revoked'"/>
+            </group>
+            <group string="Запись в сети">
+              <field name="user_id" readonly="1"/>
+              <field name="chain_network_id"/>
+              <field name="chain_tx" placeholder="пока голосуем на платформе"/>
+            </group>
+          </group>
+          <group>
+            <field name="basis" placeholder="Зачем полномочия выдаются"/>
+            <field name="voter_ids" widget="many2many_tags"/>
+          </group>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_coop_admin_grant" model="ir.actions.act_window">
+    <field name="name">Полномочия</field>
+    <field name="res_model">coop.admin.grant</field>
+    <field name="view_mode">list,form</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Решений пока нет</p>
+      <p>
+        Административные полномочия выдаёт команда голосованием. Здесь
+        видно, кому и когда они выданы, кто голосовал и на каком основании.
+      </p>
+    </field>
+  </record>
+
+</odoo>

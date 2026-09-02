@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <t t-name="coop_admin.AdminSwitch">
+    <div class="o_coop_admin_switch" t-if="state.granted">
+      <label class="o_coop_admin_label" t-att-class="{ 'o_coop_admin_on': state.active }">
+        <input type="checkbox" t-att-checked="state.active"
+               t-att-disabled="state.busy"
+               t-on-change="() => this.toggle()"
+               aria-label="Административные полномочия"/>
+        <span class="o_coop_admin_track"><span class="o_coop_admin_knob"/></span>
+        <span class="o_coop_admin_text">
+          <t t-if="state.active">Администратор</t>
+          <t t-else="">Обычный режим</t>
+        </span>
+      </label>
+    </div>
+  </t>
+
+  <!--
+    Административные разделы отдельным блоком с собственным заголовком:
+    свалить их в общий список значило бы поставить «Модели и поля» рядом
+    с «Ресурсами», как будто это раздел платформы.
+  -->
+  <t t-name="coop_admin.Sidebar" t-inherit="coop_theme.Sidebar" t-inherit-mode="extension">
+    <xpath expr="//nav[@aria-label='Расширения']" position="after">
+      <t t-if="state.admin.length">
+        <div class="o_coop_ext_title o_coop_admin_title">Администрирование</div>
+        <nav aria-label="Администрирование">
+          <a t-foreach="state.admin" t-as="item" t-key="item.label"
+             href="#" class="o_coop_nav_item"
+             t-att-class="{ 'active': isActive(item) }"
+             t-on-click.prevent="() => this.open(item)">
+            <i class="fa fa-fw" t-att-class="item.icon" role="img" aria-hidden="true"/>
+            <span t-esc="item.label"/>
+          </a>
+        </nav>
+      </t>
+    </xpath>
+  </t>
+
+</templates>
