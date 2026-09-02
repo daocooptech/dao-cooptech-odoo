@@ -89,6 +89,32 @@
       своё собственное. Правило на уровне записи, а не на уровне модели:
       скрывать целиком нельзя — состав кооператива его законный интерес.
     -->
+    <!--
+      Состав организации — открытые сведения: на карточке человека
+      написано, где он пайщик, а на карточке организации — кто в ней
+      состоит. Без этого правила каталог людей вообще не открывался:
+      карточка читает членство, а рядовой участник не состоял ни в одной
+      из ролевых групп и получал «Ошибка доступа».
+
+      Видно при этом только действующее членство. Заявки, выход и
+      исключение — внутреннее дело организации, и посторонним они
+      показываются лишь через ролевые правила ниже.
+    -->
+    <record id="rule_membership_public" model="ir.rule">
+      <field name="name">Действующий состав организаций виден участникам</field>
+      <field name="model_id" ref="model_coop_membership"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">
+        ['|',
+          ('partner_id', '=', user.partner_id.id),
+          ('state', '=', 'active')]
+      </field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="False"/>
+      <field name="perm_create" eval="False"/>
+      <field name="perm_unlink" eval="False"/>
+    </record>
+
     <record id="rule_membership_member" model="ir.rule">
       <field name="name">Пайщик видит состав своих организаций</field>
       <field name="model_id" ref="model_coop_membership"/>

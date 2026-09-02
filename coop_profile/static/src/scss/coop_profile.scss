@@ -139,6 +139,18 @@
       margin: 0;
       font: 700 24px/1.25 'Manrope', sans-serif;
       color: var(--coop-ink, #14171a);
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    // Своё имя редактируется, и поле ввода Odoo берёт ширину по числу
+    // символов, а не по месту. Из-за этого «Дашкевич Данил Игоревич»
+    // обрезался на «Игорев» — выглядело как испорченные данные.
+    .o_field_widget,
+    input {
+      width: 100%;
+      font: inherit;
+      color: inherit;
     }
   }
 
@@ -154,6 +166,17 @@
     margin: 4px 0 14px;
     font-size: 13px;
     color: var(--coop-teal-dark, #0f4f4a);
+
+    .o_field_widget,
+    input {
+      width: 100%;
+      max-width: 520px;
+    }
+  }
+
+  // То же и в справках слева: поле «Город» обрезало «Ростов-на-Дону».
+  .o_coop_infobox_body input {
+    width: 100%;
   }
 
   .o_coop_about {
