@@ -2,30 +2,37 @@
 <templates xml:space="preserve">
 
   <!--
-    Кнопки вида ставятся рядом с собственными кнопками представления, а
-    класс вида — на корень: карточка одна и та же, меняется только её
-    раскладка. Так же устроен прототип, где переключался класс `tile-mode`.
+    Класс вида ставится на корень представления: карточка одна и та же,
+    меняется её раскладка. Так же устроен прототип, где переключался класс
+    `tile-mode`. Своих кнопок здесь нет — переключатель один, штатный,
+    справа.
   -->
   <t t-name="coop_theme.CatalogKanbanView" t-inherit="web.KanbanView" t-inherit-mode="primary">
     <xpath expr="//div[@t-ref='root']" position="attributes">
       <attribute name="t-attf-class">{{ className }} {{ hasSelectedRecords ? 'o_kanban_selection_active' : 'o_kanban_selection_available' }} {{ coopLayout.rows ? 'o_coop_rows' : 'o_coop_tiles' }}</attribute>
     </xpath>
+  </t>
 
-    <xpath expr="//t[@t-set-slot='layout-buttons']" position="inside">
-      <div class="btn-group o_coop_view_toggle ms-2" role="group" aria-label="Вид каталога">
-        <button type="button" class="btn btn-secondary"
-                t-att-class="{ 'active': !coopLayout.rows }"
-                title="Плиткой" aria-label="Плиткой"
-                t-on-click="() => this.setCoopLayout(false)">
-          <i class="oi oi-view-kanban" role="img"/>
-        </button>
-        <button type="button" class="btn btn-secondary"
-                t-att-class="{ 'active': coopLayout.rows }"
-                title="Строками" aria-label="Строками"
-                t-on-click="() => this.setCoopLayout(true)">
-          <i class="fa fa-align-justify" role="img"/>
-        </button>
-      </div>
+  <!--
+    Переключатель видов. У каталога платформы кнопок три: плиткой,
+    канбаном, списком. Первые две — одно представление в двух раскладках,
+    третья — отдельное представление Odoo.
+
+    Подменяется источник кнопок, а не добавляется вторая группа: два
+    переключателя на экране заставляют гадать, чем они отличаются.
+  -->
+  <t t-name="coop_theme.ControlPanel" t-inherit="web.ControlPanel" t-inherit-mode="extension">
+    <xpath expr="//t[@t-if='env.config.viewSwitcherEntries?.length > 1']" position="attributes">
+      <attribute name="t-if">coopViewEntries.length > 1</attribute>
+    </xpath>
+    <xpath expr="//Dropdown//t[@t-set='activeView']" position="attributes">
+      <attribute name="t-value">coopViewEntries.find((view) => view.active)</attribute>
+    </xpath>
+    <xpath expr="//t[@t-set-slot='content']//t[@t-foreach='env.config.viewSwitcherEntries']" position="attributes">
+      <attribute name="t-foreach">coopViewEntries</attribute>
+    </xpath>
+    <xpath expr="//nav[hasclass('o_cp_switch_buttons')]//t[@t-foreach='env.config.viewSwitcherEntries']" position="attributes">
+      <attribute name="t-foreach">coopViewEntries</attribute>
     </xpath>
   </t>
 

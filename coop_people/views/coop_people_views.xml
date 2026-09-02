@@ -135,7 +135,7 @@
     <field name="res_model">res.partner</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('coop_is_participant', '=', True), ('is_company', '=', False)]</field>
-    <field name="context">{'default_coop_is_participant': True, 'default_is_company': False}</field>
+    <field name="context">{'coop_catalog': True, 'default_coop_is_participant': True, 'default_is_company': False}</field>
     <field name="search_view_id" ref="view_coop_people_search"/>
     <!-- Явная привязка представлений. res.partner — общая модель, и без
          этого списка действие подберёт по приоритету стандартный канбан

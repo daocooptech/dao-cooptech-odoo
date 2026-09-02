@@ -1,0 +1,189 @@
+// Оболочка платформы: боковое меню разделов и подвал.
+//
+// Размеры и оформление — из прототипа: панель 216 пикселей, пункт
+// Manrope 500 на 13, активный на фирменной подложке. Рубрика
+// «Расширения» набрана моноширинным: это заголовок раздела меню, а не
+// пункт, и читаться должна иначе.
+
+// Ширина рабочей области — 1440, как в прототипе. Без ограничения на
+// широком мониторе строка каталога растягивается на полтора метра, и
+// глазу приходится ездить от подписи слева до значения справа.
+.o_coop_layout {
+  display: flex;
+  align-items: stretch;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.o_coop_main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  padding: 22px 26px 40px;
+}
+
+// Отступы задаёт оболочка — иначе к её 26 прибавятся собственные отступы
+// панели, и заголовок раздела уедет от бокового меню вдвое дальше, чем в
+// макете.
+.o_coop_main .o_control_panel {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.o_coop_sidebar {
+  flex: 0 0 216px;
+  width: 216px;
+  background: var(--coop-white, #fff);
+  border-right: 1px solid var(--coop-line, #e6e6e1);
+  padding: 14px 12px 20px;
+  overflow-y: auto;
+
+  nav {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+}
+
+.o_coop_nav_item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 11px;
+  font: 500 13px/1.3 'Manrope', sans-serif;
+  color: var(--coop-slate, #4a4a44);
+  border-radius: 8px;
+  text-decoration: none;
+
+  &:hover {
+    background: var(--coop-surface, #f2f2ee);
+    color: var(--coop-slate, #4a4a44);
+    text-decoration: none;
+  }
+
+  &.active {
+    background: var(--coop-teal-tint, #e3efed);
+    color: var(--coop-teal-dark, #0e4f4a);
+    font-weight: 700;
+  }
+
+  .fa {
+    color: currentColor;
+    flex: none;
+  }
+}
+
+.o_coop_ext_title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 11px 8px 11px 11px;
+  border-top: 1px solid var(--coop-line, #e6e6e1);
+  border-bottom: 1px solid var(--coop-line, #e6e6e1);
+  font: 700 11px/1 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--coop-slate-light, #8f8f88);
+}
+
+.o_coop_ext_add {
+  margin-left: auto;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border-radius: 7px;
+  border: 1px solid var(--coop-line, #e6e6e1);
+  background: var(--coop-surface, #f2f2ee);
+  color: var(--coop-slate, #4a4a44);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  line-height: 1;
+
+  &:hover {
+    border-color: var(--coop-teal, #146b64);
+    color: var(--coop-teal, #146b64);
+  }
+}
+
+// Пункты расширений сдвинуты вправо, как в макете: по отступу видно, что
+// они принадлежат рубрике, а не идут наравне с основными разделами.
+.o_coop_ext_title + nav .o_coop_nav_item {
+  padding-left: 37px;
+}
+
+// ── Подвал ───────────────────────────────────────────────────────────────
+//
+// Всегда, а не через раз. В прототипе он есть на каждой странице, и его
+// отсутствие на части экранов читается как недоделанная вёрстка.
+.o_coop_footer {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 32px;
+  padding: 16px 0 12px;
+  border-top: 1px solid var(--coop-line, #e6e6e1);
+  flex: none;
+
+  a {
+    color: var(--coop-slate-light, #8f8f88);
+    font: 500 12px/1 'Manrope', sans-serif;
+    text-decoration: none;
+
+    &:hover {
+      color: var(--coop-teal, #146b64);
+      text-decoration: none;
+    }
+  }
+}
+
+// ── Раздел, которого ещё нет ─────────────────────────────────────────────
+.o_coop_soon {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 64px 24px;
+  flex: 1 1 auto;
+}
+
+.o_coop_soon_box {
+  max-width: 520px;
+  background: var(--coop-white, #fff);
+  border: 1px solid var(--coop-line, #e6e6e1);
+  border-radius: 10px;
+  padding: 28px 30px;
+
+  h2 {
+    font: 700 20px/1.3 'Manrope', sans-serif;
+    color: var(--coop-ink, #14171a);
+    margin: 0 0 12px;
+  }
+
+  p {
+    color: var(--coop-slate, #4a4a44);
+    font-size: 14px;
+    margin: 0 0 10px;
+  }
+}
+
+.o_coop_soon_note {
+  color: var(--coop-slate-light, #8f8f88) !important;
+  font-size: 13px !important;
+}
+
+// На узком экране боковое меню уезжает: 216 пикселей из 360 — это две
+// трети экрана под навигацию.
+@media (max-width: 900px) {
+  .o_coop_sidebar {
+    display: none;
+  }
+}

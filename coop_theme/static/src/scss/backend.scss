@@ -126,12 +126,27 @@
     color: var(--coop-teal-dark, #0e4f4a);
   }
 
-  // Активный пункт раздела. Без переопределения он остаётся чернильной
-  // плашкой из тёмной шапки Odoo — на светлой шапке это читается как
-  // недокрашенный кусок.
+  // Пункты разделов. Odoo красит их под тёмную шапку — чернильной
+  // плашкой; на светлой шапке такая плашка читается как недокрашенный
+  // кусок. Обычное состояние — прозрачное, и подсвечен ровно один пункт,
+  // тот, в котором находишься. Раньше подложку получали все сразу, и по
+  // ней нельзя было понять, где ты.
+  .o_menu_sections .o_nav_entry,
+  .o_menu_sections .dropdown-item,
+  .o_menu_sections .dropdown-toggle {
+    background-color: transparent !important;
+    color: var(--coop-ink, #14171a) !important;
+  }
+
+  .o_menu_sections .o_nav_entry:hover,
+  .o_menu_sections .dropdown-item:hover,
+  .o_menu_sections .dropdown-toggle:hover {
+    background-color: var(--coop-surface, #f2f2ee) !important;
+    color: var(--coop-teal-dark, #0e4f4a) !important;
+  }
+
   .o_menu_sections .o_nav_entry.active,
-  .o_menu_sections .o_nav_entry.focus,
-  .o_menu_sections .dropdown-item.o_nav_entry,
+  .o_menu_sections .dropdown-item.active,
   .o_menu_sections .dropdown-toggle.show {
     background-color: var(--coop-teal-tint, #e3efed) !important;
     color: var(--coop-teal-dark, #0e4f4a) !important;

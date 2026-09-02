@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!--
+    Оболочка платформы: слева постоянное меню разделов, снизу подвал.
+    В Odoo разделы живут в списке приложений, и чтобы перейти в соседний
+    каталог, надо этот список открыть. В прототипе они всегда на виду —
+    платформа устроена как одно пространство, а не набор приложений.
+  -->
+  <t t-name="coop_theme.WebClient" t-inherit="web.WebClient" t-inherit-mode="extension">
+    <xpath expr="//ActionContainer" position="replace">
+      <div class="o_coop_layout">
+        <CoopSidebar t-if="!state.fullscreen"/>
+        <div class="o_coop_main">
+          <ActionContainer/>
+          <CoopFooter t-if="!state.fullscreen"/>
+        </div>
+      </div>
+    </xpath>
+  </t>
+
+  <t t-name="coop_theme.Sidebar">
+    <aside class="o_coop_sidebar">
+      <nav aria-label="Разделы платформы">
+        <a t-foreach="state.main" t-as="item" t-key="item.label"
+           href="#" class="o_coop_nav_item"
+           t-att-class="{ 'active': isActive(item) }"
+           t-on-click.prevent="() => this.open(item)">
+          <i class="fa fa-fw" t-att-class="item.icon" role="img" aria-hidden="true"/>
+          <span t-esc="item.label"/>
+        </a>
+      </nav>
+
+      <!-- Рубрика расширений набрана моноширинным, как в макете: она не
+           пункт меню, а заголовок раздела меню, и читаться должна иначе. -->
+      <div class="o_coop_ext_title">
+        Расширения
+        <button type="button" class="o_coop_ext_add" title="Добавить расширение"
+                t-on-click="() => this.openCatalog()">+</button>
+      </div>
+      <nav aria-label="Расширения">
+        <a t-foreach="state.extensions" t-as="item" t-key="item.label"
+           href="#" class="o_coop_nav_item"
+           t-att-class="{ 'active': isActive(item) }"
+           t-on-click.prevent="() => this.open(item)">
+          <span t-esc="item.label"/>
+        </a>
+      </nav>
+    </aside>
+  </t>
+
+  <t t-name="coop_theme.Footer">
+    <div class="o_coop_footer">
+      <a href="/help-project">помощь проекту</a>
+      <a href="/">о платформе</a>
+      <a href="#">правила</a>
+      <a href="https://github.com/daocooptech/dao-cooptech-odoo" target="_blank" rel="noopener">разработчикам</a>
+    </div>
+  </t>
+
+  <t t-name="coop_theme.Soon">
+    <div class="o_coop_soon">
+      <div class="o_coop_soon_box">
+        <h2 t-esc="label"/>
+        <p>
+          Раздел ещё не перенесён на движок. Он есть в макете платформы и
+          появится здесь по мере переноса — порядок разделов в меню задан
+          заранее, чтобы было видно, чего ждать.
+        </p>
+        <p class="o_coop_soon_note">
+          Пункт меню оставлен намеренно: меню без него выглядело бы полным,
+          и понять, что раздела не хватает, было бы неоткуда.
+        </p>
+      </div>
+    </div>
+  </t>
+
+</templates>

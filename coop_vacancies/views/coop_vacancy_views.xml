@@ -255,6 +255,7 @@
   <record id="action_coop_vacancies" model="ir.actions.act_window">
     <field name="name">Вакансии</field>
     <field name="res_model">coop.vacancy</field>
+    <field name="context">{'coop_catalog': True}</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('state', '=', 'published')]</field>
     <field name="search_view_id" ref="view_coop_vacancy_search"/>

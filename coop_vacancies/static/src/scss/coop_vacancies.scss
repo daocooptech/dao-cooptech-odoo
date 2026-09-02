@@ -48,12 +48,19 @@
     > .o_field_widget {
       position: absolute;
       inset: 0;
+      width: auto;
+      height: auto;
       display: block;
     }
 
+    > .o_field_image > div,
+    > .o_field_widget > div {
+      position: absolute;
+      inset: 0;
+    }
+
     > .o_field_image img,
-    > .o_field_widget img,
-    > img {
+    > .o_field_widget img {
       width: 100%;
       height: 100%;
       object-fit: cover;
