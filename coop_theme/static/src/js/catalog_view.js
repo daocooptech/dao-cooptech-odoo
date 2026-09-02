@@ -6,6 +6,7 @@ import { patch } from "@web/core/utils/patch";
 import { kanbanView } from "@web/views/kanban/kanban_view";
 import { KanbanController } from "@web/views/kanban/kanban_controller";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
+import { Pager } from "@web/core/pager/pager";
 import { reactive, useEffect, useState } from "@odoo/owl";
 
 /**
@@ -120,6 +121,12 @@ export function parseOrder(order) {
 }
 
 export class CoopCatalogKanbanController extends KanbanController {
+    // Постраничная навигация рисуется внизу списка, как в макете, а не в
+    // панели сверху. Данные берутся те же, что у штатной: представление
+    // уже сложило их в настройку экрана, и считать их второй раз значило
+    // бы завести второй счётчик, который разойдётся с первым.
+    static components = { ...KanbanController.components, Pager };
+
     setup() {
         super.setup();
         this.coopLayout = useState(coopLayout);

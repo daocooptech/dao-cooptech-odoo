@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="view_coop_attribute_list" model="ir.ui.view">
+    <field name="name">coop.attribute.list</field>
+    <field name="model">coop.attribute</field>
+    <field name="arch" type="xml">
+      <list string="Характеристики" editable="bottom">
+        <field name="sequence" widget="handle"/>
+        <field name="name"/>
+        <field name="code"/>
+        <field name="value_type"/>
+        <field name="unit" optional="show"/>
+        <field name="filter_widget"/>
+        <field name="is_indexed" optional="show"/>
+        <field name="show_on_card" optional="hide"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_attribute_form" model="ir.ui.view">
+    <field name="name">coop.attribute.form</field>
+    <field name="model">coop.attribute</field>
+    <field name="arch" type="xml">
+      <form string="Характеристика">
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Пробег"/></h1>
+            <field name="code" placeholder="mileage_km"/>
+          </div>
+          <group>
+            <group string="Что это за величина">
+              <field name="value_type"/>
+              <field name="unit" placeholder="км"/>
+              <field name="value_min"
+                     invisible="value_type not in ('integer', 'float')"/>
+              <field name="value_max"
+                     invisible="value_type not in ('integer', 'float')"/>
+            </group>
+            <group string="Как показывается">
+              <field name="filter_widget"/>
+              <field name="is_indexed"/>
+              <field name="show_on_card"/>
+              <field name="help_text" placeholder="Подсказка под полем"/>
+            </group>
+          </group>
+          <notebook>
+            <page string="Варианты значений" name="options"
+                  invisible="value_type not in ('selection', 'tags')">
+              <field name="option_ids">
+                <list editable="bottom">
+                  <field name="sequence" widget="handle"/>
+                  <field name="name"/>
+                  <field name="code"/>
+                </list>
+              </field>
+            </page>
+            <page string="Где применяется" name="assignments">
+              <field name="assignment_ids">
+                <list editable="bottom">
+                  <field name="category_id"/>
+                  <field name="sequence"/>
+                  <field name="is_required"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_coop_attribute" model="ir.actions.act_window">
+    <field name="name">Характеристики</field>
+    <field name="res_model">coop.attribute</field>
+    <field name="view_mode">list,form</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Характеристик пока нет</p>
+      <p>
+        Характеристика принадлежит платформе, а рубрике — привязка к ней.
+        Марка нужна и в автомобилях, и в запчастях; заводить её дважды
+        значит получить два несводимых списка марок.
+      </p>
+    </field>
+  </record>
+
+  <!-- Формы рубрики в каталоге ресурсов не было: рубрики правились
+       списком. Характеристикам нужна форма — на ней видно, что уже
+       досталось от родительской рубрики, а что добавляется здесь. -->
+  <record id="view_coop_resource_category_form" model="ir.ui.view">
+    <field name="name">coop.resource.category.form</field>
+    <field name="model">coop.resource.category</field>
+    <field name="arch" type="xml">
+      <form string="Рубрика">
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Название рубрики"/></h1>
+          </div>
+          <group>
+            <field name="parent_id"/>
+            <field name="complete_name" readonly="1"/>
+          </group>
+          <group string="Характеристики этой рубрики">
+            <field name="attribute_assignment_ids" nolabel="1">
+              <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="attribute_id"/>
+                <field name="is_required"/>
+                <field name="option_ids" widget="many2many_tags"
+                       optional="hide"/>
+              </list>
+            </field>
+          </group>
+          <div class="text-muted">
+            Характеристики родительских рубрик добавляются к этим сами:
+            год выпуска, заданный у «Транспорта», действует и в
+            «Легковых».
+          </div>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <menuitem id="menu_coop_attribute" name="Характеристики"
+            parent="coop_resources.menu_coop_resources_config"
+            action="action_coop_attribute" sequence="30"
+            groups="base.group_system"/>
+
+</odoo>

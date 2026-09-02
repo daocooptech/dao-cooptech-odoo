@@ -67,6 +67,39 @@
   }
 }
 
+// Верхняя строка панели в каталоге почти вся убрана.
+//
+// Название раздела дублирует вкладку, которая теперь стоит выше;
+// шестерёнка настроек представления участнику не нужна; поиск переехал
+// в шапку; страницы переключаются внизу, под плитками. Остаётся то, ради
+// чего строка и нужна: кнопка создания слева, порядок и вид справа.
+.o_control_panel.o_coop_catalog {
+
+  .o_control_panel_breadcrumbs .o_breadcrumb,
+  .o_control_panel_breadcrumbs .o_cp_switch_buttons ~ *,
+  .o_cp_pager {
+    display: none !important;
+  }
+
+  // Строка становится тонкой: в ней больше нет ни названия, ни поиска.
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+}
+
+// Постраничная навигация под плитками — как в макете.
+//
+// Область содержимого выложена в строку: список и панель фильтров стоят
+// рядом. Без явной ширины пагинатор становится третьей колонкой и
+// прижимается к правому краю столбиком.
+.o_coop_pager {
+  flex: 0 0 100%;
+  width: 100%;
+  order: 3;
+  display: flex;
+  justify-content: center;
+  padding: 18px 0 26px;
+}
+
 // Каталожный поиск и выбор порядка.
 //
 // Стоят в верхней строке панели, рядом с названием раздела: широкое поле
@@ -75,12 +108,34 @@
 // ищет».
 .o_control_panel.o_coop_catalog {
 
-  // Поиск не сжимается до узкой щели, но и не растягивается на всю
-  // строку: пагинатор и переключатель вида остаются на своих местах.
+  // Поле ввода каталожного поиска убрано: поиск на платформе один и
+  // стоит в шапке, как в макете. Два поля на экране — это два вопроса
+  // «а этот где ищет», а сужают выдачу здесь фильтры справа.
+  //
+  // Сам узел поиска при этом остаётся: в нём живут применённые условия.
+  // Когда из шапки открывают каталог по запросу, человек должен видеть,
+  // почему список короткий, и уметь это снять.
+  .o_searchview .o_searchview_input_container,
+  .o_searchview .o_dropdown_toggler_btn,
+  .o_searchview_dropdown_toggler,
+  .o_searchview > i,
+  .o_searchview > .fa,
+  .o_searchview > .dropdown {
+    display: none !important;
+  }
+
   .o_searchview {
-    flex: 1 1 320px;
-    min-width: 220px;
-    max-width: 460px;
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 520px;
+    border: 0;
+    background: none;
+    padding: 0;
+  }
+
+  // Пустой поиск не должен занимать место и рисовать рамку.
+  .o_searchview:empty {
+    display: none;
   }
 
   .o_control_panel_actions {
@@ -107,7 +162,15 @@
   .o_content {
     display: flex;
     align-items: flex-start;
+    flex-wrap: wrap;
     gap: 16px;
+  }
+
+  // Список забирает всё, что осталось от панели фильтров.
+  .o_kanban_renderer {
+    flex: 1 1 0;
+    min-width: 0;
+    order: 1;
   }
 
   .o_search_panel {

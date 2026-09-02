@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_coop_attribute_user,Характеристики — чтение,model_coop_attribute,base.group_user,1,0,0,0
+access_coop_attribute_system,Характеристики — администратор,model_coop_attribute,base.group_system,1,1,1,1
+access_coop_attribute_option_user,Варианты — чтение,model_coop_attribute_option,base.group_user,1,0,0,0
+access_coop_attribute_option_system,Варианты — администратор,model_coop_attribute_option,base.group_system,1,1,1,1
+access_coop_attribute_assignment_user,Характеристики рубрики — чтение,model_coop_attribute_assignment,base.group_user,1,0,0,0
+access_coop_attribute_assignment_system,Характеристики рубрики — администратор,model_coop_attribute_assignment,base.group_system,1,1,1,1

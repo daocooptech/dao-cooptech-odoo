@@ -11,6 +11,17 @@
     <xpath expr="//div[@t-ref='root']" position="attributes">
       <attribute name="t-attf-class">{{ className }} {{ hasSelectedRecords ? 'o_kanban_selection_active' : 'o_kanban_selection_available' }} {{ coopLayout.rows ? 'o_coop_rows' : 'o_coop_tiles' }}</attribute>
     </xpath>
+
+    <!--
+      Страницы переключаются внизу, под плитками, как в макете. Наверху
+      им не место: там человек ещё ничего не посмотрел, и переключать
+      нечего.
+    -->
+    <xpath expr="//t[@t-component='props.Renderer']" position="after">
+      <div class="o_coop_pager" t-if="env.config.pagerProps">
+        <Pager t-props="env.config.pagerProps"/>
+      </div>
+    </xpath>
   </t>
 
   <!--
