@@ -2,3 +2,14 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_coop_wallet_user,Кошелёк — участник,model_coop_wallet,base.group_user,1,1,1,0
 access_coop_wallet_movement_user,Движения — участник,model_coop_wallet_movement,base.group_user,1,1,1,1
 access_coop_settlement_user,Сальдо — участник,model_coop_settlement,base.group_user,1,0,0,0
+access_coop_network_user,Сети — чтение,model_coop_wallet_network,base.group_user,1,0,0,0
+access_coop_network_admin,Сети — ведение,model_coop_wallet_network,coop_base.group_coop_platform,1,1,1,1
+access_coop_address_user,Адреса — участник,model_coop_wallet_address,base.group_user,1,1,1,1
+access_coop_asset_user,Активы — участник,model_coop_wallet_asset,base.group_user,1,1,1,1
+access_coop_method_user,Способы оплаты — участник,model_coop_wallet_method,base.group_user,1,1,1,1
+access_coop_credit_line_user,Линии кредита — участник,model_coop_credit_line,base.group_user,1,1,1,0
+access_coop_credit_movement_user,Операции кредита — участник,model_coop_credit_movement,base.group_user,1,1,1,0
+access_coop_clearing_user,Взаимозачёт — участник,model_coop_credit_clearing,base.group_user,1,1,1,0
+access_coop_signature_user,Подписи — участник,model_coop_credit_signature,base.group_user,1,1,1,0
+access_coop_share_account_user,Паевые счета — участник,model_coop_share_account,base.group_user,1,1,1,0
+access_coop_share_move_user,Движения по паю — участник,model_coop_share_move,base.group_user,1,1,1,0

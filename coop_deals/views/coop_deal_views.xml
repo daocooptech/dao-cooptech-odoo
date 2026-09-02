@@ -150,6 +150,8 @@
                 <list editable="bottom" decoration-danger="state == 'overdue'"
                       decoration-success="state == 'paid'">
                   <field name="name"/>
+                  <field name="payer_id"/>
+                  <field name="payee_id"/>
                   <field name="due_on"/>
                   <field name="amount" sum="Всего"/>
                   <field name="currency_id" column_invisible="True"/>

@@ -25,6 +25,7 @@
     'data': [
         'security/ir.model.access.csv',
         'security/coop_wallet_rules.xml',
+        'data/coop_networks.xml',
         'views/coop_wallet_views.xml',
     ],
     'assets': {

@@ -348,6 +348,20 @@ class CoopDealPayment(models.Model):
         'coop.deal', string='Сделка', required=True, ondelete='cascade', index=True)
     name = fields.Char(string='Назначение', default='Платёж по договору')
     due_on = fields.Date(string='Срок', required=True)
+
+    # Кто кому платит — явными полями. Выводить это из порядка сторон в
+    # сделке нельзя: стороны равноправны, «первая» — порядок полей, а не
+    # старшинство. На покупке знак перевернулся бы, и взаиморасчёты
+    # уверенно показывали бы «должны вам» там, где должны вы.
+    payer_id = fields.Many2one(
+        'res.partner', string='Платит', index=True,
+        compute='_compute_parties', store=True, readonly=False,
+        help='Кто по этому платежу передаёт деньги.')
+    payee_id = fields.Many2one(
+        'res.partner', string='Получает', index=True,
+        compute='_compute_parties', store=True, readonly=False,
+        help='Кто по этому платежу деньги получает — он же и подтверждает '
+             'получение.')
     amount = fields.Monetary(string='Сумма', currency_field='currency_id', required=True)
     currency_id = fields.Many2one(related='deal_id.currency_id', store=True)
     state = fields.Selection([
@@ -359,6 +373,31 @@ class CoopDealPayment(models.Model):
     paid_on = fields.Date(string='Отмечен оплаченным', readonly=True)
     confirmed_by_id = fields.Many2one(
         'res.users', string='Подтвердил получение', readonly=True)
+
+    @api.depends('deal_id.way', 'deal_id.party_a_id', 'deal_id.party_b_id')
+    def _compute_parties(self):
+        """Предположить стороны платежа по способу сделки.
+
+        Предположить, а не задать: поле остаётся правимым. Способ сделки
+        подсказывает, кто передаёт деньги — при покупке первая сторона
+        платит, при продаже получает, — но случаи бывают разные, и
+        последнее слово за теми, кто сделку заключает.
+        """
+        # Способы, где деньги идут от первой стороны ко второй.
+        pays_first = ('purchase', 'rent', 'job', 'service', 'share', 'credit')
+        for record in self:
+            deal = record.deal_id
+            if not deal:
+                record.payer_id = record.payee_id = False
+                continue
+            if record.payer_id and record.payee_id:
+                continue
+            if deal.way in pays_first:
+                record.payer_id = deal.party_a_id
+                record.payee_id = deal.party_b_id
+            else:
+                record.payer_id = deal.party_b_id
+                record.payee_id = deal.party_a_id
 
     def action_mark_paid(self):
         """Отметить получение.

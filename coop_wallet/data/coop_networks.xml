@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Сети, подключённые по умолчанию. Это не закрытый список: сеть —
+  запись справочника, и любая другая подключается указанием адреса узла,
+  идентификатора и обозначения монеты. Иначе обещание макета — «подключить
+  можно любой блокчейн, даже собственный» — осталось бы обещанием.
+
+  Адреса узлов здесь публичные и общеизвестные; ключей платформа не
+  хранит и не запрашивает.
+-->
+<odoo>
+
+  <record id="network_btc" model="coop.wallet.network">
+    <field name="name">Bitcoin</field>
+    <field name="code">btc</field>
+    <field name="symbol">BTC</field>
+    <field name="sequence">10</field>
+    <field name="explorer_url">https://mempool.space/tx/</field>
+  </record>
+
+  <record id="network_eth" model="coop.wallet.network">
+    <field name="name">Ethereum</field>
+    <field name="code">eth</field>
+    <field name="symbol">ETH</field>
+    <field name="chain_id">1</field>
+    <field name="sequence">20</field>
+    <field name="explorer_url">https://etherscan.io/tx/</field>
+  </record>
+
+  <record id="network_bnb" model="coop.wallet.network">
+    <field name="name">BNB Smart Chain</field>
+    <field name="code">bnb</field>
+    <field name="symbol">BNB</field>
+    <field name="chain_id">56</field>
+    <field name="sequence">30</field>
+    <field name="explorer_url">https://bscscan.com/tx/</field>
+  </record>
+
+  <record id="network_ton" model="coop.wallet.network">
+    <field name="name">TON</field>
+    <field name="code">ton</field>
+    <field name="symbol">TON</field>
+    <field name="sequence">40</field>
+    <field name="explorer_url">https://tonviewer.com/transaction/</field>
+  </record>
+
+  <record id="network_sol" model="coop.wallet.network">
+    <field name="name">Solana</field>
+    <field name="code">sol</field>
+    <field name="symbol">SOL</field>
+    <field name="sequence">50</field>
+    <field name="explorer_url">https://solscan.io/tx/</field>
+  </record>
+
+  <!--
+    Своя сеть кооператива. Стоит в том же списке и подключена тем же
+    способом, что публичные, — в этом и смысл: собственная разработка не
+    требует особого обращения.
+  -->
+  <record id="network_koop" model="coop.wallet.network">
+    <field name="name">ДАО КООПЕХ Chain</field>
+    <field name="code">koop</field>
+    <field name="symbol">КООП</field>
+    <field name="sequence">60</field>
+    <field name="is_custom" eval="True"/>
+  </record>
+
+</odoo>

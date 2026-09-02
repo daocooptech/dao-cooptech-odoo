@@ -1,192 +1,326 @@
 # -*- coding: utf-8 -*-
 from odoo import _, api, fields, models, tools
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 
 class CoopWallet(models.Model):
-    """Кошелёк участника — один на каждый вид средств.
+    """Кошелёк участника — один на всех, вкладки внутри.
 
-    Вкладок в кошельке не фиксированное число: состав зависит от того,
-    кем участник является и что у него подключено. Фиатный и
-    крипто-кошелёк есть у всех, паевой счёт появляется только у
-    участника кооператива — и отдельным на каждый кооператив, потому что
-    пай в каждом свой и выходят из них порознь.
+    Сначала я сделал по кошельку на каждый вид средств и сложил их
+    остатки в одну колонку в рублях. Так нельзя, и вот почему: рубли,
+    доли биткоина, кредиты-часы и пай — величины разной природы. В одной
+    колонке получалось «−18,00 ₽» вместо «−18 кредитов» и «0,08 BTC»
+    вместо «0,0842 BTC». Это не оформление, это неверные цифры на экране.
 
-    Разница между видами не косметическая, и её стоит держать в голове:
+    Поэтому кошелёк один, а величины у каждой вкладки свои:
 
-    - **фиатный** — учёт рублёвых обязательств. Денег платформа не
-      держит: принимать чужие средства и переводить их по команде —
-      банковская операция, на неё нужна лицензия. Здесь записано, кто
-      кому сколько должен и что подтверждено полученным;
-    - **крипто** — адреса и активы участника во внешних сетях. Платформа
-      их не хранит и ключами не распоряжается, она показывает остаток и
-      служит местом, откуда транзакция уходит в выбранную сеть;
-    - **взаимный кредит** — сальдо участника в кругу взаимозачёта. Не
-      деньги и не суррогат: обязательства гасятся встречными, а не
-      передачей средства платежа;
-    - **паевой счёт** — состояние пая в конкретном кооперативе. Это
-      учётный регистр членских отношений, а не банковский счёт;
-    - **токены платформы** — предоплаченная единица её услуг. Движения
-      живут отдельной моделью, потому что их нельзя ни править, ни
-      удалять, и это правило старше кошелька.
+    - **фиатный** — рубли. Денег платформа не держит: принимать чужие
+      средства и переводить их по команде — банковская операция, на неё
+      нужна лицензия. Здесь учёт обязательств и подтверждённых
+      поступлений;
+    - **крипто** — активы во внешних сетях, у каждой сети свой адрес.
+      Кошелёк некастодиальный: истина в сети, а не у нас, поэтому у
+      остатка есть время получения и признак «сеть не отвечает»;
+    - **взаимный кредит** — линии обязательств с названными
+      контрагентами, в кредитах. Кредит — примерно час труда; курса у
+      него нет и быть не может;
+    - **взаиморасчёты** — кто кому должен по неоплаченным платежам
+      сделок и к какому сроку;
+    - **паевой счёт** — доля в кооперативе, отдельным счётом на каждый.
+
+    Токенов среди вкладок нет: они живут в токеномике, и смешивать
+    предоплаченную услугу платформы с деньгами участника незачем.
     """
     _name = 'coop.wallet'
     _description = 'Кошелёк участника'
-    _order = 'sequence, id'
+    _order = 'id'
     _rec_name = 'display_name'
 
-    KINDS = [
-        ('fiat', 'Фиатный кошелёк'),
+    TABS = [
         ('crypto', 'Крипто кошелёк'),
+        ('fiat', 'Фиатный кошелёк'),
         ('lets', 'Взаимный кредит'),
+        ('settle', 'Взаиморасчёты'),
         ('share', 'Паевой счёт'),
-        ('token', 'Токены платформы'),
     ]
 
     partner_id = fields.Many2one(
-        'res.partner', string='Участник', required=True, index=True,
+        'res.partner', string='Владелец', required=True, index=True,
         ondelete='cascade')
-    kind = fields.Selection(KINDS, string='Вид', required=True, index=True)
-    sequence = fields.Integer(string='Порядок', default=10)
     display_name = fields.Char(compute='_compute_display_name', store=True)
 
-    # Паевой счёт — свой в каждом кооперативе: пай в каждом отдельный, и
-    # выходят из них порознь.
-    cooperative_id = fields.Many2one(
-        'res.partner', string='Кооператив', index=True,
-        domain=[('is_company', '=', True)])
+    # Вкладка — состояние экрана, а не свойство кошелька. Хранится, чтобы
+    # кнопки в шапке менялись вместе с вкладкой: у каждой свой набор
+    # действий, и показывать их все сразу значит предлагать «вывести
+    # средства» на вкладке пая.
+    tab = fields.Selection(TABS, string='Вкладка', default='crypto', required=True)
 
     currency_id = fields.Many2one(
         'res.currency', string='Валюта',
         default=lambda self: self.env.company.currency_id)
-    asset_code = fields.Char(
-        string='Актив',
-        help='Для крипто-кошелька: обозначение актива в сети.')
-    address = fields.Char(
-        string='Адрес в сети',
-        help='Публичный адрес. Ключи платформа не хранит и не запрашивает.')
 
+    # ── Крипто ───────────────────────────────────────────────────────────
+    address_ids = fields.One2many(
+        'coop.wallet.address', 'wallet_id', string='Адреса в сетях')
+    asset_ids = fields.One2many(
+        'coop.wallet.asset', 'wallet_id', string='Активы')
+    crypto_valuation = fields.Monetary(
+        string='Оценка активов', currency_field='currency_id',
+        compute='_compute_crypto', store=True,
+        help='Пересчёт в рубли справочно: курс определяет рынок, а не '
+             'платформа.')
+    asset_count = fields.Integer(
+        string='Активов', compute='_compute_crypto', store=True)
+    network_count = fields.Integer(
+        string='Сетей', compute='_compute_crypto', store=True)
+    crypto_synced_at = fields.Datetime(
+        string='Остаток получен',
+        help='Кошелёк некастодиальный: истина в сети. Если человек '
+             'потратил монеты другим приложением тем же ключом, наша '
+             'цифра устаревает — поэтому у неё есть время.')
+    crypto_sync_failed = fields.Boolean(
+        string='Сеть не отвечает',
+        help='Показываем последний известный остаток и говорим об этом '
+             'прямо, а не выдаём вчерашнее за сегодняшнее.')
+
+    # ── Фиат ─────────────────────────────────────────────────────────────
+    method_ids = fields.One2many(
+        'coop.wallet.method', 'wallet_id', string='Способы оплаты')
     movement_ids = fields.One2many(
         'coop.wallet.movement', 'wallet_id', string='Движения')
-    token_ids = fields.One2many(
-        related='partner_id.coop_token_ids', string='Движения токенов')
-
-    balance = fields.Monetary(
+    fiat_balance = fields.Monetary(
         string='Остаток', currency_field='currency_id',
-        compute='_compute_balance', store=True)
+        compute='_compute_fiat', store=True)
+    fiat_available = fields.Monetary(
+        string='Доступно к выводу', currency_field='currency_id',
+        compute='_compute_fiat', store=True,
+        help='Остаток за вычетом обещанного по графикам платежей: «есть на '
+             'счету» и «можно вывести» — разные вещи.')
     movement_count = fields.Integer(
-        string='Операций', compute='_compute_balance', store=True)
+        string='Операций', compute='_compute_fiat', store=True)
 
-    active = fields.Boolean(string='Подключён', default=True)
+    # ── Взаимный кредит ──────────────────────────────────────────────────
+    credit_balance = fields.Float(
+        string='Кредитов', compute='_compute_credit', store=True,
+        help='Сумма линий с контрагентами. Плюс — вам должны, минус — '
+             'должны вы. Кредит — примерно час труда, курса у него нет.')
+    credit_line_count = fields.Integer(
+        string='Линий', compute='_compute_credit', store=True)
+    # Линия хранится один раз на пару, и участник бывает на любой её
+    # стороне — обычной обратной связью такое не выражается, поэтому
+    # список собирается вычислением.
+    credit_line_ids = fields.Many2many(
+        'coop.credit.line', string='Линии с контрагентами',
+        compute='_compute_credit_line_ids')
+
+    # ── Взаиморасчёты ────────────────────────────────────────────────────
+    owed_to_me = fields.Monetary(
+        string='Должны вам', currency_field='currency_id',
+        compute='_compute_settlement', store=True)
+    owed_by_me = fields.Monetary(
+        string='Должны вы', currency_field='currency_id',
+        compute='_compute_settlement', store=True)
+    net_settlement = fields.Monetary(
+        string='Чистое сальдо', currency_field='currency_id',
+        compute='_compute_settlement', store=True)
+    next_payment_on = fields.Date(
+        string='Ближайший платёж', compute='_compute_settlement', store=True)
+    settlement_ids = fields.Many2many(
+        'coop.settlement', string='Сальдо по контрагентам',
+        compute='_compute_settlement_ids')
+
+    # ── Паевой счёт ──────────────────────────────────────────────────────
+    share_account_ids = fields.One2many(
+        'coop.share.account', 'wallet_id', string='Паевые счета')
+    share_total = fields.Monetary(
+        string='Пай во всех кооперативах', currency_field='currency_id',
+        compute='_compute_share', store=True,
+        help='Справочно. Вынуть эту сумму одним действием нельзя: каждый '
+             'пай возвращается по правилам своего кооператива и решением '
+             'его собрания.')
+    share_account_count = fields.Integer(
+        string='Кооперативов', compute='_compute_share', store=True)
 
     _sql_constraints = [
-        ('one_per_kind', 'unique(partner_id, kind, cooperative_id)',
-         'Такой кошелёк у участника уже есть.'),
+        ('one_per_partner', 'unique(partner_id)',
+         'Кошелёк у участника уже есть — он один, вкладки внутри.'),
     ]
 
-    @api.depends('kind', 'cooperative_id', 'partner_id')
+    @api.depends('partner_id')
     def _compute_display_name(self):
-        labels = dict(self.KINDS)
         for record in self:
-            name = labels.get(record.kind, '')
-            if record.kind == 'share' and record.cooperative_id:
-                name = '%s — %s' % (name, record.cooperative_id.name)
-            record.display_name = name
+            record.display_name = _('Кошелёк: %s') % (
+                record.partner_id.display_name or '')
 
-    @api.depends('movement_ids.amount', 'movement_ids.state',
-                 'partner_id.coop_token_balance', 'kind')
-    def _compute_balance(self):
+    @api.depends('asset_ids.valuation', 'asset_ids.network_id')
+    def _compute_crypto(self):
         for record in self:
-            if record.kind == 'token':
-                # Остаток по токенам считается их собственной моделью:
-                # движения там неизменяемы, и второй счётчик рано или
-                # поздно разошёлся бы с первым.
-                record.balance = record.partner_id.coop_token_balance
-                record.movement_count = len(record.partner_id.coop_token_ids)
-            else:
-                confirmed = record.movement_ids.filtered(
-                    lambda m: m.state == 'confirmed')
-                record.balance = sum(confirmed.mapped('amount'))
-                record.movement_count = len(record.movement_ids)
+            record.crypto_valuation = sum(record.asset_ids.mapped('valuation'))
+            record.asset_count = len(record.asset_ids)
+            record.network_count = len(record.asset_ids.mapped('network_id'))
 
-    # ── Состав кошельков ─────────────────────────────────────────────────
+    @api.depends('movement_ids.amount', 'movement_ids.state')
+    def _compute_fiat(self):
+        Settlement = self.env['coop.settlement'].sudo()
+        for record in self:
+            confirmed = record.movement_ids.filtered(
+                lambda m: m.state == 'confirmed')
+            record.fiat_balance = sum(confirmed.mapped('amount'))
+            record.movement_count = len(record.movement_ids)
+            promised = sum(Settlement.search([
+                ('partner_id', '=', record.partner_id.id),
+            ]).mapped('owed_by_me'))
+            record.fiat_available = max(0.0, record.fiat_balance - promised)
+
+    @api.depends('partner_id')
+    def _compute_credit(self):
+        Line = self.env['coop.credit.line'].sudo()
+        for record in self:
+            lines = Line.search([
+                '|', ('partner_id', '=', record.partner_id.id),
+                ('counterparty_id', '=', record.partner_id.id)])
+            total = 0.0
+            for line in lines:
+                own = line.partner_id == record.partner_id
+                total += line.balance if own else -line.balance
+            record.credit_balance = total
+            record.credit_line_count = len(lines)
+
+    @api.depends('partner_id')
+    def _compute_settlement(self):
+        Settlement = self.env['coop.settlement'].sudo()
+        for record in self:
+            rows = Settlement.search([('partner_id', '=', record.partner_id.id)])
+            record.owed_to_me = sum(rows.mapped('owed_to_me'))
+            record.owed_by_me = sum(rows.mapped('owed_by_me'))
+            record.net_settlement = record.owed_to_me - record.owed_by_me
+            dates = [row.next_due_on for row in rows if row.next_due_on]
+            record.next_payment_on = min(dates) if dates else False
+
+    def _compute_credit_line_ids(self):
+        Line = self.env['coop.credit.line'].sudo()
+        for record in self:
+            record.credit_line_ids = Line.search([
+                '|', ('partner_id', '=', record.partner_id.id),
+                ('counterparty_id', '=', record.partner_id.id)])
+
+    def _compute_settlement_ids(self):
+        Settlement = self.env['coop.settlement'].sudo()
+        for record in self:
+            record.settlement_ids = Settlement.search(
+                [('partner_id', '=', record.partner_id.id)])
+
+    @api.depends('share_account_ids.balance', 'share_account_ids.state')
+    def _compute_share(self):
+        for record in self:
+            live = record.share_account_ids.filtered(lambda a: a.state != 'closed')
+            record.share_total = sum(live.mapped('balance'))
+            record.share_account_count = len(live)
+
+    # ── Сборка ───────────────────────────────────────────────────────────
 
     @api.model
-    def sync_for_partner(self, partner):
-        """Собрать участнику те кошельки, которые ему положены.
+    def wallet_for(self, partner):
+        """Найти кошелёк участника или завести его.
 
-        Фиатный, крипто и токены — всем. Взаимный кредит — тоже всем:
-        круг взаимозачёта открыт любому участнику. Паевой счёт — только
-        членам кооперативов, и отдельный на каждый.
-
-        Кошелёк, переставший быть положенным (человек вышел из
-        кооператива), не удаляется, а отключается: движения по паю —
-        история расчётов, и стирать её при выходе нельзя.
+        Паевые счета пересобираются здесь же: членство меняется, и держать
+        их в согласии постоянным регламентом дороже, чем пересобрать за
+        один запрос.
         """
         partner.ensure_one()
-        Wallet = self.sudo()
-        wanted = [('fiat', False), ('crypto', False), ('lets', False), ('token', False)]
+        wallet = self.sudo().search([('partner_id', '=', partner.id)], limit=1)
+        if not wallet:
+            wallet = self.sudo().create({'partner_id': partner.id})
+        wallet._sync_share_accounts()
+        return wallet
 
-        memberships = self.env['coop.membership'].sudo().search([
-            ('partner_id', '=', partner.id),
-            ('state', 'in', ('active', 'leaving')),
-            ('org_is_cooperative', '=', True),
-        ])
-        wanted += [('share', m.organization_id.id) for m in memberships]
+    def _sync_share_accounts(self):
+        """Завести паевой счёт на каждый кооператив, где участник состоит.
 
-        existing = Wallet.with_context(active_test=False).search(
-            [('partner_id', '=', partner.id)])
-        by_key = {(w.kind, w.cooperative_id.id or False): w for w in existing}
-
-        order = {code: index for index, (code, _label) in enumerate(self.KINDS)}
-        for kind, cooperative in wanted:
-            wallet = by_key.get((kind, cooperative))
-            if wallet:
-                if not wallet.active:
-                    wallet.active = True
-                continue
-            Wallet.create({
-                'partner_id': partner.id,
-                'kind': kind,
-                'cooperative_id': cooperative or False,
-                'sequence': (order.get(kind, 9) + 1) * 10,
-            })
-
-        stale = [w for key, w in by_key.items() if key not in wanted and w.active]
-        for wallet in stale:
-            wallet.active = False
+        Счёт прекратившегося членства не прячется. По уставам пай
+        возвращается в течение года после утверждения годового отчёта —
+        то есть счёт нужен ровно тогда, когда членство уже закончилось.
+        Спрятать его в этот момент значит убрать экран тогда, когда
+        человек ждёт денег.
+        """
+        Account = self.env['coop.share.account'].sudo()
+        Membership = self.env['coop.membership'].sudo()
+        states = {
+            'active': 'open', 'applied': 'open',
+            'leaving': 'closing', 'ended': 'closed',
+        }
+        for wallet in self:
+            memberships = Membership.search([
+                ('partner_id', '=', wallet.partner_id.id),
+                ('org_is_cooperative', '=', True),
+            ])
+            by_coop = {a.cooperative_id.id: a for a in wallet.share_account_ids}
+            for membership in memberships:
+                state = states.get(membership.state, 'open')
+                account = by_coop.get(membership.organization_id.id)
+                if account:
+                    if account.state != state:
+                        account.state = state
+                    continue
+                Account.create({
+                    'wallet_id': wallet.id,
+                    'cooperative_id': membership.organization_id.id,
+                    'membership_id': membership.id,
+                    'joined_on': membership.joined_on,
+                    'state': state,
+                })
         return True
 
     @api.model
     def action_open_my_wallet(self):
-        """Открыть свой кошелёк, собрав недостающие вкладки.
-
-        Собирается при открытии, а не заранее: состав зависит от членства,
-        а членство меняется, и держать его в согласии постоянным
-        регламентом дороже, чем пересобрать за один запрос.
-        """
+        """Открыть свой кошелёк, собрав паевые счета."""
         partner = self.env.user._coop_acting_partner()
-        self.sync_for_partner(partner)
+        wallet = self.wallet_for(partner)
         return {
             'type': 'ir.actions.act_window',
             'name': _('Кошелёк'),
             'res_model': 'coop.wallet',
-            'view_mode': 'kanban,list,form',
-            'domain': [('partner_id', '=', partner.id)],
-            'context': {'default_partner_id': partner.id},
+            'res_id': wallet.id,
+            'view_mode': 'form',
+            'target': 'current',
         }
+
+    # ── Действия вкладок ─────────────────────────────────────────────────
+    #
+    # Все требуют подтверждённой личности: это деньги и обязательства.
+    # Проверка стоит и здесь, а не только в кнопке: кнопку можно обойти
+    # вызовом, а правило от этого не перестаёт действовать.
+
+    def _require_identity(self, action):
+        self.ensure_one()
+        self.partner_id.coop_require_level('identity', action)
+
+    def action_crypto_send(self):
+        self._require_identity(_('отправить перевод'))
+        raise UserError(_(
+            'Отправка в сеть пока не подключена: платформа не хранит ключей, '
+            'и транзакцию подписывает сам участник. Сети подключаются в '
+            'справочнике сетей.'))
+
+    def action_fiat_topup(self):
+        self._require_identity(_('пополнить кошелёк'))
+        raise UserError(_(
+            'Пополнение пойдёт через платёжного агрегатора — платформа денег '
+            'не принимает. Агрегатор ещё не подключён.'))
+
+    def action_fiat_withdraw(self):
+        self._require_identity(_('вывести средства'))
+        raise UserError(_(
+            'Вывод пойдёт через платёжного агрегатора на привязанный способ '
+            'оплаты. Агрегатор ещё не подключён.'))
 
 
 class CoopWalletMovement(models.Model):
-    """Движение по кошельку.
+    """Движение по фиатному кошельку.
 
     Знак суммы и есть направление: плюс — пришло, минус — ушло. Хранить
     направление отдельным полем значит завести вторую истину, которая
     рано или поздно разойдётся с первой.
-
-    Подтверждает движение получатель. «Я отправил» — утверждение одной
-    стороны, «я получил» — подтверждение другой, и доказательная сила у
-    них разная.
     """
     _name = 'coop.wallet.movement'
     _description = 'Движение по кошельку'
@@ -197,38 +331,58 @@ class CoopWalletMovement(models.Model):
         'coop.wallet', string='Кошелёк', required=True, index=True,
         ondelete='cascade')
     partner_id = fields.Many2one(
-        related='wallet_id.partner_id', store=True, index=True, string='Участник')
+        related='wallet_id.partner_id', store=True, index=True, string='Владелец')
     date = fields.Date(
         string='Дата', required=True, default=fields.Date.context_today, index=True)
-    name = fields.Char(string='Назначение', required=True)
+    name = fields.Char(
+        string='Операция', required=True,
+        help='Так, как это прочтёт человек: «Пополнение с карты МИР •• 4412», '
+             '«Оплата по вакансии „Кладовщик“ — ООО „Мириталь“». Человек '
+             'ищет глазами знакомое имя, а не вид записи.')
     amount = fields.Monetary(
         string='Сумма', currency_field='currency_id', required=True,
         help='Плюс — пришло, минус — ушло.')
     currency_id = fields.Many2one(related='wallet_id.currency_id', store=True)
 
     kind = fields.Selection([
+        ('topup', 'Пополнение'),
+        ('withdraw', 'Вывод'),
+        ('transfer', 'Перевод участнику'),
         ('deal', 'По сделке'),
-        ('contribution', 'Взнос'),
-        ('payout', 'Выплата'),
-        ('offset', 'Взаимозачёт'),
         ('correction', 'Корректировка'),
-    ], string='Основание', required=True, default='deal', index=True)
+    ], string='Вид', required=True, default='deal', index=True)
 
-    counterparty_id = fields.Many2one(
-        'res.partner', string='Контрагент', index=True)
+    method_id = fields.Many2one(
+        'coop.wallet.method', string='Способ оплаты',
+        help='Обязателен для пополнения и вывода: без него в истории не из '
+             'чего собрать «Вывод на карту МИР •• 4412».')
+    counterparty_id = fields.Many2one('res.partner', string='Контрагент', index=True)
     deal_id = fields.Many2one('coop.deal', string='Сделка', index=True)
 
     state = fields.Selection([
-        ('draft', 'Заявлено'),
-        ('confirmed', 'Подтверждено'),
+        ('pending', 'В работе'),
+        ('confirmed', 'Проведено'),
+        ('failed', 'Отклонено'),
         ('cancelled', 'Отменено'),
     ], string='Состояние', default='confirmed', required=True, index=True,
-        tracking=True)
+        tracking=True,
+        help='Вывод на карту идёт минуты, а не мгновенно, и банк его может '
+             'отклонить. Без промежуточных состояний экран показывал бы '
+             'только свершившееся, а человек не понимал бы, где его деньги.')
 
     _sql_constraints = [
         ('amount_not_zero', 'check(amount != 0)',
          'Движение на ноль не имеет смысла.'),
     ]
+
+    @api.constrains('kind', 'method_id')
+    def _check_method(self):
+        for record in self:
+            if record.kind in ('topup', 'withdraw') and not record.method_id:
+                raise ValidationError(_(
+                    'У пополнения и вывода должен быть указан способ оплаты: '
+                    'иначе в истории не из чего собрать, откуда пришло и куда '
+                    'ушло.'))
 
     def action_confirm(self):
         self.write({'state': 'confirmed'})
@@ -238,21 +392,27 @@ class CoopWalletMovement(models.Model):
         confirmed = self.filtered(lambda m: m.state == 'confirmed')
         if confirmed:
             raise UserError(_(
-                'Подтверждённое движение не удаляется: по остатку без истории '
+                'Проведённое движение не удаляется: по остатку без истории '
                 'нельзя объяснить, откуда он взялся. Ошибку исправляют '
                 'встречным движением с пояснением.'))
         return super().unlink()
 
 
 class CoopSettlement(models.Model):
-    """Сальдо по контрагентам — кто кому остался должен.
+    """Сальдо по контрагентам — кто кому должен и когда.
 
-    Не таблица, а взгляд на платежи по сделкам: считается на лету и
-    хранить его негде. Вторая копия неизбежно разойдётся с графиками
-    платежей, и тогда непонятно, какой из двух цифр верить.
+    Одно число «баланс» не отвечает на главный вопрос: кто кому должен и
+    к какому сроку. Здесь тот же оборот разложен по контрагентам — по
+    неоплаченным позициям графиков платежей в сделках.
 
-    Отсюда же берётся круг взаимных долгов: когда долги идут по кругу,
-    их гасят взаимозачётом, ничего не передавая.
+    Не таблица, а взгляд: считается на лету и хранить его негде. Вторая
+    копия неизбежно разойдётся с графиками платежей, и тогда непонятно,
+    какой из двух цифр верить.
+
+    Знак берётся из того, **кто платит**, а не из порядка сторон в
+    сделке. Стороны равноправны, «первая» — это порядок полей, а не
+    старшинство; считать её кредитором значило бы переворачивать знак на
+    каждой покупке и уверенно показывать «должны вам» там, где должны вы.
     """
     _name = 'coop.settlement'
     _description = 'Сальдо по контрагентам'
@@ -262,45 +422,62 @@ class CoopSettlement(models.Model):
     partner_id = fields.Many2one('res.partner', string='Участник', readonly=True)
     counterparty_id = fields.Many2one('res.partner', string='Контрагент', readonly=True)
     amount = fields.Monetary(
-        string='Осталось', currency_field='currency_id', readonly=True,
+        string='Сальдо', currency_field='currency_id', readonly=True,
         help='Плюс — должны вам, минус — должны вы.')
+    owed_to_me = fields.Monetary(
+        string='Должны вам', currency_field='currency_id', readonly=True)
+    owed_by_me = fields.Monetary(
+        string='Должны вы', currency_field='currency_id', readonly=True)
+    next_due_on = fields.Date(string='Ближайший срок', readonly=True)
     currency_id = fields.Many2one('res.currency', string='Валюта', readonly=True)
     deal_count = fields.Integer(string='Сделок', readonly=True)
 
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
-        # Две половины: то, что должны нам, и то, что должны мы. Одна и та
-        # же неоплаченная строка графика смотрит в разные стороны в
-        # зависимости от того, с чьей стороны сделки на неё смотреть.
         self.env.cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
                 SELECT
-                    row_number() OVER () AS id,
+                    -- Идентификатор собирается из пары участников, а не
+                    -- нумерацией строк. `row_number()` даёт разные номера
+                    -- при каждом запросе: список, собранный по одному
+                    -- запросу, при чтении по этим же номерам показывал
+                    -- чужие строки — и человек видел долги, которых у него
+                    -- нет.
+                    (t.partner_id * 1000000 + t.counterparty_id) AS id,
                     t.partner_id,
                     t.counterparty_id,
                     SUM(t.amount) AS amount,
+                    SUM(GREATEST(t.amount, 0)) AS owed_to_me,
+                    SUM(GREATEST(-t.amount, 0)) AS owed_by_me,
+                    MIN(t.due_on) AS next_due_on,
                     MAX(t.currency_id) AS currency_id,
                     COUNT(DISTINCT t.deal_id) AS deal_count
                 FROM (
-                    SELECT d.party_a_id AS partner_id,
-                           d.party_b_id AS counterparty_id,
+                    -- Получателю платежа должны: сумма в плюс.
+                    SELECT p.payee_id AS partner_id,
+                           p.payer_id AS counterparty_id,
                            p.amount AS amount,
+                           p.due_on AS due_on,
                            d.currency_id AS currency_id,
                            d.id AS deal_id
                       FROM coop_deal_payment p
                       JOIN coop_deal d ON d.id = p.deal_id
                      WHERE p.state IN ('planned', 'overdue')
                        AND d.state NOT IN ('cancelled', 'draft')
+                       AND p.payer_id IS NOT NULL AND p.payee_id IS NOT NULL
                     UNION ALL
-                    SELECT d.party_b_id AS partner_id,
-                           d.party_a_id AS counterparty_id,
+                    -- Плательщик должен: та же сумма в минус.
+                    SELECT p.payer_id AS partner_id,
+                           p.payee_id AS counterparty_id,
                            -p.amount AS amount,
+                           p.due_on AS due_on,
                            d.currency_id AS currency_id,
                            d.id AS deal_id
                       FROM coop_deal_payment p
                       JOIN coop_deal d ON d.id = p.deal_id
                      WHERE p.state IN ('planned', 'overdue')
                        AND d.state NOT IN ('cancelled', 'draft')
+                       AND p.payer_id IS NOT NULL AND p.payee_id IS NOT NULL
                 ) t
                 GROUP BY t.partner_id, t.counterparty_id
                 HAVING SUM(t.amount) <> 0

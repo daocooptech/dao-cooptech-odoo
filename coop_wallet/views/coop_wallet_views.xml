@@ -2,136 +2,527 @@
 <odoo>
 
   <!--
-    Вкладки кошелька — это его кошельки. В макете они нарисованы полосой
-    вкладок; здесь каждая вкладка сама по себе запись, потому что состав
-    у каждого свой: паевой счёт есть только у члена кооператива, и таких
-    счетов столько, во скольких кооперативах он состоит.
+    Экран кошелька. Полоса вкладок — штатный кликабельный statusbar, а не
+    свой компонент: он даёт то, чего не даёт notebook, — кнопки в шапке
+    меняются вместе с вкладкой. У каждой вкладки свой набор действий, и
+    показывать их все сразу значит предлагать «вывести средства» на
+    вкладке пая.
+
+    Списки внутри — штатные: им нужны поиск, сортировка, страницы и
+    правила доступа, и всё это в Odoo уже есть. Писать своё представление
+    ради вида значит чинить его после каждого обновления.
   -->
-  <record id="view_coop_wallet_kanban" model="ir.ui.view">
-    <field name="name">coop.wallet.kanban</field>
-    <field name="model">coop.wallet</field>
-    <field name="arch" type="xml">
-      <kanban class="o_coop_wallets" create="false">
-        <field name="kind"/>
-        <field name="balance"/>
-        <field name="movement_count"/>
-        <field name="currency_id"/>
-        <templates>
-          <t t-name="card">
-            <div class="o_coop_wallet_card" t-att-class="'o_coop_wallet_' + record.kind.raw_value">
-              <div class="o_coop_wallet_kind"><field name="display_name"/></div>
-              <div class="o_coop_wallet_balance">
-                <field name="balance" widget="monetary"/>
-              </div>
-              <div class="o_coop_wallet_meta">
-                <t t-esc="record.movement_count.value"/> операций
-              </div>
-            </div>
-          </t>
-        </templates>
-      </kanban>
-    </field>
-  </record>
-
-  <record id="view_coop_wallet_list" model="ir.ui.view">
-    <field name="name">coop.wallet.list</field>
-    <field name="model">coop.wallet</field>
-    <field name="arch" type="xml">
-      <list string="Кошелёк" create="false">
-        <field name="display_name"/>
-        <field name="partner_id" column_invisible="context.get('hide_partner')"/>
-        <field name="cooperative_id" optional="show"/>
-        <field name="asset_code" optional="hide"/>
-        <field name="balance" sum="Итого"/>
-        <field name="movement_count"/>
-        <field name="currency_id" column_invisible="True"/>
-      </list>
-    </field>
-  </record>
-
   <record id="view_coop_wallet_form" model="ir.ui.view">
     <field name="name">coop.wallet.form</field>
     <field name="model">coop.wallet</field>
     <field name="arch" type="xml">
-      <form string="Кошелёк">
+      <form string="Кошелёк" class="o_coop_wallet" create="false">
+        <header>
+          <field name="tab" widget="statusbar" options="{'clickable': '1'}"/>
+          <button name="action_crypto_send" type="object" string="Отправить"
+                  class="btn-primary" invisible="tab != 'crypto'"/>
+          <button name="action_crypto_send" type="object" string="Получить"
+                  invisible="tab != 'crypto'"/>
+          <button name="action_fiat_topup" type="object" string="Пополнить"
+                  class="btn-primary" invisible="tab != 'fiat'"/>
+          <button name="action_fiat_withdraw" type="object" string="Вывести"
+                  invisible="tab != 'fiat'"/>
+        </header>
         <sheet>
           <div class="oe_title">
             <h1><field name="display_name" readonly="1"/></h1>
           </div>
-          <group>
-            <group>
-              <field name="partner_id" readonly="1"/>
-              <field name="kind" readonly="1"/>
-              <field name="cooperative_id" readonly="1" invisible="kind != 'share'"/>
-              <field name="active" widget="boolean_toggle"/>
-            </group>
-            <group>
-              <field name="balance" readonly="1"/>
-              <field name="currency_id" invisible="kind == 'crypto'"/>
-              <field name="asset_code" invisible="kind != 'crypto'"/>
-              <field name="address" invisible="kind != 'crypto'"
-                     placeholder="Публичный адрес"/>
-            </group>
-          </group>
 
-          <div class="alert alert-info" role="status" invisible="kind != 'fiat'">
-            Денег платформа не держит. Здесь учёт обязательств: кто кому
-            сколько должен и что подтверждено полученным. Принимать чужие
-            средства и переводить их по команде — банковская операция, и на
-            неё нужна лицензия.
-          </div>
-          <div class="alert alert-info" role="status" invisible="kind != 'crypto'">
-            Ключи платформа не хранит и не запрашивает. Здесь виден остаток и
-            отсюда транзакция уходит в выбранную участником сеть — сети
-            подключаются в настройках.
-          </div>
-          <div class="alert alert-info" role="status" invisible="kind != 'lets'">
-            Взаимный кредит — не деньги и не их заменитель: обязательства
-            гасятся встречными, а не передачей средства платежа. Когда долги
-            идут по кругу, их закрывают взаимозачётом, ничего не передавая.
-          </div>
-          <div class="alert alert-info" role="status" invisible="kind != 'share'">
-            Паевой счёт — учётный регистр членских отношений, а не банковский
-            счёт. Он свой в каждом кооперативе: пай в каждом отдельный, и
-            выходят из них порознь.
-          </div>
-          <div class="alert alert-info" role="status" invisible="kind != 'token'">
-            Токен — предоплаченная единица услуг платформы. Движения по нему
-            нельзя ни править, ни удалять: по остатку без истории нельзя
-            объяснить, откуда он взялся.
+          <!-- ═══ Крипто ═══════════════════════════════════════════════ -->
+          <div invisible="tab != 'crypto'">
+            <div class="o_coop_wallet_intro">
+              Мультисетевой некастодиальный кошелёк: любое количество монет и
+              сетей в одном месте. Подключить можно любой блокчейн по RPC или
+              API — публичный или собственный: достаточно указать адрес узла,
+              идентификатор сети и обозначение монеты. Ключи платформа не
+              хранит и не запрашивает.
+            </div>
+            <div class="o_coop_kpi">
+              <div class="o_coop_kpi_cell">
+                <div class="o_coop_kpi_num">
+                  <field name="crypto_valuation" widget="monetary" nolabel="1"/>
+                </div>
+                <div class="o_coop_kpi_label">Оценка активов, справочно</div>
+              </div>
+              <div class="o_coop_kpi_cell">
+                <div class="o_coop_kpi_num"><field name="asset_count" nolabel="1"/></div>
+                <div class="o_coop_kpi_label">Активов</div>
+              </div>
+              <div class="o_coop_kpi_cell">
+                <div class="o_coop_kpi_num"><field name="network_count" nolabel="1"/></div>
+                <div class="o_coop_kpi_label">Сетей</div>
+              </div>
+            </div>
+            <div class="o_coop_sync" invisible="not crypto_synced_at">
+              Остаток получен: <field name="crypto_synced_at" readonly="1" nolabel="1"/>
+            </div>
+            <div class="alert alert-warning" role="alert" invisible="not crypto_sync_failed">
+              Сеть не отвечает — показан последний известный остаток. Выдавать
+              вчерашнее за сегодняшнее здесь нельзя: человек по этой цифре
+              принимает решение.
+            </div>
+
+            <separator string="Активы"/>
+            <field name="asset_ids" nolabel="1">
+              <list editable="bottom">
+                <field name="name"/>
+                <field name="symbol"/>
+                <field name="standard" optional="show"/>
+                <field name="network_id"/>
+                <field name="quantity" digits="[16,8]"/>
+                <field name="valuation" sum="Оценка"/>
+                <field name="valued_at" optional="hide"/>
+                <field name="valuation_source" optional="hide"/>
+                <field name="currency_id" column_invisible="True"/>
+              </list>
+            </field>
+
+            <separator string="Адреса в сетях"/>
+            <div class="o_coop_note">
+              У каждой сети собственный адрес. Перевод на адрес чужой сети
+              означает потерю средств — поэтому они разведены, а не сведены в
+              одно поле.
+            </div>
+            <field name="address_ids" nolabel="1">
+              <list editable="bottom">
+                <field name="network_id"/>
+                <field name="address"/>
+              </list>
+            </field>
+
+            <div class="o_coop_note o_coop_note_boxed">
+              <b>Чем это отличается от «Цифровых активов».</b> Здесь обычные
+              криптовалюты и любые совместимые сети — без обязанного лица:
+              курс определяет рынок, а не эмитент. В «Цифровых активах»
+              наоборот — регулируемые права с конкретным эмитентом: доли,
+              паи, права по бумагам.
+            </div>
           </div>
 
-          <notebook>
-            <page string="История операций" name="movements" invisible="kind == 'token'">
-              <field name="movement_ids" context="{'default_wallet_id': id}">
-                <list editable="bottom" decoration-muted="state == 'cancelled'">
-                  <field name="date"/>
-                  <field name="name"/>
-                  <field name="kind"/>
-                  <field name="counterparty_id"/>
-                  <field name="deal_id" optional="show"/>
-                  <field name="amount" sum="Итого"/>
-                  <field name="currency_id" column_invisible="True"/>
-                  <field name="state"/>
-                </list>
-              </field>
-            </page>
-            <page string="История операций" name="tokens" invisible="kind != 'token'">
-              <field name="token_ids" readonly="1">
-                <list>
-                  <field name="create_date" string="Дата"/>
-                  <field name="kind"/>
-                  <field name="description"/>
-                  <field name="amount" sum="Итого"/>
-                </list>
-              </field>
-            </page>
-          </notebook>
+          <!-- ═══ Фиат ═════════════════════════════════════════════════ -->
+          <div invisible="tab != 'fiat'">
+            <div class="o_coop_wallet_intro">
+              Обычные рубли — без блокчейна и курсов обмена. Денег платформа
+              не держит: принимать чужие средства и переводить их по команде —
+              банковская операция, и на неё нужна лицензия. Расчёты идут через
+              платёжного агрегатора, здесь — их учёт.
+            </div>
+            <div class="o_coop_kpi">
+              <div class="o_coop_kpi_cell">
+                <div class="o_coop_kpi_num">
+                  <field name="fiat_balance" widget="monetary" nolabel="1"/>
+                </div>
+                <div class="o_coop_kpi_label">Остаток</div>
+              </div>
+              <div class="o_coop_kpi_cell o_coop_kpi_free">
+                <div class="o_coop_kpi_num">
+                  <field name="fiat_available" widget="monetary" nolabel="1"/>
+                </div>
+                <div class="o_coop_kpi_label">Доступно к выводу</div>
+              </div>
+              <div class="o_coop_kpi_cell">
+                <div class="o_coop_kpi_num"><field name="movement_count" nolabel="1"/></div>
+                <div class="o_coop_kpi_label">Операций</div>
+              </div>
+            </div>
+
+            <separator string="Привязанные способы оплаты"/>
+            <div class="o_coop_note">
+              Реквизиты не хранятся — только то, по чему вы узнаёте свой
+              способ. Полный номер карты в базе узла не нужен ни для чего:
+              платежи идут через агрегатора, и он хранит их у себя.
+            </div>
+            <field name="method_ids" nolabel="1">
+              <list editable="bottom">
+                <field name="kind"/>
+                <field name="label"/>
+                <field name="is_default" widget="boolean_toggle"/>
+              </list>
+            </field>
+
+            <separator string="История операций"/>
+            <field name="movement_ids" nolabel="1" context="{'default_wallet_id': id}">
+              <list editable="bottom"
+                    decoration-muted="state == 'cancelled'"
+                    decoration-danger="state == 'failed'"
+                    decoration-info="state == 'pending'">
+                <field name="date"/>
+                <field name="name"/>
+                <field name="kind" optional="show"/>
+                <field name="method_id" optional="show"/>
+                <field name="counterparty_id" optional="hide"/>
+                <field name="deal_id" optional="show"/>
+                <field name="amount" sum="Итого"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="state"/>
+              </list>
+            </field>
+          </div>
+
+          <!-- ═══ Взаимный кредит ══════════════════════════════════════ -->
+          <div invisible="tab != 'lets'">
+            <div class="o_coop_wallet_intro">
+              Взаимный кредит — обязательства между двумя названными
+              сторонами, а не общий котёл. Поставили и не получили денег
+              сразу — у вас требование к конкретному контрагенту, у него
+              встречное обязательство. Ничего не выпускается: ведётся учёт
+              встречных требований, которые гасятся деньгами или
+              взаимозачётом.
+              <br/>
+              Насколько можно уйти в минус, решает не платформа, а сам
+              кредитор — тот, кто соглашается подождать. Каждое изменение
+              сальдо подтверждают обе стороны, поэтому переписать историю в
+              одиночку нельзя.
+            </div>
+            <div class="o_coop_kpi">
+              <div class="o_coop_kpi_cell">
+                <div class="o_coop_kpi_num">
+                  <field name="credit_balance" nolabel="1"/> кредитов
+                </div>
+                <div class="o_coop_kpi_label">
+                  1 кредит ≈ 1 час труда или эквивалент по договорённости
+                </div>
+              </div>
+              <div class="o_coop_kpi_cell">
+                <div class="o_coop_kpi_num"><field name="credit_line_count" nolabel="1"/></div>
+                <div class="o_coop_kpi_label">Линий с контрагентами</div>
+              </div>
+            </div>
+            <div class="o_coop_note o_coop_note_boxed">
+              <b>Взаимозачёт по кругу.</b> Когда долги замыкаются в кольцо —
+              вы должны одному, он второму, второй вам, — их можно погасить
+              встречно, без движения денег. Зачёт не проводится сам:
+              платформа предлагает круг и собирает подписи всех участников.
+              Не подписал хотя бы один — раунд отменяется целиком, частичного
+              зачёта не бывает.
+            </div>
+            <separator string="Линии по контрагентам"/>
+            <div class="o_coop_note">
+              Ниже — линии по каждому контрагенту отдельно, а не одна общая
+              цифра: общая ничего не говорит о том, с кем именно вы в
+              расчёте.
+            </div>
+            <field name="credit_line_ids" nolabel="1" readonly="1"/>
+          </div>
+
+          <!-- ═══ Взаиморасчёты ════════════════════════════════════════ -->
+          <div invisible="tab != 'settle'">
+            <div class="o_coop_wallet_intro">
+              Одно число «баланс» не отвечает на главный вопрос: кто кому
+              должен и когда. Здесь тот же оборот разложен по контрагентам —
+              по неоплаченным позициям графиков платежей в сделках. Сальдо со
+              знаком «плюс» означает, что должны вам.
+            </div>
+            <div class="o_coop_kpi">
+              <div class="o_coop_kpi_cell o_coop_kpi_free">
+                <div class="o_coop_kpi_num">
+                  <field name="owed_to_me" widget="monetary" nolabel="1"/>
+                </div>
+                <div class="o_coop_kpi_label">Должны вам</div>
+              </div>
+              <div class="o_coop_kpi_cell o_coop_kpi_due">
+                <div class="o_coop_kpi_num">
+                  <field name="owed_by_me" widget="monetary" nolabel="1"/>
+                </div>
+                <div class="o_coop_kpi_label">Должны вы</div>
+              </div>
+              <div class="o_coop_kpi_cell">
+                <div class="o_coop_kpi_num">
+                  <field name="net_settlement" widget="monetary" nolabel="1"/>
+                </div>
+                <div class="o_coop_kpi_label">Чистое сальдо</div>
+              </div>
+              <div class="o_coop_kpi_cell">
+                <div class="o_coop_kpi_num">
+                  <field name="next_payment_on" nolabel="1"/>
+                </div>
+                <div class="o_coop_kpi_label">Ближайший платёж</div>
+              </div>
+            </div>
+            <separator string="Сальдо по контрагентам"/>
+            <field name="settlement_ids" nolabel="1" readonly="1"/>
+            <div class="o_coop_note">
+              Закрытые и отменённые сделки в сальдо не входят: здесь только
+              то, что ещё предстоит заплатить или получить.
+            </div>
+          </div>
+
+          <!-- ═══ Паевой счёт ══════════════════════════════════════════ -->
+          <div invisible="tab != 'share'">
+            <div class="o_coop_wallet_intro">
+              Паевой счёт — не кошелёк: пай нельзя потратить внутри
+              платформы. Он показывает вашу долю в кооперативе: сколько
+              внесено, что начислено по итогам работы и что выплачено на
+              руки. Счёт свой в каждом кооперативе — у каждого свой устав,
+              свои правила начисления и свой порядок возврата пая.
+            </div>
+            <div class="o_coop_kpi">
+              <div class="o_coop_kpi_cell">
+                <div class="o_coop_kpi_num">
+                  <field name="share_total" widget="monetary" nolabel="1"/>
+                </div>
+                <div class="o_coop_kpi_label">Пай во всех кооперативах, справочно</div>
+              </div>
+              <div class="o_coop_kpi_cell">
+                <div class="o_coop_kpi_num"><field name="share_account_count" nolabel="1"/></div>
+                <div class="o_coop_kpi_label">Кооперативов</div>
+              </div>
+            </div>
+            <div class="o_coop_note">
+              Общая сумма ничего не значит как «богатство»: вынуть её одним
+              действием нельзя. Каждый пай возвращается по правилам своего
+              кооператива и решением его собрания — поэтому счета разделены.
+            </div>
+            <separator string="Паевые счета"/>
+            <field name="share_account_ids" nolabel="1"/>
+          </div>
+
         </sheet>
       </form>
     </field>
   </record>
 
+  <!-- ── Паевой счёт ───────────────────────────────────────────────── -->
+  <record id="view_coop_share_account_list" model="ir.ui.view">
+    <field name="name">coop.share.account.list</field>
+    <field name="model">coop.share.account</field>
+    <field name="arch" type="xml">
+      <list string="Паевые счета" decoration-muted="state == 'closed'"
+            decoration-warning="state == 'closing'">
+        <field name="cooperative_id"/>
+        <field name="joined_on"/>
+        <field name="contributed"/>
+        <field name="accrued"/>
+        <field name="paid_out"/>
+        <field name="balance" sum="Пай"/>
+        <field name="currency_id" column_invisible="True"/>
+        <field name="state" widget="badge"
+               decoration-success="state == 'open'"
+               decoration-warning="state == 'closing'"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_share_account_form" model="ir.ui.view">
+    <field name="name">coop.share.account.form</field>
+    <field name="model">coop.share.account</field>
+    <field name="arch" type="xml">
+      <form string="Паевой счёт">
+        <header>
+          <button name="action_request_payout" type="object"
+                  string="Подать заявление на выплату" class="btn-primary"
+                  invisible="state == 'closed'"/>
+          <field name="state" widget="statusbar"/>
+        </header>
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="cooperative_id" readonly="1" nolabel="1"/></h1>
+            <div class="o_coop_note">
+              Пайщик с <field name="joined_on" readonly="1" nolabel="1" class="oe_inline"/>
+            </div>
+          </div>
+          <div class="o_coop_kpi">
+            <div class="o_coop_kpi_cell">
+              <div class="o_coop_kpi_num">
+                <field name="contributed" widget="monetary" nolabel="1"/>
+              </div>
+              <div class="o_coop_kpi_label">Паевые взносы</div>
+            </div>
+            <div class="o_coop_kpi_cell o_coop_kpi_free">
+              <div class="o_coop_kpi_num">
+                <field name="accrued" widget="monetary" nolabel="1"/>
+              </div>
+              <div class="o_coop_kpi_label">Начислено</div>
+            </div>
+            <div class="o_coop_kpi_cell o_coop_kpi_due">
+              <div class="o_coop_kpi_num">
+                <field name="paid_out" widget="monetary" nolabel="1"/>
+              </div>
+              <div class="o_coop_kpi_label">Выплачено на руки</div>
+            </div>
+            <div class="o_coop_kpi_cell">
+              <div class="o_coop_kpi_num">
+                <field name="balance" widget="monetary" nolabel="1"/>
+              </div>
+              <div class="o_coop_kpi_label">Текущий пай</div>
+            </div>
+          </div>
+          <field name="currency_id" invisible="1"/>
+          <field name="partner_id" invisible="1"/>
+          <field name="membership_id" invisible="1"/>
+
+          <separator string="Движение по паевому счёту"/>
+          <field name="move_ids" nolabel="1" context="{'default_account_id': id}">
+            <list editable="bottom" decoration-muted="state == 'declined'"
+                  decoration-info="state == 'requested'">
+              <field name="date"/>
+              <field name="name"/>
+              <field name="kind"/>
+              <field name="basis"/>
+              <field name="valuation_basis" optional="hide"/>
+              <field name="amount" sum="Итого"/>
+              <field name="balance_after"/>
+              <field name="currency_id" column_invisible="True"/>
+              <field name="state"/>
+              <button name="action_confirm" type="object" string="Провести"
+                      icon="fa-check" invisible="state != 'requested'"/>
+              <button name="action_decline" type="object" string="Отклонить"
+                      icon="fa-times" invisible="state != 'requested'"/>
+            </list>
+          </field>
+
+          <separator string="Правило устава"/>
+          <field name="charter_note" nolabel="1"
+                 placeholder="Как в этом кооперативе начисляется выплата и как возвращается пай при выходе"/>
+          <div class="o_coop_note">
+            Правило берётся из устава конкретного кооператива, а не из
+            настроек платформы: у одних выплата считается за участие в
+            работе, у других — по обороту через кооператив, у третьих — по
+            размеру вклада.
+          </div>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <!-- ── Взаимный кредит ───────────────────────────────────────────── -->
+  <record id="view_coop_credit_line_list" model="ir.ui.view">
+    <field name="name">coop.credit.line.list</field>
+    <field name="model">coop.credit.line</field>
+    <field name="arch" type="xml">
+      <list string="Линии взаимного кредита"
+            decoration-danger="balance &lt; 0" decoration-success="balance &gt; 0">
+        <field name="partner_id" column_invisible="context.get('hide_partner')"/>
+        <field name="counterparty_id"/>
+        <field name="balance" sum="Сальдо"/>
+        <field name="limit_by_partner" optional="show"/>
+        <field name="limit_by_counterparty" optional="hide"/>
+        <field name="movement_count"/>
+        <field name="last_movement_on"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_credit_line_form" model="ir.ui.view">
+    <field name="name">coop.credit.line.form</field>
+    <field name="model">coop.credit.line</field>
+    <field name="arch" type="xml">
+      <form string="Линия взаимного кредита">
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="display_name" readonly="1"/></h1>
+          </div>
+          <div class="o_coop_wallet_intro">
+            Кредит — примерно час труда или эквивалент по договорённости
+            сторон. Курса у него нет и быть не может: как только у единицы
+            появляется курс и её начинают принимать где угодно, это уже
+            денежный суррогат.
+          </div>
+          <group>
+            <group string="Стороны">
+              <field name="partner_id"/>
+              <field name="counterparty_id"/>
+              <field name="balance" readonly="1"/>
+            </group>
+            <group string="Лимиты доверия">
+              <field name="limit_by_partner"/>
+              <field name="limit_by_counterparty"/>
+              <field name="active" widget="boolean_toggle"/>
+            </group>
+          </group>
+          <div class="o_coop_note o_coop_note_boxed">
+            Лимит ставит тот, кто соглашается ждать: ждёт он — ему и решать,
+            сколько ждать. Общий лимит «от платформы» сделал бы её стороной
+            отношений, которой она не является.
+          </div>
+          <separator string="Операции"/>
+          <field name="movement_ids" nolabel="1" context="{'default_line_id': id}">
+            <list editable="bottom" decoration-muted="state == 'declined'"
+                  decoration-info="state == 'proposed'">
+              <field name="date"/>
+              <field name="name"/>
+              <field name="amount" sum="Кредитов"/>
+              <field name="proposed_by_id" readonly="1"/>
+              <field name="confirmed_by_id" readonly="1" optional="show"/>
+              <field name="deal_id" optional="hide"/>
+              <field name="state"/>
+              <button name="action_confirm" type="object" string="Подтвердить"
+                      icon="fa-check" invisible="state != 'proposed'"/>
+              <button name="action_decline" type="object" string="Отклонить"
+                      icon="fa-times" invisible="state != 'proposed'"/>
+            </list>
+          </field>
+          <div class="o_coop_note">
+            Подтверждает вторая сторона. По сути это акт сверки после каждой
+            операции: переписать историю в одиночку нельзя, а
+            неподтверждённая запись в сальдо не входит.
+          </div>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_clearing_form" model="ir.ui.view">
+    <field name="name">coop.credit.clearing.form</field>
+    <field name="model">coop.credit.clearing</field>
+    <field name="arch" type="xml">
+      <form string="Взаимозачёт по кругу">
+        <header>
+          <button name="action_sign" type="object" string="Подписать"
+                  class="btn-primary" invisible="state != 'proposed'"
+                  confirm="Подписать раунд взаимозачёта? Операция меняет обязательства и необратима."/>
+          <button name="action_cancel" type="object" string="Отменить раунд"
+                  invisible="state != 'proposed'"/>
+          <field name="state" widget="statusbar"/>
+        </header>
+        <sheet>
+          <div class="oe_title"><h1><field name="name"/></h1></div>
+          <div class="o_coop_wallet_intro">
+            Когда долги замыкаются в кольцо, их гасят встречно, ничего не
+            передавая. Гасится минимальное звено круга: на эту величину ни
+            один баланс не ухудшается — это свойство зачёта, а не наша
+            щедрость. Не подписал хотя бы один — раунд отменяется целиком.
+          </div>
+          <group>
+            <group>
+              <field name="amount"/>
+              <field name="signed_count"/>
+              <field name="required_count"/>
+            </group>
+            <group>
+              <field name="participant_ids" widget="many2many_tags"/>
+            </group>
+          </group>
+          <separator string="Звенья круга"/>
+          <field name="line_ids" nolabel="1" readonly="1">
+            <list>
+              <field name="partner_id"/>
+              <field name="counterparty_id"/>
+              <field name="balance"/>
+            </list>
+          </field>
+          <separator string="Подписи"/>
+          <field name="signature_ids" nolabel="1" readonly="1">
+            <list>
+              <field name="partner_id"/>
+              <field name="signed" widget="boolean_toggle"/>
+              <field name="signed_on"/>
+            </list>
+          </field>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <!-- ── Взаиморасчёты ─────────────────────────────────────────────── -->
   <record id="view_coop_settlement_list" model="ir.ui.view">
     <field name="name">coop.settlement.list</field>
     <field name="model">coop.settlement</field>
@@ -140,7 +531,10 @@
             decoration-danger="amount &lt; 0" decoration-success="amount &gt; 0">
         <field name="counterparty_id"/>
         <field name="deal_count"/>
+        <field name="owed_to_me" sum="Должны вам"/>
+        <field name="owed_by_me" sum="Должны вы"/>
         <field name="amount" sum="Сальдо"/>
+        <field name="next_due_on"/>
         <field name="currency_id" column_invisible="True"/>
       </list>
     </field>
@@ -162,18 +556,7 @@
     </field>
   </record>
 
-  <record id="action_coop_wallet" model="ir.actions.act_window">
-    <field name="name">Кошелёк</field>
-    <field name="res_model">coop.wallet</field>
-    <field name="view_mode">kanban,list,form</field>
-    <field name="context">{'hide_partner': True}</field>
-  </record>
-
-  <!--
-    Точка входа для участника: собирает недостающие вкладки и открывает
-    свой кошелёк. Состав зависит от членства, а членство меняется, и
-    пересобрать за один запрос дешевле, чем держать в согласии регламентом.
-  -->
+  <!-- ── Действия и меню ───────────────────────────────────────────── -->
   <record id="action_coop_my_wallet" model="ir.actions.server">
     <field name="name">Мой кошелёк</field>
     <field name="model_id" ref="model_coop_wallet"/>
@@ -188,20 +571,61 @@
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Взаимных расчётов нет</p>
       <p>
-        Здесь видно, кто кому остался должен по неоплаченным платежам сделок.
-        Когда долги идут по кругу, их закрывают взаимозачётом.
+        Одно число «баланс» не отвечает на главный вопрос: кто кому должен и
+        когда. Здесь тот же оборот разложен по контрагентам.
       </p>
     </field>
+  </record>
+
+  <record id="action_coop_credit_line" model="ir.actions.act_window">
+    <field name="name">Взаимный кредит</field>
+    <field name="res_model">coop.credit.line</field>
+    <field name="view_mode">list,form</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Линий взаимного кредита нет</p>
+      <p>
+        Линия появляется, когда один поставил, а другой пока не заплатил:
+        это обязательство между двумя названными сторонами, а не общий котёл.
+      </p>
+    </field>
+  </record>
+
+  <record id="action_coop_clearing" model="ir.actions.act_window">
+    <field name="name">Взаимозачёты</field>
+    <field name="res_model">coop.credit.clearing</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <record id="action_coop_share_account" model="ir.actions.act_window">
+    <field name="name">Паевые счета</field>
+    <field name="res_model">coop.share.account</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <record id="action_coop_network" model="ir.actions.act_window">
+    <field name="name">Блокчейн-сети</field>
+    <field name="res_model">coop.wallet.network</field>
+    <field name="view_mode">list,form</field>
   </record>
 
   <menuitem id="menu_coop_wallet_root" name="Кошелёк" sequence="20"
             web_icon="coop_wallet,static/description/icon.png"/>
   <menuitem id="menu_coop_my_wallet" name="Мой кошелёк"
             parent="menu_coop_wallet_root" action="action_coop_my_wallet" sequence="10"/>
+  <!--
+    Взаиморасчёты остаются и отдельным действием: этот же список нужен на
+    странице организации. Представление одно, дублирования данных нет.
+  -->
   <menuitem id="menu_coop_settlement" name="Взаиморасчёты"
             parent="menu_coop_wallet_root" action="action_coop_settlement" sequence="20"/>
-  <menuitem id="menu_coop_wallet_all" name="Все кошельки"
-            parent="menu_coop_wallet_root" action="action_coop_wallet" sequence="90"
-            groups="base.group_system"/>
+  <menuitem id="menu_coop_credit_line" name="Линии взаимного кредита"
+            parent="menu_coop_wallet_root" action="action_coop_credit_line" sequence="30"/>
+  <menuitem id="menu_coop_clearing" name="Взаимозачёты"
+            parent="menu_coop_wallet_root" action="action_coop_clearing" sequence="40"/>
+  <menuitem id="menu_coop_share_account" name="Паевые счета"
+            parent="menu_coop_wallet_root" action="action_coop_share_account" sequence="50"/>
+  <menuitem id="menu_coop_network" name="Блокчейн-сети"
+            parent="menu_coop_wallet_root" action="action_coop_network" sequence="80"
+            groups="coop_base.group_coop_platform"/>
 
 </odoo>

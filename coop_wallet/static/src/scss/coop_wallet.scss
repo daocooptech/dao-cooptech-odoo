@@ -1,52 +1,133 @@
-// Вкладки кошелька. Остаток набран моноширинным: суммы в столбце
-// сравнивают глазами, и цифры разной ширины этому мешают.
+// Экран кошелька — по макету: полоса вкладок, пояснение под ней, полоса
+// показателей, таблицы и врезки-разъяснения.
+//
+// Показатели набраны моноширинным намеренно: их сравнивают глазами, и
+// цифры разной ширины этому мешают.
 
-.o_coop_wallets {
+.o_coop_wallet {
 
-  .o_kanban_record {
-    background: var(--coop-white, #fff);
-    border: 1px solid var(--coop-line, #e6e6e1);
-    border-radius: 10px;
-    padding: 14px 15px;
-    box-shadow: 0 1px 2px rgba(20, 23, 26, .05);
+  // Полоса вкладок. Штатный statusbar Odoo — это «этапы процесса», и
+  // выглядит он соответственно; здесь же это навигация по разделам
+  // одного предмета, и читаться должна как вкладки прототипа.
+  .o_statusbar_status {
+    gap: 2px;
 
-    &:hover {
-      border-color: var(--coop-teal, #146b64);
+    .btn {
+      border-radius: 8px;
+      padding: 7px 13px;
+      font: 600 12.5px/1.2 'Manrope', sans-serif;
+      color: var(--coop-slate, #4a4a44);
+      background: transparent;
+      border: 0;
+
+      &:hover {
+        background: var(--coop-surface, #f2f2ee);
+      }
+
+      &.o_arrow_button_current,
+      &[disabled].o_arrow_button_current {
+        background: var(--coop-teal-tint, #e3efed);
+        color: var(--coop-teal-dark, #0e4f4a);
+      }
+
+      // Стрелки-«шевроны» между этапами здесь ни к чему: вкладки не идут
+      // одна за другой, между ними нет порядка.
+      &::before,
+      &::after {
+        display: none !important;
+      }
     }
   }
 
-  .o_coop_wallet_card {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    width: 100%;
-    min-width: 0;
-  }
-
-  .o_coop_wallet_kind {
-    font: 600 12px/1.3 'Manrope', sans-serif;
+  .o_coop_wallet_intro {
+    max-width: 760px;
+    margin: 16px 0 18px;
+    font-size: 12.5px;
+    line-height: 1.55;
     color: var(--coop-slate, #4a4a44);
   }
 
-  .o_coop_wallet_balance {
-    font: 700 20px/1.2 'JetBrains Mono', ui-monospace, monospace;
-    color: var(--coop-ink, #14171a);
+  // Полоса показателей — .stock-row прототипа.
+  .o_coop_kpi {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 0 0 20px;
   }
 
-  .o_coop_wallet_meta {
+  .o_coop_kpi_cell {
+    flex: 1 1 150px;
+    min-width: 140px;
+    padding: 12px 14px;
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-radius: 10px;
+    background: var(--coop-white, #fff);
+  }
+
+  .o_coop_kpi_num {
+    font: 700 20px/1.2 'JetBrains Mono', ui-monospace, monospace;
+    color: var(--coop-ink, #14171a);
+
+    // Поле внутри показателя не должно выглядеть полем ввода: это цифра,
+    // а не то, что здесь правят.
+    .o_field_widget {
+      display: inline;
+      font: inherit;
+      color: inherit;
+    }
+  }
+
+  .o_coop_kpi_label {
+    margin-top: 3px;
     font-size: 11.5px;
+    line-height: 1.4;
     color: var(--coop-slate-light, #8f8f88);
   }
 
-  // Паевой счёт выделен фирменным: это единственная вкладка, за которой
-  // стоят членские отношения, а не расчёты.
-  .o_coop_wallet_share .o_coop_wallet_balance {
+  // «Должны вам» — фирменным, «должны вы» — приглушённо-кирпичным. Это не
+  // украшение: на полосе из четырёх чисел важно с одного взгляда отличить
+  // своё от чужого.
+  .o_coop_kpi_free .o_coop_kpi_num {
     color: var(--coop-teal-dark, #0e4f4a);
   }
 
-  // Взаимный кредит уходит в минус чаще прочего — это нормальное его
-  // состояние, и красным его красить не за что.
-  .o_coop_wallet_lets .o_coop_wallet_balance {
+  .o_coop_kpi_due .o_coop_kpi_num {
+    color: var(--coop-error, #b3413a);
+  }
+
+  .o_coop_note {
+    max-width: 760px;
+    margin: 8px 0 14px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--coop-slate-light, #8f8f88);
+  }
+
+  .o_coop_note_boxed {
+    padding: 14px 16px;
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-radius: 10px;
+    background: var(--coop-white, #fff);
     color: var(--coop-slate, #4a4a44);
+  }
+
+  .o_coop_sync {
+    margin: -8px 0 14px;
+    font: 500 11.5px/1 'JetBrains Mono', ui-monospace, monospace;
+    color: var(--coop-slate-light, #8f8f88);
+  }
+}
+
+// На узком экране показатели встают в столбец: четыре числа в ряд на 375
+// пикселях превращаются в четыре нечитаемых столбика, а полоса вкладок
+// должна прокручиваться, а не переноситься.
+@media (max-width: 900px) {
+  .o_coop_wallet .o_coop_kpi_cell {
+    flex: 1 1 100%;
+  }
+
+  .o_coop_wallet .o_statusbar_status {
+    overflow-x: auto;
+    flex-wrap: nowrap;
   }
 }

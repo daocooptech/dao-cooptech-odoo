@@ -39,9 +39,107 @@
     </record>
 
     <!--
+      Паевой счёт видит сам пайщик, а также правление и ревизионная
+      комиссия своего кооператива. Полномочия на счета для этого не
+      требуется: пай — не расчёты, а членские отношения, и ревизии он
+      открыт в первую очередь, иначе проверять нечего.
+    -->
+    <record id="rule_share_account_own" model="ir.rule">
+      <field name="name">Свой паевой счёт</field>
+      <field name="model_id" ref="model_coop_share_account"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[('partner_id', 'in', user.coop_actor_partner_ids.ids)]</field>
+    </record>
+
+    <record id="rule_share_account_board" model="ir.rule">
+      <field name="name">Паевые счета своего кооператива — правление и ревизия</field>
+      <field name="model_id" ref="model_coop_share_account"/>
+      <field name="groups" eval="[(4, ref('coop_base.group_coop_board')),
+                                  (4, ref('coop_base.group_coop_audit'))]"/>
+      <field name="domain_force">[('cooperative_id.coop_member_ids', 'any',
+        [('partner_id', '=', user.partner_id.id),
+         ('state', '=', 'active'),
+         ('role', 'in', ('board', 'audit'))])]</field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="False"/>
+      <field name="perm_create" eval="False"/>
+      <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_share_account_admin" model="ir.rule">
+      <field name="name">Паевые счета — администратор</field>
+      <field name="model_id" ref="model_coop_share_account"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <record id="rule_share_move_own" model="ir.rule">
+      <field name="name">Движения своего паевого счёта</field>
+      <field name="model_id" ref="model_coop_share_move"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[('account_id.partner_id', 'in', user.coop_actor_partner_ids.ids)]</field>
+    </record>
+
+    <record id="rule_share_move_admin" model="ir.rule">
+      <field name="name">Движения по паю — администратор</field>
+      <field name="model_id" ref="model_coop_share_move"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <!--
+      Линия взаимного кредита — дело двоих, и участник бывает на любой её
+      стороне.
+    -->
+    <record id="rule_credit_line_own" model="ir.rule">
+      <field name="name">Свои линии взаимного кредита</field>
+      <field name="model_id" ref="model_coop_credit_line"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">['|',
+        ('partner_id', 'in', user.coop_actor_partner_ids.ids),
+        ('counterparty_id', 'in', user.coop_actor_partner_ids.ids)]</field>
+    </record>
+
+    <record id="rule_credit_line_admin" model="ir.rule">
+      <field name="name">Линии — администратор</field>
+      <field name="model_id" ref="model_coop_credit_line"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <record id="rule_credit_movement_own" model="ir.rule">
+      <field name="name">Операции своих линий</field>
+      <field name="model_id" ref="model_coop_credit_movement"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">['|',
+        ('line_id.partner_id', 'in', user.coop_actor_partner_ids.ids),
+        ('line_id.counterparty_id', 'in', user.coop_actor_partner_ids.ids)]</field>
+    </record>
+
+    <record id="rule_credit_movement_admin" model="ir.rule">
+      <field name="name">Операции кредита — администратор</field>
+      <field name="model_id" ref="model_coop_credit_movement"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <record id="rule_clearing_own" model="ir.rule">
+      <field name="name">Круги, где я участник</field>
+      <field name="model_id" ref="model_coop_credit_clearing"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[('participant_ids', 'in', user.coop_actor_partner_ids.ids)]</field>
+    </record>
+
+    <record id="rule_clearing_admin" model="ir.rule">
+      <field name="name">Взаимозачёты — администратор</field>
+      <field name="model_id" ref="model_coop_credit_clearing"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <!--
       Сальдо считается по чужим сделкам тоже — иначе круг взаимных долгов
-      не сойдётся. Но показывается только своё: сколько должны вам и
-      сколько должны вы.
+      не сойдётся. Но показывается только своё.
     -->
     <record id="rule_settlement_own" model="ir.rule">
       <field name="name">Своё сальдо</field>
