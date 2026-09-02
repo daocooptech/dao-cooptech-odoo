@@ -23,6 +23,7 @@
         'security/ir.model.access.csv',
         'security/coop_people_rules.xml',
         'views/coop_people_views.xml',
+        'data/coop_home.xml',
     ],
     'assets': {
         'web.assets_backend': [
