@@ -98,12 +98,16 @@ def _demote_unpublishable(env):
     правила размещать не дают, — расхождение, которое потом ищут неделю.
     """
     moved = {}
-    for model, owner_field, level in (
-        ('coop.resource', 'owner_id', 'contact'),
-        ('coop.skill.offer', 'partner_id', 'contact'),
-        ('coop.vacancy', 'partner_id', 'identity'),
+    for model, owner_field, level, live in (
+        ('coop.resource', 'owner_id', 'contact', 'published'),
+        ('coop.skill.offer', 'partner_id', 'contact', 'published'),
+        ('coop.vacancy', 'partner_id', 'identity', 'published'),
+        # Проект собирает чужие деньги и чужой труд, поэтому открыть сбор
+        # может только подтверждённый инициатор — как и требует
+        # `action_open_gathering`.
+        ('coop.project', 'partner_id', 'identity', 'gathering'),
     ):
-        records = env[model].sudo().search([('state', '=', 'published')])
+        records = env[model].sudo().search([('state', '=', live)])
         weak = records.filtered(
             lambda r: not r[owner_field].coop_level_at_least(level))
         if weak:

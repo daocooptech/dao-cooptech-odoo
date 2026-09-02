@@ -59,9 +59,40 @@ def _category(env, cache, name, parent=None):
     return record
 
 
-def load_resources(env):
+# Добор сверх макета. Решение владельца: опубликованных записей должно
+# быть больше ста. После того как часть уйдёт в черновики по нехватке
+# верификации у владельца, ста из ста не остаётся — значит записей нужно
+# больше. Названия собираются из тех же категорий и городов, что в
+# макете: «Ресурс №117» — это не пример, а заполнитель.
+EXTRA_TITLES = [
+    'Мотопомпа', 'Бетономешалка на 180 л', 'Леса строительные',
+    'Сварочный полуавтомат', 'Дисковая пилорама', 'Сушильная камера',
+    'Прицеп бортовой', 'Мотоблок с навесным', 'Косилка роторная',
+    'Дровокол гидравлический', 'Пресс для сена', 'Ёмкость под воду',
+    'Компрессор поршневой', 'Генератор на 5 кВт', 'Плуг оборотный',
+    'Опрыскиватель прицепной', 'Зернодробилка', 'Инкубатор на 500 яиц',
+    'Медогонка на 8 рамок', 'Морозильный ларь',
+]
+
+
+def _extra_rows(rows, extra):
+    cities = sorted({row['city'] for row in rows if row.get('city')})
+    extras = []
+    for i in range(extra):
+        source = rows[(i * 11) % len(rows)]
+        city = cities[(i * 5) % len(cities)] if cities else ''
+        row = dict(source)
+        row['name'] = '%s — %s' % (EXTRA_TITLES[i % len(EXTRA_TITLES)], city)
+        row['city'] = city
+        row['promoted'] = False
+        extras.append(row)
+    return extras
+
+
+def load_resources(env, extra=45):
     with open(os.path.join(HERE, 'resources.json'), encoding='utf-8') as fh:
         rows = json.load(fh)
+    rows = rows + _extra_rows(rows, extra)
 
     methods = {m.code: m for m in env['coop.resource.method'].search([])}
     Resource = env['coop.resource']

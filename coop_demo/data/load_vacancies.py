@@ -67,9 +67,36 @@ def _ensure_projects(env):
     return projects
 
 
-def load_vacancies(env):
+
+# Добор сверх макета — по тому же основанию, что и в остальных каталогах:
+# опубликованных должно быть больше ста, а часть уйдёт в черновики по
+# нехватке верификации у того, кто размещает.
+EXTRA_TITLES = [
+    'Тракторист-машинист', 'Оператор сушильного комплекса', 'Пчеловод',
+    'Плотник', 'Сварщик', 'Кровельщик', 'Электромонтажник',
+    'Оператор пилорамы', 'Ветеринарный фельдшер', 'Агроном',
+    'Кладовщик', 'Водитель категории C', 'Слесарь-ремонтник',
+    'Пекарь', 'Сыровар', 'Швея', 'Печник', 'Садовод-питомниковод',
+    'Мастер по ремонту техники', 'Бухгалтер на первичку',
+]
+
+
+def _extra_rows(rows, extra):
+    cities = sorted({row['city'] for row in rows if row.get('city')})
+    extras = []
+    for i in range(extra):
+        source = rows[(i * 9) % len(rows)]
+        city = cities[(i * 7) % len(cities)] if cities else ''
+        row = dict(source)
+        row['name'] = '%s — %s' % (EXTRA_TITLES[i % len(EXTRA_TITLES)], city)
+        row['city'] = city
+        extras.append(row)
+    return extras
+
+def load_vacancies(env, extra=45):
     with open(os.path.join(HERE, 'vacancies.json'), encoding='utf-8') as fh:
         rows = json.load(fh)
+    rows = rows + _extra_rows(rows, extra)
 
     Vacancy = env['coop.vacancy'].sudo()
     Partner = env['res.partner'].sudo()

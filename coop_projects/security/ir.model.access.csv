@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_coop_project_category_user,Темы проектов — чтение,model_coop_project_category,base.group_user,1,0,0,0
+access_coop_project_category_admin,Темы проектов — ведение,model_coop_project_category,coop_base.group_coop_platform,1,1,1,1
+access_coop_project_user,Проекты — участник,model_coop_project,base.group_user,1,1,1,1
+access_coop_contribution_user,Вклады — участник,model_coop_project_contribution,base.group_user,1,1,1,1

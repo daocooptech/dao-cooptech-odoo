@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Без `noupdate` — правила доступа доставляются обновлением модуля.
+-->
+<odoo>
+  <data>
+
+    <record id="rule_project_read" model="ir.rule">
+      <field name="name">Участник видит проекты в сборе и свои</field>
+      <field name="model_id" ref="model_coop_project"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">
+        ['|', ('state', 'in', ('gathering', 'running', 'done')),
+         ('partner_id', 'in', user.coop_actor_partner_ids.ids)]
+      </field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="False"/>
+      <field name="perm_create" eval="False"/>
+      <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_project_own" model="ir.rule">
+      <field name="name">Править можно только свой проект</field>
+      <field name="model_id" ref="model_coop_project"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[('partner_id', 'in', user.coop_publisher_partner_ids.ids)]</field>
+      <field name="perm_read" eval="False"/>
+      <field name="perm_write" eval="True"/>
+      <field name="perm_create" eval="True"/>
+      <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <record id="rule_project_admin" model="ir.rule">
+      <field name="name">Администратор узла ведёт все проекты</field>
+      <field name="model_id" ref="model_coop_project"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <!--
+      Вклад видят двое: вкладчик и инициатор проекта. Чужой вклад говорит
+      о человеке немало — сколько он вложил и куда, — и открывать это
+      всему каталогу незачем. Общая сумма при этом видна всем: без неё не
+      понять, собран проект или нет.
+    -->
+    <record id="rule_contribution_own" model="ir.rule">
+      <field name="name">Свои вклады и вклады в свой проект</field>
+      <field name="model_id" ref="model_coop_project_contribution"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">
+        ['|', ('partner_id', 'in', user.coop_actor_partner_ids.ids),
+         ('project_id.partner_id', 'in', user.coop_actor_partner_ids.ids)]
+      </field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="True"/>
+      <field name="perm_create" eval="True"/>
+      <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_contribution_admin" model="ir.rule">
+      <field name="name">Вклады — администратор</field>
+      <field name="model_id" ref="model_coop_project_contribution"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+  </data>
+</odoo>

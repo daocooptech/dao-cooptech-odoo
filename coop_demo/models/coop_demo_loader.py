@@ -2,8 +2,9 @@
 from odoo import api, models
 
 from ..data import (emblems, load_bounty, load_memberships, load_org_profiles,
-                    load_orgs, load_people, load_reference, load_resources,
-                    load_skills, load_vacancies, load_verification)
+                    load_orgs, load_people, load_projects, load_reference,
+                    load_resources, load_skills, load_vacancies,
+                    load_verification)
 
 
 class CoopDemoLoader(models.AbstractModel):
@@ -37,6 +38,7 @@ class CoopDemoLoader(models.AbstractModel):
         # люди и организации, загруженные выше.
         load_resources.load_resources(self.env)
         load_skills.load_skills(self.env)
+        load_projects.load_projects(self.env)
         load_vacancies.load_vacancies(self.env)
         # Задачи и токены последними: исполнителей берём из уже
         # загруженного каталога людей.

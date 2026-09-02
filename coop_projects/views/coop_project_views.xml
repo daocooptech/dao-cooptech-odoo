@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ── Каталог проектов ──────────────────────────────────────────── -->
+  <record id="view_coop_project_kanban" model="ir.ui.view">
+    <field name="name">coop.project.kanban</field>
+    <field name="model">coop.project</field>
+    <field name="arch" type="xml">
+      <kanban js_class="coop_catalog_kanban" class="o_coop_projects"
+              default_order="readiness desc, id desc">
+        <field name="image_512"/>
+        <field name="city"/>
+        <field name="readiness"/>
+        <field name="kind"/>
+        <field name="summary"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_tile">
+              <div class="o_coop_tile_image">
+                <img t-att-src="'/web/image/coop.project/%s/image_512' % record.id.raw_value"
+                     alt="" loading="lazy"/>
+                <span class="o_coop_badge o_coop_kind"
+                      t-att-class="'o_coop_kind_' + record.kind.raw_value">
+                  <t t-esc="record.kind.value"/>
+                </span>
+                <span class="o_coop_loc" t-if="record.city.raw_value">
+                  <i class="fa fa-map-marker" aria-hidden="true"/>
+                  <t t-esc="record.city.value"/>
+                </span>
+              </div>
+              <div class="o_coop_tile_body">
+                <div class="o_coop_tile_name"><field name="name"/></div>
+                <div class="o_coop_tile_desc"><field name="summary"/></div>
+                <div class="o_coop_readiness">
+                  <div class="o_coop_readiness_bar">
+                    <div class="o_coop_readiness_fill"
+                         t-attf-style="width: #{record.readiness.raw_value}%"/>
+                  </div>
+                  <div class="o_coop_readiness_pct">
+                    <t t-esc="record.readiness.value"/>%
+                  </div>
+                </div>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="view_coop_project_list" model="ir.ui.view">
+    <field name="name">coop.project.list</field>
+    <field name="model">coop.project</field>
+    <field name="arch" type="xml">
+      <list string="Проекты" decoration-muted="state == 'cancelled'">
+        <field name="name"/>
+        <field name="kind"/>
+        <field name="category_id" optional="show"/>
+        <field name="subcategory_id" optional="hide"/>
+        <field name="city"/>
+        <field name="partner_id"/>
+        <field name="required_total" sum="Нужно"/>
+        <field name="contribution_total" sum="Собрано"/>
+        <field name="readiness" widget="progressbar"/>
+        <field name="contributor_count" optional="hide"/>
+        <field name="currency_id" column_invisible="True"/>
+        <field name="state" widget="badge"
+               decoration-success="state == 'running'"
+               decoration-info="state == 'gathering'"
+               decoration-muted="state in ('done', 'cancelled')"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_project_form" model="ir.ui.view">
+    <field name="name">coop.project.form</field>
+    <field name="model">coop.project</field>
+    <field name="arch" type="xml">
+      <form string="Проект">
+        <header>
+          <button name="action_open_gathering" type="object" string="Открыть сбор"
+                  class="btn-primary" invisible="state != 'draft'"/>
+          <button name="action_launch" type="object" string="Запустить"
+                  class="btn-primary" invisible="state != 'gathering'"/>
+          <button name="action_finish" type="object" string="Завершить"
+                  invisible="state != 'running'"/>
+          <button name="action_cancel" type="object" string="Отменить"
+                  invisible="state in ('done', 'cancelled')"/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="draft,gathering,running,done"/>
+        </header>
+        <sheet>
+          <div class="oe_button_box" name="button_box">
+            <button name="action_open_project" type="object" class="oe_stat_button"
+                    icon="fa-tasks" invisible="not project_id">
+              <div class="o_stat_info">
+                <span class="o_stat_text">Управление</span>
+                <span class="o_stat_text">проектом</span>
+              </div>
+            </button>
+          </div>
+          <field name="image_1920" widget="image" class="oe_avatar"
+                 options="{'preview_image': 'image_512'}"/>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Название проекта"/></h1>
+            <field name="summary" placeholder="Одна строка, которую видно в каталоге"/>
+          </div>
+          <group>
+            <group string="О проекте">
+              <field name="kind"/>
+              <field name="category_id"/>
+              <field name="subcategory_id"/>
+              <field name="city"/>
+            </group>
+            <group string="Кто собирает">
+              <field name="partner_id"/>
+              <field name="author_id"/>
+              <field name="project_id" readonly="1"/>
+            </group>
+          </group>
+          <group>
+            <group string="Ресурсы">
+              <field name="required_total"/>
+              <field name="contribution_total"/>
+              <field name="readiness" widget="progressbar"/>
+              <field name="contributor_count"/>
+              <field name="currency_id" invisible="1"/>
+            </group>
+          </group>
+          <notebook>
+            <page string="Описание" name="description">
+              <field name="description"/>
+            </page>
+            <page string="Вклады" name="contributions">
+              <div class="alert alert-info" role="status">
+                Краудресурсинг: скидываются не только деньгами. Смена
+                экскаваторщика, месяц аренды склада и перевод на счёт сводятся
+                в одну величину только через денежную оценку — она и
+                записывается, по соглашению сторон.
+              </div>
+              <field name="contribution_ids">
+                <list editable="bottom">
+                  <field name="partner_id"/>
+                  <field name="kind"/>
+                  <field name="name"/>
+                  <field name="value" sum="Собрано"/>
+                  <field name="share_percent" widget="percentage" readonly="1"/>
+                  <field name="offered_on"/>
+                  <field name="currency_id" column_invisible="True"/>
+                  <field name="state" widget="badge"
+                         decoration-success="state == 'accepted'"
+                         decoration-muted="state in ('declined', 'returned')"/>
+                  <button name="action_accept" type="object" string="Принять"
+                          icon="fa-check" invisible="state != 'offered'"/>
+                  <button name="action_decline" type="object" string="Отклонить"
+                          icon="fa-times" invisible="state != 'offered'"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_project_search" model="ir.ui.view">
+    <field name="name">coop.project.search</field>
+    <field name="model">coop.project</field>
+    <field name="arch" type="xml">
+      <search string="Проекты">
+        <field name="name"/>
+        <field name="city"/>
+        <field name="category_id"/>
+        <field name="partner_id"/>
+        <filter name="gathering" string="Идёт сбор" domain="[('state', '=', 'gathering')]"/>
+        <filter name="running" string="Запущенные" domain="[('state', '=', 'running')]"/>
+        <separator/>
+        <filter name="almost" string="Собраны больше чем наполовину"
+                domain="[('readiness', '>=', 50)]"/>
+        <filter name="starting" string="Только начали"
+                domain="[('readiness', '&lt;', 25)]"/>
+        <separator/>
+        <filter name="cooperative" string="Кооперативные" domain="[('kind', '=', 'cooperative')]"/>
+        <filter name="dao" string="ДАО" domain="[('kind', '=', 'dao')]"/>
+        <group>
+          <filter name="by_kind" string="По виду" context="{'group_by': 'kind'}"/>
+          <filter name="by_category" string="По теме" context="{'group_by': 'category_id'}"/>
+          <filter name="by_city" string="По городу" context="{'group_by': 'city'}"/>
+          <filter name="by_state" string="По состоянию" context="{'group_by': 'state'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_projects" model="ir.actions.act_window">
+    <field name="name">Проекты</field>
+    <field name="res_model">coop.project</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="context">{'coop_catalog': True}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Проектов пока нет</p>
+      <p>
+        Краудресурсинг: проект собирает не только деньги, но труд, технику,
+        материалы и знания. Доля участника складывается из стоимости его
+        вклада, а не вписывается руками.
+      </p>
+    </field>
+  </record>
+
+  <record id="action_coop_my_projects" model="ir.actions.act_window">
+    <field name="name">Мои проекты</field>
+    <field name="res_model">coop.project</field>
+    <field name="view_mode">list,kanban,form</field>
+    <field name="domain">[('partner_id', '=', uid)]</field>
+    <field name="context">{'search_default_by_state': 1}</field>
+  </record>
+
+  <record id="action_coop_project_category" model="ir.actions.act_window">
+    <field name="name">Темы проектов</field>
+    <field name="res_model">coop.project.category</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <menuitem id="menu_coop_projects_root" name="Проекты" sequence="18"
+            web_icon="coop_projects,static/description/icon.png"/>
+  <menuitem id="menu_coop_projects" name="Каталог проектов"
+            parent="menu_coop_projects_root" action="action_coop_projects" sequence="10"/>
+  <menuitem id="menu_coop_project_category" name="Темы"
+            parent="menu_coop_projects_root" action="action_coop_project_category"
+            sequence="90" groups="coop_base.group_coop_platform"/>
+
+</odoo>

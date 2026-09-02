@@ -19,7 +19,7 @@ MAIN_ITEMS = [
     ('Навыки', 'fa-wrench', 'coop_skills.action_coop_skills'),
     ('Вакансии', 'fa-briefcase', 'coop_vacancies.action_coop_vacancies'),
     ('Ресурсы', 'fa-cube', 'coop_resources.action_coop_resources'),
-    ('Проекты', 'fa-rocket', 'project.open_view_project_all'),
+    ('Проекты', 'fa-rocket', 'coop_projects.action_coop_projects'),
     ('Организации', 'fa-university', 'coop_orgs.action_coop_orgs'),
     ('Сообщества', 'fa-comments', None),
     ('Кошелёк', 'fa-credit-card', 'coop_tokens.action_coop_token'),
@@ -159,10 +159,15 @@ class CoopSidebarItem(models.Model):
                    if v['section'] == 'main' and v['name'] not in known]
         if missing:
             items |= self.create(missing)
-        # Действие могло появиться позже пункта — раздел перенесли.
-        for item in items.filtered(lambda i: i.section == 'main' and not i.action_id):
+        # Раздел мог быть перенесён после того, как меню уже собрано, —
+        # или перенесён заново, на собственный экран вместо чужого. Второе
+        # ровно так и вышло с проектами: пункт вёл в штатный модуль
+        # управления проектами, а раздел платформы — это краудресурсинг, и
+        # экран у него свой. Поэтому обязательные разделы не только
+        # дописываются, но и переставляются на нынешнее действие.
+        for item in items.filtered(lambda i: i.section == 'main'):
             xmlid = MAIN_BY_NAME.get(item.name)
             action = self.env.ref(xmlid, raise_if_not_found=False) if xmlid else None
-            if action:
+            if action and item.action_id.id != action.id:
                 item.action_id = action.id
         return items.sorted(lambda i: (0 if i.section == 'main' else 1, i.sequence, i.id))
