@@ -276,14 +276,6 @@
     gap: 16px;
   }
 
-  .o_coop_photo {
-    flex: none;
-    width: 180px;
-    aspect-ratio: auto;
-    align-self: stretch;
-    min-height: 120px;
-  }
-
   .o_coop_body {
     padding: 14px 16px 14px 0;
   }
@@ -298,12 +290,6 @@
   .o_coop_rows .o_coop_people .o_coop_person,
   .o_coop_rows.o_coop_people .o_coop_person {
     flex-direction: column;
-  }
-
-  .o_coop_rows .o_coop_people .o_coop_photo,
-  .o_coop_rows.o_coop_people .o_coop_photo {
-    width: 100%;
-    aspect-ratio: 1.2;
   }
 
   .o_coop_rows .o_coop_people .o_coop_body,

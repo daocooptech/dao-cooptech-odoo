@@ -19,7 +19,7 @@
         <templates>
           <t t-name="card">
             <div class="o_coop_org">
-              <div class="o_coop_org_logo">
+              <div class="o_coop_org_logo o_coop_media">
                 <field name="avatar_256" widget="image"/>
                 <span class="o_coop_locbar" t-if="record.city.raw_value">
                   <i class="fa fa-map-marker" role="img" aria-label="Город"/>

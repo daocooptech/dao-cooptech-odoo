@@ -16,7 +16,7 @@
         <templates>
           <t t-name="card">
             <div class="o_coop_tile">
-              <div class="o_coop_tile_image">
+              <div class="o_coop_tile_image o_coop_media">
                 <!--
                   Адрес собирается сложением строк. Питоновское
                   форматирование через «%» здесь не работает: шаблон

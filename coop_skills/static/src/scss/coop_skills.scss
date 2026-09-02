@@ -246,14 +246,6 @@
     gap: 16px;
   }
 
-  .o_coop_skill_photo {
-    flex: none;
-    width: 220px;
-    aspect-ratio: auto;
-    align-self: stretch;
-    min-height: 150px;
-  }
-
   .o_coop_skill_body {
     padding: 14px 16px 14px 0;
   }
@@ -275,12 +267,6 @@
   .o_coop_rows .o_coop_skills .o_coop_skill,
   .o_coop_rows.o_coop_skills .o_coop_skill {
     flex-direction: column;
-  }
-
-  .o_coop_rows .o_coop_skills .o_coop_skill_photo,
-  .o_coop_rows.o_coop_skills .o_coop_skill_photo {
-    width: 100%;
-    aspect-ratio: 1.6;
   }
 
   .o_coop_rows .o_coop_skills .o_coop_skill_body,

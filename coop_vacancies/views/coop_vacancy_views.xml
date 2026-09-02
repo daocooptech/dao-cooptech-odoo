@@ -27,7 +27,7 @@
         <templates>
           <t t-name="card">
             <div class="o_coop_vacancy">
-              <div class="o_coop_vac_photo">
+              <div class="o_coop_vac_photo o_coop_media">
                 <field name="image_512" widget="image"/>
                 <img class="o_coop_vac_owner"
                      t-attf-src="/web/image/res.partner/#{record.partner_id.raw_value}/avatar_128"

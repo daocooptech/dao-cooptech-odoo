@@ -22,7 +22,7 @@
         <templates>
           <t t-name="card">
             <div class="o_coop_resource">
-              <div class="o_coop_res_photo">
+              <div class="o_coop_res_photo o_coop_media">
                 <field name="image_512" widget="image"/>
                 <span class="o_coop_res_type"
                       t-attf-class="o_coop_res_type #{record.listing_type.raw_value == 'request' ? 'o_coop_res_request' : ''}">

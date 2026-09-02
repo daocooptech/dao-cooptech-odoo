@@ -30,7 +30,7 @@
         <templates>
           <t t-name="card">
             <div class="o_coop_skill">
-              <div class="o_coop_skill_photo">
+              <div class="o_coop_skill_photo o_coop_media">
                 <field name="image_512" widget="image"/>
                 <!-- Аватар владельца адресом изображения: помощника
                      kanban_image в Odoo 19 больше нет. -->
