@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Одна форма на «Мою страницу» и на карточку того же человека глазами
+    постороннего. Второй формы нет намеренно: они разъедутся на первой же
+    правке, и владелец начнёт видеть не то, что показывает гостям.
+    Разница выражена признаком «это я» и правами.
+  -->
+  <record id="view_coop_profile_form" model="ir.ui.view">
+    <field name="name">coop.profile.form</field>
+    <field name="model">res.partner</field>
+    <field name="priority">99</field>
+    <field name="arch" type="xml">
+      <form string="Участник" class="o_coop_profile">
+        <header>
+          <button name="action_coop_message" type="object" string="Написать"
+                  class="btn-primary" invisible="coop_is_self"/>
+          <button name="action_coop_befriend" type="object"
+                  string="Добавить в друзья"
+                  invisible="coop_is_self or coop_friend_state != 'none'"/>
+          <button name="action_coop_befriend" type="object"
+                  string="Принять дружбу" class="btn-primary"
+                  invisible="coop_friend_state != 'pending_in'"/>
+          <button name="action_coop_follow" type="object" string="Подписаться"
+                  invisible="coop_is_self or coop_is_following"/>
+          <button name="action_coop_follow" type="object" string="Отписаться"
+                  invisible="coop_is_self or not coop_is_following"/>
+        </header>
+        <sheet>
+          <!-- Обложки в макете нет ни у кого, кроме владельца; снимок
+               участника — то же поле, что и в каталоге. -->
+          <field name="image_1920" widget="image" class="oe_avatar"
+                 options="{'preview_image': 'avatar_256'}"/>
+
+          <div class="oe_button_box" name="button_box">
+            <!--
+              Полосы макета здесь свёрнуты в счётчики. Разворачивать их
+              девятью встроенными списками нельзя: у человека с двумя
+              записями получится семь пустых полос со стрелками, которые
+              нечего листать, и страница читается как недогрузившаяся.
+              Клик уводит в тот же каталог, что и боковое меню, — с теми
+              же фильтрами и порядком, а не во второй список ресурсов.
+            -->
+            <button name="action_coop_my_offers" type="object"
+                    class="oe_stat_button" icon="fa-wrench"
+                    invisible="coop_offer_count == 0">
+              <field name="coop_offer_count" widget="statinfo" string="Навыки"/>
+            </button>
+            <button name="action_coop_my_resources" type="object"
+                    class="oe_stat_button" icon="fa-cubes"
+                    invisible="coop_resource_count == 0">
+              <field name="coop_resource_count" widget="statinfo" string="Ресурсы"/>
+            </button>
+            <button name="action_coop_my_vacancies" type="object"
+                    class="oe_stat_button" icon="fa-briefcase"
+                    invisible="coop_vacancy_count == 0">
+              <field name="coop_vacancy_count" widget="statinfo" string="Вакансии"/>
+            </button>
+            <button name="action_coop_my_projects" type="object"
+                    class="oe_stat_button" icon="fa-rocket"
+                    invisible="coop_project_count == 0">
+              <field name="coop_project_count" widget="statinfo" string="Проекты"/>
+            </button>
+            <button name="action_coop_my_communities" type="object"
+                    class="oe_stat_button" icon="fa-comments"
+                    invisible="coop_community_count == 0">
+              <field name="coop_community_count" widget="statinfo" string="Сообщества"/>
+            </button>
+            <button name="action_coop_my_deals" type="object"
+                    class="oe_stat_button" icon="fa-handshake-o"
+                    invisible="coop_deal_count == 0">
+              <field name="coop_deal_count" widget="statinfo" string="Сделки"/>
+            </button>
+            <!-- Черновики и снятое с публикации — только владельцу: в
+                 каталоге их нет, и постороннему знать о них нечего. -->
+            <button name="action_coop_my_listings" type="object"
+                    class="oe_stat_button" icon="fa-eye-slash"
+                    invisible="not coop_is_self or coop_draft_count == 0">
+              <field name="coop_draft_count" widget="statinfo" string="Не опубликовано"/>
+            </button>
+          </div>
+
+          <div class="oe_title">
+            <h1><field name="name" readonly="not coop_is_self"
+                       placeholder="Имя и фамилия"/></h1>
+            <field name="coop_specialization_id" readonly="not coop_is_self"
+                   placeholder="Чем занимаетесь"/>
+          </div>
+
+          <!--
+            Ступень проверки — не украшение: от неё зависит, что человеку
+            вообще доступно. Владельцу говорим, что откроется дальше;
+            постороннему показываем сам факт без окраски — неподтверждённый
+            не значит мошенник.
+          -->
+          <div class="o_coop_notice o_coop_notice_wait"
+               invisible="not coop_is_self or coop_verification_level == 'identity'">
+            Подтвердите личность — после этого откроются сделки, вакансии,
+            организации, проекты и операции с деньгами.
+          </div>
+
+          <group>
+            <!--
+              Подписи укорочены не ради красоты: штатные («Ступень
+              верификации», «Завершённых сделок») занимают почти всю
+              колонку, и значение переносится по одной букве в строку.
+            -->
+            <group string="Кто и откуда">
+              <field name="coop_verification_level" string="Проверка" readonly="1"/>
+              <field name="coop_trust" string="Доверие" readonly="1"/>
+              <field name="coop_deals_done" string="Сделок" readonly="1"/>
+              <field name="city" string="Город" readonly="not coop_is_self"
+                     placeholder="Город"/>
+              <field name="coop_registered_on" string="На платформе с"
+                     readonly="1" invisible="not coop_registered_on"/>
+            </group>
+            <group string="Связь" invisible="is_company">
+              <field name="email" readonly="not coop_is_self"/>
+              <field name="phone" readonly="not coop_is_self"/>
+              <field name="website" readonly="not coop_is_self"
+                     placeholder="Сайт"/>
+              <field name="coop_birthdate" readonly="not coop_is_self"
+                     invisible="not coop_is_self"/>
+              <field name="coop_age" invisible="not coop_age"/>
+            </group>
+          </group>
+
+          <!--
+            Страница без единой записи. Показываем не девять пустых полос,
+            а один блок с тем, что можно завести: пустые разделы читаются
+            как сбой загрузки, а не как приглашение.
+          -->
+          <div class="o_coop_empty" invisible="not coop_holdings_empty or not coop_is_self">
+            <div class="o_coop_empty_title">Страница пока пустая</div>
+            <div class="o_coop_empty_text">
+              Начните с того, что у вас уже есть: умение, которым готовы
+              поделиться, вещь или помещение, которые простаивают, или
+              задача, которую в одиночку не потянуть.
+            </div>
+          </div>
+          <div class="o_coop_empty" invisible="not coop_holdings_empty or coop_is_self">
+            <div class="o_coop_empty_text">
+              Участник ещё не заполнил страницу.
+            </div>
+          </div>
+
+          <notebook>
+            <page string="О себе" name="about">
+              <field name="comment" placeholder="Расскажите о себе"
+                     readonly="not coop_is_self"/>
+            </page>
+            <page string="Навыки" name="skills" invisible="is_company">
+              <field name="coop_skill_ids" widget="many2many_tags"
+                     readonly="not coop_is_self"/>
+            </page>
+            <page string="Организации" name="orgs"
+                  invisible="coop_membership_count == 0">
+              <field name="coop_membership_ids" readonly="1">
+                <list>
+                  <field name="organization_id"/>
+                  <field name="role"/>
+                  <field name="job_title" optional="show"/>
+                  <field name="joined_on"/>
+                  <field name="state" widget="badge"
+                         decoration-success="state == 'active'"
+                         decoration-warning="state == 'applied'"/>
+                </list>
+              </field>
+            </page>
+            <page string="Подтверждения" name="verification"
+                  invisible="not coop_is_self">
+              <field name="coop_verification_ids" readonly="1">
+                <list>
+                  <field name="kind"/>
+                  <field name="method"/>
+                  <field name="confirmed_on" optional="show"/>
+                  <field name="expires_on" optional="show"/>
+                  <field name="state" widget="badge"
+                         decoration-success="state == 'confirmed'"
+                         decoration-warning="state == 'pending'"
+                         decoration-danger="state == 'rejected'"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <!--
+    «Моя страница» — серверное действие, а не окно с доменом: от чьего
+    имени человек действует, от того и страница, и это должно решаться
+    при каждом открытии, а не один раз при загрузке меню.
+  -->
+  <record id="action_coop_my_page" model="ir.actions.server">
+    <field name="name">Моя страница</field>
+    <field name="model_id" ref="base.model_res_partner"/>
+    <field name="state">code</field>
+    <field name="code">action = model.action_coop_open_my_page()</field>
+  </record>
+
+  <menuitem id="menu_coop_profile_root" name="Моя страница" sequence="1"/>
+  <menuitem id="menu_coop_my_page" name="Моя страница"
+            parent="menu_coop_profile_root" action="action_coop_my_page"
+            sequence="10"/>
+
+</odoo>

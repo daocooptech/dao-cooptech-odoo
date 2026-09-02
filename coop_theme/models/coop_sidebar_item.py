@@ -13,7 +13,7 @@ from odoo.exceptions import UserError
 # говорит: меню без него выглядело бы полным, и понять, чего не хватает,
 # было бы неоткуда.
 MAIN_ITEMS = [
-    ('Моя страница', 'fa-user-circle-o', None),
+    ('Моя страница', 'fa-user-circle-o', 'coop_profile.action_coop_my_page'),
     ('Сообщения', 'fa-comments-o', 'mail.action_discuss'),
     ('Люди', 'fa-users', 'coop_people.action_coop_people'),
     ('Навыки', 'fa-wrench', 'coop_skills.action_coop_skills'),

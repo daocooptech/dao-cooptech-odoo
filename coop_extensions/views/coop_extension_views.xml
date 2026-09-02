@@ -193,7 +193,7 @@
     <field name="name">Мои публикации</field>
     <field name="res_model">coop.extension</field>
     <field name="view_mode">list,kanban,form</field>
-    <field name="domain">[('author_id', '=', uid)]</field>
+    <field name="domain">[('author_id.user_ids', 'in', [uid])]</field>
     <field name="context">{'default_publication_state': 'draft'}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Вы ещё ничего не публиковали</p>

@@ -219,7 +219,7 @@
     <field name="name">Мои проекты</field>
     <field name="res_model">coop.project</field>
     <field name="view_mode">list,kanban,form</field>
-    <field name="domain">[('partner_id', '=', uid)]</field>
+    <field name="domain">[('partner_id.user_ids', 'in', [uid])]</field>
     <field name="context">{'search_default_by_state': 1}</field>
   </record>
 

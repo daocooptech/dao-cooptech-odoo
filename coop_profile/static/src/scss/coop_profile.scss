@@ -1,0 +1,58 @@
+// «Моя страница» и карточка участника.
+//
+// Оформление опирается на общие токены темы; своих цветов здесь нет.
+// Полосы-карусели макета сюда не переносятся: они свёрнуты в счётчики
+// над карточкой, см. комментарий в представлении.
+
+.o_coop_profile {
+
+  // Строка-предупреждение: ожидание — золотым, как во всём макете.
+  .o_coop_notice {
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    line-height: 1.45;
+    background: var(--coop-surface, #f2f2ee);
+    color: var(--coop-slate, #4a4a44);
+  }
+
+  .o_coop_notice_wait {
+    background: var(--coop-gold-tint, #f7ecd9);
+    color: var(--coop-gold-text, #8a5f1c);
+  }
+
+  // Пустая страница. Не девять пустых полос, а один внятный блок.
+  .o_coop_empty {
+    margin: 16px 0;
+    padding: 18px 20px;
+    border: 1px dashed var(--coop-line, #e6e6e1);
+    border-radius: 10px;
+    background: var(--coop-white, #fff);
+  }
+
+  .o_coop_empty_title {
+    font: 700 14px/1.35 'Manrope', sans-serif;
+    color: var(--coop-ink, #14171a);
+    margin-bottom: 4px;
+  }
+
+  .o_coop_empty_text {
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--coop-slate, #4a4a44);
+    max-width: 560px;
+  }
+
+  // Колонка подписи в карточке участника. Штатная ширина рассчитана на
+  // короткие английские подписи; по-русски «Ступень верификации» её
+  // переполняет, и значение начинает переноситься по букве в строку.
+  .o_inner_group {
+    .o_form_label,
+    .o_td_label {
+      min-width: 132px;
+      white-space: normal;
+    }
+  }
+
+}

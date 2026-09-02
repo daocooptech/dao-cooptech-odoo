@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Без noupdate — правила доступа должны доезжать до узла обновлением
+  модуля. Флаг «не обновлять» запоминается в ir_model_data при первой
+  загрузке и переживает удаление из XML; coop_base снимает его
+  вызовом coop.security.unfreeze до загрузки остальных правил.
+-->
+<odoo>
+  <data>
+
+    <!--
+      Штатно Odoo даёт рядовому пользователю только чтение контактов:
+      запись есть у «управляющего контактами», а он подразумевает
+      администратора. На платформе это означало бы, что участник не может
+      исправить у себя ни город, ни дату рождения, ни описание — а «Моя
+      страница» ровно об этом.
+
+      Выдать группу управляющего вместо этого нельзя: она даёт запись на
+      всех контактов без единого ограничения. Поэтому право на запись
+      выдаётся всем, но правилом сужается до себя и тех организаций, от
+      имени которых человеку доверено публиковать.
+
+      Правило только на запись: читать каталог людей и организаций
+      по-прежнему можно всем, иначе рассыплются все каталоги разом.
+    -->
+    <record id="rule_partner_write_own" model="ir.rule">
+      <field name="name">Править можно свой профиль и профиль своей организации</field>
+      <field name="model_id" ref="base.model_res_partner"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">
+        ['|',
+          ('id', '=', user.partner_id.id),
+          ('id', 'in', user.coop_publisher_partner_ids.ids)]
+      </field>
+      <field name="perm_read" eval="False"/>
+      <field name="perm_write" eval="True"/>
+      <field name="perm_create" eval="False"/>
+      <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!--
+      Банковские реквизиты штатно читает любой участник: доступ к модели
+      выдан группе пользователей, а правила на записи нет вовсе. Через
+      связанное поле или выгрузку это означает чужие счета в открытом
+      виде. Своё видно всегда, чужое — только тем, кому организация
+      доверила казну.
+    -->
+    <record id="rule_partner_bank_own" model="ir.rule">
+      <field name="name">Реквизиты видны владельцу и казначею</field>
+      <field name="model_id" ref="base.model_res_partner_bank"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">
+        ['|',
+          ('partner_id', '=', user.partner_id.id),
+          ('partner_id', 'in', user.coop_treasury_partner_ids.ids)]
+      </field>
+    </record>
+
+  </data>
+</odoo>

@@ -146,7 +146,7 @@
         <filter name="in_progress" string="В работе"
                 domain="[('state', 'in', ('assigned', 'submitted'))]"/>
         <filter name="mine" string="Мои задачи"
-                domain="[('assignee_id', '=', uid)]"/>
+                domain="[('assignee_id.user_ids', 'in', [uid])]"/>
         <separator/>
         <filter name="overdue" string="Просроченные"
                 domain="[('deadline', '&lt;', context_today().strftime('%Y-%m-%d')),
