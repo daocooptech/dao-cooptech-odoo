@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_coop_wallet_user,Кошелёк — участник,model_coop_wallet,base.group_user,1,1,1,0
+access_coop_wallet_movement_user,Движения — участник,model_coop_wallet_movement,base.group_user,1,1,1,1
+access_coop_settlement_user,Сальдо — участник,model_coop_settlement,base.group_user,1,0,0,0

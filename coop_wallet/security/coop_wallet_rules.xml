@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Без `noupdate` — правила доступа доставляются обновлением модуля.
+-->
+<odoo>
+  <data>
+
+    <!--
+      Кошелёк — вещь личная. Кошелёк организации видит тот, кому она
+      поручила счета: у бухгалтера полномочие есть, у сотрудника отдела
+      маркетинга — нет.
+    -->
+    <record id="rule_wallet_own" model="ir.rule">
+      <field name="name">Свой кошелёк</field>
+      <field name="model_id" ref="model_coop_wallet"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[('partner_id', 'in', user.coop_treasury_partner_ids.ids)]</field>
+    </record>
+
+    <record id="rule_wallet_admin" model="ir.rule">
+      <field name="name">Кошельки — администратор</field>
+      <field name="model_id" ref="model_coop_wallet"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <record id="rule_wallet_movement_own" model="ir.rule">
+      <field name="name">Движения своего кошелька</field>
+      <field name="model_id" ref="model_coop_wallet_movement"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[('partner_id', 'in', user.coop_treasury_partner_ids.ids)]</field>
+    </record>
+
+    <record id="rule_wallet_movement_admin" model="ir.rule">
+      <field name="name">Движения — администратор</field>
+      <field name="model_id" ref="model_coop_wallet_movement"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <!--
+      Сальдо считается по чужим сделкам тоже — иначе круг взаимных долгов
+      не сойдётся. Но показывается только своё: сколько должны вам и
+      сколько должны вы.
+    -->
+    <record id="rule_settlement_own" model="ir.rule">
+      <field name="name">Своё сальдо</field>
+      <field name="model_id" ref="model_coop_settlement"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[('partner_id', 'in', user.coop_treasury_partner_ids.ids)]</field>
+    </record>
+
+    <record id="rule_settlement_admin" model="ir.rule">
+      <field name="name">Сальдо — администратор</field>
+      <field name="model_id" ref="model_coop_settlement"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+  </data>
+</odoo>

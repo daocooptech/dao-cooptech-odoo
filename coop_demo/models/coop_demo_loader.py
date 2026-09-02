@@ -4,7 +4,7 @@ from odoo import api, models
 from ..data import (emblems, load_bounty, load_deals, load_memberships,
                     load_org_profiles, load_orgs, load_people, load_projects,
                     load_reference, load_resources, load_skills,
-                    load_vacancies, load_verification)
+                    load_vacancies, load_verification, load_wallets)
 
 
 class CoopDemoLoader(models.AbstractModel):
@@ -49,6 +49,9 @@ class CoopDemoLoader(models.AbstractModel):
         # Сделки последними: у них предметом стоят записи каталогов, а
         # сторонами — участники со ступенями, и всё это должно уже быть.
         load_deals.load_deals(self.env)
+        # Кошельки последними: состав вкладок зависит от членства, а
+        # сальдо по контрагентам считается из платежей по сделкам.
+        load_wallets.load_wallets(self.env)
         load_bounty.grant_admin_roles(self.env)
         load_bounty.load_bounty(self.env)
         return True

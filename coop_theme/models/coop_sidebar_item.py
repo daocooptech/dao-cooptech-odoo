@@ -22,7 +22,7 @@ MAIN_ITEMS = [
     ('Проекты', 'fa-rocket', 'coop_projects.action_coop_projects'),
     ('Организации', 'fa-university', 'coop_orgs.action_coop_orgs'),
     ('Сообщества', 'fa-comments', None),
-    ('Кошелёк', 'fa-credit-card', 'coop_tokens.action_coop_token'),
+    ('Кошелёк', 'fa-credit-card', 'coop_wallet.action_coop_my_wallet'),
     ('Сделки', 'fa-handshake-o', 'coop_deals.action_coop_deals'),
 ]
 
