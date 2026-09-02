@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+  <!--
+    Дружба — связь двоих, и посторонним в ней делать нечего.
+
+    Права на модель стояли полные и без единого правила: любой участник
+    мог прочитать, кто с кем дружит, создать предложение дружбы от чужого
+    имени и удалить чужую связь. Первое — чужие социальные связи целиком,
+    и по ним видно больше, чем по любому профилю; второе и третье —
+    прямая подделка.
+
+    Правило одно на все действия: запись твоя, если ты одна из двух
+    сторон. На создании оно работает так же — предложение «от Ивана
+    Петру», отправленное третьим, не пройдёт проверку.
+  -->
+  <record id="coop_friendship_own" model="ir.rule">
+    <field name="name">Своя дружба</field>
+    <field name="model_id" ref="model_coop_friendship"/>
+    <field name="domain_force">['|',
+      ('requester_id', '=', user.partner_id.id),
+      ('addressee_id', '=', user.partner_id.id)]</field>
+    <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+  </record>
+
+  <record id="coop_friendship_admin" model="ir.rule">
+    <field name="name">Дружба — администратор</field>
+    <field name="model_id" ref="model_coop_friendship"/>
+    <field name="domain_force">[(1, '=', 1)]</field>
+    <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+  </record>
+
+</odoo>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+  <!--
+    Кошелёк — вещь личная, и до сих пор он был общим.
+
+    Прав доступа к модели хватало на чтение всем участникам, а правил
+    записи не было ни одного. То есть любой участник видел движения и
+    остаток любого другого: кто сколько внёс, за что получил, на что
+    потратил. В кооперативе, где доверие считается и показывается,
+    открытые чужие кошельки — не мелочь: по ним видно, кто чем живёт.
+
+    Правление и ревизионная комиссия видят движения не отсюда, а по
+    решению и со следом в журнале — это отдельная работа, и до неё
+    исключений здесь нет.
+  -->
+  <record id="coop_token_own" model="ir.rule">
+    <field name="name">Свои движения токенов</field>
+    <field name="model_id" ref="model_coop_token_transaction"/>
+    <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+    <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+  </record>
+
+  <!--
+    Администратору видно всё: по решению владельца платформы
+    администратор портала и системный администратор — одно лицо.
+  -->
+  <record id="coop_token_admin" model="ir.rule">
+    <field name="name">Движения токенов — администратор</field>
+    <field name="model_id" ref="model_coop_token_transaction"/>
+    <field name="domain_force">[(1, '=', 1)]</field>
+    <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+  </record>
+
+</odoo>

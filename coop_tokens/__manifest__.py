@@ -22,6 +22,7 @@
     'depends': ['coop_base'],
     'data': [
         'security/ir.model.access.csv',
+        'security/coop_token_rules.xml',
         'views/coop_token_views.xml',
     ],
     'installable': True,

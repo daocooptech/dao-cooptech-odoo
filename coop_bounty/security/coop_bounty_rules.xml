@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+  <!--
+    Заявки на задачи. У откликов на вакансии правило есть, а здесь его не
+    было — та же сущность осталась открытой.
+
+    Чужая заявка на задачу говорит о человеке немало: за что он берётся,
+    сколько раз ему отказали. Видеть это должны двое — он сам и тот, кто
+    отбирает исполнителя.
+  -->
+  <record id="coop_bounty_application_own" model="ir.rule">
+    <field name="name">Свои заявки на задачи</field>
+    <field name="model_id" ref="model_coop_bounty_application"/>
+    <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+    <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+  </record>
+
+  <!--
+    Менеджер сообщества отбирает исполнителей и принимает работу — без
+    доступа ко всем заявкам он этого сделать не может.
+  -->
+  <record id="coop_bounty_application_manager" model="ir.rule">
+    <field name="name">Заявки на задачи — менеджер сообщества</field>
+    <field name="model_id" ref="model_coop_bounty_application"/>
+    <field name="domain_force">[(1, '=', 1)]</field>
+    <field name="groups" eval="[(4, ref('coop_bounty.group_coop_community_manager'))]"/>
+  </record>
+
+  <record id="coop_bounty_application_admin" model="ir.rule">
+    <field name="name">Заявки на задачи — администратор</field>
+    <field name="model_id" ref="model_coop_bounty_application"/>
+    <field name="domain_force">[(1, '=', 1)]</field>
+    <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+  </record>
+
+</odoo>
