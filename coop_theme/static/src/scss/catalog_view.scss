@@ -125,3 +125,64 @@
     flex: 1 1 100%;
   }
 }
+
+// Панель фильтров каталога — справа, как в макете.
+//
+// Штатно Odoo ставит её слева, но слева уже стоит постоянное меню
+// платформы: две левых колонки читаются как одно меню, и человек не
+// понимает, где разделы, а где фильтры.
+.o_coop_tiles,
+.o_coop_rows {
+
+  .o_content {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .o_search_panel {
+    order: 2;
+    flex: 0 0 236px;
+    width: 236px;
+    max-width: 236px;
+    border-right: 0;
+    border-left: 1px solid var(--coop-line, #e6e6e1);
+    background: var(--coop-white, #fff);
+    padding: 14px 12px;
+  }
+
+  .o_search_panel_section_header {
+    font: 600 12px/1.4 'Manrope', sans-serif;
+    color: var(--coop-ink, #14171a);
+  }
+
+  .o_search_panel_label_title {
+    font-size: 12.5px;
+  }
+
+  // Счётчик значения: моноширинный, приглушённый — он подсказка, а не
+  // содержание строки.
+  .o_search_panel_counter {
+    font: 400 11px/1 'JetBrains Mono', ui-monospace, monospace;
+    color: var(--coop-slate-light, #8a8a80);
+  }
+}
+
+// На узком экране панель уходит вниз: 236 пикселей сбоку на телефоне
+// не остаётся, а прятать фильтры совсем нельзя.
+@media (max-width: 900px) {
+  .o_coop_tiles .o_content,
+  .o_coop_rows .o_content {
+    flex-direction: column;
+  }
+
+  .o_coop_tiles .o_search_panel,
+  .o_coop_rows .o_search_panel {
+    order: 0;
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: none;
+    border-left: 0;
+    border-bottom: 1px solid var(--coop-line, #e6e6e1);
+  }
+}

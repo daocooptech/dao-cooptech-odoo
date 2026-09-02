@@ -248,6 +248,12 @@
                   context="{'group_by': 'coop_specialization_category_id'}"/>
           <filter name="by_city" string="По городу" context="{'group_by': 'city'}"/>
         </group>
+        <searchpanel class="o_coop_filters">
+          <field name="coop_specialization_id" string="Специализация"
+                 icon="fa-folder" enable_counters="1" expand="1"/>
+          <field name="employment" string="Занятость" icon="fa-clock-o"
+                 enable_counters="1"/>
+        </searchpanel>
       </search>
     </field>
   </record>
