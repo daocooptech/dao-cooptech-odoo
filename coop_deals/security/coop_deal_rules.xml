@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Без `noupdate` — правила доступа доставляются обновлением модуля.
+-->
+<odoo>
+  <data>
+
+    <!--
+      Сделка — дело двоих. Ни каталогом, ни поиском чужие сделки не
+      видны: по ним читается, кто с кем работает, почём и как часто, а
+      это коммерческая тайна обеих сторон разом.
+    -->
+    <record id="rule_deal_parties" model="ir.rule">
+      <field name="name">Свои сделки</field>
+      <field name="model_id" ref="model_coop_deal"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">
+        ['|', ('party_a_id', 'in', user.coop_actor_partner_ids.ids),
+         ('party_b_id', 'in', user.coop_actor_partner_ids.ids)]
+      </field>
+    </record>
+
+    <record id="rule_deal_admin" model="ir.rule">
+      <field name="name">Сделки — администратор</field>
+      <field name="model_id" ref="model_coop_deal"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <record id="rule_deal_line_parties" model="ir.rule">
+      <field name="name">Спецификация своих сделок</field>
+      <field name="model_id" ref="model_coop_deal_line"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">
+        ['|', ('deal_id.party_a_id', 'in', user.coop_actor_partner_ids.ids),
+         ('deal_id.party_b_id', 'in', user.coop_actor_partner_ids.ids)]
+      </field>
+    </record>
+
+    <record id="rule_deal_payment_parties" model="ir.rule">
+      <field name="name">Платежи своих сделок</field>
+      <field name="model_id" ref="model_coop_deal_payment"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">
+        ['|', ('deal_id.party_a_id', 'in', user.coop_actor_partner_ids.ids),
+         ('deal_id.party_b_id', 'in', user.coop_actor_partner_ids.ids)]
+      </field>
+    </record>
+
+    <!--
+      Отзыв виден, когда написаны оба, — и всегда виден своему автору.
+      Иначе второй пишется с оглядкой на первый, а то и в отместку, и обе
+      оценки перестают значить что-либо.
+
+      Раскрытые отзывы видны всем: доверие на платформе считается по ним,
+      и прятать их от посторонних значило бы прятать основание оценки.
+    -->
+    <record id="rule_review_visible" model="ir.rule">
+      <field name="name">Раскрытые отзывы и свои</field>
+      <field name="model_id" ref="model_coop_deal_review"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">
+        ['|', ('visible', '=', True),
+         ('author_id', 'in', user.coop_actor_partner_ids.ids)]
+      </field>
+    </record>
+
+    <record id="rule_review_admin" model="ir.rule">
+      <field name="name">Отзывы — администратор</field>
+      <field name="model_id" ref="model_coop_deal_review"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+  </data>
+</odoo>

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from odoo import api, models
 
-from ..data import (emblems, load_bounty, load_memberships, load_org_profiles,
-                    load_orgs, load_people, load_projects, load_reference,
-                    load_resources, load_skills, load_vacancies,
-                    load_verification)
+from ..data import (emblems, load_bounty, load_deals, load_memberships,
+                    load_org_profiles, load_orgs, load_people, load_projects,
+                    load_reference, load_resources, load_skills,
+                    load_vacancies, load_verification)
 
 
 class CoopDemoLoader(models.AbstractModel):
@@ -46,6 +46,9 @@ class CoopDemoLoader(models.AbstractModel):
         # публикации то, что по правилам разместить нельзя, и для этого
         # каталоги уже должны быть.
         load_verification.load_verification(self.env)
+        # Сделки последними: у них предметом стоят записи каталогов, а
+        # сторонами — участники со ступенями, и всё это должно уже быть.
+        load_deals.load_deals(self.env)
         load_bounty.grant_admin_roles(self.env)
         load_bounty.load_bounty(self.env)
         return True

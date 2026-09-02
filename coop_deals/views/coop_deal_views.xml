@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="view_coop_deal_kanban" model="ir.ui.view">
+    <field name="name">coop.deal.kanban</field>
+    <field name="model">coop.deal</field>
+    <field name="arch" type="xml">
+      <kanban js_class="coop_catalog_kanban" class="o_coop_deals">
+        <field name="number"/>
+        <field name="city"/>
+        <field name="subject"/>
+        <field name="way"/>
+        <field name="amount"/>
+        <field name="state"/>
+        <field name="outcome"/>
+        <field name="currency_id"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_deal_card">
+              <div class="o_coop_deal_top">
+                <span class="o_coop_badge_subject"><t t-esc="record.subject.value"/></span>
+                <span class="o_coop_deal_no"><t t-esc="record.number.value"/></span>
+              </div>
+              <div class="o_coop_deal_name"><field name="name"/></div>
+              <div class="o_coop_deal_meta">
+                <t t-esc="record.way.value"/>
+                <t t-if="record.city.raw_value"> · <t t-esc="record.city.value"/></t>
+              </div>
+              <div class="o_coop_deal_parties">
+                <field name="party_a_id"/> ↔ <field name="party_b_id"/>
+              </div>
+              <div class="o_coop_deal_bottom">
+                <span class="o_coop_deal_amount"><field name="amount" widget="monetary"/></span>
+                <span class="o_coop_deal_state"
+                      t-att-class="'o_coop_state_' + record.state.raw_value">
+                  <t t-esc="record.state.value"/>
+                </span>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="view_coop_deal_list" model="ir.ui.view">
+    <field name="name">coop.deal.list</field>
+    <field name="model">coop.deal</field>
+    <field name="arch" type="xml">
+      <list string="Сделки" decoration-muted="state == 'cancelled'"
+            decoration-danger="state == 'disputed'">
+        <field name="number"/>
+        <field name="name"/>
+        <field name="subject"/>
+        <field name="way"/>
+        <field name="party_a_id"/>
+        <field name="party_b_id"/>
+        <field name="city" optional="show"/>
+        <field name="signed_on"/>
+        <field name="amount" sum="Сумма"/>
+        <field name="amount_paid" optional="hide" sum="Оплачено"/>
+        <field name="currency_id" column_invisible="True"/>
+        <field name="outcome" optional="show" widget="badge"
+               decoration-success="outcome == 'positive'"
+               decoration-danger="outcome == 'negative'"/>
+        <field name="state" widget="badge"
+               decoration-success="state == 'done'"
+               decoration-info="state in ('agreed', 'active', 'acceptance')"
+               decoration-danger="state == 'disputed'"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_deal_form" model="ir.ui.view">
+    <field name="name">coop.deal.form</field>
+    <field name="model">coop.deal</field>
+    <field name="arch" type="xml">
+      <form string="Сделка">
+        <header>
+          <button name="action_agree" type="object" string="Согласовать"
+                  class="btn-primary" invisible="state != 'draft'"/>
+          <button name="action_start" type="object" string="Начать исполнение"
+                  class="btn-primary" invisible="state != 'agreed'"/>
+          <button name="action_confirm_act" type="object"
+                  string="Подтвердить акт" class="btn-primary"
+                  invisible="state not in ('active', 'acceptance')"/>
+          <button name="action_open_dispute" type="object" string="Открыть спор"
+                  invisible="state in ('draft', 'done', 'cancelled', 'disputed')"/>
+          <button name="action_resolve_dispute" type="object"
+                  string="Закрыть спор" class="btn-primary"
+                  invisible="state != 'disputed'"
+                  groups="base.group_system"/>
+          <button name="action_cancel" type="object" string="Отменить"
+                  invisible="state in ('done', 'cancelled')"/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="draft,agreed,active,acceptance,done"/>
+        </header>
+        <sheet>
+          <div class="oe_title">
+            <span class="o_form_label">Сделка</span>
+            <h1><field name="number" readonly="1"/></h1>
+            <field name="name" placeholder="Что передаётся"/>
+          </div>
+          <group>
+            <group string="Стороны">
+              <field name="party_a_id"/>
+              <field name="role_a" placeholder="продавец, арендатор, исполнитель"/>
+              <field name="party_b_id"/>
+              <field name="role_b" placeholder="покупатель, арендодатель, заказчик"/>
+              <field name="author_id"/>
+            </group>
+            <group string="Условия">
+              <field name="subject"/>
+              <field name="way"/>
+              <field name="city"/>
+              <field name="signed_on"/>
+              <field name="closed_on"/>
+              <field name="amount"/>
+              <field name="currency_id" invisible="1"/>
+            </group>
+          </group>
+          <group string="Предмет" col="4">
+            <field name="resource_id" invisible="subject != 'resource'"/>
+            <field name="skill_offer_id" invisible="subject != 'service'"/>
+            <field name="vacancy_id" invisible="subject != 'work'"/>
+            <field name="project_id" invisible="subject != 'project'"/>
+          </group>
+          <notebook>
+            <page string="Спецификация" name="lines">
+              <field name="line_ids">
+                <list editable="bottom">
+                  <field name="sequence" widget="handle"/>
+                  <field name="name"/>
+                  <field name="quantity"/>
+                  <field name="uom_name"/>
+                  <field name="price_unit"/>
+                  <field name="subtotal" sum="Итого"/>
+                  <field name="currency_id" column_invisible="True"/>
+                </list>
+              </field>
+            </page>
+            <page string="График платежей" name="payments">
+              <div class="alert alert-info" role="status">
+                Деньги через платформу не ходят. Здесь записана
+                договорённость: стороны согласовали рассрочку, а факт
+                получения отмечает получатель — «я заплатил» и «я получил»
+                имеют разную доказательную силу.
+              </div>
+              <field name="payment_ids">
+                <list editable="bottom" decoration-danger="state == 'overdue'"
+                      decoration-success="state == 'paid'">
+                  <field name="name"/>
+                  <field name="due_on"/>
+                  <field name="amount" sum="Всего"/>
+                  <field name="currency_id" column_invisible="True"/>
+                  <field name="state"/>
+                  <field name="paid_on" readonly="1"/>
+                  <field name="confirmed_by_id" readonly="1" optional="hide"/>
+                  <button name="action_mark_paid" type="object"
+                          string="Отметить получение" icon="fa-check"
+                          invisible="state == 'paid'"/>
+                </list>
+              </field>
+              <group class="oe_subtotal_footer">
+                <field name="amount_paid"/>
+                <field name="amount_due"/>
+              </group>
+            </page>
+            <page string="Акт приёма-передачи" name="act">
+              <group>
+                <group>
+                  <field name="act_confirmed_a" readonly="1"/>
+                  <field name="act_confirmed_b" readonly="1"/>
+                  <field name="act_confirmed_on" readonly="1"/>
+                </group>
+              </group>
+              <div class="alert alert-info" role="status">
+                Сделка считается исполненной, когда акт подтвердили обе
+                стороны. Одностороннее «я всё сдал» ничего не значит:
+                приёмка на то и приёмка, что её делает принимающий.
+              </div>
+            </page>
+            <page string="Отзывы" name="reviews">
+              <field name="reviews_visible" readonly="1"/>
+              <field name="outcome" readonly="1"/>
+              <field name="review_ids">
+                <list>
+                  <field name="author_id"/>
+                  <field name="target_id"/>
+                  <field name="rating"/>
+                  <field name="body"/>
+                  <field name="visible" widget="boolean_toggle" readonly="1"/>
+                </list>
+              </field>
+              <div class="alert alert-info" role="status">
+                Оба отзыва показываются одновременно — когда написаны оба.
+                Если открывать сразу, второй пишется с оглядкой на первый,
+                а то и в отместку, и обе оценки перестают значить
+                что-либо.
+              </div>
+            </page>
+            <page string="Спор" name="dispute" invisible="state != 'disputed' and not dispute_resolved_on">
+              <group>
+                <group>
+                  <field name="dispute_opened_by_id" readonly="1"/>
+                  <field name="dispute_resolved_by_id" readonly="1"/>
+                  <field name="dispute_resolved_on" readonly="1"/>
+                </group>
+              </group>
+              <field name="dispute_reason" placeholder="Существо спора"/>
+              <field name="dispute_resolution" placeholder="Решение по спору"
+                     groups="base.group_system"/>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_deal_search" model="ir.ui.view">
+    <field name="name">coop.deal.search</field>
+    <field name="model">coop.deal</field>
+    <field name="arch" type="xml">
+      <search string="Сделки">
+        <field name="number"/>
+        <field name="name"/>
+        <field name="party_a_id"/>
+        <field name="party_b_id"/>
+        <field name="city"/>
+        <filter name="active_deals" string="В работе"
+                domain="[('state', 'in', ('agreed', 'active', 'acceptance'))]"/>
+        <filter name="done" string="Завершённые" domain="[('state', '=', 'done')]"/>
+        <filter name="disputed" string="Спорные" domain="[('state', '=', 'disputed')]"/>
+        <separator/>
+        <filter name="awaiting_reviews" string="Ждут отзывов"
+                domain="[('outcome', '=', 'pending')]"/>
+        <filter name="overdue" string="С просроченным платежом"
+                domain="[('payment_ids.state', '=', 'overdue')]"/>
+        <group>
+          <filter name="by_state" string="По состоянию" context="{'group_by': 'state'}"/>
+          <filter name="by_subject" string="По предмету" context="{'group_by': 'subject'}"/>
+          <filter name="by_way" string="По способу" context="{'group_by': 'way'}"/>
+          <filter name="by_city" string="По городу" context="{'group_by': 'city'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_deals" model="ir.actions.act_window">
+    <field name="name">Сделки</field>
+    <field name="res_model">coop.deal</field>
+    <field name="view_mode">list,kanban,form</field>
+    <field name="context">{'coop_catalog': True}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Сделок пока нет</p>
+      <p>
+        Сделка на платформе — между равноправными сторонами. Продажа, аренда,
+        обмен, дар, доля в проекте, взаимный кредит: продавца и покупателя тут
+        не всегда двое.
+      </p>
+    </field>
+  </record>
+
+  <record id="action_coop_deal_review" model="ir.actions.act_window">
+    <field name="name">Отзывы по сделкам</field>
+    <field name="res_model">coop.deal.review</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <menuitem id="menu_coop_deals_root" name="Сделки" sequence="19"
+            web_icon="coop_deals,static/description/icon.png"/>
+  <menuitem id="menu_coop_deals" name="Мои сделки"
+            parent="menu_coop_deals_root" action="action_coop_deals" sequence="10"/>
+  <menuitem id="menu_coop_deal_review" name="Отзывы"
+            parent="menu_coop_deals_root" action="action_coop_deal_review" sequence="20"/>
+
+</odoo>

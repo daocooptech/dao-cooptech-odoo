@@ -23,7 +23,7 @@ MAIN_ITEMS = [
     ('Организации', 'fa-university', 'coop_orgs.action_coop_orgs'),
     ('Сообщества', 'fa-comments', None),
     ('Кошелёк', 'fa-credit-card', 'coop_tokens.action_coop_token'),
-    ('Сделки', 'fa-handshake-o', None),
+    ('Сделки', 'fa-handshake-o', 'coop_deals.action_coop_deals'),
 ]
 
 # Расширения. В макете их полтора десятка — токеномика, цифровые активы,

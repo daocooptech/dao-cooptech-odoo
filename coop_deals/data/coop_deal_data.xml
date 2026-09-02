@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Номер сделки: СД, год заключения, порядковый номер за этот год. Номер
+    не меняется и не повторяется — по нему сделку находят и ссылаются на
+    неё в переписке, актах и спорах.
+  -->
+  <record id="seq_coop_deal" model="ir.sequence">
+    <field name="name">Сделка платформы</field>
+    <field name="code">coop.deal</field>
+    <field name="prefix">СД-%(year)s-</field>
+    <field name="padding">6</field>
+    <field name="implementation">standard</field>
+  </record>
+
+  <!--
+    Просроченный платёж отмечается сам. Иначе список платежей врёт: срок
+    прошёл, а в графике всё ещё «ожидается».
+  -->
+  <record id="cron_coop_deal_overdue" model="ir.cron">
+    <field name="name">Сделки: отметить просроченные платежи</field>
+    <field name="model_id" ref="model_coop_deal_payment"/>
+    <field name="state">code</field>
+    <field name="code">model._cron_mark_overdue()</field>
+    <field name="interval_number">1</field>
+    <field name="interval_type">days</field>
+    <field name="active" eval="True"/>
+  </record>
+
+</odoo>

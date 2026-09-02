@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Печатные формы. Акт приёма-передачи — главная: сделка считается
+    исполненной, когда его подтвердили обе стороны, и бумага должна
+    говорить ровно то же, что база.
+
+    «Стороны» вместо «продавца» и «покупателя» намеренно: у обмена и дара
+    продавца нет, и подставлять его в шапку значит писать в документе то,
+    чего в сделке не было.
+  -->
+
+  <record id="action_report_deal_act" model="ir.actions.report">
+    <field name="name">Акт приёма-передачи</field>
+    <field name="model">coop.deal</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">coop_deals.report_deal_act</field>
+    <field name="report_file">coop_deals.report_deal_act</field>
+    <field name="print_report_name">'Акт %s' % object.number</field>
+    <field name="binding_model_id" ref="model_coop_deal"/>
+    <field name="binding_type">report</field>
+  </record>
+
+  <record id="action_report_deal_agreement" model="ir.actions.report">
+    <field name="name">Договор</field>
+    <field name="model">coop.deal</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">coop_deals.report_deal_agreement</field>
+    <field name="report_file">coop_deals.report_deal_agreement</field>
+    <field name="print_report_name">'Договор %s' % object.number</field>
+    <field name="binding_model_id" ref="model_coop_deal"/>
+    <field name="binding_type">report</field>
+  </record>
+
+  <template id="report_deal_act">
+    <t t-call="web.html_container">
+      <t t-foreach="docs" t-as="deal">
+        <t t-call="web.external_layout">
+          <div class="page">
+            <h2 class="mt-4">Акт приёма-передачи к сделке <span t-field="deal.number"/></h2>
+            <p class="text-muted">
+              Город <span t-field="deal.city"/>, дата
+              <span t-field="deal.act_confirmed_on"/>
+            </p>
+
+            <p>
+              <strong t-field="deal.party_a_id.name"/>
+              (<span t-field="deal.role_a"/>), с одной стороны, и
+              <strong t-field="deal.party_b_id.name"/>
+              (<span t-field="deal.role_b"/>), с другой стороны, составили
+              настоящий акт о том, что обязательства по сделке
+              «<span t-field="deal.name"/>» исполнены.
+            </p>
+
+            <table class="table table-sm" t-if="deal.line_ids">
+              <thead>
+                <tr>
+                  <th>Что передано</th>
+                  <th class="text-end">Количество</th>
+                  <th class="text-end">Цена</th>
+                  <th class="text-end">Сумма</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr t-foreach="deal.line_ids" t-as="line">
+                  <td><span t-field="line.name"/></td>
+                  <td class="text-end">
+                    <span t-field="line.quantity"/> <span t-field="line.uom_name"/>
+                  </td>
+                  <td class="text-end"><span t-field="line.price_unit"/></td>
+                  <td class="text-end"><span t-field="line.subtotal"/></td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th colspan="3" class="text-end">Итого</th>
+                  <th class="text-end"><span t-field="deal.amount"/></th>
+                </tr>
+              </tfoot>
+            </table>
+
+            <p t-if="not deal.line_ids">
+              Предмет сделки: <span t-field="deal.name"/>.
+              <t t-if="deal.amount">Сумма: <span t-field="deal.amount"/>.</t>
+              <t t-else="">Сумма не предусмотрена: сделка совершена без встречной оплаты.</t>
+            </p>
+
+            <p class="mt-4">
+              Стороны претензий друг к другу не имеют. Акт подтверждён обеими
+              сторонами в информационной системе платформы, где хранится запись
+              о времени и лице, совершившем подтверждение.
+            </p>
+
+            <div class="row mt-5">
+              <div class="col-6">
+                <p><strong t-field="deal.party_a_id.name"/></p>
+                <p class="text-muted">Акт подтверждён:
+                  <t t-if="deal.act_confirmed_a">да</t><t t-else="">нет</t>
+                </p>
+              </div>
+              <div class="col-6">
+                <p><strong t-field="deal.party_b_id.name"/></p>
+                <p class="text-muted">Акт подтверждён:
+                  <t t-if="deal.act_confirmed_b">да</t><t t-else="">нет</t>
+                </p>
+              </div>
+            </div>
+          </div>
+        </t>
+      </t>
+    </t>
+  </template>
+
+  <template id="report_deal_agreement">
+    <t t-call="web.html_container">
+      <t t-foreach="docs" t-as="deal">
+        <t t-call="web.external_layout">
+          <div class="page">
+            <h2 class="mt-4">Договор <span t-field="deal.number"/></h2>
+            <p class="text-muted">
+              Город <span t-field="deal.city"/>, дата <span t-field="deal.signed_on"/>
+            </p>
+
+            <p>
+              <strong t-field="deal.party_a_id.name"/>
+              (<span t-field="deal.role_a"/>) и
+              <strong t-field="deal.party_b_id.name"/>
+              (<span t-field="deal.role_b"/>) заключили настоящий договор о
+              нижеследующем.
+            </p>
+
+            <h4>1. Предмет</h4>
+            <p><span t-field="deal.name"/>. Основание: <span t-field="deal.way"/>.</p>
+
+            <table class="table table-sm" t-if="deal.line_ids">
+              <thead>
+                <tr>
+                  <th>Наименование</th>
+                  <th class="text-end">Количество</th>
+                  <th class="text-end">Цена</th>
+                  <th class="text-end">Сумма</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr t-foreach="deal.line_ids" t-as="line">
+                  <td><span t-field="line.name"/></td>
+                  <td class="text-end">
+                    <span t-field="line.quantity"/> <span t-field="line.uom_name"/>
+                  </td>
+                  <td class="text-end"><span t-field="line.price_unit"/></td>
+                  <td class="text-end"><span t-field="line.subtotal"/></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h4 t-if="deal.payment_ids">2. Порядок расчётов</h4>
+            <table class="table table-sm" t-if="deal.payment_ids">
+              <thead>
+                <tr>
+                  <th>Назначение</th>
+                  <th>Срок</th>
+                  <th class="text-end">Сумма</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr t-foreach="deal.payment_ids" t-as="payment">
+                  <td><span t-field="payment.name"/></td>
+                  <td><span t-field="payment.due_on"/></td>
+                  <td class="text-end"><span t-field="payment.amount"/></td>
+                </tr>
+              </tbody>
+            </table>
+            <p t-if="deal.payment_ids" class="text-muted">
+              Расчёты производятся сторонами напрямую. Платформа расчётов не
+              ведёт и денежных средств сторон не принимает; в системе
+              фиксируется подтверждение получения платежа получателем.
+            </p>
+
+            <h4>3. Приёмка</h4>
+            <p>
+              Обязательства считаются исполненными с момента подтверждения акта
+              приёма-передачи обеими сторонами в информационной системе
+              платформы.
+            </p>
+          </div>
+        </t>
+      </t>
+    </t>
+  </template>
+
+</odoo>

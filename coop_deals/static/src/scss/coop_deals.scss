@@ -1,0 +1,92 @@
+// Карточка сделки. В отличие от каталогов, здесь нет снимка: у сделки
+// нечего показывать картинкой, а важны номер, стороны, сумма и состояние.
+
+.o_coop_deals {
+
+  .o_kanban_record {
+    background: var(--coop-white, #fff);
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-radius: 10px;
+    padding: 12px 13px;
+    box-shadow: 0 1px 2px rgba(20, 23, 26, .05);
+
+    &:hover {
+      border-color: var(--coop-teal, #146b64);
+    }
+  }
+
+  .o_coop_deal_card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .o_coop_deal_top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .o_coop_badge_subject {
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid var(--coop-line, #e6e6e1);
+    font: 600 10.5px/1.4 'Manrope', sans-serif;
+    color: var(--coop-slate, #4a4a44);
+  }
+
+  // Номер — моноширинным: его сравнивают глазами и диктуют по телефону.
+  .o_coop_deal_no {
+    font: 500 11px/1 'JetBrains Mono', ui-monospace, monospace;
+    color: var(--coop-slate-light, #8f8f88);
+  }
+
+  .o_coop_deal_name {
+    font: 700 13.5px/1.35 'Manrope', sans-serif;
+    color: var(--coop-ink, #14171a);
+  }
+
+  .o_coop_deal_meta,
+  .o_coop_deal_parties {
+    font-size: 12px;
+    color: var(--coop-slate, #4a4a44);
+  }
+
+  .o_coop_deal_bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 4px;
+    padding-top: 8px;
+    border-top: 1px solid var(--coop-line, #e6e6e1);
+  }
+
+  .o_coop_deal_amount {
+    font: 700 13px/1 'JetBrains Mono', ui-monospace, monospace;
+    color: var(--coop-ink, #14171a);
+  }
+
+  .o_coop_deal_state {
+    padding: 2px 8px;
+    border-radius: 999px;
+    font: 600 10.5px/1.5 'Manrope', sans-serif;
+    background: var(--coop-surface, #f2f2ee);
+    color: var(--coop-slate, #4a4a44);
+  }
+
+  .o_coop_state_done {
+    background: var(--coop-teal-tint, #e3efed);
+    color: var(--coop-teal-dark, #0e4f4a);
+  }
+
+  // Спор виден издалека намеренно: это единственное состояние, которое
+  // требует чьего-то вмешательства.
+  .o_coop_state_disputed {
+    background: #f6e3e2;
+    color: var(--coop-error, #b3413a);
+  }
+}
