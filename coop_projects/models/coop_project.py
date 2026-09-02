@@ -78,7 +78,11 @@ class CoopProject(models.Model):
     _name = 'coop.project'
     _description = 'Проект (краудресурсинг)'
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    _order = 'readiness desc, id desc'
+    # Не по готовности: собранных проектов больше семидесяти, и при
+    # сортировке по готовности вся первая страница каталога — сплошь
+    # стопроцентные полосы. Со стороны это выглядит так, будто полоса
+    # сломана и всегда полная.
+    _order = 'id desc'
 
     name = fields.Char(string='Название', required=True, index=True, tracking=True)
     summary = fields.Char(

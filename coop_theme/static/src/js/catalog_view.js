@@ -6,7 +6,7 @@ import { patch } from "@web/core/utils/patch";
 import { kanbanView } from "@web/views/kanban/kanban_view";
 import { KanbanController } from "@web/views/kanban/kanban_controller";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
-import { reactive, useState } from "@odoo/owl";
+import { reactive, useEffect, useState } from "@odoo/owl";
 
 /**
  * Три вида каталога в одном переключателе: плиткой, канбаном, списком.
@@ -46,10 +46,97 @@ export function setCoopLayout(rows) {
     }
 }
 
+/**
+ * Порядок в каталоге.
+ *
+ * По умолчанию — сначала новые. Раньше проекты шли по готовности убыв., и
+ * первая страница была сплошь стопроцентная: со стороны это выглядело
+ * так, будто полоса готовности сломана и всегда полная.
+ *
+ * Признаки перечислены по разделам: у проекта осмысленна готовность, у
+ * сообщества — число участников, у ресурса — цена. Общий список из
+ * «названия и даты» не дал бы найти ни самый собранный проект, ни самое
+ * людное сообщество.
+ */
+const SORT_OPTIONS = {
+    "coop.project": [
+        ["id desc", "Сначала новые"],
+        ["name asc", "По названию"],
+        ["city asc", "По городу"],
+        ["readiness desc", "Сначала собранные"],
+        ["readiness asc", "Сначала те, где нужна помощь"],
+    ],
+    "coop.community": [
+        ["id desc", "Сначала новые"],
+        ["name asc", "По названию"],
+        ["city asc", "По городу"],
+        ["member_count desc", "Сначала людные"],
+    ],
+    "coop.resource": [
+        ["id desc", "Сначала новые"],
+        ["name asc", "По названию"],
+        ["city asc", "По городу"],
+    ],
+    "coop.skill.offer": [
+        ["id desc", "Сначала новые"],
+        ["name asc", "По названию"],
+        ["city asc", "По городу"],
+    ],
+    "coop.vacancy": [
+        ["id desc", "Сначала новые"],
+        ["name asc", "По названию"],
+        ["city asc", "По городу"],
+    ],
+    "coop.deal": [
+        ["id desc", "Сначала новые"],
+        ["name asc", "По номеру"],
+    ],
+    "res.partner": [
+        ["id desc", "Сначала новые"],
+        ["name asc", "По имени"],
+        ["city asc", "По городу"],
+    ],
+};
+
+const DEFAULT_SORT = [["id desc", "Сначала новые"], ["name asc", "По названию"]];
+
+export function coopSortOptionsFor(resModel) {
+    return SORT_OPTIONS[resModel] || DEFAULT_SORT;
+}
+
+// Выбранный порядок — по разделу: возвращаясь в каталог, человек
+// рассчитывает увидеть тот же порядок, а не сброшенный.
+export const coopSort = reactive({ orders: {} });
+
+export function setCoopSort(resModel, order) {
+    coopSort.orders = { ...coopSort.orders, [resModel]: order };
+}
+
+export function parseOrder(order) {
+    return order.split(",").map((part) => {
+        const [name, direction] = part.trim().split(/\s+/);
+        return { name, asc: direction !== "desc" };
+    });
+}
+
 export class CoopCatalogKanbanController extends KanbanController {
     setup() {
         super.setup();
         this.coopLayout = useState(coopLayout);
+        this.coopSort = useState(coopSort);
+        // Перезагружаем список, когда сменили признак сортировки. Через
+        // общее состояние, а не через событие: порядок выбирают в панели
+        // управления, а перезагружает представление — прямой ссылки
+        // между ними у Odoo нет.
+        useEffect(
+            () => {
+                const order = this.coopSort.orders[this.props.resModel];
+                if (order) {
+                    this.model.load({ orderBy: parseOrder(order) });
+                }
+            },
+            () => [this.coopSort.orders[this.props.resModel]]
+        );
     }
 }
 
@@ -99,6 +186,19 @@ patch(ControlPanel.prototype, {
                 },
             ];
         });
+    },
+
+    get coopSortOptions() {
+        return coopSortOptionsFor(this.env.searchModel?.resModel);
+    },
+
+    get coopCurrentSort() {
+        const resModel = this.env.searchModel?.resModel;
+        return coopSort.orders[resModel] || this.coopSortOptions[0][0];
+    },
+
+    onCoopSortChange(event) {
+        setCoopSort(this.env.searchModel?.resModel, event.target.value);
     },
 
     switchView(viewType, isMiddleClick) {

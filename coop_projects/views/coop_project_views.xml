@@ -7,7 +7,7 @@
     <field name="model">coop.project</field>
     <field name="arch" type="xml">
       <kanban js_class="coop_catalog_kanban" class="o_coop_projects"
-              default_order="readiness desc, id desc">
+              default_order="id desc">
         <field name="image_512"/>
         <field name="city"/>
         <field name="readiness"/>

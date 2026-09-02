@@ -22,6 +22,30 @@
     переключателя на экране заставляют гадать, чем они отличаются.
   -->
   <t t-name="coop_theme.ControlPanel" t-inherit="web.ControlPanel" t-inherit-mode="extension">
+    <!--
+      Признак каталога ставится классом на саму панель: по нему строка
+      поиска раскладывается во всю ширину, как в макете, и не борется за
+      место с названием раздела и пагинатором.
+    -->
+    <xpath expr="//div[hasclass('o_control_panel')]" position="attributes">
+      <attribute name="t-att-class">{ o_coop_catalog: coopIsCatalog }</attribute>
+    </xpath>
+
+    <!--
+      Выбор порядка. Стоит рядом с поиском, а не в меню фильтров: в
+      каталоге это повседневное действие, а не настройка.
+    -->
+    <xpath expr="//div[hasclass('o_control_panel_actions')]" position="inside">
+      <select t-if="coopIsCatalog" class="o_coop_sort form-select form-select-sm"
+              aria-label="Порядок в каталоге"
+              t-on-change="onCoopSortChange">
+        <option t-foreach="coopSortOptions" t-as="option" t-key="option[0]"
+                t-att-value="option[0]"
+                t-att-selected="option[0] === coopCurrentSort">
+          <t t-esc="option[1]"/>
+        </option>
+      </select>
+    </xpath>
     <xpath expr="//t[@t-if='env.config.viewSwitcherEntries?.length > 1']" position="attributes">
       <attribute name="t-if">coopViewEntries.length > 1</attribute>
     </xpath>
