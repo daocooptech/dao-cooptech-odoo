@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <t t-name="coop_search.TopbarSearch">
+    <div class="o_coop_search">
+      <div class="o_coop_search_field">
+        <i class="fa fa-search" aria-hidden="true"/>
+        <input type="search" t-ref="input" class="o_coop_search_input"
+               placeholder="Поиск по платформе..."
+               aria-label="Поиск по платформе"
+               t-att-value="state.term"
+               t-on-input="onInput"
+               t-on-focus="() => this.state.open = true"
+               t-on-blur="onBlur"
+               t-on-keydown="onKeydown"/>
+      </div>
+
+      <div class="o_coop_search_panel" t-if="state.open and state.term">
+        <!-- По одной-двум буквам совпадает половина базы: показывать
+             такую выдачу незачем, выбрать из неё нечего. -->
+        <div class="o_coop_search_hint" t-if="state.tooShort">
+          Введите ещё пару букв
+        </div>
+
+        <t t-else="">
+          <div class="o_coop_search_hint" t-if="state.busy and !state.groups.length">
+            Ищем…
+          </div>
+
+          <t t-foreach="state.groups" t-as="group" t-key="group.label">
+            <div class="o_coop_search_group">
+              <div class="o_coop_search_group_head">
+                <span t-esc="group.label"/>
+                <button class="o_coop_search_all" t-on-click="() => this.openCatalog(group)">
+                  все <t t-esc="group.count"/>
+                </button>
+              </div>
+              <a t-foreach="group.rows" t-as="row" t-key="row.model + '-' + row.id"
+                 href="#" class="o_coop_search_row"
+                 t-on-click.prevent="() => this.openRecord(row)">
+                <span class="o_coop_search_name" t-esc="row.name"/>
+                <span class="o_coop_search_note" t-if="row.note" t-esc="row.note"/>
+              </a>
+            </div>
+          </t>
+
+          <!-- Остальные разделы одной строкой со счётчиками: восемь
+               групп подряд перестают читаться. -->
+          <div class="o_coop_search_more" t-if="state.more.length">
+            Ещё:
+            <t t-foreach="state.more" t-as="group" t-key="group.label">
+              <button class="o_coop_search_all"
+                      t-on-click="() => this.openCatalog(group)">
+                <t t-esc="group.label"/> <t t-esc="group.count"/>
+              </button>
+            </t>
+          </div>
+
+          <div class="o_coop_search_hint"
+               t-if="!state.busy and !state.groups.length">
+            Ничего не нашли по «<t t-esc="state.term"/>»
+          </div>
+        </t>
+      </div>
+    </div>
+  </t>
+
+</templates>
