@@ -12,7 +12,6 @@
       <div class="o_coop_layout">
         <CoopSidebar t-if="!state.fullscreen"/>
         <div class="o_coop_main">
-          <CoopTabs t-if="!state.fullscreen"/>
           <ActionContainer/>
           <CoopFooter t-if="!state.fullscreen"/>
         </div>
@@ -79,22 +78,6 @@
         <button type="button" class="o_coop_nav_settings"
                 t-on-click="() => this.openSettings()">Настроить меню</button>
       </aside>
-    </div>
-  </t>
-
-  <!--
-    Вкладки раздела. Стоят первой строкой содержимого, как `entity-tabs`
-    в макете, а не в верхней панели рядом с названием приложения:
-    верхняя панель занята поиском по платформе и значками.
-  -->
-  <t t-name="coop_theme.Tabs">
-    <div class="o_coop_tabs" t-if="state.tabs.length">
-      <a t-foreach="state.tabs" t-as="tab" t-key="tab.id"
-         href="#" class="o_coop_tab"
-         t-att-class="{ 'active': tab.id === state.current }"
-         t-on-click.prevent="() => this.open(tab)">
-        <t t-esc="tab.name"/>
-      </a>
     </div>
   </t>
 

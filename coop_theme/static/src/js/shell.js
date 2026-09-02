@@ -19,61 +19,6 @@ import { WebClient } from "@web/webclient/webclient";
  * (`coop.sidebar.item`): разделы до «Расширений» есть у всех и убрать их
  * нельзя, порядок и набор расширений — личное дело.
  */
-/**
- * Вкладки раздела — под шапкой, внутри содержимого.
- *
- * У Odoo подразделы живут в верхней панели рядом с названием
- * приложения. В прототипе их место другое: `entity-tabs` стоят первой
- * строкой самого раздела, а верхняя панель занята поиском и значками.
- *
- * Сама панель приложений на большом экране убрана целиком: разделы
- * платформы уже слева и всегда на виду, а список приложений —
- * навигация, которой на платформе нет.
- */
-export class CoopTabs extends Component {
-    static template = "coop_theme.Tabs";
-    static props = {};
-
-    setup() {
-        this.menus = useService("menu");
-        this.state = useState({ tabs: [], current: null, title: "" });
-        this.actionId = null;
-        this.refresh();
-        this.env.bus.addEventListener("MENUS:APP-CHANGED", () => this.refresh());
-        // Какая вкладка активна, служба меню не знает: метода «текущий
-        // пункт» у неё нет. Знает тот, кто открыл действие, — как и в
-        // боковом меню, берём это из общего события о смене экрана.
-        this.env.bus.addEventListener("ACTION_MANAGER:UPDATE", ({ detail }) => {
-            const action = detail?.componentProps?.action;
-            if (action) {
-                this.actionId = action.id || null;
-            }
-            this.refresh();
-        });
-    }
-
-    refresh() {
-        const app = this.menus.getCurrentApp();
-        if (!app) {
-            this.state.tabs = [];
-            this.state.title = "";
-            return;
-        }
-        const tree = this.menus.getMenuAsTree(app.id);
-        this.state.title = app.name;
-        // Раздел с единственным подразделом вкладок не получает: одна
-        // вкладка — это не выбор, а лишняя строка на экране.
-        const children = tree.childrenTree || [];
-        this.state.tabs = children.length > 1 ? children : [];
-        const active = children.find((tab) => tab.actionID === this.actionId);
-        this.state.current = active ? active.id : (children[0] || {}).id;
-    }
-
-    open(tab) {
-        this.menus.selectMenu(tab);
-    }
-}
-
 export class CoopSidebar extends Component {
     static template = "coop_theme.Sidebar";
     static props = {};
@@ -280,5 +225,5 @@ export class CoopSoon extends Component {
 registry.category("actions").add("coop_soon", CoopSoon);
 
 patch(WebClient, {
-    components: { ...WebClient.components, CoopSidebar, CoopTabs, CoopFooter },
+    components: { ...WebClient.components, CoopSidebar, CoopFooter },
 });

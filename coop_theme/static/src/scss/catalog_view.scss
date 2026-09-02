@@ -67,89 +67,64 @@
   }
 }
 
-// Верхняя строка панели в каталоге почти вся убрана.
+// Строка поиска каталога — отдельной широкой строкой, как в макете.
 //
-// Название раздела дублирует вкладку, которая теперь стоит выше;
-// шестерёнка настроек представления участнику не нужна; поиск переехал
-// в шапку; страницы переключаются внизу, под плитками. Остаётся то, ради
-// чего строка и нужна: кнопка создания слева, порядок и вид справа.
+// Штатно поиск делит одну строку с названием раздела, пагинатором и
+// переключателем вида и сжимается до узкого поля. В прототипе это
+// самостоятельный ряд (`search-row`) сразу под вкладками: поиск —
+// главное действие каталога, и место ему соответствующее.
+//
+// `!important` здесь вынужденный: Odoo вешает на эти же узлы
+// bootstrap-утилиты (`flex-lg-nowrap`, `flex-grow-1`), а они объявлены с
+// `!important`. Без него строка не переносится и поиск остаётся зажатым
+// между названием раздела и пагинатором.
 .o_control_panel.o_coop_catalog {
 
-  .o_control_panel_breadcrumbs .o_breadcrumb,
-  .o_control_panel_breadcrumbs .o_cp_switch_buttons ~ *,
-  .o_cp_pager {
-    display: none !important;
+  .o_control_panel_main {
+    flex-wrap: wrap !important;
   }
 
-  // Строка становится тонкой: в ней больше нет ни названия, ни поиска.
-  padding-top: 4px !important;
-  padding-bottom: 4px !important;
-}
-
-// Постраничная навигация под плитками — как в макете.
-//
-// Область содержимого выложена в строку: список и панель фильтров стоят
-// рядом. Без явной ширины пагинатор становится третьей колонкой и
-// прижимается к правому краю столбиком.
-.o_coop_pager {
-  flex: 0 0 100%;
-  width: 100%;
-  order: 3;
-  display: flex;
-  justify-content: center;
-  padding: 18px 0 26px;
-}
-
-// Каталожный поиск и выбор порядка.
-//
-// Стоят в верхней строке панели, рядом с названием раздела: широкое поле
-// отдельной строкой было нужно, пока поиска в шапке не было. Теперь он
-// там есть, и два широких поля на экране — это два вопроса «а этот где
-// ищет».
-.o_control_panel.o_coop_catalog {
-
-  // Поле ввода каталожного поиска убрано: поиск на платформе один и
-  // стоит в шапке, как в макете. Два поля на экране — это два вопроса
-  // «а этот где ищет», а сужают выдачу здесь фильтры справа.
-  //
-  // Сам узел поиска при этом остаётся: в нём живут применённые условия.
-  // Когда из шапки открывают каталог по запросу, человек должен видеть,
-  // почему список короткий, и уметь это снять.
-  .o_searchview .o_searchview_input_container,
-  .o_searchview .o_dropdown_toggler_btn,
-  .o_searchview_dropdown_toggler,
-  .o_searchview > i,
-  .o_searchview > .fa,
-  .o_searchview > .dropdown {
-    display: none !important;
+  // Верхняя строка: название раздела слева, пагинатор и переключатель
+  // вида справа. Нижняя — поиск во всю ширину и рядом порядок.
+  .o_control_panel_breadcrumbs {
+    order: 0 !important;
   }
 
-  .o_searchview {
-    flex: 0 1 auto;
-    min-width: 0;
-    max-width: 520px;
-    border: 0;
-    background: none;
-    padding: 0;
-  }
-
-  // Пустой поиск не должен занимать место и рисовать рамку.
-  .o_searchview:empty {
-    display: none;
+  // Пагинатор и переключатель вида остаются в верхней строке рядом с
+  // названием раздела: без этого они уезжают на третью строку, и панель
+  // занимает втрое больше места, чем каталог в макете.
+  .o_control_panel_navigation {
+    order: 1 !important;
+    flex: 0 0 auto !important;
+    margin-left: auto;
   }
 
   .o_control_panel_actions {
-    align-items: center;
+    order: 2 !important;
+    flex: 1 1 100% !important;
+    justify-content: flex-start !important;
     gap: 8px;
+  }
+
+  .o_searchview {
+    flex: 1 1 auto !important;
+    min-width: 0;
+    max-width: none;
   }
 
   .o_coop_sort {
     flex: none;
     width: auto;
-    max-width: 200px;
+    max-width: 240px;
   }
 }
 
+@media (max-width: 900px) {
+  .o_control_panel.o_coop_catalog .o_coop_sort {
+    max-width: none;
+    flex: 1 1 100%;
+  }
+}
 
 // Панель фильтров каталога — справа, как в макете.
 //
@@ -162,15 +137,7 @@
   .o_content {
     display: flex;
     align-items: flex-start;
-    flex-wrap: wrap;
     gap: 16px;
-  }
-
-  // Список забирает всё, что осталось от панели фильтров.
-  .o_kanban_renderer {
-    flex: 1 1 0;
-    min-width: 0;
-    order: 1;
   }
 
   .o_search_panel {
@@ -218,4 +185,36 @@
     border-left: 0;
     border-bottom: 1px solid var(--coop-line, #e6e6e1);
   }
+}
+
+// Постраничная навигация — под плитками, как в макете.
+//
+// Область содержимого выложена в строку: список и панель фильтров стоят
+// рядом. Без явной ширины пагинатор становится третьей колонкой и
+// прижимается к правому краю столбиком.
+.o_coop_tiles .o_content,
+.o_coop_rows .o_content {
+  flex-wrap: wrap;
+}
+
+.o_coop_tiles .o_kanban_renderer,
+.o_coop_rows .o_kanban_renderer {
+  flex: 1 1 0;
+  min-width: 0;
+  order: 1;
+}
+
+.o_coop_pager {
+  flex: 0 0 100%;
+  width: 100%;
+  order: 3;
+  display: flex;
+  justify-content: center;
+  padding: 18px 0 26px;
+}
+
+// Наверху пагинатора больше нет: там человек ещё ничего не посмотрел, и
+// переключать нечего.
+.o_control_panel.o_coop_catalog .o_cp_pager {
+  display: none !important;
 }
