@@ -417,6 +417,43 @@ class CoopCommunityMember(models.Model):
                     % (record.partner_id.display_name,
                        record.community_id.name))
 
+    @api.constrains('state', 'role', 'community_id')
+    def _check_community_keeps_owner(self):
+        """Последний ведущий не может уйти, не передав сообщество.
+
+        Проверка живёт здесь, а не только на самом сообществе: правило
+        на карточке срабатывает, когда пишут в неё, а выход участника
+        меняет его собственную запись — карточка при этом не
+        затрагивается, и опубликованная группа оставалась без
+        ответственного.
+        """
+        for community in self.community_id:
+            if community.state != 'published':
+                continue
+            owners = community.sudo().member_ids.filtered(
+                lambda m: m.state == 'active' and m.role == 'owner')
+            if not owners:
+                raise ValidationError(_(
+                    'В сообществе «%s» не останется ведущего. Сначала '
+                    'назначьте ведущим кого-то из участников, потом '
+                    'выходите: группа без ответственного — это группа, '
+                    'которую некому ни модерировать, ни закрыть.')
+                    % community.name)
+
+    def unlink(self):
+        """Удаление записи об участии тоже не должно осиротить сообщество."""
+        communities = self.community_id
+        result = super().unlink()
+        for community in communities.exists():
+            if community.state != 'published':
+                continue
+            owners = community.sudo().member_ids.filtered(
+                lambda m: m.state == 'active' and m.role == 'owner')
+            if not owners:
+                raise ValidationError(_(
+                    'В сообществе «%s» не останется ведущего.') % community.name)
+        return result
+
     # ── Действия модератора ─────────────────────────────────────────────
 
     def action_admit(self):
