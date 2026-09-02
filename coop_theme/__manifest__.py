@@ -20,7 +20,7 @@
     'category': 'Cooperative',
     'version': '19.0.1.0.0',
     'license': 'LGPL-3',
-    'depends': ['web'],
+    'depends': ['web', 'coop_base'],
     'data': [
         'security/ir.model.access.csv',
         'security/coop_sidebar_rules.xml',

@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Без `noupdate`. Правила доступа — это код, а не данные пользователя:
+  правку правила нужно доставить на узел обновлением модуля. С пометкой
+  «не обновлять» исправления молча не доезжали до базы, и правило
+  продолжало работать в прежнем, ошибочном виде — так и вышло с правкой
+  объявлений от имени организации.
+
+  Если администратор узла подстроит правило под себя, обновление модуля
+  вернёт нашу редакцию. Это осознанно: правила доступа задаёт платформа.
+-->
 <odoo>
-  <data noupdate="1">
+  <data>
+
 
     <!--
       Читать опубликованные объявления может любой участник, править —
@@ -13,7 +24,8 @@
       <field name="model_id" ref="model_coop_resource"/>
       <field name="groups" eval="[(4, ref('base.group_user'))]"/>
       <field name="domain_force">
-        ['|', ('state', '=', 'published'), ('owner_id', '=', user.partner_id.id)]
+        ['|', ('state', '=', 'published'),
+         ('owner_id', 'in', user.coop_actor_partner_ids.ids)]
       </field>
       <field name="perm_read" eval="True"/>
       <field name="perm_write" eval="False"/>
@@ -21,11 +33,19 @@
       <field name="perm_unlink" eval="False"/>
     </record>
 
+    <!--
+      Своё — это и своё личное, и своих организаций.
+
+      Раньше здесь стоял личный партнёр, и представитель организации не мог
+      отредактировать объявление собственной организации вовсе. Не замечалось
+      это потому, что всё проверялось под администратором со сквозным
+      правилом.
+    -->
     <record id="rule_resource_own" model="ir.rule">
       <field name="name">Править можно только своё объявление</field>
       <field name="model_id" ref="model_coop_resource"/>
       <field name="groups" eval="[(4, ref('base.group_user'))]"/>
-      <field name="domain_force">[('owner_id', '=', user.partner_id.id)]</field>
+      <field name="domain_force">[('owner_id', 'in', user.coop_actor_partner_ids.ids)]</field>
       <field name="perm_read" eval="False"/>
       <field name="perm_write" eval="True"/>
       <field name="perm_create" eval="True"/>

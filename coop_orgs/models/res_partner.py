@@ -58,9 +58,12 @@ class ResPartner(models.Model):
         # есть в уставе и в выписке; закрыт поимённый состав. Без sudo
         # пересчёт у пользователя без прав на членство ронял бы чтение
         # самой карточки организации, а не только состава.
+        # `_read_group` в Odoo 19 отдаёт кортежи с записями, а не словари с
+        # парами «идентификатор, название»: организация приходит готовым
+        # `res.partner`, и брать у неё нулевой элемент нечего.
         counts = {
-            group['organization_id'][0]: group['__count']
-            for group in self.env['coop.membership'].sudo()._read_group(
+            organization.id: count
+            for organization, count in self.env['coop.membership'].sudo()._read_group(
                 [('organization_id', 'in', self.ids), ('state', '=', 'active')],
                 groupby=['organization_id'], aggregates=['__count'])
         } if self.ids else {}

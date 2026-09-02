@@ -57,6 +57,30 @@
   }
 }
 
+// Переключатель «действую от имени…». Стоит над разделами, потому что
+// меняет смысл всего, что ниже: опубликованное уйдёт от выбранного лица.
+.o_coop_acting {
+  margin: 0 0 12px;
+  padding: 0 3px;
+
+  label {
+    display: block;
+    margin-bottom: 4px;
+    font: 500 11px/1 'Manrope', sans-serif;
+    color: var(--coop-slate-light, #8f8f88);
+  }
+
+  select {
+    width: 100%;
+    padding: 7px 9px;
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-radius: 7px;
+    background: var(--coop-surface, #f2f2ee);
+    color: var(--coop-ink, #14171a);
+    font: 600 12.5px/1.2 'Manrope', sans-serif;
+  }
+}
+
 .o_coop_nav_item {
   display: flex;
   align-items: center;

@@ -27,3 +27,38 @@ class CoopShell(models.AbstractModel):
             if record and record._name.startswith('ir.actions.'):
                 resolved[xmlid] = record.id
         return resolved
+
+    # ── Переключатель «действую от имени…» ───────────────────────────────
+    #
+    # Организация — сторона обязательства, но кнопку всегда нажимает
+    # человек. Переключатель хранится на сервере: при разборе спора надо
+    # восстановить, от чьего имени была нажата кнопка, а не поверить тому,
+    # что осталось в чужом браузере.
+
+    @api.model
+    def acting_options(self):
+        user = self.env.user
+        return {
+            'current': user.coop_acting_as_id.id or user.partner_id.id,
+            'self': user.partner_id.id,
+            'options': [
+                {'id': partner.id,
+                 'name': partner.display_name,
+                 'isCompany': partner.is_company}
+                for partner in user.coop_actor_partner_ids
+            ],
+        }
+
+    @api.model
+    def set_acting(self, partner_id):
+        """Переключиться на организацию или обратно на себя.
+
+        Свой партнёр в списке есть наравне с организациями — это и есть
+        «действую от себя», и отдельного пункта «выключить» не нужно.
+        """
+        user = self.env.user
+        partner_id = int(partner_id or 0)
+        if partner_id == user.partner_id.id:
+            partner_id = False
+        user.action_coop_act_as(partner_id)
+        return True

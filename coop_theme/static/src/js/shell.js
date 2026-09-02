@@ -26,7 +26,10 @@ export class CoopSidebar extends Component {
     setup() {
         this.action = useService("action");
         this.orm = useService("orm");
-        this.state = useState({ main: [], extensions: [], current: null, open: false });
+        this.state = useState({
+            main: [], extensions: [], current: null, open: false,
+            acting: null, actors: [],
+        });
 
         onWillStart(async () => {
             await this.load();
@@ -74,10 +77,42 @@ export class CoopSidebar extends Component {
         }
         this.state.main = items.filter((item) => item.section === "main");
         this.state.extensions = items.filter((item) => item.section === "ext");
+        await this.loadActors();
         if (this.settingsId === undefined) {
             const resolved = await this._settingsAction();
             this.settingsId = resolved;
         }
+    }
+
+    /**
+     * От чьего имени человек может действовать.
+     *
+     * Список короче единицы не бывает — свой профиль в нём есть всегда, —
+     * но пока человек ни в одной организации не состоит, показывать
+     * переключатель с единственным пунктом незачем.
+     */
+    async loadActors() {
+        try {
+            const info = await this.orm.call("coop.shell", "acting_options", []);
+            this.state.actors = info.options || [];
+            this.state.acting = info.current || null;
+        } catch {
+            this.state.actors = [];
+            this.state.acting = null;
+        }
+    }
+
+    async setActing(partnerId) {
+        const value = Number(partnerId);
+        if (!value || value === this.state.acting) {
+            return;
+        }
+        await this.orm.call("coop.shell", "set_acting", [value]);
+        this.state.acting = value;
+        // Умолчания считаются на сервере, и открытая форма про смену не
+        // знает: в ней остался прежний владелец. Перезагрузка честнее,
+        // чем экран, наполовину принадлежащий предыдущему лицу.
+        browser.location.reload();
     }
 
     async _settingsAction() {

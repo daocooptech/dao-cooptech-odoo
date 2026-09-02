@@ -40,7 +40,14 @@ class CoopSkillOffer(models.Model):
 
     partner_id = fields.Many2one(
         'res.partner', string='Кто предлагает', required=True, index=True,
-        default=lambda self: self.env.user.partner_id, tracking=True)
+        default=lambda self: self.env.user._coop_acting_partner(), tracking=True)
+    author_id = fields.Many2one(
+        'res.partner', string='Разместил', readonly=True,
+        default=lambda self: self.env.user.partner_id, index=True,
+        help='Кто из людей это разместил. У объявления частного лица '
+             'совпадает с владельцем; у объявления организации '
+             'показывает, кто из её представителей нажал кнопку — без '
+             'этого спор «кто это разместил» разбирать нечем.')
     partner_trust = fields.Integer(
         related='partner_id.coop_trust', string='Доверие владельца', store=True)
 

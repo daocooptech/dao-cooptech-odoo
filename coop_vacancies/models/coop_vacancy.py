@@ -38,11 +38,12 @@ class CoopVacancy(models.Model):
     # ── Кто ищет ─────────────────────────────────────────────────────────
     partner_id = fields.Many2one(
         'res.partner', string='Кто ищет', required=True, index=True,
-        default=lambda self: self.env.user.partner_id, tracking=True,
+        default=lambda self: self.env.user._coop_acting_partner(), tracking=True,
         help='Человек или организация. Вакансию может разместить и частное '
              'лицо: в макете таких двенадцать из ста.')
     author_id = fields.Many2one(
-        'res.partner', string='Опубликовал',
+        'res.partner', string='Опубликовал', readonly=True, index=True,
+        default=lambda self: self.env.user.partner_id,
         help='Кто разместил вакансию от лица организации. У вакансии '
              'частного лица совпадает с ним самим.')
     project_id = fields.Many2one(

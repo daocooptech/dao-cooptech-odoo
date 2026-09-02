@@ -142,9 +142,16 @@ class CoopResource(models.Model):
 
     owner_id = fields.Many2one(
         'res.partner', string='Владелец', required=True, index=True,
-        default=lambda self: self.env.user.partner_id, tracking=True,
+        default=lambda self: self.env.user._coop_acting_partner(), tracking=True,
         help='Человек или организация. Обе стороны сделки равноправны, '
              'поэтому владельцем может быть и то и другое.')
+    author_id = fields.Many2one(
+        'res.partner', string='Разместил', readonly=True,
+        default=lambda self: self.env.user.partner_id, index=True,
+        help='Кто из людей это разместил. У объявления частного лица '
+             'совпадает с владельцем; у объявления организации '
+             'показывает, кто из её представителей нажал кнопку — без '
+             'этого спор «кто это разместил» разбирать нечем.')
     city = fields.Char(string='Город', index=True)
 
     # ── Цена ─────────────────────────────────────────────────────────────

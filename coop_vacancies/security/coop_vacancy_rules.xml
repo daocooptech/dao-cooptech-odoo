@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Без `noupdate`. Правила доступа — это код, а не данные пользователя:
+  правку правила нужно доставить на узел обновлением модуля. С пометкой
+  «не обновлять» исправления молча не доезжали до базы, и правило
+  продолжало работать в прежнем, ошибочном виде — так и вышло с правкой
+  объявлений от имени организации.
+
+  Если администратор узла подстроит правило под себя, обновление модуля
+  вернёт нашу редакцию. Это осознанно: правила доступа задаёт платформа.
+-->
 <odoo>
-  <data noupdate="1">
+  <data>
+
 
     <!--
       Читать опубликованные вакансии может любой участник, править — только
@@ -13,7 +24,8 @@
       <field name="model_id" ref="model_coop_vacancy"/>
       <field name="groups" eval="[(4, ref('base.group_user'))]"/>
       <field name="domain_force">
-        ['|', ('state', '=', 'published'), ('partner_id', '=', user.partner_id.id)]
+        ['|', ('state', '=', 'published'),
+         ('partner_id', 'in', user.coop_actor_partner_ids.ids)]
       </field>
       <field name="perm_read" eval="True"/>
       <field name="perm_write" eval="False"/>
@@ -25,7 +37,7 @@
       <field name="name">Править можно только свою вакансию</field>
       <field name="model_id" ref="model_coop_vacancy"/>
       <field name="groups" eval="[(4, ref('base.group_user'))]"/>
-      <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+      <field name="domain_force">[('partner_id', 'in', user.coop_actor_partner_ids.ids)]</field>
       <field name="perm_read" eval="False"/>
       <field name="perm_write" eval="True"/>
       <field name="perm_create" eval="True"/>
@@ -50,7 +62,7 @@
       <field name="groups" eval="[(4, ref('base.group_user'))]"/>
       <field name="domain_force">
         ['|', ('partner_id', '=', user.partner_id.id),
-              ('vacancy_id.partner_id', '=', user.partner_id.id)]
+              ('vacancy_id.partner_id', 'in', user.coop_actor_partner_ids.ids)]
       </field>
     </record>
 
