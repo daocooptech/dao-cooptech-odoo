@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <t t-name="coop_theme.CatalogFilters">
+    <aside class="o_coop_filters" t-att-class="{ 'o_coop_filters_open': state.open }">
+      <!-- На узком экране панель свёрнута в кнопку: 236 пикселей сбоку
+           там нет, а прятать фильтры совсем нельзя. -->
+      <button type="button" class="o_coop_filters_toggle"
+              t-on-click="() => this.toggleOpen()">
+        Фильтр
+      </button>
+
+      <div class="o_coop_filters_body">
+        <div class="o_coop_filters_title">Фильтр</div>
+
+        <t t-foreach="state.blocks" t-as="block" t-key="block.code">
+
+          <!-- Быстрые фильтры — чипами, как в макете. -->
+          <div class="o_coop_field" t-if="block.widget === 'quick'">
+            <label t-esc="block.label"/>
+            <div class="o_coop_chips">
+              <button t-foreach="block.options" t-as="option" t-key="option.value"
+                      type="button" class="o_coop_chip"
+                      t-att-class="{ 'o_coop_chip_on': isQuick(option.value) }"
+                      t-on-click="() => this.toggleQuick(option.value)">
+                <t t-esc="option.label"/>
+              </button>
+            </div>
+          </div>
+
+          <div class="o_coop_field" t-if="block.widget === 'select'">
+            <label>
+              <t t-esc="block.label"/>
+              <span class="o_coop_hint" t-if="block.hint" t-att-title="block.hint">ⓘ</span>
+            </label>
+            <select class="o_coop_input"
+                    t-on-change="(ev) => this.onChange(block.code, ev.target.value)">
+              <option value=""><t t-esc="block.placeholder or 'Любой'"/></option>
+              <option t-foreach="block.options" t-as="option" t-key="option.value"
+                      t-att-value="option.value"
+                      t-att-selected="isSelected(block, option)">
+                <t t-esc="option.label"/>
+                <t t-if="option.count"> · <t t-esc="option.count"/></t>
+              </option>
+            </select>
+          </div>
+
+          <div class="o_coop_field" t-if="block.widget === 'text'">
+            <label>
+              <t t-esc="block.label"/>
+              <span class="o_coop_hint" t-if="block.hint" t-att-title="block.hint">ⓘ</span>
+            </label>
+            <input type="text" class="o_coop_input"
+                   t-att-placeholder="block.placeholder"
+                   t-att-value="state.values[block.code] or ''"
+                   t-on-change="(ev) => this.onChange(block.code, ev.target.value)"/>
+          </div>
+
+          <!-- Свободный ввод с подсказкой значений: в макете это поле
+               «Например, аренда», а не список. -->
+          <div class="o_coop_field" t-if="block.widget === 'suggest'">
+            <label>
+              <t t-esc="block.label"/>
+              <span class="o_coop_hint" t-if="block.hint" t-att-title="block.hint">ⓘ</span>
+            </label>
+            <input type="text" class="o_coop_input"
+                   t-att-list="'coop-suggest-' + block.code"
+                   t-att-placeholder="block.placeholder"
+                   t-att-value="state.values[block.code] or ''"
+                   t-on-change="(ev) => this.onChange(block.code, ev.target.value)"/>
+            <datalist t-att-id="'coop-suggest-' + block.code">
+              <option t-foreach="block.options" t-as="option" t-key="option.value"
+                      t-att-value="option.label"/>
+            </datalist>
+          </div>
+
+          <div class="o_coop_field" t-if="block.widget === 'range'">
+            <label>
+              <t t-esc="block.label"/>
+              <span class="o_coop_hint" t-if="block.hint" t-att-title="block.hint">ⓘ</span>
+            </label>
+            <div class="o_coop_range">
+              <input type="number" class="o_coop_input" placeholder="от"
+                     t-att-value="state.values[block.code + '_from'] or ''"
+                     t-on-change="(ev) => this.onChange(block.code + '_from', ev.target.value)"/>
+              <input type="number" class="o_coop_input" placeholder="до"
+                     t-att-value="state.values[block.code + '_to'] or ''"
+                     t-on-change="(ev) => this.onChange(block.code + '_to', ev.target.value)"/>
+            </div>
+          </div>
+        </t>
+
+        <button type="button" class="o_coop_btn o_coop_btn_light"
+                t-on-click="() => this.reset()">Сбросить</button>
+
+        <!-- На узком экране панель закрывается кнопкой; на большом
+             фильтры применяются сразу, и кнопка не нужна. -->
+        <button type="button" class="o_coop_btn o_coop_btn_dark o_coop_btn_mobile"
+                t-on-click="() => this.toggleOpen()">Показать результаты</button>
+
+        <button type="button" class="o_coop_btn o_coop_btn_light"
+                t-on-click="() => this.saveSearch()">🔔 Сохранить поиск</button>
+
+        <button type="button" class="o_coop_btn o_coop_btn_light"
+                t-on-click="() => this.toggleSaved()">
+          Сохранённые поиски
+          <t t-if="state.saved.length"> · <t t-esc="state.saved.length"/></t>
+        </button>
+
+        <div class="o_coop_saved" t-if="state.savedOpen">
+          <div class="o_coop_saved_empty" t-if="!state.saved.length">
+            Пока ничего не сохранено
+          </div>
+          <div class="o_coop_saved_row" t-foreach="state.saved" t-as="saved"
+               t-key="saved.id">
+            <button type="button" class="o_coop_saved_name"
+                    t-on-click="() => this.applySaved(saved)"
+                    t-esc="saved.name"/>
+            <button type="button" class="o_coop_saved_drop"
+                    title="Удалить сохранённый поиск"
+                    t-on-click="() => this.dropSaved(saved)">×</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </t>
+
+</templates>

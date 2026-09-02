@@ -335,3 +335,69 @@ class CoopResource(models.Model):
     def action_close(self):
         self.write({'state': 'closed'})
         return True
+
+
+class CoopResourceCatalogFilters(models.Model):
+    """Панель фильтров каталога ресурсов — та же, что в макете.
+
+    Порядок полей и подписи взяты оттуда же: быстрые фильтры, вид
+    объявления, рубрика, город, цена, тип, способ получения.
+    """
+
+    _inherit = 'coop.resource'
+
+    def _coop_catalog_filters(self, domain):
+        methods = self.env['coop.resource.method'].sudo().search([])
+        exchange = methods.filtered(lambda m: 'бмен' in m.name)
+        free = methods.filtered(lambda m: 'езвозмезд' in m.name)
+
+        categories = self.env['coop.resource.category'].sudo().search(
+            [], order='complete_name')
+
+        quick = []
+        if exchange:
+            quick.append({'value': 'exchange', 'label': 'На обмен',
+                          'domain': [('method_ids', 'in', exchange.ids)]})
+        if free:
+            quick.append({'value': 'free', 'label': 'Безвозмездно',
+                          'domain': [('method_ids', 'in', free.ids)]})
+        quick.insert(0, {'value': 'photo', 'label': 'С фото',
+                         'domain': [('image_1920', '!=', False)]})
+
+        # Быстрые фильтры стоят последними, перед кнопками: это ярлыки
+        # к тому, что уже есть выше, и открывать ими панель значит
+        # предлагать выбор до того, как человек понял, из чего выбирает.
+        return [
+            {'code': 'listing_type', 'label': 'Спрос или предложение',
+             'hint': 'Предложение — «отдам, продам, сдам». '
+                     'Спрос — «ищу, куплю, приму в дар».',
+             'widget': 'select', 'field': 'listing_type', 'placeholder': 'Любая',
+             'options': [{'value': code, 'label': label}
+                         for code, label in
+                         self._fields['listing_type'].selection]},
+            {'code': 'category_id', 'label': 'Категория',
+             'hint': 'Рубрика каталога. От неё зависят характеристики ниже.',
+             'widget': 'select', 'field': 'category_id', 'placeholder': 'Любая',
+             'options': [{'value': c.id, 'label': c.complete_name}
+                         for c in categories]},
+            {'code': 'city', 'label': 'Город',
+             'hint': 'Можно ввести часть названия.',
+             'widget': 'text', 'field': 'city', 'operator': 'ilike',
+             'placeholder': 'Начните вводить город'},
+            {'code': 'price', 'label': 'Цена, ₽',
+             'hint': 'Пустое поле — без ограничения.',
+             'widget': 'range', 'field': 'price'},
+            {'code': 'resource_type', 'label': 'Тип',
+             'hint': 'Материальный, оборудование, труд или финансовый.',
+             'widget': 'select', 'field': 'resource_type', 'placeholder': 'Любой',
+             'options': [{'value': code, 'label': label}
+                         for code, label in
+                         self._fields['resource_type'].selection]},
+            {'code': 'method_ids', 'label': 'Способ получения',
+             'hint': 'Продажа, аренда, обмен, безвозмездно и другие.',
+             'widget': 'suggest', 'field': 'method_ids', 'operator': 'ilike',
+             'placeholder': 'Например, аренда',
+             'options': [{'value': m.id, 'label': m.name} for m in methods]},
+            {'code': 'quick', 'label': 'Быстрые фильтры', 'widget': 'quick',
+             'options': quick},
+        ]

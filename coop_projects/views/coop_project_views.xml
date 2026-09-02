@@ -196,14 +196,6 @@
           <filter name="by_city" string="По городу" context="{'group_by': 'city'}"/>
           <filter name="by_state" string="По состоянию" context="{'group_by': 'state'}"/>
         </group>
-        <searchpanel class="o_coop_filters">
-          <field name="category_id" string="Тема" icon="fa-folder"
-                 enable_counters="1" expand="1"/>
-          <field name="kind" string="Вид проекта" icon="fa-users"
-                 enable_counters="1"/>
-          <field name="state" string="Состояние" icon="fa-flag"
-                 enable_counters="1"/>
-        </searchpanel>
       </search>
     </field>
   </record>

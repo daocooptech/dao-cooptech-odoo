@@ -249,11 +249,6 @@
           <filter name="by_city" string="По городу" context="{'group_by': 'city'}"/>
           <filter name="by_access" string="По входу" context="{'group_by': 'access'}"/>
         </group>
-        <searchpanel class="o_coop_filters">
-          <field name="kind" string="Тип" icon="fa-users" enable_counters="1"/>
-          <field name="access" string="Кто может вступить" icon="fa-key"
-                 enable_counters="1"/>
-        </searchpanel>
       </search>
     </field>
   </record>

@@ -1,0 +1,209 @@
+// Панель фильтров каталога — по макету.
+//
+// Карточка справа от списка: белая подложка, тонкая рамка, скруглённые
+// углы. Заголовок «Фильтр» набран прописными и приглушён — он называет
+// панель, а не является полем.
+
+.o_coop_filters {
+  flex: 0 0 236px;
+  width: 236px;
+  order: 2;
+}
+
+.o_coop_filters_body {
+  background: var(--coop-white, #fff);
+  border: 1px solid var(--coop-line, #e6e6e1);
+  border-radius: 10px;
+  padding: 14px 14px 16px;
+}
+
+.o_coop_filters_title {
+  font: 600 10.5px/1.4 'Manrope', sans-serif;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--coop-slate-light, #8a8a80);
+  margin-bottom: 12px;
+}
+
+.o_coop_field {
+  margin-bottom: 12px;
+
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font: 500 12px/1.4 'Manrope', sans-serif;
+    color: var(--coop-ink, #14171a);
+  }
+}
+
+// Подсказка у подписи: значок без своего цвета, чтобы не спорить с
+// содержанием строки.
+.o_coop_hint {
+  margin-left: 4px;
+  color: var(--coop-slate-light, #8a8a80);
+  cursor: help;
+  font-size: 11px;
+}
+
+.o_coop_input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--coop-line, #e6e6e1);
+  border-radius: 8px;
+  background: var(--coop-white, #fff);
+  font-size: 12.5px;
+  color: var(--coop-ink, #14171a);
+
+  &::placeholder {
+    color: var(--coop-slate-light, #8a8a80);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--coop-teal, #146b64);
+  }
+}
+
+.o_coop_range {
+  display: flex;
+  gap: 8px;
+}
+
+.o_coop_chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.o_coop_chip {
+  padding: 5px 10px;
+  border: 1px solid var(--coop-line, #e6e6e1);
+  border-radius: 999px;
+  background: var(--coop-white, #fff);
+  font: 500 11.5px/1.3 'Manrope', sans-serif;
+  color: var(--coop-slate, #4a4a44);
+
+  &:hover {
+    border-color: var(--coop-teal, #146b64);
+    color: var(--coop-teal-dark, #0f4f4a);
+  }
+}
+
+.o_coop_chip_on {
+  background: var(--coop-teal-tint, #e3efed);
+  border-color: var(--coop-teal, #146b64);
+  color: var(--coop-teal-dark, #0f4f4a);
+}
+
+.o_coop_btn {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font: 600 12.5px/1.3 'Manrope', sans-serif;
+  border: 1px solid var(--coop-line, #e6e6e1);
+  background: var(--coop-white, #fff);
+  color: var(--coop-ink, #14171a);
+
+  &:hover {
+    border-color: var(--coop-teal, #146b64);
+  }
+}
+
+// Тёмная в панели ровно одна — «Показать результаты». Две одинаково
+// заметные кнопки заставляют выбирать между ними, хотя главная тут одна.
+.o_coop_btn_dark {
+  background: var(--coop-ink, #14171a);
+  border-color: var(--coop-ink, #14171a);
+  color: #fff;
+
+  &:hover {
+    background: #000;
+    border-color: #000;
+  }
+}
+
+.o_coop_saved {
+  margin-top: 8px;
+  border: 1px solid var(--coop-line, #e6e6e1);
+  border-radius: 8px;
+  padding: 6px;
+}
+
+.o_coop_saved_empty {
+  padding: 6px 4px;
+  font-size: 12px;
+  color: var(--coop-slate-light, #8a8a80);
+}
+
+.o_coop_saved_row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.o_coop_saved_name {
+  flex: 1 1 auto;
+  text-align: left;
+  border: 0;
+  background: none;
+  padding: 5px 4px;
+  font-size: 12.5px;
+  color: var(--coop-teal-dark, #0f4f4a);
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.o_coop_saved_drop {
+  flex: none;
+  border: 0;
+  background: none;
+  color: var(--coop-slate-light, #8a8a80);
+  font-size: 15px;
+  line-height: 1;
+
+  &:hover {
+    color: var(--coop-ink, #14171a);
+  }
+}
+
+// Кнопка раскрытия и «Показать результаты» нужны только на узком
+// экране: там панель свёрнута, и без них до фильтров не добраться.
+.o_coop_filters_toggle,
+.o_coop_btn_mobile {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .o_coop_filters {
+    flex: 1 1 auto;
+    width: 100%;
+    order: 0;
+  }
+
+  .o_coop_filters_toggle {
+    display: block;
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-radius: 8px;
+    background: var(--coop-white, #fff);
+    font: 600 12.5px/1.3 'Manrope', sans-serif;
+  }
+
+  .o_coop_filters_body {
+    display: none;
+  }
+
+  .o_coop_filters_open .o_coop_filters_body {
+    display: block;
+    margin-top: 8px;
+  }
+
+  .o_coop_btn_mobile {
+    display: block;
+  }
+}

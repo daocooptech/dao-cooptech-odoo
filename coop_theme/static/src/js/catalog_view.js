@@ -8,6 +8,7 @@ import { KanbanController } from "@web/views/kanban/kanban_controller";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { Pager } from "@web/core/pager/pager";
 import { CoopTabs } from "@coop_theme/js/shell";
+import { CoopFilters } from "@coop_theme/js/catalog_filters";
 import { reactive, useEffect, useState } from "@odoo/owl";
 
 /**
@@ -126,7 +127,7 @@ export class CoopCatalogKanbanController extends KanbanController {
     // панели сверху. Данные берутся те же, что у штатной: представление
     // уже сложило их в настройку экрана, и считать их второй раз значило
     // бы завести второй счётчик, который разойдётся с первым.
-    static components = { ...KanbanController.components, Pager };
+    static components = { ...KanbanController.components, Pager, CoopFilters };
 
     // Кнопка создания подписывается по разделу: «Добавить ресурс»,
     // «Добавить проект». Штатное «Новое» ничего не говорит о том, что

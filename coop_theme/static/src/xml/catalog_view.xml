@@ -26,6 +26,16 @@
       </button>
     </xpath>
 
+    <!--
+      Панель фильтров — своя, а не штатная: та берёт фиксированный список
+      полей из разметки и умеет только ссылки и списки значений, без
+      диапазона цены, свободного ввода города и набора полей, зависящего
+      от раздела.
+    -->
+    <xpath expr="//t[@t-component='props.Renderer']" position="after">
+      <CoopFilters resModel="props.resModel"/>
+    </xpath>
+
     <xpath expr="//t[@t-component='props.Renderer']" position="after">
       <div class="o_coop_pager" t-if="env.config.pagerProps">
         <Pager t-props="env.config.pagerProps"/>
