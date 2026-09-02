@@ -7,6 +7,7 @@ import { kanbanView } from "@web/views/kanban/kanban_view";
 import { KanbanController } from "@web/views/kanban/kanban_controller";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { Pager } from "@web/core/pager/pager";
+import { CoopTabs } from "@coop_theme/js/shell";
 import { reactive, useEffect, useState } from "@odoo/owl";
 
 /**
@@ -127,6 +128,13 @@ export class CoopCatalogKanbanController extends KanbanController {
     // бы завести второй счётчик, который разойдётся с первым.
     static components = { ...KanbanController.components, Pager };
 
+    // Кнопка создания подписывается по разделу: «Добавить ресурс»,
+    // «Добавить проект». Штатное «Новое» ничего не говорит о том, что
+    // именно заводится, а в макете подпись у каждого каталога своя.
+    get coopCreateLabel() {
+        return this.props.context?.coop_create_label || "Добавить";
+    }
+
     setup() {
         super.setup();
         this.coopLayout = useState(coopLayout);
@@ -153,6 +161,11 @@ registry.category("views").add("coop_catalog_kanban", {
     ...kanbanView,
     Controller: CoopCatalogKanbanController,
 });
+
+// Вкладки раздела рисуются самой панелью: только так они попадают в одну
+// строку с переключателем вида, а поиск с кнопкой добавления — в
+// следующую. Отдельным блоком над панелью этого не собрать.
+ControlPanel.components = { ...ControlPanel.components, CoopTabs };
 
 patch(ControlPanel.prototype, {
     /**

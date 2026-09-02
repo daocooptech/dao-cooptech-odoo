@@ -19,6 +19,65 @@ import { WebClient } from "@web/webclient/webclient";
  * (`coop.sidebar.item`): разделы до «Расширений» есть у всех и убрать их
  * нельзя, порядок и набор расширений — личное дело.
  */
+/**
+ * Вкладки раздела — в строке панели, над поиском, как в макете.
+ *
+ * Приложение определяется по текущему действию, а не спрашивается у
+ * службы меню. Служба считает текущим последнее выбранное через её
+ * собственное меню, а по разделам платформы ходят слева, минуя её, — и
+ * на «Навыках» вкладки показывали подразделы «Ресурсов».
+ */
+export class CoopTabs extends Component {
+    static template = "coop_theme.Tabs";
+    static props = {};
+
+    setup() {
+        this.menus = useService("menu");
+        this.state = useState({ tabs: [], current: null });
+        this.lastActionId = null;
+        this.refresh();
+        // Какое действие открыто, панель управления знает не всегда: у
+        // неё своя настройка экрана, и в момент первой отрисовки она
+        // пуста. Поэтому слушаем ещё и общее событие о смене экрана —
+        // так же, как боковое меню.
+        this.env.bus.addEventListener("ACTION_MANAGER:UPDATE", ({ detail }) => {
+            const action = detail?.componentProps?.action;
+            if (action?.id) {
+                this.lastActionId = action.id;
+            }
+            this.refresh();
+        });
+    }
+
+    get actionId() {
+        return this.env.config?.actionId || this.lastActionId || null;
+    }
+
+    refresh() {
+        const actionId = this.actionId;
+        const own = this.menus.getAll().find((menu) => menu.actionID === actionId);
+        const appId = own ? own.appID : this.menus.getCurrentApp()?.id;
+        if (!appId) {
+            this.state.tabs = [];
+            return;
+        }
+        const children = this.menus.getMenuAsTree(appId).childrenTree || [];
+        // Вкладка показывается даже одна: она называет раздел, а
+        // названия раздела в панели больше нет — оно дублировало её.
+        this.state.tabs = children;
+        // Активную ищем среди самих вкладок, а не по всему меню: у
+        // корневого пункта раздела и у первой вкладки одно и то же
+        // действие, и по общему списку находился корневой — он в
+        // строке вкладок не показан, и подсвечивать было нечего.
+        const active = children.find((tab) => tab.actionID === actionId);
+        this.state.current = active ? active.id : (children[0] || {}).id;
+    }
+
+    open(tab) {
+        this.menus.selectMenu(tab);
+    }
+}
+
 export class CoopSidebar extends Component {
     static template = "coop_theme.Sidebar";
     static props = {};

@@ -282,3 +282,47 @@
     padding: 16px 14px 84px;
   }
 }
+
+// Верхняя панель Odoo на большом экране: список приложений и название
+// приложения убраны. Разделы платформы стоят слева и всегда на виду, а
+// подразделы вынесены вкладками в панель каталога.
+//
+// На узком экране список приложений остаётся: там боковое меню свёрнуто
+// в шторку, и второй путь к разделам не лишний.
+@media (min-width: 901px) {
+  .o_main_navbar > .o_navbar_apps_menu,
+  .o_main_navbar > .o_menu_brand,
+  .o_main_navbar > .o_menu_sections {
+    display: none !important;
+  }
+}
+
+// Всё в шапке по одной линии: у значков, поиска и тумблера разная
+// собственная высота, и без выравнивания они стоят на разных уровнях.
+.o_main_navbar {
+  align-items: center;
+
+  .o_menu_systray {
+    align-items: center;
+  }
+
+  .o_menu_systray > * {
+    display: flex;
+    align-items: center;
+  }
+}
+
+// Название платформы слева, как в макете. Своего места в шапке Odoo для
+// него нет — занимаем освободившееся от списка приложений.
+.o_coop_platform_name {
+  font: 400 12.5px/1.4 'Manrope', sans-serif;
+  color: var(--coop-slate, #4a4a44);
+  padding-left: 20px;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .o_coop_platform_name {
+    display: none;
+  }
+}

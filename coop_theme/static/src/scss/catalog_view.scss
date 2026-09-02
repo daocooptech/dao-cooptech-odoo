@@ -67,43 +67,75 @@
   }
 }
 
-// Строка поиска каталога — отдельной широкой строкой, как в макете.
+// Панель каталога в две строки, как в макете.
 //
-// Штатно поиск делит одну строку с названием раздела, пагинатором и
-// переключателем вида и сжимается до узкого поля. В прототипе это
-// самостоятельный ряд (`search-row`) сразу под вкладками: поиск —
-// главное действие каталога, и место ему соответствующее.
+// Первая: вкладки раздела слева, переключатель вида справа. Вторая:
+// поиск по каталогу, кнопка добавления и порядок.
 //
-// `!important` здесь вынужденный: Odoo вешает на эти же узлы
-// bootstrap-утилиты (`flex-lg-nowrap`, `flex-grow-1`), а они объявлены с
-// `!important`. Без него строка не переносится и поиск остаётся зажатым
-// между названием раздела и пагинатором.
+// `!important` вынужденный: Odoo вешает на эти же узлы bootstrap-утилиты
+// (`flex-lg-nowrap`, `order-lg-*`, `flex-grow-1`), объявленные с
+// `!important`. Без него строка не переносится и порядок блоков не
+// меняется.
 .o_control_panel.o_coop_catalog {
 
   .o_control_panel_main {
     flex-wrap: wrap !important;
+    align-items: center;
   }
 
-  // Верхняя строка: название раздела слева, пагинатор и переключатель
-  // вида справа. Нижняя — поиск во всю ширину и рядом порядок.
+  // Обёртка перестаёт быть блоком: кнопка добавления должна встать во
+  // вторую строку рядом с поиском, а вкладки остаться в первой. Пока
+  // они лежат в одном контейнере, развести их нельзя.
+  // `!important` нужен и здесь: на обёртке висит bootstrap-класс
+  // `d-flex`, объявленный с ним же.
   .o_control_panel_breadcrumbs {
-    order: 0 !important;
+    display: contents !important;
   }
 
-  // Пагинатор и переключатель вида остаются в верхней строке рядом с
-  // названием раздела: без этого они уезжают на третью строку, и панель
-  // занимает втрое больше места, чем каталог в макете.
+  // Название раздела и шестерёнка настроек представления: первое
+  // дублирует активную вкладку, вторая участнику не нужна.
+  .o_breadcrumb,
+  .o_control_panel_breadcrumbs_actions {
+    display: none !important;
+  }
+
+  .o_coop_tabs {
+    order: 0;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
   .o_control_panel_navigation {
     order: 1 !important;
     flex: 0 0 auto !important;
     margin-left: auto;
   }
 
+  .o_coop_row_break {
+    order: 2;
+    flex: 0 0 100%;
+    width: 100%;
+    height: 0;
+  }
+
+  // Вторая строка.
   .o_control_panel_actions {
-    order: 2 !important;
-    flex: 1 1 100% !important;
+    order: 3 !important;
+    flex: 0 1 420px !important;
     justify-content: flex-start !important;
-    gap: 8px;
+    min-width: 0;
+  }
+
+  .o_control_panel_main_buttons {
+    order: 4;
+  }
+
+  .o_coop_sort {
+    order: 5;
+    flex: none;
+    width: auto;
+    max-width: 200px;
+    margin-left: auto;
   }
 
   .o_searchview {
@@ -112,17 +144,41 @@
     max-width: none;
   }
 
-  .o_coop_sort {
-    flex: none;
-    width: auto;
-    max-width: 240px;
+  // Пагинатор ушёл вниз, под плитки.
+  .o_cp_pager {
+    display: none !important;
   }
 }
 
-@media (max-width: 900px) {
-  .o_control_panel.o_coop_catalog .o_coop_sort {
-    max-width: none;
-    flex: 1 1 100%;
+// Вкладки раздела — первой строкой панели.
+.o_coop_tabs {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.o_coop_tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.o_coop_tab {
+  padding: 2px 0 6px;
+  border-bottom: 2px solid transparent;
+  font: 500 13px/1.4 'Manrope', sans-serif;
+  color: var(--coop-slate, #4a4a44);
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--coop-teal-dark, #0f4f4a);
+  }
+
+  &.active {
+    color: var(--coop-ink, #14171a);
+    font-weight: 700;
+    border-bottom-color: var(--coop-teal, #146b64);
   }
 }
 

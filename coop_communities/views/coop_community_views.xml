@@ -262,7 +262,7 @@
     <field name="name">Сообщества</field>
     <field name="res_model">coop.community</field>
     <field name="view_mode">kanban,list,form</field>
-    <field name="context">{'coop_catalog': True}</field>
+    <field name="context">{'coop_catalog': True, 'coop_create_label': 'Создать сообщество'}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Сообществ пока нет</p>
       <p>

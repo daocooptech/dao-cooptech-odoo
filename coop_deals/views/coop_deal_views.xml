@@ -253,7 +253,7 @@
     <field name="name">Сделки</field>
     <field name="res_model">coop.deal</field>
     <field name="view_mode">kanban,list,form</field>
-    <field name="context">{'coop_catalog': True}</field>
+    <field name="context">{'coop_catalog': True, 'coop_create_label': 'Начать сделку'}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Сделок пока нет</p>
       <p>

@@ -81,6 +81,34 @@
     </div>
   </t>
 
+  <!--
+    Вкладки раздела. Стоят в строке панели над поиском, как `entity-tabs`
+    в макете, а не в верхней панели рядом с названием приложения: та
+    панель на большом экране убрана целиком.
+  -->
+  <!--
+    Название платформы в шапке слева, как в макете. Место освободилось
+    от списка приложений: разделы платформы живут в боковом меню.
+  -->
+  <t t-name="coop_theme.NavBar" t-inherit="web.NavBar" t-inherit-mode="extension">
+    <xpath expr="//div[hasclass('o_navbar_breadcrumbs')]" position="before">
+      <span class="o_coop_platform_name">
+        Децентрализованная социально-экономическая платформа
+      </span>
+    </xpath>
+  </t>
+
+  <t t-name="coop_theme.Tabs">
+    <div class="o_coop_tabs" t-if="state.tabs.length">
+      <a t-foreach="state.tabs" t-as="tab" t-key="tab.id"
+         href="#" class="o_coop_tab"
+         t-att-class="{ 'active': tab.id === state.current }"
+         t-on-click.prevent="() => this.open(tab)">
+        <t t-esc="tab.name"/>
+      </a>
+    </div>
+  </t>
+
   <t t-name="coop_theme.Footer">
     <div class="o_coop_footer">
       <a href="/help-project">помощь проекту</a>
