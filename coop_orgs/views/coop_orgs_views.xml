@@ -168,6 +168,7 @@
                 <list>
                   <field name="partner_id" string="Участник"/>
                   <field name="role"/>
+                  <field name="power_ids" widget="many2many_tags"/>
                   <field name="state"/>
                   <field name="joined_on"/>
                   <field name="has_vote" string="Право голоса"/>

@@ -4,6 +4,7 @@ from . import coop_legal_form
 from . import coop_specialization
 from . import res_partner
 from . import res_users
+from . import coop_power
 from . import coop_membership
 from . import coop_menu_order
 from . import coop_setup

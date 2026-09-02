@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from odoo import api, models
 
-from ..data import (emblems, load_bounty, load_org_profiles, load_orgs,
-                    load_people, load_reference, load_resources, load_skills,
-                    load_vacancies)
+from ..data import (emblems, load_bounty, load_memberships, load_org_profiles,
+                    load_orgs, load_people, load_reference, load_resources,
+                    load_skills, load_vacancies)
 
 
 class CoopDemoLoader(models.AbstractModel):
@@ -29,6 +29,10 @@ class CoopDemoLoader(models.AbstractModel):
         marks = emblems.MarkAllocator()
         load_orgs.load_organizations(self.env, specializations, marks)
         load_org_profiles.load_org_profiles(self.env, specializations, marks)
+        # Состав организаций — до каталогов: правила доступа смотрят на
+        # полномочия в членстве, и объявления организаций должны попадать
+        # к людям, которым эта организация поручила публикации.
+        load_memberships.load_memberships(self.env)
         # Ресурсы последними: им нужны владельцы, а владельцы — это
         # люди и организации, загруженные выше.
         load_resources.load_resources(self.env)

@@ -25,6 +25,8 @@
     'data': [
         'data/coop_security_unfreeze.xml',
         'security/coop_groups.xml',
+        'data/coop_powers.xml',
+        'data/coop_membership_powers.xml',
         'data/coop_legal_forms.xml',
         'data/coop_setup.xml',
         'security/ir.model.access.csv',

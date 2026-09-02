@@ -28,21 +28,40 @@ class ResUsers(models.Model):
         help='Пусто — действую от себя. Организация здесь появляется, '
              'только если вы в ней состоите.')
 
+    # Три разных списка, а не один. Одним не обойтись: бухгалтеру нужен
+    # доступ к счетам организации и не нужен к публикациям, у сотрудника
+    # отдела маркетинга — наоборот. Пока список был один, оба получали всё.
     coop_actor_partner_ids = fields.Many2many(
         'res.partner', string='От чьего имени можно действовать',
-        compute='_compute_coop_actor_partner_ids',
-        help='Свой профиль и организации, где есть действующее членство.')
+        compute='_compute_coop_partner_ids',
+        help='Свой профиль и организации, где есть хоть одно полномочие, '
+             'которым что-то делают от их имени.')
+    coop_publisher_partner_ids = fields.Many2many(
+        'res.partner', string='За кого можно публиковать',
+        compute='_compute_coop_partner_ids',
+        help='Свой профиль и организации с полномочием публикации.')
+    coop_treasury_partner_ids = fields.Many2many(
+        'res.partner', string='Чьими счетами можно распоряжаться',
+        compute='_compute_coop_partner_ids',
+        help='Свой профиль и организации с полномочием на счета.')
+
+    # Полномочия, при которых человек вообще действует от имени
+    # организации: он что-то создаёт или меняет от её лица. «Переписка» в
+    # этот набор не входит — писать от имени организации можно, не владея
+    # ни одной её записью.
+    ACTING_POWERS = ('publish', 'deal', 'treasury', 'site')
 
     @api.depends('partner_id')
-    def _compute_coop_actor_partner_ids(self):
-        """Свой профиль плюс организации с действующим членством.
+    def _compute_coop_partner_ids(self):
+        """Свой профиль плюс организации — по полномочиям в членстве.
 
         Под sudo: состав членства читать вправе не каждый, а знать, от
         чьего имени он может действовать, должен любой.
 
-        Ревизионная комиссия исключена намеренно. Её дело — смотреть и
-        проверять; публикация от имени организации ревизором сделала бы
-        проверяющего участником того, что он проверяет.
+        Ревизионная комиссия сюда не попадает сама собой: исполнительных
+        полномочий ей не выдают, а без них организация в список не
+        попадает. Отдельной проверки на роль больше нет — она подменяла бы
+        собой полномочия и расходилась бы с ними при первой же правке.
         """
         Membership = self.env['coop.membership'].sudo()
         for user in self:
@@ -50,9 +69,38 @@ class ResUsers(models.Model):
             memberships = Membership.search([
                 ('partner_id', '=', partner.id),
                 ('state', '=', 'active'),
-                ('role', '!=', 'audit'),
             ])
-            user.coop_actor_partner_ids = partner | memberships.organization_id
+            acting = self.env['res.partner']
+            publishers = self.env['res.partner']
+            treasury = self.env['res.partner']
+            for membership in memberships:
+                codes = set(membership.power_ids.mapped('code'))
+                if codes & set(self.ACTING_POWERS):
+                    acting |= membership.organization_id
+                if 'publish' in codes:
+                    publishers |= membership.organization_id
+                if 'treasury' in codes:
+                    treasury |= membership.organization_id
+            user.coop_actor_partner_ids = partner | acting
+            user.coop_publisher_partner_ids = partner | publishers
+            user.coop_treasury_partner_ids = partner | treasury
+
+    def coop_has_power(self, code, partner=None):
+        """Есть ли у человека полномочие в организации.
+
+        Собственный профиль — всегда да: у себя человек вправе всё, что
+        платформа вообще позволяет, и членство для этого не нужно.
+        """
+        self.ensure_one()
+        partner = partner or self._coop_acting_partner()
+        if partner == self.partner_id:
+            return True
+        membership = self.env['coop.membership'].sudo().search([
+            ('partner_id', '=', self.partner_id.id),
+            ('organization_id', '=', partner.id),
+            ('state', '=', 'active'),
+        ], limit=1)
+        return code in set(membership.power_ids.mapped('code'))
 
     @api.constrains('coop_acting_as_id')
     def _check_coop_acting_as(self):
@@ -60,8 +108,9 @@ class ResUsers(models.Model):
             acting = user.coop_acting_as_id
             if acting and acting not in user.coop_actor_partner_ids:
                 raise ValidationError(_(
-                    'Действовать от имени «%s» нельзя: у вас нет '
-                    'действующего членства в этой организации.'
+                    'Действовать от имени «%s» нельзя: в этой организации у '
+                    'вас нет ни одного полномочия, которым что-то делают от '
+                    'её имени.'
                 ) % acting.display_name)
 
     def _coop_acting_partner(self):
@@ -75,15 +124,12 @@ class ResUsers(models.Model):
         return self.coop_acting_as_id or self.partner_id
 
     def _coop_manageable_partner_ids(self):
-        """Чьи записи человек вправе править.
+        """Чьи объявления человек вправе править.
 
-        Свои и своих организаций. До этого правила владения были написаны
-        на личного партнёра, и представитель организации не мог
-        отредактировать объявление собственной организации вовсе — это не
-        замечалось только потому, что всё проверялось под администратором.
+        Свои и тех организаций, где у него есть полномочие публикации.
         """
         self.ensure_one()
-        return self.coop_actor_partner_ids.ids
+        return self.coop_publisher_partner_ids.ids
 
     def action_coop_act_as(self, partner_id=False):
         """Переключиться. Вызывается из шапки, поэтому под sudo.

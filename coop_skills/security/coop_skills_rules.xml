@@ -40,7 +40,7 @@
       <field name="name">Править можно только своё предложение</field>
       <field name="model_id" ref="model_coop_skill_offer"/>
       <field name="groups" eval="[(4, ref('base.group_user'))]"/>
-      <field name="domain_force">[('partner_id', 'in', user.coop_actor_partner_ids.ids)]</field>
+      <field name="domain_force">[('partner_id', 'in', user.coop_publisher_partner_ids.ids)]</field>
       <field name="perm_read" eval="False"/>
       <field name="perm_write" eval="True"/>
       <field name="perm_create" eval="True"/>

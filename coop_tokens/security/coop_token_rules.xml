@@ -10,6 +10,10 @@
     потратил. В кооперативе, где доверие считается и показывается,
     открытые чужие кошельки — не мелочь: по ним видно, кто чем живёт.
 
+    Кошелёк организации видит тот, кому она поручила счета: у бухгалтера
+    полномочие «Бухгалтерия и счета» есть, у сотрудника отдела маркетинга —
+    нет, и движения организации ему не видны.
+
     Правление и ревизионная комиссия видят движения не отсюда, а по
     решению и со следом в журнале — это отдельная работа, и до неё
     исключений здесь нет.
@@ -17,7 +21,7 @@
   <record id="coop_token_own" model="ir.rule">
     <field name="name">Свои движения токенов</field>
     <field name="model_id" ref="model_coop_token_transaction"/>
-    <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+    <field name="domain_force">[('partner_id', 'in', user.coop_treasury_partner_ids.ids)]</field>
     <field name="groups" eval="[(4, ref('base.group_user'))]"/>
   </record>
 

@@ -9,7 +9,9 @@
             decoration-warning="state in ('applied', 'leaving')">
         <field name="partner_id"/>
         <field name="organization_id"/>
+        <field name="job_title"/>
         <field name="role"/>
+        <field name="power_ids" widget="many2many_tags"/>
         <field name="joined_on"/>
         <field name="has_vote" widget="boolean_toggle" readonly="1"/>
         <field name="state" widget="badge"
@@ -45,6 +47,7 @@
             <group string="Кто и где">
               <field name="partner_id"/>
               <field name="organization_id"/>
+              <field name="job_title" placeholder="Бухгалтер"/>
               <field name="role"/>
               <field name="has_vote"/>
             </group>
@@ -56,6 +59,9 @@
               <field name="termination_basis"
                      invisible="state not in ('leaving', 'ended')"/>
             </group>
+          </group>
+          <group string="Полномочия">
+            <field name="power_ids" widget="many2many_checkboxes" nolabel="1"/>
           </group>
           <div class="alert alert-info" role="status">
             Один член — один голос, независимо от размера пая. Приём и прекращение
@@ -82,6 +88,13 @@
         <filter name="members" string="Пайщики" domain="[('role', '=', 'member')]"/>
         <filter name="board" string="Правление" domain="[('role', '=', 'board')]"/>
         <filter name="audit" string="Ревизионная комиссия" domain="[('role', '=', 'audit')]"/>
+        <separator/>
+        <filter name="pw_publish" string="Публикуют"
+                domain="[('power_ids.code', '=', 'publish')]"/>
+        <filter name="pw_treasury" string="Ведут счета"
+                domain="[('power_ids.code', '=', 'treasury')]"/>
+        <filter name="pw_sign" string="Право подписи"
+                domain="[('power_ids.code', '=', 'sign')]"/>
         <group>
           <filter name="by_org" string="По организации"
                   context="{'group_by': 'organization_id'}"/>

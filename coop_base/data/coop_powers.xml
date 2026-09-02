@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Набор полномочий. Без `noupdate`: это справочник платформы, правила
+  доступа ищут записи по коду, и правка должна доезжать до узла.
+-->
+<odoo>
+
+  <record id="power_publish" model="coop.power">
+    <field name="name">Публикации</field>
+    <field name="code">publish</field>
+    <field name="sequence">10</field>
+    <field name="description">Размещать от имени организации ресурсы, навыки, услуги, вакансии и проекты; править и снимать размещённое.</field>
+  </record>
+
+  <record id="power_represent" model="coop.power">
+    <field name="name">Переписка и заявки</field>
+    <field name="code">represent</field>
+    <field name="sequence">20</field>
+    <field name="description">Вести переписку от имени организации, откликаться, подавать заявки, подписываться на обновления.</field>
+  </record>
+
+  <record id="power_deal" model="coop.power">
+    <field name="name">Сделки</field>
+    <field name="code">deal</field>
+    <field name="sequence">30</field>
+    <field name="description">Заключать сделки, подписывать акты, принимать обязательства от имени организации.</field>
+  </record>
+
+  <record id="power_treasury" model="coop.power">
+    <field name="name">Бухгалтерия и счета</field>
+    <field name="code">treasury</field>
+    <field name="sequence">40</field>
+    <field name="description">Счета и токены организации, оплата продвижения, выплаты. У сотрудника отдела маркетинга этого полномочия нет.</field>
+  </record>
+
+  <record id="power_roster" model="coop.power">
+    <field name="name">Ведение состава</field>
+    <field name="code">roster</field>
+    <field name="sequence">50</field>
+    <field name="description">Принимать в организацию и прекращать членство.</field>
+  </record>
+
+  <record id="power_powers" model="coop.power">
+    <field name="name">Выдача полномочий</field>
+    <field name="code">powers</field>
+    <field name="sequence">60</field>
+    <field name="description">Выдавать и отзывать полномочия другим участникам организации.</field>
+  </record>
+
+  <record id="power_site" model="coop.power">
+    <field name="name">Управление страницей</field>
+    <field name="code">site</field>
+    <field name="sequence">70</field>
+    <field name="description">Править страницу организации на платформе: описание, оформление, состав разделов. У бухгалтера этого полномочия нет.</field>
+  </record>
+
+  <record id="power_sign" model="coop.power">
+    <field name="name">Право подписи без доверенности</field>
+    <field name="code">sign</field>
+    <field name="sequence">80</field>
+    <field name="is_exclusive" eval="True"/>
+    <field name="description">Действует от имени организации без доверенности. Единоличный исполнительный орган по ЕГРЮЛ — он в организации один.</field>
+  </record>
+
+  <record id="power_audit" model="coop.power">
+    <field name="name">Проверка</field>
+    <field name="code">audit</field>
+    <field name="sequence">90</field>
+    <field name="is_executive" eval="False"/>
+    <field name="description">Читать всё для проверки, не меняя ничего.</field>
+  </record>
+
+</odoo>

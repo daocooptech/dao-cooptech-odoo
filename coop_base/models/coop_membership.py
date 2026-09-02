@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
+import logging
+
 from odoo import api, fields, models, tools
 from odoo.exceptions import ValidationError
+
+_logger = logging.getLogger(__name__)
 
 
 class CoopMembership(models.Model):
@@ -35,18 +39,37 @@ class CoopMembership(models.Model):
         domain=[('is_company', '=', True)])
 
     role = fields.Selection([
+        ('founder', 'Учредитель'),
         ('member', 'Пайщик'),
+        ('associate', 'Ассоциированный член'),
         ('board', 'Правление'),
         ('audit', 'Ревизионная комиссия'),
         ('staff', 'Наёмный сотрудник'),
         ('platform', 'Рабочая группа платформы'),
-    ], string='Роль', required=True, default='member', tracking=True,
+    ], string='Основание участия', required=True, default='member', tracking=True,
         help='Роль определяет, что участник вправе видеть и решать, '
              'а не его должность.\n\n'
              'Рабочая группа платформы — это не роль в кооперативе. '
              'Администратор платформы не пайщик и никаких прав в чужих '
              'кооперативах не получает: правила доступа ниже перечисляют '
              'пайщика, правление и ревизию, и его среди них нет.')
+
+    power_ids = fields.Many2many(
+        'coop.power', string='Полномочия', tracking=True,
+        help='Что человеку позволено делать от имени организации. Роль '
+             'отвечает на вопрос «на каком основании он здесь», полномочия — '
+             '«что ему позволено»: у сотрудника отдела маркетинга нет доступа '
+             'к бухгалтерии, у бухгалтера — к управлению страницей.')
+
+    # Должность — не роль и не полномочие, а то, как человека называют в
+    # организации. Держать её отдельно нужно затем, что «бухгалтер» и
+    # «маркетолог» различаются набором полномочий, а не основанием
+    # участия: у обоих оно одно — наёмный сотрудник.
+    job_title = fields.Char(
+        string='Должность',
+        help='Как называется место человека в организации: бухгалтер, '
+             'маркетолог, председатель. На права не влияет — права дают '
+             'полномочия.')
 
     # Организация бывает не только кооперативом: рабочая группа платформы,
     # НКО, коммерческая компания. Группа формы нужна, чтобы не выдавать
@@ -162,6 +185,76 @@ class CoopMembership(models.Model):
                     'Рабочая группа платформы не имеет голоса в кооперативе: '
                     'платформа обслуживает сеть, а не участвует в ней.')
 
+    # ── Полномочия ───────────────────────────────────────────────────────
+    #
+    # Набор по умолчанию — предложение, а не догма: его видно в форме и
+    # можно поправить до сохранения. Смысл в том, чтобы принятый пайщик не
+    # оказался без единого полномочия, а наёмный сотрудник не получил
+    # ключей от кассы просто потому, что о полномочиях забыли.
+    DEFAULT_POWERS = {
+        'founder': ('publish', 'represent', 'deal', 'treasury', 'roster', 'powers', 'site'),
+        'member': ('represent',),
+        'associate': ('represent',),
+        'board': ('publish', 'represent', 'deal', 'treasury', 'roster', 'powers', 'site'),
+        'audit': ('audit',),
+        'staff': ('represent',),
+        'platform': ('represent',),
+    }
+
+    def _default_power_ids(self, role):
+        codes = self.DEFAULT_POWERS.get(role, ())
+        if not codes:
+            return self.env['coop.power']
+        return self.env['coop.power'].sudo().search([('code', 'in', list(codes))])
+
+    @api.onchange('role')
+    def _onchange_role_powers(self):
+        for record in self:
+            record.power_ids = [(6, 0, record._default_power_ids(record.role).ids)]
+
+    @api.constrains('role', 'power_ids')
+    def _check_audit_has_no_executive_powers(self):
+        """Ревизия проверяет и не участвует в том, что проверяет.
+
+        Иначе проверяющий подписывает сделку, а потом сам же её проверяет —
+        и проверка перестаёт что-либо значить.
+        """
+        for record in self:
+            if record.role != 'audit':
+                continue
+            executive = record.power_ids.filtered('is_executive')
+            if executive:
+                raise ValidationError(
+                    'Ревизионной комиссии не выдаются исполнительные '
+                    'полномочия: проверяющий не должен быть участником того, '
+                    'что проверяет. Лишние: %s'
+                    % ', '.join(executive.mapped('name')))
+
+    @api.constrains('power_ids', 'organization_id', 'state')
+    def _check_exclusive_powers(self):
+        """Право подписи без доверенности — у одного человека.
+
+        Двух единоличных исполнительных органов не бывает: сведения о том,
+        кто действует без доверенности, в ЕГРЮЛ одни.
+        """
+        open_states = ('applied', 'active', 'leaving')
+        for record in self:
+            if record.state not in open_states:
+                continue
+            for power in record.power_ids.filtered('is_exclusive'):
+                twin = self.search([
+                    ('id', '!=', record.id),
+                    ('organization_id', '=', record.organization_id.id),
+                    ('power_ids', 'in', power.id),
+                    ('state', 'in', open_states),
+                ], limit=1)
+                if twin:
+                    raise ValidationError(
+                        'Полномочие «%s» в организации «%s» уже есть у %s. '
+                        'Отзовите прежнее, прежде чем выдавать новое.'
+                        % (power.name, record.organization_id.name,
+                           twin.partner_id.name))
+
     @api.constrains('state', 'admission_basis')
     def _check_admission_basis(self):
         """Действующее членство без основания — дыра в учёте.
@@ -193,19 +286,41 @@ class CoopMembership(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        for values in vals_list:
+            if not values.get('power_ids'):
+                powers = self._default_power_ids(values.get('role') or 'member')
+                values['power_ids'] = [(6, 0, powers.ids)]
         records = super().create(vals_list)
         records._invalidate_rule_cache()
         return records
 
     def write(self, vals):
         result = super().write(vals)
-        if {'partner_id', 'organization_id', 'role', 'state'} & set(vals):
+        if {'partner_id', 'organization_id', 'role', 'state', 'power_ids'} & set(vals):
             self._invalidate_rule_cache()
         return result
 
     def unlink(self):
         self._invalidate_rule_cache()
         return super().unlink()
+
+    @api.model
+    def _fill_missing_powers(self):
+        """Раздать полномочия членствам, заведённым до их появления.
+
+        Иначе принятый вчера пайщик наутро не может ничего: полномочий у
+        него нет, а правила доступа уже смотрят на них. Разовая операция,
+        идемпотентная — членства с полномочиями не трогает.
+        """
+        empty = self.sudo().search([('power_ids', '=', False)])
+        if not empty:
+            return True
+        _logger.info('Раздаю полномочия по умолчанию: %s членств', len(empty))
+        for membership in empty:
+            membership.power_ids = [
+                (6, 0, membership._default_power_ids(membership.role).ids)]
+        self.env.registry.clear_cache()
+        return True
 
     def action_admit(self):
         self.write({'state': 'active',
