@@ -11,41 +11,14 @@ import { WebClient } from "@web/webclient/webclient";
  * Боковое меню и подвал — как в прототипе.
  *
  * У Odoo разделы живут в верхней панели приложений: чтобы перейти в
- * другой каталог, надо открыть список приложений. В прототипе восемь с
- * лишним разделов постоянно на виду слева, и это не косметика, а другая
- * навигация: платформа устроена как одно пространство, а не как набор
- * приложений.
+ * другой каталог, надо открыть список приложений. В прототипе разделы
+ * постоянно на виду слева, и это не косметика, а другая навигация:
+ * платформа устроена как одно пространство, а не как набор приложений.
  *
- * Порядок пунктов до «Расширений» — из макета и обязателен. Расширения у
- * каждого узла свои: здесь показаны только те, что уже перенесены.
+ * Состав и порядок меню хранятся на сервере, у каждого участника свои
+ * (`coop.sidebar.item`): разделы до «Расширений» есть у всех и убрать их
+ * нельзя, порядок и набор расширений — личное дело.
  */
-
-// Обязательные разделы, в порядке макета. `action` — внешний
-// идентификатор действия; там, где раздел ещё не перенесён, его нет, и
-// пункт ведёт на страницу-заглушку, которая честно об этом говорит.
-const MAIN_ITEMS = [
-    { label: "Моя страница", icon: "fa-user-circle-o", action: null },
-    { label: "Сообщения", icon: "fa-comments-o", action: "mail.action_discuss" },
-    { label: "Люди", icon: "fa-users", action: "coop_people.action_coop_people" },
-    { label: "Навыки", icon: "fa-wrench", action: "coop_skills.action_coop_skills" },
-    { label: "Вакансии", icon: "fa-briefcase", action: "coop_vacancies.action_coop_vacancies" },
-    { label: "Ресурсы", icon: "fa-cube", action: "coop_resources.action_coop_resources" },
-    { label: "Проекты", icon: "fa-rocket", action: "project.open_view_project_all" },
-    { label: "Организации", icon: "fa-university", action: "coop_orgs.action_coop_orgs" },
-    { label: "Сообщества", icon: "fa-comments", action: null },
-    { label: "Кошелёк", icon: "fa-credit-card", action: "coop_tokens.action_coop_token" },
-    { label: "Сделки", icon: "fa-handshake-o", action: null },
-];
-
-// Расширения. В макете их полтора десятка — токеномика, цифровые активы,
-// закупки, склад, аукционы и прочее; здесь только то, что уже перенесено
-// на движок. Показывать пункт, за которым стоит чужой модуль Odoo без
-// нашего экрана, значит выдавать чужую страницу за перенесённую.
-const EXTENSION_ITEMS = [
-    { label: "Каталог расширений", action: "coop_extensions.action_coop_extension_catalog" },
-    { label: "Помощь проекту", action: "coop_bounty.action_coop_bounty_task" },
-];
-
 export class CoopSidebar extends Component {
     static template = "coop_theme.Sidebar";
     static props = {};
@@ -53,12 +26,13 @@ export class CoopSidebar extends Component {
     setup() {
         this.action = useService("action");
         this.orm = useService("orm");
-        this.state = useState({ main: [], extensions: [], current: null });
+        this.state = useState({ main: [], extensions: [], current: null, open: false });
 
         onWillStart(async () => {
-            this.state.main = await this._resolve(MAIN_ITEMS);
-            this.state.extensions = await this._resolve(EXTENSION_ITEMS);
-            this.state.current = this._currentAction();
+            await this.load();
+            if (!this.state.current) {
+                this.state.current = await this._currentAction();
+            }
         });
 
         // Какой пункт подсвечен, знает не меню, а тот, кто открыл действие.
@@ -67,9 +41,11 @@ export class CoopSidebar extends Component {
         // Odoo объявляет о смене экрана.
         this.env.bus.addEventListener("ACTION_MANAGER:UPDATE", ({ detail }) => {
             const action = detail?.componentProps?.action;
+            const previous = this.state.current;
             if (!action) {
-                this.state.current = this._currentAction();
-            } else if (action.tag === "coop_soon") {
+                return;
+            }
+            if (action.tag === "coop_soon") {
                 // У заглушек одно действие на все разделы, и различает их
                 // только название. Без этого подсветка пропадала ровно
                 // там, где она нужнее всего: на разделе, которого ещё нет.
@@ -77,36 +53,66 @@ export class CoopSidebar extends Component {
             } else {
                 this.state.current = action.id || action.tag;
             }
+            // Ушли с экрана настройки — перечитываем меню. Иначе правки
+            // видны только после перезагрузки страницы, и человек решает,
+            // что они не сохранились.
+            if (this.settingsId && previous === this.settingsId
+                && this.state.current !== this.settingsId) {
+                this.load();
+            }
         });
     }
 
-    _currentAction() {
-        // Первая отрисовка происходит до события: адрес страницы уже знает,
-        // какое действие открыто, и подсветка не мигает при загрузке.
-        const path = browser.location.pathname.match(/\/odoo\/action-([^/?#]+)/);
-        return path ? decodeURIComponent(path[1]) : null;
+    async load() {
+        let items = [];
+        try {
+            items = await this.orm.call("coop.sidebar.item", "items_for_current_user", []);
+        } catch {
+            // Меню не загрузилось — оболочка всё равно должна открыться:
+            // пустая полоса слева хуже, чем недоступная платформа целиком.
+            items = [];
+        }
+        this.state.main = items.filter((item) => item.section === "main");
+        this.state.extensions = items.filter((item) => item.section === "ext");
+        if (this.settingsId === undefined) {
+            const resolved = await this._settingsAction();
+            this.settingsId = resolved;
+        }
+    }
+
+    async _settingsAction() {
+        try {
+            const resolved = await this.orm.call(
+                "coop.shell", "resolve_actions", [["coop_theme.action_coop_sidebar_items"]]);
+            return resolved["coop_theme.action_coop_sidebar_items"] || false;
+        } catch {
+            return false;
+        }
     }
 
     /**
-     * Разрешить внешние идентификаторы в действия.
+     * Что открыто, если событие о смене экрана уже прошло мимо.
      *
-     * Пункт, чьего действия на узле нет, не выбрасывается: он остаётся в
-     * списке неактивным. Порядок разделов — часть договорённости с
-     * владельцем, и молча выкидывать из него пункты значит менять
-     * договорённость втихую.
+     * Меню собирается позже, чем открывается первое действие, и на
+     * загрузке страницы события ему не достаётся. Адрес его знает — но
+     * может нести внешний идентификатор вместо числа, и тогда его надо
+     * разрешить, иначе подсветки на первом экране не будет вовсе.
      */
-    async _resolve(items) {
-        const xmlids = items.filter((i) => i.action).map((i) => i.action);
-        let resolved = {};
-        try {
-            resolved = await this.orm.call("coop.shell", "resolve_actions", [xmlids]);
-        } catch {
-            resolved = {};
+    async _currentAction() {
+        const path = browser.location.pathname.match(/\/odoo\/action-([^/?#]+)/);
+        if (!path) {
+            return null;
         }
-        return items.map((item) => ({
-            ...item,
-            actionId: item.action ? resolved[item.action] || false : false,
-        }));
+        const raw = decodeURIComponent(path[1]);
+        if (/^\d+$/.test(raw)) {
+            return Number(raw);
+        }
+        try {
+            const resolved = await this.orm.call("coop.shell", "resolve_actions", [[raw]]);
+            return resolved[raw] || null;
+        } catch {
+            return null;
+        }
     }
 
     isActive(item) {
@@ -117,9 +123,7 @@ export class CoopSidebar extends Component {
         if (!item.actionId) {
             return current === "soon:" + item.label;
         }
-        // Адрес может нести и внешний идентификатор, и число: оба варианта
-        // Odoo принимает, и оба должны подсвечивать один пункт.
-        return item.actionId === Number(current) || item.action === current;
+        return item.actionId === Number(current);
     }
 
     /** «+» у рубрики ведёт в каталог расширений — оттуда их и подключают. */
@@ -128,7 +132,22 @@ export class CoopSidebar extends Component {
         return this.open(catalog || { label: "Расширения", actionId: false });
     }
 
+    openSettings() {
+        if (!this.settingsId) {
+            return;
+        }
+        return this.action.doAction(this.settingsId, { clearBreadcrumbs: true });
+    }
+
+    /** Бургер узкого экрана: 216 пикселей из 360 — это меню вместо страницы. */
+    toggle() {
+        this.state.open = !this.state.open;
+    }
+
     open(item) {
+        // Выбрали раздел — панель на узком экране закрывается сама: она
+        // перекрывает страницу, ради которой её и открывали.
+        this.state.open = false;
         // Переход по боковому меню начинает новый путь, а не продолжает
         // старый: раздел — это верхний уровень, и «Люди» внутри «Сделок»
         // в хлебных крошках означали бы вложенность, которой нет.

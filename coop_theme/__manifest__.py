@@ -21,6 +21,11 @@
     'version': '19.0.1.0.0',
     'license': 'LGPL-3',
     'depends': ['web'],
+    'data': [
+        'security/ir.model.access.csv',
+        'security/coop_sidebar_rules.xml',
+        'views/coop_sidebar_views.xml',
+    ],
     'assets': {
         'web._assets_primary_variables': [
             ('prepend', 'coop_theme/static/src/scss/primary_variables.scss'),

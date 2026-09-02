@@ -19,8 +19,21 @@
     </xpath>
   </t>
 
+  <!--
+    Один корневой узел, а не три подряд: у шаблона с несколькими корнями
+    перерисовка не доходила до разметки — подсветка раздела застревала на
+    предыдущем, а панель не выдвигалась. Обёртка раскладку не меняет, она
+    `display: contents`.
+  -->
   <t t-name="coop_theme.Sidebar">
-    <aside class="o_coop_sidebar">
+    <div class="o_coop_sidebar_wrap">
+      <button type="button" class="o_coop_burger" aria-label="Меню разделов"
+              t-att-aria-expanded="state.open ? 'true' : 'false'"
+              t-on-click="() => this.toggle()">
+        <i class="fa fa-bars" role="img" aria-hidden="true"/>
+      </button>
+      <div class="o_coop_scrim" t-if="state.open" t-on-click="() => this.toggle()"/>
+      <aside class="o_coop_sidebar" t-att-class="{ 'o_coop_sidebar_open': state.open }">
       <nav aria-label="Разделы платформы">
         <a t-foreach="state.main" t-as="item" t-key="item.label"
            href="#" class="o_coop_nav_item"
@@ -46,7 +59,14 @@
           <span t-esc="item.label"/>
         </a>
       </nav>
-    </aside>
+
+      <!-- Порядок пунктов у каждого свой: кто-то живёт в ресурсах, кто-то
+           в сделках. Разделы платформы при этом убрать нельзя — по ним
+           люди договариваются, где что лежит. -->
+        <button type="button" class="o_coop_nav_settings"
+                t-on-click="() => this.openSettings()">Настроить меню</button>
+      </aside>
+    </div>
   </t>
 
   <t t-name="coop_theme.Footer">

@@ -36,6 +36,12 @@
   padding-right: 0;
 }
 
+// Обёртка шаблона в раскладке не участвует: сайдбар должен остаться
+// прямым элементом флекса рядом с рабочей областью.
+.o_coop_sidebar_wrap {
+  display: contents;
+}
+
 .o_coop_sidebar {
   flex: 0 0 216px;
   width: 216px;
@@ -89,8 +95,28 @@
   border-bottom: 1px solid var(--coop-line, #e6e6e1);
   font: 700 11px/1 'JetBrains Mono', ui-monospace, monospace;
   letter-spacing: .09em;
-  text-transform: uppercase;
+  color: var(--coop-ink, #14171a);
+}
+
+// Настройка меню — тихой строкой внизу: нужна редко, а место занимает
+// столько же, сколько раздел, в который ходят каждый день.
+.o_coop_nav_settings {
+  display: block;
+  width: 100%;
+  margin-top: 14px;
+  padding: 8px 11px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font: 500 12px/1.3 'Manrope', sans-serif;
   color: var(--coop-slate-light, #8f8f88);
+
+  &:hover {
+    background: var(--coop-surface, #f2f2ee);
+    color: var(--coop-slate, #4a4a44);
+  }
 }
 
 .o_coop_ext_add {
@@ -180,10 +206,55 @@
   font-size: 13px !important;
 }
 
-// На узком экране боковое меню уезжает: 216 пикселей из 360 — это две
-// трети экрана под навигацию.
+// ── Узкий экран ──────────────────────────────────────────────────────────
+//
+// 216 пикселей из 360 — это две трети экрана под навигацию, поэтому меню
+// уезжает за край и выдвигается по кнопке. Совсем убрать его нельзя:
+// разделы платформы — это и есть навигация, без них на телефоне остаётся
+// один текущий экран без выхода.
+.o_coop_burger {
+  display: none;
+  position: fixed;
+  left: 10px;
+  bottom: 14px;
+  z-index: 61;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 999px;
+  background: var(--coop-btn-bg, #14171a);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(10, 14, 13, .3);
+}
+
 @media (max-width: 900px) {
+  .o_coop_burger {
+    display: block;
+  }
+
+  .o_coop_scrim {
+    position: fixed;
+    inset: 56px 0 0;
+    z-index: 55;
+    background: rgba(10, 14, 13, .45);
+  }
+
   .o_coop_sidebar {
-    display: none;
+    position: fixed;
+    left: 0;
+    top: 56px;
+    bottom: 0;
+    z-index: 60;
+    transform: translateX(-100%);
+    transition: transform .22s ease;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, .28);
+  }
+
+  .o_coop_sidebar_open {
+    transform: none;
+  }
+
+  .o_coop_main {
+    padding: 16px 14px 84px;
   }
 }
