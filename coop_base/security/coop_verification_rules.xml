@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Без `noupdate` — правила доступа доставляются обновлением модуля.
+-->
+<odoo>
+  <data>
+
+    <!--
+      Свои подтверждения человек видит и заводит: попросить проверку — его
+      действие. Подтвердить её он не может, право на запись у него не
+      стоит — иначе ступень выдавала бы себя сама, и вся конструкция
+      ничего бы не значила.
+    -->
+    <record id="coop_verification_own" model="ir.rule">
+      <field name="name">Свои подтверждения</field>
+      <field name="model_id" ref="model_coop_verification"/>
+      <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <!--
+      Правление подтверждает очно: человек приходит с документом, член
+      правления сверяет и отмечает проверку. Это и есть путь, выбранный
+      владельцем для MVP.
+    -->
+    <record id="coop_verification_board" model="ir.rule">
+      <field name="name">Подтверждения — правление</field>
+      <field name="model_id" ref="model_coop_verification"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+      <field name="groups" eval="[(4, ref('coop_base.group_coop_board'))]"/>
+    </record>
+
+    <record id="coop_verification_admin" model="ir.rule">
+      <field name="name">Подтверждения — администратор</field>
+      <field name="model_id" ref="model_coop_verification"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+    </record>
+
+  </data>
+</odoo>

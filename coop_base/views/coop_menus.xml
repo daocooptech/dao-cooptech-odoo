@@ -8,4 +8,16 @@
             parent="menu_coop_root" action="action_coop_membership" sequence="10"
             groups="coop_base.group_coop_member"/>
 
+  <!--
+    Подтверждения ведёт правление: очная проверка — его работа. Участнику
+    свои подтверждения видны в профиле, отдельный пункт меню ему не нужен.
+  -->
+  <menuitem id="menu_coop_verification" name="Подтверждения"
+            parent="menu_coop_root" action="action_coop_verification" sequence="20"
+            groups="coop_base.group_coop_board"/>
+
+  <menuitem id="menu_coop_power" name="Полномочия"
+            parent="menu_coop_root" action="action_coop_power" sequence="30"
+            groups="coop_base.group_coop_board"/>
+
 </odoo>

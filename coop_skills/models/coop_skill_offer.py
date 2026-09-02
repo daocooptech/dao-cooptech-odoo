@@ -222,6 +222,16 @@ class CoopSkillOffer(models.Model):
             record.rate_display = ('%s%s %s %s' % (prefix, amount, symbol, period)).strip()
 
     def action_publish(self):
+        """Опубликовать предложение навыка.
+
+        Нужна подтверждённая ступень контакта — телефон. Ниже неё
+        участник только смотрит: неподтверждённая учётная запись стоит
+        ноль минут, и каталог, в который можно писать с такой, наполняется
+        не навыками.
+        """
+        for record in self:
+            record.partner_id.coop_require_level(
+                'contact', _('опубликовать предложение навыка'))
         self.write({'state': 'published'})
         return True
 

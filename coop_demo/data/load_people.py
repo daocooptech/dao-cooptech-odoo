@@ -90,7 +90,6 @@ def load_people(env, specializations):
             'city': person['city'],
             'country_id': country_ru.id if country_ru else False,
             'coop_is_participant': True,
-            'coop_verified': person['verified'],
             'coop_trust': person['trust'],
             'coop_birthdate': _birthdate(person['age'], index + 1),
             'coop_specialization_id': specializations[person['specialization']].id,

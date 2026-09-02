@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="view_coop_verification_list" model="ir.ui.view">
+    <field name="name">coop.verification.list</field>
+    <field name="model">coop.verification</field>
+    <field name="arch" type="xml">
+      <list string="Подтверждения" decoration-muted="state in ('rejected', 'expired')">
+        <field name="partner_id"/>
+        <field name="kind"/>
+        <field name="method"/>
+        <field name="confirmed_by_id" optional="show"/>
+        <field name="confirmed_on" optional="show"/>
+        <field name="expires_on" optional="hide"/>
+        <field name="state" widget="badge"
+               decoration-success="state == 'confirmed'"
+               decoration-warning="state == 'pending'"
+               decoration-danger="state in ('rejected', 'expired')"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_verification_form" model="ir.ui.view">
+    <field name="name">coop.verification.form</field>
+    <field name="model">coop.verification</field>
+    <field name="arch" type="xml">
+      <form string="Подтверждение">
+        <header>
+          <button name="action_confirm" type="object" string="Подтвердить"
+                  class="btn-primary" invisible="state == 'confirmed'"/>
+          <button name="action_reject" type="object" string="Отклонить"
+                  invisible="state in ('rejected', 'expired')"/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="pending,confirmed"/>
+        </header>
+        <sheet>
+          <group>
+            <group string="Кого и что проверяем">
+              <field name="partner_id"/>
+              <field name="kind"/>
+              <field name="method"/>
+            </group>
+            <group string="Чем подтверждено">
+              <field name="confirmed_by_id"/>
+              <field name="confirmed_on"/>
+              <field name="expires_on"/>
+              <field name="evidence_ref"
+                     placeholder="Номер обращения или ссылка на выписку"/>
+              <field name="note"/>
+            </group>
+          </group>
+          <div class="alert alert-info" role="status">
+            Здесь хранится только факт проверки: кто проверил, когда и каким
+            способом. Сканов документов и паспортных данных в базе узла нет —
+            это решение владельца, и оно же снимает с каждого кооператива
+            обязанности оператора персональных данных по документам.
+          </div>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_verification_search" model="ir.ui.view">
+    <field name="name">coop.verification.search</field>
+    <field name="model">coop.verification</field>
+    <field name="arch" type="xml">
+      <search string="Подтверждения">
+        <field name="partner_id"/>
+        <filter name="pending" string="Ожидают проверки"
+                domain="[('state', '=', 'pending')]"/>
+        <filter name="confirmed" string="Подтверждённые"
+                domain="[('state', '=', 'confirmed')]"/>
+        <separator/>
+        <filter name="identity" string="Личность"
+                domain="[('kind', '=', 'identity')]"/>
+        <filter name="registry" string="Сведения в реестре"
+                domain="[('kind', '=', 'registry')]"/>
+        <group>
+          <filter name="by_kind" string="По виду" context="{'group_by': 'kind'}"/>
+          <filter name="by_method" string="По способу" context="{'group_by': 'method'}"/>
+          <filter name="by_state" string="По состоянию" context="{'group_by': 'state'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_verification" model="ir.actions.act_window">
+    <field name="name">Подтверждения</field>
+    <field name="res_model">coop.verification</field>
+    <field name="view_mode">list,form</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Пока никого не проверяли</p>
+      <p>
+        Личность подтверждают очно в кооперативе, через Госуслуги или Госключ.
+        Организацию — сверкой ИНН и ОГРН с реестром.
+      </p>
+    </field>
+  </record>
+
+  <!--
+    Истёкшие подтверждения перестают действовать сами. Сверка с реестром
+    трёхлетней давности ничего не подтверждает: сведения к этому времени
+    другие.
+  -->
+  <record id="cron_coop_verification_expire" model="ir.cron">
+    <field name="name">Верификация: снять истёкшие подтверждения</field>
+    <field name="model_id" ref="model_coop_verification"/>
+    <field name="state">code</field>
+    <field name="code">model._cron_expire()</field>
+    <field name="interval_number">1</field>
+    <field name="interval_type">days</field>
+    <field name="active" eval="True"/>
+  </record>
+
+</odoo>

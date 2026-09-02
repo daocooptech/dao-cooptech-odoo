@@ -3,7 +3,7 @@ from odoo import api, models
 
 from ..data import (emblems, load_bounty, load_memberships, load_org_profiles,
                     load_orgs, load_people, load_reference, load_resources,
-                    load_skills, load_vacancies)
+                    load_skills, load_vacancies, load_verification)
 
 
 class CoopDemoLoader(models.AbstractModel):
@@ -40,6 +40,10 @@ class CoopDemoLoader(models.AbstractModel):
         load_vacancies.load_vacancies(self.env)
         # Задачи и токены последними: исполнителей берём из уже
         # загруженного каталога людей.
+        # Ступени верификации — после каталогов: загрузчик снимает с
+        # публикации то, что по правилам разместить нельзя, и для этого
+        # каталоги уже должны быть.
+        load_verification.load_verification(self.env)
         load_bounty.grant_admin_roles(self.env)
         load_bounty.load_bounty(self.env)
         return True

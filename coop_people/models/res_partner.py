@@ -31,11 +31,20 @@ class ResPartner(models.Model):
     # Проверка личности — отдельная вещь от доверия, и в макете это
     # оговорено подсказкой. Смешивать их нельзя: подтверждённый паспорт
     # ничего не говорит о том, как человек исполняет обязательства.
+    # Ступеней теперь четыре, и булево стало их следствием, а не
+    # источником: оно осталось затем, что на него смотрят представления и
+    # фильтры каталога, и переписывать их разом незачем.
     coop_verified = fields.Boolean(
-        string='Личность подтверждена', default=False,
-        help='Подтверждены телефон и паспортные данные. На уровень доверия '
+        string='Личность подтверждена',
+        compute='_compute_coop_verified', store=True, readonly=True,
+        help='Ступень «Личность подтверждена» или выше. На уровень доверия '
              'не влияет: это разные вещи. Проверка личности говорит, кто '
              'человек, доверие — как он исполняет обязательства.')
+
+    @api.depends('coop_verification_level')
+    def _compute_coop_verified(self):
+        for partner in self:
+            partner.coop_verified = partner.coop_verification_level == 'identity'
 
     coop_membership_ids = fields.One2many(
         'coop.membership', 'partner_id', string='Членство')

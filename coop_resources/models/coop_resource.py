@@ -321,6 +321,14 @@ class CoopResource(models.Model):
         return True
 
     def action_publish(self):
+        """Опубликовать объявление о ресурсе.
+
+        Нужна подтверждённая ступень контакта — телефон. Ниже неё
+        участник только смотрит.
+        """
+        for record in self:
+            record.owner_id.coop_require_level(
+                'contact', _('опубликовать объявление'))
         self.write({'state': 'published'})
         return True
 

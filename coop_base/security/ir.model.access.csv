@@ -10,3 +10,7 @@ access_coop_specialization_category_user,Сферы деятельности —
 access_coop_specialization_user,Специализации — чтение,model_coop_specialization,base.group_user,1,0,0,0
 access_coop_specialization_category_admin,Сферы деятельности — ведение,model_coop_specialization_category,coop_base.group_coop_platform,1,1,1,1
 access_coop_specialization_admin,Специализации — ведение,model_coop_specialization,coop_base.group_coop_platform,1,1,1,1
+access_coop_verification_user,Подтверждения — участник,model_coop_verification,base.group_user,1,0,1,0
+access_coop_verification_board,Подтверждения — правление,model_coop_verification,coop_base.group_coop_board,1,1,1,0
+access_coop_power_user,Полномочия — чтение,model_coop_power,base.group_user,1,0,0,0
+access_coop_power_admin,Полномочия — ведение,model_coop_power,coop_base.group_coop_platform,1,1,1,1
