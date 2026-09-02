@@ -6,6 +6,11 @@
     постороннего. Второй формы нет намеренно: они разъедутся на первой же
     правке, и владелец начнёт видеть не то, что показывает гостям.
     Разница выражена признаком «это я» и правами.
+
+    Раскладка повторяет макет: слева колонка в 300 пикселей с обложкой и
+    справками, справа — полосы владений с плитками. Штатные группы полей
+    здесь не годятся: они дают две колонки «подпись — значение», а в
+    макете левая колонка самостоятельная и живёт по своим правилам.
   -->
   <record id="view_coop_profile_form" model="ir.ui.view">
     <field name="name">coop.profile.form</field>
@@ -26,166 +31,311 @@
                   invisible="coop_is_self or coop_is_following"/>
           <button name="action_coop_follow" type="object" string="Отписаться"
                   invisible="coop_is_self or not coop_is_following"/>
+          <button name="action_coop_my_listings" type="object"
+                  string="Мои объявления"
+                  invisible="not coop_is_self or coop_draft_count == 0"/>
         </header>
-        <sheet>
-          <!-- Обложки в макете нет ни у кого, кроме владельца; снимок
-               участника — то же поле, что и в каталоге. -->
-          <field name="image_1920" widget="image" class="oe_avatar"
-                 options="{'preview_image': 'avatar_256'}"/>
+        <sheet class="o_coop_profile_sheet">
+          <div class="o_coop_profile_layout">
 
-          <div class="oe_button_box" name="button_box">
-            <!--
-              Полосы макета здесь свёрнуты в счётчики. Разворачивать их
-              девятью встроенными списками нельзя: у человека с двумя
-              записями получится семь пустых полос со стрелками, которые
-              нечего листать, и страница читается как недогрузившаяся.
-              Клик уводит в тот же каталог, что и боковое меню, — с теми
-              же фильтрами и порядком, а не во второй список ресурсов.
-            -->
-            <button name="action_coop_my_offers" type="object"
-                    class="oe_stat_button" icon="fa-wrench"
-                    invisible="coop_offer_count == 0">
-              <field name="coop_offer_count" widget="statinfo" string="Навыки"/>
-            </button>
-            <button name="action_coop_my_resources" type="object"
-                    class="oe_stat_button" icon="fa-cubes"
-                    invisible="coop_resource_count == 0">
-              <field name="coop_resource_count" widget="statinfo" string="Ресурсы"/>
-            </button>
-            <button name="action_coop_my_vacancies" type="object"
-                    class="oe_stat_button" icon="fa-briefcase"
-                    invisible="coop_vacancy_count == 0">
-              <field name="coop_vacancy_count" widget="statinfo" string="Вакансии"/>
-            </button>
-            <button name="action_coop_my_projects" type="object"
-                    class="oe_stat_button" icon="fa-rocket"
-                    invisible="coop_project_count == 0">
-              <field name="coop_project_count" widget="statinfo" string="Проекты"/>
-            </button>
-            <button name="action_coop_my_communities" type="object"
-                    class="oe_stat_button" icon="fa-comments"
-                    invisible="coop_community_count == 0">
-              <field name="coop_community_count" widget="statinfo" string="Сообщества"/>
-            </button>
-            <button name="action_coop_my_deals" type="object"
-                    class="oe_stat_button" icon="fa-handshake-o"
-                    invisible="coop_deal_count == 0">
-              <field name="coop_deal_count" widget="statinfo" string="Сделки"/>
-            </button>
-            <!-- Черновики и снятое с публикации — только владельцу: в
-                 каталоге их нет, и постороннему знать о них нечего. -->
-            <button name="action_coop_my_listings" type="object"
-                    class="oe_stat_button" icon="fa-eye-slash"
-                    invisible="not coop_is_self or coop_draft_count == 0">
-              <field name="coop_draft_count" widget="statinfo" string="Не опубликовано"/>
-            </button>
-          </div>
+            <!-- ── Левая колонка ─────────────────────────────────── -->
+            <div class="o_coop_profile_side">
+              <div class="o_coop_cover">
+                <field name="image_1920" widget="image"
+                       options="{'preview_image': 'avatar_256'}"
+                       readonly="not coop_is_self"/>
+              </div>
 
-          <div class="oe_title">
-            <h1><field name="name" readonly="not coop_is_self"
-                       placeholder="Имя и фамилия"/></h1>
-            <field name="coop_specialization_id" readonly="not coop_is_self"
-                   placeholder="Чем занимаетесь"/>
-          </div>
+              <!--
+                Строка показателей. Баланс кошелька сюда не выносится: в
+                макете он стоит и на чужой карточке, то есть остаток
+                чужих денег виден постороннему. Это ошибка выгрузки, а не
+                решение.
+              -->
+              <div class="o_coop_stats">
+                <div>Уровень доверия:
+                  <b><field name="coop_trust" nolabel="1" readonly="1"/>%</b>
+                </div>
+                <div>Сделок закрыто:
+                  <b><field name="coop_deals_done" nolabel="1" readonly="1"/></b>
+                </div>
+                <div invisible="not coop_friend_count">Друзей:
+                  <b><field name="coop_friend_count" nolabel="1" readonly="1"/></b>
+                </div>
+              </div>
 
-          <!--
-            Ступень проверки — не украшение: от неё зависит, что человеку
-            вообще доступно. Владельцу говорим, что откроется дальше;
-            постороннему показываем сам факт без окраски — неподтверждённый
-            не значит мошенник.
-          -->
-          <div class="o_coop_notice o_coop_notice_wait"
-               invisible="not coop_is_self or coop_verification_level == 'identity'">
-            Подтвердите личность — после этого откроются сделки, вакансии,
-            организации, проекты и операции с деньгами.
-          </div>
+              <div class="o_coop_infobox">
+                <div class="o_coop_infobox_head">Контакты</div>
+                <div class="o_coop_infobox_body">
+                  <div><span class="o_coop_key">Город</span>
+                    <field name="city" readonly="not coop_is_self"
+                           placeholder="не указан"/></div>
+                  <div><span class="o_coop_key">Почта</span>
+                    <field name="email" readonly="not coop_is_self"
+                           placeholder="не указана"/></div>
+                  <div><span class="o_coop_key">Телефон</span>
+                    <field name="phone" readonly="not coop_is_self"
+                           placeholder="не указан"/></div>
+                  <div><span class="o_coop_key">Сайт</span>
+                    <field name="website" widget="url"
+                           readonly="not coop_is_self" placeholder="нет"/></div>
+                </div>
+              </div>
 
-          <group>
-            <!--
-              Подписи укорочены не ради красоты: штатные («Ступень
-              верификации», «Завершённых сделок») занимают почти всю
-              колонку, и значение переносится по одной букве в строку.
-            -->
-            <group string="Кто и откуда">
-              <field name="coop_verification_level" string="Проверка" readonly="1"/>
-              <field name="coop_trust" string="Доверие" readonly="1"/>
-              <field name="coop_deals_done" string="Сделок" readonly="1"/>
-              <field name="city" string="Город" readonly="not coop_is_self"
-                     placeholder="Город"/>
-              <field name="coop_registered_on" string="На платформе с"
-                     readonly="1" invisible="not coop_registered_on"/>
-            </group>
-            <group string="Связь" invisible="is_company">
-              <field name="email" readonly="not coop_is_self"/>
-              <field name="phone" readonly="not coop_is_self"/>
-              <field name="website" readonly="not coop_is_self"
-                     placeholder="Сайт"/>
-              <field name="coop_birthdate" readonly="not coop_is_self"
-                     invisible="not coop_is_self"/>
-              <field name="coop_age" invisible="not coop_age"/>
-            </group>
-          </group>
+              <div class="o_coop_infobox" invisible="is_company">
+                <div class="o_coop_infobox_head">Личная информация</div>
+                <div class="o_coop_infobox_body">
+                  <div invisible="not coop_age">
+                    <span class="o_coop_key">Возраст</span>
+                    <field name="coop_age" readonly="1"/>
+                  </div>
+                  <div invisible="not coop_is_self">
+                    <span class="o_coop_key">Родился</span>
+                    <field name="coop_birthdate" readonly="not coop_is_self"
+                           placeholder="не указано"/>
+                  </div>
+                  <div><span class="o_coop_key">Проверка</span>
+                    <field name="coop_verification_level" readonly="1"/></div>
+                  <div invisible="not coop_registered_on">
+                    <span class="o_coop_key">На платформе с</span>
+                    <field name="coop_registered_on" readonly="1"/>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-          <!--
-            Страница без единой записи. Показываем не девять пустых полос,
-            а один блок с тем, что можно завести: пустые разделы читаются
-            как сбой загрузки, а не как приглашение.
-          -->
-          <div class="o_coop_empty" invisible="not coop_holdings_empty or not coop_is_self">
-            <div class="o_coop_empty_title">Страница пока пустая</div>
-            <div class="o_coop_empty_text">
-              Начните с того, что у вас уже есть: умение, которым готовы
-              поделиться, вещь или помещение, которые простаивают, или
-              задача, которую в одиночку не потянуть.
+            <!-- ── Правая колонка ────────────────────────────────── -->
+            <div class="o_coop_profile_main">
+              <div class="o_coop_name_row">
+                <h1><field name="name" readonly="not coop_is_self"
+                           placeholder="Имя и фамилия"/></h1>
+                <span class="o_coop_verified"
+                      invisible="coop_verification_level != 'identity'">
+                  Личность подтверждена
+                </span>
+              </div>
+              <div class="o_coop_role">
+                <field name="coop_specialization_id"
+                       readonly="not coop_is_self"
+                       placeholder="Чем занимаетесь"/>
+              </div>
+
+              <div class="o_coop_notice o_coop_notice_wait"
+                   invisible="not coop_is_self or coop_verification_level == 'identity'">
+                Подтвердите личность — после этого откроются сделки,
+                вакансии, организации, проекты и операции с деньгами.
+              </div>
+
+              <div class="o_coop_about" invisible="not comment and not coop_is_self">
+                <field name="comment" placeholder="Расскажите о себе"
+                       readonly="not coop_is_self"/>
+              </div>
+
+              <!--
+                Полосы владений. Пустые не показываются вовсе: в макете
+                они есть все девять, и у человека с двумя записями семь
+                из них пустуют со стрелками, которые нечего листать —
+                страница читается как недогрузившаяся.
+              -->
+              <div class="o_coop_band" invisible="coop_offer_count == 0">
+                <div class="o_coop_band_head">
+                  <span>Навыки</span>
+                  <button name="action_coop_my_offers" type="object"
+                          class="o_coop_band_all">смотреть все</button>
+                </div>
+                <div class="o_coop_band_body">
+                  <field name="coop_offer_ids" readonly="1" nolabel="1">
+                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                      <field name="image_512"/>
+                      <templates>
+                        <t t-name="card">
+                          <div class="o_coop_mini">
+                            <div class="o_coop_mini_img">
+                              <img t-att-src="'/web/image/coop.skill.offer/' + record.id.raw_value + '/image_512'"
+                                   t-att-alt="record.name.value" loading="lazy"/>
+                            </div>
+                            <div class="o_coop_mini_label">
+                              <field name="name"/>
+                            </div>
+                          </div>
+                        </t>
+                      </templates>
+                    </kanban>
+                  </field>
+                </div>
+              </div>
+
+              <div class="o_coop_band" invisible="coop_resource_count == 0">
+                <div class="o_coop_band_head">
+                  <span>Ресурсы</span>
+                  <button name="action_coop_my_resources" type="object"
+                          class="o_coop_band_all">смотреть все</button>
+                </div>
+                <div class="o_coop_band_body">
+                  <field name="coop_resource_ids" readonly="1" nolabel="1">
+                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                      <field name="image_512"/>
+                      <templates>
+                        <t t-name="card">
+                          <div class="o_coop_mini">
+                            <div class="o_coop_mini_img">
+                              <img t-att-src="'/web/image/coop.resource/' + record.id.raw_value + '/image_512'"
+                                   t-att-alt="record.name.value" loading="lazy"/>
+                            </div>
+                            <div class="o_coop_mini_label">
+                              <field name="name"/>
+                            </div>
+                          </div>
+                        </t>
+                      </templates>
+                    </kanban>
+                  </field>
+                </div>
+              </div>
+
+              <div class="o_coop_band" invisible="coop_project_count == 0">
+                <div class="o_coop_band_head">
+                  <span>Проекты</span>
+                  <button name="action_coop_my_projects" type="object"
+                          class="o_coop_band_all">смотреть все</button>
+                </div>
+                <div class="o_coop_band_body">
+                  <field name="coop_project_ids" readonly="1" nolabel="1">
+                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                      <field name="image_512"/>
+                      <field name="readiness"/>
+                      <templates>
+                        <t t-name="card">
+                          <div class="o_coop_mini">
+                            <div class="o_coop_mini_img">
+                              <img t-att-src="'/web/image/coop.project/' + record.id.raw_value + '/image_512'"
+                                   t-att-alt="record.name.value" loading="lazy"/>
+                            </div>
+                            <div class="o_coop_mini_label">
+                              <field name="name"/>
+                            </div>
+                            <div class="o_coop_mini_note">
+                              собрано <t t-esc="record.readiness.value"/>%
+                            </div>
+                          </div>
+                        </t>
+                      </templates>
+                    </kanban>
+                  </field>
+                </div>
+              </div>
+
+              <div class="o_coop_band" invisible="coop_vacancy_count == 0">
+                <div class="o_coop_band_head">
+                  <span>Вакансии</span>
+                  <button name="action_coop_my_vacancies" type="object"
+                          class="o_coop_band_all">смотреть все</button>
+                </div>
+                <div class="o_coop_band_body">
+                  <field name="coop_vacancy_ids" readonly="1" nolabel="1">
+                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                      <field name="city"/>
+                      <templates>
+                        <t t-name="card">
+                          <div class="o_coop_mini o_coop_mini_text">
+                            <div class="o_coop_mini_label">
+                              <field name="name"/>
+                            </div>
+                            <div class="o_coop_mini_note">
+                              <field name="city"/>
+                            </div>
+                          </div>
+                        </t>
+                      </templates>
+                    </kanban>
+                  </field>
+                </div>
+              </div>
+
+              <div class="o_coop_band" invisible="coop_community_count == 0">
+                <div class="o_coop_band_head">
+                  <span>Сообщества</span>
+                  <button name="action_coop_my_communities" type="object"
+                          class="o_coop_band_all">смотреть все</button>
+                </div>
+                <div class="o_coop_band_body">
+                  <field name="coop_community_member_ids" readonly="1" nolabel="1"
+                         domain="[('state', '=', 'active')]">
+                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                      <field name="community_id"/>
+                      <field name="role"/>
+                      <templates>
+                        <t t-name="card">
+                          <div class="o_coop_mini o_coop_mini_text">
+                            <div class="o_coop_mini_label">
+                              <field name="community_id"/>
+                            </div>
+                            <div class="o_coop_mini_note">
+                              <field name="role"/>
+                            </div>
+                          </div>
+                        </t>
+                      </templates>
+                    </kanban>
+                  </field>
+                </div>
+              </div>
+
+              <div class="o_coop_band" invisible="coop_membership_count == 0">
+                <div class="o_coop_band_head">
+                  <span>Организации</span>
+                </div>
+                <div class="o_coop_band_body">
+                  <field name="coop_membership_ids" readonly="1" nolabel="1"
+                         domain="[('state', '=', 'active')]">
+                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                      <field name="organization_id"/>
+                      <field name="role"/>
+                      <templates>
+                        <t t-name="card">
+                          <div class="o_coop_mini o_coop_mini_text">
+                            <div class="o_coop_mini_label">
+                              <field name="organization_id"/>
+                            </div>
+                            <div class="o_coop_mini_note">
+                              <field name="role"/>
+                            </div>
+                          </div>
+                        </t>
+                      </templates>
+                    </kanban>
+                  </field>
+                </div>
+              </div>
+
+              <div class="o_coop_empty"
+                   invisible="not coop_holdings_empty or not coop_is_self">
+                <div class="o_coop_empty_title">Страница пока пустая</div>
+                <div class="o_coop_empty_text">
+                  Начните с того, что у вас уже есть: умение, которым готовы
+                  поделиться, вещь или помещение, которые простаивают, или
+                  задача, которую в одиночку не потянуть.
+                </div>
+              </div>
+              <div class="o_coop_empty"
+                   invisible="not coop_holdings_empty or coop_is_self">
+                <div class="o_coop_empty_text">
+                  Участник ещё не заполнил страницу.
+                </div>
+              </div>
             </div>
           </div>
-          <div class="o_coop_empty" invisible="not coop_holdings_empty or coop_is_self">
-            <div class="o_coop_empty_text">
-              Участник ещё не заполнил страницу.
-            </div>
-          </div>
-
-          <notebook>
-            <page string="О себе" name="about">
-              <field name="comment" placeholder="Расскажите о себе"
-                     readonly="not coop_is_self"/>
-            </page>
-            <page string="Навыки" name="skills" invisible="is_company">
-              <field name="coop_skill_ids" widget="many2many_tags"
-                     readonly="not coop_is_self"/>
-            </page>
-            <page string="Организации" name="orgs"
-                  invisible="coop_membership_count == 0">
-              <field name="coop_membership_ids" readonly="1">
-                <list>
-                  <field name="organization_id"/>
-                  <field name="role"/>
-                  <field name="job_title" optional="show"/>
-                  <field name="joined_on"/>
-                  <field name="state" widget="badge"
-                         decoration-success="state == 'active'"
-                         decoration-warning="state == 'applied'"/>
-                </list>
-              </field>
-            </page>
-            <page string="Подтверждения" name="verification"
-                  invisible="not coop_is_self">
-              <field name="coop_verification_ids" readonly="1">
-                <list>
-                  <field name="kind"/>
-                  <field name="method"/>
-                  <field name="confirmed_on" optional="show"/>
-                  <field name="expires_on" optional="show"/>
-                  <field name="state" widget="badge"
-                         decoration-success="state == 'confirmed'"
-                         decoration-warning="state == 'pending'"
-                         decoration-danger="state == 'rejected'"/>
-                </list>
-              </field>
-            </page>
-          </notebook>
         </sheet>
-        <chatter/>
+        <!--
+          Чаттера здесь нет намеренно. Штатно он встаёт колонкой справа и
+          забирает половину ширины — от раскладки макета остаётся полоса
+          в двести пикселей, где плитки идут столбиком. Вдобавок в него
+          пишется отслеживание полей, и на публичной странице человека
+          посторонний читал «Тюмень → Сочи», то есть прошлый адрес.
+
+          Стена участника в макете — лента его записей внизу главной
+          колонки; она делается отдельно и своим представлением.
+        -->
       </form>
     </field>
   </record>

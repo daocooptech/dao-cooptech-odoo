@@ -35,6 +35,20 @@ class ResPartner(models.Model):
         help='Объявления, которых в каталоге не видно: черновики и снятые '
              'с публикации. Видно только владельцу.')
 
+    # Обратные связи под полосы страницы. Заведены здесь, а не в каждом
+    # каталоге, потому что этот модуль и так стоит поверх них всех, а
+    # держать пять одинаковых объявлений в пяти местах незачем.
+    coop_offer_ids = fields.One2many(
+        'coop.skill.offer', 'partner_id', string='Навыки в каталоге')
+    coop_resource_ids = fields.One2many(
+        'coop.resource', 'owner_id', string='Ресурсы')
+    coop_vacancy_ids = fields.One2many(
+        'coop.vacancy', 'partner_id', string='Вакансии')
+    coop_project_ids = fields.One2many(
+        'coop.project', 'partner_id', string='Проекты')
+    coop_community_member_ids = fields.One2many(
+        'coop.community.member', 'partner_id', string='Участие в сообществах')
+
     # Свёрнутый признак «страница пустая». По нему форма показывает не
     # девять пустых полос, а один блок «чего здесь ещё нет»: девять пустых
     # разделов читаются как недогрузившаяся страница, а не как приглашение

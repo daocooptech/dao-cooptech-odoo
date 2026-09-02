@@ -1,14 +1,170 @@
 // «Моя страница» и карточка участника.
 //
-// Оформление опирается на общие токены темы; своих цветов здесь нет.
-// Полосы-карусели макета сюда не переносятся: они свёрнуты в счётчики
-// над карточкой, см. комментарий в представлении.
+// Размеры взяты из макета: колонка слева 300 пикселей, обложка 280 в
+// высоту, промежуток между колонками 28, плитка в полосе 128. Своих
+// цветов здесь не заводится — только токены темы.
 
 .o_coop_profile {
 
-  // Строка-предупреждение: ожидание — золотым, как во всём макете.
+  // Лист формы Odoo по умолчанию узкий и с большими полями; здесь он
+  // работает как холст, а раскладку задают колонки.
+  .o_form_sheet {
+    max-width: none;
+    padding: 20px 24px 28px;
+  }
+
+  .o_coop_profile_layout {
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+  }
+
+  // ── Левая колонка ──────────────────────────────────────────────────
+
+  .o_coop_profile_side {
+    width: 300px;
+    flex: none;
+  }
+
+  .o_coop_cover {
+    width: 100%;
+    height: 280px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--coop-line, #e6e6e1);
+    background: var(--coop-surface, #f2f2ee);
+    box-shadow: 0 1px 2px rgba(20, 23, 26, .05);
+
+    // Поле-картинка Odoo оборачивает изображение во вложенный
+    // inline-block без собственной высоты, и «height: 100%» у картинки
+    // схлопывается в ноль. Растягиваем от самой колонки.
+    .o_field_image,
+    .o_field_widget,
+    .o_field_image > div,
+    .o_field_widget > div {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  .o_coop_stats {
+    margin: 16px 0 18px;
+    font-size: 13px;
+    line-height: 2;
+    color: var(--coop-ink, #14171a);
+
+    // Строка показателей — именно строка: без этого поле занимает всю
+    // ширину блоком, и знак процента уезжает к правому краю колонки.
+    > div {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    b {
+      font-weight: 700;
+    }
+
+    // Поля внутри строки показателей идут в строку, а не блоками.
+    .o_field_widget {
+      display: inline-block;
+      width: auto;
+    }
+  }
+
+  .o_coop_infobox {
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    background: var(--coop-white, #fff);
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-radius: 10px;
+  }
+
+  .o_coop_infobox_head {
+    font-weight: 600;
+    font-size: 12.5px;
+    color: var(--coop-ink, #14171a);
+  }
+
+  .o_coop_infobox_body {
+    margin-top: 8px;
+    color: var(--coop-slate, #4a4a44);
+    font-size: 12.5px;
+    line-height: 1.9;
+
+    > div {
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+      min-width: 0;
+    }
+
+    .o_field_widget {
+      flex: 1 1 auto;
+      min-width: 0;
+      width: auto;
+    }
+  }
+
+  // Подпись строки-справки: короткая колонка слева, значение за ней.
+  // Штатная сетка полей здесь не используется — она даёт свои отступы и
+  // переносит длинные русские подписи по букве в строку.
+  .o_coop_key {
+    flex: 0 0 92px;
+    color: var(--coop-slate-light, #8a8a80);
+  }
+
+  // ── Правая колонка ─────────────────────────────────────────────────
+
+  .o_coop_profile_main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .o_coop_name_row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+
+    h1 {
+      margin: 0;
+      font: 700 24px/1.25 'Manrope', sans-serif;
+      color: var(--coop-ink, #14171a);
+    }
+  }
+
+  .o_coop_verified {
+    padding: 3px 9px;
+    border-radius: 999px;
+    font: 600 11px/1.4 'Manrope', sans-serif;
+    background: var(--coop-teal-tint, #e3efed);
+    color: var(--coop-teal-dark, #0f4f4a);
+  }
+
+  .o_coop_role {
+    margin: 4px 0 14px;
+    font-size: 13px;
+    color: var(--coop-teal-dark, #0f4f4a);
+  }
+
+  .o_coop_about {
+    margin-bottom: 18px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--coop-slate, #4a4a44);
+  }
+
   .o_coop_notice {
-    margin: 0 0 12px;
+    margin: 0 0 14px;
     padding: 10px 12px;
     border-radius: 8px;
     font-size: 12.5px;
@@ -22,7 +178,142 @@
     color: var(--coop-gold-text, #8a5f1c);
   }
 
-  // Пустая страница. Не девять пустых полос, а один внятный блок.
+  // ── Полосы владений ────────────────────────────────────────────────
+
+  .o_coop_band {
+    margin-bottom: 14px;
+  }
+
+  .o_coop_band_head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px;
+    background: var(--coop-teal-tint, #e3efed);
+    border-radius: 10px 10px 0 0;
+    font: 600 12.5px/1.4 'Manrope', sans-serif;
+    color: var(--coop-ink, #14171a);
+  }
+
+  .o_coop_band_all {
+    border: 0;
+    background: none;
+    padding: 0;
+    font: 400 11.5px/1.4 'Manrope', sans-serif;
+    color: var(--coop-teal-dark, #0f4f4a);
+    opacity: .8;
+
+    &:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+  }
+
+  .o_coop_band_body {
+    // Ширина карточки канбана задаётся переменной, а не свойством:
+    // штатное правило берёт её оттуда, и обычное «width» проигрывало —
+    // плитки растягивались на всю полосу, у проектов до семисот
+    // пикселей на одну.
+    --KanbanRecord-width: 128px;
+    --KanbanRecord-margin-h: 0px;
+    --KanbanRecord-margin-v: 0px;
+
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-top: 0;
+    border-radius: 0 0 10px 10px;
+    padding: 14px;
+    background: var(--coop-white, #fff);
+
+    // Полоса прокручивается вбок, как карусель в макете. Полоса
+    // прокрутки скрыта: она перекрывает подписи под плитками.
+    // `!important` вынужденный: Odoo вешает на этот же узел
+    // bootstrap-утилиту `flex-wrap`, а она объявлена с `!important`, и
+    // плитки без этого идут столбиком вместо полосы.
+    .o_kanban_renderer {
+      display: flex;
+      flex-wrap: nowrap !important;
+      overflow-x: auto;
+      gap: 12px;
+      scrollbar-width: none;
+      padding-bottom: 2px;
+    }
+
+    .o_kanban_renderer::-webkit-scrollbar {
+      display: none;
+    }
+
+    .o_kanban_record {
+      flex: 0 0 128px !important;
+      width: 128px !important;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      background: none;
+      box-shadow: none;
+      min-height: 0;
+    }
+
+    // Штатные заполнители и кнопка создания в узкой полосе не нужны.
+    .o_kanban_ghost,
+    .o_kanban_quick_create,
+    .o-kanban-button-new {
+      display: none;
+    }
+  }
+
+  .o_coop_mini {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .o_coop_mini_img {
+    width: 100%;
+    aspect-ratio: 1.35;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--coop-line, #e6e6e1);
+    background: var(--coop-surface, #f2f2ee);
+    margin-bottom: 8px;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  // Плитка без снимка — у вакансий и сообществ его нет. Держит ту же
+  // высоту, чтобы полоса не прыгала.
+  .o_coop_mini_text {
+    padding: 10px 12px;
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-radius: 8px;
+    background: var(--coop-surface, #f2f2ee);
+    min-height: 84px;
+  }
+
+  .o_coop_mini_label {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--coop-ink, #14171a);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .o_coop_mini_note {
+    margin-top: 3px;
+    font-size: 10.5px;
+    color: var(--coop-slate, #4a4a44);
+  }
+
+  // ── Пустая страница ────────────────────────────────────────────────
+
   .o_coop_empty {
     margin: 16px 0;
     padding: 18px 20px;
@@ -43,16 +334,21 @@
     color: var(--coop-slate, #4a4a44);
     max-width: 560px;
   }
+}
 
-  // Колонка подписи в карточке участника. Штатная ширина рассчитана на
-  // короткие английские подписи; по-русски «Ступень верификации» её
-  // переполняет, и значение начинает переноситься по букве в строку.
-  .o_inner_group {
-    .o_form_label,
-    .o_td_label {
-      min-width: 132px;
-      white-space: normal;
-    }
+// На узком экране колонки становятся друг под другом, обложка ниже:
+// 280 пикселей высоты на телефоне съедают весь экран.
+@media (max-width: 900px) {
+  .o_coop_profile .o_coop_profile_layout {
+    flex-direction: column;
+    gap: 18px;
   }
 
+  .o_coop_profile .o_coop_profile_side {
+    width: 100%;
+  }
+
+  .o_coop_profile .o_coop_cover {
+    height: 200px;
+  }
 }
