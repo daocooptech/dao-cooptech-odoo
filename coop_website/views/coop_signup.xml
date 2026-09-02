@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Выбор языка платформы при регистрации.
+
+    Штатная регистрация берёт язык из адреса страницы: на какой версии
+    сайта человек оказался, на такой и заводится. Пока сайт один и
+    переключателя нет, это незаметно, но человек может прийти по ссылке с
+    любой страницы и получить язык, которого не выбирал.
+
+    Поле стоит последним, после паролей: язык — не препятствие к
+    регистрации, а настройка, и умолчание уже проставлено.
+  -->
+  <template id="coop_signup_lang" inherit_id="auth_signup.fields"
+            name="ДАО КООПЕХ: язык платформы при регистрации">
+    <xpath expr="//div[hasclass('field-confirm_password')]" position="after">
+      <div class="mb-3 field-lang" t-if="coop_langs and len(coop_langs) > 1">
+        <label for="lang" class="form-label">Язык платформы</label>
+        <select name="lang" id="lang" class="form-select">
+          <t t-foreach="coop_langs" t-as="lang_row">
+            <option t-att-value="lang_row[0]"
+                    t-att-selected="lang_row[0] == coop_selected_lang">
+              <t t-esc="lang_row[1]"/>
+            </option>
+          </t>
+        </select>
+        <small class="form-text text-muted">
+          Можно поменять потом в настройках профиля.
+        </small>
+      </div>
+      <!--
+        Один язык на узле — выбирать не из чего, но значение отправить
+        надо: без него сервер поставит умолчание, и это верно, а лишнее
+        поле на экране только мешает.
+      -->
+      <input type="hidden" name="lang" t-att-value="coop_default_lang"
+             t-if="not coop_langs or len(coop_langs) &lt;= 1"/>
+    </xpath>
+  </template>
+
+</odoo>

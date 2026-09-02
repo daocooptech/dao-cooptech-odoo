@@ -20,8 +20,41 @@ class CoopSetup(models.AbstractModel):
     @api.model
     def apply(self):
         self._setup_currency()
+        self._setup_language()
         self._setup_home()
         return True
+
+    def _setup_language(self):
+        """Русский — язык платформы по умолчанию.
+
+        Решение владельца: при регистрации человек выбирает язык, а если
+        не выбрал — русский. Умолчание задаётся в двух местах, и оба
+        нужны: в шаблоне новой учётной записи (по нему заводят людей из
+        интерфейса) и у самой платформы (по нему говорит с человеком
+        всё, что создано мимо формы регистрации — загрузчиком, письмом,
+        приглашением).
+
+        Язык, которого на узле нет, не ставим: получилась бы учётная
+        запись, для которой перевода не существует, и интерфейс молча
+        свалился бы обратно в английский.
+        """
+        Lang = self.env['res.lang'].sudo()
+        russian = Lang.with_context(active_test=False).search(
+            [('code', '=', 'ru_RU')], limit=1)
+        if not russian:
+            _logger.info('Русский язык на узле не установлен — умолчание не меняю')
+            return
+        if not russian.active:
+            russian.active = True
+
+        template = self.env.ref('base.default_user', raise_if_not_found=False)
+        if template and template.lang != 'ru_RU':
+            template.sudo().lang = 'ru_RU'
+            _logger.info('Язык новой учётной записи по умолчанию: русский')
+
+        params = self.env['ir.config_parameter'].sudo()
+        if not params.get_param('coop.default_lang'):
+            params.set_param('coop.default_lang', 'ru_RU')
 
     def _setup_home(self):
         """Один адрес, который всегда открывает платформу.

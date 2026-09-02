@@ -18,10 +18,11 @@
     # Лендинг считает живые цифры по участникам, специализациям и
     # правовым формам и ведёт в каталоги людей и организаций.
     # Без этих зависимостей главная падает при отдельной установке.
-    'depends': ['website', 'coop_theme', 'coop_base',
+    'depends': ['website', 'auth_signup', 'coop_theme', 'coop_base',
                 'coop_people', 'coop_orgs'],
     'data': [
         'views/coop_landing.xml',
+        'views/coop_signup.xml',
     ],
     'assets': {
         'web.assets_frontend': [
