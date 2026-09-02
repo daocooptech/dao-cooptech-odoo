@@ -13,3 +13,4 @@ access_coop_clearing_user,Взаимозачёт — участник,model_coop
 access_coop_signature_user,Подписи — участник,model_coop_credit_signature,base.group_user,1,1,1,0
 access_coop_share_account_user,Паевые счета — участник,model_coop_share_account,base.group_user,1,1,1,0
 access_coop_share_move_user,Движения по паю — участник,model_coop_share_move,base.group_user,1,1,1,0
+access_coop_wallet_tx_user,Операции в сетях — участник,model_coop_wallet_tx,base.group_user,1,1,1,0

@@ -215,12 +215,46 @@ class CoopProject(models.Model):
                     'что не хватает.',
                     name=record.name, done=record.readiness))
             if not record.project_id:
-                record.project_id = self.env['project.project'].create({
-                    'name': record.name,
-                    'partner_id': record.partner_id.id,
-                })
+                record.project_id = record._create_managed_project()
             record.state = 'running'
         return True
+
+    def _create_managed_project(self):
+        """Завести проект в штатном модуле управления.
+
+        Обязательные поля туда добавляют другие модули Odoo — например,
+        «Продажи и проекты» требует указать способ выставления счетов, и
+        без него запись не создаётся вовсе. Перечислять их списком нельзя:
+        набор зависит от того, что установлено на узле. Поэтому
+        заполняются те, что действительно есть у модели, и значением по
+        умолчанию самой Odoo.
+        """
+        self.ensure_one()
+        Project = self.env['project.project'].sudo()
+        values = {'name': self.name, 'partner_id': self.partner_id.id}
+        # Способ выставления счетов приходит из модуля учёта времени: поле
+        # вычисляемое, но обязательное, и его расчёт значения не даёт —
+        # он лишь понижает «вручную» до «без счетов». Пустым его колонка
+        # не принимает, поэтому заполняем сами.
+        if 'billing_type' in Project._fields:
+            values['billing_type'] = 'not_billable'
+        for name, field in Project._fields.items():
+            if name in values or not field.store or field.type != 'selection':
+                continue
+            # Вычисляемое, но правимое поле тоже надо заполнить: расчёт
+            # такого поля не обязан дать значение — у «способа выставления
+            # счетов» он его и не даёт, а колонка при этом не допускает
+            # пустоты. Полностью вычисляемые пропускаем: их считает Odoo.
+            if field.compute and field.readonly:
+                continue
+            if not field.required:
+                continue
+            default = field.default
+            if callable(default):
+                default = default(Project)
+            options = [code for code, _label in (field.selection or [])]
+            values[name] = default or (options[0] if options else False)
+        return Project.create(values)
 
     def action_finish(self):
         self.write({'state': 'done'})

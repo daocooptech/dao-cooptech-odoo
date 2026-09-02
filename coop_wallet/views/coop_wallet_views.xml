@@ -95,6 +95,28 @@
               </list>
             </field>
 
+            <separator string="История операций"/>
+            <field name="tx_ids" nolabel="1" readonly="1">
+              <list decoration-info="state == 'pending'"
+                    decoration-danger="state == 'failed'">
+                <field name="date"/>
+                <field name="kind"/>
+                <field name="symbol"/>
+                <field name="quantity" digits="[16,8]"/>
+                <field name="swap_symbol" optional="show"/>
+                <field name="swap_quantity" digits="[16,8]" optional="show"/>
+                <field name="network_id"/>
+                <field name="peer_partner_id" optional="show"/>
+                <field name="peer_address" optional="hide"/>
+                <field name="tx_hash" optional="show"/>
+                <field name="valuation" optional="hide"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="state"/>
+                <button name="action_open_explorer" type="object"
+                        string="Проверить в сети" icon="fa-external-link"/>
+              </list>
+            </field>
+
             <div class="o_coop_note o_coop_note_boxed">
               <b>Чем это отличается от «Цифровых активов».</b> Здесь обычные
               криптовалюты и любые совместимые сети — без обязанного лица:

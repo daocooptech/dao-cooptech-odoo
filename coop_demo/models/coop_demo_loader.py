@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from odoo import api, models
 
-from ..data import (emblems, load_bounty, load_deals, load_memberships,
+from ..data import (emblems, load_bounty, load_deals, load_examples,
+                    load_memberships,
                     load_org_profiles, load_orgs, load_people, load_projects,
                     load_reference, load_resources, load_skills,
                     load_vacancies, load_verification, load_wallets)
@@ -52,6 +53,9 @@ class CoopDemoLoader(models.AbstractModel):
         # Кошельки последними: состав вкладок зависит от членства, а
         # сальдо по контрагентам считается из платежей по сделкам.
         load_wallets.load_wallets(self.env)
+        # Последним — добор примеров по случаям: он смотрит, чего в
+        # данных не хватает, и потому должен видеть всё остальное.
+        load_examples.load_examples(self.env)
         load_bounty.grant_admin_roles(self.env)
         load_bounty.load_bounty(self.env)
         return True

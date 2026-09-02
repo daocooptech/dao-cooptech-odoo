@@ -48,7 +48,7 @@ REQUIRED_STEPS = [180000, 340000, 620000, 900000, 1450000, 2400000,
                   3800000, 5200000, 8500000, 12000000]
 
 
-def load_projects(env, extra=45):
+def load_projects(env, extra=100):
     with io.open(os.path.join(HERE, 'projects.json'), encoding='utf-8') as fh:
         rows = json.load(fh)
 

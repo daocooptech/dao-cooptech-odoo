@@ -44,6 +44,20 @@
       требуется: пай — не расчёты, а членские отношения, и ревизии он
       открыт в первую очередь, иначе проверять нечего.
     -->
+    <record id="rule_wallet_tx_own" model="ir.rule">
+      <field name="name">Свои операции в сетях</field>
+      <field name="model_id" ref="model_coop_wallet_tx"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[('partner_id', 'in', user.coop_treasury_partner_ids.ids)]</field>
+    </record>
+
+    <record id="rule_wallet_tx_admin" model="ir.rule">
+      <field name="name">Операции в сетях — администратор</field>
+      <field name="model_id" ref="model_coop_wallet_tx"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
     <record id="rule_share_account_own" model="ir.rule">
       <field name="name">Свой паевой счёт</field>
       <field name="model_id" ref="model_coop_share_account"/>

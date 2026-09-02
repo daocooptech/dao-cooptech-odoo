@@ -73,6 +73,8 @@ class CoopWallet(models.Model):
         string='Активов', compute='_compute_crypto', store=True)
     network_count = fields.Integer(
         string='Сетей', compute='_compute_crypto', store=True)
+    tx_ids = fields.One2many(
+        'coop.wallet.tx', 'wallet_id', string='Операции в сетях')
     crypto_synced_at = fields.Datetime(
         string='Остаток получен',
         help='Кошелёк некастодиальный: истина в сети. Если человек '
