@@ -22,7 +22,7 @@
     -->
 
     <record id="module_category_coop" model="ir.module.category">
-      <field name="name">ДАО КООПЕХ</field>
+      <field name="name">ДАО КООПТЕХ</field>
       <field name="description">Роли участников кооператива</field>
       <field name="sequence">20</field>
     </record>

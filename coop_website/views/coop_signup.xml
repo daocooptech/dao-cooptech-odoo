@@ -13,7 +13,7 @@
     регистрации, а настройка, и умолчание уже проставлено.
   -->
   <template id="coop_signup_lang" inherit_id="auth_signup.fields"
-            name="ДАО КООПЕХ: язык платформы при регистрации">
+            name="ДАО КООПТЕХ: язык платформы при регистрации">
     <xpath expr="//div[hasclass('field-confirm_password')]" position="after">
       <div class="mb-3 field-lang" t-if="coop_langs and len(coop_langs) > 1">
         <label for="lang" class="form-label">Язык платформы</label>

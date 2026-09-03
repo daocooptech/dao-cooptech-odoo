@@ -1,5 +1,5 @@
 {
-    "name": "Россия — план счетов (сборка ДАО КООПЕХ)",
+    "name": "Россия — план счетов (сборка ДАО КООПТЕХ)",
     "icon": "/account/static/description/l10n.png",
     "version": "19.0.1.0.0",
     "countries": ["ru"],

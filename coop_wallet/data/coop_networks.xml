@@ -58,7 +58,7 @@
     требует особого обращения.
   -->
   <record id="network_koop" model="coop.wallet.network">
-    <field name="name">ДАО КООПЕХ Chain</field>
+    <field name="name">ДАО КООПТЕХ Chain</field>
     <field name="code">koop</field>
     <field name="symbol">КООП</field>
     <field name="sequence">60</field>

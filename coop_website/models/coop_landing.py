@@ -83,7 +83,7 @@ class CoopWebsiteLanding(models.AbstractModel):
         if not website:
             return False
 
-        values = {'name': 'ДАО КООПЕХ'}
+        values = {'name': 'ДАО КООПТЕХ'}
 
         # Свободная регистрация. Без неё страница `/web/signup` отвечает
         # «не найдено»: Odoo прячет её целиком, когда регистрация

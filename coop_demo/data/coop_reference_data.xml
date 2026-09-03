@@ -11,7 +11,7 @@
     <!-- Рабочая группа платформы — не кооператив. Она обслуживает сеть, и
          членство в ней не даёт никаких прав в чужих кооперативах. -->
     <record id="org_platform" model="res.partner">
-      <field name="name">ДАО КООПЕХ — рабочая группа</field>
+      <field name="name">ДАО КООПТЕХ — рабочая группа</field>
       <field name="is_company" eval="True"/>
       <field name="coop_legal_form_id" ref="coop_base.legal_form_platform"/>
       <field name="comment">Оператор платформы. Стороной обязательств участников не является.</field>

@@ -178,9 +178,10 @@
                 <div class="o_coop_infobox_head">Образование</div>
                 <div class="o_coop_infobox_body">
                   <!--
-                    Списком, а не таблицей со столбцами: в колонке справок
-                    важны две вещи — где учился и когда. Специальность и
-                    уровень остаются в самой записи, их видно при правке.
+                    Одним столбцом: в узкой колонке справок название
+                    заведения и так занимает две строки, а годы рядом
+                    вынуждали его обрезать на середине слова. Годы,
+                    специальность и уровень остаются в самой записи.
                   -->
                   <!--
                     Только чтение: строка «Добавить строку» под перечнем
@@ -190,9 +191,9 @@
                   -->
                   <field name="coop_education_ids" nolabel="1"
                          class="o_coop_plainlist" readonly="1">
-                    <list editable="bottom">
+                    <list>
                       <field name="name"/>
-                      <field name="years"/>
+                      <field name="years" column_invisible="1"/>
                       <field name="speciality" column_invisible="1"/>
                       <field name="year_from" column_invisible="1"/>
                       <field name="year_to" column_invisible="1"/>
@@ -253,6 +254,18 @@
                 </div>
               </div>
 
+
+              <div class="o_coop_band o_coop_about_band"
+                   invisible="not comment and not coop_is_self">
+                <div class="o_coop_band_head">
+                  <span>О себе</span>
+                </div>
+                <div class="o_coop_band_body">
+                  <field name="comment" nolabel="1"
+                         placeholder="Чем занимаетесь, что умеете, чем готовы помочь"
+                         readonly="not coop_is_self"/>
+                </div>
+              </div>
 
               <!--
                 Полосы владений. Пустые не показываются вовсе: в макете
