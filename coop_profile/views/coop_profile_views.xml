@@ -253,10 +253,6 @@
                 </div>
               </div>
 
-              <div class="o_coop_about" invisible="not comment and not coop_is_self">
-                <field name="comment" placeholder="Расскажите о себе"
-                       readonly="not coop_is_self"/>
-              </div>
 
               <!--
                 Полосы владений. Пустые не показываются вовсе: в макете

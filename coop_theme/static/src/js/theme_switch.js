@@ -87,5 +87,5 @@ export class CoopThemeSwitch extends Component {
 
 // Порядок в шапке: правее поиска, левее переключателя режима и имени.
 registry.category("systray").add(
-    "coop_theme.theme_switch", { Component: CoopThemeSwitch }, { sequence: 8 }
+    "coop_theme.theme_switch", { Component: CoopThemeSwitch }, { sequence: 20 }
 );

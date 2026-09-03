@@ -49,6 +49,8 @@
             'coop_theme/static/src/js/catalog_view.js',
             'coop_theme/static/src/js/shell.js',
             'coop_theme/static/src/js/theme_switch.js',
+            'coop_theme/static/src/js/acting_switch.js',
+            'coop_theme/static/src/xml/acting_switch.xml',
             'coop_theme/static/src/js/wall.js',
             'coop_theme/static/src/js/bands.js',
             'coop_theme/static/src/scss/wall.scss',

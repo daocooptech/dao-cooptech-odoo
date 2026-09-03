@@ -45,5 +45,5 @@ registry.category("systray").add(
     { Component: CoopAdminSwitch },
     // Левее прочих значков: это не уведомление, а режим работы, и стоять
     // он должен там, где его видно всегда.
-    { sequence: 1 }
+    { sequence: 10 }
 );

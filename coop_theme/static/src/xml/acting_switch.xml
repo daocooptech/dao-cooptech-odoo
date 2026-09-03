@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!--
+    «Действую от имени» в шапке. Показывается, только когда выбирать
+    есть из чего: человек, ни в одной организации не состоящий, всегда
+    действует от себя, и список из одной строки ему ничего не сообщает.
+  -->
+  <t t-name="coop_theme.ActingSwitch">
+    <div class="o_coop_acting_top" t-if="state.actors.length > 1">
+      <label class="o_coop_acting_label" for="coop_acting_top">Действую от имени</label>
+      <select id="coop_acting_top" class="o_coop_acting_select"
+              t-on-change="(ev) => this.setActing(ev.target.value)">
+        <option t-foreach="state.actors" t-as="actor" t-key="actor.id"
+                t-att-value="actor.id" t-att-selected="actor.id === state.acting">
+          <t t-esc="actor.name"/>
+        </option>
+      </select>
+    </div>
+  </t>
+
+</templates>
