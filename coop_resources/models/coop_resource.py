@@ -355,13 +355,15 @@ class CoopResourceCatalogFilters(models.Model):
             [], order='complete_name')
 
         quick = []
+        # Значки в подписях — из макета: чипы стоят в ряд, и по значку
+        # нужный находится быстрее, чем по прочтении трёх подписей.
         if exchange:
-            quick.append({'value': 'exchange', 'label': 'На обмен',
+            quick.append({'value': 'exchange', 'label': '🔄 На обмен',
                           'domain': [('method_ids', 'in', exchange.ids)]})
         if free:
-            quick.append({'value': 'free', 'label': 'Безвозмездно',
+            quick.append({'value': 'free', 'label': '🎁 Безвозмездно',
                           'domain': [('method_ids', 'in', free.ids)]})
-        quick.insert(0, {'value': 'photo', 'label': 'С фото',
+        quick.insert(0, {'value': 'photo', 'label': '📷 С фото',
                          'domain': [('image_1920', '!=', False)]})
 
         # Быстрые фильтры стоят последними, перед кнопками: это ярлыки

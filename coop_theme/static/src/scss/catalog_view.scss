@@ -69,8 +69,9 @@
 
 // Панель каталога в две строки, как в макете.
 //
-// Первая: вкладки раздела слева, переключатель вида справа. Вторая:
-// поиск по каталогу, кнопка добавления и порядок.
+// Первая: вкладки раздела. Вторая: поиск по каталогу, кнопка добавления
+// и переключатель вида у правого края. Порядок стоит не здесь, а первым
+// полем панели фильтров: это такое же условие отбора.
 //
 // `!important` вынужденный: Odoo вешает на эти же узлы bootstrap-утилиты
 // (`flex-lg-nowrap`, `order-lg-*`, `flex-grow-1`), объявленные с
@@ -105,12 +106,6 @@
     min-width: 0;
   }
 
-  .o_control_panel_navigation {
-    order: 1 !important;
-    flex: 0 0 auto !important;
-    margin-left: auto;
-  }
-
   .o_coop_row_break {
     order: 2;
     flex: 0 0 100%;
@@ -130,11 +125,13 @@
     order: 4;
   }
 
-  .o_coop_sort {
-    order: 5;
-    flex: none;
-    width: auto;
-    max-width: 200px;
+  // Переключатель вида — в конце строки поиска, как в макете. В первой
+  // строке он оставлял пустой правый край у второй и отрывался от того,
+  // чем управляет: вид меняет то, что показано под строкой поиска, а не
+  // вкладки над ней.
+  .o_control_panel_navigation {
+    order: 5 !important;
+    flex: 0 0 auto !important;
     margin-left: auto;
   }
 
@@ -142,6 +139,17 @@
     flex: 1 1 auto !important;
     min-width: 0;
     max-width: none;
+  }
+
+  // Правую границу поля поиска рисовало штатное меню фильтров: в разметке
+  // Odoo у поля стоит `border-end-0`, потому что справа к нему вплотную
+  // приставлена кнопка меню. Меню в каталоге убрано — без этого поле
+  // остаётся открытым справа и выглядит недорисованным.
+  .o_cp_searchview .o_searchview {
+    border-right-width: var(--bs-border-width, 1px) !important;
+    border-right-style: solid !important;
+    border-top-right-radius: var(--bs-border-radius, .25rem);
+    border-bottom-right-radius: var(--bs-border-radius, .25rem);
   }
 
   // Пагинатор ушёл вниз, под плитки.
@@ -187,72 +195,36 @@
 // Штатно Odoo ставит её слева, но слева уже стоит постоянное меню
 // платформы: две левых колонки читаются как одно меню, и человек не
 // понимает, где разделы, а где фильтры.
+//
+// Вид на карте перечислен здесь же: панель фильтров при нём остаётся на
+// месте, и без этого она сваливалась под карту узкой колонкой.
+//
+// Перенос строки нужен пагинатору: он встаёт третьим в этот же ряд и без
+// него прижимается к правому краю узким столбиком.
 .o_coop_tiles,
-.o_coop_rows {
+.o_coop_rows,
+.o_coop_map {
 
   .o_content {
     display: flex;
+    flex-wrap: wrap;
     align-items: flex-start;
-    gap: 16px;
-  }
-
-  .o_search_panel {
-    order: 2;
-    flex: 0 0 236px;
-    width: 236px;
-    max-width: 236px;
-    border-right: 0;
-    border-left: 1px solid var(--coop-line, #e6e6e1);
-    background: var(--coop-white, #fff);
-    padding: 14px 12px;
-  }
-
-  .o_search_panel_section_header {
-    font: 600 12px/1.4 'Manrope', sans-serif;
-    color: var(--coop-ink, #14171a);
-  }
-
-  .o_search_panel_label_title {
-    font-size: 12.5px;
-  }
-
-  // Счётчик значения: моноширинный, приглушённый — он подсказка, а не
-  // содержание строки.
-  .o_search_panel_counter {
-    font: 400 11px/1 'JetBrains Mono', ui-monospace, monospace;
-    color: var(--coop-slate-light, #8a8a80);
+    gap: 18px;
   }
 }
 
-// На узком экране панель уходит вниз: 236 пикселей сбоку на телефоне
-// не остаётся, а прятать фильтры совсем нельзя.
+// На узком экране панель уходит вниз: колонки сбоку на телефоне не
+// остаётся, а прятать фильтры совсем нельзя. Сама панель раскладывается
+// в `catalog_filters.scss` — здесь только направление колонки.
 @media (max-width: 900px) {
   .o_coop_tiles .o_content,
-  .o_coop_rows .o_content {
+  .o_coop_rows .o_content,
+  .o_coop_map .o_content {
     flex-direction: column;
-  }
-
-  .o_coop_tiles .o_search_panel,
-  .o_coop_rows .o_search_panel {
-    order: 0;
-    flex: 1 1 auto;
-    width: 100%;
-    max-width: none;
-    border-left: 0;
-    border-bottom: 1px solid var(--coop-line, #e6e6e1);
   }
 }
 
 // Постраничная навигация — под плитками, как в макете.
-//
-// Область содержимого выложена в строку: список и панель фильтров стоят
-// рядом. Без явной ширины пагинатор становится третьей колонкой и
-// прижимается к правому краю столбиком.
-.o_coop_tiles .o_content,
-.o_coop_rows .o_content {
-  flex-wrap: wrap;
-}
-
 .o_coop_tiles .o_kanban_renderer,
 .o_coop_rows .o_kanban_renderer {
   flex: 1 1 0;
@@ -279,78 +251,95 @@
 //
 // Подложка — сетка, а не картографические тайлы: платформа показывается
 // без выхода в интернет, а место у записи указано городом, а не точкой.
-.o_coop_map {
-    flex: 1 1 auto;
-    min-width: 0;
-    padding: 12px 16px;
+//
+// Класс подложки — `o_coop_mapboard`, а не `o_coop_map`: последний
+// ставится на корень представления в этом виде, и одно правило красило
+// бы заодно всю страницу вместе с панелью управления.
+//
+// Цвета — токенами платформы, а не своими: в тёмной теме токены
+// переопределены, а вписанный сюда белый остался бы белым.
+.o_coop_mapboard {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 12px 16px;
 }
 
 .o_coop_map_canvas {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    border: 1px solid var(--o-coop-line, #e3e6ea);
-    border-radius: 12px;
-    overflow: hidden;
-    background-color: var(--o-coop-paper, #f7f8f9);
-    background-image:
-        linear-gradient(rgba(20, 23, 26, .05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(20, 23, 26, .05) 1px, transparent 1px);
-    background-size: 5% 10%;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--coop-line, #e6e6e1);
+  border-radius: 14px;
+  overflow: hidden;
+  background-color: var(--coop-paper, #fbfbf9);
+  background-image:
+    linear-gradient(var(--coop-line, #e6e6e1) 1px, transparent 1px),
+    linear-gradient(90deg, var(--coop-line, #e6e6e1) 1px, transparent 1px);
+  background-size: 5% 10%;
 }
 
 .o_coop_map_empty {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #6b7280;
-    font-size: 12.5px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--coop-slate, #4a4a44);
+  font-size: 12.5px;
+  text-align: center;
 }
 
 .o_coop_pin {
-    position: absolute;
-    // Остриё метки приходится на точку города, а не её середина.
-    transform: translate(-50%, -100%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0;
-    border: 0;
-    background: none;
-    font: inherit;
-    cursor: pointer;
+  position: absolute;
+  // Остриё метки приходится на точку города, а не её середина.
+  transform: translate(-50%, -100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
 }
 
 .o_coop_pin_dot {
-    border-radius: 50% 50% 50% 0;
-    transform: rotate(-45deg);
-    background: #0f766e;
-    border: 2px solid #fff;
-    box-shadow: 0 1px 3px rgba(20, 23, 26, .35);
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  background: var(--coop-teal, #146b64);
+  border: 2px solid var(--coop-white, #fff);
+  box-shadow: 0 1px 3px rgba(20, 23, 26, .35);
 }
 
 .o_coop_pin_label {
-    margin-top: 3px;
-    padding: 2px 8px;
-    border: 1px solid var(--o-coop-line, #e3e6ea);
-    border-radius: 999px;
-    background: #fff;
-    font-size: 11px;
-    font-weight: 500;
-    white-space: nowrap;
+  margin-top: 3px;
+  padding: 2px 8px;
+  border: 1px solid var(--coop-line, #e6e6e1);
+  border-radius: 999px;
+  background: var(--coop-white, #fff);
+  color: var(--coop-ink, #14171a);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .o_coop_pin_count {
-    color: #0f766e;
-    font-weight: 700;
+  color: var(--coop-teal-dark, #0e4f4a);
+  font-weight: 700;
 }
 
-.o_coop_pin:hover .o_coop_pin_dot { background: #115e59; }
-.o_coop_pin:hover .o_coop_pin_label { border-color: #0f766e; }
+.o_coop_pin:hover .o_coop_pin_dot { background: var(--coop-teal-dark, #0e4f4a); }
+.o_coop_pin:hover .o_coop_pin_label { border-color: var(--coop-teal, #146b64); }
+
+// Клавиатурой метка выделяется так же заметно, как мышью: без этого до
+// города можно дойти табом и не понять, на какой метке стоишь.
+.o_coop_pin:focus-visible {
+  outline: 2px solid var(--coop-focus, #0e4f4a);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
 
 .o_coop_map_note {
-    margin: 8px 0 0;
-    color: #6b7280;
-    font-size: 11.5px;
+  margin: 8px 0 0;
+  color: var(--coop-slate, #4a4a44);
+  font-size: 11.5px;
 }

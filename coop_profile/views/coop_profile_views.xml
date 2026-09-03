@@ -56,8 +56,23 @@
                 <div>Уровень доверия:
                   <b><field name="coop_trust" nolabel="1" readonly="1"/>%</b>
                 </div>
+                <!--
+                  Баланс — только себе. В макете он стоит и на чужой
+                  карточке, то есть остаток чужих денег виден
+                  постороннему; это ошибка выгрузки, а не решение.
+                -->
+                <div invisible="not coop_is_self">Баланс:
+                  <b><field name="coop_balance" nolabel="1" readonly="1"/></b>
+                  <button name="action_coop_my_wallet" type="object"
+                          class="o_coop_stat_note">история операций →</button>
+                </div>
                 <div>Сделок закрыто:
                   <b><field name="coop_deals_done" nolabel="1" readonly="1"/></b>
+                  <button name="action_coop_my_deals" type="object"
+                          class="o_coop_stat_note">реестр сделок →</button>
+                </div>
+                <div invisible="not coop_follower_count">Подписчиков:
+                  <b><field name="coop_follower_count" nolabel="1" readonly="1"/></b>
                 </div>
                 <div invisible="not coop_friend_count">Друзей:
                   <b><field name="coop_friend_count" nolabel="1" readonly="1"/></b>
@@ -79,6 +94,22 @@
                   <div><span class="o_coop_key">Сайт</span>
                     <field name="website" widget="url"
                            readonly="not coop_is_self" placeholder="нет"/></div>
+                  <div invisible="not coop_skype and not coop_is_self">
+                    <span class="o_coop_key">Skype</span>
+                    <field name="coop_skype" readonly="not coop_is_self"
+                           placeholder="нет"/></div>
+                  <div invisible="not coop_messengers and not coop_is_self">
+                    <span class="o_coop_key">Мессенджеры</span>
+                    <field name="coop_messengers" readonly="not coop_is_self"
+                           placeholder="Telegram, WhatsApp"/></div>
+                  <div invisible="not coop_socials and not coop_is_self">
+                    <span class="o_coop_key">Соцсети</span>
+                    <field name="coop_socials" readonly="not coop_is_self"
+                           placeholder="нет"/></div>
+                  <div invisible="not coop_apps and not coop_is_self">
+                    <span class="o_coop_key">Приложения</span>
+                    <field name="coop_apps" readonly="not coop_is_self"
+                           placeholder="GitHub, Habr"/></div>
                 </div>
               </div>
 
@@ -96,6 +127,11 @@
                   </div>
                   <div><span class="o_coop_key">Проверка</span>
                     <field name="coop_verification_level" readonly="1"/></div>
+                  <div invisible="not coop_languages and not coop_is_self">
+                    <span class="o_coop_key">Языки</span>
+                    <field name="coop_languages" readonly="not coop_is_self"
+                           placeholder="русский, английский"/>
+                  </div>
                   <div invisible="not coop_registered_on">
                     <span class="o_coop_key">На платформе с</span>
                     <field name="coop_registered_on" readonly="1"/>
@@ -126,6 +162,31 @@
                 вакансии, организации, проекты и операции с деньгами.
               </div>
 
+              <!--
+                Напоминание из макета. Показывается только владельцу и
+                только когда есть о чём напоминать: подтверждение
+                возвращает объявлению место в выдаче, где свежие стоят
+                выше, — иначе подтверждать было бы незачем.
+              -->
+              <div class="o_coop_notice o_coop_notice_stale"
+                   invisible="not coop_stale_resource_ids">
+                <div class="o_coop_notice_text">
+                  Ваше объявление
+                  «<field name="coop_stale_resource_ids" widget="many2many_tags"
+                          readonly="1" nolabel="1"/>»
+                  висит в каталоге больше месяца.
+                  <div class="o_coop_notice_sub">
+                    Оно всё ещё актуально? Свежие объявления выше в выдаче.
+                  </div>
+                </div>
+                <div class="o_coop_notice_actions">
+                  <button name="action_coop_confirm_listing" type="object"
+                          class="btn btn-secondary">Да, актуально</button>
+                  <button name="action_coop_unpublish_listing" type="object"
+                          class="btn btn-secondary">Снять с публикации</button>
+                </div>
+              </div>
+
               <div class="o_coop_about" invisible="not comment and not coop_is_self">
                 <field name="comment" placeholder="Расскажите о себе"
                        readonly="not coop_is_self"/>
@@ -137,6 +198,53 @@
                 из них пустуют со стрелками, которые нечего листать —
                 страница читается как недогрузившаяся.
               -->
+              <div class="o_coop_band" invisible="not coop_friend_ids">
+                <div class="o_coop_band_head">
+                  <span>Связи</span>
+                  <button name="action_coop_my_friends" type="object"
+                          class="o_coop_band_all">смотреть все</button>
+                </div>
+                <div class="o_coop_band_body">
+                  <field name="coop_friend_ids" readonly="1" nolabel="1"
+                         widget="many2many_kanban">
+                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                      <templates>
+                        <t t-name="card">
+                          <div class="o_coop_mini">
+                            <div class="o_coop_mini_img">
+                              <img t-att-src="'/web/image/res.partner/' + record.id.raw_value + '/avatar_256'"
+                                   t-att-alt="record.name.value" loading="lazy"/>
+                            </div>
+                            <div class="o_coop_mini_label">
+                              <field name="name"/>
+                            </div>
+                          </div>
+                        </t>
+                      </templates>
+                    </kanban>
+                  </field>
+                </div>
+              </div>
+
+              <div class="o_coop_band"
+                   invisible="not coop_education_ids and not coop_is_self">
+                <div class="o_coop_band_head">
+                  <span>Образование</span>
+                </div>
+                <div class="o_coop_band_body">
+                  <field name="coop_education_ids" nolabel="1"
+                         readonly="not coop_is_self">
+                    <list editable="bottom">
+                      <field name="name"/>
+                      <field name="speciality" optional="show"/>
+                      <field name="level"/>
+                      <field name="year_from"/>
+                      <field name="year_to"/>
+                    </list>
+                  </field>
+                </div>
+              </div>
+
               <div class="o_coop_band" invisible="coop_offer_count == 0">
                 <div class="o_coop_band_head">
                   <span>Навыки</span>
@@ -272,6 +380,58 @@
                             </div>
                             <div class="o_coop_mini_note">
                               <field name="role"/>
+                            </div>
+                          </div>
+                        </t>
+                      </templates>
+                    </kanban>
+                  </field>
+                </div>
+              </div>
+
+              <div class="o_coop_band"
+                   invisible="not coop_achievement_ids and not coop_is_self">
+                <div class="o_coop_band_head">
+                  <span>Достижения</span>
+                </div>
+                <div class="o_coop_band_body">
+                  <field name="coop_achievement_ids" nolabel="1"
+                         readonly="not coop_is_self">
+                    <list editable="bottom">
+                      <field name="name"/>
+                      <field name="year"/>
+                      <field name="proof_url" widget="url" optional="show"/>
+                    </list>
+                  </field>
+                </div>
+              </div>
+
+              <!--
+                Потребности — собственные объявления спроса, а не новая
+                сущность: «ищу морковь» живёт по тем же правилам, что и
+                любое объявление, включая снятие с публикации. Состояние
+                показано подписью, как в макете: открыта или закрыта.
+              -->
+              <div class="o_coop_band" invisible="not coop_need_ids">
+                <div class="o_coop_band_head">
+                  <span>Потребности</span>
+                  <button name="action_coop_my_needs" type="object"
+                          class="o_coop_band_all">смотреть все</button>
+                </div>
+                <div class="o_coop_band_body">
+                  <field name="coop_need_ids" readonly="1" nolabel="1">
+                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                      <field name="state"/>
+                      <templates>
+                        <t t-name="card">
+                          <div class="o_coop_mini o_coop_mini_text">
+                            <div class="o_coop_mini_label">
+                              <field name="name"/>
+                            </div>
+                            <div class="o_coop_mini_note"
+                                 t-att-class="record.state.raw_value === 'published' ? 'o_coop_open' : 'o_coop_closed'">
+                              <t t-if="record.state.raw_value === 'published'">● открыта</t>
+                              <t t-else="">● закрыта</t>
                             </div>
                           </div>
                         </t>

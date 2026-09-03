@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { useService } from "@web/core/utils/hooks";
-import { Component, onWillStart, useState } from "@odoo/owl";
+import { Component, onWillStart, onWillUpdateProps, useState } from "@odoo/owl";
 
 /**
  * Каталог на карте: схематичная карта России с метками по городам.
@@ -34,21 +34,37 @@ export class CoopMap extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.state = useState({ pins: [], other: 0, loading: true });
-        onWillStart(() => this.load());
+        this.state = useState({ pins: [], other: 0, loading: true, failed: false });
+        onWillStart(() => this.load(this.props.domain));
+        // Отбор меняется, пока карта на экране: сняли город, поставили
+        // цену. Без этого метки остались бы от первого захода, а подпись
+        // под картой обещает «с учётом текущего отбора» — и врала бы.
+        onWillUpdateProps((next) => {
+            if (JSON.stringify(next.domain) !== JSON.stringify(this.props.domain)) {
+                return this.load(next.domain);
+            }
+        });
     }
 
-    async load() {
+    async load(domain) {
         // Считаем на сервере группировкой, а не по загруженной странице:
         // на карте нужен весь отбор целиком, а страница — это два десятка
         // записей, и метки по ней врали бы в разы.
         let groups = [];
+        this.state.loading = true;
+        this.state.failed = false;
         try {
             groups = await this.orm.call(
                 this.props.resModel, "formatted_read_group",
-                [this.props.domain || [], ["city"], ["__count"]]
+                [domain || [], ["city"], ["__count"]]
             );
         } catch {
+            // Пустая карта и «нет подходящих городов» — разные вещи, и
+            // сказать первое вторым значит соврать: отбор человек менял,
+            // а не связь.
+            this.state.pins = [];
+            this.state.other = 0;
+            this.state.failed = true;
             this.state.loading = false;
             return;
         }

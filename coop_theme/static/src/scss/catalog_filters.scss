@@ -5,16 +5,20 @@
 // панель, а не является полем.
 
 .o_coop_filters {
-  flex: 0 0 236px;
-  width: 236px;
+  // Ширина, отступы и скругление — из макета: 224 пикселя, поле 16,
+  // радиус карточки 14. Своих значений здесь не изобретаем, иначе
+  // панель перестаёт быть той же карточкой, что и всё остальное.
+  flex: 0 0 224px;
+  width: 224px;
   order: 2;
 }
 
 .o_coop_filters_body {
   background: var(--coop-white, #fff);
   border: 1px solid var(--coop-line, #e6e6e1);
-  border-radius: 10px;
-  padding: 14px 14px 16px;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(20, 23, 26, .05);
 }
 
 .o_coop_filters_title {
@@ -170,10 +174,9 @@
   }
 }
 
-// Кнопка раскрытия и «Показать результаты» нужны только на узком
-// экране: там панель свёрнута, и без них до фильтров не добраться.
-.o_coop_filters_toggle,
-.o_coop_btn_mobile {
+// Кнопка раскрытия нужна только на узком экране: там панель свёрнута,
+// и без неё до фильтров не добраться.
+.o_coop_filters_toggle {
   display: none;
 }
 
@@ -203,7 +206,4 @@
     margin-top: 8px;
   }
 
-  .o_coop_btn_mobile {
-    display: block;
-  }
 }

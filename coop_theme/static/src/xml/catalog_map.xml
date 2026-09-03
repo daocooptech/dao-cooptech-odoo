@@ -7,9 +7,13 @@
     текущего отбора; щелчок по метке отбирает город.
   -->
   <t t-name="coop_theme.CatalogMap">
-    <div class="o_coop_map">
+    <div class="o_coop_mapboard">
       <div class="o_coop_map_canvas">
-        <div class="o_coop_map_empty" t-if="!state.loading and !state.pins.length">
+        <div class="o_coop_map_empty" t-if="state.failed" role="alert">
+          Не удалось посчитать метки. Попробуйте открыть карту ещё раз.
+        </div>
+        <div class="o_coop_map_empty"
+             t-elif="!state.loading and !state.pins.length">
           Нет городов, подходящих под текущий отбор
         </div>
         <button t-foreach="state.pins" t-as="pin" t-key="pin.city"

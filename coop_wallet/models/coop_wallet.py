@@ -37,8 +37,11 @@ class CoopWallet(models.Model):
     _rec_name = 'display_name'
 
     TABS = [
-        ('crypto', 'Крипто кошелёк'),
+        # Фиат первым: в рублях у участника проходит почти всё, а крипта
+        # — у меньшинства. Первой должна стоять та вкладка, которую
+        # открывают чаще, иначе каждый заход начинается с переключения.
         ('fiat', 'Фиатный кошелёк'),
+        ('crypto', 'Крипто кошелёк'),
         ('lets', 'Взаимный кредит'),
         ('settle', 'Взаиморасчёты'),
         ('share', 'Паевой счёт'),
@@ -53,7 +56,7 @@ class CoopWallet(models.Model):
     # кнопки в шапке менялись вместе с вкладкой: у каждой свой набор
     # действий, и показывать их все сразу значит предлагать «вывести
     # средства» на вкладке пая.
-    tab = fields.Selection(TABS, string='Вкладка', default='crypto', required=True)
+    tab = fields.Selection(TABS, string='Вкладка', default='fiat', required=True)
 
     currency_id = fields.Many2one(
         'res.currency', string='Валюта',

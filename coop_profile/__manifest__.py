@@ -24,7 +24,7 @@
     'depends': [
         'coop_base', 'coop_theme', 'coop_people', 'coop_skills',
         'coop_resources', 'coop_vacancies', 'coop_projects',
-        'coop_communities', 'coop_deals', 'mail',
+        'coop_communities', 'coop_deals', 'coop_wallet', 'mail',
     ],
     'data': [
         'security/ir.model.access.csv',

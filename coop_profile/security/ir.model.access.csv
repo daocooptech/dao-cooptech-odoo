@@ -1,2 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_res_partner_coop_self,Участник правит свой профиль,base.model_res_partner,base.group_user,1,1,0,0
+access_coop_education,Образование участника,model_coop_education,base.group_user,1,1,1,1
+access_coop_achievement,Достижения участника,model_coop_achievement,base.group_user,1,1,1,1

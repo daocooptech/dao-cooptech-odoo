@@ -31,6 +31,10 @@ export class CoopFilters extends Component {
             saved: [],
             savedOpen: false,
             open: false,
+            // Сколько найдётся, если применить набранное. Показывается
+            // на кнопке: иначе «Показать результаты» — прыжок в темноту.
+            preview: null,
+            dirty: false,
         });
         onWillStart(async () => {
             await this.load();
@@ -131,6 +135,7 @@ export class CoopFilters extends Component {
                 invisible: "True",
             }]);
         }
+        this.state.dirty = false;
         // Счётчики считаются по остальным условиям, значит после
         // применения они другие.
         await this.load();
@@ -138,7 +143,7 @@ export class CoopFilters extends Component {
 
     onChange(code, value) {
         this.state.values[code] = value;
-        this.apply();
+        this.previewCount();
     }
 
     toggleQuick(value) {
@@ -148,7 +153,34 @@ export class CoopFilters extends Component {
         } else {
             this.state.quick.splice(index, 1);
         }
-        this.apply();
+        this.previewCount();
+    }
+
+    /**
+     * Сколько найдётся с набранными условиями.
+     *
+     * Раньше каждое изменение поля применяло фильтр целиком: список
+     * перезагружался, а счётчики у всех полей выбора пересчитывались
+     * отдельным запросом на каждое поле. На рубрике с десятком
+     * характеристик это десяток запросов на один щелчок, и каталог
+     * заметно вставал.
+     *
+     * Теперь щелчок стоит один дешёвый подсчёт, да и тот не сразу:
+     * пока человек щёлкает подряд, считать промежуточные наборы
+     * незачем.
+     */
+    previewCount() {
+        this.state.dirty = true;
+        clearTimeout(this.previewTimer);
+        this.previewTimer = setTimeout(async () => {
+            const domain = this.domain;
+            try {
+                this.state.preview = await this.orm.searchCount(
+                    this.props.resModel, domain);
+            } catch {
+                this.state.preview = null;
+            }
+        }, 400);
     }
 
     isQuick(value) {
@@ -170,7 +202,17 @@ export class CoopFilters extends Component {
         // где она навигация, здесь это такое же поле панели.
         this.state.values = {};
         this.state.quick = [];
+        this.state.preview = null;
         this.apply();
+    }
+
+    /** Применить набранное и, на узком экране, свернуть панель. */
+    async showResults() {
+        clearTimeout(this.previewTimer);
+        await this.apply();
+        if (this.state.open) {
+            this.state.open = false;
+        }
     }
 
     async saveSearch() {

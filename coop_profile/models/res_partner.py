@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _
 
+# Через сколько дней объявление считается залежавшимся и участнику
+# предлагают его подтвердить. Тридцать — из макета; смысл в том, что
+# свежие объявления стоят выше в выдаче, и подтверждение возвращает
+# объявлению место, а не просто убирает напоминание.
+STALE_LISTING_DAYS = 30
+
 
 class ResPartner(models.Model):
     """Владения участника — то, из чего складывается «Моя страница».
@@ -48,6 +54,50 @@ class ResPartner(models.Model):
         'coop.project', 'partner_id', string='Проекты')
     coop_community_member_ids = fields.One2many(
         'coop.community.member', 'partner_id', string='Участие в сообществах')
+    coop_education_ids = fields.One2many(
+        'coop.education', 'partner_id', string='Образование')
+    coop_achievement_ids = fields.One2many(
+        'coop.achievement', 'partner_id', string='Достижения')
+
+
+    # Связи в макете — плитки друзей. Считаются, а не хранятся: дружба
+    # двусторонняя и лежит в отдельной модели, где участник может стоять
+    # с любой из сторон.
+    coop_friend_ids = fields.Many2many(
+        'res.partner', string='Связи', compute='_compute_coop_links')
+    # Потребности — собственные объявления спроса. Отдельной сущности им
+    # заводить не за чем: «ищу морковь» — это объявление, и живёт оно по
+    # тем же правилам, что остальные, включая снятие с публикации.
+    coop_need_ids = fields.One2many(
+        'coop.resource', 'owner_id', string='Потребности',
+        domain=[('listing_type', '=', 'request')])
+    # Объявления, залежавшиеся в каталоге. Из них собирается напоминание
+    # из макета: «висит 30 дней, всё ещё актуально?».
+    coop_stale_resource_ids = fields.Many2many(
+        'coop.resource', compute='_compute_coop_links',
+        string='Залежавшиеся объявления')
+    coop_follower_count = fields.Integer(
+        string='Подписчиков', compute='_compute_coop_links')
+    coop_balance = fields.Monetary(
+        string='Баланс', compute='_compute_coop_links',
+        currency_field='coop_balance_currency_id',
+        help='Остаток кошелька. Виден только владельцу страницы.')
+    coop_balance_currency_id = fields.Many2one(
+        'res.currency', compute='_compute_coop_links')
+
+    # ── Поля из макета, которых у контакта Odoo нет ────────────────────
+    #
+    # Одной строкой каждое, а не списком записей: в макете это перечни
+    # через запятую, по ним не ищут и не фильтруют, и справочник языков
+    # или мессенджеров завёл бы работу по его ведению без всякой отдачи.
+    coop_languages = fields.Char(
+        'Языки', help='Через запятую: русский, украинский, якутский.')
+    coop_skype = fields.Char('Skype')
+    coop_messengers = fields.Char(
+        'Мессенджеры', help='Через запятую: Telegram, WhatsApp, Viber.')
+    coop_socials = fields.Char('Социальные сети')
+    coop_apps = fields.Char(
+        'Приложения', help='Профили в чужих сервисах: GitHub, Habr и другие.')
 
     # Свёрнутый признак «страница пустая». По нему форма показывает не
     # девять пустых полос, а один блок «чего здесь ещё нет»: девять пустых
@@ -76,6 +126,68 @@ class ResPartner(models.Model):
                 record.coop_vacancy_count, record.coop_project_count,
                 record.coop_community_count, record.coop_membership_count,
             ))
+
+    def _compute_coop_links(self):
+        """Связи, подписчики, баланс и залежавшиеся объявления.
+
+        Одним вычислением на четыре поля: все они нужны одной и той же
+        странице и в одну и ту же минуту, а раздельно это четыре обхода
+        по тем же записям.
+        """
+        me = self.env.user.partner_id
+        wallet = self.env['coop.wallet'].sudo()
+
+        links = self.env['coop.friendship'].sudo().search([
+            '|', ('requester_id', 'in', self.ids),
+            ('addressee_id', 'in', self.ids),
+            ('state', '=', 'accepted'),
+        ])
+        friends = {}
+        for link in links:
+            if link.requester_id.id in self.ids:
+                friends.setdefault(link.requester_id.id, []).append(
+                    link.addressee_id.id)
+            if link.addressee_id.id in self.ids:
+                friends.setdefault(link.addressee_id.id, []).append(
+                    link.requester_id.id)
+
+        # Подписчики — те, кто следит за карточкой. Своя модель подписки
+        # не нужна: у Odoo для этого есть подписчики записи, и «написать
+        # участнику» уже ходит через них.
+        followers = {}
+        groups = self.env['mail.followers'].sudo()._read_group(
+            [('res_model', '=', 'res.partner'), ('res_id', 'in', self.ids)],
+            ['res_id'], ['__count'])
+        for res_id, count in groups:
+            followers[res_id] = count
+
+        stale_before = fields.Datetime.subtract(
+            fields.Datetime.now(), days=STALE_LISTING_DAYS)
+
+        for record in self:
+            record.coop_friend_ids = [(6, 0, friends.get(record.id, []))]
+            record.coop_follower_count = followers.get(record.id, 0)
+            # Баланс и залежавшиеся объявления — только себе. Остаток
+            # чужих денег постороннему не показывают, а чужие черновики
+            # и залежи — это внутренняя кухня участника.
+            own = record.id == me.id
+            purse = wallet.search([('partner_id', '=', record.id)], limit=1)                 if own else wallet.browse()
+            # Рублёвый остаток, а не крипта и не кредитные линии: в
+            # макете в строке показателей стоит одно число в рублях, а
+            # разложение по вкладкам — это уже кошелёк.
+            record.coop_balance = purse.fiat_balance if purse else 0.0
+            record.coop_balance_currency_id = (
+                purse.currency_id.id if purse else
+                self.env.company.currency_id.id)
+            if own:
+                stale = self.env['coop.resource'].sudo().search([
+                    ('owner_id', '=', record.id),
+                    ('state', '=', 'published'),
+                    ('create_date', '<=', stale_before),
+                ], order='create_date', limit=1)
+                record.coop_stale_resource_ids = [(6, 0, stale.ids)]
+            else:
+                record.coop_stale_resource_ids = [(6, 0, [])]
 
     def _coop_count_holdings(self):
         """Восемь счётчиков восемью групповыми запросами, а не сотней.
@@ -193,6 +305,54 @@ class ResPartner(models.Model):
             'coop_deals.action_coop_deals',
             ['|', ('party_a_id', '=', self.id), ('party_b_id', '=', self.id)],
             _('Сделки — %s') % self.display_name)
+
+    def action_coop_my_wallet(self):
+        """«История операций» ведёт в тот же кошелёк, что и меню.
+
+        Своего экрана истории здесь нет намеренно: он уже есть в разделе
+        кошелька, и второй разошёлся бы с первым на первой же правке.
+        """
+        self.ensure_one()
+        return self.env['ir.actions.actions']._for_xml_id(
+            'coop_wallet.action_coop_my_wallet')
+
+    def action_coop_my_needs(self):
+        return self._coop_holdings_action(
+            'coop_resources.action_coop_resources',
+            [('owner_id', '=', self.id), ('listing_type', '=', 'request')],
+            _('Потребности — %s') % self.display_name)
+
+    def action_coop_my_friends(self):
+        self.ensure_one()
+        return self._coop_holdings_action(
+            'coop_people.action_coop_people',
+            [('id', 'in', self.coop_friend_ids.ids)],
+            _('Связи — %s') % self.display_name)
+
+    # ── Залежавшееся объявление ─────────────────────────────────────────
+    #
+    # Подтверждение не переписывает объявление, а сдвигает отметку
+    # свежести: в каталоге свежие стоят выше, и человек подтверждением
+    # возвращает объявлению место в выдаче. Если бы это просто убирало
+    # напоминание, подтверждать было бы незачем.
+
+    def action_coop_confirm_listing(self):
+        self.ensure_one()
+        listing = self.coop_stale_resource_ids[:1]
+        if not listing:
+            return False
+        listing.sudo().write({'refreshed_on': fields.Datetime.now()})
+        listing.sudo().message_post(
+            body=_('Владелец подтвердил, что объявление актуально.'))
+        return {'type': 'ir.actions.act_window_close'}
+
+    def action_coop_unpublish_listing(self):
+        self.ensure_one()
+        listing = self.coop_stale_resource_ids[:1]
+        if not listing:
+            return False
+        listing.sudo().write({'state': 'archived'})
+        return {'type': 'ir.actions.act_window_close'}
 
     def action_coop_my_listings(self):
         """«Мои объявления» — то, чего в каталоге не видно.

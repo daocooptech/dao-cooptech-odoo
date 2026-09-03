@@ -32,17 +32,24 @@
       диапазона цены, свободного ввода города и набора полей, зависящего
       от раздела.
     -->
+    <!--
+      Условие штатное плюс своё. Своё в одиночку сюда ставить нельзя:
+      `model.isReady` — это признак того, что данные уже загружены, и без
+      него список рисуется по пустой модели.
+    -->
     <xpath expr="//t[@t-component='props.Renderer']" position="attributes">
-      <attribute name="t-if">coopLayout.mode !== 'map'</attribute>
+      <attribute name="t-if">model.isReady and coopLayout.mode !== 'map'</attribute>
     </xpath>
 
+    <!--
+      Одной вставкой, а не тремя: каждая следующая «after» встаёт вплотную
+      к списку и отодвигает предыдущую, и порядок в разметке выходил
+      обратный тому, что видно на экране.
+    -->
     <xpath expr="//t[@t-component='props.Renderer']" position="after">
       <CoopMap t-if="coopLayout.mode === 'map'"
                resModel="props.resModel" domain="model.root.domain"/>
       <CoopFilters resModel="props.resModel"/>
-    </xpath>
-
-    <xpath expr="//t[@t-component='props.Renderer']" position="after">
       <div class="o_coop_pager" t-if="env.config.pagerProps and coopLayout.mode !== 'map'">
         <Pager t-props="env.config.pagerProps"/>
       </div>

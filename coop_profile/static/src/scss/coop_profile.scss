@@ -375,3 +375,49 @@
     height: 200px;
   }
 }
+
+// ── Пояснения у показателей ───────────────────────────────────────────
+//
+// В макете это ссылки-подсказки рядом с числом: «как считается?»,
+// «история операций →». Кнопкой, а не ссылкой: переход делает серверное
+// действие, и ссылка с адресом разошлась бы с ним при первой же правке
+// маршрутов.
+.o_coop_stat_note {
+  display: inline;
+  margin-left: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--coop-slate, #6b7280);
+  font-size: 11.5px;
+  text-decoration: underline dotted;
+  cursor: pointer;
+
+  &:hover { color: var(--coop-teal, #0f766e); }
+}
+
+// ── Напоминание о залежавшемся объявлении ─────────────────────────────
+.o_coop_notice_stale {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.o_coop_notice_sub {
+  margin-top: 3px;
+  color: var(--coop-slate, #6b7280);
+  font-size: 12px;
+}
+
+.o_coop_notice_actions {
+  display: flex;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+// Состояние потребности: открыта или закрыта. Цветом, а не только
+// словом — в полосе плиток подпись читается боковым зрением.
+.o_coop_mini_note.o_coop_open { color: var(--coop-teal, #0f766e); }
+.o_coop_mini_note.o_coop_closed { color: var(--coop-slate, #6b7280); }
