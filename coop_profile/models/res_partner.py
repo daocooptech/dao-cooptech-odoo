@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _
+from odoo.tools.safe_eval import safe_eval
 
 # Через сколько дней объявление считается залежавшимся и участнику
 # предлагают его подтвердить. Тридцать — из макета; смысл в том, что
@@ -281,6 +282,77 @@ class ResPartner(models.Model):
         counts['draft'] = drafts
         return counts
 
+    # ── Кнопки «Добавить» в полосах ─────────────────────────────────────
+    #
+    # Каждая заводит запись того же вида, что и полоса, в которой стоит:
+    # в «Ресурсах» — ресурс, в «Проектах» — проект. Владелец подставляется
+    # заранее: страница уже отвечает на вопрос «чьё это», и спрашивать
+    # второй раз незачем.
+    #
+    # Открывается форма того же каталога, а не своя: два разных экрана
+    # создания одной и той же записи разъедутся на первой правке.
+
+    def _coop_create_action(self, xml_id, defaults, name):
+        self.ensure_one()
+        action = self.env['ir.actions.act_window']._for_xml_id(xml_id)
+        action['name'] = name
+        action['views'] = [(False, 'form')]
+        action['view_mode'] = 'form'
+        action['res_id'] = False
+        action['target'] = 'current'
+        action['domain'] = []
+        context = self._coop_action_context(action)
+        context.pop('search_default_published', None)
+        context.update(defaults)
+        action['context'] = context
+        return action
+
+    def action_coop_add_offer(self):
+        return self._coop_create_action(
+            'coop_skills.action_coop_skills',
+            {'default_partner_id': self.id}, _('Новый навык'))
+
+    def action_coop_add_resource(self):
+        return self._coop_create_action(
+            'coop_resources.action_coop_resources',
+            {'default_owner_id': self.id, 'default_listing_type': 'offer'},
+            _('Новый ресурс'))
+
+    def action_coop_add_need(self):
+        # Потребность — то же объявление, но со стороны спроса: «ищу
+        # морковь» и «отдам морковь» отличаются одним признаком, и
+        # заводить под них разные формы значило бы держать две копии
+        # одних и тех же полей.
+        return self._coop_create_action(
+            'coop_resources.action_coop_resources',
+            {'default_owner_id': self.id, 'default_listing_type': 'request'},
+            _('Новая потребность'))
+
+    def action_coop_add_vacancy(self):
+        return self._coop_create_action(
+            'coop_vacancies.action_coop_vacancies',
+            {'default_partner_id': self.id}, _('Новая вакансия'))
+
+    def action_coop_add_project(self):
+        return self._coop_create_action(
+            'coop_projects.action_coop_projects',
+            {'default_partner_id': self.id}, _('Новый проект'))
+
+    def action_coop_add_community(self):
+        return self._coop_create_action(
+            'coop_communities.action_coop_communities',
+            {'default_partner_id': self.id}, _('Новое сообщество'))
+
+    def action_coop_add_org(self):
+        # Организация заводится карточкой участника-компании, а членство
+        # в ней — отдельным действием: завести организацию и вступить в
+        # неё это разные вещи, и человек, нажавший «Добавить», делает
+        # первое.
+        return self._coop_create_action(
+            'coop_orgs.action_coop_orgs',
+            {'default_is_company': True,
+             'default_coop_is_participant': True}, _('Новая организация'))
+
     # ── Переходы к владениям ────────────────────────────────────────────
     #
     # Каждая статкнопка открывает соответствующий каталог, отфильтрованный
@@ -288,12 +360,24 @@ class ResPartner(models.Model):
     # экран, что и из бокового меню, с теми же фильтрами и порядком —
     # иначе на платформе оказывается два разных списка ресурсов.
 
+    def _coop_action_context(self, action):
+        """Контекст действия словарём.
+
+        В базе он лежит строкой — так его задают в разметке, — и
+        `_for_xml_id` отдаёт его как есть. `dict()` на строке падает, и
+        падает молча под кнопкой, а не при загрузке модуля.
+        """
+        context = action.get('context') or {}
+        if isinstance(context, str):
+            context = safe_eval(context, {'uid': self.env.uid})
+        return dict(context)
+
     def _coop_holdings_action(self, xml_id, domain, name):
         self.ensure_one()
         action = self.env['ir.actions.act_window']._for_xml_id(xml_id)
         action['domain'] = domain
         action['name'] = name
-        context = dict(action.get('context') or {})
+        context = self._coop_action_context(action)
         context.pop('search_default_published', None)
         action['context'] = context
         return action

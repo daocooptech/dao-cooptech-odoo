@@ -20,7 +20,11 @@
     'category': 'Cooperative',
     'version': '19.0.1.0.0',
     'license': 'LGPL-3',
-    'depends': ['web', 'coop_base'],
+    # `mail` в зависимостях не ради моделей, а ради порядка загрузки:
+    # ленту в правую колонку уводит сам почтовый модуль, и наша
+    # правка должна применяться после его собственной — иначе она
+    # молча затирается.
+    'depends': ['web', 'mail', 'coop_base'],
     'data': [
         'security/ir.model.access.csv',
         'security/coop_sidebar_rules.xml',

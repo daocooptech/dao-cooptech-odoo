@@ -253,6 +253,17 @@
     padding: 14px;
     background: var(--coop-white, #fff);
 
+    // Плитка «Добавить» стоит в конце того же ряда, что и записи, а не
+    // строкой под ним: в макете это такая же плитка, просто последняя.
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+
+    > .o_field_widget {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
     // Полоса прокручивается вбок, как карусель в макете. Полоса
     // прокрутки скрыта: она перекрывает подписи под плитками.
     // `!important` вынужденный: Odoo вешает на этот же узел
@@ -438,3 +449,40 @@
 // словом — в полосе плиток подпись читается боковым зрением.
 .o_coop_mini_note.o_coop_open { color: var(--coop-teal, #146b64); }
 .o_coop_mini_note.o_coop_closed { color: var(--coop-slate, #4a4a44); }
+
+// ── Плитка «Добавить» в полосе ────────────────────────────────────────
+//
+// Последняя плитка ряда, как в макете: пунктирная рамка вместо картинки,
+// плюс и подпись. Размеры те же, что у соседних плиток, иначе ряд
+// разъезжается по высоте.
+.o_coop_add_tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: none;
+  width: 128px;
+  align-self: stretch;
+  padding: 10px;
+  border: 1px dashed var(--coop-line, #e6e6e1);
+  border-radius: 10px;
+  background: none;
+  color: var(--coop-slate, #4a4a44);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--coop-teal, #146b64);
+    color: var(--coop-teal-dark, #0e4f4a);
+  }
+}
+
+.o_coop_add_icon {
+  font-size: 26px;
+  line-height: 1;
+  font-weight: 300;
+}
+
+.o_coop_add_label {
+  font: 500 12px/1.3 'Manrope', sans-serif;
+}
