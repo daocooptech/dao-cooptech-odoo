@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Раздел «Сообщения» из макета. Штатное действие Discuss остаётся на
+    месте и доступно из настроек: там есть то, чего в макете нет, —
+    разделы каналов, приглашения, звонки. Здесь же экран платформы.
+  -->
+  <record id="action_coop_messages" model="ir.actions.client">
+    <field name="name">Сообщения</field>
+    <field name="tag">coop_messages.messages</field>
+  </record>
+
+  <!--
+    Пункт меню перевешивается на наш экран. Именно перевешивается, а не
+    заводится рядом: два пункта «Сообщения» в меню — это вопрос «а в чём
+    разница», на который ответа нет.
+  -->
+  <record id="mail.menu_root_discuss" model="ir.ui.menu">
+    <field name="action" ref="action_coop_messages"/>
+  </record>
+
+</odoo>

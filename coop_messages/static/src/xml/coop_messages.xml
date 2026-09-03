@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+<!--
+  Раскладка из макета: вкладка раздела, поиск, чипы-фильтры, ниже две
+  колонки — список переписок и сама переписка. Лента и поле ввода внутри
+  правой колонки — компоненты Discuss без изменений.
+-->
+<t t-name="coop_messages.Messages">
+  <div class="o_coop_messages">
+    <div class="o_coop_tabs o_coop_tabs_page">
+      <span class="o_coop_tab active">Сообщения</span>
+    </div>
+
+    <div class="o_coop_msg_search">
+      <input type="text" class="o_coop_input"
+             placeholder="Найти по диалогам и сообщениям..."
+             t-model="state.search"/>
+    </div>
+
+    <div class="o_coop_chips o_coop_msg_chips">
+      <button t-foreach="shownCategories" t-as="category" t-key="category.id"
+              type="button" class="o_coop_chip"
+              t-att-class="{ o_coop_chip_on: state.category === category.id }"
+              t-on-click="() => (state.category = category.id)">
+        <t t-esc="category.label"/>
+        <span class="o_coop_chip_num" t-esc="countOf(category.id)"/>
+      </button>
+    </div>
+
+    <div class="o_coop_msg_body">
+      <div class="o_coop_thread_list">
+        <t t-if="visibleThreads.length">
+          <div t-foreach="visibleThreads" t-as="thread" t-key="thread.localId"
+               class="o_coop_thread_item"
+               t-att-class="{
+                 o_coop_thread_on: thread.eq(activeThread),
+                 o_coop_thread_unread: unreadOf(thread),
+               }"
+               t-on-click="() => this.select(thread)">
+            <img class="o_coop_thread_avatar" t-att-src="thread.avatarUrl" alt=""/>
+            <div class="o_coop_thread_main">
+              <div class="o_coop_thread_row">
+                <span class="o_coop_thread_name">
+                  <t t-if="thread.coop_pinned">📌 </t>
+                  <t t-esc="thread.displayName"/>
+                </span>
+                <span class="o_coop_thread_time" t-esc="stampOf(thread)"/>
+              </div>
+              <div class="o_coop_thread_row">
+                <span class="o_coop_thread_last" t-esc="previewOf(thread)"/>
+                <span t-if="unreadOf(thread)" class="o_coop_thread_count"
+                      t-esc="unreadOf(thread)"/>
+              </div>
+            </div>
+          </div>
+        </t>
+        <div t-else="" class="o_coop_thread_empty">
+          Ничего не найдено.<br/>Попробуйте другой запрос или снимите фильтр.
+        </div>
+      </div>
+
+      <div class="o_coop_chat_pane" t-ref="pane">
+        <t t-if="activeThread">
+          <div class="o_coop_chat_head">
+            <img class="o_coop_chat_avatar" t-att-src="activeThread.avatarUrl" alt=""/>
+            <div class="o_coop_chat_head_text">
+              <div class="o_coop_chat_name" t-esc="activeThread.displayName"/>
+              <div t-if="activeThread.coop_subtitle" class="o_coop_chat_sub"
+                   t-esc="activeThread.coop_subtitle"/>
+            </div>
+            <button t-if="activeThread.coop_link_label" type="button"
+                    class="o_coop_chat_link"
+                    t-on-click="() => this.openRecord(activeThread)">
+              <t t-esc="activeThread.coop_link_label"/> →
+            </button>
+          </div>
+
+          <Thread thread="activeThread" t-key="activeThread.localId"
+                  jumpPresent="state.jump"/>
+          <Composer composer="activeThread.composer" t-key="activeThread.localId"
+                    autofocus="true" type="'message'"
+                    onPostCallback.bind="() => this.state.jump++"/>
+        </t>
+        <div t-else="" class="o_coop_chat_none">
+          Переписка не выбрана.
+        </div>
+      </div>
+    </div>
+  </div>
+</t>
+
+</templates>

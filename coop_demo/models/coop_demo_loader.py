@@ -5,7 +5,7 @@ from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_faces,
                     load_communities,
                     load_deals,
-                    load_examples, load_memberships,
+                    load_examples, load_memberships, load_messages,
                     load_org_profiles, load_orgs, load_people, load_projects,
                     load_reference, load_resources, load_skills,
                     load_vacancies, load_verification, load_wallets)
@@ -76,4 +76,8 @@ class CoopDemoLoader(models.AbstractModel):
         load_examples.load_examples(self.env)
         load_bounty.grant_admin_roles(self.env)
         load_bounty.load_bounty(self.env)
+        # Переписки в самом конце: они заводятся вокруг сделок,
+        # проектов, сообществ и организаций, и до их появления
+        # разговаривать не о чем.
+        load_messages.load_messages(self.env)
         return True
