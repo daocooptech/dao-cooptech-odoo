@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { useService } from "@web/core/utils/hooks";
+import { coopSort, coopSortOptionsFor, setCoopSort } from "@coop_theme/js/catalog_sort";
 import { Component, onWillStart, useState } from "@odoo/owl";
 
 /**
@@ -37,6 +38,21 @@ export class CoopFilters extends Component {
         });
     }
 
+    /** Порядок — такое же условие отбора, как остальные, и стоит там же.
+     *  В панели управления он спорил за место с поиском и кнопкой
+     *  добавления, а по смыслу принадлежит фильтру. */
+    get sortOptions() {
+        return coopSortOptionsFor(this.props.resModel);
+    }
+
+    get currentSort() {
+        return coopSort.orders[this.props.resModel] || this.sortOptions[0][0];
+    }
+
+    onSortChange(event) {
+        setCoopSort(this.props.resModel, event.target.value);
+    }
+
     async load() {
         this.state.blocks = await this.orm.call(
             "coop.catalog", "catalog_filters", [this.props.resModel, this.domain]
@@ -55,7 +71,10 @@ export class CoopFilters extends Component {
         for (const block of this.state.blocks) {
             const value = this.state.values[block.code];
             if (block.widget === "select" && value) {
-                domain.push([block.field, "=", this.cast(block, value)]);
+                // Условие сравнения задаёт сам блок: у метки значений у
+                // записи несколько, и равенство списку не сработает.
+                domain.push([block.field, block.operator || "=",
+                             this.cast(block, value)]);
             } else if (block.widget === "text" && value) {
                 domain.push([block.field, block.operator || "ilike", value]);
             } else if (block.widget === "suggest" && value) {

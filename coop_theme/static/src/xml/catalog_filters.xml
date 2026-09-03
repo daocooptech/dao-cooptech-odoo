@@ -13,6 +13,19 @@
       <div class="o_coop_filters_body">
         <div class="o_coop_filters_title">Фильтр</div>
 
+        <!-- Порядок — первым: он определяет, что человек увидит на
+             первой странице, ещё до всякого отбора. -->
+        <div class="o_coop_field">
+          <label for="coop_sort">Сортировка</label>
+          <select id="coop_sort" class="o_coop_input" t-on-change="onSortChange">
+            <option t-foreach="sortOptions" t-as="option" t-key="option[0]"
+                    t-att-value="option[0]"
+                    t-att-selected="option[0] === currentSort">
+              <t t-esc="option[1]"/>
+            </option>
+          </select>
+        </div>
+
         <t t-foreach="state.blocks" t-as="block" t-key="block.code">
 
           <!-- Быстрые фильтры — чипами, как в макете. -->

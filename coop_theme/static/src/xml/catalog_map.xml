@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!--
+    Схематичная карта России с метками по городам — та же, что в
+    прототипе. Размер метки — сколько объявлений в городе с учётом
+    текущего отбора; щелчок по метке отбирает город.
+  -->
+  <t t-name="coop_theme.CatalogMap">
+    <div class="o_coop_map">
+      <div class="o_coop_map_canvas">
+        <div class="o_coop_map_empty" t-if="!state.loading and !state.pins.length">
+          Нет городов, подходящих под текущий отбор
+        </div>
+        <button t-foreach="state.pins" t-as="pin" t-key="pin.city"
+                type="button" class="o_coop_pin"
+                t-attf-style="left:{{ pin.left }}%;top:{{ pin.top }}%"
+                t-on-click="() => this.selectCity(pin.city)">
+          <span class="o_coop_pin_dot"
+                t-attf-style="width:{{ pin.size }}px;height:{{ pin.size }}px"/>
+          <span class="o_coop_pin_label">
+            <t t-esc="pin.city"/> · <span class="o_coop_pin_count" t-esc="pin.count"/>
+          </span>
+        </button>
+      </div>
+      <p class="o_coop_map_note">
+        Размер метки — сколько записей в городе с учётом текущего отбора.
+        Нажмите на метку, чтобы отобрать город.
+        <t t-if="state.other">
+          Ещё <t t-esc="state.other"/> без города или вне карты.
+        </t>
+      </p>
+    </div>
+  </t>
+
+</templates>

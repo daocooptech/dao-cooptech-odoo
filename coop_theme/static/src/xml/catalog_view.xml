@@ -9,7 +9,7 @@
   -->
   <t t-name="coop_theme.CatalogKanbanView" t-inherit="web.KanbanView" t-inherit-mode="primary">
     <xpath expr="//div[@t-ref='root']" position="attributes">
-      <attribute name="t-attf-class">{{ className }} {{ hasSelectedRecords ? 'o_kanban_selection_active' : 'o_kanban_selection_available' }} {{ coopLayout.rows ? 'o_coop_rows' : 'o_coop_tiles' }}</attribute>
+      <attribute name="t-attf-class">{{ className }} {{ hasSelectedRecords ? 'o_kanban_selection_active' : 'o_kanban_selection_available' }} o_coop_{{ coopLayout.mode }}</attribute>
     </xpath>
 
     <!--
@@ -32,12 +32,18 @@
       диапазона цены, свободного ввода города и набора полей, зависящего
       от раздела.
     -->
+    <xpath expr="//t[@t-component='props.Renderer']" position="attributes">
+      <attribute name="t-if">coopLayout.mode !== 'map'</attribute>
+    </xpath>
+
     <xpath expr="//t[@t-component='props.Renderer']" position="after">
+      <CoopMap t-if="coopLayout.mode === 'map'"
+               resModel="props.resModel" domain="model.root.domain"/>
       <CoopFilters resModel="props.resModel"/>
     </xpath>
 
     <xpath expr="//t[@t-component='props.Renderer']" position="after">
-      <div class="o_coop_pager" t-if="env.config.pagerProps">
+      <div class="o_coop_pager" t-if="env.config.pagerProps and coopLayout.mode !== 'map'">
         <Pager t-props="env.config.pagerProps"/>
       </div>
     </xpath>
@@ -62,10 +68,6 @@
     </xpath>
 
     <!--
-      Выбор порядка. Стоит рядом с поиском, а не в меню фильтров: в
-      каталоге это повседневное действие, а не настройка.
-    -->
-    <!--
       Название раздела заменяется вкладками: оно дублирует активную
       вкладку, а места занимает столько же.
     -->
@@ -82,17 +84,6 @@
       <div class="o_coop_row_break" t-if="coopIsCatalog"/>
     </xpath>
 
-    <xpath expr="//div[hasclass('o_control_panel_main_buttons')]" position="after">
-      <select t-if="coopIsCatalog" class="o_coop_sort form-select form-select-sm"
-              aria-label="Порядок в каталоге"
-              t-on-change="onCoopSortChange">
-        <option t-foreach="coopSortOptions" t-as="option" t-key="option[0]"
-                t-att-value="option[0]"
-                t-att-selected="option[0] === coopCurrentSort">
-          <t t-esc="option[1]"/>
-        </option>
-      </select>
-    </xpath>
     <xpath expr="//t[@t-if='env.config.viewSwitcherEntries?.length > 1']" position="attributes">
       <attribute name="t-if">coopViewEntries.length > 1</attribute>
     </xpath>
@@ -104,6 +95,26 @@
     </xpath>
     <xpath expr="//nav[hasclass('o_cp_switch_buttons')]//t[@t-foreach='env.config.viewSwitcherEntries']" position="attributes">
       <attribute name="t-foreach">coopViewEntries</attribute>
+    </xpath>
+  </t>
+
+  <!--
+    Строка поиска каталога.
+
+    Выпадающее меню «Фильтры / Группировать по / Избранное» вместе с
+    кнопкой-стрелкой убрано: у каталога есть своя панель фильтров, и два
+    разных набора условий на одном экране расходятся между собой — снял
+    условие в одном, а второй продолжает его показывать.
+
+    Подсказка своя: «Search...» ничего не говорит о том, что искать, а в
+    каталоге ищут по названию.
+  -->
+  <t t-name="coop_theme.SearchBar" t-inherit="web.SearchBar" t-inherit-mode="extension">
+    <xpath expr="//input[hasclass('o_searchview_input')]" position="attributes">
+      <attribute name="t-att-placeholder">coopPlaceholder</attribute>
+    </xpath>
+    <xpath expr="//SearchBarMenu" position="attributes">
+      <attribute name="t-if">!coopIsCatalog</attribute>
     </xpath>
   </t>
 

@@ -26,19 +26,42 @@ MAIN_ITEMS = [
     ('Сделки', 'fa-handshake-o', 'coop_deals.action_coop_deals'),
 ]
 
-# Расширения. В макете их полтора десятка — токеномика, цифровые активы,
-# совместные закупки, склад, аукционы; здесь только перенесённое. Пункт,
-# за которым стоит чужой модуль Odoo без нашего экрана, выдавал бы чужую
-# страницу за перенесённую.
+# Расширения — те же тринадцать, что в макете, и в том же порядке.
 #
-# Это подключённое по умолчанию, а не обязательное: расширения у каждого
-# свои, и убрать их из своего меню участник вправе.
+# Раньше здесь стояли два пункта, которых в макете нет: «Каталог
+# расширений» и «Помощь проекту». Каталог — это витрина, куда приходят
+# подключать расширение, и её место за кнопкой «+» над списком, а не
+# строкой в самом списке; помощь проекту к расширениям не относится
+# вовсе.
+#
+# Пустое действие значит, что расширение ещё не перенесено на движок:
+# пункт всё равно стоит и ведёт на страницу, которая прямо об этом
+# говорит. Список без них выглядел бы полным, и понять, чего не хватает,
+# было бы неоткуда — ровно та же причина, что и у разделов выше.
 EXTENSION_ITEMS = [
-    ('Каталог расширений', 'fa-th', 'coop_extensions.action_coop_extension_catalog'),
-    ('Помощь проекту', 'fa-hand-peace-o', 'coop_bounty.action_coop_bounty_task'),
+    ('Токеномика', 'fa-diamond', 'coop_tokens.action_coop_token'),
+    ('Цифровые активы', 'fa-certificate', ''),
+    ('Нематериальные активы', 'fa-lightbulb-o', ''),
+    ('Целевые программы ПК', 'fa-bullseye', ''),
+    ('Совместные закупки', 'fa-shopping-basket', ''),
+    ('Склад', 'fa-archive', ''),
+    ('События', 'fa-calendar', ''),
+    ('Аналитика', 'fa-bar-chart', ''),
+    ('Образование', 'fa-graduation-cap', ''),
+    ('Аукционы', 'fa-gavel', ''),
+    ('Библиотеки', 'fa-book', ''),
+    ('Диск', 'fa-folder-open-o', ''),
+    ('Здоровье', 'fa-heartbeat', ''),
 ]
 
+EXT_BY_NAME = {name: xmlid for name, _icon, xmlid in EXTENSION_ITEMS}
+
 MAIN_BY_NAME = {name: xmlid for name, _icon, xmlid in MAIN_ITEMS}
+
+# Пункты, стоявшие в умолчаниях раньше и убранные из них. Перечислены
+# поимённо, а не выведены вычитанием: иначе снос затронул бы и то, что
+# участник подключил себе сам.
+RETIRED_EXTENSIONS = {'Каталог расширений', 'Помощь проекту'}
 
 
 class CoopSidebarItem(models.Model):
@@ -112,14 +135,12 @@ class CoopSidebarItem(models.Model):
                 'is_required': True,
             })
         for index, (name, icon, xmlid) in enumerate(EXTENSION_ITEMS):
-            action = self.env.ref(xmlid, raise_if_not_found=False)
-            if not action:
-                continue
+            action = self.env.ref(xmlid, raise_if_not_found=False) if xmlid else None
             values.append({
                 'user_id': user.id,
                 'name': name,
                 'icon': icon,
-                'action_id': action.id,
+                'action_id': action.id if action else False,
                 'sequence': (index + 1) * 10,
                 'section': 'ext',
                 'is_required': False,
@@ -170,4 +191,19 @@ class CoopSidebarItem(models.Model):
             action = self.env.ref(xmlid, raise_if_not_found=False) if xmlid else None
             if action and item.action_id.id != action.id:
                 item.action_id = action.id
+
+        # Список расширений по умолчанию тоже меняется: пункты, которых в
+        # нём больше нет, убираем, недостающие дописываем. Убираем только
+        # прежние умолчания — то, что участник подключил себе сам, знает
+        # он один, и трогать это нельзя.
+        ext = items.filtered(lambda i: i.section == 'ext')
+        stale = ext.filtered(lambda i: i.name in RETIRED_EXTENSIONS)
+        if stale:
+            items -= stale
+            stale.unlink()
+        known = set(items.filtered(lambda i: i.section == 'ext').mapped('name'))
+        missing = [v for v in self._defaults_for_user(user)
+                   if v['section'] == 'ext' and v['name'] not in known]
+        if missing:
+            items |= self.create(missing)
         return items.sorted(lambda i: (0 if i.section == 'main' else 1, i.sequence, i.id))

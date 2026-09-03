@@ -223,10 +223,13 @@ export class CoopSidebar extends Component {
         return item.actionId === Number(current);
     }
 
-    /** «+» у рубрики ведёт в каталог расширений — оттуда их и подключают. */
+    /** «+» у рубрики ведёт в каталог расширений — оттуда их и подключают.
+     *
+     *  По внешнему имени действия, а не по первому пункту списка: в
+     *  списке теперь те расширения, что в макете, и каталога среди них
+     *  нет — он витрина, а не расширение. */
     openCatalog() {
-        const catalog = this.state.extensions[0];
-        return this.open(catalog || { label: "Расширения", actionId: false });
+        return this.action.doAction("coop_extensions.action_coop_extension_catalog");
     }
 
     openSettings() {

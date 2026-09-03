@@ -6,13 +6,17 @@ import { patch } from "@web/core/utils/patch";
 import { kanbanView } from "@web/views/kanban/kanban_view";
 import { KanbanController } from "@web/views/kanban/kanban_controller";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
+import { SearchBar } from "@web/search/search_bar/search_bar";
 import { Pager } from "@web/core/pager/pager";
 import { CoopTabs } from "@coop_theme/js/shell";
 import { CoopFilters } from "@coop_theme/js/catalog_filters";
+import { CoopMap } from "@coop_theme/js/catalog_map";
+import { coopSort, parseOrder } from "@coop_theme/js/catalog_sort";
 import { reactive, useEffect, useState } from "@odoo/owl";
 
 /**
- * Три вида каталога в одном переключателе: плиткой, канбаном, списком.
+ * Четыре вида каталога в одном переключателе: плиткой, канбаном,
+ * списком, на карте.
  *
  * Список — отдельное представление Odoo, и его кнопка в переключателе уже
  * есть. Плитка и канбан — одно представление с разной раскладкой
@@ -38,88 +42,19 @@ function readSavedLayout() {
 
 // Общее состояние вида: его читает и панель управления, чтобы подсветить
 // нужную кнопку, и представление, чтобы поставить класс на корень.
-export const coopLayout = reactive({ rows: readSavedLayout() === "rows" });
+const MODES = ["tiles", "rows", "map"];
 
-export function setCoopLayout(rows) {
-    coopLayout.rows = rows;
+export const coopLayout = reactive({
+    mode: MODES.includes(readSavedLayout()) ? readSavedLayout() : "tiles",
+});
+
+export function setCoopLayout(mode) {
+    coopLayout.mode = mode;
     try {
-        browser.localStorage.setItem(STORAGE_KEY, rows ? "rows" : "tiles");
+        browser.localStorage.setItem(STORAGE_KEY, mode);
     } catch {
         // Не сохранилось — вид всё равно переключился, просто забудется.
     }
-}
-
-/**
- * Порядок в каталоге.
- *
- * По умолчанию — сначала новые. Раньше проекты шли по готовности убыв., и
- * первая страница была сплошь стопроцентная: со стороны это выглядело
- * так, будто полоса готовности сломана и всегда полная.
- *
- * Признаки перечислены по разделам: у проекта осмысленна готовность, у
- * сообщества — число участников, у ресурса — цена. Общий список из
- * «названия и даты» не дал бы найти ни самый собранный проект, ни самое
- * людное сообщество.
- */
-const SORT_OPTIONS = {
-    "coop.project": [
-        ["id desc", "Сначала новые"],
-        ["name asc", "По названию"],
-        ["city asc", "По городу"],
-        ["readiness desc", "Сначала собранные"],
-        ["readiness asc", "Сначала те, где нужна помощь"],
-    ],
-    "coop.community": [
-        ["id desc", "Сначала новые"],
-        ["name asc", "По названию"],
-        ["city asc", "По городу"],
-        ["member_count desc", "Сначала людные"],
-    ],
-    "coop.resource": [
-        ["id desc", "Сначала новые"],
-        ["name asc", "По названию"],
-        ["city asc", "По городу"],
-    ],
-    "coop.skill.offer": [
-        ["id desc", "Сначала новые"],
-        ["name asc", "По названию"],
-        ["city asc", "По городу"],
-    ],
-    "coop.vacancy": [
-        ["id desc", "Сначала новые"],
-        ["name asc", "По названию"],
-        ["city asc", "По городу"],
-    ],
-    "coop.deal": [
-        ["id desc", "Сначала новые"],
-        ["name asc", "По номеру"],
-    ],
-    "res.partner": [
-        ["id desc", "Сначала новые"],
-        ["name asc", "По имени"],
-        ["city asc", "По городу"],
-    ],
-};
-
-const DEFAULT_SORT = [["id desc", "Сначала новые"], ["name asc", "По названию"]];
-
-export function coopSortOptionsFor(resModel) {
-    return SORT_OPTIONS[resModel] || DEFAULT_SORT;
-}
-
-// Выбранный порядок — по разделу: возвращаясь в каталог, человек
-// рассчитывает увидеть тот же порядок, а не сброшенный.
-export const coopSort = reactive({ orders: {} });
-
-export function setCoopSort(resModel, order) {
-    coopSort.orders = { ...coopSort.orders, [resModel]: order };
-}
-
-export function parseOrder(order) {
-    return order.split(",").map((part) => {
-        const [name, direction] = part.trim().split(/\s+/);
-        return { name, asc: direction !== "desc" };
-    });
 }
 
 export class CoopCatalogKanbanController extends KanbanController {
@@ -127,7 +62,7 @@ export class CoopCatalogKanbanController extends KanbanController {
     // панели сверху. Данные берутся те же, что у штатной: представление
     // уже сложило их в настройку экрана, и считать их второй раз значило
     // бы завести второй счётчик, который разойдётся с первым.
-    static components = { ...KanbanController.components, Pager, CoopFilters };
+    static components = { ...KanbanController.components, Pager, CoopFilters, CoopMap };
 
     // Кнопка создания подписывается по разделу: «Добавить ресурс»,
     // «Добавить проект». Штатное «Новое» ничего не говорит о том, что
@@ -197,34 +132,29 @@ patch(ControlPanel.prototype, {
                     type: "coop_tiles",
                     name: "Плиткой",
                     icon: "oi oi-view-kanban",
-                    active: entry.active && !coopLayout.rows,
+                    active: entry.active && coopLayout.mode === "tiles",
                 },
                 {
                     ...entry,
                     name: "Канбаном",
                     icon: "fa fa-align-justify",
-                    active: entry.active && coopLayout.rows,
+                    active: entry.active && coopLayout.mode === "rows",
+                },
+                {
+                    ...entry,
+                    type: "coop_map",
+                    name: "На карте",
+                    icon: "fa fa-map-marker",
+                    active: entry.active && coopLayout.mode === "map",
                 },
             ];
         });
     },
 
-    get coopSortOptions() {
-        return coopSortOptionsFor(this.env.searchModel?.resModel);
-    },
-
-    get coopCurrentSort() {
-        const resModel = this.env.searchModel?.resModel;
-        return coopSort.orders[resModel] || this.coopSortOptions[0][0];
-    },
-
-    onCoopSortChange(event) {
-        setCoopSort(this.env.searchModel?.resModel, event.target.value);
-    },
-
     switchView(viewType, isMiddleClick) {
-        if (this.coopIsCatalog && (viewType === "coop_tiles" || viewType === "kanban")) {
-            setCoopLayout(viewType === "kanban");
+        const layouts = { coop_tiles: "tiles", kanban: "rows", coop_map: "map" };
+        if (this.coopIsCatalog && viewType in layouts) {
+            setCoopLayout(layouts[viewType]);
             const active = this.env.config.viewSwitcherEntries?.find((view) => view.active);
             if (active?.type === "kanban") {
                 // Уже в канбане — меняется только раскладка, перезагружать
@@ -234,5 +164,18 @@ patch(ControlPanel.prototype, {
             return super.switchView("kanban", isMiddleClick);
         }
         return super.switchView(viewType, isMiddleClick);
+    },
+});
+
+// Строка поиска каталога: без штатного выпадающего меню и со своей
+// подсказкой. Признак каталога тот же, что у панели управления, — из
+// контекста действия.
+patch(SearchBar.prototype, {
+    get coopIsCatalog() {
+        return Boolean(this.env.searchModel?.globalContext?.coop_catalog);
+    },
+
+    get coopPlaceholder() {
+        return this.coopIsCatalog ? "Начните вводить название" : "Поиск...";
     },
 });
