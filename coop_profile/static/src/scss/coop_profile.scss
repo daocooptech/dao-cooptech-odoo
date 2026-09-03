@@ -649,3 +649,33 @@
     white-space: nowrap;
   }
 }
+
+// Перечень образования выглядит как строки «Личной информации»: слева
+// заведение, справа годы, никаких рамок, заголовков и строки добавления.
+.o_coop_plainlist {
+
+  .o_field_x2many_list_row_add,
+  .o_list_record_remove,
+  .o_optional_columns_dropdown,
+  tfoot {
+    display: none !important;
+  }
+
+  .o_list_renderer,
+  .o_list_table,
+  tbody tr,
+  tbody td {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  tbody tr:hover td {
+    background: transparent !important;
+  }
+
+  td:first-of-type {
+    padding-left: 0 !important;
+    color: var(--coop-ink, #14171a);
+  }
+}
