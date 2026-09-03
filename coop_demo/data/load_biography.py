@@ -196,3 +196,84 @@ def add_followers(env):
             created += 1
     _logger.info('Подписок заведено: %s', created)
     return created
+
+
+def enrich_showcase(env, login='dashkevich'):
+    """Добить полосы у страницы, которую смотрят при показе.
+
+    На демонстрации открывают одну и ту же страницу, и половина полос на
+    ней пустовала: ни проектов, ни вакансий, ни друзей. Пустая полоса
+    прячется целиком, и со стороны кажется, что раздела нет вовсе.
+
+    Записи не выдумываются, а передаются существующие — вместе с
+    фотографиями и описаниями: свежесозданные «Проект 1, Проект 2»
+    выглядели бы заглушками, а тут человек видит настоящий каталог.
+    """
+    user = env['res.users'].sudo().search([('login', '=', login)], limit=1)
+    if not user:
+        _logger.info('Витрина: пользователь %s не найден', login)
+        return 0
+    partner = user.partner_id
+    touched = 0
+
+    # ── Проекты ────────────────────────────────────────────────────────
+    Project = env['coop.project'].sudo()
+    if not Project.search_count([('partner_id', '=', partner.id)]):
+        # С картинкой и заполненные: полоса плиток без фотографий
+        # выглядит сломанной.
+        projects = Project.search([('image_512', '!=', False)], limit=4)
+        if projects:
+            projects.write({'partner_id': partner.id})
+            touched += len(projects)
+
+    # ── Вакансии ───────────────────────────────────────────────────────
+    Vacancy = env['coop.vacancy'].sudo()
+    if not Vacancy.search_count([('partner_id', '=', partner.id)]):
+        vacancies = Vacancy.search([('state', '=', 'published')], limit=3)
+        if vacancies:
+            vacancies.write({'partner_id': partner.id})
+            touched += len(vacancies)
+
+    # ── Друзья ─────────────────────────────────────────────────────────
+    #
+    # Дружба двусторонняя и лежит отдельной записью, поэтому её нельзя
+    # «дописать полем» — заводим настоящие принятые связи.
+    Friendship = env['coop.friendship'].sudo()
+    existing = Friendship.search_count([
+        '|', ('requester_id', '=', partner.id),
+        ('addressee_id', '=', partner.id),
+        ('state', '=', 'accepted'),
+    ])
+    if not existing:
+        # Только живые участники каталога: служебные записи вроде
+        # «Administrator» в друзьях выглядят ошибкой — у них нет ни
+        # фотографии, ни страницы, на которую можно перейти.
+        service = env['res.users'].sudo().search([
+            ('login', 'in', ['admin', '__system__', 'default'])]).mapped(
+                'partner_id').ids
+        others = env['res.partner'].sudo().search([
+            ('id', '!=', partner.id),
+            ('id', 'not in', service),
+            ('is_company', '=', False),
+            ('image_1920', '!=', False),
+            ('coop_specialization_id', '!=', False),
+            ('id', 'in', env['coop.membership'].sudo().search([]).mapped(
+                'partner_id').ids),
+        ], limit=6)
+        for other in others:
+            if Friendship.search_count([
+                    '|',
+                    '&', ('requester_id', '=', partner.id),
+                    ('addressee_id', '=', other.id),
+                    '&', ('requester_id', '=', other.id),
+                    ('addressee_id', '=', partner.id)]):
+                continue
+            Friendship.create({
+                'requester_id': other.id,
+                'addressee_id': partner.id,
+                'state': 'accepted',
+            })
+            touched += 1
+
+    _logger.info('Витрина: дополнено записей — %s', touched)
+    return touched

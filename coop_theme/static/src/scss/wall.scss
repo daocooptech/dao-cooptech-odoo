@@ -111,3 +111,85 @@
     margin-left: 0;
   }
 }
+
+// ── Форма всегда в столбец, когда лента внизу ──────────────────────────
+//
+// `mailLayout()` — не единственное, что решает раскладку. Сама форма
+// (`web/views/form/form_compiler.js`, ядро Odoo, не наш модуль) на
+// экране шире XXL всегда ставит `.o_form_renderer` в строку
+// (`flex-nowrap`) — независимо от того, что вернул `mailLayout`. Разница
+// между «лентой сбоку» и «лентой снизу» на таких экранах в остальном
+// сводится только к ширине самой ленты, а не к тому, где она стоит: она
+// не переносится на новую строку, а просто сжимается рядом с карточкой.
+//
+// Правило не завязано на наши классы — оно смотрит на признак, который
+// уже верно выставляет наш патч (`js/wall.js`): у ленты нет класса
+// `.o-aside`, когда решение — «снизу». Так фикс работает сразу везде,
+// где стоит `<chatter>` в наших формах, без обхода каждой по имени.
+.o_form_renderer:has(> .o-mail-Form-chatter:not(.o-aside)) {
+  flex-direction: column !important;
+
+  // Две полосы прокрутки — следствие той же строчной раскладки: в ней
+  // лист формы получает свою высоту и прокручивается сам, а страница
+  // прокручивается снаружи. В столбце высота нужна естественная: тогда
+  // прокрутка одна, общая, и стена дочитывается тем же движением, что и
+  // карточка над ней.
+  height: auto !important;
+
+  > .o_form_sheet_bg {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+}
+
+// ── Стена оформлена блоком, как остальные полосы ──────────────────────
+//
+// В макете лента — такой же блок, что «Достижения» или «Ресурсы»: рамка,
+// шапка с названием, тело на белом. Заголовок добавляется здесь, а не в
+// разметке: `<chatter>` — готовый элемент движка, своего места под
+// заголовок у него нет, а собирать ради подписи собственное
+// представление ленты значило бы поддерживать его вечно.
+.o_coop_profile,
+.o_coop_org_form,
+.o_coop_wall_form {
+
+  .o-mail-Form-chatter:not(.o-aside) {
+    padding-bottom: 0;
+  }
+
+  .o-mail-Chatter {
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--coop-white, #fff);
+  }
+
+  // Шапка блока — та же, что у полос: подложка, подпись, линия снизу.
+  .o-mail-Chatter-topbar {
+    position: relative;
+    padding: 10px 14px 10px 82px;
+    border-bottom: 1px solid var(--coop-line, #e6e6e1);
+    background: var(--coop-teal-tint, #e3efed);
+  }
+
+  .o-mail-Chatter-topbar::before {
+    content: "Лента";
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font: 600 12.5px/1.3 'Manrope', sans-serif;
+    color: var(--coop-ink, #14171a);
+  }
+
+  // Тело ленты — с полями, как у полос, а не встык к рамке.
+  .o-mail-Chatter-content,
+  .o-mail-Thread {
+    padding: 0 14px;
+  }
+
+  .o-mail-Composer {
+    margin: 12px 14px;
+  }
+}

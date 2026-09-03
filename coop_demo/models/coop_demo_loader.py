@@ -56,6 +56,9 @@ class CoopDemoLoader(models.AbstractModel):
         load_biography.age_listings(self.env)
         load_biography.add_followers(self.env)
         load_faces.load_faces(self.env)
+        # Последним: дополняет то, чего не досталось витринной
+        # странице при обычной раздаче.
+        load_biography.enrich_showcase(self.env)
         # Задачи и токены последними: исполнителей берём из уже
         # загруженного каталога людей.
         # Ступени верификации — после каталогов: загрузчик снимает с
