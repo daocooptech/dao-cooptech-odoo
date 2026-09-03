@@ -5,19 +5,19 @@ import { useService } from "@web/core/utils/hooks";
 import { Component, onWillStart, useState } from "@odoo/owl";
 
 /**
- * «Действую от имени» — в шапке, рядом с аватаром.
+ * Выбор, от чьего имени человек действует, — в меню под аватаром.
  *
- * Раньше он стоял в боковом меню, а в шапке движок показывал название
- * компании. Получалось два списка организаций в разных углах экрана, и
- * было непонятно, чем они отличаются и который из них главный.
+ * Раньше это был отдельный список в боковом меню, а рядом, в шапке,
+ * движок показывал название компании. Два списка организаций в разных
+ * углах экрана отвечали на один вопрос разными словами, и понять, чем
+ * они отличаются, было нельзя.
  *
- * Остаётся один, и стоит он там, где у любого сайта стоит «кто я
- * сейчас»: у аватара. Компания движка оттуда убрана — на платформе
- * человек действует от своего имени или от имени организации, в которой
- * состоит, а не «переключает компанию» в учётной системе.
+ * Теперь выбор один и лежит там, где его ищут, — под своим аватаром,
+ * рядом с выходом и настройками. Строки — с фотографией и названием:
+ * человека и кооператив различают в лицо, а не по строчке текста.
  */
-export class CoopActingSwitch extends Component {
-    static template = "coop_theme.ActingSwitch";
+export class CoopActingMenu extends Component {
+    static template = "coop_theme.ActingMenu";
     static props = {};
 
     setup() {
@@ -32,24 +32,21 @@ export class CoopActingSwitch extends Component {
             this.state.actors = info.options || [];
             this.state.acting = info.current || null;
         } catch {
-            // Права или сеть — переключатель просто не показывается,
-            // страница от этого не ломается.
+            // Права или сеть — выбора просто не будет, меню от этого не
+            // ломается.
             this.state.actors = [];
         }
     }
 
-    /** Имя того, от кого человек действует сейчас. */
-    get currentName() {
-        const actor = this.state.actors.find((one) => one.id === this.state.acting);
-        return actor ? actor.name : "";
+    avatar(actor) {
+        return `/web/image/res.partner/${actor.id}/avatar_128`;
     }
 
-    async setActing(value) {
-        const id = Number(value);
-        if (!id || id === this.state.acting) {
+    async select(actor) {
+        if (actor.id === this.state.acting) {
             return;
         }
-        await this.orm.call("coop.shell", "set_acting", [id]);
+        await this.orm.call("coop.shell", "set_acting", [actor.id]);
         // Перезагрузка целиком: от имени зависит почти всё на экране —
         // своя страница, кошелёк, каталоги «мои». Досчитывать это по
         // кусочкам значило бы держать вторую копию тех же правил.
@@ -57,11 +54,13 @@ export class CoopActingSwitch extends Component {
     }
 }
 
-// Правее переключателя темы и поиска, левее аватара — на месте, где
-// движок показывал компанию.
-registry.category("systray").add(
-    "coop_theme.acting_switch", { Component: CoopActingSwitch }, { sequence: 1 }
-);
+// Первым в меню: это ответ на вопрос «кто я сейчас», а он предшествует
+// всему остальному — настройкам, справке и выходу.
+registry.category("user_menuitems").add("coop_theme.acting", () => ({
+    type: "component",
+    contentComponent: CoopActingMenu,
+    sequence: 1,
+}));
 
 // Переключатель компаний движка убран: он отвечает на тот же вопрос
 // «от чьего имени я работаю», но словами учётной системы, и рядом с

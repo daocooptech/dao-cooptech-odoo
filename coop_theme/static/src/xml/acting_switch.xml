@@ -2,21 +2,27 @@
 <templates xml:space="preserve">
 
   <!--
-    «Действую от имени» в шапке. Показывается, только когда выбирать
-    есть из чего: человек, ни в одной организации не состоящий, всегда
-    действует от себя, и список из одной строки ему ничего не сообщает.
+    Список того, от чьего имени можно действовать, внутри меню под
+    аватаром. Показывается, только когда выбирать есть из чего: человек,
+    ни в одной организации не состоящий, всегда действует от себя, и
+    список из одной строки ему ничего не сообщает.
   -->
-  <t t-name="coop_theme.ActingSwitch">
-    <div class="o_coop_acting_top" t-if="state.actors.length > 1">
-      <label class="o_coop_acting_label" for="coop_acting_top">Действую от имени</label>
-      <select id="coop_acting_top" class="o_coop_acting_select"
-              t-on-change="(ev) => this.setActing(ev.target.value)">
-        <option t-foreach="state.actors" t-as="actor" t-key="actor.id"
-                t-att-value="actor.id" t-att-selected="actor.id === state.acting">
-          <t t-esc="actor.name"/>
-        </option>
-      </select>
-    </div>
+  <t t-name="coop_theme.ActingMenu">
+    <t t-if="state.actors.length > 1">
+      <div class="o_coop_acting_menu">
+        <div class="o_coop_acting_title">Действую от имени</div>
+        <button t-foreach="state.actors" t-as="actor" t-key="actor.id"
+                type="button" class="o_coop_acting_item"
+                t-att-class="{ o_coop_acting_on: actor.id === state.acting }"
+                t-on-click="() => this.select(actor)">
+          <img class="o_coop_acting_pic" t-att-src="avatar(actor)"
+               t-att-alt="actor.name" loading="lazy"/>
+          <span class="o_coop_acting_name" t-esc="actor.name"/>
+          <span class="o_coop_acting_mark" t-if="actor.id === state.acting">✓</span>
+        </button>
+      </div>
+      <div role="separator" class="dropdown-divider"/>
+    </t>
   </t>
 
 </templates>
