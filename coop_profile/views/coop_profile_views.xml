@@ -200,7 +200,7 @@
               -->
               <div class="o_coop_band" invisible="not coop_friend_ids">
                 <div class="o_coop_band_head">
-                  <span>Связи</span>
+                  <span>Друзья</span>
                   <button name="action_coop_my_friends" type="object"
                           class="o_coop_band_all">смотреть все</button>
                 </div>

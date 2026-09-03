@@ -71,7 +71,7 @@
       место с названием раздела и пагинатором.
     -->
     <xpath expr="//div[hasclass('o_control_panel')]" position="attributes">
-      <attribute name="t-att-class">{ o_coop_catalog: coopIsCatalog }</attribute>
+      <attribute name="t-att-class">{ o_coop_catalog: coopIsCatalog, o_coop_own_page: coopIsProfile }</attribute>
     </xpath>
 
     <!--
