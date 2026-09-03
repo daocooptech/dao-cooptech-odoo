@@ -486,3 +486,63 @@
 .o_coop_add_label {
   font: 500 12px/1.3 'Manrope', sans-serif;
 }
+
+// ── Год на плитке достижения ──────────────────────────────────────────
+//
+// У достижения нет картинки, и плитка без неё выглядела бы пустой
+// рамкой с подписью. Вместо картинки — год: он и есть то, чем
+// достижения различаются в ряду, и читается с того же расстояния.
+.o_coop_mini_year {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 64px;
+  margin-bottom: 6px;
+  border-radius: 8px;
+  background: var(--coop-teal-tint, #e3efed);
+  color: var(--coop-teal-dark, #0e4f4a);
+  font: 700 20px/1 'JetBrains Mono', ui-monospace, monospace;
+}
+
+// ── Справка внутри блока «Личная информация» ──────────────────────────
+//
+// Образование стоит подсписком: подпись сверху, строки под ней. В общий
+// ряд «подпись — значение» оно не умещается — там одна строка, а тут их
+// несколько, с годами.
+.o_coop_sub {
+  display: block;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--coop-line, #e6e6e1);
+
+  .o_coop_key {
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .o_list_table {
+    font-size: 12px;
+  }
+
+  // Заголовки столбцов в узкой колонке только мешают: в трёх строках и
+  // так видно, где название, а где год.
+  thead {
+    display: none;
+  }
+
+  td {
+    padding: 2px 4px !important;
+  }
+}
+
+// Служебная обвязка текстового редактора в рассказе о себе. Это обычная
+// строка о человеке, а не документ: панель инструментов и её значок
+// торчат посреди страницы и выглядят обломком чужого интерфейса.
+.o_coop_about {
+
+  .o-wysiwyg-local-overlay,
+  .oe-toolbar,
+  .o_field_html .btn-group {
+    display: none !important;
+  }
+}

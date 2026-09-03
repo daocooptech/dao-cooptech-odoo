@@ -15,7 +15,11 @@
   <record id="view_coop_profile_form" model="ir.ui.view">
     <field name="name">coop.profile.form</field>
     <field name="model">res.partner</field>
-    <field name="priority">99</field>
+    <!-- Меньше штатного: вид по умолчанию движок выбирает по
+         наименьшему приоритету, и по прямой ссылке на участника
+         должна открываться страница платформы, а не карточка
+         контакта из справочника. -->
+    <field name="priority">1</field>
     <field name="arch" type="xml">
       <form string="Участник" class="o_coop_profile">
         <header>
@@ -167,6 +171,24 @@
                     <span class="o_coop_key">На платформе с</span>
                     <field name="coop_registered_on" readonly="1"/>
                   </div>
+                  <!--
+                    Образование стоит здесь, а не отдельной полосой: это
+                    справка о человеке, как возраст и языки, а не его
+                    владение вроде ресурса или проекта. Полосы справа —
+                    про то, что человек делает; колонка слева — про то,
+                    кто он.
+                  -->
+                  <div class="o_coop_sub" invisible="not coop_education_ids">
+                    <span class="o_coop_key">Образование</span>
+                    <field name="coop_education_ids" nolabel="1"
+                           readonly="not coop_is_self">
+                      <list editable="bottom">
+                        <field name="name"/>
+                        <field name="speciality" optional="show"/>
+                        <field name="year_to" string="Год"/>
+                      </list>
+                    </field>
+                  </div>
                 </div>
               </div>
             </div>
@@ -259,25 +281,6 @@
                 </div>
               </div>
 
-              <div class="o_coop_band"
-                   invisible="not coop_education_ids and not coop_is_self">
-                <div class="o_coop_band_head">
-                  <span>Образование</span>
-                </div>
-                <div class="o_coop_band_body">
-                  <field name="coop_education_ids" nolabel="1"
-                         readonly="not coop_is_self">
-                    <list editable="bottom">
-                      <field name="name"/>
-                      <field name="speciality" optional="show"/>
-                      <field name="level"/>
-                      <field name="year_from"/>
-                      <field name="year_to"/>
-                    </list>
-                  </field>
-                </div>
-              </div>
-
               <div class="o_coop_band" invisible="coop_offer_count == 0">
                 <div class="o_coop_band_head">
                   <span>Навыки</span>
@@ -356,7 +359,11 @@
                       <field name="city"/>
                       <templates>
                         <t t-name="card">
-                          <div class="o_coop_mini o_coop_mini_text">
+                          <div class="o_coop_mini">
+                            <div class="o_coop_mini_img">
+                              <img t-att-src="'/web/image/coop.vacancy/' + record.id.raw_value + '/image_512'"
+                                   t-att-alt="record.name.value" loading="lazy"/>
+                            </div>
                             <div class="o_coop_mini_label">
                               <field name="name"/>
                             </div>
@@ -419,13 +426,37 @@
                   <span>Достижения</span>
                 </div>
                 <div class="o_coop_band_body">
+                  <!--
+                    Плиткой, как остальные полосы, а не таблицей: две
+                    таблицы среди восьми полос с плитками читались как
+                    чужой кусок интерфейса. Картинки у достижения нет —
+                    вместо неё год крупно: он и есть то, чем достижения
+                    отличаются друг от друга в ряду.
+                  -->
                   <field name="coop_achievement_ids" nolabel="1"
                          readonly="not coop_is_self">
-                    <list editable="bottom">
-                      <field name="name"/>
-                      <field name="year"/>
-                      <field name="proof_url" widget="url" optional="show"/>
-                    </list>
+                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                      <templates>
+                        <t t-name="card">
+                          <div class="o_coop_mini o_coop_mini_text">
+                            <div class="o_coop_mini_year">
+                              <t t-esc="record.year.raw_value"/>
+                            </div>
+                            <div class="o_coop_mini_label">
+                              <field name="name"/>
+                            </div>
+                          </div>
+                        </t>
+                      </templates>
+                    </kanban>
+                    <form>
+                      <group>
+                        <field name="name"/>
+                        <field name="year"/>
+                        <field name="proof_url" widget="url"/>
+                        <field name="description"/>
+                      </group>
+                    </form>
                   </field>
                 </div>
               </div>
@@ -448,7 +479,11 @@
                       <field name="state"/>
                       <templates>
                         <t t-name="card">
-                          <div class="o_coop_mini o_coop_mini_text">
+                          <div class="o_coop_mini">
+                            <div class="o_coop_mini_img">
+                              <img t-att-src="'/web/image/coop.resource/' + record.id.raw_value + '/image_512'"
+                                   t-att-alt="record.name.value" loading="lazy"/>
+                            </div>
                             <div class="o_coop_mini_label">
                               <field name="name"/>
                             </div>
@@ -482,7 +517,11 @@
                       <field name="role"/>
                       <templates>
                         <t t-name="card">
-                          <div class="o_coop_mini o_coop_mini_text">
+                          <div class="o_coop_mini">
+                            <div class="o_coop_mini_img">
+                              <img t-att-src="'/web/image/res.partner/' + record.organization_id.raw_value + '/avatar_256'"
+                                   t-att-alt="record.organization_id.value" loading="lazy"/>
+                            </div>
                             <div class="o_coop_mini_label">
                               <field name="organization_id"/>
                             </div>
@@ -516,7 +555,11 @@
                       <field name="role"/>
                       <templates>
                         <t t-name="card">
-                          <div class="o_coop_mini o_coop_mini_text">
+                          <div class="o_coop_mini">
+                            <div class="o_coop_mini_img">
+                              <img t-att-src="'/web/image/coop.community/' + record.community_id.raw_value + '/image_512'"
+                                   t-att-alt="record.community_id.value" loading="lazy"/>
+                            </div>
                             <div class="o_coop_mini_label">
                               <field name="community_id"/>
                             </div>
