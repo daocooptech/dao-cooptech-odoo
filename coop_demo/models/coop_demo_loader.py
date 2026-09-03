@@ -2,6 +2,7 @@
 from odoo import api, models
 
 from ..data import (emblems, load_attributes, load_biography, load_bounty,
+                    load_faces,
                     load_communities,
                     load_deals,
                     load_examples, load_memberships,
@@ -54,6 +55,7 @@ class CoopDemoLoader(models.AbstractModel):
         load_biography.load_biography(self.env)
         load_biography.age_listings(self.env)
         load_biography.add_followers(self.env)
+        load_faces.load_faces(self.env)
         # Задачи и токены последними: исполнителей берём из уже
         # загруженного каталога людей.
         # Ступени верификации — после каталогов: загрузчик снимает с

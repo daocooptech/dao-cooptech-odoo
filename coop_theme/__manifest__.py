@@ -45,6 +45,8 @@
             'coop_theme/static/src/js/catalog_view.js',
             'coop_theme/static/src/js/shell.js',
             'coop_theme/static/src/js/theme_switch.js',
+            'coop_theme/static/src/js/wall.js',
+            'coop_theme/static/src/scss/wall.scss',
             'coop_theme/static/src/xml/theme_switch.xml',
             'coop_theme/static/src/xml/catalog_view.xml',
             'coop_theme/static/src/xml/shell.xml',

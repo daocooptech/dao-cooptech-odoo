@@ -44,6 +44,21 @@ class ResPartner(models.Model):
     # ── Состав ───────────────────────────────────────────────────────────
     coop_member_ids = fields.One2many(
         'coop.membership', 'organization_id', string='Состав')
+
+    # Владения организации — те же полосы, что у человека на странице.
+    # Через те же поля, что и у него: организация на платформе — такой
+    # же участник, и заводить ей отдельные связи значило бы держать два
+    # набора правил там, где хватает одного.
+    coop_org_resource_ids = fields.One2many(
+        'coop.resource', 'owner_id', string='Ресурсы организации',
+        domain=[('listing_type', '=', 'offer')])
+    coop_org_need_ids = fields.One2many(
+        'coop.resource', 'owner_id', string='Потребности организации',
+        domain=[('listing_type', '=', 'request')])
+    coop_org_project_ids = fields.One2many(
+        'coop.project', 'partner_id', string='Проекты организации')
+    coop_org_vacancy_ids = fields.One2many(
+        'coop.vacancy', 'partner_id', string='Вакансии организации')
     coop_member_count = fields.Integer(
         string='Участников', compute='_compute_coop_member_count', store=True)
     coop_has_members = fields.Boolean(

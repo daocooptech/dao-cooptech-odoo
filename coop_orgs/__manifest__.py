@@ -17,7 +17,11 @@
     'category': 'Cooperative',
     'version': '19.0.1.0.0',
     'license': 'LGPL-3',
-    'depends': ['coop_base', 'coop_theme', 'contacts', 'mail'],
+    # Карточка организации показывает её владения — ресурсы,
+    # потребности, проекты, вакансии, — поэтому модуль стоит поверх
+    # тех разделов, откуда они берутся.
+    'depends': ['coop_base', 'coop_theme', 'coop_resources',
+                'coop_projects', 'coop_vacancies', 'contacts', 'mail'],
     'data': [
         'views/coop_orgs_views.xml',
     ],

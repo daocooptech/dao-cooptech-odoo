@@ -96,7 +96,14 @@
     <field name="name">coop.orgs.form</field>
     <field name="model">res.partner</field>
     <field name="arch" type="xml">
-      <form string="Организация" class="o_coop_org_form">
+      <!--
+        Карточка организации — та же раскладка, что у страницы человека:
+        слева колонка со справками, справа полосы владений. Организация
+        на платформе — такой же участник, и разводить два разных вида
+        карточки значило бы, что человек каждый раз заново ищет, где что
+        лежит.
+      -->
+      <form string="Организация" class="o_coop_profile o_coop_org_form">
         <header>
           <button name="action_coop_org_message" type="object"
                   string="Написать" class="btn-primary"/>
@@ -105,82 +112,246 @@
           <button name="action_coop_org_follow" type="object"
                   string="Вы подписаны" invisible="not coop_org_is_following"/>
         </header>
-        <sheet>
-          <div class="oe_button_box" name="button_box">
-            <!-- Кнопка и вкладка состава — только тем, кто вправе его
-                 читать. Администратор платформы не пайщик и поимённый
-                 состав чужого кооператива не видит; без groups форма у
-                 него не открывалась бы вовсе. -->
-            <button name="action_coop_members" type="object"
-                    class="oe_stat_button" icon="fa-users"
-                    groups="coop_base.group_coop_member,coop_base.group_coop_board,coop_base.group_coop_audit"
-                    invisible="not coop_has_members">
-              <field name="coop_member_count" widget="statinfo" string="Участников"/>
-            </button>
+        <sheet class="o_coop_profile_sheet">
+          <field name="coop_has_members" invisible="1"/>
+          <field name="coop_org_is_following" invisible="1"/>
+          <field name="coop_symbol_mark" invisible="1"/>
+
+          <div class="o_coop_profile_layout">
+
+            <!-- ── Левая колонка ─────────────────────────────────── -->
+            <div class="o_coop_profile_side">
+              <div class="o_coop_cover">
+                <field name="image_1920" widget="image"
+                       options="{'preview_image': 'avatar_256'}"/>
+              </div>
+
+              <div class="o_coop_stats">
+                <div>Уровень доверия:
+                  <b><field name="coop_trust" nolabel="1" readonly="1"/>%</b>
+                </div>
+                <div invisible="not coop_member_count">Сотрудников:
+                  <b><field name="coop_member_count" nolabel="1" readonly="1"/></b>
+                  <button name="action_coop_members" type="object"
+                          class="o_coop_stat_note"
+                          groups="coop_base.group_coop_member,coop_base.group_coop_board,coop_base.group_coop_audit">состав →</button>
+                </div>
+              </div>
+
+              <div class="o_coop_infobox">
+                <div class="o_coop_infobox_head">Контакты</div>
+                <div class="o_coop_infobox_body">
+                  <div><span class="o_coop_key">Город</span>
+                    <field name="city" placeholder="не указан"/></div>
+                  <div><span class="o_coop_key">Адрес</span>
+                    <field name="street" placeholder="улица, дом"/></div>
+                  <div><span class="o_coop_key">Индекс</span>
+                    <field name="zip" placeholder="нет"/></div>
+                  <div><span class="o_coop_key">Страна</span>
+                    <field name="country_id" options="{'no_create': True}"
+                           placeholder="не указана"/></div>
+                  <div><span class="o_coop_key">Телефон</span>
+                    <field name="phone" widget="phone" placeholder="не указан"/></div>
+                  <div><span class="o_coop_key">Почта</span>
+                    <field name="email" widget="email" placeholder="не указана"/></div>
+                  <div><span class="o_coop_key">Сайт</span>
+                    <field name="website" widget="url" placeholder="нет"/></div>
+                </div>
+              </div>
+
+              <div class="o_coop_infobox">
+                <div class="o_coop_infobox_head">Реквизиты</div>
+                <div class="o_coop_infobox_body">
+                  <div><span class="o_coop_key">ИНН</span>
+                    <field name="coop_inn" placeholder="не указан"/></div>
+                  <div><span class="o_coop_key">КПП</span>
+                    <field name="coop_kpp" placeholder="нет"/></div>
+                  <div><span class="o_coop_key">ОГРН</span>
+                    <field name="coop_ogrn" placeholder="не указан"/></div>
+                  <div><span class="o_coop_key">Зарегистрирована</span>
+                    <field name="coop_registered_on" placeholder="не указано"/></div>
+                  <div><span class="o_coop_key">Устав</span>
+                    <field name="coop_charter_url" widget="url"
+                           placeholder="нет"/></div>
+                </div>
+              </div>
+
+              <div class="o_coop_infobox">
+                <div class="o_coop_infobox_head">На платформе</div>
+                <div class="o_coop_infobox_body">
+                  <div><span class="o_coop_key">Специализация</span>
+                    <field name="coop_specialization_id"
+                           options="{'no_create': True}"
+                           placeholder="не указана"/></div>
+                  <div><span class="o_coop_key">Сфера</span>
+                    <field name="coop_specialization_category_id" readonly="1"/></div>
+                  <div><span class="o_coop_key">Участник</span>
+                    <field name="coop_is_participant"/></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── Правая колонка ────────────────────────────────── -->
+            <div class="o_coop_profile_main">
+              <div class="o_coop_name_row">
+                <h1><field name="name" placeholder="Название организации"/></h1>
+                <span class="o_coop_verified" invisible="not coop_is_cooperative">
+                  Кооперативная организация
+                </span>
+              </div>
+              <div class="o_coop_role">
+                <field name="coop_legal_form_id" options="{'no_create': True}"
+                       placeholder="Правовая форма"/>
+              </div>
+
+              <div class="o_coop_about" invisible="not comment">
+                <field name="comment" placeholder="Чем занимается организация"/>
+              </div>
+
+              <!--
+                Полосы владений — те же, что на странице человека, и в том
+                же порядке, что в макете: сначала люди, потом то, что
+                организация предлагает, потом её замыслы и нужды.
+              -->
+              <div class="o_coop_band" invisible="not coop_has_members"
+                   groups="coop_base.group_coop_member,coop_base.group_coop_board,coop_base.group_coop_audit">
+                <div class="o_coop_band_head">
+                  <span>Сотрудники</span>
+                  <button name="action_coop_members" type="object"
+                          class="o_coop_band_all">смотреть все</button>
+                </div>
+                <div class="o_coop_band_body">
+                  <field name="coop_member_ids" readonly="1" nolabel="1"
+                         domain="[('state', '=', 'active')]">
+                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                      <field name="partner_id"/>
+                      <field name="role"/>
+                      <templates>
+                        <t t-name="card">
+                          <div class="o_coop_mini">
+                            <div class="o_coop_mini_img">
+                              <img t-att-src="'/web/image/res.partner/' + record.partner_id.raw_value + '/avatar_256'"
+                                   t-att-alt="record.partner_id.value" loading="lazy"/>
+                            </div>
+                            <div class="o_coop_mini_label">
+                              <field name="partner_id"/>
+                            </div>
+                            <div class="o_coop_mini_note">
+                              <field name="role"/>
+                            </div>
+                          </div>
+                        </t>
+                      </templates>
+                    </kanban>
+                  </field>
+                </div>
+              </div>
+
+              <div class="o_coop_band" invisible="not coop_org_resource_ids">
+                <div class="o_coop_band_head">
+                  <span>Ресурсы</span>
+                </div>
+                <div class="o_coop_band_body">
+                  <field name="coop_org_resource_ids" readonly="1" nolabel="1">
+                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                      <templates>
+                        <t t-name="card">
+                          <div class="o_coop_mini">
+                            <div class="o_coop_mini_img">
+                              <img t-att-src="'/web/image/coop.resource/' + record.id.raw_value + '/image_512'"
+                                   t-att-alt="record.name.value" loading="lazy"/>
+                            </div>
+                            <div class="o_coop_mini_label">
+                              <field name="name"/>
+                            </div>
+                          </div>
+                        </t>
+                      </templates>
+                    </kanban>
+                  </field>
+                </div>
+              </div>
+
+              <div class="o_coop_band" invisible="not coop_org_project_ids">
+                <div class="o_coop_band_head">
+                  <span>Проекты</span>
+                </div>
+                <div class="o_coop_band_body">
+                  <field name="coop_org_project_ids" readonly="1" nolabel="1">
+                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                      <templates>
+                        <t t-name="card">
+                          <div class="o_coop_mini">
+                            <div class="o_coop_mini_img">
+                              <img t-att-src="'/web/image/coop.project/' + record.id.raw_value + '/image_512'"
+                                   t-att-alt="record.name.value" loading="lazy"/>
+                            </div>
+                            <div class="o_coop_mini_label">
+                              <field name="name"/>
+                            </div>
+                          </div>
+                        </t>
+                      </templates>
+                    </kanban>
+                  </field>
+                </div>
+              </div>
+
+              <div class="o_coop_band" invisible="not coop_org_vacancy_ids">
+                <div class="o_coop_band_head">
+                  <span>Вакансии</span>
+                </div>
+                <div class="o_coop_band_body">
+                  <field name="coop_org_vacancy_ids" readonly="1" nolabel="1">
+                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                      <templates>
+                        <t t-name="card">
+                          <div class="o_coop_mini o_coop_mini_text">
+                            <div class="o_coop_mini_label">
+                              <field name="name"/>
+                            </div>
+                          </div>
+                        </t>
+                      </templates>
+                    </kanban>
+                  </field>
+                </div>
+              </div>
+
+              <div class="o_coop_band" invisible="not coop_org_need_ids">
+                <div class="o_coop_band_head">
+                  <span>Потребности</span>
+                </div>
+                <div class="o_coop_band_body">
+                  <field name="coop_org_need_ids" readonly="1" nolabel="1">
+                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                      <field name="state"/>
+                      <templates>
+                        <t t-name="card">
+                          <div class="o_coop_mini o_coop_mini_text">
+                            <div class="o_coop_mini_label">
+                              <field name="name"/>
+                            </div>
+                            <div class="o_coop_mini_note"
+                                 t-att-class="record.state.raw_value === 'published' ? 'o_coop_open' : 'o_coop_closed'">
+                              <t t-if="record.state.raw_value === 'published'">● открыта</t>
+                              <t t-else="">● закрыта</t>
+                            </div>
+                          </div>
+                        </t>
+                      </templates>
+                    </kanban>
+                  </field>
+                </div>
+              </div>
+            </div>
           </div>
-
-          <field name="avatar_256" widget="image" class="oe_avatar"/>
-          <div class="oe_title">
-            <h1><field name="name" placeholder="Название организации"/></h1>
-            <h3 class="text-muted"><field name="coop_legal_form_id"
-                                          options="{'no_create': True}"
-                                          placeholder="Правовая форма"/></h3>
-          </div>
-
-          <group>
-            <group string="Реквизиты">
-              <field name="coop_inn"/>
-              <field name="coop_kpp"/>
-              <field name="coop_ogrn"/>
-              <field name="coop_registered_on"/>
-              <field name="coop_charter_url" widget="url"/>
-            </group>
-            <group string="На платформе">
-              <field name="coop_is_participant"/>
-              <field name="coop_specialization_id" options="{'no_create': True}"/>
-              <field name="coop_specialization_category_id" readonly="1"/>
-              <field name="coop_trust"/>
-              <field name="coop_is_cooperative" readonly="1"/>
-              <field name="coop_has_members" invisible="1"/>
-              <field name="coop_org_is_following" invisible="1"/>
-              <field name="coop_symbol_mark" invisible="1"/>
-            </group>
-          </group>
-
-          <group string="Где находится">
-            <group>
-              <field name="street" placeholder="Улица, дом"/>
-              <field name="city"/>
-              <field name="zip"/>
-              <field name="country_id" options="{'no_create': True}"/>
-            </group>
-            <group>
-              <field name="phone" widget="phone"/>
-              <field name="email" widget="email"/>
-              <field name="website" widget="url"/>
-            </group>
-          </group>
-
-          <notebook>
-            <page string="Состав" name="members" groups="coop_base.group_coop_member,coop_base.group_coop_board,coop_base.group_coop_audit"
-                  invisible="not coop_has_members">
-              <field name="coop_member_ids" nolabel="1">
-                <list>
-                  <field name="partner_id" string="Участник"/>
-                  <field name="role"/>
-                  <field name="power_ids" widget="many2many_tags"/>
-                  <field name="state"/>
-                  <field name="joined_on"/>
-                  <field name="has_vote" string="Право голоса"/>
-                </list>
-              </field>
-            </page>
-            <!-- Ресурсы организации появятся вместе с разделом «Ресурсы»:
-                 связывать здесь пока не с чем, а вкладка-заглушка обещала
-                 бы то, чего нет. -->
-          </notebook>
         </sheet>
-        <chatter/>
+        <!--
+          Лента организации — своя у каждой, как и у человека. Под
+          карточкой, а не сбоку: сторону задаёт `coop_theme/.../wall.js`.
+        -->
+        <chatter reload_on_post="True"/>
       </form>
     </field>
   </record>

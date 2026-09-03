@@ -130,7 +130,7 @@
     <field name="name">coop.community.form</field>
     <field name="model">coop.community</field>
     <field name="arch" type="xml">
-      <form string="Сообщество">
+      <form string="Сообщество" class="o_coop_wall_form">
         <header>
           <button name="action_publish" type="object" string="Открыть сообщество"
                   class="btn-primary" invisible="state != 'draft'"/>
@@ -208,7 +208,16 @@
           </notebook>
         </sheet>
         <chatter/>
-      </form>
+              <!--
+          Лента записи — своя у каждого проекта и каждого сообщества, как
+          и у человека с организацией. Это одна и та же лента движка у
+          своей записи; отдельной «своей» сущности для неё нет.
+
+          Под карточкой, а не сбоку: сторону задаёт
+          `coop_theme/static/src/js/wall.js`.
+        -->
+        <chatter reload_on_post="True"/>
+</form>
     </field>
   </record>
 

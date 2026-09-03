@@ -1,0 +1,86 @@
+// Стена участника и организации.
+//
+// Это лента записи движка, поставленная под карточку и приведённая к
+// виду стены из макета: записи идут сверху вниз во всю ширину главной
+// колонки, а не жмутся в правую четверть экрана.
+//
+// Раскладку (сбоку или снизу) задаёт `js/wall.js`; здесь только вид.
+
+.o_coop_profile,
+.o_coop_org_form,
+.o_coop_wall_form {
+
+  .o-mail-Chatter {
+    max-width: none;
+    padding: 0;
+    background: transparent;
+  }
+
+  // Полоса кнопок ленты — как заголовок стены в макете: отделена
+  // линией, а не залита серым.
+  .o-mail-Chatter-topbar {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--coop-line, #e6e6e1);
+    background: transparent;
+  }
+
+  .o-mail-Chatter-top {
+    background: transparent;
+  }
+
+  // Запись ленты — карточка, как пост в макете.
+  .o-mail-Message {
+    padding: 12px 14px;
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-radius: 12px;
+    background: var(--coop-white, #fff);
+    margin-bottom: 10px;
+  }
+
+  .o-mail-Message:hover {
+    background: var(--coop-white, #fff);
+  }
+
+  .o-mail-Message-author {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    color: var(--coop-ink, #14171a);
+  }
+
+  .o-mail-Message-date,
+  .o-mail-Message-header small {
+    color: var(--coop-slate-light, #8f8f88);
+  }
+
+  // Поле новой записи — «Опубликовать» из макета.
+  .o-mail-Composer {
+    margin: 12px 0;
+  }
+
+  .o-mail-Composer-input {
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-radius: 12px;
+    background: var(--coop-white, #fff);
+  }
+}
+
+// Кнопки ленты, которых в макете нет. «Внутренняя заметка» и
+// «Активность» — служебные понятия движка: заметка видна только
+// сотрудникам, активность заводит задачу с напоминанием. На стене
+// участника ни того, ни другого нет, а место они занимают и сбивают с
+// толку: человек публикует запись, а попадает в заметку.
+.o_coop_profile,
+.o_coop_org_form,
+.o_coop_wall_form {
+
+  .o-mail-Chatter-logNote,
+  .o-mail-Chatter-activity,
+  .o-mail-Chatter-search {
+    display: none !important;
+  }
+
+  // «Отправить сообщение» на стене называется как в макете.
+  .o-mail-Chatter-sendMessage {
+    font-weight: 600;
+  }
+}

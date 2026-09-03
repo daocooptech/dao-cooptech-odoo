@@ -200,3 +200,63 @@
     color: var(--coop-slate) !important;
   }
 }
+
+// ── Лента и переписка ─────────────────────────────────────────────────
+//
+// Отдельным блоком, потому что модуль переписки красит себя сам и своими
+// классами: без этого лента остаётся белым прямоугольником посреди
+// тёмной страницы — ровно то, что было видно на карточке организации.
+[data-bs-theme="dark"] .o_web_client {
+
+  .o-mail-Chatter,
+  .o-mail-Chatter-top,
+  .o-mail-Chatter-topbar,
+  .o-mail-Thread,
+  .o-mail-Composer,
+  .o-mail-Discuss,
+  .o-mail-DiscussSidebar {
+    background-color: var(--coop-paper) !important;
+    color: var(--coop-ink);
+  }
+
+  .o-mail-Message,
+  .o-mail-Composer-input,
+  .o-mail-Message-content {
+    background-color: var(--coop-white) !important;
+    border-color: var(--coop-line);
+    color: var(--coop-ink);
+  }
+
+  .o-mail-Message-author,
+  .o-mail-Message-header {
+    color: var(--coop-ink);
+  }
+
+  .o-mail-Message-date,
+  .o-mail-Chatter-topbar .btn {
+    color: var(--coop-slate);
+  }
+
+  // ── Подложка формы ───────────────────────────────────────────────────
+  //
+  // Отдельно от `.o_form_sheet`: под листом лежит своя подложка, и
+  // именно она давала белую полосу над карточкой и под ней.
+  .o_form_sheet_bg,
+  .o_form_view .o_form_sheet_bg {
+    background-color: var(--coop-paper) !important;
+  }
+
+  // Полоса кнопок формы («Написать», «Подписаться») — часть листа, а не
+  // отдельная белая плашка.
+  .o_form_statusbar,
+  .o_form_view .o_form_statusbar {
+    background-color: var(--coop-white) !important;
+    border-color: var(--coop-line) !important;
+  }
+
+  // Всплывающие подсказки у полей и знаки вопроса рядом с подписями.
+  .o_field_widget .o_field_help,
+  .o_form_label_help {
+    color: var(--coop-slate-light);
+  }
+}
