@@ -49,6 +49,21 @@ class CoopEducation(models.Model):
                     '%(from)s.') % {'to': record.year_to,
                                     'from': record.year_from})
 
+    years = fields.Char('Годы учёбы', compute='_compute_years')
+
+    @api.depends('year_from', 'year_to')
+    def _compute_years(self):
+        """Годы одной строкой — «2015 — 2018».
+
+        Двумя столбцами в колонке справок они занимают больше места, чем
+        само название заведения, а читаются всё равно как одно значение.
+        """
+        for record in self:
+            if record.year_from and record.year_to:
+                record.years = '%s — %s' % (record.year_from, record.year_to)
+            else:
+                record.years = str(record.year_to or record.year_from or '')
+
     @api.depends('name', 'year_to')
     def _compute_display_name(self):
         for record in self:

@@ -171,26 +171,31 @@
                     <span class="o_coop_key">На платформе с</span>
                     <field name="coop_registered_on" readonly="1"/>
                   </div>
-                  <!--
-                    Образование стоит здесь, а не отдельной полосой: это
-                    справка о человеке, как возраст и языки, а не его
-                    владение вроде ресурса или проекта. Полосы справа —
-                    про то, что человек делает; колонка слева — про то,
-                    кто он.
-                  -->
-                  <div class="o_coop_sub" invisible="not coop_education_ids">
-                    <span class="o_coop_key">Образование</span>
-                    <field name="coop_education_ids" nolabel="1"
-                           readonly="not coop_is_self">
-                      <list editable="bottom">
-                        <field name="name"/>
-                        <field name="speciality" optional="show"/>
-                        <field name="year_to" string="Год"/>
-                      </list>
-                    </field>
-                  </div>
                 </div>
               </div>
+
+              <div class="o_coop_infobox" invisible="not coop_education_ids">
+                <div class="o_coop_infobox_head">Образование</div>
+                <div class="o_coop_infobox_body">
+                  <!--
+                    Списком, а не таблицей со столбцами: в колонке справок
+                    важны две вещи — где учился и когда. Специальность и
+                    уровень остаются в самой записи, их видно при правке.
+                  -->
+                  <field name="coop_education_ids" nolabel="1"
+                         class="o_coop_plainlist"
+                         readonly="not coop_is_self">
+                    <list editable="bottom">
+                      <field name="name"/>
+                      <field name="years"/>
+                      <field name="speciality" column_invisible="1"/>
+                      <field name="year_from" column_invisible="1"/>
+                      <field name="year_to" column_invisible="1"/>
+                    </list>
+                  </field>
+                </div>
+              </div>
+
             </div>
 
             <!-- ── Правая колонка ────────────────────────────────── -->

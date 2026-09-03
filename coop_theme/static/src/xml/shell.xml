@@ -34,6 +34,16 @@
       </button>
       <div class="o_coop_scrim" t-if="state.open" t-on-click="() => this.toggle()"/>
       <aside class="o_coop_sidebar" t-att-class="{ 'o_coop_sidebar_open': state.open }">
+        <!--
+          «Добавить» первым пунктом, как в макете. Здесь оно уместнее,
+          чем в каждом каталоге по отдельности: завести объявление или
+          проект человек решает, находясь где угодно, и идти ради этого
+          в нужный раздел — лишний шаг.
+        -->
+        <button type="button" class="o_coop_add_main"
+                t-on-click="() => this.openAdd()">
+          <span class="o_coop_add_main_icon">+</span> Добавить
+        </button>
         <!-- Пока человек ни в одной организации не состоит, выбирать не из
              чего, и переключателя нет. -->
         <div class="o_coop_acting" t-if="state.actors.length > 1">

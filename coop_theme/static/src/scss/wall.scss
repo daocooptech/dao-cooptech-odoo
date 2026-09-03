@@ -143,53 +143,68 @@
   }
 }
 
-// ── Стена оформлена блоком, как остальные полосы ──────────────────────
+// ── Вид стены ─────────────────────────────────────────────────────────
 //
-// В макете лента — такой же блок, что «Достижения» или «Ресурсы»: рамка,
-// шапка с названием, тело на белом. Заголовок добавляется здесь, а не в
-// разметке: `<chatter>` — готовый элемент движка, своего места под
-// заголовок у него нет, а собирать ради подписи собственное
-// представление ленты значило бы поддерживать его вечно.
+// В макете лента идёт прямо на фоне страницы, без рамки и заголовка:
+// поле «Что у вас нового?» сверху, под ним записи карточками. Рамка с
+// подписью «Лента», которую я добавил раньше, была домыслом — в макете
+// её нет.
 .o_coop_profile,
 .o_coop_org_form,
 .o_coop_wall_form {
 
-  .o-mail-Form-chatter:not(.o-aside) {
-    padding-bottom: 0;
+  .o-mail-Chatter {
+    border: 0;
+    background: transparent;
   }
 
-  .o-mail-Chatter {
+  // Полоса кнопок движка: поиск, вложения, подписчики, «Отправить
+  // сообщение». В макете над лентой нет ничего из этого — поле ввода
+  // начинается сразу.
+  .o-mail-Chatter-topbar {
+    display: none !important;
+  }
+
+  // Поле новой записи — во всю ширину, скруглённое, как в макете.
+  .o-mail-Composer {
+    margin: 0 0 18px;
+  }
+
+  .o-mail-Composer-input {
+    min-height: 44px;
+    padding: 12px 14px;
     border: 1px solid var(--coop-line, #e6e6e1);
     border-radius: 10px;
-    overflow: hidden;
     background: var(--coop-white, #fff);
   }
 
-  // Шапка блока — та же, что у полос: подложка, подпись, линия снизу.
-  .o-mail-Chatter-topbar {
-    position: relative;
-    padding: 10px 14px 10px 82px;
-    border-bottom: 1px solid var(--coop-line, #e6e6e1);
-    background: var(--coop-teal-tint, #e3efed);
+  // «Опубликовать» — тёмная кнопка, единственное действие под полем.
+  .o-mail-Composer-send {
+    padding: 7px 16px;
+    border-radius: 8px;
+    background: var(--coop-btn-bg, #14171a);
+    border-color: var(--coop-btn-bg, #14171a);
+    color: var(--coop-btn-fg, #fff);
+    font-weight: 600;
   }
 
-  .o-mail-Chatter-topbar::before {
-    content: "Лента";
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    font: 600 12.5px/1.3 'Manrope', sans-serif;
-    color: var(--coop-ink, #14171a);
+  // Строка «Кому:» с выбором получателей — из переписки, а не из стены:
+  // там пишут кому-то, здесь рассказывают всем сразу, и адресат не
+  // выбирается вовсе.
+  //
+  // По месту в разметке, а не по классу: своего класса у этой строки в
+  // движке нет — только `d-flex py-1 ps-3`. Внутри шапки ленты других
+  // таких строк нет, а сама шапка у нас скрыта целиком.
+  .o-mail-Chatter-top > .d-flex {
+    display: none !important;
   }
 
-  // Тело ленты — с полями, как у полос, а не встык к рамке.
-  .o-mail-Chatter-content,
-  .o-mail-Thread {
-    padding: 0 14px;
-  }
-
-  .o-mail-Composer {
-    margin: 12px 14px;
+  // Запись ленты — карточка, как пост в макете.
+  .o-mail-Message {
+    padding: 14px 16px;
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-radius: 12px;
+    background: var(--coop-white, #fff);
+    margin-bottom: 12px;
   }
 }

@@ -3,6 +3,7 @@
 import { patch } from "@web/core/utils/patch";
 import { FormRenderer } from "@web/views/form/form_renderer";
 import { Chatter } from "@mail/chatter/web_portal/chatter";
+import { Composer } from "@mail/core/common/composer";
 
 // Записи, у которых лента — публичная стена, а не служебная переписка.
 // Список один на весь модуль: раскладка и вид поля публикации должны
@@ -65,5 +66,33 @@ patch(Chatter.prototype, {
             // создания.
             this.state.composerType = "message";
         }
+    },
+});
+
+/**
+ * Подсказка и подпись кнопки на стене — из макета.
+ *
+ * «Отправить сообщение подписчикам…» и «Отправить» — слова переписки: там
+ * пишут кому-то. Стена устроена иначе, там рассказывают всем сразу, и
+ * подпись «Опубликовать» отвечает на другой вопрос — что случится с
+ * написанным.
+ *
+ * Правится через компонент, а не переводом: тот же компонент обслуживает
+ * настоящую переписку, где прежние слова верны.
+ */
+patch(Composer.prototype, {
+    get placeholder() {
+        if (WALL_MODELS.includes(this.thread?.model)) {
+            return "Что у вас нового?";
+        }
+        return super.placeholder;
+    },
+
+    get SEND_TEXT() {
+        if (!this.props.composer.message && this.props.type !== "note"
+                && WALL_MODELS.includes(this.thread?.model)) {
+            return "Опубликовать";
+        }
+        return super.SEND_TEXT;
     },
 });
