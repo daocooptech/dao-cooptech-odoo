@@ -50,9 +50,10 @@ class CoopWalletNetwork(models.Model):
              'Подключается ровно так же — по адресу узла.')
     active = fields.Boolean(string='Подключена', default=True)
 
-    _sql_constraints = [
-        ('code_uniq', 'unique(code)', 'Сеть с таким кодом уже подключена.'),
-    ]
+    _code_uniq = models.Constraint(
+        'unique(code)',
+        'Сеть с таким кодом уже подключена.',
+    )
 
 
 class CoopWalletAddress(models.Model):
@@ -75,10 +76,10 @@ class CoopWalletAddress(models.Model):
         ondelete='restrict')
     address = fields.Char(string='Адрес', required=True)
 
-    _sql_constraints = [
-        ('one_per_network', 'unique(wallet_id, network_id)',
-         'Адрес в этой сети у кошелька уже есть.'),
-    ]
+    _one_per_network = models.Constraint(
+        'unique(wallet_id, network_id)',
+        'Адрес в этой сети у кошелька уже есть.',
+    )
 
 
 class CoopWalletAsset(models.Model):
@@ -128,10 +129,10 @@ class CoopWalletAsset(models.Model):
         help='Кошелёк некастодиальный: монеты могли уйти другим '
              'приложением тем же ключом, и наш остаток тогда устарел.')
 
-    _sql_constraints = [
-        ('one_per_asset', 'unique(wallet_id, network_id, symbol)',
-         'Такой актив в этой сети у кошелька уже есть.'),
-    ]
+    _one_per_asset = models.Constraint(
+        'unique(wallet_id, network_id, symbol)',
+        'Такой актив в этой сети у кошелька уже есть.',
+    )
 
 
 class CoopWalletMethod(models.Model):

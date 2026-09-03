@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from psycopg2 import IntegrityError
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
@@ -99,10 +101,10 @@ class CoopSidebarItem(models.Model):
         'Обязательный', default=False,
         help='Разделы платформы есть у всех: их можно переставить, но не убрать.')
 
-    _sql_constraints = [
-        ('coop_sidebar_unique', 'unique(user_id, section, name)',
-         'Такой пункт уже есть в меню.'),
-    ]
+    _coop_sidebar_unique = models.Constraint(
+        'unique(user_id, section, name)',
+        'Такой пункт уже есть в меню.',
+    )
 
     def unlink(self):
         required = self.filtered('is_required')
@@ -147,6 +149,35 @@ class CoopSidebarItem(models.Model):
             })
         return values
 
+    def _create_menu_items(self, values, user):
+        """Создать пункты, уступая тому, кто успел раньше.
+
+        Меню собирается при чтении, а не при заведении участника, — и это
+        значит, что две одновременные вкладки заходят в сборку вместе.
+        Раньше обе создавали полный набор, и меню удваивалось: на стенде
+        четыре одновременных первых захода дали 96 пунктов вместо 24.
+        Уникальности в базе при этом не было вовсе (см. коммит о
+        `models.Constraint`), так что не спасала и она.
+
+        Теперь каждый пункт заводится в своей точке отката: если его уже
+        завела соседняя вкладка, мы просто берём её запись.
+        """
+        created = self.browse()
+        for value in values:
+            try:
+                with self.env.cr.savepoint():
+                    created |= self.create(value)
+            except IntegrityError:
+                # Только столкновение по уникальности; всё прочее —
+                # настоящая ошибка, и глушить её нельзя: меню молча
+                # соберётся неполным, и понять почему будет неоткуда.
+                created |= self.search([
+                    ('user_id', '=', user.id),
+                    ('section', '=', value['section']),
+                    ('name', '=', value['name']),
+                ], limit=1)
+        return created
+
     @api.model
     def items_for_current_user(self):
         """Меню текущего участника; при первом обращении — по умолчанию.
@@ -158,7 +189,10 @@ class CoopSidebarItem(models.Model):
         model = self.sudo()
         items = model.search([('user_id', '=', user.id)])
         if not items:
-            items = model.create(model._defaults_for_user(user))
+            defaults = model._defaults_for_user(user)
+            items = model._create_menu_items(defaults, user)
+            user._coop_remember_sidebar_defaults(
+                [v['name'] for v in defaults if v['section'] == 'ext'])
         else:
             items = model._sync_required(items, user)
         return [{
@@ -174,12 +208,20 @@ class CoopSidebarItem(models.Model):
 
         Иначе участник, зашедший до переноса раздела, не увидит его
         никогда: меню у него уже есть, а нового пункта в нём нет.
+
+        С расширениями правило другое, и раньше оно нарушалось. Раздел
+        обязателен у всех, расширение — личное дело: участник вправе его
+        убрать. Убранное же возвращалось на следующем открытии страницы,
+        потому что «нет в меню» читалось как «ещё не предлагали». Теперь
+        у участника хранится список уже предложенных расширений, и
+        дописываются только те, которых в нём нет.
         """
+        defaults = self._defaults_for_user(user)
         known = set(items.filtered(lambda i: i.section == 'main').mapped('name'))
-        missing = [v for v in self._defaults_for_user(user)
+        missing = [v for v in defaults
                    if v['section'] == 'main' and v['name'] not in known]
         if missing:
-            items |= self.create(missing)
+            items |= self._create_menu_items(missing, user)
         # Раздел мог быть перенесён после того, как меню уже собрано, —
         # или перенесён заново, на собственный экран вместо чужого. Второе
         # ровно так и вышло с проектами: пункт вёл в штатный модуль
@@ -196,14 +238,24 @@ class CoopSidebarItem(models.Model):
         # нём больше нет, убираем, недостающие дописываем. Убираем только
         # прежние умолчания — то, что участник подключил себе сам, знает
         # он один, и трогать это нельзя.
+        #
+        # «Прежнее умолчание» — это не совпадение названия. По названию
+        # сносилась и «Помощь проекту», которую участник подключил себе
+        # сам уже после того, как её убрали из умолчаний. Сносим только
+        # то, что мы же участнику и выдали.
+        offered = user._coop_sidebar_defaults()
         ext = items.filtered(lambda i: i.section == 'ext')
-        stale = ext.filtered(lambda i: i.name in RETIRED_EXTENSIONS)
+        stale = ext.filtered(
+            lambda i: i.name in RETIRED_EXTENSIONS and i.name in offered)
         if stale:
             items -= stale
             stale.unlink()
-        known = set(items.filtered(lambda i: i.section == 'ext').mapped('name'))
-        missing = [v for v in self._defaults_for_user(user)
-                   if v['section'] == 'ext' and v['name'] not in known]
+        offered -= RETIRED_EXTENSIONS
+
+        missing = [v for v in defaults
+                   if v['section'] == 'ext' and v['name'] not in offered]
         if missing:
-            items |= self.create(missing)
+            items |= self._create_menu_items(missing, user)
+            offered |= {v['name'] for v in missing}
+        user._coop_remember_sidebar_defaults(offered)
         return items.sorted(lambda i: (0 if i.section == 'main' else 1, i.sequence, i.id))

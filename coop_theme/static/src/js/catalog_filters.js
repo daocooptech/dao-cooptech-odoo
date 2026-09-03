@@ -35,10 +35,18 @@ export class CoopFilters extends Component {
             // на кнопке: иначе «Показать результаты» — прыжок в темноту.
             preview: null,
             dirty: false,
+            // Выбранный, но ещё не применённый порядок. Хранится здесь, а
+            // не сразу в общем состоянии вида: порядок — такое же поле
+            // панели, как остальные, и применяется той же кнопкой.
+            order: null,
         });
         onWillStart(async () => {
             await this.load();
             await this.loadSaved();
+            // Число на кнопке считается сразу, а не после первого
+            // щелчка по полю: пустая «Показать результаты» над полным
+            // каталогом читается как кнопка, которой нечего показать.
+            await this.countNow();
         });
     }
 
@@ -50,11 +58,21 @@ export class CoopFilters extends Component {
     }
 
     get currentSort() {
-        return coopSort.orders[this.props.resModel] || this.sortOptions[0][0];
+        return this.state.order
+            || coopSort.orders[this.props.resModel]
+            || this.sortOptions[0][0];
     }
 
+    /** Порядок запоминается, но не применяется сам.
+     *
+     *  Применялся сразу — и панель вела себя по-разному в соседних
+     *  строках: список мгновенно перестраивался от «Сортировки» и не
+     *  двигался от «Города», пока не нажмёшь кнопку. Со стороны это
+     *  читается как поломка второго поля, а не как разница в цене
+     *  запроса. */
     onSortChange(event) {
-        setCoopSort(this.props.resModel, event.target.value);
+        this.state.order = event.target.value;
+        this.state.dirty = true;
     }
 
     async load() {
@@ -114,6 +132,13 @@ export class CoopFilters extends Component {
     }
 
     async apply() {
+        // Порядок ставится первым: он меняет запрос представления, а не
+        // условия отбора, и обе перезагрузки должны сойтись на одном
+        // наборе, а не спорить за последнюю.
+        if (this.state.order) {
+            setCoopSort(this.props.resModel, this.state.order);
+            this.state.order = null;
+        }
         // Условия панели живут отдельной группой в штатной модели
         // поиска: так они складываются с поиском по строке, а не
         // заменяют его. Прежнюю группу перед этим снимаем — иначе с
@@ -172,15 +197,17 @@ export class CoopFilters extends Component {
     previewCount() {
         this.state.dirty = true;
         clearTimeout(this.previewTimer);
-        this.previewTimer = setTimeout(async () => {
-            const domain = this.domain;
-            try {
-                this.state.preview = await this.orm.searchCount(
-                    this.props.resModel, domain);
-            } catch {
-                this.state.preview = null;
-            }
-        }, 400);
+        this.previewTimer = setTimeout(() => this.countNow(), 400);
+    }
+
+    /** Пересчитать число на кнопке немедленно. */
+    async countNow() {
+        try {
+            this.state.preview = await this.orm.searchCount(
+                this.props.resModel, this.domain);
+        } catch {
+            this.state.preview = null;
+        }
     }
 
     isQuick(value) {
@@ -197,13 +224,19 @@ export class CoopFilters extends Component {
         return value !== undefined && `${value}` === `${option.value}`;
     }
 
-    reset() {
+    async reset() {
         // Рубрика сбрасывается вместе с остальным: в отличие от макета,
         // где она навигация, здесь это такое же поле панели.
+        clearTimeout(this.previewTimer);
         this.state.values = {};
         this.state.quick = [];
-        this.state.preview = null;
-        this.apply();
+        // Порядок сбрасывается вместе с полями: он такое же поле панели,
+        // и «Сбросить», оставляющее половину набранного, — обман.
+        this.state.order = this.sortOptions[0][0];
+        await this.apply();
+        // Число на кнопке после сброса — это весь каталог, а не прочерк:
+        // сброс тем и делают, чтобы увидеть всё.
+        await this.countNow();
     }
 
     /** Применить набранное и, на узком экране, свернуть панель. */
@@ -228,10 +261,12 @@ export class CoopFilters extends Component {
 
     async applySaved(saved) {
         this.state.savedOpen = false;
-        let domain = [];
-        try {
-            domain = JSON.parse(saved.domain.replace(/'/g, '"'));
-        } catch {
+        // Условие приходит с сервера уже разобранным списком. Раньше оно
+        // приходило записью Python и чинилось здесь заменой апострофов на
+        // кавычки: на первом же значении с апострофом внутри, на `True`
+        // или на `None` такой разбор ломался, и поиск молча не применялся.
+        const domain = saved.domain;
+        if (!Array.isArray(domain)) {
             this.notification.add("Не удалось прочитать сохранённый поиск",
                                   { type: "warning" });
             return;
@@ -241,10 +276,12 @@ export class CoopFilters extends Component {
             search.deactivateGroup(this.groupId);
         }
         this.groupId = search.nextGroupId;
-        search.createNewFilters([{
-            description: saved.name, domain, invisible: "True",
-        }]);
+        // Условие сохранённого поиска показывается в строке поиска, в
+        // отличие от условий панели: полей панели оно не заполняет, и без
+        // видимой отметки выдача менялась молча — снять её было нечем.
+        search.createNewFilters([{ description: saved.name, domain }]);
         await this.load();
+        await this.countNow();
     }
 
     async dropSaved(saved) {

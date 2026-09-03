@@ -736,14 +736,21 @@ def _friendship_cases(env):
     if len(people) < 10:
         return {}
     made = {}
+    # Отсчёт пар сквозной, а не с нуля на каждое состояние. С нуля каждое
+    # состояние бралось за те же самые пары, и одна пара заводилась трижды
+    # — на стенде так вышло 25 пар-дублей из 75 связей. Уникальности в
+    # базе тогда не было (см. `models.Constraint`), и дубли просто копили
+    # счётчик друзей: у человека с одним другом их выходило три.
+    index = 0
     for state in ('pending', 'accepted', 'declined'):
         need = _need(env, 'coop.friendship', [('state', '=', state)])
         created = 0
-        index = 0
-        while created < need and index < len(people) * 3:
+        attempts = 0
+        while created < need and attempts < len(people) * 3:
             first = people[index % len(people)]
             second = people[(index * 7 + 13) % len(people)]
             index += 1
+            attempts += 1
             if first == second:
                 continue
             try:

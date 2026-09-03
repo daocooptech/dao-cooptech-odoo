@@ -266,9 +266,34 @@
     <field name="view_mode">list,form</field>
   </record>
 
+  <!--
+    «Мои организации» — те, где человек состоит: учредитель, совладелец,
+    подрядчик. Отбор по членству, а не по тому, кто завёл карточку:
+    организацию мог завести кто угодно, а работают в ней все.
+  -->
+  <record id="action_coop_my_orgs" model="ir.actions.act_window">
+    <field name="name">Мои организации</field>
+    <field name="res_model">res.partner</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="domain">[('coop_is_participant', '=', True), ('is_company', '=', True), ('coop_member_ids', 'any', [('partner_id.user_ids', 'in', [uid]), ('state', '=', 'active')])]</field>
+    <field name="context">{'coop_catalog': True, 'default_coop_is_participant': True, 'default_is_company': True, 'coop_create_label': 'Добавить организацию'}</field>
+    <field name="search_view_id" ref="view_coop_orgs_search"/>
+    <field name="view_ids" eval="[(5, 0, 0),
+           (0, 0, {'sequence': 10, 'view_mode': 'kanban', 'view_id': ref('view_coop_orgs_kanban')}),
+           (0, 0, {'sequence': 20, 'view_mode': 'list', 'view_id': ref('view_coop_orgs_list')}),
+           (0, 0, {'sequence': 30, 'view_mode': 'form', 'view_id': ref('view_coop_orgs_form')})]"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Вы пока нигде не состоите</p>
+      <p>Заведите свою организацию или попросите принять вас в существующую.</p>
+    </field>
+  </record>
+
   <menuitem id="menu_coop_orgs_root" name="Организации" sequence="80"/>
   <menuitem id="menu_coop_orgs" name="Каталог организаций"
             parent="menu_coop_orgs_root" action="action_coop_orgs" sequence="10"/>
+  <menuitem id="menu_coop_my_orgs" name="Мои организации"
+            parent="menu_coop_orgs_root" action="action_coop_my_orgs"
+            sequence="15"/>
   <menuitem id="menu_coop_orgs_config" name="Справочники"
             parent="menu_coop_orgs_root" sequence="90"/>
   <menuitem id="menu_coop_legal_form" name="Правовые формы"

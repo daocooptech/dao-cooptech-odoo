@@ -31,11 +31,21 @@
                   invisible="coop_is_self or coop_is_following"/>
           <button name="action_coop_follow" type="object" string="Отписаться"
                   invisible="coop_is_self or not coop_is_following"/>
-          <button name="action_coop_my_listings" type="object"
-                  string="Мои объявления"
-                  invisible="not coop_is_self or coop_draft_count == 0"/>
         </header>
         <sheet class="o_coop_profile_sheet">
+          <!--
+            Вкладки страницы, как в макете. Раньше «Мои объявления» были
+            кнопкой в шапке формы — там они стояли в одном ряду с
+            «Написать» и «Добавить в друзья», то есть с действиями, а не
+            с навигацией, и держали на своей странице целую полосу ради
+            одной ссылки.
+          -->
+          <div class="o_coop_tabs o_coop_tabs_page" invisible="not coop_is_self">
+            <span class="o_coop_tab active">Моя страница</span>
+            <button name="action_coop_my_listings" type="object"
+                    class="o_coop_tab">Мои объявления</button>
+          </div>
+
           <div class="o_coop_profile_layout">
 
             <!-- ── Левая колонка ─────────────────────────────────── -->
@@ -47,14 +57,28 @@
               </div>
 
               <!--
-                Строка показателей. Баланс кошелька сюда не выносится: в
-                макете он стоит и на чужой карточке, то есть остаток
-                чужих денег виден постороннему. Это ошибка выгрузки, а не
-                решение.
+                Строка показателей: доверие, баланс, сделки, подписчики,
+                друзья — как в макете. У каждого числа, которое нельзя
+                проверить взглядом, рядом стоит переход туда, где оно
+                раскладывается.
               -->
               <div class="o_coop_stats">
+                <!--
+                  Доверие без пояснения — число, взявшееся ниоткуда, а по
+                  нему решают, иметь ли с человеком дело. Ссылка ведёт в
+                  реестр сделок: там видно, из чего оно сложилось.
+                -->
                 <div>Уровень доверия:
                   <b><field name="coop_trust" nolabel="1" readonly="1"/>%</b>
+                  <!-- Дробь — как в макете, короткой записью: колонка
+                       узкая, а расшифровка живёт в подсказке рядом. -->
+                  <span class="o_coop_stat_frac" invisible="not coop_deals_rated">
+                    (<field name="coop_deals_rated" nolabel="1" readonly="1"/>/<field
+                       name="coop_deals_done" nolabel="1" readonly="1"/>)
+                  </span>
+                  <button name="action_coop_my_deals" type="object"
+                          class="o_coop_stat_note"
+                          title="Столько завершённых сделок получили двусторонний отзыв. Отзыв задним числом не меняется. Открыть реестр сделок.">как считается?</button>
                 </div>
                 <!--
                   Баланс — только себе. В макете он стоит и на чужой
@@ -66,8 +90,15 @@
                   <button name="action_coop_my_wallet" type="object"
                           class="o_coop_stat_note">история операций →</button>
                 </div>
-                <div>Сделок закрыто:
-                  <b><field name="coop_deals_done" nolabel="1" readonly="1"/></b>
+                <!--
+                  Здесь настоящее число сделок из реестра, а не отметка
+                  «завершённых» из карточки: рядом стоит ссылка на сам
+                  реестр, и два разных числа в двух щелчках друг от друга
+                  выглядят как сбой. Отметка осталась в строке доверия —
+                  она про отзывы, а не про количество.
+                -->
+                <div>Сделки:
+                  <b><field name="coop_deal_count" nolabel="1" readonly="1"/></b>
                   <button name="action_coop_my_deals" type="object"
                           class="o_coop_stat_note">реестр сделок →</button>
                 </div>
@@ -171,9 +202,12 @@
               <div class="o_coop_notice o_coop_notice_stale"
                    invisible="not coop_stale_resource_ids">
                 <div class="o_coop_notice_text">
+                  <!-- Название плашкой, без кавычек вокруг неё: плашка и
+                       так отделяет название от текста, а кавычки рядом с
+                       ней читались как часть названия. -->
                   Ваше объявление
-                  «<field name="coop_stale_resource_ids" widget="many2many_tags"
-                          readonly="1" nolabel="1"/>»
+                  <field name="coop_stale_resource_ids" widget="many2many_tags"
+                         readonly="1" nolabel="1"/>
                   висит в каталоге больше месяца.
                   <div class="o_coop_notice_sub">
                     Оно всё ещё актуально? Свежие объявления выше в выдаче.
@@ -301,38 +335,6 @@
                 </div>
               </div>
 
-              <div class="o_coop_band" invisible="coop_project_count == 0">
-                <div class="o_coop_band_head">
-                  <span>Проекты</span>
-                  <button name="action_coop_my_projects" type="object"
-                          class="o_coop_band_all">смотреть все</button>
-                </div>
-                <div class="o_coop_band_body">
-                  <field name="coop_project_ids" readonly="1" nolabel="1">
-                    <kanban class="o_coop_band_kanban" records_draggable="false">
-                      <field name="image_512"/>
-                      <field name="readiness"/>
-                      <templates>
-                        <t t-name="card">
-                          <div class="o_coop_mini">
-                            <div class="o_coop_mini_img">
-                              <img t-att-src="'/web/image/coop.project/' + record.id.raw_value + '/image_512'"
-                                   t-att-alt="record.name.value" loading="lazy"/>
-                            </div>
-                            <div class="o_coop_mini_label">
-                              <field name="name"/>
-                            </div>
-                            <div class="o_coop_mini_note">
-                              собрано <t t-esc="record.readiness.value"/>%
-                            </div>
-                          </div>
-                        </t>
-                      </templates>
-                    </kanban>
-                  </field>
-                </div>
-              </div>
-
               <div class="o_coop_band" invisible="coop_vacancy_count == 0">
                 <div class="o_coop_band_head">
                   <span>Вакансии</span>
@@ -360,26 +362,29 @@
                 </div>
               </div>
 
-              <div class="o_coop_band" invisible="coop_community_count == 0">
+              <div class="o_coop_band" invisible="coop_project_count == 0">
                 <div class="o_coop_band_head">
-                  <span>Сообщества</span>
-                  <button name="action_coop_my_communities" type="object"
+                  <span>Проекты</span>
+                  <button name="action_coop_my_projects" type="object"
                           class="o_coop_band_all">смотреть все</button>
                 </div>
                 <div class="o_coop_band_body">
-                  <field name="coop_community_member_ids" readonly="1" nolabel="1"
-                         domain="[('state', '=', 'active')]">
+                  <field name="coop_project_ids" readonly="1" nolabel="1">
                     <kanban class="o_coop_band_kanban" records_draggable="false">
-                      <field name="community_id"/>
-                      <field name="role"/>
+                      <field name="image_512"/>
+                      <field name="readiness"/>
                       <templates>
                         <t t-name="card">
-                          <div class="o_coop_mini o_coop_mini_text">
+                          <div class="o_coop_mini">
+                            <div class="o_coop_mini_img">
+                              <img t-att-src="'/web/image/coop.project/' + record.id.raw_value + '/image_512'"
+                                   t-att-alt="record.name.value" loading="lazy"/>
+                            </div>
                             <div class="o_coop_mini_label">
-                              <field name="community_id"/>
+                              <field name="name"/>
                             </div>
                             <div class="o_coop_mini_note">
-                              <field name="role"/>
+                              собрано <t t-esc="record.readiness.value"/>%
                             </div>
                           </div>
                         </t>
@@ -456,6 +461,35 @@
                           <div class="o_coop_mini o_coop_mini_text">
                             <div class="o_coop_mini_label">
                               <field name="organization_id"/>
+                            </div>
+                            <div class="o_coop_mini_note">
+                              <field name="role"/>
+                            </div>
+                          </div>
+                        </t>
+                      </templates>
+                    </kanban>
+                  </field>
+                </div>
+              </div>
+
+              <div class="o_coop_band" invisible="coop_community_count == 0">
+                <div class="o_coop_band_head">
+                  <span>Сообщества</span>
+                  <button name="action_coop_my_communities" type="object"
+                          class="o_coop_band_all">смотреть все</button>
+                </div>
+                <div class="o_coop_band_body">
+                  <field name="coop_community_member_ids" readonly="1" nolabel="1"
+                         domain="[('state', '=', 'active')]">
+                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                      <field name="community_id"/>
+                      <field name="role"/>
+                      <templates>
+                        <t t-name="card">
+                          <div class="o_coop_mini o_coop_mini_text">
+                            <div class="o_coop_mini_label">
+                              <field name="community_id"/>
                             </div>
                             <div class="o_coop_mini_note">
                               <field name="role"/>

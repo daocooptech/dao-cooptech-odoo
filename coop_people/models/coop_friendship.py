@@ -33,12 +33,14 @@ class CoopFriendship(models.Model):
          ('declined', 'Отклонено')],
         string='Состояние', default='pending', required=True, index=True)
 
-    _sql_constraints = [
-        ('pair_uniq', 'unique(requester_id, addressee_id)',
-         'Такое предложение дружбы уже отправлено.'),
-        ('not_self', 'check(requester_id != addressee_id)',
-         'Нельзя добавить в друзья самого себя.'),
-    ]
+    _pair_uniq = models.Constraint(
+        'unique(requester_id, addressee_id)',
+        'Такое предложение дружбы уже отправлено.',
+    )
+    _not_self = models.Constraint(
+        'check(requester_id != addressee_id)',
+        'Нельзя добавить в друзья самого себя.',
+    )
 
     @api.constrains('requester_id', 'addressee_id')
     def _check_reverse(self):

@@ -30,7 +30,15 @@ const CITY_POS = {
 
 export class CoopMap extends Component {
     static template = "coop_theme.CatalogMap";
-    static props = { resModel: String, domain: { type: Array, optional: true } };
+    static props = {
+        resModel: String,
+        domain: { type: Array, optional: true },
+        // Куда вернуться после выбора города. Передаётся представлением, а
+        // не берётся из состояния вида: карта и переключатель вида тогда
+        // ссылались бы друг на друга, и модуль загружался бы наполовину
+        // собранным.
+        showTiles: { type: Function, optional: true },
+    };
 
     setup() {
         this.orm = useService("orm");
@@ -51,13 +59,27 @@ export class CoopMap extends Component {
         // на карте нужен весь отбор целиком, а страница — это два десятка
         // записей, и метки по ней врали бы в разы.
         let groups = [];
+        let total = 0;
         this.state.loading = true;
         this.state.failed = false;
         try {
-            groups = await this.orm.call(
-                this.props.resModel, "formatted_read_group",
-                [domain || [], ["city"], ["__count"]]
-            );
+            // Группируем только по городам, у которых на схеме есть место,
+            // а «в остальных» получаем вычитанием из общего числа.
+            //
+            // Раньше группировка шла по всему отбору без ограничений. Город
+            // у объявления — свободная строка, и на большом каталоге разных
+            // её написаний становятся тысячи: сервер собирал бы и слал
+            // тысячи групп ради одного числа под картой, а показывались бы
+            // из них те же двадцать восемь.
+            const known = Object.keys(CITY_POS);
+            [groups, total] = await Promise.all([
+                this.orm.call(
+                    this.props.resModel, "formatted_read_group",
+                    [[...(domain || []), ["city", "in", known]],
+                     ["city"], ["__count"]]
+                ),
+                this.orm.searchCount(this.props.resModel, domain || []),
+            ]);
         } catch {
             // Пустая карта и «нет подходящих городов» — разные вещи, и
             // сказать первое вторым значит соврать: отбор человек менял,
@@ -69,31 +91,41 @@ export class CoopMap extends Component {
             return;
         }
         const pins = [];
-        let other = 0;
+        let shown = 0;
         for (const group of groups) {
             const city = group.city;
             const count = group.__count || 0;
             const pos = city && CITY_POS[city];
             if (!pos) {
-                other += count;
                 continue;
             }
-            pins.push({
-                city,
-                count,
-                left: pos[0],
-                top: pos[1],
-                // Размер метки — сколько объявлений в городе, но с
-                // потолком: без него Москва закрыла бы половину карты.
-                size: Math.min(28, 12 + count * 1.5),
-            });
+            shown += count;
+            pins.push({ city, count, left: pos[0], top: pos[1], size: 12 });
+        }
+        // Всё, что не попало на схему: города без места на ней и
+        // объявления вовсе без города.
+        const other = Math.max(0, total - shown);
+        // Размер метки — доля от самого людного города, а не само число.
+        // Считали от числа с потолком в 28 — и на каталоге в двести
+        // записей все метки упирались в потолок и выходили одинаковыми,
+        // хотя подпись под картой обещает, что размер о чём-то говорит.
+        const largest = pins.reduce((top, pin) => Math.max(top, pin.count), 0);
+        for (const pin of pins) {
+            pin.size = largest
+                ? Math.round(10 + 18 * Math.sqrt(pin.count / largest))
+                : 10;
         }
         this.state.pins = pins;
         this.state.other = other;
         this.state.loading = false;
     }
 
-    /** Щелчок по метке отбирает город — как в прототипе. */
+    /** Щелчок по метке отбирает город и возвращает к плиткам.
+     *
+     *  Возврат — как в прототипе: нажав на город, человек хочет увидеть
+     *  тамошние объявления. Раньше он оставался на карте, где после
+     *  отбора оставалась одна метка, и происшедшее выглядело так, будто
+     *  карта опустела. */
     selectCity(city) {
         const search = this.env.searchModel;
         if (this.groupId) {
@@ -103,5 +135,6 @@ export class CoopMap extends Component {
         search.createNewFilters([{
             description: city, domain: [["city", "=", city]],
         }]);
+        this.props.showTiles?.();
     }
 }

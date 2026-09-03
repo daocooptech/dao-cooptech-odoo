@@ -63,10 +63,15 @@
 
     // Строка показателей — именно строка: без этого поле занимает всю
     // ширину блоком, и знак процента уезжает к правому краю колонки.
+    //
+    // С переносом: колонка 300 пикселей, а в строке помещаются число,
+    // дробь и пояснение. Без переноса «история операций →» и «как
+    // считается?» вылезали за край колонки на обложку.
     > div {
       display: flex;
+      flex-wrap: wrap;
       align-items: baseline;
-      gap: 6px;
+      gap: 2px 6px;
     }
 
     b {
@@ -119,7 +124,7 @@
   // переносит длинные русские подписи по букве в строку.
   .o_coop_key {
     flex: 0 0 92px;
-    color: var(--coop-slate-light, #8a8a80);
+    color: var(--coop-slate-light, #8f8f88);
   }
 
   // ── Правая колонка ─────────────────────────────────────────────────
@@ -159,13 +164,13 @@
     border-radius: 999px;
     font: 600 11px/1.4 'Manrope', sans-serif;
     background: var(--coop-teal-tint, #e3efed);
-    color: var(--coop-teal-dark, #0f4f4a);
+    color: var(--coop-teal-dark, #0e4f4a);
   }
 
   .o_coop_role {
     margin: 4px 0 14px;
     font-size: 13px;
-    color: var(--coop-teal-dark, #0f4f4a);
+    color: var(--coop-teal-dark, #0e4f4a);
 
     .o_field_widget,
     input {
@@ -224,7 +229,7 @@
     background: none;
     padding: 0;
     font: 400 11.5px/1.4 'Manrope', sans-serif;
-    color: var(--coop-teal-dark, #0f4f4a);
+    color: var(--coop-teal-dark, #0e4f4a);
     opacity: .8;
 
     &:hover {
@@ -388,12 +393,24 @@
   padding: 0;
   border: 0;
   background: none;
-  color: var(--coop-slate, #6b7280);
+  color: var(--coop-slate, #4a4a44);
   font-size: 11.5px;
   text-decoration: underline dotted;
   cursor: pointer;
 
-  &:hover { color: var(--coop-teal, #0f766e); }
+  &:hover { color: var(--coop-teal, #146b64); }
+}
+
+// Дробь «оценённых из завершённых» рядом с доверием — приглушена: это
+// расшифровка процента, а не второй показатель.
+.o_coop_stat_frac {
+  color: var(--coop-slate, #4a4a44);
+  font-size: 12px;
+
+  .o_field_widget {
+    display: inline-block;
+    width: auto;
+  }
 }
 
 // ── Напоминание о залежавшемся объявлении ─────────────────────────────
@@ -407,7 +424,7 @@
 
 .o_coop_notice_sub {
   margin-top: 3px;
-  color: var(--coop-slate, #6b7280);
+  color: var(--coop-slate, #4a4a44);
   font-size: 12px;
 }
 
@@ -419,21 +436,5 @@
 
 // Состояние потребности: открыта или закрыта. Цветом, а не только
 // словом — в полосе плиток подпись читается боковым зрением.
-.o_coop_mini_note.o_coop_open { color: var(--coop-teal, #0f766e); }
-.o_coop_mini_note.o_coop_closed { color: var(--coop-slate, #6b7280); }
-
-// ── Своя страница без хлебных крошек и переключателя записей ──────────
-//
-// Крошка на «Моей странице» — одно звено, и то же имя стоит заголовком
-// прямо под ней; переключатель показывает «1 / 1», то есть переключать
-// нечего. На чужой карточке оба нужны: туда приходят из каталога людей,
-// и по ним возвращаются и листают дальше.
-//
-// Прячется только сама крошка, а не вся полоса: рядом с ней живёт
-// указатель несохранённых правок, а страница редактируемая.
-.o_coop_own_page {
-  .o_breadcrumb,
-  .o_cp_pager {
-    display: none !important;
-  }
-}
+.o_coop_mini_note.o_coop_open { color: var(--coop-teal, #146b64); }
+.o_coop_mini_note.o_coop_closed { color: var(--coop-slate, #4a4a44); }

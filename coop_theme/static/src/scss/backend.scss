@@ -186,14 +186,17 @@
 // кнопка на каждой карточке делала интерфейс пёстрым.
 .o_web_client {
   .btn-primary {
-    background-color: var(--coop-ink, #14171a);
-    border-color: var(--coop-ink, #14171a);
-    color: var(--coop-white, #fff);
+    background-color: var(--coop-btn-bg, #14171a);
+    border-color: var(--coop-btn-bg, #14171a);
+    color: var(--coop-btn-fg, #fff);
 
+    // Осветлением, а не подстановкой чёрного: в тёмной теме кнопка
+    // бирюзовая, и чёрный на наведении читался как погасшая кнопка.
     &:hover, &:focus, &:active {
-      background-color: #000;
-      border-color: #000;
-      color: var(--coop-white, #fff);
+      background-color: var(--coop-btn-bg, #14171a);
+      border-color: var(--coop-btn-bg, #14171a);
+      color: var(--coop-btn-fg, #fff);
+      filter: brightness(1.08);
     }
   }
 

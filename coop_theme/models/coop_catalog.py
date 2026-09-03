@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
+import ast
+import logging
+
 from odoo import api, models
+
+_logger = logging.getLogger(__name__)
 
 
 class CoopCatalog(models.AbstractModel):
@@ -26,8 +31,31 @@ class CoopCatalog(models.AbstractModel):
         if not describe:
             return []
         blocks = describe(domain or [])
-        for block in blocks:
-            if block.get('widget') in ('select', 'chips') and block.get('field'):
+        counted = [b for b in blocks
+                   if b.get('widget') in ('select', 'chips') and b.get('field')]
+
+        # Характеристики считаются все разом: у каждой свой ключ в одной
+        # и той же колонке значений, и разбирать их по отдельным
+        # группировкам значит платить по два запроса за каждую. Каталог
+        # знает, как это сделать одним, — спрашиваем его.
+        attr_blocks = [b for b in counted if b['field'].startswith('attrs.')]
+        attr_ids = {id(b) for b in attr_blocks}
+        if attr_blocks and hasattr(model, '_coop_attr_counts'):
+            codes = [b['field'].split('.', 1)[1] for b in attr_blocks]
+            try:
+                attr_counts = model._coop_attr_counts(domain or [], codes)
+            except Exception:
+                _logger.exception(
+                    'Не удалось посчитать значения характеристик каталога %s',
+                    res_model)
+                attr_counts = {}
+            for block in attr_blocks:
+                values = attr_counts.get(block['field'].split('.', 1)[1], {})
+                for option in block.get('options', []):
+                    option['count'] = values.get(option['value'], 0)
+
+        for block in counted:
+            if id(block) not in attr_ids:
                 self._fill_counts(model, block, domain or [])
         return blocks
 
@@ -44,6 +72,12 @@ class CoopCatalog(models.AbstractModel):
         try:
             groups = model._read_group(others, [field], ['__count'])
         except Exception:
+            # Молча ноль во всех счётчиках — худший исход: панель выглядит
+            # рабочей и говорит неправду. Показать её всё-таки надо, но
+            # причина обязана попасть в журнал, иначе искать её негде.
+            _logger.exception(
+                'Не удалось посчитать значения поля «%s» каталога %s',
+                field, model._name)
             return
         counts = {}
         for value, count in groups:
@@ -70,16 +104,34 @@ class CoopCatalog(models.AbstractModel):
 
     @api.model
     def coop_saved_searches(self, res_model):
+        """Сохранённые поиски участника, с уже разобранным условием.
+
+        Условие разбирается здесь, а не в браузере. Хранится оно в виде
+        записи Python, и на той стороне его чинили заменой апострофов на
+        кавычки — на первом же городе с апострофом в названии или на
+        сохранённом «истина/ложь» такой разбор ломается и молча отдаёт
+        пустой фильтр.
+        """
         records = self.env['ir.filters'].search([
             ('model_id', '=', res_model),
             ('user_ids', 'in', [self.env.uid]),
         ], order='name')
-        return [{'id': r.id, 'name': r.name, 'domain': r.domain}
-                for r in records]
+        result = []
+        for record in records:
+            try:
+                domain = ast.literal_eval(record.domain or '[]')
+            except (ValueError, SyntaxError):
+                _logger.warning(
+                    'Сохранённый поиск %s: условие не читается: %s',
+                    record.id, record.domain)
+                continue
+            result.append({'id': record.id, 'name': record.name,
+                           'domain': domain})
+        return result
 
     @api.model
     def coop_drop_search(self, filter_id):
-        record = self.env['ir.filters'].browse(filter_id)
-        if self.env.uid in record.user_ids.ids:
+        record = self.env['ir.filters'].browse(filter_id).exists()
+        if record and self.env.uid in record.user_ids.ids:
             record.unlink()
         return True

@@ -50,9 +50,10 @@ class CoopPromotionSlot(models.Model):
     resource_id = fields.Many2one(
         'coop.resource', string='Сейчас показывается', compute='_compute_is_taken')
 
-    _sql_constraints = [
-        ('place_uniq', 'unique(page, position)', 'Такое место уже заведено.'),
-    ]
+    _place_uniq = models.Constraint(
+        'unique(page, position)',
+        'Такое место уже заведено.',
+    )
 
     def _search_is_taken(self, operator, value):
         """Поиск по занятости.
@@ -118,9 +119,10 @@ class CoopPromotion(models.Model):
     transaction_id = fields.Many2one(
         'coop.token.transaction', string='Движение токенов', readonly=True)
 
-    _sql_constraints = [
-        ('days_positive', 'check(days > 0)', 'Срок должен быть больше нуля.'),
-    ]
+    _days_positive = models.Constraint(
+        'check(days > 0)',
+        'Срок должен быть больше нуля.',
+    )
 
     @api.depends('price_per_day', 'days')
     def _compute_total(self):

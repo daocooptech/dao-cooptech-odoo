@@ -50,6 +50,7 @@ class CoopPower(models.Model):
              'Ревизионной комиссии не выдаются: проверяющий не должен быть '
              'участником того, что проверяет.')
 
-    _sql_constraints = [
-        ('code_uniq', 'unique(code)', 'Полномочие с таким кодом уже есть.'),
-    ]
+    _code_uniq = models.Constraint(
+        'unique(code)',
+        'Полномочие с таким кодом уже есть.',
+    )

@@ -204,10 +204,10 @@ class CoopBountyApplication(models.Model):
         ('rejected', 'Отклонена'),
     ], string='Состояние', default='applied', required=True, index=True)
 
-    _sql_constraints = [
-        ('one_per_task', 'unique(task_id, partner_id)',
-         'Участник уже подал заявку по этой задаче.'),
-    ]
+    _one_per_task = models.Constraint(
+        'unique(task_id, partner_id)',
+        'Участник уже подал заявку по этой задаче.',
+    )
 
     def action_approve(self):
         """Утвердить исполнителя.

@@ -56,10 +56,10 @@ class CoopTokenTransaction(models.Model):
     res_model = fields.Char(string='Модель объекта')
     res_id = fields.Integer(string='Объект')
 
-    _sql_constraints = [
-        ('amount_not_zero', 'check(amount != 0)',
-         'Движение на ноль токенов не имеет смысла.'),
-    ]
+    _amount_not_zero = models.Constraint(
+        'check(amount != 0)',
+        'Движение на ноль токенов не имеет смысла.',
+    )
 
     @api.model_create_multi
     def create(self, vals_list):

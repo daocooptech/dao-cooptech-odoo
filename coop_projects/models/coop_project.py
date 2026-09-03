@@ -30,10 +30,10 @@ class CoopProjectCategory(models.Model):
     project_count = fields.Integer(
         string='Проектов', compute='_compute_project_count')
 
-    _sql_constraints = [
-        ('name_parent_uniq', 'unique(name, parent_id)',
-         'Такая тема на этом уровне уже есть.'),
-    ]
+    _name_parent_uniq = models.Constraint(
+        'unique(name, parent_id)',
+        'Такая тема на этом уровне уже есть.',
+    )
 
     @api.depends('name', 'parent_id.complete_name')
     def _compute_complete_name(self):

@@ -21,9 +21,10 @@ class CoopSpecializationCategory(models.Model):
     partner_count = fields.Integer(
         string='Людей', compute='_compute_counts')
 
-    _sql_constraints = [
-        ('name_uniq', 'unique(name)', 'Такая сфера деятельности уже есть.'),
-    ]
+    _name_uniq = models.Constraint(
+        'unique(name)',
+        'Такая сфера деятельности уже есть.',
+    )
 
     @api.depends('specialization_ids.partner_count')
     def _compute_counts(self):
@@ -63,9 +64,10 @@ class CoopSpecialization(models.Model):
     partner_count = fields.Integer(
         string='Записей', compute='_compute_partner_count', store=True)
 
-    _sql_constraints = [
-        ('name_uniq', 'unique(name)', 'Такая специализация уже есть.'),
-    ]
+    _name_uniq = models.Constraint(
+        'unique(name)',
+        'Такая специализация уже есть.',
+    )
 
     @api.depends('partner_ids.coop_is_participant')
     def _compute_partner_count(self):

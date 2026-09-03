@@ -336,10 +336,31 @@
   </record>
 
   <!-- ── Меню ──────────────────────────────────────────────────────── -->
+  <!--
+    «Мои сообщества» — те, где человек состоит. Отдельно от «Участия»:
+    там перечислены записи о членстве со сроками и ролями, а здесь сами
+    сообщества, теми же карточками, что в каталоге.
+  -->
+  <record id="action_coop_my_communities" model="ir.actions.act_window">
+    <field name="name">Мои сообщества</field>
+    <field name="res_model">coop.community</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="context">{'coop_catalog': True, 'coop_create_label': 'Создать сообщество'}</field>
+    <field name="domain">[('member_ids', 'any', [('partner_id.user_ids', 'in', [uid]), ('state', '=', 'active')])]</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Вы пока ни в чём не состоите</p>
+      <p>Сообщество — это люди, договорившиеся о деле; вступить можно из
+         каталога.</p>
+    </field>
+  </record>
+
   <menuitem id="menu_coop_communities_root" name="Сообщества" sequence="55"/>
   <menuitem id="menu_coop_communities" name="Каталог сообществ"
             parent="menu_coop_communities_root" action="action_coop_communities"
             sequence="10"/>
+  <menuitem id="menu_coop_my_communities" name="Мои сообщества"
+            parent="menu_coop_communities_root" action="action_coop_my_communities"
+            sequence="15"/>
   <menuitem id="menu_coop_community_members" name="Участие"
             parent="menu_coop_communities_root" action="action_coop_community_members"
             sequence="90" groups="coop_base.group_coop_platform"/>

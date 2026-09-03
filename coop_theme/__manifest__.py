@@ -33,6 +33,7 @@
         'web.assets_backend': [
             'coop_theme/static/src/scss/fonts.scss',
             'coop_theme/static/src/scss/backend.scss',
+            'coop_theme/static/src/scss/dark.scss',
             'coop_theme/static/src/scss/catalog_view.scss',
             'coop_theme/static/src/scss/shell.scss',
             'coop_theme/static/src/js/catalog_sort.js',
@@ -43,6 +44,8 @@
             'coop_theme/static/src/scss/catalog_filters.scss',
             'coop_theme/static/src/js/catalog_view.js',
             'coop_theme/static/src/js/shell.js',
+            'coop_theme/static/src/js/theme_switch.js',
+            'coop_theme/static/src/xml/theme_switch.xml',
             'coop_theme/static/src/xml/catalog_view.xml',
             'coop_theme/static/src/xml/shell.xml',
         ],

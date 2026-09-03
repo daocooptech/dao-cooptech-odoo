@@ -97,10 +97,10 @@ class CoopVerification(models.Model):
              'ссылка на выписку. Сам документ здесь не хранится.')
     note = fields.Char(string='Пояснение')
 
-    _sql_constraints = [
-        ('one_per_kind', 'unique(partner_id, kind)',
-         'Такое подтверждение у участника уже есть — правьте его, а не заводите второе.'),
-    ]
+    _one_per_kind = models.Constraint(
+        'unique(partner_id, kind)',
+        'Такое подтверждение у участника уже есть — правьте его, а не заводите второе.',
+    )
 
     def action_confirm(self):
         for record in self:

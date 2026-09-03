@@ -229,10 +229,32 @@
     <field name="view_mode">list,form</field>
   </record>
 
+  <!--
+    «Мои проекты» — и заведённые самим человеком, и те, куда он вложился.
+    Вторая половина не менее важна первой: краудресурсинг тем и живёт,
+    что участник вкладывает труд и технику в чужой замысел, и найти,
+    куда именно, он должен здесь, а не перебирая каталог.
+  -->
+  <record id="action_coop_my_projects" model="ir.actions.act_window">
+    <field name="name">Мои проекты</field>
+    <field name="res_model">coop.project</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="context">{'coop_catalog': True, 'coop_create_label': 'Добавить проект'}</field>
+    <field name="domain">['|', ('partner_id.user_ids', 'in', [uid]), ('contribution_ids.partner_id.user_ids', 'in', [uid])]</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Вы пока ни в чём не участвуете</p>
+      <p>Заведите свой замысел или вложитесь в чужой — вкладом считается не
+         только деньги, но труд, техника, материалы и знания.</p>
+    </field>
+  </record>
+
   <menuitem id="menu_coop_projects_root" name="Проекты" sequence="18"
             web_icon="coop_projects,static/description/icon.png"/>
   <menuitem id="menu_coop_projects" name="Каталог проектов"
             parent="menu_coop_projects_root" action="action_coop_projects" sequence="10"/>
+  <menuitem id="menu_coop_my_projects" name="Мои проекты"
+            parent="menu_coop_projects_root" action="action_coop_my_projects"
+            sequence="15"/>
   <menuitem id="menu_coop_project_category" name="Темы"
             parent="menu_coop_projects_root" action="action_coop_project_category"
             sequence="90" groups="coop_base.group_coop_platform"/>

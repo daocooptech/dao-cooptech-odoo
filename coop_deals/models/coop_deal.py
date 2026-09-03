@@ -149,11 +149,14 @@ class CoopDeal(models.Model):
 
     import_key = fields.Char(string='Ключ источника', index=True, copy=False)
 
-    _sql_constraints = [
-        ('number_uniq', 'unique(number)', 'Такой номер сделки уже есть.'),
-        ('parties_differ', 'check(party_a_id != party_b_id)',
-         'Сделка с самим собой не имеет смысла.'),
-    ]
+    _number_uniq = models.Constraint(
+        'unique(number)',
+        'Такой номер сделки уже есть.',
+    )
+    _parties_differ = models.Constraint(
+        'check(party_a_id != party_b_id)',
+        'Сделка с самим собой не имеет смысла.',
+    )
 
     @api.depends('number', 'name')
     def _compute_display_name(self):
@@ -456,12 +459,14 @@ class CoopDealReview(models.Model):
     visible = fields.Boolean(
         related='deal_id.reviews_visible', store=True, string='Раскрыт')
 
-    _sql_constraints = [
-        ('one_per_author', 'unique(deal_id, author_id)',
-         'Отзыв по этой сделке вы уже оставили.'),
-        ('not_self', 'check(author_id != target_id)',
-         'Оценивать самого себя не имеет смысла.'),
-    ]
+    _one_per_author = models.Constraint(
+        'unique(deal_id, author_id)',
+        'Отзыв по этой сделке вы уже оставили.',
+    )
+    _not_self = models.Constraint(
+        'check(author_id != target_id)',
+        'Оценивать самого себя не имеет смысла.',
+    )
 
     @api.model_create_multi
     def create(self, vals_list):

@@ -114,10 +114,10 @@ class CoopCommunity(models.Model):
 
     import_key = fields.Char(string='Ключ источника', index=True, copy=False)
 
-    _sql_constraints = [
-        ('import_key_uniq', 'unique(import_key)',
-         'Такой ключ источника уже занят другим сообществом.'),
-    ]
+    _import_key_uniq = models.Constraint(
+        'unique(import_key)',
+        'Такой ключ источника уже занят другим сообществом.',
+    )
 
     # ── Вычисления ──────────────────────────────────────────────────────
 

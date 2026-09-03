@@ -146,10 +146,10 @@ class CoopWallet(models.Model):
     share_account_count = fields.Integer(
         string='Кооперативов', compute='_compute_share', store=True)
 
-    _sql_constraints = [
-        ('one_per_partner', 'unique(partner_id)',
-         'Кошелёк у участника уже есть — он один, вкладки внутри.'),
-    ]
+    _one_per_partner = models.Constraint(
+        'unique(partner_id)',
+        'Кошелёк у участника уже есть — он один, вкладки внутри.',
+    )
 
     @api.depends('partner_id')
     def _compute_display_name(self):
@@ -375,10 +375,10 @@ class CoopWalletMovement(models.Model):
              'отклонить. Без промежуточных состояний экран показывал бы '
              'только свершившееся, а человек не понимал бы, где его деньги.')
 
-    _sql_constraints = [
-        ('amount_not_zero', 'check(amount != 0)',
-         'Движение на ноль не имеет смысла.'),
-    ]
+    _amount_not_zero = models.Constraint(
+        'check(amount != 0)',
+        'Движение на ноль не имеет смысла.',
+    )
 
     @api.constrains('kind', 'method_id')
     def _check_method(self):

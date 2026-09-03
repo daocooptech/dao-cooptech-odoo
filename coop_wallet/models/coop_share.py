@@ -78,10 +78,10 @@ class CoopShareAccount(models.Model):
         help='Как в этом кооперативе начисляется выплата и как возвращается '
              'пай при выходе.')
 
-    _sql_constraints = [
-        ('one_per_coop', 'unique(wallet_id, cooperative_id)',
-         'Паевой счёт в этом кооперативе уже есть.'),
-    ]
+    _one_per_coop = models.Constraint(
+        'unique(wallet_id, cooperative_id)',
+        'Паевой счёт в этом кооперативе уже есть.',
+    )
 
     @api.depends('cooperative_id', 'partner_id')
     def _compute_display_name(self):
@@ -187,10 +187,10 @@ class CoopShareMove(models.Model):
         help='Считается по порядку дат. Хранить отдельно нельзя: '
              'вставленная задним числом операция сдвинет весь столбец.')
 
-    _sql_constraints = [
-        ('amount_not_zero', 'check(amount != 0)',
-         'Движение на ноль не имеет смысла.'),
-    ]
+    _amount_not_zero = models.Constraint(
+        'check(amount != 0)',
+        'Движение на ноль не имеет смысла.',
+    )
 
     @api.depends('account_id.move_ids.amount', 'date', 'state')
     def _compute_balance_after(self):

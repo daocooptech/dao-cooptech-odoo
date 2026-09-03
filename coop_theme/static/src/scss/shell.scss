@@ -326,3 +326,56 @@
     display: none;
   }
 }
+
+// ── Переключатель темы ────────────────────────────────────────────────
+//
+// Размеры и движение ручки — из прототипа (`theme.css`): тумблер тот же,
+// и человек, переходящий между макетом и стендом, не должен замечать
+// разницы.
+.o_coop_theme_switch {
+  position: relative;
+  flex: none;
+  width: 46px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--coop-line, #e6e6e1);
+  border-radius: 13px;
+  background: var(--coop-surface, #f5f5f0);
+  cursor: pointer;
+}
+
+.o_coop_tt_sun,
+.o_coop_tt_moon {
+  position: absolute;
+  top: 5px;
+  display: flex;
+  // Ручка ездит поверх значков, и щелчок должен доходить до самой
+  // кнопки, а не застревать на картинке.
+  pointer-events: none;
+}
+
+.o_coop_tt_sun {
+  left: 5px;
+  color: #d9a441;
+}
+
+.o_coop_tt_moon {
+  right: 5px;
+  color: var(--coop-slate, #6f6f66);
+}
+
+.o_coop_tt_knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--coop-white, #fff);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+  transition: left .18s ease;
+}
+
+.o_coop_theme_dark .o_coop_tt_knob {
+  left: 24px;
+}

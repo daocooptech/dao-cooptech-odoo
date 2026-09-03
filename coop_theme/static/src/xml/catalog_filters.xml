@@ -28,6 +28,16 @@
           </select>
         </div>
 
+        <!--
+          Раздел, у которого набор полей ещё не описан, показывает не
+          пустую карточку с заголовком «Фильтр», а прямую строку о том,
+          чем здесь пока отбирают. Карточка без единого поля читается как
+          недогрузившаяся, и человек ждёт, что она вот-вот появится.
+        -->
+        <div class="o_coop_filters_none" t-if="!state.blocks.length">
+          В этом разделе пока отбирают порядком и поиском по названию.
+        </div>
+
         <t t-foreach="state.blocks" t-as="block" t-key="block.code">
 
           <!-- Быстрые фильтры — чипами, как в макете. -->
@@ -118,9 +128,15 @@
              на рубрике с десятком характеристик это был десяток
              запросов на щелчок, и каталог заметно вставал. -->
         <button type="button" class="o_coop_btn o_coop_btn_dark"
+                t-att-class="{ 'o_coop_btn_dirty': state.dirty }"
                 t-on-click="() => this.showResults()">
           Показать результаты
-          <t t-if="state.preview !== null"> · <t t-esc="state.preview"/></t>
+          <!-- Число произносится вслух при пересчёте: иначе незрячий
+               человек не узнает, что после последнего выбора показывать
+               уже нечего. -->
+          <t t-if="state.preview !== null">
+            · <span aria-live="polite" t-esc="state.preview"/>
+          </t>
         </button>
 
         <button type="button" class="o_coop_btn o_coop_btn_light"

@@ -1,0 +1,202 @@
+// Тёмная тема для интерфейса движка.
+//
+// Своей тёмной темы у Odoo Community нет: Bootstrap собран с
+// выключенным `$enable-dark-mode`, то есть блок `[data-bs-theme="dark"]`
+// в стили не попадает вовсе, а собственные цвета движка вкомпилированы
+// литералами из SCSS-переменных и на ходу не меняются. Поэтому одного
+// переопределения наших токенов мало: страница получалась пёстрой —
+// наши блоки тёмные, чужие белые.
+//
+// Здесь перекрашивается то, из чего собраны наши экраны: полоса
+// управления, формы, списки, канбан, поля ввода и выпадающие меню.
+// Диалоги и разделы движка, которых на платформе нет, сюда не входят —
+// красить весь Odoo вслепую значит взять на себя починку после каждого
+// обновления.
+//
+// Порядок: файл идёт после `backend.scss`, где объявлены сами токены.
+
+[data-bs-theme="dark"] .o_web_client {
+
+  // ── Основа ───────────────────────────────────────────────────────────
+  //
+  // Переменные Bootstrap переопределяются здесь, а не в теме: движок
+  // собран без тёмного режима, и без этого блока значения остаются
+  // светлыми, откуда бы их ни брали компоненты.
+  --bs-body-bg: var(--coop-paper);
+  --bs-body-color: var(--coop-ink);
+  --bs-emphasis-color: var(--coop-ink);
+  --bs-heading-color: var(--coop-ink);
+  --bs-border-color: var(--coop-line);
+  --bs-secondary-bg: var(--coop-surface);
+  --bs-tertiary-bg: var(--coop-surface);
+  --bs-secondary-color: var(--coop-slate);
+  --bs-tertiary-color: var(--coop-slate-light);
+  --bs-link-color: var(--coop-teal-dark);
+  --bs-link-hover-color: var(--coop-teal);
+
+  background-color: var(--coop-paper);
+  color: var(--coop-ink);
+
+  .o_action_manager,
+  .o_content,
+  .o_form_view,
+  .o_list_view,
+  .o_kanban_view,
+  .o_form_sheet_bg,
+  .o_view_controller {
+    background-color: var(--coop-paper);
+    color: var(--coop-ink);
+  }
+
+  .o_form_sheet,
+  .o_kanban_record,
+  .card,
+  .modal-content,
+  .popover,
+  .o_popover {
+    background-color: var(--coop-white);
+    border-color: var(--coop-line);
+    color: var(--coop-ink);
+  }
+
+  // ── Полоса управления ────────────────────────────────────────────────
+  .o_control_panel {
+    background-color: var(--coop-white);
+    border-color: var(--coop-line);
+    color: var(--coop-ink);
+  }
+
+  .o_breadcrumb,
+  .o_last_breadcrumb_item,
+  .breadcrumb-item a {
+    color: var(--coop-ink);
+  }
+
+  // ── Поля ввода ───────────────────────────────────────────────────────
+  //
+  // Отдельным правилом, потому что поле формы — это настоящий `input`, и
+  // цвет текста он берёт свой, а не наследует от блока. Из-за этого имя
+  // участника на своей странице оказывалось тёмно-серым по тёмному.
+  input,
+  textarea,
+  select,
+  .o_input,
+  .o_field_widget input,
+  .o_field_widget textarea,
+  .form-control,
+  .form-select {
+    background-color: transparent;
+    color: var(--coop-ink);
+    border-color: var(--coop-line);
+
+    &::placeholder {
+      color: var(--coop-slate-light);
+    }
+  }
+
+  .form-control:focus,
+  .form-select:focus,
+  .o_input:focus {
+    background-color: var(--coop-surface);
+    color: var(--coop-ink);
+  }
+
+  // Поле в форме подчёркнуто снизу — линия должна быть видна и на тёмном.
+  .o_field_widget .o_input:not(:focus) {
+    border-bottom-color: var(--coop-line);
+  }
+
+  // ── Списки ───────────────────────────────────────────────────────────
+  //
+  // У таблиц Bootstrap свои переменные, и без них строки остаются белыми
+  // внутри тёмной карточки — ровно это и было видно в полосах
+  // «Образование» и «Достижения».
+  .table,
+  .o_list_table {
+    --bs-table-bg: var(--coop-white);
+    --bs-table-color: var(--coop-ink);
+    --bs-table-border-color: var(--coop-line);
+    --bs-table-striped-bg: var(--coop-surface);
+    --bs-table-striped-color: var(--coop-ink);
+    --bs-table-hover-bg: var(--coop-surface);
+    --bs-table-hover-color: var(--coop-ink);
+    --bs-table-active-bg: var(--coop-teal-tint);
+    --bs-table-active-color: var(--coop-ink);
+
+    color: var(--coop-ink);
+  }
+
+  .o_list_table thead,
+  .o_list_table thead th,
+  .o_list_table > thead > tr > th {
+    background-color: var(--coop-surface);
+    color: var(--coop-slate);
+    border-color: var(--coop-line);
+  }
+
+  .o_list_table tbody tr,
+  .o_list_table tbody td,
+  .o_data_row td {
+    background-color: var(--coop-white);
+    border-color: var(--coop-line);
+  }
+
+  .o_list_table tbody tr:hover td,
+  .o_data_row:hover td {
+    background-color: var(--coop-surface);
+  }
+
+  // Строка добавления записи — та же подложка, что у остальных, иначе
+  // «Добавить строку» висит белой полосой под тёмной таблицей.
+  .o_field_x2many_list_row_add td,
+  .o_list_table tfoot td {
+    background-color: var(--coop-white);
+    border-color: var(--coop-line);
+    color: var(--coop-ink);
+  }
+
+  // ── Выпадающие меню и подсказки ──────────────────────────────────────
+  .dropdown-menu,
+  .o_dropdown_menu {
+    --bs-dropdown-bg: var(--coop-white);
+    --bs-dropdown-color: var(--coop-ink);
+    --bs-dropdown-border-color: var(--coop-line);
+    --bs-dropdown-link-color: var(--coop-ink);
+    --bs-dropdown-link-hover-bg: var(--coop-surface);
+    --bs-dropdown-link-hover-color: var(--coop-ink);
+    --bs-dropdown-link-active-bg: var(--coop-teal-tint);
+    --bs-dropdown-link-active-color: var(--coop-teal-dark);
+  }
+
+  .tooltip-inner,
+  .o_popover_container {
+    background-color: var(--coop-surface);
+    color: var(--coop-ink);
+  }
+
+  // ── Второстепенные кнопки ────────────────────────────────────────────
+  //
+  // Серая кнопка Odoo на тёмном фоне становится светлым пятном с белой
+  // надписью. Перекрашивается подложкой из палитры, а не осветлением.
+  .btn-secondary,
+  .btn-light {
+    background-color: var(--coop-surface);
+    border-color: var(--coop-line);
+    color: var(--coop-ink);
+
+    &:hover,
+    &:focus {
+      background-color: var(--coop-line);
+      color: var(--coop-ink);
+    }
+  }
+
+  // ── Пустые состояния и служебный текст ───────────────────────────────
+  .o_view_nocontent,
+  .o_nocontent_help,
+  .text-muted,
+  .o_form_label,
+  small {
+    color: var(--coop-slate) !important;
+  }
+}

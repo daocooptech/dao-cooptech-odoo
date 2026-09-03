@@ -19,9 +19,10 @@ class CoopLegalFormGroup(models.Model):
     sequence = fields.Integer(string='Порядок', default=10)
     form_ids = fields.One2many('coop.legal.form', 'group_id', string='Формы')
 
-    _sql_constraints = [
-        ('code_uniq', 'unique(code)', 'Такая группа уже есть.'),
-    ]
+    _code_uniq = models.Constraint(
+        'unique(code)',
+        'Такая группа уже есть.',
+    )
 
 
 class CoopLegalForm(models.Model):
@@ -78,9 +79,10 @@ class CoopLegalForm(models.Model):
     partner_count = fields.Integer(
         string='Организаций', compute='_compute_partner_count')
 
-    _sql_constraints = [
-        ('code_uniq', 'unique(code)', 'Такая правовая форма уже есть.'),
-    ]
+    _code_uniq = models.Constraint(
+        'unique(code)',
+        'Такая правовая форма уже есть.',
+    )
 
     @api.depends('partner_ids')
     def _compute_partner_count(self):

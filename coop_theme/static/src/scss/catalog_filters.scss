@@ -25,7 +25,7 @@
   font: 600 10.5px/1.4 'Manrope', sans-serif;
   letter-spacing: .06em;
   text-transform: uppercase;
-  color: var(--coop-slate-light, #8a8a80);
+  color: var(--coop-slate-light, #8f8f88);
   margin-bottom: 12px;
 }
 
@@ -44,7 +44,7 @@
 // содержанием строки.
 .o_coop_hint {
   margin-left: 4px;
-  color: var(--coop-slate-light, #8a8a80);
+  color: var(--coop-slate-light, #8f8f88);
   cursor: help;
   font-size: 11px;
 }
@@ -59,7 +59,7 @@
   color: var(--coop-ink, #14171a);
 
   &::placeholder {
-    color: var(--coop-slate-light, #8a8a80);
+    color: var(--coop-slate-light, #8f8f88);
   }
 
   &:focus {
@@ -89,14 +89,23 @@
 
   &:hover {
     border-color: var(--coop-teal, #146b64);
-    color: var(--coop-teal-dark, #0f4f4a);
+    color: var(--coop-teal-dark, #0e4f4a);
   }
 }
 
 .o_coop_chip_on {
   background: var(--coop-teal-tint, #e3efed);
   border-color: var(--coop-teal, #146b64);
-  color: var(--coop-teal-dark, #0f4f4a);
+  color: var(--coop-teal-dark, #0e4f4a);
+}
+
+// Строка вместо полей там, где их ещё нет. Приглушена: это пояснение, а
+// не поле и не ошибка.
+.o_coop_filters_none {
+  margin-bottom: 12px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--coop-slate, #4a4a44);
 }
 
 .o_coop_btn {
@@ -117,15 +126,27 @@
 
 // Тёмная в панели ровно одна — «Показать результаты». Две одинаково
 // заметные кнопки заставляют выбирать между ними, хотя главная тут одна.
+//
+// Цвета — теми же токенами, что у основной кнопки движка. Своими
+// значениями («чернила» плюс белый текст) кнопка в тёмной теме
+// становилась белой надписью на почти белом фоне: `--coop-ink` там
+// светлый.
 .o_coop_btn_dark {
-  background: var(--coop-ink, #14171a);
-  border-color: var(--coop-ink, #14171a);
-  color: #fff;
+  background: var(--coop-btn-bg, #14171a);
+  border-color: var(--coop-btn-bg, #14171a);
+  color: var(--coop-btn-fg, #fff);
 
   &:hover {
-    background: #000;
-    border-color: #000;
+    filter: brightness(1.08);
+    border-color: var(--coop-btn-bg, #14171a);
   }
+}
+
+// Условия набраны, но ещё не применены. Кнопка — единственное, чем их
+// применяют, и без отметки человек не понимает, почему список не
+// изменился после выбора рубрики.
+.o_coop_btn_dirty {
+  box-shadow: 0 0 0 3px var(--coop-teal-tint, #e3efed);
 }
 
 .o_coop_saved {
@@ -138,7 +159,7 @@
 .o_coop_saved_empty {
   padding: 6px 4px;
   font-size: 12px;
-  color: var(--coop-slate-light, #8a8a80);
+  color: var(--coop-slate-light, #8f8f88);
 }
 
 .o_coop_saved_row {
@@ -154,7 +175,7 @@
   background: none;
   padding: 5px 4px;
   font-size: 12.5px;
-  color: var(--coop-teal-dark, #0f4f4a);
+  color: var(--coop-teal-dark, #0e4f4a);
 
   &:hover {
     text-decoration: underline;
@@ -165,7 +186,7 @@
   flex: none;
   border: 0;
   background: none;
-  color: var(--coop-slate-light, #8a8a80);
+  color: var(--coop-slate-light, #8f8f88);
   font-size: 15px;
   line-height: 1;
 

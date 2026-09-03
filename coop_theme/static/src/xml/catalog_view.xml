@@ -48,7 +48,8 @@
     -->
     <xpath expr="//t[@t-component='props.Renderer']" position="after">
       <CoopMap t-if="coopLayout.mode === 'map'"
-               resModel="props.resModel" domain="model.root.domain"/>
+               resModel="props.resModel" domain="model.root.domain"
+               showTiles.bind="coopShowTiles"/>
       <CoopFilters resModel="props.resModel"/>
       <div class="o_coop_pager" t-if="env.config.pagerProps and coopLayout.mode !== 'map'">
         <Pager t-props="env.config.pagerProps"/>
@@ -71,7 +72,7 @@
       место с названием раздела и пагинатором.
     -->
     <xpath expr="//div[hasclass('o_control_panel')]" position="attributes">
-      <attribute name="t-att-class">{ o_coop_catalog: coopIsCatalog, o_coop_own_page: coopIsProfile }</attribute>
+      <attribute name="t-att-class">{ o_coop_catalog: coopIsCatalog, o_coop_lone_crumb: coopSingleCrumb }</attribute>
     </xpath>
 
     <!--
@@ -89,6 +90,14 @@
     -->
     <xpath expr="//div[hasclass('o_control_panel_navigation')]" position="after">
       <div class="o_coop_row_break" t-if="coopIsCatalog"/>
+    </xpath>
+
+    <!--
+      Переключатель записей над единственной записью показывает «1 / 1»:
+      переключать нечего, а полосу он держит.
+    -->
+    <xpath expr="//div[hasclass('o_cp_pager')]" position="attributes">
+      <attribute name="t-if">pagerProps and pagerProps.total > 1</attribute>
     </xpath>
 
     <xpath expr="//t[@t-if='env.config.viewSwitcherEntries?.length > 1']" position="attributes">

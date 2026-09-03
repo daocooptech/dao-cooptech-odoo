@@ -321,10 +321,10 @@ class CoopVacancyApplication(models.Model):
     hr_applicant_id = fields.Many2one(
         'hr.applicant', string='Кандидат в наборе', readonly=True, copy=False)
 
-    _sql_constraints = [
-        ('one_per_vacancy', 'unique(vacancy_id, partner_id)',
-         'Вы уже откликнулись на эту вакансию.'),
-    ]
+    _one_per_vacancy = models.Constraint(
+        'unique(vacancy_id, partner_id)',
+        'Вы уже откликнулись на эту вакансию.',
+    )
 
     def action_invite(self):
         for record in self:

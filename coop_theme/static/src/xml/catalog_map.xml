@@ -8,17 +8,24 @@
   -->
   <t t-name="coop_theme.CatalogMap">
     <div class="o_coop_mapboard">
-      <div class="o_coop_map_canvas">
+      <div class="o_coop_map_canvas"
+           t-att-aria-busy="state.loading ? 'true' : 'false'">
         <div class="o_coop_map_empty" t-if="state.failed" role="alert">
           Не удалось посчитать метки. Попробуйте открыть карту ещё раз.
         </div>
-        <div class="o_coop_map_empty"
-             t-elif="!state.loading and !state.pins.length">
+        <!-- Пока считаем — так и написано. Пустая сетка без единой метки
+             неотличима от «ничего не нашлось», и человек успевает менять
+             отбор, который ещё не применился. -->
+        <div class="o_coop_map_empty" t-elif="state.loading">
+          Считаем метки…
+        </div>
+        <div class="o_coop_map_empty" t-elif="!state.pins.length">
           Нет городов, подходящих под текущий отбор
         </div>
         <button t-foreach="state.pins" t-as="pin" t-key="pin.city"
                 type="button" class="o_coop_pin"
                 t-attf-style="left:{{ pin.left }}%;top:{{ pin.top }}%"
+                t-attf-title="Показать записи из города {{ pin.city }}"
                 t-on-click="() => this.selectCity(pin.city)">
           <span class="o_coop_pin_dot"
                 t-attf-style="width:{{ pin.size }}px;height:{{ pin.size }}px"/>
@@ -29,7 +36,7 @@
       </div>
       <p class="o_coop_map_note">
         Размер метки — сколько записей в городе с учётом текущего отбора.
-        Нажмите на метку, чтобы отобрать город.
+        Нажмите на метку: отберём этот город и покажем записи плиткой.
         <t t-if="state.other">
           Ещё <t t-esc="state.other"/> без города или вне карты.
         </t>

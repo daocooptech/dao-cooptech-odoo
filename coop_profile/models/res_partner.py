@@ -134,7 +134,10 @@ class ResPartner(models.Model):
         странице и в одну и ту же минуту, а раздельно это четыре обхода
         по тем же записям.
         """
-        me = self.env.user.partner_id
+        # От чьего имени человек действует, тот и «я»: переключившись на
+        # организацию, он открывает её страницу — и должен видеть на ней
+        # её кошелёк и её залежавшиеся объявления, а не пустоту.
+        me = self.env.user._coop_acting_partner()
         wallet = self.env['coop.wallet'].sudo()
 
         links = self.env['coop.friendship'].sudo().search([
@@ -171,7 +174,10 @@ class ResPartner(models.Model):
             # чужих денег постороннему не показывают, а чужие черновики
             # и залежи — это внутренняя кухня участника.
             own = record.id == me.id
-            purse = wallet.search([('partner_id', '=', record.id)], limit=1)                 if own else wallet.browse()
+            purse = wallet.browse()
+            if own:
+                purse = wallet.search(
+                    [('partner_id', '=', record.id)], limit=1)
             # Рублёвый остаток, а не крипта и не кредитные линии: в
             # макете в строке показателей стоит одно число в рублях, а
             # разложение по вкладкам — это уже кошелёк.
@@ -180,10 +186,17 @@ class ResPartner(models.Model):
                 purse.currency_id.id if purse else
                 self.env.company.currency_id.id)
             if own:
+                # Отсчёт — от последнего подтверждения, а если его не
+                # было, от появления объявления. Считать только от даты
+                # создания нельзя: подтверждение тогда ничего не меняет,
+                # и напоминание возвращается на следующий же день.
                 stale = self.env['coop.resource'].sudo().search([
                     ('owner_id', '=', record.id),
                     ('state', '=', 'published'),
+                    '|',
+                    '&', ('refreshed_on', '=', False),
                     ('create_date', '<=', stale_before),
+                    ('refreshed_on', '<=', stale_before),
                 ], order='create_date', limit=1)
                 record.coop_stale_resource_ids = [(6, 0, stale.ids)]
             else:
@@ -194,12 +207,17 @@ class ResPartner(models.Model):
 
         `_read_group` в Odoo 19 отдаёт кортежи записей, а не словари.
         """
-        me = self.env.user.partner_id
+        me = self.env.user._coop_acting_partner()
         # Владелец видит и то, чего в каталоге нет; посторонний — только
         # опубликованное. Без этого «Моя страница» врёт владельцу о том,
         # сколько у него всего, ровно на число черновиков.
+        #
+        # Опубликованное считается всем сразу, неопубликованное — только
+        # себе и отдельным проходом. Раньше признак «это я» выводился из
+        # того, один ли я в пачке (`self.ids == [me.id]`), а размер пачки
+        # решает ORM: открыв свою карточку из списка людей, человек
+        # переставал видеть собственные черновики.
         published = [('state', '=', 'published')]
-        own = self.ids == [me.id]
 
         def tally(model, field, domain=None):
             result = {}
@@ -210,12 +228,9 @@ class ResPartner(models.Model):
             return result
 
         counts = {
-            'offer': tally('coop.skill.offer', 'partner_id',
-                           [] if own else published),
-            'resource': tally('coop.resource', 'owner_id',
-                              [] if own else published),
-            'vacancy': tally('coop.vacancy', 'partner_id',
-                             [] if own else published),
+            'offer': tally('coop.skill.offer', 'partner_id', published),
+            'resource': tally('coop.resource', 'owner_id', published),
+            'vacancy': tally('coop.vacancy', 'partner_id', published),
             'project': tally('coop.project', 'partner_id'),
             'deal': tally('coop.deal', 'party_a_id'),
         }
@@ -245,14 +260,24 @@ class ResPartner(models.Model):
                     friends[partner.id] = friends.get(partner.id, 0) + 1
         counts['friend'] = friends
 
+        # Своё неопубликованное — тремя дешёвыми подсчётами по одной
+        # записи, а не группировкой по всей пачке: считается оно только
+        # себе, и группировать тут не по кому.
         drafts = {}
-        if own:
-            for model, field in (('coop.skill.offer', 'partner_id'),
-                                 ('coop.resource', 'owner_id'),
-                                 ('coop.vacancy', 'partner_id')):
-                for partner_id, count in tally(
-                        model, field, [('state', '!=', 'published')]).items():
-                    drafts[partner_id] = drafts.get(partner_id, 0) + count
+        if me.id in self.ids:
+            unpublished = [('state', '!=', 'published')]
+            for model, field, key in (
+                    ('coop.skill.offer', 'partner_id', 'offer'),
+                    ('coop.resource', 'owner_id', 'resource'),
+                    ('coop.vacancy', 'partner_id', 'vacancy')):
+                count = self.env[model].sudo().search_count(
+                    [(field, '=', me.id)] + unpublished)
+                if not count:
+                    continue
+                drafts[me.id] = drafts.get(me.id, 0) + count
+                # Своё неопубликованное входит и в общий счётчик: на своей
+                # странице человек считает всё, что у него есть.
+                counts[key][me.id] = counts[key].get(me.id, 0) + count
         counts['draft'] = drafts
         return counts
 
@@ -336,6 +361,11 @@ class ResPartner(models.Model):
     # возвращает объявлению место в выдаче. Если бы это просто убирало
     # напоминание, подтверждать было бы незачем.
 
+    # Ни одно из двух действий не закрывает страницу: человек нажал
+    # кнопку в напоминании на своей же странице и должен остаться на ней.
+    # Возврата действия достаточно — форма перечитывает запись сама, и
+    # напоминание исчезает.
+
     def action_coop_confirm_listing(self):
         self.ensure_one()
         listing = self.coop_stale_resource_ids[:1]
@@ -344,15 +374,18 @@ class ResPartner(models.Model):
         listing.sudo().write({'refreshed_on': fields.Datetime.now()})
         listing.sudo().message_post(
             body=_('Владелец подтвердил, что объявление актуально.'))
-        return {'type': 'ir.actions.act_window_close'}
+        return True
 
     def action_coop_unpublish_listing(self):
         self.ensure_one()
         listing = self.coop_stale_resource_ids[:1]
         if not listing:
             return False
-        listing.sudo().write({'state': 'archived'})
-        return {'type': 'ir.actions.act_window_close'}
+        # Состояний у объявления три: черновик, опубликовано, закрыто.
+        # Снятое с публикации — «закрыто»; писавшееся сюда «archived»
+        # такого значения не имеет, и кнопка падала на проверке.
+        listing.sudo().action_close()
+        return True
 
     def action_coop_my_listings(self):
         """«Мои объявления» — то, чего в каталоге не видно.

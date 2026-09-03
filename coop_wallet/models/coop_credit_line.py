@@ -70,12 +70,14 @@ class CoopCreditLine(models.Model):
 
     active = fields.Boolean(string='Действующая', default=True)
 
-    _sql_constraints = [
-        ('pair_uniq', 'unique(partner_id, counterparty_id)',
-         'Линия с этим контрагентом уже заведена.'),
-        ('not_self', 'check(partner_id != counterparty_id)',
-         'Линия взаимного кредита с самим собой не имеет смысла.'),
-    ]
+    _pair_uniq = models.Constraint(
+        'unique(partner_id, counterparty_id)',
+        'Линия с этим контрагентом уже заведена.',
+    )
+    _not_self = models.Constraint(
+        'check(partner_id != counterparty_id)',
+        'Линия взаимного кредита с самим собой не имеет смысла.',
+    )
 
     @api.constrains('partner_id', 'counterparty_id')
     def _check_reverse(self):
@@ -182,10 +184,10 @@ class CoopCreditMovement(models.Model):
     clearing_id = fields.Many2one(
         'coop.credit.clearing', string='Взаимозачёт', index=True, readonly=True)
 
-    _sql_constraints = [
-        ('amount_not_zero', 'check(amount != 0)',
-         'Операция на ноль кредитов не имеет смысла.'),
-    ]
+    _amount_not_zero = models.Constraint(
+        'check(amount != 0)',
+        'Операция на ноль кредитов не имеет смысла.',
+    )
 
     def action_confirm(self):
         """Подтвердить со своей стороны.
@@ -327,7 +329,7 @@ class CoopCreditSignature(models.Model):
     signed = fields.Boolean(string='Подписал')
     signed_on = fields.Date(string='Когда', readonly=True)
 
-    _sql_constraints = [
-        ('one_per_partner', 'unique(clearing_id, partner_id)',
-         'Этот участник уже в списке подписантов.'),
-    ]
+    _one_per_partner = models.Constraint(
+        'unique(clearing_id, partner_id)',
+        'Этот участник уже в списке подписантов.',
+    )
