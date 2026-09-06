@@ -2,6 +2,7 @@
 from odoo import api, models
 
 from ..data import (emblems, load_attributes, load_biography, load_bounty,
+                    load_cessions,
                     load_faces,
                     load_communities,
                     load_deals,
@@ -68,6 +69,12 @@ class CoopDemoLoader(models.AbstractModel):
         # Сделки последними: у них предметом стоят записи каталогов, а
         # сторонами — участники со ступенями, и всё это должно уже быть.
         load_deals.load_deals(self.env)
+        # Витрина уступок сразу за сделками и до кошельков: она возвращает
+        # части завершённых сделок отсрочку по последнему платежу, а
+        # сальдо по контрагентам считается как раз из платежей. Иначе
+        # кошельки посчитались бы по данным, которые через шаг изменятся.
+        if 'coop.cession' in self.env:
+            load_cessions.load_cessions(self.env)
         # Кошельки последними: состав вкладок зависит от членства, а
         # сальдо по контрагентам считается из платежей по сделкам.
         load_wallets.load_wallets(self.env)

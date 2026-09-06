@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+  <!--
+    Витрина открыта, черновики — нет.
+
+    Размещённое предложение по смыслу публично: его затем и размещают,
+    чтобы увидели все участники. А черновик и снятое предложение видит
+    только тот, кто его завёл: незаконченный замысел «продать требование
+    к такому-то» говорит о делах участника больше, чем он собирался
+    рассказать, и снятое предложение — тоже сведение о его положении.
+
+    Должник в списке видящих не выделен намеренно: он и так сторона
+    сделки, увидит предложение на общей витрине, а уведомление получит
+    отдельно и обязательно — без него уступка для него не работает
+    (ст. 382 ГК).
+  -->
+  <record id="coop_cession_published" model="ir.rule">
+    <field name="name">Витрина уступок — размещённые предложения</field>
+    <field name="model_id" ref="model_coop_cession"/>
+    <field name="domain_force">['|', ('state', 'in', ['published', 'negotiating', 'done']), ('creditor_id', 'in', user.coop_treasury_partner_ids.ids)]</field>
+    <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+  </record>
+
+  <!--
+    Править своё. Чужое предложение можно только читать и откликаться на
+    него: цену за чужое требование назначает тот, чьё требование.
+  -->
+  <record id="coop_cession_write_own" model="ir.rule">
+    <field name="name">Уступки — правит тот, кто разместил</field>
+    <field name="model_id" ref="model_coop_cession"/>
+    <field name="domain_force">[('creditor_id', 'in', user.coop_treasury_partner_ids.ids)]</field>
+    <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    <field name="perm_read" eval="False"/>
+    <field name="perm_write" eval="True"/>
+    <field name="perm_create" eval="True"/>
+    <field name="perm_unlink" eval="True"/>
+  </record>
+
+  <!--
+    Отклики видят двое: тот, кто откликнулся, и тот, чьё предложение.
+    Остальным участникам витрины чужие отклики не показываются — по ним
+    видно, кто ищет, куда вложить деньги, и на каких условиях.
+  -->
+  <record id="coop_cession_response_own" model="ir.rule">
+    <field name="name">Отклики — свои и на свои предложения</field>
+    <field name="model_id" ref="model_coop_cession_response"/>
+    <field name="domain_force">['|', ('partner_id', 'in', user.coop_treasury_partner_ids.ids), ('cession_id.creditor_id', 'in', user.coop_treasury_partner_ids.ids)]</field>
+    <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+  </record>
+
+  <!--
+    Администратору видно всё: по решению владельца платформы
+    администратор портала и системный администратор — одно лицо.
+  -->
+  <record id="coop_cession_admin" model="ir.rule">
+    <field name="name">Уступки — администратор</field>
+    <field name="model_id" ref="model_coop_cession"/>
+    <field name="domain_force">[(1, '=', 1)]</field>
+    <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+  </record>
+
+  <record id="coop_cession_response_admin" model="ir.rule">
+    <field name="name">Отклики на уступку — администратор</field>
+    <field name="model_id" ref="model_coop_cession_response"/>
+    <field name="domain_force">[(1, '=', 1)]</field>
+    <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+  </record>
+
+</odoo>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="view_coop_cession_list" model="ir.ui.view">
+    <field name="name">coop.cession.list</field>
+    <field name="model">coop.cession</field>
+    <field name="arch" type="xml">
+      <list string="Витрина уступок">
+        <field name="debtor_id" string="Требование к"/>
+        <field name="deal_id" string="Основание"/>
+        <field name="amount" string="Сумма" sum="Номинал"/>
+        <field name="price" string="Цена уступки" sum="К оплате"/>
+        <field name="discount_percent" string="Дисконт, %" digits="[5, 1]"/>
+        <field name="due_date" string="Срок"/>
+        <field name="creditor_id" string="Уступает"/>
+        <field name="response_count" string="Откликов"/>
+        <field name="state" widget="badge"
+               decoration-success="state == 'done'"
+               decoration-info="state == 'published'"
+               decoration-warning="state == 'negotiating'"
+               decoration-muted="state in ('draft', 'cancelled')"/>
+        <field name="currency_id" column_invisible="True"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_cession_form" model="ir.ui.view">
+    <field name="name">coop.cession.form</field>
+    <field name="model">coop.cession</field>
+    <field name="arch" type="xml">
+      <form string="Предложение об уступке">
+        <header>
+          <button name="action_publish" type="object" string="Разместить"
+                  class="btn-primary" invisible="state != 'draft'"/>
+          <button name="action_respond" type="object" string="Откликнуться"
+                  class="btn-primary"
+                  invisible="state not in ('published', 'negotiating')"/>
+          <button name="action_complete" type="object" string="Оформить уступку"
+                  invisible="state != 'negotiating'"/>
+          <button name="action_cancel" type="object" string="Снять с витрины"
+                  invisible="state in ('done', 'cancelled')"/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="draft,published,negotiating,done"/>
+        </header>
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="display_name" readonly="1"/></h1>
+          </div>
+          <group>
+            <group string="Требование">
+              <field name="deal_id"
+                     options="{'no_create': True}"
+                     readonly="state != 'draft'"/>
+              <field name="creditor_id" readonly="state != 'draft'"/>
+              <field name="debtor_id" readonly="state != 'draft'"/>
+              <field name="due_date" readonly="state != 'draft'"/>
+              <field name="currency_id" invisible="1"/>
+            </group>
+            <group string="Условия">
+              <field name="amount" readonly="state != 'draft'"/>
+              <field name="price" readonly="state != 'draft'"/>
+              <field name="discount"/>
+              <field name="discount_percent" digits="[5, 1]"/>
+            </group>
+          </group>
+          <group string="Что важно знать" invisible="state == 'draft'">
+            <field name="published_on" readonly="1"/>
+            <field name="assignee_id" readonly="1" invisible="state != 'done'"/>
+            <field name="ceded_on" readonly="1" invisible="state != 'done'"/>
+            <field name="debtor_notified_on" readonly="1" invisible="state != 'done'"/>
+          </group>
+          <notebook>
+            <page string="Условия словами" name="note">
+              <field name="note" placeholder="«Готов уступить с рассрочкой оплаты в две недели» — то, чего не выразить одной ценой."/>
+            </page>
+            <page string="Отклики" name="responses">
+              <field name="response_ids" readonly="1">
+                <list>
+                  <field name="partner_id"/>
+                  <field name="message"/>
+                  <field name="state" widget="badge"
+                         decoration-success="state == 'accepted'"
+                         decoration-muted="state == 'declined'"/>
+                  <button name="action_accept" type="object" string="Принять"
+                          icon="fa-check" invisible="state == 'accepted'"/>
+                  <button name="action_decline" type="object" string="Отклонить"
+                          icon="fa-times" invisible="state == 'declined'"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_cession_search" model="ir.ui.view">
+    <field name="name">coop.cession.search</field>
+    <field name="model">coop.cession</field>
+    <field name="arch" type="xml">
+      <search string="Витрина уступок">
+        <field name="debtor_id" string="Должник"/>
+        <field name="creditor_id" string="Уступает"/>
+        <field name="deal_id" string="Сделка"/>
+        <filter name="published" string="Размещённые"
+                domain="[('state', 'in', ['published', 'negotiating'])]"/>
+        <filter name="mine" string="Мои предложения"
+                domain="[('is_mine', '=', True)]"/>
+        <separator/>
+        <filter name="soon" string="Срок в ближайший месяц"
+                domain="[('due_date', '&lt;=', (context_today() + relativedelta(months=1)).strftime('%Y-%m-%d'))]"/>
+        <group>
+          <filter name="by_state" string="По состоянию"
+                  context="{'group_by': 'state'}"/>
+          <filter name="by_debtor" string="По должнику"
+                  context="{'group_by': 'debtor_id'}"/>
+          <filter name="by_due" string="По сроку"
+                  context="{'group_by': 'due_date'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_cession" model="ir.actions.act_window">
+    <field name="name">Витрина уступок</field>
+    <field name="res_model">coop.cession</field>
+    <field name="view_mode">list,form</field>
+    <field name="search_view_id" ref="view_coop_cession_search"/>
+    <field name="context">{'search_default_published': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Предложений пока нет</p>
+      <p>Здесь участник предлагает своё требование по сделке другому
+         участнику: должны через месяц, а деньги нужны сейчас. Это уступка
+         требования (глава 24 ГК), а не торги: цену называет тот, чьё
+         требование, откликнувшийся договаривается с ним напрямую.</p>
+    </field>
+  </record>
+
+  <!--
+    Признак запрета уступки — на форме сделки, рядом с актом: решается он
+    там же, где подписывается договор, а не на витрине задним числом.
+  -->
+  <record id="view_coop_deal_form_cession" model="ir.ui.view">
+    <field name="name">coop.deal.form.cession</field>
+    <field name="model">coop.deal</field>
+    <field name="inherit_id" ref="coop_deals.view_coop_deal_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//sheet" position="inside">
+        <group string="Уступка требования">
+          <field name="cession_forbidden"/>
+          <field name="cession_forbidden_reason"
+                 invisible="not cession_forbidden"
+                 placeholder="«Пункт 8.4 договора»"/>
+          <field name="can_be_ceded" readonly="1"/>
+        </group>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

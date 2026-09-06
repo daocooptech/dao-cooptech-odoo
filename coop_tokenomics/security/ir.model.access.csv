@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_coop_cession_user,Предложения об уступке — участник,model_coop_cession,base.group_user,1,1,1,0
+access_coop_cession_admin,Предложения об уступке — администратор,model_coop_cession,base.group_system,1,1,1,1
+access_coop_cession_response_user,Отклики на уступку — участник,model_coop_cession_response,base.group_user,1,1,1,0
+access_coop_cession_response_admin,Отклики на уступку — администратор,model_coop_cession_response,base.group_system,1,1,1,1
