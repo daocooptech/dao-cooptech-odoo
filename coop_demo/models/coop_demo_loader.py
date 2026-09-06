@@ -4,6 +4,7 @@ from odoo import api, models
 from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_cessions,
                     load_tokens,
+                    load_intangibles,
                     load_faces,
                     load_communities,
                     load_deals,
@@ -81,6 +82,11 @@ class CoopDemoLoader(models.AbstractModel):
         # вкладам в проекты — и то и другое к этому моменту уже есть.
         if 'coop.token.claim' in self.env:
             load_tokens.load_tokens(self.env)
+        # Реестр НМА и заявки ЦФА — после проектов и токенов: активы
+        # вносятся вкладом в проекты и получают доли по той же формуле,
+        # что труд и техника, а значит механика долей должна уже работать.
+        if 'coop.intangible' in self.env:
+            load_intangibles.load_intangibles(self.env)
         # Кошельки последними: состав вкладок зависит от членства, а
         # сальдо по контрагентам считается из платежей по сделкам.
         load_wallets.load_wallets(self.env)
