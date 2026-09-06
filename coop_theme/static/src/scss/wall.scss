@@ -220,6 +220,21 @@
     background: var(--coop-white, #fff);
   }
 
+  // Рамка-подсветка при фокусе — своя переменная движка (`--border-
+  // color`), выставляемая правилом `:has(textarea:focus)` отдельно от
+  // самого поля. Гасим саму переменную и оба места, откуда мог бы
+  // взяться контур, — тот же приём, что и в композере «Сообщений»
+  // (`coop_messages.scss`).
+  .o-mail-Composer-inputContainer {
+    --border-color: var(--coop-line, #e6e6e1) !important;
+  }
+
+  .o-mail-Composer-input:focus,
+  .o-mail-Composer-input:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
   // «Опубликовать» — тёмная кнопка, единственное действие под полем.
   .o-mail-Composer-send {
     padding: 7px 16px;
