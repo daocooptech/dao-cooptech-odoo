@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo noupdate="1">
+
+  <!--
+    Операторы из реестра Банка России — те же, что названы в прототипе.
+
+    Данные внесены как ориентир для сравнения, а не как справка: реестр
+    ведёт ЦБ, он меняется, и перед выпуском участник обязан свериться с
+    первоисточником. Номера записей и лимиты намеренно не проставлены
+    там, где их не проверить: пустое поле честнее выдуманного числа.
+
+    noupdate="1" — чтобы правки, внесённые на стенде руками, не затирались
+    при каждом обновлении модуля.
+  -->
+
+  <record id="operator_atomyze" model="coop.cfa.operator">
+    <field name="name">Атомайз</field>
+    <field name="sequence">10</field>
+    <field name="issues_what">Денежные требования, права на драгоценные металлы, гибридные права</field>
+    <field name="fee_note">Комиссия за выпуск и за сделку; уточняется договором</field>
+    <field name="website">https://atomyze.ru</field>
+    <field name="note">Первый оператор, включённый в реестр ЦБ. Ориентирован на крупные корпоративные выпуски.</field>
+  </record>
+
+  <record id="operator_sber" model="coop.cfa.operator">
+    <field name="name">Сбербанк</field>
+    <field name="sequence">20</field>
+    <field name="issues_what">Денежные требования</field>
+    <field name="fee_note">По тарифам банка</field>
+    <field name="note">Выпуск в собственной информационной системе; расчёты через счета банка.</field>
+  </record>
+
+  <record id="operator_alfa" model="coop.cfa.operator">
+    <field name="name">Альфа-Банк (А-Токен)</field>
+    <field name="sequence">30</field>
+    <field name="issues_what">Денежные требования</field>
+    <field name="fee_note">По тарифам банка</field>
+  </record>
+
+  <record id="operator_masterchain" model="coop.cfa.operator">
+    <field name="name">Мастерчейн</field>
+    <field name="sequence">40</field>
+    <field name="issues_what">Денежные требования, права участия</field>
+    <field name="note">Инфраструктура на отечественном блокчейне.</field>
+  </record>
+
+  <record id="operator_lighthouse" model="coop.cfa.operator">
+    <field name="name">Лайтхаус</field>
+    <field name="sequence">50</field>
+    <field name="issues_what">Денежные требования, факторинговые обязательства</field>
+    <field name="note">Специализация на дебиторской задолженности — ближе всего к тому, что делают участники платформы.</field>
+  </record>
+
+</odoo>

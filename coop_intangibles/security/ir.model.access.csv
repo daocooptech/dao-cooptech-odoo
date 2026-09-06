@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_coop_intangible_user,Нематериальные активы — участник,model_coop_intangible,base.group_user,1,1,1,0
+access_coop_intangible_admin,Нематериальные активы — администратор,model_coop_intangible,base.group_system,1,1,1,1
+access_coop_intangible_license_user,Лицензии — участник,model_coop_intangible_license,base.group_user,1,1,1,0
+access_coop_intangible_license_admin,Лицензии — администратор,model_coop_intangible_license,base.group_system,1,1,1,1

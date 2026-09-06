@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="view_coop_intangible_kanban" model="ir.ui.view">
+    <field name="name">coop.intangible.kanban</field>
+    <field name="model">coop.intangible</field>
+    <field name="arch" type="xml">
+      <kanban class="o_coop_catalog_kanban_view o_coop_intangibles">
+        <field name="kind"/>
+        <field name="state"/>
+        <field name="pledge_state"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_tile">
+              <div class="o_coop_tile_head">
+                <field name="name" class="fw-bold"/>
+              </div>
+              <div class="text-muted small">
+                <field name="kind"/>
+              </div>
+              <div class="small mt-1">
+                <field name="owner_id"/>
+              </div>
+              <div class="small mt-1">
+                <field name="legal_basis"/>
+              </div>
+              <div class="mt-2">
+                <field name="residual_value" widget="monetary"/>
+                <span class="text-muted small"> остаточная</span>
+              </div>
+              <div class="mt-1">
+                <span t-if="record.pledge_state.raw_value == 'none'"
+                      class="badge text-bg-light">залог не оформлен</span>
+                <span t-if="record.pledge_state.raw_value == 'notary'"
+                      class="badge text-bg-success">уведомление у нотариуса</span>
+                <span t-if="record.pledge_state.raw_value == 'rospatent'"
+                      class="badge text-bg-success">залог в Роспатенте</span>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="view_coop_intangible_list" model="ir.ui.view">
+    <field name="name">coop.intangible.list</field>
+    <field name="model">coop.intangible</field>
+    <field name="arch" type="xml">
+      <list string="Нематериальные активы">
+        <field name="name" string="Актив"/>
+        <field name="kind" string="Вид"/>
+        <field name="owner_id" string="Правообладатель"/>
+        <field name="legal_basis" string="Правовое основание"/>
+        <field name="initial_cost" string="Первоначальная" sum="Итого"/>
+        <field name="residual_value" string="Остаточная" sum="Итого"/>
+        <field name="pledge_state" string="Залог" widget="badge"
+               decoration-success="pledge_state != 'none'"
+               decoration-muted="pledge_state == 'none'"/>
+        <field name="active_license_count" string="Лицензий"/>
+        <field name="state" widget="badge"
+               decoration-success="state == 'active'"
+               decoration-danger="state == 'disputed'"
+               decoration-muted="state in ('draft', 'expired')"/>
+        <field name="currency_id" column_invisible="True"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_intangible_form" model="ir.ui.view">
+    <field name="name">coop.intangible.form</field>
+    <field name="model">coop.intangible</field>
+    <field name="arch" type="xml">
+      <form string="Нематериальный актив">
+        <header>
+          <button name="action_activate" type="object" string="Право действует"
+                  class="btn-primary" invisible="state == 'active'"/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="draft,active"/>
+        </header>
+        <sheet>
+          <field name="image_1920" widget="image" class="oe_avatar"/>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Рецептура сыра «Дербентский»"/></h1>
+          </div>
+          <group>
+            <group string="Что это">
+              <field name="kind"/>
+              <field name="owner_id"/>
+            </group>
+            <group string="Правовая охрана">
+              <field name="legal_basis"
+                     placeholder="Режим коммерческой тайны, приказ от 12.03.2025"/>
+              <field name="registration_number"/>
+              <field name="registered_on"/>
+              <field name="protection_until"/>
+            </group>
+          </group>
+          <group>
+            <group string="Учёт по ФСБУ 14/2022">
+              <field name="initial_cost"/>
+              <field name="useful_life_months"/>
+              <field name="accumulated_depreciation"/>
+              <field name="residual_value" readonly="1"/>
+              <field name="currency_id" invisible="1"/>
+            </group>
+            <group string="Залог">
+              <field name="pledge_state"/>
+              <field name="pledge_reference" invisible="pledge_state == 'none'"/>
+              <field name="pledge_holder_id" invisible="pledge_state == 'none'"/>
+              <div colspan="2" class="text-muted small"
+                   invisible="pledge_state != 'none'">
+                Оценка показывает стоимость актива, но сама по себе ничего
+                не обеспечивает. Обеспечением он становится после
+                регистрации залога: для движимого — уведомление у
+                нотариуса, для зарегистрированных прав — запись в
+                Роспатенте.
+              </div>
+            </group>
+          </group>
+          <notebook>
+            <page string="Описание" name="description">
+              <field name="description"/>
+            </page>
+            <page string="Лицензии" name="licenses">
+              <field name="license_ids">
+                <list editable="bottom">
+                  <field name="licensee_id"/>
+                  <field name="is_exclusive"/>
+                  <field name="territory"/>
+                  <field name="starts_on"/>
+                  <field name="ends_on"/>
+                  <field name="volume_limit"/>
+                  <field name="volume_unit"/>
+                  <field name="price"/>
+                  <field name="royalty_percent"/>
+                  <field name="state" widget="badge"
+                         decoration-success="state == 'active'"
+                         decoration-muted="state in ('expired', 'revoked')"/>
+                  <field name="currency_id" column_invisible="True"/>
+                </list>
+              </field>
+            </page>
+            <page string="Внесён в проекты" name="contributions">
+              <field name="contribution_ids" readonly="1">
+                <list>
+                  <field name="project_id"/>
+                  <field name="partner_id"/>
+                  <field name="value"/>
+                  <field name="share_tokens" string="Долей начислено"/>
+                  <field name="state"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_intangible_search" model="ir.ui.view">
+    <field name="name">coop.intangible.search</field>
+    <field name="model">coop.intangible</field>
+    <field name="arch" type="xml">
+      <search string="Нематериальные активы">
+        <field name="name" string="Актив"/>
+        <field name="owner_id" string="Правообладатель"/>
+        <field name="legal_basis" string="Основание"/>
+        <filter name="active" string="Право действует" domain="[('state', '=', 'active')]"/>
+        <filter name="pledged" string="В залоге" domain="[('pledge_state', '!=', 'none')]"/>
+        <filter name="licensed" string="С лицензиями"
+                domain="[('active_license_count', '&gt;', 0)]"/>
+        <separator/>
+        <filter name="know_how" string="Ноу-хау" domain="[('kind', '=', 'know_how')]"/>
+        <filter name="trademark" string="Товарные знаки" domain="[('kind', '=', 'trademark')]"/>
+        <filter name="software" string="Программы и БД" domain="[('kind', '=', 'software')]"/>
+        <filter name="patent" string="Патенты и сорта" domain="[('kind', '=', 'patent')]"/>
+        <group>
+          <filter name="by_kind" string="По виду" context="{'group_by': 'kind'}"/>
+          <filter name="by_owner" string="По правообладателю" context="{'group_by': 'owner_id'}"/>
+          <filter name="by_pledge" string="По залогу" context="{'group_by': 'pledge_state'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_intangibles" model="ir.actions.act_window">
+    <field name="name">Нематериальные активы</field>
+    <field name="res_model">coop.intangible</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="search_view_id" ref="view_coop_intangible_search"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Активов пока нет</p>
+      <p>Рецептура, программа, товарный знак, сорт — то, что у кооператива
+         есть, но нельзя потрогать. В карточке видно, чем право
+         подтверждено, во сколько оценено и оформлен ли залог: оценка сама
+         по себе ничего не обеспечивает.</p>
+    </field>
+  </record>
+
+  <!-- ═══════════════ ЛИЦЕНЗИИ ═══════════════ -->
+
+  <record id="view_coop_license_list" model="ir.ui.view">
+    <field name="name">coop.intangible.license.list</field>
+    <field name="model">coop.intangible.license</field>
+    <field name="arch" type="xml">
+      <list string="Лицензии">
+        <field name="intangible_id" string="Актив"/>
+        <field name="licensor_id" string="Правообладатель"/>
+        <field name="licensee_id" string="Кому"/>
+        <field name="is_exclusive" string="Исключительная"/>
+        <field name="territory" string="Территория"/>
+        <field name="starts_on" string="С"/>
+        <field name="ends_on" string="По"/>
+        <field name="volume_limit" string="Тираж"/>
+        <field name="volume_unit" string="Ед."/>
+        <field name="price" string="Цена"/>
+        <field name="royalty_percent" string="Роялти, %"/>
+        <field name="state" widget="badge"
+               decoration-success="state == 'active'"
+               decoration-info="state == 'offered'"
+               decoration-muted="state in ('expired', 'revoked')"/>
+        <field name="currency_id" column_invisible="True"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_license_form" model="ir.ui.view">
+    <field name="name">coop.intangible.license.form</field>
+    <field name="model">coop.intangible.license</field>
+    <field name="arch" type="xml">
+      <form string="Лицензия">
+        <header>
+          <button name="action_activate" type="object" string="Ввести в действие"
+                  class="btn-primary" invisible="state == 'active'"/>
+          <button name="action_revoke" type="object" string="Отозвать"
+                  invisible="state != 'active'"/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="draft,offered,active"/>
+        </header>
+        <sheet>
+          <div class="oe_title"><h1><field name="display_name" readonly="1"/></h1></div>
+          <group>
+            <group string="Что и кому">
+              <field name="intangible_id" options="{'no_create': True}"/>
+              <field name="licensor_id" readonly="1"/>
+              <field name="licensee_id"/>
+              <field name="is_share_of_right"/>
+              <div colspan="2" class="alert alert-warning small"
+                   invisible="not is_share_of_right">
+                Это не лицензия, а доля в самом исключительном праве.
+                Распоряжение исключительным правом на зарегистрированный
+                объект подлежит государственной регистрации (ст. 1232 ГК):
+                токен фиксирует договорённость сторон, но записи в
+                Роспатенте не заменяет.
+              </div>
+            </group>
+            <group string="Условия">
+              <field name="is_exclusive"/>
+              <field name="territory"/>
+              <field name="starts_on"/>
+              <field name="ends_on"/>
+              <field name="volume_limit"/>
+              <field name="volume_unit"/>
+              <field name="volume_used" readonly="1"/>
+            </group>
+          </group>
+          <group string="Деньги">
+            <field name="price"/>
+            <field name="royalty_percent"/>
+            <field name="currency_id" invisible="1"/>
+          </group>
+          <group string="Токен" invisible="not jetton_master_address">
+            <field name="jetton_master_address" readonly="1"/>
+          </group>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_license_search" model="ir.ui.view">
+    <field name="name">coop.intangible.license.search</field>
+    <field name="model">coop.intangible.license</field>
+    <field name="arch" type="xml">
+      <search string="Лицензии">
+        <field name="intangible_id" string="Актив"/>
+        <field name="licensee_id" string="Лицензиат"/>
+        <filter name="active" string="Действующие" domain="[('state', '=', 'active')]"/>
+        <filter name="offered" string="Предложены" domain="[('state', '=', 'offered')]"/>
+        <filter name="exclusive" string="Исключительные" domain="[('is_exclusive', '=', True)]"/>
+        <filter name="shares" string="Доли в праве" domain="[('is_share_of_right', '=', True)]"/>
+        <group>
+          <filter name="by_asset" string="По активу" context="{'group_by': 'intangible_id'}"/>
+          <filter name="by_licensee" string="По лицензиату" context="{'group_by': 'licensee_id'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_licenses" model="ir.actions.act_window">
+    <field name="name">Лицензии</field>
+    <field name="res_model">coop.intangible.license</field>
+    <field name="view_mode">list,form</field>
+    <field name="search_view_id" ref="view_coop_license_search"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Лицензий пока нет</p>
+      <p>Кооператив продаёт соседнему право пользоваться своей
+         технологией: на срок, на территорию, на тираж. Исключительная
+         лицензия на одну территорию бывает одна — вторая нарушает первую.</p>
+    </field>
+  </record>
+
+  <menuitem id="menu_coop_intangibles_root" name="Нематериальные активы"
+            sequence="140"/>
+  <menuitem id="menu_coop_intangibles" name="Реестр активов"
+            parent="menu_coop_intangibles_root"
+            action="action_coop_intangibles" sequence="10"/>
+  <menuitem id="menu_coop_licenses" name="Лицензии"
+            parent="menu_coop_intangibles_root"
+            action="action_coop_licenses" sequence="20"/>
+
+</odoo>

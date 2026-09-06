@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ═══════════════ ЗАЯВКИ НА ВЫПУСК ═══════════════ -->
+
+  <record id="view_coop_cfa_issue_list" model="ir.ui.view">
+    <field name="name">coop.cfa.issue.list</field>
+    <field name="model">coop.cfa.issue</field>
+    <field name="arch" type="xml">
+      <list string="Заявки на выпуск ЦФА">
+        <field name="name" string="Выпуск"/>
+        <field name="issuer_id" string="Эмитент"/>
+        <field name="operator_id" string="Оператор"/>
+        <field name="rights_kind" string="Что удостоверяет"/>
+        <field name="amount" string="Объём" sum="Итого"/>
+        <field name="maturity_date" string="Погашение"/>
+        <field name="collateral" string="Обеспечение"/>
+        <field name="state" widget="badge"
+               decoration-success="state == 'issued'"
+               decoration-info="state in ('submitted', 'accepted')"
+               decoration-danger="state == 'rejected'"
+               decoration-muted="state in ('draft', 'redeemed')"/>
+        <field name="currency_id" column_invisible="True"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_cfa_issue_form" model="ir.ui.view">
+    <field name="name">coop.cfa.issue.form</field>
+    <field name="model">coop.cfa.issue</field>
+    <field name="arch" type="xml">
+      <form string="Заявка на выпуск ЦФА">
+        <header>
+          <button name="action_submit" type="object" string="Передать оператору"
+                  class="btn-primary" invisible="state != 'draft'"/>
+          <button name="action_mark_issued" type="object" string="Отметить выпущенным"
+                  invisible="state not in ('submitted', 'accepted')"/>
+          <button name="action_reject" type="object" string="Отказ оператора"
+                  invisible="state not in ('submitted', 'accepted')"/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="draft,submitted,accepted,issued"/>
+        </header>
+        <sheet>
+          <div class="alert alert-info" role="status">
+            Платформа сама ЦФА не выпускает. Выпуск и обращение возможны
+            только в информационной системе оператора из реестра Банка
+            России: здесь собирается заявка и документы, решение принимает
+            оператор.
+          </div>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Требование по поставке зерна урожая 2027"/></h1>
+          </div>
+          <group>
+            <group string="Кто и через кого">
+              <field name="issuer_id"/>
+              <field name="operator_id" options="{'no_create': True}"/>
+              <field name="rights_kind"/>
+            </group>
+            <group string="Параметры выпуска">
+              <field name="amount"/>
+              <field name="unit_count"/>
+              <field name="unit_price" readonly="1"/>
+              <field name="maturity_date"/>
+              <field name="currency_id" invisible="1"/>
+            </group>
+          </group>
+          <group string="Обеспечение">
+            <field name="collateral" placeholder="Залог техники, поручительство кооператива"/>
+            <field name="intangible_id" options="{'no_create': True}"/>
+            <div colspan="2" class="text-muted small" invisible="collateral or intangible_id">
+              Обеспечения нет. Покупатель должен видеть это прямо, а не
+              догадываться по отсутствию строки.
+            </div>
+          </group>
+          <group string="У оператора" invisible="state in ('draft', 'submitted')">
+            <field name="external_reference" readonly="1"/>
+            <field name="submitted_on" readonly="1"/>
+            <field name="issued_on" readonly="1" invisible="state != 'issued'"/>
+            <field name="rejection_reason" readonly="1" invisible="state != 'rejected'"/>
+          </group>
+          <notebook>
+            <page string="Описание" name="description">
+              <field name="description"/>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_cfa_issue_search" model="ir.ui.view">
+    <field name="name">coop.cfa.issue.search</field>
+    <field name="model">coop.cfa.issue</field>
+    <field name="arch" type="xml">
+      <search string="Заявки на выпуск">
+        <field name="name" string="Выпуск"/>
+        <field name="issuer_id" string="Эмитент"/>
+        <field name="operator_id" string="Оператор"/>
+        <filter name="issued" string="Выпущено" domain="[('state', '=', 'issued')]"/>
+        <filter name="in_progress" string="В работе"
+                domain="[('state', 'in', ['submitted', 'accepted'])]"/>
+        <filter name="drafts" string="Черновики" domain="[('state', '=', 'draft')]"/>
+        <group>
+          <filter name="by_operator" string="По оператору" context="{'group_by': 'operator_id'}"/>
+          <filter name="by_kind" string="По правам" context="{'group_by': 'rights_kind'}"/>
+          <filter name="by_state" string="По состоянию" context="{'group_by': 'state'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_cfa_issue" model="ir.actions.act_window">
+    <field name="name">Заявки на выпуск</field>
+    <field name="res_model">coop.cfa.issue</field>
+    <field name="view_mode">list,form</field>
+    <field name="search_view_id" ref="view_coop_cfa_issue_search"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Заявок пока нет</p>
+      <p>Здесь собирается всё, что оператор всё равно спросит: кто
+         выпускает, что удостоверяет актив, на какую сумму, на какой срок
+         и чем обеспечено. Решение о выпуске принимает оператор из реестра
+         Банка России — платформа готовит документы и передаёт их.</p>
+    </field>
+  </record>
+
+  <!-- ═══════════════ ОПЕРАТОРЫ ═══════════════ -->
+
+  <record id="view_coop_cfa_operator_list" model="ir.ui.view">
+    <field name="name">coop.cfa.operator.list</field>
+    <field name="model">coop.cfa.operator</field>
+    <field name="arch" type="xml">
+      <list string="Операторы ЦФА">
+        <field name="sequence" widget="handle"/>
+        <field name="name" string="Оператор"/>
+        <field name="issues_what" string="Что выпускает"/>
+        <field name="fee_note" string="Комиссии"/>
+        <field name="registry_number" string="Номер в реестре"/>
+        <field name="website" string="Сайт" widget="url"/>
+        <field name="note" string="Примечание"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_cfa_operator_form" model="ir.ui.view">
+    <field name="name">coop.cfa.operator.form</field>
+    <field name="model">coop.cfa.operator</field>
+    <field name="arch" type="xml">
+      <form string="Оператор ЦФА">
+        <sheet>
+          <div class="oe_title"><h1><field name="name"/></h1></div>
+          <group>
+            <group string="В реестре ЦБ">
+              <field name="registry_number"/>
+              <field name="registered_on"/>
+              <field name="inn"/>
+              <field name="website" widget="url"/>
+            </group>
+            <group string="Условия">
+              <field name="issues_what"/>
+              <field name="fee_note"/>
+              <field name="unqualified_limit"/>
+              <field name="currency_id" invisible="1"/>
+              <field name="active"/>
+            </group>
+          </group>
+          <group string="Примечание">
+            <field name="note" nolabel="1"/>
+          </group>
+          <notebook>
+            <page string="Заявки" name="issues">
+              <field name="issue_ids" readonly="1">
+                <list>
+                  <field name="name"/>
+                  <field name="issuer_id"/>
+                  <field name="amount"/>
+                  <field name="state"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_coop_cfa_operator" model="ir.actions.act_window">
+    <field name="name">Операторы из реестра ЦБ</field>
+    <field name="res_model">coop.cfa.operator</field>
+    <field name="view_mode">list,form</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Справочник пуст</p>
+      <p>Перечень удостоверяемых прав у операторов разный — выбор
+         начинается с него, а не с комиссий. Сведения здесь ориентир:
+         реестр ведёт Банк России, и перед выпуском стоит свериться с
+         первоисточником.</p>
+    </field>
+  </record>
+
+  <!-- ═══════════════ МОИ ЦФА ═══════════════ -->
+
+  <record id="view_coop_cfa_holding_list" model="ir.ui.view">
+    <field name="name">coop.cfa.holding.list</field>
+    <field name="model">coop.cfa.holding</field>
+    <field name="arch" type="xml">
+      <list string="Мои ЦФА" editable="bottom">
+        <field name="partner_id" string="Держатель"/>
+        <field name="name" string="Актив"/>
+        <field name="operator_id" string="Оператор"/>
+        <field name="quantity" string="Количество"/>
+        <field name="value" string="Оценка" sum="Итого"/>
+        <field name="maturity_date" string="Погашение"/>
+        <field name="source" string="Откуда данные"/>
+        <field name="issue_id" string="Наш выпуск"/>
+        <field name="currency_id" column_invisible="True"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="action_coop_cfa_holding" model="ir.actions.act_window">
+    <field name="name">Мои ЦФА</field>
+    <field name="res_model">coop.cfa.holding</field>
+    <field name="view_mode">list</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Цифровых активов нет</p>
+      <p>Купленное у операторов видно здесь — рядом с паями и токенами,
+         чтобы имущественная картина не собиралась в голове из трёх
+         приложений. Платформа этих сведений ни у кого не сверяет: что
+         внесено участником, так и помечено.</p>
+    </field>
+  </record>
+
+  <menuitem id="menu_coop_cfa_root" name="Цифровые активы" sequence="135"/>
+  <menuitem id="menu_coop_cfa_issue" name="Заявки на выпуск"
+            parent="menu_coop_cfa_root" action="action_coop_cfa_issue" sequence="10"/>
+  <menuitem id="menu_coop_cfa_holding" name="Мои ЦФА"
+            parent="menu_coop_cfa_root" action="action_coop_cfa_holding" sequence="20"/>
+  <menuitem id="menu_coop_cfa_operator" name="Операторы"
+            parent="menu_coop_cfa_root" action="action_coop_cfa_operator" sequence="30"/>
+
+</odoo>

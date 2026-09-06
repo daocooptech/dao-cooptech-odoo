@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_coop_cfa_operator_user,Операторы ЦФА — участник,model_coop_cfa_operator,base.group_user,1,0,0,0
+access_coop_cfa_operator_admin,Операторы ЦФА — администратор,model_coop_cfa_operator,base.group_system,1,1,1,1
+access_coop_cfa_issue_user,Заявки на выпуск — участник,model_coop_cfa_issue,base.group_user,1,1,1,0
+access_coop_cfa_issue_admin,Заявки на выпуск — администратор,model_coop_cfa_issue,base.group_system,1,1,1,1
+access_coop_cfa_holding_user,ЦФА на руках — участник,model_coop_cfa_holding,base.group_user,1,1,1,1
+access_coop_cfa_holding_admin,ЦФА на руках — администратор,model_coop_cfa_holding,base.group_system,1,1,1,1
