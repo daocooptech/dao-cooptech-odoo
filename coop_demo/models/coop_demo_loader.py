@@ -3,6 +3,7 @@ from odoo import api, models
 
 from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_cessions,
+                    load_tokens,
                     load_faces,
                     load_communities,
                     load_deals,
@@ -75,6 +76,11 @@ class CoopDemoLoader(models.AbstractModel):
         # кошельки посчитались бы по данным, которые через шаг изменятся.
         if 'coop.cession' in self.env:
             load_cessions.load_cessions(self.env)
+        # Биржа токенов после сделок и уступок: выпуски заводятся на
+        # опубликованные объявления, а доли начисляются по уже принятым
+        # вкладам в проекты — и то и другое к этому моменту уже есть.
+        if 'coop.token.claim' in self.env:
+            load_tokens.load_tokens(self.env)
         # Кошельки последними: состав вкладок зависит от членства, а
         # сальдо по контрагентам считается из платежей по сделкам.
         load_wallets.load_wallets(self.env)

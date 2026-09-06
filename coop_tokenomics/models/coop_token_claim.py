@@ -102,6 +102,41 @@ class CoopTokenClaim(models.Model):
         string='Стоимость выпуска', compute='_compute_total_price', store=True,
         digits=(16, 4))
 
+    # ── Залог поставщика ─────────────────────────────────────────────────
+    #
+    # Штраф за срыв поставки нельзя удержать из воздуха: если поставщик не
+    # привёз товар, взять с него что-либо после срока — это уже суд, а не
+    # смарт-контракт. Поэтому обеспечение вносится вперёд, при выпуске, и
+    # лежит в том же эскроу, что и деньги покупателей.
+    #
+    # Десять процентов от суммы выпуска, но не меньше стоимости самого
+    # выпуска. Нижняя граница нужна для мелких партий: выпуск на тысячу
+    # рублей дал бы залог в сто, а развернуть контракт в сети стоит
+    # дороже — и сорвать такой выпуск было бы выгоднее, чем исполнить.
+    deposit_percent = fields.Float(
+        string='Залог, %', default=10.0, required=True, digits=(5, 2),
+        help='Доля от суммы выпуска, вносимая поставщиком в обеспечение.')
+    mint_cost = fields.Float(
+        string='Стоимость выпуска в сети', digits=(16, 4),
+        default=lambda self: self._default_mint_cost(),
+        help='Во что обходится развернуть контракт выпуска и провести '
+             'первые операции. Ниже этой суммы залог не опускается.')
+    deposit_amount = fields.Float(
+        string='Залог к внесению', compute='_compute_deposit', store=True,
+        digits=(16, 4),
+        help='Больше из двух: процент от суммы выпуска и стоимость выпуска '
+             'в сети.')
+    deposit_paid = fields.Boolean(
+        string='Залог внесён', readonly=True, copy=False,
+        help='Без внесённого залога выпуск в сеть не уходит: обещание без '
+             'обеспечения ничем не отличается от обычного объявления.')
+    deposit_paid_on = fields.Datetime(string='Залог внесён когда', readonly=True)
+    deposit_tx_hash = fields.Char(string='Транзакция залога', readonly=True, copy=False)
+    deposit_returned = fields.Boolean(
+        string='Залог возвращён', readonly=True, copy=False,
+        help='Возвращается поставщику после исполнения выпуска. При срыве '
+             'уходит держателям как штраф сверх возврата их денег.')
+
     # ── Состояние ────────────────────────────────────────────────────────
     state = fields.Selection([
         ('draft', 'Черновик'),
@@ -169,10 +204,32 @@ class CoopTokenClaim(models.Model):
                 record.delivery_date and record.delivery_date.strftime('%d.%m.%Y') or '—',
             )
 
+    @api.model
+    def _default_mint_cost(self):
+        """Во что обходится выпуск в сети.
+
+        Параметром, а не числом в коде: комиссии сети меняются, а курс
+        валюты расчёта — тем более. Значение по умолчанию соответствует
+        примерно десятой доле TON на развёртывание контракта и первые
+        операции, пересчитанной в валюту расчёта с запасом.
+        """
+        value = self.env['ir.config_parameter'].sudo().get_param(
+            'coop_tokenomics.mint_cost', '2.0')
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return 2.0
+
     @api.depends('quantity', 'price_per_unit')
     def _compute_total_price(self):
         for record in self:
             record.total_price = record.quantity * record.price_per_unit
+
+    @api.depends('total_price', 'deposit_percent', 'mint_cost')
+    def _compute_deposit(self):
+        for record in self:
+            share = record.total_price * record.deposit_percent / 100.0
+            record.deposit_amount = max(share, record.mint_cost or 0.0)
 
     @api.depends('holder_ids.quantity', 'quantity')
     def _compute_available(self):
@@ -213,7 +270,31 @@ class CoopTokenClaim(models.Model):
                     'У поставщика не подключён кошелёк TON. Выпуск '
                     'подписывается его кошельком: платформа чужих ключей '
                     'не хранит.'))
+            if not record.deposit_paid:
+                raise UserError(_(
+                    'Залог %(amount)g не внесён. Без обеспечения штраф за '
+                    'срыв поставки не с чего удержать, и обещание ничем не '
+                    'отличается от обычного объявления.',
+                    amount=record.deposit_amount,
+                ))
             record.state = 'minted'
+        return True
+
+    def action_pay_deposit(self):
+        """Отметить залог внесённым.
+
+        Вносится на шаге публикации объявления, вместе с галочкой «выпустить
+        токены»: платить потом означало бы, что между выпуском и
+        обеспечением есть окно, в котором обещание уже висит на витрине, а
+        отвечать по нему нечем.
+        """
+        for record in self:
+            if record.deposit_paid:
+                continue
+            record.write({
+                'deposit_paid': True,
+                'deposit_paid_on': fields.Datetime.now(),
+            })
         return True
 
     def action_start_trading(self):
@@ -251,10 +332,14 @@ class CoopTokenClaim(models.Model):
                 'state': 'defaulted',
                 'default_reason': record.default_reason or _(
                     'Срок поставки прошёл, товар не передан'),
+                'deposit_returned': False,
             })
             record.issuer_id.message_post(body=_(
-                'Сорван выпуск токенов: %s. Деньги держателей возвращаются '
-                'из эскроу.') % record.display_name)
+                'Сорван выпуск токенов: %(claim)s. Деньги держателей '
+                'возвращаются из эскроу, залог %(deposit)g уходит им же '
+                'штрафом сверх возврата.',
+                claim=record.display_name, deposit=record.deposit_amount,
+            ))
         return True
 
     def action_cancel(self):

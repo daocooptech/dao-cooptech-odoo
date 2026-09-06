@@ -44,6 +44,7 @@
         'security/ir.model.access.csv',
         'security/coop_cession_rules.xml',
         'views/coop_cession_views.xml',
+        'views/coop_token_views.xml',
     ],
     'installable': True,
 }

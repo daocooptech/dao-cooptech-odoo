@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ═══════════════ БИРЖА: заявки ═══════════════ -->
+
+  <record id="view_coop_token_order_list" model="ir.ui.view">
+    <field name="name">coop.token.order.list</field>
+    <field name="model">coop.token.order</field>
+    <field name="arch" type="xml">
+      <list string="Биржа" default_order="delivery_date, price_per_unit">
+        <field name="claim_id" string="Требование"/>
+        <field name="side" string="Сторона" widget="badge"
+               decoration-success="side == 'buy'" decoration-info="side == 'sell'"/>
+        <field name="quantity_left" string="Осталось"/>
+        <field name="unit_label" string="Ед."/>
+        <field name="price_per_unit" string="Цена"/>
+        <field name="premium_percent" string="К выпуску, %" digits="[5, 1]"
+               decoration-success="premium_percent &gt; 0"
+               decoration-danger="premium_percent &lt; 0"/>
+        <field name="delivery_date" string="Срок"/>
+        <field name="partner_id" string="Кто выставил"/>
+        <field name="settlement_currency" string="Валюта"/>
+        <field name="kind" string="Вид"/>
+        <field name="state" widget="badge"
+               decoration-info="state == 'open'"
+               decoration-warning="state == 'partial'"
+               decoration-success="state == 'done'"
+               decoration-muted="state in ('draft', 'cancelled')"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_token_order_form" model="ir.ui.view">
+    <field name="name">coop.token.order.form</field>
+    <field name="model">coop.token.order</field>
+    <field name="arch" type="xml">
+      <form string="Заявка">
+        <header>
+          <button name="action_open" type="object" string="Выставить"
+                  class="btn-primary" invisible="state != 'draft'"/>
+          <button name="action_prepare_trade" type="object" string="Купить"
+                  class="btn-primary" invisible="state not in ('open', 'partial')"/>
+          <button name="action_cancel" type="object" string="Снять"
+                  invisible="state in ('done', 'cancelled')"/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="draft,open,partial,done"/>
+        </header>
+        <sheet>
+          <div class="oe_title"><h1><field name="display_name" readonly="1"/></h1></div>
+          <group>
+            <group string="Требование">
+              <field name="claim_id" options="{'no_create': True}"/>
+              <field name="kind"/>
+              <field name="side"/>
+              <field name="delivery_date" readonly="1"/>
+            </group>
+            <group string="Условия">
+              <field name="quantity"/>
+              <field name="quantity_left" readonly="1"/>
+              <field name="price_per_unit"/>
+              <field name="total_price" readonly="1"/>
+              <field name="premium_percent" readonly="1" digits="[5, 1]"/>
+              <field name="settlement_currency" readonly="1"/>
+            </group>
+          </group>
+          <notebook>
+            <page string="Сделки" name="trades">
+              <field name="trade_ids" readonly="1">
+                <list>
+                  <field name="create_date" string="Когда"/>
+                  <field name="buyer_id"/>
+                  <field name="quantity"/>
+                  <field name="price_per_unit"/>
+                  <field name="total_price"/>
+                  <field name="state" widget="badge"
+                         decoration-success="state == 'done'"
+                         decoration-danger="state == 'failed'"/>
+                  <field name="tx_hash" string="Транзакция"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_token_order_search" model="ir.ui.view">
+    <field name="name">coop.token.order.search</field>
+    <field name="model">coop.token.order</field>
+    <field name="arch" type="xml">
+      <search string="Биржа">
+        <field name="claim_id" string="Требование"/>
+        <field name="partner_id" string="Участник"/>
+        <filter name="open" string="Открытые заявки"
+                domain="[('state', 'in', ['open', 'partial'])]"/>
+        <filter name="sell" string="Продают" domain="[('side', '=', 'sell')]"/>
+        <filter name="buy" string="Покупают" domain="[('side', '=', 'buy')]"/>
+        <separator/>
+        <filter name="secondary" string="Перепродажа"
+                domain="[('kind', '=', 'secondary')]"/>
+        <filter name="soon" string="Срок в ближайший месяц"
+                domain="[('delivery_date', '&lt;=', (context_today() + relativedelta(months=1)).strftime('%Y-%m-%d'))]"/>
+        <group>
+          <filter name="by_claim" string="По выпуску" context="{'group_by': 'claim_id'}"/>
+          <filter name="by_date" string="По сроку" context="{'group_by': 'delivery_date'}"/>
+          <filter name="by_side" string="По стороне" context="{'group_by': 'side'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_token_exchange" model="ir.actions.act_window">
+    <field name="name">Биржа</field>
+    <field name="res_model">coop.token.order</field>
+    <field name="view_mode">list,form</field>
+    <field name="search_view_id" ref="view_coop_token_order_search"/>
+    <field name="context">{'search_default_open': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Заявок пока нет</p>
+      <p>Здесь торгуются права на будущий товар: тонна моркови первого
+         сорта во Владивостоке к первому октября. Продавец назвал цену при
+         выпуске, дальше держатели перепродают её друг другу — и по цене
+         видно, дорожает обещание или дешевеет.</p>
+    </field>
+  </record>
+
+  <!-- ═══════════════ МОИ ТОКЕНЫ: выпуски и держание ═══════════════ -->
+
+  <record id="view_coop_token_claim_list" model="ir.ui.view">
+    <field name="name">coop.token.claim.list</field>
+    <field name="model">coop.token.claim</field>
+    <field name="arch" type="xml">
+      <list string="Выпуски токенов">
+        <field name="resource_id" string="Объявление"/>
+        <field name="issuer_id" string="Поставщик"/>
+        <field name="quantity" string="Выпущено"/>
+        <field name="unit_label" string="Ед."/>
+        <field name="quality" string="Качество"/>
+        <field name="delivery_place" string="Место"/>
+        <field name="delivery_date" string="Срок"/>
+        <field name="price_per_unit" string="Цена"/>
+        <field name="total_price" string="Сумма" sum="Всего"/>
+        <field name="deposit_amount" string="Залог"/>
+        <field name="deposit_paid" string="Внесён" widget="boolean_toggle"/>
+        <field name="holder_count" string="Держателей"/>
+        <field name="state" widget="badge"
+               decoration-info="state == 'trading'"
+               decoration-success="state == 'settled'"
+               decoration-danger="state == 'defaulted'"
+               decoration-muted="state in ('draft', 'cancelled')"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_token_claim_form" model="ir.ui.view">
+    <field name="name">coop.token.claim.form</field>
+    <field name="model">coop.token.claim</field>
+    <field name="arch" type="xml">
+      <form string="Выпуск токенов">
+        <header>
+          <button name="action_pay_deposit" type="object" string="Внести залог"
+                  class="btn-primary"
+                  invisible="deposit_paid or state != 'draft'"/>
+          <button name="action_mint" type="object" string="Выпустить токены"
+                  class="btn-primary"
+                  invisible="state != 'draft' or not deposit_paid"/>
+          <button name="action_settle" type="object" string="Отметить исполненным"
+                  invisible="state not in ('trading', 'delivering')"/>
+          <button name="action_default" type="object" string="Признать срыв"
+                  invisible="state not in ('trading', 'delivering')"/>
+          <button name="action_cancel" type="object" string="Отменить"
+                  invisible="state not in ('draft', 'minted')"/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="draft,minted,trading,settled"/>
+        </header>
+        <sheet>
+          <div class="oe_title"><h1><field name="display_name" readonly="1"/></h1></div>
+          <group>
+            <group string="Что обещано">
+              <field name="resource_id" options="{'no_create': True}"
+                     readonly="state != 'draft'"/>
+              <field name="issuer_id" readonly="state != 'draft'"/>
+              <field name="quantity" readonly="state != 'draft'"/>
+              <field name="unit_label" readonly="state != 'draft'"/>
+              <field name="quality" readonly="state != 'draft'"/>
+              <field name="delivery_place" readonly="state != 'draft'"/>
+              <field name="delivery_date" readonly="state != 'draft'"/>
+              <field name="is_future" readonly="state != 'draft'"/>
+            </group>
+            <group string="Деньги">
+              <field name="price_per_unit" readonly="state != 'draft'"/>
+              <field name="settlement_currency" readonly="state != 'draft'"/>
+              <field name="total_price" readonly="1"/>
+              <field name="deposit_percent" readonly="state != 'draft'"/>
+              <field name="mint_cost" readonly="state != 'draft'"/>
+              <field name="deposit_amount" readonly="1"/>
+              <field name="deposit_paid" readonly="1"/>
+              <field name="deposit_paid_on" readonly="1" invisible="not deposit_paid"/>
+              <field name="deposit_returned" readonly="1" invisible="state != 'settled'"/>
+            </group>
+          </group>
+          <group string="Сеть TON" invisible="state == 'draft'">
+            <field name="network" readonly="1"/>
+            <field name="jetton_master_address" readonly="1"/>
+            <field name="escrow_address" readonly="1"/>
+            <field name="mint_tx_hash" readonly="1"/>
+          </group>
+          <group string="Исполнение" invisible="state in ('draft', 'minted')">
+            <field name="available_quantity" readonly="1"/>
+            <field name="delivered_quantity" readonly="1"/>
+            <field name="settled_on" readonly="1" invisible="state != 'settled'"/>
+            <field name="default_reason" readonly="1" invisible="state != 'defaulted'"/>
+          </group>
+          <notebook>
+            <page string="Держатели" name="holders">
+              <field name="holder_ids" readonly="1">
+                <list>
+                  <field name="partner_id"/>
+                  <field name="quantity"/>
+                  <field name="accepted_quantity"/>
+                  <field name="acquired_on"/>
+                </list>
+              </field>
+            </page>
+            <page string="Заявки" name="orders">
+              <field name="order_ids" readonly="1">
+                <list>
+                  <field name="side"/>
+                  <field name="partner_id"/>
+                  <field name="quantity_left"/>
+                  <field name="price_per_unit"/>
+                  <field name="state"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_token_claim_search" model="ir.ui.view">
+    <field name="name">coop.token.claim.search</field>
+    <field name="model">coop.token.claim</field>
+    <field name="arch" type="xml">
+      <search string="Выпуски">
+        <field name="resource_id" string="Объявление"/>
+        <field name="issuer_id" string="Поставщик"/>
+        <field name="delivery_place" string="Место"/>
+        <filter name="trading" string="Торгуются" domain="[('state', '=', 'trading')]"/>
+        <filter name="future" string="Товара ещё нет" domain="[('is_future', '=', True)]"/>
+        <filter name="defaulted" string="Сорванные" domain="[('state', '=', 'defaulted')]"/>
+        <group>
+          <filter name="by_issuer" string="По поставщику" context="{'group_by': 'issuer_id'}"/>
+          <filter name="by_state" string="По состоянию" context="{'group_by': 'state'}"/>
+          <filter name="by_date" string="По сроку" context="{'group_by': 'delivery_date'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_token_claim" model="ir.actions.act_window">
+    <field name="name">Мои токены</field>
+    <field name="res_model">coop.token.claim</field>
+    <field name="view_mode">list,form</field>
+    <field name="search_view_id" ref="view_coop_token_claim_search"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Выпусков пока нет</p>
+      <p>Выпуск заводится при публикации объявления: отмечаете «выпустить
+         токены», указываете количество, качество, место и срок — и вносите
+         залог. Десять процентов от суммы выпуска, но не меньше стоимости
+         самого выпуска: без обеспечения штраф за срыв удержать не с чего.</p>
+    </field>
+  </record>
+
+  <!-- ═══════════════ ДОЛИ В ПРОЕКТАХ ═══════════════ -->
+
+  <record id="view_coop_share_list" model="ir.ui.view">
+    <field name="name">coop.project.contribution.share.list</field>
+    <field name="model">coop.project.contribution</field>
+    <field name="arch" type="xml">
+      <list string="Доли в проектах">
+        <field name="project_id" string="Проект"/>
+        <field name="partner_id" string="Вкладчик"/>
+        <field name="kind" string="Вид вклада"/>
+        <field name="name" string="Что именно"/>
+        <field name="value" string="Оценка"/>
+        <field name="share_factor_used" string="Коэффициент"/>
+        <field name="share_tokens" string="Долей" sum="Всего долей"/>
+        <field name="share_percent" string="Доля, %"/>
+        <field name="share_minted" string="В сети" widget="boolean_toggle"/>
+        <field name="state" widget="badge"
+               decoration-success="state == 'accepted'"
+               decoration-muted="state in ('declined', 'returned')"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_share_search" model="ir.ui.view">
+    <field name="name">coop.project.contribution.share.search</field>
+    <field name="model">coop.project.contribution</field>
+    <field name="arch" type="xml">
+      <search string="Доли в проектах">
+        <field name="project_id" string="Проект"/>
+        <field name="partner_id" string="Вкладчик"/>
+        <filter name="accepted" string="Принятые вклады"
+                domain="[('state', '=', 'accepted')]"/>
+        <filter name="with_shares" string="С начисленными долями"
+                domain="[('share_tokens', '&gt;', 0)]"/>
+        <filter name="labour" string="Труд" domain="[('kind', '=', 'labour')]"/>
+        <group>
+          <filter name="by_project" string="По проекту" context="{'group_by': 'project_id'}"/>
+          <filter name="by_kind" string="По виду вклада" context="{'group_by': 'kind'}"/>
+          <filter name="by_partner" string="По вкладчику" context="{'group_by': 'partner_id'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_project_share" model="ir.actions.act_window">
+    <field name="name">Доли в проектах</field>
+    <field name="res_model">coop.project.contribution</field>
+    <field name="view_mode">list,form</field>
+    <field name="search_view_id" ref="view_coop_share_search"/>
+    <field name="context">{'search_default_with_shares': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Долей пока нет</p>
+      <p>Доли выпускаются в момент, когда проект принимает вклад: труд,
+         технику, материалы или знания. Считаются по коэффициенту вида —
+         у труда он выше, чем у денег, потому что кооператив распределяет
+         по труду, а не по капиталу.</p>
+    </field>
+  </record>
+
+  <!-- ═══════════════ КОШЕЛЁК TON ═══════════════ -->
+
+  <record id="view_coop_ton_holding_list" model="ir.ui.view">
+    <field name="name">coop.token.holding.list</field>
+    <field name="model">coop.token.holding</field>
+    <field name="arch" type="xml">
+      <list string="Кошелёк TON">
+        <field name="partner_id" string="Держатель"/>
+        <field name="claim_id" string="Требование"/>
+        <field name="quantity" string="Токенов" sum="Всего"/>
+        <field name="accepted_quantity" string="Принято"/>
+        <field name="acquired_on" string="Куплено"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="action_coop_ton_wallet" model="ir.actions.act_window">
+    <field name="name">Кошелёк TON</field>
+    <field name="res_model">coop.token.holding</field>
+    <field name="view_mode">list</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Токенов на руках нет</p>
+      <p>Здесь видно, какие права на будущий товар у вас есть: сколько
+         единиц, по какому требованию и к какому сроку. Сами токены лежат
+         в вашем кошельке TON — платформа их не хранит и распорядиться ими
+         не может.</p>
+    </field>
+  </record>
+
+  <!-- ═══════════════ РАЗДЕЛ ═══════════════ -->
+
+  <menuitem id="menu_coop_tokenomics_root" name="Токеномика" sequence="130"/>
+  <menuitem id="menu_coop_token_exchange" name="Биржа"
+            parent="menu_coop_tokenomics_root"
+            action="action_coop_token_exchange" sequence="10"/>
+  <menuitem id="menu_coop_token_claim" name="Мои токены"
+            parent="menu_coop_tokenomics_root"
+            action="action_coop_token_claim" sequence="20"/>
+  <menuitem id="menu_coop_project_share" name="Доли в проектах"
+            parent="menu_coop_tokenomics_root"
+            action="action_coop_project_share" sequence="30"/>
+  <menuitem id="menu_coop_ton_wallet" name="Кошелёк TON"
+            parent="menu_coop_tokenomics_root"
+            action="action_coop_ton_wallet" sequence="40"/>
+
+</odoo>

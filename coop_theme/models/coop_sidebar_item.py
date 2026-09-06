@@ -41,7 +41,11 @@ MAIN_ITEMS = [
 # говорит. Список без них выглядел бы полным, и понять, чего не хватает,
 # было бы неоткуда — ровно та же причина, что и у разделов выше.
 EXTENSION_ITEMS = [
-    ('Токеномика', 'fa-diamond', 'coop_tokens.action_coop_token'),
+    # Ведёт на биржу, а не на движения COOP: COOP — предоплата услуг
+    # платформы, она не торгуется и к бирже отношения не имеет. Пока пункт
+    # вёл туда, участник открывал «Токеномику» и видел пустой список
+    # служебных начислений.
+    ('Токеномика', 'fa-diamond', 'coop_tokenomics.action_coop_token_exchange'),
     ('Цифровые активы', 'fa-certificate', ''),
     ('Нематериальные активы', 'fa-lightbulb-o', ''),
     ('Целевые программы ПК', 'fa-bullseye', ''),
@@ -230,6 +234,21 @@ class CoopSidebarItem(models.Model):
         # дописываются, но и переставляются на нынешнее действие.
         for item in items.filtered(lambda i: i.section == 'main'):
             xmlid = MAIN_BY_NAME.get(item.name)
+            action = self.env.ref(xmlid, raise_if_not_found=False) if xmlid else None
+            if action and item.action_id.id != action.id:
+                item.action_id = action.id
+
+        # То же и с расширениями, и по той же причине. Раньше здесь
+        # переустановки не было, и «Токеномика» у всех, кто заходил
+        # раньше, продолжала вести на движения COOP — предоплату услуг
+        # платформы, к бирже отношения не имеющую. Участник открывал
+        # раздел и видел пустой список служебных начислений.
+        #
+        # Само действие не подменяется, если участник его сменил себе
+        # сам: переставляем только пункты, стоящие на прежнем умолчании
+        # или пустые, — то, что мы же участнику и выдали.
+        for item in items.filtered(lambda i: i.section == 'ext'):
+            xmlid = EXT_BY_NAME.get(item.name)
             action = self.env.ref(xmlid, raise_if_not_found=False) if xmlid else None
             if action and item.action_id.id != action.id:
                 item.action_id = action.id
