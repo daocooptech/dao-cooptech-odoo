@@ -275,5 +275,52 @@ def enrich_showcase(env, login='dashkevich'):
             })
             touched += 1
 
+    # ── Образование, достижения и связь ────────────────────────────────
+    #
+    # Обычная раздача биографии витринную страницу обходит стороной: она
+    # идёт по тем, у кого есть членство в организации, а владелец стенда
+    # числится сам по себе. После пересборки базы это выглядит как
+    # пропавший блок — полоса без записей прячется целиком.
+    rnd = random.Random(partner.id)
+
+    Education = env['coop.education'].sudo()
+    if not Education.search_count([('partner_id', '=', partner.id)]):
+        for name, speciality, level in rnd.sample(SCHOOLS, k=2):
+            year_from = rnd.randint(1995, 2015)
+            length = {'school': 10, 'college': 3,
+                      'higher': 5, 'courses': 1}[level]
+            Education.create({
+                'partner_id': partner.id,
+                'name': name,
+                'speciality': speciality,
+                'level': level,
+                'year_from': year_from,
+                'year_to': year_from + length,
+            })
+            touched += 1
+
+    Achievement = env['coop.achievement'].sudo()
+    if not Achievement.search_count([('partner_id', '=', partner.id)]):
+        for name, has_proof in rnd.sample(ACHIEVEMENTS, k=3):
+            Achievement.create({
+                'partner_id': partner.id,
+                'name': name,
+                'year': rnd.randint(2016, 2025),
+                'proof_url': ('https://reestr.cooptech.ru/%s'
+                              % rnd.randint(1000, 9999)) if has_proof else False,
+            })
+            touched += 1
+
+    # Способы связи: без них колонка «Контакты» пуста, а в макете она
+    # стоит первой, и пустой читается как поломка, а не как выбор.
+    contacts = {}
+    if not partner.coop_languages:
+        contacts['coop_languages'] = rnd.choice(LANGUAGES)
+    if not partner.coop_messengers:
+        contacts['coop_messengers'] = rnd.choice(MESSENGERS)
+    if contacts:
+        partner.write(contacts)
+        touched += 1
+
     _logger.info('Витрина: дополнено записей — %s', touched)
     return touched
