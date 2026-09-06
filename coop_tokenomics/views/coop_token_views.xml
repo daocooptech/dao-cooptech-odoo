@@ -116,7 +116,7 @@
     <field name="res_model">coop.token.order</field>
     <field name="view_mode">list,form</field>
     <field name="search_view_id" ref="view_coop_token_order_search"/>
-    <field name="context">{'search_default_open': 1}</field>
+    <field name="context">{'search_default_open': 1, 'coop_section': 1}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Заявок пока нет</p>
       <p>Здесь торгуются права на будущий товар: тонна моркови первого
@@ -267,6 +267,7 @@
     <field name="res_model">coop.token.claim</field>
     <field name="view_mode">list,form</field>
     <field name="search_view_id" ref="view_coop_token_claim_search"/>
+    <field name="context">{'coop_section': 1}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Выпусков пока нет</p>
       <p>Выпуск заводится при публикации объявления: отмечаете «выпустить
@@ -325,7 +326,7 @@
     <field name="res_model">coop.project.contribution</field>
     <field name="view_mode">list,form</field>
     <field name="search_view_id" ref="view_coop_share_search"/>
-    <field name="context">{'search_default_with_shares': 1}</field>
+    <field name="context">{'search_default_with_shares': 1, 'coop_section': 1}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Долей пока нет</p>
       <p>Доли выпускаются в момент, когда проект принимает вклад: труд,
@@ -355,6 +356,7 @@
     <field name="name">Кошелёк TON</field>
     <field name="res_model">coop.token.holding</field>
     <field name="view_mode">list</field>
+    <field name="context">{'coop_section': 1}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Токенов на руках нет</p>
       <p>Здесь видно, какие права на будущий товар у вас есть: сколько

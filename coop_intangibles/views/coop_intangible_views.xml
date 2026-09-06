@@ -170,7 +170,7 @@
         <filter name="active" string="Право действует" domain="[('state', '=', 'active')]"/>
         <filter name="pledged" string="В залоге" domain="[('pledge_state', '!=', 'none')]"/>
         <filter name="licensed" string="С лицензиями"
-                domain="[('active_license_count', '&gt;', 0)]"/>
+                domain="[('license_ids.state', '=', 'active')]"/>
         <separator/>
         <filter name="know_how" string="Ноу-хау" domain="[('kind', '=', 'know_how')]"/>
         <filter name="trademark" string="Товарные знаки" domain="[('kind', '=', 'trademark')]"/>
@@ -190,6 +190,7 @@
     <field name="res_model">coop.intangible</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="search_view_id" ref="view_coop_intangible_search"/>
+    <field name="context">{'coop_section': 1, 'coop_catalog': 1}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Активов пока нет</p>
       <p>Рецептура, программа, товарный знак, сорт — то, что у кооператива
@@ -304,6 +305,7 @@
     <field name="res_model">coop.intangible.license</field>
     <field name="view_mode">list,form</field>
     <field name="search_view_id" ref="view_coop_license_search"/>
+    <field name="context">{'coop_section': 1}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Лицензий пока нет</p>
       <p>Кооператив продаёт соседнему право пользоваться своей
