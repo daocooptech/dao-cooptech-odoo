@@ -74,6 +74,15 @@
 
 .o_coop_msg_chips {
   margin-bottom: 14px;
+
+  // У фильтров переписок свой акцент из макета: выбранный фильтр залит
+  // цветом целиком, а не подсвечен подложкой — так виден один активный
+  // вид среди семи, а не только едва заметная разница оттенков.
+  .o_coop_chip_on {
+    background: var(--coop-teal, #146b64);
+    border-color: var(--coop-teal, #146b64);
+    color: var(--coop-btn-fg, #fff);
+  }
 }
 
 // Число рядом с подписью чипа — сколько переписок попадает под фильтр.
@@ -82,6 +91,10 @@
   margin-left: 5px;
   opacity: .65;
   font-weight: 600;
+}
+
+.o_coop_msg_chips .o_coop_chip_on .o_coop_chip_num {
+  opacity: .85;
 }
 
 .o_coop_msg_body {
@@ -125,6 +138,13 @@
   flex: none;
   border-radius: 9px;
   object-fit: cover;
+}
+
+// Человек — круглый портрет, организация или группа — логотип плиткой.
+// Так различают по силуэту, не читая подпись: то же деление, что и в
+// остальном макете (`.avatar` против `.torg`).
+.o_coop_avatar_circle {
+  border-radius: 50%;
 }
 
 .o_coop_thread_main {
@@ -228,8 +248,23 @@
 
 .o_coop_chat_sub {
   margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
   font-size: 11.5px;
   color: var(--coop-slate, #4a4a44);
+}
+
+.o_coop_online_dot {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--coop-teal, #146b64);
+}
+
+.o_coop_online_off {
+  background: var(--coop-slate-light, #8f8f88);
 }
 
 .o_coop_chat_link {
@@ -260,6 +295,103 @@
 .o_coop_chat_pane .o-mail-Thread {
   flex: 1;
   min-height: 0;
+}
+
+// ── Композер: свои цвета вместо стандартных бутстраповских ─────────────
+//
+// Кнопки вложения и эмодзи движок уже рисует кружками (это включает
+// `inChatWindow`, тот же признак, что даёт пузыри сообщениям) — здесь
+// только цвет: подложка платформы вместо прозрачной, акцент при
+// наведении и фокусе — фирменный тёмно-бирюзовый, а не бутстраповский
+// синий.
+.o_coop_chat_pane .o-mail-ActionList-button {
+  background: var(--coop-paper, #fbfbf9);
+  border: 1px solid var(--coop-line, #e6e6e1);
+  color: var(--coop-slate, #4a4a44);
+
+  &:hover, &:focus {
+    background: var(--coop-teal-tint, #e3efed);
+    border-color: var(--coop-teal, #146b64);
+    color: var(--coop-teal-dark, #0e4f4a);
+  }
+}
+
+// Кнопка отправки — тёмный кружок, как основная кнопка платформы, а не
+// едва заметная бутстраповская ссылка. `!important` — у движка своё
+// правило той же специфичности на нажатие/фокус, побеждает по порядку
+// подключения пакетов, а не по значимости.
+.o_coop_chat_pane .o-mail-Composer-send {
+  width: 32px;
+  height: 32px;
+  background: var(--coop-btn-bg, #14171a) !important;
+  color: var(--coop-btn-fg, #fff) !important;
+  opacity: 1 !important;
+
+  i {
+    color: var(--coop-btn-fg, #fff) !important;
+  }
+
+  &:hover, &:focus {
+    background: var(--coop-teal-dark, #0e4f4a) !important;
+  }
+
+  &:disabled {
+    background: var(--coop-line, #e6e6e1) !important;
+    color: var(--coop-slate-light, #8f8f88) !important;
+
+    i { color: var(--coop-slate-light, #8f8f88) !important; }
+  }
+}
+
+// Поле ввода — скруглённое и на подложке платформы, как везде в макете,
+// а не в бутстраповском сером.
+.o_coop_chat_pane .o-mail-Composer-inputStyle,
+.o_coop_chat_pane .o-mail-Composer-bg {
+  background: var(--coop-paper, #fbfbf9);
+}
+
+// ── Пузыри сообщений: свой цвет вместо бутстраповского ──────────────────
+//
+// Движок уже красит свои и чужие сообщения по-разному (`.o-green` /
+// `.o-blue`) — остаётся не переопределять раскладку, а перекрасить в
+// цвета платформы: чужое сообщение — как карточка в макете, белое с
+// тонкой рамкой; своё — на бирюзовой подложке, тем же оттенком, что и
+// подсветка активной переписки в списке слева.
+.o_coop_chat_pane {
+  .o-mail-Message-bubble.o-green,
+  .o-mail-Message-bubbleTail.o-green {
+    --o-message-bubble-bg: var(--coop-teal-tint, #e3efed);
+    --o-message-bubble-border-color: var(--coop-teal, #146b64);
+    --o-message-bubble-color-base: var(--coop-teal-dark, #0e4f4a);
+  }
+
+  .o-mail-Message-bubble.o-blue,
+  .o-mail-Message-bubbleTail.o-blue {
+    --o-message-bubble-bg: var(--coop-white, #fff);
+    --o-message-bubble-border-color: var(--coop-line, #e6e6e1);
+    --o-message-bubble-color-base: var(--coop-ink, #14171a);
+  }
+}
+
+// Поле ввода при фокусе обводится движком бирюзовой рамкой через
+// `--border-color`, выставляемый на обёртке правилом `:has(textarea:
+// focus)`. Гасим саму переменную и все три места, откуда мог бы взяться
+// контур — обводку, тень, цвет рамки, — а не гадаем, какое из них
+// сработало.
+.o_coop_chat_pane .o-mail-Composer-inputContainer {
+  --border-color: var(--coop-line, #e6e6e1) !important;
+
+  &:focus-within {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: var(--coop-line, #e6e6e1) !important;
+  }
+}
+
+.o_coop_chat_pane .o-mail-Composer-input:focus,
+.o_coop_chat_pane .o-mail-Composer-input:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 // Узкий экран: колонки становятся одна под другой, список переписок

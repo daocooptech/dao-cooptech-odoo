@@ -38,7 +38,8 @@
                  o_coop_thread_unread: unreadOf(thread),
                }"
                t-on-click="() => this.select(thread)">
-            <img class="o_coop_thread_avatar" t-att-src="thread.avatarUrl" alt=""/>
+            <img class="o_coop_thread_avatar" t-att-src="thread.avatarUrl" alt=""
+                 t-att-class="{ o_coop_avatar_circle: thread.coop_kind === 'person' }"/>
             <div class="o_coop_thread_main">
               <div class="o_coop_thread_row">
                 <span class="o_coop_thread_name">
@@ -63,11 +64,19 @@
       <div class="o_coop_chat_pane" t-ref="pane">
         <t t-if="activeThread">
           <div class="o_coop_chat_head">
-            <img class="o_coop_chat_avatar" t-att-src="activeThread.avatarUrl" alt=""/>
+            <img class="o_coop_chat_avatar" t-att-src="activeThread.avatarUrl" alt=""
+                 t-att-class="{ o_coop_avatar_circle: activeThread.coop_kind === 'person' }"/>
             <div class="o_coop_chat_head_text">
               <div class="o_coop_chat_name" t-esc="activeThread.displayName"/>
-              <div t-if="activeThread.coop_subtitle" class="o_coop_chat_sub"
-                   t-esc="activeThread.coop_subtitle"/>
+              <div class="o_coop_chat_sub">
+                <t t-if="activeThread.coop_kind === 'person' and onlineStatus(activeThread)">
+                  <span class="o_coop_online_dot"
+                        t-att-class="{ o_coop_online_off: onlineStatus(activeThread) !== 'online' }"/>
+                  <t t-esc="onlineStatus(activeThread) === 'online' ? 'в сети' : 'был(а) недавно'"/>
+                  <t t-if="activeThread.coop_subtitle"> · </t>
+                </t>
+                <t t-esc="activeThread.coop_subtitle"/>
+              </div>
             </div>
             <button t-if="activeThread.coop_link_label" type="button"
                     class="o_coop_chat_link"

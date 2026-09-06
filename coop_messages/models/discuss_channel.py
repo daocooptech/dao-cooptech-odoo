@@ -87,6 +87,7 @@ class DiscussChannel(models.Model):
         'org': 'Открыть организацию',
         'project': 'Открыть проект',
         'community': 'Открыть сообщество',
+        'person': 'Открыть профиль',
     }
 
     @api.depends('coop_kind', 'coop_res_model', 'coop_res_id')

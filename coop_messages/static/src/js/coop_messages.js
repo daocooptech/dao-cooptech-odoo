@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, onWillStart, useState } from "@odoo/owl";
+import { Component, onWillStart, useState, useSubEnv } from "@odoo/owl";
 import { patch } from "@web/core/utils/patch";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -9,11 +9,60 @@ import { fields } from "@mail/core/common/record";
 import { Thread as ThreadComponent } from "@mail/core/common/thread";
 import { Composer } from "@mail/core/common/composer";
 import { Thread } from "@mail/core/common/thread_model";
+import { composerActionsRegistry } from "@mail/core/common/composer_actions";
 
 // Luxon в движке подключён библиотекой, а не модулем: импортировать его
 // нельзя — сборщик не найдёт «luxon», наш файл не определится, и вместе
 // с ним не окажется в реестре действие раздела. Экран тогда пустой.
 const { DateTime } = luxon;
+
+/**
+ * Вложение и голосовое сообщение — как в макете, отдельными видимыми
+ * кнопками, а не пунктами скрытого меню «+».
+ *
+ * У движка они попадают в список «прочих» действий и всплывают только
+ * по клику на «+» — экономия места, которая на широком экране обернулась
+ * тем, что владелец случайно задел «Голосовое сообщение», пока проверял
+ * прокрутку списка: кнопка пряталась там же, где на неё легко нажать
+ * не глядя. В макете таких меню нет вовсе — только прямые кнопки.
+ *
+ * Это не отдельные наши кнопки, а те же самые действия движка: просто
+ * `sequenceQuick` переводит их из «прочих» в «быстрые», и они встают в
+ * один ряд с отправкой и эмодзи. Условие — только для нашего экрана
+ * (`env.inCoopMessages`, выставлен ниже), обычный Discuss не трогаем.
+ */
+const QUICK_ON_THIS_SCREEN = { "upload-files": 25, "voice-start": 15, "voice-stop": 15 };
+for (const [id, sequenceQuick] of Object.entries(QUICK_ON_THIS_SCREEN)) {
+    const definition = composerActionsRegistry.get(id, null);
+    if (!definition) {
+        continue;
+    }
+    const original = definition.sequenceQuick;
+    definition.sequenceQuick = function (params) {
+        if (params.owner?.env?.inCoopMessages) {
+            return sequenceQuick;
+        }
+        return typeof original === "function" ? original.call(this, params) : original;
+    };
+}
+
+// Шаблонные ответы (`::сокращение`) в макете отсутствуют, а после того
+// как вложение и голосовое стали прямыми кнопками, это единственное,
+// что осталось бы в меню «+» — сама кнопка меню тогда не исчезла бы, а
+// открывала бы список из одного пункта. Проще снять этот пункт здесь же
+// и остаться совсем без меню, как в макете.
+const cannedResponseDef = composerActionsRegistry.get("add-canned-response", null);
+if (cannedResponseDef) {
+    const originalCondition = cannedResponseDef.condition;
+    cannedResponseDef.condition = function (params) {
+        if (params.owner?.env?.inCoopMessages) {
+            return false;
+        }
+        return typeof originalCondition === "function"
+            ? originalCondition.call(this, params)
+            : originalCondition;
+    };
+}
 
 /**
  * Раздел «Сообщения» — переписки движка Discuss экраном из макета.
@@ -69,6 +118,16 @@ export class CoopMessages extends Component {
         this.action = useService("action");
         this.categories = CATEGORIES;
         this.state = useState({ category: "all", search: "", jump: 0 });
+        // У ленты уже есть готовый вид переписки — цветные пузыри,
+        // хвостик, свои сообщения справа. Он не самодельный, а встроен в
+        // движок, только включается признаком `inChatWindow` — тем же,
+        // что раньше давал приличный вид только в плавающем окошке чата
+        // (которое мы как раз убрали). Здесь тот же признак — тот же вид,
+        // но в своей панели, а не поверх экрана.
+        // Свой признак экрана — только чтобы вложение и голосовое (см.
+        // выше) стали прямыми кнопками именно здесь, не трогая обычный
+        // Discuss.
+        useSubEnv({ inChatWindow: true, inCoopMessages: true });
         onWillStart(async () => {
             await this.store.isReady;
             // Переписки движок присылает не при загрузке страницы, а по
@@ -186,6 +245,11 @@ export class CoopMessages extends Component {
             return current;
         }
         return this.visibleThreads[0];
+    }
+
+    /** «В сети» / «был(а) недавно» под именем в личной переписке. */
+    onlineStatus(thread) {
+        return thread.correspondent?.im_status;
     }
 
     /**

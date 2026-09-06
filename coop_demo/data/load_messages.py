@@ -218,9 +218,12 @@ def load_messages(env, login='dashkevich'):
     # ── Личные беседы ─────────────────────────────────────────────────
     for person in people[:45]:
         last = spread()
+        parts = [p for p in (person.city, person.coop_specialization_id.name)
+                 if p]
         channel = _channel(
             env, person.name, 'person', person, me, user,
-            subtitle=person.city or 'Участник платформы')
+            subtitle=' · '.join(parts) or 'Участник платформы',
+            res_model='res.partner', res_id=person.id)
         talk(channel, 'person', person, rnd.randint(3, 9), last)
         made['channels'] += 1
 
