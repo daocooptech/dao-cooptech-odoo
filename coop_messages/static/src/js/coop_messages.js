@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { Component, onWillStart, useState } from "@odoo/owl";
-import { DateTime } from "luxon";
 import { patch } from "@web/core/utils/patch";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -10,6 +9,11 @@ import { fields } from "@mail/core/common/record";
 import { Thread as ThreadComponent } from "@mail/core/common/thread";
 import { Composer } from "@mail/core/common/composer";
 import { Thread } from "@mail/core/common/thread_model";
+
+// Luxon в движке подключён библиотекой, а не модулем: импортировать его
+// нельзя — сборщик не найдёт «luxon», наш файл не определится, и вместе
+// с ним не окажется в реестре действие раздела. Экран тогда пустой.
+const { DateTime } = luxon;
 
 /**
  * Раздел «Сообщения» — переписки движка Discuss экраном из макета.
@@ -65,14 +69,28 @@ export class CoopMessages extends Component {
         this.action = useService("action");
         this.categories = CATEGORIES;
         this.state = useState({ category: "all", search: "", jump: 0 });
-        onWillStart(() => this.store.isReady);
+        onWillStart(async () => {
+            await this.store.isReady;
+            // Переписки движок присылает не при загрузке страницы, а по
+            // запросу: их может быть много, и на большинстве экранов они
+            // не нужны. Штатный Discuss просит их при открытии — просим и
+            // мы, иначе список пуст при полной базе.
+            await this.store.channels.fetch();
+        });
     }
 
-    /** Все переписки, в которых человек состоит. */
+    /**
+     * Все переписки, в которых человек состоит.
+     *
+     * Берутся из набора движка, а не перебором всех записей хранилища:
+     * перебор возвращает верный список ровно один раз — в момент вызова.
+     * Появление новой переписки такой список не замечает, и экран
+     * остаётся пустым при полной базе, пока его не перерисует что-то
+     * другое. Набор `allChannels` движок ведёт сам, и на него подписка
+     * работает.
+     */
     get threads() {
-        return Object.values(this.store.Thread.records).filter(
-            (thread) => thread.model === "discuss.channel" && thread.displayToSelf
-        );
+        return this.store.allChannels.filter((thread) => thread.displayToSelf);
     }
 
     /**
