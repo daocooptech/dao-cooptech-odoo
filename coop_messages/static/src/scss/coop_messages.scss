@@ -64,6 +64,123 @@
   background: var(--coop-surface, #f2f2ee);
 }
 
+// Вкладка раздела в макете одна — «Сообщения», без соседей, и растягивать
+// на неё общий `justify-content` вкладок других экранов не стоит. Кнопка
+// нового диалога встаёт на свободное место строки через `margin-left:
+// auto`, не трогая базовое правило `.o_coop_tabs`.
+//
+// `overflow: visible` — не просто на будущее. `.o_coop_tabs` держит
+// `overflow-x: auto` для прокрутки длинного ряда вкладок на других
+// страницах, а по спецификации CSS заданный `overflow-x` без явного
+// `overflow-y` вычисляет и его как `auto`, а не `visible`. На этой
+// странице вкладка одна, прокручивать нечего, а вот выпадающая панель
+// «Добавить диалог» из-за этого молча обрезалась по границе строки —
+// панель существовала, отвечала на клики, но не была видна вовсе.
+.o_coop_messages .o_coop_tabs_page {
+  align-items: center;
+  overflow: visible;
+}
+
+.o_coop_new_dialog {
+  position: relative;
+  margin-left: auto;
+}
+
+.o_coop_new_dialog_btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 1px solid var(--coop-line, #e6e6e1);
+  border-radius: 999px;
+  background: var(--coop-white, #fff);
+  color: var(--coop-ink, #14171a);
+  font: 600 12.5px/1.3 'Manrope', sans-serif;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--coop-teal, #146b64);
+    color: var(--coop-teal-dark, #0e4f4a);
+  }
+}
+
+.o_coop_new_dialog_plus {
+  font-size: 15px;
+  line-height: 1;
+  color: var(--coop-teal, #146b64);
+}
+
+// Панель — тот же приём, что у вложения/эмодзи в макете: карточка на
+// белом, с тенью, подвешенная под кнопкой.
+.o_coop_new_dialog_pop {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 300px;
+  padding: 10px;
+  border: 1px solid var(--coop-line, #e6e6e1);
+  border-radius: 10px;
+  background: var(--coop-white, #fff);
+  box-shadow: 0 8px 24px rgba(20, 23, 26, .12);
+  z-index: 20;
+
+  .o_coop_input {
+    width: 100%;
+  }
+}
+
+.o_coop_new_dialog_list {
+  max-height: 280px;
+  margin-top: 8px;
+  overflow-y: auto;
+}
+
+.o_coop_new_dialog_row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--coop-paper, #fbfbf9);
+  }
+}
+
+.o_coop_new_dialog_avatar {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.o_coop_new_dialog_text {
+  flex: 1;
+  min-width: 0;
+}
+
+.o_coop_new_dialog_name {
+  font: 600 12.5px/1.4 'Manrope', sans-serif;
+  color: var(--coop-ink, #14171a);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.o_coop_new_dialog_city {
+  font-size: 11px;
+  color: var(--coop-slate, #4a4a44);
+}
+
+.o_coop_new_dialog_empty {
+  padding: 14px 4px;
+  font-size: 12px;
+  text-align: center;
+  color: var(--coop-slate, #4a4a44);
+}
+
 .o_coop_msg_search {
   margin-bottom: 10px;
 

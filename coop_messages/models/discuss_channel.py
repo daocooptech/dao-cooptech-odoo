@@ -99,6 +99,34 @@ class DiscussChannel(models.Model):
                 channel.coop_link_label = self.LINK_LABELS.get(
                     channel.coop_kind, 'Открыть запись')
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Личная переписка, заведённая на лету, — сразу с подписью и
+        ссылкой на профиль, а не только с видом.
+
+        `_compute_coop_kind` расставляет вид «личная» и без этого — он
+        смотрит только на тип канала. Запись же, город и специализация
+        собеседника требуют дойти до партнёра, а к этому моменту участники
+        канала ещё не сохранены (они появляются в той же транзакции), так
+        что делать это приходится после создания, а не в compute.
+        """
+        channels = super().create(vals_list)
+        chats = channels.filtered(
+            lambda c: c.channel_type == 'chat' and not c.coop_res_model)
+        for channel in chats:
+            correspondent = channel.channel_partner_ids - self.env.user.partner_id
+            if len(correspondent) != 1 or correspondent.is_company:
+                continue
+            parts = [p for p in (correspondent.city,
+                                  correspondent.coop_specialization_id.name)
+                     if p]
+            channel.write({
+                'coop_res_model': 'res.partner',
+                'coop_res_id': correspondent.id,
+                'coop_subtitle': ' · '.join(parts) or False,
+            })
+        return channels
+
     def _to_store_defaults(self, target: Store.Target):
         """Наши поля уезжают на клиент вместе с каналом.
 

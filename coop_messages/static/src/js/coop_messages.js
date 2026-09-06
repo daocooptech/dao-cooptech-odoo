@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, onWillStart, useState, useSubEnv } from "@odoo/owl";
+import { Component, onWillStart, useExternalListener, useRef, useState, useSubEnv } from "@odoo/owl";
 import { patch } from "@web/core/utils/patch";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -116,8 +116,18 @@ export class CoopMessages extends Component {
     setup() {
         this.store = useService("mail.store");
         this.action = useService("action");
+        this.orm = useService("orm");
         this.categories = CATEGORIES;
-        this.state = useState({ category: "all", search: "", jump: 0 });
+        this.state = useState({
+            category: "all",
+            search: "",
+            jump: 0,
+            // Панель «Добавить диалог»: своё маленькое состояние — открыта
+            // ли она, что набрано в поиске человека и кого уже нашли.
+            newDialogOpen: false,
+            newDialogQuery: "",
+            newDialogResults: [],
+        });
         // У ленты уже есть готовый вид переписки — цветные пузыри,
         // хвостик, свои сообщения справа. Он не самодельный, а встроен в
         // движок, только включается признаком `inChatWindow` — тем же,
@@ -128,6 +138,15 @@ export class CoopMessages extends Component {
         // выше) стали прямыми кнопками именно здесь, не трогая обычный
         // Discuss.
         useSubEnv({ inChatWindow: true, inCoopMessages: true });
+        this.newDialogRef = useRef("newDialog");
+        // Клик мимо панели закрывает её — тот же приём, что у popover'ов
+        // в макете (вложение, эмодзи): открытая панель поверх списка
+        // переписок не должна требовать отдельной кнопки «закрыть».
+        useExternalListener(window, "click", (ev) => {
+            if (this.state.newDialogOpen && !this.newDialogRef.el?.contains(ev.target)) {
+                this.state.newDialogOpen = false;
+            }
+        });
         onWillStart(async () => {
             await this.store.isReady;
             // Переписки движок присылает не при загрузке страницы, а по
@@ -264,6 +283,63 @@ export class CoopMessages extends Component {
     select(thread) {
         this.store.discuss.thread = thread;
         this.state.jump++;
+    }
+
+    /** Открыть/закрыть панель «Добавить диалог» и сбросить её состояние. */
+    toggleNewDialog() {
+        this.state.newDialogOpen = !this.state.newDialogOpen;
+        this.state.newDialogQuery = "";
+        this.state.newDialogResults = [];
+    }
+
+    /**
+     * Поиск человека для нового диалога.
+     *
+     * По имени, без учёта регистра, только участники платформы — с
+     * посторонним контактом Odoo (перевозчиком из адресной книги,
+     * банком в реквизитах) переписки не заводят. Свою запись из выдачи
+     * исключаем: с собой не переписываются.
+     */
+    async searchNewDialog(query) {
+        this.state.newDialogQuery = query;
+        const needle = query.trim();
+        if (needle.length < 2) {
+            this.state.newDialogResults = [];
+            return;
+        }
+        const people = await this.orm.searchRead(
+            "res.partner",
+            [
+                ["coop_is_participant", "=", true],
+                ["is_company", "=", false],
+                ["id", "!=", this.store.self.id],
+                ["name", "ilike", needle],
+            ],
+            ["id", "name", "city"],
+            { limit: 20 }
+        );
+        // Пока запрос летал, человек мог напечатать другое слово —
+        // ответ на устаревший запрос тогда просто выбрасываем.
+        if (this.state.newDialogQuery === query) {
+            this.state.newDialogResults = people;
+        }
+    }
+
+    /**
+     * Начать переписку с выбранным человеком — своя или уже существующая.
+     *
+     * `store.startChat()` не подходит напрямую: она сама открывает
+     * переписку через `thread.open()`, а это ровно тот путь, что уводит
+     * в плавающее окошко поверх экрана (см. `select()` выше). Здесь та же
+     * последовательность — найти или завести канал, — но открытие в
+     * своей панели, через `select()`.
+     */
+    async startNewDialog(person) {
+        const thread = await this.store.joinChat(person.id, false);
+        this.toggleNewDialog();
+        if (thread) {
+            this.select(thread);
+        }
     }
 
     /** Переход к записи, из которой выросла переписка. */

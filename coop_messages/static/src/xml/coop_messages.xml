@@ -10,6 +10,33 @@
   <div class="o_coop_messages">
     <div class="o_coop_tabs o_coop_tabs_page">
       <span class="o_coop_tab active">Сообщения</span>
+      <div class="o_coop_new_dialog" t-ref="newDialog">
+        <button type="button" class="o_coop_new_dialog_btn"
+                t-on-click="() => this.toggleNewDialog()">
+          <span class="o_coop_new_dialog_plus">+</span> Добавить диалог
+        </button>
+        <div t-if="state.newDialogOpen" class="o_coop_new_dialog_pop">
+          <input type="text" class="o_coop_input" autofocus="autofocus"
+                 placeholder="Найти человека по имени..."
+                 t-on-input="(ev) => this.searchNewDialog(ev.target.value)"/>
+          <div class="o_coop_new_dialog_list">
+            <t t-if="state.newDialogQuery.trim().length > 1 and !state.newDialogResults.length">
+              <div class="o_coop_new_dialog_empty">Никого не нашли.</div>
+            </t>
+            <div t-foreach="state.newDialogResults" t-as="person" t-key="person.id"
+                 class="o_coop_new_dialog_row"
+                 t-on-click="() => this.startNewDialog(person)">
+              <img class="o_coop_new_dialog_avatar"
+                   t-attf-src="/web/image/res.partner/{{person.id}}/avatar_128"
+                   alt=""/>
+              <div class="o_coop_new_dialog_text">
+                <div class="o_coop_new_dialog_name" t-esc="person.name"/>
+                <div t-if="person.city" class="o_coop_new_dialog_city" t-esc="person.city"/>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="o_coop_msg_search">
