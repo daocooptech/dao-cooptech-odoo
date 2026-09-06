@@ -3,3 +3,13 @@ access_coop_cession_user,Предложения об уступке — учас
 access_coop_cession_admin,Предложения об уступке — администратор,model_coop_cession,base.group_system,1,1,1,1
 access_coop_cession_response_user,Отклики на уступку — участник,model_coop_cession_response,base.group_user,1,1,1,0
 access_coop_cession_response_admin,Отклики на уступку — администратор,model_coop_cession_response,base.group_system,1,1,1,1
+access_coop_token_claim_user,Выпуски токенов — участник,model_coop_token_claim,base.group_user,1,1,1,0
+access_coop_token_claim_admin,Выпуски токенов — администратор,model_coop_token_claim,base.group_system,1,1,1,1
+access_coop_token_holding_user,Токены на руках — участник,model_coop_token_holding,base.group_user,1,1,1,0
+access_coop_token_holding_admin,Токены на руках — администратор,model_coop_token_holding,base.group_system,1,1,1,1
+access_coop_token_order_user,Заявки биржи — участник,model_coop_token_order,base.group_user,1,1,1,0
+access_coop_token_order_admin,Заявки биржи — администратор,model_coop_token_order,base.group_system,1,1,1,1
+access_coop_token_trade_user,Сделки по токенам — участник,model_coop_token_trade,base.group_user,1,1,1,0
+access_coop_token_trade_admin,Сделки по токенам — администратор,model_coop_token_trade,base.group_system,1,1,1,1
+access_coop_share_rate_user,Ставки долей — участник,model_coop_project_share_rate,base.group_user,1,1,1,0
+access_coop_share_rate_admin,Ставки долей — администратор,model_coop_project_share_rate,base.group_system,1,1,1,1

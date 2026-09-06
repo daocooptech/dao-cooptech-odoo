@@ -33,14 +33,14 @@ class CoopTokenTransaction(models.Model):
     истории остаток восстанавливается всегда.
     """
     _name = 'coop.token.transaction'
-    _description = 'Движение токенов'
+    _description = 'Движение токенов COOP'
     _order = 'create_date desc, id desc'
 
     partner_id = fields.Many2one(
         'res.partner', string='Участник', required=True,
         ondelete='cascade', index=True)
     amount = fields.Integer(
-        string='Токенов', required=True,
+        string='COOP', required=True,
         help='Положительное — начисление, отрицательное — списание.')
     kind = fields.Selection([
         ('topup', 'Пополнение'),
@@ -99,7 +99,7 @@ class ResPartner(models.Model):
     coop_token_ids = fields.One2many(
         'coop.token.transaction', 'partner_id', string='Движения токенов')
     coop_token_balance = fields.Integer(
-        string='Токенов на балансе', compute='_compute_coop_token_balance',
+        string='COOP на балансе', compute='_compute_coop_token_balance',
         store=True, help='Сумма всех начислений и списаний.')
 
     @api.depends('coop_token_ids.amount')
