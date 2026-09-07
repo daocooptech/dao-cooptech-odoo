@@ -58,6 +58,7 @@
             'coop_theme/static/src/xml/theme_switch.xml',
             'coop_theme/static/src/xml/catalog_view.xml',
             'coop_theme/static/src/xml/shell.xml',
+            'coop_theme/static/src/xml/chatter.xml',
         ],
         'web.assets_frontend': [
             'coop_theme/static/src/scss/fonts.scss',

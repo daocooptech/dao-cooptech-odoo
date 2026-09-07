@@ -3,7 +3,7 @@
 import { Component, useState, onWillStart } from "@odoo/owl";
 import { patch } from "@web/core/utils/patch";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
+import { useBus, useService } from "@web/core/utils/hooks";
 import { browser } from "@web/core/browser/browser";
 import { WebClient } from "@web/webclient/webclient";
 
@@ -303,4 +303,38 @@ registry.category("actions").add("coop_soon", CoopSoon);
 
 patch(WebClient, {
     components: { ...WebClient.components, CoopSidebar, CoopFooter },
+});
+
+/**
+ * Новая страница открывается сверху.
+ *
+ * Прокрутка у нас вынесена на общий слой `.o_coop_layout`: полоса стоит у
+ * правого края окна, как на обычном сайте, а не внутри рабочей области.
+ * Слой при этом один на всю работу и между страницами не пересоздаётся —
+ * в отличие от контейнера вида, на который рассчитывает Odoo. Поэтому
+ * положение прокрутки переезжало с предыдущей страницы: пролистал
+ * каталог до середины, нажал «Мою страницу» — и она открывалась где-то
+ * на ленте, будто по якорю.
+ *
+ * Сброс повешен на событие, которое движок подаёт после отрисовки нового
+ * действия. Диалоги (`mode === "new"`) пропускаются: они рисуются поверх
+ * страницы, и та никуда не уходила.
+ */
+patch(WebClient.prototype, {
+    setup() {
+        super.setup();
+        useBus(this.env.bus, "ACTION_MANAGER:UI-UPDATED", ({ detail: mode }) => {
+            if (mode === "new") {
+                return;
+            }
+            // Сброс — следующим кадром: в момент события разметка новой
+            // страницы ещё не на месте, и слой короче, чем станет.
+            browser.requestAnimationFrame(() => {
+                const layout = document.querySelector(".o_coop_layout");
+                if (layout) {
+                    layout.scrollTop = 0;
+                }
+            });
+        });
+    },
 });
