@@ -1,0 +1,10 @@
+# Скрипты и юниты уезжают на Linux. С переводами строк Windows шебанг
+# читается как `/usr/bin/env bash\r`, и запуск падает с «bad interpreter».
+deploy/*.sh      text eol=lf
+deploy/*.service text eol=lf
+deploy/*.timer   text eol=lf
+deploy/*.conf    text eol=lf
+*.py             text eol=lf
+*.xml            text eol=lf
+*.scss           text eol=lf
+*.js             text eol=lf
