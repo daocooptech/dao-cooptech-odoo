@@ -19,7 +19,14 @@ sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='$DB'" | gre
     sudo -u postgres psql -c "DROP DATABASE $DB;"
 }
 sudo -u postgres psql -c "CREATE DATABASE $DB OWNER $USER;"
-sudo -u "$USER" pg_restore -d "$DB" --no-owner --role="$USER" "$DUMP"
+
+# Дамп обычно лежит в домашнем каталоге root, а восстановление идёт от
+# пользователя платформы — до файла он не дотянется. Копия в общем
+# каталоге снимает вопрос и убирается за собой.
+WORK="/tmp/coop-restore.dump"
+install -m 644 "$DUMP" "$WORK"
+trap 'rm -f "$WORK"' EXIT
+sudo -u "$USER" pg_restore -d "$DB" --no-owner --role="$USER" "$WORK"
 
 if [ -n "$STORE" ]; then
     echo "Разворачиваю файловое хранилище"
