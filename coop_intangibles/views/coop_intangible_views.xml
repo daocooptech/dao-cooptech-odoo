@@ -156,7 +156,6 @@
                   <field name="project_id"/>
                   <field name="partner_id"/>
                   <field name="value"/>
-                  <field name="share_tokens" string="Долей начислено"/>
                   <field name="state"/>
                 </list>
               </field>
