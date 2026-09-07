@@ -342,9 +342,14 @@
       <div class="o_coop_dex_mname">
         <div class="o_coop_dex_mtitle" t-esc="m.name"/>
         <div class="o_coop_dex_msub">
-          <t t-esc="m.type_label"/> · <t t-esc="m.city"/> · <t t-esc="dueLabel(m)"/>
+          <t t-esc="m.type_label"/> · <t t-esc="m.city"/>
         </div>
-        <div class="o_coop_dex_msub"><t t-esc="m.issuer"/></div>
+        <!-- Срок стоит первым во второй строке, а не последним в первой:
+             строка обрезается по правому краю, и именно срок пропадал —
+             признак, без которого обещание на товар не читается. -->
+        <div class="o_coop_dex_msub">
+          <t t-esc="dueLabel(m)"/> · <t t-esc="m.issuer"/>
+        </div>
       </div>
       <div class="o_coop_dex_num">
         <div class="o_coop_dex_price" t-esc="money(m.price, m.currency)"/>

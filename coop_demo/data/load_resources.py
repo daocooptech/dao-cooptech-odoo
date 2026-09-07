@@ -77,9 +77,15 @@ EXTRA_TITLES = [
 
 def _extra_rows(rows, extra):
     cities = sorted({row['city'] for row in rows if row.get('city')})
+    # Образец берётся среди оборудования, а не среди всех подряд: в
+    # доборе одни машины и станки, а строка копируется целиком — тип,
+    # категория, единица цены. От случайного образца мотопомпа выходила
+    # материалом с ценой за килограмм, и группировка по типу товара на
+    # бирже показывала прицепы среди сыпучих грузов.
+    pool = [row for row in rows if row.get('type') == 'Оборудование'] or rows
     extras = []
     for i in range(extra):
-        source = rows[(i * 11) % len(rows)]
+        source = pool[(i * 7) % len(pool)]
         city = cities[(i * 5) % len(cities)] if cities else ''
         row = dict(source)
         row['name'] = '%s — %s' % (EXTRA_TITLES[i % len(EXTRA_TITLES)], city)

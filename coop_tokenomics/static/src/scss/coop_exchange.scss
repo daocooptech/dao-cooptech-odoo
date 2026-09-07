@@ -282,10 +282,17 @@
   text-decoration: underline;
 }
 
+// Стакан занимает всю ширину панели, форма сделки стоит под ним.
+//
+// Рядом они не помещаются: в нашем стакане, в отличие от биржевого,
+// есть имя контрагента — заявки не сводятся сами, и покупатель выбирает
+// конкретного продавца. При двух колонках по двести пикселей это имя
+// схлопывалось до одной буквы с многоточием, то есть до бесполезного.
 .o_coop_dex_grid {
   display: flex;
+  flex-direction: column;
   gap: 14px;
-  align-items: flex-start;
+  align-items: stretch;
 }
 
 // ── Стакан ──────────────────────────────────────────────────────────────
@@ -307,7 +314,7 @@
 }
 
 .o_coop_dex_bookhead {
-  grid-template-columns: 1fr 84px 66px;
+  grid-template-columns: minmax(0, 1fr) 84px 66px;
   gap: 8px;
 }
 
@@ -316,7 +323,7 @@
 .o_coop_dex_row {
   position: relative;
   display: grid;
-  grid-template-columns: 1fr 84px 66px;
+  grid-template-columns: minmax(0, 1fr) 84px 66px;
   gap: 8px;
   padding: 7px 12px;
   font-size: 12px;
@@ -365,7 +372,10 @@
 // ── Форма сделки ────────────────────────────────────────────────────────
 
 .o_coop_dex_form {
-  flex: 0 0 280px;
+  // Форма стоит под стаканом и ширину панели не занимает: поле «сколько»
+  // во всю строку выглядит полем для абзаца, а не для числа.
+  flex: 0 0 auto;
+  max-width: 460px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -498,7 +508,7 @@
 // ── Узкий экран ─────────────────────────────────────────────────────────
 //
 // Терминал в две колонки на телефоне не живёт: список рынков уходит
-// наверх, стакан — в одну колонку под ним.
+// наверх, а стакан ниже разворачивается в одну колонку (760).
 @media (max-width: 1100px) {
   .o_coop_dex_body {
     flex-direction: column;
@@ -509,14 +519,6 @@
     max-height: 320px;
   }
 
-  .o_coop_dex_grid {
-    flex-direction: column;
-  }
-
-  .o_coop_dex_form {
-    flex: 1 1 auto;
-    width: 100%;
-  }
 }
 
 @media (max-width: 760px) {
