@@ -250,10 +250,34 @@ class CoopTokenTrade(models.Model):
             'confirmed_on': fields.Datetime.now(),
         })
         self._move_holdings()
+        self._open_escrow()
         order = self.order_id
         order.quantity_left = max(order.quantity_left - self.quantity, 0)
         order.state = 'done' if order.quantity_left <= 0 else 'partial'
         return True
+
+    def _open_escrow(self):
+        """Положить оплату покупателя в эскроу до поставки.
+
+        Только для первичной продажи: там покупатель платит поставщику за
+        товар, которого ещё нет. На вторичном рынке продавец — такой же
+        держатель, товар ему никто не должен, и держать его деньги не за
+        чем: он передаёт обещание, а не берёт на себя поставку.
+        """
+        Escrow = self.env['coop.token.escrow'].sudo()
+        for record in self:
+            if record.order_id.kind != 'primary':
+                continue
+            if Escrow.search_count([('trade_id', '=', record.id)]):
+                continue
+            Escrow.create({
+                'trade_id': record.id,
+                'buyer_id': record.buyer_id.id,
+                'seller_id': record.seller_id.id,
+                'amount': record.total_price,
+                'quantity': record.quantity,
+                'due_date': record.claim_id.delivery_date,
+            })
 
     def _move_holdings(self):
         """Перенести токены между держателями в зеркале балансов."""

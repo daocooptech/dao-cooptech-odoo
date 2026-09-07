@@ -13,3 +13,5 @@ access_coop_token_trade_user,Сделки по токенам — участни
 access_coop_token_trade_admin,Сделки по токенам — администратор,model_coop_token_trade,base.group_system,1,1,1,1
 access_coop_share_rate_user,Ставки долей — участник,model_coop_project_share_rate,base.group_user,1,1,1,0
 access_coop_share_rate_admin,Ставки долей — администратор,model_coop_project_share_rate,base.group_system,1,1,1,1
+access_coop_token_escrow_user,Эскроу — участник,model_coop_token_escrow,base.group_user,1,1,0,0
+access_coop_token_escrow_admin,Эскроу — администратор,model_coop_token_escrow,base.group_system,1,1,1,1

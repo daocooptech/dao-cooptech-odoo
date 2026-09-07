@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Автовозврат по сроку.
+
+       Раз в сутки, а не в полночь минута в минуту: поставка, привезённая
+       в последний день, должна успеть получить подтверждение покупателя.
+       Утро выбрано намеренно — если возврат прошёл, обе стороны узнают
+       об этом в рабочее время, а не ночью. -->
+  <record id="cron_coop_escrow_refund" model="ir.cron">
+    <field name="name">Эскроу: вернуть деньги по просроченным поставкам</field>
+    <field name="model_id" ref="model_coop_token_escrow"/>
+    <field name="state">code</field>
+    <field name="code">model._cron_refund_overdue()</field>
+    <field name="interval_number">1</field>
+    <field name="interval_type">days</field>
+    <field name="active" eval="True"/>
+  </record>
+
+</odoo>

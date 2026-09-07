@@ -322,6 +322,48 @@ class CoopTokenClaim(models.Model):
             })
         return True
 
+    # ── Отклики эскроу ───────────────────────────────────────────────────
+    #
+    # Состояние выпуска меняет сам выпуск, а эскроу лишь сообщает о
+    # событии: два места, меняющие одно состояние, рано или поздно
+    # разойдутся, и разбираться придётся уже с деньгами на руках.
+
+    def _escrow_released(self):
+        """Расчёт по одной сделке завершён.
+
+        Выпуск считается исполненным, когда денег в ожидании поставки не
+        осталось вовсе: пока хоть один покупатель ждёт товар, обещание
+        не выполнено, сколько бы других приёмок ни прошло.
+        """
+        Escrow = self.env['coop.token.escrow'].sudo()
+        for record in self:
+            waiting = Escrow.search_count([
+                ('claim_id', '=', record.id), ('state', '=', 'held')])
+            if waiting:
+                continue
+            if record.state in ('minted', 'trading', 'delivering'):
+                record.sudo().write({
+                    'state': 'settled',
+                    'settled_on': fields.Date.context_today(record),
+                })
+
+    def _escrow_refunded(self):
+        """Деньги вернулись покупателю — обещание сорвано.
+
+        Достаточно одного возврата: срок один на весь выпуск, и если он
+        прошёл без поставки хотя бы для одного держателя, остальным
+        обещание тоже не исполнено.
+        """
+        for record in self:
+            if record.state in ('settled', 'defaulted', 'cancelled'):
+                continue
+            record.sudo().write({
+                'state': 'defaulted',
+                'default_reason': record.default_reason or _(
+                    'Срок поставки прошёл, деньги возвращены покупателям'),
+                'deposit_returned': False,
+            })
+
     def action_default(self):
         """Признать выпуск сорванным.
 
