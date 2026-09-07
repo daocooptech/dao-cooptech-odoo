@@ -406,3 +406,75 @@ def _fake_address(rnd):
 
 def _fake_hash(rnd):
     return ''.join(rnd.choice('0123456789abcdef') for _ in range(64))
+
+
+def load_escrow(env, rnd=None):
+    """Открыть эскроу по первичным сделкам.
+
+    Раздел «Поставки» показывает, где лежат деньги покупателей. Пустым он
+    выглядит так, будто механики нет вовсе, — а она и есть главное, что
+    отличает обещание на товар от объявления.
+
+    Состояния разложены по срокам: у будущих поставок деньги лежат, у
+    прошедших либо расчёт завершён приёмкой, либо срок вышел и деньги
+    вернулись. Спорные — отдельно: по ним видно, что платформа не решает
+    за стороны, а ждёт, пока они разберутся.
+    """
+    import random as _random
+    rnd = rnd or _random.Random(20260907)
+
+    Escrow = env['coop.token.escrow'].sudo()
+    Trade = env['coop.token.trade'].sudo()
+    if Escrow.search_count([]) >= 40:
+        _logger.info('Эскроу: уже наполнено, пропускаю')
+        return
+
+    today = fields.Date.context_today(Escrow)
+    trades = Trade.search([('state', '=', 'done')])
+    made = 0
+    for trade in trades:
+        if trade.order_id.kind != 'primary':
+            continue
+        if Escrow.search_count([('trade_id', '=', trade.id)]):
+            continue
+        due = trade.claim_id.delivery_date
+        if not due:
+            continue
+        escrow = Escrow.create({
+            'trade_id': trade.id,
+            'buyer_id': trade.buyer_id.id,
+            'seller_id': trade.seller_id.id,
+            'amount': trade.total_price,
+            'quantity': trade.quantity,
+            'due_date': due,
+        })
+        if due < today:
+            # Срок прошёл: чаще всего поставка состоялась, реже сорвалась,
+            # изредка стороны спорят.
+            outcome = rnd.choice(['released'] * 6 + ['refunded'] * 2 + ['dispute'])
+            if outcome == 'released':
+                escrow.write({
+                    'state': 'released',
+                    'delivered_on': fields.Datetime.now(),
+                    'accepted_on': fields.Datetime.now(),
+                    'settled_on': fields.Datetime.now(),
+                })
+            elif outcome == 'refunded':
+                escrow.write({'state': 'refunded',
+                              'settled_on': fields.Datetime.now()})
+            else:
+                escrow.write({
+                    'disputed': True,
+                    'dispute_note': rnd.choice([
+                        'Привезли меньше заявленного объёма',
+                        'Качество ниже указанного в выпуске',
+                        'Поставка не в то место передачи',
+                    ]),
+                })
+        elif rnd.random() < 0.25:
+            # Часть поставщиков уже отметила отгрузку, покупатель ещё нет:
+            # это самое частое промежуточное состояние.
+            escrow.write({'delivered_on': fields.Datetime.now()})
+        made += 1
+
+    _logger.info('Эскроу: открыто %s записей', made)
