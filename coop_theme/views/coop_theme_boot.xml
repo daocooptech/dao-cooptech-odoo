@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Тема ставится в самом начале страницы, до стилей и разметки.
+
+       Наш переключатель живёт в пакете скриптов, а тот грузится после
+       того, как страница уже отрисована: участник с тёмной темой видел
+       белую вспышку на каждой загрузке. Отдельного «правильного» места
+       для этого в Odoo нет — тёмный режим сообщества выбирается на
+       сервере отдельным пакетом стилей, которым мы не пользуемся.
+
+       Поэтому крошечный скрипт прямо в head: он ставит тот же признак
+       `data-bs-theme`, что и переключатель, и потому переключателю
+       нечего исправлять после загрузки.
+
+       Скрипт умышленно не вынесен в файл: внешний файл — это ещё один
+       запрос, который выполнится позже разметки, то есть ровно то, от
+       чего мы уходим. -->
+  <template id="coop_theme_boot" inherit_id="web.webclient_bootstrap"
+            name="ДАО КООПТЕХ: тема до отрисовки">
+    <xpath expr="//t[@t-set='head_web']" position="inside">
+      <script type="text/javascript">
+        {
+            var coopChoice = null;
+            try {
+                coopChoice = window.localStorage.getItem("coop-theme");
+            } catch (error) {
+                // Хранилище недоступно — в приватном окне или при
+                // запрете. Тогда идём за системной темой.
+            }
+            var coopDark = coopChoice
+                ? coopChoice === "dark"
+                : Boolean(window.matchMedia
+                    &amp;&amp; window.matchMedia("(prefers-color-scheme: dark)").matches);
+            document.documentElement.setAttribute(
+                "data-bs-theme", coopDark ? "dark" : "light");
+        }
+      </script>
+    </xpath>
+  </template>
+
+</odoo>

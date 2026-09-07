@@ -28,6 +28,7 @@
     'data': [
         'security/ir.model.access.csv',
         'security/coop_sidebar_rules.xml',
+        'views/coop_theme_boot.xml',
         'views/coop_sidebar_views.xml',
     ],
     'assets': {

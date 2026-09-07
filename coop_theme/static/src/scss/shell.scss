@@ -116,6 +116,12 @@
   }
 }
 
+// Селектор длиннее обычного намеренно: пункт меню — ссылка, а правило
+// `.o_web_client a:not(.btn)` красит все ссылки бирюзой. Оно весит
+// больше простого класса, поэтому меню целиком уходило в цвет ссылки. В
+// светлой теме бирюза тёмная и разница почти не видна, в тёмной она
+// яркая — и боковое меню превращалось в столбец подсвеченных ссылок.
+.o_web_client a.o_coop_nav_item,
 .o_coop_nav_item {
   display: flex;
   align-items: center;
@@ -126,13 +132,15 @@
   border-radius: 8px;
   text-decoration: none;
 
-  &:hover {
+  &:hover,
+  &:hover:not(.btn) {
     background: var(--coop-surface, #f2f2ee);
     color: var(--coop-slate, #4a4a44);
     text-decoration: none;
   }
 
-  &.active {
+  &.active,
+  &.active:not(.btn) {
     background: var(--coop-teal-tint, #e3efed);
     color: var(--coop-teal-dark, #0e4f4a);
     font-weight: 700;
