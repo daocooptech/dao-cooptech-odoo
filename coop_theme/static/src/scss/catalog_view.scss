@@ -146,10 +146,10 @@
   // приставлена кнопка меню. Меню в каталоге убрано — без этого поле
   // остаётся открытым справа и выглядит недорисованным.
   .o_cp_searchview .o_searchview {
-    border-right-width: var(--bs-border-width, 1px) !important;
+    border-right-width: var(--border-width, 1px) !important;
     border-right-style: solid !important;
-    border-top-right-radius: var(--bs-border-radius, .25rem);
-    border-bottom-right-radius: var(--bs-border-radius, .25rem);
+    border-top-right-radius: var(--border-radius, .25rem);
+    border-bottom-right-radius: var(--border-radius, .25rem);
   }
 
   // Пагинатор ушёл вниз, под плитки.

@@ -22,20 +22,66 @@
   // Переменные Bootstrap переопределяются здесь, а не в теме: движок
   // собран без тёмного режима, и без этого блока значения остаются
   // светлыми, откуда бы их ни брали компоненты.
-  --bs-body-bg: var(--coop-paper);
-  --bs-body-color: var(--coop-ink);
-  --bs-emphasis-color: var(--coop-ink);
-  --bs-heading-color: var(--coop-ink);
-  --bs-border-color: var(--coop-line);
-  --bs-secondary-bg: var(--coop-surface);
-  --bs-tertiary-bg: var(--coop-surface);
-  --bs-secondary-color: var(--coop-slate);
-  --bs-tertiary-color: var(--coop-slate-light);
-  --bs-link-color: var(--coop-teal-dark);
-  --bs-link-hover-color: var(--coop-teal);
+  //
+  // Имена идут без приставки `bs-`. Bootstrap зовёт их `--bs-body-bg`,
+  // но Odoo собирает его с пустой приставкой, и в готовых стилях
+  // читается `var(--body-bg)`. Написанный с приставкой, весь этот блок
+  // не действовал вовсе: в собранном пакете `--bs-body-bg` встречался
+  // ровно один раз — нашей же строкой, и ни одного `var(--bs-body-bg)`
+  // рядом. Отсюда и бралась пёстрая тёмная тема: правила работали,
+  // переменные — нет.
+  --body-bg: var(--coop-paper);
+  --body-color: var(--coop-ink);
+  --emphasis-color: var(--coop-ink);
+  --heading-color: var(--coop-ink);
+  --border-color: var(--coop-line);
+  --secondary-bg: var(--coop-surface);
+  --tertiary-bg: var(--coop-surface);
+  --secondary-color: var(--coop-slate);
+  --tertiary-color: var(--coop-slate-light);
+  --link-color: var(--coop-teal-dark);
+  --link-hover-color: var(--coop-teal);
 
   background-color: var(--coop-paper);
   color: var(--coop-ink);
+
+  // ── Переменные самого движка ─────────────────────────────────────────
+  //
+  // Компоненты Odoo подложку берут не из Bootstrap, а из собственных
+  // переменных, объявленных на своих же контейнерах и посчитанных при
+  // сборке из светлой палитры: `--Kanban-background: #fbfbf9`,
+  // `--ListRenderer-thead-bg-color: #fbfbf9` и так далее. Объявлены они
+  // на `.o_kanban_renderer` и `.o_list_renderer`, поэтому наш общий
+  // блок их не перекрывает — нужно назвать те же контейнеры.
+  //
+  // Это и был «белый фон» на каталогах: лента канбана под карточками
+  // оставалась белым листом во всю высоту содержимого — на целевых
+  // программах 920 на 20928 точек, — а карточки лежали на нём тёмными
+  // прямоугольниками.
+  .o_kanban_renderer {
+    --Kanban-background: var(--coop-paper);
+    --KanbanGroup-background: var(--coop-surface);
+    --KanbanRecord-background: var(--coop-white);
+  }
+
+  .o_list_renderer {
+    --ListRenderer-thead-bg-color: var(--coop-surface);
+    --ListRenderer-tfoot-bg-color: var(--coop-surface);
+    --ListRenderer-tbody-bg-color: var(--coop-white);
+  }
+
+  .o_base_settings_view .o_form_renderer {
+    --settings__tab-bg: var(--coop-surface);
+    --settings__title-bg: var(--coop-surface);
+  }
+
+  // Календарь событий: своя палитра, унаследованная от FullCalendar.
+  .o_calendar_renderer {
+    --fc-page-bg-color: var(--coop-paper);
+    --fc-neutral-bg-color: var(--coop-surface);
+    --fc-border-color: var(--coop-line);
+    --fc-today-bg-color: var(--coop-teal-tint);
+  }
 
   .o_action_manager,
   .o_content,
@@ -113,15 +159,15 @@
   // «Образование» и «Достижения».
   .table,
   .o_list_table {
-    --bs-table-bg: var(--coop-white);
-    --bs-table-color: var(--coop-ink);
-    --bs-table-border-color: var(--coop-line);
-    --bs-table-striped-bg: var(--coop-surface);
-    --bs-table-striped-color: var(--coop-ink);
-    --bs-table-hover-bg: var(--coop-surface);
-    --bs-table-hover-color: var(--coop-ink);
-    --bs-table-active-bg: var(--coop-teal-tint);
-    --bs-table-active-color: var(--coop-ink);
+    --table-bg: var(--coop-white);
+    --table-color: var(--coop-ink);
+    --table-border-color: var(--coop-line);
+    --table-striped-bg: var(--coop-surface);
+    --table-striped-color: var(--coop-ink);
+    --table-hover-bg: var(--coop-surface);
+    --table-hover-color: var(--coop-ink);
+    --table-active-bg: var(--coop-teal-tint);
+    --table-active-color: var(--coop-ink);
 
     color: var(--coop-ink);
   }
@@ -158,14 +204,14 @@
   // ── Выпадающие меню и подсказки ──────────────────────────────────────
   .dropdown-menu,
   .o_dropdown_menu {
-    --bs-dropdown-bg: var(--coop-white);
-    --bs-dropdown-color: var(--coop-ink);
-    --bs-dropdown-border-color: var(--coop-line);
-    --bs-dropdown-link-color: var(--coop-ink);
-    --bs-dropdown-link-hover-bg: var(--coop-surface);
-    --bs-dropdown-link-hover-color: var(--coop-ink);
-    --bs-dropdown-link-active-bg: var(--coop-teal-tint);
-    --bs-dropdown-link-active-color: var(--coop-teal-dark);
+    --dropdown-bg: var(--coop-white);
+    --dropdown-color: var(--coop-ink);
+    --dropdown-border-color: var(--coop-line);
+    --dropdown-link-color: var(--coop-ink);
+    --dropdown-link-hover-bg: var(--coop-surface);
+    --dropdown-link-hover-color: var(--coop-ink);
+    --dropdown-link-active-bg: var(--coop-teal-tint);
+    --dropdown-link-active-color: var(--coop-teal-dark);
   }
 
   .tooltip-inner,
