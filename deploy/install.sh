@@ -82,6 +82,14 @@ sudo -u "$ODOO_USER" "$ODOO_HOME/venv/bin/pip" install -q --upgrade pip wheel se
 sudo -u "$ODOO_USER" "$ODOO_HOME/venv/bin/pip" install -q psycopg2-binary
 sudo -u "$ODOO_USER" "$ODOO_HOME/venv/bin/pip" install -q -r "$ODOO_HOME/odoo/requirements.txt"
 
+# У российской сборки свой список зависимостей, и без него платформа не
+# поднимается вовсе: модуль перевода падает на импорте, а вместе с ним
+# не собирается весь реестр — снаружи это выглядит как 500 на любой
+# странице, без единой подсказки о причине.
+if [ -f "$ODOO_HOME/rudoo-addons/requirements.txt" ]; then
+    sudo -u "$ODOO_USER" "$ODOO_HOME/venv/bin/pip" install -q         -r "$ODOO_HOME/rudoo-addons/requirements.txt"
+fi
+
 # ── Конфигурация ─────────────────────────────────────────────────────────
 say "Конфигурация"
 install -o "$ODOO_USER" -g "$ODOO_USER" -m 640 \
