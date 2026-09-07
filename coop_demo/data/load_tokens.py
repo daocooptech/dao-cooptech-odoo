@@ -116,7 +116,10 @@ def load_tokens(env, target=TARGET_CLAIMS):
         quality = rnd.choice(QUALITY_BY_TYPE.get(rtype, ['По договорённости сторон']))
         quantity = float(rnd.choice([
             50, 100, 200, 500, 1000, 2000, 5000, 10, 20, 8, 12, 40]))
-        price = round(max(resource.price or rnd.uniform(50, 900), 10) / 10.0, 2)
+        # Цена ресурса ведётся в рублях, и цена обещания на него — тоже:
+        # деление на условный курс давало числа, несопоставимые с
+        # ценой того же товара в каталоге.
+        price = round(max(resource.price or rnd.uniform(500, 9000), 100), 2)
         # Состояние берётся жребием, а не по порядку: при выборке
         # короче списка состояний срез приходился бы на первые два, и
         # весь разброс пропадал — ровно это и случилось в первый прогон.
@@ -135,7 +138,7 @@ def load_tokens(env, target=TARGET_CLAIMS):
             'delivery_date': delivery,
             'is_future': rnd.random() < 0.7,
             'price_per_unit': price,
-            'settlement_currency': 'usdt',
+            'settlement_currency': 'rub',
             'state': 'draft',
             'import_key': key,
         })
