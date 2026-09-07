@@ -73,6 +73,11 @@ clone_or_pull https://github.com/odoo/odoo.git        "$ODOO_HOME/odoo"         
 clone_or_pull https://git.ruodoo.ru/ruodoo-public/public.git "$ODOO_HOME/rudoo-addons" master "--depth 1"
 clone_or_pull https://github.com/daocooptech/dao-cooptech-odoo.git "$ODOO_HOME/coop-addons" main
 
+# Каталоги могли быть созданы вручную до установки — от root. Тогда
+# обновление падает на «insufficient permission for adding an object»:
+# git пишет от пользователя платформы, а объекты репозитория чужие.
+chown -R "$ODOO_USER:$ODOO_USER" "$ODOO_HOME/odoo" "$ODOO_HOME/rudoo-addons"     "$ODOO_HOME/coop-addons"
+
 # ── Окружение Python ─────────────────────────────────────────────────────
 say "Виртуальное окружение"
 if [ ! -x "$ODOO_HOME/venv/bin/python" ]; then
