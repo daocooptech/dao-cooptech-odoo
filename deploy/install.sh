@@ -38,6 +38,12 @@ apt-get install -y -qq wkhtmltopdf || echo "wkhtmltopdf не поставлен 
 
 # ── Пользователь и каталоги ──────────────────────────────────────────────
 say "Пользователь $ODOO_USER и каталоги"
+# Исходники принадлежат пользователю платформы, а обслуживающие команды
+# идут от root: без этой пометки git отказывается работать в чужом
+# каталоге («dubious ownership»), и обновление молча не доезжает.
+for d in "$ODOO_HOME/odoo" "$ODOO_HOME/rudoo-addons" "$ODOO_HOME/coop-addons"; do
+    git config --global --get-all safe.directory | grep -qxF "$d"         || git config --global --add safe.directory "$d"
+done
 id -u "$ODOO_USER" >/dev/null 2>&1 || useradd -m -d "$ODOO_HOME" -s /bin/bash "$ODOO_USER"
 mkdir -p "$ODOO_HOME" /var/log/coop /var/lib/coop
 chown -R "$ODOO_USER:$ODOO_USER" "$ODOO_HOME" /var/log/coop /var/lib/coop
