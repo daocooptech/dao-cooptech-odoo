@@ -292,11 +292,83 @@
     </field>
   </record>
 
+  <!-- Продвижение: список трат и того, что показывается сейчас.
+       Без своего вида Odoo рисует таблицу из одного столбца «ID» — по
+       ней не видно ни объявления, ни места, ни срока. -->
+  <record id="view_coop_promotion_list" model="ir.ui.view">
+    <field name="name">coop.promotion.list</field>
+    <field name="model">coop.promotion</field>
+    <field name="arch" type="xml">
+      <list string="Продвижение" create="false"
+            decoration-success="is_running == True"
+            decoration-muted="is_running == False">
+        <field name="resource_id" string="Объявление"/>
+        <field name="slot_id" string="Место"/>
+        <field name="partner_id" string="Плательщик" optional="show"/>
+        <field name="date_from" string="С"/>
+        <field name="date_to" string="По"/>
+        <field name="days" string="Дней" sum="Дней всего"/>
+        <field name="price_per_day" string="Токенов в сутки" optional="hide"/>
+        <field name="total_tokens" string="Списано токенов" sum="Списано всего"/>
+        <field name="is_running" string="Идёт сейчас" widget="boolean_toggle"
+               readonly="1"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_promotion_form" model="ir.ui.view">
+    <field name="name">coop.promotion.form</field>
+    <field name="model">coop.promotion</field>
+    <field name="arch" type="xml">
+      <form string="Продвижение">
+        <sheet>
+          <group>
+            <group string="Что и где">
+              <field name="resource_id"/>
+              <field name="slot_id"/>
+              <field name="partner_id"/>
+            </group>
+            <group string="Срок и плата">
+              <field name="date_from"/>
+              <field name="date_to"/>
+              <field name="days"/>
+              <field name="price_per_day"/>
+              <field name="total_tokens"/>
+              <field name="is_running"/>
+              <field name="transaction_id"/>
+            </group>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_promotion_search" model="ir.ui.view">
+    <field name="name">coop.promotion.search</field>
+    <field name="model">coop.promotion</field>
+    <field name="arch" type="xml">
+      <search string="Продвижение">
+        <field name="resource_id" string="Объявление"/>
+        <field name="partner_id" string="Плательщик"/>
+        <field name="slot_id" string="Место"/>
+        <filter name="running" string="Идут сейчас"
+                domain="[('is_running', '=', True)]"/>
+        <filter name="finished" string="Завершённые"
+                domain="[('date_to', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
+        <group>
+          <filter name="by_slot" string="По месту" context="{'group_by': 'slot_id'}"/>
+          <filter name="by_payer" string="По плательщику"
+                  context="{'group_by': 'partner_id'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
   <record id="action_coop_promotion" model="ir.actions.act_window">
     <field name="name">Продвижение</field>
     <field name="res_model">coop.promotion</field>
     <field name="view_mode">list,form</field>
-      <field name="help" type="html">
+    <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Продвижений пока нет</p>
       <p>Место в выдаче занимается под ваше объявление на срок и
       оплачивается токенами COOP вперёд. Пока место занято вами,

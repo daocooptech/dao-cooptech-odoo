@@ -64,8 +64,8 @@
                 <div class="o_coop_vac_foot">
                   <span class="o_coop_vac_applications"
                         t-if="record.is_mine.raw_value and record.application_count.raw_value">
-                    Откликов: <field name="application_count"/>
-                  </span>
+                    <t>Откликов:</t>
+                    <field name="application_count"/></span>
                   <div class="o_coop_vac_actions">
                     <button name="action_apply" type="object"
                             class="btn o_coop_vac_btn"

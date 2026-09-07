@@ -152,6 +152,11 @@
   }
 
   .o_coop_skill_chips {
+    // Что не поместилось в строку, растворяется у правого края.
+    // Метка, обрубленная на середине слова, читается как сбой отрисовки;
+    // затухание читается как продолжение списка, которого не видно.
+    mask-image: linear-gradient(to right, #000 calc(100% - 22px), transparent);
+
     margin-top: 8px;
     max-height: 26px;
     overflow: hidden;

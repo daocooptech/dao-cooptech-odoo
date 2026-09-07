@@ -56,7 +56,10 @@ def load_promotions(env, target=TARGET):
         # Цепочка назад по времени: у одного места периоды не
         # пересекаются, иначе на одной строке выдачи оказались бы два
         # объявления разом.
-        cursor = now + timedelta(days=rnd.randint(-3, 9))
+        # Время суток разное: одинаковые «13:48» во всём столбце выдают
+        # машинную генерацию сильнее, чем сами даты.
+        cursor = (now + timedelta(days=rnd.randint(-3, 9))).replace(
+            hour=rnd.randrange(8, 21), minute=rnd.choice([0, 5, 15, 30, 45]))
         for step in range(per_slot):
             if created >= target:
                 break
@@ -64,9 +67,12 @@ def load_promotions(env, target=TARGET):
             date_to = cursor
             date_from = date_to - timedelta(days=days)
 
-            # Каждое третье продвижение — своё: раздел должен показывать
-            # и чужие показы, и собственные траты.
-            pool = my_resources if (my_resources and step % 3 == 0) else resources
+            # Каждое шестое продвижение — своё. Раздел показывает
+            # участнику только его собственные траты (чужие закрыты
+            # правилом доступа), а объявлений у одного участника
+            # несколько — если брать своё чаще, история выглядит как
+            # одно и то же объявление, выкупавшее места три десятка раз.
+            pool = my_resources if (my_resources and step % 6 == 0) else resources
             resource = pool[rnd.randrange(len(pool))]
 
             Promotion.create({
@@ -80,7 +86,8 @@ def load_promotions(env, target=TARGET):
             })
             created += 1
             # Между показами бывает пауза: место не выкупают непрерывно.
-            cursor = date_from - timedelta(days=rnd.choice([0, 0, 1, 3, 8]))
+            cursor = (date_from - timedelta(days=rnd.choice([0, 0, 1, 3, 8]))).replace(
+                hour=rnd.randrange(8, 21), minute=rnd.choice([0, 5, 15, 30, 45]))
 
     active = Promotion.search_count([('date_from', '<=', now), ('date_to', '>', now)])
     _logger.info('Продвижение: создано %s, пропущено %s, показывается сейчас %s',

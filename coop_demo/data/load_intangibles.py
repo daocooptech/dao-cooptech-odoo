@@ -330,12 +330,27 @@ def _showcase(env, rnd, login='dashkevich'):
         return
     me = user.partner_id
     org = (user.coop_treasury_partner_ids - me)[:1]
+    mine_partners = user.coop_treasury_partner_ids
 
     def hand_over(model, field, share):
+        """Передать участнику долю записей — но только недостающую.
+
+        Загрузка запускается не один раз, и без сверки с тем, что уже
+        есть, доля растёт с каждым проходом: после двух прогонов
+        участник владел двумя третями всех выпусков ЦФА. Витрина должна
+        показывать, что у участника есть своё, а не что платформа
+        состоит из него одного.
+        """
         records = env[model].sudo().search([])
         if not records:
             return 0
-        take = rnd.sample(list(records), max(1, int(len(records) * share)))
+        target = max(1, int(len(records) * share))
+        already = records.filtered(lambda r: r[field] in mine_partners)
+        need = target - len(already)
+        if need <= 0:
+            return 0
+        pool = list(records - already)
+        take = rnd.sample(pool, min(need, len(pool)))
         for i, record in enumerate(take):
             record[field] = org if (org and i % 3 == 0) else me
         return len(take)

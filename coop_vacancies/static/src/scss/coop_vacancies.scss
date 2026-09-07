@@ -171,6 +171,11 @@
   }
 
   .o_coop_vac_chips {
+    // Что не поместилось в строку, растворяется у правого края.
+    // Метка, обрубленная на середине слова, читается как сбой отрисовки;
+    // затухание читается как продолжение списка, которого не видно.
+    mask-image: linear-gradient(to right, #000 calc(100% - 22px), transparent);
+
     margin-top: 8px;
     max-height: 26px;
     overflow: hidden;
@@ -203,6 +208,11 @@
   .o_coop_vac_applications {
     color: var(--coop-slate-light, #8f8f88);
     font-size: 11.5px;
+    // Подпись и число не разрываются: в узкой карточке двоеточие
+    // уезжало на вторую строку и вставало перед числом отдельно.
+    white-space: nowrap;
+    display: inline-flex;
+    gap: 3px;
   }
 
   .o_coop_vac_actions {

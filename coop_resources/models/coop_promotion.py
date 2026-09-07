@@ -119,6 +119,41 @@ class CoopPromotion(models.Model):
     transaction_id = fields.Many2one(
         'coop.token.transaction', string='Движение токенов', readonly=True)
 
+    is_running = fields.Boolean(
+        string='Показывается сейчас', compute='_compute_is_running',
+        search='_search_is_running',
+        help='Место занято этим объявлением прямо сейчас. Прошедшие '
+             'продвижения остаются в списке историей трат.')
+
+    @api.depends('date_from', 'date_to')
+    def _compute_is_running(self):
+        now = fields.Datetime.now()
+        for record in self:
+            record.is_running = bool(
+                record.date_from and record.date_to
+                and record.date_from <= now < record.date_to)
+
+    def _search_is_running(self, operator, value):
+        # Odoo приводит «= True» к «in {True}» и передаёт свой набор,
+        # поэтому значение разбирается как последовательность.
+        if isinstance(value, bool):
+            wanted = value
+        else:
+            items = list(value)
+            if len(items) != 1 or not isinstance(items[0], bool):
+                raise ValueError('Поддерживается только «да» или «нет».')
+            wanted = items[0]
+        if operator in ('=', 'in'):
+            positive = wanted
+        elif operator in ('!=', 'not in'):
+            positive = not wanted
+        else:
+            raise ValueError('Поддерживается только «да» или «нет».')
+        now = fields.Datetime.now()
+        running = [('date_from', '<=', now), ('date_to', '>', now)]
+        return running if positive else ['|', ('date_from', '>', now),
+                                         ('date_to', '<=', now)]
+
     _days_positive = models.Constraint(
         'check(days > 0)',
         'Срок должен быть больше нуля.',
