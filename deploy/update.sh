@@ -54,4 +54,19 @@ env.cr.commit()
 PYEOF
 
 systemctl restart coop-odoo
+
+# Прогрев: собрать пакеты стилей и скриптов сразу, а не при первом
+# заходе участника.
+#
+# Сборка стоит около десяти секунд на этой машине, и без прогрева их
+# платит тот, кто зашёл первым после ночного обновления. Ждать десять
+# секунд на пустой белой странице — ровно то, из-за чего платформу
+# считают неработающей.
+say "Прогреваю пакеты"
+for attempt in $(seq 1 30); do
+    code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 60         http://127.0.0.1:8069/web/login || true)
+    [ "$code" = "200" ] && break
+    sleep 2
+done
+bash "$ODOO_HOME/coop-addons/deploy/warmup.sh" || true
 say "Готово: $(run git log -1 --format='%h %s')"
