@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Выпуск токена — последним пунктом формы объявления.
+
+       Участник описывает ресурс один раз. Пока галочка не стоит, полей
+       выпуска не видно: тому, кто просто продаёт мешок картошки со
+       двора, незачем читать про качество, срок и залог. -->
+  <record id="view_coop_resource_form_token" model="ir.ui.view">
+    <field name="name">coop.resource.form.token</field>
+    <field name="model">coop.resource</field>
+    <field name="inherit_id" ref="coop_resources.view_coop_resource_form"/>
+    <field name="arch" type="xml">
+
+      <xpath expr="//notebook" position="inside">
+        <page string="Токен на бирже" name="token">
+          <group>
+            <field name="coop_token_issue"
+                   readonly="state == 'published' and coop_token_claim_id != False"/>
+            <field name="coop_token_claim_id" invisible="1"/>
+          </group>
+
+          <div class="text-muted mb-3" invisible="coop_token_issue">
+            Обещание поставить этот ресурс к сроку можно сделать торгуемым.
+            Покупатель платит вперёд, деньги ждут поставки в эскроу, а до
+            срока обещание перепродаётся другому участнику. Так весенний
+            посев продаётся осенним урожаем.
+          </div>
+
+          <group invisible="not coop_token_issue">
+            <group string="Что обещаете">
+              <label for="coop_token_quantity"/>
+              <div class="o_row">
+                <field name="coop_token_quantity"
+                       required="coop_token_issue"/>
+                <field name="coop_token_unit" placeholder="кг, т, смена"
+                       required="coop_token_issue"/>
+              </div>
+              <field name="coop_token_quality" required="coop_token_issue"
+                     placeholder="ГОСТ 32284-2013, первый сорт"/>
+              <field name="coop_token_place" required="coop_token_issue"
+                     placeholder="Красноярск, производственная площадка"/>
+              <field name="coop_token_date" required="coop_token_issue"/>
+            </group>
+            <group string="Деньги">
+              <field name="coop_token_price" required="coop_token_issue"/>
+              <field name="coop_token_total" readonly="1"/>
+              <field name="coop_token_deposit" readonly="1"/>
+            </group>
+          </group>
+
+          <div class="alert alert-info" role="status"
+               invisible="not coop_token_issue or coop_token_claim_id">
+            Залог вносится при размещении и возвращается после поставки.
+            При срыве срока он уходит держателям токенов — вместе с
+            возвратом их денег из эскроу.
+          </div>
+
+          <div class="alert alert-success" role="status"
+               invisible="not coop_token_claim_id">
+            Токен выпущен.
+            <button name="action_open_token_claim" type="object"
+                    class="btn btn-link p-0 align-baseline"
+                    string="Открыть карточку выпуска"/>
+          </div>
+        </page>
+      </xpath>
+
+    </field>
+  </record>
+
+</odoo>

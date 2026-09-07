@@ -21,12 +21,34 @@ sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='$DB'" | gre
 sudo -u postgres psql -c "CREATE DATABASE $DB OWNER $USER;"
 
 # Дамп обычно лежит в домашнем каталоге root, а восстановление идёт от
-# пользователя платформы — до файла он не дотянется. Копия в общем
+# другого пользователя — до файла он не дотянется. Копия в общем
 # каталоге снимает вопрос и убирается за собой.
 WORK="/tmp/coop-restore.dump"
 install -m 644 "$DUMP" "$WORK"
 trap 'rm -f "$WORK"' EXIT
-sudo -u "$USER" pg_restore -d "$DB" --no-owner --role="$USER" "$WORK"
+
+# Формат определяется по самому файлу, а не по расширению.
+#
+# Двоичный дамп читается только своей версией PostgreSQL или новее:
+# перенос со стенда, где версия свежее серверной, падает на «unsupported
+# version in file header». Текстовый переносится между версиями, поэтому
+# он и предпочтителен — но принимаем оба.
+case "$(file -b --mime-type "$WORK")" in
+  application/gzip|application/x-gzip)
+    echo "Восстанавливаю из сжатого текстового дампа"
+    ( cd /tmp && gunzip -c "$WORK" | sudo -u "$USER" psql -q -d "$DB" -v ON_ERROR_STOP=0 )         > /tmp/coop-restore.out 2>&1
+    tail -3 /tmp/coop-restore.out
+    ;;
+  text/plain|application/sql)
+    echo "Восстанавливаю из текстового дампа"
+    ( cd /tmp && sudo -u "$USER" psql -q -d "$DB" -v ON_ERROR_STOP=0 -f "$WORK" )         > /tmp/coop-restore.out 2>&1
+    tail -3 /tmp/coop-restore.out
+    ;;
+  *)
+    echo "Восстанавливаю из двоичного дампа"
+    ( cd /tmp && sudo -u "$USER" pg_restore -d "$DB" --no-owner --role="$USER" "$WORK" )
+    ;;
+esac
 
 if [ -n "$STORE" ]; then
     echo "Разворачиваю файловое хранилище"

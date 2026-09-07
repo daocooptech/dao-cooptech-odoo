@@ -212,16 +212,16 @@ class CoopTokenClaim(models.Model):
         """Во что обходится выпуск в сети.
 
         Параметром, а не числом в коде: комиссии сети меняются, а курс
-        валюты расчёта — тем более. Значение по умолчанию соответствует
-        примерно десятой доле TON на развёртывание контракта и первые
-        операции, пересчитанной в валюту расчёта с запасом.
+        валюты расчёта — тем более. Значение по умолчанию — примерно
+        десятая доля TON на развёртывание контракта и первые операции,
+        пересчитанная в рубли с запасом.
         """
         value = self.env['ir.config_parameter'].sudo().get_param(
-            'coop_tokenomics.mint_cost', '2.0')
+            'coop_tokenomics.mint_cost', '200.0')
         try:
             return float(value)
         except (TypeError, ValueError):
-            return 2.0
+            return 200.0
 
     @api.depends('quantity', 'price_per_unit')
     def _compute_total_price(self):
