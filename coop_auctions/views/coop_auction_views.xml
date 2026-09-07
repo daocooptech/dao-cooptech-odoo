@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="view_coop_auction_kanban" model="ir.ui.view">
+    <field name="name">coop.auction.kanban</field>
+    <field name="model">coop.auction</field>
+    <field name="arch" type="xml">
+      <kanban js_class="coop_catalog_kanban" class="o_coop_auctions"
+              default_order="date_end">
+        <field name="kind"/>
+        <field name="city"/>
+        <field name="current_price"/>
+        <field name="currency_id"/>
+        <field name="bid_count"/>
+        <field name="date_end"/>
+        <field name="minutes_left"/>
+        <field name="owner_id"/>
+        <field name="state"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_auction"
+                 t-att-class="record.kind.raw_value === 'reverse' ? 'o_coop_auction_reverse' : ''">
+              <div class="o_coop_auction_head">
+                <span class="o_coop_badge o_coop_auction_state"
+                      t-att-class="'o_coop_auction_' + record.state.raw_value">
+                  <t t-esc="record.state.value"/>
+                </span>
+                <span class="o_coop_auction_meta" t-if="record.city.raw_value">
+                  <i class="fa fa-map-marker" aria-hidden="true"/>
+                  <t t-esc="record.city.value"/>
+                </span>
+              </div>
+
+              <div class="o_coop_auction_name"><field name="name"/></div>
+
+              <div class="o_coop_auction_head">
+                <span class="o_coop_auction_price">
+                  <field name="current_price" widget="monetary"/>
+                </span>
+                <span class="o_coop_auction_meta"
+                      t-att-class="record.minutes_left.raw_value &gt; 0 and record.minutes_left.raw_value &lt; 60 ? 'o_coop_auction_soon' : ''">
+                  <t t-if="record.state.raw_value === 'running' and record.minutes_left.raw_value &gt; 0">
+                    осталось <t t-esc="record.minutes_left.value"/> мин
+                  </t>
+                  <t t-else="">
+                    <t t-esc="record.date_end.value"/>
+                  </t>
+                </span>
+              </div>
+
+              <div class="o_coop_auction_meta">
+                <t t-esc="record.kind.value"/> · <t t-esc="record.owner_id.value"/>
+              </div>
+
+              <div class="o_coop_auction_foot">
+                <span class="o_coop_chip"><t t-esc="record.kind.value"/></span>
+                <span class="o_coop_auction_meta">
+                  ставок: <t t-esc="record.bid_count.value"/>
+                </span>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="view_coop_auction_list" model="ir.ui.view">
+    <field name="name">coop.auction.list</field>
+    <field name="model">coop.auction</field>
+    <field name="arch" type="xml">
+      <list string="Аукционы"
+            decoration-success="state == 'running'"
+            decoration-muted="state in ('finished', 'cancelled', 'no_bids')">
+        <field name="name"/>
+        <field name="kind"/>
+        <field name="owner_id" string="Организатор"/>
+        <field name="city"/>
+        <field name="start_price" string="Старт"/>
+        <field name="current_price" string="Сейчас"/>
+        <field name="bid_count" string="Ставок"/>
+        <field name="date_end" string="Окончание"/>
+        <field name="leader_id" string="Лидер" optional="show"/>
+        <field name="winner_id" string="Победитель" optional="hide"/>
+        <field name="currency_id" column_invisible="1"/>
+        <field name="state" widget="badge"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_auction_form" model="ir.ui.view">
+    <field name="name">coop.auction.form</field>
+    <field name="model">coop.auction</field>
+    <field name="arch" type="xml">
+      <form string="Аукцион">
+        <header>
+          <button name="action_start" type="object" string="Открыть торги"
+                  class="btn-primary" invisible="state != 'draft'"/>
+          <button name="action_finish" type="object" string="Подвести итог"
+                  invisible="state != 'running'"/>
+          <button name="action_cancel" type="object" string="Отменить"
+                  invisible="state in ('finished', 'cancelled', 'no_bids')"/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="draft,running,finished"/>
+        </header>
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Что разыгрываем"/></h1>
+          </div>
+          <group>
+            <group string="Что и кто">
+              <field name="kind" widget="radio" options="{'horizontal': True}"/>
+              <field name="owner_id"/>
+              <field name="resource_id"/>
+              <field name="city"/>
+            </group>
+            <group string="Цена и время">
+              <field name="start_price"/>
+              <field name="step"/>
+              <field name="reserve_price"/>
+              <field name="currency_id" invisible="1"/>
+              <field name="date_start"/>
+              <field name="date_end"/>
+              <field name="extend_minutes"/>
+            </group>
+          </group>
+          <group string="Ход торга">
+            <group>
+              <field name="current_price" readonly="1"/>
+              <field name="leader_id" readonly="1"/>
+              <field name="bid_count" readonly="1"/>
+            </group>
+            <group>
+              <field name="minutes_left" readonly="1"
+                     invisible="state != 'running'"/>
+              <field name="my_bid" readonly="1"/>
+              <field name="winner_id" readonly="1"
+                     invisible="state != 'finished'"/>
+            </group>
+          </group>
+
+          <div class="alert alert-info" role="status" invisible="state != 'running'">
+            Ставка в последние <field name="extend_minutes" class="oe_inline" readonly="1"/>
+            минут продлевает торг. Без продления выигрывал бы не тот, кто
+            больше готов заплатить, а тот, у кого быстрее рука.
+          </div>
+
+          <notebook>
+            <page string="Описание лота" name="description">
+              <field name="description"
+                     placeholder="Что за лот, в каком состоянии, как забирать"/>
+            </page>
+            <page string="Ставки" name="bids">
+              <field name="bid_ids" readonly="1">
+                <list string="Ставки">
+                  <field name="create_date" string="Когда"/>
+                  <field name="partner_id"/>
+                  <field name="amount"/>
+                  <field name="currency_id" column_invisible="1"/>
+                </list>
+              </field>
+              <div class="text-muted mt-2">
+                Ставки не редактируются и не удаляются: история торга — то,
+                чем он доказуем.
+              </div>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_auction_search" model="ir.ui.view">
+    <field name="name">coop.auction.search</field>
+    <field name="model">coop.auction</field>
+    <field name="arch" type="xml">
+      <search string="Аукционы">
+        <field name="name"/>
+        <field name="owner_id" string="Организатор"/>
+        <field name="city"/>
+        <filter name="running" string="Идут торги" domain="[('state', '=', 'running')]"/>
+        <filter name="direct" string="На повышение" domain="[('kind', '=', 'direct')]"/>
+        <filter name="reverse" string="Редукцион" domain="[('kind', '=', 'reverse')]"/>
+        <separator/>
+        <filter name="finished" string="Завершённые" domain="[('state', '=', 'finished')]"/>
+        <filter name="no_bids" string="Без ставок" domain="[('state', '=', 'no_bids')]"/>
+        <group>
+          <filter name="by_kind" string="По виду торга" context="{'group_by': 'kind'}"/>
+          <filter name="by_city" string="По городу" context="{'group_by': 'city'}"/>
+          <filter name="by_state" string="По состоянию" context="{'group_by': 'state'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_auction" model="ir.actions.act_window">
+    <field name="name">Аукционы</field>
+    <field name="res_model">coop.auction</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="context">{'coop_catalog': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Торгов пока нет</p>
+      <p>Аукцион нужен там, где цена неизвестна заранее: продать излишки
+         урожая или технику, найти подрядчика подешевле. На повышение
+         побеждает больший, в редукционе — меньший.</p>
+    </field>
+  </record>
+
+  <menuitem id="menu_coop_auctions_root" name="Аукционы" sequence="155"/>
+  <menuitem id="menu_coop_auctions_all" name="Все торги"
+            parent="menu_coop_auctions_root"
+            action="action_coop_auction" sequence="10"/>
+
+</odoo>

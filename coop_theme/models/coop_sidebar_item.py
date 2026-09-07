@@ -54,7 +54,7 @@ EXTENSION_ITEMS = [
     ('События', 'fa-calendar', 'coop_events.action_coop_event'),
     ('Аналитика', 'fa-bar-chart', ''),
     ('Образование', 'fa-graduation-cap', ''),
-    ('Аукционы', 'fa-gavel', ''),
+    ('Аукционы', 'fa-gavel', 'coop_auctions.action_coop_auction'),
     ('Библиотеки', 'fa-book', ''),
     ('Диск', 'fa-folder-open-o', ''),
     ('Здоровье', 'fa-heartbeat', ''),

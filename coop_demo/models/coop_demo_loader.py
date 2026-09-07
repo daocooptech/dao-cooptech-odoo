@@ -10,6 +10,7 @@ from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_deals,
                     load_examples, load_memberships, load_messages,
                     load_org_profiles, load_orgs, load_people, load_projects,
+                    load_auctions,
                     load_events,
                     load_groupbuy,
                     load_programs,
@@ -106,6 +107,9 @@ class CoopDemoLoader(models.AbstractModel):
         # События — после сообществ: часть событий проводят они.
         if 'coop.event' in self.env:
             load_events.load_events(self.env)
+        # Аукционы — после ресурсов: лот часто ссылается на объявление.
+        if 'coop.auction' in self.env:
+            load_auctions.load_auctions(self.env)
         # Кошельки последними: состав вкладок зависит от членства, а
         # сальдо по контрагентам считается из платежей по сделкам.
         load_wallets.load_wallets(self.env)

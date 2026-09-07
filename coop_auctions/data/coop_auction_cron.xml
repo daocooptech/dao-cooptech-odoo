@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Закрытие торгов по времени.
+
+       Отдельным заданием, а не «когда кто-то откроет страницу»: иначе
+       аукцион завершается в момент чужого захода, и объявленное время
+       окончания перестаёт что-либо значить. Раз в пять минут — чаще не
+       нужно, потому что ставка на последних минутах и так продлевает
+       торг. -->
+  <record id="cron_coop_auction_close" model="ir.cron">
+    <field name="name">Аукционы: закрыть торги по времени</field>
+    <field name="model_id" ref="model_coop_auction"/>
+    <field name="state">code</field>
+    <field name="code">model._cron_close_expired()</field>
+    <field name="interval_number">5</field>
+    <field name="interval_type">minutes</field>
+    <field name="active" eval="True"/>
+  </record>
+
+</odoo>
