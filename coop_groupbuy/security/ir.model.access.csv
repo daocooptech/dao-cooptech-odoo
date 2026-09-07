@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_coop_groupbuy_user,Совместные закупки — участник,model_coop_groupbuy,base.group_user,1,1,1,0
+access_coop_groupbuy_admin,Совместные закупки — администратор,model_coop_groupbuy,base.group_system,1,1,1,1
+access_coop_groupbuy_tier_user,Уровни цены — участник,model_coop_groupbuy_tier,base.group_user,1,1,1,0
+access_coop_groupbuy_tier_admin,Уровни цены — администратор,model_coop_groupbuy_tier,base.group_system,1,1,1,1
+access_coop_groupbuy_order_user,Заказы закупки — участник,model_coop_groupbuy_order,base.group_user,1,1,1,1
+access_coop_groupbuy_order_admin,Заказы закупки — администратор,model_coop_groupbuy_order,base.group_system,1,1,1,1

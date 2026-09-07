@@ -49,7 +49,7 @@ EXTENSION_ITEMS = [
     ('Цифровые активы', 'fa-certificate', 'coop_digital_assets.action_coop_cfa_issue'),
     ('Нематериальные активы', 'fa-lightbulb-o', 'coop_intangibles.action_coop_intangibles'),
     ('Целевые программы ПК', 'fa-bullseye', 'coop_programs.action_coop_program'),
-    ('Совместные закупки', 'fa-shopping-basket', ''),
+    ('Совместные закупки', 'fa-shopping-basket', 'coop_groupbuy.action_coop_groupbuy'),
     ('Склад', 'fa-archive', ''),
     ('События', 'fa-calendar', ''),
     ('Аналитика', 'fa-bar-chart', ''),

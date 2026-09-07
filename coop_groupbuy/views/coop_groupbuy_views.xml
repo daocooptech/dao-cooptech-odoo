@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="view_coop_groupbuy_kanban" model="ir.ui.view">
+    <field name="name">coop.groupbuy.kanban</field>
+    <field name="model">coop.groupbuy</field>
+    <field name="arch" type="xml">
+      <kanban js_class="coop_catalog_kanban" class="o_coop_groupbuys"
+              default_order="stop_date">
+        <field name="city"/>
+        <field name="current_price"/>
+        <field name="unit_label"/>
+        <field name="progress"/>
+        <field name="total_quantity"/>
+        <field name="min_volume"/>
+        <field name="participant_count"/>
+        <field name="stop_date"/>
+        <field name="state"/>
+        <field name="organizer_id"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_gb">
+              <div class="o_coop_gb_head">
+                <span class="o_coop_badge o_coop_gb_state"
+                      t-att-class="'o_coop_gb_' + record.state.raw_value">
+                  <t t-esc="record.state.value"/>
+                </span>
+                <span class="o_coop_gb_meta" t-if="record.city.raw_value">
+                  <i class="fa fa-map-marker" aria-hidden="true"/>
+                  <t t-esc="record.city.value"/>
+                </span>
+              </div>
+
+              <div class="o_coop_gb_name"><field name="name"/></div>
+
+              <div class="o_coop_gb_head">
+                <span class="o_coop_gb_price">
+                  <field name="current_price"/> ₽ / <t t-esc="record.unit_label.value"/>
+                </span>
+                <span class="o_coop_gb_meta">
+                  стоп <t t-esc="record.stop_date.value"/>
+                </span>
+              </div>
+
+              <!-- Полоса набора: заполнение обрезано сотней процентов,
+                   а «набрали больше» видно числом рядом. Иначе полоса
+                   вылезает за карточку. -->
+              <div class="o_coop_gb_bar">
+                <div class="o_coop_gb_fill"
+                     t-attf-style="width: #{record.progress.raw_value > 100 ? 100 : record.progress.raw_value}%"/>
+              </div>
+              <div class="o_coop_gb_progress">
+                <span>
+                  <t t-esc="record.total_quantity.value"/> из
+                  <t t-esc="record.min_volume.value"/> <t t-esc="record.unit_label.value"/>
+                </span>
+                <span><t t-esc="record.progress.value"/>%</span>
+              </div>
+
+              <div class="o_coop_gb_foot">
+                <span class="o_coop_gb_meta"><t t-esc="record.organizer_id.value"/></span>
+                <span class="o_coop_gb_meta">
+                  <t t-esc="record.participant_count.value"/> участников
+                </span>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="view_coop_groupbuy_list" model="ir.ui.view">
+    <field name="name">coop.groupbuy.list</field>
+    <field name="model">coop.groupbuy</field>
+    <field name="arch" type="xml">
+      <list string="Совместные закупки"
+            decoration-muted="state in ('done', 'cancelled')"
+            decoration-success="state == 'collecting'">
+        <field name="name"/>
+        <field name="organizer_id" string="Организатор"/>
+        <field name="city"/>
+        <field name="current_price" string="Цена сейчас"/>
+        <field name="unit_label" string="Единица"/>
+        <field name="total_quantity" string="Набрано"/>
+        <field name="min_volume" string="Нужно"/>
+        <field name="progress" string="%" widget="progressbar"/>
+        <field name="participant_count" string="Участников"/>
+        <field name="stop_date" string="Стоп"/>
+        <field name="state" widget="badge"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_groupbuy_form" model="ir.ui.view">
+    <field name="name">coop.groupbuy.form</field>
+    <field name="model">coop.groupbuy</field>
+    <field name="arch" type="xml">
+      <form string="Совместная закупка">
+        <header>
+          <button name="action_stop" type="object" string="Закрыть сбор"
+                  class="btn-primary" invisible="state != 'collecting'"
+                  confirm="После стопа заказы отменять нельзя, а партия заказывается у поставщика. Закрыть сбор?"/>
+          <button name="action_delivering" type="object" string="Заказано у поставщика"
+                  invisible="state != 'stopped'"/>
+          <button name="action_handout" type="object" string="Партия пришла"
+                  class="btn-primary" invisible="state != 'delivering'"/>
+          <button name="action_done" type="object" string="Завершить"
+                  invisible="state != 'handout'"/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="collecting,stopped,delivering,handout,done"/>
+        </header>
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Что закупаем"/></h1>
+          </div>
+          <group>
+            <group string="Кто и где">
+              <field name="organizer_id"/>
+              <field name="supplier_name" placeholder="У кого закупаем"/>
+              <field name="city"/>
+              <field name="pickup_point" placeholder="Куда приезжать за своим"/>
+            </group>
+            <group string="Объём и цена">
+              <label for="min_volume"/>
+              <div class="o_row">
+                <field name="min_volume"/>
+                <field name="unit_label" placeholder="кг, шт."/>
+              </div>
+              <field name="base_price"/>
+              <field name="org_fee_percent"/>
+              <field name="current_price" readonly="1"/>
+              <field name="total_quantity" readonly="1"/>
+              <field name="progress" widget="progressbar" readonly="1"/>
+            </group>
+          </group>
+          <group>
+            <group string="Сроки">
+              <field name="stop_date"/>
+              <field name="delivery_date"/>
+            </group>
+            <group string="Итоги">
+              <field name="participant_count"/>
+              <field name="total_amount"/>
+              <field name="my_quantity"/>
+            </group>
+          </group>
+
+          <notebook>
+            <page string="Условия" name="description">
+              <field name="description"
+                     placeholder="Что за товар, чем подтверждено качество, как считается оргсбор"/>
+            </page>
+            <page string="Уровни цены" name="tiers">
+              <field name="tier_ids">
+                <list editable="bottom">
+                  <field name="from_quantity" string="От объёма"/>
+                  <field name="price" string="Цена за единицу"/>
+                </list>
+              </field>
+              <div class="text-muted mt-2">
+                Цена по набранному объёму — одна на всех: заказавший первым
+                платит столько же, сколько заказавший последним. Набранный
+                объём удешевляет партию целиком, а не отдельные заказы.
+              </div>
+            </page>
+            <page string="Заказы" name="orders">
+              <field name="order_ids">
+                <list editable="bottom"
+                      decoration-muted="state == 'cancelled'"
+                      decoration-success="state == 'taken'">
+                  <field name="partner_id"/>
+                  <field name="quantity"/>
+                  <field name="amount" readonly="1" sum="Всего"/>
+                  <field name="state" widget="badge"/>
+                  <button name="action_take" type="object" string="Забран"
+                          icon="fa-check" invisible="state != 'confirmed'"/>
+                  <button name="action_cancel" type="object" string="Отменить"
+                          icon="fa-times" invisible="state != 'draft'"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_groupbuy_search" model="ir.ui.view">
+    <field name="name">coop.groupbuy.search</field>
+    <field name="model">coop.groupbuy</field>
+    <field name="arch" type="xml">
+      <search string="Совместные закупки">
+        <field name="name"/>
+        <field name="organizer_id" string="Организатор"/>
+        <field name="city"/>
+        <filter name="collecting" string="Идёт сбор"
+                domain="[('state', '=', 'collecting')]"/>
+        <filter name="mine" string="Мои заказы"
+                domain="[('order_ids.partner_id.user_ids', 'in', [uid])]"/>
+        <separator/>
+        <filter name="done" string="Завершённые" domain="[('state', '=', 'done')]"/>
+        <filter name="cancelled" string="Не состоялись"
+                domain="[('state', '=', 'cancelled')]"/>
+        <group>
+          <filter name="by_city" string="По городу" context="{'group_by': 'city'}"/>
+          <filter name="by_state" string="По состоянию" context="{'group_by': 'state'}"/>
+          <filter name="by_organizer" string="По организатору"
+                  context="{'group_by': 'organizer_id'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_groupbuy" model="ir.actions.act_window">
+    <field name="name">Совместные закупки</field>
+    <field name="res_model">coop.groupbuy</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="context">{'coop_catalog': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Закупок пока нет</p>
+      <p>Совместная закупка — способ получить оптовую цену, не будучи
+         оптовым покупателем. Организатор находит поставщика и минимальный
+         объём выкупа, участники набирают его вскладчину, цена падает по
+         уровням по мере набора.</p>
+    </field>
+  </record>
+
+  <record id="action_coop_groupbuy_mine" model="ir.actions.act_window">
+    <field name="name">Мои закупки</field>
+    <field name="res_model">coop.groupbuy</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="domain">['|', ('organizer_id.user_ids', 'in', [uid]), ('order_ids.partner_id.user_ids', 'in', [uid])]</field>
+    <field name="context">{'coop_catalog': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Вы пока ни в одной закупке</p>
+      <p>Здесь окажутся закупки, которые вы ведёте сами, и те, где вы
+         заказали свою долю.</p>
+    </field>
+  </record>
+
+  <menuitem id="menu_coop_groupbuy_root" name="Совместные закупки"
+            sequence="145"/>
+  <menuitem id="menu_coop_groupbuy_all" name="Все закупки"
+            parent="menu_coop_groupbuy_root"
+            action="action_coop_groupbuy" sequence="10"/>
+  <menuitem id="menu_coop_groupbuy_mine" name="Мои закупки"
+            parent="menu_coop_groupbuy_root"
+            action="action_coop_groupbuy_mine" sequence="20"/>
+
+</odoo>

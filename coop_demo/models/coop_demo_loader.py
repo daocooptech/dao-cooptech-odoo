@@ -10,6 +10,7 @@ from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_deals,
                     load_examples, load_memberships, load_messages,
                     load_org_profiles, load_orgs, load_people, load_projects,
+                    load_groupbuy,
                     load_programs,
                     load_promotions,
                     load_reference, load_resources, load_skills,
@@ -97,6 +98,10 @@ class CoopDemoLoader(models.AbstractModel):
         # программы всегда кооператив, участники — живые люди.
         if 'coop.program' in self.env:
             load_programs.load_programs(self.env)
+        # Совместные закупки — после организаций: организатор всегда
+        # кооператив, заказчики — участники.
+        if 'coop.groupbuy' in self.env:
+            load_groupbuy.load_groupbuy(self.env)
         # Кошельки последними: состав вкладок зависит от членства, а
         # сальдо по контрагентам считается из платежей по сделкам.
         load_wallets.load_wallets(self.env)
