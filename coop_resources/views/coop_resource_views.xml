@@ -271,7 +271,7 @@
         <field name="name"/>
         <field name="page"/>
         <field name="position" string="Строка"/>
-        <field name="price_per_day" string="Цена, токенов в сутки"/>
+        <field name="price_per_day" string="Цена суток, ₽"/>
         <field name="reach_share" string="Доля просмотров, %"/>
         <field name="is_taken" string="Занято"/>
         <field name="resource_id" string="Сейчас показывается"/>
@@ -308,8 +308,8 @@
         <field name="date_from" string="С"/>
         <field name="date_to" string="По"/>
         <field name="days" string="Дней" sum="Дней всего"/>
-        <field name="price_per_day" string="Токенов в сутки" optional="hide"/>
-        <field name="total_tokens" string="Списано токенов" sum="Списано всего"/>
+        <field name="price_per_day" string="Цена суток, ₽" optional="hide"/>
+        <field name="total_tokens" string="Списано, ₽" sum="Списано всего"/>
         <field name="is_running" string="Идёт сейчас" widget="boolean_toggle"
                readonly="1"/>
       </list>
@@ -371,7 +371,7 @@
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Продвижений пока нет</p>
       <p>Место в выдаче занимается под ваше объявление на срок и
-      оплачивается токенами COOP вперёд. Пока место занято вами,
+      оплачивается вперёд, в рублях. Пока место занято вами,
       объявление стоит выше обычной выдачи; когда срок выйдет, оно
       вернётся на своё место, а строка останется здесь в истории.</p>
     </field>

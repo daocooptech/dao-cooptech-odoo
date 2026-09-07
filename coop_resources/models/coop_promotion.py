@@ -34,7 +34,7 @@ class CoopPromotionSlot(models.Model):
     position = fields.Integer(string='Строка в блоке', required=True)
 
     price_per_day = fields.Integer(
-        string='Цена, токенов в сутки', required=True,
+        string='Цена суток, ₽', required=True,
         help='Зависит от охвата: чем ближе к началу выдачи, тем дороже.')
     reach_share = fields.Float(
         string='Доля просмотров, %', digits=(5, 1),
@@ -111,13 +111,13 @@ class CoopPromotion(models.Model):
     partner_id = fields.Many2one(
         'res.partner', string='Плательщик', required=True, index=True)
     days = fields.Integer(string='Дней', required=True, default=7)
-    price_per_day = fields.Integer(string='Цена суток, токенов', required=True)
+    price_per_day = fields.Integer(string='Цена суток, ₽', required=True)
     total_tokens = fields.Integer(
-        string='Списано токенов', compute='_compute_total', store=True)
+        string='Списано, ₽', compute='_compute_total', store=True)
     date_from = fields.Datetime(string='С', required=True)
     date_to = fields.Datetime(string='По', required=True, index=True)
     transaction_id = fields.Many2one(
-        'coop.token.transaction', string='Движение токенов', readonly=True)
+        'coop.token.transaction', string='Движение средств', readonly=True)
 
     is_running = fields.Boolean(
         string='Показывается сейчас', compute='_compute_is_running',
@@ -230,7 +230,7 @@ class CoopPromotion(models.Model):
         resource.write({'promoted_until': end, 'promotion_slot_id': slot.id})
         resource.message_post(body=_(
             'Объявление занимает место «%(slot)s» до %(until)s. '
-            'Списано %(total)s токенов.',
+            'Списано %(total)s ₽.',
             slot=slot.name, until=fields.Datetime.to_string(end), total=total))
         self.env['coop.resource']._recompute_catalog_rank()
         return promotion
@@ -248,10 +248,10 @@ class CoopResourcePromote(models.TransientModel):
     days = fields.Integer(string='Срок, дней', default=7, required=True)
 
     price_per_day = fields.Integer(
-        string='Цена суток, токенов', related='slot_id.price_per_day')
+        string='Цена суток, ₽', related='slot_id.price_per_day')
     reach_share = fields.Float(
         string='Доля просмотров, %', related='slot_id.reach_share')
-    total_tokens = fields.Integer(string='Итого токенов', compute='_compute_total')
+    total_tokens = fields.Integer(string='Итого, ₽', compute='_compute_total')
     balance = fields.Integer(string='На балансе', compute='_compute_total')
     free_slots = fields.Integer(
         string='Свободных мест', compute='_compute_total')

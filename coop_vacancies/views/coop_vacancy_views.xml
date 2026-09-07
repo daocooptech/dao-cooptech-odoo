@@ -58,9 +58,6 @@
                 <div class="o_coop_vac_desc">
                   <field name="description" widget="html"/>
                 </div>
-                <div class="o_coop_vac_chips">
-                  <field name="skill_ids" widget="many2many_tags"/>
-                </div>
                 <div class="o_coop_vac_foot">
                   <span class="o_coop_vac_applications"
                         t-if="record.is_mine.raw_value and record.application_count.raw_value">

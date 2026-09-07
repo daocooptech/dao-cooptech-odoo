@@ -244,7 +244,7 @@ class CoopCfaHolding(models.Model):
     """
     _name = 'coop.cfa.holding'
     _description = 'ЦФА на руках'
-    _order = 'partner_id, id'
+    _order = 'create_date desc, id desc'
 
     partner_id = fields.Many2one(
         'res.partner', string='Держатель', required=True, index=True,

@@ -27,6 +27,13 @@ class CoopTokenTransaction(models.Model):
     получить начислением за вклад в общее дело — второе решает владелец,
     правила начисления согласуются отдельно.
 
+    Курс к рублю — один к одному, и на экранах участник видит рубли
+    (решение владельца от 7 сентября). Держать в голове второй счёт ради
+    платы за место в выдаче незачем, а паритет избавляет от переоценки:
+    списание в сто единиц и есть сто рублей. Единица при этом остаётся
+    учётной — обратно в деньги не выкупается и за пределы платформы не
+    выходит, иначе она стала бы средством платежа со всеми вытекающими.
+
     Хранятся движения, а не остаток. Остаток считается как их сумма:
     иначе первое же расхождение между «сколько было» и «откуда взялось»
     станет неразрешимым — по остатку нельзя восстановить историю, по
@@ -40,8 +47,9 @@ class CoopTokenTransaction(models.Model):
         'res.partner', string='Участник', required=True,
         ondelete='cascade', index=True)
     amount = fields.Integer(
-        string='COOP', required=True,
-        help='Положительное — начисление, отрицательное — списание.')
+        string='Сумма, ₽', required=True,
+        help='Положительное — начисление, отрицательное — списание. '
+             'Единица платформы приравнена к рублю один к одному.')
     kind = fields.Selection([
         ('topup', 'Пополнение'),
         ('grant', 'Начисление за вклад'),
@@ -99,7 +107,7 @@ class ResPartner(models.Model):
     coop_token_ids = fields.One2many(
         'coop.token.transaction', 'partner_id', string='Движения токенов')
     coop_token_balance = fields.Integer(
-        string='COOP на балансе', compute='_compute_coop_token_balance',
+        string='Баланс, ₽', compute='_compute_coop_token_balance',
         store=True, help='Сумма всех начислений и списаний.')
 
     @api.depends('coop_token_ids.amount')
