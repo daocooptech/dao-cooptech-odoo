@@ -40,7 +40,10 @@ if gzip -t "$WORK" 2>/dev/null; then
     echo "Восстанавливаю из сжатого текстового дампа"
     ( cd /tmp && gunzip -c "$WORK" | sudo -u "$USER" psql -q -d "$DB" )         > /tmp/coop-restore.out 2>&1
     echo "строк в журнале восстановления: $(wc -l < /tmp/coop-restore.out)"
-    grep -c "ОШИБКА\|ERROR" /tmp/coop-restore.out | sed "s/^/ошибок: /"
+    # `|| true` обязателен: grep -c при нуле совпадений возвращает
+    # единицу, и при set -e чистое восстановление обрывало скрипт ровно
+    # там, где всё прошло хорошо — до переноса файлового хранилища.
+    echo "ошибок: $(grep -c 'ОШИБКА\|ERROR' /tmp/coop-restore.out || true)"
 elif head -c 5 "$WORK" | grep -q "PGDMP"; then
     echo "Восстанавливаю из двоичного дампа"
     ( cd /tmp && sudo -u "$USER" pg_restore -d "$DB" --no-owner --role="$USER" "$WORK" )
