@@ -51,7 +51,7 @@ EXTENSION_ITEMS = [
     ('Целевые программы ПК', 'fa-bullseye', 'coop_programs.action_coop_program'),
     ('Совместные закупки', 'fa-shopping-basket', 'coop_groupbuy.action_coop_groupbuy'),
     ('Склад', 'fa-archive', ''),
-    ('События', 'fa-calendar', ''),
+    ('События', 'fa-calendar', 'coop_events.action_coop_event'),
     ('Аналитика', 'fa-bar-chart', ''),
     ('Образование', 'fa-graduation-cap', ''),
     ('Аукционы', 'fa-gavel', ''),

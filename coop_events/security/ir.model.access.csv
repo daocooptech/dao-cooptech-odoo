@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_coop_event_user,События — участник,model_coop_event,base.group_user,1,1,1,0
+access_coop_event_admin,События — администратор,model_coop_event,base.group_system,1,1,1,1
+access_coop_event_signup_user,Записи на событие — участник,model_coop_event_signup,base.group_user,1,1,1,1
+access_coop_event_signup_admin,Записи на событие — администратор,model_coop_event_signup,base.group_system,1,1,1,1

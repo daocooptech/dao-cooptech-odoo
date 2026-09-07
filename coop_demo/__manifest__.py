@@ -14,7 +14,7 @@
     'category': 'Cooperative',
     'version': '19.0.1.0.0',
     'license': 'LGPL-3',
-    'depends': ['coop_base', 'coop_people', 'coop_orgs', 'coop_resources', 'coop_skills', 'coop_vacancies', 'coop_projects', 'coop_communities', 'coop_attributes', 'coop_profile', 'coop_deals', 'coop_wallet', 'coop_bounty', 'coop_messages', 'coop_programs', 'coop_groupbuy', 'product', 'project', 'hr_skills', 'sale_management'],
+    'depends': ['coop_base', 'coop_people', 'coop_orgs', 'coop_resources', 'coop_skills', 'coop_vacancies', 'coop_projects', 'coop_communities', 'coop_attributes', 'coop_profile', 'coop_deals', 'coop_wallet', 'coop_bounty', 'coop_messages', 'coop_programs', 'coop_groupbuy', 'coop_events', 'product', 'project', 'hr_skills', 'sale_management'],
     'data': [
         'security/ir.model.access.csv',
         'data/coop_admin_rights.xml',

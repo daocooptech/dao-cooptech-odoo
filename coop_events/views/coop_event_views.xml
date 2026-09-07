@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="view_coop_event_kanban" model="ir.ui.view">
+    <field name="name">coop.event.kanban</field>
+    <field name="model">coop.event</field>
+    <field name="arch" type="xml">
+      <kanban js_class="coop_catalog_kanban" class="o_coop_events o_coop_listings"
+              default_order="date_start desc">
+        <field name="icon"/>
+        <field name="category"/>
+        <field name="format"/>
+        <field name="city"/>
+        <field name="date_start"/>
+        <field name="signup_count"/>
+        <field name="organizer_id"/>
+        <field name="is_past"/>
+        <field name="state"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_event"
+                 t-att-class="record.is_past.raw_value ? 'o_coop_event_past' : ''">
+              <div class="o_coop_event_ico"
+                   t-att-class="'o_coop_event_' + record.category.raw_value">
+                <t t-esc="record.icon.value"/>
+              </div>
+              <div class="o_coop_event_body">
+                <div class="o_coop_event_name"><field name="name"/></div>
+                <div class="o_coop_event_when">
+                  <field name="date_start"/>
+                </div>
+                <div class="o_coop_event_meta">
+                  <t t-esc="record.city.value"/> ·
+                  <t t-esc="record.format.value"/> ·
+                  <t t-esc="record.organizer_id.value"/>
+                </div>
+                <div class="o_coop_event_desc"><field name="description"/></div>
+                <div class="o_coop_event_foot">
+                  <span class="o_coop_chip"><t t-esc="record.category.value"/></span>
+                  <span class="o_coop_event_meta">
+                    <t t-esc="record.signup_count.value"/> записались
+                  </span>
+                </div>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="view_coop_event_list" model="ir.ui.view">
+    <field name="name">coop.event.list</field>
+    <field name="model">coop.event</field>
+    <field name="arch" type="xml">
+      <list string="События" decoration-muted="is_past or state == 'cancelled'">
+        <field name="date_start" string="Когда"/>
+        <field name="name"/>
+        <field name="category"/>
+        <field name="city"/>
+        <field name="format"/>
+        <field name="organizer_id" string="Организатор"/>
+        <field name="signup_count" string="Записались"/>
+        <field name="state" widget="badge"/>
+        <field name="is_past" column_invisible="1"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_event_calendar" model="ir.ui.view">
+    <field name="name">coop.event.calendar</field>
+    <field name="model">coop.event</field>
+    <field name="arch" type="xml">
+      <!-- Календарь — второй способ смотреть на то же самое. У события
+           «когда» решает всё, и по списку это видно хуже, чем по сетке
+           месяца. -->
+      <calendar string="Календарь событий" date_start="date_start"
+                date_stop="date_end" color="category" mode="month">
+        <field name="name"/>
+        <field name="city"/>
+        <field name="signup_count"/>
+      </calendar>
+    </field>
+  </record>
+
+  <record id="view_coop_event_form" model="ir.ui.view">
+    <field name="name">coop.event.form</field>
+    <field name="model">coop.event</field>
+    <field name="arch" type="xml">
+      <form string="Событие">
+        <header>
+          <button name="action_signup" type="object" string="Записаться"
+                  class="btn-primary"
+                  invisible="am_i_signed or state in ('closed', 'held', 'cancelled')"/>
+          <button name="action_cancel_signup" type="object" string="Не смогу прийти"
+                  invisible="not am_i_signed"/>
+          <button name="action_open" type="object" string="Открыть запись"
+                  invisible="state != 'draft'"/>
+          <button name="action_close" type="object" string="Закрыть запись"
+                  invisible="state != 'open'"/>
+          <button name="action_hold" type="object" string="Состоялось"
+                  invisible="state not in ('open', 'closed')"/>
+          <button name="action_cancel" type="object" string="Отменить событие"
+                  invisible="state in ('held', 'cancelled')"
+                  confirm="Записавшиеся увидят отмену в ленте события. Отменить?"/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="draft,open,closed,held"/>
+        </header>
+        <sheet>
+          <div class="oe_title">
+            <h1>
+              <field name="icon" class="oe_inline" style="width: 3ch"/>
+              <field name="name" class="oe_inline" placeholder="Что за событие"/>
+            </h1>
+          </div>
+          <group>
+            <group string="Когда и где">
+              <field name="date_start"/>
+              <field name="date_end"/>
+              <field name="format"/>
+              <field name="city"/>
+              <field name="place" placeholder="Адрес или ссылка на созвон"/>
+            </group>
+            <group string="Кто и сколько">
+              <field name="category"/>
+              <field name="organizer_id"/>
+              <field name="community_id"/>
+              <field name="capacity"/>
+              <field name="signup_count"/>
+              <field name="seats_left" invisible="not capacity"/>
+              <field name="am_i_signed" invisible="1"/>
+              <field name="is_past" invisible="1"/>
+            </group>
+          </group>
+          <notebook>
+            <page string="Описание" name="description">
+              <field name="description"
+                     placeholder="Что будет, для кого, что взять с собой"/>
+            </page>
+            <page string="Записались" name="signups">
+              <field name="signup_ids">
+                <list editable="bottom"
+                      decoration-muted="state == 'cancelled'"
+                      decoration-success="state == 'attended'"
+                      decoration-warning="state == 'missed'">
+                  <field name="partner_id"/>
+                  <field name="state"/>
+                  <field name="note" optional="show"/>
+                  <button name="action_attended" type="object" string="Был"
+                          icon="fa-check" invisible="state != 'going'"/>
+                  <button name="action_missed" type="object" string="Не пришёл"
+                          icon="fa-times" invisible="state != 'going'"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_event_search" model="ir.ui.view">
+    <field name="name">coop.event.search</field>
+    <field name="model">coop.event</field>
+    <field name="arch" type="xml">
+      <search string="События">
+        <field name="name"/>
+        <field name="city"/>
+        <field name="organizer_id" string="Организатор"/>
+        <filter name="upcoming" string="Впереди" domain="[('is_past', '=', False)]"/>
+        <filter name="mine" string="Я записан" domain="[('am_i_signed', '=', True)]"/>
+        <separator/>
+        <filter name="offline" string="Офлайн" domain="[('format', '=', 'offline')]"/>
+        <filter name="online" string="Онлайн" domain="[('format', '=', 'online')]"/>
+        <separator/>
+        <filter name="past" string="Прошедшие" domain="[('is_past', '=', True)]"/>
+        <group>
+          <filter name="by_category" string="По виду" context="{'group_by': 'category'}"/>
+          <filter name="by_city" string="По городу" context="{'group_by': 'city'}"/>
+          <filter name="by_month" string="По месяцу"
+                  context="{'group_by': 'date_start:month'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_event" model="ir.actions.act_window">
+    <field name="name">События</field>
+    <field name="res_model">coop.event</field>
+    <field name="view_mode">kanban,calendar,list,form</field>
+    <field name="context">{'coop_catalog': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Событий пока нет</p>
+      <p>Событие — единственное место платформы, где кооперация происходит
+         лично: собрание пайщиков, обучение, ярмарка, созвон сообщества.
+         Запись на него — обязательство перед организатором: он считает
+         места заранее.</p>
+    </field>
+  </record>
+
+  <record id="action_coop_event_mine" model="ir.actions.act_window">
+    <field name="name">Мои события</field>
+    <field name="res_model">coop.event</field>
+    <field name="view_mode">kanban,calendar,list,form</field>
+    <field name="domain">[('am_i_signed', '=', True)]</field>
+    <field name="context">{'coop_catalog': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Вы никуда не записаны</p>
+      <p>Записаться можно из календаря событий. Если планы поменяются,
+         отмените запись — организатор считает места.</p>
+    </field>
+  </record>
+
+  <menuitem id="menu_coop_events_root" name="События" sequence="150"/>
+  <menuitem id="menu_coop_events_all" name="Календарь событий"
+            parent="menu_coop_events_root"
+            action="action_coop_event" sequence="10"/>
+  <menuitem id="menu_coop_events_mine" name="Мои события"
+            parent="menu_coop_events_root"
+            action="action_coop_event_mine" sequence="20"/>
+
+</odoo>
