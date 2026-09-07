@@ -195,7 +195,7 @@
     <field name="view_mode">kanban,list,form</field>
     <field name="search_view_id" ref="view_coop_cfa_issue_search"/>
     <field name="context">{'coop_section': 1, 'coop_catalog': 1}</field>
-    <field name="domain">[('issuer_id', 'in', [x for x in user.coop_treasury_partner_ids.ids])]</field>
+    <field name="domain">[('is_mine', '=', True)]</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Своих выпусков пока нет</p>
       <p>Заявка собирает всё, что оператор всё равно спросит: что
@@ -304,7 +304,7 @@
     <field name="res_model">coop.cfa.holding</field>
     <field name="view_mode">list</field>
     <field name="context">{'coop_section': 1}</field>
-    <field name="domain">[('partner_id', 'in', [x for x in user.coop_treasury_partner_ids.ids])]</field>
+    <field name="domain">[('is_mine', '=', True)]</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Цифровых активов нет</p>
       <p>Купленное у операторов видно здесь — рядом с паями и токенами,

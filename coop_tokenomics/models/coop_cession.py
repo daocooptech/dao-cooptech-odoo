@@ -162,9 +162,23 @@ class CoopCession(models.Model):
             record.is_mine = record.creditor_id in mine
 
     def _search_is_mine(self, operator, value):
-        if operator not in ('=', '!=') or not isinstance(value, bool):
-            raise ValueError(_('Поддерживается только «моё: да» или «моё: нет».'))
-        positive = (operator == '=') == value
+        # Odoo приводит «= True» к «in {True}» ещё до вызова поиска и
+        # передаёт при этом свой набор, а не список. Поэтому значение
+        # разбирается как последовательность, а не сверяется с типом:
+        # иначе вкладка «моё» падала с ошибкой прямо при открытии.
+        if isinstance(value, bool):
+            wanted = value
+        else:
+            items = list(value)
+            if len(items) != 1 or not isinstance(items[0], bool):
+                raise ValueError('Поддерживается только «моё: да» или «моё: нет».')
+            wanted = items[0]
+        if operator in ('=', 'in'):
+            positive = wanted
+        elif operator in ('!=', 'not in'):
+            positive = not wanted
+        else:
+            raise ValueError('Поддерживается только «моё: да» или «моё: нет».')
         return [('creditor_id', 'in' if positive else 'not in',
                  self._my_partners().ids)]
 

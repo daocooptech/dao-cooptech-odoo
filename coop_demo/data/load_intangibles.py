@@ -161,6 +161,8 @@ def load_intangibles(env, target=TARGET_ASSETS, target_cfa=TARGET_CFA):
     _make_licenses(License, assets, companies, people, rnd, today)
     _contribute_to_projects(env, assets, rnd)
     _load_cfa(env, companies, people, rnd, today, target_cfa)
+    _showcase(env, rnd)
+    _spread_created(env, rnd)
 
     _logger.info('Реестр НМА: создано %s, пропущено %s', created, skipped)
 
@@ -309,3 +311,60 @@ def _load_cfa(env, companies, people, rnd, today, target):
             'maturity_date': today + timedelta(days=rnd.randint(60, 800)),
             'source': rnd.choice(['manual'] * 3 + ['operator']),
         })
+
+
+def _showcase(env, rnd, login='dashkevich'):
+    """Часть записей — участнику, под которым ведётся показ.
+
+    Вкладка «моё» без единой записи неотличима от сломанной: участник
+    открывает её, видит пустоту и решает, что раздел не работает. У него
+    должны быть и свои НМА, и свои выпуски ЦФА, и активы на руках —
+    иначе проверить сценарий «выпустил, держу, лицензировал» не на чем.
+
+    Часть записей уходит на его организацию, а не на него самого: он
+    ведёт её счета, и «моё» обязано включать обе стороны — иначе отбор
+    разойдётся с правилами видимости.
+    """
+    user = env['res.users'].sudo().search([('login', '=', login)], limit=1)
+    if not user:
+        return
+    me = user.partner_id
+    org = (user.coop_treasury_partner_ids - me)[:1]
+
+    def hand_over(model, field, share):
+        records = env[model].sudo().search([])
+        if not records:
+            return 0
+        take = rnd.sample(list(records), max(1, int(len(records) * share)))
+        for i, record in enumerate(take):
+            record[field] = org if (org and i % 3 == 0) else me
+        return len(take)
+
+    _logger.info(
+        'Витрина участника: НМА %s, выпусков ЦФА %s, активов на руках %s',
+        hand_over('coop.intangible', 'owner_id', 0.15),
+        hand_over('coop.cfa.issue', 'issuer_id', 0.25),
+        hand_over('coop.cfa.holding', 'partner_id', 0.20))
+
+
+def _spread_created(env, rnd):
+    """Развести даты создания записей во времени.
+
+    Загрузчик идёт по видам циклом, и записи одного вида ложатся подряд.
+    Каталог сортирован «сначала новые», то есть по дате создания, — и на
+    первом экране семь одинаковых «баз данных поставщиков» подряд.
+    Разброс дат перемешивает виды между собой, не трогая сами записи.
+
+    Дата создания служебная, обычной записью её не изменить, поэтому
+    правится прямым запросом.
+    """
+    for model, table, days in (
+            ('coop.intangible', 'coop_intangible', 900),
+            ('coop.intangible.license', 'coop_intangible_license', 700),
+            ('coop.cfa.issue', 'coop_cfa_issue', 500),
+            ('coop.cfa.holding', 'coop_cfa_holding', 500)):
+        for record_id in env[model].sudo().search([]).ids:
+            env.cr.execute(
+                "UPDATE %s SET create_date = now() - (%%s || ' days')::interval "
+                "WHERE id = %%s" % table, (rnd.randint(0, days), record_id))
+    env.invalidate_all()

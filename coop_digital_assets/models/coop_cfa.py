@@ -138,6 +138,51 @@ class CoopCfaIssue(models.Model):
 
     import_key = fields.Char(string='Ключ источника', index=True, copy=False)
 
+
+    is_mine = fields.Boolean(
+        string='Моё', compute='_compute_is_mine', search='_search_is_mine',
+        help='Своё — то, что принадлежит участнику или организации, счета '
+             'которой он ведёт.')
+
+    def _my_partners(self):
+        """Партнёры, от чьего лица действует пользователь.
+
+        Не один партнёр, а набор: участник ведёт счета своей организации
+        и действует от её имени. Тот же набор используют правила
+        видимости — иначе «моё» и «что мне видно» разошлись бы.
+        """
+        return self.env.user.coop_treasury_partner_ids
+
+    @api.depends_context('uid')
+    def _compute_is_mine(self):
+        mine = self._my_partners()
+        for record in self:
+            record.is_mine = record.issuer_id in mine
+
+    def _search_is_mine(self, operator, value):
+        # Отбор идёт на сервере, а не выражением в самом действии:
+        # клиентский разборщик выражений не понимает обращений к полям
+        # пользователя, и вкладка «моё» не открывалась вовсе.
+        # Odoo приводит «= True» к «in {True}» ещё до вызова поиска и
+        # передаёт при этом свой набор, а не список. Поэтому значение
+        # разбирается как последовательность, а не сверяется с типом:
+        # иначе вкладка «моё» падала с ошибкой прямо при открытии.
+        if isinstance(value, bool):
+            wanted = value
+        else:
+            items = list(value)
+            if len(items) != 1 or not isinstance(items[0], bool):
+                raise ValueError('Поддерживается только «моё: да» или «моё: нет».')
+            wanted = items[0]
+        if operator in ('=', 'in'):
+            positive = wanted
+        elif operator in ('!=', 'not in'):
+            positive = not wanted
+        else:
+            raise ValueError('Поддерживается только «моё: да» или «моё: нет».')
+        return [('issuer_id', 'in' if positive else 'not in',
+                 self._my_partners().ids)]
+
     @api.depends('name', 'issuer_id.name', 'amount')
     def _compute_display_name(self):
         for record in self:
@@ -224,3 +269,42 @@ class CoopCfaHolding(models.Model):
     ], string='Откуда данные', default='manual', required=True,
         help='«Внесено участником» значит, что платформа этих сведений ни '
              'у кого не сверяла.')
+
+    is_mine = fields.Boolean(
+        string='Моё', compute='_compute_is_mine', search='_search_is_mine',
+        help='Своё — то, что принадлежит участнику или организации, счета '
+             'которой он ведёт.')
+
+    def _my_partners(self):
+        """Партнёры, от чьего лица действует пользователь."""
+        return self.env.user.coop_treasury_partner_ids
+
+    @api.depends_context('uid')
+    def _compute_is_mine(self):
+        mine = self._my_partners()
+        for record in self:
+            record.is_mine = record.partner_id in mine
+
+    def _search_is_mine(self, operator, value):
+        # Отбор идёт на сервере, а не выражением в самом действии:
+        # клиентский разборщик выражений не понимает обращений к полям
+        # пользователя, и вкладка «моё» не открывалась вовсе.
+        # Odoo приводит «= True» к «in {True}» ещё до вызова поиска и
+        # передаёт при этом свой набор, а не список. Поэтому значение
+        # разбирается как последовательность, а не сверяется с типом:
+        # иначе вкладка «моё» падала с ошибкой прямо при открытии.
+        if isinstance(value, bool):
+            wanted = value
+        else:
+            items = list(value)
+            if len(items) != 1 or not isinstance(items[0], bool):
+                raise ValueError('Поддерживается только «моё: да» или «моё: нет».')
+            wanted = items[0]
+        if operator in ('=', 'in'):
+            positive = wanted
+        elif operator in ('!=', 'not in'):
+            positive = not wanted
+        else:
+            raise ValueError('Поддерживается только «моё: да» или «моё: нет».')
+        return [('partner_id', 'in' if positive else 'not in',
+                 self._my_partners().ids)]
