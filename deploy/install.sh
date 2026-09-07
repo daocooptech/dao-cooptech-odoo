@@ -109,7 +109,12 @@ ln -sf /etc/nginx/sites-available/coop /etc/nginx/sites-enabled/coop
 rm -f /etc/nginx/sites-enabled/default
 
 systemctl daemon-reload
-systemctl enable coop-odoo.service coop-update.timer
+# `--now` обязателен для таймера: enable без него лишь помечает юнит к
+# запуску после перезагрузки, а до неё обновление не идёт вовсе —
+# `systemctl list-timers` показывает пустой список, и это легко принять
+# за «всё в порядке, просто срок не подошёл».
+systemctl enable coop-odoo.service
+systemctl enable --now coop-update.timer
 nginx -t && systemctl reload nginx
 
 say "Готово"
