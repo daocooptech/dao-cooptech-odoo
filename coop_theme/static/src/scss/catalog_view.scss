@@ -197,9 +197,14 @@
   // Odoo у поля стоит `border-end-0`, потому что справа к нему вплотную
   // приставлена кнопка меню. Меню в каталоге убрано — без этого поле
   // остаётся открытым справа и выглядит недорисованным.
+  // Цвет задаётся вместе с шириной и стилем. Без него граница берёт
+  // `currentColor` — цвет текста, — и в тёмной теме правый край поля
+  // светился белым, когда остальные три стороны графитовые. На экране
+  // это выглядело как белый хвостик, приставленный к полю справа.
   .o_cp_searchview .o_searchview {
     border-right-width: var(--border-width, 1px) !important;
     border-right-style: solid !important;
+    border-right-color: var(--coop-line-strong, var(--coop-line, #e6e6e1)) !important;
     border-top-right-radius: var(--border-radius, .25rem);
     border-bottom-right-radius: var(--border-radius, .25rem);
   }
