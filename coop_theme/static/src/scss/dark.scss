@@ -199,6 +199,16 @@
   small {
     color: var(--coop-slate) !important;
   }
+
+  // Заголовок пустого состояния Odoo красит отдельно и темнее прочего —
+  // на светлом фоне это выглядит спокойно, на тёмном он пропадает
+  // вовсе. А это первое, что читает человек на пустом экране: «здесь
+  // ничего нет» должно быть видно раньше объяснения почему.
+  .o_view_nocontent .o_view_nocontent_smiling_face,
+  .o_view_nocontent .o_view_nocontent_empty_folder,
+  .o_nocontent_help > p:first-child {
+    color: var(--coop-ink) !important;
+  }
 }
 
 // ── Лента и переписка ─────────────────────────────────────────────────
@@ -259,9 +269,18 @@
     color: var(--coop-slate) !important;
   }
 
+  // Подложка у метки рисуется дважды: фон самого элемента (он же
+  // `.badge`) и псевдоэлемент поверх него. Красить только псевдоэлемент
+  // мало — под ним остаётся светлый фон badge, и на нём же лежит текст.
+  .o_tag,
+  .o_tag[class*="o_tag_color_"] {
+    --background-color: var(--coop-line);
+    --color: var(--coop-slate);
+    background-color: var(--coop-line) !important;
+  }
+
   .o_tag::after,
   .o_tag[class*="o_tag_color_"]::after {
-    --background-color: var(--coop-line);
     background-color: var(--coop-line);
   }
 
