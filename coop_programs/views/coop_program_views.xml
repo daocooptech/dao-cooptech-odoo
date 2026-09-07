@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ═══ Каталог программ ═══
+
+       Карточка отвечает на четыре вопроса, которые задают о программе
+       раньше остальных: чем занимаются, кто ведёт, сколько собрано и
+       сколько уже участвует. Первоисточник вынесен в карточку
+       программы — в каталоге он занял бы место, которое нужнее
+       описанию. -->
+  <record id="view_coop_program_kanban" model="ir.ui.view">
+    <field name="name">coop.program.kanban</field>
+    <field name="model">coop.program</field>
+    <field name="arch" type="xml">
+      <kanban js_class="coop_catalog_kanban" class="o_coop_programs"
+              default_order="create_date desc">
+        <field name="city"/>
+        <field name="industry"/>
+        <field name="fund_amount"/>
+        <field name="participant_count"/>
+        <field name="duration_months"/>
+        <field name="organizer_id"/>
+        <field name="state"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_program">
+              <div class="o_coop_program_head">
+                <span class="o_coop_badge o_coop_program_state"
+                      t-att-class="'o_coop_program_' + record.state.raw_value">
+                  <t t-esc="record.state.value"/>
+                </span>
+                <span class="o_coop_program_loc" t-if="record.city.raw_value">
+                  <i class="fa fa-map-marker" aria-hidden="true"/>
+                  <t t-esc="record.city.value"/>
+                </span>
+              </div>
+              <div class="o_coop_program_name"><field name="name"/></div>
+              <div class="o_coop_program_fund">
+                Фонд программы: <field name="fund_amount" widget="monetary"/>
+              </div>
+              <div class="o_coop_program_meta">
+                <t t-esc="record.organizer_id.value"/> ·
+                срок <t t-esc="record.duration_months.value"/> мес.
+              </div>
+              <div class="o_coop_program_desc"><field name="description"/></div>
+              <div class="o_coop_program_foot">
+                <span class="o_coop_chip"><t t-esc="record.industry.value"/></span>
+                <span class="o_coop_program_people">
+                  <t t-esc="record.participant_count.value"/> участников
+                </span>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="view_coop_program_list" model="ir.ui.view">
+    <field name="name">coop.program.list</field>
+    <field name="model">coop.program</field>
+    <field name="arch" type="xml">
+      <list string="Целевые программы">
+        <field name="name"/>
+        <field name="organizer_id" string="Организатор"/>
+        <field name="city"/>
+        <field name="industry"/>
+        <field name="fund_amount" sum="Фонды всего"/>
+        <field name="participant_count" string="Участников"/>
+        <field name="duration_months" string="Срок, мес."/>
+        <field name="state" widget="badge"
+               decoration-info="state == 'collecting'"
+               decoration-success="state == 'active'"
+               decoration-muted="state == 'finished'"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_program_form" model="ir.ui.view">
+    <field name="name">coop.program.form</field>
+    <field name="model">coop.program</field>
+    <field name="arch" type="xml">
+      <form string="Целевая программа">
+        <header>
+          <button name="action_join" type="object" string="Присоединиться"
+                  class="btn-primary" invisible="is_participant or state == 'finished'"/>
+          <button name="action_leave" type="object" string="Выйти из программы"
+                  invisible="not is_participant"/>
+          <button name="action_subscribe" type="object" string="Подписаться на новости"
+                  invisible="is_subscribed"/>
+          <button name="action_unsubscribe" type="object" string="Отписаться"
+                  invisible="not is_subscribed"/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="draft,collecting,active,finished"/>
+        </header>
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Название программы"/></h1>
+          </div>
+          <group>
+            <group string="Кто и где">
+              <field name="organizer_id"/>
+              <field name="city"/>
+              <field name="geography" placeholder="участие удалённо по всей РФ"/>
+              <field name="industry"/>
+            </group>
+            <group string="Сколько и как долго">
+              <field name="fund_amount"/>
+              <field name="currency_id" invisible="1"/>
+              <field name="duration_months"/>
+              <field name="participant_count"/>
+              <field name="is_participant" invisible="1"/>
+              <field name="is_subscribed" invisible="1"/>
+            </group>
+          </group>
+
+          <!-- Первоисточник стоит выше описания намеренно: участник
+               должен видеть, что механика проверена, до того как решит,
+               интересна ли она ему. -->
+          <group string="Научная основа">
+            <group>
+              <field name="source_author" placeholder="А.В. Чаянов"/>
+              <field name="source_title"
+                     placeholder="Организация крестьянского хозяйства"/>
+              <field name="source_year" placeholder="1925–1927"/>
+            </group>
+            <group>
+              <field name="source_summary" nolabel="1"
+                     placeholder="Какая именно механика взята из работы"/>
+            </group>
+          </group>
+
+          <notebook>
+            <page string="О программе" name="description">
+              <field name="description"
+                     placeholder="Что объединяет участников и что они делают сообща"/>
+            </page>
+            <page string="Механика" name="steps">
+              <field name="step_ids">
+                <list editable="bottom">
+                  <field name="sequence" widget="handle"/>
+                  <field name="icon" string="Значок"/>
+                  <field name="name"/>
+                  <field name="note" string="Пояснение" optional="show"/>
+                </list>
+              </field>
+            </page>
+            <page string="Потребности" name="needs">
+              <field name="need_ids">
+                <list editable="bottom"
+                      decoration-muted="state == 'covered'">
+                  <field name="sequence" widget="handle"/>
+                  <field name="name"/>
+                  <field name="kind"/>
+                  <field name="amount" optional="show"/>
+                  <field name="currency_id" column_invisible="1"/>
+                  <field name="state" widget="badge"
+                         decoration-success="state == 'covered'"/>
+                  <field name="covered_by_id" optional="hide"/>
+                  <button name="action_cover" type="object" string="Беру на себя"
+                          icon="fa-hand-paper-o" invisible="state == 'covered'"/>
+                </list>
+              </field>
+            </page>
+            <page string="Участники" name="participants">
+              <field name="participant_ids" widget="many2many_tags"/>
+            </page>
+            <page string="Ресурсы программы" name="resources">
+              <field name="resource_ids" widget="many2many_tags"/>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_program_search" model="ir.ui.view">
+    <field name="name">coop.program.search</field>
+    <field name="model">coop.program</field>
+    <field name="arch" type="xml">
+      <search string="Целевые программы">
+        <field name="name"/>
+        <field name="organizer_id" string="Организатор"/>
+        <field name="city"/>
+        <filter name="mine" string="Мои программы"
+                domain="[('is_participant', '=', True)]"/>
+        <filter name="collecting" string="Набирают участников"
+                domain="[('state', '=', 'collecting')]"/>
+        <filter name="active" string="Идут" domain="[('state', '=', 'active')]"/>
+        <separator/>
+        <filter name="finished" string="Завершённые"
+                domain="[('state', '=', 'finished')]"/>
+        <group>
+          <filter name="by_industry" string="По направлению"
+                  context="{'group_by': 'industry'}"/>
+          <filter name="by_city" string="По городу" context="{'group_by': 'city'}"/>
+          <filter name="by_state" string="По состоянию" context="{'group_by': 'state'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_program" model="ir.actions.act_window">
+    <field name="name">Целевые программы</field>
+    <field name="res_model">coop.program</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="context">{'coop_catalog': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Программ пока нет</p>
+      <p>Целевая программа объединяет самостоятельные хозяйства ради того,
+         что поодиночке невыгодно: оптовой закупки, общей техники, общего
+         склада. Каждое хозяйство остаётся своим — программа надстраивается
+         над снабжением и сбытом, а не заменяет их.</p>
+    </field>
+  </record>
+
+  <record id="action_coop_program_mine" model="ir.actions.act_window">
+    <field name="name">Мои программы</field>
+    <field name="res_model">coop.program</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="domain">[('is_participant', '=', True)]</field>
+    <field name="context">{'coop_catalog': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Вы пока ни в одной программе</p>
+      <p>Присоединиться можно из каталога: программа принимает и тех, кто
+         не готов становиться пайщиком кооператива — это разные решения.</p>
+    </field>
+  </record>
+
+  <menuitem id="menu_coop_programs_root" name="Целевые программы ПК"
+            sequence="140"/>
+  <menuitem id="menu_coop_programs_catalog" name="Все программы"
+            parent="menu_coop_programs_root"
+            action="action_coop_program" sequence="10"/>
+  <menuitem id="menu_coop_programs_mine" name="Мои программы"
+            parent="menu_coop_programs_root"
+            action="action_coop_program_mine" sequence="20"/>
+
+</odoo>

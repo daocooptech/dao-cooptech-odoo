@@ -10,6 +10,7 @@ from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_deals,
                     load_examples, load_memberships, load_messages,
                     load_org_profiles, load_orgs, load_people, load_projects,
+                    load_programs,
                     load_promotions,
                     load_reference, load_resources, load_skills,
                     load_vacancies, load_verification, load_wallets)
@@ -92,6 +93,10 @@ class CoopDemoLoader(models.AbstractModel):
         # объявление и оплачивается токенами платформы.
         if 'coop.promotion' in self.env:
             load_promotions.load_promotions(self.env)
+        # Целевые программы — после организаций и людей: организатор
+        # программы всегда кооператив, участники — живые люди.
+        if 'coop.program' in self.env:
+            load_programs.load_programs(self.env)
         # Кошельки последними: состав вкладок зависит от членства, а
         # сальдо по контрагентам считается из платежей по сделкам.
         load_wallets.load_wallets(self.env)

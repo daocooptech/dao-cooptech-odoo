@@ -47,6 +47,7 @@
         'views/coop_cession_views.xml',
         'views/coop_token_views.xml',
         'views/coop_resource_issue_views.xml',
+        'views/coop_escrow_views.xml',
     ],
     'assets': {
         'web.assets_backend': [

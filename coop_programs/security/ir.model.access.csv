@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_coop_program_user,Целевые программы — участник,model_coop_program,base.group_user,1,1,1,0
+access_coop_program_admin,Целевые программы — администратор,model_coop_program,base.group_system,1,1,1,1
+access_coop_program_step_user,Механика программы — участник,model_coop_program_step,base.group_user,1,1,1,0
+access_coop_program_step_admin,Механика программы — администратор,model_coop_program_step,base.group_system,1,1,1,1
+access_coop_program_need_user,Потребности программы — участник,model_coop_program_need,base.group_user,1,1,1,0
+access_coop_program_need_admin,Потребности программы — администратор,model_coop_program_need,base.group_system,1,1,1,1

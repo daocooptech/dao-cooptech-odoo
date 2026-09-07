@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Поставки: где лежат деньги и чего ждут.
+
+       Экран отвечает на два вопроса сразу — что мне должны привезти и
+       что я должен привезти. Разделять их на два раздела незачем:
+       участник платформы бывает и покупателем, и поставщиком, часто в
+       один день. -->
+  <record id="view_coop_escrow_list" model="ir.ui.view">
+    <field name="name">coop.token.escrow.list</field>
+    <field name="model">coop.token.escrow</field>
+    <field name="arch" type="xml">
+      <list string="Поставки" create="false"
+            decoration-warning="state == 'held' and days_left &lt; 0"
+            decoration-success="state == 'released'"
+            decoration-muted="state == 'refunded'">
+        <field name="claim_id" string="Выпуск"/>
+        <field name="seller_id" string="Поставщик"/>
+        <field name="buyer_id" string="Покупатель"/>
+        <field name="quantity" string="Количество"/>
+        <field name="amount" string="Сумма, ₽" sum="Всего"/>
+        <field name="due_date" string="Срок"/>
+        <field name="days_left" string="Дней" optional="show"/>
+        <field name="delivered_on" string="Отмечена поставка" optional="hide"/>
+        <field name="accepted_on" string="Принято" optional="hide"/>
+        <field name="disputed" string="Спор" optional="show"/>
+        <field name="state" string="Состояние" widget="badge"
+               decoration-info="state == 'held'"
+               decoration-success="state == 'released'"
+               decoration-muted="state == 'refunded'"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_escrow_form" model="ir.ui.view">
+    <field name="name">coop.token.escrow.form</field>
+    <field name="model">coop.token.escrow</field>
+    <field name="arch" type="xml">
+      <form string="Поставка">
+        <header>
+          <button name="action_mark_delivered" type="object"
+                  string="Я привёз" class="btn-primary"
+                  invisible="state != 'held' or delivered_on"/>
+          <button name="action_accept" type="object"
+                  string="Принять поставку" class="btn-primary"
+                  invisible="state != 'held' or accepted_on"/>
+          <button name="action_dispute" type="object" string="Заявить спор"
+                  invisible="state != 'held' or disputed"/>
+          <button name="action_refund" type="object" string="Вернуть деньги"
+                  invisible="state != 'held' or days_left &gt;= 0"
+                  confirm="Срок прошёл. Деньги вернутся покупателю, а выпуск будет отмечен как сорванный. Продолжить?"/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="held,released,refunded"/>
+        </header>
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="display_name" readonly="1"/></h1>
+          </div>
+          <group>
+            <group string="Кто и сколько">
+              <field name="claim_id"/>
+              <field name="seller_id"/>
+              <field name="buyer_id"/>
+              <field name="quantity"/>
+              <field name="amount"/>
+            </group>
+            <group string="Сроки">
+              <field name="due_date"/>
+              <field name="days_left"/>
+              <field name="delivered_on"/>
+              <field name="accepted_on"/>
+              <field name="settled_on"/>
+            </group>
+          </group>
+          <group string="Спор" invisible="not disputed">
+            <field name="disputed" readonly="1"/>
+            <field name="dispute_note" placeholder="Что именно не так с поставкой"/>
+          </group>
+          <div class="alert alert-info" role="status" invisible="state != 'held'">
+            Деньги лежат до поставки. Когда поставщик отметит, что привёз,
+            а покупатель подтвердит приёмку, оплата уйдёт поставщику. Если
+            срок пройдёт без этого, деньги вернутся покупателю сами.
+          </div>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_escrow_search" model="ir.ui.view">
+    <field name="name">coop.token.escrow.search</field>
+    <field name="model">coop.token.escrow</field>
+    <field name="arch" type="xml">
+      <search string="Поставки">
+        <field name="claim_id" string="Выпуск"/>
+        <field name="seller_id" string="Поставщик"/>
+        <field name="buyer_id" string="Покупатель"/>
+        <filter name="held" string="Ждут поставки" domain="[('state', '=', 'held')]"/>
+        <filter name="overdue" string="Срок прошёл"
+                domain="[('state', '=', 'held'), ('due_date', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
+        <filter name="disputed" string="Со спором" domain="[('disputed', '=', True)]"/>
+        <separator/>
+        <filter name="released" string="Расчёт завершён" domain="[('state', '=', 'released')]"/>
+        <filter name="refunded" string="Деньги вернулись" domain="[('state', '=', 'refunded')]"/>
+        <group>
+          <filter name="by_claim" string="По выпуску" context="{'group_by': 'claim_id'}"/>
+          <filter name="by_state" string="По состоянию" context="{'group_by': 'state'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_escrow" model="ir.actions.act_window">
+    <field name="name">Поставки</field>
+    <field name="res_model">coop.token.escrow</field>
+    <field name="view_mode">list,form</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Поставок пока нет</p>
+      <p>Здесь оказываются оплаты по купленным обещаниям: деньги лежат до
+         приёмки. Поставщик отмечает, что привёз, покупатель подтверждает —
+         и оплата уходит поставщику. Если срок прошёл, а поставки не было,
+         деньги возвращаются покупателю сами.</p>
+    </field>
+  </record>
+
+  <menuitem id="menu_coop_escrow" name="Поставки"
+            parent="menu_coop_tokenomics_root"
+            action="action_coop_escrow" sequence="25"/>
+
+</odoo>

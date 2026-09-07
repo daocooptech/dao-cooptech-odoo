@@ -48,7 +48,7 @@ EXTENSION_ITEMS = [
     ('Токеномика', 'fa-diamond', 'coop_tokenomics.action_coop_exchange_screen'),
     ('Цифровые активы', 'fa-certificate', 'coop_digital_assets.action_coop_cfa_issue'),
     ('Нематериальные активы', 'fa-lightbulb-o', 'coop_intangibles.action_coop_intangibles'),
-    ('Целевые программы ПК', 'fa-bullseye', ''),
+    ('Целевые программы ПК', 'fa-bullseye', 'coop_programs.action_coop_program'),
     ('Совместные закупки', 'fa-shopping-basket', ''),
     ('Склад', 'fa-archive', ''),
     ('События', 'fa-calendar', ''),
