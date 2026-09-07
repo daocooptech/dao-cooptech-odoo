@@ -8,24 +8,42 @@ import { useService } from "@web/core/utils/hooks";
  * Торговый экран биржи.
  *
  * Устроен как площадка обмена, к которой участник привык по внешним
- * биржам: слева список рынков с ценой и изменением, справа выбранный
- * рынок — заявки на продажу и на покупку двумя колонками, под ними
- * прошедшие сделки, сбоку форма покупки.
+ * биржам: категории над списком рынков, сортировка по любой колонке,
+ * группировки, стакан двумя колонками, линия цены и форма сделки.
  *
- * Одно отличие от привычного, и оно намеренное: **встречные заявки не
- * сводятся сами**. Покупатель выбирает конкретную заявку и подтверждает
- * покупку. Автоматическое сведение по цене — это организованные торги,
- * которые вправе проводить только биржа по лицензии Банка России
- * (ст. 5 ФЗ «Об организованных торгах»). Внешне разница в один щелчок,
- * юридически — принципиальная.
+ * Два отличия от привычного, и оба намеренные.
  *
- * Второе отличие: рынок здесь — не пара валют, а партия товара. Поэтому
- * у каждой строки списка стоят качество, место и срок: «морковь» без
- * этих трёх слов — не товар, а обещание вообще.
+ * **Встречные заявки не сводятся сами.** Покупатель выбирает конкретную
+ * заявку и подтверждает покупку. Автоматическое сведение по цене — это
+ * организованные торги, которые вправе проводить только биржа по
+ * лицензии Банка России (ст. 5 ФЗ «Об организованных торгах»). Внешне
+ * разница в один щелчок, юридически — принципиальная.
+ *
+ * **Рынок — не пара валют, а партия товара.** Поэтому у каждой строки
+ * стоят качество, место и срок: «морковь» без этих трёх слов — не товар,
+ * а обещание вообще. По той же причине группировки идут по типу товара,
+ * сроку, месту и поставщику: покупателю зерна и покупателю смен
+ * экскаватора нужны разные списки.
  */
 export class CoopExchange extends Component {
     static template = "coop_tokenomics.Exchange";
     static props = ["*"];
+
+    static CATEGORIES = [
+        { key: "all", label: "Все рынки" },
+        { key: "soon", label: "Скоро поставка" },
+        { key: "new", label: "Новые выпуски" },
+        { key: "up", label: "Дорожают" },
+        { key: "down", label: "Дешевеют" },
+    ];
+
+    static GROUPINGS = [
+        { key: "none", label: "Без группировки" },
+        { key: "type", label: "По типу товара" },
+        { key: "due", label: "По сроку поставки" },
+        { key: "place", label: "По месту передачи" },
+        { key: "issuer", label: "По поставщику" },
+    ];
 
     setup() {
         this.orm = useService("orm");
@@ -33,14 +51,19 @@ export class CoopExchange extends Component {
         this.notification = useService("notification");
 
         this.state = useState({
-            markets: [],
+            data: null,
             book: null,
             wallet: null,
             currentId: null,
             search: "",
-            side: "buy",
+            category: "all",
+            grouping: "none",
+            sort: "due",
+            desc: false,
+            openGroups: {},
             amount: 0,
             selectedOrder: null,
+            showScore: false,
             loading: true,
         });
 
@@ -50,38 +73,113 @@ export class CoopExchange extends Component {
     }
 
     async load() {
-        const [markets, wallet] = await Promise.all([
-            this.orm.call("coop.exchange", "markets", []),
+        const [data, wallet] = await Promise.all([
+            this.orm.call("coop.exchange", "markets", [], {
+                category: this.state.category,
+                grouping: this.state.grouping,
+            }),
             this.orm.call("coop.exchange", "wallet", []),
         ]);
-        this.state.markets = markets;
+        this.state.data = data;
         this.state.wallet = wallet;
         this.state.loading = false;
-        if (markets.length) {
-            await this.select(markets[0].id);
+        const rows = this.sortedRows;
+        if (rows.length && !rows.some((r) => r.id === this.state.currentId)) {
+            await this.select(rows[0].id);
         }
     }
 
-    /** Рынки, отфильтрованные строкой поиска.
+    get rows() {
+        return this.state.data ? this.state.data.rows : [];
+    }
+
+    get counts() {
+        return this.state.data ? this.state.data.counts : {};
+    }
+
+    get groups() {
+        return this.state.data ? this.state.data.groups : [];
+    }
+
+    /** Рынки после поиска и сортировки.
      *
-     * Ищем по названию, поставщику и месту передачи разом: участник
+     * Ищем по названию, поставщику, месту и качеству разом: участник
      * помнит партию по-разному — кто по товару, кто по хозяйству, кто по
      * тому, что забирать во Владивостоке.
      */
-    get visibleMarkets() {
+    get sortedRows() {
         const q = this.state.search.trim().toLowerCase();
-        if (!q) {
-            return this.state.markets;
+        let rows = this.rows;
+        if (q) {
+            rows = rows.filter((m) =>
+                [m.name, m.issuer, m.place, m.quality, m.city]
+                    .filter(Boolean)
+                    .some((v) => v.toLowerCase().includes(q))
+            );
         }
-        return this.state.markets.filter((m) =>
-            [m.name, m.issuer, m.place, m.quality]
-                .filter(Boolean)
-                .some((v) => v.toLowerCase().includes(q))
-        );
+        const key = this.state.sort;
+        const sign = this.state.desc ? -1 : 1;
+        return [...rows].sort((a, b) => {
+            const va = key === "due" ? a.days_left : a[key];
+            const vb = key === "due" ? b.days_left : b[key];
+            if (typeof va === "string") {
+                return sign * va.localeCompare(vb, "ru");
+            }
+            return sign * ((va || 0) - (vb || 0));
+        });
+    }
+
+    /** Строки одной группы — в том же порядке сортировки, что и общий список. */
+    groupRows(group) {
+        const ids = new Set(group.ids);
+        return this.sortedRows.filter((r) => ids.has(r.id));
+    }
+
+    isGroupOpen(group) {
+        return this.state.openGroups[group.key] !== false;
+    }
+
+    toggleGroup(group) {
+        this.state.openGroups[group.key] = !this.isGroupOpen(group);
     }
 
     get current() {
         return this.state.book ? this.state.book.claim : null;
+    }
+
+    get currentRow() {
+        return this.rows.find((r) => r.id === this.state.currentId) || null;
+    }
+
+    async setCategory(key) {
+        this.state.category = key;
+        await this.load();
+    }
+
+    async setGrouping(ev) {
+        this.state.grouping = ev.target.value;
+        await this.load();
+    }
+
+    /** Сортировка щелчком по заголовку — как в биржевых таблицах.
+     *
+     * Повторный щелчок по той же колонке переворачивает порядок; это
+     * ожидаемое поведение, и объяснять его подписью не нужно.
+     */
+    sortBy(key) {
+        if (this.state.sort === key) {
+            this.state.desc = !this.state.desc;
+        } else {
+            this.state.sort = key;
+            this.state.desc = key !== "due" && key !== "name";
+        }
+    }
+
+    sortMark(key) {
+        if (this.state.sort !== key) {
+            return "";
+        }
+        return this.state.desc ? " ↓" : " ↑";
     }
 
     async select(claimId) {
@@ -95,10 +193,8 @@ export class CoopExchange extends Component {
         this.state.search = ev.target.value;
     }
 
-    setSide(side) {
-        this.state.side = side;
-        this.state.selectedOrder = null;
-        this.state.amount = 0;
+    toggleScore() {
+        this.state.showScore = !this.state.showScore;
     }
 
     /** Выбрать заявку в стакане.
@@ -158,7 +254,7 @@ export class CoopExchange extends Component {
                 { type: "success" }
             );
             await this.select(this.state.currentId);
-            await this.refreshWallet();
+            await this.load();
         } catch (error) {
             this.notification.add(
                 error.data && error.data.message ? error.data.message : String(error),
@@ -167,11 +263,6 @@ export class CoopExchange extends Component {
         }
     }
 
-    async refreshWallet() {
-        this.state.wallet = await this.orm.call("coop.exchange", "wallet", []);
-    }
-
-    /** Открыть карточку выпуска — там подробности и действия поставщика. */
     openClaim() {
         if (!this.state.currentId) {
             return;
@@ -188,6 +279,8 @@ export class CoopExchange extends Component {
     openWallet() {
         this.action.doAction("coop_profile.action_coop_my_page");
     }
+
+    // ── Отрисовка чисел ──────────────────────────────────────────────────
 
     money(value, currency) {
         const num = (value || 0).toLocaleString("ru-RU", {
@@ -207,6 +300,21 @@ export class CoopExchange extends Component {
         return value > 0 ? `+${num}%` : `${num}%`;
     }
 
+    /** Срок словами: до чего считать дни, участник понимает сразу. */
+    dueLabel(row) {
+        const d = row.days_left;
+        if (d < 0) {
+            return "срок прошёл";
+        }
+        if (d === 0) {
+            return "сегодня";
+        }
+        if (d <= 30) {
+            return `через ${d} дн.`;
+        }
+        return row.due;
+    }
+
     /** Ширина полоски объёма в стакане.
      *
      * На биржах за ценой стоит полоса — по ней видно, где стена, а где
@@ -217,6 +325,40 @@ export class CoopExchange extends Component {
     depth(order, rows) {
         const max = Math.max(...rows.map((r) => r.quantity), 1);
         return `${Math.max((order.quantity / max) * 100, 4)}%`;
+    }
+
+    /** Линия цены по сделкам — координаты для SVG.
+     *
+     * Своей библиотеки графиков не подключаем: линия из десятка точек
+     * рисуется двумя строками, а зависимость тянула бы за собой вес,
+     * который на этом экране нечем оправдать.
+     */
+    get chartPath() {
+        const points = (this.state.book && this.state.book.chart) || [];
+        if (points.length < 2) {
+            return "";
+        }
+        const prices = points.map((p) => p.price);
+        const min = Math.min(...prices);
+        const max = Math.max(...prices);
+        const span = max - min || 1;
+        const step = 100 / (points.length - 1);
+        return points
+            .map((p, i) => {
+                const x = (i * step).toFixed(2);
+                const y = (100 - ((p.price - min) / span) * 90 - 5).toFixed(2);
+                return `${i === 0 ? "M" : "L"}${x},${y}`;
+            })
+            .join(" ");
+    }
+
+    get chartRange() {
+        const points = (this.state.book && this.state.book.chart) || [];
+        if (!points.length) {
+            return null;
+        }
+        const prices = points.map((p) => p.price);
+        return { min: Math.min(...prices), max: Math.max(...prices), count: points.length };
     }
 }
 

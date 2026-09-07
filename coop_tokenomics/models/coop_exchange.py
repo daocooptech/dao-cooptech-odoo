@@ -1,5 +1,24 @@
 # -*- coding: utf-8 -*-
+from datetime import timedelta
+
 from odoo import api, fields, models
+
+# Категории над списком рынков — то же, что на биржах вкладки «Тренд»,
+# «Новые», «Растущие», только переведённое на товар. Понятие «тренда» у
+# нас заменяет срок: чем ближе поставка, тем горячее торгуют, потому что
+# ждать осталось меньше и обещание превращается в товар.
+CATEGORIES = ['all', 'soon', 'new', 'up', 'down']
+
+# По чему группировать. Четыре разреза, и каждый отвечает на свой вопрос:
+# что покупаю, когда получу, куда ехать, у кого беру.
+GROUPINGS = ['none', 'type', 'due', 'place', 'issuer']
+
+TYPE_LABELS = {
+    'material': 'Материалы',
+    'equipment': 'Оборудование',
+    'labour': 'Труд',
+    'financial': 'Финансы',
+}
 
 
 class CoopExchange(models.AbstractModel):
@@ -21,15 +40,15 @@ class CoopExchange(models.AbstractModel):
     # ── Рынки ────────────────────────────────────────────────────────────
 
     @api.model
-    def markets(self, limit=60):
-        """Список торгуемых выпусков с ценой и оборотом.
+    def markets(self, category='all', grouping='none', limit=200):
+        """Список торгуемых выпусков с ценой, оборотом и оценкой.
 
         Рынок здесь — один выпуск токенов: партия товара определённого
         качества, в определённом месте, к определённому сроку. Пара на
         обычной бирже устроена так же — «это за то», — только «то» у нас
-        всегда валюта расчёта, потому что менять морковь на пиломатериалы
-        напрямую значит заводить пул ликвидности на каждую пару, которого
-        никто не наполнит.
+        всегда валюта расчёта: менять морковь на пиломатериалы напрямую
+        значит заводить пул ликвидности на каждую пару, которого никто не
+        наполнит.
         """
         Claim = self.env['coop.token.claim']
         claims = Claim.search(
@@ -38,7 +57,10 @@ class CoopExchange(models.AbstractModel):
 
         Order = self.env['coop.token.order']
         Trade = self.env['coop.token.trade']
-        result = []
+        today = fields.Date.context_today(self)
+        me = self.env.user._coop_acting_partner()
+
+        rows = []
         for claim in claims:
             open_orders = Order.search([
                 ('claim_id', '=', claim.id),
@@ -48,36 +70,44 @@ class CoopExchange(models.AbstractModel):
             buys = open_orders.filtered(lambda o: o.side == 'buy')
             trades = Trade.search([
                 ('claim_id', '=', claim.id), ('state', '=', 'done')],
-                order='confirmed_on desc', limit=20)
+                order='confirmed_on desc', limit=30)
 
             # Цена рынка — по последней прошедшей сделке, а при её
             # отсутствии по лучшему предложению на продажу. Не средняя:
-            # средняя между «продам за сто» и «куплю за пятьдесят» —
-            # число, по которому никто не торговал и не будет.
+            # средняя между «продам за сто» и «куплю за пятьдесят» — число,
+            # по которому никто не торговал и не будет.
             last = trades[:1].price_per_unit if trades else 0.0
             best_ask = min(sells.mapped('price_per_unit')) if sells else 0.0
             best_bid = max(buys.mapped('price_per_unit')) if buys else 0.0
             price = last or best_ask or claim.price_per_unit
+            change = ((price - claim.price_per_unit) / claim.price_per_unit * 100
+                      if claim.price_per_unit else 0.0)
 
-            result.append({
+            days_left = (claim.delivery_date - today).days if claim.delivery_date else 999
+            age_days = (fields.Date.to_date(claim.create_date) - today).days * -1 \
+                if claim.create_date else 999
+
+            rows.append({
                 'id': claim.id,
                 'name': claim.resource_id.name or claim.display_name,
                 'issuer': claim.issuer_id.name,
+                'issuer_id': claim.issuer_id.id,
+                'type': claim.resource_id.resource_type or 'material',
+                'type_label': TYPE_LABELS.get(
+                    claim.resource_id.resource_type or 'material', 'Прочее'),
                 'quality': claim.quality,
                 'place': claim.delivery_place,
+                'city': (claim.resource_id.city or '').strip() or '—',
                 'due': claim.delivery_date and claim.delivery_date.isoformat(),
+                'days_left': days_left,
+                'age_days': age_days,
                 'unit': claim.unit_label,
                 'currency': claim.settlement_currency,
                 'issue_price': claim.price_per_unit,
                 'price': price,
                 'best_ask': best_ask,
                 'best_bid': best_bid,
-                # Изменение к цене выпуска — то, что на бирже называют
-                # «сколько прибавил с размещения». Считается от цены
-                # выпуска, а не от вчерашней: сделок по большинству
-                # выпусков за сутки просто нет.
-                'change': ((price - claim.price_per_unit) / claim.price_per_unit * 100
-                           if claim.price_per_unit else 0.0),
+                'change': change,
                 'supply': claim.quantity,
                 'available': claim.available_quantity,
                 'holders': claim.holder_count,
@@ -85,8 +115,149 @@ class CoopExchange(models.AbstractModel):
                 'trades': len(trades),
                 'state': claim.state,
                 'is_future': claim.is_future,
+                'mine': claim.issuer_id.id == me.id,
+                'spark': list(reversed(trades.mapped('price_per_unit')))[-12:],
             })
-        return result
+            rows[-1].update(self._reliability(claim, rows[-1]))
+
+        # Счётчики считаются по всему набору, а не по отфильтрованному:
+        # иначе на вкладке «Скоро поставка» в подписи «Все рынки» стоит
+        # число самой этой вкладки, и переключаться становится некуда.
+        counts = self._counts(rows)
+        rows = self._filter_category(rows, category)
+        return {
+            'rows': rows,
+            'groups': self._group(rows, grouping),
+            'grouping': grouping,
+            'category': category,
+            'counts': counts,
+        }
+
+    def _filter_category(self, rows, category):
+        """Категории — не украшение, а ответ на «что смотреть сначала».
+
+        «Скоро поставка» вместо биржевого «тренда»: у обещания на товар
+        нет разогрева новостями, зато есть срок, и по мере его
+        приближения торгуют чаще. «Новые выпуски» — прямой аналог новых
+        пар. «Дорожают» и «дешевеют» — Gainers и Losers, только считанные
+        от цены выпуска, а не от вчерашней: сделок по большинству
+        выпусков за сутки просто нет.
+        """
+        if category == 'soon':
+            return [r for r in rows if 0 <= r['days_left'] <= 30]
+        if category == 'new':
+            return [r for r in rows if r['age_days'] <= 14]
+        if category == 'up':
+            return sorted([r for r in rows if r['change'] > 0],
+                          key=lambda r: -r['change'])
+        if category == 'down':
+            return sorted([r for r in rows if r['change'] < 0],
+                          key=lambda r: r['change'])
+        return rows
+
+    def _group(self, rows, grouping):
+        """Разложить рынки по группам с итогами по каждой.
+
+        Итог по группе — оборот и число рынков: без них группировка
+        превращается в оглавление, по которому не видно, где вообще
+        что-то происходит.
+        """
+        if grouping == 'none':
+            return []
+        keys = {
+            'type': lambda r: (r['type'], r['type_label']),
+            'due': lambda r: self._due_bucket(r['days_left']),
+            'place': lambda r: (r['city'], r['city']),
+            'issuer': lambda r: (str(r['issuer_id']), r['issuer']),
+        }
+        pick = keys.get(grouping)
+        if not pick:
+            return []
+        buckets = {}
+        for row in rows:
+            key, label = pick(row)
+            bucket = buckets.setdefault(key, {
+                'key': key, 'label': label, 'ids': [], 'volume': 0.0, 'count': 0,
+            })
+            bucket['ids'].append(row['id'])
+            bucket['volume'] += row['volume']
+            bucket['count'] += 1
+        return sorted(buckets.values(), key=lambda b: -b['count'])
+
+    def _due_bucket(self, days):
+        if days < 0:
+            return ('overdue', 'Срок прошёл')
+        if days <= 30:
+            return ('m1', 'В ближайший месяц')
+        if days <= 90:
+            return ('m3', 'В ближайший квартал')
+        if days <= 180:
+            return ('m6', 'В полугодие')
+        return ('later', 'Позже')
+
+    def _counts(self, rows):
+        """Сколько рынков в каждой категории — для подписей на вкладках."""
+        return {
+            'all': len(rows),
+            'soon': len([r for r in rows if 0 <= r['days_left'] <= 30]),
+            'new': len([r for r in rows if r['age_days'] <= 14]),
+            'up': len([r for r in rows if r['change'] > 0]),
+            'down': len([r for r in rows if r['change'] < 0]),
+        }
+
+    def _reliability(self, claim, row):
+        """Оценка выпуска: чем обеспечено обещание и как его исполняют.
+
+        Устроена как сводные оценки токенов на биржах — из держателей,
+        оборота и ликвидности, — но собрана из того, что на платформе
+        действительно что-то значит: уровень доверия поставщика, внесённый
+        залог, история его прошлых выпусков и живость торгов.
+
+        **Показывается с расшифровкой, а не одной цифрой.** Балл без
+        объяснения — это просьба поверить платформе на слово; участнику
+        нужно видеть, что именно за ним стоит, чтобы решать самому.
+        Поэтому наружу уходит и число, и четыре слагаемых.
+
+        Максимум сорок, потому что слагаемых четыре и каждое до десяти;
+        приводить к ста незачем — точности это не добавит, а видимость
+        точности создаст.
+        """
+        issuer = claim.issuer_id
+        # Доверие поставщика — уже посчитанное платформой по завершённым
+        # сделкам. Своей формулы здесь не заводим: две меры доверия рядом
+        # неизбежно разойдутся, и участник не поймёт, какой верить.
+        trust = min((issuer.coop_trust or 0) / 10.0, 10.0)
+
+        deposit = 10.0 if claim.deposit_paid else 0.0
+
+        history = self.env['coop.token.claim'].search([
+            ('issuer_id', '=', issuer.id),
+            ('state', 'in', ('settled', 'defaulted')),
+        ])
+        settled = len(history.filtered(lambda c: c.state == 'settled'))
+        broken = len(history.filtered(lambda c: c.state == 'defaulted'))
+        if settled or broken:
+            record = settled / float(settled + broken) * 10.0
+        else:
+            # Первый выпуск — не плохой и не хороший: половина балла и
+            # прямая пометка, что истории ещё нет.
+            record = 5.0
+
+        liveliness = min(row['holders'] * 1.5 + row['trades'] * 0.8, 10.0)
+
+        return {
+            'score': round(trust + deposit + record + liveliness, 1),
+            'score_parts': {
+                'trust': round(trust, 1),
+                'deposit': deposit,
+                'record': round(record, 1),
+                'liveliness': round(liveliness, 1),
+            },
+            'issuer_trust': issuer.coop_trust or 0,
+            'issuer_settled': settled,
+            'issuer_broken': broken,
+            'first_issue': not (settled or broken),
+        }
 
     # ── Стакан и сделки ──────────────────────────────────────────────────
 
@@ -128,9 +299,18 @@ class CoopExchange(models.AbstractModel):
         ], order='price_per_unit desc')
         trades = self.env['coop.token.trade'].search([
             ('claim_id', '=', claim_id), ('state', '=', 'done'),
-        ], order='confirmed_on desc', limit=25)
+        ], order='confirmed_on desc', limit=40)
 
         holding = claim.holder_ids.filtered(lambda h: h.partner_id == me)
+
+        # Линия цены строится по сделкам в хронологическом порядке. Свечей
+        # нет намеренно: по большинству выпусков сделок единицы, и свечной
+        # график рисовал бы движение, которого не было.
+        chart = [{
+            'price': t.price_per_unit,
+            'when': t.confirmed_on and fields.Datetime.to_string(t.confirmed_on),
+        } for t in reversed(trades)]
+
         return {
             'claim': {
                 'id': claim.id,
@@ -163,6 +343,7 @@ class CoopExchange(models.AbstractModel):
                 'seller': t.seller_id.name,
                 'tx': t.tx_hash,
             } for t in trades],
+            'chart': chart,
             'my_holding': holding[:1].quantity if holding else 0.0,
         }
 

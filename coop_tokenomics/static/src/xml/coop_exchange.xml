@@ -4,9 +4,8 @@
   <t t-name="coop_tokenomics.Exchange">
     <div class="o_coop_dex">
 
-      <!-- Шапка: кошелёк и что вообще происходит. Кошелёк слева, потому
-           что без него нельзя ни купить, ни продать, и узнать об этом
-           лучше до выбора партии, а не после нажатия кнопки. -->
+      <!-- Шапка: кошелёк слева, потому что без него нельзя ни купить, ни
+           продать, и узнать об этом лучше до выбора партии. -->
       <div class="o_coop_dex_top">
         <div class="o_coop_dex_wallet" t-if="state.wallet">
           <t t-if="state.wallet.connected">
@@ -23,8 +22,21 @@
         <div class="o_coop_dex_stats" t-if="state.wallet">
           <span>Позиций: <b t-esc="state.wallet.positions"/></span>
           <span>Своих выпусков: <b t-esc="state.wallet.my_claims"/></span>
-          <span>Рынков: <b t-esc="state.markets.length"/></span>
+          <span>Рынков: <b t-esc="rows.length"/></span>
         </div>
+      </div>
+
+      <!-- Категории — как вкладки «Тренд / Новые / Растущие» на биржах,
+           переведённые на товар. Число рядом с подписью: без него
+           непонятно, есть ли там что смотреть. -->
+      <div class="o_coop_dex_cats">
+        <button t-foreach="constructor.CATEGORIES" t-as="c" t-key="c.key"
+                class="o_coop_dex_cat"
+                t-att-class="{ 'o_coop_dex_caton': state.category === c.key }"
+                t-on-click="() => this.setCategory(c.key)">
+          <t t-esc="c.label"/>
+          <span class="o_coop_dex_catn" t-if="counts[c.key] !== undefined" t-esc="counts[c.key]"/>
+        </button>
       </div>
 
       <div class="o_coop_dex_body">
@@ -32,46 +44,65 @@
         <!-- ═══ Рынки ═══ -->
         <div class="o_coop_dex_markets">
           <div class="o_coop_dex_search">
-            <input type="text" placeholder="Товар, поставщик или место"
+            <input type="text" placeholder="Товар, поставщик, качество или город"
                    t-att-value="state.search" t-on-input="onSearch"/>
+            <select t-on-change="setGrouping">
+              <option t-foreach="constructor.GROUPINGS" t-as="g" t-key="g.key"
+                      t-att-value="g.key" t-att-selected="state.grouping === g.key">
+                <t t-esc="g.label"/>
+              </option>
+            </select>
           </div>
 
           <div class="o_coop_dex_mhead">
-            <span>Рынок</span>
-            <span class="o_coop_dex_num">Цена</span>
-            <span class="o_coop_dex_num">К выпуску</span>
+            <span class="o_coop_dex_sortable" t-on-click="() => this.sortBy('name')">
+              Рынок<t t-esc="sortMark('name')"/>
+            </span>
+            <span class="o_coop_dex_num o_coop_dex_sortable" t-on-click="() => this.sortBy('price')">
+              Цена<t t-esc="sortMark('price')"/>
+            </span>
+            <span class="o_coop_dex_num o_coop_dex_sortable" t-on-click="() => this.sortBy('change')">
+              Изм.<t t-esc="sortMark('change')"/>
+            </span>
+            <span class="o_coop_dex_num o_coop_dex_sortable" t-on-click="() => this.sortBy('score')">
+              Оценка<t t-esc="sortMark('score')"/>
+            </span>
           </div>
 
           <div class="o_coop_dex_mlist">
-            <div t-foreach="visibleMarkets" t-as="m" t-key="m.id"
-                 class="o_coop_dex_market"
-                 t-att-class="{ 'o_coop_dex_active': m.id === state.currentId }"
-                 t-on-click="() => this.select(m.id)">
-              <div class="o_coop_dex_mname">
-                <div class="o_coop_dex_mtitle" t-esc="m.name"/>
-                <div class="o_coop_dex_msub">
-                  <t t-esc="m.quality"/> · <t t-esc="m.place"/>
-                </div>
-                <div class="o_coop_dex_msub">
-                  до <t t-esc="m.due"/> · <t t-esc="m.issuer"/>
-                </div>
-              </div>
-              <div class="o_coop_dex_num">
-                <div class="o_coop_dex_price" t-esc="money(m.price, m.currency)"/>
-                <div class="o_coop_dex_msub">за <t t-esc="m.unit"/></div>
-              </div>
-              <div class="o_coop_dex_num">
-                <span class="o_coop_dex_change"
-                      t-att-class="{ 'o_coop_up': m.change &gt; 0, 'o_coop_down': m.change &lt; 0 }"
-                      t-esc="percent(m.change)"/>
-                <div class="o_coop_dex_msub" t-if="m.trades">сделок: <t t-esc="m.trades"/></div>
-                <div class="o_coop_dex_msub" t-else="">сделок нет</div>
-              </div>
-            </div>
 
-            <div class="o_coop_dex_empty" t-if="!visibleMarkets.length and !state.loading">
-              По запросу ничего не нашлось. Рынок — это партия товара:
-              попробуйте искать по товару, хозяйству или городу.
+            <!-- Без группировки: плоский список. -->
+            <t t-if="state.grouping === 'none'">
+              <t t-call="coop_tokenomics.MarketRows">
+                <t t-set="rowset" t-value="sortedRows"/>
+              </t>
+            </t>
+
+            <!-- С группировкой: заголовок группы с итогом и её строки.
+                 Итог по группе — число рынков и оборот: без них
+                 группировка превращается в оглавление, по которому не
+                 видно, где что-то происходит. -->
+            <t t-else="">
+              <div t-foreach="groups" t-as="g" t-key="g.key" class="o_coop_dex_group">
+                <div class="o_coop_dex_ghead" t-on-click="() => this.toggleGroup(g)">
+                  <span class="o_coop_dex_gname">
+                    <t t-esc="isGroupOpen(g) ? '▾' : '▸'"/> <t t-esc="g.label"/>
+                  </span>
+                  <span class="o_coop_dex_gmeta">
+                    <t t-esc="g.count"/> рын. · оборот <t t-esc="qty(g.volume)"/>
+                  </span>
+                </div>
+                <t t-if="isGroupOpen(g)">
+                  <t t-call="coop_tokenomics.MarketRows">
+                    <t t-set="rowset" t-value="groupRows(g)"/>
+                  </t>
+                </t>
+              </div>
+            </t>
+
+            <div class="o_coop_dex_empty" t-if="!sortedRows.length and !state.loading">
+              По этой категории и запросу рынков нет. Рынок — это партия
+              товара: попробуйте искать по товару, хозяйству или городу.
             </div>
           </div>
         </div>
@@ -94,6 +125,71 @@
               </span>
               <button class="o_coop_dex_link" t-on-click="openClaim">карточка выпуска</button>
             </div>
+          </div>
+
+          <!-- Оценка выпуска с расшифровкой. Балл без объяснения — просьба
+               поверить платформе на слово; участник должен видеть, из чего
+               он сложился, и решать сам. -->
+          <div class="o_coop_dex_score" t-if="currentRow">
+            <div class="o_coop_dex_scoreline" t-on-click="toggleScore">
+              <span class="o_coop_dex_scoreval" t-esc="currentRow.score"/>
+              <span class="o_coop_dex_scoremax">из 40</span>
+              <span class="o_coop_dex_scorename">надёжность выпуска</span>
+              <span class="o_coop_dex_link" t-esc="state.showScore ? 'свернуть' : 'из чего сложилась'"/>
+            </div>
+            <div class="o_coop_dex_scoreparts" t-if="state.showScore">
+              <div class="o_coop_dex_part">
+                <span>Доверие поставщика</span>
+                <b t-esc="currentRow.score_parts.trust"/>
+                <span class="o_coop_dex_partnote">
+                  уровень <t t-esc="currentRow.issuer_trust"/> по завершённым сделкам
+                </span>
+              </div>
+              <div class="o_coop_dex_part">
+                <span>Залог</span>
+                <b t-esc="currentRow.score_parts.deposit"/>
+                <span class="o_coop_dex_partnote">
+                  <t t-if="current.deposit_paid">внесён — при срыве уходит держателям</t>
+                  <t t-else="">не внесён</t>
+                </span>
+              </div>
+              <div class="o_coop_dex_part">
+                <span>Как исполняет</span>
+                <b t-esc="currentRow.score_parts.record"/>
+                <span class="o_coop_dex_partnote">
+                  <t t-if="currentRow.first_issue">первый выпуск, истории ещё нет</t>
+                  <t t-else="">
+                    исполнено <t t-esc="currentRow.issuer_settled"/>,
+                    сорвано <t t-esc="currentRow.issuer_broken"/>
+                  </t>
+                </span>
+              </div>
+              <div class="o_coop_dex_part">
+                <span>Живость торгов</span>
+                <b t-esc="currentRow.score_parts.liveliness"/>
+                <span class="o_coop_dex_partnote">
+                  держателей <t t-esc="currentRow.holders"/>, сделок <t t-esc="currentRow.trades"/>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Линия цены по сделкам. Свечей нет: по большинству выпусков
+               сделок единицы, и свечной график рисовал бы движение,
+               которого не было. -->
+          <div class="o_coop_dex_chart" t-if="chartRange and chartRange.count &gt; 1">
+            <div class="o_coop_dex_chartlabels">
+              <span>Цена по сделкам</span>
+              <span class="o_coop_dex_msub">
+                от <t t-esc="money(chartRange.min, current.currency)"/>
+                до <t t-esc="money(chartRange.max, current.currency)"/>
+                · сделок <t t-esc="chartRange.count"/>
+              </span>
+            </div>
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="o_coop_dex_svg">
+              <path t-att-d="chartPath" fill="none" stroke="currentColor"
+                    stroke-width="1.4" vector-effect="non-scaling-stroke"/>
+            </svg>
           </div>
 
           <div class="o_coop_dex_grid">
@@ -152,8 +248,8 @@
             </div>
 
             <!-- Форма сделки. Не «обменять по рынку», а «купить у
-                 названного участника по его цене»: сведение здесь
-                 ручное, и человек должен видеть, с кем имеет дело. -->
+                 названного участника по его цене»: сведение здесь ручное,
+                 и человек должен видеть, с кем имеет дело. -->
             <div class="o_coop_dex_form">
               <div class="o_coop_dex_formhead">Сделка</div>
 
@@ -189,9 +285,9 @@
               </button>
 
               <div class="o_coop_dex_note" t-if="state.wallet and !state.wallet.connected">
-                Чтобы покупать и продавать, подключите кошелёк TON:
-                расчёт идёт между кошельками напрямую, платформа чужих
-                ключей не хранит.
+                Чтобы покупать и продавать, подключите кошелёк TON: расчёт
+                идёт между кошельками напрямую, платформа чужих ключей не
+                хранит.
               </div>
               <div class="o_coop_dex_note" t-else="">
                 Токены и оплата переходят одной транзакцией. Не поставили в
@@ -232,6 +328,39 @@
           Рынков пока нет: чтобы они появились, участники должны выпустить
           токены на свои объявления.
         </div>
+      </div>
+    </div>
+  </t>
+
+  <!-- Строки списка рынков. Вынесены отдельно, потому что рисуются в двух
+       местах: плоским списком и внутри групп. -->
+  <t t-name="coop_tokenomics.MarketRows">
+    <div t-foreach="rowset" t-as="m" t-key="m.id"
+         class="o_coop_dex_market"
+         t-att-class="{ 'o_coop_dex_active': m.id === state.currentId }"
+         t-on-click="() => this.select(m.id)">
+      <div class="o_coop_dex_mname">
+        <div class="o_coop_dex_mtitle" t-esc="m.name"/>
+        <div class="o_coop_dex_msub">
+          <t t-esc="m.type_label"/> · <t t-esc="m.city"/> · <t t-esc="dueLabel(m)"/>
+        </div>
+        <div class="o_coop_dex_msub"><t t-esc="m.issuer"/></div>
+      </div>
+      <div class="o_coop_dex_num">
+        <div class="o_coop_dex_price" t-esc="money(m.price, m.currency)"/>
+        <div class="o_coop_dex_msub">за <t t-esc="m.unit"/></div>
+      </div>
+      <div class="o_coop_dex_num">
+        <span class="o_coop_dex_change"
+              t-att-class="{ 'o_coop_up': m.change &gt; 0, 'o_coop_down': m.change &lt; 0 }"
+              t-esc="percent(m.change)"/>
+        <div class="o_coop_dex_msub" t-if="m.trades">сделок <t t-esc="m.trades"/></div>
+        <div class="o_coop_dex_msub" t-else="">сделок нет</div>
+      </div>
+      <div class="o_coop_dex_num">
+        <span class="o_coop_dex_scorepill"
+              t-att-class="{ 'o_coop_up': m.score &gt;= 28, 'o_coop_down': m.score &lt; 18 }"
+              t-esc="m.score"/>
       </div>
     </div>
   </t>

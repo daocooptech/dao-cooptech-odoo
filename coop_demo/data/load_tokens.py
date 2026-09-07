@@ -162,6 +162,7 @@ def load_tokens(env, target=TARGET_CLAIMS):
         claims |= claim
         created += 1
 
+    _spread_created(env, claims, rnd)
     _ensure_defaults(Claim, claims, today)
     _make_orders_and_holdings(Order, Holding, claims, buyers, rnd, today)
     _make_trades(env, claims, rnd)
@@ -256,6 +257,21 @@ def _seed_owner(env, claims, rnd):
                 'state': 'open',
                 'import_key': 'tokens.order.owner#%s' % claim.id,
             })
+
+
+def _spread_created(env, claims, rnd):
+    """Развести даты размещения выпусков во времени.
+
+    Демо создаётся за один прогон, и без этого все выпуски оказываются
+    размещёнными сегодня: вкладка «Новые выпуски» показывает весь
+    каталог, то есть не показывает ничего. Дата создания служебная и
+    правится прямым запросом — обычной записью её не изменить.
+    """
+    for claim in claims:
+        env.cr.execute(
+            "UPDATE coop_token_claim SET create_date = now() - (%s || ' days')::interval "
+            "WHERE id = %s", (rnd.randint(0, 120), claim.id))
+    env.invalidate_all()
 
 
 def _ensure_defaults(Claim, claims, today):
