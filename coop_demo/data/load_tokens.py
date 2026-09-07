@@ -164,9 +164,98 @@ def load_tokens(env, target=TARGET_CLAIMS):
 
     _ensure_defaults(Claim, claims, today)
     _make_orders_and_holdings(Order, Holding, claims, buyers, rnd, today)
+    _make_trades(env, claims, rnd)
+    _seed_owner(env, claims, rnd)
     _grant_project_shares(env)
 
     _logger.info('Биржа токенов: выпусков создано %s, пропущено %s', created, skipped)
+
+
+def _make_trades(env, claims, rnd):
+    """Прошедшие сделки: без них у биржи нет цены.
+
+    Цена рынка берётся по последней сделке, а не по средней между «продам
+    за сто» и «куплю за пятьдесят»: среднее — число, по которому никто не
+    торговал и не будет. Пока сделок нет вовсе, показывать нечего, и
+    терминал выглядит пустым при полном стакане.
+
+    Цены расходятся вокруг цены выпуска в обе стороны: обещание к сроку
+    то дорожает, то дешевеет, и ровный рост выглядел бы нарисованным.
+    """
+    Trade = env['coop.token.trade'].sudo()
+    Holding = env['coop.token.holding'].sudo()
+    for claim in claims.filtered(lambda c: c.state in ('trading', 'delivering')):
+        if Trade.search_count([('claim_id', '=', claim.id)]):
+            continue
+        holders = claim.holder_ids.filtered(lambda h: h.quantity > 0)
+        orders = claim.order_ids.filtered(lambda o: o.kind == 'primary')
+        if not holders or not orders:
+            continue
+        for holder in holders:
+            if rnd.random() > 0.75:
+                continue
+            price = round(claim.price_per_unit * rnd.uniform(0.88, 1.28), 4)
+            quantity = round(holder.quantity * rnd.uniform(0.2, 1.0), 1) or holder.quantity
+            Trade.create({
+                'order_id': orders[0].id,
+                'claim_id': claim.id,
+                'seller_id': claim.issuer_id.id,
+                'buyer_id': holder.partner_id.id,
+                'quantity': quantity,
+                'price_per_unit': price,
+                'state': 'done',
+                'tx_hash': _fake_hash(rnd),
+                'confirmed_on': fields.Datetime.now() - timedelta(
+                    days=rnd.randint(0, 40), hours=rnd.randint(0, 23)),
+            })
+
+
+def _seed_owner(env, claims, rnd):
+    """Дать владельцу стенда позиции и свой выпуск.
+
+    Иначе он открывает биржу и видит рынок, на котором его самого нет:
+    ни своих токенов, ни своих заявок, ни своих сделок — проверить
+    сценарий «купил, держу, перепродаю» не на чем.
+    """
+    Holding = env['coop.token.holding'].sudo()
+    Order = env['coop.token.order'].sudo()
+    user = env['res.users'].sudo().search([('login', '=', 'dashkevich')], limit=1)
+    if not user:
+        return
+    me = user.partner_id
+    if not me.coop_ton_address:
+        me.write({
+            'coop_ton_address': _fake_address(rnd),
+            'coop_ton_network': 'testnet',
+            'coop_ton_connected_on': fields.Datetime.now(),
+        })
+    pool = claims.filtered(
+        lambda c: c.state == 'trading' and c.issuer_id != me)[:6]
+    for claim in pool:
+        if Holding.search_count([('claim_id', '=', claim.id),
+                                 ('partner_id', '=', me.id)]):
+            continue
+        quantity = round(claim.quantity * rnd.uniform(0.05, 0.2), 1) or 1
+        Holding.create({
+            'claim_id': claim.id,
+            'partner_id': me.id,
+            'quantity': quantity,
+            'acquired_on': fields.Datetime.now() - timedelta(days=rnd.randint(2, 60)),
+        })
+        # На часть купленного выставлена перепродажа: так на экране виден
+        # и собственный след в стакане, помеченный «ваша».
+        if rnd.random() < 0.5:
+            Order.create({
+                'claim_id': claim.id,
+                'kind': 'secondary',
+                'side': 'sell',
+                'partner_id': me.id,
+                'quantity': round(quantity * 0.6, 1) or quantity,
+                'quantity_left': round(quantity * 0.6, 1) or quantity,
+                'price_per_unit': round(claim.price_per_unit * rnd.uniform(1.05, 1.3), 4),
+                'state': 'open',
+                'import_key': 'tokens.order.owner#%s' % claim.id,
+            })
 
 
 def _ensure_defaults(Claim, claims, today):

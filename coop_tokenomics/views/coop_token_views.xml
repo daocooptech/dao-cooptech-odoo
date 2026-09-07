@@ -3,6 +3,131 @@
 
   <!-- ═══════════════ БИРЖА: заявки ═══════════════ -->
 
+  <!--
+    Биржа карточками, а не таблицей.
+
+    Тринадцать колонок с русскими заголовками на 1440 точках не помещаются
+    в принципе, и раздел выглядел выгрузкой из бухгалтерии посреди
+    платформы, где всё остальное — карточки. Главное число на карточке —
+    цена за единицу: с ней сравнивают, ради неё сюда и заходят. Таблица
+    осталась вторым переключателем для тех, кому нужно сравнить два
+    десятка заявок разом.
+  -->
+  <record id="view_coop_token_order_kanban" model="ir.ui.view">
+    <field name="name">coop.token.order.kanban</field>
+    <field name="model">coop.token.order</field>
+    <field name="arch" type="xml">
+      <kanban class="o_coop_orders" quick_create="false" js_class="coop_catalog_kanban">
+        <field name="side"/>
+        <field name="kind"/>
+        <field name="state"/>
+        <field name="premium_percent"/>
+        <field name="unit_label"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_fact">
+              <div class="o_coop_fact_head">
+                <div class="o_coop_fact_title"><field name="claim_id"/></div>
+                <div>
+                  <div class="o_coop_fact_value"><field name="price_per_unit"/></div>
+                  <div class="o_coop_fact_unit">за <field name="unit_label"/></div>
+                </div>
+              </div>
+              <div class="o_coop_fact_rows">
+                <div class="o_coop_fact_row">
+                  <span class="o_coop_fact_key">Осталось</span>
+                  <span class="o_coop_fact_val"><field name="quantity_left"/> <field name="unit_label"/></span>
+                </div>
+                <div class="o_coop_fact_row">
+                  <span class="o_coop_fact_key">Срок</span>
+                  <span class="o_coop_fact_val"><field name="delivery_date"/></span>
+                </div>
+                <div class="o_coop_fact_row">
+                  <span class="o_coop_fact_key">Участник</span>
+                  <span class="o_coop_fact_val"><field name="partner_id"/></span>
+                </div>
+                <div class="o_coop_fact_row" t-if="record.kind.raw_value == 'secondary'">
+                  <span class="o_coop_fact_key">К выпуску</span>
+                  <span class="o_coop_fact_val"><field name="premium_percent"/> %</span>
+                </div>
+              </div>
+              <div class="o_coop_fact_foot">
+                <span t-attf-class="o_coop_fact_state #{record.side.raw_value == 'sell' ? 'o_coop_ok' : 'o_coop_wait'}">
+                  <t t-if="record.side.raw_value == 'sell'">продажа</t>
+                  <t t-else="">покупка</t>
+                </span>
+                <span class="o_coop_fact_note">
+                  <t t-if="record.kind.raw_value == 'primary'">от поставщика</t>
+                  <t t-else="">перепродажа</t>
+                </span>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <!--
+    Выпуск токенов карточкой: что обещано, какого качества, где и к какому
+    сроку — те самые четыре признака, без которых токен превращается в
+    обещание вообще. Залог стоит рядом с ними, потому что он и отвечает на
+    вопрос «а если не привезёт».
+  -->
+  <record id="view_coop_token_claim_kanban" model="ir.ui.view">
+    <field name="name">coop.token.claim.kanban</field>
+    <field name="model">coop.token.claim</field>
+    <field name="arch" type="xml">
+      <kanban class="o_coop_claims" quick_create="false" js_class="coop_catalog_kanban">
+        <field name="state"/>
+        <field name="is_future"/>
+        <field name="unit_label"/>
+        <field name="deposit_paid"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_fact">
+              <div class="o_coop_fact_head">
+                <div class="o_coop_fact_title"><field name="resource_id"/></div>
+                <div>
+                  <div class="o_coop_fact_value"><field name="quantity"/></div>
+                  <div class="o_coop_fact_unit"><field name="unit_label"/></div>
+                </div>
+              </div>
+              <div class="o_coop_fact_rows">
+                <div class="o_coop_fact_row">
+                  <span class="o_coop_fact_key">Качество</span>
+                  <span class="o_coop_fact_val"><field name="quality"/></span>
+                </div>
+                <div class="o_coop_fact_row">
+                  <span class="o_coop_fact_key">Где</span>
+                  <span class="o_coop_fact_val"><field name="delivery_place"/></span>
+                </div>
+                <div class="o_coop_fact_row">
+                  <span class="o_coop_fact_key">Срок</span>
+                  <span class="o_coop_fact_val"><field name="delivery_date"/></span>
+                </div>
+                <div class="o_coop_fact_row">
+                  <span class="o_coop_fact_key">Цена</span>
+                  <span class="o_coop_fact_val"><field name="price_per_unit"/> за <field name="unit_label"/></span>
+                </div>
+                <div class="o_coop_fact_row">
+                  <span class="o_coop_fact_key">Залог</span>
+                  <span class="o_coop_fact_val"><field name="deposit_amount"/></span>
+                </div>
+              </div>
+              <div class="o_coop_fact_foot">
+                <span t-attf-class="o_coop_fact_state #{['settled','trading'].indexOf(record.state.raw_value) >= 0 ? 'o_coop_ok' : record.state.raw_value == 'defaulted' ? 'o_coop_bad' : 'o_coop_wait'}">
+                  <field name="state"/>
+                </span>
+                <span class="o_coop_fact_note" t-if="record.is_future.raw_value">товара ещё нет</span>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
   <record id="view_coop_token_order_list" model="ir.ui.view">
     <field name="name">coop.token.order.list</field>
     <field name="model">coop.token.order</field>
@@ -111,12 +236,26 @@
     </field>
   </record>
 
+  <!--
+    Биржа — свой экран, а не список записей.
+
+    Списком заявок торговая площадка не показывается: участнику нужно
+    одновременно видеть рынки, цену, чужие заявки по обе стороны и своё
+    положение — пять таблиц, между которыми пришлось бы ходить. Экран
+    собирает это в один снимок; список заявок остаётся отдельным
+    действием для тех, кому нужно перебрать их фильтрами.
+  -->
+  <record id="action_coop_exchange_screen" model="ir.actions.client">
+    <field name="name">Биржа</field>
+    <field name="tag">coop_tokenomics.exchange</field>
+  </record>
+
   <record id="action_coop_token_exchange" model="ir.actions.act_window">
     <field name="name">Биржа</field>
     <field name="res_model">coop.token.order</field>
-    <field name="view_mode">list,form</field>
+    <field name="view_mode">kanban,list,form</field>
     <field name="search_view_id" ref="view_coop_token_order_search"/>
-    <field name="context">{'search_default_open': 1, 'coop_section': 1}</field>
+    <field name="context">{'search_default_open': 1, 'coop_section': 1, 'coop_catalog': 1}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Заявок пока нет</p>
       <p>Здесь торгуются права на будущий товар: тонна моркови первого
@@ -265,9 +404,9 @@
   <record id="action_coop_token_claim" model="ir.actions.act_window">
     <field name="name">Мои токены</field>
     <field name="res_model">coop.token.claim</field>
-    <field name="view_mode">list,form</field>
+    <field name="view_mode">kanban,list,form</field>
     <field name="search_view_id" ref="view_coop_token_claim_search"/>
-    <field name="context">{'coop_section': 1}</field>
+    <field name="context">{'coop_section': 1, 'coop_catalog': 1}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Выпусков пока нет</p>
       <p>Выпуск заводится при публикации объявления: отмечаете «выпустить
@@ -371,7 +510,10 @@
   <menuitem id="menu_coop_tokenomics_root" name="Токеномика" sequence="130"/>
   <menuitem id="menu_coop_token_exchange" name="Биржа"
             parent="menu_coop_tokenomics_root"
-            action="action_coop_token_exchange" sequence="10"/>
+            action="action_coop_exchange_screen" sequence="10"/>
+  <menuitem id="menu_coop_token_orders" name="Заявки"
+            parent="menu_coop_tokenomics_root"
+            action="action_coop_token_exchange" sequence="15"/>
   <menuitem id="menu_coop_token_claim" name="Мои токены"
             parent="menu_coop_tokenomics_root"
             action="action_coop_token_claim" sequence="20"/>

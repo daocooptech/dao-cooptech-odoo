@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <t t-name="coop_tokenomics.Exchange">
+    <div class="o_coop_dex">
+
+      <!-- Шапка: кошелёк и что вообще происходит. Кошелёк слева, потому
+           что без него нельзя ни купить, ни продать, и узнать об этом
+           лучше до выбора партии, а не после нажатия кнопки. -->
+      <div class="o_coop_dex_top">
+        <div class="o_coop_dex_wallet" t-if="state.wallet">
+          <t t-if="state.wallet.connected">
+            <span class="o_coop_dex_dot"/>
+            <span class="o_coop_dex_addr" t-esc="state.wallet.address.slice(0, 6) + '…' + state.wallet.address.slice(-4)"/>
+            <span class="o_coop_dex_net" t-esc="state.wallet.network === 'testnet' ? 'тестовая сеть' : 'основная сеть'"/>
+          </t>
+          <t t-else="">
+            <button class="o_coop_dex_connect" t-on-click="openWallet">
+              Подключить кошелёк TON
+            </button>
+          </t>
+        </div>
+        <div class="o_coop_dex_stats" t-if="state.wallet">
+          <span>Позиций: <b t-esc="state.wallet.positions"/></span>
+          <span>Своих выпусков: <b t-esc="state.wallet.my_claims"/></span>
+          <span>Рынков: <b t-esc="state.markets.length"/></span>
+        </div>
+      </div>
+
+      <div class="o_coop_dex_body">
+
+        <!-- ═══ Рынки ═══ -->
+        <div class="o_coop_dex_markets">
+          <div class="o_coop_dex_search">
+            <input type="text" placeholder="Товар, поставщик или место"
+                   t-att-value="state.search" t-on-input="onSearch"/>
+          </div>
+
+          <div class="o_coop_dex_mhead">
+            <span>Рынок</span>
+            <span class="o_coop_dex_num">Цена</span>
+            <span class="o_coop_dex_num">К выпуску</span>
+          </div>
+
+          <div class="o_coop_dex_mlist">
+            <div t-foreach="visibleMarkets" t-as="m" t-key="m.id"
+                 class="o_coop_dex_market"
+                 t-att-class="{ 'o_coop_dex_active': m.id === state.currentId }"
+                 t-on-click="() => this.select(m.id)">
+              <div class="o_coop_dex_mname">
+                <div class="o_coop_dex_mtitle" t-esc="m.name"/>
+                <div class="o_coop_dex_msub">
+                  <t t-esc="m.quality"/> · <t t-esc="m.place"/>
+                </div>
+                <div class="o_coop_dex_msub">
+                  до <t t-esc="m.due"/> · <t t-esc="m.issuer"/>
+                </div>
+              </div>
+              <div class="o_coop_dex_num">
+                <div class="o_coop_dex_price" t-esc="money(m.price, m.currency)"/>
+                <div class="o_coop_dex_msub">за <t t-esc="m.unit"/></div>
+              </div>
+              <div class="o_coop_dex_num">
+                <span class="o_coop_dex_change"
+                      t-att-class="{ 'o_coop_up': m.change &gt; 0, 'o_coop_down': m.change &lt; 0 }"
+                      t-esc="percent(m.change)"/>
+                <div class="o_coop_dex_msub" t-if="m.trades">сделок: <t t-esc="m.trades"/></div>
+                <div class="o_coop_dex_msub" t-else="">сделок нет</div>
+              </div>
+            </div>
+
+            <div class="o_coop_dex_empty" t-if="!visibleMarkets.length and !state.loading">
+              По запросу ничего не нашлось. Рынок — это партия товара:
+              попробуйте искать по товару, хозяйству или городу.
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ Выбранный рынок ═══ -->
+        <div class="o_coop_dex_pane" t-if="current">
+
+          <div class="o_coop_dex_head">
+            <div>
+              <div class="o_coop_dex_title" t-esc="current.name"/>
+              <div class="o_coop_dex_sub">
+                <t t-esc="current.quality"/> · <t t-esc="current.place"/> ·
+                поставка до <t t-esc="current.due"/> · <t t-esc="current.issuer"/>
+              </div>
+            </div>
+            <div class="o_coop_dex_headright">
+              <span class="o_coop_dex_chip" t-if="current.is_future">товара ещё нет</span>
+              <span class="o_coop_dex_chip" t-if="current.deposit_paid">
+                залог <t t-esc="money(current.deposit, current.currency)"/>
+              </span>
+              <button class="o_coop_dex_link" t-on-click="openClaim">карточка выпуска</button>
+            </div>
+          </div>
+
+          <div class="o_coop_dex_grid">
+
+            <!-- Стакан: продают слева, покупают справа. Своё помечено —
+                 чтобы не пытаться купить у самого себя. -->
+            <div class="o_coop_dex_book">
+              <div class="o_coop_dex_bookcol">
+                <div class="o_coop_dex_bookhead">
+                  <span>Продают</span>
+                  <span class="o_coop_dex_num">Цена</span>
+                  <span class="o_coop_dex_num">Объём</span>
+                </div>
+                <div t-foreach="state.book.asks" t-as="o" t-key="o.id"
+                     class="o_coop_dex_row o_coop_ask"
+                     t-att-class="{ 'o_coop_dex_picked': state.selectedOrder and state.selectedOrder.id === o.id }"
+                     t-on-click="() => this.pick(o)">
+                  <span class="o_coop_dex_depth o_coop_depth_ask"
+                        t-attf-style="width: {{ depth(o, state.book.asks) }}"/>
+                  <span class="o_coop_dex_who">
+                    <t t-esc="o.partner"/>
+                    <b t-if="o.mine"> — ваша</b>
+                  </span>
+                  <span class="o_coop_dex_num" t-esc="money(o.price, current.currency)"/>
+                  <span class="o_coop_dex_num" t-esc="qty(o.quantity)"/>
+                </div>
+                <div class="o_coop_dex_empty" t-if="!state.book.asks.length">
+                  Никто не продаёт. Можно оставить заявку на покупку —
+                  держатель увидит её и решит сам.
+                </div>
+              </div>
+
+              <div class="o_coop_dex_bookcol">
+                <div class="o_coop_dex_bookhead">
+                  <span>Покупают</span>
+                  <span class="o_coop_dex_num">Цена</span>
+                  <span class="o_coop_dex_num">Объём</span>
+                </div>
+                <div t-foreach="state.book.bids" t-as="o" t-key="o.id"
+                     class="o_coop_dex_row o_coop_bid"
+                     t-att-class="{ 'o_coop_dex_picked': state.selectedOrder and state.selectedOrder.id === o.id }"
+                     t-on-click="() => this.pick(o)">
+                  <span class="o_coop_dex_depth o_coop_depth_bid"
+                        t-attf-style="width: {{ depth(o, state.book.bids) }}"/>
+                  <span class="o_coop_dex_who">
+                    <t t-esc="o.partner"/>
+                    <b t-if="o.mine"> — ваша</b>
+                  </span>
+                  <span class="o_coop_dex_num" t-esc="money(o.price, current.currency)"/>
+                  <span class="o_coop_dex_num" t-esc="qty(o.quantity)"/>
+                </div>
+                <div class="o_coop_dex_empty" t-if="!state.book.bids.length">
+                  Заявок на покупку нет.
+                </div>
+              </div>
+            </div>
+
+            <!-- Форма сделки. Не «обменять по рынку», а «купить у
+                 названного участника по его цене»: сведение здесь
+                 ручное, и человек должен видеть, с кем имеет дело. -->
+            <div class="o_coop_dex_form">
+              <div class="o_coop_dex_formhead">Сделка</div>
+
+              <div class="o_coop_dex_field">
+                <label>Заявка</label>
+                <div class="o_coop_dex_value" t-if="state.selectedOrder">
+                  <t t-esc="state.selectedOrder.partner"/>,
+                  <t t-esc="money(state.selectedOrder.price, current.currency)"/>
+                  за <t t-esc="current.unit"/>
+                </div>
+                <div class="o_coop_dex_hint" t-else="">
+                  Выберите строку в стакане — цена и объём подставятся сюда.
+                </div>
+              </div>
+
+              <div class="o_coop_dex_field">
+                <label>Сколько (<t t-esc="current.unit"/>)</label>
+                <input type="number" min="0" step="0.001"
+                       t-att-value="state.amount" t-on-input="onAmount"
+                       t-att-disabled="!state.selectedOrder"/>
+                <div class="o_coop_dex_hint" t-if="state.selectedOrder">
+                  доступно <t t-esc="qty(state.selectedOrder.quantity)"/>
+                </div>
+              </div>
+
+              <div class="o_coop_dex_total">
+                <span>К оплате</span>
+                <b t-esc="money(total, current.currency)"/>
+              </div>
+
+              <button class="o_coop_dex_go" t-att-disabled="!canTrade" t-on-click="trade">
+                Купить
+              </button>
+
+              <div class="o_coop_dex_note" t-if="state.wallet and !state.wallet.connected">
+                Чтобы покупать и продавать, подключите кошелёк TON:
+                расчёт идёт между кошельками напрямую, платформа чужих
+                ключей не хранит.
+              </div>
+              <div class="o_coop_dex_note" t-else="">
+                Токены и оплата переходят одной транзакцией. Не поставили в
+                срок — эскроу возвращает деньги без заявления и разбора.
+              </div>
+
+              <div class="o_coop_dex_myline" t-if="state.book.my_holding">
+                На руках: <b t-esc="qty(state.book.my_holding)"/> <t t-esc="current.unit"/>
+              </div>
+            </div>
+          </div>
+
+          <!-- Прошедшие сделки: по ним и видно настоящую цену, а не ту,
+               которую кто-то просит. -->
+          <div class="o_coop_dex_trades">
+            <div class="o_coop_dex_formhead">Сделки</div>
+            <div class="o_coop_dex_thead">
+              <span>Когда</span>
+              <span>Продавец</span>
+              <span>Покупатель</span>
+              <span class="o_coop_dex_num">Цена</span>
+              <span class="o_coop_dex_num">Объём</span>
+            </div>
+            <div t-foreach="state.book.trades" t-as="t" t-key="t_index" class="o_coop_dex_trow">
+              <span t-esc="t.when"/>
+              <span t-esc="t.seller"/>
+              <span t-esc="t.buyer"/>
+              <span class="o_coop_dex_num" t-esc="money(t.price, current.currency)"/>
+              <span class="o_coop_dex_num" t-esc="qty(t.quantity)"/>
+            </div>
+            <div class="o_coop_dex_empty" t-if="!state.book.trades.length">
+              По этому выпуску ещё не торговали. Первая сделка и задаст цену.
+            </div>
+          </div>
+        </div>
+
+        <div class="o_coop_dex_pane o_coop_dex_blank" t-if="!current and !state.loading">
+          Рынков пока нет: чтобы они появились, участники должны выпустить
+          токены на свои объявления.
+        </div>
+      </div>
+    </div>
+  </t>
+
+</templates>

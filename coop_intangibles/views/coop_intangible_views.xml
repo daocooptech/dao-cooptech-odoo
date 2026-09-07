@@ -5,36 +5,45 @@
     <field name="name">coop.intangible.kanban</field>
     <field name="model">coop.intangible</field>
     <field name="arch" type="xml">
-      <kanban class="o_coop_catalog_kanban_view o_coop_intangibles">
+      <kanban class="o_coop_listings o_coop_intangibles" quick_create="false"
+              js_class="coop_catalog_kanban">
         <field name="kind"/>
         <field name="state"/>
         <field name="pledge_state"/>
+        <field name="image_512"/>
+        <field name="useful_life_months"/>
+        <field name="active_license_count"/>
         <templates>
           <t t-name="card">
-            <div class="o_coop_tile">
-              <div class="o_coop_tile_head">
-                <field name="name" class="fw-bold"/>
+            <div class="o_coop_listing">
+              <div class="o_coop_listing_ico">
+                <field name="image_512" widget="image" t-if="record.image_512.raw_value"/>
+                <t t-else="" t-esc="record.owner_id.value.trim().charAt(0)"/>
               </div>
-              <div class="text-muted small">
-                <field name="kind"/>
-              </div>
-              <div class="small mt-1">
-                <field name="owner_id"/>
-              </div>
-              <div class="small mt-1">
-                <field name="legal_basis"/>
-              </div>
-              <div class="mt-2">
-                <field name="residual_value" widget="monetary"/>
-                <span class="text-muted small"> остаточная</span>
-              </div>
-              <div class="mt-1">
-                <span t-if="record.pledge_state.raw_value == 'none'"
-                      class="badge text-bg-light">залог не оформлен</span>
-                <span t-if="record.pledge_state.raw_value == 'notary'"
-                      class="badge text-bg-success">уведомление у нотариуса</span>
-                <span t-if="record.pledge_state.raw_value == 'rospatent'"
-                      class="badge text-bg-success">залог в Роспатенте</span>
+              <div class="o_coop_listing_body">
+                <div class="o_coop_listing_title"><field name="name"/></div>
+                <div class="o_coop_listing_meta">
+                  <field name="owner_id"/> · <field name="legal_basis"/>
+                </div>
+                <div class="o_coop_listing_tags">
+                  <span class="o_coop_chip"><field name="kind"/></span>
+                  <span class="o_coop_chip" t-if="record.active_license_count.raw_value">
+                    Лицензия доступна
+                  </span>
+                  <span class="o_coop_chip" t-if="record.useful_life_months.raw_value">
+                    СПИ <field name="useful_life_months"/> мес.
+                  </span>
+                  <span class="o_coop_chip" t-else="">Срок не определён</span>
+                </div>
+                <div class="o_coop_listing_foot">
+                  <span class="o_coop_listing_money">
+                    <field name="initial_cost"/> · остаточная <field name="residual_value"/>
+                  </span>
+                  <span t-attf-class="o_coop_badge #{record.pledge_state.raw_value == 'none' ? '' : 'o_coop_ok'}">
+                    <t t-if="record.pledge_state.raw_value == 'none'">залог не оформлен</t>
+                    <t t-else=""><field name="pledge_state"/></t>
+                  </span>
+                </div>
               </div>
             </div>
           </t>
@@ -186,7 +195,7 @@
   </record>
 
   <record id="action_coop_intangibles" model="ir.actions.act_window">
-    <field name="name">Нематериальные активы</field>
+    <field name="name">Каталог НМА</field>
     <field name="res_model">coop.intangible</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="search_view_id" ref="view_coop_intangible_search"/>
@@ -200,7 +209,99 @@
     </field>
   </record>
 
+  <!--
+    «Мои НМА» отдельной вкладкой, как в макете (`nma-catalog.html` и
+    `intangible-assets.html` — две вкладки одного раздела).
+
+    Разделение не косметическое: каталог отвечает на вопрос «что есть у
+    участников платформы», свой список — «что есть у меня и что с этим
+    делать». Это разные задачи с разными действиями, и смешивать их в
+    одном списке с фильтром значит прятать вторую за галочкой.
+
+    Домен по казначейским партнёрам, а не по одному участнику: человек
+    ведёт активы своей организации, и её рецептура для него такая же
+    своя, как личная.
+  -->
+  <record id="action_coop_my_intangibles" model="ir.actions.act_window">
+    <field name="name">Мои НМА</field>
+    <field name="res_model">coop.intangible</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="search_view_id" ref="view_coop_intangible_search"/>
+    <field name="context">{'coop_section': 1, 'coop_catalog': 1}</field>
+    <field name="domain">[('owner_id', 'in', [x for x in user.coop_treasury_partner_ids.ids])]</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Вы ещё ничего не поставили на учёт</p>
+      <p>Рецептура, программа, товарный знак, сорт — то, что у вас есть,
+         но нельзя потрогать. Поставленный на учёт актив можно внести
+         вкладом в проект и получить за него доли или выдать на него
+         лицензию другому участнику.</p>
+    </field>
+  </record>
+
   <!-- ═══════════════ ЛИЦЕНЗИИ ═══════════════ -->
+
+  <!--
+    Лицензия карточкой: четыре условия, которые её и составляют — срок,
+    территория, тираж, исключительность. В таблице на двенадцать колонок
+    их приходилось искать глазами, хотя в них весь предмет договора.
+  -->
+  <record id="view_coop_license_kanban" model="ir.ui.view">
+    <field name="name">coop.intangible.license.kanban</field>
+    <field name="model">coop.intangible.license</field>
+    <field name="arch" type="xml">
+      <kanban class="o_coop_listings o_coop_licenses" quick_create="false"
+              js_class="coop_catalog_kanban">
+        <field name="state"/>
+        <field name="is_exclusive"/>
+        <field name="volume_limit"/>
+        <field name="volume_unit"/>
+        <field name="royalty_percent"/>
+        <field name="ends_on"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_listing">
+              <div class="o_coop_listing_ico">
+                <t t-esc="record.intangible_id.value.trim().charAt(0)"/>
+              </div>
+              <div class="o_coop_listing_body">
+                <div class="o_coop_listing_title"><field name="intangible_id"/></div>
+                <div class="o_coop_listing_meta">
+                  <field name="licensor_id"/>
+                  <t t-if="record.licensee_id.raw_value"> · кому: <field name="licensee_id"/></t>
+                  <t t-else=""> · ждёт лицензиата</t>
+                </div>
+                <div class="o_coop_listing_tags">
+                  <span class="o_coop_chip">
+                    <t t-if="record.is_exclusive.raw_value">Исключительная</t>
+                    <t t-else="">Простая</t>
+                  </span>
+                  <span class="o_coop_chip"><field name="territory"/></span>
+                  <span class="o_coop_chip" t-if="record.volume_limit.raw_value">
+                    Тираж <field name="volume_limit"/> <field name="volume_unit"/>
+                  </span>
+                  <span class="o_coop_chip" t-if="record.ends_on.raw_value">
+                    До <field name="ends_on"/>
+                  </span>
+                  <span class="o_coop_chip" t-else="">Бессрочно</span>
+                </div>
+                <div class="o_coop_listing_foot">
+                  <span class="o_coop_listing_money">
+                    <field name="price"/>
+                    <t t-if="record.royalty_percent.raw_value">
+                      · роялти <field name="royalty_percent"/> %
+                    </t>
+                  </span>
+                  <span t-attf-class="o_coop_badge #{record.state.raw_value == 'active' ? 'o_coop_ok' : record.state.raw_value == 'revoked' ? 'o_coop_bad' : 'o_coop_wait'}">
+                    <field name="state"/>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
 
   <record id="view_coop_license_list" model="ir.ui.view">
     <field name="name">coop.intangible.license.list</field>
@@ -303,9 +404,9 @@
   <record id="action_coop_licenses" model="ir.actions.act_window">
     <field name="name">Лицензии</field>
     <field name="res_model">coop.intangible.license</field>
-    <field name="view_mode">list,form</field>
+    <field name="view_mode">kanban,list,form</field>
     <field name="search_view_id" ref="view_coop_license_search"/>
-    <field name="context">{'coop_section': 1}</field>
+    <field name="context">{'coop_section': 1, 'coop_catalog': 1}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Лицензий пока нет</p>
       <p>Кооператив продаёт соседнему право пользоваться своей
@@ -316,9 +417,12 @@
 
   <menuitem id="menu_coop_intangibles_root" name="Нематериальные активы"
             sequence="140"/>
-  <menuitem id="menu_coop_intangibles" name="Реестр активов"
+  <menuitem id="menu_coop_intangibles" name="Каталог НМА"
             parent="menu_coop_intangibles_root"
             action="action_coop_intangibles" sequence="10"/>
+  <menuitem id="menu_coop_my_intangibles" name="Мои НМА"
+            parent="menu_coop_intangibles_root"
+            action="action_coop_my_intangibles" sequence="15"/>
   <menuitem id="menu_coop_licenses" name="Лицензии"
             parent="menu_coop_intangibles_root"
             action="action_coop_licenses" sequence="20"/>

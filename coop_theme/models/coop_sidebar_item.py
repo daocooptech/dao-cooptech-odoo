@@ -45,7 +45,7 @@ EXTENSION_ITEMS = [
     # платформы, она не торгуется и к бирже отношения не имеет. Пока пункт
     # вёл туда, участник открывал «Токеномику» и видел пустой список
     # служебных начислений.
-    ('Токеномика', 'fa-diamond', 'coop_tokenomics.action_coop_token_exchange'),
+    ('Токеномика', 'fa-diamond', 'coop_tokenomics.action_coop_exchange_screen'),
     ('Цифровые активы', 'fa-certificate', 'coop_digital_assets.action_coop_cfa_issue'),
     ('Нематериальные активы', 'fa-lightbulb-o', 'coop_intangibles.action_coop_intangibles'),
     ('Целевые программы ПК', 'fa-bullseye', ''),

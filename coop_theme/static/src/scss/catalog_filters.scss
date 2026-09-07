@@ -62,9 +62,11 @@
     color: var(--coop-slate-light, #8f8f88);
   }
 
+  // Та же причина, что и у полей формы: фирменный цвет на клик мышью
+  // тянет взгляд туда, где ничего не произошло.
   &:focus {
     outline: none;
-    border-color: var(--coop-teal, #146b64);
+    border-color: var(--coop-slate-light, #8f8f88);
   }
 }
 

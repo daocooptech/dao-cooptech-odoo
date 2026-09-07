@@ -46,5 +46,12 @@
         'views/coop_cession_views.xml',
         'views/coop_token_views.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'coop_tokenomics/static/src/js/coop_exchange.js',
+            'coop_tokenomics/static/src/xml/coop_exchange.xml',
+            'coop_tokenomics/static/src/scss/coop_exchange.scss',
+        ],
+    },
     'installable': True,
 }
