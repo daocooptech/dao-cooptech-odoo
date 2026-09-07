@@ -1,0 +1,10 @@
+[Unit]
+Description=Обновлять ДАО КООПТЕХ раз в сутки
+
+[Timer]
+; Ночью по Москве: участники спят, перезапуск никого не прерывает.
+OnCalendar=*-*-* 04:30:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

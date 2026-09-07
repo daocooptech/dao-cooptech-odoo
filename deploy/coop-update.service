@@ -1,0 +1,7 @@
+[Unit]
+Description=Свежая версия ДАО КООПТЕХ из репозиториев
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/coop/coop-addons/deploy/update.sh

@@ -1,0 +1,18 @@
+[Unit]
+Description=ДАО КООПТЕХ (Odoo 19)
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=simple
+User=odoo
+Group=odoo
+ExecStart=/opt/coop/venv/bin/python /opt/coop/odoo/odoo-bin -c /etc/coop-odoo.conf
+KillMode=mixed
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
