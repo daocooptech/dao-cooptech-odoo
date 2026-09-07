@@ -14,7 +14,7 @@
             <span class="o_coop_dex_net" t-esc="state.wallet.network === 'testnet' ? 'тестовая сеть' : 'основная сеть'"/>
           </t>
           <t t-else="">
-            <button class="o_coop_dex_connect" t-on-click="openWallet">
+            <button class="o_coop_dex_connect" t-on-click="connectWallet">
               Подключить кошелёк TON
             </button>
           </t>

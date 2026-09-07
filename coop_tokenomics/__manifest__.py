@@ -49,6 +49,7 @@
     ],
     'assets': {
         'web.assets_backend': [
+            'coop_tokenomics/static/src/js/coop_ton_connect.js',
             'coop_tokenomics/static/src/js/coop_exchange.js',
             'coop_tokenomics/static/src/xml/coop_exchange.xml',
             'coop_tokenomics/static/src/scss/coop_exchange.scss',

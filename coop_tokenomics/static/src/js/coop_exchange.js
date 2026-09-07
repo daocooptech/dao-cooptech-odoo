@@ -3,6 +3,7 @@
 import { Component, onWillStart, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+import { connectTonWallet } from "@coop_tokenomics/js/coop_ton_connect";
 
 /**
  * Торговый экран биржи.
@@ -275,9 +276,27 @@ export class CoopExchange extends Component {
         });
     }
 
-    /** Подключение кошелька — на странице участника, где оно и живёт. */
-    openWallet() {
-        this.action.doAction("coop_profile.action_coop_my_page");
+    /** Подключить кошелёк, не уходя с торгов.
+     *
+     * Раньше кнопка уводила на страницу участника: человек нажимал
+     * «купить», попадал в профиль и терял место, на котором стоял.
+     * Кошелёк подключается здесь же, а на странице участника остаётся
+     * то же действие для тех, кто пришёл туда сам.
+     */
+    async connectWallet() {
+        try {
+            const result = await connectTonWallet();
+            if (!result) {
+                return;
+            }
+            this.notification.add("Кошелёк подключён.", { type: "success" });
+            await this.load();
+        } catch (error) {
+            this.notification.add(
+                error && error.message ? error.message : String(error),
+                { type: "danger" }
+            );
+        }
     }
 
     // ── Отрисовка чисел ──────────────────────────────────────────────────
