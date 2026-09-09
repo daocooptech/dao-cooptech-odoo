@@ -1,0 +1,27 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Страница показывается те несколько секунд, пока служба платформы
+     перезапускается после обновления. Обновляется сама, поэтому человеку
+     ничего нажимать не надо: как только платформа поднялась, он окажется
+     там же, куда шёл. -->
+<meta http-equiv="refresh" content="3">
+<title>Обновляемся — ДАО КООПТЕХ</title>
+<style>
+  body { margin: 0; min-height: 100vh; display: flex; align-items: center;
+         justify-content: center; background: #f7f7f4; color: #14171a;
+         font: 400 15px/1.5 'Manrope', system-ui, sans-serif; }
+  .box { max-width: 380px; padding: 32px; text-align: center; }
+  h1 { margin: 0 0 10px; font-size: 19px; font-weight: 700; }
+  p { margin: 0; color: #4a4a44; font-size: 13.5px; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+         background: #146b64; margin: 18px 3px 0; animation: b 1.2s infinite; }
+  .dot:nth-child(2) { animation-delay: .2s }
+  .dot:nth-child(3) { animation-delay: .4s }
+  @keyframes b { 0%, 80%, 100% { opacity: .25 } 40% { opacity: 1 } }
+</style>
+<div class="box">
+  <h1>Платформа обновляется</h1>
+  <p>Это занимает несколько секунд. Страница откроется сама — закрывать её не нужно.</p>
+  <div><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+</div>

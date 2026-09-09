@@ -39,6 +39,23 @@ for unit in coop-odoo.service coop-update.service coop-update.timer; do
         units_changed=1
     fi
 done
+# Конфиг nginx и страница «обновляемся» тоже лежат в репозитории.
+mkdir -p /var/www/coop
+if ! cmp -s "$ODOO_HOME/coop-addons/deploy/maintenance.html" /var/www/coop/maintenance.html; then
+    cp "$ODOO_HOME/coop-addons/deploy/maintenance.html" /var/www/coop/maintenance.html
+    say "Обновляю страницу обновления"
+fi
+if ! cmp -s "$ODOO_HOME/coop-addons/deploy/nginx-coop.conf" /etc/nginx/sites-available/coop; then
+    cp "$ODOO_HOME/coop-addons/deploy/nginx-coop.conf" /etc/nginx/sites-available/coop
+    if nginx -t 2>/dev/null; then
+        systemctl reload nginx
+        say "Обновляю nginx"
+    else
+        say "ВНИМАНИЕ: новый конфиг nginx не прошёл проверку, оставлен прежний"
+        nginx -t || true
+    fi
+fi
+
 if [ "${units_changed:-0}" = "1" ]; then
     systemctl daemon-reload
     systemctl restart coop-update.timer || true
@@ -56,6 +73,15 @@ changed=$(run git diff --name-only "$before" "$after" \
           | awk -F/ 'NF>1 {print $1}' | sort -u \
           | while read -r d; do [ -f "$ODOO_HOME/coop-addons/$d/__manifest__.py" ] && echo "$d"; done \
           | paste -sd, -)
+
+# Правки в static/ — это стили, скрипты и шаблоны браузера. Базы они не
+# касаются, и обновлять ради них модули незачем: обновление останавливает
+# службу на десятки секунд, а перезапуск занимает секунды. При выкладке
+# раз в минуту разница видна невооружённым глазом.
+if [ -n "$changed" ] && ! run git diff --name-only "$before" "$after" | grep -qv '/static/'; then
+    say "Изменения только в static — обновление модулей не нужно"
+    changed=""
+fi
 
 if [ -z "$changed" ]; then
     say "Изменения вне модулей — только перезапуск"
