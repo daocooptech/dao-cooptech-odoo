@@ -15,6 +15,18 @@ set -u
 BASE="${1:-http://127.0.0.1:8069}"
 started=$(date +%s)
 
+# Пакеты бэкенда — отдельным списком, и вот почему. Сценарий собирал
+# адреса со страниц, но /odoo без входа отдаёт форму логина, а значит
+# самый тяжёлый пакет — web.assets_web, семь мегабайт скриптов — не
+# прогревался никогда. В логе его сборка занимает двенадцать секунд,
+# и платил их первый вошедший участник, глядя на пустую страницу.
+# Сами адреса ассетов вход не требуют, поэтому запросить их можно прямо.
+for asset in /web/assets/any/web.assets_web.min.js              /web/assets/any/web.assets_web.min.css              /web/assets/any/web.assets_web_print.min.css; do
+    seconds=$(curl -s -o /dev/null -w '%{time_total}' --max-time 300         "$BASE$asset" || echo '—')
+    printf '  %-56s %s с
+' "$(basename "$asset")" "$seconds"
+done
+
 for page in /web/login /odoo; do
     html=$(curl -s --max-time 120 "$BASE$page" || true)
     printf '%s' "$html" | grep -oE '/web/assets/[^"]+\.(js|css)' | sort -u \
