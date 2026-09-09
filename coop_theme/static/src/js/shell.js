@@ -122,6 +122,20 @@ export class CoopSidebar extends Component {
             if (!action) {
                 return;
             }
+            if (!this._knownAction(action)) {
+                // Событие принесло действие, которого нет ни в одном пункте
+                // меню, — так открываются вложенные экраны раздела и
+                // карточки записей. Оставлять подсветку на прошлом разделе
+                // нельзя: человек стоит на «Ресурсах», а подсвечена
+                // «Токеномика», откуда он пришёл. Спрашиваем адрес — он
+                // всегда знает, что открыто.
+                this._currentAction().then((fromUrl) => {
+                    if (fromUrl) {
+                        this.state.current = fromUrl;
+                    }
+                });
+                return;
+            }
             if (action.tag === "coop_soon") {
                 // У заглушек одно действие на все разделы, и различает их
                 // только название. Без этого подсветка пропадала ровно
@@ -225,6 +239,17 @@ export class CoopSidebar extends Component {
         } catch {
             return null;
         }
+    }
+
+    /** Есть ли такое действие среди пунктов меню. */
+    _knownAction(action) {
+        if (action.tag === "coop_soon") {
+            return true;
+        }
+        const id = action.id || action.tag;
+        const все = [].concat(this.state.main || [], this.state.extensions || [],
+                              this.state.admin || []);
+        return все.some((item) => item.actionId === id);
     }
 
     isActive(item) {
