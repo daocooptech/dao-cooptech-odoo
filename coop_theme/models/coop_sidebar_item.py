@@ -204,6 +204,12 @@ class CoopSidebarItem(models.Model):
             'label': item.name,
             'icon': item.icon or '',
             'actionId': item.action_id.id or False,
+            # Модель раздела нужна подсветке. По действию её опознать нельзя:
+            # карточка записи открывается своим действием, которого в меню
+            # нет, и адрес у неё вида /odoo/coop.wallet/6 — без номера
+            # действия вовсе. По модели же видно, что кошелёк открыт из
+            # раздела «Кошелёк», а не из того, откуда пришли.
+            'model': item.action_id.res_model or False,
             'section': item.section,
         } for item in items]
 

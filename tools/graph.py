@@ -19,6 +19,7 @@
     python tools/graph.py class o_coop_listing
                                              где селектор задан и кто им пользуется
     python tools/graph.py cards              карточки канбанов: кто на каком семействе
+    python tools/graph.py naked              классы разметки, к которым нет стилей
     python tools/graph.py action Люди        действие по названию или xml id
     python tools/graph.py grep запись        поиск по всему индексу
 """
@@ -107,7 +108,10 @@ def parse_python(path, module, out):
 # ── разбор xml ───────────────────────────────────────────────────────────
 
 CLASS_RE = re.compile(r'class="([^"]+)"')
-TATT_RE = re.compile(r"t-att-class=\"[^\"]*?'([a-z_][a-z0-9_ ]*)'")
+# Из t-att-class берём только целые имена. Склейка вида «'o_coop_deal_ico_'
+# + record.subject.raw_value» даёт обрубок, которого в стилях нет и быть
+# не может, — такие отбрасываем по хвостовому подчёркиванию.
+TATT_RE = re.compile(r"t-att-class=\"[^\"]*?'([a-z_][a-z0-9_ ]*[a-z0-9])'")
 
 
 def parse_xml(path, module, out):
@@ -170,7 +174,10 @@ def parse_xml(path, module, out):
 
 # ── разбор стилей ────────────────────────────────────────────────────────
 
-SEL_RE = re.compile(r"^\s*([.&][A-Za-z0-9_.\-&:> ,\[\]=\"']+?)\s*\{\s*$")
+# Селектор ловится и когда правило записано в одну строку: «.o_coop_fact_key
+# { color: … }» — на такой записи первая версия разборщика молчала, и
+# инструмент показывал написанные стили как отсутствующие.
+SEL_RE = re.compile(r"^\s*([.&][A-Za-z0-9_.\-&:> ,\[\]=\"']+?)\s*\{")
 
 
 def parse_scss(path, module, out):
@@ -322,6 +329,28 @@ def q_cards(g):
               % (корень, адрес, len(семьи[корень]), ", ".join(семьи[корень])))
 
 
+def q_naked(g):
+    """Классы, на которые разметка ссылается, а правил к ним нет нигде.
+
+    Так нашлись обе выдачи токеномики: разметка была написана, стилей
+    к o_coop_fact* не существовало ни в одном файле, и карточки рисовались
+    голым столбиком текста.
+
+    Не всякая находка — поломка: класс-крючок рядом с общим (o_coop_res_meta
+    при o_coop_listing_meta) правил не требует, оформление ему приходит
+    от соседа. Смотреть надо те, у которых соседа нет.
+    """
+    селекторы = set(g["селекторы"])
+    голые = {c: f for c, f in g["использование_классов"].items()
+             if c not in селекторы and not c.endswith("_")}
+    print("ссылок без своих правил:", len(голые))
+    for cls in sorted(голые):
+        соседи = [s for s in селекторы if cls.startswith(s) or s.startswith(cls)]
+        пометка = "" if соседи else "  ← правил нет и рядом"
+        print("  %-32s %-28s%s" % (cls, ", ".join(sorted({f.split("/")[0]
+              for f in голые[cls]}))[:26], пометка))
+
+
 def q_action(g, name):
     for a in g["действия"]:
         if name.lower() in (a["название"] or "").lower() or name in (a["xmlid"] or ""):
@@ -354,6 +383,7 @@ COMMANDS = {
     "view": lambda g, a: q_view(g, a),
     "class": lambda g, a: q_class(g, a),
     "cards": lambda g, a: q_cards(g),
+    "naked": lambda g, a: q_naked(g),
     "action": lambda g, a: q_action(g, a),
     "grep": lambda g, a: q_grep(g, a),
 }

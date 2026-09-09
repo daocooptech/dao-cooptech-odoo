@@ -101,7 +101,7 @@ export class CoopSidebar extends Component {
         this.action = useService("action");
         this.orm = useService("orm");
         this.state = useState({
-            main: [], extensions: [], admin: [], current: null, open: false,
+            main: [], extensions: [], admin: [], current: null, model: null, open: false,
             acting: null, actors: [],
         });
 
@@ -122,13 +122,18 @@ export class CoopSidebar extends Component {
             if (!action) {
                 return;
             }
+            // Модель открытого экрана запоминаем всегда: по ней подсветка
+            // находит раздел там, где действие не помогает.
+            this.state.model = action.res_model || null;
             if (!this._knownAction(action)) {
                 // Событие принесло действие, которого нет ни в одном пункте
-                // меню, — так открываются вложенные экраны раздела и
-                // карточки записей. Оставлять подсветку на прошлом разделе
-                // нельзя: человек стоит на «Ресурсах», а подсвечена
-                // «Токеномика», откуда он пришёл. Спрашиваем адрес — он
-                // всегда знает, что открыто.
+                // меню. Так открываются вложенные экраны раздела и карточки
+                // записей: у кошелька адрес вида /odoo/coop.wallet/6 —
+                // номера действия в нём нет вовсе, и спрашивать адрес
+                // бесполезно. Зато есть модель, а по ней раздел опознаётся
+                // однозначно. Оставлять подсветку на прошлом разделе нельзя:
+                // человек стоит на кошельке, а подсвечены «Ресурсы».
+                this.state.current = null;
                 this._currentAction().then((fromUrl) => {
                     if (fromUrl) {
                         this.state.current = fromUrl;
@@ -254,13 +259,24 @@ export class CoopSidebar extends Component {
 
     isActive(item) {
         const current = this.state.current;
-        if (!current) {
-            return false;
+        if (current) {
+            if (!item.actionId) {
+                return current === "soon:" + item.label;
+            }
+            if (item.actionId === Number(current)) {
+                return true;
+            }
         }
-        if (!item.actionId) {
-            return current === "soon:" + item.label;
+        // Действие не опознано — идём по модели. Одну модель могут делить
+        // несколько разделов: и «Люди», и «Организации» стоят на res.partner.
+        // Тогда не подсвечиваем ничего: пустая подсветка честнее ложной.
+        if (!current && this.state.model && item.model === this.state.model) {
+            const сколько = [].concat(this.state.main || [], this.state.extensions || [],
+                                      this.state.admin || [])
+                .filter((i) => i.model === this.state.model).length;
+            return сколько === 1;
         }
-        return item.actionId === Number(current);
+        return false;
     }
 
     /** «+» у рубрики ведёт в каталог расширений — оттуда их и подключают.
