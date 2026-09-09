@@ -10,6 +10,7 @@
   <t t-name="coop_theme.CatalogKanbanView" t-inherit="web.KanbanView" t-inherit-mode="primary">
     <xpath expr="//div[@t-ref='root']" position="attributes">
       <attribute name="t-attf-class">{{ className }} {{ hasSelectedRecords ? 'o_kanban_selection_active' : 'o_kanban_selection_available' }} o_coop_{{ coopLayout.mode }}</attribute>
+      <attribute name="t-att-data-coop-shelf">coopShelfField or 'нет'</attribute>
     </xpath>
 
     <!--
