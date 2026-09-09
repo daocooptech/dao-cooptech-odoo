@@ -92,21 +92,17 @@ export class CoopCatalogKanbanController extends KanbanController {
      *  группировки и только в плитке. В списке витрина по рубрикам
      *  спорит с самим списком. */
     get coopShelvesVisible() {
-        const facets = this.env.searchModel?.facets || [];
-        const видно = Boolean(this.coopShelfField)
-            && this.coopLayout.mode === "tiles"
-            && facets.length === 0;
-        // Временная запись: полки не появились на ресурсах, хотя признак
-        // в действии есть и рубрики читаются. Снять, как только причина
-        // найдена.
-        console.log("[полки]", {
-            поле: this.coopShelfField,
-            режим: this.coopLayout.mode,
-            фасетов: facets.length,
-            ключи: Object.keys(this.props.context || {}),
-            видно,
-        });
-        return видно;
+        // Условие нарочно короткое: признак в действии и режим плитки.
+        //
+        // Раньше сюда входила ещё проверка «в поиске ничего не выбрано»
+        // через searchModel.facets — и полки не появлялись вовсе. Проверять
+        // это условие снаружи оказалось нечем: Owl не отдаёт внутренности
+        // компонента, а консоль расширения до них не доходит. Значит либо
+        // фасеты там не пусты по причине, которую отсюда не видно, либо
+        // обращение к searchModel в этот момент роняет геттер. Поэтому
+        // условие оставлено тем, что можно проверить глазами, а скрытие
+        // полок при поиске сделано ниже — по строке запроса.
+        return Boolean(this.coopShelfField) && this.coopLayout.mode === "tiles";
     }
 
     setup() {
