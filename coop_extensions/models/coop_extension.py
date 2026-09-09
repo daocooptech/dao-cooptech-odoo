@@ -41,6 +41,19 @@ class CoopExtension(models.Model):
         ('integration', 'Интеграции'),
     ], string='Раздел', required=True, default='process')
 
+    # Значок раздела — чтобы карточка расширения читалась как остальные
+    # каталоги: слева квадрат с символом, а не пустое место. Фотографии
+    # у модуля нет и быть не может, но геометрия одна.
+    ICONS = {'accounting': '🧾', 'process': '⚙️', 'sales': '🛍',
+             'finance': '💳', 'community': '🏘️', 'integration': '🔌'}
+
+    icon = fields.Char(string='Значок', compute='_compute_icon')
+
+    @api.depends('category')
+    def _compute_icon(self):
+        for record in self:
+            record.icon = self.ICONS.get(record.category, '⚙️')
+
     # ── Кто автор ───────────────────────────────────────────────────────
     author_id = fields.Many2one(
         'res.partner', string='Автор',

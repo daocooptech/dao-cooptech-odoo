@@ -47,11 +47,10 @@
   --coop-gold-text: #8a5c14;
   --coop-radius: 10px;
 
-  // Карточка — колонка: только так подвал можно прижать книзу, а значит
-  // выровнять нижние границы карточек в ряду.
+  // Карточка — строка: слева квадрат раздела, справа тело. Колонкой
+  // становится тело, и подвал прижимается книзу уже внутри него.
   .o_kanban_record {
     display: flex;
-    flex-direction: column;
     background: var(--coop-white);
     border: 1px solid var(--coop-line);
     border-radius: var(--coop-radius);
@@ -199,3 +198,12 @@
   --coop-gold-tint: #221c11;
   --coop-gold-text: #e0b061;
 }
+
+// Квадрат раздела. Подложка одна на все разделы: расширения различаются
+// символом, а не цветом — цветовых значений на платформе и так хватает.
+.o_coop_listing_ico.o_coop_ext_ico {
+  font-size: 20px;
+  background: var(--coop-surface, #f2f2ee);
+}
+
+.o_coop_ext_card { gap: 12px; }

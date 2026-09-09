@@ -19,40 +19,52 @@
         <field name="module_id"/>
         <field name="is_official"/>
         <field name="pricing"/>
+        <field name="icon"/>
         <templates>
           <t t-name="card">
-            <div class="o_coop_ext_cat">
-              <field name="category"/>
-            </div>
-            <div class="o_coop_ext_title">
-              <field name="name"/>
-            </div>
-            <div class="o_coop_ext_summary">
-              <field name="summary"/>
-            </div>
-            <div class="o_coop_ext_foot">
-              <div class="d-flex align-items-center gap-2 flex-wrap">
-                <span t-if="record.is_installed.raw_value"
-                      class="o_coop_badge o_coop_on">✓ Подключено</span>
-                <span t-if="!record.is_installed.raw_value and record.module_id.raw_value"
-                      class="o_coop_badge o_coop_off">Не подключено</span>
-                <span t-if="!record.module_id.raw_value"
-                      class="o_coop_badge o_coop_off">Заявлено</span>
-                <span t-if="!record.is_official.raw_value"
-                      class="o_coop_badge o_coop_third">Стороннее</span>
+            <!-- Общая карточка каталога: слева квадрат, справа тело.
+                 Фотографии у модуля нет и быть не может, поэтому в
+                 квадрате символ раздела — но геометрия та же, что у
+                 карточек с настоящими снимками. -->
+            <div class="o_coop_listing o_coop_ext_card">
+              <div class="o_coop_listing_ico o_coop_ext_ico">
+                <t t-esc="record.icon.value"/>
               </div>
-              <div class="d-flex align-items-center gap-2">
-                <span class="o_coop_ext_price"
-                      t-attf-class="o_coop_ext_price {{ record.pricing.raw_value == 'free' ? 'o_coop_free' : '' }}">
-                  <field name="price_label"/>
-                </span>
-                <button t-if="!record.is_installed.raw_value and record.module_id.raw_value"
-                        name="action_install" type="object"
-                        class="btn o_coop_action"
-                        confirm="Подключить расширение? Модуль будет установлен в вашу
-базу, в интерфейсе появятся его разделы. Отключение делается там же, в каталоге.">
-                  Подключить
-                </button>
+              <div class="o_coop_listing_body">
+              <div class="o_coop_ext_cat">
+                <field name="category"/>
+              </div>
+              <div class="o_coop_ext_title">
+                <field name="name"/>
+              </div>
+              <div class="o_coop_ext_summary">
+                <field name="summary"/>
+              </div>
+              <div class="o_coop_ext_foot">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                  <span t-if="record.is_installed.raw_value"
+                        class="o_coop_badge o_coop_on">✓ Подключено</span>
+                  <span t-if="!record.is_installed.raw_value and record.module_id.raw_value"
+                        class="o_coop_badge o_coop_off">Не подключено</span>
+                  <span t-if="!record.module_id.raw_value"
+                        class="o_coop_badge o_coop_off">Заявлено</span>
+                  <span t-if="!record.is_official.raw_value"
+                        class="o_coop_badge o_coop_third">Стороннее</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="o_coop_ext_price"
+                        t-attf-class="o_coop_ext_price {{ record.pricing.raw_value == 'free' ? 'o_coop_free' : '' }}">
+                    <field name="price_label"/>
+                  </span>
+                  <button t-if="!record.is_installed.raw_value and record.module_id.raw_value"
+                          name="action_install" type="object"
+                          class="btn o_coop_action"
+                          confirm="Подключить расширение? Модуль будет установлен в вашу
+  базу, в интерфейсе появятся его разделы. Отключение делается там же, в каталоге.">
+                    Подключить
+                  </button>
+                </div>
+              </div>
               </div>
             </div>
           </t>

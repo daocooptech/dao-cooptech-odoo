@@ -24,8 +24,14 @@
         <templates>
           <t t-name="card">
             <div class="o_coop_listing">
+              <!-- Логотип эмитента: у организаций он есть у 186 из 187, и карточка
+                   узнаётся по знаку так же, как в каталоге организаций.
+                   Буква остаётся запасным вариантом, когда знака нет. -->
               <div class="o_coop_listing_ico">
-                <t t-esc="record.issuer_id.value.trim().charAt(0)"/>
+                <img t-if="record.issuer_id.raw_value"
+                     t-att-src="'/web/image/res.partner/' + record.issuer_id.raw_value[0] + '/image_512'"
+                     t-att-alt="record.issuer_id.value" loading="lazy"/>
+                <t t-else="" t-esc="record.issuer_id.value.trim().charAt(0)"/>
               </div>
               <div class="o_coop_listing_body">
                 <div class="o_coop_listing_title"><field name="name"/></div>
