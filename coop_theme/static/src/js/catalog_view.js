@@ -92,11 +92,21 @@ export class CoopCatalogKanbanController extends KanbanController {
      *  группировки и только в плитке. В списке витрина по рубрикам
      *  спорит с самим списком. */
     get coopShelvesVisible() {
-        if (!this.coopShelfField || this.coopLayout.mode !== "tiles") {
-            return false;
-        }
         const facets = this.env.searchModel?.facets || [];
-        return facets.length === 0;
+        const видно = Boolean(this.coopShelfField)
+            && this.coopLayout.mode === "tiles"
+            && facets.length === 0;
+        // Временная запись: полки не появились на ресурсах, хотя признак
+        // в действии есть и рубрики читаются. Снять, как только причина
+        // найдена.
+        console.log("[полки]", {
+            поле: this.coopShelfField,
+            режим: this.coopLayout.mode,
+            фасетов: facets.length,
+            ключи: Object.keys(this.props.context || {}),
+            видно,
+        });
+        return видно;
     }
 
     setup() {
