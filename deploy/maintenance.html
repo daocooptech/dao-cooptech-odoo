@@ -12,6 +12,7 @@
          justify-content: center; background: #f7f7f4; color: #14171a;
          font: 400 15px/1.5 'Manrope', system-ui, sans-serif; }
   .box { max-width: 380px; padding: 32px; text-align: center; }
+  .mark { width: 120px; height: 40px; margin-bottom: 18px; }
   h1 { margin: 0 0 10px; font-size: 19px; font-weight: 700; }
   p { margin: 0; color: #4a4a44; font-size: 13.5px; }
   .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%;
@@ -21,6 +22,15 @@
   @keyframes b { 0%, 80%, 100% { opacity: .25 } 40% { opacity: 1 } }
 </style>
 <div class="box">
+  <!-- Знак платформы: страница показывается на её же адресе, и без знака
+       человек не понимает, куда попал. Знак нарисован прямо здесь — файл
+       отдаёт nginx, когда служба лежит, и подтянуть картинку ему неоткуда. -->
+  <svg class="mark" viewBox="0 0 120 40" role="img" aria-label="ДАО КООПТЕХ">
+    <rect x="0" y="6" width="120" height="28" rx="6" fill="#146b64"/>
+    <text x="60" y="26" text-anchor="middle" fill="#ffffff"
+          font-family="Manrope, system-ui, sans-serif" font-size="15"
+          font-weight="700" letter-spacing="2">COOP</text>
+  </svg>
   <h1>Платформа обновляется</h1>
   <p>Это занимает несколько секунд. Страница откроется сама — закрывать её не нужно.</p>
   <div><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>

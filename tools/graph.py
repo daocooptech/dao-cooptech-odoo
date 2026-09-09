@@ -31,6 +31,11 @@ import re
 import sys
 import xml.etree.ElementTree as ET
 
+# Консоль Windows по умолчанию в cp1251, и стрелка «←» в выводе роняла
+# всю команду. Переключаем поток вывода на utf-8 явно.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)          # coop-addons
 INDEX = os.path.join(HERE, "graph.json")
