@@ -11,6 +11,7 @@ import { Pager } from "@web/core/pager/pager";
 import { CoopTabs } from "@coop_theme/js/shell";
 import { CoopFilters } from "@coop_theme/js/catalog_filters";
 import { CoopMap } from "@coop_theme/js/catalog_map";
+import { CoopShelves } from "@coop_theme/js/catalog_shelves";
 import { coopSort, parseOrder } from "@coop_theme/js/catalog_sort";
 import { reactive, useEffect, useState } from "@odoo/owl";
 
@@ -62,7 +63,7 @@ export class CoopCatalogKanbanController extends KanbanController {
     // панели сверху. Данные берутся те же, что у штатной: представление
     // уже сложило их в настройку экрана, и считать их второй раз значило
     // бы завести второй счётчик, который разойдётся с первым.
-    static components = { ...KanbanController.components, Pager, CoopFilters, CoopMap };
+    static components = { ...KanbanController.components, Pager, CoopFilters, CoopMap, CoopShelves };
 
     // Кнопка создания подписывается по разделу: «Добавить ресурс»,
     // «Добавить проект». Штатное «Новое» ничего не говорит о том, что
@@ -77,6 +78,25 @@ export class CoopCatalogKanbanController extends KanbanController {
      *  неё нет намеренно, иначе модули ссылались бы друг на друга. */
     coopShowTiles() {
         setCoopLayout("tiles");
+    }
+
+    /** По какому полю раскладывать полки. Объявляется в действии
+     *  каталога (`coop_shelf_field` в контексте), а не угадывается: у
+     *  каждого раздела своя рубрикация, и промах здесь виден сразу всем.
+     *  Не объявлено — полок нет, каталог работает как раньше. */
+    get coopShelfField() {
+        return this.props.context?.coop_shelf_field || false;
+    }
+
+    /** Полки только на чистом экране: без поиска, без отбора, без
+     *  группировки и только в плитке. В списке витрина по рубрикам
+     *  спорит с самим списком. */
+    get coopShelvesVisible() {
+        if (!this.coopShelfField || this.coopLayout.mode !== "tiles") {
+            return false;
+        }
+        const facets = this.env.searchModel?.facets || [];
+        return facets.length === 0;
     }
 
     setup() {

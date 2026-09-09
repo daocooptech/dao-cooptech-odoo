@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!--
+    Полка: заголовок рубрики со счётчиком, ряд карточек и «Смотреть все».
+    Ряд прокручивается вбок — на узком экране полка не превращается
+    в сетку, иначе витрина занимает три экрана и до каталога никто
+    не долистывает.
+  -->
+  <t t-name="coop_theme.CatalogShelves">
+    <div class="o_coop_shelves" t-if="state.shelves.length">
+      <div class="o_coop_shelf" t-foreach="state.shelves" t-as="shelf" t-key="shelf.id">
+        <div class="o_coop_shelf_head">
+          <div class="o_coop_shelf_title">
+            <t t-esc="shelf.label"/>
+            <span class="o_coop_shelf_count"><t t-esc="shelf.count"/></span>
+          </div>
+          <button class="o_coop_shelf_all" type="button" t-on-click="() => this.openAll(shelf)">
+            Смотреть все
+          </button>
+        </div>
+        <div class="o_coop_shelf_row">
+          <div class="o_coop_shelf_card" t-foreach="shelf.records" t-as="rec" t-key="rec.id"
+               t-on-click="() => this.open(rec)">
+            <div class="o_coop_shelf_photo">
+              <img t-att-src="photo(rec)" t-att-alt="rec.display_name" loading="lazy"/>
+              <span class="o_coop_shelf_city" t-if="rec.city">
+                <i class="fa fa-map-marker" aria-hidden="true"/>
+                <t t-esc="rec.city"/>
+              </span>
+            </div>
+            <div class="o_coop_shelf_name"><t t-esc="rec.display_name"/></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </t>
+
+</templates>

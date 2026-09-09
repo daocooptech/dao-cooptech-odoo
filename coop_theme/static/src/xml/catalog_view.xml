@@ -37,6 +37,18 @@
       `model.isReady` — это признак того, что данные уже загружены, и без
       него список рисуется по пустой модели.
     -->
+    <!--
+      Полки по рубрикам — над сеткой каталога и только на чистом экране:
+      как только человек искал или отбирал, витрина по рубрикам мешает,
+      он уже знает, что ищет.
+    -->
+    <xpath expr="//t[@t-component='props.Renderer']" position="before">
+      <CoopShelves t-if="coopShelvesVisible"
+                   resModel="props.resModel"
+                   field="coopShelfField"
+                   domain="props.domain or []"/>
+    </xpath>
+
     <xpath expr="//t[@t-component='props.Renderer']" position="attributes">
       <attribute name="t-if">model.isReady and coopLayout.mode !== 'map'</attribute>
     </xpath>

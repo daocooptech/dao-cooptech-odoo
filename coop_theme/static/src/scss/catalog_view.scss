@@ -18,10 +18,28 @@
   --KanbanRecord-margin-v: 8px;
 }
 
-@media (max-width: 900px) {
+// Планшету — свой шаг: 150 рассчитаны на телефон, а на планшете давали
+// пять плиток по 163 px, где в строку заголовка влезало тринадцать знаков.
+@media (max-width: 900px) and (min-width: 561px) {
   .o_coop_tiles .o_kanban_renderer {
-    --KanbanRecord-width: 150px;
+    --KanbanRecord-width: 210px;
     --KanbanRecord-margin-h: 5px;
+  }
+}
+
+// Телефон — одна колонка во всю ширину. Решение владельца: в двух
+// колонках по 169 px у пятнадцати заголовков из ста текст упирался
+// в предел двух строк. Цена — полторы карточки на экран вместо четырёх;
+// она принята сознательно.
+@media (max-width: 560px) {
+  .o_coop_tiles .o_kanban_renderer {
+    --KanbanRecord-width: 100%;
+    --KanbanRecord-margin-h: 0;
+  }
+
+  .o_coop_tiles .o_kanban_renderer .o_kanban_record {
+    width: 100%;
+    max-width: 100%;
   }
 }
 
