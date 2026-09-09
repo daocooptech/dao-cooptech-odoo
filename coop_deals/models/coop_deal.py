@@ -93,11 +93,12 @@ class CoopDeal(models.Model):
 
     # ── Предмет ──────────────────────────────────────────────────────────
     resource_id = fields.Many2one('coop.resource', string='Объявление о ресурсе')
-    # Если сделка про ресурс — показываем его фотографию, а не значок:
-    # карточка сделки становится узнаваемой так же, как объявление,
-    # из которого она выросла.
+    # Фотография предмета сделки. Через resource_id её брать не вышло:
+    # связь пуста у всех четырёхсот десяти сделок — они заводились сами
+    # по себе, а не из объявлений. Поэтому снимок хранится у сделки,
+    # а подбирается по предмету при наполнении.
     image_512 = fields.Image(
-        string='Фото предмета', related='resource_id.image_512', readonly=True)
+        string='Фото предмета', max_width=512, max_height=512)
     skill_offer_id = fields.Many2one('coop.skill.offer', string='Предложение навыка')
     vacancy_id = fields.Many2one('coop.vacancy', string='Вакансия')
     project_id = fields.Many2one('coop.project', string='Проект')
