@@ -22,13 +22,10 @@ run git fetch --quiet origin main
 run git reset --hard --quiet origin/main
 after=$(run git rev-parse HEAD)
 
-if [ "$before" = "$after" ]; then
-    say "Изменений нет ($after)"
-    exit 0
-fi
-
-say "Обновление $before → $after"
-
+# Блоки systemd сверяются до проверки «изменений нет»: сами блоки могли
+# приехать прошлым обновлением, а поставить их было некому — сценарий
+# выходил раньше. Ровно на этом минутный таймер и не встал с первого раза.
+#
 # Сценарии запуска лежат в этом же репозитории, но systemd читает их
 # из /etc. Раньше их переносил только install.sh, и правка таймера
 # доезжала до сервера, ничего не меняя. Теперь блоки сверяются при каждом
@@ -46,6 +43,13 @@ if [ "${units_changed:-0}" = "1" ]; then
     systemctl daemon-reload
     systemctl restart coop-update.timer || true
 fi
+
+if [ "$before" = "$after" ]; then
+    say "Изменений нет ($after)"
+    exit 0
+fi
+
+say "Обновление $before → $after"
 
 # Какие модули задеты. Первый уровень каталогов и есть имена модулей.
 changed=$(run git diff --name-only "$before" "$after" \
