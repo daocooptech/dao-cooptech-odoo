@@ -85,6 +85,12 @@ class CoopEvent(models.Model):
         string='Я записан', compute='_compute_am_i_signed',
         search='_search_am_i_signed')
 
+    signup_label = fields.Char(
+        string='Сколько людей', compute='_compute_signup_label',
+        help='Готовая строка для карточки: у будущего события люди '
+             'записались, у прошедшего — участвовали. Считается здесь, '
+             'а не в шаблоне: склонение числительного шаблону не по силам.')
+
     @api.depends('signup_ids.state', 'capacity')
     def _compute_signups(self):
         for record in self:
@@ -92,6 +98,25 @@ class CoopEvent(models.Model):
             record.signup_count = len(going)
             record.seats_left = (record.capacity - len(going)
                                  if record.capacity else 0)
+
+    @api.depends('signup_count', 'is_past')
+    def _compute_signup_label(self):
+        for record in self:
+            n = record.signup_count or 0
+            tail, hundred = n % 10, n % 100
+            if record.is_past:
+                if hundred in (11, 12, 13, 14):
+                    word = 'участников'
+                elif tail == 1:
+                    word = 'участник'
+                elif tail in (2, 3, 4):
+                    word = 'участника'
+                else:
+                    word = 'участников'
+            else:
+                word = ('записался' if tail == 1 and hundred != 11
+                        else 'записались')
+            record.signup_label = '%d %s' % (n, word)
 
     @api.depends('date_start')
     def _compute_is_past(self):

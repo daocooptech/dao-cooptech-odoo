@@ -1,63 +1,40 @@
 // Карточка события.
 //
-// Дата стоит рядом с названием и крупнее прочего: у события всё решает
-// «когда». Остальное — где, кто ведёт, сколько записалось — читается
-// после того, как человек понял, свободен ли он в этот день.
+// Раскладку, значок, заголовок и строку происхождения даёт общая карточка
+// каталога (`o_coop_listing*` в coop_theme) — вместе с правилами режима
+// плитки. Раньше у событий была своя разметка со своими классами, под эти
+// правила она не попадала: в плитке значок оставался сбоку от текста,
+// тело сжималось до нуля, и строка «24 записались» рассыпалась в столбик
+// по одной букве, распирая весь ряд по высоте.
+//
+// Здесь остаётся только то, что у события действительно своё: подложка
+// значка по категории, строка даты и вид прошедшего.
 
-.o_coop_event {
-  display: flex;
-  gap: 12px;
-  padding: 14px 16px;
-  width: 100%;
-  min-width: 0;
-}
-
-.o_coop_event_ico {
-  flex: 0 0 44px;
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+// Подложка по категории перебивает общий бирюзовый фон значка. Два класса
+// в селекторе — намеренно: у общего правила один, и без второго исход
+// зависел бы от того, чей файл окажется в сборке ниже.
+.o_coop_listing_ico.o_coop_event_ico {
+  // Значок события — эмодзи, а не буква: ему нужен кегль побольше.
   font-size: 20px;
-  background: var(--coop-surface, #f2f2ee);
 }
+.o_coop_listing_ico.o_coop_event_meeting { background: var(--coop-gold-tint, #f7ecd9); }
+.o_coop_listing_ico.o_coop_event_learning { background: var(--coop-teal-tint, #e3efed); }
+.o_coop_listing_ico.o_coop_event_fair { background: var(--coop-gold-tint, #f7ecd9); }
+.o_coop_listing_ico.o_coop_event_community { background: var(--coop-teal-tint, #e3efed); }
 
-.o_coop_event_meeting { background: var(--coop-gold-tint, #f7ecd9); }
-.o_coop_event_learning { background: var(--coop-teal-tint, #e3efed); }
-.o_coop_event_fair { background: var(--coop-gold-tint, #f7ecd9); }
-.o_coop_event_community { background: var(--coop-teal-tint, #e3efed); }
-
-.o_coop_event_body {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.o_coop_event_name {
-  font: 700 15px/1.3 'Manrope', sans-serif;
-  color: var(--coop-ink, #14171a);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
+// Дата стоит сразу под названием и крупнее прочего: у события всё решает
+// «когда». Где, кто ведёт и сколько записалось читаются после того, как
+// человек понял, свободен ли он в этот день.
 .o_coop_event_when {
   font: 600 12.5px/1.4 'Manrope', sans-serif;
   color: var(--coop-teal-dark, #0e4f4a);
   margin-top: 2px;
 }
 
-.o_coop_event_meta,
-.o_coop_event_desc {
-  font-size: 12px;
-  line-height: 1.45;
-  color: var(--coop-slate-light, #8f8f88);
-}
-
 .o_coop_event_desc {
   margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.45;
   color: var(--coop-slate, #4a4a44);
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -65,12 +42,11 @@
   overflow: hidden;
 }
 
-.o_coop_event_foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-top: 8px;
+// «24 записались» не переносится никогда. Это та самая строка, которая
+// в узкой плитке вставала столбиком по букве и тянула ряд на пол-экрана.
+.o_coop_event_signups {
+  white-space: nowrap;
+  flex: 0 0 auto;
 }
 
 // Прошедшее событие приглушено целиком: записываться на него нельзя, и

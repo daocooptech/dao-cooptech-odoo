@@ -13,32 +13,42 @@
         <field name="city"/>
         <field name="date_start"/>
         <field name="signup_count"/>
+        <field name="signup_label"/>
         <field name="organizer_id"/>
         <field name="is_past"/>
         <field name="state"/>
         <templates>
           <t t-name="card">
-            <div class="o_coop_event"
+            <!-- Разметка — общая для всех каталогов (o_coop_listing*).
+                 Со своими классами события не попадали под правила режима
+                 плитки в coop_theme: значок оставался сбоку от текста, тело
+                 карточки сжималось до нуля, и строка «24 записались»
+                 рассыпалась в столбик по одной букве, распирая ряд по высоте.
+                 Своим здесь остаётся только то, что и правда своё: подложка
+                 значка по категории, строка даты и приглушённое прошедшее. -->
+            <div class="o_coop_listing o_coop_event"
                  t-att-class="record.is_past.raw_value ? 'o_coop_event_past' : ''">
-              <div class="o_coop_event_ico"
+              <div class="o_coop_listing_ico o_coop_event_ico"
                    t-att-class="'o_coop_event_' + record.category.raw_value">
                 <t t-esc="record.icon.value"/>
               </div>
-              <div class="o_coop_event_body">
-                <div class="o_coop_event_name"><field name="name"/></div>
+              <div class="o_coop_listing_body">
+                <div class="o_coop_listing_title"><field name="name"/></div>
                 <div class="o_coop_event_when">
                   <field name="date_start"/>
                 </div>
-                <div class="o_coop_event_meta">
+                <div class="o_coop_listing_meta">
                   <t t-esc="record.city.value"/> ·
                   <t t-esc="record.format.value"/> ·
                   <t t-esc="record.organizer_id.value"/>
                 </div>
                 <div class="o_coop_event_desc"><field name="description"/></div>
-                <div class="o_coop_event_foot">
+                <div class="o_coop_listing_tags">
                   <span class="o_coop_chip"><t t-esc="record.category.value"/></span>
-                  <span class="o_coop_event_meta">
-                    <t t-esc="record.signup_count.value"/> записались
+                </div>
+                <div class="o_coop_listing_foot">
+                  <span class="o_coop_listing_meta o_coop_event_signups">
+                    <field name="signup_label"/>
                   </span>
                 </div>
               </div>
