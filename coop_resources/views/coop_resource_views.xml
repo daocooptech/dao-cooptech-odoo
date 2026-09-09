@@ -16,6 +16,8 @@
       <kanban class="o_coop_resources" quick_create="false" js_class="coop_catalog_kanban">
         <field name="image_512"/>
         <field name="city"/>
+        <field name="category_id"/>
+        <field name="owner_id"/>
         <field name="listing_type"/>
         <field name="price_display"/>
         <field name="is_promoted"/>
@@ -37,6 +39,16 @@
               </div>
               <div class="o_coop_res_body">
                 <div class="o_coop_res_name"><field name="name"/></div>
+                <!-- Строка происхождения — как во всех остальных каталогах:
+                     город, владелец, рубрика. Раньше город стоял только
+                     плашкой на фотографии, и карточка ресурса читалась
+                     скупее соседних: название и цена, больше ничего. -->
+                <div class="o_coop_res_meta o_coop_listing_meta">
+                  <t t-if="record.city.raw_value"><t t-esc="record.city.value"/></t>
+                  <t t-if="record.city.raw_value and record.owner_id.raw_value"> · </t>
+                  <t t-if="record.owner_id.raw_value"><t t-esc="record.owner_id.value"/></t>
+                  <t t-if="record.category_id.raw_value"> · <t t-esc="record.category_id.value"/></t>
+                </div>
                 <div class="o_coop_res_price"><field name="price_display"/></div>
               </div>
             </div>

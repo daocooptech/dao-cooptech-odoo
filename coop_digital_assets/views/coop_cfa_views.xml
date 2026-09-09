@@ -20,6 +20,7 @@
         <field name="intangible_id"/>
         <field name="unit_count"/>
         <field name="unit_price"/>
+        <field name="city"/>
         <templates>
           <t t-name="card">
             <div class="o_coop_listing">
@@ -29,6 +30,7 @@
               <div class="o_coop_listing_body">
                 <div class="o_coop_listing_title"><field name="name"/></div>
                 <div class="o_coop_listing_meta">
+                  <t t-if="record.city.raw_value"><t t-esc="record.city.value"/> · </t>
                   <field name="issuer_id"/>
                   <t t-if="record.operator_id.raw_value"> · оператор <field name="operator_id"/></t>
                   <t t-if="record.maturity_date.raw_value"> · погашение <field name="maturity_date"/></t>

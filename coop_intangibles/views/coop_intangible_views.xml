@@ -13,6 +13,7 @@
         <field name="image_512"/>
         <field name="useful_life_months"/>
         <field name="active_license_count"/>
+        <field name="city"/>
         <templates>
           <t t-name="card">
             <div class="o_coop_listing">
@@ -23,6 +24,7 @@
               <div class="o_coop_listing_body">
                 <div class="o_coop_listing_title"><field name="name"/></div>
                 <div class="o_coop_listing_meta">
+                  <t t-if="record.city.raw_value"><t t-esc="record.city.value"/> · </t>
                   <field name="owner_id"/> · <field name="legal_basis"/>
                 </div>
                 <div class="o_coop_listing_tags">

@@ -87,6 +87,11 @@ class CoopCfaIssue(models.Model):
         'coop.cfa.operator', string='Оператор', index=True,
         help='Через кого идёт выпуск. Пока не выбран — заявка черновик.')
 
+    # Город берётся у эмитента: своего у выпуска нет, а в каталоге
+    # он нужен так же, как в остальных — по нему ищут и по нему
+    # понимают, с кем придётся иметь дело.
+    city = fields.Char(string='Город', related='issuer_id.city', readonly=True)
+
     name = fields.Char(string='Название выпуска', required=True)
     rights_kind = fields.Selection([
         ('money_claim', 'Денежное требование'),
