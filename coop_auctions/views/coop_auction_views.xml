@@ -16,11 +16,20 @@
         <field name="minutes_left"/>
         <field name="owner_id"/>
         <field name="state"/>
+        <field name="image_512"/>
         <templates>
           <t t-name="card">
             <div class="o_coop_listing o_coop_auction"
                  t-att-class="record.kind.raw_value === 'reverse' ? 'o_coop_auction_reverse' : ''">
-              <div class="o_coop_listing_ico o_coop_auction_ico">🔨</div>
+              <!-- Фотография лота: у аукциона своих снимков нет, берём
+                   у ресурса, который выставлен на торги. Нет и там —
+                   остаётся молоток на подложке. -->
+              <div class="o_coop_listing_ico o_coop_auction_ico">
+                <img t-if="record.image_512.raw_value"
+                     t-att-src="'/web/image/coop.auction/' + record.id.raw_value + '/image_512'"
+                     t-att-alt="record.name.value" loading="lazy"/>
+                <t t-else="">🔨</t>
+              </div>
               <div class="o_coop_listing_body">
               <div class="o_coop_auction_head">
                 <span class="o_coop_badge o_coop_auction_state"

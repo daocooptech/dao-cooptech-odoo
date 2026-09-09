@@ -44,6 +44,12 @@ class CoopAuction(models.Model):
     resource_id = fields.Many2one(
         'coop.resource', string='Объявление',
         help='Если лот уже описан объявлением в каталоге ресурсов.')
+    # Фотография лота берётся у ресурса, который выставлен на торги.
+    # Своих снимков у аукциона нет и заводить их незачем: лот — это тот же
+    # ресурс, и человек узнаёт его по той же картинке, что в каталоге.
+    image_512 = fields.Image(
+        string='Фото лота', related='resource_id.image_512', readonly=True)
+
     city = fields.Char(string='Город', index=True)
     description = fields.Html(string='Описание лота')
 

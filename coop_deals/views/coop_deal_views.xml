@@ -15,6 +15,7 @@
         <field name="state"/>
         <field name="outcome"/>
         <field name="currency_id"/>
+        <field name="image_512"/>
         <templates>
           <t t-name="card">
             <!-- Общая карточка каталога: слева квадрат со значком, справа
@@ -22,9 +23,14 @@
                  карточка получает правила ровной плитки из coop_theme.
                  Своим у сделки остаётся номер, стороны, сумма и состояние. -->
             <div class="o_coop_listing o_coop_deal_card">
+              <!-- Фотография предмета, если сделка выросла из объявления
+                   о ресурсе; иначе значок по предмету сделки. -->
               <div class="o_coop_listing_ico o_coop_deal_ico"
                    t-att-class="'o_coop_deal_ico_' + record.subject.raw_value">
-                <t t-esc="record.icon.value"/>
+                <img t-if="record.image_512.raw_value"
+                     t-att-src="'/web/image/coop.deal/' + record.id.raw_value + '/image_512'"
+                     t-att-alt="record.name.value" loading="lazy"/>
+                <t t-else="" t-esc="record.icon.value"/>
               </div>
               <div class="o_coop_listing_body">
                 <div class="o_coop_deal_top">
