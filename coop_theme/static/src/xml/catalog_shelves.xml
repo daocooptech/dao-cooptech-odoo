@@ -8,10 +8,7 @@
     не долистывает.
   -->
   <t t-name="coop_theme.CatalogShelves">
-    <div class="o_coop_shelves">
-      <!-- временная пометка: отличить «компонент не нарисован»
-           от «полки не набрались» -->
-      <div class="o_coop_shelf_probe">полки: <t t-esc="state.shelves.length"/>, поле: <t t-esc="props.field"/>, модель: <t t-esc="props.resModel"/></div>
+    <div class="o_coop_shelves" t-if="state.shelves.length">
       <div class="o_coop_shelf" t-foreach="state.shelves" t-as="shelf" t-key="shelf.id">
         <div class="o_coop_shelf_head">
           <div class="o_coop_shelf_title">
