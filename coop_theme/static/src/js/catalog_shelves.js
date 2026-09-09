@@ -34,7 +34,17 @@ export class CoopShelves extends Component {
         this.state = useState({ shelves: [], loading: true });
 
         onWillStart(async () => {
-            await this.load();
+            // Полки не имеют права уронить каталог. Один неверный вызов
+            // ORM уже сделал это: readGroup в этой версии движка нет, есть
+            // formattedReadGroup, — и вместо каталога был пустой экран.
+            // Поэтому вся загрузка обёрнута: не вышло собрать полки —
+            // их просто не будет.
+            try {
+                await this.load();
+            } catch (e) {
+                console.warn("[полки] не собрались:", e);
+                this.state.shelves = [];
+            }
             this.state.loading = false;
         });
     }
@@ -56,16 +66,22 @@ export class CoopShelves extends Component {
         // Сначала спрашиваем, какие рубрики вообще есть и сколько в них
         // записей: полка из одной карточки выглядит ошибкой, и такие
         // рубрики отсеиваются здесь, а не в разметке.
+        // Имя метода разное в разных версиях движка: formattedReadGroup
+        // в нынешней, readGroup в прежних. Берём то, что есть, а не то,
+        // что помним.
+        const orm = this.orm;
         let groups = [];
-        try {
-            groups = await this.orm.readGroup(
+        if (orm.formattedReadGroup) {
+            groups = await orm.formattedReadGroup(
+                this.props.resModel, domain, [this.props.field], ["__count"], { limit: 40 }
+            );
+        } else if (orm.readGroup) {
+            groups = await orm.readGroup(
                 this.props.resModel, domain, [this.props.field],
                 [this.props.field], { limit: 40 }
             );
-        } catch {
-            return;
         }
-        const считать = (g) => g[this.props.field + "_count"] ?? g.__count ?? 0;
+        const считать = (g) => g.__count ?? g[this.props.field + "_count"] ?? 0;
         const годные = groups
             .filter((g) => g[this.props.field] && считать(g) >= 3)
             .sort((a, b) => считать(b) - считать(a))
