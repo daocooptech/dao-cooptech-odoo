@@ -199,6 +199,14 @@ class CoopSidebarItem(models.Model):
                 [v['name'] for v in defaults if v['section'] == 'ext'])
         else:
             items = model._sync_required(items, user)
+        # Модель раздела читается у окна действия, а не у самого действия:
+        # action_id указывает на общую ir.actions.actions, и res_model у неё
+        # нет — на этом выдача меню однажды упала целиком, а вместе с ней
+        # пропала вся левая полоса.
+        windows = self.env['ir.actions.act_window'].sudo().browse(
+            [i.action_id.id for i in items if i.action_id]).exists()
+        models_by_action = {w.id: w.res_model for w in windows}
+
         return [{
             'id': item.id,
             'label': item.name,
@@ -209,7 +217,7 @@ class CoopSidebarItem(models.Model):
             # нет, и адрес у неё вида /odoo/coop.wallet/6 — без номера
             # действия вовсе. По модели же видно, что кошелёк открыт из
             # раздела «Кошелёк», а не из того, откуда пришли.
-            'model': item.action_id.res_model or False,
+            'model': models_by_action.get(item.action_id.id) or False,
             'section': item.section,
         } for item in items]
 
