@@ -9,6 +9,7 @@
         <field name="number"/>
         <field name="city"/>
         <field name="subject"/>
+        <field name="icon"/>
         <field name="way"/>
         <field name="amount"/>
         <field name="state"/>
@@ -16,25 +17,35 @@
         <field name="currency_id"/>
         <templates>
           <t t-name="card">
-            <div class="o_coop_deal_card">
-              <div class="o_coop_deal_top">
-                <span class="o_coop_badge_subject"><t t-esc="record.subject.value"/></span>
-                <span class="o_coop_deal_no"><t t-esc="record.number.value"/></span>
+            <!-- Общая карточка каталога: слева квадрат со значком, справа
+                 тело. Так же устроены ЦФА, НМА, уступки и события — и так
+                 карточка получает правила ровной плитки из coop_theme.
+                 Своим у сделки остаётся номер, стороны, сумма и состояние. -->
+            <div class="o_coop_listing o_coop_deal_card">
+              <div class="o_coop_listing_ico o_coop_deal_ico"
+                   t-att-class="'o_coop_deal_ico_' + record.subject.raw_value">
+                <t t-esc="record.icon.value"/>
               </div>
-              <div class="o_coop_deal_name"><field name="name"/></div>
-              <div class="o_coop_deal_meta">
-                <t t-esc="record.way.value"/>
-                <t t-if="record.city.raw_value"> · <t t-esc="record.city.value"/></t>
-              </div>
-              <div class="o_coop_deal_parties">
-                <field name="party_a_id"/> ↔ <field name="party_b_id"/>
-              </div>
-              <div class="o_coop_deal_bottom">
-                <span class="o_coop_deal_amount"><field name="amount" widget="monetary"/></span>
-                <span class="o_coop_deal_state"
-                      t-att-class="'o_coop_state_' + record.state.raw_value">
-                  <t t-esc="record.state.value"/>
-                </span>
+              <div class="o_coop_listing_body">
+                <div class="o_coop_deal_top">
+                  <span class="o_coop_badge_subject"><t t-esc="record.subject.value"/></span>
+                  <span class="o_coop_deal_no"><t t-esc="record.number.value"/></span>
+                </div>
+                <div class="o_coop_listing_title"><field name="name"/></div>
+                <div class="o_coop_listing_meta">
+                  <t t-esc="record.way.value"/>
+                  <t t-if="record.city.raw_value"> · <t t-esc="record.city.value"/></t>
+                </div>
+                <div class="o_coop_deal_parties">
+                  <field name="party_a_id"/> ↔ <field name="party_b_id"/>
+                </div>
+                <div class="o_coop_listing_foot">
+                  <span class="o_coop_deal_amount"><field name="amount" widget="monetary"/></span>
+                  <span class="o_coop_deal_state"
+                        t-att-class="'o_coop_state_' + record.state.raw_value">
+                    <t t-esc="record.state.value"/>
+                  </span>
+                </div>
               </div>
             </div>
           </t>

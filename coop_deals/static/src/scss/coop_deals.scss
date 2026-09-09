@@ -15,13 +15,20 @@
     }
   }
 
+  // Раскладку карточки задаёт общая o_coop_listing: значок слева, тело
+  // справа. Здесь остаётся только то, что у сделки своё.
   .o_coop_deal_card {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    width: 100%;
-    min-width: 0;
+    gap: 12px;
   }
+
+  // Значок предмета сделки. Подложка по предмету — как у событий по виду:
+  // взгляд отличает поставку от взаимного кредита раньше, чем читает текст.
+  .o_coop_listing_ico.o_coop_deal_ico { font-size: 20px; }
+  .o_coop_listing_ico.o_coop_deal_ico_resource { background: var(--coop-teal-tint, #e3efed); }
+  .o_coop_listing_ico.o_coop_deal_ico_service { background: var(--coop-gold-tint, #f7ecd9); }
+  .o_coop_listing_ico.o_coop_deal_ico_work { background: var(--coop-gold-tint, #f7ecd9); }
+  .o_coop_listing_ico.o_coop_deal_ico_project { background: var(--coop-teal-tint, #e3efed); }
+  .o_coop_listing_ico.o_coop_deal_ico_credit { background: var(--coop-surface, #f2f2ee); }
 
   .o_coop_deal_top {
     display: flex;

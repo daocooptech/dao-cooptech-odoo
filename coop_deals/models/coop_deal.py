@@ -46,6 +46,19 @@ class CoopDeal(models.Model):
     ], string='Что передаётся', required=True, default='resource', index=True,
         tracking=True)
 
+    # Значок предмета — чтобы карточка сделки читалась так же, как
+    # остальные каталоги: у всех слева квадрат с картинкой или символом,
+    # а не пустое место. Считается из предмета, руками не заполняется.
+    ICONS = {'resource': '📦', 'service': '🛠', 'work': '🧰',
+             'project': '🏗', 'credit': '🤝'}
+
+    icon = fields.Char(string='Значок', compute='_compute_icon')
+
+    @api.depends('subject')
+    def _compute_icon(self):
+        for record in self:
+            record.icon = self.ICONS.get(record.subject, '📦')
+
     way = fields.Selection([
         ('sale', 'Продажа'),
         ('purchase', 'Покупка'),
