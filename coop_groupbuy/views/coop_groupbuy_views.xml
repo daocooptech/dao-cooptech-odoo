@@ -19,7 +19,9 @@
         <field name="organizer_id"/>
         <templates>
           <t t-name="card">
-            <div class="o_coop_gb">
+            <div class="o_coop_listing o_coop_gb">
+              <div class="o_coop_listing_ico o_coop_gb_ico">🛒</div>
+              <div class="o_coop_listing_body">
               <div class="o_coop_gb_head">
                 <span class="o_coop_badge o_coop_gb_state"
                       t-att-class="'o_coop_gb_' + record.state.raw_value">
@@ -31,7 +33,7 @@
                 </span>
               </div>
 
-              <div class="o_coop_gb_name"><field name="name"/></div>
+              <div class="o_coop_listing_title o_coop_gb_name"><field name="name"/></div>
 
               <div class="o_coop_gb_head">
                 <span class="o_coop_gb_price">
@@ -57,11 +59,12 @@
                 <span><t t-esc="record.progress.value"/>%</span>
               </div>
 
-              <div class="o_coop_gb_foot">
+              <div class="o_coop_listing_foot o_coop_gb_foot">
                 <span class="o_coop_gb_meta"><t t-esc="record.organizer_id.value"/></span>
                 <span class="o_coop_gb_meta">
                   <t t-esc="record.participant_count.value"/> участников
                 </span>
+              </div>
               </div>
             </div>
           </t>

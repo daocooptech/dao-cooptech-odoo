@@ -18,8 +18,10 @@
         <field name="state"/>
         <templates>
           <t t-name="card">
-            <div class="o_coop_auction"
+            <div class="o_coop_listing o_coop_auction"
                  t-att-class="record.kind.raw_value === 'reverse' ? 'o_coop_auction_reverse' : ''">
+              <div class="o_coop_listing_ico o_coop_auction_ico">🔨</div>
+              <div class="o_coop_listing_body">
               <div class="o_coop_auction_head">
                 <span class="o_coop_badge o_coop_auction_state"
                       t-att-class="'o_coop_auction_' + record.state.raw_value">
@@ -31,7 +33,7 @@
                 </span>
               </div>
 
-              <div class="o_coop_auction_name"><field name="name"/></div>
+              <div class="o_coop_listing_title o_coop_auction_name"><field name="name"/></div>
 
               <div class="o_coop_auction_head">
                 <span class="o_coop_auction_price">
@@ -52,14 +54,15 @@
                 <t t-esc="record.kind.value"/> · <t t-esc="record.owner_id.value"/>
               </div>
 
-              <div class="o_coop_auction_foot">
+              <div class="o_coop_listing_foot o_coop_auction_foot">
                 <span class="o_coop_chip"><t t-esc="record.kind.value"/></span>
                 <span class="o_coop_auction_meta">
                   ставок: <t t-esc="record.bid_count.value"/>
                 </span>
               </div>
+              </div>
             </div>
-          </t>
+            </t>
         </templates>
       </kanban>
     </field>

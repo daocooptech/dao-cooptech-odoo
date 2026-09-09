@@ -624,6 +624,12 @@
 .o_coop_tiles .o_coop_listing_body {
   width: 100%;
   max-width: 100%;
+  // Колонка — чтобы подвал можно было прижать книзу. Без этого
+  // margin-top: auto у подвала не работает, и у карточки с коротким
+  // описанием кнопки повисают посередине, а нижние границы в ряду
+  // не совпадают.
+  display: flex;
+  flex-direction: column;
 }
 
 .o_coop_tiles .o_coop_listing_meta {
