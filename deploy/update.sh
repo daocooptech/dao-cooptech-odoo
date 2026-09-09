@@ -29,6 +29,24 @@ fi
 
 say "Обновление $before → $after"
 
+# Сценарии запуска лежат в этом же репозитории, но systemd читает их
+# из /etc. Раньше их переносил только install.sh, и правка таймера
+# доезжала до сервера, ничего не меняя. Теперь блоки сверяются при каждом
+# обновлении: изменились — переносим и перечитываем.
+for unit in coop-odoo.service coop-update.service coop-update.timer; do
+    src="$ODOO_HOME/coop-addons/deploy/$unit"
+    dst="/etc/systemd/system/$unit"
+    if [ -f "$src" ] && ! cmp -s "$src" "$dst"; then
+        say "Обновляю $unit"
+        cp "$src" "$dst"
+        units_changed=1
+    fi
+done
+if [ "${units_changed:-0}" = "1" ]; then
+    systemctl daemon-reload
+    systemctl restart coop-update.timer || true
+fi
+
 # Какие модули задеты. Первый уровень каталогов и есть имена модулей.
 changed=$(run git diff --name-only "$before" "$after" \
           | awk -F/ 'NF>1 {print $1}' | sort -u \
