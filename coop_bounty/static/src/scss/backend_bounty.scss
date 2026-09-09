@@ -3,3 +3,12 @@
   font: 700 13px/1 'Manrope', sans-serif;
   color: var(--coop-teal-dark, #0e4f4a);
 }
+
+// Квадрат исполнителя. Задача с лицом читается иначе, чем ничья: видно,
+// что она занята, раньше чем прочитан текст. Ничья показывает мишень.
+.o_coop_listing_ico.o_coop_bounty_ico {
+  font-size: 20px;
+  background: var(--coop-teal-tint, #e3efed);
+}
+
+.o_coop_bounty_card { gap: 12px; }

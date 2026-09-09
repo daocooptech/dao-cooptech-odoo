@@ -113,9 +113,20 @@
         <field name="reward_tokens"/>
         <templates>
           <t t-name="card">
-            <div class="o_coop_bounty_card">
-              <div class="fw-bold"><field name="name"/></div>
-              <div class="text-muted small mt-1">
+            <!-- Общая карточка каталога. В квадрате — исполнитель, если
+                 задача уже за кем-то закреплена: по лицу видно, свободна
+                 она или нет, раньше чем прочитан текст. Ничья задача
+                 показывает символ вознаграждения. -->
+            <div class="o_coop_listing o_coop_bounty_card">
+              <div class="o_coop_listing_ico o_coop_bounty_ico">
+                <img t-if="record.assignee_id.raw_value"
+                     t-att-src="'/web/image/res.users/' + record.assignee_id.raw_value[0] + '/image_512'"
+                     t-att-alt="record.assignee_id.value" loading="lazy"/>
+                <t t-else="">🎯</t>
+              </div>
+              <div class="o_coop_listing_body">
+              <div class="o_coop_listing_title"><field name="name"/></div>
+              <div class="o_coop_listing_meta">
                 <field name="coop_specialization_id"/>
               </div>
               <div class="mt-2 d-flex justify-content-between align-items-center">
@@ -126,6 +137,7 @@
               </div>
               <div class="text-muted small mt-1" t-if="record.deadline.raw_value">
                 до <field name="deadline"/>
+              </div>
               </div>
             </div>
           </t>
