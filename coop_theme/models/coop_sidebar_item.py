@@ -14,6 +14,20 @@ from odoo.exceptions import UserError
 # всё равно стоит в меню и ведёт на страницу, которая прямо об этом
 # говорит: меню без него выглядело бы полным, и понять, чего не хватает,
 # было бы неоткуда.
+# Чем подсвечивать раздел, когда его действие модели не называет.
+#
+# «Кошелёк» открывается сервер-действием, «Сообщения» и «Токеномика» —
+# клиентскими: у таких действий поля res_model нет. А карточка записи
+# внутри раздела открывается обычным окном — /odoo/coop.wallet/6, — и
+# связать её с пунктом меню больше нечем. Отсюда явный список: он короткий
+# и меняется вместе с разделами, а не живёт своей жизнью.
+MODEL_HINTS = {
+    'Кошелёк': 'coop.wallet',
+    'Сообщения': 'discuss.channel',
+    'Токеномика': 'coop.token.order',
+    'Моя страница': False,   # стоит на res.partner, как «Люди», — не подсвечиваем
+}
+
 MAIN_ITEMS = [
     ('Моя страница', 'fa-user-circle-o', 'coop_profile.action_coop_my_page'),
     ('Сообщения', 'fa-comments-o', 'mail.action_discuss'),
@@ -217,7 +231,8 @@ class CoopSidebarItem(models.Model):
             # нет, и адрес у неё вида /odoo/coop.wallet/6 — без номера
             # действия вовсе. По модели же видно, что кошелёк открыт из
             # раздела «Кошелёк», а не из того, откуда пришли.
-            'model': models_by_action.get(item.action_id.id) or False,
+            'model': (models_by_action.get(item.action_id.id)
+                      or MODEL_HINTS.get(item.name) or False),
             'section': item.section,
         } for item in items]
 
