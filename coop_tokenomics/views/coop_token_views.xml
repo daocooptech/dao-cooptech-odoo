@@ -25,9 +25,19 @@
         <field name="unit_label"/>
         <templates>
           <t t-name="card">
-            <div class="o_coop_fact">
+            <!-- Общая карточка каталога: слева квадрат, справа тело.
+                 В квадрате — участник, чья это заявка: на бирже важнее
+                 всего, с кем предстоит иметь дело. -->
+            <div class="o_coop_listing o_coop_fact">
+              <div class="o_coop_listing_ico o_coop_fact_ico">
+                <img t-if="record.partner_id.raw_value"
+                     t-att-src="'/web/image/res.partner/' + record.partner_id.raw_value[0] + '/image_512'"
+                     t-att-alt="record.partner_id.value" loading="lazy"/>
+                <t t-else="">📄</t>
+              </div>
+              <div class="o_coop_listing_body">
               <div class="o_coop_fact_head">
-                <div class="o_coop_fact_title"><field name="claim_id"/></div>
+                <div class="o_coop_listing_title o_coop_fact_title"><field name="claim_id"/></div>
                 <div>
                   <div class="o_coop_fact_value"><field name="price_per_unit"/></div>
                   <div class="o_coop_fact_unit">за <field name="unit_label"/></div>
@@ -61,6 +71,7 @@
                   <t t-else="">перепродажа</t>
                 </span>
               </div>
+              </div>
             </div>
           </t>
         </templates>
@@ -85,9 +96,18 @@
         <field name="deposit_paid"/>
         <templates>
           <t t-name="card">
-            <div class="o_coop_fact">
+            <!-- В квадрате — фотография ресурса, на который выписано
+                 обязательство: обещание на товар узнаётся по товару. -->
+            <div class="o_coop_listing o_coop_fact">
+              <div class="o_coop_listing_ico o_coop_fact_ico">
+                <img t-if="record.resource_id.raw_value"
+                     t-att-src="'/web/image/coop.resource/' + record.resource_id.raw_value[0] + '/image_512'"
+                     t-att-alt="record.resource_id.value" loading="lazy"/>
+                <t t-else="">📦</t>
+              </div>
+              <div class="o_coop_listing_body">
               <div class="o_coop_fact_head">
-                <div class="o_coop_fact_title"><field name="resource_id"/></div>
+                <div class="o_coop_listing_title o_coop_fact_title"><field name="resource_id"/></div>
                 <div>
                   <div class="o_coop_fact_value"><field name="quantity"/></div>
                   <div class="o_coop_fact_unit"><field name="unit_label"/></div>
@@ -120,6 +140,7 @@
                   <field name="state"/>
                 </span>
                 <span class="o_coop_fact_note" t-if="record.is_future.raw_value">товара ещё нет</span>
+              </div>
               </div>
             </div>
           </t>
