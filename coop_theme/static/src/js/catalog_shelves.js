@@ -31,7 +31,7 @@ export class CoopShelves extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
-        this.state = useState({ shelves: [], loading: true, hasPhoto: true, hasCity: true });
+        this.state = useState({ shelves: [], loading: true });
 
         onWillStart(async () => {
             // Полки не имеют права уронить каталог. Один неверный вызов
@@ -61,51 +61,8 @@ export class CoopShelves extends Component {
         return 6;
     }
 
-    /** Что за поле разложено по полкам и из чего собирать карточку.
-     *
-     *  Рубрика бывает двух родов: ссылка на справочник — тогда сервер
-     *  отдаёт и номер, и название, — и список выбора, откуда приходит
-     *  только техническое значение: `equipment`, `barter`, `running`. Без
-     *  этого запроса на полке стояло бы именно оно.
-     *
-     *  Снимок и город есть не у всякой модели: у прав на технологию и
-     *  выпусков ЦФА фотографии нет. Спрашивать поле, которого нет, —
-     *  ошибка, а ошибка здесь означает каталог без полок, поэтому состав
-     *  карточки выясняется, а не предполагается.
-     */
-    async describeField(domain) {
-        const info = await this.orm.call(
-            this.props.resModel, "fields_get",
-            [[this.props.field, "image_512", "city"], ["type", "selection"]]
-        );
-        const own = info[this.props.field] || {};
-
-        // Наличия поля мало: у прав на технологию поле снимка есть, а
-        // снимков нет ни у одной записи, и Odoo отдаёт на каждую свою
-        // серую заглушку — фотоаппарат с плюсом. Полка из восьми таких
-        // заглушек выглядит поломкой, и именно так она и выглядела.
-        // Поэтому спрашиваем, есть ли хоть один настоящий снимок, —
-        // одним счётом, а не чтением картинок.
-        let hasPhoto = false;
-        if (info.image_512) {
-            const снимков = await this.orm.searchCount(
-                this.props.resModel, domain.concat([["image_512", "!=", false]])
-            );
-            hasPhoto = снимков > 0;
-        }
-
-        return {
-            labels: own.selection ? Object.fromEntries(own.selection) : null,
-            hasPhoto,
-            hasCity: Boolean(info.city),
-        };
-    }
-
     async load() {
         const domain = this.props.domain || [];
-        const meta = await this.describeField(domain);
-        this.state.hasPhoto = meta.hasPhoto;
-        this.state.hasCity = meta.hasCity;
         // Сначала спрашиваем, какие рубрики вообще есть и сколько в них
         // записей: полка из одной карточки выглядит ошибкой, и такие
         // рубрики отсеиваются здесь, а не в разметке.
@@ -130,16 +87,13 @@ export class CoopShelves extends Component {
             .sort((a, b) => считать(b) - считать(a))
             .slice(0, this.maxShelves);
 
-        const поля = ["display_name"].concat(meta.hasCity ? ["city"] : []);
         for (const g of годные) {
             const значение = g[this.props.field];
-            const [id, label] = Array.isArray(значение)
-                ? значение
-                : [значение, (meta.labels && meta.labels[значение]) || значение];
+            const [id, label] = Array.isArray(значение) ? значение : [значение, значение];
             const записи = await this.orm.searchRead(
                 this.props.resModel,
                 domain.concat([[this.props.field, "=", id]]),
-                поля,
+                ["display_name", "city"],
                 { limit: this.perShelf }
             );
             this.state.shelves.push({
