@@ -45,8 +45,21 @@ if ! cmp -s "$ODOO_HOME/coop-addons/deploy/maintenance.html" /var/www/coop/maint
     cp "$ODOO_HOME/coop-addons/deploy/maintenance.html" /var/www/coop/maintenance.html
     say "Обновляю страницу обновления"
 fi
+# Зона кэша объявляется в контексте http, поэтому лежит отдельным
+# файлом в conf.d. Каталог под кэш создаём сами: nginx создаёт его при
+# старте, но только если у него хватает прав на родителя.
+mkdir -p /var/cache/nginx/coop
+chown -R www-data:www-data /var/cache/nginx/coop 2>/dev/null || true
+nginx_changed=0
+if ! cmp -s "$ODOO_HOME/coop-addons/deploy/nginx-cache.conf" /etc/nginx/conf.d/coop-cache.conf; then
+    cp "$ODOO_HOME/coop-addons/deploy/nginx-cache.conf" /etc/nginx/conf.d/coop-cache.conf
+    nginx_changed=1
+fi
 if ! cmp -s "$ODOO_HOME/coop-addons/deploy/nginx-coop.conf" /etc/nginx/sites-available/coop; then
     cp "$ODOO_HOME/coop-addons/deploy/nginx-coop.conf" /etc/nginx/sites-available/coop
+    nginx_changed=1
+fi
+if [ "$nginx_changed" = "1" ]; then
     if nginx -t 2>/dev/null; then
         systemctl reload nginx
         say "Обновляю nginx"
