@@ -23,7 +23,7 @@
               <div class="o_coop_listing_ico">
                 <field name="image_512" widget="image" t-if="record.image_512.raw_value"/>
                 <img t-elif="record.owner_id.raw_value"
-                     t-att-src="'/web/image/res.partner/' + record.owner_id.raw_value[0] + '/image_512'"
+                     t-att-src="'/web/image/res.partner/' + record.owner_id.raw_value + '/image_512'"
                      t-att-alt="record.owner_id.value" loading="lazy"/>
                 <t t-else="" t-esc="record.owner_id.value.trim().charAt(0)"/>
               </div>

@@ -24,7 +24,7 @@
                    Буква остаётся запасным вариантом, когда знака нет. -->
               <div class="o_coop_listing_ico">
                 <img t-if="record.debtor_id.raw_value"
-                     t-att-src="'/web/image/res.partner/' + record.debtor_id.raw_value[0] + '/image_512'"
+                     t-att-src="'/web/image/res.partner/' + record.debtor_id.raw_value + '/image_512'"
                      t-att-alt="record.debtor_id.value" loading="lazy"/>
                 <t t-else="" t-esc="record.debtor_id.value.trim().charAt(0)"/>
               </div>

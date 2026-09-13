@@ -120,7 +120,7 @@
             <div class="o_coop_listing o_coop_bounty_card">
               <div class="o_coop_listing_ico o_coop_bounty_ico">
                 <img t-if="record.assignee_id.raw_value"
-                     t-att-src="'/web/image/res.users/' + record.assignee_id.raw_value[0] + '/image_512'"
+                     t-att-src="'/web/image/res.users/' + record.assignee_id.raw_value + '/image_512'"
                      t-att-alt="record.assignee_id.value" loading="lazy"/>
                 <t t-else="">🎯</t>
               </div>
