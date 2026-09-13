@@ -204,6 +204,7 @@
   <record id="action_coop_intangibles" model="ir.actions.act_window">
     <field name="name">Каталог НМА</field>
     <field name="res_model">coop.intangible</field>
+    <field name="path">intangibles</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="search_view_id" ref="view_coop_intangible_search"/>
     <field name="context">{'coop_section': 1, 'coop_catalog': 1}</field>
@@ -232,6 +233,7 @@
   <record id="action_coop_my_intangibles" model="ir.actions.act_window">
     <field name="name">Мои НМА</field>
     <field name="res_model">coop.intangible</field>
+    <field name="path">my-intangibles</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="search_view_id" ref="view_coop_intangible_search"/>
     <field name="context">{'coop_section': 1, 'coop_catalog': 1}</field>

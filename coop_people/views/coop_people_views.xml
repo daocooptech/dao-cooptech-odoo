@@ -133,6 +133,7 @@
   <record id="action_coop_people" model="ir.actions.act_window">
     <field name="name">Люди</field>
     <field name="res_model">res.partner</field>
+    <field name="path">people</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('coop_is_participant', '=', True), ('is_company', '=', False)]</field>
     <field name="context">{'coop_catalog': True, 'default_coop_is_participant': True, 'default_is_company': False, 'coop_create_label': 'Пригласить человека'}</field>

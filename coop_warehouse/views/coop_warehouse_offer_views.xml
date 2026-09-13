@@ -235,6 +235,7 @@
   <record id="action_coop_warehouse_offer_mine" model="ir.actions.act_window">
     <field name="name">Мои объявления</field>
     <field name="res_model">coop.warehouse.offer</field>
+    <field name="path">my-warehouse-offers</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('is_mine', '=', True)]</field>
     <field name="context">{'coop_catalog': 1}</field>

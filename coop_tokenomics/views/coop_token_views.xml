@@ -274,6 +274,7 @@
   <record id="action_coop_token_exchange" model="ir.actions.act_window">
     <field name="name">Биржа</field>
     <field name="res_model">coop.token.order</field>
+    <field name="path">token-exchange</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="search_view_id" ref="view_coop_token_order_search"/>
     <field name="context">{'search_default_open': 1, 'coop_section': 1, 'coop_catalog': 1}</field>

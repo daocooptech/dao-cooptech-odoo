@@ -265,6 +265,7 @@
   <record id="action_coop_communities" model="ir.actions.act_window">
     <field name="name">Сообщества</field>
     <field name="res_model">coop.community</field>
+    <field name="path">communities</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="context">{'coop_catalog': True, 'coop_create_label': 'Создать сообщество'}</field>
     <field name="help" type="html">
@@ -357,6 +358,7 @@
   <record id="action_coop_my_communities" model="ir.actions.act_window">
     <field name="name">Мои сообщества</field>
     <field name="res_model">coop.community</field>
+    <field name="path">my-communities</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="context">{'coop_catalog': True, 'coop_create_label': 'Создать сообщество'}</field>
     <field name="domain">[('member_ids', 'any', [('partner_id.user_ids', 'in', [uid]), ('state', '=', 'active')])]</field>

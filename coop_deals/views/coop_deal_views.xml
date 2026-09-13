@@ -269,6 +269,7 @@
   <record id="action_coop_deals" model="ir.actions.act_window">
     <field name="name">Сделки</field>
     <field name="res_model">coop.deal</field>
+    <field name="path">deals</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="context">{'coop_catalog': True, 'coop_create_label': 'Начать сделку'}</field>
     <field name="help" type="html">

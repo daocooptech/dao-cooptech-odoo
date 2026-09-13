@@ -114,6 +114,7 @@
   <record id="action_coop_escrow" model="ir.actions.act_window">
     <field name="name">Поставки</field>
     <field name="res_model">coop.token.escrow</field>
+    <field name="path">escrow</field>
     <field name="view_mode">list,form</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Поставок пока нет</p>

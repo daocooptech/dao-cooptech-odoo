@@ -179,6 +179,7 @@
        разные вопросы, и человек задаёт их в разные моменты. -->
   <record id="action_coop_extension_installed" model="ir.actions.act_window">
     <field name="name">Установленные</field>
+    <field name="path">extensions-installed</field>
     <field name="res_model">coop.extension</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('is_installed', '=', True)]</field>
@@ -192,6 +193,7 @@
   <record id="action_coop_extension_catalog" model="ir.actions.act_window">
     <field name="name">Общий каталог</field>
     <field name="res_model">coop.extension</field>
+    <field name="path">extensions</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('publication_state', '=', 'published')]</field>
     <field name="help" type="html">
@@ -204,6 +206,7 @@
   <record id="action_coop_extension_mine" model="ir.actions.act_window">
     <field name="name">Мои публикации</field>
     <field name="res_model">coop.extension</field>
+    <field name="path">my-extensions</field>
     <field name="view_mode">list,kanban,form</field>
     <field name="domain">[('author_id.user_ids', 'in', [uid])]</field>
     <field name="context">{'default_publication_state': 'draft'}</field>

@@ -207,6 +207,7 @@
   <record id="action_coop_program" model="ir.actions.act_window">
     <field name="name">Целевые программы</field>
     <field name="res_model">coop.program</field>
+    <field name="path">programs</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="context">{'coop_catalog': 1}</field>
     <field name="help" type="html">
@@ -221,6 +222,7 @@
   <record id="action_coop_program_mine" model="ir.actions.act_window">
     <field name="name">Мои программы</field>
     <field name="res_model">coop.program</field>
+    <field name="path">my-programs</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('is_participant', '=', True)]</field>
     <field name="context">{'coop_catalog': 1}</field>

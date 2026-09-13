@@ -180,6 +180,7 @@
   <record id="action_coop_cfa_issue" model="ir.actions.act_window">
     <field name="name">Каталог ЦФА</field>
     <field name="res_model">coop.cfa.issue</field>
+    <field name="path">cfa</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="search_view_id" ref="view_coop_cfa_issue_search"/>
     <field name="context">{'coop_section': 1, 'coop_catalog': 1}</field>
@@ -200,6 +201,7 @@
   <record id="action_coop_my_cfa_issue" model="ir.actions.act_window">
     <field name="name">Мои выпуски</field>
     <field name="res_model">coop.cfa.issue</field>
+    <field name="path">my-cfa</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="search_view_id" ref="view_coop_cfa_issue_search"/>
     <field name="context">{'coop_section': 1, 'coop_catalog': 1}</field>

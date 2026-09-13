@@ -209,6 +209,7 @@
   <record id="action_coop_auction" model="ir.actions.act_window">
     <field name="name">Аукционы</field>
     <field name="res_model">coop.auction</field>
+    <field name="path">auctions</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="context">{'coop_catalog': 1}</field>
     <field name="help" type="html">

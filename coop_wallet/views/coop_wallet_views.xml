@@ -581,6 +581,7 @@
   <!-- ── Действия и меню ───────────────────────────────────────────── -->
   <record id="action_coop_my_wallet" model="ir.actions.server">
     <field name="name">Мой кошелёк</field>
+    <field name="path">wallet</field>
     <field name="model_id" ref="model_coop_wallet"/>
     <field name="state">code</field>
     <field name="code">action = model.action_open_my_wallet()</field>
@@ -589,6 +590,7 @@
   <record id="action_coop_settlement" model="ir.actions.act_window">
     <field name="name">Взаиморасчёты</field>
     <field name="res_model">coop.settlement</field>
+    <field name="path">settlements</field>
     <field name="view_mode">list</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Взаимных расчётов нет</p>
@@ -602,6 +604,7 @@
   <record id="action_coop_credit_line" model="ir.actions.act_window">
     <field name="name">Взаимный кредит</field>
     <field name="res_model">coop.credit.line</field>
+    <field name="path">credit</field>
     <field name="view_mode">list,form</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Линий взаимного кредита нет</p>
@@ -614,12 +617,14 @@
 
   <record id="action_coop_clearing" model="ir.actions.act_window">
     <field name="name">Взаимозачёты</field>
+    <field name="path">clearing</field>
     <field name="res_model">coop.credit.clearing</field>
     <field name="view_mode">list,form</field>
   </record>
 
   <record id="action_coop_share_account" model="ir.actions.act_window">
     <field name="name">Паевые счета</field>
+    <field name="path">shares</field>
     <field name="res_model">coop.share.account</field>
     <field name="view_mode">list,form</field>
   </record>
@@ -627,6 +632,7 @@
   <record id="action_coop_network" model="ir.actions.act_window">
     <field name="name">Блокчейн-сети</field>
     <field name="res_model">coop.wallet.network</field>
+    <field name="path">network</field>
     <field name="view_mode">list,form</field>
   </record>
 

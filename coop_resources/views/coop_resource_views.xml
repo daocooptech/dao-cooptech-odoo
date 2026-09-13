@@ -223,6 +223,7 @@
   <record id="action_coop_resources" model="ir.actions.act_window">
     <field name="name">Ресурсы</field>
     <field name="res_model">coop.resource</field>
+    <field name="path">resources</field>
     <field name="context">{'coop_catalog': True, 'coop_create_label': 'Добавить ресурс'}</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('state', '=', 'published')]</field>
@@ -379,6 +380,7 @@
   <record id="action_coop_promotion" model="ir.actions.act_window">
     <field name="name">Продвижение</field>
     <field name="res_model">coop.promotion</field>
+    <field name="path">promotion</field>
     <field name="view_mode">list,form</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Продвижений пока нет</p>
@@ -401,6 +403,7 @@
   <record id="action_coop_my_resources" model="ir.actions.act_window">
     <field name="name">Мои ресурсы</field>
     <field name="res_model">coop.resource</field>
+    <field name="path">my-resources</field>
     <field name="context">{'coop_catalog': True, 'coop_create_label': 'Добавить ресурс'}</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('owner_id.user_ids', 'in', [uid])]</field>

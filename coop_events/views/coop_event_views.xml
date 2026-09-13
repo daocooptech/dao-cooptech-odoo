@@ -198,6 +198,7 @@
   <record id="action_coop_event" model="ir.actions.act_window">
     <field name="name">События</field>
     <field name="res_model">coop.event</field>
+    <field name="path">coop-events</field>
     <field name="view_mode">kanban,calendar,list,form</field>
     <field name="context">{'coop_catalog': 1}</field>
     <field name="help" type="html">
@@ -212,6 +213,7 @@
   <record id="action_coop_event_mine" model="ir.actions.act_window">
     <field name="name">Мои события</field>
     <field name="res_model">coop.event</field>
+    <field name="path">my-events</field>
     <field name="view_mode">kanban,calendar,list,form</field>
     <field name="domain">[('am_i_signed', '=', True)]</field>
     <field name="context">{'coop_catalog': 1}</field>

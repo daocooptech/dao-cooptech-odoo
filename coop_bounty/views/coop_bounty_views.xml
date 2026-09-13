@@ -175,6 +175,7 @@
   <record id="action_coop_bounty_task" model="ir.actions.act_window">
     <field name="name">Задачи рабочей группы</field>
     <field name="res_model">coop.bounty.task</field>
+    <field name="path">bounty</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="search_view_id" ref="view_coop_bounty_task_search"/>
     <field name="help" type="html">

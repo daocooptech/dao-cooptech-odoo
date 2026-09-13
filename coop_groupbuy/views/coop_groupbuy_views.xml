@@ -219,6 +219,7 @@
   <record id="action_coop_groupbuy" model="ir.actions.act_window">
     <field name="name">Совместные закупки</field>
     <field name="res_model">coop.groupbuy</field>
+    <field name="path">groupbuy</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="context">{'coop_catalog': 1}</field>
     <field name="help" type="html">
@@ -233,6 +234,7 @@
   <record id="action_coop_groupbuy_mine" model="ir.actions.act_window">
     <field name="name">Мои закупки</field>
     <field name="res_model">coop.groupbuy</field>
+    <field name="path">my-groupbuy</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">['|', ('organizer_id.user_ids', 'in', [uid]), ('order_ids.partner_id.user_ids', 'in', [uid])]</field>
     <field name="context">{'coop_catalog': 1}</field>
