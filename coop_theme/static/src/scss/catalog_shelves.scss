@@ -4,11 +4,30 @@
 // город. Полка отвечает «что здесь бывает», а не «какая именно запись
 // мне нужна»; для второго есть каталог ниже.
 
+// Полки занимают всю строку рабочей области — как пагинатор внизу.
+//
+// Без этого витрина вылезала за край. Содержимое каталога разложено в
+// строку с переносом: там лента, панель фильтров и пагинатор. Полка
+// шириной по своему содержимому — восемь карточек, 1364 точки — выходила
+// за правый край области, где всего 1162. Каталог при этом оставался на
+// месте, и разъезд был виден только на полках.
+//
+// `min-width: 0` обязателен: без него дочерний ряд растягивает родителя
+// по содержимому, и ограничение ширины не срабатывает — прокрутка ряда
+// тоже не появляется, потому что нечему переполняться.
 .o_coop_shelves {
   display: flex;
   flex-direction: column;
+  flex: 0 0 100%;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   gap: 22px;
   margin-bottom: 26px;
+}
+
+.o_coop_shelf {
+  min-width: 0;
 }
 
 .o_coop_shelf_head {
@@ -51,7 +70,27 @@
   gap: 12px;
   overflow-x: auto;
   padding-bottom: 4px;
+
+  // Полоса прокрутки появляется, когда к полке тянутся.
+  //
+  // По умолчанию браузер рисует её светлой и во всю ширину ряда: под
+  // каждой полкой шла черта заметнее самих карточек, а прокручивать там
+  // нужно две сотни точек. Поэтому в покое полоса прозрачная, при
+  // наведении — приглушённая.
   scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color .15s ease;
+
+  &:hover {
+    scrollbar-color: var(--coop-line-strong, #d2d2cb) transparent;
+  }
+
+  &::-webkit-scrollbar { height: 6px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: transparent; border-radius: 3px; }
+  &:hover::-webkit-scrollbar-thumb {
+    background: var(--coop-line-strong, #d2d2cb);
+  }
 }
 
 .o_coop_shelf_card {
@@ -105,4 +144,29 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   min-height: calc(2 * 1.35em);
+}
+
+// Полка без снимков: права на технологию, выпуски ЦФА, события —
+// фотографии у них нет вовсе.
+//
+// Голый текст в ряду читается как список ссылок, а не как витрина: восемь
+// названий в два столбца слов, между которыми не видно границ. Карточке
+// возвращается тело — подложка, рамка и место под текст, — и полка снова
+// выглядит полкой.
+.o_coop_shelves_text {
+  .o_coop_shelf_card {
+    padding: 12px 14px;
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-radius: 10px;
+    background: var(--coop-white, #fff);
+    transition: border-color .15s ease;
+
+    &:hover { border-color: var(--coop-teal, #146b64); }
+  }
+
+  .o_coop_shelf_name {
+    margin-top: 0;
+    -webkit-line-clamp: 3;
+    min-height: calc(3 * 1.35em);
+  }
 }

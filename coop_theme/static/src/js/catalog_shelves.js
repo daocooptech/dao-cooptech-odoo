@@ -73,22 +73,37 @@ export class CoopShelves extends Component {
      *  ошибка, а ошибка здесь означает каталог без полок, поэтому состав
      *  карточки выясняется, а не предполагается.
      */
-    async describeField() {
+    async describeField(domain) {
         const info = await this.orm.call(
             this.props.resModel, "fields_get",
             [[this.props.field, "image_512", "city"], ["type", "selection"]]
         );
         const own = info[this.props.field] || {};
+
+        // Наличия поля мало: у прав на технологию поле снимка есть, а
+        // снимков нет ни у одной записи, и Odoo отдаёт на каждую свою
+        // серую заглушку — фотоаппарат с плюсом. Полка из восьми таких
+        // заглушек выглядит поломкой, и именно так она и выглядела.
+        // Поэтому спрашиваем, есть ли хоть один настоящий снимок, —
+        // одним счётом, а не чтением картинок.
+        let hasPhoto = false;
+        if (info.image_512) {
+            const снимков = await this.orm.searchCount(
+                this.props.resModel, domain.concat([["image_512", "!=", false]])
+            );
+            hasPhoto = снимков > 0;
+        }
+
         return {
             labels: own.selection ? Object.fromEntries(own.selection) : null,
-            hasPhoto: Boolean(info.image_512),
+            hasPhoto,
             hasCity: Boolean(info.city),
         };
     }
 
     async load() {
         const domain = this.props.domain || [];
-        const meta = await this.describeField();
+        const meta = await this.describeField(domain);
         this.state.hasPhoto = meta.hasPhoto;
         this.state.hasCity = meta.hasCity;
         // Сначала спрашиваем, какие рубрики вообще есть и сколько в них

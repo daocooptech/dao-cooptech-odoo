@@ -8,7 +8,8 @@
     не долистывает.
   -->
   <t t-name="coop_theme.CatalogShelves">
-    <div class="o_coop_shelves" t-if="state.shelves.length">
+    <div class="o_coop_shelves" t-if="state.shelves.length"
+         t-att-class="{ 'o_coop_shelves_text': !state.hasPhoto }">
       <div class="o_coop_shelf" t-foreach="state.shelves" t-as="shelf" t-key="shelf.id">
         <div class="o_coop_shelf_head">
           <div class="o_coop_shelf_title">
