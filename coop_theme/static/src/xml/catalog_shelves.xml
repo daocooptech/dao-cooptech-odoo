@@ -22,9 +22,9 @@
         <div class="o_coop_shelf_row">
           <div class="o_coop_shelf_card" t-foreach="shelf.records" t-as="rec" t-key="rec.id"
                t-on-click="() => this.open(rec)">
-            <div class="o_coop_shelf_photo">
+            <div class="o_coop_shelf_photo" t-if="state.hasPhoto">
               <img t-att-src="photo(rec)" t-att-alt="rec.display_name" loading="lazy"/>
-              <span class="o_coop_shelf_city" t-if="rec.city">
+              <span class="o_coop_shelf_city" t-if="state.hasCity and rec.city">
                 <i class="fa fa-map-marker" aria-hidden="true"/>
                 <t t-esc="rec.city"/>
               </span>
