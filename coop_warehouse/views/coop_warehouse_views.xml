@@ -246,18 +246,13 @@
     </field>
   </record>
 
-  <record id="action_coop_warehouse_all" model="ir.actions.act_window">
-    <field name="name">Склады платформы</field>
-    <field name="res_model">coop.warehouse</field>
-    <field name="path">warehouses</field>
-    <field name="view_mode">kanban,list,form</field>
-    <field name="context">{'coop_catalog': 1}</field>
-    <field name="help" type="html">
-      <p class="o_view_nocontent_smiling_face">Складов пока нет</p>
-      <p>Здесь видны ваши склады и те чужие, с которых хозяева выставили
-         мощности на биржу.</p>
-    </field>
-  </record>
+  <!-- Вкладки «Склады платформы» здесь нет намеренно (решение владельца
+       от 2026-09-14). Порядок вкладок из макета собран из четырёх, и
+       пятая, показывающая чужие склады общим списком, в него не входит.
+       Чужой склад смотрят оттуда, откуда он и понадобился: с карточки
+       объявления на бирже поле «Склад» открывает его форму, а правило
+       видимости пускает к чужому складу ровно тогда, когда с него
+       что-то выставлено. -->
 
   <record id="action_coop_warehouse_deals" model="ir.actions.act_window">
     <field name="name">Договорённости по складам</field>
@@ -281,8 +276,5 @@
   <menuitem id="menu_coop_warehouse_deals" name="Договорённости"
             parent="menu_coop_warehouse_root"
             action="action_coop_warehouse_deals" sequence="20"/>
-  <menuitem id="menu_coop_warehouse_all" name="Склады платформы"
-            parent="menu_coop_warehouse_root"
-            action="action_coop_warehouse_all" sequence="40"/>
 
 </odoo>
