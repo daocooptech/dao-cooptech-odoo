@@ -1,0 +1,121 @@
+// Карточки склада и биржи мощностей.
+//
+// Главное на карточке склада — не название и не адрес, а полоса
+// занятости: хозяин смотрит, сколько у него простаивает, а гость — есть
+// ли вообще смысл писать. Поэтому полоса идёт до подвала карточки, а
+// цифры под ней подписаны словами, а не цветом: «своё / сдано /
+// свободно» должно читаться и без различения оттенков.
+
+.o_coop_wh,
+.o_coop_who {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  width: 100%;
+  min-width: 0;
+}
+
+.o_coop_wh_head,
+.o_coop_who_head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.o_coop_wh_name,
+.o_coop_who_name {
+  font: 700 15px/1.3 'Manrope', sans-serif;
+  color: var(--coop-ink, #14171a);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.o_coop_wh_meta,
+.o_coop_who_meta {
+  font-size: 12px;
+  color: var(--coop-slate-light, #8f8f88);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.o_coop_wh_free,
+.o_coop_who_price {
+  font: 700 14px/1.3 'Manrope', sans-serif;
+  color: var(--coop-teal-dark, #0e4f4a);
+  white-space: nowrap;
+}
+
+// Полоса занятости. Три сегмента идут подряд и в сумме дают ровно
+// сотню: доли посчитаны в Python, свободное — остаток, поэтому правый
+// край не дёргается на округлении.
+.o_coop_wh_bar {
+  display: flex;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--coop-surface, #f2f2ee);
+  overflow: hidden;
+}
+
+.o_coop_wh_seg {
+  height: 100%;
+}
+
+.o_coop_wh_own {
+  background: var(--coop-teal-dark, #0e4f4a);
+}
+
+.o_coop_wh_rented {
+  background: var(--coop-amber, #c98a2b);
+}
+
+.o_coop_wh_free_seg {
+  background: var(--coop-surface-strong, #dcdcd4);
+}
+
+.o_coop_wh_legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--coop-slate-light, #8f8f88);
+
+  .o_coop_wh_dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    margin-right: 3px;
+    vertical-align: middle;
+  }
+}
+
+// Сторона биржи различается цветом ярлыка: предложение и запрос лежат
+// в одном списке, и без различия карточки читаются как однородные.
+.o_coop_who_offer {
+  background: var(--coop-teal-soft, #e3efec);
+  color: var(--coop-teal-dark, #0e4f4a);
+}
+
+.o_coop_who_request {
+  background: var(--coop-amber-soft, #f7ecd9);
+  color: var(--coop-amber-dark, #8a5c14);
+}
+
+.o_coop_who_terms {
+  font-size: 12px;
+  color: var(--coop-slate, #6b6b64);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.o_coop_wh_foot,
+.o_coop_who_foot {
+  gap: 8px;
+}

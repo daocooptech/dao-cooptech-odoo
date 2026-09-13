@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="view_coop_warehouse_kanban" model="ir.ui.view">
+    <field name="name">coop.warehouse.kanban</field>
+    <field name="model">coop.warehouse</field>
+    <field name="arch" type="xml">
+      <kanban js_class="coop_catalog_kanban" class="o_coop_warehouses"
+              default_order="city, name">
+        <field name="city"/>
+        <field name="storage_kind"/>
+        <field name="capacity"/>
+        <field name="used_own"/>
+        <field name="used_rented"/>
+        <field name="free"/>
+        <field name="unit_label"/>
+        <field name="free_label"/>
+        <field name="own_label"/>
+        <field name="rented_label"/>
+        <field name="capacity_label"/>
+        <field name="own_percent"/>
+        <field name="rented_percent"/>
+        <field name="free_percent"/>
+        <field name="load_percent"/>
+        <field name="offer_count"/>
+        <field name="owner_id"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_listing o_coop_wh">
+              <div class="o_coop_listing_ico o_coop_wh_ico">🏬</div>
+              <div class="o_coop_listing_body">
+
+                <div class="o_coop_wh_head">
+                  <span class="o_coop_badge o_coop_wh_kind">
+                    <t t-esc="record.storage_kind.value"/>
+                  </span>
+                  <span class="o_coop_wh_meta" t-if="record.city.raw_value">
+                    <i class="fa fa-map-marker" aria-hidden="true"/>
+                    <t t-esc="record.city.value"/>
+                  </span>
+                </div>
+
+                <div class="o_coop_listing_title o_coop_wh_name">
+                  <field name="name"/>
+                </div>
+
+                <div class="o_coop_wh_head">
+                  <span class="o_coop_wh_free">
+                    свободно <t t-esc="record.free_label.value"/>
+                  </span>
+                  <span class="o_coop_wh_meta">
+                    из <t t-esc="record.capacity_label.value"/>
+                  </span>
+                </div>
+
+                <!-- Полоса занятости: своё, сдано, свободно. Ширины
+                     посчитаны в Python и сложены ровно в сотню — в
+                     шаблоне канбана арифметика выполняется браузером и
+                     на пустой ёмкости даёт NaN без единой ошибки. -->
+                <div class="o_coop_wh_bar">
+                  <div class="o_coop_wh_seg o_coop_wh_own"
+                       t-attf-style="width: #{record.own_percent.raw_value}%"/>
+                  <div class="o_coop_wh_seg o_coop_wh_rented"
+                       t-attf-style="width: #{record.rented_percent.raw_value}%"/>
+                  <div class="o_coop_wh_seg o_coop_wh_free_seg"
+                       t-attf-style="width: #{record.free_percent.raw_value}%"/>
+                </div>
+
+                <div class="o_coop_wh_legend">
+                  <span><i class="o_coop_wh_dot o_coop_wh_own"/> своё
+                    <t t-esc="record.own_label.value"/></span>
+                  <span><i class="o_coop_wh_dot o_coop_wh_rented"/> сдано
+                    <t t-esc="record.rented_label.value"/></span>
+                  <span><i class="o_coop_wh_dot o_coop_wh_free_seg"/> свободно
+                    <t t-esc="record.free_label.value"/></span>
+                </div>
+
+                <div class="o_coop_listing_foot o_coop_wh_foot">
+                  <span class="o_coop_wh_meta">
+                    <t t-esc="record.owner_id.value"/>
+                  </span>
+                  <span class="o_coop_wh_meta"
+                        t-if="record.offer_count.raw_value">
+                    на бирже: <t t-esc="record.offer_count.value"/>
+                  </span>
+                </div>
+
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="view_coop_warehouse_list" model="ir.ui.view">
+    <field name="name">coop.warehouse.list</field>
+    <field name="model">coop.warehouse</field>
+    <field name="arch" type="xml">
+      <list string="Склады" decoration-success="free &gt; 0"
+            decoration-muted="free == 0">
+        <field name="name"/>
+        <field name="owner_id" string="Владелец"/>
+        <field name="city"/>
+        <field name="storage_kind"/>
+        <field name="capacity" string="Ёмкость"/>
+        <field name="unit_label" string="Единица"/>
+        <field name="used_own" string="Своё"/>
+        <field name="used_rented" string="Сдано"/>
+        <field name="free" string="Свободно"/>
+        <field name="load_percent" string="Занято, %" widget="progressbar"/>
+        <field name="offer_count" string="На бирже"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_warehouse_form" model="ir.ui.view">
+    <field name="name">coop.warehouse.form</field>
+    <field name="model">coop.warehouse</field>
+    <field name="arch" type="xml">
+      <form string="Склад">
+        <header>
+          <button name="action_publish_free" type="object"
+                  string="Выставить свободные мощности" class="btn-primary"
+                  invisible="free &lt;= 0"/>
+          <button name="action_open_deals" type="object"
+                  string="Договорённости"/>
+        </header>
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Как называется склад"/></h1>
+          </div>
+          <group>
+            <group string="Кто и где">
+              <field name="owner_id"/>
+              <field name="keeper_id"/>
+              <field name="city"/>
+              <field name="address" placeholder="Улица, дом, как заезжать"/>
+              <field name="schedule"/>
+            </group>
+            <group string="Что за склад">
+              <field name="storage_kind"/>
+              <field name="capacity_unit"/>
+              <field name="capacity"/>
+              <field name="used_own"/>
+              <field name="used_rented" readonly="1"/>
+              <field name="free" readonly="1"/>
+              <field name="load_percent" widget="progressbar" readonly="1"/>
+              <field name="resource_id"/>
+            </group>
+          </group>
+
+          <notebook>
+            <page string="Зоны" name="zones">
+              <field name="zone_ids">
+                <list editable="bottom">
+                  <field name="sequence" widget="handle"/>
+                  <field name="name"/>
+                  <field name="capacity"/>
+                  <field name="capacity_unit" readonly="1"/>
+                  <field name="terms"/>
+                  <field name="note"/>
+                </list>
+              </field>
+              <div class="text-muted mt-2">
+                Зона нужна там, где склад неоднороден: у одной стены
+                морозильник, у другой сухой стеллаж. Пустое условие
+                означает «под своё» — такая зона на биржу не выходит.
+              </div>
+            </page>
+            <page string="На бирже" name="offers">
+              <field name="offer_ids">
+                <list>
+                  <field name="name"/>
+                  <field name="side"/>
+                  <field name="volume"/>
+                  <field name="capacity_unit"/>
+                  <field name="terms_label" string="Условия"/>
+                  <field name="main_price_label" string="Цена"/>
+                  <field name="period_label" string="Срок"/>
+                  <field name="state" widget="badge"/>
+                </list>
+              </field>
+            </page>
+            <page string="Договорённости" name="deals">
+              <field name="deal_ids">
+                <list>
+                  <field name="number"/>
+                  <field name="name"/>
+                  <field name="party_b_id" string="С кем"/>
+                  <field name="warehouse_terms" string="Условие"/>
+                  <field name="warehouse_volume" string="Объём"/>
+                  <field name="signed_on"/>
+                  <field name="state" widget="badge"/>
+                </list>
+              </field>
+            </page>
+            <page string="Описание" name="description">
+              <field name="description"
+                     placeholder="Пандус, высота потолков, допуск машин, что хранить нельзя"/>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_warehouse_search" model="ir.ui.view">
+    <field name="name">coop.warehouse.search</field>
+    <field name="model">coop.warehouse</field>
+    <field name="arch" type="xml">
+      <search string="Склады">
+        <field name="name"/>
+        <field name="owner_id" string="Владелец"/>
+        <field name="city"/>
+        <filter name="mine" string="Мои склады" domain="[('is_mine', '=', True)]"/>
+        <filter name="has_free" string="Есть свободное место"
+                domain="[('free', '&gt;', 0)]"/>
+        <separator/>
+        <filter name="on_market" string="Выставлены на биржу"
+                domain="[('offer_ids.state', '=', 'published')]"/>
+        <group>
+          <filter name="by_city" string="По городу" context="{'group_by': 'city'}"/>
+          <filter name="by_kind" string="По типу хранения"
+                  context="{'group_by': 'storage_kind'}"/>
+          <filter name="by_owner" string="По владельцу"
+                  context="{'group_by': 'owner_id'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_warehouse_mine" model="ir.actions.act_window">
+    <field name="name">Мои склады</field>
+    <field name="res_model">coop.warehouse</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="domain">[('is_mine', '=', True)]</field>
+    <field name="context">{'coop_catalog': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Складов пока нет</p>
+      <p>Заведите склад — и станет видно, сколько места занято под своё,
+         сколько сдано другим и сколько простаивает. Простаивающее можно
+         выставить на биржу мощностей.</p>
+    </field>
+  </record>
+
+  <record id="action_coop_warehouse_all" model="ir.actions.act_window">
+    <field name="name">Склады платформы</field>
+    <field name="res_model">coop.warehouse</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="context">{'coop_catalog': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Складов пока нет</p>
+      <p>Здесь видны ваши склады и те чужие, с которых хозяева выставили
+         мощности на биржу.</p>
+    </field>
+  </record>
+
+  <record id="action_coop_warehouse_deals" model="ir.actions.act_window">
+    <field name="name">Договорённости по складам</field>
+    <field name="res_model">coop.deal</field>
+    <field name="view_mode">list,kanban,form</field>
+    <field name="domain">[('warehouse_id', '!=', False)]</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Договорённостей пока нет</p>
+      <p>Сюда попадает всё, о чём договорились по складскому месту: и то,
+         что сдаёте вы, и то, что берёте у других.</p>
+    </field>
+  </record>
+
+  <menuitem id="menu_coop_warehouse_root" name="Склад" sequence="148"/>
+  <!-- Порядок вкладок задан владельцем 2026-08-31: сначала своё
+       хозяйство и текущие обязательства, потом рынок. -->
+  <menuitem id="menu_coop_warehouse_mine" name="Мои склады"
+            parent="menu_coop_warehouse_root"
+            action="action_coop_warehouse_mine" sequence="10"/>
+  <menuitem id="menu_coop_warehouse_deals" name="Договорённости"
+            parent="menu_coop_warehouse_root"
+            action="action_coop_warehouse_deals" sequence="20"/>
+  <menuitem id="menu_coop_warehouse_all" name="Склады платформы"
+            parent="menu_coop_warehouse_root"
+            action="action_coop_warehouse_all" sequence="40"/>
+
+</odoo>

@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_coop_warehouse_user,Склады — участник,model_coop_warehouse,base.group_user,1,1,1,1
+access_coop_warehouse_admin,Склады — администратор,model_coop_warehouse,base.group_system,1,1,1,1
+access_coop_warehouse_zone_user,Зоны склада — участник,model_coop_warehouse_zone,base.group_user,1,1,1,1
+access_coop_warehouse_zone_admin,Зоны склада — администратор,model_coop_warehouse_zone,base.group_system,1,1,1,1
+access_coop_warehouse_offer_user,Биржа мощностей — участник,model_coop_warehouse_offer,base.group_user,1,1,1,1
+access_coop_warehouse_offer_admin,Биржа мощностей — администратор,model_coop_warehouse_offer,base.group_system,1,1,1,1
+access_coop_warehouse_offer_term_user,Условия объявления — участник,model_coop_warehouse_offer_term,base.group_user,1,1,1,1
+access_coop_warehouse_offer_term_admin,Условия объявления — администратор,model_coop_warehouse_offer_term,base.group_system,1,1,1,1
