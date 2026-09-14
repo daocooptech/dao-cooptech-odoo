@@ -30,6 +30,7 @@
         'security/coop_sidebar_rules.xml',
         'views/coop_theme_boot.xml',
         'views/coop_sidebar_views.xml',
+        'data/coop_sidebar_resync.xml',
     ],
     'assets': {
         'web._assets_primary_variables': [

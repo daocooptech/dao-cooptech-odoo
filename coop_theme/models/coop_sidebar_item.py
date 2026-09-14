@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 from psycopg2 import IntegrityError
 
+import logging
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+
+_logger = logging.getLogger(__name__)
 
 # Разделы платформы в порядке макета. Это не «настройки по умолчанию,
 # которые всё равно кто-нибудь поменяет»: порядок согласован с владельцем
@@ -36,6 +40,11 @@ MAIN_ITEMS = [
     ('Вакансии', 'fa-briefcase', 'coop_vacancies.action_coop_vacancies'),
     ('Ресурсы', 'fa-cube', 'coop_resources.action_coop_resources'),
     ('Проекты', 'fa-rocket', 'coop_projects.action_coop_projects'),
+    # Решение владельца 281 от 2026-09-14: сбор вкладов и ведение работ —
+    # разные разделы и стоят рядом. «Проекты» — это краудресурсинг, здесь
+    # собирают вклады; «Управление проектами» — штатный модуль Odoo, там
+    # ведут задачи, сроки и исполнителей после запуска.
+    ('Управление проектами', 'fa-tasks', 'project.open_view_project_all'),
     ('Организации', 'fa-university', 'coop_orgs.action_coop_orgs'),
     ('Сообщества', 'fa-comments', 'coop_communities.action_coop_communities'),
     ('Кошелёк', 'fa-credit-card', 'coop_wallet.action_coop_my_wallet'),
@@ -132,6 +141,48 @@ class CoopSidebarItem(models.Model):
                 'договариваются, где что лежит. Переставить их можно, убрать из '
                 'меню нельзя: %s') % ', '.join(required.mapped('name')))
         return super().unlink()
+
+    @api.model
+    def resync_defaults(self):
+        """Довести уже собранные меню до нынешнего набора разделов.
+
+        Меню участника собирается один раз и дальше живёт записями: это
+        нужно, чтобы человек мог переставить разделы под себя. Обратная
+        сторона — новый обязательный раздел в уже собранное меню сам не
+        попадает, и появляется он только у тех, кто завёлся позже.
+
+        Номера тоже приходится переставлять. Порядок хранится числом, и
+        раздел, вставленный в середину списка, получает номер, который у
+        старых пунктов занят: при равных номерах порядок решает
+        идентификатор, и новый раздел уезжает вниз — проверено глазами,
+        «Управление проектами» встало после «Организаций».
+
+        Что человек переставил сам, при этом теряется. Это осознанно:
+        разделы платформы одинаковы у всех, по ним договариваются, где
+        что лежит, — а личные перестановки редки и переживаются легче,
+        чем раздел, которого у половины участников нет.
+        """
+        users = self.env['res.users'].sudo().search([('share', '=', False)])
+        added = renumbered = 0
+        for user in users:
+            defaults = self._defaults_for_user(user)
+            existing = self.sudo().search([('user_id', '=', user.id)])
+            by_key = {(item.section, item.name): item for item in existing}
+            for values in defaults:
+                key = (values['section'], values['name'])
+                item = by_key.get(key)
+                if not item:
+                    if values['section'] == 'main' or values.get('action_id'):
+                        self.sudo().create(values)
+                        added += 1
+                    continue
+                if item.sequence != values['sequence']:
+                    item.sudo().sequence = values['sequence']
+                    renumbered += 1
+        if added or renumbered:
+            _logger.info('Меню участников: добавлено %s, перенумеровано %s',
+                         added, renumbered)
+        return True
 
     @api.model
     def _defaults_for_user(self, user):

@@ -25,6 +25,7 @@
     'data': [
         'security/ir.model.access.csv',
         'security/coop_project_rules.xml',
+        'security/coop_project_groups.xml',
         'views/coop_project_views.xml',
         'data/coop_project_backfill.xml',
     ],

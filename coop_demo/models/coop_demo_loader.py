@@ -16,6 +16,7 @@ from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_programs,
                     load_promotions,
                     load_reference, load_resources, load_skills,
+                    load_project_tasks,
                     load_vacancies, load_verification, load_wallets,
                     load_warehouses)
 
@@ -108,6 +109,11 @@ class CoopDemoLoader(models.AbstractModel):
         # События — после сообществ: часть событий проводят они.
         if 'coop.event' in self.env:
             load_events.load_events(self.env)
+        # Задачи проектов — после того, как сборы вкладов обзавелись
+        # проектами в управлении: задача заводится в управляемом проекте,
+        # а исполнители берутся из вкладчиков сбора.
+        if 'project.task' in self.env:
+            load_project_tasks.load_project_tasks(self.env)
         # Склады и биржа мощностей — после сделок: сданное другим место
         # склад считает по действующим договорённостям, а не по
         # введённому числу, и договорённости для этого должны уже быть.

@@ -239,7 +239,16 @@ class CoopProject(models.Model):
         """
         self.ensure_one()
         Project = self.env['project.project'].sudo()
-        values = {'name': self.name, 'partner_id': self.partner_id.id}
+        values = {
+            'name': self.name,
+            'partner_id': self.partner_id.id,
+            # Название задач у проекта — не перевод, а его собственное
+            # поле, и по умолчанию оно английское. На карточке это
+            # выглядит как «8 Tasks» посреди русского интерфейса, и
+            # никаким обновлением языка не лечится: правится значение, а
+            # не строка.
+            'label_tasks': 'Задачи',
+        }
         # Способ выставления счетов приходит из модуля учёта времени: поле
         # вычисляемое, но обязательное, и его расчёт значения не даёт —
         # он лишь понижает «вручную» до «без счетов». Пустым его колонка
@@ -265,6 +274,33 @@ class CoopProject(models.Model):
         return Project.create(values)
 
     @api.model
+    def grant_project_access(self):
+        """Право вести проекты — каждому участнику платформы.
+
+        Решение владельца от 2026-09-14: раздел «Управление проектами»
+        виден всем. Без права пользователя проектов штатный модуль
+        прячет и меню, и сами записи — участник не увидел бы ни своих
+        задач, ни сроков.
+
+        Записью в XML это не сделать: `base.group_user` помечена как
+        необновляемая, и правка молча пропускается — проверено, поле
+        осталось прежним при нулевых ошибках в журнале.
+
+        Роль руководителя проектов не выдаётся намеренно: она открывает
+        все проекты узла целиком.
+        """
+        base_group = self.env.ref('base.group_user', raise_if_not_found=False)
+        project_group = self.env.ref('project.group_project_user',
+                                     raise_if_not_found=False)
+        if not base_group or not project_group:
+            return False
+        if project_group in base_group.implied_ids:
+            return True
+        base_group.sudo().write({'implied_ids': [(4, project_group.id)]})
+        _logger.info('Право вести проекты выдано всем участникам платформы')
+        return True
+
+    @api.model
     def backfill_managed_projects(self, limit=None):
         """Завести управляемый проект тем, кто запущен, но связи не имеет.
 
@@ -283,6 +319,23 @@ class CoopProject(models.Model):
         Вызывается при обновлении модуля и безопасен к повторению: тем,
         у кого связь уже есть, ничего не делает.
         """
+        # Заодно чиним название задач: по умолчанию оно английское, и на
+        # карточке выходит «8 Tasks» посреди русского интерфейса. Это не
+        # перевод, а поле проекта, и обновлением языка не лечится.
+        #
+        # Не трогаем то, что завела сама Odoo своими данными: у её
+        # служебных проектов название не наше дело. Всё остальное на
+        # платформе — наше, включая заглушки, оставшиеся от наполнения.
+        Project = self.env['project.project'].sudo()
+        theirs = self.env['ir.model.data'].sudo().search([
+            ('model', '=', 'project.project')]).mapped('res_id')
+        stale = Project.with_context(active_test=False).search([
+            ('id', 'not in', theirs)])
+        stale = stale.filtered(lambda p: p.label_tasks in (False, 'Tasks'))
+        if stale:
+            stale.write({'label_tasks': 'Задачи'})
+            _logger.info('Название задач поправлено у %s проектов', len(stale))
+
         records = self.search([
             ('state', 'in', ('running', 'done')),
             ('project_id', '=', False),
