@@ -13,10 +13,19 @@
     длинный, читают его дважды — когда выбирают форму и когда решают,
     вкладываться ли в чужой проект, — и в обоих случаях читают целиком.
 
-    Пояснения вынесены из <group> в блоки во всю ширину. Внутри группы
-    Odoo раскладывает поля в две колонки таблицы, и абзац на четыре
-    строки там не переносится, а уезжает за правый край — проверено
-    глазами на стенде, из разметки этого не видно.
+    Пояснения идут блоками во всю ширину внутри обёртки с классом
+    `o_coop_legal_page`. Обёртка нужна потому, что `class` у самого
+    <page> Odoo вешает на ярлычок вкладки, а не на её содержимое —
+    проверено в браузере. Класс здесь не для красоты: Odoo вешает
+    `white-space: nowrap` на `.o_notebook.horizontal`, чтобы не
+    переносились ярлычки вкладок, свойство наследуется всем содержимым, и
+    абзац текста уезжает за правый край. Обычные поля это не задевает —
+    их виджеты перебивают правило сами. Стиль, снимающий наследование, —
+    в `static/src/scss/coop_economic_models.scss`.
+
+    Замечено только глазами: разметка правильная, а наружу торчит не
+    блок, а строка внутри него — ловится сравнением scrollWidth с
+    шириной блока.
   -->
   <record id="view_coop_project_form_legal" model="ir.ui.view">
     <field name="name">coop.project.form.legal</field>
@@ -26,7 +35,7 @@
 
       <notebook position="inside">
         <page string="Форма собственности" name="legal_form">
-
+          <div class="o_coop_legal_head">
           <group>
             <group string="Что выбрано">
               <field name="economic_model_id"
@@ -42,6 +51,9 @@
               <field name="legal_checked_on" readonly="1"/>
             </group>
           </group>
+          </div>
+
+          <div class="o_coop_legal_page">
 
           <div class="text-muted mb-3" invisible="not economic_model_id">
             <field name="legal_summary" readonly="1" nolabel="1"/>
@@ -102,6 +114,7 @@
             проекта устарела бы молча. Дата сверки — выше.
           </div>
 
+          </div>
         </page>
       </notebook>
 

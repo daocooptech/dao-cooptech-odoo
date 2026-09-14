@@ -30,5 +30,10 @@
         'views/coop_project_views.xml',
         'data/coop_economic_load.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'coop_economic_models/static/src/scss/coop_economic_models.scss',
+        ],
+    },
     'installable': True,
 }
