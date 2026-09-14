@@ -61,9 +61,13 @@ def _renamed(Partner, org):
     was = RENAMED.get(org['name'])
     if not was:
         return Partner.browse()
+    # По названию, без города. Город у организации мог быть проставлен
+    # позже — обогащением профиля, — и в выгрузке его нет. Совпадения по
+    # названию достаточно: список переименований ведётся руками и
+    # содержит имена самой платформы, а не рядовых кооперативов, среди
+    # которых тёзки в разных городах — обычное дело.
     old = Partner.search([
-        ('name', '=', was), ('city', '=', org['city']),
-        ('is_company', '=', True)], limit=1)
+        ('name', '=', was), ('is_company', '=', True)], limit=1)
     if old:
         old.name = org['name']
     return old
