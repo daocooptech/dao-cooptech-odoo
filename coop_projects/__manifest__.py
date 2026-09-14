@@ -31,6 +31,7 @@
         'views/coop_project_need_views.xml',
         'data/coop_project_backfill.xml',
         'data/coop_project_readiness.xml',
+        'data/coop_project_cron.xml',
     ],
     'assets': {
         'web.assets_backend': [

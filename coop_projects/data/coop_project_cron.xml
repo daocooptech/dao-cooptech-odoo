@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!--
+    Срок сбора без этого прохода — просто число на карточке: проект, у
+    которого он давно вышел, продолжает стоять в каталоге и собирать.
+
+    Раз в сутки, а не чаще: сбор меряется неделями, и закрывать его с
+    точностью до минуты незачем.
+  -->
+  <record id="cron_close_expired_gatherings" model="ir.cron">
+    <field name="name">Проекты: закрыть сборы с вышедшим сроком</field>
+    <field name="model_id" ref="model_coop_project"/>
+    <field name="state">code</field>
+    <field name="code">model.close_expired_gatherings()</field>
+    <field name="interval_number">1</field>
+    <field name="interval_type">days</field>
+    <field name="active" eval="True"/>
+  </record>
+</odoo>

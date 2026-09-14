@@ -32,7 +32,7 @@
                   <t t-esc="record.kind.value"/>
                 </span>
                 <span class="o_coop_stop"
-                      t-if="record.state.raw_value == 'frozen' or record.state.raw_value == 'cancelled'">
+                      t-if="record.state.raw_value == 'frozen' or record.state.raw_value == 'cancelled' or record.state.raw_value == 'failed'">
                   <t t-esc="record.state.value"/>
                 </span>
                 <span class="o_coop_loc" t-if="record.city.raw_value">
@@ -68,7 +68,7 @@
     <field name="model">coop.project</field>
     <field name="arch" type="xml">
       <list string="Проекты" decoration-muted="state == 'cancelled'"
-            decoration-warning="state == 'frozen'">
+            decoration-warning="state in ('frozen', 'failed')">
         <field name="name"/>
         <field name="kind"/>
         <field name="category_id" optional="show"/>
@@ -83,7 +83,7 @@
         <field name="state" widget="badge"
                decoration-success="state == 'running'"
                decoration-info="state == 'gathering'"
-               decoration-warning="state == 'frozen'"
+               decoration-warning="state in ('frozen', 'failed')"
                decoration-muted="state in ('done', 'cancelled')"/>
       </list>
     </field>
@@ -103,6 +103,8 @@
                   invisible="state != 'running'"/>
           <button name="action_resume" type="object" string="Возобновить"
                   class="btn-primary" invisible="state != 'frozen'"/>
+          <button name="action_fail" type="object" string="Сбор не удался"
+                  invisible="state != 'gathering'"/>
           <button name="action_freeze" type="object" string="Заморозить"
                   invisible="state not in ('gathering', 'running')"/>
           <button name="action_cancel" type="object" string="Отменить"
@@ -122,6 +124,14 @@
                                           nolabel="1" class="oe_inline"/>».
             </div>
           </div>
+          <div class="alert alert-secondary" role="status"
+               invisible="state != 'failed'">
+            <strong>Сбор не удался.</strong>
+            К сроку собрано меньше, чем требовало правило закрытия. Это не
+            отмена: проект никто не закрывал, просто не хватило вкладов.
+            Денежные вклады подлежат возврату, обещанное трудом и вещами —
+            снятию.
+          </div>
           <div class="oe_button_box" name="button_box">
             <button name="action_open_project" type="object" class="oe_stat_button"
                     icon="fa-tasks" invisible="not project_id">
@@ -137,6 +147,32 @@
             <h1><field name="name" placeholder="Название проекта"/></h1>
             <field name="summary" placeholder="Одна строка, которую видно в каталоге"/>
           </div>
+          <!--
+            Блок сбора идёт во всю ширину листа, а не половиной. У
+            половины поле выбора выходило 156 точек при нужных 159, и
+            «Номинальный счёт в банке» читался как «Номинальный счёт в».
+          -->
+          <group string="Сбор" class="o_coop_funding" invisible="state == 'draft'">
+            <group>
+              <field name="date_start" readonly="1"
+                     invisible="not date_start"/>
+              <field name="date_deadline"/>
+              <field name="days_left" invisible="state != 'gathering'"/>
+              <field name="funding_rule"/>
+              <field name="funding_threshold"
+                     invisible="funding_rule != 'threshold'"/>
+            </group>
+            <group>
+              <field name="contribution_basis"/>
+              <field name="payment_route"
+                     invisible="not contribution_basis"/>
+            </group>
+          </group>
+          <group string="Если соберём не всё"
+                 invisible="funding_rule == 'all_or_nothing' or state == 'draft'">
+            <field name="fallback_plan" nolabel="1"
+                   placeholder="Что именно будет сделано на неполном сборе"/>
+          </group>
           <group>
             <group string="О проекте">
               <field name="kind"/>
@@ -216,9 +252,17 @@
         <filter name="gathering" string="Идёт сбор" domain="[('state', '=', 'gathering')]"/>
         <filter name="running" string="Запущенные" domain="[('state', '=', 'running')]"/>
         <filter name="frozen" string="Заморожены" domain="[('state', '=', 'frozen')]"/>
+        <filter name="failed" string="Сбор не удался" domain="[('state', '=', 'failed')]"/>
+        <separator/>
+        <!-- По дате, а не по «осталось дней»: вычисляемое нехранимое поле
+             в домене фильтра Odoo отвергает целиком, с «Unsearchable
+             field», и представление не грузится вовсе. -->
+        <filter name="deadline_soon" string="Срок на исходе"
+                domain="[('state', '=', 'gathering'),
+                         ('date_deadline', '&lt;=', (context_today() + relativedelta(days=7)).strftime('%Y-%m-%d'))]"/>
         <separator/>
         <filter name="alive" string="Не остановлены"
-                domain="[('state', 'not in', ('frozen', 'cancelled'))]"/>
+                domain="[('state', 'not in', ('frozen', 'cancelled', 'failed'))]"/>
         <separator/>
         <filter name="almost" string="Собраны больше чем наполовину"
                 domain="[('readiness', '>=', 50)]"/>

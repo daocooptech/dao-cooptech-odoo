@@ -29,6 +29,11 @@ class CoopProjectCase(CoopCase):
             'name': name,
             'partner_id': (partner or cls.initiator.partner_id).id,
             'required_total': required,
+            # Проект, который может запуститься на неполном сборе, обязан
+            # сказать, что он в этом случае сделает. Заготовка ставит это
+            # сразу: иначе каждый тест начинался бы с обхода правила,
+            # которое сам же и проверяет.
+            'fallback_plan': 'Запустим первую очередь.',
         })
         if state:
             project.state = state

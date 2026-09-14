@@ -18,10 +18,13 @@ import json
 import logging
 import os
 import random
+from datetime import timedelta
 
 from . import emblems
 from .dao_projects import (DAO_FROM_MOCKUP, DAO_PROJECTS, IT_SUBCATEGORIES,
                            MOCKUP_CATEGORY_FIX)
+
+from odoo import fields
 
 _logger = logging.getLogger(__name__)
 
@@ -226,6 +229,7 @@ def load_projects(env, extra=100):
         return
 
     rnd = random.Random(20260902)
+    today = fields.Date.today()
     created = updated = 0
 
     seen = {}
@@ -239,6 +243,11 @@ def load_projects(env, extra=100):
 
         values = {
             'name': row['name'],
+            'date_deadline': _deadline_for(index, rnd, today),
+            'funding_rule': _rule_for(index),
+            'funding_threshold': 70,
+            'fallback_plan': _fallback_for(row),
+            'contribution_basis': _basis_for(row),
             'summary': row['description'],
             'description': '<p>%s</p>' % row['description'] if row['description'] else False,
             'city': row['city'],
@@ -285,12 +294,12 @@ def load_projects(env, extra=100):
         # считается от вкладов, и брать её как основание для выбора
         # состояния значит смотреть на то, что сам же и создал.
         #
-        # Вклады у черновика при этом не удаляем, хотя «замысел, собравший
+        # Вклады у черновика при этом не удаляем, хотя «идея, собравшая
         # деньги» и выглядит противоречием. Полсотни таких — не ошибка
         # загрузчика: это проекты, снятые с публикации по нехватке ступени
         # у инициатора (`load_verification._demote_unpublishable`). Они
         # собирали по-настоящему, и стирать собранное нельзя. Что у такого
-        # состояния должно быть своё имя, а не «Замысел», — вопрос к
+        # состояния должно быть своё имя, а не «Идея», — вопрос к
         # владельцу, а не повод терять данные.
         state = _state_for(readiness, index)
         if not project.contribution_ids:
@@ -416,6 +425,61 @@ def _make_contributions(Contribution, project, required, readiness, people, rnd,
         })
 
 
+def _deadline_for(index, rnd, today):
+    """Срок сбора с разбросом, часть — уже просроченная.
+
+    Просроченные нужны: по ним и видно, как крон закрывает сбор. Без них
+    состояние «Сбор не удался» в каталоге не на чем проверить.
+    """
+    if index % 11 == 4:
+        return today - timedelta(days=rnd.randint(1, 40))
+    return today + timedelta(days=rnd.randint(14, 180))
+
+
+def _rule_for(index):
+    """Правило закрытия. Умолчание — от порога (решение владельца 294).
+
+    «Оставляем собранное» даётся редко и только пожертвованиям: при
+    предоплате оговорка «возврат не производится» ничтожна, и схема
+    оборачивается необеспеченным обязательством.
+    """
+    if index % 9 == 3:
+        return 'all_or_nothing'
+    if index % 17 == 8:
+        return 'keep_all'
+    return 'threshold'
+
+
+def _basis_for(row):
+    """Правовое основание денежного вклада.
+
+    Кооперативный проект собирает паевые взносы, некоммерческий —
+    пожертвования, остальные — предоплату за вознаграждение.
+    Инвестирование в наполнении не ставим: на узле оно закрыто, пока нет
+    статуса оператора инвестиционной платформы.
+    """
+    return {
+        'Кооперативный': 'share',
+        'Некоммерческий': 'donation',
+    }.get(row['project_type'], 'prepay')
+
+
+def _fallback_for(row):
+    """Что будет сделано, если соберут не всё.
+
+    Обязательно у всех, кто может запуститься на неполном сборе:
+    вкладчик читает не «порог 70 %», а что именно он получит при
+    семидесяти процентах. Текст выводится из самого проекта — общая
+    отписка вроде «сделаем что успеем» тут хуже пустого поля.
+    """
+    name = (row['name'] or 'проект').split(' — ')[0].strip().lower()
+    return ('Соберём не всё — запустим первую очередь: %s в меньшем '
+            'объёме, без второй площадки и без запаса по оборудованию. '
+            'Недостающее добираем вкладами по ходу работы, о каждом '
+            'сокращении пишем в ленту проекта до того, как начать.'
+            % name)
+
+
 def _initiator_for(row, index, initiators, dao_orgs, people):
     """От чьего имени собирается проект.
 
@@ -461,7 +525,7 @@ def _state_for(readiness, index):
     считается от вкладов, а вклады заводятся после того, как состояние
     уже выбрано.
 
-    Замыслы, замороженные и отменённые нужны, чтобы соответствующие
+    Идеи, замороженные и отменённые нужны, чтобы соответствующие
     экраны было на чём проверить; их доли небольшие — каталог должен
     оставаться каталогом.
     """

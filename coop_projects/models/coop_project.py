@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import logging
+from datetime import timedelta
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -62,12 +63,45 @@ class CoopProjectCategory(models.Model):
 # Состояния проекта. Списком наверху, потому что их два поля: само
 # состояние и то, куда вернуть проект после разморозки.
 STATES = [
-    ('draft', 'Замысел'),
+    ('draft', 'Идея'),
     ('gathering', 'Сбор'),
     ('running', 'Запущен'),
     ('frozen', 'Заморожен'),
+    ('failed', 'Сбор не удался'),
     ('done', 'Завершён'),
     ('cancelled', 'Отменён'),
+]
+
+# Правовое основание денежного вклада. Решение владельца 294: разрешены
+# все четыре. Это не оформление — от основания зависит, обязан ли проект
+# вернуть деньги и в какой срок.
+#
+# Пожертвование: вернуть не обязан, но и потратить на другое не вправе.
+# Предоплата: вернуть обязан, десять дней, полпроцента в день просрочки.
+# Паевой взнос: возврат только при выходе из кооператива, по уставу.
+# Инвестирование: заём, доля, ЦФА — требует статуса оператора
+# инвестиционной платформы. До получения статуса закрыто настройкой узла.
+# Границы срока сбора. Меньше двух недель никто не успеет узнать о
+# проекте, больше полугода — это уже не срок, а его отсутствие.
+MIN_DAYS = 14
+MAX_DAYS = 180
+DEFAULT_DAYS = 60
+
+CONTRIBUTION_BASIS = [
+    ('donation', 'Пожертвование или целевой взнос'),
+    ('prepay', 'Предоплата за вознаграждение'),
+    ('share', 'Паевой взнос пайщика'),
+    ('investment', 'Инвестирование'),
+]
+
+# Кто держит деньги на время сбора. Счёта самой платформы здесь нет и не
+# будет: деньги вкладчиков на нём — это сразу либо спецсчёт с ККТ и
+# учётом в Росфинмониторинге, либо требование банковской лицензии.
+PAYMENT_ROUTES = [
+    ('nominal', 'Номинальный счёт в банке'),
+    ('escrow', 'Эскроу-счёт'),
+    ('contract', 'Смарт-контракт'),
+    ('direct', 'Прямой платёж инициатору'),
 ]
 
 
@@ -108,7 +142,7 @@ class CoopProject(models.Model):
 
     state = fields.Selection(STATES, string='Состояние', default='draft',
         required=True, index=True, tracking=True,
-        help='Замысел — черновик, в каталоге его не видно. Сбор — проект '
+        help='Идея — черновик, в каталоге её не видно. Сбор — проект '
              'ищет людей, ресурсы и деньги. Запущен — собранное позволяет '
              'начать, и здесь создаётся проект в модуле управления. '
              'Завершён — итоги и распределение. Заморожен — приостановлен '
@@ -188,7 +222,93 @@ class CoopProject(models.Model):
     need_count = fields.Integer(string='Потребностей',
                                 compute='_compute_need_count')
 
+    # ── Срок сбора и правило закрытия ────────────────────────────────────
+    #
+    # Решение владельца 294. До него у проекта не было ни одной даты, и
+    # сбор не кончался никогда: нельзя было ни показать «осталось
+    # двенадцать дней», ни закрыть сбор, ни отличить заброшенный проект
+    # от идущего.
+    date_start = fields.Date(
+        string='Сбор начат', readonly=True, copy=False,
+        help='Ставится при открытии сбора.')
+    date_deadline = fields.Date(
+        string='Собираем до', tracking=True,
+        help='Обязателен для открытия сбора: от него считается, сколько '
+             'осталось, и по нему сбор закрывается сам.')
+    days_left = fields.Integer(
+        string='Осталось дней', compute='_compute_days_left')
+
+    funding_rule = fields.Selection([
+        ('all_or_nothing', 'Только полный сбор'),
+        ('threshold', 'От порога'),
+        ('keep_all', 'Оставляем собранное'),
+    ], string='Правило закрытия', default='threshold', required=True,
+        tracking=True,
+        help='Что происходит, когда срок вышел. Полный сбор — не собрали '
+             'сто процентов, сбор не удался. От порога — собрали больше '
+             'порога, запускаемся на собранное. Оставляем собранное — '
+             'запуск при любом сборе, но каждого вкладчика придётся '
+             'спросить, вернуть ему деньги или оставить проекту.')
+    funding_threshold = fields.Integer(
+        string='Порог, %', default=70, tracking=True,
+        help='При какой готовности проект считается собранным. Готовность '
+             'у нас — сумма оценок разнородных вкладов, согласованных на '
+             'глаз; требовать от неё точных ста процентов — ложная '
+             'точность.')
+    fallback_plan = fields.Text(
+        string='Что сделаем, если соберём не всё',
+        help='Обязательно, когда проект может запуститься на неполном '
+             'сборе. Вкладчик должен читать не «порог 70 %», а что именно '
+             'он получит при семидесяти процентах.')
+    deadline_extensions = fields.Integer(
+        string='Продлений срока', readonly=True, default=0, copy=False)
+
+    # ── Правовой каркас ──────────────────────────────────────────────────
+    contribution_basis = fields.Selection(
+        CONTRIBUTION_BASIS, string='Основание денежного вклада',
+        default='donation', tracking=True,
+        help='От основания зависит, обязан ли проект вернуть деньги и в '
+             'какой срок. Неденежных вкладов не касается.')
+    payment_route = fields.Selection(
+        PAYMENT_ROUTES, string='Кто держит деньги', default='nominal',
+        tracking=True,
+        help='Платформа получателем денег не бывает ни в каком варианте.')
+
     import_key = fields.Char(string='Ключ источника', index=True, copy=False)
+
+    @api.depends('date_deadline', 'state')
+    def _compute_days_left(self):
+        today = fields.Date.context_today(self)
+        for record in self:
+            if record.state == 'gathering' and record.date_deadline:
+                record.days_left = (record.date_deadline - today).days
+            else:
+                record.days_left = 0
+
+    @api.constrains('funding_threshold')
+    def _check_funding_threshold(self):
+        for record in self:
+            if not 50 <= record.funding_threshold <= 100:
+                raise ValidationError(_(
+                    'Порог сбора — от 50 до 100 процентов. Ниже половины '
+                    'это уже другой проект, а не недособранный тот же.'))
+
+    @api.constrains('state', 'fallback_plan', 'funding_rule',
+                    'funding_threshold')
+    def _check_fallback_plan(self):
+        """Обещал запуститься на неполном сборе — скажи, что сделаешь."""
+        for record in self:
+            if record.state not in ('gathering', 'running'):
+                continue
+            partial = (record.funding_rule == 'keep_all'
+                       or (record.funding_rule == 'threshold'
+                           and record.funding_threshold < 100))
+            if partial and not (record.fallback_plan or '').strip():
+                raise ValidationError(_(
+                    'Проект «%s» может запуститься на неполном сборе. '
+                    'Напишите, что именно будет сделано в этом случае: '
+                    'вкладчик читает не «порог 70 %%», а что он получит '
+                    'при семидесяти процентах.') % record.name)
 
     @api.depends('need_ids.state')
     def _compute_need_count(self):
@@ -268,8 +388,54 @@ class CoopProject(models.Model):
                     'У проекта «%s» не указано, сколько нужно. Без этого '
                     'готовность считать не от чего, и вкладчик не увидит, '
                     'сколько ещё собирать.') % record.name)
+            record._check_investment_allowed()
+            today = fields.Date.context_today(record)
+            if not record.date_deadline:
+                record.date_deadline = today + timedelta(days=DEFAULT_DAYS)
+            days = (record.date_deadline - today).days
+            if not MIN_DAYS <= days <= MAX_DAYS:
+                raise UserError(_(
+                    'Срок сбора — от %(min)s до %(max)s дней. У проекта '
+                    '«%(name)s» выходит %(days)s. Меньше двух недель никто '
+                    'не успеет узнать о проекте, больше полугода — это уже '
+                    'не срок, а его отсутствие.',
+                    min=MIN_DAYS, max=MAX_DAYS, name=record.name, days=days))
+            record.date_start = today
             record.state = 'gathering'
         return True
+
+    def _check_investment_allowed(self):
+        """Инвестиционный сбор — только со статусом оператора.
+
+        Решение владельца 294: разрешены все четыре основания, включая
+        инвестирование. Но заём, доля и ЦФА через платформу требуют
+        статуса оператора инвестиционной платформы — ООО, собственные
+        средства от пяти миллионов, реестр Банка России. Пока статуса
+        нет, поле в схеме есть, а сбор по нему не открывается: иначе
+        первый же заём через платформу — нарушение.
+        """
+        self.ensure_one()
+        if self.contribution_basis != 'investment':
+            return
+        allowed = self.env['ir.config_parameter'].sudo().get_param(
+            'coop.investment_operator')
+        if allowed not in ('True', 'true', '1'):
+            raise UserError(_(
+                'Сбор по основанию «Инвестирование» на этом узле закрыт: '
+                'заём, доля и цифровые права требуют статуса оператора '
+                'инвестиционной платформы и записи в реестре Банка '
+                'России. Пока статуса нет, выберите другое основание: '
+                'пожертвование, предоплату за вознаграждение или паевой '
+                'взнос.'))
+
+    def _required_readiness(self):
+        """При какой готовности проект считается собранным."""
+        self.ensure_one()
+        if self.funding_rule == 'all_or_nothing':
+            return 100
+        if self.funding_rule == 'threshold':
+            return self.funding_threshold
+        return 0
 
     def action_launch(self):
         """Запустить проект и завести его в модуле управления.
@@ -279,12 +445,14 @@ class CoopProject(models.Model):
         берём готовыми.
         """
         for record in self:
-            if record.readiness < 100:
+            need = record._required_readiness()
+            if record.readiness < need:
                 raise UserError(_(
-                    'Проект «%(name)s» собран на %(done)s%%. Запускать '
+                    'Проект «%(name)s» собран на %(done)s%%, а по его '
+                    'правилу закрытия нужно %(need)s%%. Запускать '
                     'недособранный проект значит обещать вкладчикам то, на '
                     'что не хватает.',
-                    name=record.name, done=record.readiness))
+                    name=record.name, done=record.readiness, need=need))
             if not record.project_id:
                 record.project_id = record._create_managed_project()
             record.state = 'running'
@@ -397,7 +565,7 @@ class CoopProject(models.Model):
         двухсот записей: две вселенные проектов без единой точки
         касания.
 
-        Добор идёт только по запущенным и завершённым. Замыслу и сбору
+        Добор идёт только по запущенным и завершённым. Идее и сбору
         управляемый проект не нужен: вести там пока нечего, и заводить
         его заранее значило бы засорить раздел управления пустыми
         карточками.
@@ -509,11 +677,65 @@ class CoopProject(models.Model):
                 state=dict(STATES)[back]))
         return True
 
+    def action_fail(self):
+        """Признать сбор несостоявшимся.
+
+        Отдельно от отмены, и это не косметика. Отмена — волевое действие
+        человека, за неё отвечает инициатор; несостоявшийся сбор —
+        обстоятельство, вины ничьей нет. От разницы зависит доверие: если
+        склеить их в одно состояние, честные сборы перестанут открывать.
+        """
+        for record in self:
+            if record.state != 'gathering':
+                raise UserError(_(
+                    'Признать сбор несостоявшимся можно только пока он '
+                    'идёт. Проект «%s» сейчас не в сборе.') % record.name)
+            record.state = 'failed'
+            record.message_post(body=_(
+                'Сбор не удался: к сроку собрано %(done)s%% при нужных '
+                '%(need)s%%. Объявления сняты. Денежные вклады подлежат '
+                'возврату, обещанное трудом и вещами — снятию.',
+                done=record.readiness, need=record._required_readiness()))
+        return True
+
+    @api.model
+    def close_expired_gatherings(self):
+        """Закрыть сборы, у которых вышел срок.
+
+        Раз в сутки. Без этого прохода срок — просто число на карточке:
+        проект, у которого он давно вышел, продолжает стоять в каталоге и
+        собирать.
+        """
+        today = fields.Date.context_today(self)
+        expired = self.sudo().search([
+            ('state', '=', 'gathering'),
+            ('date_deadline', '!=', False),
+            ('date_deadline', '<', today),
+        ])
+        launched = failed = 0
+        for project in expired:
+            need = project._required_readiness()
+            if project.readiness >= need:
+                # Запускаем тем же кодом, что и кнопка: иначе крон
+                # создавал бы состояние, которого платформа сама достичь
+                # не умеет.
+                with self.env.cr.savepoint():
+                    project.action_launch()
+                    launched += 1
+            else:
+                with self.env.cr.savepoint():
+                    project.action_fail()
+                    failed += 1
+        if launched or failed:
+            _logger.info('Сроки сбора: запущено %s, не удалось %s',
+                         launched, failed)
+        return launched + failed
+
     # Состояния, в которых проект больше никого не ищет. Отмена — совсем,
-    # заморозка — до поры; объявления снимаются в обоих случаях, потому
-    # что снаружи разницы нет: человек откликается на потребность, которой
-    # уже не существует.
-    SILENT_STATES = ('cancelled', 'frozen')
+    # заморозка — до поры, несостоявшийся сбор — по сроку; объявления
+    # снимаются во всех трёх случаях, потому что снаружи разницы нет:
+    # человек откликается на потребность, которой уже не существует.
+    SILENT_STATES = ('cancelled', 'frozen', 'failed')
 
     def write(self, vals):
         """Снять объявления, когда проект перестал искать.
