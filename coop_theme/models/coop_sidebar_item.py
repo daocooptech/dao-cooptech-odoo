@@ -220,16 +220,30 @@ class CoopSidebarItem(models.Model):
             # а не завести заново: иначе он окажется в меню дважды.
             wanted_section = {values['name']: values['section']
                               for values in defaults}
+            wanted_required = {values['name']: values['is_required']
+                               for values in defaults}
             for item in existing:
                 section = wanted_section.get(item.name)
                 if section and item.section != section:
-                    item.sudo().section = section
+                    # Вместе с частью меняется и обязательность: раздел
+                    # платформы убрать нельзя, расширение — личное дело
+                    # участника.
+                    item.sudo().write({
+                        'section': section,
+                        'is_required': wanted_required.get(item.name, False),
+                    })
                     moved += 1
 
             # Раздел, который участнику больше не положен, убирается. Иначе
             # он остаётся у того, кто его однажды увидел, навсегда.
             for item in existing:
                 if item.name in REQUIRES_PROJECT and item.name not in wanted_section:
+                    # Пометку обязательности снимаем перед удалением:
+                    # обязательный раздел удалить нельзя, и на узле, где
+                    # пункт заводился ещё основным разделом, обновление
+                    # падало именно здесь. Раздел, которого больше нет в
+                    # наборе, обязательным быть не может по определению.
+                    item.sudo().write({'is_required': False})
                     item.sudo().unlink()
                     dropped += 1
             existing = existing.exists()
