@@ -82,9 +82,20 @@ fi
 say "Обновление $before → $after"
 
 # Какие модули задеты. Первый уровень каталогов и есть имена модулей.
+#
+# `if`, а не `[ -f … ] && echo`: при `set -e` и `pipefail` последняя
+# проверка в цикле задаёт его код возврата, и папка без манифеста,
+# оказавшаяся в списке последней, роняла всю выкатку. Так и вышло с
+# `forks/`: правка README форков остановила обновление уже после
+# `git reset` — код на сервере обновился, а модули нет, и следующий
+# запуск изменений уже не видел.
 changed=$(run git diff --name-only "$before" "$after" \
           | awk -F/ 'NF>1 {print $1}' | sort -u \
-          | while read -r d; do [ -f "$ODOO_HOME/coop-addons/$d/__manifest__.py" ] && echo "$d"; done \
+          | while read -r d; do
+                if [ -f "$ODOO_HOME/coop-addons/$d/__manifest__.py" ]; then
+                    echo "$d"
+                fi
+            done \
           | paste -sd, -)
 
 # Правки в static/ — это стили, скрипты и шаблоны браузера. Базы они не
