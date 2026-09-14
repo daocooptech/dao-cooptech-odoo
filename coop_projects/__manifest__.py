@@ -21,13 +21,14 @@
     'category': 'Cooperative',
     'version': '19.0.1.0.0',
     'license': 'LGPL-3',
-    'depends': ['coop_base', 'project', 'mail'],
+    'depends': ['coop_base', 'coop_resources', 'project', 'mail'],
     'data': [
         'security/ir.model.access.csv',
         'security/coop_project_rules.xml',
         'security/coop_project_groups.xml',
         'security/coop_task_rules.xml',
         'views/coop_project_views.xml',
+        'views/coop_project_need_views.xml',
         'data/coop_project_backfill.xml',
     ],
     'assets': {

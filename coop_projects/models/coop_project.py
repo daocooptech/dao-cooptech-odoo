@@ -165,7 +165,21 @@ class CoopProject(models.Model):
         help='Создаётся при запуске. До запуска вести нечего, поэтому '
              'пусто — это не пропуск, а состояние дел.')
 
+    need_ids = fields.One2many(
+        'coop.resource', 'project_id', string='Потребности',
+        domain=[('listing_type', '=', 'request')],
+        help='Что проекту нужно: объявления спроса в каталоге ресурсов. '
+             'На каждое приходят предложения, и утверждается одно.')
+    need_count = fields.Integer(string='Потребностей',
+                                compute='_compute_need_count')
+
     import_key = fields.Char(string='Ключ источника', index=True, copy=False)
+
+    @api.depends('need_ids.state')
+    def _compute_need_count(self):
+        for record in self:
+            record.need_count = len(record.need_ids.filtered(
+                lambda need: need.state == 'published'))
 
     @api.depends('contribution_ids.value', 'contribution_ids.state')
     def _compute_contribution_total(self):
@@ -472,6 +486,14 @@ class CoopProjectContribution(models.Model):
         help='Вклад, делённый на сумму принятых вкладов проекта. Меняется, '
              'когда в проект вносят что-то ещё, — так и должно быть.')
 
+    # На какую потребность откликнулись. Пусто у вкладов, предложенных
+    # проекту вообще, а не в ответ на объявленную нужду: так вносили до
+    # появления потребностей, и так же вносят деньги «просто в проект».
+    need_id = fields.Many2one(
+        'coop.resource', string='Потребность', index=True,
+        domain="[('project_id', '=', project_id), ('listing_type', '=', 'request')]",
+        help='Объявление спроса, на которое это предложение.')
+
     offered_on = fields.Date(
         string='Предложен', default=fields.Date.context_today)
     accepted_on = fields.Date(string='Принят')
@@ -486,22 +508,53 @@ class CoopProjectContribution(models.Model):
                 record.share_percent = 0
 
     def action_accept(self):
-        """Принять вклад.
+        """Принять вклад, а если он на потребность — утвердить предложение.
 
         Принимает инициатор проекта: оценка — это соглашение, и вклад,
         принятый вкладчиком самостоятельно, размывал бы доли остальных.
+        У потребности может быть свой ответственный — тогда утверждает и
+        он (решение владельца от 2026-09-14): на проекте в три десятка
+        потребностей инициатор становится узким местом.
+
+        Потребность закрывается одним предложением, остальные отклоняются
+        сразу: держать откликнувшихся в ожидании после того, как выбор
+        сделан, — неуважение к их времени.
         """
         for record in self:
-            if not self.env.user.coop_has_power('deal', record.project_id.partner_id) \
-                    and record.project_id.partner_id != self.env.user.partner_id:
+            deciders = record.project_id.partner_id
+            if record.need_id:
+                deciders = record.need_id._need_deciders()
+            allowed = (self.env.user.partner_id in deciders
+                       or any(self.env.user.coop_has_power('deal', partner)
+                              for partner in deciders))
+            if not allowed:
                 raise UserError(_(
-                    'Принимать вклады в проект «%s» может его инициатор или '
-                    'тот, кому организация поручила сделки.') % record.project_id.name)
+                    'Утверждать предложения по проекту «%s» может его '
+                    'инициатор, ответственный за потребность или тот, кому '
+                    'организация поручила сделки.') % record.project_id.name)
             record.write({
                 'state': 'accepted',
                 'accepted_on': fields.Date.context_today(record),
             })
+            record._close_need()
         return True
+
+    def _close_need(self):
+        """Закрыть потребность и отклонить остальные предложения по ней."""
+        self.ensure_one()
+        need = self.need_id
+        if not need:
+            return
+        others = need.need_offer_ids.filtered(
+            lambda offer: offer.id != self.id and offer.state == 'offered')
+        if others:
+            others.write({'state': 'declined'})
+        need.write({'need_accepted_id': self.id, 'state': 'closed'})
+        need.message_post(body=_(
+            'Потребность закрыта: утверждено предложение «%(what)s» от '
+            '%(who)s. Прочих предложений отклонено: %(count)s.',
+            what=self.name, who=self.partner_id.name,
+            count=len(others)))
 
     def action_decline(self):
         self.write({'state': 'declined'})

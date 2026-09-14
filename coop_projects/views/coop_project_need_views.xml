@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Потребности проекта. Отдельного экрана у них нет и не нужно: это
+    объявления спроса в каталоге ресурсов, привязанные к проекту.
+    Здесь — только взгляд со стороны проекта и со стороны объявления.
+  -->
+
+  <record id="view_coop_project_form_needs" model="ir.ui.view">
+    <field name="name">coop.project.form.needs</field>
+    <field name="model">coop.project</field>
+    <field name="inherit_id" ref="coop_projects.view_coop_project_form"/>
+    <field name="arch" type="xml">
+      <notebook position="inside">
+        <page string="Потребности" name="needs">
+          <field name="need_ids" context="{'default_project_id': id,
+                                           'default_listing_type': 'request'}">
+            <list editable="bottom">
+              <field name="name" string="Что нужно"/>
+              <field name="category_id" string="Рубрика"/>
+              <field name="city"/>
+              <field name="price_display" string="Сколько готовы дать"/>
+              <field name="need_manager_id" string="Ответственный"/>
+              <field name="need_offer_count" string="Предложений"/>
+              <field name="need_accepted_id" string="Утверждено" readonly="1"/>
+              <field name="state" widget="badge"/>
+              <field name="listing_type" column_invisible="1"/>
+              <button name="action_view_offers" type="object"
+                      string="Предложения" icon="fa-inbox"
+                      invisible="need_offer_count == 0"/>
+            </list>
+          </field>
+          <div class="text-muted mt-2">
+            Потребность — это объявление спроса: оно попадает в каталог
+            ресурсов и видно всем, кто ищет работу или сбыт. На каждую
+            приходят предложения, и ответственный утверждает одно —
+            остальные отклоняются в тот же момент.
+          </div>
+        </page>
+      </notebook>
+    </field>
+  </record>
+
+  <!-- Со стороны объявления: чья это потребность и что с предложениями. -->
+  <record id="view_coop_resource_form_need" model="ir.ui.view">
+    <field name="name">coop.resource.form.need</field>
+    <field name="model">coop.resource</field>
+    <field name="inherit_id" ref="coop_resources.view_coop_resource_form"/>
+    <field name="arch" type="xml">
+      <sheet position="inside">
+        <group string="Потребность проекта" invisible="not project_id">
+          <group>
+            <field name="project_id" readonly="1"/>
+            <field name="need_manager_id"/>
+          </group>
+          <group>
+            <field name="need_offer_count" readonly="1"/>
+            <field name="need_accepted_id" readonly="1"/>
+          </group>
+        </group>
+      </sheet>
+    </field>
+  </record>
+
+  <!-- Пометка на карточке каталога. Решение владельца от 2026-09-14:
+       потребности стоят в общем спросе, но видно, что это проект.
+       Иначе откликнувшийся не понимает, во что входит: частное «ищу
+       сварщика» и потребность кооперативного проекта — разные истории. -->
+  <record id="view_coop_resource_kanban_need" model="ir.ui.view">
+    <field name="name">coop.resource.kanban.need</field>
+    <field name="model">coop.resource</field>
+    <field name="inherit_id" ref="coop_resources.view_coop_resource_kanban"/>
+    <field name="arch" type="xml">
+      <field name="listing_type" position="after">
+        <field name="is_project_need"/>
+        <field name="project_id"/>
+      </field>
+      <xpath expr="//span[hasclass('o_coop_res_promo')]" position="before">
+        <span class="o_coop_res_need" t-if="record.is_project_need.raw_value"
+              title="Потребность проекта: отклик становится вкладом, а вкладчик — участником">
+          Проект
+        </span>
+      </xpath>
+    </field>
+  </record>
+
+  <!-- И в отборе: пометка, что объявление принадлежит проекту.
+       Решение владельца от 2026-09-14: потребности стоят в общем спросе,
+       но видно, что это проект, и есть переход в него. -->
+  <record id="view_coop_resource_search_need" model="ir.ui.view">
+    <field name="name">coop.resource.search.need</field>
+    <field name="model">coop.resource</field>
+    <field name="inherit_id" ref="coop_resources.view_coop_resource_search"/>
+    <field name="arch" type="xml">
+      <search position="inside">
+        <filter name="project_needs" string="Потребности проектов"
+                domain="[('project_id', '!=', False)]"/>
+        <field name="project_id"/>
+      </search>
+    </field>
+  </record>
+
+</odoo>
