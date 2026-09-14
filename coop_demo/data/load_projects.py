@@ -258,7 +258,17 @@ def load_projects(env, extra=100):
         if not project.contribution_ids:
             _make_contributions(Contribution, project, required, readiness,
                                people, rnd, index)
-        project.state = _state_for(project.readiness, index)
+        state = _state_for(project.readiness, index)
+        # Заморозка — не просто состояние: проект помнит, куда вернётся,
+        # и объявления с него снимаются. Пишем через `write`, чтобы
+        # сработал тот же код, что и у кнопки.
+        if state == 'frozen':
+            # Куда вернётся — по готовности: собранный проект замораживают
+            # уже запущенным, недособранный остаётся в сборе.
+            back = 'running' if project.readiness >= 100 else 'gathering'
+            project.write({'resume_state': back, 'state': state})
+        else:
+            project.state = state
 
     _logger.info('Каталог проектов: создано %s, обновлено %s', created, updated)
 
@@ -341,13 +351,18 @@ def _make_contributions(Contribution, project, required, readiness, people, rnd,
 def _state_for(readiness, index):
     """Состояние по готовности, с разбросом.
 
-    Замыслы и отменённые нужны, чтобы соответствующие экраны было на чём
-    проверить; их доли небольшие — каталог должен оставаться каталогом.
+    Замыслы, замороженные и отменённые нужны, чтобы соответствующие
+    экраны было на чём проверить; их доли небольшие — каталог должен
+    оставаться каталогом.
     """
     if index % 29 == 7:
         return 'draft'
     if index % 37 == 11:
         return 'cancelled'
+    # Заморозка — не отмена: проект стоит, но жив. Без таких записей в
+    # каталоге не видно ни пометки на плитке, ни кнопки «Возобновить».
+    if index % 23 == 5:
+        return 'frozen'
     if readiness >= 100:
         return 'done' if index % 3 == 0 else 'running'
     return 'gathering'

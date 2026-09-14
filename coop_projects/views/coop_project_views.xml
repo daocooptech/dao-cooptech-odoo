@@ -13,6 +13,7 @@
         <field name="readiness"/>
         <field name="kind"/>
         <field name="summary"/>
+        <field name="state"/>
         <templates>
           <t t-name="card">
             <div class="o_coop_tile">
@@ -29,6 +30,10 @@
                 <span class="o_coop_badge o_coop_kind"
                       t-att-class="'o_coop_kind_' + record.kind.raw_value">
                   <t t-esc="record.kind.value"/>
+                </span>
+                <span class="o_coop_stop"
+                      t-if="record.state.raw_value == 'frozen' or record.state.raw_value == 'cancelled'">
+                  <t t-esc="record.state.value"/>
                 </span>
                 <span class="o_coop_loc" t-if="record.city.raw_value">
                   <i class="fa fa-map-marker" aria-hidden="true"/>
@@ -59,7 +64,8 @@
     <field name="name">coop.project.list</field>
     <field name="model">coop.project</field>
     <field name="arch" type="xml">
-      <list string="Проекты" decoration-muted="state == 'cancelled'">
+      <list string="Проекты" decoration-muted="state == 'cancelled'"
+            decoration-warning="state == 'frozen'">
         <field name="name"/>
         <field name="kind"/>
         <field name="category_id" optional="show"/>
@@ -74,6 +80,7 @@
         <field name="state" widget="badge"
                decoration-success="state == 'running'"
                decoration-info="state == 'gathering'"
+               decoration-warning="state == 'frozen'"
                decoration-muted="state in ('done', 'cancelled')"/>
       </list>
     </field>
@@ -91,12 +98,27 @@
                   class="btn-primary" invisible="state != 'gathering'"/>
           <button name="action_finish" type="object" string="Завершить"
                   invisible="state != 'running'"/>
+          <button name="action_resume" type="object" string="Возобновить"
+                  class="btn-primary" invisible="state != 'frozen'"/>
+          <button name="action_freeze" type="object" string="Заморозить"
+                  invisible="state not in ('gathering', 'running')"/>
           <button name="action_cancel" type="object" string="Отменить"
                   invisible="state in ('done', 'cancelled')"/>
           <field name="state" widget="statusbar"
                  statusbar_visible="draft,gathering,running,done"/>
         </header>
         <sheet>
+          <div class="alert alert-warning" role="status"
+               invisible="state != 'frozen'">
+            <strong>Проект заморожен.</strong>
+            Объявления сняты с публикации, новых откликов не будет.
+            Вклады и участники сохранены — после возобновления объявления
+            нужно опубликовать заново.
+            <div class="mt-1">
+              Вернётся в состояние «<field name="resume_state" readonly="1"
+                                          nolabel="1" class="oe_inline"/>».
+            </div>
+          </div>
           <div class="oe_button_box" name="button_box">
             <button name="action_open_project" type="object" class="oe_stat_button"
                     icon="fa-tasks" invisible="not project_id">
@@ -190,6 +212,10 @@
         <field name="partner_id"/>
         <filter name="gathering" string="Идёт сбор" domain="[('state', '=', 'gathering')]"/>
         <filter name="running" string="Запущенные" domain="[('state', '=', 'running')]"/>
+        <filter name="frozen" string="Заморожены" domain="[('state', '=', 'frozen')]"/>
+        <separator/>
+        <filter name="alive" string="Не остановлены"
+                domain="[('state', 'not in', ('frozen', 'cancelled'))]"/>
         <separator/>
         <filter name="almost" string="Собраны больше чем наполовину"
                 domain="[('readiness', '>=', 50)]"/>

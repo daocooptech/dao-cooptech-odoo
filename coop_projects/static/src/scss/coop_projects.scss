@@ -190,3 +190,18 @@
   padding: 3px 9px;
   border-radius: 999px;
 }
+
+// Замороженный и отменённый проект в каталоге. Без пометки плитка
+// неотличима от живой: та же картинка, та же полоса готовности — а
+// откликнуться уже не на что. Ряд значков сверху слева занят видом
+// проекта, поэтому эта пометка встаёт справа.
+.o_coop_projects .o_coop_tile_image .o_coop_stop {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(20, 23, 26, .82);
+  color: #fff;
+  font: 600 10.5px/1.3 'Manrope', sans-serif;
+  padding: 3px 8px;
+  border-radius: 4px;
+}

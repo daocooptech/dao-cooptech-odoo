@@ -59,6 +59,18 @@ class CoopProjectCategory(models.Model):
             record.project_count = counts.get(record.id, 0)
 
 
+# Состояния проекта. Списком наверху, потому что их два поля: само
+# состояние и то, куда вернуть проект после разморозки.
+STATES = [
+    ('draft', 'Замысел'),
+    ('gathering', 'Сбор'),
+    ('running', 'Запущен'),
+    ('frozen', 'Заморожен'),
+    ('done', 'Завершён'),
+    ('cancelled', 'Отменён'),
+]
+
+
 class CoopProject(models.Model):
     """Проект платформы — краудресурсинг.
 
@@ -94,18 +106,21 @@ class CoopProject(models.Model):
         help='Одна строка, которую видно в каталоге.')
     description = fields.Html(string='Описание')
 
-    state = fields.Selection([
-        ('draft', 'Замысел'),
-        ('gathering', 'Сбор'),
-        ('running', 'Запущен'),
-        ('done', 'Завершён'),
-        ('cancelled', 'Отменён'),
-    ], string='Состояние', default='draft', required=True, index=True,
-        tracking=True,
+    state = fields.Selection(STATES, string='Состояние', default='draft',
+        required=True, index=True, tracking=True,
         help='Замысел — черновик, в каталоге его не видно. Сбор — проект '
              'ищет людей, ресурсы и деньги. Запущен — собранное позволяет '
              'начать, и здесь создаётся проект в модуле управления. '
-             'Завершён — итоги и распределение.')
+             'Завершён — итоги и распределение. Заморожен — приостановлен '
+             'до поры, объявления сняты, но проект жив и его можно '
+             'возобновить. Отменён — закрыт совсем.')
+
+    # Куда вернётся проект при разморозке. Хранится, потому что снаружи
+    # «заморожен» одинаков, а внутри разница есть: сбор продолжают
+    # собирать, запущенный — вести. Спрашивать об этом при разморозке
+    # значило бы перекладывать на человека то, что система знает сама.
+    resume_state = fields.Selection(
+        STATES, string='Вернуться в', readonly=True, copy=False)
 
     kind = fields.Selection([
         ('cooperative', 'Кооперативный'),
@@ -416,14 +431,55 @@ class CoopProject(models.Model):
         self.write({'state': 'cancelled'})
         return True
 
+    def action_freeze(self):
+        """Заморозить проект: приостановить, не закрывая.
+
+        Между «идёт» и «отменён» есть промежуток, и он занимает месяцы:
+        инициатор уехал, поставщик сорвался, ждут разрешения. Отменять
+        такой проект нечестно — вклады остаются, участники остаются, —
+        а оставлять его в сборе нечестно вдвойне: он продолжает звать
+        людей, которых сейчас некому встретить.
+        """
+        for record in self:
+            if record.state not in ('gathering', 'running'):
+                raise UserError(_(
+                    'Заморозить можно проект в сборе или запущенный. '
+                    'Проект «%(name)s» сейчас в состоянии «%(state)s».',
+                    name=record.name,
+                    state=dict(STATES).get(record.state, record.state)))
+            record.write({'resume_state': record.state, 'state': 'frozen'})
+            record.message_post(body=_(
+                'Проект заморожен. Объявления сняты с публикации; вклады '
+                'и участники сохранены. При возобновлении проект вернётся '
+                'в состояние «%s».') % dict(STATES)[record.resume_state])
+        return True
+
+    def action_resume(self):
+        """Разморозить проект и вернуть его туда, откуда заморозили.
+
+        Объявления обратно не поднимаются намеренно: пока проект стоял,
+        часть потребностей закрылась сама, часть устарела. Возвращать их
+        скопом значило бы позвать людей на работу, которой уже нет.
+        """
+        for record in self:
+            if record.state != 'frozen':
+                raise UserError(_(
+                    'Возобновлять нечего: проект «%s» не заморожен.')
+                    % record.name)
+            back = record.resume_state or 'gathering'
+            record.write({'state': back, 'resume_state': False})
+            record.message_post(body=_(
+                'Проект возобновлён, состояние — «%(state)s». Объявления '
+                'нужно опубликовать заново: пока проект стоял, часть '
+                'потребностей могла отпасть.',
+                state=dict(STATES)[back]))
+        return True
+
     # Состояния, в которых проект больше никого не ищет. Отмена — совсем,
     # заморозка — до поры; объявления снимаются в обоих случаях, потому
     # что снаружи разницы нет: человек откликается на потребность, которой
     # уже не существует.
-    #
-    # Заморозки в состояниях ещё нет — она предложена разбором экономиста
-    # и ждёт решения. Когда появится, её достаточно дописать сюда.
-    SILENT_STATES = ('cancelled',)
+    SILENT_STATES = ('cancelled', 'frozen')
 
     def write(self, vals):
         """Снять объявления, когда проект перестал искать.
@@ -448,11 +504,14 @@ class CoopProject(models.Model):
         """
         withdrawn = 0
         for record in self:
+            # Счётчик на запись, а не общий: при отмене пачкой проектов
+            # общий счётчик писал в ленту каждого проекта итог всей пачки.
+            here = 0
             needs = record.need_ids.filtered(
                 lambda need: need.state == 'published')
             if needs:
                 needs.sudo().write({'state': 'closed'})
-                withdrawn += len(needs)
+                here += len(needs)
             if 'coop.vacancy' in self.env:
                 vacancies = self.env['coop.vacancy'].sudo().search([
                     ('coop_project_id', '=', record.id),
@@ -460,11 +519,12 @@ class CoopProject(models.Model):
                 ])
                 if vacancies:
                     vacancies.write({'state': 'closed'})
-                    withdrawn += len(vacancies)
-            if withdrawn:
+                    here += len(vacancies)
+            if here:
                 record.message_post(body=_(
-                    'Проект остановлен: объявления сняты с публикации, '
-                    'снято всего %(count)s.', count=withdrawn))
+                    'Объявления сняты с публикации, снято всего '
+                    '%(count)s.', count=here))
+            withdrawn += here
         if withdrawn:
             _logger.info('Снято объявлений остановленных проектов: %s',
                          withdrawn)

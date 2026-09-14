@@ -358,7 +358,7 @@
               <field name="licensor_id" readonly="1"/>
               <field name="licensee_id"/>
               <field name="is_share_of_right"/>
-              <div colspan="2" class="alert alert-warning small"
+              <div colspan="2" class="alert alert-warning small" role="status"
                    invisible="not is_share_of_right">
                 Это не лицензия, а доля в самом исключительном праве.
                 Распоряжение исключительным правом на зарегистрированный
