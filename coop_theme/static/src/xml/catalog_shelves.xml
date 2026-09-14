@@ -19,45 +19,19 @@
             Смотреть все
           </button>
         </div>
+        <!--
+          Карточку рисует сам канбан каталога — тем же разбором
+          представления, что и лента ниже. Своей карточки у полки нет
+          намеренно: два вида карточек на одном экране читаются как
+          разнобой, и владелец на это указал 15 сентября.
+        -->
         <div class="o_coop_shelf_row">
-          <!--
-            Две карточки, и обе — карточки этого же каталога.
-
-            Где есть снимки, полка повторяет плиточную карточку: снимок
-            сверху, название под ним. Где снимков нет — закупки, сделки,
-            выпуски ЦФА, — повторяет строчную: квадратная плитка со
-            значком слева, название и город справа. Классы взяты те же,
-            что у каталога (`o_coop_listing`), а не скопированы: иначе
-            полка и каталог разойдутся при первой же правке стиля.
-
-            Владелец на это и указал 15 сентября: «на стенде какие-то
-            микро-карточки, на хостинге вообще по-другому». Своя мелкая
-            карточка поверх чужого каталога — и есть разнобой.
-          -->
-          <div t-foreach="shelf.records" t-as="rec" t-key="rec.id"
-               t-att-class="hasPhotos ? 'o_coop_shelf_card' : 'o_coop_shelf_card o_coop_listing o_coop_shelf_listing'"
-               t-on-click="() => this.open(rec)">
-            <t t-if="hasPhotos">
-              <div class="o_coop_shelf_photo">
-                <img t-att-src="photo(rec)" t-att-alt="rec.display_name" loading="lazy"/>
-                <span class="o_coop_shelf_city" t-if="rec.city">
-                  <i class="fa fa-map-marker" aria-hidden="true"/>
-                  <t t-esc="rec.city"/>
-                </span>
-              </div>
-              <div class="o_coop_shelf_name"><t t-esc="rec.display_name"/></div>
-            </t>
-            <t t-else="">
-              <div class="o_coop_listing_ico"><t t-esc="icon(rec)"/></div>
-              <div class="o_coop_listing_body">
-                <div class="o_coop_listing_title"><t t-esc="rec.display_name"/></div>
-                <div class="o_coop_shelf_where" t-if="rec.city">
-                  <i class="fa fa-map-marker" aria-hidden="true"/>
-                  <t t-esc="rec.city"/>
-                </div>
-              </div>
-            </t>
-          </div>
+          <KanbanRecord t-foreach="shelf.records" t-as="rec" t-key="rec.id"
+                        archInfo="props.archInfo"
+                        record="rec"
+                        openRecord="props.openRecord"
+                        forceGlobalClick="true"
+                        readonly="true"/>
         </div>
       </div>
     </div>

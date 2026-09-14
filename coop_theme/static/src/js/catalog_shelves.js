@@ -2,6 +2,9 @@
 
 import { Component, onWillStart, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
+import { RelationalModel } from "@web/model/relational_model/relational_model";
+import { addFieldDependencies, extractFieldsFromArchInfo } from "@web/model/relational_model/utils";
+import { KanbanRecord } from "@web/views/kanban/kanban_record";
 
 /**
  * Полки каталога: ряды по рубрикам над общим списком.
@@ -22,20 +25,43 @@ import { useService } from "@web/core/utils/hooks";
  */
 export class CoopShelves extends Component {
     static template = "coop_theme.CatalogShelves";
+    static components = { KanbanRecord };
     static props = {
         resModel: { type: String },
         field: { type: String },
         domain: { type: Array, optional: true },
-        icon: { type: [String, Boolean], optional: true },
+        // Разбор представления и список полей — те же, по которым
+        // каталог рисует свои карточки. Полка рисует ими же: два вида
+        // карточек на одном экране владелец назвал разнобоем, и был
+        // прав — витрина показывает тот же каталог, а не другой раздел.
+        archInfo: { type: Object },
+        fields: { type: Object },
+        openRecord: { type: Function, optional: true },
     };
 
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
         this.state = useState({ shelves: [], loading: true });
-        // Снимки — признак всего каталога, а не отдельной карточки:
-        // разметка выбирает по нему вид карточки целиком.
-        this.hasPhotos = false;
+
+        // Вторая модель — на все полки одна.
+        //
+        // Карточке канбана нужна не строка из `search_read`, а запись
+        // модели: она сама достаёт значения полей, считает цвета и
+        // разрешает условия видимости. Своя модель нужна потому, что у
+        // каталога загружена только первая страница, а полкам нужны
+        // записи каждой рубрики.
+        //
+        // Одна на шесть полок, а не шесть по одной: столько же запросов
+        // ушло бы на счётчики, а записи всё равно берутся одним
+        // запросом с отбором по списку рубрик.
+        this.модельПолок = new RelationalModel(
+            this.env, this.параметрыМодели, {
+                action: useService("action"),
+                dialog: useService("dialog"),
+                notification: useService("notification"),
+                orm: this.orm,
+            });
 
         onWillStart(async () => {
             // Полки не имеют права уронить каталог. Один неверный вызов
@@ -53,8 +79,33 @@ export class CoopShelves extends Component {
         });
     }
 
-    /** Сколько карточек в полке. Восемь — столько влезает в ряд на широком
-     *  экране; на узком ряд прокручивается вбок, как в макете. */
+    get параметрыМодели() {
+        const { activeFields, fields } = extractFieldsFromArchInfo(
+            this.props.archInfo, this.props.fields);
+        // Поле рубрики карточке не нужно и в разборе представления его
+        // может не быть — у закупок «Раздел» в канбане не показывается.
+        // А разложить записи по полкам без него нечем: значение приходит
+        // пустым, полки выходят с заголовками и без карточек.
+        const описание = this.props.fields[this.props.field];
+        if (описание && !activeFields[this.props.field]) {
+            addFieldDependencies(activeFields, fields,
+                [{ name: this.props.field, type: описание.type }]);
+        }
+        // `groupBy` и `orderBy` пустыми списками, а не пропущенными:
+        // модель их не подставляет, а `_getNextConfig` по ним проходит
+        // `map` и `length` — без них загрузка падает на `undefined`.
+        return {
+            config: {
+                resModel: this.props.resModel, activeFields, fields,
+                domain: [], groupBy: [], orderBy: [], context: {},
+            },
+            limit: this.perShelf * this.maxShelves,
+        };
+    }
+
+    /** Сколько карточек грузим на полку. Показывается меньше — столько,
+     *  сколько влезло целыми; остальные ждут за «Смотреть все». Грузим с
+     *  запасом, чтобы на широком экране полка не обрывалась на третьей. */
     get perShelf() {
         return 8;
     }
@@ -67,7 +118,7 @@ export class CoopShelves extends Component {
 
     async load() {
         const domain = this.props.domain || [];
-        await this.readFieldInfo(domain);
+        await this.readFieldInfo();
         // Сначала спрашиваем, какие рубрики вообще есть и сколько в них
         // записей: полка из одной карточки выглядит ошибкой, и такие
         // рубрики отсеиваются здесь, а не в разметке.
@@ -110,87 +161,63 @@ export class CoopShelves extends Component {
             return;
         }
 
+        // Записи всех полок одним запросом: модель грузит их отбором по
+        // списку рубрик, а разложить по полкам можно уже здесь. Шесть
+        // запросов вместо одного полка не стоит.
+        const рубрики = годные.map((g) => {
+            const значение = g[this.props.field];
+            return Array.isArray(значение) ? значение[0] : значение;
+        });
+        await this.модельПолок.load({
+            domain: domain.concat([[this.props.field, "in", рубрики]]),
+            limit: this.perShelf * this.maxShelves,
+        });
+        const записи = this.модельПолок.root.records || [];
+        const поПолкам = new Map(рубрики.map((id) => [id, []]));
+        for (const запись of записи) {
+            // Значение поля у записи модели приходит в трёх видах: пара
+            // [номер, название] у старых сборок, объект с `id` у
+            // нынешних, простое значение у списка выбора. Разбираем все
+            // три здесь, иначе полка пустая, а ошибки нет.
+            const значение = запись.data[this.props.field];
+            const id = Array.isArray(значение) ? значение[0]
+                : (значение && typeof значение === "object" ? значение.id : значение);
+            const полка = поПолкам.get(id);
+            if (полка && полка.length < this.perShelf) {
+                полка.push(запись);
+            }
+        }
+
         for (const g of годные) {
             const значение = g[this.props.field];
             const id = Array.isArray(значение) ? значение[0] : значение;
-            const label = подпись(значение);
-            const записи = await this.orm.searchRead(
-                this.props.resModel,
-                domain.concat([[this.props.field, "=", id]]),
-                this.cardFields,
-                { limit: this.perShelf }
-            );
             this.state.shelves.push({
-                id, label, count: считать(g), records: записи,
+                id,
+                label: подпись(значение),
+                count: считать(g),
+                records: поПолкам.get(id) || [],
             });
         }
     }
 
     /**
-     * Что за поле группировки и есть ли у каталога снимки.
+     * Метки рубрики.
      *
-     * Два вопроса, оба к самой модели, и оба обязательны.
-     *
-     * Первый: у списка выбора метки живут в описании поля, а не в
-     * данных. Без них на полке стоит `equipment` вместо
-     * «Оборудование».
-     *
-     * Второй: поле снимка бывает объявлено, а снимков нет ни у одной
-     * записи — движок тогда отдаёт на каждую свою серую заглушку, и
-     * полка выходит рядом одинаковых серых прямоугольников. Проверки
-     * «поле существует» мало, нужен счёт непустых.
+     * У списка выбора сервер отдаёт техническое значение — `equipment`,
+     * `barter`, `running`, — и на заголовке полки стояло бы именно оно.
+     * Метки живут в описании поля, поэтому спрашиваем модель, одним
+     * запросом на каталог. У `many2one` название приходит с данными, и
+     * спрашивать нечего.
      */
-    async readFieldInfo(domain) {
+    async readFieldInfo() {
         this.labels = {};
-        this.hasPhotos = false;
-        this.cardFields = ["display_name"];
         const info = await this.orm.call(
             this.props.resModel, "fields_get",
-            [[this.props.field, "image_512", "city"], ["type", "selection"]]);
+            [[this.props.field], ["type", "selection"]]);
         const поле = info[this.props.field] || {};
-        if (поле.type === "selection") {
-            for (const [код, метка] of поле.selection || []) {
-                this.labels[код] = метка;
-            }
+        for (const [код, метка] of поле.selection || []) {
+            this.labels[код] = метка;
         }
-        // Город на карточке — но не там, где по городу разложены сами
-        // полки: под заголовком «Казань» ряд карточек с подписью
-        // «Казань» на каждой ничего не сообщает.
-        if (info.city && this.props.field !== "city") {
-            this.cardFields.push("city");
-        }
-        if (info.image_512) {
-            const снимков = await this.orm.searchCount(
-                this.props.resModel, domain.concat([["image_512", "!=", false]]));
-            this.hasPhotos = снимков > 0;
-        }
-    }
-
-    /** Что стоит в плитке там, где снимков нет.
-     *
-     *  Значок раздела — тот же, что в карточке каталога, — объявляется
-     *  в действии (`coop_shelf_icon`). Первая буква названия остаётся
-     *  запасным вариантом: у каталога без объявленного значка полка
-     *  всё равно должна выглядеть карточкой, а не пустой плиткой. */
-    icon(record) {
-        return this.props.icon
-            || (record.display_name || "?").trim().charAt(0).toUpperCase();
-    }
-
-    photo(record) {
-        if (!this.hasPhotos) {
-            return false;
-        }
-        return `/web/image/${this.props.resModel}/${record.id}/image_512`;
-    }
-
-    open(record) {
-        return this.action.doAction({
-            type: "ir.actions.act_window",
-            res_model: this.props.resModel,
-            res_id: record.id,
-            views: [[false, "form"]],
-        });
     }
 
     /** «Смотреть все» открывает тот же каталог, отобранный по рубрике.

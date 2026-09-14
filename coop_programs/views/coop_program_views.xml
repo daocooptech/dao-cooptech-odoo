@@ -209,7 +209,7 @@
     <field name="res_model">coop.program</field>
     <field name="path">programs</field>
     <field name="view_mode">kanban,list,form</field>
-    <field name="context">{'bin_size': True,'coop_catalog': 1, 'coop_shelf_field': 'industry', 'coop_shelf_icon': '🎯'}</field>
+    <field name="context">{'bin_size': True,'coop_catalog': 1, 'coop_shelf_field': 'industry'}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Программ пока нет</p>
       <p>Целевая программа объединяет самостоятельные хозяйства ради того,
