@@ -248,7 +248,15 @@ class CoopProject(models.Model):
             # никаким обновлением языка не лечится: правится значение, а
             # не строка.
             'label_tasks': 'Задачи',
+            # Видимость «по приглашению» — штатная механика Odoo, и она
+            # ровно то, что нужно: проект виден подписчикам и тем, на кого
+            # назначены задачи. Своих правил доступа для этого писать не
+            # надо (решение владельца от 2026-09-14).
+            'privacy_visibility': 'followers',
         }
+        lead = self.partner_id.user_ids[:1]
+        if lead:
+            values['user_id'] = lead.id
         # Способ выставления счетов приходит из модуля учёта времени: поле
         # вычисляемое, но обязательное, и его расчёт значения не даёт —
         # он лишь понижает «вручную» до «без счетов». Пустым его колонка
@@ -271,7 +279,22 @@ class CoopProject(models.Model):
                 default = default(Project)
             options = [code for code, _label in (field.selection or [])]
             values[name] = default or (options[0] if options else False)
-        return Project.create(values)
+        project = Project.create(values)
+        project.message_subscribe(partner_ids=self._project_followers().ids)
+        return project
+
+    def _project_followers(self):
+        """Кого проект должен видеть своими: инициатор и принятые вкладчики.
+
+        Подписка — не украшение ленты, а доступ: при видимости «по
+        приглашению» подписчик и есть тот, кто видит проект. Тот, чьё
+        предложение приняли, становится подписчиком в тот же момент.
+        """
+        self.ensure_one()
+        partners = self.partner_id
+        partners |= self.contribution_ids.filtered(
+            lambda c: c.state == 'accepted').mapped('partner_id')
+        return partners
 
     @api.model
     def grant_project_access(self):
@@ -335,6 +358,24 @@ class CoopProject(models.Model):
         if stale:
             stale.write({'label_tasks': 'Задачи'})
             _logger.info('Название задач поправлено у %s проектов', len(stale))
+
+        # Видимость и подписки у уже заведённых проектов: они создавались
+        # до того, как видимость стала «по приглашению», и остались
+        # открытыми всем.
+        linked = self.search([('project_id', '!=', False)])
+        opened = linked.filtered(
+            lambda c: c.project_id.privacy_visibility != 'followers')
+        for record in opened:
+            record.project_id.sudo().privacy_visibility = 'followers'
+        for record in linked:
+            wanted = record._project_followers()
+            missing = wanted - record.project_id.message_partner_ids
+            if missing:
+                record.project_id.sudo().message_subscribe(
+                    partner_ids=missing.ids)
+        if opened:
+            _logger.info('Видимость «по приглашению» проставлена у %s проектов',
+                         len(opened))
 
         records = self.search([
             ('state', 'in', ('running', 'done')),

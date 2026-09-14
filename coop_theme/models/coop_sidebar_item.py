@@ -40,11 +40,6 @@ MAIN_ITEMS = [
     ('Вакансии', 'fa-briefcase', 'coop_vacancies.action_coop_vacancies'),
     ('Ресурсы', 'fa-cube', 'coop_resources.action_coop_resources'),
     ('Проекты', 'fa-rocket', 'coop_projects.action_coop_projects'),
-    # Решение владельца 281 от 2026-09-14: сбор вкладов и ведение работ —
-    # разные разделы и стоят рядом. «Проекты» — это краудресурсинг, здесь
-    # собирают вклады; «Управление проектами» — штатный модуль Odoo, там
-    # ведут задачи, сроки и исполнителей после запуска.
-    ('Управление проектами', 'fa-tasks', 'project.open_view_project_all'),
     ('Организации', 'fa-university', 'coop_orgs.action_coop_orgs'),
     ('Сообщества', 'fa-comments', 'coop_communities.action_coop_communities'),
     ('Кошелёк', 'fa-credit-card', 'coop_wallet.action_coop_my_wallet'),
@@ -81,7 +76,24 @@ EXTENSION_ITEMS = [
     ('Библиотеки', 'fa-book', ''),
     ('Диск', 'fa-folder-open-o', ''),
     ('Здоровье', 'fa-heartbeat', ''),
+    # Решение владельца от 2026-09-14: ведение работ — расширение, а не
+    # основной раздел, и стоит внизу списка. Появляется не у всех: см.
+    # REQUIRES_PROJECT.
+    ('Управление проектами', 'fa-tasks', 'project.open_view_project_all'),
 ]
+
+# Разделы, которые появляются, только когда участнику есть что в них
+# делать.
+#
+# Владелец 14 сентября 2026: вкладка появляется после того, как человека
+# или организацию утвердили. Утверждение здесь — не верификация личности,
+# а принятое предложение в проект: «на каждую потребность поступают
+# предложения, а ответственный после ознакомления со всеми предложениями
+# утверждает одно».
+#
+# Раздел не прячется на экране, а не создаётся вовсе: пункт меню, который
+# видно и по которому не пускает, раздражает сильнее, чем его отсутствие.
+REQUIRES_PROJECT = {'Управление проектами'}
 
 EXT_BY_NAME = {name: xmlid for name, _icon, xmlid in EXTENSION_ITEMS}
 
@@ -143,6 +155,42 @@ class CoopSidebarItem(models.Model):
         return super().unlink()
 
     @api.model
+    def _has_project(self, user):
+        """Есть ли участнику что вести: утверждён ли он хоть в одном проекте.
+
+        Три случая, и все три — участие, а не право:
+
+        * он затеял сбор и ведёт его сам;
+        * его предложение приняли — вклад в состоянии «принят»;
+        * на него назначена задача в проекте.
+
+        Своей организацией участник тоже считается: председатель, который
+        внёс вклад от кооператива, ведёт этот проект.
+        """
+        # Тема не зависит от раздела проектов и не должна: она нужна на
+        # узле, где проектов может не быть вовсе. Поэтому модель
+        # спрашивается у реестра, а не импортируется. Без этой проверки
+        # обновление падало на разборе данных темы с KeyError.
+        if 'coop.project' not in self.env:
+            return False
+        partners = user._coop_partner_ids() if hasattr(
+            user, '_coop_partner_ids') else user.partner_id.ids
+        if not partners:
+            return False
+        Collect = self.env['coop.project'].sudo()
+        if Collect.search_count([('partner_id', 'in', list(partners))]):
+            return True
+        Contribution = self.env['coop.project.contribution'].sudo()
+        if 'coop.project.contribution' in self.env and Contribution.search_count([
+                ('partner_id', 'in', list(partners)),
+                ('state', '=', 'accepted')]):
+            return True
+        if 'project.task' not in self.env:
+            return False
+        Task = self.env['project.task'].sudo()
+        return bool(Task.search_count([('user_ids', 'in', [user.id])]))
+
+    @api.model
     def resync_defaults(self):
         """Довести уже собранные меню до нынешнего набора разделов.
 
@@ -163,10 +211,29 @@ class CoopSidebarItem(models.Model):
         чем раздел, которого у половины участников нет.
         """
         users = self.env['res.users'].sudo().search([('share', '=', False)])
-        added = renumbered = 0
+        added = renumbered = moved = dropped = 0
         for user in users:
             defaults = self._defaults_for_user(user)
             existing = self.sudo().search([('user_id', '=', user.id)])
+
+            # Раздел, переехавший из основных в расширения, надо перенести,
+            # а не завести заново: иначе он окажется в меню дважды.
+            wanted_section = {values['name']: values['section']
+                              for values in defaults}
+            for item in existing:
+                section = wanted_section.get(item.name)
+                if section and item.section != section:
+                    item.sudo().section = section
+                    moved += 1
+
+            # Раздел, который участнику больше не положен, убирается. Иначе
+            # он остаётся у того, кто его однажды увидел, навсегда.
+            for item in existing:
+                if item.name in REQUIRES_PROJECT and item.name not in wanted_section:
+                    item.sudo().unlink()
+                    dropped += 1
+            existing = existing.exists()
+
             by_key = {(item.section, item.name): item for item in existing}
             for values in defaults:
                 key = (values['section'], values['name'])
@@ -176,12 +243,17 @@ class CoopSidebarItem(models.Model):
                         self.sudo().create(values)
                         added += 1
                     continue
+                if values['name'] in REQUIRES_PROJECT and not self._has_project(user):
+                    # Участие кончилось — раздел уходит вместе с ним.
+                    item.sudo().unlink()
+                    continue
                 if item.sequence != values['sequence']:
                     item.sudo().sequence = values['sequence']
                     renumbered += 1
-        if added or renumbered:
-            _logger.info('Меню участников: добавлено %s, перенумеровано %s',
-                         added, renumbered)
+        if added or renumbered or moved or dropped:
+            _logger.info('Меню участников: добавлено %s, перенумеровано %s, '
+                         'перенесено %s, убрано %s',
+                         added, renumbered, moved, dropped)
         return True
 
     @api.model
@@ -205,7 +277,10 @@ class CoopSidebarItem(models.Model):
                 'section': 'main',
                 'is_required': True,
             })
+        allowed = self._has_project(user)
         for index, (name, icon, xmlid) in enumerate(EXTENSION_ITEMS):
+            if name in REQUIRES_PROJECT and not allowed:
+                continue
             action = self.env.ref(xmlid, raise_if_not_found=False) if xmlid else None
             values.append({
                 'user_id': user.id,
