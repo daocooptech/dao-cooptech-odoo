@@ -1,10 +1,11 @@
 /** @odoo-module **/
 
-import { Component, useState, onWillStart } from "@odoo/owl";
+import { Component, useState, onWillStart, onWillUnmount } from "@odoo/owl";
 import { patch } from "@web/core/utils/patch";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { browser } from "@web/core/browser/browser";
+import { router, routerBus } from "@web/core/browser/router";
 import { WebClient } from "@web/webclient/webclient";
 
 /**
@@ -124,7 +125,8 @@ export class CoopSidebar extends Component {
         this.state = useState({
             main: [], extensions: [], admin: [], current: null, model: null, open: false,
             acting: null, actors: [],
-            path: browser.location.pathname,
+            route: router.current?.action ?? null,
+            soonLabel: null,
         });
 
         onWillStart(async () => {
@@ -140,17 +142,24 @@ export class CoopSidebar extends Component {
             }
         });
 
+        // Кнопка «назад» меняет адрес, не поднимая события о смене
+        // экрана: раздел открыт прежним действием, менеджеру действий
+        // сообщать не о чем. Без этого слушателя подсветка после
+        // «назад» оставалась на том разделе, откуда ушли.
+        // Роутер сообщает о смене раздела сам, и делает это до того, как
+        // меняется адрес. Кнопка «назад» сюда же попадает.
+        routerBus.addEventListener("ROUTE_CHANGE", () => this._rememberPath());
+        // Треть секунды — незаметно человеку и достаточно, чтобы не
+        // зависеть от того, в каком порядке движок обновляет свои части.
+        this.routeTimer = browser.setInterval(() => this._syncRoute(), 300);
+        onWillUnmount(() => browser.clearInterval(this.routeTimer));
+
         // Какой пункт подсвечен, знает не меню, а тот, кто открыл действие.
         // Меню живёт снаружи представления, и `env.config` у него свой —
         // пустой; поэтому текущее действие берётся из общего события, которым
         // Odoo объявляет о смене экрана.
         this.env.bus.addEventListener("ACTION_MANAGER:UPDATE", ({ detail }) => {
-            // Адрес запоминаем первым и всегда, до любых проверок. Это
-            // и признак раздела для подсветки, и то, что заставляет
-            // меню перерисоваться: `location` сам по себе не
-            // реактивен, и без этой строки подсветка оставалась бы на
-            // прошлом разделе, даже зная правильный адрес.
-            this.state.path = browser.location.pathname;
+            this._rememberPath();
             const action = this._actionFromEvent(detail);
             const previous = this.state.current;
             if (!action) {
@@ -327,12 +336,57 @@ export class CoopSidebar extends Component {
      * сюда не попадают — там либо «action-», либо имя модели с точкой,
      * и ни то ни другое коротким адресом не бывает.
      */
-    _pathSegment() {
-        // Из состояния, а не прямо из `location`: состояние реактивно, и
-        // от него перерисовка. Значение то же — его кладёт слушатель.
-        const pathname = this.state.path || browser.location.pathname;
-        const match = pathname.match(/^\/odoo\/([a-z][\w-]*)(?:\/|$)/);
-        return match ? match[1] : null;
+    /**
+     * Какой раздел открыт — по мнению роутера движка.
+     *
+     * `router.current.action` — это либо короткий адрес раздела
+     * («projects», «discuss»), либо номер действия. Ровно то, что нужно
+     * подсветке, и ровно то, чем меню сверяется с пунктами.
+     *
+     * Почему не адрес страницы и не событие о смене экрана — на обоих
+     * уже обожглись:
+     *
+     * - событие приходит **раньше**, чем меняется адрес, и `location` в
+     *   обработчике отдаёт предыдущий раздел. Подсветка отставала ровно
+     *   на шаг: человек на «Людях», горят «Проекты»;
+     * - отложить чтение на тик не помогает: роутер пишет адрес с
+     *   задержкой, и угадывать её — то же самое, но с таймером.
+     *
+     * Роутер меняет своё состояние сразу, до адреса, и сообщает об этом
+     * событием `ROUTE_CHANGE`. Это и есть источник правды.
+     */
+    _rememberPath() {
+        // Значение читаем не в момент события, а следующим тиком: роутер
+        // объявляет о смене раздела раньше, чем меняет своё состояние, и
+        // прочитанное сразу оказывается прежним. Измерено: в обработчике
+        // «tokenomics», а через тик — уже «projects».
+        browser.setTimeout(() => this._syncRoute(), 0);
+    }
+
+    /**
+     * Сверить подсвеченный раздел с тем, что открыто на самом деле.
+     *
+     * Вызывается и по событию роутера, и раз в треть секунды. Второе —
+     * не перестраховка, а вывод: подсветка ломалась трижды за день, и
+     * каждый раз потому, что я угадывал момент, когда движок уже
+     * обновился. Сверка по таймеру ничего не угадывает; если значение
+     * совпало, она не делает ничего и перерисовки не вызывает.
+     */
+    _syncRoute() {
+        const current = router.current || {};
+        const route = current.action ?? null;
+        if (this.state.route !== route) {
+            this.state.route = route;
+        }
+        // У непереносённых разделов одно действие на всех, и различает
+        // их только название. Берём его оттуда же, у роутера: прежде
+        // название приходило событием движка и отставало на шаг вместе
+        // со всем остальным.
+        const stack = current.actionStack || [];
+        const label = stack.length ? stack[stack.length - 1].displayName : null;
+        if (this.state.soonLabel !== label) {
+            this.state.soonLabel = label;
+        }
     }
 
     /** Есть ли такое действие среди пунктов меню. */
@@ -356,8 +410,21 @@ export class CoopSidebar extends Component {
         // и оба раза потому, что опознание раздела стояло на чужой
         // механике: сперва на форме события о смене экрана, потом на
         // праве читать `ir.actions.actions`. Адрес не ломается.
-        if (item.path && this._pathSegment() === item.path) {
-            return true;
+        const route = this.state.route;
+        if (route !== null && route !== undefined) {
+            if (item.path && String(route) === item.path) {
+                return true;
+            }
+            if (item.actionId && Number(route) === item.actionId) {
+                return true;
+            }
+            if (!item.actionId && route === "coop_soon") {
+                return this.state.soonLabel === item.label;
+            }
+            // Роутер знает открытый раздел — он и решает. Без этого
+            // возврата прежние пути подсвечивали заодно и тот раздел,
+            // откуда ушли: горело сразу два пункта.
+            return false;
         }
 
         const current = this.state.current;
