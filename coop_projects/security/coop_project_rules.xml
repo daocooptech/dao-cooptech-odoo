@@ -38,18 +38,26 @@
     </record>
 
     <!--
-      Вклад видят двое: вкладчик и инициатор проекта. Чужой вклад говорит
-      о человеке немало — сколько он вложил и куда, — и открывать это
-      всему каталогу незачем. Общая сумма при этом видна всем: без неё не
+      Вклад видят трое: вкладчик, инициатор проекта и ответственный за ту
+      потребность, на которую этот вклад предложен. Чужой вклад говорит о
+      человеке немало — сколько он вложил и куда, — и открывать это всему
+      каталогу незачем. Общая сумма при этом видна всем: без неё не
       понять, собран проект или нет.
+
+      Ответственный за потребность попал сюда не для удобства: владелец
+      14 сентября 2026 поручил утверждение ему наравне с инициатором, а
+      выбрать одно предложение из пяти, не видя их, нельзя. Без этой
+      строки ответственный получал пустой список и отказ в доступе при
+      нажатии кнопки.
     -->
     <record id="rule_contribution_own" model="ir.rule">
-      <field name="name">Свои вклады и вклады в свой проект</field>
+      <field name="name">Свои вклады, вклады в свой проект и по своей потребности</field>
       <field name="model_id" ref="model_coop_project_contribution"/>
       <field name="groups" eval="[(4, ref('base.group_user'))]"/>
       <field name="domain_force">
         ['|', ('partner_id', 'in', user.coop_actor_partner_ids.ids),
-         ('project_id.partner_id', 'in', user.coop_actor_partner_ids.ids)]
+         '|', ('project_id.partner_id', 'in', user.coop_actor_partner_ids.ids),
+         ('need_id.need_manager_id', 'in', user.coop_actor_partner_ids.ids)]
       </field>
       <field name="perm_read" eval="True"/>
       <field name="perm_write" eval="True"/>

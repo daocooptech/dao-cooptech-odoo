@@ -329,7 +329,12 @@ class CoopVacancyApplication(models.Model):
     def action_invite(self):
         for record in self:
             record.state = 'invited'
-            record.vacancy_id.message_post(body=_(
+            # Запись в ленту — след уже сделанного приглашения, а не
+            # правка вакансии. Права на саму вакансию у приглашающего
+            # может не быть: у вакансии проекта отклики утверждает
+            # ответственный за потребность, а вакансия принадлежит
+            # проекту, и без sudo приглашение падало отказом в доступе.
+            record.vacancy_id.sudo().message_post(body=_(
                 'Приглашён: %s') % record.partner_id.display_name)
             if record.vacancy_id.hr_job_id:
                 record._create_hr_applicant()

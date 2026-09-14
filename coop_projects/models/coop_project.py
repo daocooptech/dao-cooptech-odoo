@@ -659,12 +659,17 @@ class CoopProjectContribution(models.Model):
         need = self.need_id
         if not need:
             return
+        # Дальше — последствия уже принятого решения, а не новое
+        # решение: право утверждать проверено выше по существу. Права на
+        # сами записи у утвердившего может не быть — у представителя
+        # организации полномочие на сделки есть, а на публикации нет, и
+        # закрыть объявление он без этого не может.
         others = need.need_offer_ids.filtered(
             lambda offer: offer.id != self.id and offer.state == 'offered')
         if others:
-            others.write({'state': 'declined'})
-        need.write({'need_accepted_id': self.id, 'state': 'closed'})
-        need.message_post(body=_(
+            others.sudo().write({'state': 'declined'})
+        need.sudo().write({'need_accepted_id': self.id, 'state': 'closed'})
+        need.sudo().message_post(body=_(
             'Потребность закрыта: утверждено предложение «%(what)s» от '
             '%(who)s. Прочих предложений отклонено: %(count)s.',
             what=self.name, who=self.partner_id.name,

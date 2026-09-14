@@ -55,14 +55,21 @@
       Отклик видит тот, кто его подал, и тот, кому он адресован. Чужие
       отклики на чужую вакансию не видно: это переписка двоих, а не
       публичный список.
+
+      Третий — ответственный за потребность у вакансии проекта. Владелец
+      14 сентября 2026 поручил утверждение ему наравне с инициатором, а
+      выбрать один отклик из пяти, не видя их, нельзя. Пока этой строки
+      не было, ответственный получал пустой список и отказ в доступе при
+      нажатии «Пригласить».
     -->
     <record id="rule_vacancy_application" model="ir.rule">
-      <field name="name">Отклик виден откликнувшемуся и автору вакансии</field>
+      <field name="name">Отклик виден откликнувшемуся, автору вакансии и ответственному</field>
       <field name="model_id" ref="model_coop_vacancy_application"/>
       <field name="groups" eval="[(4, ref('base.group_user'))]"/>
       <field name="domain_force">
         ['|', ('partner_id', '=', user.partner_id.id),
-              ('vacancy_id.partner_id', 'in', user.coop_actor_partner_ids.ids)]
+         '|', ('vacancy_id.partner_id', 'in', user.coop_actor_partner_ids.ids),
+              ('vacancy_id.need_manager_id', 'in', user.coop_actor_partner_ids.ids)]
       </field>
     </record>
 

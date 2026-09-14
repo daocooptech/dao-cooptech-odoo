@@ -128,15 +128,18 @@ class CoopVacancyApplication(models.Model):
         })
         self.contribution_id = contribution.id
 
+        # Дальше — последствия уже принятого решения: право утверждать
+        # проверено выше по существу, а прав на саму вакансию и чужие
+        # отклики у ответственного за потребность нет и быть не должно.
         others = self.vacancy_id.application_ids.filtered(
             lambda app: app.id != self.id and app.state == 'applied')
         if others:
-            others.write({'state': 'declined'})
+            others.sudo().write({'state': 'declined'})
         self.vacancy_id.sudo().write({
             'state': 'closed',
             'need_accepted_id': contribution.id,
         })
-        self.vacancy_id.message_post(body=_(
+        self.vacancy_id.sudo().message_post(body=_(
             'Вакансия закрыта: утверждён отклик от %(who)s, труд учтён '
             'вкладом на %(value)s ₽. Прочих откликов отклонено: %(count)s.',
             who=self.partner_id.display_name, value=value, count=len(others)))

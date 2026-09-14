@@ -157,18 +157,26 @@ class CoopProjectContribution(models.Model):
         self.ensure_one()
         if self.share_tokens:
             return
-        rate = self.project_id.share_rate_ids.filtered(
+        # Начисление — следствие уже принятого вклада, а не отдельное
+        # решение: право принимать проверено в `action_accept`. Прав на
+        # сам проект у принявшего может не быть — ответственный за
+        # потребность и представитель организации с полномочием на
+        # сделки утверждают по существу, а править проект не вправе, и
+        # без sudo начисление падало отказом в доступе на чтении ставок
+        # и на записи в ленту.
+        project = self.project_id.sudo()
+        rate = project.share_rate_ids.filtered(
             lambda r: r.kind == self.kind)[:1]
         if not rate:
-            self.project_id.action_setup_share_rates()
-            rate = self.project_id.share_rate_ids.filtered(
+            project.action_setup_share_rates()
+            rate = project.share_rate_ids.filtered(
                 lambda r: r.kind == self.kind)[:1]
         factor = rate.factor if rate else 1.0
-        self.write({
+        self.sudo().write({
             'share_tokens': self.value * factor,
             'share_factor_used': factor,
         })
-        self.project_id.message_post(body=_(
+        project.message_post(body=_(
             'Вклад «%(what)s» принят: %(who)s начислено %(tokens)g долей '
             '(оценка %(value)s × %(factor)g). У проекта возникло встречное '
             'обязательство перед вкладчиком на эту долю.',
