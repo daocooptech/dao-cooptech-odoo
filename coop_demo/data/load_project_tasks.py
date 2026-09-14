@@ -89,6 +89,10 @@ def load_project_tasks(env, per_project=None):
         return 0
 
     projects = collects.mapped('project_id')
+    # Раскладка по этапам идёт до проверки на «уже заведены»: задачи
+    # заводятся один раз, а этап меняется вслед за состоянием проекта, и
+    # пропускать его вместе с задачами нельзя.
+    _spread_project_stages(env)
     if Task.search_count([('project_id', 'in', projects.ids)]) >= len(projects):
         _logger.info('Задачи проектов: уже заведены, пропускаю')
         return 0
@@ -160,6 +164,52 @@ def load_project_tasks(env, per_project=None):
     _logger.info('Задач по проектам заведено: %s на %s проектов',
                  made, len(collects))
     return made
+
+
+def _spread_project_stages(env):
+    """Разложить управляемые проекты по этапам ведения.
+
+    Все сто стояли в «Подготовке» — так их перевёл переход на
+    кооперативные этапы. Канбан из одного столбца не показывает ни
+    перетаскивания, ни свёрнутых этапов, ни того, ради чего этапы вообще
+    заведены.
+
+    Этап выводится из того, что с проектом на самом деле: остановленный —
+    в «Остановлен», завершённый — в «Итоги», идущий — по готовности.
+    Раскладывать наугад значило бы получить проект в «Приёмке» при
+    двадцати процентах сбора.
+    """
+    Collect = env['coop.project'].sudo()
+    by_key = {}
+    for key in ('preparation', 'supply', 'work', 'acceptance',
+                'settlement', 'stopped'):
+        stage = env.ref('coop_projects.project_stage_%s' % key,
+                        raise_if_not_found=False)
+        if stage:
+            by_key[key] = stage.id
+    if len(by_key) < 6:
+        return 0
+
+    moved = 0
+    for collect in Collect.search([('project_id', '!=', False)]):
+        if collect.state in ('cancelled', 'failed', 'frozen'):
+            key = 'stopped'
+        elif collect.state == 'done':
+            key = 'settlement'
+        elif collect.readiness >= 100:
+            key = 'acceptance'
+        elif collect.readiness >= 70:
+            key = 'work'
+        elif collect.readiness >= 40:
+            key = 'supply'
+        else:
+            key = 'preparation'
+        if collect.project_id.stage_id.id != by_key[key]:
+            collect.project_id.sudo().stage_id = by_key[key]
+            moved += 1
+    if moved:
+        _logger.info('Этапы ведения разложены: проектов %s', moved)
+    return moved
 
 
 def _ensure_stages(Stage, projects):

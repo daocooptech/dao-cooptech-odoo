@@ -136,6 +136,12 @@
             <button name="action_open_project" type="object" class="oe_stat_button"
                     icon="fa-tasks" invisible="not project_id">
               <div class="o_stat_info">
+                <!-- Этап ведения прямо на кнопке: человек видит, где
+                     идут работы, не открывая управление. Пока этапа нет
+                     — подпись прежняя. -->
+                <span class="o_stat_value" invisible="not project_stage_id">
+                  <field name="project_stage_id" nolabel="1"/>
+                </span>
                 <span class="o_stat_text">Управление</span>
                 <span class="o_stat_text">проектом</span>
               </div>

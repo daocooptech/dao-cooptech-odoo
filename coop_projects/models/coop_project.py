@@ -234,6 +234,14 @@ class CoopProject(models.Model):
         copy=False,
         help='Создаётся при запуске. До запуска вести нечего, поэтому '
              'пусто — это не пропуск, а состояние дел.')
+    # Этап ведения показываем на карточке сбора, но правится он там, где
+    # им и занимаются, — в управлении проектами. Две разные вещи рядом:
+    # состояние сбора говорит, собрали ли; этап — где идут работы.
+    project_stage_id = fields.Many2one(
+        related='project_id.stage_id', string='Этап ведения', readonly=True,
+        help='Столбец канбана в управлении проектами. Кооператив правит '
+             'набор этапов сам: у стройки они одни, у разработки другие. '
+             'Состояние сбора от них не зависит.')
 
     need_ids = fields.One2many(
         'coop.resource', 'project_id', string='Потребности',
@@ -368,6 +376,66 @@ class CoopProject(models.Model):
             self.subcategory_id = False
 
     # ── Действия ─────────────────────────────────────────────────────────
+
+    # ── Этапы ведения ────────────────────────────────────────────────────
+    #
+    # Соответствие штатных этапов Odoo нашим. Нужно один раз — при
+    # переходе; дальше проекты заводятся сразу на нашем наборе.
+    STAGE_MAP = {
+        'project.project_project_stage_0': 'coop_projects.project_stage_preparation',
+        'project.project_project_stage_1': 'coop_projects.project_stage_work',
+        'project.project_project_stage_2': 'coop_projects.project_stage_settlement',
+        'project.project_project_stage_3': 'coop_projects.project_stage_stopped',
+    }
+
+    @api.model
+    def adopt_project_stages(self):
+        """Перевести ведение проектов на кооперативные этапы.
+
+        Штатные этапы Odoo общие для любой конторы: «К выполнению»,
+        «В процессе», «Готово», «Отменено». Кооперативный проект после
+        запуска идёт иначе — подготовка, закупки, работы, приёмка,
+        распределение, — и приёмка там не формальность: результат
+        принимают те, кто вкладывался.
+
+        Прежние этапы уводятся в архив, а не удаляются: они объявлены в
+        чужом модуле с защитой от обновления, и удалённое вернулось бы
+        при первой переустановке. Проекты, стоявшие на них,
+        переставляются по соответствию — иначе сотня управляемых
+        проектов осталась бы без этапа вовсе.
+
+        Вызов идемпотентный: нечего переставлять — ничего не делает.
+        """
+        Stage = self.env['project.project.stage'].sudo()
+        Project = self.env['project.project'].sudo()
+        moved = archived = 0
+        for old_xmlid, new_xmlid in self.STAGE_MAP.items():
+            old = self.env.ref(old_xmlid, raise_if_not_found=False)
+            new = self.env.ref(new_xmlid, raise_if_not_found=False)
+            if not old or not new:
+                continue
+            on_old = Project.with_context(active_test=False).search(
+                [('stage_id', '=', old.id)])
+            if on_old:
+                on_old.write({'stage_id': new.id})
+                moved += len(on_old)
+            if old.active:
+                old.active = False
+                archived += 1
+        # Этап есть не у всех: проект, заведённый до появления набора,
+        # мог остаться вовсе без него.
+        first = self.env.ref('coop_projects.project_stage_preparation',
+                             raise_if_not_found=False)
+        if first:
+            homeless = Project.with_context(active_test=False).search(
+                [('stage_id', '=', False)])
+            if homeless:
+                homeless.write({'stage_id': first.id})
+                moved += len(homeless)
+        if moved or archived:
+            _logger.info('Этапы ведения: переставлено проектов %s, '
+                         'убрано в архив прежних этапов %s', moved, archived)
+        return moved
 
     @api.model
     def recompute_readiness(self):
@@ -509,6 +577,13 @@ class CoopProject(models.Model):
         lead = self.partner_id.user_ids[:1]
         if lead:
             values['user_id'] = lead.id
+        # Первый этап ведения ставим сами. Odoo подставила бы свой
+        # первый по порядку, а наш набор кооперативный: проект начинается
+        # с подготовки, а не с «К выполнению».
+        stage = self.env.ref('coop_projects.project_stage_preparation',
+                             raise_if_not_found=False)
+        if stage:
+            values['stage_id'] = stage.id
         # Способ выставления счетов приходит из модуля учёта времени: поле
         # вычисляемое, но обязательное, и его расчёт значения не даёт —
         # он лишь понижает «вручную» до «без счетов». Пустым его колонка
@@ -569,10 +644,21 @@ class CoopProject(models.Model):
                                      raise_if_not_found=False)
         if not base_group or not project_group:
             return False
-        if project_group in base_group.implied_ids:
+        # Право видеть и менять этапы ведения — оттуда же. Без него
+        # штатный модуль прячет столбцы канбана целиком: этапы заведены,
+        # проекты по ним разложены, а участник видит один общий список.
+        stages_group = self.env.ref('project.group_project_stages',
+                                    raise_if_not_found=False)
+        wanted = project_group
+        if stages_group:
+            wanted |= stages_group
+        missing = wanted - base_group.implied_ids
+        if not missing:
             return True
-        base_group.sudo().write({'implied_ids': [(4, project_group.id)]})
-        _logger.info('Право вести проекты выдано всем участникам платформы')
+        base_group.sudo().write({
+            'implied_ids': [(4, group.id) for group in missing]})
+        _logger.info('Права на ведение проектов выданы всем участникам: %s',
+                     ', '.join(missing.mapped('name')))
         return True
 
     @api.model

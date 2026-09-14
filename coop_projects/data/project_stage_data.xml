@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Этапы ведения проекта. Пункт 13 разбора архитектора.
+
+    Состояние сбора и этап ведения — разные вещи, и смешивать их нельзя.
+    «Идея → Сбор → Запущен → Завершён» это автомат сбора: он один на всю
+    платформу, меняется кодом и описан законом и решениями владельца.
+    Этапы ведения — столбцы канбана, которые кооператив правит сам под
+    своё дело: у стройки они одни, у разработки другие.
+
+    Поэтому `coop.project.state` остаётся как есть, а ведение живёт на
+    штатной `project.project.stage` — она для того и заведена в Odoo и
+    не менялась с пятнадцатой версии. Вписать этапы ведения в наш
+    Selection значило бы получить поле, которое правится миграцией
+    всякий раз, когда очередной кооператив попросит свой столбец.
+
+    Набор ниже — не из строительства и не из разработки, а общий для
+    того, как кооперативный проект идёт после запуска. Кооператив волен
+    его переписать: записи не помечены `noupdate`, но и не
+    восстанавливаются обновлением — правка остаётся за узлом.
+  -->
+
+  <record id="project_stage_preparation" model="project.project.stage">
+    <field name="name">Подготовка</field>
+    <field name="sequence">1</field>
+  </record>
+
+  <record id="project_stage_supply" model="project.project.stage">
+    <field name="name">Закупки и подряд</field>
+    <field name="sequence">2</field>
+  </record>
+
+  <record id="project_stage_work" model="project.project.stage">
+    <field name="name">Работы</field>
+    <field name="sequence">3</field>
+  </record>
+
+  <!--
+    Приёмка отдельным этапом, а не концом работ: в кооперативе результат
+    принимают те, кто вкладывался, и это отдельный разговор, а не
+    формальность. Пока он идёт, проект уже не в работе, но ещё не сдан.
+  -->
+  <record id="project_stage_acceptance" model="project.project.stage">
+    <field name="name">Приёмка</field>
+    <field name="sequence">4</field>
+  </record>
+
+  <!--
+    Итоги — это распределение: доли посчитаны, результат передан,
+    вкладчики рассчитаны. Свёрнут, потому что в канбане это архив, а не
+    работа.
+  -->
+  <record id="project_stage_settlement" model="project.project.stage">
+    <field name="name">Итоги и распределение</field>
+    <field name="sequence">5</field>
+    <field name="fold" eval="True"/>
+  </record>
+
+  <record id="project_stage_stopped" model="project.project.stage">
+    <field name="name">Остановлен</field>
+    <field name="sequence">6</field>
+    <field name="fold" eval="True"/>
+  </record>
+
+  <!--
+    Штатные этапы Odoo — «К выполнению», «В процессе», «Готово»,
+    «Отменено» — уводятся в архив, а не удаляются: записи объявлены в
+    чужом модуле с защитой от обновления, удаление вернулось бы при
+    первой же переустановке, а данные на них могут ссылаться.
+
+    Уводятся именно в архив, а не прячутся: столбец канбана, который
+    видно и в который нельзя перетащить, раздражает сильнее, чем его
+    отсутствие.
+  -->
+  <function model="coop.project" name="adopt_project_stages"/>
+
+</odoo>

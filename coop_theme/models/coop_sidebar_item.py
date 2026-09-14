@@ -62,7 +62,13 @@ EXTENSION_ITEMS = [
     # Решение владельца от 2026-09-14: ведение работ — расширение, а не
     # основной раздел, и стоит первым в списке расширений. Появляется не
     # у всех: см. REQUIRES_PROJECT.
-    ('Управление проектами', 'fa-tasks', 'project.open_view_project_all'),
+    # Действие с группировкой по этапам, а не плоский список: у Odoo их
+    # два, и второе заведено ровно для тех, у кого включены этапы.
+    # Плоский список не показывает ни столбцов ведения, ни перетаскивания
+    # между ними — а ради них этапы и заводились (пункт 13 разбора
+    # архитектора).
+    ('Управление проектами', 'fa-tasks',
+     'project.open_view_project_all_group_stage'),
     # Ведёт на биржу, а не на движения COOP: COOP — предоплата услуг
     # платформы, она не торгуется и к бирже отношения не имеет. Пока пункт
     # вёл туда, участник открывал «Токеномику» и видел пустой список
@@ -284,7 +290,19 @@ class CoopSidebarItem(models.Model):
                 # Переставляем только пустые: если участник сменил
                 # действие себе сам, это его дело.
                 wanted = values.get('action_id')
-                if wanted and not item.action_id:
+                if not wanted:
+                    continue
+                # Пустому — ставим. Обязательному разделу — ставим всегда:
+                # такой пункт участник себе не выбирал, его выдала
+                # платформа, и она же вправе перевести его на другое
+                # действие. Так вышло с управлением проектами: сперва оно
+                # вело в плоский список Odoo, а нужно в тот, что
+                # сгруппирован по этапам ведения.
+                obligatory = (values['section'] == 'main'
+                              or values['name'] in REQUIRES_PROJECT)
+                if item.action_id and not obligatory:
+                    continue
+                if item.action_id.id != wanted:
                     item.sudo().action_id = wanted
                     rewired += 1
         if added or renumbered or moved or dropped or rewired:
@@ -292,6 +310,42 @@ class CoopSidebarItem(models.Model):
                          'перенесено %s, убрано %s, подключено %s',
                          added, renumbered, moved, dropped, rewired)
         return True
+
+    @api.model
+    def repoint_obligatory(self):
+        """Перевести обязательные разделы на нынешние действия.
+
+        Отдельным проходом, а не внутри пересборки меню: та строит
+        список по `_defaults_for_user`, а тот при обновлении темы может
+        не увидеть раздел вовсе — модуль проектов на этот момент ещё не
+        загружен, и «есть ли у участника проекты» узнать неоткуда.
+        Раздел при этом у участника уже есть, и переставить его надо.
+
+        Идём от имени пункта, а не от списка умолчаний: имя у раздела
+        платформы одно и то же независимо от того, что о нём знает
+        загрузчик.
+
+        Переставляем только разделы платформы и те расширения, что
+        выдаёт она сама. Что участник подключил себе руками — не трогаем.
+        """
+        obligatory = dict(MAIN_BY_NAME)
+        obligatory.update({name: EXT_BY_NAME[name]
+                           for name in REQUIRES_PROJECT
+                           if name in EXT_BY_NAME})
+        moved = 0
+        for name, xmlid in obligatory.items():
+            action = self.env.ref(xmlid, raise_if_not_found=False)
+            if not action:
+                continue
+            stale = self.sudo().search([
+                ('name', '=', name), ('action_id', '!=', action.id)])
+            if stale:
+                stale.write({'action_id': action.id})
+                moved += len(stale)
+        if moved:
+            _logger.info('Разделы переставлены на нынешние действия: %s',
+                         moved)
+        return moved
 
     @api.model
     def _defaults_for_user(self, user):

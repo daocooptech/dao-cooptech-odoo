@@ -5,3 +5,4 @@ from . import test_needs
 from . import test_shares
 from . import test_deadline
 from . import test_refund
+from . import test_stages

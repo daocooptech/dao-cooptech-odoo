@@ -32,6 +32,7 @@
         'data/coop_project_backfill.xml',
         'data/coop_project_readiness.xml',
         'data/coop_project_cron.xml',
+        'data/project_stage_data.xml',
     ],
     'assets': {
         'web.assets_backend': [
