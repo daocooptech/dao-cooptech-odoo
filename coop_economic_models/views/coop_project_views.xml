@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Форма собственности и разбор под ней.
+
+    Решение владельца от 2026-09-14: «когда человек при создании проекта
+    выбирает форму собственности, то ниже надо дать пояснения по этой
+    модели, управление, налоги и всё что может иметь значение при выборе
+    инвестпроекта».
+
+    Поэтому блок стоит отдельной вкладкой, а не строчкой в шапке: разбор
+    длинный, читают его дважды — когда выбирают форму и когда решают,
+    вкладываться ли в чужой проект, — и в обоих случаях читают целиком.
+
+    Пояснения вынесены из <group> в блоки во всю ширину. Внутри группы
+    Odoo раскладывает поля в две колонки таблицы, и абзац на четыре
+    строки там не переносится, а уезжает за правый край — проверено
+    глазами на стенде, из разметки этого не видно.
+  -->
+  <record id="view_coop_project_form_legal" model="ir.ui.view">
+    <field name="name">coop.project.form.legal</field>
+    <field name="model">coop.project</field>
+    <field name="inherit_id" ref="coop_projects.view_coop_project_form"/>
+    <field name="arch" type="xml">
+
+      <notebook position="inside">
+        <page string="Форма собственности" name="legal_form">
+
+          <group>
+            <group string="Что выбрано">
+              <field name="economic_model_id"
+                     options="{'no_create': True, 'no_open': True}"/>
+              <field name="economic_scheme_applicable" invisible="1"/>
+              <field name="economic_scheme_id"
+                     invisible="not economic_scheme_applicable"
+                     options="{'no_create': True, 'no_open': True}"
+                     domain="[('form_ids', 'in', economic_model_id)]"/>
+            </group>
+            <group string="Откуда сведения" invisible="not economic_model_id">
+              <field name="legal_basis" readonly="1"/>
+              <field name="legal_checked_on" readonly="1"/>
+            </group>
+          </group>
+
+          <div class="text-muted mb-3" invisible="not economic_model_id">
+            <field name="legal_summary" readonly="1" nolabel="1"/>
+          </div>
+
+          <!-- Предупреждение отдельно и заметно: оно заполняется только
+               там, где выбор чаще всего оказывается ошибкой, и
+               потеряться в общем тексте не должно. -->
+          <div class="alert alert-warning" role="alert"
+               invisible="not legal_warning">
+            <field name="legal_warning" readonly="1" nolabel="1"/>
+          </div>
+
+          <div invisible="not economic_model_id">
+            <h3 class="o_horizontal_separator mt-4">Управление</h3>
+            <field name="legal_management" readonly="1" nolabel="1"/>
+
+            <h3 class="o_horizontal_separator mt-4">Налоги и взносы</h3>
+            <field name="legal_taxes" readonly="1" nolabel="1"/>
+
+            <h3 class="o_horizontal_separator mt-4">Отчётность</h3>
+            <field name="legal_reporting" readonly="1" nolabel="1"/>
+
+            <h3 class="o_horizontal_separator mt-4">Ответственность</h3>
+            <field name="legal_liability" readonly="1" nolabel="1"/>
+
+            <h3 class="o_horizontal_separator mt-4">Ограничения</h3>
+            <field name="legal_limits" readonly="1" nolabel="1"/>
+
+            <!-- Ради этого блока всё и затевалось: его читает не тот, кто
+                 выбирает форму, а тот, кто думает вложиться в чужой
+                 проект. -->
+            <h3 class="o_horizontal_separator mt-4">Что важно вкладывающемуся</h3>
+            <field name="legal_for_investor" readonly="1" nolabel="1"/>
+          </div>
+
+          <div invisible="not legal_members_note">
+            <h3 class="o_horizontal_separator mt-4">Состав участников</h3>
+            <div class="text-muted">
+              <field name="legal_members_note" readonly="1" nolabel="1"/>
+            </div>
+          </div>
+
+          <div invisible="not economic_scheme_id">
+            <h3 class="o_horizontal_separator mt-4">Как делится результат</h3>
+            <field name="scheme_distribution" readonly="1" nolabel="1"/>
+
+            <h3 class="o_horizontal_separator mt-4">Что закрепить уставом</h3>
+            <field name="scheme_charter_notes" readonly="1" nolabel="1"/>
+
+            <h3 class="o_horizontal_separator mt-4">Что важно вкладывающемуся по укладу</h3>
+            <field name="scheme_for_investor" readonly="1" nolabel="1"/>
+          </div>
+
+          <div class="text-muted mt-4" invisible="not economic_model_id">
+            Пояснения берутся из справочника платформы и обновляются
+            вместе с ним: закон меняется каждый год, и копия в карточке
+            проекта устарела бы молча. Дата сверки — выше.
+          </div>
+
+        </page>
+      </notebook>
+
+    </field>
+  </record>
+
+  <!-- Форма видна и в списке проектов: по ней отбирают, когда ищут,
+       во что вложиться. -->
+  <record id="view_coop_project_list_legal" model="ir.ui.view">
+    <field name="name">coop.project.list.legal</field>
+    <field name="model">coop.project</field>
+    <field name="inherit_id" ref="coop_projects.view_coop_project_list"/>
+    <field name="arch" type="xml">
+      <field name="city" position="after">
+        <field name="economic_model_id" optional="show"/>
+      </field>
+    </field>
+  </record>
+
+  <record id="view_coop_project_search_legal" model="ir.ui.view">
+    <field name="name">coop.project.search.legal</field>
+    <field name="model">coop.project</field>
+    <field name="inherit_id" ref="coop_projects.view_coop_project_search"/>
+    <field name="arch" type="xml">
+      <field name="city" position="after">
+        <field name="economic_model_id"/>
+      </field>
+    </field>
+  </record>
+
+</odoo>

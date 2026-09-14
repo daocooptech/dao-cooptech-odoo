@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_coop_economic_model_user,Формы собственности — участник,model_coop_economic_model,base.group_user,1,0,0,0
+access_coop_economic_model_admin,Формы собственности — администратор,model_coop_economic_model,base.group_system,1,1,1,1
+access_coop_economic_scheme_user,Уклады кооперативов — участник,model_coop_economic_scheme,base.group_user,1,0,0,0
+access_coop_economic_scheme_admin,Уклады кооперативов — администратор,model_coop_economic_scheme,base.group_system,1,1,1,1

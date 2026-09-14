@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="view_coop_economic_model_list" model="ir.ui.view">
+    <field name="name">coop.economic.model.list</field>
+    <field name="model">coop.economic.model</field>
+    <field name="arch" type="xml">
+      <list string="Формы собственности и режимы"
+            decoration-warning="is_expiring"
+            decoration-muted="not active">
+        <field name="sequence" widget="handle"/>
+        <field name="name"/>
+        <field name="form_group"/>
+        <field name="regime"/>
+        <field name="summary" string="Коротко"/>
+        <field name="member_composition" string="Состав членов" optional="show"/>
+        <field name="income_limit" string="Предел дохода" optional="hide"/>
+        <field name="employee_limit" string="Работников" optional="hide"/>
+        <field name="checked_on" string="Сверено"/>
+        <field name="valid_to" string="Действует по" optional="show"/>
+        <field name="is_expiring" column_invisible="1"/>
+        <field name="project_count" string="Проектов"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_economic_model_form" model="ir.ui.view">
+    <field name="name">coop.economic.model.form</field>
+    <field name="model">coop.economic.model</field>
+    <field name="arch" type="xml">
+      <form string="Форма собственности">
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="ООО на УСН «доходы»"/></h1>
+            <h3><field name="summary"
+                       placeholder="Одной строкой: почему выбирают именно это"/></h3>
+          </div>
+
+          <group>
+            <group string="Что это">
+              <field name="key" placeholder="ooo_usn_income"/>
+              <field name="form_group"/>
+              <field name="form_name" placeholder="Общество с ограниченной ответственностью"/>
+              <field name="regime"/>
+              <field name="legal_basis"/>
+              <field name="active"/>
+            </group>
+            <group string="Пределы и признаки">
+              <field name="requires_registration"/>
+              <field name="can_hire"/>
+              <field name="region_dependent"/>
+              <field name="min_members"/>
+              <field name="income_limit"/>
+              <field name="employee_limit"/>
+              <field name="vat_exempt_limit"/>
+            </group>
+          </group>
+
+          <group string="Состав членов"
+                 invisible="member_composition == 'n/a'">
+            <group>
+              <field name="member_composition"/>
+              <field name="org_share_cap"/>
+            </group>
+            <group>
+              <field name="requires_charter_clause"/>
+              <field name="org_acts_via_representative"/>
+            </group>
+            <field name="members_note" colspan="2"
+                   placeholder="Через кого действует организация-член, какие пределы, что закрепить уставом"/>
+          </group>
+
+          <group string="Срок годности сведений">
+            <group>
+              <field name="checked_on"/>
+              <field name="valid_from"/>
+            </group>
+            <group>
+              <field name="valid_to"/>
+              <field name="is_expiring" readonly="1"/>
+            </group>
+          </group>
+
+          <notebook>
+            <page string="Пояснения" name="explanations">
+              <group string="Управление">
+                <field name="management" nolabel="1"
+                       placeholder="Кто принимает решения, как считаются голоса, кто ведёт текущую работу"/>
+              </group>
+              <group string="Налоги и взносы">
+                <field name="taxes" nolabel="1"
+                       placeholder="Ставка, база, страховые взносы, что с выплатами участникам"/>
+              </group>
+              <group string="Отчётность">
+                <field name="reporting" nolabel="1"
+                       placeholder="Что и когда сдавать, нужен ли бухгалтер, нужна ли касса"/>
+              </group>
+              <group string="Ответственность">
+                <field name="liability" nolabel="1"
+                       placeholder="Чем отвечают по долгам"/>
+              </group>
+              <group string="Ограничения">
+                <field name="limits" nolabel="1"
+                       placeholder="Пределы дохода и численности, запрещённые виды деятельности"/>
+              </group>
+            </page>
+            <page string="Вкладывающемуся" name="investor">
+              <group string="Что важно знать тому, кто вкладывается">
+                <field name="for_investor" nolabel="1"
+                       placeholder="Чем закрепляется доля, как выйти, на что можно влиять, чем рискует"/>
+              </group>
+              <group string="Предупреждение">
+                <field name="warning" nolabel="1"
+                       placeholder="Заполняется только там, где выбор чаще всего оказывается ошибкой"/>
+              </group>
+            </page>
+            <page string="Уклады" name="schemes"
+                  invisible="form_group not in ('prodcoop', 'consumercoop')">
+              <field name="scheme_ids" widget="many2many_tags"/>
+              <div class="text-muted mt-2">
+                Уклад — это способ распределения внутри одной и той же
+                правовой формы. Закон отдаёт его уставу, поэтому у одного
+                кооператива укладов может быть несколько на выбор.
+              </div>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_economic_model_search" model="ir.ui.view">
+    <field name="name">coop.economic.model.search</field>
+    <field name="model">coop.economic.model</field>
+    <field name="arch" type="xml">
+      <search string="Формы собственности">
+        <field name="name"/>
+        <field name="form_name"/>
+        <field name="summary"/>
+        <filter name="expiring" string="С назначенным концом"
+                domain="[('is_expiring', '=', True)]"/>
+        <filter name="regions" string="Зависит от региона"
+                domain="[('region_dependent', '=', True)]"/>
+        <separator/>
+        <filter name="coops" string="Кооперативы"
+                domain="[('form_group', 'in', ('prodcoop', 'consumercoop'))]"/>
+        <filter name="orgs_allowed" string="Допускают организации в члены"
+                domain="[('member_composition', 'in', ('citizens_and_orgs', 'orgs_only_allowed'))]"/>
+        <group>
+          <filter name="by_group" string="По группе"
+                  context="{'group_by': 'form_group'}"/>
+          <filter name="by_regime" string="По режиму"
+                  context="{'group_by': 'regime'}"/>
+          <filter name="by_composition" string="По составу членов"
+                  context="{'group_by': 'member_composition'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="view_coop_economic_scheme_list" model="ir.ui.view">
+    <field name="name">coop.economic.scheme.list</field>
+    <field name="model">coop.economic.scheme</field>
+    <field name="arch" type="xml">
+      <list string="Уклады кооперативов">
+        <field name="sequence" widget="handle"/>
+        <field name="name"/>
+        <field name="summary"/>
+        <field name="form_ids" widget="many2many_tags"/>
+        <field name="checked_on"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_economic_scheme_form" model="ir.ui.view">
+    <field name="name">coop.economic.scheme.form</field>
+    <field name="model">coop.economic.scheme</field>
+    <field name="arch" type="xml">
+      <form string="Уклад кооператива">
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Распределение по Чартаеву"/></h1>
+            <h3><field name="summary" placeholder="Одной строкой"/></h3>
+          </div>
+          <group>
+            <group>
+              <field name="key"/>
+              <field name="legal_basis"/>
+            </group>
+            <group>
+              <field name="checked_on"/>
+              <field name="active"/>
+            </group>
+          </group>
+          <field name="form_ids" widget="many2many_tags"
+                 string="Применим к формам"/>
+          <notebook>
+            <page string="Как устроено" name="description">
+              <field name="description" nolabel="1"/>
+            </page>
+            <page string="Как делится результат" name="distribution">
+              <field name="distribution" nolabel="1"/>
+            </page>
+            <page string="Что закрепить уставом" name="charter">
+              <field name="charter_notes" nolabel="1"/>
+            </page>
+            <page string="Вкладывающемуся" name="investor">
+              <field name="for_investor" nolabel="1"/>
+              <group string="Предупреждение">
+                <field name="warning" nolabel="1"/>
+              </group>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_coop_economic_model" model="ir.actions.act_window">
+    <field name="name">Формы собственности</field>
+    <field name="res_model">coop.economic.model</field>
+    <field name="path">legal-forms</field>
+    <field name="view_mode">list,form</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Справочник пуст</p>
+      <p>Здесь живут формы собственности и налоговые режимы, из которых
+         участник выбирает при сборке проекта, вместе с пояснениями —
+         управление, налоги, отчётность, ответственность и то, что важно
+         знать вкладывающемуся.</p>
+    </field>
+  </record>
+
+  <record id="action_coop_economic_scheme" model="ir.actions.act_window">
+    <field name="name">Уклады кооперативов</field>
+    <field name="res_model">coop.economic.scheme</field>
+    <field name="path">coop-schemes</field>
+    <field name="view_mode">list,form</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Укладов пока нет</p>
+      <p>Уклад — способ распределения внутри кооператива. Правовая форма
+         одна, а устав может задать разный порядок: по трудовому вкладу,
+         по паю, с периодической сверкой.</p>
+    </field>
+  </record>
+
+  <menuitem id="menu_coop_economic_root" name="Формы и режимы" sequence="205"/>
+  <menuitem id="menu_coop_economic_model" name="Формы собственности"
+            parent="menu_coop_economic_root"
+            action="action_coop_economic_model" sequence="10"/>
+  <menuitem id="menu_coop_economic_scheme" name="Уклады кооперативов"
+            parent="menu_coop_economic_root"
+            action="action_coop_economic_scheme" sequence="20"/>
+
+</odoo>
