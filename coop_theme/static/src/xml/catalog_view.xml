@@ -46,6 +46,7 @@
       <CoopShelves t-if="coopShelvesVisible"
                    resModel="props.resModel"
                    field="coopShelfField"
+                   icon="coopShelfIcon"
                    domain="props.domain or []"/>
     </xpath>
 

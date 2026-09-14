@@ -211,7 +211,7 @@
     <field name="res_model">coop.auction</field>
     <field name="path">auctions</field>
     <field name="view_mode">kanban,list,form</field>
-    <field name="context">{'bin_size': True,'coop_catalog': 1, 'coop_shelf_field': 'kind'}</field>
+    <field name="context">{'bin_size': True,'coop_catalog': 1, 'coop_shelf_field': 'kind', 'coop_shelf_icon': '🔨'}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Торгов пока нет</p>
       <p>Аукцион нужен там, где цена неизвестна заранее: продать излишки

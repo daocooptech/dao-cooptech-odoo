@@ -21,27 +21,42 @@
         </div>
         <div class="o_coop_shelf_row">
           <!--
-            Две карточки, а не одна с необязательным снимком. Каталог без
-            снимков — складчина, сделки, выпуски ЦФА — со снимочной
-            карточкой превращается в ряд одинаковых заглушек, и полка
-            перестаёт что-либо сообщать. Там, где снимать нечего, карточка
-            становится текстовой: название крупно, город снизу.
+            Две карточки, и обе — карточки этого же каталога.
+
+            Где есть снимки, полка повторяет плиточную карточку: снимок
+            сверху, название под ним. Где снимков нет — закупки, сделки,
+            выпуски ЦФА, — повторяет строчную: квадратная плитка со
+            значком слева, название и город справа. Классы взяты те же,
+            что у каталога (`o_coop_listing`), а не скопированы: иначе
+            полка и каталог разойдутся при первой же правке стиля.
+
+            Владелец на это и указал 15 сентября: «на стенде какие-то
+            микро-карточки, на хостинге вообще по-другому». Своя мелкая
+            карточка поверх чужого каталога — и есть разнобой.
           -->
           <div t-foreach="shelf.records" t-as="rec" t-key="rec.id"
-               t-att-class="hasPhotos ? 'o_coop_shelf_card' : 'o_coop_shelf_card o_coop_shelf_card--text'"
+               t-att-class="hasPhotos ? 'o_coop_shelf_card' : 'o_coop_shelf_card o_coop_listing o_coop_shelf_listing'"
                t-on-click="() => this.open(rec)">
-            <div class="o_coop_shelf_photo" t-if="hasPhotos">
-              <img t-att-src="photo(rec)" t-att-alt="rec.display_name" loading="lazy"/>
-              <span class="o_coop_shelf_city" t-if="rec.city">
-                <i class="fa fa-map-marker" aria-hidden="true"/>
-                <t t-esc="rec.city"/>
-              </span>
-            </div>
-            <div class="o_coop_shelf_name"><t t-esc="rec.display_name"/></div>
-            <div class="o_coop_shelf_where" t-if="!hasPhotos and rec.city">
-              <i class="fa fa-map-marker" aria-hidden="true"/>
-              <t t-esc="rec.city"/>
-            </div>
+            <t t-if="hasPhotos">
+              <div class="o_coop_shelf_photo">
+                <img t-att-src="photo(rec)" t-att-alt="rec.display_name" loading="lazy"/>
+                <span class="o_coop_shelf_city" t-if="rec.city">
+                  <i class="fa fa-map-marker" aria-hidden="true"/>
+                  <t t-esc="rec.city"/>
+                </span>
+              </div>
+              <div class="o_coop_shelf_name"><t t-esc="rec.display_name"/></div>
+            </t>
+            <t t-else="">
+              <div class="o_coop_listing_ico"><t t-esc="icon(rec)"/></div>
+              <div class="o_coop_listing_body">
+                <div class="o_coop_listing_title"><t t-esc="rec.display_name"/></div>
+                <div class="o_coop_shelf_where" t-if="rec.city">
+                  <i class="fa fa-map-marker" aria-hidden="true"/>
+                  <t t-esc="rec.city"/>
+                </div>
+              </div>
+            </t>
           </div>
         </div>
       </div>

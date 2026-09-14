@@ -26,6 +26,7 @@ export class CoopShelves extends Component {
         resModel: { type: String },
         field: { type: String },
         domain: { type: Array, optional: true },
+        icon: { type: [String, Boolean], optional: true },
     };
 
     setup() {
@@ -163,6 +164,17 @@ export class CoopShelves extends Component {
                 this.props.resModel, domain.concat([["image_512", "!=", false]]));
             this.hasPhotos = снимков > 0;
         }
+    }
+
+    /** Что стоит в плитке там, где снимков нет.
+     *
+     *  Значок раздела — тот же, что в карточке каталога, — объявляется
+     *  в действии (`coop_shelf_icon`). Первая буква названия остаётся
+     *  запасным вариантом: у каталога без объявленного значка полка
+     *  всё равно должна выглядеть карточкой, а не пустой плиткой. */
+    icon(record) {
+        return this.props.icon
+            || (record.display_name || "?").trim().charAt(0).toUpperCase();
     }
 
     photo(record) {
