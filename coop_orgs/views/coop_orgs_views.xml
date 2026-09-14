@@ -362,7 +362,7 @@
     <field name="path">orgs</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('coop_is_participant', '=', True), ('is_company', '=', True)]</field>
-    <field name="context">{'coop_catalog': True, 'default_coop_is_participant': True, 'default_is_company': True, 'coop_create_label': 'Добавить организацию'}</field>
+    <field name="context">{'bin_size': True,'coop_catalog': True, 'default_coop_is_participant': True, 'default_is_company': True, 'coop_create_label': 'Добавить организацию'}</field>
     <field name="search_view_id" ref="view_coop_orgs_search"/>
     <field name="view_ids" eval="[(5, 0, 0),
            (0, 0, {'sequence': 10, 'view_mode': 'kanban', 'view_id': ref('view_coop_orgs_kanban')}),
@@ -449,7 +449,7 @@
     <field name="path">my-orgs</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('coop_is_participant', '=', True), ('is_company', '=', True), ('coop_member_ids', 'any', [('partner_id.user_ids', 'in', [uid]), ('state', '=', 'active')])]</field>
-    <field name="context">{'coop_catalog': True, 'default_coop_is_participant': True, 'default_is_company': True, 'coop_create_label': 'Добавить организацию'}</field>
+    <field name="context">{'bin_size': True,'coop_catalog': True, 'default_coop_is_participant': True, 'default_is_company': True, 'coop_create_label': 'Добавить организацию'}</field>
     <field name="search_view_id" ref="view_coop_orgs_search"/>
     <field name="view_ids" eval="[(5, 0, 0),
            (0, 0, {'sequence': 10, 'view_mode': 'kanban', 'view_id': ref('view_coop_orgs_kanban')}),

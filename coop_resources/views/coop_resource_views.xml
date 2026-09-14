@@ -224,7 +224,7 @@
     <field name="name">Ресурсы</field>
     <field name="res_model">coop.resource</field>
     <field name="path">resources</field>
-    <field name="context">{'coop_catalog': True, 'coop_create_label': 'Добавить ресурс'}</field>
+    <field name="context">{'bin_size': True,'coop_catalog': True, 'coop_create_label': 'Добавить ресурс'}</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('state', '=', 'published')]</field>
     <field name="search_view_id" ref="view_coop_resource_search"/>
@@ -404,7 +404,7 @@
     <field name="name">Мои ресурсы</field>
     <field name="res_model">coop.resource</field>
     <field name="path">my-resources</field>
-    <field name="context">{'coop_catalog': True, 'coop_create_label': 'Добавить ресурс'}</field>
+    <field name="context">{'bin_size': True,'coop_catalog': True, 'coop_create_label': 'Добавить ресурс'}</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('owner_id.user_ids', 'in', [uid])]</field>
     <field name="search_view_id" ref="view_coop_resource_search"/>
