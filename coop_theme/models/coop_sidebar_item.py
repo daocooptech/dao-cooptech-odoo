@@ -59,6 +59,10 @@ MAIN_ITEMS = [
 # говорит. Список без них выглядел бы полным, и понять, чего не хватает,
 # было бы неоткуда — ровно та же причина, что и у разделов выше.
 EXTENSION_ITEMS = [
+    # Решение владельца от 2026-09-14: ведение работ — расширение, а не
+    # основной раздел, и стоит первым в списке расширений. Появляется не
+    # у всех: см. REQUIRES_PROJECT.
+    ('Управление проектами', 'fa-tasks', 'project.open_view_project_all'),
     # Ведёт на биржу, а не на движения COOP: COOP — предоплата услуг
     # платформы, она не торгуется и к бирже отношения не имеет. Пока пункт
     # вёл туда, участник открывал «Токеномику» и видел пустой список
@@ -76,10 +80,6 @@ EXTENSION_ITEMS = [
     ('Библиотеки', 'fa-book', ''),
     ('Диск', 'fa-folder-open-o', ''),
     ('Здоровье', 'fa-heartbeat', ''),
-    # Решение владельца от 2026-09-14: ведение работ — расширение, а не
-    # основной раздел, и стоит внизу списка. Появляется не у всех: см.
-    # REQUIRES_PROJECT.
-    ('Управление проектами', 'fa-tasks', 'project.open_view_project_all'),
 ]
 
 # Разделы, которые появляются, только когда участнику есть что в них
@@ -171,8 +171,14 @@ class CoopSidebarItem(models.Model):
         # узле, где проектов может не быть вовсе. Поэтому модель
         # спрашивается у реестра, а не импортируется. Без этой проверки
         # обновление падало на разборе данных темы с KeyError.
+        #
+        # Возвращается None, а не False: «модели нет в реестре» — это не
+        # «участник ни в чём не участвует», а «сейчас не узнать». Разница
+        # дорогая: при обновлении темы раздел проектов может быть ещё не
+        # загружен, и ответ False стоил бы удаления раздела у всех, кто
+        # его уже видел. Проверено — ровно так он и пропал.
         if 'coop.project' not in self.env:
-            return False
+            return None
         partners = user._coop_partner_ids() if hasattr(
             user, '_coop_partner_ids') else user.partner_id.ids
         if not partners:
@@ -186,7 +192,7 @@ class CoopSidebarItem(models.Model):
                 ('state', '=', 'accepted')]):
             return True
         if 'project.task' not in self.env:
-            return False
+            return None
         Task = self.env['project.task'].sudo()
         return bool(Task.search_count([('user_ids', 'in', [user.id])]))
 
@@ -237,7 +243,9 @@ class CoopSidebarItem(models.Model):
             # Раздел, который участнику больше не положен, убирается. Иначе
             # он остаётся у того, кто его однажды увидел, навсегда.
             for item in existing:
-                if item.name in REQUIRES_PROJECT and item.name not in wanted_section:
+                if (item.name in REQUIRES_PROJECT
+                        and item.name not in wanted_section
+                        and self._has_project(user) is False):
                     # Пометку обязательности снимаем перед удалением:
                     # обязательный раздел удалить нельзя, и на узле, где
                     # пункт заводился ещё основным разделом, обновление
@@ -293,7 +301,7 @@ class CoopSidebarItem(models.Model):
             })
         allowed = self._has_project(user)
         for index, (name, icon, xmlid) in enumerate(EXTENSION_ITEMS):
-            if name in REQUIRES_PROJECT and not allowed:
+            if name in REQUIRES_PROJECT and allowed is not True:
                 continue
             action = self.env.ref(xmlid, raise_if_not_found=False) if xmlid else None
             values.append({
@@ -393,6 +401,19 @@ class CoopSidebarItem(models.Model):
         known = set(items.filtered(lambda i: i.section == 'main').mapped('name'))
         missing = [v for v in defaults
                    if v['section'] == 'main' and v['name'] not in known]
+
+        # Разделы, которые появляются по участию, дописываются здесь же, а
+        # не при обновлении модуля. Причина простая: во время обновления
+        # темы раздел проектов может быть ещё не загружен, и узнать про
+        # участие неоткуда. При входе участника реестр уже полон.
+        #
+        # Предложенным такой раздел не считается: участник не выбирал его
+        # себе, он появился вместе с первым проектом, и убирать его из
+        # списка предложенных значило бы предлагать заново после того,
+        # как человек его уберёт.
+        have = set(items.mapped('name'))
+        missing += [v for v in defaults
+                    if v['name'] in REQUIRES_PROJECT and v['name'] not in have]
         if missing:
             items |= self._create_menu_items(missing, user)
         # Раздел мог быть перенесён после того, как меню уже собрано, —
