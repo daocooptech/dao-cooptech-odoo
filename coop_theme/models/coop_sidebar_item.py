@@ -73,7 +73,11 @@ EXTENSION_ITEMS = [
     ('Целевые программы ПК', 'fa-bullseye', 'coop_programs.action_coop_program'),
     ('Совместные закупки', 'fa-shopping-basket', 'coop_groupbuy.action_coop_groupbuy'),
     ('Аукционы', 'fa-gavel', 'coop_auctions.action_coop_auction'),
-    ('Склад', 'fa-archive', ''),
+    # Раздел перенесён на движок 14 сентября 2026 — биржа складских
+    # мощностей. Пока здесь стояла пустая строка, участник открывал
+    # «Склад» и видел «раздел ещё не перенесён», хотя в нём сто
+    # пятнадцать складов и сто шестьдесят пять объявлений.
+    ('Склад', 'fa-archive', 'coop_warehouse.action_coop_warehouse_offer'),
     ('События', 'fa-calendar', 'coop_events.action_coop_event'),
     ('Аналитика', 'fa-bar-chart', ''),
     ('Образование', 'fa-graduation-cap', ''),
@@ -217,7 +221,7 @@ class CoopSidebarItem(models.Model):
         чем раздел, которого у половины участников нет.
         """
         users = self.env['res.users'].sudo().search([('share', '=', False)])
-        added = renumbered = moved = dropped = 0
+        added = renumbered = moved = dropped = rewired = 0
         for user in users:
             defaults = self._defaults_for_user(user)
             existing = self.sudo().search([('user_id', '=', user.id)])
@@ -272,10 +276,21 @@ class CoopSidebarItem(models.Model):
                 if item.sequence != values['sequence']:
                     item.sudo().sequence = values['sequence']
                     renumbered += 1
-        if added or renumbered or moved or dropped:
+                # Действие у пункта тоже могло появиться позже самого
+                # пункта. Так и вышло со «Складом»: раздел перенесли на
+                # движок, а в меню он остался пустым и открывал «ещё не
+                # перенесён» — при ста пятнадцати складах внутри.
+                #
+                # Переставляем только пустые: если участник сменил
+                # действие себе сам, это его дело.
+                wanted = values.get('action_id')
+                if wanted and not item.action_id:
+                    item.sudo().action_id = wanted
+                    rewired += 1
+        if added or renumbered or moved or dropped or rewired:
             _logger.info('Меню участников: добавлено %s, перенумеровано %s, '
-                         'перенесено %s, убрано %s',
-                         added, renumbered, moved, dropped)
+                         'перенесено %s, убрано %s, подключено %s',
+                         added, renumbered, moved, dropped, rewired)
         return True
 
     @api.model

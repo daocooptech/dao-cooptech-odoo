@@ -214,14 +214,42 @@
                   <field name="value" sum="Собрано"/>
                   <field name="share_percent" widget="percentage" readonly="1"/>
                   <field name="offered_on"/>
+                  <field name="withdraw_until" optional="hide"/>
+                  <field name="delivered_on" optional="hide"/>
+                  <field name="return_mode" optional="hide"/>
+                  <field name="refund_amount" optional="hide"/>
+                  <field name="unrecovered_amount" optional="hide"/>
+                  <field name="labour_form" optional="hide"
+                         column_invisible="1"/>
                   <field name="currency_id" column_invisible="True"/>
                   <field name="state" widget="badge"
                          decoration-success="state == 'accepted'"
-                         decoration-muted="state in ('declined', 'returned')"/>
+                         decoration-info="state in ('returned', 'compensated', 'waived')"
+                         decoration-muted="state in ('declined', 'expired',
+                                                     'withdrawn', 'released',
+                                                     'consumed')"/>
                   <button name="action_accept" type="object" string="Принять"
                           icon="fa-check" invisible="state != 'offered'"/>
                   <button name="action_decline" type="object" string="Отклонить"
                           icon="fa-times" invisible="state != 'offered'"/>
+                  <button name="action_mark_delivered" type="object"
+                          string="Передано" icon="fa-truck"
+                          invisible="state != 'accepted' or delivered_on
+                                     or parent.state != 'running'"/>
+                  <button name="action_consume" type="object"
+                          string="Израсходован" icon="fa-fire"
+                          invisible="state != 'accepted'
+                                     or kind not in ('material', 'knowledge')"/>
+                  <button name="action_return" type="object" string="Вернуть"
+                          icon="fa-undo"
+                          invisible="state not in ('accepted', 'consumed')
+                                     or kind != 'money'"/>
+                  <button name="action_release" type="object"
+                          string="Снять обязательство" icon="fa-unlink"
+                          invisible="state != 'accepted' or kind == 'money'"/>
+                  <button name="action_compensate" type="object"
+                          string="Возместить" icon="fa-money"
+                          invisible="state != 'consumed'"/>
                 </list>
               </field>
             </page>
@@ -319,8 +347,8 @@
   <!--
     «Мои проекты» — и заведённые самим человеком, и те, куда он вложился.
     Вторая половина не менее важна первой: краудресурсинг тем и живёт,
-    что участник вкладывает труд и технику в чужой замысел, и найти,
-    куда именно, он должен здесь, а не перебирая каталог.
+    что участник принимает участие в чужом проекте трудом и техникой, и
+    найти, где именно, он должен здесь, а не перебирая каталог.
   -->
   <record id="action_coop_my_projects" model="ir.actions.act_window">
     <field name="name">Мои проекты</field>
@@ -330,8 +358,9 @@
     <field name="domain">['|', ('partner_id.user_ids', 'in', [uid]), ('contribution_ids.partner_id.user_ids', 'in', [uid])]</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Вы пока ни в чём не участвуете</p>
-      <p>Заведите свой замысел или вложитесь в чужой — вкладом считается не
-         только деньги, но труд, техника, материалы и знания.</p>
+      <p>Заведите свой проект или примите участие в чужом — вкладом
+         считается не только деньги, но труд, техника, материалы и
+         знания.</p>
     </field>
   </record>
 

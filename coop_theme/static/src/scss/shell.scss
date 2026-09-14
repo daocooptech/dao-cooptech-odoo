@@ -499,3 +499,21 @@
 .o_coop_acting_on {
   background: var(--coop-teal-tint, #e3efed);
 }
+
+// Раздел, который ещё не перенесён на движок. Пункт оставлен намеренно —
+// по нему видно, чего ждать, — но без пометки меню читается как
+// наполовину сломанное: человек жмёт и попадает на страницу-заглушку, не
+// поняв заранее, что так и задумано.
+.o_coop_nav_item.o_coop_nav_soon {
+  color: var(--coop-slate-light, #8f8f88);
+
+  .o_coop_soon_mark {
+    margin-left: auto;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: var(--coop-surface, #f2f2ee);
+    color: var(--coop-slate-light, #8f8f88);
+    font: 600 9.5px/1.5 'Manrope', sans-serif;
+    letter-spacing: .02em;
+  }
+}

@@ -301,6 +301,8 @@ def load_projects(env, extra=100):
         # собирали по-настоящему, и стирать собранное нельзя. Что у такого
         # состояния должно быть своё имя, а не «Идея», — вопрос к
         # владельцу, а не повод терять данные.
+        _set_economic_model(env, project, row, index)
+        _fix_basis(env, project)
         state = _state_for(readiness, index)
         if not project.contribution_ids:
             _make_contributions(Contribution, project, required, readiness,
@@ -423,6 +425,73 @@ def _make_contributions(Contribution, project, required, readiness, people, rnd,
             'value': round(required * 0.08),
             'state': 'offered',
         })
+
+
+# Правовая форма под вид проекта. Экономическая модель — это правовая
+# форма плюс налоговый режим (решение владельца 283), и справочник из
+# шестидесяти четырёх сочетаний на платформе есть. А в каталоге его не
+# было ни у одного проекта из двухсот девятнадцати, кроме одного: вкладка
+# «Форма собственности» стояла пустой, и весь разбор — управление,
+# налоги, ответственность, что важно вкладывающемуся — прочитать было
+# негде.
+#
+# Форма выводится из вида проекта, а не берётся наугад: у кооперативного
+# проекта не бывает акционерного общества, а у коммерческого —
+# потребительского кооператива.
+FORMS_BY_KIND = {
+    'cooperative': ['po', 'pk', 'spk', 'sppk', 'kpk'],
+    'commercial': ['ooo', 'ao', 'ip', 'hoz_part'],
+    'nonprofit': ['ano', 'fond', 'oo', 'association'],
+    # У ДАО правовой формы в России нет: организация всё равно
+    # регистрируется чем-то из существующего. Разработку чаще ведут через
+    # ООО, а общее дело участников — через потребительский кооператив.
+    'dao': ['ooo', 'po', 'ano'],
+}
+
+
+def _set_economic_model(env, project, row, index):
+    """Проставить экономическую модель по виду проекта."""
+    if project.economic_model_id:
+        return 0
+    Model = env['coop.economic.model'].sudo()
+    codes = FORMS_BY_KIND.get(project.kind, ['ooo'])
+    code = codes[index % len(codes)]
+    models = Model.search([('legal_form_id.code', '=', code)], order='id')
+    if not models:
+        return 0
+    project.economic_model_id = models[index % len(models)].id
+    return 1
+
+
+def _fix_basis(env, project):
+    """Свести основание сбора с тем, кто на самом деле вложился.
+
+    Паевой взнос вносит только пайщик — платформа это проверяет. В
+    наполнении же деньги в кооперативный проект несут кто угодно: состав
+    вкладчиков собран раньше, чем появилось основание сбора, и членство
+    там не при чём.
+
+    Спорить с собственной проверкой не будем и подделывать членство тоже:
+    основание опускается до пожертвования, а «паевой взнос» остаётся у
+    тех проектов, где вкладчики действительно пайщики.
+    """
+    if project.contribution_basis != 'share':
+        return 0
+    org = project.partner_id
+    money = project.contribution_ids.filtered(
+        lambda c: c.state == 'accepted' and c.kind == 'money')
+    if not money:
+        return 0
+    if not org.is_company:
+        project.contribution_basis = 'donation'
+        return 1
+    members = set(env['coop.membership'].sudo().search([
+        ('organization_id', '=', org.id), ('state', '=', 'active'),
+    ]).mapped('partner_id').ids)
+    if not set(money.mapped('partner_id').ids) <= members:
+        project.contribution_basis = 'donation'
+        return 1
+    return 0
 
 
 def _deadline_for(index, rnd, today):

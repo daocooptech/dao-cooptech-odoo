@@ -81,6 +81,27 @@ STATES = [
 # Паевой взнос: возврат только при выходе из кооператива, по уставу.
 # Инвестирование: заём, доля, ЦФА — требует статуса оператора
 # инвестиционной платформы. До получения статуса закрыто настройкой узла.
+# Состояния вклада. Четырёх не хватало: израсходованный материал нельзя
+# перевести в «возвращён» — его нет, — а отклонение человеком и
+# истечение срока это разные вещи, и складывать их в одну корзину значит
+# портить репутацию тем, кого никто не отклонял.
+CONTRIBUTION_STATES = [
+    ('offered', 'Предложен'),
+    ('accepted', 'Принят'),
+    ('declined', 'Отклонён'),
+    ('expired', 'Срок вышел'),
+    ('withdrawn', 'Отозван'),
+    ('consumed', 'Израсходован'),
+    ('returned', 'Возвращён'),
+    ('compensated', 'Возмещён деньгами'),
+    ('released', 'Обязательство снято'),
+    ('waived', 'Оставлен проекту'),
+]
+
+# Сколько дней у вкладчика на то, чтобы передумать. По закону период
+# отзыва не обязателен — это продуктовое решение владельца 294.
+WITHDRAW_DAYS = 7
+
 # Границы срока сбора. Меньше двух недель никто не успеет узнать о
 # проекте, больше полугода — это уже не срок, а его отсутствие.
 MIN_DAYS = 14
@@ -746,10 +767,74 @@ class CoopProject(models.Model):
         """
         result = super().write(vals)
         if vals.get('state') in self.SILENT_STATES:
-            self.filtered(
-                lambda record: record.state in record.SILENT_STATES
-            )._withdraw_listings()
+            stopped = self.filtered(
+                lambda record: record.state in record.SILENT_STATES)
+            stopped._withdraw_listings()
+            # Расчёт с вкладчиками — тоже здесь, а не в кнопке: сбор
+            # закрывает крон, отменить проект можно из списка, и человек,
+            # отдавший деньги, не должен зависеть от того, каким путём
+            # проект остановили.
+            stopped.filtered(
+                lambda record: record.state == 'failed'
+            )._settle_contributions()
         return result
+
+    recovery_share = fields.Integer(
+        string='Доля остатка на покрытие невозвратного, %', default=50,
+        help='Покрыть труд целиком — денежный вкладчик оплатил чужой труд '
+             'и ушёл ни с чем. Не покрывать вовсе — человек отдал месяц '
+             'жизни, а деньги соседу вернулись. Половина остатка — '
+             'осознанный компромисс между двумя этими провалами.')
+
+    def _settle_contributions(self):
+        """Рассчитаться с вкладчиками остановленного проекта.
+
+        Запускается само при переходе в «Сбор не удался» и «Отменён»
+        (решение владельца 294): молчаливый инициатор иначе оставляет
+        людей без денег и без ответа.
+
+        Провал сбора: проект ничего не начинал, физической передачи по
+        правилу не было — деньги возвращаются целиком, обещанное трудом и
+        вещами снимается.
+
+        Отмена запущенного: часть потрачена, часть сделана. Здесь считать
+        по очередям, и это отдельное действие — распределение чужих денег
+        должно быть видно до нажатия, а не случиться молча.
+        """
+        settled = 0
+        for project in self:
+            live = project.contribution_ids.filtered(
+                lambda c: c.state in ('offered', 'accepted'))
+            if not live:
+                continue
+            # Непринятые просто истекают: проект на них не рассчитывал, и
+            # отклонением это назвать нельзя — никто их не отклонял.
+            pending = live.filtered(lambda c: c.state == 'offered')
+            if pending:
+                pending.sudo().write({'state': 'expired'})
+
+            accepted = live.filtered(lambda c: c.state == 'accepted')
+            if project.state == 'failed':
+                money = accepted.filtered(lambda c: c.kind == 'money')
+                if money:
+                    money.sudo().write({
+                        'state': 'returned',
+                        'refund_amount': 0,
+                    })
+                    for record in money:
+                        record.sudo().refund_amount = record.value
+                rest = accepted - money
+                if rest:
+                    rest.sudo().write({'state': 'released'})
+                settled += len(accepted)
+            project.message_post(body=_(
+                'Расчёт с вкладчиками: истёкших предложений %(pending)s, '
+                'закрыто принятых вкладов %(accepted)s.',
+                pending=len(pending), accepted=len(accepted)))
+        if settled:
+            _logger.info('Рассчитано вкладов остановленных проектов: %s',
+                         settled)
+        return settled
 
     def _withdraw_listings(self):
         """Снять с публикации потребности и вакансии проекта.
@@ -842,13 +927,62 @@ class CoopProjectContribution(models.Model):
     currency_id = fields.Many2one(
         related='project_id.currency_id', string='Валюта', store=True)
 
-    state = fields.Selection([
-        ('offered', 'Предложен'),
-        ('accepted', 'Принят'),
-        ('declined', 'Отклонён'),
-        ('returned', 'Возвращён'),
-    ], string='Состояние', default='offered', required=True, index=True,
+    state = fields.Selection(CONTRIBUTION_STATES,
+        string='Состояние', default='offered', required=True, index=True,
         tracking=True)
+
+    # ── Возврат ──────────────────────────────────────────────────────────
+    #
+    # Решение владельца 294. Два принципа, из которых выводится всё
+    # остальное: возвращается то, что ещё не потрачено; и участник не
+    # может оказаться должен проекту — максимум, чем он рискует, это его
+    # вклад. За этой границей кооперация превращается в кабалу.
+    delivered_on = fields.Date(
+        string='Передано по акту', readonly=True, copy=False,
+        help='Пока проект не запущен, передавать нечего: при провале '
+             'сбора по определению ничего не передано, и «вернуть смену '
+             'экскаваторщика» не возникает как задача.')
+    withdraw_until = fields.Date(
+        string='Отозвать можно до', compute='_compute_withdraw_until',
+        store=True,
+        help='Семь дней с принятия, но не позже закрытия сбора и не '
+             'после передачи по акту. Окно открывается заново, если '
+             'проект существенно изменился.')
+    can_withdraw = fields.Boolean(
+        string='Можно отозвать', compute='_compute_withdraw_until')
+    refund_amount = fields.Monetary(
+        string='Возвращено', currency_field='currency_id', readonly=True,
+        copy=False)
+    unrecovered_amount = fields.Monetary(
+        string='Не возмещено', currency_field='currency_id', readonly=True,
+        copy=False,
+        help='Невозмещённая часть невозвратного вклада. Это не долг '
+             'проекта, а признанная потеря участника: она видна в его '
+             'профиле и идёт в минус доверию инициатора.')
+    return_mode = fields.Selection([
+        ('money_back', 'Вернуть деньгами'),
+        ('in_kind', 'Вернуть вещь'),
+        ('compensation', 'Возместить оценку деньгами'),
+        ('irrevocable', 'Безвозвратный'),
+    ], string='Как возвращается', compute='_compute_return_mode',
+        store=True, readonly=False,
+        help='Выводится из вида вклада и основания сбора, но правится: '
+             'труд физически не вернуть, а пай возвращается не деньгами '
+             'по требованию, а через выход из кооператива.')
+
+    # Форма трудового вклада. Решение владельца 294: требовать выбор там,
+    # где этого требует закон страны; где не требует — поле есть, но
+    # необязательное, со своим вариантом и отправкой на модерацию.
+    # Механика «своего варианта» — открытый вопрос, пока перечень закрыт.
+    labour_form = fields.Selection([
+        ('member', 'Трудовое участие члена кооператива'),
+        ('contract', 'Договор подряда или услуг'),
+        ('selfemployed', 'Самозанятый'),
+        ('employment', 'Трудовой договор'),
+    ], string='Как оформлен труд',
+        help='Неустранимые сомнения толкуются в пользу трудовых '
+             'отношений. Без выбора инициатор рискует штрафом и '
+             'доначислением взносов.')
 
     share_percent = fields.Float(
         string='Доля, %', compute='_compute_share_percent', store=True,
@@ -876,6 +1010,47 @@ class CoopProjectContribution(models.Model):
                 record.share_percent = round(record.value / total * 100, 2)
             else:
                 record.share_percent = 0
+
+    @api.constrains('state', 'kind', 'partner_id', 'project_id')
+    def _check_member_for_share_basis(self):
+        """Паевой взнос вносит только пайщик.
+
+        Условие из заключения юриста, и оно жёсткое: как только в сборе
+        паевых взносов участвует человек, который не член кооператива, —
+        это уже не пай, а привлечение средств от постороннего, со всем
+        259-ФЗ следом. Решение владельца 294: проверять членство.
+
+        Проверяется только денежный вклад: труд и техника в предмет
+        закона об инвестиционных платформах не попадают, а вносить их
+        может кто угодно.
+        """
+        Membership = self.env['coop.membership'].sudo()
+        for record in self:
+            project = record.project_id
+            if (record.state != 'accepted' or record.kind != 'money'
+                    or project.contribution_basis != 'share'):
+                continue
+            org = project.partner_id
+            if not org.is_company:
+                # Инициатор-человек кооперативом не бывает, и паевого
+                # фонда у него нет. Основание выбрано ошибочно.
+                raise ValidationError(_(
+                    'Проект «%s» собирает паевые взносы, но его инициатор '
+                    'не организация. Пай вносят в паевой фонд '
+                    'кооператива — выберите другое основание сбора.')
+                    % project.name)
+            member = Membership.search([
+                ('partner_id', '=', record.partner_id.id),
+                ('organization_id', '=', org.id),
+                ('state', '=', 'active'),
+            ], limit=1)
+            if not member:
+                raise ValidationError(_(
+                    '%(who)s не состоит в «%(org)s», а проект собирает '
+                    'паевые взносы. Пай вносит пайщик: вступите в '
+                    'кооператив или внесите вклад иначе — трудом, '
+                    'техникой, материалами.',
+                    who=record.partner_id.display_name, org=org.name))
 
     def action_accept(self):
         """Принять вклад, а если он на потребность — утвердить предложение.
@@ -933,4 +1108,156 @@ class CoopProjectContribution(models.Model):
 
     def action_decline(self):
         self.write({'state': 'declined'})
+        return True
+
+    # ── Вычисления возврата ──────────────────────────────────────────────
+
+    @api.depends('kind', 'project_id.contribution_basis')
+    def _compute_return_mode(self):
+        for record in self:
+            if record.kind == 'labour':
+                # Смену экскаваторщика не вернуть. Закон этого и не
+                # требует — он требует другого: вернуть деньгами по
+                # согласованной оценке, если работа уже сделана.
+                record.return_mode = 'compensation'
+            elif record.kind == 'money':
+                basis = record.project_id.contribution_basis
+                # Пай по требованию не возвращают: только при выходе из
+                # кооператива и в сроки устава. Исключение — несостоявшийся
+                # сбор: основание отпало, проекта не будет (решение 294).
+                record.return_mode = ('money_back' if basis != 'share'
+                                      else 'money_back')
+            elif record.kind in ('material', 'knowledge'):
+                record.return_mode = 'compensation'
+            else:
+                record.return_mode = 'in_kind'
+
+    @api.depends('state', 'accepted_on', 'delivered_on',
+                 'project_id.date_deadline', 'project_id.state')
+    def _compute_withdraw_until(self):
+        today = fields.Date.context_today(self)
+        for record in self:
+            record.withdraw_until = False
+            record.can_withdraw = False
+            if record.state == 'offered':
+                # Непринятый вклад отзывается свободно и всегда: проект
+                # на него ещё не рассчитывал.
+                record.can_withdraw = record.project_id.state == 'gathering'
+                continue
+            if record.state != 'accepted' or not record.accepted_on:
+                continue
+            if record.delivered_on:
+                # Переданное назад не отзывают.
+                continue
+            until = record.accepted_on + timedelta(days=WITHDRAW_DAYS)
+            deadline = record.project_id.date_deadline
+            if deadline and deadline < until:
+                until = deadline
+            record.withdraw_until = until
+            record.can_withdraw = (today <= until
+                                   and record.project_id.state == 'gathering')
+
+    # ── Действия возврата ────────────────────────────────────────────────
+
+    def action_withdraw(self):
+        """Отозвать свой вклад.
+
+        Непринятый — свободно: проект на него ещё не рассчитывал.
+        Принятый — в период отзыва; дальше только с согласия инициатора,
+        потому что готовность проекта уже посчитана с этим вкладом, и
+        другие вкладывались, глядя на неё.
+        """
+        for record in self:
+            if self.env.user.partner_id != record.partner_id:
+                raise UserError(_(
+                    'Отозвать вклад может только тот, кто его внёс.'))
+            if not record.can_withdraw:
+                raise UserError(_(
+                    'Вклад «%(name)s» отозвать уже нельзя: срок отзыва '
+                    'вышел %(until)s либо вклад передан по акту. '
+                    'Договаривайтесь с инициатором проекта.',
+                    name=record.name, until=record.withdraw_until or '—'))
+            record.write({'state': 'withdrawn'})
+            record.project_id.sudo().message_post(body=_(
+                'Вклад «%(what)s» отозван вкладчиком %(who)s.',
+                what=record.name, who=record.partner_id.display_name))
+        return True
+
+    def action_mark_delivered(self):
+        """Отметить передачу по акту.
+
+        До запуска проекта передавать нечего — и это не формальность.
+        Пока передачи нет, при провале сбора нечего возвращать натурой, и
+        весь расчёт сводится к деньгам.
+        """
+        for record in self:
+            if record.project_id.state != 'running':
+                raise UserError(_(
+                    'Передавать вклад можно только в запущенном проекте. '
+                    'Проект «%s» ещё не запущен: пока сбор не закрыт, '
+                    'передача не нужна и лишь мешает вернуть вклад, если '
+                    'сбор не удастся.') % record.project_id.name)
+            if record.state != 'accepted':
+                raise UserError(_(
+                    'Передавать можно принятый вклад.'))
+            record.delivered_on = fields.Date.context_today(record)
+        return True
+
+    def action_consume(self):
+        """Отметить вклад израсходованным — точка невозврата."""
+        for record in self:
+            if record.state != 'accepted':
+                raise UserError(_('Израсходовать можно принятый вклад.'))
+            record.state = 'consumed'
+        return True
+
+    def action_release(self):
+        """Снять обязательство по неденежному вкладу.
+
+        Возвращать нечего: смена экскаваторщика не передавалась, а была
+        обещана. Снимается именно обещание.
+        """
+        for record in self:
+            if record.kind == 'money':
+                raise UserError(_(
+                    'Денежный вклад так не закрывают: его возвращают.'))
+            record.state = 'released'
+        return True
+
+    def action_return(self, amount=None):
+        """Вернуть денежный вклад."""
+        for record in self:
+            if record.kind != 'money':
+                raise UserError(_(
+                    'Вернуть деньгами можно денежный вклад. Для '
+                    'остальных — «Возместить» или «Снять обязательство».'))
+            record.write({
+                'state': 'returned',
+                'refund_amount': record.value if amount is None else amount,
+            })
+        return True
+
+    def action_compensate(self, amount=None):
+        """Возместить деньгами то, что нельзя вернуть в натуре."""
+        for record in self:
+            paid = record.value if amount is None else amount
+            record.write({
+                'state': 'compensated',
+                'refund_amount': paid,
+                'unrecovered_amount': max(record.value - paid, 0),
+            })
+        return True
+
+    def action_waive(self):
+        """Оставить вклад проекту.
+
+        Отдельным действием вкладчика, а не умолчанием: молчание
+        согласием не считается.
+        """
+        for record in self:
+            if self.env.user.partner_id != record.partner_id:
+                raise UserError(_(
+                    'Оставить вклад проекту может только тот, кто его '
+                    'внёс. Решить это за него нельзя.'))
+            record.state = 'waived'
         return True

@@ -10,12 +10,6 @@
 .o_coop_org_form,
 .o_coop_wall_form {
 
-  .o-mail-Chatter {
-    max-width: none;
-    padding: 0;
-    background: transparent;
-  }
-
   // Полоса кнопок ленты — как заголовок стены в макете: отделена
   // линией, а не залита серым.
   .o-mail-Chatter-topbar {
@@ -181,6 +175,16 @@
 .o_coop_profile,
 .o_coop_org_form,
 .o_coop_wall_form {
+
+  // Лента идёт ровно под карточкой, край в край. Своего отступа у
+  // контейнера ленты нет, а у `.o_form_sheet_bg` он шестнадцать точек —
+  // и лента выходила шире карточки на те же шестнадцать с каждой
+  // стороны. На глаз это читается как съехавшая вёрстка, хотя оба блока
+  // по отдельности стоят правильно.
+  .o-mail-ChatterContainer {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
 
   .o-mail-Chatter {
     border: 1px solid var(--coop-line, #e6e6e1);

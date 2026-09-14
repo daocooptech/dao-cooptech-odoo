@@ -52,11 +52,17 @@
                 t-on-click="() => this.openCatalog()">+</button>
       </div>
       <nav aria-label="Расширения">
+        <!-- Раздел без действия ещё не перенесён на движок. Пункт
+             оставлен намеренно, но выглядеть он должен иначе: без
+             пометки меню читается как наполовину сломанное, а не как
+             наполовину готовое. -->
         <a t-foreach="state.extensions" t-as="item" t-key="item.label"
            href="#" class="o_coop_nav_item"
-           t-att-class="{ 'active': isActive(item) }"
+           t-att-class="{ 'active': isActive(item), 'o_coop_nav_soon': !item.actionId }"
+           t-att-title="item.actionId ? undefined : 'Раздел ещё не перенесён на движок'"
            t-on-click.prevent="() => this.open(item)">
           <span t-esc="item.label"/>
+          <span class="o_coop_soon_mark" t-if="!item.actionId">скоро</span>
         </a>
       </nav>
 
