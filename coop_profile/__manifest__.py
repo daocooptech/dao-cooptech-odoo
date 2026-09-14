@@ -30,6 +30,7 @@
         'security/ir.model.access.csv',
         'security/coop_profile_rules.xml',
         'views/coop_profile_views.xml',
+        'data/coop_home.xml',
     ],
     'assets': {
         'web.assets_backend': [

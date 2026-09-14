@@ -141,3 +141,53 @@ class ResUsers(models.Model):
         self.ensure_one()
         self.sudo().coop_acting_as_id = partner_id or False
         return True
+
+    # ── Умолчания новой учётной записи ───────────────────────────────────
+    #
+    # В Odoo 19 шаблона новой учётной записи для внутренних участников
+    # нет: `base.default_user` из базового модуля исчез, а
+    # `base.template_portal_user_id` — про портальных. Поэтому умолчания
+    # ставятся при создании, а не правкой шаблона: иначе каждый новый
+    # участник заходит в список приложений Odoo на английском языке.
+
+    @api.model
+    def _coop_home_action(self):
+        """Домашний экран платформы.
+
+        «Моя страница» — решение владельца от 14 сентября 2026: после
+        ввода логина и пароля человек попадает на свою страницу. Пока
+        модуль профиля не установлен, домашним остаётся каталог людей.
+        """
+        return (self.env.ref('coop_profile.action_coop_my_page',
+                             raise_if_not_found=False)
+                or self.env.ref('coop_people.action_coop_people',
+                                raise_if_not_found=False))
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        # Язык проверяется до создания. После него поле уже заполнено
+        # умолчанием Odoo — английским, — и «не задан» отличить от
+        # «выбран английский» нельзя.
+        without_lang = [not vals.get('lang') for vals in vals_list]
+        users = super().create(vals_list)
+
+        home = self._coop_home_action()
+        # Портальным домашний экран платформы не ставим: у них своя
+        # оболочка, и действие панели управления им не открыть.
+        fresh = users.filtered(lambda user: not user.share)
+        if home:
+            need_home = fresh.filtered(lambda user: not user.action_id)
+            if need_home:
+                need_home.sudo().action_id = home.id
+
+        lang = self.env['ir.config_parameter'].sudo().get_param(
+            'coop.default_lang')
+        if lang and self.env['res.lang'].sudo().with_context(
+                active_test=False).search_count([('code', '=', lang)]):
+            need_lang = self.browse()
+            for user, was_empty in zip(users, without_lang):
+                if was_empty and user in fresh:
+                    need_lang |= user
+            if need_lang:
+                need_lang.sudo().lang = lang
+        return users
