@@ -22,7 +22,39 @@ class CoopSetup(models.AbstractModel):
         self._setup_currency()
         self._setup_language()
         self._setup_home()
+        self._setup_branding()
         return True
+
+    def _setup_branding(self):
+        """Имя платформы в заголовке вкладки и в интерфейсе.
+
+        Дистрибутив Rudoo подписывает интерфейс своим именем через модуль
+        дебрендинга: в заголовке вкладки стояло «Руодоо». Это имя сборки
+        движка, а не платформы, и участник его нигде больше не встречает.
+
+        Правится параметрами узла, а не самим модулем: он чужой и лежит
+        в `rudoo-addons`. Правка на месте живёт до первого обновления
+        дистрибутива, а параметр переживает его.
+
+        Заголовок длинный намеренно — так его назвал владелец. На
+        карточке записи движок дописывает к нему имя записи, и вкладка
+        выходит длинной; зато вкладка, открытая отдельно, говорит, что
+        это за платформа, а не что за сборка.
+        """
+        params = self.env['ir.config_parameter'].sudo()
+        branding = {
+            'web_debranding.new_name': 'COOPTECH',
+            'web_debranding.new_title':
+                'COOPTECH — Децентрализованная социально-экономическая '
+                'платформа с открытым исходным кодом',
+        }
+        changed = []
+        for key, value in branding.items():
+            if params.get_param(key) != value:
+                params.set_param(key, value)
+                changed.append(key)
+        if changed:
+            _logger.info('Имя платформы в интерфейсе: %s', ', '.join(changed))
 
     def _setup_language(self):
         """Русский — язык платформы по умолчанию.

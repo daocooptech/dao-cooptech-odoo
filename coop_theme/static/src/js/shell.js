@@ -33,6 +33,7 @@ export class CoopTabs extends Component {
 
     setup() {
         this.menus = useService("menu");
+        this.action = useService("action");
         this.state = useState({ tabs: [], current: null });
         this.lastActionId = null;
         this.refresh();
@@ -41,12 +42,32 @@ export class CoopTabs extends Component {
         // пуста. Поэтому слушаем ещё и общее событие о смене экрана —
         // так же, как боковое меню.
         this.env.bus.addEventListener("ACTION_MANAGER:UPDATE", ({ detail }) => {
-            const action = detail?.componentProps?.action;
+            const action = this._actionFromEvent(detail);
             if (action?.id) {
                 this.lastActionId = action.id;
             }
             this.refresh();
         });
+    }
+
+    /**
+     * Какое действие открыто сейчас.
+     *
+     * Раньше оно приходило прямо в событии — `detail.componentProps.action`.
+     * В Odoo 19 в `componentProps` этого ключа больше нет вовсе: там
+     * `context`, `domain`, `resModel` и прочее устройство представления.
+     * Событие приходит, действие в нём не приходит, слушатель выходит
+     * первой же строкой — и подсветка открытого раздела пропадает
+     * целиком, без единой ошибки в журнале.
+     *
+     * Спрашиваем службу действий: она знает открытый экран независимо от
+     * того, что положили в событие. Прежний путь оставлен запасным —
+     * если в следующей версии ключ вернётся, ничего чинить не придётся.
+     */
+    _actionFromEvent(detail) {
+        return (this.action?.currentController?.action
+                || detail?.componentProps?.action
+                || null);
     }
 
     get actionId() {
@@ -108,7 +129,13 @@ export class CoopSidebar extends Component {
         onWillStart(async () => {
             await this.load();
             if (!this.state.current) {
-                this.state.current = await this._currentAction();
+                // Сначала спрашиваем службу действий: к моменту, когда
+                // меню собралось, экран обычно уже открыт, и она знает
+                // его без единого запроса. Разбор адреса остаётся
+                // запасным — на случай холодной загрузки, когда служба
+                // ещё пуста.
+                const open = this._actionFromEvent();
+                this.state.current = open?.id || await this._currentAction();
             }
         });
 
@@ -117,7 +144,7 @@ export class CoopSidebar extends Component {
         // пустой; поэтому текущее действие берётся из общего события, которым
         // Odoo объявляет о смене экрана.
         this.env.bus.addEventListener("ACTION_MANAGER:UPDATE", ({ detail }) => {
-            const action = detail?.componentProps?.action;
+            const action = this._actionFromEvent(detail);
             const previous = this.state.current;
             if (!action) {
                 return;
@@ -229,9 +256,47 @@ export class CoopSidebar extends Component {
      * может нести внешний идентификатор вместо числа, и тогда его надо
      * разрешить, иначе подсветки на первом экране не будет вовсе.
      */
+    /**
+     * Какое действие открыто сейчас.
+     *
+     * Раньше оно приходило прямо в событии — `detail.componentProps.action`.
+     * В Odoo 19 в `componentProps` этого ключа больше нет вовсе: там
+     * `context`, `domain`, `resModel` и прочее устройство представления.
+     * Событие приходит, действие в нём не приходит, слушатель выходит
+     * первой же строкой — и подсветка открытого раздела пропадает
+     * целиком, без единой ошибки в журнале.
+     *
+     * Спрашиваем службу действий: она знает открытый экран независимо от
+     * того, что положили в событие. Прежний путь оставлен запасным —
+     * если в следующей версии ключ вернётся, ничего чинить не придётся.
+     */
+    _actionFromEvent(detail) {
+        return (this.action?.currentController?.action
+                || detail?.componentProps?.action
+                || null);
+    }
+
     async _currentAction() {
-        const path = browser.location.pathname.match(/\/odoo\/action-([^/?#]+)/);
+        const pathname = browser.location.pathname;
+        let path = pathname.match(/\/odoo\/action-([^/?#]+)/);
         if (!path) {
+            // Короткий адрес раздела: /odoo/projects вместо
+            // /odoo/action-803. Их завели ради читаемых ссылок, а разбор
+            // адреса остался прежним — и раздел, открытый по короткому
+            // адресу, подсветки не получал.
+            const short = pathname.match(/^\/odoo\/([a-z][\w-]*)\/?$/);
+            if (short) {
+                try {
+                    // Через свой метод: читать `ir.actions.actions` из
+                    // браузера участнику не положено, и прямой запрос
+                    // отвечает «Odoo Server Error».
+                    const resolved = await this.orm.call(
+                        "coop.shell", "resolve_paths", [[short[1]]]);
+                    return resolved[short[1]] || null;
+                } catch {
+                    return null;
+                }
+            }
             return null;
         }
         const raw = decodeURIComponent(path[1]);

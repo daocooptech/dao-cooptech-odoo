@@ -28,6 +28,25 @@ class CoopShell(models.AbstractModel):
                 resolved[xmlid] = record.id
         return resolved
 
+    @api.model
+    def resolve_paths(self, paths):
+        """Номера действий по коротким адресам.
+
+        Через свой метод, а не запросом к `ir.actions.actions` из
+        браузера: читать эту модель участнику не положено, и прямой
+        `search_read` отвечает «Odoo Server Error» — без объяснения, что
+        именно не так. Подсветка открытого раздела от этого молча
+        пропадала на всех коротких адресах, то есть на всей платформе.
+        """
+        resolved = {}
+        if not paths:
+            return resolved
+        actions = self.env['ir.actions.actions'].sudo().search(
+            [('path', 'in', list(paths))])
+        for action in actions:
+            resolved[action.path] = action.id
+        return resolved
+
     # ── Переключатель «действую от имени…» ───────────────────────────────
     #
     # Организация — сторона обязательства, но кнопку всегда нажимает
