@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 """Потребности проектов и предложения на них.
 
+Трудовые потребности заводятся вакансиями, а не объявлениями ресурсов:
+решение владельца от 14 сентября 2026 — «вакансии из проектов
+размещаются в вакансиях а не в ресурсах». Каталог ресурсов про вещи,
+работа живёт в своём каталоге, где есть специализация, навыки и отклики.
+
 Потребность — объявление спроса в каталоге ресурсов, привязанное к
 проекту. Порядок фрилансовый: на каждую приходят предложения, и
 ответственный утверждает одно, остальные отклоняются.
@@ -108,6 +113,9 @@ def load_project_needs(env, target=TARGET_NEEDS):
     rnd = random.Random(20260914)
     today = fields.Date.today()
     made_needs = made_offers = closed = 0
+    # Счётчик закрытых живёт в списке: вакансии заводит отдельная
+    # функция, а число закрытых нужно общее.
+    closed_box = [0]
 
     for index, project in enumerate(projects):
         if made_needs >= target:
@@ -128,6 +136,12 @@ def load_project_needs(env, target=TARGET_NEEDS):
             manager = (project.contribution_ids.filtered(
                 lambda c: c.state == 'accepted')[:1].partner_id
                 if order and project.contribution_ids else False)
+
+            if kind in ('labour', 'service'):
+                made_needs += _make_vacancy(
+                    env, project, title, price, manager, rnd, today,
+                    people, closed_box)
+                continue
 
             with env.cr.savepoint():
                 need = Resource.create({
@@ -191,5 +205,72 @@ def load_project_needs(env, target=TARGET_NEEDS):
                     closed += 1
 
     _logger.info('Потребностей: %s, предложений: %s, закрыто: %s',
-                 made_needs, made_offers, closed)
+                 made_needs, made_offers, closed + closed_box[0])
     return made_needs
+
+
+def _make_vacancy(env, project, title, price, manager, rnd, today, people,
+                  closed_box):
+    """Трудовая потребность — вакансия проекта с откликами.
+
+    Вознаграждение долей, а не деньгами: работа в кооперативном проекте
+    и есть вклад, от которого считается доля. Деньгами платят там, где
+    нанимают, — а нанимает организация, не проект.
+    """
+    Vacancy = env['coop.vacancy'].sudo()
+    Application = env['coop.vacancy.application'].sudo()
+    Contribution = env['coop.project.contribution'].sudo()
+
+    with env.cr.savepoint():
+        vacancy = Vacancy.create({
+            'name': title,
+            'coop_project_id': project.id,
+            'partner_id': project.partner_id.id,
+            'need_manager_id': manager.id if manager else False,
+            'city': project.city,
+            'contribution_value': price,
+            'reward_kind': 'share',
+            'state': 'published',
+            'description': '<p>Работа нужна проекту «%s».</p>' % project.name,
+        })
+
+    applicants = []
+    for step in range(rnd.randint(2, 4)):
+        who = people[(project.id * 7 + step * 5) % len(people)]
+        if who == project.partner_id or who in applicants:
+            continue
+        applicants.append(who)
+        with env.cr.savepoint():
+            Application.create({
+                'vacancy_id': vacancy.id,
+                'partner_id': who.id,
+                'state': 'applied',
+                'message': 'Возьмусь: %s' % title.lower(),
+            })
+
+    # Часть вакансий уже закрыта утверждённым откликом — по ним видно,
+    # как работает выбор.
+    if applicants and rnd.random() < 0.5:
+        chosen = vacancy.application_ids.filtered(
+            lambda app: app.state == 'applied')[:1]
+        if chosen:
+            with env.cr.savepoint():
+                contribution = Contribution.create({
+                    'project_id': project.id,
+                    'partner_id': chosen.partner_id.id,
+                    'kind': 'labour',
+                    'name': title,
+                    'value': price,
+                    'state': 'accepted',
+                    'accepted_on': today,
+                })
+                chosen.write({'state': 'invited',
+                              'contribution_id': contribution.id})
+                others = vacancy.application_ids.filtered(
+                    lambda app: app.state == 'applied')
+                if others:
+                    others.write({'state': 'declined'})
+                vacancy.write({'state': 'closed',
+                               'need_accepted_id': contribution.id})
+                closed_box[0] += 1
+    return 1

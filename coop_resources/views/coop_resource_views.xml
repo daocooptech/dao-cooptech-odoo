@@ -424,11 +424,24 @@
             sequence="15"/>
   <menuitem id="menu_coop_promotion" name="Продвижение"
             parent="menu_coop_resources_root" action="action_coop_promotion" sequence="20"/>
+  <!--
+    Места в выдаче — часть продвижения, а не отдельная вкладка раздела
+    (решение владельца от 2026-09-14). Участник приходит сюда не «сначала
+    посмотреть места», а купить показ: место — подробность покупки, и
+    жить ей внутри продвижения.
+  -->
   <menuitem id="menu_coop_promotion_slot" name="Места в выдаче"
-            parent="menu_coop_resources_root" action="action_coop_promotion_slot"
+            parent="menu_coop_promotion" action="action_coop_promotion_slot"
             sequence="30"/>
+
+  <!--
+    Справочников в разделе нет: рубрики и способы передачи — настройка
+    узла, а не то, чем участник пользуется каждый день. Вкладка убрана
+    решением владельца от 2026-09-14; сами справочники остаются
+    доступными через настройки и по прямой ссылке.
+  -->
   <menuitem id="menu_coop_resources_config" name="Справочники"
-            parent="menu_coop_resources_root" sequence="90"/>
+            parent="menu_coop_resources_root" sequence="90" active="False"/>
   <menuitem id="menu_coop_resource_category" name="Категории ресурсов"
             parent="menu_coop_resources_config" action="action_coop_resource_category"
             sequence="10"/>

@@ -416,6 +416,60 @@ class CoopProject(models.Model):
         self.write({'state': 'cancelled'})
         return True
 
+    # Состояния, в которых проект больше никого не ищет. Отмена — совсем,
+    # заморозка — до поры; объявления снимаются в обоих случаях, потому
+    # что снаружи разницы нет: человек откликается на потребность, которой
+    # уже не существует.
+    #
+    # Заморозки в состояниях ещё нет — она предложена разбором экономиста
+    # и ждёт решения. Когда появится, её достаточно дописать сюда.
+    SILENT_STATES = ('cancelled',)
+
+    def write(self, vals):
+        """Снять объявления, когда проект перестал искать.
+
+        Не в `action_cancel`, а в `write`: отменить проект можно и
+        загрузчиком, и переносом, и правкой из списка — а объявление в
+        каталоге живёт своей жизнью и само о проекте не узнает.
+        """
+        result = super().write(vals)
+        if vals.get('state') in self.SILENT_STATES:
+            self.filtered(
+                lambda record: record.state in record.SILENT_STATES
+            )._withdraw_listings()
+        return result
+
+    def _withdraw_listings(self):
+        """Снять с публикации потребности и вакансии проекта.
+
+        Обратно они сами не возвращаются: проект, который снова открыли,
+        решает заново, что ему нужно. Возвращать всё скопом значило бы
+        воскресить и то, что уже не актуально.
+        """
+        withdrawn = 0
+        for record in self:
+            needs = record.need_ids.filtered(
+                lambda need: need.state == 'published')
+            if needs:
+                needs.sudo().write({'state': 'closed'})
+                withdrawn += len(needs)
+            if 'coop.vacancy' in self.env:
+                vacancies = self.env['coop.vacancy'].sudo().search([
+                    ('coop_project_id', '=', record.id),
+                    ('state', '=', 'published'),
+                ])
+                if vacancies:
+                    vacancies.write({'state': 'closed'})
+                    withdrawn += len(vacancies)
+            if withdrawn:
+                record.message_post(body=_(
+                    'Проект остановлен: объявления сняты с публикации, '
+                    'снято всего %(count)s.', count=withdrawn))
+        if withdrawn:
+            _logger.info('Снято объявлений остановленных проектов: %s',
+                         withdrawn)
+        return withdrawn
+
     def action_open_project(self):
         self.ensure_one()
         if not self.project_id:
