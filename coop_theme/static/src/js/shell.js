@@ -124,6 +124,7 @@ export class CoopSidebar extends Component {
         this.state = useState({
             main: [], extensions: [], admin: [], current: null, model: null, open: false,
             acting: null, actors: [],
+            path: browser.location.pathname,
         });
 
         onWillStart(async () => {
@@ -144,6 +145,12 @@ export class CoopSidebar extends Component {
         // пустой; поэтому текущее действие берётся из общего события, которым
         // Odoo объявляет о смене экрана.
         this.env.bus.addEventListener("ACTION_MANAGER:UPDATE", ({ detail }) => {
+            // Адрес запоминаем первым и всегда, до любых проверок. Это
+            // и признак раздела для подсветки, и то, что заставляет
+            // меню перерисоваться: `location` сам по себе не
+            // реактивен, и без этой строки подсветка оставалась бы на
+            // прошлом разделе, даже зная правильный адрес.
+            this.state.path = browser.location.pathname;
             const action = this._actionFromEvent(detail);
             const previous = this.state.current;
             if (!action) {
@@ -311,6 +318,23 @@ export class CoopSidebar extends Component {
         }
     }
 
+    /**
+     * Первый кусок адреса после /odoo — короткий адрес раздела.
+     *
+     * Карточка записи выглядит как /odoo/projects/4, и первый кусок у
+     * неё тот же: человек стоит внутри раздела, и подсвечен должен быть
+     * он. Служебные адреса движка (/odoo/action-803, /odoo/coop.wallet/6)
+     * сюда не попадают — там либо «action-», либо имя модели с точкой,
+     * и ни то ни другое коротким адресом не бывает.
+     */
+    _pathSegment() {
+        // Из состояния, а не прямо из `location`: состояние реактивно, и
+        // от него перерисовка. Значение то же — его кладёт слушатель.
+        const pathname = this.state.path || browser.location.pathname;
+        const match = pathname.match(/^\/odoo\/([a-z][\w-]*)(?:\/|$)/);
+        return match ? match[1] : null;
+    }
+
     /** Есть ли такое действие среди пунктов меню. */
     _knownAction(action) {
         if (action.tag === "coop_soon") {
@@ -323,6 +347,19 @@ export class CoopSidebar extends Component {
     }
 
     isActive(item) {
+        // Первым — адрес. Он виден всегда, не зависит ни от событий
+        // движка, ни от запросов к серверу, и переживает обновление
+        // мажорной версии: /odoo/projects — это раздел «Проекты», и
+        // спорить тут не с чем.
+        //
+        // Это не украшение порядка проверок. Подсветка ломалась дважды,
+        // и оба раза потому, что опознание раздела стояло на чужой
+        // механике: сперва на форме события о смене экрана, потом на
+        // праве читать `ir.actions.actions`. Адрес не ломается.
+        if (item.path && this._pathSegment() === item.path) {
+            return true;
+        }
+
         const current = this.state.current;
         if (current) {
             if (!item.actionId) {

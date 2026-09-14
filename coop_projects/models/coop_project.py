@@ -949,7 +949,7 @@ class CoopProjectContribution(models.Model):
              'после передачи по акту. Окно открывается заново, если '
              'проект существенно изменился.')
     can_withdraw = fields.Boolean(
-        string='Можно отозвать', compute='_compute_withdraw_until')
+        string='Можно отозвать', compute='_compute_can_withdraw')
     refund_amount = fields.Monetary(
         string='Возвращено', currency_field='currency_id', readonly=True,
         copy=False)
@@ -1132,18 +1132,15 @@ class CoopProjectContribution(models.Model):
             else:
                 record.return_mode = 'in_kind'
 
+    # Два вычисления, а не одно на оба поля. Одно хранимое, другое нет, и
+    # Odoo на общий метод ругается: обращение к нехранимому пересчитывает
+    # и перезаписывает хранимое. Предупреждение в журнале при каждой
+    # загрузке реестра — верный способ перестать его замечать.
     @api.depends('state', 'accepted_on', 'delivered_on',
-                 'project_id.date_deadline', 'project_id.state')
+                 'project_id.date_deadline')
     def _compute_withdraw_until(self):
-        today = fields.Date.context_today(self)
         for record in self:
             record.withdraw_until = False
-            record.can_withdraw = False
-            if record.state == 'offered':
-                # Непринятый вклад отзывается свободно и всегда: проект
-                # на него ещё не рассчитывал.
-                record.can_withdraw = record.project_id.state == 'gathering'
-                continue
             if record.state != 'accepted' or not record.accepted_on:
                 continue
             if record.delivered_on:
@@ -1154,8 +1151,23 @@ class CoopProjectContribution(models.Model):
             if deadline and deadline < until:
                 until = deadline
             record.withdraw_until = until
-            record.can_withdraw = (today <= until
-                                   and record.project_id.state == 'gathering')
+
+    @api.depends('state', 'withdraw_until', 'delivered_on',
+                 'project_id.state')
+    def _compute_can_withdraw(self):
+        today = fields.Date.context_today(self)
+        for record in self:
+            gathering = record.project_id.state == 'gathering'
+            if record.state == 'offered':
+                # Непринятый вклад отзывается свободно: проект на него
+                # ещё не рассчитывал.
+                record.can_withdraw = gathering
+            elif record.state == 'accepted' and record.withdraw_until:
+                record.can_withdraw = (gathering
+                                       and not record.delivered_on
+                                       and today <= record.withdraw_until)
+            else:
+                record.can_withdraw = False
 
     # ── Действия возврата ────────────────────────────────────────────────
 

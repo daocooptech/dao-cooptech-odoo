@@ -269,6 +269,14 @@
   <record id="action_coop_exchange_screen" model="ir.actions.client">
     <field name="name">Биржа</field>
     <field name="tag">coop_tokenomics.exchange</field>
+    <!-- Короткий адрес нужен не только ради читаемой ссылки: по нему
+         боковое меню узнаёт открытый раздел. Единственный пункт без
+         адреса подсвечивался обходным путём, через номер действия, —
+         а он у клиентских действий приходит не всегда.
+
+         «token-exchange» уже занят окном биржи заявок; адрес уникален
+         на все действия сразу, включая штатные Odoo. -->
+    <field name="path">tokenomics</field>
   </record>
 
   <record id="action_coop_token_exchange" model="ir.actions.act_window">

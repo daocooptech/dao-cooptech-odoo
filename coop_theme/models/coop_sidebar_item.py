@@ -384,6 +384,15 @@ class CoopSidebarItem(models.Model):
             [i.action_id.id for i in items if i.action_id]).exists()
         models_by_action = {w.id: w.res_model for w in windows}
 
+        # Короткий адрес раздела: /odoo/projects. По нему подсветка
+        # опознаёт открытый раздел, не спрашивая ни событий движка, ни
+        # сервера. Адрес виден всегда и не зависит от того, как именно
+        # открыт экран, — а событие о смене экрана уже дважды меняло
+        # форму между версиями Odoo и дважды уносило с собой подсветку.
+        paths = self.env['ir.actions.actions'].sudo().browse(
+            [i.action_id.id for i in items if i.action_id]).exists()
+        path_by_action = {a.id: a.path for a in paths if a.path}
+
         return [{
             'id': item.id,
             'label': item.name,
@@ -396,6 +405,7 @@ class CoopSidebarItem(models.Model):
             # раздела «Кошелёк», а не из того, откуда пришли.
             'model': (models_by_action.get(item.action_id.id)
                       or MODEL_HINTS.get(item.name) or False),
+            'path': path_by_action.get(item.action_id.id) or False,
             'section': item.section,
         } for item in items]
 
