@@ -224,6 +224,12 @@ class CoopIntangibleLicense(models.Model):
     licensor_id = fields.Many2one(
         'res.partner', related='intangible_id.owner_id', store=True,
         string='Правообладатель')
+    # Вид берётся у актива: своего у лицензии нет и быть не может —
+    # лицензия на товарный знак и лицензия на ноу-хау различаются именно
+    # тем, на что они выданы. Хранится, потому что по нему раскладывают
+    # полки каталога, а группировка по несохранённому полю невозможна.
+    kind = fields.Selection(
+        related='intangible_id.kind', store=True, index=True, string='Вид')
     licensee_id = fields.Many2one(
         'res.partner', string='Кому выдана', index=True,
         help='Пусто — лицензия выставлена на витрину и ждёт покупателя.')

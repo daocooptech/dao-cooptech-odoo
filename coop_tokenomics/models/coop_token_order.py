@@ -36,6 +36,12 @@ class CoopTokenOrder(models.Model):
     claim_id = fields.Many2one(
         'coop.token.claim', string='Выпуск', required=True, index=True,
         ondelete='cascade')
+    # Рубрика заявки — рубрика того ресурса, чьё обещание продаётся.
+    # «Вид» и «сторона» ниже для полок не годятся: это направление
+    # сделки, а не то, чем на бирже торгуют.
+    resource_category_id = fields.Many2one(
+        'coop.resource.category', related='claim_id.resource_category_id',
+        store=True, index=True, string='Раздел')
     kind = fields.Selection([
         ('primary', 'Первичная продажа'),
         ('secondary', 'Перепродажа'),

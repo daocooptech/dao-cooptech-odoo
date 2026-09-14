@@ -20,9 +20,17 @@
           </button>
         </div>
         <div class="o_coop_shelf_row">
-          <div class="o_coop_shelf_card" t-foreach="shelf.records" t-as="rec" t-key="rec.id"
+          <!--
+            Две карточки, а не одна с необязательным снимком. Каталог без
+            снимков — складчина, сделки, выпуски ЦФА — со снимочной
+            карточкой превращается в ряд одинаковых заглушек, и полка
+            перестаёт что-либо сообщать. Там, где снимать нечего, карточка
+            становится текстовой: название крупно, город снизу.
+          -->
+          <div t-foreach="shelf.records" t-as="rec" t-key="rec.id"
+               t-att-class="hasPhotos ? 'o_coop_shelf_card' : 'o_coop_shelf_card o_coop_shelf_card--text'"
                t-on-click="() => this.open(rec)">
-            <div class="o_coop_shelf_photo">
+            <div class="o_coop_shelf_photo" t-if="hasPhotos">
               <img t-att-src="photo(rec)" t-att-alt="rec.display_name" loading="lazy"/>
               <span class="o_coop_shelf_city" t-if="rec.city">
                 <i class="fa fa-map-marker" aria-hidden="true"/>
@@ -30,6 +38,10 @@
               </span>
             </div>
             <div class="o_coop_shelf_name"><t t-esc="rec.display_name"/></div>
+            <div class="o_coop_shelf_where" t-if="!hasPhotos and rec.city">
+              <i class="fa fa-map-marker" aria-hidden="true"/>
+              <t t-esc="rec.city"/>
+            </div>
           </div>
         </div>
       </div>

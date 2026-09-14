@@ -51,6 +51,12 @@ class CoopTokenClaim(models.Model):
         help='Публикация ресурса, из которой выпущены токены. Выпуск не '
              'существует сам по себе: он всегда обещание по конкретному '
              'объявлению.')
+    # Рубрика требования — рубрика того ресурса, на который оно выдано:
+    # обещание тонны зерна лежит на той же полке, что и само зерно.
+    # Хранится ради группировки в полках каталога.
+    resource_category_id = fields.Many2one(
+        'coop.resource.category', related='resource_id.category_id',
+        store=True, index=True, string='Раздел')
     issuer_id = fields.Many2one(
         'res.partner', string='Поставщик', required=True, index=True,
         help='Кто обязан поставить. Он же владелец jetton-мастера.')

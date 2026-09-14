@@ -32,6 +32,9 @@ export class CoopShelves extends Component {
         this.orm = useService("orm");
         this.action = useService("action");
         this.state = useState({ shelves: [], loading: true });
+        // Снимки — признак всего каталога, а не отдельной карточки:
+        // разметка выбирает по нему вид карточки целиком.
+        this.hasPhotos = false;
 
         onWillStart(async () => {
             // Полки не имеют права уронить каталог. Один неверный вызов
@@ -63,6 +66,7 @@ export class CoopShelves extends Component {
 
     async load() {
         const domain = this.props.domain || [];
+        await this.readFieldInfo(domain);
         // Сначала спрашиваем, какие рубрики вообще есть и сколько в них
         // записей: полка из одной карточки выглядит ошибкой, и такие
         // рубрики отсеиваются здесь, а не в разметке.
@@ -82,18 +86,37 @@ export class CoopShelves extends Component {
             );
         }
         const считать = (g) => g.__count ?? g[this.props.field + "_count"] ?? 0;
+        const подпись = (значение) => {
+            // У списка выбора сервер отдаёт техническое значение —
+            // `equipment`, `barter`, `running`, — и на полке стояло бы
+            // именно оно. Метки берём у самой модели, одним запросом на
+            // каталог.
+            if (Array.isArray(значение)) {
+                return значение[1];
+            }
+            return this.labels[значение] || значение;
+        };
         const годные = groups
             .filter((g) => g[this.props.field] && считать(g) >= 3)
             .sort((a, b) => считать(b) - считать(a))
             .slice(0, this.maxShelves);
 
+        // Одна полка — это не витрина, а тот же каталог с заголовком.
+        // Так выходит там, где правила доступа оставили человеку
+        // несколько записей одного вида: полок нет, каталог работает
+        // как обычно.
+        if (годные.length < 2) {
+            return;
+        }
+
         for (const g of годные) {
             const значение = g[this.props.field];
-            const [id, label] = Array.isArray(значение) ? значение : [значение, значение];
+            const id = Array.isArray(значение) ? значение[0] : значение;
+            const label = подпись(значение);
             const записи = await this.orm.searchRead(
                 this.props.resModel,
                 domain.concat([[this.props.field, "=", id]]),
-                ["display_name", "city"],
+                this.cardFields,
                 { limit: this.perShelf }
             );
             this.state.shelves.push({
@@ -102,7 +125,50 @@ export class CoopShelves extends Component {
         }
     }
 
+    /**
+     * Что за поле группировки и есть ли у каталога снимки.
+     *
+     * Два вопроса, оба к самой модели, и оба обязательны.
+     *
+     * Первый: у списка выбора метки живут в описании поля, а не в
+     * данных. Без них на полке стоит `equipment` вместо
+     * «Оборудование».
+     *
+     * Второй: поле снимка бывает объявлено, а снимков нет ни у одной
+     * записи — движок тогда отдаёт на каждую свою серую заглушку, и
+     * полка выходит рядом одинаковых серых прямоугольников. Проверки
+     * «поле существует» мало, нужен счёт непустых.
+     */
+    async readFieldInfo(domain) {
+        this.labels = {};
+        this.hasPhotos = false;
+        this.cardFields = ["display_name"];
+        const info = await this.orm.call(
+            this.props.resModel, "fields_get",
+            [[this.props.field, "image_512", "city"], ["type", "selection"]]);
+        const поле = info[this.props.field] || {};
+        if (поле.type === "selection") {
+            for (const [код, метка] of поле.selection || []) {
+                this.labels[код] = метка;
+            }
+        }
+        // Город на карточке — но не там, где по городу разложены сами
+        // полки: под заголовком «Казань» ряд карточек с подписью
+        // «Казань» на каждой ничего не сообщает.
+        if (info.city && this.props.field !== "city") {
+            this.cardFields.push("city");
+        }
+        if (info.image_512) {
+            const снимков = await this.orm.searchCount(
+                this.props.resModel, domain.concat([["image_512", "!=", false]]));
+            this.hasPhotos = снимков > 0;
+        }
+    }
+
     photo(record) {
+        if (!this.hasPhotos) {
+            return false;
+        }
         return `/web/image/${this.props.resModel}/${record.id}/image_512`;
     }
 

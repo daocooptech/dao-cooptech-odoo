@@ -207,7 +207,7 @@
     <field name="path">intangibles</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="search_view_id" ref="view_coop_intangible_search"/>
-    <field name="context">{'coop_section': 1, 'coop_catalog': 1}</field>
+    <field name="context">{'coop_section': 1, 'coop_catalog': 1, 'coop_shelf_field': 'kind'}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Активов пока нет</p>
       <p>Рецептура, программа, товарный знак, сорт — то, что у кооператива
@@ -415,7 +415,7 @@
     <field name="res_model">coop.intangible.license</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="search_view_id" ref="view_coop_license_search"/>
-    <field name="context">{'coop_section': 1, 'coop_catalog': 1}</field>
+    <field name="context">{'coop_section': 1, 'coop_catalog': 1, 'coop_shelf_field': 'kind'}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Лицензий пока нет</p>
       <p>Кооператив продаёт соседнему право пользоваться своей

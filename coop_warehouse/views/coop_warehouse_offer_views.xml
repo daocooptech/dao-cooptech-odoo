@@ -222,7 +222,7 @@
     <field name="path">warehouse-market</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('state', 'in', ('published', 'matched'))]</field>
-    <field name="context">{'bin_size': True,'coop_catalog': 1, 'search_default_side_offer': 1}</field>
+    <field name="context">{'bin_size': True,'coop_catalog': 1, 'search_default_side_offer': 1, 'coop_shelf_field': 'storage_kind'}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">На бирже пока пусто</p>
       <p>Свободное место одного участника закрывает потребность другого

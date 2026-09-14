@@ -285,7 +285,7 @@
     <field name="path">token-exchange</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="search_view_id" ref="view_coop_token_order_search"/>
-    <field name="context">{'search_default_open': 1, 'coop_section': 1, 'coop_catalog': 1}</field>
+    <field name="context">{'search_default_open': 1, 'coop_section': 1, 'coop_catalog': 1, 'coop_shelf_field': 'resource_category_id'}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Заявок пока нет</p>
       <p>Здесь торгуются права на будущий товар: тонна моркови первого
@@ -436,7 +436,7 @@
     <field name="res_model">coop.token.claim</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="search_view_id" ref="view_coop_token_claim_search"/>
-    <field name="context">{'coop_section': 1, 'coop_catalog': 1}</field>
+    <field name="context">{'coop_section': 1, 'coop_catalog': 1, 'coop_shelf_field': 'resource_category_id'}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Выпусков пока нет</p>
       <p>Выпуск заводится при публикации объявления: отмечаете «выпустить

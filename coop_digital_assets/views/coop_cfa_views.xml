@@ -183,7 +183,7 @@
     <field name="path">cfa</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="search_view_id" ref="view_coop_cfa_issue_search"/>
-    <field name="context">{'coop_section': 1, 'coop_catalog': 1}</field>
+    <field name="context">{'coop_section': 1, 'coop_catalog': 1, 'coop_shelf_field': 'rights_kind'}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Заявок пока нет</p>
       <p>Здесь собирается всё, что оператор всё равно спросит: кто
