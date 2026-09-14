@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 
 class CoopProject(models.Model):
@@ -29,6 +29,16 @@ class CoopProject(models.Model):
 
     share_rate_ids = fields.One2many(
         'coop.project.share.rate', 'project_id', string='Ставки по видам вклада')
+    share_rates_frozen = fields.Boolean(
+        string='Ставки заморожены', compute='_compute_share_rates_frozen',
+        help='С первым принятым вкладом ставки перестают меняться: доли '
+             'тех, кто вошёл раньше, пересчитались бы задним числом.')
+
+    @api.depends('contribution_ids.state')
+    def _compute_share_rates_frozen(self):
+        for record in self:
+            record.share_rates_frozen = bool(record.contribution_ids.filtered(
+                lambda c: c.state == 'accepted'))
     share_total = fields.Float(
         string='Долей выпущено', compute='_compute_share_total', store=True,
         digits=(16, 3),
@@ -41,24 +51,39 @@ class CoopProject(models.Model):
             record.share_total = sum(record.contribution_ids.filtered(
                 lambda c: c.state == 'accepted').mapped('share_tokens'))
 
+    # Коэффициент — плата за невозвратность, а не за «ценность».
+    #
+    # Прежнее обоснование («труд ценнее капитала») не выдерживало первого
+    # спора: если час оценён справедливо в рублях, множитель учитывает
+    # труд дважды, а если ставка занижена — чинить надо ставку. Решение
+    # владельца 294 от 14 сентября 2026 меняет основание.
+    #
+    # Вклады различаются тем, что с ними происходит при провале: деньги
+    # возвращаются целиком, техника с износом, помещение занято впустую,
+    # материалы израсходованы, труд не возвращается ничем и никогда. Кто
+    # внёс невозвратное, на ту же рублёвую сумму несёт больший риск —
+    # коэффициент и есть премия за этот риск.
+    #
+    # Отсюда правило порядка, которое можно оспорить по существу: чем
+    # меньше возвращается при провале, тем выше коэффициент.
+    DEFAULT_RATES = [
+        ('labour', 1.5),      # не возвращается вовсе
+        ('material', 1.3),    # израсходованы безвозвратно
+        ('knowledge', 1.3),   # создано под проект
+        ('space', 1.15),      # объект остаётся, но занят
+        ('resource', 1.1),    # возвращается с износом
+        ('money', 1.0),       # точка отсчёта
+    ]
+
     def action_setup_share_rates(self):
         """Завести ставки по умолчанию.
 
-        Труд идёт с повышающим коэффициентом не по нашей прихоти: это
-        кооперативный принцип — распределение по труду, а не по капиталу.
         Проект вправе поменять ставки до первого принятого вклада; после
         менять их нельзя, иначе доли уже вошедших пересчитаются задним
         числом.
         """
         Rate = self.env['coop.project.share.rate']
-        defaults = [
-            ('labour', 1.5),
-            ('knowledge', 1.3),
-            ('resource', 1.0),
-            ('material', 1.0),
-            ('space', 1.0),
-            ('money', 1.0),
-        ]
+        defaults = self.DEFAULT_RATES
         for record in self:
             if record.share_rate_ids:
                 continue
@@ -109,6 +134,64 @@ class CoopProjectShareRate(models.Model):
         'unique(project_id, kind)',
         'На один вид вклада в проекте — одна ставка.',
     )
+    # Нижняя граница — не придирка. Без неё через коэффициент можно
+    # наказать неугодный вид вклада, обнулив чей-то труд решением
+    # инициатора. Верхняя — чтобы премия за риск не превращалась в
+    # способ отдать проект одному человеку.
+    def _check_not_frozen(self):
+        """Ставки заморожены с первым принятым вкладом.
+
+        Это правило было записано в пояснении к модели и нигде не
+        проверялось: менять коэффициент мог кто угодно и когда угодно, а
+        доли уже вошедших пересчитывались бы задним числом. Сам по себе
+        текст в подсказке ничего не запрещает.
+
+        Оговорка для наполнения: весь демонстрационный каталог порождён
+        загрузчиком, и когда владелец меняет шкалу, он меняет её и в
+        наполнении. Загрузчик проходит с пометкой в контексте — сюда
+        она попадает только оттуда.
+        """
+        if self.env.context.get('coop_rescale_demo'):
+            return
+        for record in self:
+            accepted = record.project_id.contribution_ids.filtered(
+                lambda c: c.state == 'accepted')
+            if accepted:
+                raise UserError(_(
+                    'В проекте «%(name)s» уже есть принятые вклады '
+                    '(%(count)s). Менять коэффициенты нельзя: доли тех, '
+                    'кто вошёл раньше, пересчитались бы задним числом.',
+                    name=record.project_id.name, count=len(accepted)))
+
+    def write(self, vals):
+        self._check_not_frozen()
+        return super().write(vals)
+
+    def unlink(self):
+        self._check_not_frozen()
+        return super().unlink()
+
+    @api.constrains('kind', 'factor')
+    def _check_money_is_the_baseline(self):
+        """Деньги — точка отсчёта, её нельзя двигать.
+
+        Коэффициент значит «во сколько раз этот вклад невозвратнее
+        денег». Сдвинуть сами деньги — всё равно что менять длину метра:
+        остальные значения перестают что-либо означать.
+        """
+        for record in self:
+            if record.kind == 'money' and round(record.factor, 3) != 1.0:
+                raise ValidationError(_(
+                    'Коэффициент денег — всегда ровно 1,0: от него '
+                    'отсчитываются остальные. Если деньги в этом проекте '
+                    'должны весить меньше труда, поднимайте коэффициент '
+                    'труда, а не опускайте денежный.'))
+
+    _factor_in_range = models.Constraint(
+        'check(factor >= 1.0 and factor <= 2.0)',
+        'Коэффициент — от 1,0 до 2,0. Ниже единицы он наказывает вид '
+        'вклада, выше двух — отдаёт проект одному вкладчику.',
+    )
     _factor_positive = models.Constraint(
         'check(factor > 0)',
         'Коэффициент должен быть больше нуля.',
@@ -139,6 +222,52 @@ class CoopProjectContribution(models.Model):
     share_minted = fields.Boolean(
         string='Доли выпущены в сеть', readonly=True, copy=False)
     share_mint_tx = fields.Char(string='Транзакция выпуска', readonly=True, copy=False)
+
+    @api.depends('share_tokens', 'state', 'project_id.share_total')
+    def _compute_share_percent(self):
+        """Доля считается от начисленных долей, а не от рублей.
+
+        Правд было две, и они расходились у 684 принятых вкладов из 921:
+        карточка проекта показывала долю от рублей, реестр долей жил по
+        начисленным долям. Спор вкладчика с проектом сводился бы к тому,
+        какое из чисел настоящее, а настоящих было два.
+
+        Настоящее — одно, по долям (решение владельца 294). Рублёвая
+        сумма остаётся ответом на другой вопрос — «сколько собрано», и
+        от неё по-прежнему считается готовность.
+
+        Если коэффициентов у проекта нет (все ставки 1,0 или модуль
+        токеномики не установлен), формула вырождается в прежнюю: доли
+        равны рублям, и доля по долям равна доле по рублям.
+        """
+        with_tokens = self.filtered(lambda c: c.project_id.share_total)
+        for record in with_tokens:
+            if record.state == 'accepted':
+                record.share_percent = round(
+                    record.share_tokens / record.project_id.share_total * 100, 2)
+            else:
+                record.share_percent = 0
+        # Проекты без выпущенных долей считает исходная формула из
+        # `coop_projects`: модуль токеномики может стоять, а проект —
+        # ещё не начислять.
+        super(CoopProjectContribution, self - with_tokens)._compute_share_percent()
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Вклад, заведённый сразу принятым, тоже получает доли.
+
+        Начисление висело только на кнопке «Принять». А вклад попадает в
+        базу и мимо неё — переносом, загрузчиком, утверждённым откликом
+        на вакансию. Такие оставались с нулём долей и пустым
+        коэффициентом, и в карточке у человека выходило «×0»:
+        признанный вклад без доли, то есть ровно то, чего эта модель не
+        должна допускать.
+        """
+        records = super().create(vals_list)
+        for record in records.filtered(
+                lambda c: c.state == 'accepted' and not c.share_tokens):
+            record._grant_shares()
+        return records
 
     def action_accept(self):
         """Принять вклад и начислить доли тем же движением."""

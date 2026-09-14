@@ -2,3 +2,4 @@
 from . import common
 from . import test_lifecycle
 from . import test_needs
+from . import test_shares

@@ -388,6 +388,36 @@ def _grant_project_shares(env):
     вкладах, и понять, работает ли он, неоткуда.
     """
     Contribution = env['coop.project.contribution'].sudo()
+    Project = env['coop.project'].sudo()
+    Rate = env['coop.project.share.rate'].sudo()
+
+    # Шкала коэффициентов изменилась (решение владельца 294 от 14 сентября
+    # 2026: материалы 1,3, помещение 1,15, техника 1,1 вместо прежних
+    # единиц). У живого проекта ставки заморожены с первого принятого
+    # вклада и переписывать их нельзя — доли уже вошедших пересчитались
+    # бы задним числом. Но весь этот каталог порождён загрузчиком, и
+    # оставить его на прежней шкале значит показывать в наполнении то,
+    # чего платформа больше не делает.
+    current = dict(Project.DEFAULT_RATES)
+    # Пометка в контексте: ставки заморожены с первым принятым вкладом, и
+    # у живого проекта это правило снимать нельзя. Здесь оно снимается
+    # осознанно — каталог порождён загрузчиком целиком.
+    Rate = Rate.with_context(coop_rescale_demo=True)
+    stale = Rate.search([]).filtered(
+        lambda r: round(r.factor, 3) != round(current.get(r.kind, r.factor), 3))
+    if stale:
+        projects = stale.mapped('project_id')
+        for rate in stale:
+            rate.factor = current[rate.kind]
+        # Начисленное по прежней шкале обнуляем: `_grant_shares` не
+        # трогает вклад, у которого доли уже есть, и без сброса
+        # пересчёта не случится.
+        regrant = Contribution.search([
+            ('state', '=', 'accepted'), ('project_id', 'in', projects.ids)])
+        regrant.write({'share_tokens': 0, 'share_factor_used': 0})
+        _logger.info('Ставки обновлены у %s проектов, к пересчёту вкладов: %s',
+                     len(projects), len(regrant))
+
     accepted = Contribution.search([
         ('state', '=', 'accepted'), ('share_tokens', '=', 0)])
     for project in accepted.mapped('project_id'):

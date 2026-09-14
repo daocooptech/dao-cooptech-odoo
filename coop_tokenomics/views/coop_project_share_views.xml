@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Коэффициенты видны на карточке проекта — до вклада, а не после.
+
+    Решение владельца 294 от 14 сентября 2026: коэффициент это плата за
+    невозвратность вклада. Если человек узнаёт о нём после того, как
+    вложился, вся конструкция превращается в ловушку, сколь угодно
+    справедливую по замыслу.
+  -->
+
+  <record id="view_coop_project_form_shares" model="ir.ui.view">
+    <field name="name">coop.project.form.shares</field>
+    <field name="model">coop.project</field>
+    <field name="inherit_id" ref="coop_projects.view_coop_project_form"/>
+    <field name="arch" type="xml">
+      <notebook position="inside">
+        <page string="Как считается доля" name="share_rates">
+          <div class="o_coop_share_page">
+            <p>
+              Доля считается не от рублей напрямую, а от рублей с
+              коэффициентом по виду вклада. Коэффициент — это плата за
+              невозвратность: деньги при провале проекта возвращаются
+              целиком, техника с износом, материалы израсходованы, а труд
+              не возвращается ничем и никогда. Кто внёс невозвратное, на
+              ту же сумму несёт больший риск.
+            </p>
+            <p class="text-muted">
+              Ставки задаются один раз и замораживаются с первым принятым
+              вкладом: доля, которая меняется задним числом, — не доля.
+            </p>
+            <field name="share_rates_frozen" invisible="1"/>
+            <div class="alert alert-info" role="status"
+                 invisible="not share_rates_frozen">
+              В проект уже приняты вклады — ставки заморожены. Менять их
+              теперь значило бы пересчитать доли тех, кто вошёл раньше.
+            </div>
+            <field name="share_rate_ids" nolabel="1"
+                   readonly="share_rates_frozen">
+              <list editable="bottom">
+                <field name="kind" string="Вид вклада"/>
+                <field name="factor" string="Коэффициент"/>
+              </list>
+            </field>
+            <group>
+              <field name="share_total" string="Долей выпущено"/>
+            </group>
+            <div class="text-muted">
+              Пример: оценка 100 000 ₽ × коэффициент 1,5 = 150 000 долей.
+              Доля вкладчика — это его доли, делённые на все доли проекта.
+            </div>
+          </div>
+        </page>
+      </notebook>
+    </field>
+  </record>
+
+</odoo>
