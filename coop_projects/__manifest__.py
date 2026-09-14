@@ -30,6 +30,7 @@
         'views/coop_project_views.xml',
         'views/coop_project_need_views.xml',
         'data/coop_project_backfill.xml',
+        'data/coop_project_readiness.xml',
     ],
     'assets': {
         'web.assets_backend': [

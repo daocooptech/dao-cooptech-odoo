@@ -50,6 +50,19 @@ class TestProjectLifecycle(CoopProjectCase):
         self.assertEqual(project.readiness, 40)
         self.assertEqual(project.contributor_count, 1)
 
+    def test_perebor_viden_a_ne_obrezan(self):
+        """Собрал вдвое — так и показываем.
+
+        Обрезка на ста процентах прятала перебор: вкладчик не видел ни
+        того, что деньги уже не нужны, ни того, что проект собрал вдвое.
+        Ограничивать надо ширину полосы в вёрстке, а не само число.
+        """
+        project = self._make_project(required=100000)
+        giver = self._make_person('Переборный Вкладчик')
+        offer = self._make_offer(project, giver, value=216000)
+        offer.with_user(self.initiator).action_accept()
+        self.assertEqual(project.readiness, 216)
+
     def test_dolya_skladyvaetsya_a_ne_vpisyvaetsya(self):
         project = self._make_project(required=100000)
         first = self._make_person('Первый Вкладчик')

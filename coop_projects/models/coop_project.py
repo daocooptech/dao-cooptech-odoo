@@ -206,10 +206,18 @@ class CoopProject(models.Model):
 
     @api.depends('contribution_total', 'required_total')
     def _compute_readiness(self):
+        """Готовность как есть, без потолка в сто процентов.
+
+        Обрезка прятала перебор: проект, собравший втрое больше нужного,
+        показывал ровно сто — и вкладчик не видел ни того, что деньги
+        уже не нужны, ни того, что проект собрал вдвое. Ограничивать
+        надо ширину полосы в вёрстке, а не само число: полоса и процент
+        отвечают на разные вопросы.
+        """
         for record in self:
             if record.required_total:
-                record.readiness = min(
-                    100, round(record.contribution_total / record.required_total * 100))
+                record.readiness = round(
+                    record.contribution_total / record.required_total * 100)
             else:
                 record.readiness = 0
 
@@ -219,6 +227,32 @@ class CoopProject(models.Model):
             self.subcategory_id = False
 
     # ── Действия ─────────────────────────────────────────────────────────
+
+    @api.model
+    def recompute_readiness(self):
+        """Пересчитать готовность там, где она осталась обрезанной.
+
+        Поле хранимое, и от правки формулы само не пересчитывается: Odoo
+        трогает вычисляемое поле, только когда меняется то, от чего оно
+        зависит. Здесь не изменилось ни «собрано», ни «нужно» — изменился
+        код, а обновление модуля об этом не знает.
+
+        Ищем признак обрезки: собрано больше нужного, а готовность ровно
+        сто. Ничего не нашли — выходим, поэтому вызывать можно при каждом
+        обновлении.
+        """
+        capped = self.search([
+            ('readiness', '=', 100),
+            ('required_total', '>', 0),
+        ]).filtered(
+            lambda p: p.contribution_total > p.required_total)
+        if not capped:
+            return 0
+        self.env.add_to_compute(self._fields['readiness'], capped)
+        capped.flush_recordset(['readiness'])
+        _logger.info('Готовность пересчитана без потолка: %s проектов',
+                     len(capped))
+        return len(capped)
 
     def action_open_gathering(self):
         """Открыть сбор.

@@ -45,8 +45,11 @@
                 <div class="o_coop_tile_desc"><field name="summary"/></div>
                 <div class="o_coop_readiness">
                   <div class="o_coop_readiness_bar">
+                    <!-- Ширина полосы ограничена сотней, само число — нет:
+                         «собрано 312 %» это правда, а полоса длиннее
+                         своей дорожки — просто сломанная вёрстка. -->
                     <div class="o_coop_readiness_fill"
-                         t-attf-style="width: #{record.readiness.raw_value}%"/>
+                         t-attf-style="width: #{Math.min(100, record.readiness.raw_value)}%"/>
                   </div>
                   <div class="o_coop_readiness_pct">
                     <t t-esc="record.readiness.value"/>%
