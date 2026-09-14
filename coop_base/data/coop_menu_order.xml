@@ -6,4 +6,24 @@
     иначе вклинивались бы в середину списка платформы.
   -->
   <function model="coop.menu.order" name="apply"/>
+
+  <!--
+    И раз в сутки — потому что порядок с названиями держится не на наших
+    записях, а поверх чужих. Обновление приложения, которому мы поменяли
+    имя, возвращает имя из его же данных: «Управление проектами» снова
+    становится «Проектами», а раздел уезжает на исходное место в списке.
+    Заметить это можно только глазами и только случайно.
+
+    Суточного шага хватает: перестановка ничего не ломает и живёт до
+    следующего прогона.
+  -->
+  <record id="cron_coop_menu_order" model="ir.cron">
+    <field name="name">Порядок и названия разделов платформы</field>
+    <field name="model_id" ref="coop_base.model_coop_menu_order"/>
+    <field name="state">code</field>
+    <field name="code">model.apply()</field>
+    <field name="interval_number">1</field>
+    <field name="interval_type">days</field>
+    <field name="active" eval="True"/>
+  </record>
 </odoo>

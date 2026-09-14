@@ -28,7 +28,13 @@ MOCKUP_ORDER = [
     (40, 'coop_skills.menu_coop_skills_root', None),
     (50, 'coop_vacancies.menu_coop_vacancies_root', None),
     (60, 'coop_resources.menu_coop_resources_root', None),
-    (70, 'project.menu_main_pm', 'Проекты'),
+    # Решение владельца 281 от 2026-09-14: сбор вкладов и ведение работ —
+    # разные разделы и стоят рядом. Наш «Проекты» — это краудресурсинг,
+    # штатное приложение Odoo рядом с ним становится «Управлением
+    # проектами»: до запуска вести нечего, после запуска незачем
+    # изобретать своё.
+    (70, 'coop_projects.menu_coop_projects_root', None),
+    (75, 'project.menu_main_pm', 'Управление проектами'),
     (80, 'coop_orgs.menu_coop_orgs_root', 'Организации'),
     # (90, 'Сообщества')              — раздел ещё не перенесён
     # (100, 'Кошелёк')                — раздел ещё не перенесён

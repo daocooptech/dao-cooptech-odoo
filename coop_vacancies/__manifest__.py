@@ -20,7 +20,7 @@
     'category': 'Cooperative',
     'version': '19.0.1.0.0',
     'license': 'LGPL-3',
-    'depends': ['coop_base', 'coop_people', 'coop_theme',
+    'depends': ['coop_base', 'coop_people', 'coop_projects', 'coop_theme',
                 'hr_recruitment', 'hr_skills', 'project', 'mail'],
     'data': [
         'security/ir.model.access.csv',

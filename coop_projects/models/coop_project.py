@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
+import logging
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+
+_logger = logging.getLogger(__name__)
 
 
 class CoopProjectCategory(models.Model):
@@ -259,6 +263,42 @@ class CoopProject(models.Model):
             options = [code for code, _label in (field.selection or [])]
             values[name] = default or (options[0] if options else False)
         return Project.create(values)
+
+    @api.model
+    def backfill_managed_projects(self, limit=None):
+        """Завести управляемый проект тем, кто запущен, но связи не имеет.
+
+        Связь `project_id` заполняется при запуске — но запущенные
+        проекты появились на платформе иначе: их завёл загрузчик
+        наполнения сразу в нужном состоянии, минуя `action_launch`. В
+        итоге поле объявлено, механика написана, а в базе пусто у всех
+        двухсот записей: две вселенные проектов без единой точки
+        касания.
+
+        Добор идёт только по запущенным и завершённым. Замыслу и сбору
+        управляемый проект не нужен: вести там пока нечего, и заводить
+        его заранее значило бы засорить раздел управления пустыми
+        карточками.
+
+        Вызывается при обновлении модуля и безопасен к повторению: тем,
+        у кого связь уже есть, ничего не делает.
+        """
+        records = self.search([
+            ('state', 'in', ('running', 'done')),
+            ('project_id', '=', False),
+        ], limit=limit, order='id')
+        made = 0
+        for record in records:
+            # Своя точка отката на каждую запись: обязательные поля
+            # `project.project` приходят из чужих модулей, и падение на
+            # одной записи не должно уносить весь добор.
+            with self.env.cr.savepoint():
+                record.project_id = record._create_managed_project()
+                made += 1
+        if made:
+            _logger.info('Управляемых проектов заведено: %s из %s',
+                         made, len(records))
+        return made
 
     def action_finish(self):
         self.write({'state': 'done'})

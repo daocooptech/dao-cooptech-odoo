@@ -353,25 +353,6 @@ class CoopVacancyApplication(models.Model):
         }).id
 
 
-class ProjectProject(models.Model):
-    """Сумма вкладов проекта — то, от чего считается доля.
-
-    Поле заводится здесь, а не в разделе проектов, потому что нужно уже
-    сейчас: без него доля исполнителя в вакансии не считается ни от чего.
-    Когда дойдёт очередь до раздела проектов, сумма станет вычисляемой из
-    самих вкладов, а поле останется тем же.
-    """
-    _inherit = 'project.project'
-
-    coop_contribution_total = fields.Monetary(
-        string='Сумма вкладов, ₽', currency_field='currency_id',
-        help='Денежная оценка всех вкладов в проект: деньгами, ресурсами и '
-             'трудом. От неё считается доля каждого участника.')
-    currency_id = fields.Many2one(
-        'res.currency', string='Валюта',
-        default=lambda self: self.env.company.currency_id)
-
-
 def _format_range(low, high, symbol):
     """Диапазон суммы: «60 000 – 90 000 ₽» или «от 60 000 ₽»."""
     def money(value):
