@@ -1,5 +1,5 @@
 {
-  "name": "ДАО КООПЕХ — стенд",
+  "name": "ДАО КООПТЕХ — стенд",
   "dockerComposeFile": "docker-compose.yml",
   "service": "odoo",
   "workspaceFolder": "/workspace",
@@ -10,7 +10,7 @@
   "forwardPorts": [8069],
   "portsAttributes": {
     "8069": {
-      "label": "ДАО КООПЕХ",
+      "label": "ДАО КООПТЕХ",
       "onAutoForward": "openBrowser",
       "visibility": "public"
     }

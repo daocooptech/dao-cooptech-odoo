@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Сборка стенда ДАО КООПЕХ в Codespaces. Выполняется один раз при создании.
+# Сборка стенда ДАО КООПТЕХ в Codespaces. Выполняется один раз при создании.
 set -eu
 
 STAND=/stand
@@ -63,7 +63,7 @@ rub = env['res.currency'].with_context(active_test=False).search([('name', '=', 
 rub.active = True
 ru = env['res.country'].search([('code', '=', 'RU')], limit=1)
 env.company.write({'currency_id': rub.id, 'country_id': ru.id,
-                   'name': 'ДАО КООПЕХ — рабочая группа'})
+                   'name': 'ДАО КООПТЕХ — рабочая группа'})
 env.cr.commit()
 print('валюта:', env.company.currency_id.name, '| страна:', env.company.country_id.code)
 PY

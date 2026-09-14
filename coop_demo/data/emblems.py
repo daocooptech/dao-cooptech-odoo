@@ -222,6 +222,47 @@ def monogram(name, activity=None):
     return base64.b64encode(_svg(bg, glyph + text).encode('utf-8'))
 
 
+def dao_mark(name, icon):
+    """Знак ДАО-проекта: символ предмета на тёмном поле.
+
+    У ДАО-проекта нечего снимать: предмет — код, узел, реестр, перевод.
+    Фотография ноутбука на двадцати плитках подряд читается как сбой
+    загрузки, а не как двадцать разных проектов; настоящие ДАО по той же
+    причине живут под знаком, а не под фотографией.
+
+    Поле не квадратное, а 1,2 к 1 — ровно как область снимка в плитке
+    каталога. Квадрат туда не влезает: движок обрезает его сверху и
+    снизу, и композиция, выверенная в файле, на экране оказывается
+    другой.
+
+    Цвет всегда из тёмной половины палитры: так ДАО-проекты читаются
+    одним семейством, не сливаясь с фотографиями соседей. Оттенок
+    зависит от названия — одинаковых плиток подряд не будет.
+    """
+    width, height = 307, 256
+    dark = [pair for pair in PALETTE if pair[0] in ('#0e4f4a', '#14171a',
+                                                    '#146b64', '#4a4a44')]
+    seed = int(hashlib.sha256(name.encode('utf-8')).hexdigest()[:8], 16)
+    fg, _light = dark[seed % len(dark)]
+    body = _icon_body(icon)
+    size = 116
+    glyph = ('<g transform="translate(%.1f %.1f) scale(%.3f)" fill="none" '
+             'stroke="#fff" stroke-width="1.6" stroke-linecap="round" '
+             'stroke-linejoin="round">%s</g>') % (
+                 (width - size) / 2.0, (height - size) / 2.0,
+                 size / 24.0, body)
+    # Редкая сетка точек: узлы, из которых складывается сеть. Приглушена
+    # до трёх процентов — это фон, а не второй знак рядом с первым.
+    dots = ''.join(
+        '<circle cx="%d" cy="%d" r="2" fill="#fff" opacity="0.07"/>' % (x, y)
+        for x in range(19, width, 32) for y in range(16, height, 32))
+    svg = ('<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" '
+           'viewBox="0 0 %d %d"><rect width="%d" height="%d" fill="%s"/>'
+           '%s%s</svg>') % (width, height, width, height,
+                            width, height, fg, dots, glyph)
+    return base64.b64encode(svg.encode('utf-8'))
+
+
 def _marks():
     """Список настоящих эмблем, отсортированный для повторяемости.
 

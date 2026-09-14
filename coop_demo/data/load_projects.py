@@ -19,6 +19,10 @@ import logging
 import os
 import random
 
+from . import emblems
+from .dao_projects import (DAO_FROM_MOCKUP, DAO_PROJECTS, IT_SUBCATEGORIES,
+                           MOCKUP_CATEGORY_FIX)
+
 _logger = logging.getLogger(__name__)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -212,6 +216,11 @@ def load_projects(env, extra=100):
     companies = Partner.search([
         ('coop_is_participant', '=', True), ('is_company', '=', True)], order='id')
     initiators = list(companies) + list(people)
+    # ДАО-проект заводит ДАО или человек, а не ИП с пилорамой. Форма
+    # «децентрализованная автономная организация» в справочнике есть, и
+    # организации с ней в каталоге тоже.
+    dao_orgs = [org for org in companies
+                if org.coop_legal_form_id.code == 'dao']
     if not initiators:
         _logger.warning('Нет участников — каталог проектов не наполняю')
         return
@@ -222,30 +231,41 @@ def load_projects(env, extra=100):
     seen = {}
     for index, row in enumerate(rows + _extra_rows(rows, extra, rnd)):
         key = 'projects.json#%s' % index
-        initiator = initiators[(index * 5) % len(initiators)]
-        required = REQUIRED_STEPS[index % len(REQUIRED_STEPS)]
+        initiator = _initiator_for(row, index, initiators, dao_orgs, people)
+        required = row.get('required') or REQUIRED_STEPS[
+            index % len(REQUIRED_STEPS)]
         readiness = max(1, min(100, int(row['readiness'])))
+        category, subcategory = _category_for(row)
 
         values = {
             'name': row['name'],
             'summary': row['description'],
             'description': '<p>%s</p>' % row['description'] if row['description'] else False,
             'city': row['city'],
-            'kind': KIND.get(row['project_type'], 'cooperative'),
-            'category_id': categories.get(row['category'], {}).get('id'),
-            'subcategory_id': categories.get(row['category'], {}).get(
-                'children', {}).get(row['subcategory']),
+            'kind': _kind_for(row),
+            'category_id': categories.get(category, {}).get('id'),
+            'subcategory_id': categories.get(category, {}).get(
+                'children', {}).get(subcategory),
             'partner_id': initiator.id,
             'author_id': (initiator if not initiator.is_company
                           else people[index % len(people)]).id,
             'required_total': required,
             'import_key': key,
         }
-        photo_file = _photo_for(row, seen)
-        photo = os.path.join(PHOTO_DIR, photo_file) if photo_file else ''
-        if photo and os.path.exists(photo):
-            with open(photo, 'rb') as fh:
-                values['image_1920'] = base64.b64encode(fh.read())
+        if row.get('emblem'):
+            # У ДАО-проекта снимать нечего: предмет — код, узел, реестр.
+            # Фотография ноутбука на двадцати плитках подряд читалась бы
+            # как сбой загрузки, а не как двадцать разных проектов.
+            # Настоящие ДАО по той же причине живут под знаком, а не под
+            # фотографией.
+            values['image_1920'] = emblems.dao_mark(row['name'],
+                                                    row['emblem'])
+        else:
+            photo_file = _photo_for(row, seen)
+            photo = os.path.join(PHOTO_DIR, photo_file) if photo_file else ''
+            if photo and os.path.exists(photo):
+                with open(photo, 'rb') as fh:
+                    values['image_1920'] = base64.b64encode(fh.read())
 
         project = Project.search([('import_key', '=', key)], limit=1)
         if project:
@@ -284,6 +304,10 @@ def _load_categories(Category, rows):
         tree.setdefault(row['category'], set())
         if row['subcategory']:
             tree[row['category']].add(row['subcategory'])
+    # Разделы ИТ заводятся своим списком: в выгрузке макета под этой
+    # темой был один раздел на всё, и лежали в нём сушильный комплекс и
+    # медпункт. Чем занимаются ДАО на самом деле — см. `dao_projects`.
+    tree.setdefault('ИТ', set()).update(IT_SUBCATEGORIES)
 
     result = {}
     for name, children in tree.items():
@@ -348,6 +372,44 @@ def _make_contributions(Contribution, project, required, readiness, people, rnd,
         })
 
 
+def _initiator_for(row, index, initiators, dao_orgs, people):
+    """От чьего имени собирается проект.
+
+    У ДАО-проекта инициатор не любой: «ИП Ковалёва» в роли затейника
+    сети узлов читается как ошибка наполнения. Заводят такое сами ДАО —
+    их в каталоге шесть — и люди: настоящая ДАО и начинается с
+    нескольких человек, а организация появляется потом.
+    """
+    if row.get('is_dao') or row['name'] in DAO_FROM_MOCKUP:
+        pool = list(dao_orgs) + list(people[:12])
+        if pool:
+            return pool[index % len(pool)]
+    return initiators[(index * 5) % len(initiators)]
+
+
+def _kind_for(row):
+    """Вид проекта — из существа дела, а не из пометки в выгрузке.
+
+    В выгрузке макета `project_type` расставлен так же наугад, как
+    рубрики: ДАО там значатся сыроварня, теплица и пункт приёма
+    вторсырья. Владелец 14 сентября 2026: «дао проекты в основном в ит
+    сфере». ДАО работает там, где вклад проверяем без доверия к
+    участнику, — это про код, а не про лопату.
+    """
+    if row.get('is_dao') or row['name'] in DAO_FROM_MOCKUP:
+        return 'dao'
+    kind = KIND.get(row['project_type'], 'cooperative')
+    return 'cooperative' if kind == 'dao' else kind
+
+
+def _category_for(row):
+    """Тема и раздел, с поправкой на ошибки выгрузки."""
+    fix = MOCKUP_CATEGORY_FIX.get(row['name'])
+    if fix and row['category'] == 'ИТ':
+        return fix
+    return row['category'], row['subcategory']
+
+
 def _state_for(readiness, index):
     """Состояние по готовности, с разбросом.
 
@@ -404,7 +466,12 @@ def _extra_rows(rows, extra, rnd):
         sample.setdefault(row['category'], row)
     # Теми же словами, что в выгрузке: их переводит в код словарь KIND,
     # и готовый код здесь превратился бы в «Кооперативный» по умолчанию.
-    kinds = ['Кооперативный', 'Коммерческий', 'Некоммерческий', 'ДАО']
+    #
+    # ДАО в этом круге больше нет. Раньше вид раздавался по очереди —
+    # каждый четвёртый проект становился ДАО независимо от того, что он
+    # такое, и в каталоге заводилась «Сыроварня — ДАО». ДАО-проекты
+    # заводятся отдельно, своим списком и своим предметом.
+    kinds = ['Кооперативный', 'Коммерческий', 'Некоммерческий']
 
     extras = []
     for i in range(extra):
@@ -424,4 +491,35 @@ def _extra_rows(rows, extra, rnd):
             'readiness': 100 if i % 7 == 3 else rnd.randint(8, 99),
             'photo': photos[(i // len(EXTRA_PROJECTS)) % len(photos)],
         })
-    return extras
+    return extras + _dao_rows(rnd)
+
+
+def _dao_rows(rnd):
+    """ДАО-проекты: предмет, которым ДАО занимаются на самом деле.
+
+    Города нет намеренно. ДАО не привязана к месту: узлы стоят в разных
+    городах, дежурство идёт по часовым поясам, переводчик живёт где
+    живёт. Приписать такому проекту Волгоград значило бы соврать ради
+    заполненного поля — и увести его в отбор по городу, где ему делать
+    нечего.
+    """
+    rows = []
+    for i, (name, subcategory, description, required, icon) in enumerate(
+            DAO_PROJECTS):
+        rows.append({
+            'name': name,
+            'description': description,
+            'city': '',
+            'category': 'ИТ',
+            'subcategory': subcategory,
+            'project_type': 'ДАО',
+            'is_dao': True,
+            'required': required,
+            'emblem': icon,
+            # Собранные тоже нужны: запуск проекта и передачу его в
+            # модуль управления проверять не на чем, если ни один не
+            # доведён до конца.
+            'readiness': 100 if i % 6 == 2 else rnd.randint(12, 96),
+            'photo': '',
+        })
+    return rows

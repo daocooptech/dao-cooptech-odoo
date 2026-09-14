@@ -45,6 +45,30 @@ def _registered_on(seed):
     return date(year, month, day)
 
 
+# Переименования организаций наполнения. Загрузчик ищет организацию по
+# названию и городу, поэтому правка названия в выгрузке заводит вторую
+# запись вместо переименования первой — с теми же членами, проектами и
+# вакансиями. Так и вышло с «ДАО КООПЕХ»: старая опечатка в названии
+# платформы держалась в наполнении, а её исправление раздвоило
+# организацию.
+RENAMED = {
+    'ДАО КООПТЕХ': 'ДАО КООПЕХ',
+}
+
+
+def _renamed(Partner, org):
+    """Найти организацию по прежнему названию и переименовать."""
+    was = RENAMED.get(org['name'])
+    if not was:
+        return Partner.browse()
+    old = Partner.search([
+        ('name', '=', was), ('city', '=', org['city']),
+        ('is_company', '=', True)], limit=1)
+    if old:
+        old.name = org['name']
+    return old
+
+
 def load_organizations(env, specializations, marks):
     with open(os.path.join(HERE, 'organizations.json'), encoding='utf-8') as fh:
         orgs = json.load(fh)
@@ -104,6 +128,8 @@ def load_organizations(env, specializations, marks):
         existing = Partner.search([
             ('name', '=', org['name']), ('city', '=', org['city']),
             ('is_company', '=', True)], limit=1)
+        if not existing:
+            existing = _renamed(Partner, org)
         if existing:
             # Правовую форму у заведённых вручную не трогаем: там она
             # проставлена осознанно, а в макете — выведена по названию.
