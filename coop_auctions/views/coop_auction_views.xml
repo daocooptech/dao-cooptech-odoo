@@ -24,11 +24,19 @@
               <!-- Фотография лота: у аукциона своих снимков нет, берём
                    у ресурса, который выставлен на торги. Нет и там —
                    остаётся молоток на подложке. -->
-              <div class="o_coop_listing_ico o_coop_auction_ico">
-                <img t-if="record.image_512.raw_value"
-                     t-att-src="'/web/image/coop.auction/' + record.id.raw_value + '/image_512'"
-                     t-att-alt="record.name.value" loading="lazy"/>
-                <t t-else="">🔨</t>
+              <!-- Снимок карточки. Свой, если есть; иначе лицо той стороны,
+                   с которой придётся иметь дело, — знак организации или
+                   аватар человека. Значок остаётся последним средством. -->
+              <div class="o_coop_media">
+                <field name="image_512" widget="image" t-if="record.image_512.raw_value"/>
+                <img class="o_coop_media_logo" t-elif="record.owner_id.raw_value" loading="lazy"
+                     t-attf-src="/web/image/res.partner/#{record.owner_id.raw_value}/image_512"
+                     t-att-alt="record.owner_id.value"/>
+                <span t-else="" class="o_coop_media_sign">🔨</span>
+                <span class="o_coop_locbar" t-if="record.city.raw_value">
+                  <i class="fa fa-map-marker" role="img" aria-label="Город"/>
+                  <field name="city"/>
+                </span>
               </div>
               <div class="o_coop_listing_body">
               <div class="o_coop_auction_head">

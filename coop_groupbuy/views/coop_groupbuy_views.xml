@@ -7,6 +7,7 @@
     <field name="arch" type="xml">
       <kanban js_class="coop_catalog_kanban" class="o_coop_groupbuys"
               default_order="stop_date">
+        <field name="image_512"/>
         <field name="city"/>
         <field name="current_price"/>
         <field name="unit_label"/>
@@ -20,7 +21,20 @@
         <templates>
           <t t-name="card">
             <div class="o_coop_listing o_coop_gb">
-              <div class="o_coop_listing_ico o_coop_gb_ico">🛒</div>
+              <!-- Снимок карточки. Свой, если есть; иначе лицо той стороны,
+                   с которой придётся иметь дело, — знак организации или
+                   аватар человека. Значок остаётся последним средством. -->
+              <div class="o_coop_media">
+                <field name="image_512" widget="image" t-if="record.image_512.raw_value"/>
+                <img class="o_coop_media_logo" t-elif="record.organizer_id.raw_value" loading="lazy"
+                     t-attf-src="/web/image/res.partner/#{record.organizer_id.raw_value}/image_512"
+                     t-att-alt="record.organizer_id.value"/>
+                <span t-else="" class="o_coop_media_sign">🛒</span>
+                <span class="o_coop_locbar" t-if="record.city.raw_value">
+                  <i class="fa fa-map-marker" role="img" aria-label="Город"/>
+                  <field name="city"/>
+                </span>
+              </div>
               <div class="o_coop_listing_body">
               <div class="o_coop_gb_head">
                 <span class="o_coop_badge o_coop_gb_state"

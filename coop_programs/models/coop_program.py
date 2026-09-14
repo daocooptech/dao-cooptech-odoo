@@ -30,6 +30,17 @@ class CoopProgram(models.Model):
         index=True, tracking=True,
         help='Тот, кто ведёт программу и отвечает за общий фонд.')
     city = fields.Char(string='Город', index=True)
+
+    # Снимок. Заводится тем же образом, что у объявлений о ресурсах:
+    # большой хранится, малый считается от него и тоже хранится —
+    # каталог показывает малый, и пересчитывать его на каждую карточку
+    # значило бы гонять мегабайты на каждый экран.
+    image_1920 = fields.Image(
+        string='Изображение', max_width=1920, max_height=1920)
+    image_512 = fields.Image(
+        string='Изображение (малое)', related='image_1920',
+        max_width=512, max_height=512, store=True)
+
     geography = fields.Char(
         string='География',
         help='«Москва, участие удалённо по всей РФ» — когда программа не '

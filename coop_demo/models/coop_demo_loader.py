@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
+import logging
+
 from odoo import api, models
 
+from ..data import photos
 from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_cessions,
                     load_tokens,
@@ -20,6 +23,8 @@ from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_vacancies, load_verification, load_wallets,
                     load_warehouses)
 
+
+_logger = logging.getLogger(__name__)
 
 class CoopDemoLoader(models.AbstractModel):
     """Точка входа для наполнения каталогов из макета.
@@ -138,4 +143,39 @@ class CoopDemoLoader(models.AbstractModel):
         # проектов, сообществ и организаций, и до их появления
         # разговаривать не о чем.
         load_messages.load_messages(self.env)
+        # Снимки последними и по всем каталогам разом.
+        #
+        # Отдельным проходом, а не внутри каждого загрузчика: каталоги
+        # наполнялись в разное время и разными людьми, и часть из них
+        # снимок не ставила вовсе — сделки, аукционы, реестр НМА,
+        # складчина. Владелец 15 сентября 2026: «во всех каталогах
+        # должны быть картинки». Проход идёт по тем записям, у которых
+        # снимка нет, и потому безвреден при повторном запуске.
+        self._load_photos()
         return True
+
+    # Каталог, поле снимка и модель. Поле разное: где-то снимок хранится
+    # большим и уменьшается связанным полем, где-то сразу малым.
+    PHOTO_TARGETS = [
+        ('coop.deal', 'image_512'),
+        ('coop.auction', 'image_512'),
+        ('coop.intangible', 'image_1920'),
+        ('coop.groupbuy', 'image_1920'),
+        ('coop.program', 'image_1920'),
+        ('coop.event', 'image_1920'),
+    ]
+
+    def _load_photos(self):
+        for модель, поле in self.PHOTO_TARGETS:
+            if модель not in self.env:
+                continue
+            Модель = self.env[модель].sudo()
+            if поле not in Модель._fields:
+                continue
+            записи = Модель.search([(поле, '=', False)])
+            if not записи:
+                continue
+            поставлено = photos.fill(записи, field=поле)
+            if поставлено:
+                _logger.info('%s: снимков проставлено %s из %s',
+                             модель, поставлено, len(записи))

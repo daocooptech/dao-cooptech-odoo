@@ -21,8 +21,18 @@
         <templates>
           <t t-name="card">
             <div class="o_coop_listing o_coop_who">
-              <div class="o_coop_listing_ico o_coop_who_ico">
-                <t t-esc="record.icon.raw_value"/>
+              <!-- Снимок карточки. Свой, если есть; иначе лицо той стороны,
+                   с которой придётся иметь дело, — знак организации или
+                   аватар человека. Значок остаётся последним средством. -->
+              <div class="o_coop_media">
+                <img class="o_coop_media_logo" t-if="record.owner_id.raw_value" loading="lazy"
+                     t-attf-src="/web/image/res.partner/#{record.owner_id.raw_value}/image_512"
+                     t-att-alt="record.owner_id.value"/>
+                <span t-else="" class="o_coop_media_sign"><t t-esc="record.icon.value"/></span>
+                <span class="o_coop_locbar" t-if="record.city.raw_value">
+                  <i class="fa fa-map-marker" role="img" aria-label="Город"/>
+                  <field name="city"/>
+                </span>
               </div>
               <div class="o_coop_listing_body">
 
