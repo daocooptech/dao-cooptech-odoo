@@ -71,7 +71,11 @@ class ResPartner(models.Model):
              'завершённых сделок.')
     coop_deals_done = fields.Integer(
         string='Завершённых сделок', default=0, readonly=True)
+    coop_deals_reviewed = fields.Integer(
+        string='Сделок с отзывом', default=0, readonly=True,
+        help='Завершённые сделки, по которым о человеке отозвались. '
+             'Знаменатель доверия: молчание второй стороны не должно '
+             'снижать оценку тому, кто ничего не сделал.')
     coop_deals_positive = fields.Integer(
         string='Из них с положительным отзывом', default=0, readonly=True,
-        help='Отзыв о человеке на «хорошо» или «отлично». Сделка без '
-             'отзыва в это число не входит.')
+        help='Отзыв о человеке на «хорошо» или «отлично».')
