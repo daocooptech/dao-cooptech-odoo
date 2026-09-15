@@ -54,7 +54,8 @@ class ResPartner(models.Model):
     # человек видел «ищу цемент» в списке того, что у него есть.
     coop_resource_ids = fields.One2many(
         'coop.resource', 'owner_id', string='Ресурсы',
-        domain=[('listing_type', '=', 'offer')])
+        domain=[('listing_type', '=', 'offer'),
+                ('project_id', '=', False)])
     coop_vacancy_ids = fields.One2many(
         'coop.vacancy', 'partner_id', string='Вакансии')
     coop_project_ids = fields.One2many(
@@ -75,9 +76,17 @@ class ResPartner(models.Model):
     # Потребности — собственные объявления спроса. Отдельной сущности им
     # заводить не за чем: «ищу морковь» — это объявление, и живёт оно по
     # тем же правилам, что остальные, включая снятие с публикации.
+    # Только личные. Потребности проектов — это тоже спрос и тоже
+    # лежат в каталоге ресурсов, но на странице человека им не место:
+    # владелец 15 сентября 2026 — «у пользователя только личные
+    # потребности, у проектов свои потребности, которые грузятся в
+    # каталог ресурсов в спрос». Без отбора у инициатора четырёх
+    # проектов в полке стояло тридцать девять плиток, и «Ищу морковь для
+    # дома» терялась среди цемента и смен экскаваторщика.
     coop_need_ids = fields.One2many(
         'coop.resource', 'owner_id', string='Потребности',
-        domain=[('listing_type', '=', 'request')])
+        domain=[('listing_type', '=', 'request'),
+                ('project_id', '=', False)])
     # Объявления, залежавшиеся в каталоге. Из них собирается напоминание
     # из макета: «висит 30 дней, всё ещё актуально?».
     coop_stale_resource_ids = fields.Many2many(
@@ -242,9 +251,11 @@ class ResPartner(models.Model):
             # «Ресурсы» показывает, что у человека есть, полка
             # «Потребности» — чего ему не хватает.
             'resource': tally('coop.resource', 'owner_id',
-                              published + [('listing_type', '=', 'offer')]),
+                              published + [('listing_type', '=', 'offer'),
+                                           ('project_id', '=', False)]),
             'need': tally('coop.resource', 'owner_id',
-                          published + [('listing_type', '=', 'request')]),
+                          published + [('listing_type', '=', 'request'),
+                                       ('project_id', '=', False)]),
             'vacancy': tally('coop.vacancy', 'partner_id', published),
             'project': tally('coop.project', 'partner_id'),
             'deal': tally('coop.deal', 'party_a_id'),
@@ -404,7 +415,8 @@ class ResPartner(models.Model):
     def action_coop_my_resources(self):
         return self._coop_holdings_action(
             'coop_resources.action_coop_resources',
-            [('owner_id', '=', self.id), ('listing_type', '=', 'offer')],
+            [('owner_id', '=', self.id), ('listing_type', '=', 'offer'),
+             ('project_id', '=', False)],
             _('Ресурсы — %s') % self.display_name)
 
     def action_coop_my_vacancies(self):
@@ -443,7 +455,8 @@ class ResPartner(models.Model):
     def action_coop_my_needs(self):
         return self._coop_holdings_action(
             'coop_resources.action_coop_resources',
-            [('owner_id', '=', self.id), ('listing_type', '=', 'request')],
+            [('owner_id', '=', self.id), ('listing_type', '=', 'request'),
+             ('project_id', '=', False)],
             _('Потребности — %s') % self.display_name)
 
     def action_coop_my_friends(self):

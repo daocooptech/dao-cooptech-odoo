@@ -23,6 +23,10 @@ class CoopContributeWizard(models.TransientModel):
         'coop.project', string='Проект', required=True, readonly=True)
     currency_id = fields.Many2one(
         related='project_id.currency_id', readonly=True)
+    # Вид проекта решает, чем считается принятый вклад: паем, долей или
+    # ничем. Обещать долю в некоммерческом проекте нельзя даже вскользь.
+    project_kind = fields.Selection(
+        related='project_id.kind', readonly=True)
     kind = fields.Selection([
         ('money', 'Деньги'),
         ('labour', 'Труд'),

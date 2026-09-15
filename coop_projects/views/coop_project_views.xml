@@ -152,6 +152,7 @@
       <form string="Вклад в проект">
         <field name="project_id" invisible="1"/>
         <field name="currency_id" invisible="1"/>
+        <field name="project_kind" invisible="1"/>
         <!-- Пришли из строки потребности — показываем, из какой:
              человек выбрал «Двигатель асинхронный», и окно должно это
              подтвердить, а не спрашивать заново. -->
@@ -164,9 +165,23 @@
           <field name="value"/>
           <field name="note" placeholder="Необязательно"/>
         </group>
-        <div class="alert alert-info" role="status">
+        <!-- Чем считается принятый вклад — зависит от вида проекта.
+             Решение владельца 15 сентября 2026. -->
+        <div class="alert alert-info" role="status"
+             invisible="project_kind != 'cooperative'">
+          Инициатор проекта увидит предложение и решит, принять ли его.
+          Принятый вклад считается паем: ваша оценка к сумме всех вкладов.
+        </div>
+        <div class="alert alert-info" role="status"
+             invisible="project_kind not in ('commercial', 'dao')">
           Инициатор проекта увидит предложение и решит, принять ли его.
           Принятый вклад считается долей: ваша оценка к сумме всех вкладов.
+        </div>
+        <div class="alert alert-info" role="status"
+             invisible="project_kind != 'nonprofit'">
+          Инициатор проекта увидит предложение и решит, принять ли его.
+          Долей и паёв в некоммерческом проекте нет: вклад сюда — помощь
+          делу, а не участие в собственности.
         </div>
         <footer>
           <button name="action_offer" type="object" string="Предложить вклад"
@@ -355,13 +370,37 @@
           -->
           <div class="o_coop_needs" invisible="state == 'draft' or (not need_material_ids and not need_equipment_ids and not need_labour_ids and not need_financial_ids)">
             <div class="o_coop_needs_head">Участие в проекте</div>
-            <div class="o_coop_needs_lead">Вносите долю не только деньгами</div>
-            <p class="o_coop_needs_note">
+            <div class="o_coop_needs_lead"
+                 invisible="kind == 'nonprofit'">Вносите долю не только деньгами</div>
+            <div class="o_coop_needs_lead"
+                 invisible="kind != 'nonprofit'">Помочь можно не только деньгами</div>
+            <!--
+              Слово меняется по виду проекта. Пай — имущественное участие
+              в кооперативе, доля в коммерческом — часть в капитале, а в
+              некоммерческом нет ни того ни другого: вклад туда не даёт
+              прав на результат, и обещать их нельзя даже вскользь.
+            -->
+            <p class="o_coop_needs_note" invisible="kind != 'cooperative'">
               В проект можно войти разными формами вклада — деньгами,
               физическим или умственным трудом, материальными и
               нематериальными активами и другими ресурсами, какие у вас
               есть. Какой пай полагается за конкретный вклад — указано в
               списках ниже.
+            </p>
+            <p class="o_coop_needs_note"
+               invisible="kind not in ('commercial', 'dao')">
+              В проект можно войти разными формами вклада — деньгами,
+              физическим или умственным трудом, материальными и
+              нематериальными активами и другими ресурсами, какие у вас
+              есть. Какая доля полагается за конкретный вклад — указано в
+              списках ниже.
+            </p>
+            <p class="o_coop_needs_note" invisible="kind != 'nonprofit'">
+              Проекту можно помочь разными формами вклада — деньгами,
+              физическим или умственным трудом, материалами и другими
+              ресурсами, какие у вас есть. Долей и паёв в некоммерческом
+              проекте нет: вклад сюда — помощь делу, а не участие в
+              собственности.
             </p>
             <div class="o_coop_needs_group" invisible="not need_material_ids">
               <div class="o_coop_needs_title">Необходимые материальные ресурсы</div>
@@ -370,8 +409,16 @@
                   <field name="need_can_join" column_invisible="1"/>
                   <field name="name" string="Ресурс"/>
                   <field name="price" string="Стоимость"/>
+                  <!-- Пай, доля или ничего — по виду проекта. Решение
+                       владельца 15 сентября 2026. Поле-двойник, потому
+                       что подпись колонки задаётся разметкой, а одно и
+                       то же поле дважды в списке движок не берёт. -->
                   <field name="need_share_percent" string="Пай, %"
-                         widget="float" digits="[5,2]"/>
+                         widget="float" digits="[5,2]"
+                         column_invisible="parent.kind != 'cooperative'"/>
+                  <field name="need_share_ratio" string="Доля, %"
+                         widget="float" digits="[5,2]"
+                         column_invisible="parent.kind not in ('commercial', 'dao')"/>
                   <field name="need_offer_count" string="Откликов"/>
                   <button name="action_join_need" type="object"
                           string="Участвовать" class="btn btn-secondary btn-sm"
@@ -387,8 +434,16 @@
                   <field name="need_can_join" column_invisible="1"/>
                   <field name="name" string="Ресурс"/>
                   <field name="price" string="Стоимость"/>
+                  <!-- Пай, доля или ничего — по виду проекта. Решение
+                       владельца 15 сентября 2026. Поле-двойник, потому
+                       что подпись колонки задаётся разметкой, а одно и
+                       то же поле дважды в списке движок не берёт. -->
                   <field name="need_share_percent" string="Пай, %"
-                         widget="float" digits="[5,2]"/>
+                         widget="float" digits="[5,2]"
+                         column_invisible="parent.kind != 'cooperative'"/>
+                  <field name="need_share_ratio" string="Доля, %"
+                         widget="float" digits="[5,2]"
+                         column_invisible="parent.kind not in ('commercial', 'dao')"/>
                   <field name="need_offer_count" string="Откликов"/>
                   <button name="action_join_need" type="object"
                           string="Участвовать" class="btn btn-secondary btn-sm"
@@ -404,8 +459,16 @@
                   <field name="need_can_join" column_invisible="1"/>
                   <field name="name" string="Ресурс"/>
                   <field name="price" string="Стоимость"/>
+                  <!-- Пай, доля или ничего — по виду проекта. Решение
+                       владельца 15 сентября 2026. Поле-двойник, потому
+                       что подпись колонки задаётся разметкой, а одно и
+                       то же поле дважды в списке движок не берёт. -->
                   <field name="need_share_percent" string="Пай, %"
-                         widget="float" digits="[5,2]"/>
+                         widget="float" digits="[5,2]"
+                         column_invisible="parent.kind != 'cooperative'"/>
+                  <field name="need_share_ratio" string="Доля, %"
+                         widget="float" digits="[5,2]"
+                         column_invisible="parent.kind not in ('commercial', 'dao')"/>
                   <field name="need_offer_count" string="Откликов"/>
                   <button name="action_join_need" type="object"
                           string="Участвовать" class="btn btn-secondary btn-sm"
@@ -421,8 +484,16 @@
                   <field name="need_can_join" column_invisible="1"/>
                   <field name="name" string="Ресурс"/>
                   <field name="price" string="Стоимость"/>
+                  <!-- Пай, доля или ничего — по виду проекта. Решение
+                       владельца 15 сентября 2026. Поле-двойник, потому
+                       что подпись колонки задаётся разметкой, а одно и
+                       то же поле дважды в списке движок не берёт. -->
                   <field name="need_share_percent" string="Пай, %"
-                         widget="float" digits="[5,2]"/>
+                         widget="float" digits="[5,2]"
+                         column_invisible="parent.kind != 'cooperative'"/>
+                  <field name="need_share_ratio" string="Доля, %"
+                         widget="float" digits="[5,2]"
+                         column_invisible="parent.kind not in ('commercial', 'dao')"/>
                   <field name="need_offer_count" string="Откликов"/>
                   <button name="action_join_need" type="object"
                           string="Участвовать" class="btn btn-secondary btn-sm"
@@ -449,7 +520,12 @@
                   <field name="kind"/>
                   <field name="name"/>
                   <field name="value" sum="Собрано"/>
-                  <field name="share_percent" widget="percentage" readonly="1"/>
+                  <field name="share_percent" widget="percentage" readonly="1"
+                         string="Пай"
+                         column_invisible="parent.kind != 'cooperative'"/>
+                  <field name="share_ratio" widget="percentage" readonly="1"
+                         string="Доля"
+                         column_invisible="parent.kind not in ('commercial', 'dao')"/>
                   <field name="offered_on"/>
                   <field name="withdraw_until" optional="hide"/>
                   <field name="delivered_on" optional="hide"/>
@@ -556,8 +632,9 @@
       <p class="o_view_nocontent_smiling_face">Проектов пока нет</p>
       <p>
         Краудресурсинг: проект собирает не только деньги, но труд, технику,
-        материалы и знания. Доля участника складывается из стоимости его
-        вклада, а не вписывается руками.
+        материалы и знания. Пай в кооперативном проекте и доля в
+        коммерческом складываются из стоимости вклада, а не вписываются
+        руками.
       </p>
     </field>
   </record>

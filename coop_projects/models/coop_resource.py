@@ -57,6 +57,19 @@ class CoopResource(models.Model):
     need_share_percent = fields.Float(
         string='Пай, %', compute='_compute_need_share', digits=(5, 2),
         help='Стоимость потребности к общей потребности проекта.')
+    # То же число под другой подписью. Владелец 15 сентября 2026: «пай
+    # только в кооперативных проектах, доля в коммерческих, а в
+    # некоммерческих вообще нет долей и паёв».
+    #
+    # Подпись колонки в списке движка задаётся разметкой и от записи не
+    # зависит, а одно и то же поле дважды в списке движок не берёт.
+    # Поэтому полей два, значение у них общее, и в разметке показывается
+    # то, чьё слово подходит виду проекта. Слово тут не украшение: пай —
+    # имущественное участие в кооперативе с правом возврата по уставу,
+    # доля в коммерческом — часть в капитале, и путать их нельзя.
+    need_share_ratio = fields.Float(
+        string='Доля, %', compute='_compute_need_share', digits=(5, 2),
+        help='Стоимость потребности к общей потребности проекта.')
     need_can_join = fields.Boolean(
         string='Можно участвовать', compute='_compute_need_can_join')
 
@@ -64,8 +77,10 @@ class CoopResource(models.Model):
     def _compute_need_share(self):
         for record in self:
             всего = record.project_id.required_total
-            record.need_share_percent = (
-                record.price * 100.0 / всего if всего and record.price else 0.0)
+            доля = (record.price * 100.0 / всего
+                    if всего and record.price else 0.0)
+            record.need_share_percent = доля
+            record.need_share_ratio = доля
 
     @api.depends_context('uid')
     @api.depends('state', 'project_id.state', 'need_accepted_id',
