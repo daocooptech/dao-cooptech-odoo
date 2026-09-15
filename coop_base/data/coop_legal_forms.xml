@@ -16,18 +16,24 @@
     <record id="legal_group_commercial" model="coop.legal.form.group">
       <field name="name">Коммерческие организации</field>
       <field name="code">commercial</field>
+      <field name="card_label">Коммерческая организация</field>
+      <field name="member_label">Сотрудники</field>
       <field name="sequence">10</field>
     </record>
 
     <record id="legal_group_cooperative" model="coop.legal.form.group">
       <field name="name">Кооперативные организации</field>
       <field name="code">cooperative</field>
+      <field name="card_label">Кооперативная организация</field>
+      <field name="member_label">Пайщики</field>
       <field name="sequence">20</field>
     </record>
 
     <record id="legal_group_nonprofit" model="coop.legal.form.group">
       <field name="name">Некоммерческие организации</field>
       <field name="code">nonprofit</field>
+      <field name="card_label">Некоммерческая организация</field>
+      <field name="member_label">Участники</field>
       <field name="sequence">30</field>
     </record>
 
@@ -38,6 +44,8 @@
     <record id="legal_group_decentralized" model="coop.legal.form.group">
       <field name="name">Децентрализованные</field>
       <field name="code">decentralized</field>
+      <field name="card_label">Децентрализованная организация</field>
+      <field name="member_label">Участники</field>
       <field name="sequence">40</field>
     </record>
 

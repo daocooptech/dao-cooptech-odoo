@@ -90,6 +90,75 @@ class ResPartner(models.Model):
         'coop.vacancy', 'partner_id', string='Вакансии организации')
     coop_member_count = fields.Integer(
         string='Участников', compute='_compute_coop_member_count', store=True)
+
+    # ── Вид организации на карточке ──────────────────────────────────
+    #
+    # В макете под названием стоит «Кооперативная организация», а полка
+    # состава подписана «Пайщики» — у коммерческой «Сотрудники», у
+    # некоммерческой «Участники». Слово не украшение: пайщик вносит пай
+    # и голосует, наёмный сотрудник — ни того ни другого.
+    coop_card_label = fields.Char(
+        string='Вид организации',
+        related='coop_legal_form_group_id.card_label', readonly=True)
+    coop_member_label = fields.Char(
+        string='Как зовётся состав', compute='_compute_coop_member_label')
+
+    @api.depends('coop_legal_form_group_id.member_label')
+    def _compute_coop_member_label(self):
+        """Запасное слово — «Участники»: у организации без указанной
+        формы состав всё равно надо как-то назвать, и нейтральное слово
+        здесь честнее, чем «Пайщики» наугад.
+        """
+        for record in self:
+            record.coop_member_label = (
+                record.coop_legal_form_group_id.member_label or 'Участники')
+
+    # ── Услуги ───────────────────────────────────────────────────────
+    #
+    # Полка появляется, когда организация завела хоть одну услугу, —
+    # владелец 15 сентября 2026: «услуги (появляется при добавлении
+    # услуги)». Услуга на платформе — это предложение навыка: тот же
+    # каталог, та же карточка, и заводить рядом вторую сущность незачем.
+    coop_org_service_ids = fields.One2many(
+        'coop.skill.offer', 'partner_id', string='Услуги организации',
+        domain=[('state', '=', 'published')])
+
+    # ── Связанные организации ────────────────────────────────────────
+    coop_org_link_ids = fields.One2many(
+        'coop.org.link', 'org_id', string='Связи организации')
+    coop_org_backlink_ids = fields.One2many(
+        'coop.org.link', 'other_id', string='Связи с этой организацией')
+    coop_related_org_ids = fields.Many2many(
+        'res.partner', string='Связанные организации',
+        compute='_compute_coop_related_orgs')
+    coop_project_count = fields.Integer(
+        string='Проектов', compute='_compute_coop_related_orgs')
+
+    @api.depends('coop_org_link_ids.confirmed', 'coop_org_backlink_ids.confirmed')
+    def _compute_coop_related_orgs(self):
+        """Связи с обеих сторон и счётчик проектов — одним проходом.
+
+        Связь двусторонняя: если «Заря» входит в союз, то у союза «Заря»
+        — член. Запись при этом одна, и на карточке её надо видеть с
+        любой стороны.
+
+        Неподтверждённые не показываем: связь, объявленная одной
+        стороной, — это её заявление, а не факт. Иначе кто угодно
+        объявил бы себя учредителем чужого кооператива.
+        """
+        Project = self.env['coop.project'].sudo()
+        счёт = {}
+        if self.ids:
+            for организация, число in Project._read_group(
+                    [('partner_id', 'in', self.ids)],
+                    groupby=['partner_id'], aggregates=['__count']):
+                счёт[организация.id] = число
+        for record in self:
+            прямые = record.coop_org_link_ids.filtered('confirmed')
+            обратные = record.coop_org_backlink_ids.filtered('confirmed')
+            record.coop_related_org_ids = (
+                прямые.mapped('other_id') | обратные.mapped('org_id'))
+            record.coop_project_count = счёт.get(record.id, 0)
     coop_has_members = fields.Boolean(
         string='Форма предполагает членство',
         related='coop_legal_form_id.has_members', store=True,

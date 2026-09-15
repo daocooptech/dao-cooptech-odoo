@@ -2,3 +2,4 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_coop_okved_all,coop.okved читают все,model_coop_okved,,1,0,0,0
 access_coop_okved_admin,coop.okved правят настройщики,model_coop_okved,base.group_system,1,1,1,1
 access_coop_org_join,Окно вступления — участник,model_coop_org_join,base.group_user,1,1,1,1
+access_coop_org_link_user,Связи организаций — участник,model_coop_org_link,base.group_user,1,1,1,1

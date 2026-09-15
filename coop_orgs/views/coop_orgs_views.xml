@@ -184,6 +184,9 @@
           <field name="coop_my_membership_state" invisible="1"/>
           <field name="coop_application_count" invisible="1"/>
           <field name="coop_can_manage_roster" invisible="1"/>
+          <field name="coop_card_label" invisible="1"/>
+          <field name="coop_member_label" invisible="1"/>
+          <field name="coop_project_count" invisible="1"/>
           <field name="coop_symbol_mark" invisible="1"/>
 
           <div class="o_coop_profile_layout">
@@ -214,7 +217,12 @@
                     Подано заявление о выходе
                   </t>
                 </div>
-                <div invisible="not coop_member_count">Сотрудников:
+                <!-- Проектов — как в макете, рядом с составом: это две
+                     величины, по которым организацию и оценивают. -->
+                <div invisible="not coop_project_count">Проектов:
+                  <b><field name="coop_project_count" nolabel="1" readonly="1"/></b>
+                </div>
+                <div invisible="not coop_member_count"><field name="coop_member_label" nolabel="1" readonly="1"/>:
                   <b><field name="coop_member_count" nolabel="1" readonly="1"/></b>
                   <button name="action_coop_members" type="object"
                           class="o_coop_stat_note"
@@ -298,6 +306,15 @@
 
               <!-- То же, что у человека: короткая заметка, а не статья
                    с редактором. -->
+              <!-- Вид организации под названием, как в макете:
+                   «Кооперативная организация», «Коммерческая», и так
+                   далее. Слово берётся у группы правовых форм, а не
+                   пишется в разметке: групп четыре, и пятая появится
+                   вместе с новой формой, а не с правкой шаблона. -->
+              <div class="o_coop_org_kind" invisible="not coop_card_label">
+                <field name="coop_card_label" nolabel="1" readonly="1"/>
+              </div>
+
               <div class="o_coop_about" invisible="not coop_about">
                 <field name="coop_about" nolabel="1"
                        placeholder="Чем занимается организация — до 280 знаков"/>
@@ -311,7 +328,7 @@
               <div class="o_coop_band" invisible="not coop_has_members"
                    groups="coop_base.group_coop_member,coop_base.group_coop_board,coop_base.group_coop_audit">
                 <div class="o_coop_band_head">
-                  <span>Сотрудники</span>
+                  <span><field name="coop_member_label" nolabel="1" readonly="1"/></span>
                   <button name="action_coop_members" type="object"
                           class="o_coop_band_all">смотреть все</button>
                 </div>
@@ -379,6 +396,115 @@
                           <div class="o_coop_mini">
                             <div class="o_coop_mini_img">
                               <img t-att-src="'/web/image/coop.project/' + record.id.raw_value + '/image_512'"
+                                   t-att-alt="record.name.value" loading="lazy"/>
+                            </div>
+                            <div class="o_coop_mini_label">
+                              <field name="name"/>
+                            </div>
+                          </div>
+                        </t>
+                      </templates>
+                    </kanban>
+                  </field>
+                </div>
+              </div>
+
+              <!--
+                Услуги. Появляется, когда организация завела хоть одну, —
+                владелец 15 сентября 2026: «услуги (появляется при
+                добавлении услуги)». Услуга на платформе это предложение
+                навыка: тот же каталог и та же карточка, и заводить
+                рядом вторую сущность незачем.
+              -->
+              <div class="o_coop_band" invisible="not coop_org_service_ids">
+                <div class="o_coop_band_head">
+                  <span>Услуги</span>
+                </div>
+                <div class="o_coop_band_body">
+                  <field name="coop_org_service_ids" readonly="1" nolabel="1">
+                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                      <templates>
+                        <t t-name="card">
+                          <div class="o_coop_mini">
+                            <div class="o_coop_mini_img">
+                              <img t-att-src="'/web/image/coop.skill.offer/' + record.id.raw_value + '/image_512'"
+                                   t-att-alt="record.name.value" loading="lazy"/>
+                            </div>
+                            <div class="o_coop_mini_label">
+                              <field name="name"/>
+                            </div>
+                          </div>
+                        </t>
+                      </templates>
+                    </kanban>
+                  </field>
+                </div>
+              </div>
+
+              <!--
+                Организационная структура. В макете она есть у всех трёх
+                видов организаций: кто в каком органе состоит. Строится
+                из того же членства, что и состав, — роль участия и есть
+                орган: правление, ревизия, учредители, пайщики.
+
+                Отдельной модели под органы нет намеренно: орган — это не
+                справочник, а свойство членства, и заводить рядом второй
+                перечень значило бы разойтись с составом при первой же
+                правке.
+              -->
+              <div class="o_coop_band" invisible="not coop_member_count"
+                   groups="coop_base.group_coop_member,coop_base.group_coop_board,coop_base.group_coop_audit">
+                <div class="o_coop_band_head">
+                  <span>Организационная структура</span>
+                </div>
+                <div class="o_coop_band_body">
+                  <field name="coop_member_ids" readonly="1" nolabel="1"
+                         domain="[('state', '=', 'active')]">
+                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                      <field name="role"/>
+                      <field name="job_title"/>
+                      <templates>
+                        <t t-name="card">
+                          <div class="o_coop_mini">
+                            <div class="o_coop_mini_img">
+                              <img t-att-src="'/web/image/res.partner/' + record.partner_id.raw_value + '/avatar_256'"
+                                   t-att-alt="record.partner_id.value" loading="lazy"/>
+                            </div>
+                            <div class="o_coop_mini_label">
+                              <field name="partner_id"/>
+                            </div>
+                            <div class="o_coop_mini_note">
+                              <t t-esc="record.job_title.value or record.role.value"/>
+                            </div>
+                          </div>
+                        </t>
+                      </templates>
+                    </kanban>
+                  </field>
+                </div>
+              </div>
+
+              <!--
+                Связанные организации: с кем работаем. Союз, в который
+                входим, учредитель, дочернее хозяйство, поставщик.
+
+                Показываются только подтверждённые второй стороной:
+                связь, объявленная одной стороной, — её заявление, а не
+                факт, и без подтверждения кто угодно объявил бы себя
+                учредителем чужого кооператива.
+              -->
+              <div class="o_coop_band" invisible="not coop_related_org_ids">
+                <div class="o_coop_band_head">
+                  <span>Связанные организации</span>
+                </div>
+                <div class="o_coop_band_body">
+                  <field name="coop_related_org_ids" readonly="1" nolabel="1">
+                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                      <templates>
+                        <t t-name="card">
+                          <div class="o_coop_mini">
+                            <div class="o_coop_mini_img">
+                              <img t-att-src="'/web/image/res.partner/' + record.id.raw_value + '/avatar_256'"
                                    t-att-alt="record.name.value" loading="lazy"/>
                             </div>
                             <div class="o_coop_mini_label">
