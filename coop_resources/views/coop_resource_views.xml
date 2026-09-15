@@ -490,7 +490,22 @@
     <field name="path">my-resources</field>
     <field name="context">{'bin_size': True,'coop_catalog': True, 'coop_create_label': 'Добавить ресурс'}</field>
     <field name="view_mode">kanban,list,form</field>
-    <field name="domain">[('owner_id.user_ids', 'in', [uid])]</field>
+    <!--
+      Только своё, без потребностей своих проектов.
+
+      Владельцем потребности проекта стоит его инициатор — иначе не
+      понять, кто её объявил и с кем договариваться. Из-за этого в «Моих
+      ресурсах» у инициатора четырёх проектов висели сорок три чужие по
+      смыслу строки: «Крепёж и метизы, 15780 кг», «Разнорабочие на
+      монтаж, 911 смен». Владелец 16 сентября 2026: «почему в ресурсах у
+      человека потребности проекта?»
+
+      Потребности проекта ведутся на его карточке, а в каталоге ресурсов
+      они остаются в разделе спроса — там их и ищут те, кто готов
+      закрыть.
+    -->
+    <field name="domain">[('owner_id.user_ids', 'in', [uid]),
+                          ('project_id', '=', False)]</field>
     <field name="search_view_id" ref="view_coop_resource_search"/>
     <field name="limit">20</field>
     <field name="help" type="html">
