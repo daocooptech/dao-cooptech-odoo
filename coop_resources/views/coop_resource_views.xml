@@ -21,6 +21,10 @@
         <field name="listing_type"/>
         <field name="price_display"/>
         <field name="is_promoted"/>
+        <!-- Объявлено ради выражения в разметке: ниже поле читается как
+             `record.can_respond.raw_value`, а разбор представления видит
+             только `<field>`. -->
+        <field name="can_respond"/>
         <templates>
           <t t-name="card">
             <div class="o_coop_resource">
@@ -58,6 +62,16 @@
                   <t t-if="record.category_id.raw_value"><t t-esc="record.category_id.value"/></t>
                 </div>
                 <div class="o_coop_res_price"><field name="price_display"/></div>
+                <!-- Отклик прямо с витрины: ради этого каталог и
+                     открывают. Полоса есть всегда, даже когда
+                     откликаться нельзя, — иначе карточки с кнопкой и без
+                     неё расходятся по высоте ровно на её строку. То же
+                     было у торгов и у проектов, и лечится тем же. -->
+                <div class="o_coop_tile_act">
+                  <button name="action_respond" type="object"
+                          class="btn o_coop_btn o_coop_tile_respond"
+                          t-if="record.can_respond.raw_value">Откликнуться</button>
+                </div>
               </div>
             </div>
           </t>
@@ -125,12 +139,61 @@
     <field name="target">new</field>
   </record>
 
+  <!--
+    Окно отклика. Заводит сделку в состоянии «Переговоры», а не письмо и
+    не заявку: сделка на платформе уже есть, она двусторонняя, у неё
+    состояния, спецификация, сроки, приёмка, спор и отзывы. Вторая
+    сущность «отклик» рядом с ней означала бы две конструкции об одном.
+  -->
+  <record id="view_coop_resource_respond_form" model="ir.ui.view">
+    <field name="name">coop.resource.respond.form</field>
+    <field name="model">coop.resource.respond</field>
+    <field name="arch" type="xml">
+      <form string="Отклик на объявление">
+        <field name="resource_id" invisible="1"/>
+        <field name="currency_id" invisible="1"/>
+        <field name="available_method_ids" invisible="1"/>
+        <field name="listing_type" invisible="1"/>
+        <group>
+          <field name="owner_id"/>
+          <field name="method_id" options="{'no_create': True}"/>
+          <field name="amount"/>
+          <field name="note" placeholder="Когда готовы, на каких условиях"/>
+        </group>
+        <div class="alert alert-info" role="status"
+             invisible="listing_type != 'offer'">
+          Отклик заведёт сделку в переговорах: вы принимаете, владелец
+          объявления передаёт. Условия дальше согласуете в самой сделке —
+          там же спецификация, сроки, приёмка и отзывы.
+        </div>
+        <div class="alert alert-info" role="status"
+             invisible="listing_type != 'request'">
+          Это объявление о спросе: вы передаёте, разместивший принимает.
+          Отклик заведёт сделку в переговорах — условия согласуете в ней.
+        </div>
+        <footer>
+          <button name="action_respond" type="object" string="Откликнуться"
+                  class="btn-primary"/>
+          <button string="Отмена" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
   <record id="view_coop_resource_form" model="ir.ui.view">
     <field name="name">coop.resource.form</field>
     <field name="model">coop.resource</field>
     <field name="arch" type="xml">
       <form string="Ресурс">
         <header>
+          <!--
+            Единственное действие участника в самом большом каталоге
+            платформы. До него здесь было три кнопки, и все три — хозяина
+            объявления: опубликовать, закрыть, продвинуть. Тому, кто
+            нашёл нужное, нажать было нечего.
+          -->
+          <button name="action_respond" type="object" string="Откликнуться"
+                  class="btn-primary" invisible="not can_respond"/>
           <button name="action_publish" type="object" string="Опубликовать"
                   class="btn-primary" invisible="state == 'published'"/>
           <button name="%(action_coop_resource_promote)d" type="action"
@@ -138,6 +201,7 @@
                   context="{'default_resource_id': id}"/>
           <button name="action_close" type="object" string="Закрыть"
                   invisible="state == 'closed'"/>
+          <field name="can_respond" invisible="1"/>
           <field name="state" widget="statusbar"
                  statusbar_visible="draft,published,closed"/>
         </header>

@@ -9,3 +9,4 @@ access_promotion_admin,Продвижение — платформа,model_coop_
 access_resource_promote_user,Окно продвижения,model_coop_resource_promote,base.group_user,1,1,1,1
 access_promotion_slot_user,Места в выдаче — чтение,model_coop_promotion_slot,base.group_user,1,0,0,0
 access_promotion_slot_admin,Места в выдаче — ведение,model_coop_promotion_slot,coop_base.group_coop_platform,1,1,1,1
+access_coop_resource_respond,Окно отклика — участник,model_coop_resource_respond,base.group_user,1,1,1,1

@@ -330,6 +330,43 @@ class CoopResource(models.Model):
                 record.catalog_rank = rank
         return True
 
+    # ── Отклик участника ─────────────────────────────────────────────
+    #
+    # Каталог ресурсов — самый большой на платформе, а действий у него
+    # было три, и все три владельца объявления: опубликовать, закрыть,
+    # продвинуть. Тому, кто нашёл нужное, нажать было нечего.
+
+    can_respond = fields.Boolean(
+        string='Можно откликнуться', compute='_compute_can_respond',
+        help='Объявление опубликовано, и оно не моё.')
+
+    @api.depends_context('uid')
+    @api.depends('state', 'owner_id')
+    def _compute_can_respond(self):
+        """Тот же вопрос, что решает кнопку, и тот же, что решает отказ.
+
+        Разойдись они — и человек увидел бы кнопку, отвечающую ошибкой.
+        """
+        мои = self.env.user.coop_actor_partner_ids
+        for record in self:
+            record.can_respond = bool(
+                record.state == 'published' and record.owner_id not in мои)
+
+    def action_respond(self):
+        """Окно отклика: завести переговоры по сделке."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Отклик: %s') % self.name,
+            'res_model': 'coop.resource.respond',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_resource_id': self.id,
+                'default_amount': self.price,
+            },
+        }
+
     def action_publish(self):
         """Опубликовать объявление о ресурсе.
 
