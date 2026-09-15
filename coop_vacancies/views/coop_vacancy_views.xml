@@ -290,6 +290,31 @@
   </record>
 
   <!--
+    Окно отклика: одно поле и две кнопки. Больше здесь ничего не нужно —
+    вакансию человек только что прочитал, а имя и город у него уже на
+    странице.
+  -->
+  <record id="view_coop_vacancy_apply_form" model="ir.ui.view">
+    <field name="name">coop.vacancy.apply.form</field>
+    <field name="model">coop.vacancy.apply</field>
+    <field name="arch" type="xml">
+      <form string="Отклик">
+        <field name="vacancy_id" invisible="1"/>
+        <group>
+          <field name="message" nolabel="1"
+                 placeholder="Почему вы подходите. Необязательно — можно отправить и так."/>
+        </group>
+        <footer>
+          <button name="action_send" type="object" string="Отправить отклик"
+                  class="btn-primary"/>
+          <button name="action_cancel" type="object" string="Отмена"
+                  special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <!--
     Отклики списком. Своих представлений у модели не было вовсе, и обе
     стороны получали то, что движок рисует по умолчанию: столбец из
     номеров записей — 861, 865, 573. Откликнувшийся не видел, на что

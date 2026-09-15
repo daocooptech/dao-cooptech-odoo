@@ -231,7 +231,33 @@ class CoopVacancy(models.Model):
         return True
 
     def action_apply(self):
-        """Откликнуться на вакансию."""
+        """Открыть окно отклика.
+
+        Отклик спрашивает пару слов о себе — решение владельца от
+        15 сентября 2026. Раньше нажатие отправляло пустую запись, и у
+        нанимателя в списке рядом с «Возьмусь: бухгалтер на первичку по
+        проекту» стояли строки без единого слова: выбирать между ними
+        было не по чему. Поле необязательное — отклик без письма
+        по-прежнему уходит, но теперь это выбор человека, а не устройство
+        кнопки.
+        """
+        self.ensure_one()
+        self._check_can_apply()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Отклик на «%s»') % self.name,
+            'res_model': 'coop.vacancy.apply',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_vacancy_id': self.id},
+        }
+
+    def _check_can_apply(self):
+        """Условия отклика — до окна, а не после.
+
+        Проверять их при отправке значило бы дать человеку написать
+        письмо и отказать ему уже с текстом на руках.
+        """
         self.ensure_one()
         if self.state != 'published':
             raise UserError(_('Откликнуться можно только на опубликованную вакансию.'))
@@ -240,9 +266,16 @@ class CoopVacancy(models.Model):
             raise UserError(_('Нельзя откликнуться на собственную вакансию.'))
         if self.application_ids.filtered(lambda a: a.partner_id == me):
             raise UserError(_('Вы уже откликнулись на эту вакансию.'))
+
+    def _do_apply(self, message=None):
+        """Завести отклик. Вызывается из окна отклика."""
+        self.ensure_one()
+        self._check_can_apply()
+        me = self.env.user.partner_id
         self.env['coop.vacancy.application'].sudo().create({
             'vacancy_id': self.id,
             'partner_id': me.id,
+            'message': message or False,
         })
         # Через sudo, как и в приглашении: запись в ленту — след уже
         # состоявшегося отклика, а не правка вакансии. Вакансия чужая,
