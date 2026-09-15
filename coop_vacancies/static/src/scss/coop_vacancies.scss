@@ -140,9 +140,24 @@
     padding: 12px 14px 14px;
   }
 
+  // Название, строка происхождения и описание меняют длину от записи к
+  // записи и тянут за собой всю карточку: в полке от этого ряды выходят
+  // разной высоты — измерено 15 сентября 2026, от 441 до 497 в одном
+  // каталоге. Обрыв держит карточку от роста, подпорка снизу — от
+  // усадки; поодиночке не работает ни то, ни другое.
+  //
+  // Интерлиньяж и подпорка заданы одним числом намеренно: от
+  // `line-height: normal` высоту не посчитать — она разная у разных
+  // начертаний, и подпорка разошлась бы со строками на пару пикселей.
   .o_coop_vac_name {
     font: 700 14px/1.35 'Manrope', sans-serif;
     color: var(--coop-ink, #14171a);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: calc(2 * 1.35em);
   }
 
   .o_coop_vac_reward {
@@ -154,20 +169,32 @@
   .o_coop_vac_meta {
     color: var(--coop-slate-light, #8f8f88);
     font-size: 11.5px;
+    line-height: 1.45;
     margin-top: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: calc(2 * 1.45em);
   }
 
   .o_coop_vac_desc {
     color: var(--coop-slate, #4a4a44);
     font-size: 13px;
+    line-height: 1.45;
     margin-top: 8px;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    min-height: calc(3 * 1.45em);
 
     p { margin: 0 0 4px; }
+    // Отступ под последним абзацем прибавляется к высоте описания и
+    // сводит подпорку на нет: он нужен между абзацами, а не снизу.
+    p:last-child { margin-bottom: 0; }
   }
 
   .o_coop_vac_foot {

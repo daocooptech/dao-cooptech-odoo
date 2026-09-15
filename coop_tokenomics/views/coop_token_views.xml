@@ -97,6 +97,16 @@
         <field name="is_future"/>
         <field name="unit_label"/>
         <field name="deposit_paid"/>
+        <!-- Поставщик объявлен ради выражения в разметке, а не ради
+             вывода: ниже он читается как `record.issuer_id.raw_value`, а
+             разбор представления видит только `<field>` — поля из `t-if`
+             и `t-attf-` он не подхватывает.
+             Поле именно `issuer_id`: `partner_id` у обязательства нет, и
+             карточка, написанная под него, падала на `.raw_value`, унося
+             весь раздел — «Упс! Что-то пошло не так». Проверено
+             15 сентября 2026: до правки «Мои токены» не открывались
+             вовсе, ни лентой, ни полками. -->
+        <field name="issuer_id"/>
         <templates>
           <t t-name="card">
             <!-- В квадрате — фотография ресурса, на который выписано
@@ -106,9 +116,9 @@
                    Своего снимка у записи может не быть; тогда лицом
                    становится тот, с кем придётся иметь дело. -->
               <div class="o_coop_media">
-                <img class="o_coop_media_logo" t-if="record.partner_id.raw_value" loading="lazy"
-                     t-attf-src="/web/image/res.partner/#{record.partner_id.raw_value}/image_512"
-                     t-att-alt="record.partner_id.value"/>
+                <img class="o_coop_media_logo" t-if="record.issuer_id.raw_value" loading="lazy"
+                     t-attf-src="/web/image/res.partner/#{record.issuer_id.raw_value}/image_512"
+                     t-att-alt="record.issuer_id.value"/>
                 <span t-else="" class="o_coop_media_sign">🪙</span>
               </div>
               <div class="o_coop_listing_body">

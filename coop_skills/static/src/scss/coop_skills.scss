@@ -132,23 +132,47 @@
     margin-top: 3px;
   }
 
+  // Строка происхождения и описание — те две части карточки, длина
+  // которых зависит от записи, а не от раздела. Без обрыва и без
+  // подпорки снизу они тянут карточку за собой, и в полке ряды выходят
+  // разной высоты: измерено 15 сентября 2026 — 495, 513, 514, 532, 544
+  // в одном каталоге. Обрыв держит карточку от роста, подпорка — от
+  // усадки; нужны оба, поодиночке не работает ни то, ни другое.
+  //
+  // Интерлиньяж задан явно и тем же числом, что в подпорке: посчитать
+  // высоту от `line-height: normal` нельзя — он разный у разных шрифтов
+  // и начертаний, и подпорка разошлась бы со строками на пару пикселей.
   .o_coop_skill_meta {
     color: var(--coop-slate-light, #8f8f88);
     font-size: 12px;
+    line-height: 1.35;
     margin-top: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: calc(2 * 1.35em);
   }
 
   .o_coop_skill_desc {
     color: var(--coop-slate, #4a4a44);
     font-size: 13px;
+    line-height: 1.45;
     margin-top: 8px;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    min-height: calc(3 * 1.45em);
 
     p { margin: 0 0 4px; }
+    // Поле отступа у последнего абзаца прибавляется к высоте описания и
+    // сводит на нет подпорку: три строки с абзацем внизу выше трёх
+    // строк без него ровно на этот отступ, и карточка снова выбивается
+    // из ряда. Отступ нужен между абзацами, а не под последним.
+    p:last-child { margin-bottom: 0; }
   }
 
   .o_coop_skill_chips {
