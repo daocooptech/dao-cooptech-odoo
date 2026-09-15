@@ -775,3 +775,47 @@
   // пикселей выше: без общей высоты карточки без ссылки оказываются ниже.
   .o_coop_listing_foot { min-height: 28px; }
 }
+
+// Сердечко «в избранное» на карточке каталога.
+//
+// В макете оно справа сверху над снимком, полупрозрачным кружком, и
+// заливается фирменным цветом, когда отмечено. Поверх фотографии, а не
+// под ней: место на карточке дорого, а сердце должно быть там, где его
+// ищут глазами во всех каталогах одинаково.
+.o_coop_fav {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .88);
+  box-shadow: 0 1px 3px rgba(20, 23, 26, .18);
+  cursor: pointer;
+  transition: transform .12s ease, background .12s ease;
+
+  svg {
+    display: block;
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: var(--coop-slate, #4a4a44);
+    stroke-width: 1.7;
+  }
+
+  &:hover {
+    transform: scale(1.08);
+    background: #fff;
+  }
+
+  // Отмечено — залито фирменным. Обводка снимается: контур поверх
+  // заливки делает сердце грязным на мелком размере.
+  &.o_coop_fav_on svg {
+    fill: var(--coop-teal, #146b64);
+    stroke: var(--coop-teal, #146b64);
+  }
+}

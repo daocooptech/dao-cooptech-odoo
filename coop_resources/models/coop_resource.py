@@ -339,6 +339,55 @@ class CoopResource(models.Model):
     can_respond = fields.Boolean(
         string='Можно откликнуться', compute='_compute_can_respond',
         help='Объявление опубликовано, и оно не моё.')
+    # Подпись кнопки — по способу передачи, а не одна на всё.
+    #
+    # Сначала здесь стояло «Откликнуться» — слово, которого в макете нет
+    # вовсе. Владелец остановил: «что ты делаешь, какие еще отклики в
+    # ресурсах?» В макете (`resource.html`) язык раздела торговый:
+    # «Купить в один клик», «Добавить в корзину», «Написать владельцу».
+    #
+    # Но «купить» годится не всякому объявлению: у аренды берут напрокат,
+    # даром — принимают, на обмен — предлагают своё, а у объявления о
+    # спросе покупает как раз разместивший. Одна подпись на все случаи
+    # обещала бы не то, что произойдёт.
+    respond_label = fields.Char(
+        string='Подпись кнопки', compute='_compute_respond_label')
+
+    @api.depends('listing_type', 'method_ids')
+    def _compute_respond_label(self):
+        for record in self:
+            if record.listing_type == 'request':
+                # Спрос: разместивший ищет, откликнувшийся отдаёт.
+                record.respond_label = 'Предложить своё'
+                continue
+            коды = set(record.method_ids.mapped('code'))
+            if 'free' in коды and not (коды - {'free'}):
+                record.respond_label = 'Принять в дар'
+            elif 'barter' in коды and not (коды - {'barter'}):
+                record.respond_label = 'Предложить обмен'
+            elif коды and not (коды - {'rent', 'leasing'}):
+                record.respond_label = 'Арендовать'
+            else:
+                record.respond_label = 'Купить в один клик'
+
+    def action_message_owner(self):
+        """Написать владельцу объявления.
+
+        В макете это отдельная кнопка рядом с покупкой: спросить о
+        подробностях, не заводя сделку. Ведёт в сообщения, как и «Написать»
+        на карточке человека и организации, — переписка на платформе одна.
+        """
+        self.ensure_one()
+        if not self.owner_id:
+            raise UserError(_('У объявления не указан владелец.'))
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Написать: %s') % self.owner_id.display_name,
+            'res_model': 'discuss.channel',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_channel_partner_ids': [(4, self.owner_id.id)]},
+        }
 
     @api.depends_context('uid')
     @api.depends('state', 'owner_id')
@@ -357,7 +406,7 @@ class CoopResource(models.Model):
         self.ensure_one()
         return {
             'type': 'ir.actions.act_window',
-            'name': _('Отклик: %s') % self.name,
+            'name': '%s: %s' % (self.respond_label, self.name),
             'res_model': 'coop.resource.respond',
             'view_mode': 'form',
             'target': 'new',

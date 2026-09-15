@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Без noupdate — правила доступа должны доезжать до узла обновлением
+  модуля.
+-->
+<odoo>
+  <data>
+
+    <!--
+      Своё избранное видно только своему хозяину.
+
+      Это не мелочь оформления: список того, что человек присматривает,
+      говорит о его намерениях больше, чем половина карточки. Кто чем
+      интересуется — его дело, и посторонним этого знать не положено.
+    -->
+    <record id="rule_favorite_own" model="ir.rule">
+      <field name="name">Избранное видно только своему хозяину</field>
+      <field name="model_id" ref="model_coop_favorite"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="True"/>
+      <field name="perm_create" eval="True"/>
+      <field name="perm_unlink" eval="True"/>
+    </record>
+
+  </data>
+</odoo>

@@ -25,6 +25,7 @@
              `record.can_respond.raw_value`, а разбор представления видит
              только `<field>`. -->
         <field name="can_respond"/>
+        <field name="respond_label"/>
         <templates>
           <t t-name="card">
             <div class="o_coop_resource">
@@ -39,6 +40,10 @@
                      t-attf-src="/web/image/res.partner/#{record.owner_id.raw_value}/image_512"
                      t-att-alt="record.owner_id.value"/>
                 <span t-else="" class="o_coop_media_sign">📦</span>
+                <!-- Сердечко поверх снимка, как в макете: справа сверху,
+                     одинаково во всех каталогах. Привязано к `id`, потому
+                     что виджету нужна сама запись, а не значение поля. -->
+                <field name="id" widget="coop_favorite_heart" nolabel="1"/>
                 <span class="o_coop_res_type"
                       t-attf-class="o_coop_res_type #{record.listing_type.raw_value == 'request' ? 'o_coop_res_request' : ''}">
                   <field name="listing_type"/>
@@ -70,7 +75,9 @@
                 <div class="o_coop_tile_act">
                   <button name="action_respond" type="object"
                           class="btn o_coop_btn o_coop_tile_respond"
-                          t-if="record.can_respond.raw_value">Откликнуться</button>
+                          t-if="record.can_respond.raw_value">
+                    <t t-esc="record.respond_label.value"/>
+                  </button>
                 </div>
               </div>
             </div>
@@ -172,7 +179,7 @@
           Отклик заведёт сделку в переговорах — условия согласуете в ней.
         </div>
         <footer>
-          <button name="action_respond" type="object" string="Откликнуться"
+          <button name="action_respond" type="object" string="Подтвердить"
                   class="btn-primary"/>
           <button string="Отмена" special="cancel"/>
         </footer>
@@ -192,8 +199,12 @@
             объявления: опубликовать, закрыть, продвинуть. Тому, кто
             нашёл нужное, нажать было нечего.
           -->
-          <button name="action_respond" type="object" string="Откликнуться"
-                  class="btn-primary" invisible="not can_respond"/>
+          <button name="action_respond" type="object"
+                  class="btn-primary" invisible="not can_respond">
+            <field name="respond_label" nolabel="1" readonly="1"/>
+          </button>
+          <button name="action_message_owner" type="object"
+                  string="Написать владельцу" invisible="not can_respond"/>
           <button name="action_publish" type="object" string="Опубликовать"
                   class="btn-primary" invisible="state == 'published'"/>
           <button name="%(action_coop_resource_promote)d" type="action"
@@ -202,6 +213,7 @@
           <button name="action_close" type="object" string="Закрыть"
                   invisible="state == 'closed'"/>
           <field name="can_respond" invisible="1"/>
+          <field name="respond_label" invisible="1"/>
           <field name="state" widget="statusbar"
                  statusbar_visible="draft,published,closed"/>
         </header>
