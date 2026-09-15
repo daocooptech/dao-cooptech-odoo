@@ -17,6 +17,34 @@ class CoopShell(models.AbstractModel):
     _description = 'Оболочка платформы'
 
     @api.model
+    def boot(self):
+        """Всё, что оболочке нужно при запуске, — одним запросом.
+
+        Измерено 15 сентября 2026: при открытии страницы оболочка делала
+        четыре отдельных вызова — боковое меню, колокольчик,
+        переключатель «действую от имени» и признак управляющего. Все
+        четыре уходят до того, как начнёт грузиться сам раздел, и занимают
+        те же соединения: браузер держит их к одному узлу шесть штук.
+        На боевой установке, где обращение стоит триста миллисекунд, это
+        секунда с лишним впереди содержимого — при том, что ответы
+        умещаются в пару килобайт.
+
+        Части может не быть: узел ставится не всеми модулями сразу.
+        Отсутствующий кусок возвращается пустым, а не роняет запуск.
+        """
+        env = self.env
+        Users = env['res.users']
+        данные = {'acting': self.acting_options()}
+
+        if 'coop.sidebar.item' in env:
+            данные['sidebar'] = env['coop.sidebar.item'].items_for_current_user()
+        if 'coop.notification' in env:
+            данные['unread'] = env['coop.notification'].unread_count()
+        if hasattr(Users, 'coop_admin_state'):
+            данные['admin'] = Users.coop_admin_state()
+        return данные
+
+    @api.model
     def resolve_actions(self, xmlids):
         resolved = {}
         for xmlid in xmlids or []:

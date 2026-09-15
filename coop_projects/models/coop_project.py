@@ -284,6 +284,28 @@ class CoopProject(models.Model):
     need_count = fields.Integer(string='Потребностей',
                                 compute='_compute_need_count')
 
+    # Потребности по видам — четырьмя списками, как в макете: «Необходимые
+    # материальные ресурсы», «…трудовые», и так далее. Одним списком на
+    # три десятка строк вкладчик не поймёт, что из этого он может закрыть:
+    # сварщик ищет глазами труд, а не цемент.
+    #
+    # Отбор вида задан здесь, а не в представлении: тогда пустой раздел
+    # прячется сам по пустоте поля, и держать четыре счётчика не нужно.
+    ОТБОР_ПОТРЕБНОСТИ = [('listing_type', '=', 'request'),
+                         ('state', '=', 'published')]
+    need_material_ids = fields.One2many(
+        'coop.resource', 'project_id', string='Материальные потребности',
+        domain=ОТБОР_ПОТРЕБНОСТИ + [('resource_type', '=', 'material')])
+    need_equipment_ids = fields.One2many(
+        'coop.resource', 'project_id', string='Потребности в оборудовании',
+        domain=ОТБОР_ПОТРЕБНОСТИ + [('resource_type', '=', 'equipment')])
+    need_labour_ids = fields.One2many(
+        'coop.resource', 'project_id', string='Трудовые потребности',
+        domain=ОТБОР_ПОТРЕБНОСТИ + [('resource_type', '=', 'labour')])
+    need_financial_ids = fields.One2many(
+        'coop.resource', 'project_id', string='Финансовые потребности',
+        domain=ОТБОР_ПОТРЕБНОСТИ + [('resource_type', '=', 'financial')])
+
     # ── Срок сбора и правило закрытия ────────────────────────────────────
     #
     # Решение владельца 294. До него у проекта не было ни одной даты, и

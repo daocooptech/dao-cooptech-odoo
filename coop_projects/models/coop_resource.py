@@ -48,6 +48,72 @@ class CoopResource(models.Model):
         'coop.project.contribution', string='Утверждённое предложение',
         readonly=True, copy=False)
 
+    # Пай — доля, которая полагается за закрытие этой потребности.
+    #
+    # Вкладчику важнее стоимости: 150 000 ₽ значат разное в проекте на
+    # полтора миллиона и в проекте на пятнадцать. Считается от того же
+    # знаменателя, что и готовность проекта, — `required_total`, иначе
+    # сумма паёв по всем потребностям не сошлась бы со ста процентами.
+    need_share_percent = fields.Float(
+        string='Пай, %', compute='_compute_need_share', digits=(5, 2),
+        help='Стоимость потребности к общей потребности проекта.')
+    need_can_join = fields.Boolean(
+        string='Можно участвовать', compute='_compute_need_can_join')
+
+    @api.depends('price', 'project_id.required_total')
+    def _compute_need_share(self):
+        for record in self:
+            всего = record.project_id.required_total
+            record.need_share_percent = (
+                record.price * 100.0 / всего if всего and record.price else 0.0)
+
+    @api.depends_context('uid')
+    @api.depends('state', 'project_id.state', 'need_accepted_id',
+                 'project_id.partner_id')
+    def _compute_need_can_join(self):
+        """Те же условия, что и у окна вклада, одним признаком.
+
+        Разойдись они — и человек увидел бы кнопку, отвечающую ошибкой.
+        """
+        мои = self.env.user.coop_actor_partner_ids
+        for record in self:
+            record.need_can_join = bool(
+                record.project_id
+                and record.project_id.state == 'gathering'
+                and record.state == 'published'
+                and not record.need_accepted_id
+                and record.project_id.partner_id not in мои)
+
+    # Чем закрывается потребность того или иного вида. Окно вклада
+    # спрашивает то же самое; подставляем ответ заранее, чтобы человек,
+    # пришедший из строки «Двигатель асинхронный», не выбирал вид вклада
+    # руками.
+    ВИД_ВКЛАДА = {
+        'material': 'material',
+        'equipment': 'resource',
+        'labour': 'labour',
+        'financial': 'money',
+    }
+
+    def action_join_need(self):
+        """«Участвовать» из строки потребности."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Участие: %s') % self.name,
+            'res_model': 'coop.project.contribute',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_project_id': self.project_id.id,
+                'default_need_id': self.id,
+                'default_name': self.name,
+                'default_value': self.price,
+                'default_kind': self.ВИД_ВКЛАДА.get(
+                    self.resource_type, 'resource'),
+            },
+        }
+
     @api.depends('project_id')
     def _compute_is_project_need(self):
         for record in self:

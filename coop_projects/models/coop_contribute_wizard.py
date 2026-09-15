@@ -39,6 +39,11 @@ class CoopContributeWizard(models.TransientModel):
         help='Денежная оценка вклада. Только через неё труд и деньги '
              'сводятся в одну величину, из которой считается доля.')
     note = fields.Text(string='Пара слов инициатору')
+    # Заполнено, когда пришли из строки потребности. Тогда
+    # предложение видно ответственному за неё, а не только
+    # инициатору проекта, и утверждение одного закрывает строку.
+    need_id = fields.Many2one(
+        'coop.resource', string='Потребность', readonly=True)
 
     @api.onchange('kind')
     def _onchange_kind(self):
@@ -63,6 +68,7 @@ class CoopContributeWizard(models.TransientModel):
 
         вклад = self.env['coop.project.contribution'].sudo().create({
             'project_id': проект.id,
+            'need_id': self.need_id.id,
             'partner_id': я.id,
             'kind': self.kind,
             'name': self.name,
@@ -78,8 +84,14 @@ class CoopContributeWizard(models.TransientModel):
                  кто=я.display_name)
         if self.note:
             тело = '%s %s' % (тело, self.note)
+        # Ответственному за потребность — если участие пришло на
+        # строку. Инициатор проекта с тремя десятками потребностей
+        # иначе остаётся единственным, кто вообще об этом узнает.
+        кому = проект.partner_id
+        if self.need_id:
+            кому |= self.need_id._need_deciders()
         self.env['coop.notification']._notify(
-            проект.partner_id, тело, record=проект, kind='project')
+            кому, тело, record=проект, kind='project')
         # След в ленте проекта — через sudo: проект чужой, и права писать
         # в него у вкладчика нет.
         проект.sudo().message_post(body=тело)

@@ -22,13 +22,16 @@ export class CoopActingMenu extends Component {
 
     setup() {
         this.orm = useService("orm");
+        this.boot = useService("coopBoot");
         this.state = useState({ actors: [], acting: null });
         onWillStart(() => this.load());
     }
 
     async load() {
         try {
-            const info = await this.orm.call("coop.shell", "acting_options", []);
+            // Тот же запуск, что и у бокового меню: список лиц
+            // спрашивался дважды — здесь и там.
+            const info = (await this.boot.get()).acting || {};
             this.state.actors = info.options || [];
             this.state.acting = info.current || null;
         } catch {

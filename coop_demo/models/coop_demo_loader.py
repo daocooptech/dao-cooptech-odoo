@@ -23,6 +23,7 @@ from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_promotions,
                     load_reference, load_resources, load_skills,
                     load_project_needs, load_project_tasks,
+                    load_vacancy_photos,
                     load_vacancies, load_verification, load_wallets,
                     load_warehouses)
 
@@ -129,6 +130,11 @@ class CoopDemoLoader(models.AbstractModel):
         # этапе сбора, и предложения на них становятся вкладами.
         if 'coop.resource' in self.env:
             load_project_needs.load_project_needs(self.env)
+            # Разброс по всем четырём видам — после общего наполнения:
+            # тот шаг заводит первую потребность проекта, этот доводит
+            # число потребностей до правдоподобного и закрывает виды
+            # (труд и деньги), которых не бывает у первого шага.
+            load_project_needs.diversify_project_needs(self.env)
         # Задачи проектов — после того, как сборы вкладов обзавелись
         # проектами в управлении: задача заводится в управляемом проекте,
         # а исполнители берутся из вкладчиков сбора.
@@ -180,6 +186,12 @@ class CoopDemoLoader(models.AbstractModel):
         # рубрика ещё и решает, в какой полке запись окажется.
         self._load_rubrics()
         self._load_photos()
+        # Снимки вакансий — последним и отдельно: у вакансий,
+        # заведённых под трудовые потребности проектов, поля
+        # снимка не было вовсе, и полка «Вакансии» на витринной
+        # странице стояла из четырнадцати пустых плиток.
+        if 'coop.vacancy' in self.env:
+            load_vacancy_photos.load(self.env)
         return True
 
     def _load_rubrics(self):

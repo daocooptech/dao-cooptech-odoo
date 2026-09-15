@@ -23,9 +23,11 @@ export class CoopAdminSwitch extends Component {
 
     setup() {
         this.orm = useService("orm");
+        this.boot = useService("coopBoot");
         this.state = useState({ granted: false, active: false, busy: false });
         onWillStart(async () => {
-            const result = await this.orm.call("res.users", "coop_admin_state", []);
+            // Из общего запуска оболочки, а не своим вызовом.
+            const result = (await this.boot.get()).admin || {};
             Object.assign(this.state, result);
         });
     }

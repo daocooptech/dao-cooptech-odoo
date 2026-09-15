@@ -27,6 +27,8 @@ class ResPartner(models.Model):
         string='Навыков', compute='_compute_coop_holdings')
     coop_resource_count = fields.Integer(
         string='Ресурсов', compute='_compute_coop_holdings')
+    coop_need_count = fields.Integer(
+        string='Потребностей', compute='_compute_coop_holdings')
     coop_vacancy_count = fields.Integer(
         string='Вакансий', compute='_compute_coop_holdings')
     coop_project_count = fields.Integer(
@@ -47,8 +49,12 @@ class ResPartner(models.Model):
     # держать пять одинаковых объявлений в пяти местах незачем.
     coop_offer_ids = fields.One2many(
         'coop.skill.offer', 'partner_id', string='Навыки в каталоге')
+    # Только предложения. Без отбора полка показывала и спрос —
+    # то же объявление попадало и сюда, и в «Потребности», и
+    # человек видел «ищу цемент» в списке того, что у него есть.
     coop_resource_ids = fields.One2many(
-        'coop.resource', 'owner_id', string='Ресурсы')
+        'coop.resource', 'owner_id', string='Ресурсы',
+        domain=[('listing_type', '=', 'offer')])
     coop_vacancy_ids = fields.One2many(
         'coop.vacancy', 'partner_id', string='Вакансии')
     coop_project_ids = fields.One2many(
@@ -109,13 +115,14 @@ class ResPartner(models.Model):
 
     def _compute_coop_holdings(self):
         counts = {field: {} for field in (
-            'offer', 'resource', 'vacancy', 'project', 'community', 'deal',
-            'friend', 'draft')}
+            'offer', 'resource', 'need', 'vacancy', 'project',
+            'community', 'deal', 'friend', 'draft')}
         if self.ids:
             counts = self._coop_count_holdings()
         for record in self:
             record.coop_offer_count = counts['offer'].get(record.id, 0)
             record.coop_resource_count = counts['resource'].get(record.id, 0)
+            record.coop_need_count = counts['need'].get(record.id, 0)
             record.coop_vacancy_count = counts['vacancy'].get(record.id, 0)
             record.coop_project_count = counts['project'].get(record.id, 0)
             record.coop_community_count = counts['community'].get(record.id, 0)
@@ -124,6 +131,7 @@ class ResPartner(models.Model):
             record.coop_draft_count = counts['draft'].get(record.id, 0)
             record.coop_holdings_empty = not any((
                 record.coop_offer_count, record.coop_resource_count,
+                record.coop_need_count,
                 record.coop_vacancy_count, record.coop_project_count,
                 record.coop_community_count, record.coop_membership_count,
             ))
@@ -230,7 +238,13 @@ class ResPartner(models.Model):
 
         counts = {
             'offer': tally('coop.skill.offer', 'partner_id', published),
-            'resource': tally('coop.resource', 'owner_id', published),
+            # Спрос и предложение считаются порознь: полка
+            # «Ресурсы» показывает, что у человека есть, полка
+            # «Потребности» — чего ему не хватает.
+            'resource': tally('coop.resource', 'owner_id',
+                              published + [('listing_type', '=', 'offer')]),
+            'need': tally('coop.resource', 'owner_id',
+                          published + [('listing_type', '=', 'request')]),
             'vacancy': tally('coop.vacancy', 'partner_id', published),
             'project': tally('coop.project', 'partner_id'),
             'deal': tally('coop.deal', 'party_a_id'),
@@ -390,7 +404,8 @@ class ResPartner(models.Model):
     def action_coop_my_resources(self):
         return self._coop_holdings_action(
             'coop_resources.action_coop_resources',
-            [('owner_id', '=', self.id)], _('Ресурсы — %s') % self.display_name)
+            [('owner_id', '=', self.id), ('listing_type', '=', 'offer')],
+            _('Ресурсы — %s') % self.display_name)
 
     def action_coop_my_vacancies(self):
         return self._coop_holdings_action(

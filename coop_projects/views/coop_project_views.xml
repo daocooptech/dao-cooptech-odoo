@@ -104,7 +104,7 @@
                 <div class="o_coop_tile_act">
                   <button name="action_contribute" type="object"
                           class="btn o_coop_btn o_coop_tile_contribute"
-                          t-if="record.can_contribute.raw_value">Вложиться</button>
+                          t-if="record.can_contribute.raw_value">Участвовать</button>
                 </div>
               </div>
             </div>
@@ -152,6 +152,12 @@
       <form string="Вклад в проект">
         <field name="project_id" invisible="1"/>
         <field name="currency_id" invisible="1"/>
+        <!-- Пришли из строки потребности — показываем, из какой:
+             человек выбрал «Двигатель асинхронный», и окно должно это
+             подтвердить, а не спрашивать заново. -->
+        <group invisible="not need_id">
+          <field name="need_id" readonly="1"/>
+        </group>
         <group>
           <field name="kind" widget="radio"/>
           <field name="name" placeholder="Смена экскаваторщика, месяц аренды склада, комплект досок"/>
@@ -179,7 +185,7 @@
         <header>
           <!-- Единственное действие участника. Кнопки не было вовсе:
                проект собирал деньги и вещи, а внести их было нечем. -->
-          <button name="action_contribute" type="object" string="Вложиться"
+          <button name="action_contribute" type="object" string="Участвовать"
                   class="btn-primary" invisible="not can_contribute"/>
           <button name="action_open_gathering" type="object" string="Открыть сбор"
                   class="btn-primary" invisible="state != 'draft'"/>
@@ -249,11 +255,43 @@
               </div>
             </button>
           </div>
-          <field name="image_1920" widget="image" class="oe_avatar"
-                 options="{'preview_image': 'image_512'}"/>
-          <div class="oe_title">
-            <h1><field name="name" placeholder="Название проекта"/></h1>
-            <field name="summary" placeholder="Одна строка, которую видно в каталоге"/>
+          <!--
+            Шапка карточки по макету: снимок слева крупно, справа
+            название, вид проекта, инициатор с лицом и кольцо готовности.
+
+            Штатная `oe_avatar` ставит снимок квадратиком в угол — в
+            каталоге проект показан большой фотографией, и открыв его,
+            человек видел ту же фотографию величиной с почтовую марку.
+            Готовность стояла строкой в группе «Ресурсы», ниже трёх
+            экранов полей: главное число страницы читалось последним.
+          -->
+          <div class="o_coop_project_hero">
+            <div class="o_coop_hero_photo">
+              <field name="image_1920" widget="image" nolabel="1"
+                     options="{'preview_image': 'image_512'}"/>
+            </div>
+            <div class="o_coop_hero_main">
+              <h1><field name="name" placeholder="Название проекта"/></h1>
+              <field name="summary" class="o_coop_hero_summary"
+                     placeholder="Одна строка, которую видно в каталоге"/>
+              <div class="o_coop_hero_tags">
+                <field name="kind" widget="badge"
+                       decoration-info="kind == 'cooperative'"
+                       decoration-warning="kind == 'commercial'"
+                       decoration-muted="kind == 'nonprofit'"/>
+                <span class="o_coop_hero_city" invisible="not city">
+                  <field name="city" nolabel="1" readonly="1"/>
+                </span>
+              </div>
+              <div class="o_coop_hero_owner">
+                <field name="partner_id" widget="many2one_avatar" nolabel="1"
+                       readonly="1"/>
+              </div>
+              <div class="o_coop_hero_ring" invisible="state == 'draft'">
+                <field name="readiness" widget="coop_readiness_ring"
+                       nolabel="1"/>
+              </div>
+            </div>
           </div>
           <!--
             Блок сбора идёт во всю ширину листа, а не половиной. У
@@ -276,7 +314,7 @@
                      invisible="not contribution_basis"/>
             </group>
           </group>
-          <group string="Если соберём не всё"
+          <group string="Если соберём не всё" class="o_coop_fallback"
                  invisible="funding_rule == 'all_or_nothing' or state == 'draft'">
             <field name="fallback_plan" nolabel="1"
                    placeholder="Что именно будет сделано на неполном сборе"/>
@@ -303,6 +341,97 @@
               <field name="currency_id" invisible="1"/>
             </group>
           </group>
+
+          <!--
+            Участие в проекте — главный экран для того, кто пришёл со
+            стороны. До него на странице проекта были только действия
+            инициатора: посмотреть, чего проекту не хватает и что за это
+            полагается, было негде.
+
+            Разбито по видам, как в макете: сварщик ищет глазами труд, а
+            не цемент. Пай — доля за закрытие строки; она важнее
+            стоимости, потому что 150 000 ₽ значат разное в проекте на
+            полтора миллиона и в проекте на пятнадцать.
+          -->
+          <div class="o_coop_needs" invisible="state == 'draft' or (not need_material_ids and not need_equipment_ids and not need_labour_ids and not need_financial_ids)">
+            <div class="o_coop_needs_head">Участие в проекте</div>
+            <div class="o_coop_needs_lead">Вносите долю не только деньгами</div>
+            <p class="o_coop_needs_note">
+              В проект можно войти разными формами вклада — деньгами,
+              физическим или умственным трудом, материальными и
+              нематериальными активами и другими ресурсами, какие у вас
+              есть. Какой пай полагается за конкретный вклад — указано в
+              списках ниже.
+            </p>
+            <div class="o_coop_needs_group" invisible="not need_material_ids">
+              <div class="o_coop_needs_title">Необходимые материальные ресурсы</div>
+              <field name="need_material_ids" nolabel="1" readonly="1">
+                <list class="o_coop_needs_list" create="false" delete="false">
+                  <field name="need_can_join" column_invisible="1"/>
+                  <field name="name" string="Ресурс"/>
+                  <field name="price" string="Стоимость"/>
+                  <field name="need_share_percent" string="Пай, %"
+                         widget="float" digits="[5,2]"/>
+                  <field name="need_offer_count" string="Откликов"/>
+                  <button name="action_join_need" type="object"
+                          string="Участвовать" class="btn btn-secondary btn-sm"
+                          invisible="not need_can_join"/>
+                  <field name="currency_id" column_invisible="1"/>
+                </list>
+              </field>
+            </div>
+            <div class="o_coop_needs_group" invisible="not need_equipment_ids">
+              <div class="o_coop_needs_title">Необходимое оборудование</div>
+              <field name="need_equipment_ids" nolabel="1" readonly="1">
+                <list class="o_coop_needs_list" create="false" delete="false">
+                  <field name="need_can_join" column_invisible="1"/>
+                  <field name="name" string="Ресурс"/>
+                  <field name="price" string="Стоимость"/>
+                  <field name="need_share_percent" string="Пай, %"
+                         widget="float" digits="[5,2]"/>
+                  <field name="need_offer_count" string="Откликов"/>
+                  <button name="action_join_need" type="object"
+                          string="Участвовать" class="btn btn-secondary btn-sm"
+                          invisible="not need_can_join"/>
+                  <field name="currency_id" column_invisible="1"/>
+                </list>
+              </field>
+            </div>
+            <div class="o_coop_needs_group" invisible="not need_labour_ids">
+              <div class="o_coop_needs_title">Необходимые трудовые ресурсы</div>
+              <field name="need_labour_ids" nolabel="1" readonly="1">
+                <list class="o_coop_needs_list" create="false" delete="false">
+                  <field name="need_can_join" column_invisible="1"/>
+                  <field name="name" string="Ресурс"/>
+                  <field name="price" string="Стоимость"/>
+                  <field name="need_share_percent" string="Пай, %"
+                         widget="float" digits="[5,2]"/>
+                  <field name="need_offer_count" string="Откликов"/>
+                  <button name="action_join_need" type="object"
+                          string="Участвовать" class="btn btn-secondary btn-sm"
+                          invisible="not need_can_join"/>
+                  <field name="currency_id" column_invisible="1"/>
+                </list>
+              </field>
+            </div>
+            <div class="o_coop_needs_group" invisible="not need_financial_ids">
+              <div class="o_coop_needs_title">Необходимые финансовые ресурсы</div>
+              <field name="need_financial_ids" nolabel="1" readonly="1">
+                <list class="o_coop_needs_list" create="false" delete="false">
+                  <field name="need_can_join" column_invisible="1"/>
+                  <field name="name" string="Ресурс"/>
+                  <field name="price" string="Стоимость"/>
+                  <field name="need_share_percent" string="Пай, %"
+                         widget="float" digits="[5,2]"/>
+                  <field name="need_offer_count" string="Откликов"/>
+                  <button name="action_join_need" type="object"
+                          string="Участвовать" class="btn btn-secondary btn-sm"
+                          invisible="not need_can_join"/>
+                  <field name="currency_id" column_invisible="1"/>
+                </list>
+              </field>
+            </div>
+          </div>
           <notebook>
             <page string="Описание" name="description">
               <field name="description"/>

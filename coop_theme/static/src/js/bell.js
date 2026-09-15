@@ -23,11 +23,23 @@ export class CoopBell extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
+        this.boot = useService("coopBoot");
         this.state = useState({ count: 0 });
 
-        onWillStart(() => this.refresh());
+        // Первое число — из общего запуска: при открытии страницы
+        // колокольчик спрашивал сервер отдельно, впереди раздела.
+        // Дальше опрашивает сам, раз в минуту.
+        onWillStart(() => this.first());
         this.таймер = setInterval(() => this.refresh(), 60000);
         onWillUnmount(() => clearInterval(this.таймер));
+    }
+
+    async first() {
+        try {
+            this.state.count = (await this.boot.get()).unread || 0;
+        } catch {
+            this.state.count = 0;
+        }
     }
 
     async refresh() {

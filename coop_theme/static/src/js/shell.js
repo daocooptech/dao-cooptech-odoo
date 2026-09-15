@@ -122,6 +122,7 @@ export class CoopSidebar extends Component {
     setup() {
         this.action = useService("action");
         this.orm = useService("orm");
+        this.boot = useService("coopBoot");
         this.state = useState({
             main: [], extensions: [], admin: [], current: null, model: null, open: false,
             acting: null, actors: [],
@@ -205,7 +206,10 @@ export class CoopSidebar extends Component {
     async load() {
         let items = [];
         try {
-            items = await this.orm.call("coop.sidebar.item", "items_for_current_user", []);
+            // Из общего запуска, а не своим вызовом: меню,
+            // колокольчик и переключатели спрашивали сервер
+            // порознь и занимали соединения впереди раздела.
+            items = (await this.boot.get()).sidebar || [];
         } catch {
             // Меню не загрузилось — оболочка всё равно должна открыться:
             // пустая полоса слева хуже, чем недоступная платформа целиком.
@@ -232,7 +236,7 @@ export class CoopSidebar extends Component {
      */
     async loadActors() {
         try {
-            const info = await this.orm.call("coop.shell", "acting_options", []);
+            const info = (await this.boot.get()).acting || {};
             this.state.actors = info.options || [];
             this.state.acting = info.current || null;
         } catch {

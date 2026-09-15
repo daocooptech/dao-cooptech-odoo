@@ -37,6 +37,8 @@
     'assets': {
         'web.assets_backend': [
             'coop_projects/static/src/scss/coop_projects.scss',
+            'coop_projects/static/src/js/readiness_ring.js',
+            'coop_projects/static/src/xml/readiness_ring.xml',
         ],
     },
     'installable': True,

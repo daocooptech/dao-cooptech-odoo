@@ -42,6 +42,7 @@
             'coop_theme/static/src/scss/dark.scss',
             'coop_theme/static/src/scss/catalog_view.scss',
             'coop_theme/static/src/scss/shell.scss',
+            'coop_theme/static/src/js/boot.js',
             'coop_theme/static/src/js/catalog_sort.js',
             'coop_theme/static/src/js/catalog_map.js',
             'coop_theme/static/src/xml/catalog_map.xml',
