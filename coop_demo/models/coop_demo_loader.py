@@ -5,6 +5,7 @@ from odoo import api, models
 
 from ..data import photos, rubrics
 from ..data import load_project_updates
+from ..data import load_okved
 from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_cessions,
                     load_tokens,
@@ -157,6 +158,9 @@ class CoopDemoLoader(models.AbstractModel):
         # должно быть окончательным.
         if 'project.update' in self.env:
             load_project_updates.load_project_updates(self.env)
+        # Вид деятельности организаций — по названию и правовой форме.
+        if 'coop.okved' in self.env:
+            load_okved.load_okved(self.env)
         # Рубрики — до снимков: и то и другое выводится из названия, но
         # рубрика ещё и решает, в какой полке запись окажется.
         self._load_rubrics()

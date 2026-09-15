@@ -46,6 +46,8 @@
         <field name="city"/>
         <field name="coop_specialization_id" string="Специализация" optional="show"/>
         <field name="coop_specialization_category_id" string="Сфера деятельности" optional="hide"/>
+        <field name="coop_okved_section_id" string="Раздел ОКВЭД" optional="show"/>
+        <field name="coop_okved_code" string="ОКВЭД" optional="hide"/>
         <field name="coop_member_count" string="Участников"/>
         <field name="coop_trust" string="Доверие, %"/>
         <field name="coop_inn" string="ИНН" optional="hide"/>
@@ -173,6 +175,14 @@
                   <div><span class="o_coop_key">Устав</span>
                     <field name="coop_charter_url" widget="url"
                            placeholder="нет"/></div>
+                  <!-- Вид деятельности стоит среди реквизитов, а не в
+                       блоке «На платформе»: это выписка, а не то, что
+                       организация о себе рассказала. -->
+                  <div><span class="o_coop_key">Вид деятельности</span>
+                    <field name="coop_okved_id" options="{'no_create': True}"
+                           placeholder="не указан"/></div>
+                  <div><span class="o_coop_key">Код ОКВЭД</span>
+                    <field name="coop_okved_code" placeholder="не указан"/></div>
                 </div>
               </div>
 
@@ -362,7 +372,7 @@
     <field name="path">orgs</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('coop_is_participant', '=', True), ('is_company', '=', True)]</field>
-    <field name="context">{'bin_size': True,'coop_catalog': True, 'default_coop_is_participant': True, 'default_is_company': True, 'coop_create_label': 'Добавить организацию', 'coop_shelf_field': 'coop_specialization_category_id'}</field>
+    <field name="context">{'bin_size': True,'coop_catalog': True, 'default_coop_is_participant': True, 'default_is_company': True, 'coop_create_label': 'Добавить организацию', 'coop_shelf_field': 'coop_okved_section_id'}</field>
     <field name="search_view_id" ref="view_coop_orgs_search"/>
     <field name="view_ids" eval="[(5, 0, 0),
            (0, 0, {'sequence': 10, 'view_mode': 'kanban', 'view_id': ref('view_coop_orgs_kanban')}),

@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Классификатор ОКВЭД: разделы и классы.
+
+    Двадцать один раздел — весь верхний уровень классификатора, как он
+    есть в ОК 029-2014. Классы взяты не все: их восемьдесят восемь, и
+    большинство к кооперации отношения не имеет — добыча урана,
+    производство табака, деятельность экстерриториальных организаций.
+    Заведены те, в которых кооперативы действительно работают, плюс те,
+    без которых раздел остался бы пустым.
+
+    Справочник правится приказами Росстандарта, поэтому записи не
+    помечены `noupdate`: обновление модуля приносит правки. Но и не
+    восстанавливаются насильно — если узел завёл свой класс, он
+    останется.
+  -->
+
+  <!-- ── Разделы ────────────────────────────────────────────────────── -->
+
+  <record id="okved_a" model="coop.okved">
+    <field name="code">A</field>
+    <field name="name">Сельское, лесное хозяйство, охота, рыболовство</field>
+  </record>
+  <record id="okved_b" model="coop.okved">
+    <field name="code">B</field>
+    <field name="name">Добыча полезных ископаемых</field>
+  </record>
+  <record id="okved_c" model="coop.okved">
+    <field name="code">C</field>
+    <field name="name">Обрабатывающие производства</field>
+  </record>
+  <record id="okved_d" model="coop.okved">
+    <field name="code">D</field>
+    <field name="name">Энергоснабжение</field>
+  </record>
+  <record id="okved_e" model="coop.okved">
+    <field name="code">E</field>
+    <field name="name">Водоснабжение, сбор и утилизация отходов</field>
+  </record>
+  <record id="okved_f" model="coop.okved">
+    <field name="code">F</field>
+    <field name="name">Строительство</field>
+  </record>
+  <record id="okved_g" model="coop.okved">
+    <field name="code">G</field>
+    <field name="name">Торговля оптовая и розничная</field>
+  </record>
+  <record id="okved_h" model="coop.okved">
+    <field name="code">H</field>
+    <field name="name">Транспортировка и хранение</field>
+  </record>
+  <record id="okved_i" model="coop.okved">
+    <field name="code">I</field>
+    <field name="name">Гостиницы и общественное питание</field>
+  </record>
+  <record id="okved_j" model="coop.okved">
+    <field name="code">J</field>
+    <field name="name">Информация и связь</field>
+  </record>
+  <record id="okved_k" model="coop.okved">
+    <field name="code">K</field>
+    <field name="name">Финансы и страхование</field>
+  </record>
+  <record id="okved_l" model="coop.okved">
+    <field name="code">L</field>
+    <field name="name">Операции с недвижимостью</field>
+  </record>
+  <record id="okved_m" model="coop.okved">
+    <field name="code">M</field>
+    <field name="name">Научная и техническая деятельность</field>
+  </record>
+  <record id="okved_n" model="coop.okved">
+    <field name="code">N</field>
+    <field name="name">Административная деятельность и сопутствующие услуги</field>
+  </record>
+  <record id="okved_o" model="coop.okved">
+    <field name="code">O</field>
+    <field name="name">Государственное управление и социальное обеспечение</field>
+  </record>
+  <record id="okved_p" model="coop.okved">
+    <field name="code">P</field>
+    <field name="name">Образование</field>
+  </record>
+  <record id="okved_q" model="coop.okved">
+    <field name="code">Q</field>
+    <field name="name">Здравоохранение и социальные услуги</field>
+  </record>
+  <record id="okved_r" model="coop.okved">
+    <field name="code">R</field>
+    <field name="name">Культура, спорт, досуг и развлечения</field>
+  </record>
+  <record id="okved_s" model="coop.okved">
+    <field name="code">S</field>
+    <field name="name">Прочие виды услуг</field>
+  </record>
+  <record id="okved_t" model="coop.okved">
+    <field name="code">T</field>
+    <field name="name">Деятельность домашних хозяйств</field>
+  </record>
+  <record id="okved_u" model="coop.okved">
+    <field name="code">U</field>
+    <field name="name">Деятельность экстерриториальных организаций</field>
+  </record>
+
+  <!-- ── Классы ─────────────────────────────────────────────────────── -->
+
+  <record id="okved_01" model="coop.okved">
+    <field name="code">01</field>
+    <field name="name">Растениеводство и животноводство</field>
+    <field name="parent_id" ref="okved_a"/>
+  </record>
+  <record id="okved_02" model="coop.okved">
+    <field name="code">02</field>
+    <field name="name">Лесоводство и лесозаготовки</field>
+    <field name="parent_id" ref="okved_a"/>
+  </record>
+  <record id="okved_03" model="coop.okved">
+    <field name="code">03</field>
+    <field name="name">Рыболовство и рыбоводство</field>
+    <field name="parent_id" ref="okved_a"/>
+  </record>
+  <record id="okved_08" model="coop.okved">
+    <field name="code">08</field>
+    <field name="name">Добыча прочих полезных ископаемых</field>
+    <field name="parent_id" ref="okved_b"/>
+  </record>
+  <record id="okved_10" model="coop.okved">
+    <field name="code">10</field>
+    <field name="name">Производство пищевых продуктов</field>
+    <field name="parent_id" ref="okved_c"/>
+  </record>
+  <record id="okved_11" model="coop.okved">
+    <field name="code">11</field>
+    <field name="name">Производство напитков</field>
+    <field name="parent_id" ref="okved_c"/>
+  </record>
+  <record id="okved_13" model="coop.okved">
+    <field name="code">13</field>
+    <field name="name">Производство текстильных изделий</field>
+    <field name="parent_id" ref="okved_c"/>
+  </record>
+  <record id="okved_14" model="coop.okved">
+    <field name="code">14</field>
+    <field name="name">Производство одежды</field>
+    <field name="parent_id" ref="okved_c"/>
+  </record>
+  <record id="okved_16" model="coop.okved">
+    <field name="code">16</field>
+    <field name="name">Обработка древесины и производство изделий из дерева</field>
+    <field name="parent_id" ref="okved_c"/>
+  </record>
+  <record id="okved_23" model="coop.okved">
+    <field name="code">23</field>
+    <field name="name">Производство прочей неметаллической минеральной продукции</field>
+    <field name="parent_id" ref="okved_c"/>
+  </record>
+  <record id="okved_25" model="coop.okved">
+    <field name="code">25</field>
+    <field name="name">Производство готовых металлических изделий</field>
+    <field name="parent_id" ref="okved_c"/>
+  </record>
+  <record id="okved_28" model="coop.okved">
+    <field name="code">28</field>
+    <field name="name">Производство машин и оборудования</field>
+    <field name="parent_id" ref="okved_c"/>
+  </record>
+  <record id="okved_32" model="coop.okved">
+    <field name="code">32</field>
+    <field name="name">Производство прочих готовых изделий</field>
+    <field name="parent_id" ref="okved_c"/>
+  </record>
+  <record id="okved_33" model="coop.okved">
+    <field name="code">33</field>
+    <field name="name">Ремонт и монтаж машин и оборудования</field>
+    <field name="parent_id" ref="okved_c"/>
+  </record>
+  <record id="okved_35" model="coop.okved">
+    <field name="code">35</field>
+    <field name="name">Обеспечение электроэнергией, газом и паром</field>
+    <field name="parent_id" ref="okved_d"/>
+  </record>
+  <record id="okved_36" model="coop.okved">
+    <field name="code">36</field>
+    <field name="name">Забор, очистка и распределение воды</field>
+    <field name="parent_id" ref="okved_e"/>
+  </record>
+  <record id="okved_38" model="coop.okved">
+    <field name="code">38</field>
+    <field name="name">Сбор, обработка и утилизация отходов</field>
+    <field name="parent_id" ref="okved_e"/>
+  </record>
+  <record id="okved_41" model="coop.okved">
+    <field name="code">41</field>
+    <field name="name">Строительство зданий</field>
+    <field name="parent_id" ref="okved_f"/>
+  </record>
+  <record id="okved_42" model="coop.okved">
+    <field name="code">42</field>
+    <field name="name">Строительство инженерных сооружений</field>
+    <field name="parent_id" ref="okved_f"/>
+  </record>
+  <record id="okved_43" model="coop.okved">
+    <field name="code">43</field>
+    <field name="name">Специализированные строительные работы</field>
+    <field name="parent_id" ref="okved_f"/>
+  </record>
+  <record id="okved_46" model="coop.okved">
+    <field name="code">46</field>
+    <field name="name">Торговля оптовая</field>
+    <field name="parent_id" ref="okved_g"/>
+  </record>
+  <record id="okved_47" model="coop.okved">
+    <field name="code">47</field>
+    <field name="name">Торговля розничная</field>
+    <field name="parent_id" ref="okved_g"/>
+  </record>
+  <record id="okved_49" model="coop.okved">
+    <field name="code">49</field>
+    <field name="name">Деятельность сухопутного транспорта</field>
+    <field name="parent_id" ref="okved_h"/>
+  </record>
+  <record id="okved_52" model="coop.okved">
+    <field name="code">52</field>
+    <field name="name">Складское хозяйство и вспомогательная транспортная деятельность</field>
+    <field name="parent_id" ref="okved_h"/>
+  </record>
+  <record id="okved_55" model="coop.okved">
+    <field name="code">55</field>
+    <field name="name">Деятельность по предоставлению мест для временного проживания</field>
+    <field name="parent_id" ref="okved_i"/>
+  </record>
+  <record id="okved_56" model="coop.okved">
+    <field name="code">56</field>
+    <field name="name">Деятельность по предоставлению продуктов питания и напитков</field>
+    <field name="parent_id" ref="okved_i"/>
+  </record>
+  <record id="okved_58" model="coop.okved">
+    <field name="code">58</field>
+    <field name="name">Издательская деятельность</field>
+    <field name="parent_id" ref="okved_j"/>
+  </record>
+  <record id="okved_59" model="coop.okved">
+    <field name="code">59</field>
+    <field name="name">Производство кино-, видеофильмов и звукозаписей</field>
+    <field name="parent_id" ref="okved_j"/>
+  </record>
+  <record id="okved_62" model="coop.okved">
+    <field name="code">62</field>
+    <field name="name">Разработка программного обеспечения и консультирование</field>
+    <field name="parent_id" ref="okved_j"/>
+  </record>
+  <record id="okved_63" model="coop.okved">
+    <field name="code">63</field>
+    <field name="name">Деятельность в области информационных технологий</field>
+    <field name="parent_id" ref="okved_j"/>
+  </record>
+  <record id="okved_64" model="coop.okved">
+    <field name="code">64</field>
+    <field name="name">Финансовые услуги, кроме страхования</field>
+    <field name="parent_id" ref="okved_k"/>
+  </record>
+  <record id="okved_66" model="coop.okved">
+    <field name="code">66</field>
+    <field name="name">Вспомогательная деятельность в сфере финансов</field>
+    <field name="parent_id" ref="okved_k"/>
+  </record>
+  <record id="okved_68" model="coop.okved">
+    <field name="code">68</field>
+    <field name="name">Операции с недвижимым имуществом</field>
+    <field name="parent_id" ref="okved_l"/>
+  </record>
+  <record id="okved_69" model="coop.okved">
+    <field name="code">69</field>
+    <field name="name">Деятельность в области права и бухгалтерского учёта</field>
+    <field name="parent_id" ref="okved_m"/>
+  </record>
+  <record id="okved_70" model="coop.okved">
+    <field name="code">70</field>
+    <field name="name">Деятельность головных офисов, консультирование по управлению</field>
+    <field name="parent_id" ref="okved_m"/>
+  </record>
+  <record id="okved_71" model="coop.okved">
+    <field name="code">71</field>
+    <field name="name">Архитектура, инженерные изыскания, технические испытания</field>
+    <field name="parent_id" ref="okved_m"/>
+  </record>
+  <record id="okved_72" model="coop.okved">
+    <field name="code">72</field>
+    <field name="name">Научные исследования и разработки</field>
+    <field name="parent_id" ref="okved_m"/>
+  </record>
+  <record id="okved_74" model="coop.okved">
+    <field name="code">74</field>
+    <field name="name">Прочая профессиональная и техническая деятельность</field>
+    <field name="parent_id" ref="okved_m"/>
+  </record>
+  <record id="okved_77" model="coop.okved">
+    <field name="code">77</field>
+    <field name="name">Аренда и лизинг</field>
+    <field name="parent_id" ref="okved_n"/>
+  </record>
+  <record id="okved_81" model="coop.okved">
+    <field name="code">81</field>
+    <field name="name">Обслуживание зданий и территорий</field>
+    <field name="parent_id" ref="okved_n"/>
+  </record>
+  <record id="okved_82" model="coop.okved">
+    <field name="code">82</field>
+    <field name="name">Вспомогательная деятельность в сфере бизнеса</field>
+    <field name="parent_id" ref="okved_n"/>
+  </record>
+  <record id="okved_84" model="coop.okved">
+    <field name="code">84</field>
+    <field name="name">Государственное управление и обеспечение военной безопасности</field>
+    <field name="parent_id" ref="okved_o"/>
+  </record>
+  <record id="okved_85" model="coop.okved">
+    <field name="code">85</field>
+    <field name="name">Образование</field>
+    <field name="parent_id" ref="okved_p"/>
+  </record>
+  <record id="okved_86" model="coop.okved">
+    <field name="code">86</field>
+    <field name="name">Деятельность в области здравоохранения</field>
+    <field name="parent_id" ref="okved_q"/>
+  </record>
+  <record id="okved_88" model="coop.okved">
+    <field name="code">88</field>
+    <field name="name">Социальные услуги без обеспечения проживания</field>
+    <field name="parent_id" ref="okved_q"/>
+  </record>
+  <record id="okved_90" model="coop.okved">
+    <field name="code">90</field>
+    <field name="name">Творческая деятельность, искусство и развлечения</field>
+    <field name="parent_id" ref="okved_r"/>
+  </record>
+  <record id="okved_91" model="coop.okved">
+    <field name="code">91</field>
+    <field name="name">Деятельность библиотек, архивов и музеев</field>
+    <field name="parent_id" ref="okved_r"/>
+  </record>
+  <record id="okved_93" model="coop.okved">
+    <field name="code">93</field>
+    <field name="name">Деятельность в области спорта, отдыха и развлечений</field>
+    <field name="parent_id" ref="okved_r"/>
+  </record>
+  <record id="okved_94" model="coop.okved">
+    <field name="code">94</field>
+    <field name="name">Деятельность общественных организаций</field>
+    <field name="parent_id" ref="okved_s"/>
+  </record>
+  <record id="okved_95" model="coop.okved">
+    <field name="code">95</field>
+    <field name="name">Ремонт компьютеров, предметов личного потребления</field>
+    <field name="parent_id" ref="okved_s"/>
+  </record>
+  <record id="okved_96" model="coop.okved">
+    <field name="code">96</field>
+    <field name="name">Деятельность по предоставлению прочих персональных услуг</field>
+    <field name="parent_id" ref="okved_s"/>
+  </record>
+  <record id="okved_97" model="coop.okved">
+    <field name="code">97</field>
+    <field name="name">Деятельность домашних хозяйств с наёмными работниками</field>
+    <field name="parent_id" ref="okved_t"/>
+  </record>
+  <record id="okved_99" model="coop.okved">
+    <field name="code">99</field>
+    <field name="name">Деятельность экстерриториальных организаций</field>
+    <field name="parent_id" ref="okved_u"/>
+  </record>
+
+</odoo>
