@@ -27,6 +27,8 @@ from datetime import timedelta
 
 from odoo import fields
 
+from . import rubrics
+
 _logger = logging.getLogger(__name__)
 
 # Общее для любой затеи: без рук, перевозки и места не обходится никто.
@@ -141,6 +143,25 @@ OFFER_KIND = {
 TARGET_NEEDS = 130
 
 
+def _рубрика_ресурса(env, name):
+    """Номер рубрики по названию, или ложь — как ждёт `create`."""
+    имя = rubrics.category_for(name)
+    if not имя:
+        return False
+    рубрика = env['coop.resource.category'].sudo().search(
+        [('name', '=', имя)], limit=1)
+    return рубрика.id or False
+
+
+def _специализация(env, name):
+    имя = rubrics.specialization_for(name)
+    if not имя:
+        return False
+    спец = env['coop.specialization'].sudo().search(
+        [('name', '=', имя)], limit=1)
+    return спец.id or False
+
+
 def load_project_needs(env, target=TARGET_NEEDS):
     Resource = env['coop.resource'].sudo()
     Contribution = env['coop.project.contribution'].sudo()
@@ -249,6 +270,11 @@ def load_project_needs(env, target=TARGET_NEEDS):
                     'price_kind': 'to',
                     'description': '<p>Потребность проекта «%s».</p>' % project.name,
                     'state': 'published',
+                    # Рубрика выводится из названия тут же: объявление без
+                    # раздела не находится отбором и попадает на витрине в
+                    # полку «Другое». Раньше её не ставили вовсе, и таких
+                    # объявлений накопилось двести семнадцать.
+                    'category_id': _рубрика_ресурса(env, title),
                 })
                 made_needs += 1
 
@@ -321,6 +347,7 @@ def _make_vacancy(env, project, title, price, manager, rnd, today, people,
             'reward_kind': 'share',
             'state': 'published',
             'description': '<p>Работа нужна проекту «%s».</p>' % project.name,
+            'coop_specialization_id': _специализация(env, title),
         })
 
     applicants = []
