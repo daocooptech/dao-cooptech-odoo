@@ -1,0 +1,90 @@
+# -*- coding: utf-8 -*-
+"""Картинки записей — в кэш браузера.
+
+Измерено 15 сентября 2026 на боевой установке: страница участника
+доходит до готовности за 6,0 с, из восьмидесяти запросов тридцать девять
+— это `/web/image/…`. Передают они 10 КБ на всех: каждый ответ приходит
+с кодом 304, «не изменилось». То есть браузер не берёт ни байта, но на
+каждую картинку тратит полный поход до сервера и обратно.
+
+Почему так. Odoo даёт долгий срок хранения только адресам с меткой
+версии — `?unique=…`, см. `web/controllers/binary.py`, ветка `if unique`.
+Без метки срок не задаётся вовсе, и Werkzeug пишет `no-cache`: браузер
+обязан переспрашивать. Метки нет ни у одного из тридцати пяти наших
+адресов, и поставить её негде — в карточке каталога аватар берётся по
+ссылке на партнёра, а даты его изменения в карточке нет.
+
+Метка и не нужна: ответ и так несёт ETag, а в нём — отпечаток
+содержимого. Сменится картинка — сменится ETag. Значит, достаточно
+разрешить браузеру не спрашивать какое-то время.
+
+Своя карточка — исключение. Человек, сменивший себе фотографию, должен
+увидеть её сразу, иначе решит, что не загрузилось. Чужие аватары
+обновятся в течение часа, и этого никто не заметит.
+
+Срок хранения — `coop.image_cache_seconds`, чтобы менять его без выкатки.
+Хранилище всегда частное (`private`): картинки записей закрыты правами
+доступа, и общим кэшам их отдавать нельзя.
+"""
+
+from odoo import http
+from odoo.addons.web.controllers.binary import Binary
+
+СРОК_ПО_УМОЛЧАНИЮ = 3600  # час
+
+
+class CoopBinary(Binary):
+
+    @http.route()
+    def content_image(self, *args, **kwargs):
+        ответ = super().content_image(*args, **kwargs)
+        if kwargs.get('unique') or kwargs.get('nocache'):
+            # Об этих Odoo уже позаботилась: первым выдан вечный срок,
+            # вторым он снят намеренно.
+            return ответ
+        if ответ.status_code not in (200, 304):
+            return ответ
+        срок = self._coop_image_max_age(kwargs)
+        if not срок:
+            return ответ
+        ответ.cache_control.pop('no-cache', None)
+        ответ.cache_control.pop('public', None)
+        ответ.cache_control.private = True
+        ответ.cache_control.max_age = срок
+        return ответ
+
+    def _coop_image_max_age(self, kwargs):
+        """Сколько браузеру можно не переспрашивать про эту картинку."""
+        env = http.request.env
+        параметр = env['ir.config_parameter'].sudo().get_param(
+            'coop.image_cache_seconds', СРОК_ПО_УМОЛЧАНИЮ)
+        try:
+            срок = int(параметр)
+        except (TypeError, ValueError):
+            срок = СРОК_ПО_УМОЛЧАНИЮ
+        if срок <= 0:
+            return 0
+        if self._coop_is_my_own(kwargs):
+            return 0
+        return срок
+
+    def _coop_is_my_own(self, kwargs):
+        """Это моя собственная карточка?
+
+        Своя фотография должна меняться на глазах. Чужая — может
+        подождать час.
+        """
+        if kwargs.get('model') != 'res.partner':
+            return False
+        try:
+            кто = int(kwargs.get('id') or 0)
+        except (TypeError, ValueError):
+            return False
+        if not кто:
+            return False
+        пользователь = http.request.env.user
+        мои = пользователь.partner_id.ids
+        # Действие от имени организации: её карточка тоже «своя».
+        if 'coop_actor_partner_ids' in пользователь._fields:
+            мои = мои + пользователь.coop_actor_partner_ids.ids
+        return кто in мои
