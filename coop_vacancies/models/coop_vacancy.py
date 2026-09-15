@@ -244,7 +244,12 @@ class CoopVacancy(models.Model):
             'vacancy_id': self.id,
             'partner_id': me.id,
         })
-        self.message_post(body=_('Отклик: %s') % me.display_name)
+        # Через sudo, как и в приглашении: запись в ленту — след уже
+        # состоявшегося отклика, а не правка вакансии. Вакансия чужая,
+        # права писать в неё у откликающегося нет, и без sudo весь отклик
+        # падал отказом «Тип документа: Message, Операция: create» —
+        # кнопка «Откликнуться» не работала ни на одной вакансии.
+        self.sudo().message_post(body=_('Отклик: %s') % me.display_name)
         return True
 
     def action_open_applications(self):
@@ -321,10 +326,44 @@ class CoopVacancyApplication(models.Model):
     hr_applicant_id = fields.Many2one(
         'hr.applicant', string='Кандидат в наборе', readonly=True, copy=False)
 
+    can_decide = fields.Boolean(
+        string='Решать мне', compute='_compute_can_decide',
+        help='Наниматель по этой вакансии: ему видны «Пригласить» и '
+             '«Отклонить», откликнувшемуся — нет.')
+
     _one_per_vacancy = models.Constraint(
         'unique(vacancy_id, partner_id)',
         'Вы уже откликнулись на эту вакансию.',
     )
+
+    @api.depends('vacancy_id.partner_id', 'vacancy_id.need_manager_id')
+    def _compute_can_decide(self):
+        """Кто решает по отклику.
+
+        Те же двое, что и в правиле доступа: автор вакансии и
+        ответственный за потребность проекта. Список держится в одном
+        месте с правилом намеренно — разойдись они, и человек увидел бы
+        кнопку, которая отвечает отказом в доступе.
+        """
+        мои = self.env.user.coop_actor_partner_ids
+        for record in self:
+            вакансия = record.vacancy_id
+            record.can_decide = bool(
+                вакансия.partner_id in мои
+                or вакансия.need_manager_id in мои)
+
+    @api.depends('vacancy_id.name', 'partner_id.display_name')
+    def _compute_display_name(self):
+        """Отклик читается как «вакансия — кто», а не как номер.
+
+        Без этого модель без своего названия показывалась номером записи,
+        и список откликов выглядел столбцом из 861, 865, 573 — по нему
+        нельзя было понять даже, на что откликался.
+        """
+        for record in self:
+            record.display_name = '%s — %s' % (
+                record.vacancy_id.name or _('Вакансия'),
+                record.partner_id.display_name or '')
 
     def action_invite(self):
         for record in self:

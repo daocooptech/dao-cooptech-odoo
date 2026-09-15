@@ -249,7 +249,7 @@
     <field name="path">my-warehouses</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('is_mine', '=', True)]</field>
-    <field name="context">{'bin_size': True,'coop_catalog': 1}</field>
+    <field name="context">{'bin_size': True,'coop_catalog': 1, 'coop_create_label': 'Добавить склад'}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Складов пока нет</p>
       <p>Заведите склад — и станет видно, сколько места занято под своё,

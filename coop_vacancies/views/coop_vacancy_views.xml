@@ -286,6 +286,77 @@
       <p>Закрытая или черновая вакансия из каталога уходит, но остаётся
          здесь.</p>
     </field>
+    <field name="context">{'coop_create_label': 'Добавить вакансию'}</field>
+  </record>
+
+  <!--
+    Отклики списком. Своих представлений у модели не было вовсе, и обе
+    стороны получали то, что движок рисует по умолчанию: столбец из
+    номеров записей — 861, 865, 573. Откликнувшийся не видел, на что
+    откликался, наниматель не видел, кто к нему пришёл, а «Пригласить» и
+    «Отклонить» негде было нажать, хотя в модели они написаны. Действие
+    доходило до середины и обрывалось.
+
+    Один список на обе стороны: разделяет их не представление, а правило
+    доступа — откликнувшийся видит свои отклики, наниматель отклики на
+    свои вакансии. Кнопки решения показываются по `can_decide`, который
+    считается по тем же двоим, что и правило.
+  -->
+  <record id="view_coop_vacancy_application_list" model="ir.ui.view">
+    <field name="name">coop.vacancy.application.list</field>
+    <field name="model">coop.vacancy.application</field>
+    <field name="arch" type="xml">
+      <list string="Отклики" create="false">
+        <field name="create_date" string="Когда" widget="date"/>
+        <field name="vacancy_id" string="Вакансия"/>
+        <field name="partner_id" string="Кто откликнулся"/>
+        <field name="message" string="Сопроводительное письмо" optional="show"/>
+        <field name="state" string="Состояние" widget="badge"
+               decoration-info="state == 'applied'"
+               decoration-success="state == 'invited'"
+               decoration-muted="state == 'declined'"/>
+        <!-- Решение принимается прямо из списка: выбирают из нескольких
+             откликов сразу, и заходить в каждый ради одной кнопки
+             значит потерять из виду остальные. -->
+        <field name="can_decide" column_invisible="1"/>
+        <button name="action_invite" type="object" string="Пригласить"
+                icon="fa-check" invisible="not can_decide or state == 'invited'"/>
+        <button name="action_decline" type="object" string="Отклонить"
+                icon="fa-times" invisible="not can_decide or state == 'declined'"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_vacancy_application_form" model="ir.ui.view">
+    <field name="name">coop.vacancy.application.form</field>
+    <field name="model">coop.vacancy.application</field>
+    <field name="arch" type="xml">
+      <form string="Отклик">
+        <header>
+          <button name="action_invite" type="object" string="Пригласить"
+                  class="btn-primary" invisible="not can_decide or state == 'invited'"/>
+          <button name="action_decline" type="object" string="Отклонить"
+                  invisible="not can_decide or state == 'declined'"/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="applied,invited"/>
+        </header>
+        <sheet>
+          <group>
+            <group>
+              <field name="vacancy_id" readonly="1"/>
+              <field name="partner_id" readonly="1"/>
+            </group>
+            <group>
+              <field name="create_date" string="Когда" readonly="1"/>
+              <field name="can_decide" invisible="1"/>
+            </group>
+          </group>
+          <group string="Сопроводительное письмо">
+            <field name="message" nolabel="1" readonly="1"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
   </record>
 
   <record id="action_coop_vacancy_application" model="ir.actions.act_window">

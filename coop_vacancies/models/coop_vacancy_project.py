@@ -97,17 +97,38 @@ class CoopVacancyApplication(models.Model):
             record._accept_into_project()
         return result
 
+    @api.depends('vacancy_id.coop_project_id')
+    def _compute_can_decide(self):
+        """У вакансии проекта решают не те, кто у вакансии организации.
+
+        Признак и проверка при нажатии должны совпадать буква в букву.
+        Пока они расходились, кнопка «Пригласить» показывалась автору
+        вакансии проекта, а нажатие отвечало «Недопустимая операция»:
+        право у инициатора проекта и ответственного за потребность, а не
+        у того, от чьего имени размещена вакансия. Кнопка, которая
+        отказывает, хуже отсутствующей: по ней человек делает вывод, что
+        сломана платформа, а не что решает не он.
+        """
+        super()._compute_can_decide()
+        for record in self.filtered(lambda a: a.vacancy_id.coop_project_id):
+            record.can_decide = record._may_decide_in_project()
+
+    def _may_decide_in_project(self):
+        """Кому проект доверил утверждать отклики по потребности."""
+        self.ensure_one()
+        deciders = self.vacancy_id._need_deciders()
+        return bool(
+            self.env.user.partner_id in deciders
+            or any(self.env.user.coop_has_power('deal', partner)
+                   for partner in deciders))
+
     def _accept_into_project(self):
         """Превратить утверждённый отклик во вклад и закрыть вакансию."""
         self.ensure_one()
         project = self.vacancy_id.coop_project_id
         if not project or self.contribution_id:
             return
-        deciders = self.vacancy_id._need_deciders()
-        allowed = (self.env.user.partner_id in deciders
-                   or any(self.env.user.coop_has_power('deal', partner)
-                          for partner in deciders))
-        if not allowed:
+        if not self._may_decide_in_project():
             raise UserError(_(
                 'Утверждать отклики по проекту «%s» может его инициатор, '
                 'ответственный за потребность или тот, кому организация '

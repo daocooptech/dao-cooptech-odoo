@@ -5,6 +5,7 @@ import { browser } from "@web/core/browser/browser";
 import { patch } from "@web/core/utils/patch";
 import { kanbanView } from "@web/views/kanban/kanban_view";
 import { KanbanController } from "@web/views/kanban/kanban_controller";
+import { ListController } from "@web/views/list/list_controller";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { SearchBar } from "@web/search/search_bar/search_bar";
 import { Pager } from "@web/core/pager/pager";
@@ -293,6 +294,34 @@ patch(ControlPanel.prototype, {
             return super.switchView("kanban", isMiddleClick);
         }
         return super.switchView(viewType, isMiddleClick);
+    },
+});
+
+// Кнопка создания в списках подписывается так же, как в каталоге.
+//
+// В плитке подпись своя с самого начала — «Добавить ресурс», «Добавить
+// вакансию»: так в макете, и по ней видно, что именно заводится. А
+// списки — «Мои вакансии», «Мои ресурсы», «Мои закупки» — остались со
+// штатным «Новое». Владелец 15 сентября 2026 указал на это прямо:
+// кнопка встречается много где и везде называется одинаково, тогда как
+// в макете у неё своё место и своё название в каждом разделе.
+//
+// Патч общий, а не по `js_class` у каждого списка: подпись берётся из
+// того же `coop_create_label`, что и в плитке, и там, где его в
+// действии нет, остаётся штатное «Новое».
+patch(ListController.prototype, {
+    get coopCreateLabel() {
+        // Из действия, а не из `props.context`. Списку достаётся контекст
+        // поиска, а не действия: `WithSearch` передаёт вниз
+        // `searchModel.context`, и от объявленного в действии там
+        // остаются только `lang`, `tz`, `uid` и список компаний —
+        // измерено 15 сентября 2026, подпись просто не доезжала. В
+        // плитке контекст свой, поэтому там подпись работала с самого
+        // начала, и расхождение выглядело необъяснимым.
+        const действие = this.env.services.action?.currentAction;
+        return действие?.context?.coop_create_label
+            || this.props.context?.coop_create_label
+            || "Новое";
     },
 });
 

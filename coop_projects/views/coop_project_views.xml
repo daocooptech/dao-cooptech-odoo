@@ -390,7 +390,7 @@
     <field name="path">my-projects</field>
     <field name="view_mode">list,kanban,form</field>
     <field name="domain">[('partner_id.user_ids', 'in', [uid])]</field>
-    <field name="context">{'search_default_by_state': 1}</field>
+    <field name="context">{'search_default_by_state': 1, 'coop_create_label': 'Добавить проект'}</field>
   </record>
 
   <record id="action_coop_project_category" model="ir.actions.act_window">

@@ -18,14 +18,23 @@
       свои. Без этого правила участник мог бы переписать чужую вакансию и
       сменить у неё автора: права на модель выданы, а правил записи нет.
       Тот же случай, что был в навыках.
+
+      Третье условие — вакансия, на которую человек откликался. Без него
+      отклик переживал вакансию: объявление закрывали, оно уходило из
+      каталога, а вместе с ним пропадало и право читать его у того, кто
+      уже откликнулся. В разделе «Мои отклики» это валило весь экран —
+      «нет доступа „чтение“ к: Вакансия», — и человек не мог узнать даже,
+      на что подавался. Откликнувшийся имеет к этой вакансии прямое
+      отношение, и закрытие объявления его не отменяет.
     -->
     <record id="rule_vacancy_read" model="ir.rule">
-      <field name="name">Участник видит опубликованные вакансии и свои</field>
+      <field name="name">Участник видит опубликованные вакансии, свои и те, на которые откликался</field>
       <field name="model_id" ref="model_coop_vacancy"/>
       <field name="groups" eval="[(4, ref('base.group_user'))]"/>
       <field name="domain_force">
-        ['|', ('state', '=', 'published'),
-         ('partner_id', 'in', user.coop_actor_partner_ids.ids)]
+        ['|', '|', ('state', '=', 'published'),
+         ('partner_id', 'in', user.coop_actor_partner_ids.ids),
+         ('application_ids.partner_id', 'in', user.coop_actor_partner_ids.ids)]
       </field>
       <field name="perm_read" eval="True"/>
       <field name="perm_write" eval="False"/>

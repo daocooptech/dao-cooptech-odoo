@@ -164,4 +164,21 @@
     </xpath>
   </t>
 
+  <!--
+    Кнопка создания в списке подписывается по разделу, как в плитке.
+    Штатная называется одинаково во всех разделах — «Новое», — и по ней
+    не видно, что заводится: вакансия, ресурс или закупка. Подпись
+    берётся из того же `coop_create_label`, что и в плитке; там, где его
+    в действии нет, остаётся прежнее слово.
+  -->
+  <t t-name="coop_theme.ListView" t-inherit="web.ListView" t-inherit-mode="extension">
+    <xpath expr="//button[hasclass('o_list_button_add')]" position="replace">
+      <button t-if="!editedRecord and activeActions.create and props.showButtons"
+              type="button" class="btn btn-primary o_list_button_add"
+              data-hotkey="c" t-on-click="onClickCreate" data-bounce-button="">
+        <t t-esc="coopCreateLabel"/>
+      </button>
+    </xpath>
+  </t>
+
 </templates>

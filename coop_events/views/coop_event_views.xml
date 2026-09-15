@@ -227,7 +227,7 @@
     <field name="path">my-events</field>
     <field name="view_mode">kanban,calendar,list,form</field>
     <field name="domain">[('am_i_signed', '=', True)]</field>
-    <field name="context">{'bin_size': True,'coop_catalog': 1}</field>
+    <field name="context">{'bin_size': True,'coop_catalog': 1, 'coop_create_label': 'Создать событие'}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Вы никуда не записаны</p>
       <p>Записаться можно из календаря событий. Если планы поменяются,
