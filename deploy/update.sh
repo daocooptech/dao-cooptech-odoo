@@ -16,6 +16,39 @@ USER=odoo
 say() { printf '\n\033[1m== %s\033[0m\n' "$*"; }
 run() { sudo -u "$USER" "$@"; }
 
+BACKUP_DIR=/var/backups/coop
+KEEP=7
+LAST_DUMP=""
+
+# Снимок базы в сжатом формате. Возвращает ложь, если не вышло: вызов
+# решает сам, что с этим делать — перед обновлением это повод не
+# обновляться, в суточном таймере повод написать в журнал.
+backup_db() {
+    mkdir -p "$BACKUP_DIR"
+    chown postgres:postgres "$BACKUP_DIR" 2>/dev/null || true
+    LAST_DUMP="$BACKUP_DIR/$DB-$(date +%F-%H%M%S).dump"
+    say "Снимок базы → $LAST_DUMP"
+    # От postgres, а не от root: у root нет роли в базе. Формат `-Fc`
+    # сжатый, его понимает pg_restore в restore.sh.
+    if sudo -u postgres pg_dump -Fc "$DB" > "$LAST_DUMP" 2>/dev/null; then
+        # Пустой файл — это не снимок. Проверка дешёвая, а без неё
+        # «копия есть» оказалось бы неправдой ровно тогда, когда она
+        # понадобится.
+        if [ -s "$LAST_DUMP" ]; then
+            say "Снимок готов: $(du -h "$LAST_DUMP" | cut -f1)"
+            # Храним последние семь. Считаем по времени изменения, а не
+            # по имени: имя с датой удобно читать, но сортировать по нему
+            # значит зависеть от формата даты.
+            ls -1t "$BACKUP_DIR/$DB-"*.dump 2>/dev/null                 | tail -n +$((KEEP + 1)) | xargs -r rm -f
+            return 0
+        fi
+    fi
+    rm -f "$LAST_DUMP"
+    LAST_DUMP=""
+    return 1
+}
+
+
 cd "$ODOO_HOME/coop-addons"
 before=$(run git rev-parse HEAD)
 run git fetch --quiet origin main
@@ -30,7 +63,8 @@ after=$(run git rev-parse HEAD)
 # из /etc. Раньше их переносил только install.sh, и правка таймера
 # доезжала до сервера, ничего не меняя. Теперь блоки сверяются при каждом
 # обновлении: изменились — переносим и перечитываем.
-for unit in coop-odoo.service coop-update.service coop-update.timer; do
+for unit in coop-odoo.service coop-update.service coop-update.timer \
+            coop-backup.service coop-backup.timer; do
     src="$ODOO_HOME/coop-addons/deploy/$unit"
     dst="/etc/systemd/system/$unit"
     if [ -f "$src" ] && ! cmp -s "$src" "$dst"; then
@@ -72,6 +106,10 @@ fi
 if [ "${units_changed:-0}" = "1" ]; then
     systemctl daemon-reload
     systemctl restart coop-update.timer || true
+    # Таймер снимков включается сам при первой же выкатке: заводить его
+    # руками значит однажды забыть — и узнать об этом в тот день, когда
+    # копия понадобится.
+    systemctl enable --now coop-backup.timer || true
 fi
 
 if [ "$before" = "$after" ]; then
@@ -110,10 +148,37 @@ fi
 if [ -z "$changed" ]; then
     say "Изменения вне модулей — только перезапуск"
 else
+    # Снимок базы до обновления.
+    #
+    # Резервной копии боевой базы не было вообще: `restore.sh` заливает
+    # со стенда разработки, то есть восстановил бы девелоперские данные,
+    # а не боевые. На боевой двести проектов, пятьсот сделок, тысяча
+    # вкладов — недели работы, которые держались на одной копии.
+    #
+    # Снимок делается только перед обновлением модулей: правки стилей и
+    # перезапуск базу не трогают, и копия на каждую выкладку заняла бы
+    # диск без пользы. Суточная копия идёт отдельным таймером.
+    #
+    # Пункт 19 разбора архитектора.
+    if backup_db; then
+        snapshot="$LAST_DUMP"
+    else
+        say "ВНИМАНИЕ: снимок базы не сделан — обновление отменено"
+        exit 1
+    fi
+
     say "Обновляю: $changed"
     systemctl stop coop-odoo
-    run "$ODOO_HOME/venv/bin/python" "$ODOO_HOME/odoo/odoo-bin" \
-        -c "$CONF" -d "$DB" -u "$changed" --stop-after-init --no-http
+    # Код возврата обновления ловим сами: при `set -e` сценарий вышел бы
+    # молча, не сказав, откуда откатываться. Тринадцатого сентября
+    # обновление уже роняло загрузку реестра целиком, оставив в базе
+    # двадцать семь адресов из сорока семи, и код возврата был нулевой.
+    if ! run "$ODOO_HOME/venv/bin/python" "$ODOO_HOME/odoo/odoo-bin"             -c "$CONF" -d "$DB" -u "$changed" --stop-after-init --no-http; then
+        say "ОБНОВЛЕНИЕ УПАЛО. База могла остаться в половинчатом виде."
+        say "Откат: bash $ODOO_HOME/coop-addons/deploy/restore.sh $snapshot"
+        systemctl start coop-odoo || true
+        exit 1
+    fi
 fi
 
 # Собранные пакеты больше не сносим.
