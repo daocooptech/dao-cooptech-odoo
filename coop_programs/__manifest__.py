@@ -21,6 +21,7 @@
     'depends': ['coop_base', 'coop_orgs', 'coop_resources', 'mail'],
     'data': [
         'security/ir.model.access.csv',
+        'security/coop_program_rules.xml',
         'views/coop_program_views.xml',
     ],
     'assets': {

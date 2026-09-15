@@ -18,6 +18,7 @@
     'depends': ['coop_base', 'coop_orgs', 'mail'],
     'data': [
         'security/ir.model.access.csv',
+        'security/coop_groupbuy_rules.xml',
         'views/coop_groupbuy_views.xml',
     ],
     'assets': {

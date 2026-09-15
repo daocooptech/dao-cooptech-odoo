@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Без noupdate — правила доступа должны доезжать до узла обновлением
+  модуля. Флаг «не обновлять» запоминается в ir_model_data при первой
+  загрузке и переживает удаление из XML.
+
+  Разбор архитектора 15 сентября 2026: у этого модуля в `security/` лежал
+  только `ir.model.access.csv`, а файла с `ir.rule` не было ни одного —
+  при том, что право на запись выдано всем участникам. Проверено на
+  стенде от имени обычного участника: чужую запись удавалось переписать
+  и удалить.
+
+  Ниже — тот же образец, что уже работает в ресурсах, вакансиях,
+  проектах и сообществах: опубликованное читают все, правит владелец,
+  своё участие ведёт сам участник.
+-->
+<odoo>
+  <data>
+
+    <!-- Черновик — дело хозяина. Опубликованное читают все: это витрина,
+         и закрывать её значило бы закрыть каталог. -->
+    <record id="rule_groupbuy_read" model="ir.rule">
+      <field name="name">Складчина: черновик виден организатору, остальное всем</field>
+      <field name="model_id" ref="model_coop_groupbuy"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">['|', ('state', '!=', 'draft'),
+          ('organizer_id', 'in', user.coop_actor_partner_ids.ids)]</field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="False"/>
+      <field name="perm_create" eval="False"/>
+      <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- Правит тот, кому доверено публиковать от имени владельца. Без
+         этого правила любой участник переписывал чужую запись —
+         цену, состояние, владельца — и удалял её. -->
+    <record id="rule_groupbuy_write" model="ir.rule">
+      <field name="name">Складчину правит организатор</field>
+      <field name="model_id" ref="model_coop_groupbuy"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[('organizer_id', 'in', user.coop_publisher_partner_ids.ids)]</field>
+      <field name="perm_read" eval="False"/>
+      <field name="perm_write" eval="True"/>
+      <field name="perm_create" eval="True"/>
+      <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- Ступень — часть складчины, и прячется вместе с ней. -->
+    <record id="rule_groupbuy_tier_read" model="ir.rule">
+      <field name="name">Ступени цены видны вместе со складчиной</field>
+      <field name="model_id" ref="model_coop_groupbuy_tier"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">['|', ('groupbuy_id.state', '!=', 'draft'),
+          ('groupbuy_id.organizer_id', 'in', user.coop_actor_partner_ids.ids)]</field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="False"/>
+      <field name="perm_create" eval="False"/>
+      <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- Правит тот, кому доверено публиковать от имени владельца. Без
+         этого правила любой участник переписывал чужую запись —
+         цену, состояние, владельца — и удалял её. -->
+    <record id="rule_groupbuy_tier_write" model="ir.rule">
+      <field name="name">Ступени правит организатор</field>
+      <field name="model_id" ref="model_coop_groupbuy_tier"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[('groupbuy_id.organizer_id', 'in', user.coop_publisher_partner_ids.ids)]</field>
+      <field name="perm_read" eval="False"/>
+      <field name="perm_write" eval="True"/>
+      <field name="perm_create" eval="True"/>
+      <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- Своё участие человек ведёт сам. Чужого не видит и тронуть не
+         может: «кто куда записался» — это о людях, а не о записях. -->
+    <record id="rule_groupbuy_order_own" model="ir.rule">
+      <field name="name">Свой заказ в складчине</field>
+      <field name="model_id" ref="model_coop_groupbuy_order"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[('partner_id', 'in', user.coop_actor_partner_ids.ids)]</field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="True"/>
+      <field name="perm_create" eval="True"/>
+      <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- Хозяину записи видно, кто в ней участвует: без этого он не может
+         ни подвести итог, ни раздать заказ. -->
+    <record id="rule_groupbuy_order_organizer" model="ir.rule">
+      <field name="name">Организатор видит заказы</field>
+      <field name="model_id" ref="model_coop_groupbuy_order"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[('groupbuy_id.organizer_id', 'in', user.coop_actor_partner_ids.ids)]</field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="True"/>
+      <field name="perm_create" eval="False"/>
+      <field name="perm_unlink" eval="False"/>
+    </record>
+
+  </data>
+</odoo>

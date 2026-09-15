@@ -18,6 +18,7 @@
     'depends': ['coop_base', 'coop_resources', 'mail'],
     'data': [
         'security/ir.model.access.csv',
+        'security/coop_auction_rules.xml',
         'data/coop_auction_cron.xml',
         'views/coop_auction_views.xml',
     ],
