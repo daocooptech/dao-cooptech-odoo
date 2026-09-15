@@ -8,6 +8,7 @@
     <field name="arch" type="xml">
       <kanban js_class="coop_catalog_kanban" class="o_coop_projects"
               default_order="id desc">
+        <field name="partner_id"/>
         <field name="image_512"/>
         <field name="city"/>
         <field name="readiness"/>
@@ -27,8 +28,17 @@
                   от деления, и адрес выходил равным NaN. Картинки при
                   этом не ломались с ошибкой, а просто не появлялись.
                 -->
-                <img t-att-src="'/web/image/coop.project/' + record.id.raw_value + '/image_512'"
+                <!-- Цепочка одна на все каталоги: свой снимок, иначе лицо
+                     инициатора, иначе значок раздела. Безусловный адрес
+                     показывал заглушку «добавить фото» у всех, кто снимка
+                     не имеет, — и карточка выглядела незагрузившейся. -->
+                <img t-if="record.image_512.raw_value"
+                     t-att-src="'/web/image/coop.project/' + record.id.raw_value + '/image_512'"
                      t-att-alt="record.name.value" loading="lazy"/>
+                <img class="o_coop_media_logo" t-elif="record.partner_id.raw_value" loading="lazy"
+                     t-attf-src="/web/image/res.partner/#{record.partner_id.raw_value}/image_512"
+                     t-att-alt="record.partner_id.value"/>
+                <span t-else="" class="o_coop_media_sign">🎯</span>
                 <span class="o_coop_badge o_coop_kind"
                       t-att-class="'o_coop_kind_' + record.kind.raw_value">
                   <t t-esc="record.kind.value"/>

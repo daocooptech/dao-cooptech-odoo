@@ -28,7 +28,16 @@
           <t t-name="card">
             <div class="o_coop_vacancy">
               <div class="o_coop_vac_photo o_coop_media">
-                <field name="image_512" widget="image"/>
+                <!-- Цепочка одна на все каталоги: свой снимок, иначе лицо той
+                     стороны, с которой придётся иметь дело, иначе значок
+                     раздела. Штатное поле-картинка так не умеет: при пустом
+                     значении оно рисует заглушку «добавить фото», и карточка
+                     выглядит незагрузившейся. -->
+                <field name="image_512" widget="image" t-if="record.image_512.raw_value"/>
+                <img class="o_coop_media_logo" t-elif="record.partner_id.raw_value" loading="lazy"
+                     t-attf-src="/web/image/res.partner/#{record.partner_id.raw_value}/image_512"
+                     t-att-alt="record.partner_id.value"/>
+                <span t-else="" class="o_coop_media_sign">💼</span>
                 <img class="o_coop_vac_owner"
                      t-attf-src="/web/image/res.partner/#{record.partner_id.raw_value}/avatar_128"
                      t-att-title="record.partner_id.value" t-att-alt="record.partner_id.value"/>
