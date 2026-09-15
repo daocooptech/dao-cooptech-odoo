@@ -73,12 +73,17 @@ class ResPartner(models.Model):
     # Через те же поля, что и у него: организация на платформе — такой
     # же участник, и заводить ей отдельные связи значило бы держать два
     # набора правил там, где хватает одного.
+    # Своё, а не проектов. Потребности проектов — тоже спрос и тоже
+    # лежат в каталоге ресурсов, но на карточке организации им не место:
+    # то же правило, что и на странице человека. Владелец 15 сентября
+    # 2026: «у пользователя только личные потребности, у проектов свои
+    # потребности, которые грузятся в каталог ресурсов в спрос».
     coop_org_resource_ids = fields.One2many(
         'coop.resource', 'owner_id', string='Ресурсы организации',
-        domain=[('listing_type', '=', 'offer')])
+        domain=[('listing_type', '=', 'offer'), ('project_id', '=', False)])
     coop_org_need_ids = fields.One2many(
         'coop.resource', 'owner_id', string='Потребности организации',
-        domain=[('listing_type', '=', 'request')])
+        domain=[('listing_type', '=', 'request'), ('project_id', '=', False)])
     coop_org_project_ids = fields.One2many(
         'coop.project', 'partner_id', string='Проекты организации')
     coop_org_vacancy_ids = fields.One2many(

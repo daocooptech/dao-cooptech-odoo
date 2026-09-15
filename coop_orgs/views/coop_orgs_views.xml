@@ -401,7 +401,16 @@
                     <kanban class="o_coop_band_kanban" records_draggable="false">
                       <templates>
                         <t t-name="card">
-                          <div class="o_coop_mini o_coop_mini_text">
+                          <!-- Со снимком, как в полках человека и как в
+                               макете: полка из голых подписей на сером
+                               читается как список, а не как витрина, и
+                               рядом с полкой ресурсов выглядит
+                               недогрузившейся. -->
+                          <div class="o_coop_mini">
+                            <div class="o_coop_mini_img">
+                              <img t-att-src="'/web/image/coop.vacancy/' + record.id.raw_value + '/image_512'"
+                                   t-att-alt="record.name.value" loading="lazy"/>
+                            </div>
                             <div class="o_coop_mini_label">
                               <field name="name"/>
                             </div>
@@ -423,7 +432,11 @@
                       <field name="state"/>
                       <templates>
                         <t t-name="card">
-                          <div class="o_coop_mini o_coop_mini_text">
+                          <div class="o_coop_mini">
+                            <div class="o_coop_mini_img">
+                              <img t-att-src="'/web/image/coop.resource/' + record.id.raw_value + '/image_512'"
+                                   t-att-alt="record.name.value" loading="lazy"/>
+                            </div>
                             <div class="o_coop_mini_label">
                               <field name="name"/>
                             </div>
