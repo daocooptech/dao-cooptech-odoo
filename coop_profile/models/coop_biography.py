@@ -23,7 +23,24 @@ class CoopEducation(models.Model):
     partner_id = fields.Many2one(
         'res.partner', string='Участник', required=True, ondelete='cascade',
         index=True)
-    name = fields.Char('Учебное заведение', required=True)
+    # Из справочника, а не строкой. Владелец 15 сентября 2026: сокращение
+    # брать «из каталога учебных заведений страны». По свободной строке
+    # люди друг друга не находят: сто человек, написавших «СФУ», «Сиб.
+    # федеральный» и «СибФУ», окажутся из разных мест.
+    institution_id = fields.Many2one(
+        'coop.institution', string='Учебное заведение', index=True,
+        ondelete='restrict')
+    # Свободная строка осталась запасной: справочник заведомо неполон, и
+    # участник, чьего заведения в нём нет, вписывает своё руками.
+    name = fields.Char('Название вручную')
+    # Своим вычислением, а не заодно с `display_name`: `display_name` —
+    # особое поле движка, и когда на нём висит второе поле, движок
+    # пересчитывает его по своим правилам, а наше остаётся пустым.
+    # Проверено: после привязки к справочнику 306 записей сокращение у
+    # всех осталось незаполненным.
+    short_name = fields.Char(
+        'Сокращённо', compute='_compute_short_name', store=True,
+        help='Из справочника; у вписанного вручную — само название.')
     speciality = fields.Char('Специальность')
     year_from = fields.Integer('Год поступления')
     year_to = fields.Integer('Год выпуска')
@@ -33,6 +50,38 @@ class CoopEducation(models.Model):
         ('higher', 'Высшее'),
         ('courses', 'Курсы'),
     ], string='Уровень', default='higher', required=True)
+
+    @api.depends('institution_id.short_name', 'institution_id.name', 'name')
+    def _compute_short_name(self):
+        for record in self:
+            заведение = record.institution_id
+            record.short_name = (заведение.short_name or заведение.name
+                                 or record.name or '')
+
+    @api.onchange('institution_id')
+    def _onchange_institution(self):
+        """Ступень подставляется из справочника.
+
+        У заведения она своя и не меняется: университет даёт высшее,
+        техникум — профессиональное. Спрашивать об этом участника, когда
+        ответ уже известен, значит спрашивать зря.
+        """
+        for record in self:
+            if record.institution_id:
+                record.level = record.institution_id.kind
+
+    @api.constrains('institution_id', 'name')
+    def _check_institution(self):
+        """Либо из справочника, либо вписано руками — но не пусто.
+
+        Обязательным `required` тут не обойтись: обязательных полей два, и
+        заполнено должно быть любое из них.
+        """
+        for record in self:
+            if not record.institution_id and not (record.name or '').strip():
+                raise ValidationError(_(
+                    'Выберите учебное заведение из справочника или впишите '
+                    'название вручную.'))
 
     @api.constrains('year_from', 'year_to')
     def _check_years(self):

@@ -1,0 +1,1571 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Справочник учебных заведений. Владелец 15 сентября 2026: сокращённое
+  название брать «из каталога учебных заведений страны (в данном случае
+  рф)».
+
+  Заведения настоящие, с их обиходными аббревиатурами; города — из
+  согласованного списка платформы. Справочник заведомо неполон: в России
+  тысячи заведений, и участник, чьего здесь нет, вписывает своё руками —
+  свободная строка в записи об образовании для этого и оставлена.
+
+  Без noupdate: справочник — это код, а не данные участника, и правки в
+  нём должны доезжать до узла обновлением модуля.
+-->
+<odoo>
+
+  <record id="institution_mgu_moskva" model="coop.institution">
+    <field name="short_name">МГУ</field>
+    <field name="name">Московский государственный университет имени М. В. Ломоносова</field>
+    <field name="kind">higher</field>
+    <field name="city">Москва</field>
+  </record>
+
+  <record id="institution_mgtu_im_baumana_moskva" model="coop.institution">
+    <field name="short_name">МГТУ им. Баумана</field>
+    <field name="name">Московский государственный технический университет имени Н. Э. Баумана</field>
+    <field name="kind">higher</field>
+    <field name="city">Москва</field>
+  </record>
+
+  <record id="institution_mfti_moskva" model="coop.institution">
+    <field name="short_name">МФТИ</field>
+    <field name="name">Московский физико-технический институт</field>
+    <field name="kind">higher</field>
+    <field name="city">Москва</field>
+  </record>
+
+  <record id="institution_niu_vshe_moskva" model="coop.institution">
+    <field name="short_name">НИУ ВШЭ</field>
+    <field name="name">Национальный исследовательский университет «Высшая школа экономики»</field>
+    <field name="kind">higher</field>
+    <field name="city">Москва</field>
+  </record>
+
+  <record id="institution_misis_moskva" model="coop.institution">
+    <field name="short_name">МИСиС</field>
+    <field name="name">Университет науки и технологий МИСиС</field>
+    <field name="kind">higher</field>
+    <field name="city">Москва</field>
+  </record>
+
+  <record id="institution_mei_moskva" model="coop.institution">
+    <field name="short_name">МЭИ</field>
+    <field name="name">Национальный исследовательский университет «МЭИ»</field>
+    <field name="kind">higher</field>
+    <field name="city">Москва</field>
+  </record>
+
+  <record id="institution_reu_im_plehanova_moskva" model="coop.institution">
+    <field name="short_name">РЭУ им. Плеханова</field>
+    <field name="name">Российский экономический университет имени Г. В. Плеханова</field>
+    <field name="kind">higher</field>
+    <field name="city">Москва</field>
+  </record>
+
+  <record id="institution_rgau_msha_moskva" model="coop.institution">
+    <field name="short_name">РГАУ-МСХА</field>
+    <field name="name">Российский государственный аграрный университет — МСХА имени К. А. Тимирязева</field>
+    <field name="kind">higher</field>
+    <field name="city">Москва</field>
+  </record>
+
+  <record id="institution_madi_moskva" model="coop.institution">
+    <field name="short_name">МАДИ</field>
+    <field name="name">Московский автомобильно-дорожный государственный технический университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Москва</field>
+  </record>
+
+  <record id="institution_miit_moskva" model="coop.institution">
+    <field name="short_name">МИИТ</field>
+    <field name="name">Российский университет транспорта</field>
+    <field name="kind">higher</field>
+    <field name="city">Москва</field>
+  </record>
+
+  <record id="institution_spbgu_sankt_peterburg" model="coop.institution">
+    <field name="short_name">СПбГУ</field>
+    <field name="name">Санкт-Петербургский государственный университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Санкт-Петербург</field>
+  </record>
+
+  <record id="institution_politeh_sankt_peterburg" model="coop.institution">
+    <field name="short_name">Политех</field>
+    <field name="name">Санкт-Петербургский политехнический университет Петра Великого</field>
+    <field name="kind">higher</field>
+    <field name="city">Санкт-Петербург</field>
+  </record>
+
+  <record id="institution_itmo_sankt_peterburg" model="coop.institution">
+    <field name="short_name">ИТМО</field>
+    <field name="name">Национальный исследовательский университет ИТМО</field>
+    <field name="kind">higher</field>
+    <field name="city">Санкт-Петербург</field>
+  </record>
+
+  <record id="institution_leti_sankt_peterburg" model="coop.institution">
+    <field name="short_name">ЛЭТИ</field>
+    <field name="name">Санкт-Петербургский государственный электротехнический университет «ЛЭТИ»</field>
+    <field name="kind">higher</field>
+    <field name="city">Санкт-Петербург</field>
+  </record>
+
+  <record id="institution_spbgasu_sankt_peterburg" model="coop.institution">
+    <field name="short_name">СПбГАСУ</field>
+    <field name="name">Санкт-Петербургский государственный архитектурно-строительный университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Санкт-Петербург</field>
+  </record>
+
+  <record id="institution_guap_sankt_peterburg" model="coop.institution">
+    <field name="short_name">ГУАП</field>
+    <field name="name">Санкт-Петербургский государственный университет аэрокосмического приборостроения</field>
+    <field name="kind">higher</field>
+    <field name="city">Санкт-Петербург</field>
+  </record>
+
+  <record id="institution_sfu_krasnoyarsk" model="coop.institution">
+    <field name="short_name">СФУ</field>
+    <field name="name">Сибирский федеральный университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Красноярск</field>
+  </record>
+
+  <record id="institution_sibgu_im_reshetneva_krasnoyarsk" model="coop.institution">
+    <field name="short_name">СибГУ им. Решетнёва</field>
+    <field name="name">Сибирский государственный университет науки и технологий имени М. Ф. Решетнёва</field>
+    <field name="kind">higher</field>
+    <field name="city">Красноярск</field>
+  </record>
+
+  <record id="institution_krasgau_krasnoyarsk" model="coop.institution">
+    <field name="short_name">КрасГАУ</field>
+    <field name="name">Красноярский государственный аграрный университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Красноярск</field>
+  </record>
+
+  <record id="institution_ngu_novosibirsk" model="coop.institution">
+    <field name="short_name">НГУ</field>
+    <field name="name">Новосибирский национальный исследовательский государственный университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Новосибирск</field>
+  </record>
+
+  <record id="institution_ngtu_novosibirsk" model="coop.institution">
+    <field name="short_name">НГТУ</field>
+    <field name="name">Новосибирский государственный технический университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Новосибирск</field>
+  </record>
+
+  <record id="institution_ngau_novosibirsk" model="coop.institution">
+    <field name="short_name">НГАУ</field>
+    <field name="name">Новосибирский государственный аграрный университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Новосибирск</field>
+  </record>
+
+  <record id="institution_urfu_ekaterinburg" model="coop.institution">
+    <field name="short_name">УрФУ</field>
+    <field name="name">Уральский федеральный университет имени первого Президента России Б. Н. Ельцина</field>
+    <field name="kind">higher</field>
+    <field name="city">Екатеринбург</field>
+  </record>
+
+  <record id="institution_urgeu_ekaterinburg" model="coop.institution">
+    <field name="short_name">УрГЭУ</field>
+    <field name="name">Уральский государственный экономический университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Екатеринбург</field>
+  </record>
+
+  <record id="institution_urgau_ekaterinburg" model="coop.institution">
+    <field name="short_name">УрГАУ</field>
+    <field name="name">Уральский государственный аграрный университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Екатеринбург</field>
+  </record>
+
+  <record id="institution_kfu_kazan" model="coop.institution">
+    <field name="short_name">КФУ</field>
+    <field name="name">Казанский (Приволжский) федеральный университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Казань</field>
+  </record>
+
+  <record id="institution_knitu_kai_kazan" model="coop.institution">
+    <field name="short_name">КНИТУ-КАИ</field>
+    <field name="name">Казанский национальный исследовательский технический университет имени А. Н. Туполева</field>
+    <field name="kind">higher</field>
+    <field name="city">Казань</field>
+  </record>
+
+  <record id="institution_kgeu_kazan" model="coop.institution">
+    <field name="short_name">КГЭУ</field>
+    <field name="name">Казанский государственный энергетический университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Казань</field>
+  </record>
+
+  <record id="institution_yufu_rostov_na_donu" model="coop.institution">
+    <field name="short_name">ЮФУ</field>
+    <field name="name">Южный федеральный университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Ростов-на-Дону</field>
+  </record>
+
+  <record id="institution_dgtu_rostov_na_donu" model="coop.institution">
+    <field name="short_name">ДГТУ</field>
+    <field name="name">Донской государственный технический университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Ростов-на-Дону</field>
+  </record>
+
+  <record id="institution_dvfu_vladivostok" model="coop.institution">
+    <field name="short_name">ДВФУ</field>
+    <field name="name">Дальневосточный федеральный университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Владивосток</field>
+  </record>
+
+  <record id="institution_mgu_im_nevelskogo_vladivostok" model="coop.institution">
+    <field name="short_name">МГУ им. Невельского</field>
+    <field name="name">Морской государственный университет имени адмирала Г. И. Невельского</field>
+    <field name="kind">higher</field>
+    <field name="city">Владивосток</field>
+  </record>
+
+  <record id="institution_togu_habarovsk" model="coop.institution">
+    <field name="short_name">ТОГУ</field>
+    <field name="name">Тихоокеанский государственный университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Хабаровск</field>
+  </record>
+
+  <record id="institution_dvgups_habarovsk" model="coop.institution">
+    <field name="short_name">ДВГУПС</field>
+    <field name="name">Дальневосточный государственный университет путей сообщения</field>
+    <field name="kind">higher</field>
+    <field name="city">Хабаровск</field>
+  </record>
+
+  <record id="institution_nngu_nizhniy_novgorod" model="coop.institution">
+    <field name="short_name">ННГУ</field>
+    <field name="name">Нижегородский государственный университет имени Н. И. Лобачевского</field>
+    <field name="kind">higher</field>
+    <field name="city">Нижний Новгород</field>
+  </record>
+
+  <record id="institution_ngtu_im_alekseeva_nizhniy_novgorod" model="coop.institution">
+    <field name="short_name">НГТУ им. Алексеева</field>
+    <field name="name">Нижегородский государственный технический университет имени Р. Е. Алексеева</field>
+    <field name="kind">higher</field>
+    <field name="city">Нижний Новгород</field>
+  </record>
+
+  <record id="institution_nngasu_nizhniy_novgorod" model="coop.institution">
+    <field name="short_name">ННГАСУ</field>
+    <field name="name">Нижегородский государственный архитектурно-строительный университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Нижний Новгород</field>
+  </record>
+
+  <record id="institution_samgtu_samara" model="coop.institution">
+    <field name="short_name">СамГТУ</field>
+    <field name="name">Самарский государственный технический университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Самара</field>
+  </record>
+
+  <record id="institution_samarskiy_universitet_samara" model="coop.institution">
+    <field name="short_name">Самарский университет</field>
+    <field name="name">Самарский национальный исследовательский университет имени академика С. П. Королёва</field>
+    <field name="kind">higher</field>
+    <field name="city">Самара</field>
+  </record>
+
+  <record id="institution_yuurgu_chelyabinsk" model="coop.institution">
+    <field name="short_name">ЮУрГУ</field>
+    <field name="name">Южно-Уральский государственный университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Челябинск</field>
+  </record>
+
+  <record id="institution_chelgu_chelyabinsk" model="coop.institution">
+    <field name="short_name">ЧелГУ</field>
+    <field name="name">Челябинский государственный университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Челябинск</field>
+  </record>
+
+  <record id="institution_kubgu_krasnodar" model="coop.institution">
+    <field name="short_name">КубГУ</field>
+    <field name="name">Кубанский государственный университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Краснодар</field>
+  </record>
+
+  <record id="institution_kubgau_krasnodar" model="coop.institution">
+    <field name="short_name">КубГАУ</field>
+    <field name="name">Кубанский государственный аграрный университет имени И. Т. Трубилина</field>
+    <field name="kind">higher</field>
+    <field name="city">Краснодар</field>
+  </record>
+
+  <record id="institution_kubgtu_krasnodar" model="coop.institution">
+    <field name="short_name">КубГТУ</field>
+    <field name="name">Кубанский государственный технологический университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Краснодар</field>
+  </record>
+
+  <record id="institution_pgniu_perm" model="coop.institution">
+    <field name="short_name">ПГНИУ</field>
+    <field name="name">Пермский государственный национальный исследовательский университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Пермь</field>
+  </record>
+
+  <record id="institution_pnipu_perm" model="coop.institution">
+    <field name="short_name">ПНИПУ</field>
+    <field name="name">Пермский национальный исследовательский политехнический университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Пермь</field>
+  </record>
+
+  <record id="institution_omgtu_omsk" model="coop.institution">
+    <field name="short_name">ОмГТУ</field>
+    <field name="name">Омский государственный технический университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Омск</field>
+  </record>
+
+  <record id="institution_omgau_omsk" model="coop.institution">
+    <field name="short_name">ОмГАУ</field>
+    <field name="name">Омский государственный аграрный университет имени П. А. Столыпина</field>
+    <field name="kind">higher</field>
+    <field name="city">Омск</field>
+  </record>
+
+  <record id="institution_volggtu_volgograd" model="coop.institution">
+    <field name="short_name">ВолгГТУ</field>
+    <field name="name">Волгоградский государственный технический университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Волгоград</field>
+  </record>
+
+  <record id="institution_volgu_volgograd" model="coop.institution">
+    <field name="short_name">ВолГУ</field>
+    <field name="name">Волгоградский государственный университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Волгоград</field>
+  </record>
+
+  <record id="institution_vgu_voronezh" model="coop.institution">
+    <field name="short_name">ВГУ</field>
+    <field name="name">Воронежский государственный университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Воронеж</field>
+  </record>
+
+  <record id="institution_vgtu_voronezh" model="coop.institution">
+    <field name="short_name">ВГТУ</field>
+    <field name="name">Воронежский государственный технический университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Воронеж</field>
+  </record>
+
+  <record id="institution_vgau_voronezh" model="coop.institution">
+    <field name="short_name">ВГАУ</field>
+    <field name="name">Воронежский государственный аграрный университет имени императора Петра I</field>
+    <field name="kind">higher</field>
+    <field name="city">Воронеж</field>
+  </record>
+
+  <record id="institution_ugntu_ufa" model="coop.institution">
+    <field name="short_name">УГНТУ</field>
+    <field name="name">Уфимский государственный нефтяной технический университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Уфа</field>
+  </record>
+
+  <record id="institution_uunit_ufa" model="coop.institution">
+    <field name="short_name">УУНиТ</field>
+    <field name="name">Уфимский университет науки и технологий</field>
+    <field name="kind">higher</field>
+    <field name="city">Уфа</field>
+  </record>
+
+  <record id="institution_bashkirskiy_gau_ufa" model="coop.institution">
+    <field name="short_name">Башкирский ГАУ</field>
+    <field name="name">Башкирский государственный аграрный университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Уфа</field>
+  </record>
+
+  <record id="institution_tyumgu_tyumen" model="coop.institution">
+    <field name="short_name">ТюмГУ</field>
+    <field name="name">Тюменский государственный университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Тюмень</field>
+  </record>
+
+  <record id="institution_tiu_tyumen" model="coop.institution">
+    <field name="short_name">ТИУ</field>
+    <field name="name">Тюменский индустриальный университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Тюмень</field>
+  </record>
+
+  <record id="institution_gau_severnogo_zauralya_tyumen" model="coop.institution">
+    <field name="short_name">ГАУ Северного Зауралья</field>
+    <field name="name">Государственный аграрный университет Северного Зауралья</field>
+    <field name="kind">higher</field>
+    <field name="city">Тюмень</field>
+  </record>
+
+  <record id="institution_kemgu_kemerovo" model="coop.institution">
+    <field name="short_name">КемГУ</field>
+    <field name="name">Кемеровский государственный университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Кемерово</field>
+  </record>
+
+  <record id="institution_kuzgtu_kemerovo" model="coop.institution">
+    <field name="short_name">КузГТУ</field>
+    <field name="name">Кузбасский государственный технический университет имени Т. Ф. Горбачёва</field>
+    <field name="kind">higher</field>
+    <field name="city">Кемерово</field>
+  </record>
+
+  <record id="institution_bfu_im_kanta_kaliningrad" model="coop.institution">
+    <field name="short_name">БФУ им. Канта</field>
+    <field name="name">Балтийский федеральный университет имени Иммануила Канта</field>
+    <field name="kind">higher</field>
+    <field name="city">Калининград</field>
+  </record>
+
+  <record id="institution_kgtu_kaliningrad" model="coop.institution">
+    <field name="short_name">КГТУ</field>
+    <field name="name">Калининградский государственный технический университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Калининград</field>
+  </record>
+
+  <record id="institution_safu_arhangelsk" model="coop.institution">
+    <field name="short_name">САФУ</field>
+    <field name="name">Северный (Арктический) федеральный университет имени М. В. Ломоносова</field>
+    <field name="kind">higher</field>
+    <field name="city">Архангельск</field>
+  </record>
+
+  <record id="institution_sgmu_arhangelsk" model="coop.institution">
+    <field name="short_name">СГМУ</field>
+    <field name="name">Северный государственный медицинский университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Архангельск</field>
+  </record>
+
+  <record id="institution_yargu_yaroslavl" model="coop.institution">
+    <field name="short_name">ЯрГУ</field>
+    <field name="name">Ярославский государственный университет имени П. Г. Демидова</field>
+    <field name="kind">higher</field>
+    <field name="city">Ярославль</field>
+  </record>
+
+  <record id="institution_yagtu_yaroslavl" model="coop.institution">
+    <field name="short_name">ЯГТУ</field>
+    <field name="name">Ярославский государственный технический университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Ярославль</field>
+  </record>
+
+  <record id="institution_mgtu_im_nosova_magnitogorsk" model="coop.institution">
+    <field name="short_name">МГТУ им. Носова</field>
+    <field name="name">Магнитогорский государственный технический университет имени Г. И. Носова</field>
+    <field name="kind">higher</field>
+    <field name="city">Магнитогорск</field>
+  </record>
+
+  <record id="institution_dgu_derbent" model="coop.institution">
+    <field name="short_name">ДГУ</field>
+    <field name="name">Дагестанский государственный университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Дербент</field>
+  </record>
+
+  <record id="institution_daggau_derbent" model="coop.institution">
+    <field name="short_name">ДагГАУ</field>
+    <field name="name">Дагестанский государственный аграрный университет имени М. М. Джамбулатова</field>
+    <field name="kind">higher</field>
+    <field name="city">Дербент</field>
+  </record>
+
+  <record id="institution_vogu_vologda" model="coop.institution">
+    <field name="short_name">ВоГУ</field>
+    <field name="name">Вологодский государственный университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Вологда</field>
+  </record>
+
+  <record id="institution_vologodskaya_gmha_vologda" model="coop.institution">
+    <field name="short_name">Вологодская ГМХА</field>
+    <field name="name">Вологодская государственная молочнохозяйственная академия имени Н. В. Верещагина</field>
+    <field name="kind">higher</field>
+    <field name="city">Вологда</field>
+  </record>
+
+  <record id="institution_sgu_sochi" model="coop.institution">
+    <field name="short_name">СГУ</field>
+    <field name="name">Сочинский государственный университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Сочи</field>
+  </record>
+
+  <record id="institution_rgppu_nizhniy_tagil" model="coop.institution">
+    <field name="short_name">РГППУ</field>
+    <field name="name">Российский государственный профессионально-педагогический университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Нижний Тагил</field>
+  </record>
+
+  <record id="institution_altgtu_altayskiy_kray" model="coop.institution">
+    <field name="short_name">АлтГТУ</field>
+    <field name="name">Алтайский государственный технический университет имени И. И. Ползунова</field>
+    <field name="kind">higher</field>
+    <field name="city">Алтайский край</field>
+  </record>
+
+  <record id="institution_agau_altayskiy_kray" model="coop.institution">
+    <field name="short_name">АГАУ</field>
+    <field name="name">Алтайский государственный аграрный университет</field>
+    <field name="kind">higher</field>
+    <field name="city">Алтайский край</field>
+  </record>
+
+  <record id="institution_tyumgu_tobolsk_tobolsk" model="coop.institution">
+    <field name="short_name">ТюмГУ (Тобольск)</field>
+    <field name="name">Тобольский педагогический институт имени Д. И. Менделеева</field>
+    <field name="kind">higher</field>
+    <field name="city">Тобольск</field>
+  </record>
+
+  <record id="institution_igpi_ishim" model="coop.institution">
+    <field name="short_name">ИГПИ</field>
+    <field name="name">Ишимский педагогический институт имени П. П. Ершова</field>
+    <field name="kind">higher</field>
+    <field name="city">Ишим</field>
+  </record>
+
+  <record id="institution_mkeiit_moskva" model="coop.institution">
+    <field name="short_name">МКЭиИТ</field>
+    <field name="name">Московский колледж электромеханики и информационных технологий</field>
+    <field name="kind">college</field>
+    <field name="city">Москва</field>
+  </record>
+
+  <record id="institution_kms_moskva" model="coop.institution">
+    <field name="short_name">КМС</field>
+    <field name="name">Колледж машиностроения и сварки</field>
+    <field name="kind">college</field>
+    <field name="city">Москва</field>
+  </record>
+
+  <record id="institution_pk_8_moskva" model="coop.institution">
+    <field name="short_name">ПК № 8</field>
+    <field name="name">Политехнический колледж № 8 имени дважды Героя Советского Союза И. Ф. Павлова</field>
+    <field name="kind">college</field>
+    <field name="city">Москва</field>
+  </record>
+
+  <record id="institution_spbtkuik_sankt_peterburg" model="coop.institution">
+    <field name="short_name">СПбТКУиК</field>
+    <field name="name">Санкт-Петербургский техникум компьютерных технологий</field>
+    <field name="kind">college</field>
+    <field name="city">Санкт-Петербург</field>
+  </record>
+
+  <record id="institution_pk_im_kotina_sankt_peterburg" model="coop.institution">
+    <field name="short_name">ПК им. Котина</field>
+    <field name="name">Политехнический колледж городского хозяйства</field>
+    <field name="kind">college</field>
+    <field name="city">Санкт-Петербург</field>
+  </record>
+
+  <record id="institution_krasek_krasnoyarsk" model="coop.institution">
+    <field name="short_name">КрасЭК</field>
+    <field name="name">Красноярский энергетический колледж</field>
+    <field name="kind">college</field>
+    <field name="city">Красноярск</field>
+  </record>
+
+  <record id="institution_krizht_krasnoyarsk" model="coop.institution">
+    <field name="short_name">КрИЖТ</field>
+    <field name="name">Красноярский монтажный колледж</field>
+    <field name="kind">college</field>
+    <field name="city">Красноярск</field>
+  </record>
+
+  <record id="institution_nst_novosibirsk" model="coop.institution">
+    <field name="short_name">НСТ</field>
+    <field name="name">Новосибирский строительно-монтажный колледж</field>
+    <field name="kind">college</field>
+    <field name="city">Новосибирск</field>
+  </record>
+
+  <record id="institution_nkpiit_novosibirsk" model="coop.institution">
+    <field name="short_name">НКПиИТ</field>
+    <field name="name">Новосибирский колледж промышленных и информационных технологий</field>
+    <field name="kind">college</field>
+    <field name="city">Новосибирск</field>
+  </record>
+
+  <record id="institution_uksap_ekaterinburg" model="coop.institution">
+    <field name="short_name">УКСАП</field>
+    <field name="name">Уральский колледж строительства, архитектуры и предпринимательства</field>
+    <field name="kind">college</field>
+    <field name="city">Екатеринбург</field>
+  </record>
+
+  <record id="institution_emt_ekaterinburg" model="coop.institution">
+    <field name="short_name">ЕМТ</field>
+    <field name="name">Екатеринбургский монтажный колледж</field>
+    <field name="kind">college</field>
+    <field name="city">Екатеринбург</field>
+  </record>
+
+  <record id="institution_keis_kazan" model="coop.institution">
+    <field name="short_name">КЭиС</field>
+    <field name="name">Казанский энергетический колледж</field>
+    <field name="kind">college</field>
+    <field name="city">Казань</field>
+  </record>
+
+  <record id="institution_ksk_kazan" model="coop.institution">
+    <field name="short_name">КСК</field>
+    <field name="name">Казанский строительный колледж</field>
+    <field name="kind">college</field>
+    <field name="city">Казань</field>
+  </record>
+
+  <record id="institution_rksi_rostov_na_donu" model="coop.institution">
+    <field name="short_name">РКСИ</field>
+    <field name="name">Ростовский-на-Дону колледж связи и информатики</field>
+    <field name="kind">college</field>
+    <field name="city">Ростов-на-Дону</field>
+  </record>
+
+  <record id="institution_rsk_rostov_na_donu" model="coop.institution">
+    <field name="short_name">РСК</field>
+    <field name="name">Ростовский строительный колледж</field>
+    <field name="kind">college</field>
+    <field name="city">Ростов-на-Дону</field>
+  </record>
+
+  <record id="institution_vsk_vladivostok" model="coop.institution">
+    <field name="short_name">ВСК</field>
+    <field name="name">Владивостокский судостроительный колледж</field>
+    <field name="kind">college</field>
+    <field name="city">Владивосток</field>
+  </record>
+
+  <record id="institution_htzht_habarovsk" model="coop.institution">
+    <field name="short_name">ХТЖТ</field>
+    <field name="name">Хабаровский техникум железнодорожного транспорта</field>
+    <field name="kind">college</field>
+    <field name="city">Хабаровск</field>
+  </record>
+
+  <record id="institution_nrt_nizhniy_novgorod" model="coop.institution">
+    <field name="short_name">НРТ</field>
+    <field name="name">Нижегородский радиотехнический колледж</field>
+    <field name="kind">college</field>
+    <field name="city">Нижний Новгород</field>
+  </record>
+
+  <record id="institution_nsk_nizhniy_novgorod" model="coop.institution">
+    <field name="short_name">НСК</field>
+    <field name="name">Нижегородский строительный техникум</field>
+    <field name="kind">college</field>
+    <field name="city">Нижний Новгород</field>
+  </record>
+
+  <record id="institution_sek_samara" model="coop.institution">
+    <field name="short_name">СЭК</field>
+    <field name="name">Самарский энергетический колледж</field>
+    <field name="kind">college</field>
+    <field name="city">Самара</field>
+  </record>
+
+  <record id="institution_chmt_chelyabinsk" model="coop.institution">
+    <field name="short_name">ЧМТ</field>
+    <field name="name">Челябинский механико-технологический техникум</field>
+    <field name="kind">college</field>
+    <field name="city">Челябинск</field>
+  </record>
+
+  <record id="institution_kkep_krasnodar" model="coop.institution">
+    <field name="short_name">ККЭП</field>
+    <field name="name">Краснодарский колледж электронного приборостроения</field>
+    <field name="kind">college</field>
+    <field name="city">Краснодар</field>
+  </record>
+
+  <record id="institution_kmsht_krasnodar" model="coop.institution">
+    <field name="short_name">КМСХТ</field>
+    <field name="name">Краснодарский монтажный техникум</field>
+    <field name="kind">college</field>
+    <field name="city">Краснодар</field>
+  </record>
+
+  <record id="institution_pat_perm" model="coop.institution">
+    <field name="short_name">ПАТ</field>
+    <field name="name">Пермский агропромышленный техникум</field>
+    <field name="kind">college</field>
+    <field name="city">Пермь</field>
+  </record>
+
+  <record id="institution_pkpt_perm" model="coop.institution">
+    <field name="short_name">ПКПТ</field>
+    <field name="name">Пермский колледж предпринимательства и сервиса</field>
+    <field name="kind">college</field>
+    <field name="city">Пермь</field>
+  </record>
+
+  <record id="institution_oktes_omsk" model="coop.institution">
+    <field name="short_name">ОКТЭС</field>
+    <field name="name">Омский колледж транспортного строительства</field>
+    <field name="kind">college</field>
+    <field name="city">Омск</field>
+  </record>
+
+  <record id="institution_vtzhtik_volgograd" model="coop.institution">
+    <field name="short_name">ВТЖТиК</field>
+    <field name="name">Волгоградский технический колледж</field>
+    <field name="kind">college</field>
+    <field name="city">Волгоград</field>
+  </record>
+
+  <record id="institution_vgpgk_voronezh" model="coop.institution">
+    <field name="short_name">ВГПГК</field>
+    <field name="name">Воронежский государственный промышленно-гуманитарный колледж</field>
+    <field name="kind">college</field>
+    <field name="city">Воронеж</field>
+  </record>
+
+  <record id="institution_uksivt_ufa" model="coop.institution">
+    <field name="short_name">УКСИВТ</field>
+    <field name="name">Уфимский колледж статистики, информатики и вычислительной техники</field>
+    <field name="kind">college</field>
+    <field name="city">Уфа</field>
+  </record>
+
+  <record id="institution_utek_ufa" model="coop.institution">
+    <field name="short_name">УТЭК</field>
+    <field name="name">Уфимский топливно-энергетический колледж</field>
+    <field name="kind">college</field>
+    <field name="city">Уфа</field>
+  </record>
+
+  <record id="institution_tkpist_tyumen" model="coop.institution">
+    <field name="short_name">ТКПиСТ</field>
+    <field name="name">Тюменский колледж производственных и социальных технологий</field>
+    <field name="kind">college</field>
+    <field name="city">Тюмень</field>
+  </record>
+
+  <record id="institution_tlt_tyumen" model="coop.institution">
+    <field name="short_name">ТЛТ</field>
+    <field name="name">Тюменский лесотехнический техникум</field>
+    <field name="kind">college</field>
+    <field name="city">Тюмень</field>
+  </record>
+
+  <record id="institution_kemtipp_kemerovo" model="coop.institution">
+    <field name="short_name">КемТИПП</field>
+    <field name="name">Кемеровский техникум индустрии питания и сферы услуг</field>
+    <field name="kind">college</field>
+    <field name="city">Кемерово</field>
+  </record>
+
+  <record id="institution_kmt_kemerovo" model="coop.institution">
+    <field name="short_name">КМТ</field>
+    <field name="name">Кемеровский горнотехнический техникум</field>
+    <field name="kind">college</field>
+    <field name="city">Кемерово</field>
+  </record>
+
+  <record id="institution_kmt_klg_kaliningrad" model="coop.institution">
+    <field name="short_name">КМТ (Клг)</field>
+    <field name="name">Калининградский морской рыбопромышленный колледж</field>
+    <field name="kind">college</field>
+    <field name="city">Калининград</field>
+  </record>
+
+  <record id="institution_att_arhangelsk" model="coop.institution">
+    <field name="short_name">АТТ</field>
+    <field name="name">Архангельский техникум строительства и экономики</field>
+    <field name="kind">college</field>
+    <field name="city">Архангельск</field>
+  </record>
+
+  <record id="institution_yartpt_yaroslavl" model="coop.institution">
+    <field name="short_name">ЯрТПТ</field>
+    <field name="name">Ярославский торгово-экономический колледж</field>
+    <field name="kind">college</field>
+    <field name="city">Ярославль</field>
+  </record>
+
+  <record id="institution_mpk_magnitogorsk" model="coop.institution">
+    <field name="short_name">МПК</field>
+    <field name="name">Магнитогорский педагогический колледж</field>
+    <field name="kind">college</field>
+    <field name="city">Магнитогорск</field>
+  </record>
+
+  <record id="institution_dpk_derbent" model="coop.institution">
+    <field name="short_name">ДПК</field>
+    <field name="name">Дербентский профессионально-педагогический колледж имени Г. Б. Казиахмедова</field>
+    <field name="kind">college</field>
+    <field name="city">Дербент</field>
+  </record>
+
+  <record id="institution_vst_vologda" model="coop.institution">
+    <field name="short_name">ВСТ</field>
+    <field name="name">Вологодский строительный колледж</field>
+    <field name="kind">college</field>
+    <field name="city">Вологда</field>
+  </record>
+
+  <record id="institution_sksit_sochi" model="coop.institution">
+    <field name="short_name">СКСиТ</field>
+    <field name="name">Сочинский колледж поликультурного образования</field>
+    <field name="kind">college</field>
+    <field name="city">Сочи</field>
+  </record>
+
+  <record id="institution_ntst_nizhniy_tagil" model="coop.institution">
+    <field name="short_name">НТСТ</field>
+    <field name="name">Нижнетагильский строительный колледж</field>
+    <field name="kind">college</field>
+    <field name="city">Нижний Тагил</field>
+  </record>
+
+  <record id="institution_altpk_altayskiy_kray" model="coop.institution">
+    <field name="short_name">АлтПК</field>
+    <field name="name">Алтайский политехнический техникум</field>
+    <field name="kind">college</field>
+    <field name="city">Алтайский край</field>
+  </record>
+
+  <record id="institution_tmt_tobolsk" model="coop.institution">
+    <field name="short_name">ТМТ</field>
+    <field name="name">Тобольский многопрофильный техникум</field>
+    <field name="kind">college</field>
+    <field name="city">Тобольск</field>
+  </record>
+
+  <record id="institution_imt_ishim" model="coop.institution">
+    <field name="short_name">ИМТ</field>
+    <field name="name">Ишимский многопрофильный техникум</field>
+    <field name="kind">college</field>
+    <field name="city">Ишим</field>
+  </record>
+
+  <record id="institution_ifkatt_udalenno" model="coop.institution">
+    <field name="short_name">ИФКАТТ</field>
+    <field name="name">Иркутский филиал Красноярского автотранспортного техникума</field>
+    <field name="kind">college</field>
+    <field name="city">Удалённо</field>
+  </record>
+
+  <record id="institution_sosh_1_moskva" model="coop.institution">
+    <field name="short_name">СОШ № 1</field>
+    <field name="name">Средняя общеобразовательная школа № 1</field>
+    <field name="kind">school</field>
+    <field name="city">Москва</field>
+  </record>
+
+  <record id="institution_gimnaziya_2_moskva" model="coop.institution">
+    <field name="short_name">Гимназия № 2</field>
+    <field name="name">Гимназия № 2</field>
+    <field name="kind">school</field>
+    <field name="city">Москва</field>
+  </record>
+
+  <record id="institution_licey_3_moskva" model="coop.institution">
+    <field name="short_name">Лицей № 3</field>
+    <field name="name">Лицей № 3</field>
+    <field name="kind">school</field>
+    <field name="city">Москва</field>
+  </record>
+
+  <record id="institution_sosh_4_sankt_peterburg" model="coop.institution">
+    <field name="short_name">СОШ № 4</field>
+    <field name="name">Средняя общеобразовательная школа № 4</field>
+    <field name="kind">school</field>
+    <field name="city">Санкт-Петербург</field>
+  </record>
+
+  <record id="institution_gimnaziya_5_sankt_peterburg" model="coop.institution">
+    <field name="short_name">Гимназия № 5</field>
+    <field name="name">Гимназия № 5</field>
+    <field name="kind">school</field>
+    <field name="city">Санкт-Петербург</field>
+  </record>
+
+  <record id="institution_licey_6_sankt_peterburg" model="coop.institution">
+    <field name="short_name">Лицей № 6</field>
+    <field name="name">Лицей № 6</field>
+    <field name="kind">school</field>
+    <field name="city">Санкт-Петербург</field>
+  </record>
+
+  <record id="institution_sosh_7_krasnoyarsk" model="coop.institution">
+    <field name="short_name">СОШ № 7</field>
+    <field name="name">Средняя общеобразовательная школа № 7</field>
+    <field name="kind">school</field>
+    <field name="city">Красноярск</field>
+  </record>
+
+  <record id="institution_gimnaziya_8_krasnoyarsk" model="coop.institution">
+    <field name="short_name">Гимназия № 8</field>
+    <field name="name">Гимназия № 8</field>
+    <field name="kind">school</field>
+    <field name="city">Красноярск</field>
+  </record>
+
+  <record id="institution_licey_9_krasnoyarsk" model="coop.institution">
+    <field name="short_name">Лицей № 9</field>
+    <field name="name">Лицей № 9</field>
+    <field name="kind">school</field>
+    <field name="city">Красноярск</field>
+  </record>
+
+  <record id="institution_sosh_10_novosibirsk" model="coop.institution">
+    <field name="short_name">СОШ № 10</field>
+    <field name="name">Средняя общеобразовательная школа № 10</field>
+    <field name="kind">school</field>
+    <field name="city">Новосибирск</field>
+  </record>
+
+  <record id="institution_gimnaziya_11_novosibirsk" model="coop.institution">
+    <field name="short_name">Гимназия № 11</field>
+    <field name="name">Гимназия № 11</field>
+    <field name="kind">school</field>
+    <field name="city">Новосибирск</field>
+  </record>
+
+  <record id="institution_licey_12_novosibirsk" model="coop.institution">
+    <field name="short_name">Лицей № 12</field>
+    <field name="name">Лицей № 12</field>
+    <field name="kind">school</field>
+    <field name="city">Новосибирск</field>
+  </record>
+
+  <record id="institution_sosh_13_ekaterinburg" model="coop.institution">
+    <field name="short_name">СОШ № 13</field>
+    <field name="name">Средняя общеобразовательная школа № 13</field>
+    <field name="kind">school</field>
+    <field name="city">Екатеринбург</field>
+  </record>
+
+  <record id="institution_gimnaziya_14_ekaterinburg" model="coop.institution">
+    <field name="short_name">Гимназия № 14</field>
+    <field name="name">Гимназия № 14</field>
+    <field name="kind">school</field>
+    <field name="city">Екатеринбург</field>
+  </record>
+
+  <record id="institution_licey_15_ekaterinburg" model="coop.institution">
+    <field name="short_name">Лицей № 15</field>
+    <field name="name">Лицей № 15</field>
+    <field name="kind">school</field>
+    <field name="city">Екатеринбург</field>
+  </record>
+
+  <record id="institution_sosh_16_kazan" model="coop.institution">
+    <field name="short_name">СОШ № 16</field>
+    <field name="name">Средняя общеобразовательная школа № 16</field>
+    <field name="kind">school</field>
+    <field name="city">Казань</field>
+  </record>
+
+  <record id="institution_gimnaziya_17_kazan" model="coop.institution">
+    <field name="short_name">Гимназия № 17</field>
+    <field name="name">Гимназия № 17</field>
+    <field name="kind">school</field>
+    <field name="city">Казань</field>
+  </record>
+
+  <record id="institution_licey_18_kazan" model="coop.institution">
+    <field name="short_name">Лицей № 18</field>
+    <field name="name">Лицей № 18</field>
+    <field name="kind">school</field>
+    <field name="city">Казань</field>
+  </record>
+
+  <record id="institution_sosh_19_rostov_na_donu" model="coop.institution">
+    <field name="short_name">СОШ № 19</field>
+    <field name="name">Средняя общеобразовательная школа № 19</field>
+    <field name="kind">school</field>
+    <field name="city">Ростов-на-Дону</field>
+  </record>
+
+  <record id="institution_gimnaziya_20_rostov_na_donu" model="coop.institution">
+    <field name="short_name">Гимназия № 20</field>
+    <field name="name">Гимназия № 20</field>
+    <field name="kind">school</field>
+    <field name="city">Ростов-на-Дону</field>
+  </record>
+
+  <record id="institution_licey_21_rostov_na_donu" model="coop.institution">
+    <field name="short_name">Лицей № 21</field>
+    <field name="name">Лицей № 21</field>
+    <field name="kind">school</field>
+    <field name="city">Ростов-на-Дону</field>
+  </record>
+
+  <record id="institution_sosh_22_vladivostok" model="coop.institution">
+    <field name="short_name">СОШ № 22</field>
+    <field name="name">Средняя общеобразовательная школа № 22</field>
+    <field name="kind">school</field>
+    <field name="city">Владивосток</field>
+  </record>
+
+  <record id="institution_gimnaziya_23_vladivostok" model="coop.institution">
+    <field name="short_name">Гимназия № 23</field>
+    <field name="name">Гимназия № 23</field>
+    <field name="kind">school</field>
+    <field name="city">Владивосток</field>
+  </record>
+
+  <record id="institution_licey_24_vladivostok" model="coop.institution">
+    <field name="short_name">Лицей № 24</field>
+    <field name="name">Лицей № 24</field>
+    <field name="kind">school</field>
+    <field name="city">Владивосток</field>
+  </record>
+
+  <record id="institution_sosh_25_habarovsk" model="coop.institution">
+    <field name="short_name">СОШ № 25</field>
+    <field name="name">Средняя общеобразовательная школа № 25</field>
+    <field name="kind">school</field>
+    <field name="city">Хабаровск</field>
+  </record>
+
+  <record id="institution_gimnaziya_26_habarovsk" model="coop.institution">
+    <field name="short_name">Гимназия № 26</field>
+    <field name="name">Гимназия № 26</field>
+    <field name="kind">school</field>
+    <field name="city">Хабаровск</field>
+  </record>
+
+  <record id="institution_licey_27_habarovsk" model="coop.institution">
+    <field name="short_name">Лицей № 27</field>
+    <field name="name">Лицей № 27</field>
+    <field name="kind">school</field>
+    <field name="city">Хабаровск</field>
+  </record>
+
+  <record id="institution_sosh_28_nizhniy_novgorod" model="coop.institution">
+    <field name="short_name">СОШ № 28</field>
+    <field name="name">Средняя общеобразовательная школа № 28</field>
+    <field name="kind">school</field>
+    <field name="city">Нижний Новгород</field>
+  </record>
+
+  <record id="institution_gimnaziya_29_nizhniy_novgorod" model="coop.institution">
+    <field name="short_name">Гимназия № 29</field>
+    <field name="name">Гимназия № 29</field>
+    <field name="kind">school</field>
+    <field name="city">Нижний Новгород</field>
+  </record>
+
+  <record id="institution_licey_30_nizhniy_novgorod" model="coop.institution">
+    <field name="short_name">Лицей № 30</field>
+    <field name="name">Лицей № 30</field>
+    <field name="kind">school</field>
+    <field name="city">Нижний Новгород</field>
+  </record>
+
+  <record id="institution_sosh_31_samara" model="coop.institution">
+    <field name="short_name">СОШ № 31</field>
+    <field name="name">Средняя общеобразовательная школа № 31</field>
+    <field name="kind">school</field>
+    <field name="city">Самара</field>
+  </record>
+
+  <record id="institution_gimnaziya_32_samara" model="coop.institution">
+    <field name="short_name">Гимназия № 32</field>
+    <field name="name">Гимназия № 32</field>
+    <field name="kind">school</field>
+    <field name="city">Самара</field>
+  </record>
+
+  <record id="institution_licey_33_samara" model="coop.institution">
+    <field name="short_name">Лицей № 33</field>
+    <field name="name">Лицей № 33</field>
+    <field name="kind">school</field>
+    <field name="city">Самара</field>
+  </record>
+
+  <record id="institution_sosh_34_chelyabinsk" model="coop.institution">
+    <field name="short_name">СОШ № 34</field>
+    <field name="name">Средняя общеобразовательная школа № 34</field>
+    <field name="kind">school</field>
+    <field name="city">Челябинск</field>
+  </record>
+
+  <record id="institution_gimnaziya_35_chelyabinsk" model="coop.institution">
+    <field name="short_name">Гимназия № 35</field>
+    <field name="name">Гимназия № 35</field>
+    <field name="kind">school</field>
+    <field name="city">Челябинск</field>
+  </record>
+
+  <record id="institution_licey_36_chelyabinsk" model="coop.institution">
+    <field name="short_name">Лицей № 36</field>
+    <field name="name">Лицей № 36</field>
+    <field name="kind">school</field>
+    <field name="city">Челябинск</field>
+  </record>
+
+  <record id="institution_sosh_37_krasnodar" model="coop.institution">
+    <field name="short_name">СОШ № 37</field>
+    <field name="name">Средняя общеобразовательная школа № 37</field>
+    <field name="kind">school</field>
+    <field name="city">Краснодар</field>
+  </record>
+
+  <record id="institution_gimnaziya_38_krasnodar" model="coop.institution">
+    <field name="short_name">Гимназия № 38</field>
+    <field name="name">Гимназия № 38</field>
+    <field name="kind">school</field>
+    <field name="city">Краснодар</field>
+  </record>
+
+  <record id="institution_licey_39_krasnodar" model="coop.institution">
+    <field name="short_name">Лицей № 39</field>
+    <field name="name">Лицей № 39</field>
+    <field name="kind">school</field>
+    <field name="city">Краснодар</field>
+  </record>
+
+  <record id="institution_sosh_40_perm" model="coop.institution">
+    <field name="short_name">СОШ № 40</field>
+    <field name="name">Средняя общеобразовательная школа № 40</field>
+    <field name="kind">school</field>
+    <field name="city">Пермь</field>
+  </record>
+
+  <record id="institution_gimnaziya_41_perm" model="coop.institution">
+    <field name="short_name">Гимназия № 41</field>
+    <field name="name">Гимназия № 41</field>
+    <field name="kind">school</field>
+    <field name="city">Пермь</field>
+  </record>
+
+  <record id="institution_licey_42_perm" model="coop.institution">
+    <field name="short_name">Лицей № 42</field>
+    <field name="name">Лицей № 42</field>
+    <field name="kind">school</field>
+    <field name="city">Пермь</field>
+  </record>
+
+  <record id="institution_sosh_43_omsk" model="coop.institution">
+    <field name="short_name">СОШ № 43</field>
+    <field name="name">Средняя общеобразовательная школа № 43</field>
+    <field name="kind">school</field>
+    <field name="city">Омск</field>
+  </record>
+
+  <record id="institution_gimnaziya_44_omsk" model="coop.institution">
+    <field name="short_name">Гимназия № 44</field>
+    <field name="name">Гимназия № 44</field>
+    <field name="kind">school</field>
+    <field name="city">Омск</field>
+  </record>
+
+  <record id="institution_licey_45_omsk" model="coop.institution">
+    <field name="short_name">Лицей № 45</field>
+    <field name="name">Лицей № 45</field>
+    <field name="kind">school</field>
+    <field name="city">Омск</field>
+  </record>
+
+  <record id="institution_sosh_46_volgograd" model="coop.institution">
+    <field name="short_name">СОШ № 46</field>
+    <field name="name">Средняя общеобразовательная школа № 46</field>
+    <field name="kind">school</field>
+    <field name="city">Волгоград</field>
+  </record>
+
+  <record id="institution_gimnaziya_47_volgograd" model="coop.institution">
+    <field name="short_name">Гимназия № 47</field>
+    <field name="name">Гимназия № 47</field>
+    <field name="kind">school</field>
+    <field name="city">Волгоград</field>
+  </record>
+
+  <record id="institution_licey_48_volgograd" model="coop.institution">
+    <field name="short_name">Лицей № 48</field>
+    <field name="name">Лицей № 48</field>
+    <field name="kind">school</field>
+    <field name="city">Волгоград</field>
+  </record>
+
+  <record id="institution_sosh_49_voronezh" model="coop.institution">
+    <field name="short_name">СОШ № 49</field>
+    <field name="name">Средняя общеобразовательная школа № 49</field>
+    <field name="kind">school</field>
+    <field name="city">Воронеж</field>
+  </record>
+
+  <record id="institution_gimnaziya_50_voronezh" model="coop.institution">
+    <field name="short_name">Гимназия № 50</field>
+    <field name="name">Гимназия № 50</field>
+    <field name="kind">school</field>
+    <field name="city">Воронеж</field>
+  </record>
+
+  <record id="institution_licey_51_voronezh" model="coop.institution">
+    <field name="short_name">Лицей № 51</field>
+    <field name="name">Лицей № 51</field>
+    <field name="kind">school</field>
+    <field name="city">Воронеж</field>
+  </record>
+
+  <record id="institution_sosh_52_ufa" model="coop.institution">
+    <field name="short_name">СОШ № 52</field>
+    <field name="name">Средняя общеобразовательная школа № 52</field>
+    <field name="kind">school</field>
+    <field name="city">Уфа</field>
+  </record>
+
+  <record id="institution_gimnaziya_53_ufa" model="coop.institution">
+    <field name="short_name">Гимназия № 53</field>
+    <field name="name">Гимназия № 53</field>
+    <field name="kind">school</field>
+    <field name="city">Уфа</field>
+  </record>
+
+  <record id="institution_licey_54_ufa" model="coop.institution">
+    <field name="short_name">Лицей № 54</field>
+    <field name="name">Лицей № 54</field>
+    <field name="kind">school</field>
+    <field name="city">Уфа</field>
+  </record>
+
+  <record id="institution_sosh_55_tyumen" model="coop.institution">
+    <field name="short_name">СОШ № 55</field>
+    <field name="name">Средняя общеобразовательная школа № 55</field>
+    <field name="kind">school</field>
+    <field name="city">Тюмень</field>
+  </record>
+
+  <record id="institution_gimnaziya_56_tyumen" model="coop.institution">
+    <field name="short_name">Гимназия № 56</field>
+    <field name="name">Гимназия № 56</field>
+    <field name="kind">school</field>
+    <field name="city">Тюмень</field>
+  </record>
+
+  <record id="institution_licey_57_tyumen" model="coop.institution">
+    <field name="short_name">Лицей № 57</field>
+    <field name="name">Лицей № 57</field>
+    <field name="kind">school</field>
+    <field name="city">Тюмень</field>
+  </record>
+
+  <record id="institution_sosh_58_kemerovo" model="coop.institution">
+    <field name="short_name">СОШ № 58</field>
+    <field name="name">Средняя общеобразовательная школа № 58</field>
+    <field name="kind">school</field>
+    <field name="city">Кемерово</field>
+  </record>
+
+  <record id="institution_gimnaziya_59_kemerovo" model="coop.institution">
+    <field name="short_name">Гимназия № 59</field>
+    <field name="name">Гимназия № 59</field>
+    <field name="kind">school</field>
+    <field name="city">Кемерово</field>
+  </record>
+
+  <record id="institution_licey_60_kemerovo" model="coop.institution">
+    <field name="short_name">Лицей № 60</field>
+    <field name="name">Лицей № 60</field>
+    <field name="kind">school</field>
+    <field name="city">Кемерово</field>
+  </record>
+
+  <record id="institution_sosh_61_kaliningrad" model="coop.institution">
+    <field name="short_name">СОШ № 61</field>
+    <field name="name">Средняя общеобразовательная школа № 61</field>
+    <field name="kind">school</field>
+    <field name="city">Калининград</field>
+  </record>
+
+  <record id="institution_gimnaziya_62_kaliningrad" model="coop.institution">
+    <field name="short_name">Гимназия № 62</field>
+    <field name="name">Гимназия № 62</field>
+    <field name="kind">school</field>
+    <field name="city">Калининград</field>
+  </record>
+
+  <record id="institution_licey_63_kaliningrad" model="coop.institution">
+    <field name="short_name">Лицей № 63</field>
+    <field name="name">Лицей № 63</field>
+    <field name="kind">school</field>
+    <field name="city">Калининград</field>
+  </record>
+
+  <record id="institution_sosh_64_arhangelsk" model="coop.institution">
+    <field name="short_name">СОШ № 64</field>
+    <field name="name">Средняя общеобразовательная школа № 64</field>
+    <field name="kind">school</field>
+    <field name="city">Архангельск</field>
+  </record>
+
+  <record id="institution_gimnaziya_65_arhangelsk" model="coop.institution">
+    <field name="short_name">Гимназия № 65</field>
+    <field name="name">Гимназия № 65</field>
+    <field name="kind">school</field>
+    <field name="city">Архангельск</field>
+  </record>
+
+  <record id="institution_licey_66_arhangelsk" model="coop.institution">
+    <field name="short_name">Лицей № 66</field>
+    <field name="name">Лицей № 66</field>
+    <field name="kind">school</field>
+    <field name="city">Архангельск</field>
+  </record>
+
+  <record id="institution_sosh_67_yaroslavl" model="coop.institution">
+    <field name="short_name">СОШ № 67</field>
+    <field name="name">Средняя общеобразовательная школа № 67</field>
+    <field name="kind">school</field>
+    <field name="city">Ярославль</field>
+  </record>
+
+  <record id="institution_gimnaziya_68_yaroslavl" model="coop.institution">
+    <field name="short_name">Гимназия № 68</field>
+    <field name="name">Гимназия № 68</field>
+    <field name="kind">school</field>
+    <field name="city">Ярославль</field>
+  </record>
+
+  <record id="institution_licey_69_yaroslavl" model="coop.institution">
+    <field name="short_name">Лицей № 69</field>
+    <field name="name">Лицей № 69</field>
+    <field name="kind">school</field>
+    <field name="city">Ярославль</field>
+  </record>
+
+  <record id="institution_sosh_70_magnitogorsk" model="coop.institution">
+    <field name="short_name">СОШ № 70</field>
+    <field name="name">Средняя общеобразовательная школа № 70</field>
+    <field name="kind">school</field>
+    <field name="city">Магнитогорск</field>
+  </record>
+
+  <record id="institution_gimnaziya_71_magnitogorsk" model="coop.institution">
+    <field name="short_name">Гимназия № 71</field>
+    <field name="name">Гимназия № 71</field>
+    <field name="kind">school</field>
+    <field name="city">Магнитогорск</field>
+  </record>
+
+  <record id="institution_licey_72_magnitogorsk" model="coop.institution">
+    <field name="short_name">Лицей № 72</field>
+    <field name="name">Лицей № 72</field>
+    <field name="kind">school</field>
+    <field name="city">Магнитогорск</field>
+  </record>
+
+  <record id="institution_sosh_73_derbent" model="coop.institution">
+    <field name="short_name">СОШ № 73</field>
+    <field name="name">Средняя общеобразовательная школа № 73</field>
+    <field name="kind">school</field>
+    <field name="city">Дербент</field>
+  </record>
+
+  <record id="institution_gimnaziya_74_derbent" model="coop.institution">
+    <field name="short_name">Гимназия № 74</field>
+    <field name="name">Гимназия № 74</field>
+    <field name="kind">school</field>
+    <field name="city">Дербент</field>
+  </record>
+
+  <record id="institution_licey_75_derbent" model="coop.institution">
+    <field name="short_name">Лицей № 75</field>
+    <field name="name">Лицей № 75</field>
+    <field name="kind">school</field>
+    <field name="city">Дербент</field>
+  </record>
+
+  <record id="institution_sosh_76_vologda" model="coop.institution">
+    <field name="short_name">СОШ № 76</field>
+    <field name="name">Средняя общеобразовательная школа № 76</field>
+    <field name="kind">school</field>
+    <field name="city">Вологда</field>
+  </record>
+
+  <record id="institution_gimnaziya_77_vologda" model="coop.institution">
+    <field name="short_name">Гимназия № 77</field>
+    <field name="name">Гимназия № 77</field>
+    <field name="kind">school</field>
+    <field name="city">Вологда</field>
+  </record>
+
+  <record id="institution_licey_78_vologda" model="coop.institution">
+    <field name="short_name">Лицей № 78</field>
+    <field name="name">Лицей № 78</field>
+    <field name="kind">school</field>
+    <field name="city">Вологда</field>
+  </record>
+
+  <record id="institution_sosh_79_sochi" model="coop.institution">
+    <field name="short_name">СОШ № 79</field>
+    <field name="name">Средняя общеобразовательная школа № 79</field>
+    <field name="kind">school</field>
+    <field name="city">Сочи</field>
+  </record>
+
+  <record id="institution_gimnaziya_80_sochi" model="coop.institution">
+    <field name="short_name">Гимназия № 80</field>
+    <field name="name">Гимназия № 80</field>
+    <field name="kind">school</field>
+    <field name="city">Сочи</field>
+  </record>
+
+  <record id="institution_licey_81_sochi" model="coop.institution">
+    <field name="short_name">Лицей № 81</field>
+    <field name="name">Лицей № 81</field>
+    <field name="kind">school</field>
+    <field name="city">Сочи</field>
+  </record>
+
+  <record id="institution_sosh_82_nizhniy_tagil" model="coop.institution">
+    <field name="short_name">СОШ № 82</field>
+    <field name="name">Средняя общеобразовательная школа № 82</field>
+    <field name="kind">school</field>
+    <field name="city">Нижний Тагил</field>
+  </record>
+
+  <record id="institution_gimnaziya_83_nizhniy_tagil" model="coop.institution">
+    <field name="short_name">Гимназия № 83</field>
+    <field name="name">Гимназия № 83</field>
+    <field name="kind">school</field>
+    <field name="city">Нижний Тагил</field>
+  </record>
+
+  <record id="institution_licey_84_nizhniy_tagil" model="coop.institution">
+    <field name="short_name">Лицей № 84</field>
+    <field name="name">Лицей № 84</field>
+    <field name="kind">school</field>
+    <field name="city">Нижний Тагил</field>
+  </record>
+
+  <record id="institution_sosh_85_altayskiy_kray" model="coop.institution">
+    <field name="short_name">СОШ № 85</field>
+    <field name="name">Средняя общеобразовательная школа № 85</field>
+    <field name="kind">school</field>
+    <field name="city">Алтайский край</field>
+  </record>
+
+  <record id="institution_gimnaziya_86_altayskiy_kray" model="coop.institution">
+    <field name="short_name">Гимназия № 86</field>
+    <field name="name">Гимназия № 86</field>
+    <field name="kind">school</field>
+    <field name="city">Алтайский край</field>
+  </record>
+
+  <record id="institution_licey_87_altayskiy_kray" model="coop.institution">
+    <field name="short_name">Лицей № 87</field>
+    <field name="name">Лицей № 87</field>
+    <field name="kind">school</field>
+    <field name="city">Алтайский край</field>
+  </record>
+
+  <record id="institution_sosh_88_tobolsk" model="coop.institution">
+    <field name="short_name">СОШ № 88</field>
+    <field name="name">Средняя общеобразовательная школа № 88</field>
+    <field name="kind">school</field>
+    <field name="city">Тобольск</field>
+  </record>
+
+  <record id="institution_gimnaziya_89_tobolsk" model="coop.institution">
+    <field name="short_name">Гимназия № 89</field>
+    <field name="name">Гимназия № 89</field>
+    <field name="kind">school</field>
+    <field name="city">Тобольск</field>
+  </record>
+
+  <record id="institution_licey_90_tobolsk" model="coop.institution">
+    <field name="short_name">Лицей № 90</field>
+    <field name="name">Лицей № 90</field>
+    <field name="kind">school</field>
+    <field name="city">Тобольск</field>
+  </record>
+
+  <record id="institution_sosh_91_ishim" model="coop.institution">
+    <field name="short_name">СОШ № 91</field>
+    <field name="name">Средняя общеобразовательная школа № 91</field>
+    <field name="kind">school</field>
+    <field name="city">Ишим</field>
+  </record>
+
+  <record id="institution_gimnaziya_92_ishim" model="coop.institution">
+    <field name="short_name">Гимназия № 92</field>
+    <field name="name">Гимназия № 92</field>
+    <field name="kind">school</field>
+    <field name="city">Ишим</field>
+  </record>
+
+  <record id="institution_licey_93_ishim" model="coop.institution">
+    <field name="short_name">Лицей № 93</field>
+    <field name="name">Лицей № 93</field>
+    <field name="kind">school</field>
+    <field name="city">Ишим</field>
+  </record>
+
+  <record id="institution_yandeks_praktikum_udalenno" model="coop.institution">
+    <field name="short_name">Яндекс Практикум</field>
+    <field name="name">Образовательная платформа «Яндекс Практикум»</field>
+    <field name="kind">courses</field>
+    <field name="city">Удалённо</field>
+  </record>
+
+  <record id="institution_netologiya_udalenno" model="coop.institution">
+    <field name="short_name">Нетология</field>
+    <field name="name">Университет интернет-профессий «Нетология»</field>
+    <field name="kind">courses</field>
+    <field name="city">Удалённо</field>
+  </record>
+
+  <record id="institution_otkrytoe_obrazovanie_udalenno" model="coop.institution">
+    <field name="short_name">Открытое образование</field>
+    <field name="name">Национальная платформа «Открытое образование»</field>
+    <field name="kind">courses</field>
+    <field name="city">Удалённо</field>
+  </record>
+
+  <record id="institution_skilboks_udalenno" model="coop.institution">
+    <field name="short_name">Скилбокс</field>
+    <field name="name">Онлайн-университет «Скилбокс»</field>
+    <field name="kind">courses</field>
+    <field name="city">Удалённо</field>
+  </record>
+
+  <record id="institution_uchebnyy_centr_dpo_udalenno" model="coop.institution">
+    <field name="short_name">Учебный центр ДПО</field>
+    <field name="name">Учебный центр дополнительного профессионального образования</field>
+    <field name="kind">courses</field>
+    <field name="city">Удалённо</field>
+  </record>
+
+</odoo>

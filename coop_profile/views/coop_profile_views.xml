@@ -12,6 +12,39 @@
     здесь не годятся: они дают две колонки «подпись — значение», а в
     макете левая колонка самостоятельная и живёт по своим правилам.
   -->
+  <!--
+    Форма записи об образовании. Открывается кнопкой «+ добавить» из
+    блока на странице — по одной записи за раз, как просил владелец.
+
+    Заведение выбирается из справочника; ступень подставляется сама —
+    университет даёт высшее, техникум профессиональное, и спрашивать об
+    этом участника незачем. Своё, которого в справочнике нет, вписывается
+    в отдельное поле.
+  -->
+  <record id="view_coop_education_form" model="ir.ui.view">
+    <field name="name">coop.education.form</field>
+    <field name="model">coop.education</field>
+    <field name="arch" type="xml">
+      <form string="Образование">
+        <field name="partner_id" invisible="1"/>
+        <group>
+          <field name="institution_id" options="{'no_create': True}"
+                 placeholder="Начните вводить: СФУ, МГУ, ИФКАТТ"/>
+          <field name="name" invisible="institution_id"
+                 placeholder="Если вашего заведения нет в справочнике"/>
+          <field name="level"/>
+          <field name="speciality" placeholder="Электроснабжение, агрономия"/>
+          <field name="year_from"/>
+          <field name="year_to"/>
+        </group>
+        <footer>
+          <button string="Сохранить" special="save" class="btn-primary"/>
+          <button string="Отмена" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
   <record id="view_coop_profile_form" model="ir.ui.view">
     <field name="name">coop.profile.form</field>
     <field name="model">res.partner</field>
@@ -171,31 +204,50 @@
                 </div>
               </div>
 
-              <div class="o_coop_infobox" invisible="not coop_education_ids">
+              <!--
+                Образование строками по ступеням, как велел владелец
+                15 сентября 2026: «напиши высшее и сокращённо заведение,
+                например СФУ и год окончания, ниже профессиональное…
+                ниже среднее».
+
+                Так же, как «Контакты» и «Личная информация» рядом:
+                метка слева, значение справа. Списком записей блок
+                выбивался из ряда, а названия заведений в узкой колонке
+                ломались посреди слова.
+
+                Сокращение — из справочника учебных заведений; вписанное
+                вручную показывается как есть.
+              -->
+              <div class="o_coop_infobox"
+                   invisible="not coop_education_ids and not coop_is_self">
                 <div class="o_coop_infobox_head">Образование</div>
                 <div class="o_coop_infobox_body">
+                  <div invisible="not coop_edu_higher">
+                    <span class="o_coop_key">Высшее</span>
+                    <field name="coop_edu_higher" readonly="1"/>
+                  </div>
+                  <div invisible="not coop_edu_college">
+                    <span class="o_coop_key">Профессиональное</span>
+                    <field name="coop_edu_college" readonly="1"/>
+                  </div>
+                  <div invisible="not coop_edu_school">
+                    <span class="o_coop_key">Среднее</span>
+                    <field name="coop_edu_school" readonly="1"/>
+                  </div>
+                  <div invisible="not coop_edu_courses">
+                    <span class="o_coop_key">Доп. образование</span>
+                    <field name="coop_edu_courses" readonly="1"/>
+                  </div>
                   <!--
-                    Одним столбцом: в узкой колонке справок название
-                    заведения и так занимает две строки, а годы рядом
-                    вынуждали его обрезать на середине слова. Годы,
-                    специальность и уровень остаются в самой записи.
+                    Своя страница — можно дописать. Владелец просил
+                    «возможность добавить в список по одному»: заводится
+                    по одной записи на своей форме, где есть и годы, и
+                    специальность.
                   -->
-                  <!--
-                    Только чтение: строка «Добавить строку» под перечнем
-                    превращала справку в таблицу для правки, а рядом,
-                    в «Личной информации», значения просто перечислены.
-                    Заводится образование на своей форме, а не здесь.
-                  -->
-                  <field name="coop_education_ids" nolabel="1"
-                         class="o_coop_plainlist" readonly="1">
-                    <list>
-                      <field name="name"/>
-                      <field name="years" column_invisible="1"/>
-                      <field name="speciality" column_invisible="1"/>
-                      <field name="year_from" column_invisible="1"/>
-                      <field name="year_to" column_invisible="1"/>
-                    </list>
-                  </field>
+                  <div class="o_coop_infobox_add" invisible="not coop_is_self">
+                    <button name="action_coop_add_education" type="object"
+                            class="btn btn-link p-0">+ добавить</button>
+                  </div>
                 </div>
               </div>
 
@@ -330,11 +382,6 @@
                       </templates>
                     </kanban>
                   </field>
-                                  <button name="action_coop_add_offer" type="object"
-                          class="o_coop_add_tile" invisible="not coop_is_self">
-                    <span class="o_coop_add_icon">+</span>
-                    <span class="o_coop_add_label">Добавить</span>
-                  </button>
                 </div>
               </div>
 
@@ -363,11 +410,6 @@
                       </templates>
                     </kanban>
                   </field>
-                                  <button name="action_coop_add_resource" type="object"
-                          class="o_coop_add_tile" invisible="not coop_is_self">
-                    <span class="o_coop_add_icon">+</span>
-                    <span class="o_coop_add_label">Добавить</span>
-                  </button>
                 </div>
               </div>
 
@@ -399,11 +441,6 @@
                       </templates>
                     </kanban>
                   </field>
-                                  <button name="action_coop_add_vacancy" type="object"
-                          class="o_coop_add_tile" invisible="not coop_is_self">
-                    <span class="o_coop_add_icon">+</span>
-                    <span class="o_coop_add_label">Добавить</span>
-                  </button>
                 </div>
               </div>
 
@@ -436,11 +473,6 @@
                       </templates>
                     </kanban>
                   </field>
-                                  <button name="action_coop_add_project" type="object"
-                          class="o_coop_add_tile" invisible="not coop_is_self">
-                    <span class="o_coop_add_icon">+</span>
-                    <span class="o_coop_add_label">Добавить</span>
-                  </button>
                 </div>
               </div>
 
@@ -521,11 +553,6 @@
                       </templates>
                     </kanban>
                   </field>
-                                  <button name="action_coop_add_need" type="object"
-                          class="o_coop_add_tile" invisible="not coop_is_self">
-                    <span class="o_coop_add_icon">+</span>
-                    <span class="o_coop_add_label">Добавить</span>
-                  </button>
                 </div>
               </div>
 
@@ -557,11 +584,6 @@
                       </templates>
                     </kanban>
                   </field>
-                                  <button name="action_coop_add_org" type="object"
-                          class="o_coop_add_tile" invisible="not coop_is_self">
-                    <span class="o_coop_add_icon">+</span>
-                    <span class="o_coop_add_label">Добавить</span>
-                  </button>
                 </div>
               </div>
 
@@ -595,11 +617,6 @@
                       </templates>
                     </kanban>
                   </field>
-                                  <button name="action_coop_add_community" type="object"
-                          class="o_coop_add_tile" invisible="not coop_is_self">
-                    <span class="o_coop_add_icon">+</span>
-                    <span class="o_coop_add_label">Добавить</span>
-                  </button>
                 </div>
               </div>
 

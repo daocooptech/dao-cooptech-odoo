@@ -64,6 +64,52 @@ class ResPartner(models.Model):
         'coop.community.member', 'partner_id', string='Участие в сообществах')
     coop_education_ids = fields.One2many(
         'coop.education', 'partner_id', string='Образование')
+
+    # Образование строками по ступеням, как велел владелец 15 сентября
+    # 2026: «напиши высшее и сокращённо заведение, например СФУ и год
+    # окончания, ниже профессиональное… ниже среднее».
+    #
+    # Четыре готовых строки, а не список записей: блок стоит в колонке
+    # справок рядом с «Контактами» и «Личной информацией», и читается
+    # так же — метка слева, значение справа. Списком он выбивался из
+    # ряда, а названия заведений в узкой колонке ломались посреди слова.
+    coop_edu_higher = fields.Char(
+        'Высшее', compute='_compute_coop_education_lines')
+    coop_edu_college = fields.Char(
+        'Профессиональное', compute='_compute_coop_education_lines')
+    coop_edu_school = fields.Char(
+        'Среднее', compute='_compute_coop_education_lines')
+    coop_edu_courses = fields.Char(
+        'Доп. образование', compute='_compute_coop_education_lines')
+
+    @api.depends('coop_education_ids.short_name', 'coop_education_ids.level',
+                 'coop_education_ids.year_to')
+    def _compute_coop_education_lines(self):
+        """Одна строка на ступень: «СФУ — 2009 г.».
+
+        Несколько заведений одной ступени — через запятую: два высших у
+        человека бывают, и прятать второе неправильно.
+        """
+        поля = {'higher': 'coop_edu_higher', 'college': 'coop_edu_college',
+                'school': 'coop_edu_school', 'courses': 'coop_edu_courses'}
+        for record in self:
+            собрано = {ключ: [] for ключ in поля}
+            # Свежее первым: последнее оконченное заведение человек и
+            # называет, когда его спрашивают об образовании.
+            записи = record.coop_education_ids.sorted(
+                key=lambda з: (з.year_to or 0), reverse=True)
+            for запись in записи:
+                если = поля.get(запись.level)
+                if not если:
+                    continue
+                имя = (запись.short_name or запись.name or '').strip()
+                if not имя:
+                    continue
+                собрано[запись.level].append(
+                    '%s — %s г.' % (имя, запись.year_to) if запись.year_to
+                    else имя)
+            for ключ, поле in поля.items():
+                record[поле] = ', '.join(собрано[ключ])
     coop_achievement_ids = fields.One2many(
         'coop.achievement', 'partner_id', string='Достижения')
 
@@ -337,6 +383,24 @@ class ResPartner(models.Model):
         return self._coop_create_action(
             'coop_skills.action_coop_skills',
             {'default_partner_id': self.id}, _('Новый навык'))
+
+    def action_coop_add_education(self):
+        """Дописать учебное заведение — по одному.
+
+        Владелец 15 сентября 2026 просил «возможность добавить в список
+        по одному». Своей формой, а не строкой в блоке: у записи есть
+        годы, специальность и ступень, и правка их прямо в колонке
+        справок превратила бы её в таблицу.
+        """
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Образование'),
+            'res_model': 'coop.education',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_partner_id': self.id},
+        }
 
     def action_coop_add_resource(self):
         return self._coop_create_action(

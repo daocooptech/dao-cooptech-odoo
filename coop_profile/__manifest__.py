@@ -28,6 +28,7 @@
     ],
     'data': [
         'security/ir.model.access.csv',
+        'data/coop_institutions.xml',
         'security/coop_profile_rules.xml',
         'views/coop_profile_views.xml',
         'data/coop_home.xml',

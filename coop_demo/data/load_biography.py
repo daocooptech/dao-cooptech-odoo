@@ -243,6 +243,37 @@ def enrich_showcase(env, login='dashkevich'):
             vacancies.write({'partner_id': partner.id})
             touched += len(vacancies)
 
+    # ── Образование ────────────────────────────────────────────────────
+    #
+    # Все четыре ступени: витринная страница показывает, как блок
+    # выглядит заполненным. У Дашкевича было две записи из четырёх, и
+    # половина строк блока пустовала.
+    Education = env['coop.education'].sudo()
+    Institution = env['coop.institution'].sudo()
+    есть = set(Education.search(
+        [('partner_id', '=', partner.id)]).mapped('level'))
+    город = partner.city or ''
+    for ступень, год in (('higher', 2009), ('school', 2004)):
+        if ступень in есть:
+            continue
+        заведение = Institution.search(
+            [('kind', '=', ступень), ('city', '=', город)], limit=1)
+        if not заведение:
+            заведение = Institution.search([('kind', '=', ступень)], limit=1)
+        if not заведение:
+            continue
+        with env.cr.savepoint():
+            Education.create({
+                'partner_id': partner.id,
+                'institution_id': заведение.id,
+                'level': ступень,
+                'year_from': год - 5 if ступень == 'higher' else год - 11,
+                'year_to': год,
+                'speciality': ('Электроснабжение' if ступень == 'higher'
+                               else False),
+            })
+        touched += 1
+
     # ── Ресурсы ────────────────────────────────────────────────────────
     #
     # Только предложения. Спрос у него есть и живёт в своей полке
@@ -369,3 +400,56 @@ def enrich_showcase(env, login='dashkevich'):
 
     _logger.info('Витрина: дополнено записей — %s', touched)
     return touched
+
+def link_education(env):
+    """Привязать записи об образовании к справочнику заведений.
+
+    Записи заводились свободной строкой, до появления справочника: 306
+    строк вроде «Политехнический колледж №8». Сокращения у них нет, а
+    владелец 15 сентября 2026 велел показывать именно сокращённое —
+    «СФУ», «ИФКАТТ».
+
+    Сначала ищем заведение по названию: часть строк совпадёт дословно.
+    Остальным подбираем по городу участника и ступени записи — на
+    демонстрации важно, чтобы у сибиряка в графе стоял сибирский вуз, а
+    не первый попавшийся.
+
+    Безвредно при повторе: записи с уже проставленным заведением
+    пропускаются.
+    """
+    Institution = env['coop.institution'].sudo()
+    Education = env['coop.education'].sudo()
+    справочник = Institution.search([])
+    if not справочник:
+        _logger.info('Образование: справочник заведений пуст')
+        return 0
+
+    по_названию = {(з.name or '').strip().lower(): з for з in справочник}
+    по_городу = {}
+    for з in справочник:
+        по_городу.setdefault((з.city or '', з.kind), []).append(з)
+    по_ступени = {}
+    for з in справочник:
+        по_ступени.setdefault(з.kind, []).append(з)
+
+    rnd = random.Random(20260915)
+    связано = 0
+    for запись in Education.search([('institution_id', '=', False)]):
+        найдено = по_названию.get((запись.name or '').strip().lower())
+        if not найдено:
+            город = запись.partner_id.city or ''
+            свои = по_городу.get((город, запись.level)) or []
+            если_нет = по_ступени.get(запись.level) or []
+            набор = свои or если_нет
+            if not набор:
+                continue
+            # Выбор по номеру записи, а не наугад: повторный прогон
+            # наполнения должен дать то же самое, иначе каталог меняется
+            # на ровном месте.
+            найдено = набор[запись.id % len(набор)]
+        with env.cr.savepoint():
+            запись.write({'institution_id': найдено.id, 'name': False})
+        связано += 1
+
+    _logger.info('Образование: привязано к справочнику %s записей', связано)
+    return связано
