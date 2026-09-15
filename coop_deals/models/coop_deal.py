@@ -145,6 +145,9 @@ class CoopDeal(models.Model):
 
     # ── Отзывы ───────────────────────────────────────────────────────────
     review_ids = fields.One2many('coop.deal.review', 'deal_id', string='Отзывы')
+    can_review = fields.Boolean(
+        string='Можно оставить отзыв', compute='_compute_can_review',
+        help='Сделка завершена, я её сторона и ещё не оценивал.')
     reviews_visible = fields.Boolean(
         string='Отзывы раскрыты', compute='_compute_reviews_visible', store=True,
         help='Оба отзыва показываются одновременно — когда написаны оба. '
@@ -190,12 +193,20 @@ class CoopDeal(models.Model):
             record.amount_paid = paid
             record.amount_due = max(0, (record.amount or 0) - paid)
 
-    @api.depends('review_ids.deal_id', 'review_ids.author_id')
+    @api.depends('review_ids.deal_id', 'review_ids.side')
     def _compute_reviews_visible(self):
+        """Раскрываем, когда высказались обе стороны.
+
+        По сторонам, а не по авторам. От лица организации действует
+        человек, которому она поручила дела, и автором отзыва стоит он —
+        не сама организация. Пока условие требовало совпадения авторов со
+        сторонами, отзывы по сделке с организацией не раскрывались
+        никогда: оба написаны, оба скрыты, итог сделки навсегда
+        «ожидается». Проверено 15 сентября 2026 на сделке СД-2026-000271.
+        """
         for record in self:
-            authors = set(record.review_ids.mapped('author_id').ids)
-            record.reviews_visible = bool(
-                {record.party_a_id.id, record.party_b_id.id} <= authors)
+            стороны = set(record.review_ids.mapped('side'))
+            record.reviews_visible = {'a', 'b'} <= стороны
 
     @api.depends('state', 'reviews_visible', 'review_ids.rating')
     def _compute_outcome(self):
@@ -245,6 +256,48 @@ class CoopDeal(models.Model):
             raise UserError(_(
                 'Это чужая сделка. Действовать в ней могут только её стороны.'))
         return side
+
+    # ── Стороны ──────────────────────────────────────────────────────────
+
+    def _other_partner(self):
+        """Вторая сторона сделки — та, что не я."""
+        self.ensure_one()
+        мои = self.env.user.coop_actor_partner_ids
+        другая = (self.party_a_id | self.party_b_id) - мои
+        return другая[:1]
+
+    @api.depends_context('uid')
+    @api.depends('state', 'review_ids.author_id')
+    def _compute_can_review(self):
+        """Отзыв оставляют по завершённой сделке и только один раз.
+
+        Признак считается теми же условиями, что и проверка при записи
+        отзыва, — иначе кнопка отвечала бы отказом.
+        """
+        мои = self.env.user.coop_actor_partner_ids
+        for record in self:
+            уже = bool(record.review_ids.filtered(
+                lambda r: r.author_id in мои))
+            record.can_review = bool(
+                record.state == 'done'
+                and not уже
+                and (record.party_a_id | record.party_b_id) & мои)
+
+    def action_review(self):
+        """Открыть окно отзыва."""
+        self.ensure_one()
+        if self.state != 'done':
+            raise UserError(_(
+                'Отзыв оставляют по завершённой сделке. Пока она не '
+                'исполнена, оценивать нечего.'))
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Отзыв по сделке %s') % self.display_name,
+            'res_model': 'coop.deal.review.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_deal_id': self.id},
+        }
 
     # ── Извещения ────────────────────────────────────────────────────────
 
@@ -314,6 +367,9 @@ class CoopDeal(models.Model):
                 record.message_post(body=_(
                     'Акт подтверждён обеими сторонами. Сделка исполнена, '
                     'отзывы открыты.'))
+                # Счётчик завершённых сделок у обеих сторон: он показан
+                # на странице человека и участвует в уровне доверия.
+                (record.party_a_id | record.party_b_id).sudo()                    ._coop_recompute_deal_stats()
                 record._notify_other(_(
                     'Сделка %s исполнена: акт подтверждён обеими сторонами. '
                     'Можно оставить отзыв.') % record.display_name)
@@ -361,6 +417,7 @@ class CoopDeal(models.Model):
             })
             # Обеим сторонам: администратор в сделке не сторона, и
             # вычитать из пары некого — извещение уходит и той, и другой.
+            (record.party_a_id | record.party_b_id).sudo()                ._coop_recompute_deal_stats()
             record._notify_other(_(
                 'Спор по сделке %s закрыт администратором платформы.')
                 % record.display_name)
@@ -521,6 +578,13 @@ class CoopDealReview(models.Model):
         default=lambda self: self.env.user._coop_acting_partner())
     target_id = fields.Many2one(
         'res.partner', string='Кого оценивают', required=True, index=True)
+    side = fields.Selection([
+        ('a', 'Первая сторона'),
+        ('b', 'Вторая сторона'),
+    ], string='Чей отзыв', index=True,
+        help='Сторона сделки, от имени которой оставлен отзыв. Автором '
+             'может быть уполномоченный организации, а сторона — сама '
+             'организация.')
     rating = fields.Selection([
         ('1', 'Плохо'), ('2', 'Так себе'), ('3', 'Нормально'),
         ('4', 'Хорошо'), ('5', 'Отлично'),
@@ -529,10 +593,38 @@ class CoopDealReview(models.Model):
     visible = fields.Boolean(
         related='deal_id.reviews_visible', store=True, string='Раскрыт')
 
-    _one_per_author = models.Constraint(
-        'unique(deal_id, author_id)',
-        'Отзыв по этой сделке вы уже оставили.',
+    _one_per_side = models.Constraint(
+        'unique(deal_id, side)',
+        'Отзыв по этой сделке от вашей стороны уже оставлен.',
     )
+
+    def init(self):
+        """Проставить сторону отзывам, заведённым до её появления.
+
+        Без этого раскрытие по сторонам не сработало бы ни для одного
+        старого отзыва: сторона пуста, множество из двух не собирается,
+        и триста с лишним отзывов остались бы скрытыми навсегда.
+
+        Раньше автором мог быть только сам участник сделки — по нему
+        сторона и восстанавливается однозначно.
+        """
+        self.env.cr.execute("""
+            UPDATE coop_deal_review r
+               SET side = CASE WHEN r.author_id = d.party_a_id THEN 'a'
+                               ELSE 'b' END
+              FROM coop_deal d
+             WHERE d.id = r.deal_id AND r.side IS NULL
+        """)
+        # Правка шла напрямую в базу, и сохранённые вычисляемые поля о
+        # ней не знают: признак раскрытия и итог сделки остались бы
+        # прежними. Пересчитываем их явно — иначе триста отзывов
+        # проставлены, а на экране по-прежнему «ожидается».
+        сделки = self.env['coop.deal'].sudo().search([
+            ('review_ids', '!=', False)])
+        if сделки:
+            сделки._compute_reviews_visible()
+            сделки._compute_outcome()
+            сделки.flush_recordset(['reviews_visible', 'outcome'])
     _not_self = models.Constraint(
         'check(author_id != target_id)',
         'Оценивать самого себя не имеет смысла.',
@@ -540,12 +632,29 @@ class CoopDealReview(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        for vals in vals_list:
+            if not vals.get('side') and vals.get('deal_id'):
+                сделка = self.env['coop.deal'].browse(vals['deal_id'])
+                vals['side'] = сделка._my_side() or 'a'
         records = super().create(vals_list)
         for record in records:
             if record.deal_id.state != 'done':
                 raise UserError(_(
                     'Отзыв оставляют по завершённой сделке. Пока она не '
                     'исполнена, оценивать нечего.'))
+            # Пока второй отзыв не написан, оба скрыты — и тот, кого
+            # оценили, об этом даже не знает. Извещаем не оценкой, а
+            # самим фактом: оценку он увидит, когда ответит своей, и это
+            # ровно то, ради чего отзывы раскрываются одновременно.
+            record.target_id.sudo()._coop_recompute_deal_stats()
+            if record.deal_id.reviews_visible:
+                record.deal_id._notify_other(_(
+                    'Отзывы по сделке %s раскрыты: обе стороны оценили '
+                    'друг друга.') % record.deal_id.display_name)
+            else:
+                record.deal_id._notify_other(_(
+                    'По сделке %s вас оценили. Отзыв раскроется, когда вы '
+                    'оставите свой.') % record.deal_id.display_name)
         return records
 
     def write(self, vals):

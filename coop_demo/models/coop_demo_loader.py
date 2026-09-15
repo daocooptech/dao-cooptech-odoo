@@ -6,6 +6,7 @@ from odoo import api, models
 from ..data import photos, rubrics
 from ..data import load_project_updates
 from ..data import load_okved
+from ..data import load_accounts
 from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_cessions,
                     load_tokens,
@@ -76,6 +77,14 @@ class CoopDemoLoader(models.AbstractModel):
         # Последним: дополняет то, чего не досталось витринной
         # странице при обычной раздаче.
         load_biography.enrich_showcase(self.env)
+        # Учётные записи участникам — после каталога людей и членства:
+        # записи заводятся тем, кто уже состоит в организации или имеет
+        # специализацию, а до загрузки каталогов таких попросту нет.
+        #
+        # Без этого шага вторая сторона любого взаимодействия не может
+        # действовать: у сделки некому подтвердить акт, у вакансии —
+        # ответить на отклик, у торга — перебить ставку.
+        load_accounts.load_accounts(self.env)
         # Задачи и токены последними: исполнителей берём из уже
         # загруженного каталога людей.
         # Ступени верификации — после каталогов: загрузчик снимает с

@@ -96,6 +96,34 @@
     </field>
   </record>
 
+  <!--
+    Окно отзыва: оценка и пара слов. Кого оценивают, спрашивать незачем —
+    в сделке две стороны, и вторая известна.
+  -->
+  <record id="view_coop_deal_review_wizard_form" model="ir.ui.view">
+    <field name="name">coop.deal.review.wizard.form</field>
+    <field name="model">coop.deal.review.wizard</field>
+    <field name="arch" type="xml">
+      <form string="Отзыв">
+        <field name="deal_id" invisible="1"/>
+        <group>
+          <field name="target_id" readonly="1"/>
+          <field name="rating" widget="radio"/>
+          <field name="body" placeholder="Что получилось и что стоило бы сделать иначе. Необязательно."/>
+        </group>
+        <div class="alert alert-info" role="status">
+          Оба отзыва раскрываются одновременно — когда написаны оба. Пока
+          второй не написан, вашу оценку никто не увидит.
+        </div>
+        <footer>
+          <button name="action_send" type="object" string="Оставить отзыв"
+                  class="btn-primary"/>
+          <button string="Отмена" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
   <record id="view_coop_deal_form" model="ir.ui.view">
     <field name="name">coop.deal.form</field>
     <field name="model">coop.deal</field>
@@ -109,6 +137,8 @@
           <button name="action_confirm_act" type="object"
                   string="Подтвердить акт" class="btn-primary"
                   invisible="state not in ('active', 'acceptance')"/>
+          <button name="action_review" type="object" string="Оставить отзыв"
+                  class="btn-primary" invisible="not can_review"/>
           <button name="action_open_dispute" type="object" string="Открыть спор"
                   invisible="state in ('draft', 'done', 'cancelled', 'disputed')"/>
           <button name="action_resolve_dispute" type="object"
@@ -208,6 +238,7 @@
               </div>
             </page>
             <page string="Отзывы" name="reviews">
+              <field name="can_review" invisible="1"/>
               <field name="reviews_visible" readonly="1"/>
               <field name="outcome" readonly="1"/>
               <field name="review_ids">
