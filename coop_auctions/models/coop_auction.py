@@ -104,6 +104,15 @@ class CoopAuction(models.Model):
         currency_field='currency_id')
     minutes_left = fields.Integer(
         string='Осталось минут', compute='_compute_minutes_left')
+    can_bid = fields.Boolean(
+        string='Можно поставить', compute='_compute_can_bid',
+        help='Торг идёт, срок не вышел, и ставящий — не организатор и не '
+             'нынешний лидер.')
+    live_rank = fields.Integer(
+        string='Порядок на витрине', compute='_compute_live_rank',
+        store=True, index=True,
+        help='Идущие торги впереди завершённых. Число, а не сортировка по '
+             'состоянию: по алфавиту «завершён» встаёт раньше «идут торги».')
 
     _step_positive = models.Constraint(
         'check(step > 0)',
@@ -148,6 +157,43 @@ class CoopAuction(models.Model):
                 record.minutes_left = int(
                     (record.date_end - now).total_seconds() // 60)
 
+    @api.depends('state')
+    def _compute_live_rank(self):
+        """Витрина торгов показывает то, где ещё можно поучаствовать.
+
+        До этого каталог сортировался по дате окончания, и первыми шли
+        торги, закончившиеся раньше всех: из ста пяти лотов на витрине
+        стояли одни завершённые, а все семь идущих не попадали на экран
+        вовсе. Раздел, где нельзя сделать ставку, — не торги, а архив.
+        """
+        порядок = {
+            'running': 0,     # идут — ради них сюда и заходят
+            'draft': 1,       # вот-вот начнутся
+            'no_bids': 2,     # закончились, но лот свободен
+            'finished': 3,
+            'cancelled': 4,
+        }
+        for record in self:
+            record.live_rank = порядок.get(record.state, 9)
+
+    @api.depends_context('uid')
+    @api.depends('state', 'date_end', 'owner_id', 'leader_id')
+    def _compute_can_bid(self):
+        """Условия участия одним признаком — тем же, что и у проверки.
+
+        Кнопку показывает он, отказ выдаёт `_check_can_bid`. Разойдись
+        они — и человек увидел бы кнопку, которая отвечает ошибкой; в
+        вакансиях это ровно так и вышло 15 сентября 2026.
+        """
+        me = self.env.user._coop_acting_partner()
+        now = fields.Datetime.now()
+        for record in self:
+            record.can_bid = bool(
+                record.state == 'running'
+                and record.date_end and record.date_end > now
+                and record.owner_id != me
+                and record.leader_id != me)
+
     # ── Торг ─────────────────────────────────────────────────────────────
 
     def action_start(self):
@@ -160,6 +206,55 @@ class CoopAuction(models.Model):
         return True
 
     def action_bid(self, amount=None):
+        """Открыть окно ставки — или поставить, если сумма уже известна.
+
+        Кнопки у этого действия не было вовсе: метод в модели написан, а
+        нажать его негде, и участник мог только смотреть за торгом.
+        Сумму надо где-то ввести, а править саму запись аукциона
+        участнику нельзя — отсюда окно.
+
+        Сигнатура прежняя: с суммой метод работает как раньше, и вызовы
+        из кода ничего не замечают.
+        """
+        self.ensure_one()
+        if amount is None:
+            self._check_can_bid()
+            return {
+                'type': 'ir.actions.act_window',
+                'name': _('Ставка на «%s»') % self.name,
+                'res_model': 'coop.auction.bid.wizard',
+                'view_mode': 'form',
+                'target': 'new',
+                'context': {'default_auction_id': self.id},
+            }
+        return self._do_bid(amount)
+
+    def _check_can_bid(self):
+        """Условия участия — до окна, а не после ввода суммы."""
+        self.ensure_one()
+        me = self.env.user._coop_acting_partner()
+        if self.state != 'running':
+            raise UserError(_('Торги по этому лоту не идут.'))
+        if self.date_end <= fields.Datetime.now():
+            raise UserError(_('Время торга вышло.'))
+        if self.owner_id == me:
+            raise UserError(_(
+                'Организатор не участвует в своём торге: это разгон цены, '
+                'а не участие.'))
+        if self.leader_id == me:
+            raise UserError(_(
+                'Вы и так лидируете. Перебивать самого себя незачем.'))
+
+    def _suggested_bid(self):
+        """Ближайшая допустимая ставка — её и подставляем в окно."""
+        self.ensure_one()
+        if self.kind == 'direct':
+            return (self.current_price + self.step if self.bid_ids
+                    else self.start_price)
+        return (self.current_price - self.step if self.bid_ids
+                else self.start_price)
+
+    def _do_bid(self, amount=None):
         """Сделать ставку.
 
         Проверок три, и каждая закрывает свой способ испортить торг:
@@ -208,14 +303,21 @@ class CoopAuction(models.Model):
         })
 
         # Антиснайпинг: ставка на последних минутах отодвигает конец.
+        #
+        # Через sudo: продление срока и запись в ленту — последствия уже
+        # принятой ставки, а не правка торга участником. Торг чужой, и
+        # права двигать его окончание у того, кто ставит, нет и быть не
+        # должно — иначе ставку можно было бы использовать как способ
+        # переписать чужой лот.
         if self.extend_minutes:
             edge = self.date_end - timedelta(minutes=self.extend_minutes)
             if now >= edge:
-                self.date_end = self.date_end + timedelta(
+                продлённый = self.date_end + timedelta(
                     minutes=self.extend_minutes)
-                self.message_post(body=_(
+                self.sudo().date_end = продлённый
+                self.sudo().message_post(body=_(
                     'Ставка на последних минутах — торг продлён до %(until)s.',
-                    until=fields.Datetime.to_string(self.date_end)))
+                    until=fields.Datetime.to_string(продлённый)))
         return bid
 
     def action_finish(self):

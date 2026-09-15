@@ -6,7 +6,7 @@
     <field name="model">coop.auction</field>
     <field name="arch" type="xml">
       <kanban js_class="coop_catalog_kanban" class="o_coop_auctions"
-              default_order="date_end">
+              default_order="live_rank, date_end">
         <field name="kind"/>
         <field name="city"/>
         <field name="current_price"/>
@@ -17,6 +17,10 @@
         <field name="owner_id"/>
         <field name="state"/>
         <field name="image_512"/>
+        <!-- Объявлено ради выражения в разметке: ниже поле читается как
+             `record.can_bid.raw_value`, а разбор представления видит
+             только `<field>`. -->
+        <field name="can_bid"/>
         <templates>
           <t t-name="card">
             <div class="o_coop_listing o_coop_auction"
@@ -77,6 +81,20 @@
                   ставок: <t t-esc="record.bid_count.value"/>
                 </span>
               </div>
+
+              <!-- Ставка прямо с витрины: торг — единственный раздел, где
+                   промедление стоит лота, и заставлять открывать карточку
+                   ради одного числа здесь дороже, чем где-либо ещё.
+                   Условие то же, что у кнопки внутри карточки.
+
+                   Полоса действия есть всегда, даже когда ставить нельзя:
+                   иначе карточки с кнопкой и без неё расходятся по высоте
+                   на строку — измерено, 35 точек. -->
+              <div class="o_coop_auction_act">
+                <button name="action_bid" type="object"
+                        class="btn o_coop_btn o_coop_auction_bid"
+                        t-if="record.can_bid.raw_value">Сделать ставку</button>
+              </div>
               </div>
             </div>
             </t>
@@ -108,12 +126,50 @@
     </field>
   </record>
 
+  <!--
+    Окно ставки: подсказанная сумма и кнопка. Считать шаг в уме — работа,
+    которую платформа может сделать за человека, а промах на рубль стоит
+    отказа с ошибкой, поэтому ближайшая допустимая ставка подставлена.
+  -->
+  <record id="view_coop_auction_bid_wizard_form" model="ir.ui.view">
+    <field name="name">coop.auction.bid.wizard.form</field>
+    <field name="model">coop.auction.bid.wizard</field>
+    <field name="arch" type="xml">
+      <form string="Ставка">
+        <field name="auction_id" invisible="1"/>
+        <field name="kind" invisible="1"/>
+        <field name="currency_id" invisible="1"/>
+        <group>
+          <field name="current_price" readonly="1"/>
+          <field name="step" readonly="1"/>
+          <field name="amount"/>
+        </group>
+        <div class="text-muted" invisible="kind != 'direct'">
+          На повышение: ставка не меньше текущей цены плюс шаг.
+        </div>
+        <div class="text-muted" invisible="kind != 'reverse'">
+          Редукцион: предложение не больше текущей цены минус шаг.
+        </div>
+        <footer>
+          <button name="action_place" type="object" string="Поставить"
+                  class="btn-primary"/>
+          <button string="Отмена" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
   <record id="view_coop_auction_form" model="ir.ui.view">
     <field name="name">coop.auction.form</field>
     <field name="model">coop.auction</field>
     <field name="arch" type="xml">
       <form string="Аукцион">
         <header>
+          <!-- Единственное действие, ради которого участник сюда пришёл.
+               Кнопки не было вовсе: метод в модели написан, нажать негде,
+               и раздел работал только на просмотр. -->
+          <button name="action_bid" type="object" string="Сделать ставку"
+                  class="btn-primary" invisible="not can_bid"/>
           <button name="action_start" type="object" string="Открыть торги"
                   class="btn-primary" invisible="state != 'draft'"/>
           <button name="action_finish" type="object" string="Подвести итог"

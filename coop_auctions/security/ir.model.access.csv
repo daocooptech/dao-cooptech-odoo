@@ -3,3 +3,4 @@ access_coop_auction_user,Аукционы — участник,model_coop_auctio
 access_coop_auction_admin,Аукционы — администратор,model_coop_auction,base.group_system,1,1,1,1
 access_coop_auction_bid_user,Ставки — участник,model_coop_auction_bid,base.group_user,1,0,1,0
 access_coop_auction_bid_admin,Ставки — администратор,model_coop_auction_bid,base.group_system,1,1,1,1
+access_coop_auction_bid_wizard,Окно ставки — участник,model_coop_auction_bid_wizard,base.group_user,1,1,1,1

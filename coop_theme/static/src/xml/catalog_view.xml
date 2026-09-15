@@ -47,6 +47,7 @@
                    resModel="props.resModel"
                    field="coopShelfField"
                    domain="props.domain or []"
+                   orderBy="coopShelfOrder"
                    archInfo="props.archInfo"
                    fields="props.fields"
                    openRecord="(record) => this.openRecord(record)"/>

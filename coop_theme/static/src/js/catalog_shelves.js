@@ -30,6 +30,11 @@ export class CoopShelves extends Component {
         resModel: { type: String },
         field: { type: String },
         domain: { type: Array, optional: true },
+        // Порядок передаётся снаружи: своей модели полки грузят записи
+        // сами, и без него брали их в порядке базы. На торгах это было
+        // видно сразу — витрина показывала завершённые лоты при
+        // выбранном порядке «сначала идущие».
+        orderBy: { type: Array, optional: true },
         // Разбор представления и список полей — те же, по которым
         // каталог рисует свои карточки. Полка рисует ими же: два вида
         // карточек на одном экране владелец назвал разнобоем, и был
@@ -97,7 +102,8 @@ export class CoopShelves extends Component {
         return {
             config: {
                 resModel: this.props.resModel, activeFields, fields,
-                domain: [], groupBy: [], orderBy: [], context: {},
+                domain: [], groupBy: [],
+                orderBy: this.props.orderBy || [], context: {},
             },
             limit: this.perShelf * this.maxShelves,
         };
@@ -209,6 +215,7 @@ export class CoopShelves extends Component {
         const рубрики = взятые;
         await this.модельПолок.load({
             domain: domain.concat([[this.props.field, "in", рубрики]]),
+            orderBy: this.props.orderBy || [],
             limit: this.perShelf * this.maxShelves,
         });
         const записи = this.модельПолок.root.records || [];
@@ -246,6 +253,7 @@ export class CoopShelves extends Component {
             // на каждый каталог.
             await this.модельПолок.load({
                 domain: domain.concat(условиеОстатка),
+                orderBy: this.props.orderBy || [],
                 limit: this.perShelf,
             });
             this.state.shelves.push({

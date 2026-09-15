@@ -98,6 +98,24 @@ export class CoopCatalogKanbanController extends KanbanController {
             && this.coopSearchIsClean;
     }
 
+    /** Порядок для полок.
+     *
+     *  Полки грузят записи своей моделью, и порядок им надо передать
+     *  отдельно: без него они брали записи в порядке базы. На торгах это
+     *  было видно сразу — из ста пяти лотов идут семь, и на витрине
+     *  стояли одни завершённые, хотя в панели выбран порядок «сначала
+     *  идущие».
+     *
+     *  Выбранный человеком порядок, а если он ничего не выбирал —
+     *  тот, что объявлен в самом представлении. */
+    get coopShelfOrder() {
+        const order = this.coopSort?.orders?.[this.props.resModel];
+        if (order) {
+            return parseOrder(order);
+        }
+        return this.props.archInfo?.defaultOrder || [];
+    }
+
     /** Домен самого раздела — без того, что человек выбрал в поиске.
      *
      *  `props.domain` для этого не годится: он уже с поиском. Домен
@@ -141,9 +159,8 @@ export class CoopCatalogKanbanController extends KanbanController {
         if (!модель) {
             return true;
         }
-        const подпись = (фасет) => [
-            фасет.type, фасет.title, (фасет.values || []).join("|"),
-        ].join(" ");
+        const подпись = (фасет) => JSON.stringify(
+            [фасет.type, фасет.title, фасет.values || []]);
         const сейчас = (модель.facets || []).map(подпись);
         // Отбор раздела снимается один раз — при первом же обращении, то
         // есть на первой отрисовке, когда умолчания действия уже
