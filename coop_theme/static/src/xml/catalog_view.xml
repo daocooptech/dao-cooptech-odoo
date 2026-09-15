@@ -65,7 +65,7 @@
       <CoopMap t-if="coopLayout.mode === 'map'"
                resModel="props.resModel" domain="model.root.domain"
                showTiles.bind="coopShowTiles"/>
-      <CoopFilters resModel="props.resModel"/>
+      <CoopFilters resModel="props.resModel" baseDomain="coopBaseDomain"/>
       <div class="o_coop_pager" t-if="env.config.pagerProps and coopLayout.mode !== 'map'">
         <Pager t-props="env.config.pagerProps"/>
       </div>

@@ -97,6 +97,15 @@ export class CoopCatalogKanbanController extends KanbanController {
             && this.coopSearchIsClean;
     }
 
+    /** Домен самого раздела — без того, что человек выбрал в поиске.
+     *
+     *  `props.domain` для этого не годится: он уже с поиском. Домен
+     *  действия лежит отдельно, в `globalDomain` поисковой модели, —
+     *  измерено 15 сентября 2026 там же, где выяснилось про фасеты. */
+    get coopBaseDomain() {
+        return this.env.searchModel?.globalDomain || [];
+    }
+
     /** Ничего не искали и не отбирали.
      *
      *  По фасетам поиска — по тем самым плашкам, которые видно в строке

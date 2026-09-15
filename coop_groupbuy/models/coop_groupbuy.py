@@ -122,6 +122,18 @@ class CoopGroupBuy(models.Model):
     my_quantity = fields.Float(
         string='Мой заказ', compute='_compute_my_order', digits=(16, 3))
 
+    # Две роли в складчине — не одно и то же, и человеку они видны
+    # по-разному. Организатор следит за набором объёма, договором с
+    # поставщиком и раздачей; участник — за своим заказом и своей
+    # долей в цене. Решение владельца 15 сентября 2026: «в мои закупки
+    # добавь вкладку Организую».
+    is_organizer = fields.Boolean(
+        string='Я организую', compute='_compute_my_roles',
+        search='_search_is_organizer')
+    is_participant = fields.Boolean(
+        string='Я участвую', compute='_compute_my_roles',
+        search='_search_is_participant')
+
     _min_volume_positive = models.Constraint(
         'check(min_volume > 0)',
         'Минимальный выкуп должен быть больше нуля.',
@@ -166,6 +178,44 @@ class CoopGroupBuy(models.Model):
             mine = record.order_ids.filtered(
                 lambda o: o.partner_id == me and o.state != 'cancelled')
             record.my_quantity = sum(mine.mapped('quantity'))
+
+    @api.depends_context('uid')
+    def _compute_my_roles(self):
+        # Организации считаются вместе с человеком: складчину ведёт
+        # кооператив, а нажимает кнопки тот, кому он это поручил.
+        mine = self.env.user._coop_partner_ids()
+        for record in self:
+            record.is_organizer = record.organizer_id.id in mine
+            record.is_participant = bool(record.order_ids.filtered(
+                lambda o: o.partner_id.id in mine and o.state != 'cancelled'))
+
+    def _хочет(self, operator, value):
+        """Что именно спросили: «да» или «нет».
+
+        Odoo приводит `= True` к `in {True}` и передаёт множество, а не
+        список — значение разбирается как последовательность.
+        """
+        if isinstance(value, (list, tuple, set, frozenset)):
+            хотят = True in value
+        else:
+            хотят = bool(value)
+        if operator in ('!=', 'not in'):
+            хотят = not хотят
+        return хотят
+
+    def _search_is_organizer(self, operator, value):
+        mine = list(self.env.user._coop_partner_ids())
+        да = self._хочет(operator, value)
+        return [('organizer_id', 'in' if да else 'not in', mine)]
+
+    def _search_is_participant(self, operator, value):
+        mine = list(self.env.user._coop_partner_ids())
+        да = self._хочет(operator, value)
+        условие = [('order_ids.partner_id', 'in', mine),
+                   ('order_ids.state', '!=', 'cancelled')]
+        if да:
+            return условие
+        return ['!', ('id', 'in', self.search(условие).ids)]
 
     # ── Действия ─────────────────────────────────────────────────────────
 

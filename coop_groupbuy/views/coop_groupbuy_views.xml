@@ -250,7 +250,7 @@
     <field name="res_model">coop.groupbuy</field>
     <field name="path">my-groupbuy</field>
     <field name="view_mode">kanban,list,form</field>
-    <field name="domain">['|', ('organizer_id.user_ids', 'in', [uid]), ('order_ids.partner_id.user_ids', 'in', [uid])]</field>
+    <field name="domain">['|', ('is_organizer', '=', True), ('is_participant', '=', True)]</field>
     <field name="context">{'bin_size': True,'coop_catalog': 1}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Вы пока ни в одной закупке</p>
@@ -264,8 +264,32 @@
   <menuitem id="menu_coop_groupbuy_all" name="Все закупки"
             parent="menu_coop_groupbuy_root"
             action="action_coop_groupbuy" sequence="10"/>
+  <!--
+    Складчину ведёт один, а участвуют многие, и заботы у них разные:
+    организатор смотрит за набором объёма, договором с поставщиком и
+    раздачей, участник — за своим заказом. Смешанные в одном списке,
+    они друг другу мешают. Решение владельца 15 сентября 2026.
+  -->
+  <record id="action_coop_groupbuy_organized" model="ir.actions.act_window">
+    <field name="name">Организую</field>
+    <field name="res_model">coop.groupbuy</field>
+    <field name="path">groupbuy-organized</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="domain">[('is_organizer', '=', True)]</field>
+    <field name="context">{'bin_size': True,'coop_catalog': 1, 'coop_create_label': 'Объявить закупку'}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Вы пока ничего не организуете</p>
+      <p>Организатор находит поставщика и минимальный объём выкупа, а
+         платформа собирает заказчиков. Оргсбор включается в цену и
+         виден каждому до того, как он закажет.</p>
+    </field>
+  </record>
+
   <menuitem id="menu_coop_groupbuy_mine" name="Мои закупки"
             parent="menu_coop_groupbuy_root"
             action="action_coop_groupbuy_mine" sequence="20"/>
+  <menuitem id="menu_coop_groupbuy_organized" name="Организую"
+            parent="menu_coop_groupbuy_root"
+            action="action_coop_groupbuy_organized" sequence="30"/>
 
 </odoo>

@@ -18,7 +18,13 @@ import { Component, onWillStart, useState } from "@odoo/owl";
  */
 export class CoopFilters extends Component {
     static template = "coop_theme.CatalogFilters";
-    static props = { resModel: String };
+    static props = {
+        resModel: String,
+        // Домен самого раздела: «Организую», «Мои закупки», «Опубликованные».
+        // Без него число на кнопке считалось по всей модели — во вкладке
+        // «Организую» с одной записью стояло «Показать результаты · 120».
+        baseDomain: { type: Array, optional: true },
+    };
 
     setup() {
         this.orm = useService("orm");
@@ -204,7 +210,8 @@ export class CoopFilters extends Component {
     async countNow() {
         try {
             this.state.preview = await this.orm.searchCount(
-                this.props.resModel, this.domain);
+                this.props.resModel,
+                (this.props.baseDomain || []).concat(this.domain));
         } catch {
             this.state.preview = null;
         }
