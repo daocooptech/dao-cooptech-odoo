@@ -227,6 +227,9 @@ class CoopProject(models.Model):
              'ресурсами и трудом. Готовность считается от неё.')
     contribution_ids = fields.One2many(
         'coop.project.contribution', 'project_id', string='Вклады')
+    can_contribute = fields.Boolean(
+        string='Можно вложиться', compute='_compute_can_contribute',
+        help='Проект собирает, и я не его инициатор.')
     contribution_total = fields.Monetary(
         string='Собрано, ₽', currency_field='currency_id',
         compute='_compute_contribution_total', store=True,
@@ -555,6 +558,37 @@ class CoopProject(models.Model):
         if self.funding_rule == 'threshold':
             return self.funding_threshold
         return 0
+
+    @api.depends_context('uid')
+    @api.depends('state', 'partner_id')
+    def _compute_can_contribute(self):
+        """Условия вклада одним признаком — тем же, что и у проверки.
+
+        Кнопку показывает он, отказ выдаёт окно вклада. Разойдись они
+        — и человек увидел бы кнопку, которая отвечает ошибкой.
+        """
+        мои = self.env.user.coop_actor_partner_ids
+        for record in self:
+            record.can_contribute = bool(
+                record.state == 'gathering'
+                and record.partner_id not in мои)
+
+    def action_contribute(self):
+        """Открыть окно вклада.
+
+        Вклад описан моделью до мелочей, а внести его было нечем: на
+        странице проекта только действия инициатора. Проект собирал
+        деньги и вещи, и собирать их было неоткуда.
+        """
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Вклад в проект «%s»') % self.name,
+            'res_model': 'coop.project.contribute',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_project_id': self.id},
+        }
 
     def action_launch(self):
         """Запустить проект и завести его в модуле управления.
@@ -1306,6 +1340,16 @@ class CoopProjectContribution(models.Model):
                 'accepted_on': fields.Date.context_today(record),
             })
             record._close_need()
+            # Вкладчику: он предложил и ждёт ответа. Без извещения
+            # узнать о принятии можно было только вернувшись на
+            # страницу проекта по своей воле.
+            record.env['coop.notification']._notify(
+                record.partner_id,
+                _('Ваш вклад в проект «%(проект)s» принят: '
+                  '%(что)s, оценка %(сколько)s ₽.',
+                  проект=record.project_id.name, что=record.name,
+                  сколько=record.value),
+                record=record.project_id, kind='project')
         return True
 
     def _close_need(self):
@@ -1332,6 +1376,15 @@ class CoopProjectContribution(models.Model):
 
     def action_decline(self):
         self.write({'state': 'declined'})
+        for record in self:
+            # Отказ извещают так же, как принятие: не зная о нём,
+            # человек считает свой вклад в деле и не предлагает его
+            # другому проекту.
+            record.env['coop.notification']._notify(
+                record.partner_id,
+                _('Вклад в проект «%(проект)s» отклонён: %(что)s.',
+                  проект=record.project_id.name, что=record.name),
+                record=record.project_id, kind='project')
         return True
 
     # ── Вычисления возврата ──────────────────────────────────────────────

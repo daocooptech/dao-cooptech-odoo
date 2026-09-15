@@ -12,6 +12,10 @@
         <field name="image_512"/>
         <field name="city"/>
         <field name="readiness"/>
+        <!-- Объявлено ради выражения в разметке: ниже поле
+             читается как `record.can_contribute.raw_value`, а
+             разбор представления видит только `<field>`. -->
+        <field name="can_contribute"/>
         <field name="kind"/>
         <field name="summary"/>
         <field name="state"/>
@@ -92,6 +96,16 @@
                     <t t-esc="record.readiness.value"/>%
                   </div>
                 </div>
+                <!-- Вложиться прямо с витрины: у проекта в сборе
+                     это единственное, ради чего его открывают.
+                     Полоса есть всегда, даже когда вкладывать
+                     некуда, — иначе карточки расходятся по высоте
+                     на строку, как вышло у торгов. -->
+                <div class="o_coop_tile_act">
+                  <button name="action_contribute" type="object"
+                          class="btn o_coop_btn o_coop_tile_contribute"
+                          t-if="record.can_contribute.raw_value">Вложиться</button>
+                </div>
               </div>
             </div>
           </t>
@@ -126,12 +140,47 @@
     </field>
   </record>
 
+  <!--
+    Окно вклада: чем, что именно, во сколько оценивается. Оценка нужна
+    не ради цены, а ради доли: только через неё труд и деньги сводятся в
+    одну величину.
+  -->
+  <record id="view_coop_contribute_form" model="ir.ui.view">
+    <field name="name">coop.project.contribute.form</field>
+    <field name="model">coop.project.contribute</field>
+    <field name="arch" type="xml">
+      <form string="Вклад в проект">
+        <field name="project_id" invisible="1"/>
+        <field name="currency_id" invisible="1"/>
+        <group>
+          <field name="kind" widget="radio"/>
+          <field name="name" placeholder="Смена экскаваторщика, месяц аренды склада, комплект досок"/>
+          <field name="value"/>
+          <field name="note" placeholder="Необязательно"/>
+        </group>
+        <div class="alert alert-info" role="status">
+          Инициатор проекта увидит предложение и решит, принять ли его.
+          Принятый вклад считается долей: ваша оценка к сумме всех вкладов.
+        </div>
+        <footer>
+          <button name="action_offer" type="object" string="Предложить вклад"
+                  class="btn-primary"/>
+          <button string="Отмена" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
   <record id="view_coop_project_form" model="ir.ui.view">
     <field name="name">coop.project.form</field>
     <field name="model">coop.project</field>
     <field name="arch" type="xml">
       <form string="Проект" class="o_coop_wall_form">
         <header>
+          <!-- Единственное действие участника. Кнопки не было вовсе:
+               проект собирал деньги и вещи, а внести их было нечем. -->
+          <button name="action_contribute" type="object" string="Вложиться"
+                  class="btn-primary" invisible="not can_contribute"/>
           <button name="action_open_gathering" type="object" string="Открыть сбор"
                   class="btn-primary" invisible="state != 'draft'"/>
           <button name="action_launch" type="object" string="Запустить"

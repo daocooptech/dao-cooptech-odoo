@@ -3,3 +3,4 @@ access_coop_project_category_user,Темы проектов — чтение,mod
 access_coop_project_category_admin,Темы проектов — ведение,model_coop_project_category,coop_base.group_coop_platform,1,1,1,1
 access_coop_project_user,Проекты — участник,model_coop_project,base.group_user,1,1,1,1
 access_coop_contribution_user,Вклады — участник,model_coop_project_contribution,base.group_user,1,1,1,1
+access_coop_project_contribute,Окно вклада — участник,model_coop_project_contribute,base.group_user,1,1,1,1
