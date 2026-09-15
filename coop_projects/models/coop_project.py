@@ -645,6 +645,29 @@ class CoopProject(models.Model):
         self._create_milestones(project)
         return project
 
+    @api.model
+    def backfill_milestones(self):
+        """Завести вехи тем, кто запустился раньше их появления.
+
+        Вехи ставятся при запуске, а запущенные проекты на платформе уже
+        есть — и без этого прохода веха была бы только у будущих. Идём по
+        тем, у кого вех нет, поэтому повторный запуск безвреден.
+        """
+        if 'project.milestone' not in self.env:
+            return 0
+        Веха = self.env['project.milestone'].sudo()
+        сделано = 0
+        for сбор in self.search([('project_id', '!=', False)]):
+            if Веха.search_count([('project_id', '=', сбор.project_id.id)]):
+                continue
+            сбор._create_milestones(сбор.project_id)
+            if not сбор.project_id.allow_milestones:
+                сбор.project_id.sudo().allow_milestones = True
+            сделано += 1
+        if сделано:
+            _logger.info('Вехи заведены проектам: %s', сделано)
+        return сделано
+
     def _create_milestones(self, project):
         """Перенести ступени сбора в вехи проекта.
 

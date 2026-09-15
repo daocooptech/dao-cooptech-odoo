@@ -161,6 +161,9 @@ class CoopDemoLoader(models.AbstractModel):
         # Суммы проектов — до всего остального, что на них смотрит:
         # готовность, доли и вехи считаются от «нужно».
         load_projects.repair_scales(self.env)
+        # Вехи — после сумм: их названия содержат сами суммы.
+        if 'project.milestone' in self.env:
+            self.env['coop.project'].sudo().backfill_milestones()
         # Вид деятельности организаций — по названию и правовой форме.
         if 'coop.okved' in self.env:
             load_okved.load_okved(self.env)
