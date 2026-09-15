@@ -564,3 +564,14 @@
     height: auto !important;
   }
 }
+
+// «Все потребности закрыты» вместо исчезнувшего раздела.
+.o_coop_needs .o_coop_needs_empty {
+  padding: 14px 16px;
+  border: 1px dashed var(--coop-line, #e6e6e1);
+  border-radius: 10px;
+  color: var(--coop-slate, #4a4a44);
+  font-size: 13px;
+  line-height: 1.5;
+  background: var(--coop-surface, #f2f2ee);
+}

@@ -368,7 +368,7 @@
             стоимости, потому что 150 000 ₽ значат разное в проекте на
             полтора миллиона и в проекте на пятнадцать.
           -->
-          <div class="o_coop_needs" invisible="state == 'draft' or (not need_material_ids and not need_equipment_ids and not need_labour_ids and not need_financial_ids)">
+          <div class="o_coop_needs" invisible="state in ('draft', 'cancelled')">
             <div class="o_coop_needs_head">Участие в проекте</div>
             <div class="o_coop_needs_lead"
                  invisible="kind == 'nonprofit'">Вносите долю не только деньгами</div>
@@ -402,6 +402,14 @@
               проекте нет: вклад сюда — помощь делу, а не участие в
               собственности.
             </p>
+            <!-- Все потребности закрыты — раздел не прячем, а говорим об
+                 этом словами. Исчезнувший раздел читается как поломка
+                 страницы, а не как «участвовать сейчас не в чем». -->
+            <div class="o_coop_needs_empty"
+                 invisible="need_material_ids or need_equipment_ids or need_labour_ids or need_financial_ids">
+              Все потребности проекта закрыты — участвовать сейчас не в чем.
+              Инициатор объявит новые, когда они появятся.
+            </div>
             <div class="o_coop_needs_group" invisible="not need_material_ids">
               <div class="o_coop_needs_title">Необходимые материальные ресурсы</div>
               <field name="need_material_ids" nolabel="1" readonly="1">
