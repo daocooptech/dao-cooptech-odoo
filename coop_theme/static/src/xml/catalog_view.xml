@@ -52,8 +52,21 @@
                    openRecord="(record) => this.openRecord(record)"/>
     </xpath>
 
+    <!--
+      Лента под полками не показывается.
+
+      Решение владельца 15 сентября 2026: «полки оставь, остальное убери,
+      все предложения должны быть по полкам». Двух раскладок на одном
+      экране не бывает без разнобоя: полка и лента считали ширину
+      карточки по-разному, и в строку их вставало разное число. Спор
+      решается не подбором чисел, а тем, что раскладка остаётся одна.
+
+      Полки покрывают каталог целиком — за этим следит «Другое», куда
+      попадает всё, что не вошло в остальные. В строчном виде и на карте
+      лента остаётся: там полок нет.
+    -->
     <xpath expr="//t[@t-component='props.Renderer']" position="attributes">
-      <attribute name="t-if">model.isReady and coopLayout.mode !== 'map'</attribute>
+      <attribute name="t-if">model.isReady and coopLayout.mode !== 'map' and !coopShelvesVisible</attribute>
     </xpath>
 
     <!--
@@ -66,7 +79,9 @@
                resModel="props.resModel" domain="model.root.domain"
                showTiles.bind="coopShowTiles"/>
       <CoopFilters resModel="props.resModel" baseDomain="coopBaseDomain"/>
-      <div class="o_coop_pager" t-if="env.config.pagerProps and coopLayout.mode !== 'map'">
+      <!-- Постраничная навигация вместе с лентой: листать нечего, когда
+           весь каталог разложен по полкам. -->
+      <div class="o_coop_pager" t-if="env.config.pagerProps and coopLayout.mode !== 'map' and !coopShelvesVisible">
         <Pager t-props="env.config.pagerProps"/>
       </div>
     </xpath>
