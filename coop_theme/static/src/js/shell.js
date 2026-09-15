@@ -458,7 +458,13 @@ export class CoopSidebar extends Component {
      *  списке теперь те расширения, что в макете, и каталога среди них
      *  нет — он витрина, а не расширение. */
     openCatalog() {
-        return this.action.doAction("coop_extensions.action_coop_extension_catalog");
+        // Со сбросом следа: каталог расширений — самостоятельный раздел,
+        // а не углубление в тот, откуда пришли. Без сброса адрес копил
+        // цепочку переходов — `/odoo/my-resources/notifications/extensions`,
+        // — и выглядел поломкой. Владелец 16 сентября 2026 велел чистить.
+        return this.action.doAction(
+            "coop_extensions.action_coop_extension_catalog",
+            { clearBreadcrumbs: true });
     }
 
     openSettings() {

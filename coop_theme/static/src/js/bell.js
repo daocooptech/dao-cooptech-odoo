@@ -60,7 +60,11 @@ export class CoopBell extends Component {
     // работают, и в остальном коде проекта они остаются; ограничение
     // касается только того, что вызывается из разметки.
     open() {
-        this.action.doAction("coop_base.action_coop_notifications");
+        // Со сбросом следа: извещения — самостоятельный раздел, и
+        // приходят в него из любого места. Без сброса адрес копил
+        // цепочку переходов и выглядел поломкой.
+        this.action.doAction("coop_base.action_coop_notifications",
+                             { clearBreadcrumbs: true });
         // Список прочитан не будет сам собой, но счётчик пересчитаем
         // после перехода: человек уже смотрит на события.
         setTimeout(() => this.refresh(), 1500);
