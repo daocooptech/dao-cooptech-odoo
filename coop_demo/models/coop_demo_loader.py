@@ -4,6 +4,7 @@ import logging
 from odoo import api, models
 
 from ..data import photos, rubrics
+from ..data import load_project_updates
 from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_cessions,
                     load_tokens,
@@ -151,6 +152,11 @@ class CoopDemoLoader(models.AbstractModel):
         # складчина. Владелец 15 сентября 2026: «во всех каталогах
         # должны быть картинки». Проход идёт по тем записям, у которых
         # снимка нет, и потому безвреден при повторном запуске.
+        # Отчёты о ходе — после задач и сборов: состояние отчёта
+        # выводится из положения проекта, и положение к этому моменту
+        # должно быть окончательным.
+        if 'project.update' in self.env:
+            load_project_updates.load_project_updates(self.env)
         # Рубрики — до снимков: и то и другое выводится из названия, но
         # рубрика ещё и решает, в какой полке запись окажется.
         self._load_rubrics()

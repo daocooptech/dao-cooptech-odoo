@@ -218,3 +218,26 @@
     min-width: 230px;
   }
 }
+
+// Ход проекта точкой у названия.
+//
+// Штатные состояния отчёта `project.update`: идёт по плану, есть риск,
+// отстаёт, приостановлен, завершён. Пункт 14 разбора архитектора — «ход
+// показывать отчётом, а не своей лентой». Точка, а не плашка: состояние
+// работ это не то же, что состояние сбора, и спорить с ним за внимание
+// на карточке ему не надо.
+.o_coop_run {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 7px;
+  vertical-align: middle;
+  background: var(--coop-muted, #6b6f72);
+}
+
+.o_coop_run_on_track  { background: #1f9d55; }   // идёт по плану
+.o_coop_run_at_risk   { background: #e0a800; }   // есть риск
+.o_coop_run_off_track { background: #d64545; }   // отстаёт
+.o_coop_run_on_hold   { background: #8a8f94; }   // приостановлен
+.o_coop_run_done      { background: #146b64; }   // завершён

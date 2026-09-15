@@ -243,6 +243,27 @@ class CoopProject(models.Model):
              'набор этапов сам: у стройки они одни, у разработки другие. '
              'Состояние сбора от них не зависит.')
 
+    # Ход проекта — штатный отчёт Odoo, а не своя лента.
+    #
+    # «Новости проекта» из макета — это и есть отчёт о ходе: заголовок,
+    # состояние, процент, дата, автор, описание, и он уходит подписчикам.
+    # Своей моделью это писать нельзя: рядом с чаттером и стеной вышла бы
+    # четвёртая сущность о том же самом. Пункт 14 разбора архитектора.
+    #
+    # На сборе показываем только последнее состояние — точкой в каталоге
+    # и подписью на карточке. Сами отчёты живут у проекта в управлении,
+    # там их и пишут.
+    last_update_status = fields.Selection(
+        related='project_id.last_update_status', string='Ход проекта',
+        readonly=True,
+        help='Последний отчёт о ходе. Пишется в управлении проектами: '
+             'состояние сбора и состояние работ — разные вещи.')
+    last_update_id = fields.Many2one(
+        related='project_id.last_update_id', string='Последний отчёт',
+        readonly=True)
+    update_count = fields.Integer(
+        string='Отчётов о ходе', compute='_compute_update_count')
+
     need_ids = fields.One2many(
         'coop.resource', 'project_id', string='Потребности',
         domain=[('listing_type', '=', 'request')],
@@ -956,6 +977,44 @@ class CoopProject(models.Model):
             _logger.info('Снято объявлений остановленных проектов: %s',
                          withdrawn)
         return withdrawn
+
+    @api.depends('project_id')
+    def _compute_update_count(self):
+        # Считаем одним запросом на всю выборку: у каталога карточек
+        # двести, и по запросу на каждую он встанет.
+        по_проектам = {}
+        проекты = self.mapped('project_id')
+        if проекты:
+            группы = self.env['project.update'].sudo()._read_group(
+                [('project_id', 'in', проекты.ids)], ['project_id'],
+                ['__count'])
+            по_проектам = {проект.id: сколько for проект, сколько in группы}
+        for record in self:
+            record.update_count = по_проектам.get(record.project_id.id, 0)
+
+    def action_open_updates(self):
+        """Отчёты о ходе проекта — штатные, Odoo.
+
+        Своей ленты новостей у нас нет намеренно: отчёт о ходе это
+        документ, а не сообщение, и он уже есть в движке вместе с
+        рассылкой подписчикам и показом в канбане управления.
+        """
+        self.ensure_one()
+        if not self.project_id:
+            raise UserError(
+                'Проект ещё не запущен: вести пока нечего. Отчёт о ходе '
+                'пишется тогда, когда работы начались.')
+        action = self.env['ir.actions.actions']._for_xml_id(
+            'project.project_update_all_action')
+        # Заголовок свой: у штатного действия он «Dashboard», и на
+        # русской платформе это выглядит как чужая страница.
+        action['name'] = 'Ход проекта: %s' % self.name
+        action['domain'] = [('project_id', '=', self.project_id.id)]
+        action['context'] = {
+            'default_project_id': self.project_id.id,
+            'active_id': self.project_id.id,
+        }
+        return action
 
     def action_open_project(self):
         self.ensure_one()

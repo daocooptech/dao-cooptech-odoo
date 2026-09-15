@@ -14,6 +14,7 @@
         <field name="kind"/>
         <field name="summary"/>
         <field name="state"/>
+        <field name="last_update_status"/>
         <templates>
           <t t-name="card">
             <div class="o_coop_tile">
@@ -41,7 +42,19 @@
                 </span>
               </div>
               <div class="o_coop_tile_body">
-                <div class="o_coop_tile_name"><field name="name"/></div>
+                <div class="o_coop_tile_name">
+                  <!--
+                    Точка хода проекта — штатные состояния `project.update`:
+                    идёт по плану, есть риск, отстаёт, приостановлен,
+                    завершён. Пункт 14 разбора архитектора. Показывается
+                    только там, где работы начались: до запуска вести
+                    нечего, и серая точка на сборе врала бы.
+                  -->
+                  <span class="o_coop_run" t-if="record.last_update_status.raw_value and record.last_update_status.raw_value != 'to_define'"
+                        t-att-class="'o_coop_run_' + record.last_update_status.raw_value"
+                        t-att-title="record.last_update_status.value"/>
+                  <field name="name"/>
+                </div>
                 <div class="o_coop_tile_desc"><field name="summary"/></div>
                 <div class="o_coop_readiness">
                   <div class="o_coop_readiness_bar">
@@ -144,6 +157,22 @@
                 </span>
                 <span class="o_stat_text">Управление</span>
                 <span class="o_stat_text">проектом</span>
+              </div>
+            </button>
+            <!--
+              Отчёты о ходе — штатные `project.update`. Пункт 14 разбора
+              архитектора: «новости проекта» из макета это отчёт о ходе,
+              а не переписка, и он в движке уже есть — с рассылкой
+              подписчикам и показом в управлении.
+            -->
+            <button name="action_open_updates" type="object" class="oe_stat_button"
+                    icon="fa-line-chart" invisible="not project_id">
+              <div class="o_stat_info">
+                <span class="o_stat_value">
+                  <field name="update_count" nolabel="1"/>
+                </span>
+                <span class="o_stat_text">Ход</span>
+                <span class="o_stat_text">проекта</span>
               </div>
             </button>
           </div>
