@@ -133,6 +133,9 @@
     border-radius: 999px;
     background: var(--coop-surface, #f2f2ee);
     overflow: hidden;
+    // Точка отсчёта для засечки порога: без неё засечка считала бы
+    // проценты от карточки, а не от полосы.
+    position: relative;
   }
 
   .o_coop_readiness_fill {
@@ -241,3 +244,18 @@
 .o_coop_run_off_track { background: #d64545; }   // отстаёт
 .o_coop_run_on_hold   { background: #8a8f94; }   // приостановлен
 .o_coop_run_done      { background: #146b64; }   // завершён
+
+// Засечка порога запуска на полосе готовности.
+//
+// Полоса отвечает «сколько собрано», засечка — «сколько нужно, чтобы
+// начали». Второе для вкладчика важнее первого: собранные 60 % значат
+// разное при пороге 50 и при пороге 90. Пункт 16 разбора архитектора.
+.o_coop_readiness_mark {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--coop-ink, #14171a);
+  opacity: .45;
+  pointer-events: auto;
+}

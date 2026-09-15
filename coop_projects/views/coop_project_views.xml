@@ -15,6 +15,7 @@
         <field name="summary"/>
         <field name="state"/>
         <field name="last_update_status"/>
+        <field name="funding_threshold"/>
         <templates>
           <t t-name="card">
             <div class="o_coop_tile">
@@ -63,6 +64,19 @@
                          своей дорожки — просто сломанная вёрстка. -->
                     <div class="o_coop_readiness_fill"
                          t-attf-style="width: #{Math.min(100, record.readiness.raw_value)}%"/>
+                    <!--
+                      Засечка порога запуска. Полоса показывает, сколько
+                      собрано, но не отвечает на главный вопрос
+                      вкладчика: хватит ли этого, чтобы проект начался.
+                      Порог у каждого проекта свой — от половины до ста
+                      процентов. При стопроцентном засечки нет: она
+                      совпала бы с концом полосы и читалась бы как
+                      украшение. Пункт 16 разбора архитектора.
+                    -->
+                    <div class="o_coop_readiness_mark"
+                         t-if="record.funding_threshold.raw_value and record.funding_threshold.raw_value &lt; 100"
+                         t-attf-style="left: #{record.funding_threshold.raw_value}%"
+                         t-attf-title="Порог запуска — #{record.funding_threshold.value}%"/>
                   </div>
                   <div class="o_coop_readiness_pct">
                     <t t-esc="record.readiness.value"/>%

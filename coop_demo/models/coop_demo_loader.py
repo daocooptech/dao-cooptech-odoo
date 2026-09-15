@@ -158,6 +158,9 @@ class CoopDemoLoader(models.AbstractModel):
         # должно быть окончательным.
         if 'project.update' in self.env:
             load_project_updates.load_project_updates(self.env)
+        # Суммы проектов — до всего остального, что на них смотрит:
+        # готовность, доли и вехи считаются от «нужно».
+        load_projects.repair_scales(self.env)
         # Вид деятельности организаций — по названию и правовой форме.
         if 'coop.okved' in self.env:
             load_okved.load_okved(self.env)

@@ -8,6 +8,15 @@ from odoo.exceptions import UserError, ValidationError
 _logger = logging.getLogger(__name__)
 
 
+def _деньги(сумма):
+    """Сумма для названия вехи: без копеек и с пробелами по три знака.
+
+    Штатная веха — это строка, а не денежное поле, и форматировать её
+    некому. «120000.0 ₽» в названии читается как ошибка ввода.
+    """
+    return '{:,.0f}'.format(сумма or 0).replace(',', ' ')
+
+
 class CoopProjectCategory(models.Model):
     """Тема проекта и её раздел.
 
@@ -611,6 +620,10 @@ class CoopProject(models.Model):
         # не принимает, поэтому заполняем сами.
         if 'billing_type' in Project._fields:
             values['billing_type'] = 'not_billable'
+        # Вехи включаем сразу: по ним в управлении видно, чего проект уже
+        # достиг. Пункт 16 разбора архитектора.
+        if 'allow_milestones' in Project._fields:
+            values['allow_milestones'] = True
         for name, field in Project._fields.items():
             if name in values or not field.store or field.type != 'selection':
                 continue
@@ -629,7 +642,50 @@ class CoopProject(models.Model):
             values[name] = default or (options[0] if options else False)
         project = Project.create(values)
         project.message_subscribe(partner_ids=self._project_followers().ids)
+        self._create_milestones(project)
         return project
+
+    def _create_milestones(self, project):
+        """Перенести ступени сбора в вехи проекта.
+
+        Пункт 16 разбора архитектора. У сбора две ступени, и обе известны
+        до запуска: порог, при котором проект вправе стартовать, и полный
+        сбор. Обе переносятся в штатные вехи — по ним в управлении видно,
+        с чем проект вышел в работу.
+
+        Ступеней сверх полного сбора («собрали вдвое — сделаем вторую
+        очередь») здесь нет намеренно: их назначает инициатор, а такого
+        поля у нас пока нет. Выдумывать лестницу за него значит обещать
+        вкладчику то, чего никто не обещал.
+
+        Вехи заводятся при запуске, а не при открытии сбора: у штатной
+        вехи обязателен проект, а проект в управлении появляется ровно в
+        момент запуска.
+        """
+        self.ensure_one()
+        if 'project.milestone' not in self.env:
+            return
+        Веха = self.env['project.milestone'].sudo()
+        порог = self.required_total * (self.funding_threshold or 100) / 100.0
+        ступени = [
+            ('Порог запуска — %s ₽' % _деньги(порог), порог, 10),
+            ('Полный сбор — %s ₽' % _деньги(self.required_total),
+             self.required_total, 20),
+        ]
+        # При стопроцентном пороге обе ступени совпадают — вторую не
+        # заводим: две одинаковые вехи в управлении выглядят ошибкой.
+        if self.funding_threshold and self.funding_threshold >= 100:
+            ступени = ступени[1:]
+        for название, сумма, порядок in ступени:
+            Веха.create({
+                'name': название,
+                'project_id': project.id,
+                'sequence': порядок,
+                'deadline': self.date_deadline or False,
+                # Достигнута — если к моменту запуска собрано столько.
+                # Это не оценка, а факт вкладов на сегодня.
+                'is_reached': self.contribution_total >= сумма,
+            })
 
     def _project_followers(self):
         """Кого проект должен видеть своими: инициатор и принятые вкладчики.
