@@ -218,21 +218,66 @@ def enrich_showcase(env, login='dashkevich'):
 
     # ── Проекты ────────────────────────────────────────────────────────
     Project = env['coop.project'].sudo()
-    if not Project.search_count([('partner_id', '=', partner.id)]):
+    # Добираем до четырёх, а не «если ни одного»: с единственной плиткой
+    # полка выглядит остатком, а не разделом, — и показывать на ней
+    # нечего, ради чего полка и заведена.
+    своих = Project.search_count([('partner_id', '=', partner.id)])
+    if своих < 4:
         # С картинкой и заполненные: полоса плиток без фотографий
         # выглядит сломанной.
-        projects = Project.search([('image_512', '!=', False)], limit=4)
+        projects = Project.search([('image_512', '!=', False),
+                                   ('partner_id', '!=', partner.id)],
+                                  limit=4 - своих)
         if projects:
             projects.write({'partner_id': partner.id})
             touched += len(projects)
 
     # ── Вакансии ───────────────────────────────────────────────────────
     Vacancy = env['coop.vacancy'].sudo()
-    if not Vacancy.search_count([('partner_id', '=', partner.id)]):
-        vacancies = Vacancy.search([('state', '=', 'published')], limit=3)
+    моих_вакансий = Vacancy.search_count([('partner_id', '=', partner.id)])
+    if моих_вакансий < 4:
+        vacancies = Vacancy.search([('state', '=', 'published'),
+                                    ('partner_id', '!=', partner.id)],
+                                   limit=4 - моих_вакансий)
         if vacancies:
             vacancies.write({'partner_id': partner.id})
             touched += len(vacancies)
+
+    # ── Ресурсы ────────────────────────────────────────────────────────
+    #
+    # Только предложения. Спрос у него есть и живёт в своей полке
+    # «Потребности»; полка «Ресурсы» отвечает на другой вопрос — что у
+    # человека есть, — и без единого предложения пряталась целиком.
+    Resource = env['coop.resource'].sudo()
+    свои = Resource.search_count([('owner_id', '=', partner.id),
+                                  ('listing_type', '=', 'offer')])
+    if not свои:
+        ресурсы = Resource.search([
+            ('listing_type', '=', 'offer'),
+            ('state', '=', 'published'),
+            ('image_512', '!=', False),
+            ('project_id', '=', False),
+        ], limit=4)
+        if ресурсы:
+            ресурсы.write({'owner_id': partner.id})
+            touched += len(ресурсы)
+
+    # ── Навыки ─────────────────────────────────────────────────────────
+    #
+    # Две плитки в полке — это не полка. Витринная страница показывает,
+    # как раздел выглядит наполненным, и четырёх хватает, чтобы ряд
+    # читался рядом, а не остатком.
+    Offer = env['coop.skill.offer'].sudo()
+    моих = Offer.search_count([('partner_id', '=', partner.id)])
+    if моих < 4:
+        навыки = Offer.search([
+            ('partner_id', '!=', partner.id),
+            ('state', '=', 'published'),
+            ('image_512', '!=', False),
+        ], limit=4 - моих)
+        if навыки:
+            навыки.write({'partner_id': partner.id})
+            touched += len(навыки)
 
     # ── Друзья ─────────────────────────────────────────────────────────
     #
