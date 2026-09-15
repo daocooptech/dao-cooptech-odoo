@@ -559,3 +559,18 @@ a.chip:hover { border-color: var(--teal); color: var(--teal-dark); text-decorati
 
 .button.danger:hover { background: var(--error-text); border-color: var(--error-text); }
 
+
+// Лого в шапке публичной страницы.
+//
+// Лого нарисовано для тёмной темы: чёрная подложка и белые буквы. На
+// тёмном фоне подложка сливается и видны буквы, а на светлом выходит
+// чёрный прямоугольник. Публичная страница светлая, поэтому инверсия.
+//
+// Инвертировать можно без потерь: в файле ровно два цвета — чёрный и
+// белый, полутонов нет, и оттенки не поедут.
+.o_main_navbar .o_company_logo,
+header .navbar-brand img,
+#top_menu_container img.o_company_logo,
+.o_footer_logo img {
+  filter: invert(1);
+}
