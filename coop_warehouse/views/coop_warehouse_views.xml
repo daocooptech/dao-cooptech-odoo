@@ -27,7 +27,19 @@
         <templates>
           <t t-name="card">
             <div class="o_coop_listing o_coop_wh">
-              <div class="o_coop_listing_ico o_coop_wh_ico">🏬</div>
+              <!-- Снимок во всю ширину — общий вид карточки каталога.
+                   Своего снимка у записи может не быть; тогда лицом
+                   становится тот, с кем придётся иметь дело. -->
+              <div class="o_coop_media">
+                <img class="o_coop_media_logo" t-if="record.owner_id.raw_value" loading="lazy"
+                     t-attf-src="/web/image/res.partner/#{record.owner_id.raw_value}/image_512"
+                     t-att-alt="record.owner_id.value"/>
+                <span t-else="" class="o_coop_media_sign">🏬</span>
+                <span class="o_coop_locbar" t-if="record.city.raw_value">
+                  <i class="fa fa-map-marker" role="img" aria-label="Город"/>
+                  <field name="city"/>
+                </span>
+              </div>
               <div class="o_coop_listing_body">
 
                 <div class="o_coop_wh_head">

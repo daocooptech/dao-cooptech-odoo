@@ -20,12 +20,19 @@
               <!-- Своя картинка права, если её завели; иначе знак правообладателя,
                    и только потом буква. Из пятисот двадцати прав своих
                    картинок нет ни у одного — знак и работает. -->
-              <div class="o_coop_listing_ico">
+              <!-- Снимок во всю ширину — общий вид карточки каталога.
+                   Своего снимка у записи может не быть; тогда лицом
+                   становится тот, с кем придётся иметь дело. -->
+              <div class="o_coop_media">
                 <field name="image_512" widget="image" t-if="record.image_512.raw_value"/>
-                <img t-elif="record.owner_id.raw_value"
-                     t-att-src="'/web/image/res.partner/' + record.owner_id.raw_value + '/image_512'"
-                     t-att-alt="record.owner_id.value" loading="lazy"/>
-                <t t-else="" t-esc="record.owner_id.value.trim().charAt(0)"/>
+                <img class="o_coop_media_logo" t-elif="record.owner_id.raw_value" loading="lazy"
+                     t-attf-src="/web/image/res.partner/#{record.owner_id.raw_value}/image_512"
+                     t-att-alt="record.owner_id.value"/>
+                <span t-else="" class="o_coop_media_sign">💡</span>
+                <span class="o_coop_locbar" t-if="record.city.raw_value">
+                  <i class="fa fa-map-marker" role="img" aria-label="Город"/>
+                  <field name="city"/>
+                </span>
               </div>
               <div class="o_coop_listing_body">
                 <div class="o_coop_listing_title"><field name="name"/></div>
@@ -269,8 +276,14 @@
         <templates>
           <t t-name="card">
             <div class="o_coop_listing">
-              <div class="o_coop_listing_ico">
-                <t t-esc="record.intangible_id.value.trim().charAt(0)"/>
+              <!-- Снимок во всю ширину — общий вид карточки каталога. У
+                   лицензии своего снимка нет: она про право, а не про вещь.
+                   Лицом становится правообладатель. -->
+              <div class="o_coop_media">
+                <img class="o_coop_media_logo" t-if="record.licensor_id.raw_value" loading="lazy"
+                     t-attf-src="/web/image/res.partner/#{record.licensor_id.raw_value}/image_512"
+                     t-att-alt="record.licensor_id.value"/>
+                <span t-else="" class="o_coop_media_sign">📄</span>
               </div>
               <div class="o_coop_listing_body">
                 <div class="o_coop_listing_title"><field name="intangible_id"/></div>

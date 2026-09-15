@@ -204,6 +204,33 @@ REQUIRED_STEPS = [180000, 340000, 620000, 900000, 1450000, 2400000,
                   3800000, 5200000, 8500000, 12000000]
 
 
+# Снимки, которыми иллюстрируются проекты про код и узлы. Взяты те, что
+# показывают работу, а не предмет: у распределённого реестра предмета
+# нет, а люди за работой есть.
+IT_PHOTO_STEMS = ('server-rack', 'programmer', 'coding-class', 'laptop-desk',
+                  'office-desk', 'printer3d-arm', 'printer3d-nozzle')
+
+
+def _it_photo(name):
+    """Снимок для ДАО-проекта: свой у каждого, устойчиво по названию."""
+    import glob
+    import zlib
+    # Ищем в обеих папках: у проектов своих ИТ-снимков четыре, а
+    # добор по запросам про сервера и разработку лёг к ресурсам — их там
+    # три десятка. Двадцати ДАО-проектам четырёх мало: владелец просил
+    # «сделай все разные».
+    папки = [PHOTO_DIR, os.path.join(os.path.dirname(PHOTO_DIR), 'resources')]
+    файлы = []
+    for папка in папки:
+        for основа in IT_PHOTO_STEMS:
+            файлы.extend(sorted(glob.glob(os.path.join(папка, основа + '*.jpg'))))
+    if not файлы:
+        return None
+    путь = файлы[zlib.crc32((name or '').encode('utf-8')) % len(файлы)]
+    with open(путь, 'rb') as fh:
+        return base64.b64encode(fh.read())
+
+
 def load_projects(env, extra=100):
     with io.open(os.path.join(HERE, 'projects.json'), encoding='utf-8') as fh:
         rows = json.load(fh)
@@ -262,13 +289,18 @@ def load_projects(env, extra=100):
             'import_key': key,
         }
         if row.get('emblem'):
-            # У ДАО-проекта снимать нечего: предмет — код, узел, реестр.
-            # Фотография ноутбука на двадцати плитках подряд читалась бы
-            # как сбой загрузки, а не как двадцать разных проектов.
-            # Настоящие ДАО по той же причине живут под знаком, а не под
-            # фотографией.
-            values['image_1920'] = emblems.dao_mark(row['name'],
-                                                    row['emblem'])
+            # Раньше ДАО-проект получал знак: предмет у него — код, узел,
+            # реестр, и фотография ноутбука на двадцати плитках подряд
+            # читалась бы как сбой загрузки.
+            #
+            # Владелец 15 сентября 2026 сказал иначе: «непонятные иконки
+            # вместо картинок». Довод про однообразие снят добором
+            # снимков: по запросам про сервера, разработку и обучение их
+            # набралось три десятка, и каждому ДАО-проекту достаётся
+            # свой. Знак остаётся запасным — если снимков не хватит.
+            values['image_1920'] = (_it_photo(row['name'])
+                                    or emblems.dao_mark(row['name'],
+                                                        row['emblem']))
         else:
             photo_file = _photo_for(row, seen)
             photo = os.path.join(PHOTO_DIR, photo_file) if photo_file else ''
