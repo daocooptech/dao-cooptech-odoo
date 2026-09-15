@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!--
+    Колокол с числом непрошедших событий. Значок взят из дизайн-макета
+    один в один: у платформы свой набор линейных значков, и подставлять
+    сюда шрифтовую иконку движка значит ставить рядом два разных почерка.
+  -->
+  <t t-name="coop_theme.Bell">
+    <button class="o_coop_bell" type="button" t-on-click="() => this.open()"
+            t-att-aria-label="state.count ? 'Уведомления: ' + state.count + ' новых' : 'Уведомления'"
+            title="Уведомления">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
+           stroke-linejoin="round" aria-hidden="true">
+        <path d="M18 15.4V10a6 6 0 10-12 0v5.4L4.6 18h14.8M10 20.4a2 2 0 004 0"/>
+      </svg>
+      <span class="o_coop_bell_count" t-if="state.count">
+        <t t-esc="state.count"/>
+      </span>
+    </button>
+  </t>
+
+</templates>

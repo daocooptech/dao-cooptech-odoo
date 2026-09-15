@@ -283,6 +283,14 @@ class CoopVacancy(models.Model):
         # падал отказом «Тип документа: Message, Операция: create» —
         # кнопка «Откликнуться» не работала ни на одной вакансии.
         self.sudo().message_post(body=_('Отклик: %s') % me.display_name)
+        # Наниматель узнаёт об отклике сам, а не заглянув в вакансию.
+        # У вакансии проекта решает не только её автор, поэтому извещаем
+        # тех же, кто вправе утвердить.
+        self.env['coop.notification']._notify(
+            self.partner_id | self._need_deciders(),
+            _('Отклик на вашу вакансию «%(лот)s» — %(кто)s.',
+              лот=self.name, кто=me.display_name),
+            record=self, kind='vacancy')
         return True
 
     def action_open_applications(self):
@@ -408,12 +416,27 @@ class CoopVacancyApplication(models.Model):
             # проекту, и без sudo приглашение падало отказом в доступе.
             record.vacancy_id.sudo().message_post(body=_(
                 'Приглашён: %s') % record.partner_id.display_name)
+            # Приглашение без извещения — это приглашение, о котором
+            # приглашённый не знает: состояние отклика он увидел бы,
+            # только зайдя в «Мои отклики» по своей воле.
+            self.env['coop.notification']._notify(
+                record.partner_id,
+                _('Вас пригласили по вакансии «%s».') % record.vacancy_id.name,
+                record=record.vacancy_id, kind='vacancy')
             if record.vacancy_id.hr_job_id:
                 record._create_hr_applicant()
         return True
 
     def action_decline(self):
         self.write({'state': 'declined'})
+        for record in self:
+            # Отказ извещают так же, как приглашение: не зная об отказе,
+            # человек ждёт ответа и не ищет другую работу.
+            self.env['coop.notification']._notify(
+                record.partner_id,
+                _('По вакансии «%s» выбрали другого исполнителя.')
+                % record.vacancy_id.name,
+                record=record.vacancy_id, kind='vacancy')
         return True
 
     def _create_hr_applicant(self):

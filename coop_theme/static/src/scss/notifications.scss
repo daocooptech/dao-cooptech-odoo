@@ -1,0 +1,104 @@
+// Список извещений.
+//
+// Вид взят из дизайн-макета (`notifications.html`, `.notif-item`): точка
+// слева, событие текстом, под ним время. Карточки не рисуем — событие
+// читают, а не сравнивают с соседним, и плитка здесь только мешала бы.
+
+.o_coop_notifs .o_kanban_renderer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  // Строка события длиннее 860 точек читается плохо: глаз теряет начало
+  // следующей строки. То же ограничение, что в макете.
+  max-width: 860px;
+}
+
+// Вес правила поднят намеренно: штатная ширина карточки объявлена у
+// Odoo через `.o_kanban_renderer.o_kanban_ungrouped .o_kanban_record`,
+// и правило из двух классов ей проигрывает — запись оставалась 320
+// точек шириной внутри списка на 860.
+.o_coop_notifs .o_kanban_renderer .o_kanban_record {
+  width: 100%;
+  max-width: 100%;
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0;
+}
+
+.o_coop_notif {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--coop-white, #fff);
+  border: 1px solid var(--coop-line, #e6e4de);
+  border-radius: var(--coop-radius, 10px);
+}
+
+// Точка непрочитанного. У прочитанного она прозрачная, а не убранная:
+// иначе строки разъезжаются по левому краю — ровно тот же приём, что в
+// макете, и та же причина.
+.o_coop_notif_dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: var(--coop-gold, #d4a017);
+}
+
+.o_coop_notif_read .o_coop_notif_dot {
+  background: transparent;
+}
+
+.o_coop_notif_body {
+  min-width: 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--coop-ink, #14171a);
+
+  // Тело события приходит разметкой со ссылками на записи. Поле html
+  // оборачивает её в свои отступы — они здесь лишние.
+  .o_field_html,
+  .o_field_html > div,
+  p {
+    margin: 0;
+  }
+}
+
+.o_coop_notif_time {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--coop-slate-light, #8f8f88);
+}
+
+// Колокол в шапке. Счётчик — только когда есть что считать: нулевая
+// плашка сообщает ровно столько же, сколько её отсутствие, но занимает
+// место и тянет взгляд.
+.o_coop_bell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.o_coop_bell_count {
+  position: absolute;
+  top: 2px;
+  right: 0;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--coop-gold, #d4a017);
+  color: #fff;
+  font: 700 10px/15px 'Manrope', sans-serif;
+  text-align: center;
+}

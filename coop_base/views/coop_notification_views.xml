@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Список извещений — как в дизайн-макете: точка слева, событие текстом
+    со ссылками, под ним время. Ни колонок, ни таблицы: читают это
+    сверху вниз, а не сравнивают строки между собой.
+  -->
+  <record id="view_coop_notification_kanban" model="ir.ui.view">
+    <field name="name">coop.notification.kanban</field>
+    <field name="model">coop.notification</field>
+    <field name="arch" type="xml">
+      <kanban class="o_coop_notifs" create="false" records_draggable="false"
+              default_order="create_date desc">
+        <field name="is_read"/>
+        <field name="res_model"/>
+        <field name="res_id"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_notif"
+                 t-att-class="record.is_read.raw_value ? 'o_coop_notif_read' : ''">
+              <!-- Точка — единственный признак непрочитанного. Так в
+                   макете: подсветка всей строки на списке в сотню
+                   событий превращает экран в полосатый ковёр. -->
+              <span class="o_coop_notif_dot"/>
+              <div class="o_coop_notif_body">
+                <field name="body" widget="html"/>
+                <div class="o_coop_notif_time">
+                  <field name="create_date" widget="relative"/>
+                </div>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="view_coop_notification_list" model="ir.ui.view">
+    <field name="name">coop.notification.list</field>
+    <field name="model">coop.notification</field>
+    <field name="arch" type="xml">
+      <list string="Извещения" create="false">
+        <field name="create_date" string="Когда" widget="relative"/>
+        <field name="kind" string="О чём"/>
+        <field name="body" string="Событие"/>
+        <field name="is_read" string="Прочитано" widget="boolean_toggle"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_notification_search" model="ir.ui.view">
+    <field name="name">coop.notification.search</field>
+    <field name="model">coop.notification</field>
+    <field name="arch" type="xml">
+      <search string="Извещения">
+        <field name="body" string="Событие"/>
+        <filter name="unread" string="Непрочитанные"
+                domain="[('is_read', '=', False)]"/>
+        <separator/>
+        <filter name="by_kind" string="По разделу"
+                context="{'group_by': 'kind'}"/>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_notifications" model="ir.actions.act_window">
+    <field name="name">Уведомления</field>
+    <field name="res_model">coop.notification</field>
+    <field name="path">notifications</field>
+    <field name="view_mode">kanban,list</field>
+    <field name="search_view_id" ref="view_coop_notification_search"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Пока ничего не происходило</p>
+      <p>Здесь появляется всё, что случилось с вашими записями: отклики на
+         ваши вакансии, ответы на ваши отклики, перебитые ставки, движение
+         по сделкам.</p>
+    </field>
+  </record>
+
+</odoo>

@@ -9,3 +9,4 @@ from . import coop_power
 from . import coop_membership
 from . import coop_menu_order
 from . import coop_setup
+from . import coop_notification

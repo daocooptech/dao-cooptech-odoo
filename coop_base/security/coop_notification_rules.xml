@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Без `noupdate`: правила доступа — это код, а не данные узла, и правка
+  должна доезжать обновлением модуля.
+-->
+<odoo>
+  <data>
+
+    <!--
+      Извещение видит только тот, кому оно адресовано. Не «свои и
+      организаций, где я состою»: список извещений — это личное, и
+      попадать в него чужому нельзя даже в кооперативе, где всё общее.
+
+      Права на запись выданы ради одного действия — погасить точку
+      «прочитано». Создавать извещения участник не может вовсе: их
+      заводит платформа от имени системы, когда происходит событие.
+    -->
+    <record id="rule_notification_own" model="ir.rule">
+      <field name="name">Извещение видит только адресат</field>
+      <field name="model_id" ref="model_coop_notification"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">
+        [('partner_id', 'in', user.coop_actor_partner_ids.ids)]
+      </field>
+    </record>
+
+    <record id="rule_notification_system" model="ir.rule">
+      <field name="name">Администратор узла видит все извещения</field>
+      <field name="model_id" ref="model_coop_notification"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+  </data>
+</odoo>
