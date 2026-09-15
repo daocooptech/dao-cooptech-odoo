@@ -182,4 +182,18 @@
     </xpath>
   </t>
 
+  <!--
+    То же для формы: кнопка создания там называется так же «Новое», и
+    встречается она на каждом экране записи.
+  -->
+  <t t-name="coop_theme.FormView" t-inherit="web.FormView" t-inherit-mode="extension">
+    <xpath expr="//button[hasclass('o_form_button_create')]" position="replace">
+      <button t-if="canCreate" type="button"
+              class="btn btn-outline-primary o_form_button_create"
+              data-hotkey="c" t-on-click.stop="create">
+        <t t-esc="coopCreateLabel"/>
+      </button>
+    </xpath>
+  </t>
+
 </templates>

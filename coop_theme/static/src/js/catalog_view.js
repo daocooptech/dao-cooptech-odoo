@@ -6,6 +6,7 @@ import { patch } from "@web/core/utils/patch";
 import { kanbanView } from "@web/views/kanban/kanban_view";
 import { KanbanController } from "@web/views/kanban/kanban_controller";
 import { ListController } from "@web/views/list/list_controller";
+import { FormController } from "@web/views/form/form_controller";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { SearchBar } from "@web/search/search_bar/search_bar";
 import { Pager } from "@web/core/pager/pager";
@@ -326,7 +327,9 @@ patch(ControlPanel.prototype, {
 // Патч общий, а не по `js_class` у каждого списка: подпись берётся из
 // того же `coop_create_label`, что и в плитке, и там, где его в
 // действии нет, остаётся штатное «Новое».
-patch(ListController.prototype, {
+// Тот же геттер списку и форме: «Новое» встречается и там, и там, а
+// подпись у раздела одна.
+const подписьСоздания = {
     get coopCreateLabel() {
         // Из действия, а не из `props.context`. Списку достаётся контекст
         // поиска, а не действия: `WithSearch` передаёт вниз
@@ -340,7 +343,10 @@ patch(ListController.prototype, {
             || this.props.context?.coop_create_label
             || "Новое";
     },
-});
+};
+
+patch(ListController.prototype, подписьСоздания);
+patch(FormController.prototype, подписьСоздания);
 
 // Строка поиска каталога: без штатного выпадающего меню и со своей
 // подсказкой. Признак каталога тот же, что у панели управления, — из

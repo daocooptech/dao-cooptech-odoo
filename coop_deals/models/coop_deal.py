@@ -246,6 +246,27 @@ class CoopDeal(models.Model):
                 'Это чужая сделка. Действовать в ней могут только её стороны.'))
         return side
 
+    # ── Извещения ────────────────────────────────────────────────────────
+
+    def _notify_other(self, body):
+        """Известить вторую сторону о том, что сделка сдвинулась.
+
+        Каждый переход меняет сделку для обоих, а знает о нём только тот,
+        кто нажал кнопку. До извещений вторая сторона узнавала о
+        согласовании, начале исполнения и даже о споре, только открыв
+        сделку по своей воле, — то есть случайно.
+
+        Вторая сторона считается вычитанием: так работает и у стороны
+        «а», и у стороны «б», и у администратора, разбирающего спор, —
+        ему вычитать нечего, и извещение уходит обоим.
+        """
+        self.ensure_one()
+        мои = self.env.user.coop_actor_partner_ids
+        другая = (self.party_a_id | self.party_b_id) - мои
+        if другая:
+            self.env['coop.notification']._notify(
+                другая, body, record=self, kind='deal')
+
     # ── Действия ─────────────────────────────────────────────────────────
 
     def action_agree(self):
@@ -262,12 +283,17 @@ class CoopDeal(models.Model):
                 'state': 'agreed',
                 'signed_on': record.signed_on or fields.Date.context_today(record),
             })
+            record._notify_other(_(
+                'Сделка %(номер)s согласована: «%(предмет)s».',
+                номер=record.display_name, предмет=record.name))
         return True
 
     def action_start(self):
         for record in self:
             record._require_party()
             record.state = 'active'
+            record._notify_other(_(
+                'По сделке %s началось исполнение.') % record.display_name)
         return True
 
     def action_confirm_act(self):
@@ -288,6 +314,15 @@ class CoopDeal(models.Model):
                 record.message_post(body=_(
                     'Акт подтверждён обеими сторонами. Сделка исполнена, '
                     'отзывы открыты.'))
+                record._notify_other(_(
+                    'Сделка %s исполнена: акт подтверждён обеими сторонами. '
+                    'Можно оставить отзыв.') % record.display_name)
+            else:
+                # Пока подтвердила одна сторона, вторая об этом не знает —
+                # и сделка стоит на месте ровно из-за этого.
+                record._notify_other(_(
+                    'По сделке %s подтверждён акт с одной стороны — ждём '
+                    'вашего подтверждения.') % record.display_name)
         return True
 
     def action_open_dispute(self):
@@ -298,6 +333,9 @@ class CoopDeal(models.Model):
                 'dispute_opened_by_id': (record.party_a_id if side == 'a'
                                          else record.party_b_id).id,
             })
+            record._notify_other(_(
+                'По сделке %s открыт спор — требуется ваше решение.')
+                % record.display_name)
         return True
 
     def action_resolve_dispute(self):
@@ -321,12 +359,19 @@ class CoopDeal(models.Model):
                 'dispute_resolved_on': fields.Date.context_today(record),
                 'closed_on': fields.Date.context_today(record),
             })
+            # Обеим сторонам: администратор в сделке не сторона, и
+            # вычитать из пары некого — извещение уходит и той, и другой.
+            record._notify_other(_(
+                'Спор по сделке %s закрыт администратором платформы.')
+                % record.display_name)
         return True
 
     def action_cancel(self):
         for record in self:
             record._require_party()
             record.state = 'cancelled'
+            record._notify_other(_(
+                'Сделка %s отменена второй стороной.') % record.display_name)
         return True
 
 
@@ -435,6 +480,12 @@ class CoopDealPayment(models.Model):
                 'paid_on': fields.Date.context_today(record),
                 'confirmed_by_id': self.env.user.id,
             })
+            # Плательщику: он отдал деньги и до сих пор не знал, дошли ли
+            # они. Отмечает получение вторая сторона, и только она может
+            # об этом сообщить.
+            record.deal_id._notify_other(_(
+                'Платёж по сделке %(номер)s получен: %(сумма)s.',
+                номер=record.deal_id.display_name, сумма=record.amount))
         return True
 
     @api.model
