@@ -108,6 +108,10 @@
     <field name="arch" type="xml">
       <form string="Объявление на бирже">
         <header>
+          <!-- Единственное действие участника: до него все три кнопки
+               были хозяйскими. Как в макете (`ext-warehouse.html`). -->
+          <button name="action_respond" type="object" string="Отправить отклик"
+                  class="btn-primary" invisible="not can_respond"/>
           <button name="action_publish" type="object" string="Опубликовать"
                   class="btn-primary" invisible="state == 'published'"/>
           <button name="action_matched" type="object" string="Договорились"
@@ -120,6 +124,7 @@
                  statusbar_visible="draft,published,matched"/>
         </header>
         <sheet>
+          <field name="can_respond" invisible="1"/>
           <div class="oe_title">
             <h1><field name="name" placeholder="Что предлагаете или что ищете"/></h1>
           </div>

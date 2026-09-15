@@ -5,3 +5,4 @@ access_coop_cfa_issue_user,Заявки на выпуск — участник,m
 access_coop_cfa_issue_admin,Заявки на выпуск — администратор,model_coop_cfa_issue,base.group_system,1,1,1,1
 access_coop_cfa_holding_user,ЦФА на руках — участник,model_coop_cfa_holding,base.group_user,1,1,1,1
 access_coop_cfa_holding_admin,ЦФА на руках — администратор,model_coop_cfa_holding,base.group_system,1,1,1,1
+access_coop_cfa_buy,Окно приобретения — участник,model_coop_cfa_buy,base.group_user,1,1,1,1

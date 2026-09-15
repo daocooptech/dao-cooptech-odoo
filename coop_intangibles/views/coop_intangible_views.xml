@@ -97,12 +97,19 @@
     <field name="arch" type="xml">
       <form string="Нематериальный актив">
         <header>
+          <!-- «Запросить лицензию» — как в макете (`nma-asset.html`).
+               Модель лицензии была описана полностью, а попросить её участник
+               не мог. -->
+          <button name="action_request_license" type="object"
+                  string="Запросить лицензию" class="btn-primary"
+                  invisible="not can_request_license"/>
           <button name="action_activate" type="object" string="Право действует"
                   class="btn-primary" invisible="state == 'active'"/>
           <field name="state" widget="statusbar"
                  statusbar_visible="draft,active"/>
         </header>
         <sheet>
+          <field name="can_request_license" invisible="1"/>
           <field name="image_1920" widget="image" class="oe_avatar"/>
           <div class="oe_title">
             <h1><field name="name" placeholder="Рецептура сыра «Дербентский»"/></h1>

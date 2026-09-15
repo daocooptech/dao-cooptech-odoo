@@ -239,6 +239,16 @@ class CoopSkillOffer(models.Model):
         self.write({'state': 'paused'})
         return True
 
+    def action_show_contacts(self):
+        """«Показать контакты» — как в макете (`skill.html`).
+
+        Телефон и почта не выставлены на карточке сразу, а открываются по
+        нажатию: карточка отвечает на вопрос «что человек умеет», и
+        строка телефона спорит с этим за внимание.
+        """
+        self.ensure_one()
+        return self.partner_id.action_coop_show_contacts()
+
     def action_message_owner(self):
         """Написать тому, кто предлагает навык."""
         self.ensure_one()

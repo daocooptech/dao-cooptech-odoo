@@ -130,6 +130,11 @@
           <button name="action_pause" type="object" string="Приостановить"
                   invisible="state != 'published'"/>
           <button name="action_message_owner" type="object" string="Написать"/>
+          <!-- «Показать контакты» — как в макете (`skill.html`):
+               телефон и почта не выставлены сразу, а открываются
+               по нажатию. -->
+          <button name="action_show_contacts" type="object"
+                  string="Показать контакты"/>
           <field name="state" widget="statusbar"
                  statusbar_visible="draft,published,paused"/>
         </header>

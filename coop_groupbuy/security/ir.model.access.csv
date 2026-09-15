@@ -5,3 +5,4 @@ access_coop_groupbuy_tier_user,Уровни цены — участник,model_
 access_coop_groupbuy_tier_admin,Уровни цены — администратор,model_coop_groupbuy_tier,base.group_system,1,1,1,1
 access_coop_groupbuy_order_user,Заказы закупки — участник,model_coop_groupbuy_order,base.group_user,1,1,1,1
 access_coop_groupbuy_order_admin,Заказы закупки — администратор,model_coop_groupbuy_order,base.group_system,1,1,1,1
+access_coop_groupbuy_join,Окно участия — участник,model_coop_groupbuy_join,base.group_user,1,1,1,1

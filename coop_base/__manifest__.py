@@ -36,6 +36,7 @@
         'views/coop_membership_views.xml',
         'views/coop_verification_views.xml',
         'views/coop_notification_views.xml',
+        'views/coop_contacts_views.xml',
         'views/coop_menus.xml',
         'data/coop_menu_order.xml',
     ],

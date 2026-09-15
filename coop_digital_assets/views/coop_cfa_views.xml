@@ -9,6 +9,36 @@
     ячейке таблицы этого не прочитать, а покупателю это важнее всего
     остального.
   -->
+  <!--
+    Окно приобретения цифрового актива. Спрашивает количество и тут же
+    показывает сумму: цена за единицу известна, и считать её в уме
+    человеку незачем.
+  -->
+  <record id="view_coop_cfa_buy_form" model="ir.ui.view">
+    <field name="name">coop.cfa.buy.form</field>
+    <field name="model">coop.cfa.buy</field>
+    <field name="arch" type="xml">
+      <form string="Приобретение актива">
+        <field name="issue_id" invisible="1"/>
+        <field name="currency_id" invisible="1"/>
+        <group>
+          <field name="unit_price" readonly="1"/>
+          <field name="quantity"/>
+          <field name="total" readonly="1"/>
+        </group>
+        <div class="alert alert-info" role="status">
+          Реестр держателей ведёт оператор — так требует закон о цифровых
+          финансовых активах. Запись о вашем владении появится в нём.
+        </div>
+        <footer>
+          <button name="action_buy" type="object" string="Приобрести"
+                  class="btn-primary"/>
+          <button string="Отмена" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
   <record id="view_coop_cfa_issue_kanban" model="ir.ui.view">
     <field name="name">coop.cfa.issue.kanban</field>
     <field name="model">coop.cfa.issue</field>
@@ -105,6 +135,10 @@
     <field name="arch" type="xml">
       <form string="Заявка на выпуск ЦФА">
         <header>
+          <!-- «Приобрести» — как в макете (`cfa-asset.html`). До него все
+               действия раздела были эмитентскими и операторскими. -->
+          <button name="action_buy" type="object" string="Приобрести"
+                  class="btn-primary" invisible="not can_buy"/>
           <button name="action_submit" type="object" string="Передать оператору"
                   class="btn-primary" invisible="state != 'draft'"/>
           <button name="action_mark_issued" type="object" string="Отметить выпущенным"
@@ -115,6 +149,7 @@
                  statusbar_visible="draft,submitted,accepted,issued"/>
         </header>
         <sheet>
+          <field name="can_buy" invisible="1"/>
           <div class="alert alert-info" role="status">
             Платформа сама ЦФА не выпускает. Выпуск и обращение возможны
             только в информационной системе оператора из реестра Банка

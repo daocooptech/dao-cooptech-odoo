@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Окно «Показать контакты».
+
+  В макете телефон и почта на карточке навыка и на объявлении не
+  выставлены сразу, а открываются по нажатию. Смысл не в защите — на
+  платформе все свои, — а в том, что карточка отвечает на вопрос «что
+  человек предлагает», и строка телефона в ней спорит с этим за
+  внимание.
+
+  Только чтение: контакты правит их хозяин у себя, а не тот, кто их
+  смотрит.
+-->
+<odoo>
+
+  <record id="view_coop_contacts_dialog" model="ir.ui.view">
+    <field name="name">coop.contacts.dialog</field>
+    <field name="model">res.partner</field>
+    <field name="arch" type="xml">
+      <form string="Контакты" create="false" edit="false">
+        <sheet class="o_coop_contacts_dialog">
+          <group>
+            <field name="name" readonly="1"/>
+            <field name="city" readonly="1" invisible="not city"/>
+            <field name="phone" readonly="1" invisible="not phone"/>
+            <field name="email" readonly="1" invisible="not email"/>
+            <field name="website" readonly="1" widget="url"
+                   invisible="not website"/>
+            <field name="coop_messengers" readonly="1"
+                   invisible="not coop_messengers"/>
+            <field name="coop_skype" readonly="1" invisible="not coop_skype"/>
+            <field name="coop_socials" readonly="1"
+                   invisible="not coop_socials"/>
+          </group>
+          <!--
+            Пусто — говорим словами. Окно без единой строки читается как
+            поломка, а не как «человек контактов не оставил».
+          -->
+          <div class="alert alert-info" role="status"
+               invisible="phone or email or website or coop_messengers or coop_skype or coop_socials">
+            Участник не указал способов связи. Напишите ему в сообщениях —
+            это работает всегда.
+          </div>
+        </sheet>
+        <footer>
+          <button string="Закрыть" special="cancel" class="btn-primary"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+</odoo>

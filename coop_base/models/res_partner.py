@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from odoo import fields, models
+from odoo import _, fields, models
 from odoo.tools import html2plaintext
 
 _logger = logging.getLogger(__name__)
@@ -103,6 +103,44 @@ class ResPartner(models.Model):
         string='О себе', size=280,
         help='Короткая заметка о себе: чем занимаетесь, что умеете, чем '
              'готовы помочь. До 280 знаков.')
+
+    # ── Поля из макета, которых у контакта Odoo нет ────────────────────
+    #
+    # Одной строкой каждое, а не списком записей: в макете это перечни
+    # через запятую, по ним не ищут и не фильтруют, и справочник языков
+    # или мессенджеров завёл бы работу по его ведению без всякой отдачи.
+    coop_languages = fields.Char(
+        'Языки', help='Через запятую: русский, украинский, якутский.')
+    coop_skype = fields.Char('Skype')
+    coop_messengers = fields.Char(
+        'Мессенджеры', help='Через запятую: Telegram, WhatsApp, Viber.')
+    coop_socials = fields.Char('Социальные сети')
+    coop_apps = fields.Char(
+        'Приложения', help='Профили в чужих сервисах: GitHub, Habr и другие.')
+
+    def action_coop_show_contacts(self):
+        """Показать контакты участника.
+
+        В макете это кнопка «Показать контакты» на карточке навыка и на
+        объявлении: телефон и почта не выставлены сразу, а открываются по
+        нажатию. Смысл не в защите — на платформе все свои, — а в том,
+        что карточка отвечает на вопрос «что человек предлагает», и
+        строка телефона в ней спорит с этим за внимание.
+
+        Отдельным окном, а не переходом на страницу участника: человек
+        смотрит объявление и хочет позвонить, а не уходить со страницы.
+        """
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Контакты: %s') % self.display_name,
+            'res_model': 'res.partner',
+            'res_id': self.id,
+            'view_mode': 'form',
+            'views': [(self.env.ref('coop_base.view_coop_contacts_dialog').id,
+                       'form')],
+            'target': 'new',
+        }
 
     def init(self):
         """Перенести написанное в «О себе» из штатного комментария.

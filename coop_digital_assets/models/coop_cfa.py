@@ -200,6 +200,39 @@ class CoopCfaIssue(models.Model):
             record.unit_price = (
                 record.amount / record.unit_count if record.unit_count else 0.0)
 
+    can_buy = fields.Boolean(
+        string='Можно приобрести', compute='_compute_can_buy',
+        help='Выпуск состоялся, и я не эмитент.')
+
+    @api.depends_context('uid')
+    @api.depends('state', 'issuer_id')
+    def _compute_can_buy(self):
+        """Приобрести можно выпущенное и не своё."""
+        мои = self.env.user.coop_actor_partner_ids
+        for record in self:
+            record.can_buy = bool(
+                record.state == 'issued' and record.issuer_id not in мои)
+
+    def action_buy(self):
+        """«Приобрести» — как в макете (`cfa-asset.html`).
+
+        Открывает окно: сколько единиц беру. Запись о владении заводится
+        оператором — он ведёт реестр держателей, — но приобретение
+        начинается здесь, иначе выпуск некому купить.
+        """
+        self.ensure_one()
+        if not self.can_buy:
+            raise UserError(_(
+                'Приобрести можно выпущенный актив, и не свой.'))
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Приобретение: %s') % self.display_name,
+            'res_model': 'coop.cfa.buy',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_issue_id': self.id},
+        }
+
     def action_submit(self):
         """Передать заявку оператору.
 

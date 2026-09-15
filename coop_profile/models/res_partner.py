@@ -147,19 +147,7 @@ class ResPartner(models.Model):
     coop_balance_currency_id = fields.Many2one(
         'res.currency', compute='_compute_coop_links')
 
-    # ── Поля из макета, которых у контакта Odoo нет ────────────────────
-    #
-    # Одной строкой каждое, а не списком записей: в макете это перечни
-    # через запятую, по ним не ищут и не фильтруют, и справочник языков
-    # или мессенджеров завёл бы работу по его ведению без всякой отдачи.
-    coop_languages = fields.Char(
-        'Языки', help='Через запятую: русский, украинский, якутский.')
-    coop_skype = fields.Char('Skype')
-    coop_messengers = fields.Char(
-        'Мессенджеры', help='Через запятую: Telegram, WhatsApp, Viber.')
-    coop_socials = fields.Char('Социальные сети')
-    coop_apps = fields.Char(
-        'Приложения', help='Профили в чужих сервисах: GitHub, Habr и другие.')
+
 
 
     # Свёрнутый признак «страница пустая». По нему форма показывает не

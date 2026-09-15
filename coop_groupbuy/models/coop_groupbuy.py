@@ -219,6 +219,51 @@ class CoopGroupBuy(models.Model):
 
     # ── Действия ─────────────────────────────────────────────────────────
 
+    can_join = fields.Boolean(
+        string='Можно участвовать', compute='_compute_can_join',
+        help='Сбор идёт, и я его не организую.')
+    my_order_id = fields.Many2one(
+        'coop.groupbuy.order', string='Мой заказ', compute='_compute_can_join')
+
+    @api.depends_context('uid')
+    @api.depends('state', 'organizer_id', 'order_ids.partner_id',
+                 'order_ids.state')
+    def _compute_can_join(self):
+        """Тот же вопрос, что решает кнопку, и тот же, что решает отказ.
+
+        Заодно находим свой заказ: у кого он уже есть, тому показываем
+        его, а не вторую кнопку «участвовать».
+        """
+        мои = self.env.user.coop_actor_partner_ids
+        for record in self:
+            свой = record.order_ids.filtered(
+                lambda з: з.partner_id in мои and з.state != 'cancelled')[:1]
+            record.my_order_id = свой
+            record.can_join = bool(
+                record.state == 'collecting'
+                and record.organizer_id not in мои
+                and not свой)
+
+    def action_join(self):
+        """«Участвовать» — как в макете (`ext-group-buying.html`).
+
+        Открывает окно заказа: сколько беру. Сколько — не мелочь: от
+        общего количества зависит, какая ступень цены сработает, и
+        участник должен назвать число сам.
+        """
+        self.ensure_one()
+        if not self.can_join:
+            raise UserError(_(
+                'Участвовать можно в идущем сборе, не в своём, и один раз.'))
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Участие в складчине «%s»') % self.name,
+            'res_model': 'coop.groupbuy.join',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_groupbuy_id': self.id},
+        }
+
     def action_stop(self):
         """Закрыть сбор заказов.
 

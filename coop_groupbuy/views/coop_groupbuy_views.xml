@@ -1,6 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+  <!--
+    Окно участия в складчине. Спрашивает то, без чего заказ не завести:
+    сколько беру. Складчина тем и работает, что цена падает с общим
+    количеством, и это число касается всех участников, а не только того,
+    кто его называет.
+  -->
+  <record id="view_coop_groupbuy_join_form" model="ir.ui.view">
+    <field name="name">coop.groupbuy.join.form</field>
+    <field name="model">coop.groupbuy.join</field>
+    <field name="arch" type="xml">
+      <form string="Участие в складчине">
+        <field name="groupbuy_id" invisible="1"/>
+        <group>
+          <label for="quantity"/>
+          <div class="o_row">
+            <field name="quantity"/>
+            <field name="unit_label" nolabel="1" readonly="1"/>
+          </div>
+          <field name="note" placeholder="Необязательно"/>
+        </group>
+        <div class="alert alert-info" role="status">
+          Чем больше наберётся у всех вместе, тем ниже ступень цены.
+          Организатор закроет сбор и закажет у поставщика одной партией.
+        </div>
+        <footer>
+          <button name="action_join" type="object" string="Участвовать"
+                  class="btn-primary"/>
+          <button string="Отмена" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
   <record id="view_coop_groupbuy_kanban" model="ir.ui.view">
     <field name="name">coop.groupbuy.kanban</field>
     <field name="model">coop.groupbuy</field>
@@ -115,6 +148,10 @@
     <field name="arch" type="xml">
       <form string="Совместная закупка">
         <header>
+          <!-- «Участвовать» — как в макете (`ext-group-buying.html`).
+               До него все действия раздела были организаторскими. -->
+          <button name="action_join" type="object" string="Участвовать"
+                  class="btn-primary" invisible="not can_join"/>
           <button name="action_stop" type="object" string="Закрыть сбор"
                   class="btn-primary" invisible="state != 'collecting'"
                   confirm="После стопа заказы отменять нельзя, а партия заказывается у поставщика. Закрыть сбор?"/>
@@ -128,6 +165,8 @@
                  statusbar_visible="collecting,stopped,delivering,handout,done"/>
         </header>
         <sheet>
+          <field name="can_join" invisible="1"/>
+          <field name="my_order_id" invisible="1"/>
           <div class="oe_title">
             <h1><field name="name" placeholder="Что закупаем"/></h1>
           </div>
