@@ -73,13 +73,13 @@
                   <b><field name="coop_trust" nolabel="1" readonly="1"/>%</b>
                   <!-- Дробь — как в макете, короткой записью: колонка
                        узкая, а расшифровка живёт в подсказке рядом. -->
-                  <span class="o_coop_stat_frac" invisible="not coop_deals_rated">
-                    (<field name="coop_deals_rated" nolabel="1" readonly="1"/>/<field
+                  <span class="o_coop_stat_frac" invisible="not coop_deals_done">
+                    (<field name="coop_deals_positive" nolabel="1" readonly="1"/>/<field
                        name="coop_deals_done" nolabel="1" readonly="1"/>)
                   </span>
                   <button name="action_coop_my_deals" type="object"
                           class="o_coop_stat_note"
-                          title="Столько завершённых сделок получили двусторонний отзыв. Отзыв задним числом не меняется. Открыть реестр сделок.">как считается?</button>
+                          title="Слева — сделки, по которым о вас отозвались на «хорошо» или «отлично»; справа — все завершённые. Отзыв задним числом не меняется. Открыть реестр сделок.">как считается?</button>
                 </div>
                 <!--
                   Баланс — только себе. В макете он стоит и на чужой

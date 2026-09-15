@@ -90,7 +90,9 @@ def load_people(env, specializations):
             'city': person['city'],
             'country_id': country_ru.id if country_ru else False,
             'coop_is_participant': True,
-            'coop_trust': person['trust'],
+            # Доверие не выдумывается: его считает модуль сделок по
+            # настоящим отзывам. Вписанное здесь число означало бы
+            # оценку, за которой ничего нет.
             'coop_birthdate': _birthdate(person['age'], index + 1),
             'coop_specialization_id': specializations[person['specialization']].id,
             'coop_skill_ids': [(6, 0, [skills[s].id for s in person['skills']])],
@@ -101,7 +103,10 @@ def load_people(env, specializations):
         # при двух сделках выглядит как ошибка, и это правильно, потому
         # что так оно и есть.
         values['coop_deals_done'] = max(1, (person['trust'] - 50) // 2)
-        values['coop_deals_rated'] = max(1, values['coop_deals_done'] - (index % 3))
+        # Доверие и счётчики сделок больше не выдумываются: их
+        # считает модуль сделок по настоящим отзывам. Придуманное
+        # число здесь означало бы, что на странице человека стоит
+        # оценка, за которой ничего нет.
 
         avatar = os.path.join(AVATAR_DIR, person['avatar'].replace('/', os.sep))
         if os.path.exists(avatar):

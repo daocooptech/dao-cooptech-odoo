@@ -92,7 +92,9 @@ def load_organizations(env, specializations, marks):
             'city': org['city'],
             'country_id': country_ru.id if country_ru else False,
             'coop_is_participant': True,
-            'coop_trust': org['trust'],
+            # Доверие не выдумывается: его считает модуль сделок по
+            # настоящим отзывам. Вписанное здесь число означало бы
+            # оценку, за которой ничего нет.
             'coop_legal_form_id': form.id if form else False,
             'coop_registered_on': _registered_on(index),
         }

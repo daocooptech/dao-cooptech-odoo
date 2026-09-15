@@ -213,7 +213,9 @@ def load_org_profiles(env, specializations, marks):
                     300 + seed % 600, seed * 13 % 1000, seed % 100, (seed * 7) % 100),
                 'email': 'info@coop-%03d.example' % seed,
                 'website': _domain(name, seed),
-                'coop_trust': 55 + (seed * 13) % 45,
+                # Доверие считается по отзывам, а не по остатку от
+                # деления: число на странице организации должно
+                # означать то же, что и на странице человека.
                 'coop_symbol_mark': True,
             }
             specialization = specializations.get(specialization_name)
