@@ -115,6 +115,42 @@
       <field name="perm_unlink" eval="False"/>
     </record>
 
+    <!--
+      Заявления видит тот, кто вправе их решать.
+
+      Остальные правила ниже смотрят на роль — «правление», «ревизия»,
+      «пайщик». Но приём в организацию — вопрос не основания участия, а
+      полномочия: платформа с самого начала разделяет «на каком
+      основании человек здесь» и «что ему позволено». Полномочие
+      «Ведение состава» (`roster`) может быть у наёмного сотрудника
+      кадровой службы, у которого роли «правление» нет и не должно быть.
+
+      Без этого правила кнопка «Принять» существовала, а прочитать
+      заявление её обладатель не мог: карточка отвечала «Ошибка
+      доступа» ещё на вычислении признака. Проверено 15 сентября 2026.
+
+      Только чтение. Запись идёт через sudo после явной проверки
+      полномочия в самой модели — раздавать право писать в членство по
+      правилу доступа значило бы дать его и там, где проверки нет.
+    -->
+    <record id="rule_membership_roster" model="ir.rule">
+      <field name="name">Заявления видит тот, кто ведёт состав</field>
+      <field name="model_id" ref="model_coop_membership"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">
+        [('organization_id', 'in',
+            [m.organization_id.id for m in
+             user.env['coop.membership'].sudo().search(
+                 [('partner_id', '=', user.partner_id.id),
+                  ('state', '=', 'active'),
+                  ('power_ids.code', '=', 'roster')])])]
+      </field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="False"/>
+      <field name="perm_create" eval="False"/>
+      <field name="perm_unlink" eval="False"/>
+    </record>
+
     <record id="rule_membership_member" model="ir.rule">
       <field name="name">Пайщик видит состав своих организаций</field>
       <field name="model_id" ref="model_coop_membership"/>

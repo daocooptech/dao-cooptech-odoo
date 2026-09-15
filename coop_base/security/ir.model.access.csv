@@ -17,3 +17,4 @@ access_coop_power_user,Полномочия — чтение,model_coop_power,ba
 access_coop_power_admin,Полномочия — ведение,model_coop_power,coop_base.group_coop_platform,1,1,1,1
 access_coop_notification_user,Извещения — участник,model_coop_notification,base.group_user,1,1,0,0
 access_coop_notification_admin,Извещения — администратор узла,model_coop_notification,base.group_system,1,1,1,1
+access_coop_membership_admit,Окно приёма — участник,model_coop_membership_admit,base.group_user,1,1,1,1

@@ -40,6 +40,7 @@ class CoopNotification(models.Model):
         ('project', 'Проекты'),
         ('community', 'Сообщества'),
         ('resource', 'Ресурсы'),
+        ('org', 'Организации'),
         ('wallet', 'Кошелёк'),
         ('other', 'Прочее'),
     ], string='О чём', default='other', required=True, index=True)

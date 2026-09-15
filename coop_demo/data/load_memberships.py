@@ -151,3 +151,47 @@ def load_memberships(env, target=180):
                 break
 
     _logger.info('Состав организаций: создано %s, пропущено %s', created, skipped)
+    _ensure_roster_holder(env)
+
+
+def _ensure_roster_holder(env):
+    """В каждой организации должен быть кто-то, кто ведёт состав.
+
+    Заявление о вступлении уходит тому, у кого есть полномочие «Ведение
+    состава» (`roster`). Должности раздавались по остатку от деления, и
+    в 63 организациях из 189 такого человека не оказалось вовсе:
+    заявление там подать можно, а решить его некому.
+
+    Даём полномочие тому, кто и так представляет организацию вовне, —
+    правлению, потом любому действующему участнику. Заводить нового
+    человека ради этого не нужно.
+    """
+    Membership = env['coop.membership'].sudo()
+    roster = env.ref('coop_base.power_roster', raise_if_not_found=False)
+    if not roster:
+        return 0
+    действующие = Membership.search([('state', '=', 'active')])
+    по_организациям = {}
+    for членство in действующие:
+        по_организациям.setdefault(членство.organization_id.id, []).append(членство)
+
+    выдано = 0
+    for записи in по_организациям.values():
+        if any('roster' in м.power_ids.mapped('code') for м in записи):
+            continue
+        # Правление первым: вести состав — его дело по уставу. Если
+        # правления нет (общество, а не кооператив) — тот, кто
+        # представляет организацию вовне.
+        кандидат = next(
+            (м for м in записи if м.role == 'board'),
+            next((м for м in записи
+                  if 'represent' in м.power_ids.mapped('code')), None))
+        if not кандидат:
+            кандидат = записи[0]
+        with env.cr.savepoint():
+            кандидат.write({'power_ids': [(4, roster.id)]})
+        выдано += 1
+    if выдано:
+        _logger.info('Полномочие «Ведение состава» выдано в %s организациях',
+                     выдано)
+    return выдано

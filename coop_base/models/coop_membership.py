@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from odoo import api, fields, models, tools
-from odoo.exceptions import ValidationError
+from odoo import _, api, fields, models, tools
+from odoo.exceptions import UserError, ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -322,13 +322,146 @@ class CoopMembership(models.Model):
         self.env.registry.clear_cache()
         return True
 
+    # ── Кто решает и что видит вступающий ────────────────────────────
+
+    def _roster_deciders(self):
+        """Кому в организации позволено принимать и прекращать членство.
+
+        Полномочие «Ведение состава» (`roster`). Если его нет ни у кого —
+        организация только заведена, состава ещё нет, — извещаем тех, кто
+        представляет её вовне: иначе заявление уходит в пустоту.
+        """
+        self.ensure_one()
+        организация = self.organization_id
+        действующие = self.sudo().search([
+            ('organization_id', '=', организация.id),
+            ('state', '=', 'active'),
+        ])
+        ведут = действующие.filtered(
+            lambda m: 'roster' in m.power_ids.mapped('code'))
+        if not ведут:
+            ведут = действующие.filtered(
+                lambda m: 'represent' in m.power_ids.mapped('code'))
+        return ведут.mapped('partner_id') or организация
+
+    @api.depends_context('uid')
+    @api.depends('organization_id', 'state')
+    def _compute_can_decide(self):
+        """Тот же вопрос, что решает кнопку, и тот же, что решает отказ.
+
+        Разойдись они — и человек увидел бы «Принять», отвечающую
+        ошибкой прав.
+        """
+        user = self.env.user
+        for record in self:
+            record.can_decide = bool(
+                record.organization_id
+                and user.coop_has_power('roster', record.organization_id))
+
+    can_decide = fields.Boolean(
+        string='Могу решать', compute='_compute_can_decide',
+        help='Есть полномочие вести состав этой организации.')
+
+    def _notify_member(self, body):
+        """Извещение вступающему. Без него он не знает ничего."""
+        self.ensure_one()
+        self.env['coop.notification']._notify(
+            self.partner_id, body, record=self.organization_id, kind='org')
+
+    def _check_can_decide(self):
+        for record in self:
+            if not record.can_decide:
+                raise UserError(_(
+                    'Принимать и прекращать членство в «%s» может тот, у '
+                    'кого есть полномочие «Ведение состава».')
+                    % record.organization_id.display_name)
+
+    def action_open_admit(self):
+        """Окно приёма: спросить основание, а не упереться в проверку.
+
+        Приём в члены — решение органа управления, и без ссылки на него
+        запись о членстве не имеет силы (`_check_admission_basis`).
+        Кнопка без окна упиралась в эту проверку: человек нажимал
+        «Принять» и получал ошибку вместо приёма.
+        """
+        self.ensure_one()
+        self._check_can_decide()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Принять в «%s»') % self.organization_id.display_name,
+            'res_model': 'coop.membership.admit',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_membership_id': self.id},
+        }
+
     def action_admit(self):
-        self.write({'state': 'active',
-                    'joined_on': fields.Date.context_today(self)})
+        # Права на членство у участника — только чтение: состав ведёт
+        # правление, и раздавать запись всем нельзя. Поэтому проверка
+        # полномочия своя и явная, а запись — через sudo. Проверка идёт
+        # первой: sudo без неё означал бы, что принять может кто угодно.
+        self._check_can_decide()
+        self.sudo().write({'state': 'active',
+                           'joined_on': fields.Date.context_today(self)})
+        for record in self:
+            record._notify_member(_(
+                'Вы приняты в «%(орг)s»: %(кем)s.',
+                орг=record.organization_id.display_name,
+                кем=dict(record._fields['role'].selection)[record.role]))
+        return True
+
+    def action_decline(self):
+        """Отказать по заявлению.
+
+        Не «прекращено»: членства не было, и запись о выбытии из него
+        была бы неправдой. Заявление отклонено — и человек может подать
+        новое, когда обстоятельства изменятся.
+        """
+        self._check_can_decide()
+        for record in self:
+            if record.state != 'applied':
+                raise UserError(_(
+                    'Отклонить можно заявление. «%s» уже в другом '
+                    'состоянии.') % record.display_name)
+            record._notify_member(_(
+                'Заявление о вступлении в «%s» отклонено.')
+                % record.organization_id.display_name)
+        self.sudo().unlink()
+        return True
 
     def action_apply_to_leave(self):
-        self.write({'state': 'leaving'})
+        for record in self:
+            if record.partner_id != self.env.user.partner_id                     and not record.can_decide:
+                raise UserError(_(
+                    'Заявление о выходе подаёт сам участник.'))
+        self.sudo().write({'state': 'leaving'})
+        for record in self:
+            record.env['coop.notification']._notify(
+                record._roster_deciders(),
+                _('Заявление о выходе из «%(орг)s»: %(кто)s.',
+                  орг=record.organization_id.display_name,
+                  кто=record.partner_id.display_name),
+                record=record.organization_id, kind='org')
+        return True
+
+    def action_withdraw(self):
+        """Отозвать собственное заявление, пока его не рассмотрели."""
+        for record in self:
+            if record.partner_id != self.env.user.partner_id:
+                raise UserError(_('Отозвать можно своё заявление.'))
+            if record.state != 'applied':
+                raise UserError(_(
+                    'Отзывают заявление. Членство уже действует — из него '
+                    'выходят, а не отзывают.'))
+        self.sudo().unlink()
+        return True
 
     def action_terminate(self):
-        self.write({'state': 'ended',
-                    'left_on': fields.Date.context_today(self)})
+        self._check_can_decide()
+        self.sudo().write({'state': 'ended',
+                           'left_on': fields.Date.context_today(self)})
+        for record in self:
+            record._notify_member(_(
+                'Членство в «%s» прекращено.')
+                % record.organization_id.display_name)
+        return True

@@ -535,3 +535,22 @@
   position: static;
   height: auto;
 }
+
+// «О себе» — строка статуса.
+//
+// Поле стало текстовым, и штатный ввод движка берёт ширину по своему
+// значению: у кого заметка в три слова, у того рамка в три слова.
+// Здесь она во всю ширину блока, как и была у редактора.
+.o_coop_about_band .o_coop_band_body,
+.o_coop_about {
+  .o_field_char,
+  input.o_input {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  input.o_input {
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+}

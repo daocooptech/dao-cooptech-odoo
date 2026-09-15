@@ -17,7 +17,54 @@
         <field name="state" widget="badge"
                decoration-success="state == 'active'"
                decoration-warning="state in ('applied', 'leaving')"/>
+        <!-- Решение прямо из списка: с заявлениями работают пачкой, и
+             открывать каждое ради двух кнопок — лишний шаг. Признак
+             `can_decide` тот же, что проверяет и сам метод, поэтому
+             кнопки, отвечающей ошибкой прав, тут не будет. -->
+        <field name="can_decide" column_invisible="1"/>
+        <button name="action_open_admit" type="object" string="Принять"
+                class="btn-primary btn-sm"
+                invisible="state != 'applied' or not can_decide"/>
+        <button name="action_decline" type="object" string="Отклонить"
+                class="btn-secondary btn-sm"
+                invisible="state != 'applied' or not can_decide"/>
       </list>
+    </field>
+  </record>
+
+  <!--
+    Окно приёма. Спрашивает то, без чего членство недействительно:
+    основание — решение общего собрания или правления. Заодно даёт
+    правлению поправить основание участия: заявление — просьба, а не
+    указание, и принять пайщиком того, кто просился сотрудником, или
+    наоборот, организация вправе.
+  -->
+  <record id="view_coop_membership_admit_form" model="ir.ui.view">
+    <field name="name">coop.membership.admit.form</field>
+    <field name="model">coop.membership.admit</field>
+    <field name="arch" type="xml">
+      <form string="Приём в организацию">
+        <field name="membership_id" invisible="1"/>
+        <group>
+          <field name="partner_id"/>
+          <field name="organization_id"/>
+          <field name="role"/>
+          <field name="job_title" invisible="role != 'staff'"/>
+          <field name="has_vote"/>
+          <field name="admission_basis"
+                 placeholder="Протокол общего собрания № 12 от 03.09.2026"/>
+        </group>
+        <div class="alert alert-info" role="status">
+          Без ссылки на решение органа запись о членстве не имеет силы.
+          Один член — один голос, независимо от размера пая; наёмный
+          сотрудник голоса не имеет.
+        </div>
+        <footer>
+          <button name="action_confirm" type="object" string="Принять"
+                  class="btn-primary"/>
+          <button string="Отмена" special="cancel"/>
+        </footer>
+      </form>
     </field>
   </record>
 
@@ -27,13 +74,24 @@
     <field name="arch" type="xml">
       <form string="Членство">
         <header>
-          <button name="action_admit" type="object" string="Принять в члены"
-                  class="btn-primary" invisible="state != 'applied'"/>
+          <field name="can_decide" invisible="1"/>
+          <button name="action_open_admit" type="object" string="Принять в члены"
+                  class="btn-primary"
+                  invisible="state != 'applied' or not can_decide"/>
+          <!--
+            Отказ по заявлению — не то же, что прекращение членства.
+            Членства не было, и запись о выбытии из него была бы
+            неправдой; человек может подать новое заявление, когда
+            обстоятельства изменятся.
+          -->
+          <button name="action_decline" type="object" string="Отклонить заявление"
+                  invisible="state != 'applied' or not can_decide"
+                  confirm="Заявление будет отклонено. Человек сможет подать новое."/>
           <button name="action_apply_to_leave" type="object"
                   string="Подано заявление о выходе"
                   invisible="state != 'active'"/>
           <button name="action_terminate" type="object" string="Прекратить членство"
-                  invisible="state not in ('leaving', 'applied')"
+                  invisible="state not in ('leaving', 'active') or not can_decide"
                   confirm="Членство будет прекращено. Расчёт по паю производится
 по уставу — как правило, после утверждения годового отчёта. Продолжить?"/>
           <field name="state" widget="statusbar"

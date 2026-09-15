@@ -94,6 +94,48 @@
     читалась бы как «участников пока не добавили», хотя добавлять их туда
     не следует вовсе.
   -->
+  <!--
+    Окно заявления о вступлении.
+
+    Окном, а не кнопкой сразу: основание участия — не мелочь. Пайщик
+    вносит пай и получает голос, наёмный сотрудник не получает ни того
+    ни другого, и выбрать должен человек, а не узнать постфактум, кем
+    его записали.
+  -->
+  <record id="view_coop_org_join_form" model="ir.ui.view">
+    <field name="name">coop.org.join.form</field>
+    <field name="model">coop.org.join</field>
+    <field name="arch" type="xml">
+      <form string="Заявление о вступлении">
+        <field name="organization_id" invisible="1"/>
+        <field name="is_cooperative" invisible="1"/>
+        <group>
+          <field name="role" widget="radio"/>
+          <field name="job_title" placeholder="Бухгалтер, механик, менеджер по продажам"
+                 invisible="role != 'staff'"/>
+          <field name="note" placeholder="Необязательно"/>
+        </group>
+        <div class="alert alert-info" role="status"
+             invisible="role != 'member'">
+          Пайщик вносит пай и получает голос на собрании: один член —
+          один голос, независимо от размера пая. Решение о приёме
+          принимает тот, кто ведёт состав организации.
+        </div>
+        <div class="alert alert-info" role="status"
+             invisible="role != 'staff'">
+          Наёмный сотрудник пая не вносит и голоса на собрании не имеет.
+          Что ему позволено делать от имени организации, задают
+          полномочия — их выдают при приёме.
+        </div>
+        <footer>
+          <button name="action_apply" type="object" string="Подать заявление"
+                  class="btn-primary"/>
+          <button string="Отмена" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
   <record id="view_coop_orgs_form" model="ir.ui.view">
     <field name="name">coop.orgs.form</field>
     <field name="model">res.partner</field>
@@ -113,10 +155,35 @@
                   string="Подписаться" invisible="coop_org_is_following"/>
           <button name="action_coop_org_follow" type="object"
                   string="Вы подписаны" invisible="not coop_org_is_following"/>
+          <!--
+            Вступление. Модель членства была описана до мелочей, а подать
+            заявление участник не мог: путь к составу вёл только через
+            загрузчик демо-данных и администраторский список.
+
+            Четыре состояния — четыре кнопки, потому что человеку важно
+            не только что он может сделать, но и где он сейчас: подано
+            заявление, состоит, выходит или не состоит вовсе.
+          -->
+          <button name="action_coop_join" type="object" string="Вступить"
+                  class="btn-secondary" invisible="not coop_can_join"/>
+          <button name="action_coop_withdraw" type="object"
+                  string="Отозвать заявление"
+                  invisible="coop_my_membership_state != 'applied'"/>
+          <button name="action_coop_leave" type="object" string="Выйти"
+                  invisible="coop_my_membership_state != 'active'"
+                  confirm="Подать заявление о выходе из организации?"/>
+          <button name="action_coop_applications" type="object"
+                  class="btn-primary"
+                  invisible="not coop_application_count"
+                  string="Заявления"/>
         </header>
         <sheet class="o_coop_profile_sheet">
           <field name="coop_has_members" invisible="1"/>
           <field name="coop_org_is_following" invisible="1"/>
+          <field name="coop_can_join" invisible="1"/>
+          <field name="coop_my_membership_state" invisible="1"/>
+          <field name="coop_application_count" invisible="1"/>
+          <field name="coop_can_manage_roster" invisible="1"/>
           <field name="coop_symbol_mark" invisible="1"/>
 
           <div class="o_coop_profile_layout">
@@ -131,6 +198,21 @@
               <div class="o_coop_stats">
                 <div>Уровень доверия:
                   <b><field name="coop_trust" nolabel="1" readonly="1"/>%</b>
+                </div>
+                <!-- Где я в этой организации. Без строки человек,
+                     подавший заявление неделю назад, не может узнать,
+                     рассмотрели его или нет. -->
+                <div class="o_coop_my_membership"
+                     invisible="coop_my_membership_state == 'none'">
+                  <t invisible="coop_my_membership_state != 'applied'">
+                    Заявление подано, ждёт решения
+                  </t>
+                  <t invisible="coop_my_membership_state != 'active'">
+                    Вы состоите в организации
+                  </t>
+                  <t invisible="coop_my_membership_state != 'leaving'">
+                    Подано заявление о выходе
+                  </t>
                 </div>
                 <div invisible="not coop_member_count">Сотрудников:
                   <b><field name="coop_member_count" nolabel="1" readonly="1"/></b>
@@ -214,8 +296,11 @@
                        placeholder="Правовая форма"/>
               </div>
 
-              <div class="o_coop_about" invisible="not comment">
-                <field name="comment" placeholder="Чем занимается организация"/>
+              <!-- То же, что у человека: короткая заметка, а не статья
+                   с редактором. -->
+              <div class="o_coop_about" invisible="not coop_about">
+                <field name="coop_about" nolabel="1"
+                       placeholder="Чем занимается организация — до 280 знаков"/>
               </div>
 
               <!--

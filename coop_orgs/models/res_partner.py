@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from odoo.exceptions import UserError
 from odoo import _, api, fields, models
 
 
@@ -107,6 +108,116 @@ class ResPartner(models.Model):
         } if self.ids else {}
         for record in self:
             record.coop_member_count = counts.get(record.id, 0)
+
+    # ── Вступление и выход ───────────────────────────────────────────
+    #
+    # Модель членства описана до мелочей, а подать заявление участник не
+    # мог: на карточке организации были только «Написать» и
+    # «Подписаться». Состав заводился загрузчиком демо-данных и вручную
+    # из администраторского списка — то есть пути к нему на платформе не
+    # было вовсе.
+
+    coop_my_membership_state = fields.Selection([
+        ('none', 'Не состою'),
+        ('applied', 'Заявление подано'),
+        ('active', 'Состою'),
+        ('leaving', 'Подано заявление о выходе'),
+    ], string='Моё членство', compute='_compute_coop_my_membership')
+    coop_can_join = fields.Boolean(
+        string='Можно вступить', compute='_compute_coop_my_membership')
+    coop_application_count = fields.Integer(
+        string='Заявлений', compute='_compute_coop_my_membership')
+    coop_can_manage_roster = fields.Boolean(
+        string='Веду состав', compute='_compute_coop_my_membership')
+
+    @api.depends_context('uid')
+    @api.depends('coop_member_ids.state', 'coop_has_members', 'is_company')
+    def _compute_coop_my_membership(self):
+        """Четыре ответа одним проходом: все нужны одной шапке разом."""
+        user = self.env.user
+        я = user.partner_id
+        Membership = self.env['coop.membership'].sudo()
+        моё = {}
+        заявлений = {}
+        if self.ids:
+            for запись in Membership.search([
+                    ('organization_id', 'in', self.ids),
+                    ('partner_id', '=', я.id),
+                    ('state', 'in', ('applied', 'active', 'leaving'))]):
+                моё[запись.organization_id.id] = запись.state
+            for организация, число in Membership._read_group(
+                    [('organization_id', 'in', self.ids),
+                     ('state', '=', 'applied')],
+                    groupby=['organization_id'], aggregates=['__count']):
+                заявлений[организация.id] = число
+        for record in self:
+            состояние = моё.get(record.id, 'none')
+            record.coop_my_membership_state = состояние
+            ведёт = bool(record.is_company
+                         and user.coop_has_power('roster', record))
+            record.coop_can_manage_roster = ведёт
+            record.coop_application_count = (
+                заявлений.get(record.id, 0) if ведёт else 0)
+            # Вступают в организацию, основанную на членстве, и не в свою
+            # собственную карточку. У фонда и АНО членства нет вовсе —
+            # предлагать туда вступить значило бы обещать несуществующее.
+            record.coop_can_join = bool(
+                record.is_company and record.coop_has_members
+                and record != я and состояние == 'none')
+
+    def action_coop_join(self):
+        """Окно заявления о вступлении."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Вступить в «%s»') % self.name,
+            'res_model': 'coop.org.join',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_organization_id': self.id},
+        }
+
+    def _coop_my_membership(self):
+        """Моё открытое членство в этой организации, если оно есть."""
+        self.ensure_one()
+        return self.env['coop.membership'].sudo().search([
+            ('organization_id', '=', self.id),
+            ('partner_id', '=', self.env.user.partner_id.id),
+            ('state', 'in', ('applied', 'active', 'leaving')),
+        ], limit=1)
+
+    def action_coop_leave(self):
+        """Подать заявление о выходе."""
+        self.ensure_one()
+        членство = self._coop_my_membership()
+        if not членство:
+            raise UserError(_('Вы не состоите в «%s».') % self.name)
+        членство.action_apply_to_leave()
+        return True
+
+    def action_coop_withdraw(self):
+        """Отозвать своё заявление, пока его не рассмотрели."""
+        self.ensure_one()
+        членство = self._coop_my_membership()
+        if not членство:
+            raise UserError(_('Заявления нет.'))
+        # Проверка «своё» и «ещё не рассмотрено» — в самой модели, чтобы
+        # она была одна и для кнопки, и для вызова со стороны.
+        членство.sudo().with_user(self.env.user).action_withdraw()
+        return True
+
+    def action_coop_applications(self):
+        """Заявления, ждущие решения."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Заявления о вступлении: %s') % self.name,
+            'res_model': 'coop.membership',
+            'view_mode': 'list,form',
+            'domain': [('organization_id', '=', self.id),
+                       ('state', '=', 'applied')],
+            'context': {'default_organization_id': self.id},
+        }
 
     def action_coop_members(self):
         """Открыть состав организации."""
