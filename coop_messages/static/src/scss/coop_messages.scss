@@ -676,3 +676,17 @@
     border-bottom: 1px solid var(--coop-line, #e6e6e1);
   }
 }
+
+// Пометка вида чата в выпадающем списке у значка в шапке: сделка,
+// проект, сообщество, организация. Приглушённая и мелкая — она уточняет
+// название, а не спорит с ним за внимание.
+.o_coop_menu_kind {
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--coop-surface, #f2f2ee);
+  color: var(--coop-slate-light, #8f8f88);
+  font: 600 10px/1.6 'Manrope', sans-serif;
+  white-space: nowrap;
+  vertical-align: middle;
+}

@@ -11,6 +11,7 @@ import { Composer } from "@mail/core/common/composer";
 import { ActionList } from "@mail/core/common/action_list";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { threadActionsRegistry, useThreadActions } from "@mail/core/common/thread_actions";
+import { Store } from "@mail/core/common/store_service";
 import { Thread } from "@mail/core/common/thread_model";
 import { composerActionsRegistry } from "@mail/core/common/composer_actions";
 
@@ -95,6 +96,35 @@ patch(Thread.prototype, {
         this.coop_link_label = fields.Attr("");
         this.coop_pinned = fields.Attr(false);
     },
+
+    /**
+     * Переписка открывается в разделе платформы, а не окном движка.
+     *
+     * Движок на «открыть переписку» отвечает по-своему: либо окошком в
+     * углу поверх страницы, либо собственным экраном Discuss. И то и
+     * другое — второй интерфейс переписки рядом с нашим: человек нажимает
+     * значок чатов в шапке, выбирает диалог и попадает не туда, где та же
+     * переписка лежит в разделе.
+     *
+     * Поэтому все входы ведут в один раздел: значок в шапке,
+     * уведомление, ссылка «написать» с чужой карточки. Если раздел уже
+     * открыт — просто меняем выбранную переписку, без перехода: переход
+     * поверх самого себя сбрасывает прокрутку ленты.
+     */
+    open(options) {
+        if (this.model !== "discuss.channel") {
+            return super.open(...arguments);
+        }
+        const actionService = this.store.env.services.action;
+        this.setAsDiscussThread(false);
+        const открытоСейчас = actionService.currentController?.action?.tag;
+        if (открытоСейчас === "coop_messages.messages") {
+            return true;
+        }
+        actionService.doAction("coop_messages.action_coop_messages",
+                               { clearBreadcrumbs: true });
+        return true;
+    },
 });
 
 // Порядок и подписи — из макета. «Непрочитанные» стоят вторыми и, как в
@@ -133,6 +163,33 @@ const ДЕЙСТВИЯ_НЕ_ПОКАЗЫВАЕМ = new Set([
     "expand-discuss", "show-threads", "fold-chat-window", "close",
     "advanced-settings",
 ]);
+
+// Выпадающий список у значка чатов в шапке: две вкладки, а не три.
+//
+// У движка переписки трёх видов: личная (один на один), группа
+// (несколько человек, без названия, только по приглашению) и канал (с
+// названием, в него можно вступить самому). Разница не в числе людей, а
+// в том, есть ли имя и можно ли войти.
+//
+// Владелец 16 сентября 2026: «если каналы это обычные групповые чаты, то
+// надо так и написать, а не плодить сущности». Для кооператора и группа,
+// и канал — групповой разговор, и двух вкладок под это не нужно.
+//
+// Поэтому вкладок две: «Личные» — разговор один на один, «Групповые» —
+// всё остальное. Деление делается там, где движок сопоставляет вкладку
+// видам переписки: тогда и список, и счётчик, и поиск считают по нему
+// сами.
+patch(Store.prototype, {
+    tabToThreadType(tab) {
+        if (tab === "chat") {
+            return ["chat"];
+        }
+        if (tab === "channel") {
+            return ["channel", "group"];
+        }
+        return super.tabToThreadType(...arguments);
+    },
+});
 
 // Слова движка на экран не пускаем.
 //

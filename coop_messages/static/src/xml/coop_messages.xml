@@ -165,4 +165,52 @@
   </div>
 </t>
 
+<!--
+  Полоса вкладок у значка чатов в шапке.
+
+  У движка она собрана прямо в разметке тремя кнопками — «Notifications»,
+  «Chats», «Channels», — и список действий в коде на неё не влияет. В
+  первую кнопку «Chats» свалены и разговор с одним человеком, и групповой
+  чат на пятерых.
+
+  Владелец 16 сентября 2026: «если каналы это обычные групповые чаты, то
+  надо так и написать, а не плодить сущности». Остаются две вкладки:
+  «Личные» — разговор один на один, «Групповые» — всё остальное, и
+  группы, и каналы. Какого вида чат на самом деле, видно по строке
+  списка, а не по вкладке.
+-->
+<t t-name="coop_messages.MessagingMenuHeader" t-inherit="mail.MessagingMenu.content" t-inherit-mode="extension">
+  <xpath expr="//button[contains(@t-on-click, &quot;activeTab = 'chat'&quot;)]" position="replace">
+    <button class="o-mail-MessagingMenu-headerFilter btn btn-link o-px-1_5 py-1 m-1 lh-1"
+            t-att-class="store.discuss.activeTab === 'chat' ? 'fw-bold o-active shadow-sm' : 'text-muted'"
+            type="button" role="tab"
+            t-on-click="() => store.discuss.activeTab = 'chat'">Личные</button>
+  </xpath>
+  <!--
+    Строка списка говорит, к чему привязан чат: сделка, проект,
+    сообщество, организация. Без этого все чаты разделов сваливались в
+    одну кучу, и по строке было не понять, чат это сделки или общий
+    разговор — а в самом разделе «Сообщения» они разложены чипами.
+  -->
+  <xpath expr="//t[@name='threads']//t[@t-set-slot='name']" position="inside">
+    <!-- Имя переменной латиницей: разбор выражений в шаблонах движка
+         русских имён не принимает и отказывает словами «could not
+         tokenize», не называя причины. В коде на русском можно, в
+         выражении шаблона — нет. -->
+    <t t-set="coopKindLabels" t-value="{
+      'deal': 'Сделка', 'project': 'Проект',
+      'community': 'Сообщество', 'org': 'Организация',
+    }"/>
+    <span t-if="coopKindLabels[thread.coop_kind]" class="o_coop_menu_kind"
+          t-esc="coopKindLabels[thread.coop_kind]"/>
+  </xpath>
+
+  <xpath expr="//button[contains(@t-on-click, &quot;activeTab = 'channel'&quot;)]" position="replace">
+    <button class="o-mail-MessagingMenu-headerFilter btn btn-link o-px-1_5 py-1 m-1 lh-1"
+            t-att-class="store.discuss.activeTab === 'channel' ? 'fw-bold o-active shadow-sm' : 'text-muted'"
+            type="button" role="tab"
+            t-on-click="() => store.discuss.activeTab = 'channel'">Групповые</button>
+  </xpath>
+</t>
+
 </templates>
