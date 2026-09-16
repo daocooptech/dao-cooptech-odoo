@@ -530,7 +530,8 @@
                     уходил и возвращался.
                   -->
                   <field name="coop_active_membership_ids" readonly="1" nolabel="1">
-                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                    <kanban class="o_coop_band_kanban" records_draggable="false"
+                            action="action_coop_open_organization" type="object">
                       <field name="organization_id"/>
                       <field name="role"/>
                       <templates>
