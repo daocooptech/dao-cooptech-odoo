@@ -180,24 +180,33 @@
                  statusbar_visible="draft,running,finished"/>
         </header>
         <sheet>
+          <!--
+            Править условия может только организатор и только пока торг
+            готовится (`coop_can_edit`). Раньше форма давала править всё
+            и всем, а отказ приходил при сохранении — от правила
+            видимости, уже после того как человек набрал текст.
+          -->
+          <field name="coop_can_edit" invisible="1"/>
           <div class="oe_title">
-            <h1><field name="name" placeholder="Что разыгрываем"/></h1>
+            <h1><field name="name" placeholder="Что разыгрываем"
+                       readonly="not coop_can_edit"/></h1>
           </div>
           <group>
             <group string="Что и кто">
-              <field name="kind" widget="radio" options="{'horizontal': True}"/>
-              <field name="owner_id"/>
-              <field name="resource_id"/>
-              <field name="city"/>
+              <field name="kind" widget="radio" options="{'horizontal': True}"
+                     readonly="not coop_can_edit"/>
+              <field name="owner_id" readonly="not coop_can_edit"/>
+              <field name="resource_id" readonly="not coop_can_edit"/>
+              <field name="city" readonly="not coop_can_edit"/>
             </group>
             <group string="Цена и время">
-              <field name="start_price"/>
-              <field name="step"/>
-              <field name="reserve_price"/>
+              <field name="start_price" readonly="not coop_can_edit"/>
+              <field name="step" readonly="not coop_can_edit"/>
+              <field name="reserve_price" readonly="not coop_can_edit"/>
               <field name="currency_id" invisible="1"/>
-              <field name="date_start"/>
-              <field name="date_end"/>
-              <field name="extend_minutes"/>
+              <field name="date_start" readonly="not coop_can_edit"/>
+              <field name="date_end" readonly="not coop_can_edit"/>
+              <field name="extend_minutes" readonly="not coop_can_edit"/>
             </group>
           </group>
           <group string="Ход торга">
@@ -223,7 +232,7 @@
 
           <notebook>
             <page string="Описание лота" name="description">
-              <field name="description"
+              <field name="description" readonly="not coop_can_edit"
                      placeholder="Что за лот, в каком состоянии, как забирать"/>
             </page>
             <page string="Ставки" name="bids">

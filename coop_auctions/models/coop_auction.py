@@ -108,6 +108,10 @@ class CoopAuction(models.Model):
         string='Можно поставить', compute='_compute_can_bid',
         help='Торг идёт, срок не вышел, и ставящий — не организатор и не '
              'нынешний лидер.')
+    coop_can_edit = fields.Boolean(
+        string='Условия торга можно править', compute='_compute_coop_can_edit',
+        help='Правит только организатор и только пока торг готовится: '
+             'после открытия условия неизменны — на них уже поставили.')
     live_rank = fields.Integer(
         string='Порядок на витрине', compute='_compute_live_rank',
         store=True, index=True,
@@ -177,6 +181,27 @@ class CoopAuction(models.Model):
             record.live_rank = порядок.get(record.state, 9)
 
     @api.depends_context('uid')
+    @api.depends('state', 'owner_id')
+    def _compute_coop_can_edit(self):
+        """Кому и когда можно править условия торга.
+
+        Права на запись уже описаны правилом видимости: писать в аукцион
+        может тот, от чьего имени он размещён. Но правило срабатывает
+        только при сохранении — до этого форма даёт править всё подряд, и
+        человек узнаёт об отказе, уже потеряв набранное. Владелец
+        16 сентября 2026: «ты даешь возможность править поля, а потом при
+        сохранении выводишь ошибку, надо сделать так что править было не
+        возможно».
+
+        Второе условие — состояние. Условия торга неизменны с момента
+        открытия: стартовая цена, шаг и срок — то, на что ставили. Менять
+        их задним числом значит переписывать правила игры после ставок.
+        """
+        publishers = self.env.user.coop_publisher_partner_ids
+        for record in self:
+            record.coop_can_edit = (
+                record.state == 'draft' and record.owner_id in publishers)
+
     @api.depends('state', 'date_end', 'owner_id', 'leader_id')
     def _compute_can_bid(self):
         """Условия участия одним признаком — тем же, что и у проверки.
