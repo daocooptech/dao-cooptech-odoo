@@ -16,9 +16,16 @@
             parent="menu_coop_root" action="action_coop_verification" sequence="20"
             groups="coop_base.group_coop_board"/>
 
+  <!--
+    Полномочия — справочник, а не журнал: девять записей, которые
+    называют, что человеку позволено делать от имени организации.
+    Поэтому стоят вкладкой в общем разделе справочников, а не пунктом
+    меню «Кооператив», откуда их всё равно было не достать. Решение
+    владельца 16 сентября 2026, по снимку самого экрана.
+  -->
   <menuitem id="menu_coop_power" name="Полномочия"
-            parent="menu_coop_root" action="action_coop_power" sequence="30"
-            groups="coop_base.group_coop_board"/>
+            parent="menu_coop_reference_root" action="action_coop_power"
+            sequence="70"/>
 
   <!--
     Справочники узла — одним разделом, а не вкладкой в каждом разделе.

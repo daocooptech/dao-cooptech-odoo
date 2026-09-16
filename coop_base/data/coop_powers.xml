@@ -74,6 +74,8 @@
     <field name="name">Полномочия</field>
     <field name="res_model">coop.power</field>
     <field name="view_mode">list,form</field>
+    <!-- Экран раздела справочников: по признаку рисуется строка вкладок. -->
+    <field name="context">{'coop_section': True}</field>
   </record>
 
 </odoo>

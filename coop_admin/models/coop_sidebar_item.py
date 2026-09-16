@@ -7,6 +7,11 @@ from odoo import api, models
 ADMIN_ITEMS = [
     ('Полномочия', 'fa-shield', 'coop_admin.action_coop_admin_grant'),
     ('Участники узла', 'fa-users', 'base.action_res_users'),
+    # Сводный реестр членств по всей платформе: кто, где, на каком
+    # основании, с какими полномочиями. Состав каждой организации виден
+    # на её странице, а этот экран — взгляд узла целиком, и место ему
+    # здесь. Решение владельца 16 сентября 2026.
+    ('Членство', 'fa-id-card-o', 'coop_base.action_coop_membership'),
     ('Настройки', 'fa-cog', 'base_setup.action_general_configuration'),
     ('Модели и поля', 'fa-database', 'base.action_model_model'),
     ('Журнал действий', 'fa-history', 'base.action_ir_logging'),
