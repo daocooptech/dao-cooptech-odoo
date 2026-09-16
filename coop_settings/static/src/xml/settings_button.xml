@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <t t-name="coop_settings.Button">
+    <div class="o_coop_settings_btn">
+      <button type="button" class="btn" title="Настройки" aria-label="Настройки"
+              t-on-click="() => this.open()">
+        <i class="fa fa-lg fa-cog" role="img" aria-hidden="true"/>
+      </button>
+    </div>
+  </t>
+
+</templates>

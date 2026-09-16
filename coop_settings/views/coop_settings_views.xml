@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Вкладка «Аккаунт» настроек участника.
+
+    Состав взят из макета (`settings.html`, вкладка «Аккаунт»): членство и
+    статус, подтверждения. Выгрузка данных и опасная зона — следующим
+    заходом: они требуют не экрана, а работы (сборка архива, скрытие
+    профиля, удаление), и делать их видимыми раньше, чем работающими,
+    значит обещать то, чего нет.
+
+    Полосы теми же классами, что на «Моей странице»: это один и тот же
+    человек и один и тот же язык страницы.
+  -->
+  <record id="view_coop_settings_account_form" model="ir.ui.view">
+    <field name="name">coop.settings.account.form</field>
+    <field name="model">res.partner</field>
+    <field name="priority">100</field>
+    <field name="arch" type="xml">
+      <form string="Настройки" create="false" edit="false" duplicate="false"
+            class="o_coop_profile o_coop_settings">
+        <sheet>
+          <div class="oe_title">
+            <h1>Настройки</h1>
+          </div>
+
+          <div class="o_coop_band">
+            <div class="o_coop_band_head">
+              <span>Членство и статус</span>
+            </div>
+            <div class="o_coop_band_body">
+              <group>
+                <field name="coop_member_since" readonly="1"/>
+                <field name="coop_verification_level" readonly="1"/>
+              </group>
+
+              <!--
+                Действующие членства, а не все: прекращённые и заявления
+                здесь только сбивают — «где я состою» и «где состоял»
+                разные вопросы. То же поле, что у полки на странице.
+              -->
+              <field name="coop_active_membership_ids" readonly="1" nolabel="1"
+                     invisible="not coop_active_membership_ids">
+                <list string="Членства" create="false" delete="false">
+                  <field name="organization_id"/>
+                  <field name="role"/>
+                  <field name="job_title" optional="show"/>
+                  <field name="joined_on"/>
+                  <field name="has_vote" optional="show"/>
+                </list>
+              </field>
+              <div class="text-muted" invisible="coop_active_membership_ids">
+                Вы пока нигде не состоите.
+              </div>
+            </div>
+          </div>
+
+          <div class="o_coop_band">
+            <div class="o_coop_band_head">
+              <span>Подтверждения</span>
+            </div>
+            <div class="o_coop_band_body">
+              <!--
+                Свои подтверждения участник видит и без настроек — правила
+                видимости режут чужое, — но искать их было негде. Владелец
+                16 сентября 2026: «наверно в настройки каждому участнику».
+              -->
+              <field name="coop_verification_ids" readonly="1" nolabel="1"
+                     invisible="not coop_verification_ids">
+                <list string="Подтверждения" create="false" delete="false">
+                  <field name="kind"/>
+                  <field name="method"/>
+                  <field name="state" widget="badge"
+                         decoration-success="state == 'confirmed'"
+                         decoration-warning="state == 'pending'"
+                         decoration-danger="state in ('rejected', 'expired')"/>
+                  <field name="confirmed_on" optional="show"/>
+                  <field name="expires_on" optional="hide"/>
+                  <field name="confirmed_by_id" optional="hide"/>
+                </list>
+              </field>
+              <div class="text-muted" invisible="coop_verification_ids">
+                Подтверждений пока нет. Пока не подтверждён хотя бы контакт,
+                на платформе можно только смотреть.
+              </div>
+            </div>
+          </div>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!--
+    Серверным действием, а не окном с доменом: от чьего имени человек
+    действует, того и настройки, и решается это при каждом открытии.
+  -->
+  <record id="action_coop_settings" model="ir.actions.server">
+    <field name="name">Настройки</field>
+    <!--
+      `settings` занят настройками самой Odoo: короткий адрес уникален на
+      всё пространство действий, и его выбирают из свободных, а не
+      придумывают. Проверено запросом: занятых 181.
+    -->
+    <field name="path">my-settings</field>
+    <field name="model_id" ref="base.model_res_partner"/>
+    <field name="state">code</field>
+    <field name="code">action = model.action_coop_open_settings()</field>
+  </record>
+
+  <menuitem id="menu_coop_settings_root" name="Настройки" sequence="950"/>
+  <menuitem id="menu_coop_settings_account" name="Аккаунт"
+            parent="menu_coop_settings_root" action="action_coop_settings"
+            sequence="10"/>
+
+</odoo>
