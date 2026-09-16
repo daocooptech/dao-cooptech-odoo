@@ -110,6 +110,25 @@
                     t-on-click="() => this.openRecord(activeThread)">
               <t t-esc="activeThread.coop_link_label"/> →
             </button>
+
+            <!--
+              Действия движка: звонок, участники, приглашение, вложения,
+              закреплённое, поиск по сообщениям, уведомления, «покинуть».
+              Списком из реестра, а не своими кнопками, — чтобы ничего не
+              пропало при обновлении движка. Что не умещается в строку,
+              движок сам убирает под многоточие.
+            -->
+            <div class="o_coop_chat_actions">
+              <ActionList actions="[quickActions]" inline="true" thread="activeThread"/>
+              <Dropdown t-if="moreActions.length" position="'bottom-end'">
+                <button type="button" class="o_coop_chat_more"
+                        aria-label="Ещё действия" title="Ещё действия">⋯</button>
+                <t t-set-slot="content">
+                  <ActionList actions="[moreActions]" dropdown="true"
+                              thread="activeThread"/>
+                </t>
+              </Dropdown>
+            </div>
           </div>
 
           <Thread thread="activeThread" t-key="activeThread.localId"
@@ -121,6 +140,26 @@
         <div t-else="" class="o_coop_chat_none">
           Переписка не выбрана.
         </div>
+      </div>
+
+      <!--
+        Третья колонка: панель открытого действия — участники, вложения,
+        закреплённое, поиск по сообщениям, настройки уведомлений. Своя
+        колонка, а не поверх переписки: список участников читают, не
+        отрываясь от разговора.
+      -->
+      <div t-if="threadActions.activeAction?.actionPanelComponentCondition"
+           class="o_coop_chat_panel">
+        <!-- Возврат к переписке. Виден только там, где панель встаёт
+             вместо переписки, а не рядом: на узком экране шапка диалога
+             с её значками скрыта, и закрыть панель было бы нечем. -->
+        <button type="button" class="o_coop_panel_back"
+                t-on-click="() => this.threadActions.activeAction.close()">
+          ← К переписке
+        </button>
+        <t t-component="threadActions.activeAction.actionPanelComponent"
+           thread="activeThread"
+           t-props="threadActions.activeAction.actionPanelComponentProps"/>
       </div>
     </div>
   </div>

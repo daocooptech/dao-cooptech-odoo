@@ -342,6 +342,113 @@
   border-bottom: 1px solid var(--coop-line, #e6e6e1);
 }
 
+// ── Действия движка в шапке диалога ─────────────────────────────────
+//
+// Кнопки приходят готовым списком из реестра движка (звонок, участники,
+// приглашение, вложения, закреплённое, поиск по сообщениям, уведомления
+// треда). Здесь им задаётся только вид: в макете шапка диалога набрана
+// приглушённо, а кнопки движка по умолчанию идут крупными и цветными.
+.o_coop_chat_actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+
+  // Кнопка «ещё действия». Своя, а не движковая: у движка на её месте
+  // либо ничего, либо кнопка с подписью словами.
+  .o_coop_chat_more {
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    color: var(--coop-slate, #4a4a44);
+    font-size: 18px;
+    line-height: 1;
+
+    &:hover {
+      background: var(--coop-surface, #f2f2ee);
+      color: var(--coop-ink, #14171a);
+    }
+  }
+
+  .btn {
+    --btn-color: var(--coop-slate, #4a4a44);
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    color: var(--coop-slate, #4a4a44);
+    font-size: 14px;
+
+    &:hover,
+    &.active {
+      background: var(--coop-surface, #f2f2ee);
+      color: var(--coop-ink, #14171a);
+    }
+  }
+}
+
+// ── Панель открытого действия ───────────────────────────────────────
+//
+// Третья колонка справа: участники, вложения, закреплённое, поиск по
+// сообщениям, настройки уведомлений. Ширина — как у списка переписок в
+// макете, чтобы экран остался симметричным.
+.o_coop_chat_panel {
+  flex: none;
+  // 300 точек: ленте остаётся 632, и пузыри сообщений при `max-width: 70%`
+  // ещё читаются. Считано проектировщиком на рабочей области 1214.
+  width: 300px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  border-left: 1px solid var(--coop-line, #e6e6e1);
+  background: var(--coop-paper, #fbfbf9);
+}
+
+// Кнопка возврата видна только на узком экране — там панель встаёт
+// вместо переписки. На широком переписка рядом, возвращаться некуда.
+.o_coop_panel_back {
+  display: none;
+}
+
+// ── Панель на узком экране ──────────────────────────────────────────
+//
+// Ниже 1200 точек ленте после вычета панели остаётся меньше шестисот, и
+// пузыри сообщений начинают ломаться по два слова в строку. Поэтому
+// панель встаёт **вместо** переписки, а не рядом: разговор никуда не
+// делся, к нему возвращает кнопка сверху.
+@media (max-width: 1199px) {
+  .o_coop_msg_body:has(.o_coop_chat_panel) .o_coop_chat_pane {
+    display: none;
+  }
+
+  .o_coop_chat_panel {
+    flex: 1 1 auto;
+    width: auto;
+    border-left: 0;
+  }
+
+  .o_coop_panel_back {
+    display: block;
+    flex: none;
+    width: 100%;
+    padding: 10px 16px;
+    border: 0;
+    border-bottom: 1px solid var(--coop-line, #e6e6e1);
+    background: none;
+    text-align: left;
+    font: 600 12.5px/1.3 'Manrope', sans-serif;
+    color: var(--coop-teal, #146b64);
+  }
+}
+
 .o_coop_chat_avatar {
   width: 38px;
   height: 38px;
@@ -351,8 +458,12 @@
 }
 
 .o_coop_chat_head_text {
-  flex: 1;
-  min-width: 0;
+  flex: 1 1 auto;
+  // Имени отводится столько, чтобы его можно было узнать. Без нижней
+  // границы флекс отдавал всё место значкам и ссылке, а имя сжимал до
+  // многоточия — притом что именно оно отвечает на вопрос «с кем я
+  // говорю».
+  min-width: 120px;
 }
 
 .o_coop_chat_name {
@@ -384,8 +495,18 @@
   background: var(--coop-slate-light, #8f8f88);
 }
 
+// Ссылка на запись, к которой привязан разговор («Открыть организацию»).
+//
+// Уступает место первой: в шапке теперь три значка движка плюс
+// многоточие, и при неуступчивой ссылке имя собеседника сжималось до
+// двух букв — «Ко…» вместо «Кооператив „Борозда“». Кто перед тобой,
+// важнее, чем куда можно уйти.
 .o_coop_chat_link {
-  flex: none;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   padding: 0;
   border: 0;
   background: none;

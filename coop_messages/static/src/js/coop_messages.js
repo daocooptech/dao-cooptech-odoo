@@ -8,6 +8,9 @@ import { useService } from "@web/core/utils/hooks";
 import { fields } from "@mail/core/common/record";
 import { Thread as ThreadComponent } from "@mail/core/common/thread";
 import { Composer } from "@mail/core/common/composer";
+import { ActionList } from "@mail/core/common/action_list";
+import { Dropdown } from "@web/core/dropdown/dropdown";
+import { threadActionsRegistry, useThreadActions } from "@mail/core/common/thread_actions";
 import { Thread } from "@mail/core/common/thread_model";
 import { composerActionsRegistry } from "@mail/core/common/composer_actions";
 
@@ -108,15 +111,77 @@ const CATEGORIES = [
     { id: "service", label: "Сервис" },
 ];
 
+// Что из действий движка стоит в шапке диалога наружу, а что уходит под
+// многоточие. Разбор проектировщика от 16 сентября 2026: наружу три
+// значка, четвёртый — многоточие; пятый всегда оказывается дублем пункта
+// меню, а упирается здесь не ширина, а внимание.
+//
+// Поиск по сообщениям — самое частое действие внутри переписки. Звонок
+// ищут глазами, а не в меню. Третий значок разный: в групповой переписке
+// «кто здесь» спрашивают до первого сообщения, в личной участников нет.
+const ЗНАЧКИ_НАРУЖУ_В_ГРУППЕ = ["search-messages", "call", "member-list"];
+const ЗНАЧКИ_НАРУЖУ_В_ЛИЧНОЙ = ["search-messages", "call", "attachments"];
+
+// Действия движка, которых на экране платформы быть не должно.
+//
+// «Открыть в полном Discuss» — ровно тот второй экран того же, ради
+// которого раздел и переводили на наш. Остальные принадлежат окнам
+// переписки поверх страницы, которых у платформы нет, или открывают
+// форму настроек словами движка — нужное из неё вынесено отдельными
+// пунктами.
+const ДЕЙСТВИЯ_НЕ_ПОКАЗЫВАЕМ = new Set([
+    "expand-discuss", "show-threads", "fold-chat-window", "close",
+    "advanced-settings",
+]);
+
+// Слова движка на экран не пускаем.
+//
+// Движок говорит «канал», «тред», «пользователь» — для кооператора это
+// чужой язык: у него чат сообщества, переписка и люди. Подписи
+// переопределяются у самих действий, а не переводом: перевод один на всю
+// установку, а здесь нужен язык платформы в одном разделе.
+const ПОДПИСИ_ДЕЙСТВИЙ = {
+    "search-messages": "Поиск по переписке",
+    "call": "Позвонить",
+    "camera-call": "Видеозвонок",
+    "member-list": "Участники",
+    "attachments": "Вложения",
+    "pinned-messages": "Закреплённые",
+    "notification-settings": "Уведомления этой переписки",
+    "invite-people": "Позвать людей",
+    "mark-read": "Отметить прочитанной",
+    "leave": "Выйти из переписки",
+    "rename-thread": "Переименовать",
+    "delete-thread": "Удалить переписку",
+};
+
+for (const [id, подпись] of Object.entries(ПОДПИСИ_ДЕЙСТВИЙ)) {
+    const определение = threadActionsRegistry.get(id, null);
+    if (определение) {
+        определение.name = подпись;
+    }
+}
+
 export class CoopMessages extends Component {
     static template = "coop_messages.Messages";
-    static components = { Thread: ThreadComponent, Composer };
+    static components = { Thread: ThreadComponent, Composer, ActionList, Dropdown };
     static props = ["*"];
 
     setup() {
         this.store = useService("mail.store");
         this.action = useService("action");
         this.orm = useService("orm");
+        this.ui = useService("ui");
+        // Всё, что движок умеет с перепиской, приходит отсюда одним
+        // списком: звонок, видео, участники, приглашение, вложения,
+        // закреплённое, поиск по сообщениям, уведомления треда, «покинуть».
+        //
+        // Через реестр движка, а не своими кнопками: список действий
+        // меняется от версии к версии и зависит от того, что за тред
+        // открыт — личный диалог, канал или почтовый ящик. Свои кнопки
+        // означали бы, что после обновления половина возможностей
+        // пропала, и никто бы этого не заметил.
+        this.threadActions = useThreadActions({ thread: () => this.activeThread });
         this.categories = CATEGORIES;
         this.state = useState({
             category: "all",
@@ -256,6 +321,29 @@ export class CoopMessages extends Component {
             return "вчера";
         }
         return dt.toFormat("dd.MM");
+    }
+
+    /** Групповая ли переписка: от этого зависит третий значок в шапке. */
+    get isGroupThread() {
+        const тип = this.activeThread?.channel_type;
+        return тип === "channel" || тип === "group";
+    }
+
+    /** Значки, которые стоят в шапке наружу. */
+    get quickActions() {
+        const наружу = this.isGroupThread
+            ? ЗНАЧКИ_НАРУЖУ_В_ГРУППЕ
+            : ЗНАЧКИ_НАРУЖУ_В_ЛИЧНОЙ;
+        return наружу
+            .map((id) => this.threadActions.actions.find((a) => a.id === id))
+            .filter(Boolean);
+    }
+
+    /** Всё остальное — под многоточием, в порядке движка. */
+    get moreActions() {
+        const наружу = new Set(this.quickActions.map((a) => a.id));
+        return this.threadActions.actions.filter(
+            (a) => !наружу.has(a.id) && !ДЕЙСТВИЯ_НЕ_ПОКАЗЫВАЕМ.has(a.id));
     }
 
     get activeThread() {
