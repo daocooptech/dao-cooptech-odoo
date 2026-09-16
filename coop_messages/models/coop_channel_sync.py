@@ -58,6 +58,36 @@ class CoopChannelSync(models.AbstractModel):
         """
         return self.env['res.partner']
 
+    def _coop_channel_values(self):
+        """Чем заполнить новую переписку. Переопределяется."""
+        self.ensure_one()
+        return {}
+
+    def _coop_ensure_channel(self):
+        """Завести переписку записи, если её ещё нет.
+
+        Заводится групповой, а не разговором двоих: движок в переписку
+        двоих не пускает третьего и вид её менять запрещает — а состав
+        по записи меняется (сторона поменяла представителя, в проект
+        приняли вклад).
+        """
+        Channel = self.env['discuss.channel'].sudo()
+        заведено = self.env['discuss.channel']
+        for record in self:
+            if record._coop_channels():
+                continue
+            значения = record._coop_channel_values()
+            if not значения:
+                continue
+            значения.update({
+                'channel_type': 'group',
+                'coop_res_model': record._name,
+                'coop_res_id': record.id,
+                'coop_managed': True,
+            })
+            заведено |= Channel.create(значения)
+        return заведено
+
     def _coop_sync_channels(self):
         """Привести состав переписок в соответствие с записью.
 

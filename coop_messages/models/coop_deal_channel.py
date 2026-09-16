@@ -7,7 +7,7 @@
 сделку и не видит своей.
 """
 
-from odoo import models
+from odoo import api, models
 
 
 class CoopDeal(models.Model):
@@ -47,3 +47,41 @@ class CoopDeal(models.Model):
         if self.author_id and not self.author_id.is_company:
             люди |= self.author_id
         return люди
+
+    def _coop_channel_values(self):
+        """Название переписки — номер сделки и предмет, как в списке.
+
+        Подпись под названием — стороны: в списке переписок по ней
+        отличают одну поставку от другой, не открывая.
+        """
+        self.ensure_one()
+        return {
+            'name': self.display_name,
+            'coop_kind': 'deal',
+            'coop_subtitle': ' · '.join(filter(None, [
+                self.party_a_id.display_name, self.party_b_id.display_name])),
+        }
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Новая сделка получает переписку сразу.
+
+        Не отложенно и не по первой реплике: стороны должны увидеть, где
+        договариваться, в тот же момент, когда сделка появилась.
+        """
+        сделки = super().create(vals_list)
+        сделки._coop_ensure_channel()
+        сделки._coop_sync_channels()
+        return сделки
+
+    def write(self, vals):
+        """Сменились стороны — сменился и состав переписки.
+
+        Иначе прежний представитель остаётся читать чужой разговор, а
+        новый в него не попадает: то самое, что чинили сведением
+        составов 16 сентября 2026.
+        """
+        res = super().write(vals)
+        if {'party_a_id', 'party_b_id', 'author_id'} & set(vals):
+            self._coop_sync_channels()
+        return res

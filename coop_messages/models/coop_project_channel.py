@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Состав чата проекта — инициатор и те, чей вклад принят."""
 
-from odoo import models
+from odoo import api, models
 
 
 class CoopProject(models.Model):
@@ -20,3 +20,54 @@ class CoopProject(models.Model):
         вклады = self.contribution_ids.filtered(lambda c: c.state == 'accepted')
         люди |= вклады.mapped('partner_id')
         return люди.coop_power_holders('represent')
+
+    def _coop_channel_values(self):
+        """Название переписки — название проекта, как в каталоге."""
+        self.ensure_one()
+        return {
+            'name': self.name,
+            'coop_kind': 'project',
+            'coop_subtitle': self.city or False,
+        }
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        проекты = super().create(vals_list)
+        проекты._coop_ensure_channel()
+        проекты._coop_sync_channels()
+        return проекты
+
+    def write(self, vals):
+        res = super().write(vals)
+        if 'partner_id' in vals:
+            self._coop_sync_channels()
+        return res
+
+
+class CoopProjectContribution(models.Model):
+    """Приняли вклад — человек вошёл в разговор проекта.
+
+    Хук на вкладе, а не на проекте: состав меняется именно здесь, и
+    отсюда же видно, что изменилось — принятие, отзыв, удаление.
+    """
+
+    _inherit = 'coop.project.contribution'
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        вклады = super().create(vals_list)
+        вклады.mapped('project_id')._coop_sync_channels()
+        return вклады
+
+    def write(self, vals):
+        проекты_до = self.mapped('project_id')
+        res = super().write(vals)
+        if {'state', 'partner_id', 'project_id'} & set(vals):
+            (проекты_до | self.mapped('project_id'))._coop_sync_channels()
+        return res
+
+    def unlink(self):
+        проекты = self.mapped('project_id')
+        res = super().unlink()
+        проекты._coop_sync_channels()
+        return res
