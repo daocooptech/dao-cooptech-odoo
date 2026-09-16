@@ -145,6 +145,41 @@ if [ -n "$changed" ] && ! run git diff --name-only "$before" "$after" | grep -qv
     changed=""
 fi
 
+# Новые модули: их надо не обновить, а поставить.
+#
+# `-u` ставит только то, что уже установлено; модуль, которого в базе нет,
+# он молча пропускает. Отсюда 16 сентября 2026 вышло так: код `coop_settings`
+# приехал на боевую, выкатка отчиталась «Готово», а раздела настроек на
+# платформе не было — ставили руками.
+#
+# Ищем по папкам с манифестом, а не по списку в коде: список разошёлся бы
+# с действительностью на первом же новом модуле. Спрашиваем базу напрямую
+# (`psql` от имени odoo), потому что поднимать реестр ради одного запроса
+# дороже самого запроса.
+new_modules=""
+for d in "$ODOO_HOME"/coop-addons/coop_*/; do
+    name=$(basename "$d")
+    [ -f "$d/__manifest__.py" ] || continue
+    state=$(run psql -d "$DB" -tAc         "select state from ir_module_module where name = '$name'" 2>/dev/null || echo '')
+    # Пусто — модуля нет в списке вовсе (ещё не читали каталог модулей);
+    # `uninstalled` — прочитали, но не ставили. И то и другое значит «поставить».
+    case "$state" in
+        installed|to\ upgrade) ;;
+        *) new_modules="${new_modules:+$new_modules,}$name" ;;
+    esac
+done
+
+if [ -n "$new_modules" ]; then
+    say "Новые модули, ставлю: $new_modules"
+    systemctl stop coop-odoo
+    if ! run "$ODOO_HOME/venv/bin/python" "$ODOO_HOME/odoo/odoo-bin"             -c "$CONF" -d "$DB" -i "$new_modules" --stop-after-init --no-http; then
+        say "УСТАНОВКА УПАЛА: $new_modules"
+        systemctl start coop-odoo || true
+        exit 1
+    fi
+    systemctl start coop-odoo
+fi
+
 if [ -z "$changed" ]; then
     say "Изменения вне модулей — только перезапуск"
 else
