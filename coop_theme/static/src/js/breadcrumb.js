@@ -3,7 +3,7 @@
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
 import { Breadcrumbs } from "@web/search/breadcrumbs/breadcrumbs";
-import { onWillStart, useState } from "@odoo/owl";
+import { useState } from "@odoo/owl";
 
 /**
  * Путь и кнопка возврата.
@@ -44,15 +44,28 @@ patch(Breadcrumbs.prototype, {
         // Разделы бокового меню — чтобы найти раздел по модели записи,
         // когда действие не опознано (прямая ссылка). Список приходит
         // общим запросом запуска оболочки, второй раз он бесплатен.
+        //
+        // Спрашиваем без ожидания, и это главное здесь. Сначала запрос
+        // стоял в `onWillStart` — и уронил боевую целиком: `onWillStart`
+        // задерживает первую отрисовку компонента, компонент этот —
+        // крошка, а крошка есть на каждом экране. Пока ответ не пришёл,
+        // не рисовалось ничего: ни «Моя страница», ни каталог, ни
+        // карточка. На стенде ответ мгновенный, и поломка не показалась
+        // ни разу; на боевой запрос идёт по сети, и вкладка вставала
+        // намертво без единой ошибки в журнале.
+        //
+        // Список нужен только кнопке возврата и только в одном случае из
+        // трёх. Экран не должен ждать его ни секунды: придёт — кнопка
+        // дорисуется сама, реактивное состояние вызовет перерисовку.
         this.coopItems = useState({ list: [] });
-        onWillStart(async () => {
-            try {
-                this.coopItems.list = (await this.coopBoot.get()).sidebar || [];
-            } catch {
+        this.coopBoot
+            .get()
+            .then((data) => {
+                this.coopItems.list = data.sidebar || [];
+            })
+            .catch(() => {
                 // Не пришло — кнопка просто не найдёт раздел по модели.
-                this.coopItems.list = [];
-            }
-        });
+            });
     },
 
     /** Ближайший предок в пути, если он есть. */
@@ -167,19 +180,31 @@ patch(Breadcrumbs.prototype, {
         return подходящие.length === 1 ? подходящие[0] : null;
     },
 
-    /** Что показывает кнопка возврата, или пусто — если её нет. */
+    /**
+     * Что показывает кнопка возврата, или пусто — если её нет.
+     *
+     * Всё вычисление обёрнуто: getter зовётся на каждой отрисовке крошки,
+     * а крошка стоит на каждом экране. Брошенное отсюда исключение — это
+     * не «кнопка не нарисовалась», а сорванная отрисовка всей страницы, и
+     * дальше как повезёт: пустой экран или петля перерисовки. Кнопка
+     * возврата не стоит такой цены — не сосчиталась, значит её нет.
+     */
     get coopBack() {
-        const parent = this.coopParent;
-        if (parent) {
-            return { label: parent.name || "", title: `Назад: ${parent.name || ""}` };
-        }
-        const section = this.coopSection;
-        if (section) {
-            return { label: section.name, title: `В ${section.name}` };
-        }
-        const byModel = this.coopSectionByModel;
-        if (byModel) {
-            return { label: byModel.label, title: `В ${byModel.label}` };
+        try {
+            const parent = this.coopParent;
+            if (parent) {
+                return { label: parent.name || "", title: `Назад: ${parent.name || ""}` };
+            }
+            const section = this.coopSection;
+            if (section) {
+                return { label: section.name, title: `В ${section.name}` };
+            }
+            const byModel = this.coopSectionByModel;
+            if (byModel) {
+                return { label: byModel.label, title: `В ${byModel.label}` };
+            }
+        } catch (ошибка) {
+            console.warn("[крошка] кнопка возврата не сосчиталась:", ошибка);
         }
         return null;
     },
