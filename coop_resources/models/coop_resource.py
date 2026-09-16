@@ -106,7 +106,10 @@ class CoopResource(models.Model):
     """
     _name = 'coop.resource'
     _description = 'Ресурс'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin']
+    # Форм у ресурса три: своя, проектная и токеномическая. Страницей
+    # работает своя, поэтому вид назван явно.
+    _coop_page_view = 'coop_resources.view_coop_resource_form'
     # Порядок в каталоге считается заранее и хранится числом: платное
     # объявление стоит не «выше всех», а на конкретной строке конкретной
     # страницы, и выразить это одним сравнением полей нельзя. Как

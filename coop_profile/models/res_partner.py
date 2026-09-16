@@ -21,7 +21,20 @@ class ResPartner(models.Model):
     счётчик, а их восемь.
     """
 
-    _inherit = 'res.partner'
+    _inherit = ['res.partner', 'coop.page.mixin']
+
+    def _coop_page_view_ref(self):
+        """Страница контакта: у человека своя, у организации своя.
+
+        Полки ведут на контакт с обеих сторон — из друзей на человека, из
+        членства на организацию, — а форма контакта из «Контактов» не
+        годится ни там, ни там. Ссылка на вид организаций мягкая: этот
+        модуль от `coop_orgs` не зависит.
+        """
+        self.ensure_one()
+        if self.is_company:
+            return 'coop_orgs.view_coop_orgs_form'
+        return 'coop_profile.view_coop_profile_form'
 
     coop_offer_count = fields.Integer(
         string='Навыков', compute='_compute_coop_holdings')

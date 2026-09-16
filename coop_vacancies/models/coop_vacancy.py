@@ -23,7 +23,8 @@ class CoopVacancy(models.Model):
     """
     _name = 'coop.vacancy'
     _description = 'Вакансия'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin']
+    _coop_page_view = 'coop_vacancies.view_coop_vacancy_form'
     _order = 'create_date desc, id desc'
 
     name = fields.Char(string='Кто нужен', required=True, tracking=True)

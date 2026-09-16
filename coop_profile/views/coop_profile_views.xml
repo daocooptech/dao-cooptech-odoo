@@ -338,7 +338,8 @@
                 </div>
                 <div class="o_coop_band_body">
                   <field name="coop_friend_ids" readonly="1" nolabel="1">
-                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                    <kanban class="o_coop_band_kanban" records_draggable="false"
+                            action="action_coop_open_page" type="object">
                       <templates>
                         <t t-name="card">
                           <div class="o_coop_mini">
@@ -365,7 +366,8 @@
                 </div>
                 <div class="o_coop_band_body">
                   <field name="coop_offer_ids" readonly="1" nolabel="1">
-                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                    <kanban class="o_coop_band_kanban" records_draggable="false"
+                            action="action_coop_open_page" type="object">
                       <field name="image_512"/>
                       <templates>
                         <t t-name="card">
@@ -393,7 +395,8 @@
                 </div>
                 <div class="o_coop_band_body">
                   <field name="coop_resource_ids" readonly="1" nolabel="1">
-                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                    <kanban class="o_coop_band_kanban" records_draggable="false"
+                            action="action_coop_open_page" type="object">
                       <field name="image_512"/>
                       <templates>
                         <t t-name="card">
@@ -421,7 +424,8 @@
                 </div>
                 <div class="o_coop_band_body">
                   <field name="coop_vacancy_ids" readonly="1" nolabel="1">
-                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                    <kanban class="o_coop_band_kanban" records_draggable="false"
+                            action="action_coop_open_page" type="object">
                       <field name="city"/>
                       <templates>
                         <t t-name="card">
@@ -452,7 +456,8 @@
                 </div>
                 <div class="o_coop_band_body">
                   <field name="coop_project_ids" readonly="1" nolabel="1">
-                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                    <kanban class="o_coop_band_kanban" records_draggable="false"
+                            action="action_coop_open_page" type="object">
                       <field name="image_512"/>
                       <field name="readiness"/>
                       <templates>
@@ -491,7 +496,8 @@
                 </div>
                 <div class="o_coop_band_body">
                   <field name="coop_need_ids" readonly="1" nolabel="1">
-                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                    <kanban class="o_coop_band_kanban" records_draggable="false"
+                            action="action_coop_open_page" type="object">
                       <field name="state"/>
                       <templates>
                         <t t-name="card">
@@ -531,7 +537,7 @@
                   -->
                   <field name="coop_active_membership_ids" readonly="1" nolabel="1">
                     <kanban class="o_coop_band_kanban" records_draggable="false"
-                            action="action_coop_open_organization" type="object">
+                            action="action_coop_open_page" type="object">
                       <field name="organization_id"/>
                       <field name="role"/>
                       <templates>
@@ -564,7 +570,8 @@
                 <div class="o_coop_band_body">
                   <field name="coop_community_member_ids" readonly="1" nolabel="1"
                          domain="[('state', '=', 'active')]">
-                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                    <kanban class="o_coop_band_kanban" records_draggable="false"
+                            action="action_coop_open_page" type="object">
                       <field name="community_id"/>
                       <field name="role"/>
                       <templates>

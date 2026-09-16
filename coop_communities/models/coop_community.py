@@ -15,7 +15,8 @@ class CoopCommunity(models.Model):
 
     _name = 'coop.community'
     _description = 'Сообщество'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin']
+    _coop_page_view = 'coop_communities.view_coop_community_form'
     # Крупные сообщества выше: в каталоге без сортировки первым идёт
     # последнее заведённое, а это чаще всего пустая новая группа.
     _order = 'member_count desc, id desc'
@@ -344,7 +345,12 @@ class CoopCommunityMember(models.Model):
 
     _name = 'coop.community.member'
     _description = 'Участие в сообществе'
-    _inherit = ['mail.thread']
+    _inherit = ['mail.thread', 'coop.page.mixin']
+
+    # Как и членство в организации: карточка в полке показывает
+    # сообщество, а запись под ней — участие.
+    _coop_page_field = 'community_id'
+    _coop_page_view = 'coop_communities.view_coop_community_form'
     _order = 'create_date desc, id desc'
 
     community_id = fields.Many2one(

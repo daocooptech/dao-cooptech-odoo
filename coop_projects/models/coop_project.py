@@ -157,7 +157,8 @@ class CoopProject(models.Model):
     """
     _name = 'coop.project'
     _description = 'Проект (краудресурсинг)'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin']
+    _coop_page_view = 'coop_projects.view_coop_project_form'
     # Не по готовности: собранных проектов больше семидесяти, и при
     # сортировке по готовности вся первая страница каталога — сплошь
     # стопроцентные полосы. Со стороны это выглядит так, будто полоса
