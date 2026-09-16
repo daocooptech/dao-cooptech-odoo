@@ -25,23 +25,28 @@ class ResPartner(models.Model):
             partner.coop_member_since = дата
 
     @api.model
-    def action_coop_open_settings(self):
+    def action_coop_open_settings(self, view_xmlid='coop_settings.view_coop_settings_account_form',
+                                  name=None):
         """Настройки — свои, и решается это при каждом открытии.
 
         Серверным действием, а не окном с доменом, по той же причине, что
         и «Моя страница»: от чьего имени человек действует, того и
         настройки. Переключил себя на организацию — открываются настройки
         организации.
+
+        Вкладка передаётся внешним именем представления: вкладки раздела
+        собираются из пунктов меню, у каждого своё действие, а код у них
+        один.
         """
         partner = self.env.user._coop_acting_partner()
+        view = self.env.ref(view_xmlid, raise_if_not_found=False)
         return {
             'type': 'ir.actions.act_window',
-            'name': _('Настройки'),
+            'name': name or _('Настройки'),
             'res_model': 'res.partner',
             'res_id': partner.id,
             'view_mode': 'form',
-            'views': [(self.env.ref('coop_settings.view_coop_settings_account_form').id,
-                       'form')],
+            'views': [(view.id if view else False, 'form')],
             'target': 'current',
             'context': {'coop_settings': True},
         }

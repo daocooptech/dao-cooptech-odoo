@@ -264,10 +264,15 @@ patch(ControlPanel.prototype, {
         // Владелец 16 сентября 2026: «это одна и та же страница, для чего
         // так». Вкладки называют разделы витрины и место им на витрине;
         // из карточки наружу ведёт путь и кнопка возврата.
-        if (this.env.config?.viewType === "form") {
-            return false;
-        }
         const context = this.env.searchModel?.globalContext || {};
+        if (this.env.config?.viewType === "form") {
+            // Кроме настроек: там сам раздел собран из карточек — вкладка
+            // «Аккаунт» и есть экран, а не витрина записей. Признак на
+            // действии, а не угадывание по виду: карточка аукциона и
+            // экран настроек — оба формы, и различить их можно только
+            // тем, что про них сказано.
+            return Boolean(context.coop_settings);
+        }
         return Boolean(context.coop_catalog || context.coop_section);
     },
 

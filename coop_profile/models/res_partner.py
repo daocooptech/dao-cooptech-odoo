@@ -36,6 +36,30 @@ class ResPartner(models.Model):
             return 'coop_orgs.view_coop_orgs_form'
         return 'coop_profile.view_coop_profile_form'
 
+    # ── Что показывать на своей странице ─────────────────────────────
+    #
+    # Пять переключателей, а не один «закрытый профиль»: человек охотно
+    # показывает, что умеет, и не охотно — сколько у него денег. Каждый
+    # относится к своей полосе страницы, и каждый действует сразу — полоса
+    # просто не рисуется. Настройка, которая ничего не меняет, хуже её
+    # отсутствия.
+    #
+    # По умолчанию показывается всё, кроме баланса: остаток на счету —
+    # единственное, что человек обычно не готов показывать посторонним, и
+    # умолчание здесь важнее свободы выбора.
+    coop_show_balance = fields.Boolean(
+        string='Показывать баланс', default=False,
+        help='Остаток на счету виден посторонним. Сами операции не видны '
+             'никогда — только вам.')
+    coop_show_trust = fields.Boolean(
+        string='Показывать уровень доверия', default=True)
+    coop_show_deals = fields.Boolean(
+        string='Показывать число сделок', default=True)
+    coop_show_friends = fields.Boolean(
+        string='Показывать друзей', default=True)
+    coop_show_followers = fields.Boolean(
+        string='Показывать подписчиков', default=True)
+
     coop_offer_count = fields.Integer(
         string='Навыков', compute='_compute_coop_holdings')
     coop_resource_count = fields.Integer(

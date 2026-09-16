@@ -102,7 +102,10 @@
                   нему решают, иметь ли с человеком дело. Ссылка ведёт в
                   реестр сделок: там видно, из чего оно сложилось.
                 -->
-                <div>Уровень доверия:
+                <!-- Переключатели приватности действуют на чужом
+                     взгляде, себе видно всё: настройка про то, что
+                     показывают другим, а не про то, что видишь сам. -->
+                <div invisible="not coop_is_self and not coop_show_trust">Уровень доверия:
                   <b><field name="coop_trust" nolabel="1" readonly="1"/>%</b>
                   <!-- Дробь — как в макете, короткой записью: колонка
                        узкая, а расшифровка живёт в подсказке рядом. -->
@@ -131,15 +134,15 @@
                   выглядят как сбой. Отметка осталась в строке доверия —
                   она про отзывы, а не про количество.
                 -->
-                <div>Сделки:
+                <div invisible="not coop_is_self and not coop_show_deals">Сделки:
                   <b><field name="coop_deal_count" nolabel="1" readonly="1"/></b>
                   <button name="action_coop_my_deals" type="object"
                           class="o_coop_stat_note">реестр сделок →</button>
                 </div>
-                <div invisible="not coop_follower_count">Подписчиков:
+                <div invisible="not coop_follower_count or (not coop_is_self and not coop_show_followers)">Подписчиков:
                   <b><field name="coop_follower_count" nolabel="1" readonly="1"/></b>
                 </div>
-                <div invisible="not coop_friend_count">Друзей:
+                <div invisible="not coop_friend_count or (not coop_is_self and not coop_show_friends)">Друзей:
                   <b><field name="coop_friend_count" nolabel="1" readonly="1"/></b>
                 </div>
               </div>
@@ -264,6 +267,12 @@
                 </span>
               </div>
               <div class="o_coop_role">
+                <!-- Признаки приватности: условия выше считаются по ним. -->
+                <field name="coop_show_trust" invisible="1"/>
+                <field name="coop_show_deals" invisible="1"/>
+                <field name="coop_show_balance" invisible="1"/>
+                <field name="coop_show_friends" invisible="1"/>
+                <field name="coop_show_followers" invisible="1"/>
                 <field name="coop_specialization_id"
                        readonly="not coop_is_self"
                        placeholder="Чем занимаетесь"/>
@@ -330,7 +339,8 @@
                 из них пустуют со стрелками, которые нечего листать —
                 страница читается как недогрузившаяся.
               -->
-              <div class="o_coop_band" invisible="not coop_friend_ids">
+              <div class="o_coop_band"
+                   invisible="not coop_friend_ids or (not coop_is_self and not coop_show_friends)">
                 <div class="o_coop_band_head">
                   <span>Друзья</span>
                   <button name="action_coop_my_friends" type="object"

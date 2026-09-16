@@ -108,9 +108,113 @@
     <field name="code">action = model.action_coop_open_settings()</field>
   </record>
 
+  <!--
+    Приватность: что из страницы видно посторонним.
+
+    Пять переключателей, а не один «закрытый профиль»: человек охотно
+    показывает, что умеет, и неохотно — сколько у него денег. Каждый
+    действует сразу: полоса просто не рисуется.
+
+    «Кто видит мою страницу» и «чёрный список» из макета сюда пока не
+    входят: первое — правило видимости записи, второе — работа в
+    переписке, и то и другое не экран, а поведение. Рисовать их раньше,
+    чем они действуют, значит обещать несуществующее.
+  -->
+  <record id="view_coop_settings_privacy_form" model="ir.ui.view">
+    <field name="name">coop.settings.privacy.form</field>
+    <field name="model">res.partner</field>
+    <field name="priority">101</field>
+    <field name="arch" type="xml">
+      <form string="Приватность" create="false" duplicate="false"
+            class="o_coop_profile o_coop_settings">
+        <sheet>
+          <div class="oe_title">
+            <h1>Приватность</h1>
+          </div>
+          <div class="o_coop_band">
+            <div class="o_coop_band_head">
+              <span>Что показывать в профиле</span>
+            </div>
+            <div class="o_coop_band_body">
+              <group>
+                <field name="coop_show_trust"/>
+                <field name="coop_show_deals"/>
+                <field name="coop_show_balance"/>
+                <field name="coop_show_friends"/>
+                <field name="coop_show_followers"/>
+              </group>
+              <div class="text-muted">
+                Сами операции по счёту не видны никому, кроме вас, — и это
+                не настройка, а устройство платформы.
+              </div>
+            </div>
+          </div>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!--
+    Язык и регион. Вкладка «Профиль» из макета сюда не переносится: имя,
+    специализация, контакты правятся на самой карточке по месту (решение
+    владельца 332), и второе место для тех же полей их бы рассинхронило.
+  -->
+  <record id="view_coop_settings_region_form" model="ir.ui.view">
+    <field name="name">coop.settings.region.form</field>
+    <field name="model">res.users</field>
+    <field name="priority">100</field>
+    <field name="arch" type="xml">
+      <form string="Язык и регион" create="false" duplicate="false"
+            class="o_coop_profile o_coop_settings">
+        <sheet>
+          <div class="oe_title">
+            <h1>Язык и регион</h1>
+          </div>
+          <div class="o_coop_band">
+            <div class="o_coop_band_head">
+              <span>Язык и часовой пояс</span>
+            </div>
+            <div class="o_coop_band_body">
+              <group>
+                <field name="lang"/>
+                <field name="tz"/>
+              </group>
+              <div class="text-muted">
+                Часовой пояс решает, в котором часу вы видите время торгов,
+                сроки заявок и отметки сообщений.
+              </div>
+            </div>
+          </div>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_coop_settings_privacy" model="ir.actions.server">
+    <field name="name">Приватность</field>
+    <field name="path">my-privacy</field>
+    <field name="model_id" ref="base.model_res_partner"/>
+    <field name="state">code</field>
+    <field name="code">action = model.action_coop_open_settings('coop_settings.view_coop_settings_privacy_form', 'Приватность')</field>
+  </record>
+
+  <record id="action_coop_settings_region" model="ir.actions.server">
+    <field name="name">Язык и регион</field>
+    <field name="path">my-region</field>
+    <field name="model_id" ref="base.model_res_users"/>
+    <field name="state">code</field>
+    <field name="code">action = model.action_coop_open_region_settings()</field>
+  </record>
+
   <menuitem id="menu_coop_settings_root" name="Настройки" sequence="950"/>
   <menuitem id="menu_coop_settings_account" name="Аккаунт"
             parent="menu_coop_settings_root" action="action_coop_settings"
             sequence="10"/>
+  <menuitem id="menu_coop_settings_privacy" name="Приватность"
+            parent="menu_coop_settings_root" action="action_coop_settings_privacy"
+            sequence="20"/>
+  <menuitem id="menu_coop_settings_region" name="Язык и регион"
+            parent="menu_coop_settings_root" action="action_coop_settings_region"
+            sequence="30"/>
 
 </odoo>
