@@ -205,9 +205,17 @@ class CoopTokenClaim(models.Model):
 
     @api.depends('resource_id.name', 'quantity', 'unit_label', 'delivery_date')
     def _compute_display_name(self):
+        # Название предмета — от имени узла.
+        #
+        # Требование торгуется и видно всем, а объявление под ним живёт по
+        # своим правилам видимости: снятое с публикации или чужой черновик
+        # участнику не показывается. Имя при этом печатается везде, где
+        # требование упоминается — в стакане, в сделке, в списке, — и
+        # прямое чтение роняло весь экран ошибкой доступа вместо строки
+        # «Без объявления».
         for record in self:
             record.display_name = '%s — %g %s до %s' % (
-                record.resource_id.name or _('Без объявления'),
+                record.resource_id.sudo().name or _('Без объявления'),
                 record.quantity,
                 record.unit_label or '',
                 record.delivery_date and record.delivery_date.strftime('%d.%m.%Y') or '—',
