@@ -22,7 +22,8 @@
     'category': 'Cooperative',
     'version': '19.0.1.0.0',
     'license': 'LGPL-3',
-    'depends': ['coop_base', 'coop_theme', 'coop_people', 'coop_profile', 'mail'],
+    'depends': ['coop_base', 'coop_theme', 'coop_people', 'coop_profile',
+                'coop_orgs', 'mail'],
     'data': [
         'views/coop_settings_views.xml',
     ],

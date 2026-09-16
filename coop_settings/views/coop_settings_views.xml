@@ -25,7 +25,15 @@
             <h1>Настройки</h1>
           </div>
 
-          <div class="o_coop_band">
+          <field name="is_company" invisible="1"/>
+
+          <!--
+            Организация не «состоит» — в ней состоят. Поэтому у человека
+            здесь его членства, у организации её состав, и это две разные
+            полосы, а не одна с переименованным заголовком: в них разные
+            столбцы и разный смысл строки.
+          -->
+          <div class="o_coop_band" invisible="is_company">
             <div class="o_coop_band_head">
               <span>Членство и статус</span>
             </div>
@@ -56,6 +64,42 @@
             </div>
           </div>
 
+          <div class="o_coop_band" invisible="not is_company">
+            <div class="o_coop_band_head">
+              <span>Сведения и состав</span>
+            </div>
+            <div class="o_coop_band_body">
+              <!--
+                Реквизиты только для чтения: правятся они на самой
+                карточке организации по месту (решение владельца 332), и
+                второе место для тех же полей их бы рассинхронило. Здесь
+                они стоят справкой — по ним видно, чем организация
+                подтверждена.
+              -->
+              <group>
+                <field name="coop_legal_form_id" readonly="1"/>
+                <field name="coop_inn" readonly="1"/>
+                <field name="coop_ogrn" readonly="1"/>
+                <field name="coop_registered_on" readonly="1"/>
+                <field name="coop_member_count" readonly="1"/>
+              </group>
+              <field name="coop_member_ids" readonly="1" nolabel="1"
+                     invisible="not coop_member_ids">
+                <list string="Состав" create="false" delete="false">
+                  <field name="partner_id"/>
+                  <field name="role"/>
+                  <field name="job_title" optional="show"/>
+                  <field name="joined_on"/>
+                  <field name="state"/>
+                  <field name="has_vote" optional="hide"/>
+                </list>
+              </field>
+              <div class="text-muted" invisible="coop_member_ids">
+                В организации пока никто не состоит.
+              </div>
+            </div>
+          </div>
+
           <div class="o_coop_band">
             <div class="o_coop_band_head">
               <span>Подтверждения</span>
@@ -80,9 +124,13 @@
                   <field name="confirmed_by_id" optional="hide"/>
                 </list>
               </field>
-              <div class="text-muted" invisible="coop_verification_ids">
+              <div class="text-muted" invisible="coop_verification_ids or is_company">
                 Подтверждений пока нет. Пока не подтверждён хотя бы контакт,
                 на платформе можно только смотреть.
+              </div>
+              <div class="text-muted" invisible="coop_verification_ids or not is_company">
+                Сведения организации ещё не сверены с реестром. Сверку
+                проводит правление узла.
               </div>
             </div>
           </div>
