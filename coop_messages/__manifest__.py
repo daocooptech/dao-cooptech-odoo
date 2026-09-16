@@ -24,6 +24,7 @@
     'license': 'LGPL-3',
     'depends': ['mail', 'coop_base', 'coop_theme'],
     'data': [
+        'security/coop_channel_rules.xml',
         'views/coop_messages_views.xml',
     ],
     'assets': {
