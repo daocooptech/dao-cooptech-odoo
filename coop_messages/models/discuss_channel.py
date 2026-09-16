@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
+import logging
+
 from odoo import api, fields, models
 from odoo.addons.mail.tools.discuss import Store
+
+_logger = logging.getLogger(__name__)
 
 
 class DiscussChannel(models.Model):
@@ -62,6 +66,15 @@ class DiscussChannel(models.Model):
     coop_pinned = fields.Boolean(
         string='Закреплена',
         help='Закреплённые переписки идут первыми в списке.')
+
+    coop_managed = fields.Boolean(
+        string='Состав ведёт платформа', index=True,
+        help='У переписки, заведённой платформой, состав следует за '
+             'составом записи: стороны сделки, участники проекта, '
+             'пайщики кооператива. '
+             'У остальных переписок состав ведёт тот, кто их завёл: '
+             'решение владельца 328 — у одной организации чатов может '
+             'быть сколько угодно, и платформа в них не вмешивается.')
 
     @api.depends('channel_type', 'coop_res_model')
     def _compute_coop_kind(self):
@@ -126,6 +139,45 @@ class DiscussChannel(models.Model):
                 'coop_subtitle': ' · '.join(parts) or False,
             })
         return channels
+
+    # Модели, чьи переписки ведёт платформа. Списком, а не цепочкой
+    # условий: новый раздел добавляется одной строкой.
+    MANAGED_MODELS = ('coop.deal', 'coop.project')
+
+    @api.model
+    def coop_resync_managed(self):
+        """Привести состав переписок платформы к составу записей.
+
+        Зовётся при обновлении модуля, как пересборка бокового меню:
+        правило состава живёт в коде, а записи участников — в базе, и
+        разойтись они могут от любой правки мимо платформы. Разовый
+        прогон дешевле расследования «почему человек не видит свою
+        сделку».
+
+        Заодно проставляется признак «состав ведёт платформа»: до 16
+        сентября 2026 его не было, и переписки, заведённые платформой, от
+        заведённых руками ничем не отличались.
+        """
+        Каналы = self.sudo()
+        сведено = {'каналов': 0, 'добавлено': 0, 'убрано': 0}
+        for модель in self.MANAGED_MODELS:
+            if модель not in self.env:
+                continue
+            Модель = self.env[модель].sudo()
+            for канал in Каналы.search([('coop_res_model', '=', модель)]):
+                запись = Модель.browse(канал.coop_res_id)
+                if not запись.exists():
+                    continue
+                канал.coop_managed = True
+                добавлено, убрано = запись._coop_apply_members(
+                    канал, запись._coop_channel_partners())
+                сведено['каналов'] += 1
+                сведено['добавлено'] += добавлено
+                сведено['убрано'] += убрано
+        _logger.info(
+            'Состав переписок сведён с записями: каналов %(каналов)s, '
+            'добавлено %(добавлено)s, убрано %(убрано)s', сведено)
+        return True
 
     def _to_store_defaults(self, target: Store.Target):
         """Наши поля уезжают на клиент вместе с каналом.

@@ -22,10 +22,11 @@
     'category': 'Cooperative',
     'version': '19.0.1.0.0',
     'license': 'LGPL-3',
-    'depends': ['mail', 'coop_base', 'coop_theme'],
+    'depends': ['mail', 'coop_base', 'coop_theme', 'coop_deals', 'coop_projects'],
     'data': [
         'security/coop_channel_rules.xml',
         'views/coop_messages_views.xml',
+        'data/coop_channel_resync.xml',
     ],
     'assets': {
         'web.assets_backend': [
