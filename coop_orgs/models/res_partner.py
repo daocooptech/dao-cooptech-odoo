@@ -131,8 +131,16 @@ class ResPartner(models.Model):
     coop_related_org_ids = fields.Many2many(
         'res.partner', string='Связанные организации',
         compute='_compute_coop_related_orgs')
+    # Своим вычислением, а не вместе со связями.
+    #
+    # Оба поля считались одним методом: связи и счётчик проектов «одним
+    # проходом». При чтении связей движок вычисляет только их, а
+    # присваивание счётчика оказывается вне вычисления — и уходит
+    # **записью** в карточку. Участнику писать в чужую организацию
+    # нельзя, и карточка отвечала «нет доступа „запись“ к Контактам»:
+    # человек не мог открыть ни одну организацию.
     coop_project_count = fields.Integer(
-        string='Проектов', compute='_compute_coop_related_orgs')
+        string='Проектов', compute='_compute_coop_project_count')
 
     @api.depends('coop_org_link_ids.confirmed', 'coop_org_backlink_ids.confirmed')
     def _compute_coop_related_orgs(self):
@@ -146,6 +154,18 @@ class ResPartner(models.Model):
         стороной, — это её заявление, а не факт. Иначе кто угодно
         объявил бы себя учредителем чужого кооператива.
         """
+        for record in self:
+            прямые = record.coop_org_link_ids.filtered('confirmed')
+            обратные = record.coop_org_backlink_ids.filtered('confirmed')
+            record.coop_related_org_ids = (
+                прямые.mapped('other_id') | обратные.mapped('org_id'))
+
+    def _compute_coop_project_count(self):
+        """Сколько проектов ведёт организация.
+
+        Через sudo: число проектов — публичная величина, она стоит на
+        карточке у всех, и права на сами проекты тут ни при чём.
+        """
         Project = self.env['coop.project'].sudo()
         счёт = {}
         if self.ids:
@@ -154,10 +174,6 @@ class ResPartner(models.Model):
                     groupby=['partner_id'], aggregates=['__count']):
                 счёт[организация.id] = число
         for record in self:
-            прямые = record.coop_org_link_ids.filtered('confirmed')
-            обратные = record.coop_org_backlink_ids.filtered('confirmed')
-            record.coop_related_org_ids = (
-                прямые.mapped('other_id') | обратные.mapped('org_id'))
             record.coop_project_count = счёт.get(record.id, 0)
     coop_has_members = fields.Boolean(
         string='Форма предполагает членство',
