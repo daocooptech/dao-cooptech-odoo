@@ -48,19 +48,27 @@ class CoopDeal(models.Model):
             люди |= self.author_id
         return люди
 
-    def _coop_channel_values(self):
-        """Название переписки — номер сделки и предмет, как в списке.
+    # Состояния, в которых сделке ещё есть о чём говорить. Решение
+    # владельца 16 сентября 2026: переписку заводим только действующим —
+    # завершённой и отменённой она больше не нужна, а заводить её задним
+    # числом пяти сотням закрытых сделок значит засыпать список мёртвыми
+    # разговорами.
+    ЖИВЫЕ_СОСТОЯНИЯ = ('draft', 'agreed', 'active', 'acceptance', 'disputed')
 
-        Подпись под названием — стороны: в списке переписок по ней
-        отличают одну поставку от другой, не открывая.
-        """
+    def _coop_channel_specs(self):
+        """Одна переписка на сделку: номер и предмет в названии, стороны
+        в подписи — по ней в списке отличают одну поставку от другой, не
+        открывая."""
         self.ensure_one()
-        return {
+        if self.state not in self.ЖИВЫЕ_СОСТОЯНИЯ:
+            return []
+        return [{
+            'kind': 'deal',
             'name': self.display_name,
-            'coop_kind': 'deal',
-            'coop_subtitle': ' · '.join(filter(None, [
+            'subtitle': ' · '.join(filter(None, [
                 self.party_a_id.display_name, self.party_b_id.display_name])),
-        }
+            'partners': self._coop_channel_partners(),
+        }]
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -84,4 +92,9 @@ class CoopDeal(models.Model):
         res = super().write(vals)
         if {'party_a_id', 'party_b_id', 'author_id'} & set(vals):
             self._coop_sync_channels()
+        # Сделка ожила — переписка нужна: из переговоров в исполнение
+        # сделка попадает и без нашего участия, загрузкой данных или
+        # переносом.
+        if 'state' in vals:
+            self._coop_ensure_channel()
         return res

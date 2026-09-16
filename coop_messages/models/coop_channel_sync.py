@@ -32,7 +32,21 @@ class CoopChannelSync(models.AbstractModel):
     _name = 'coop.channel.sync'
     _description = 'Состав переписки по составу записи'
 
-    def _coop_channels(self):
+    def _coop_channel_specs(self):
+        """Какие переписки ведёт платформа у этой записи.
+
+        Список, а не одна: у кооператива их две — рабочая для сотрудников
+        и отдельная для пайщиков, и составы у них разные. Каждая
+        спецификация — вид переписки, название, подпись и состав:
+
+            [{'kind': 'org', 'name': …, 'subtitle': …, 'partners': …}]
+
+        Вид служит и различителем: по нему переписка находится среди
+        других переписок той же записи.
+        """
+        return []
+
+    def _coop_channels(self, kind=None):
         """Переписки этой записи, состав которых ведёт платформа.
 
         Ищутся обратной ссылкой, а не полем на записи: у одной записи
@@ -43,49 +57,46 @@ class CoopChannelSync(models.AbstractModel):
         self.ensure_one()
         if not self.id:
             return self.env['discuss.channel']
-        return self.env['discuss.channel'].sudo().search([
+        условие = [
             ('coop_res_model', '=', self._name),
             ('coop_res_id', '=', self.id),
             ('coop_managed', '=', True),
-        ])
+        ]
+        if kind:
+            условие.append(('coop_kind', '=', kind))
+        return self.env['discuss.channel'].sudo().search(условие)
 
     def _coop_channel_partners(self):
-        """Кто должен состоять в переписке. Переопределяется.
+        """Состав единственной переписки. Устаревшая точка входа.
 
-        Возвращает `res.partner` — людей, а не организации: у организации
-        нет учётной записи, и канал с одной организацией в составе не
-        читает никто.
+        Оставлена для моделей с одной перепиской: они переопределяют её,
+        а спецификацию собирает эта примесь.
         """
         return self.env['res.partner']
 
-    def _coop_channel_values(self):
-        """Чем заполнить новую переписку. Переопределяется."""
-        self.ensure_one()
-        return {}
-
     def _coop_ensure_channel(self):
-        """Завести переписку записи, если её ещё нет.
+        """Завести недостающие переписки записи.
 
-        Заводится групповой, а не разговором двоих: движок в переписку
-        двоих не пускает третьего и вид её менять запрещает — а состав
-        по записи меняется (сторона поменяла представителя, в проект
-        приняли вклад).
+        Заводятся групповыми, а не разговором двоих: движок в переписку
+        двоих не пускает третьего и вид её менять запрещает — а состав по
+        записи меняется (сторона поменяла представителя, в проект приняли
+        вклад, в кооператив вступил пайщик).
         """
         Channel = self.env['discuss.channel'].sudo()
         заведено = self.env['discuss.channel']
         for record in self:
-            if record._coop_channels():
-                continue
-            значения = record._coop_channel_values()
-            if not значения:
-                continue
-            значения.update({
-                'channel_type': 'group',
-                'coop_res_model': record._name,
-                'coop_res_id': record.id,
-                'coop_managed': True,
-            })
-            заведено |= Channel.create(значения)
+            for спец in record._coop_channel_specs():
+                if record._coop_channels(спец['kind']):
+                    continue
+                заведено |= Channel.create({
+                    'name': спец['name'],
+                    'coop_kind': спец['kind'],
+                    'coop_subtitle': спец.get('subtitle') or False,
+                    'channel_type': 'group',
+                    'coop_res_model': record._name,
+                    'coop_res_id': record.id,
+                    'coop_managed': True,
+                })
         return заведено
 
     def _coop_sync_channels(self):
@@ -96,12 +107,9 @@ class CoopChannelSync(models.AbstractModel):
         ровно до того, как об этом узнает эта строка.
         """
         for record in self:
-            каналы = record._coop_channels()
-            if not каналы:
-                continue
-            должны = record._coop_channel_partners()
-            for канал in каналы:
-                record._coop_apply_members(канал, должны)
+            for спец in record._coop_channel_specs():
+                for канал in record._coop_channels(спец['kind']):
+                    record._coop_apply_members(канал, спец['partners'])
         return True
 
     @api.model

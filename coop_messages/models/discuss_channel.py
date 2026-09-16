@@ -28,6 +28,7 @@ class DiscussChannel(models.Model):
         ('person', 'Личная'),
         ('deal', 'Сделка'),
         ('org', 'Организация'),
+        ('shareholders', 'Пайщики'),
         ('project', 'Проект'),
         ('community', 'Сообщество'),
         ('service', 'Сервис'),
@@ -142,7 +143,13 @@ class DiscussChannel(models.Model):
 
     # Модели, чьи переписки ведёт платформа. Списком, а не цепочкой
     # условий: новый раздел добавляется одной строкой.
-    MANAGED_MODELS = ('coop.deal', 'coop.project')
+    MANAGED_MODELS = ('coop.deal', 'coop.project', 'res.partner')
+
+    # Виды переписок, которые ведёт платформа. Личная переписка тоже
+    # ссылается на человека, и по одной лишь модели записи её от рабочего
+    # чата организации не отличить: пометив по модели, я записал в
+    # «ведёт платформа» все сорок шесть личных.
+    MANAGED_KINDS = ('deal', 'project', 'org', 'shareholders')
 
     @api.model
     def coop_resync_managed(self):
@@ -160,17 +167,40 @@ class DiscussChannel(models.Model):
         """
         Каналы = self.sudo()
         сведено = {'каналов': 0, 'добавлено': 0, 'убрано': 0}
+        # Снять пометку с того, что платформа не ведёт: личные переписки
+        # пометились по ошибке, когда признак ставился по модели записи.
+        чужие = Каналы.search([('coop_managed', '=', True),
+                               ('coop_kind', 'not in', list(self.MANAGED_KINDS))])
+        if чужие:
+            чужие.write({'coop_managed': False})
         for модель in self.MANAGED_MODELS:
             if модель not in self.env:
                 continue
             Модель = self.env[модель].sudo()
-            for канал in Каналы.search([('coop_res_model', '=', модель)]):
+            # Сначала помечаем уже заведённые: до 16 сентября 2026
+            # признака не было, и переписки платформы от заведённых
+            # руками ничем не отличались.
+            свои = Каналы.search([('coop_res_model', '=', модель),
+                                  ('coop_kind', 'in', self.MANAGED_KINDS),
+                                  ('coop_managed', '=', False)])
+            if свои:
+                свои.write({'coop_managed': True})
+            # Потом заводим недостающие и сводим составы. Порядок важен:
+            # заведение ищет переписку по признаку, и без пометки выше
+            # оно завело бы вторую рядом с существующей.
+            записи = Модель.search([])
+            записи._coop_ensure_channel()
+            for канал in Каналы.search([('coop_res_model', '=', модель),
+                                        ('coop_kind', 'in', self.MANAGED_KINDS)]):
                 запись = Модель.browse(канал.coop_res_id)
                 if not запись.exists():
                     continue
-                канал.coop_managed = True
+                спецификации = {с['kind']: с for с in запись._coop_channel_specs()}
+                спец = спецификации.get(канал.coop_kind)
+                if not спец:
+                    continue
                 добавлено, убрано = запись._coop_apply_members(
-                    канал, запись._coop_channel_partners())
+                    канал, спец['partners'])
                 сведено['каналов'] += 1
                 сведено['добавлено'] += добавлено
                 сведено['убрано'] += убрано

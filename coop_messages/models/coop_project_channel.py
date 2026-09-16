@@ -21,14 +21,15 @@ class CoopProject(models.Model):
         люди |= вклады.mapped('partner_id')
         return люди.coop_power_holders('represent')
 
-    def _coop_channel_values(self):
-        """Название переписки — название проекта, как в каталоге."""
+    def _coop_channel_specs(self):
+        """Одна переписка на проект: название — как в каталоге."""
         self.ensure_one()
-        return {
+        return [{
+            'kind': 'project',
             'name': self.name,
-            'coop_kind': 'project',
-            'coop_subtitle': self.city or False,
-        }
+            'subtitle': self.city or False,
+            'partners': self._coop_channel_partners(),
+        }]
 
     @api.model_create_multi
     def create(self, vals_list):
