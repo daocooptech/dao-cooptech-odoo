@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!--
+    Кнопка возврата. Подпись рисуется всегда, но на широком экране
+    скрывается стилями: там справа стоит весь путь и говорит, куда
+    ведёт стрелка. На телефоне пути нет, и без подписи стрелка отвечает
+    «назад», но не отвечает «куда» — а на третьем уровне это и есть
+    главный вопрос.
+  -->
+  <t t-name="coop_theme.BackButton">
+    <button t-if="coopBack" type="button" class="o_coop_back"
+            t-att-title="coopBack.title" t-att-aria-label="coopBack.title"
+            data-hotkey="b"
+            t-on-click="() => this.coopGoBack()">
+      <i class="oi oi-arrow-left" role="img" aria-hidden="true"/>
+      <span class="o_coop_back_label" t-esc="coopBack.label"/>
+    </button>
+  </t>
+
+  <t t-name="coop_theme.Breadcrumbs" t-inherit="web.Breadcrumbs" t-inherit-mode="extension">
+
+    <!--
+      Кнопка — первой в полосе, до пути.
+    -->
+    <xpath expr="//t[@t-if='env.isSmall']" position="before">
+      <t t-call="coop_theme.BackButton"/>
+    </xpath>
+
+    <!--
+      Штатная стрелка убирается. Не удалением узла, а условием: за ним
+      идёт `t-else` с самим путём, и без `t-if` перед ним шаблон не
+      собрался бы вовсе.
+
+      Так путь рисуется на всех ширинах, а прячется на узком экране
+      стилями — одно место вместо двух, расходящихся на 767 точках.
+    -->
+    <xpath expr="//t[@t-if='env.isSmall']" position="attributes">
+      <attribute name="t-if">false</attribute>
+    </xpath>
+
+    <!--
+      Вторая ветка шаблона: крошка одна, предков нет. Кнопка нужна и
+      здесь — это случай прямой ссылки на запись, откуда наружу не ведёт
+      ничего.
+    -->
+    <xpath expr="//div[hasclass('o_last_breadcrumb_item')][hasclass('fs-4')]" position="before">
+      <t t-call="coop_theme.BackButton"/>
+    </xpath>
+
+  </t>
+
+</templates>

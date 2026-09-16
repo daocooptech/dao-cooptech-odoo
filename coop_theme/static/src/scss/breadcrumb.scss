@@ -1,0 +1,181 @@
+// ── Путь и кнопка возврата ───────────────────────────────────────────
+//
+// Вложенность на платформе настоящая с тех пор, как полки ведут на
+// страницы: «Моя страница → организация → состав → членство». Путь
+// показывает, где человек находится и куда вернуться; кнопка возвращает
+// на шаг.
+//
+// Размеры взяты из макета — из класса `.crumb` в `styles.css`, который
+// там объявлен и не использован ни на одной странице: кегль 12.5,
+// цвет `--slate`, отступ снизу 18. Своей навигации вложенности в макете
+// нет вовсе, так что это ближайшее к «как было бы нарисовано».
+
+.o_control_panel_breadcrumbs {
+  // Строка не прыгает, когда путь дорисовывается: без заданной высоты
+  // содержимое страницы при каждом переходе уезжает вниз на высоту
+  // строки и возвращается.
+  min-height: 28px;
+}
+
+.o_breadcrumb {
+  // Движок раскладывает полосу колонкой (`flex-md-column`): сверху путь,
+  // снизу имя открытой страницы. Имя мы прячем — оно стоит заголовком, —
+  // и в колонке остаются кнопка возврата и путь друг под другом, тремя
+  // строками вместе с шестерёнкой. Со строкой всё встаёт в один ряд, как
+  // и задумано. Утилита объявлена с `!important`, поэтому и здесь без
+  // него не обойтись.
+  &:has(.o_coop_back) {
+    flex-direction: row !important;
+    align-items: center;
+  }
+
+  .breadcrumb {
+    // Фон крошки движок задаёт белым литералом прямо на `.breadcrumb`.
+    // В тёмной теме это уже снято (`dark.scss`), но правило там — про
+    // тёмную; на светлой белая полоса внутри белой панели не видна и
+    // потому не мешала, а лишней остаётся всё равно.
+    --breadcrumb-bg: transparent;
+    --breadcrumb-divider: "→";
+    --breadcrumb-divider-color: var(--coop-slate-light, #8a8a80);
+    --breadcrumb-item-padding-x: 8px;
+
+    font: 400 12.5px/1.4 'Manrope', sans-serif;
+  }
+
+  .breadcrumb-item {
+    // Каждая крошка обрезается сама по себе, а не строка целиком: имя,
+    // оборванное на «Кооператив «Реч…», всё равно узнаётся, а строка,
+    // оборванная справа, теряет последнее звено — то самое, куда чаще
+    // всего и возвращаются.
+    max-width: 260px;
+  }
+
+  .breadcrumb-item a {
+    // Движок ставит крошке `fw-bold !important`: путь набран жирным и
+    // спорит с заголовком страницы под ним. Перебивается только своим
+    // `!important`.
+    font-weight: 500 !important;
+    color: var(--coop-slate, #4a4a44);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--coop-teal-dark, #0f6b63);
+      text-decoration: underline;
+    }
+  }
+}
+
+// Свёрнутая часть пути. Движок сам прячет всё, что дальше двух предков,
+// за многоточие — своей логики писать не надо, но оформить надо: без
+// этого правила значок остаётся бутстраповской кнопкой `btn-light`,
+// то есть в тёмной теме белым прямоугольником.
+.o_breadcrumb .breadcrumb-item .btn-light {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid var(--coop-line-strong, var(--coop-line, #e6e6e1));
+  border-radius: 6px;
+  background: var(--coop-surface, #f2f2ee);
+  color: var(--coop-slate, #4a4a44);
+  line-height: 1;
+
+  &:hover {
+    background: var(--coop-teal-tint, #e3efed);
+    color: var(--coop-teal-dark, #0f6b63);
+  }
+}
+
+// ── Кнопка возврата ──────────────────────────────────────────────────
+.o_coop_back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  margin-right: 8px;
+  padding: 0;
+  border: 1px solid var(--coop-line-strong, var(--coop-line, #e6e6e1));
+  border-radius: 8px;
+  background: var(--coop-surface, #f2f2ee);
+  color: var(--coop-slate, #4a4a44);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  justify-content: center;
+
+  // Обёртка крошек в каталоге объявлена `display: contents`, то есть
+  // кнопка становится прямым элементом флекса полосы и встаёт в общий
+  // порядок — между вкладками и поиском. Явный порядок держит её слева.
+  order: -1;
+
+  &:hover {
+    background: var(--coop-teal-tint, #e3efed);
+    color: var(--coop-teal-dark, #0f6b63);
+    border-color: var(--coop-teal, #2ba79a);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--coop-focus, var(--coop-teal, #2ba79a));
+    outline-offset: 2px;
+  }
+}
+
+// На широком экране подпись не нужна: справа стоит весь путь и говорит,
+// куда ведёт стрелка.
+.o_coop_back_label {
+  display: none;
+}
+
+// ── Телефон ──────────────────────────────────────────────────────────
+//
+// Полный путь на 375 точках нечитаем: два имени по 25 знаков в строку не
+// встают, а перенос съедает экран. Остаются стрелка и имя предка.
+@media (max-width: 900px) {
+  .o_breadcrumb ol.breadcrumb {
+    display: none;
+  }
+
+  .o_coop_back {
+    width: auto;
+    min-width: 32px;
+    height: 32px;
+    max-width: 100%;
+    padding: 0 10px 0 8px;
+    font-size: 16px;
+  }
+
+  .o_coop_back_label {
+    display: inline;
+    overflow: hidden;
+    font: 500 13px/1.3 'Manrope', sans-serif;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .o_control_panel_breadcrumbs {
+    min-height: 40px;
+  }
+
+  // На узком экране движок рисует путь не над содержимым, а в самой
+  // шапке (`.o_navbar_breadcrumbs`), и кнопка попадает туда же — поверх
+  // знака платформы. Место в шапке считано по точкам: 375 минус кнопка
+  // меню и знак, на органы управления остаётся 256.
+  //
+  // Поэтому на время, пока человек внутри записи, знак уступает место
+  // возврату: ☰ · ← Ресурсы · поиск · тема · колокол. Знак ведёт на свою
+  // страницу, а она в нижней панели, — потеря невелика, тогда как
+  // возврат из записи иначе негде разместить.
+  .o_main_navbar:has(.o_coop_back) {
+    .o_coop_logo,
+    .o_coop_platform_name {
+      display: none;
+    }
+  }
+
+  // Имя предка не выталкивает значки за край: строка шапки не
+  // переносится, и длинное название уводило бы колокол за экран.
+  .o_navbar_breadcrumbs .o_coop_back_label {
+    max-width: 38vw;
+  }
+}
