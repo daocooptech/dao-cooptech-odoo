@@ -24,6 +24,15 @@
   -->
   <t t-name="coop_admin.Sidebar" t-inherit="coop_theme.Sidebar" t-inherit-mode="extension">
     <xpath expr="//nav[@aria-label='Расширения']" position="after">
+      <!--
+        Переключатель полномочий в самом меню — для телефона, где его нет
+        в шапке. Условие показа внутри самого компонента: человек без
+        выданных полномочий не видит ни строки. На широком экране строка
+        скрыта стилями.
+      -->
+      <div class="o_coop_sidebar_admin">
+        <CoopAdminSwitch/>
+      </div>
       <t t-if="state.admin.length">
         <div class="o_coop_ext_title o_coop_admin_title">Администрирование</div>
         <nav aria-label="Администрирование">

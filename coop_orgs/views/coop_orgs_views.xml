@@ -658,18 +658,23 @@
     <field name="name">Правовые формы</field>
     <field name="res_model">coop.legal.form</field>
     <field name="view_mode">list,form</field>
+    <!-- Признак «экран раздела платформы»: по нему появляется строка
+         вкладок, и пять справочников читаются одним разделом. -->
+    <field name="context">{'coop_section': True}</field>
   </record>
 
   <record id="action_coop_specialization" model="ir.actions.act_window">
     <field name="name">Специализации</field>
     <field name="res_model">coop.specialization</field>
     <field name="view_mode">list,form</field>
+    <field name="context">{'coop_section': True}</field>
   </record>
 
   <record id="action_coop_specialization_category" model="ir.actions.act_window">
     <field name="name">Сферы деятельности</field>
     <field name="res_model">coop.specialization.category</field>
     <field name="view_mode">list,form</field>
+    <field name="context">{'coop_section': True}</field>
   </record>
 
   <!--
@@ -701,13 +706,21 @@
   <menuitem id="menu_coop_my_orgs" name="Мои организации"
             parent="menu_coop_orgs_root" action="action_coop_my_orgs"
             sequence="15"/>
-  <menuitem id="menu_coop_orgs_config" name="Справочники"
-            parent="menu_coop_orgs_root" sequence="90"/>
+  <!--
+    Справочники переехали в общий раздел `coop_base.menu_coop_reference_root`
+    (решение владельца 16 сентября 2026). Прежний пункт «Справочники»
+    внутри раздела организаций убран совсем, а не погашен: детей у него не
+    осталось, и пустая запись в меню — это то, что потом ищут глазами и не
+    находят.
+  -->
   <menuitem id="menu_coop_legal_form" name="Правовые формы"
-            parent="menu_coop_orgs_config" action="action_coop_legal_form" sequence="10"/>
+            parent="coop_base.menu_coop_reference_root"
+            action="action_coop_legal_form" sequence="10"/>
   <menuitem id="menu_coop_specialization" name="Специализации"
-            parent="menu_coop_orgs_config" action="action_coop_specialization" sequence="20"/>
+            parent="coop_base.menu_coop_reference_root"
+            action="action_coop_specialization" sequence="20"/>
   <menuitem id="menu_coop_specialization_category" name="Сферы деятельности"
-            parent="menu_coop_orgs_config" action="action_coop_specialization_category" sequence="30"/>
+            parent="coop_base.menu_coop_reference_root"
+            action="action_coop_specialization_category" sequence="30"/>
 
 </odoo>

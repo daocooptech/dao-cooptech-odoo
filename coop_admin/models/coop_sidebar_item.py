@@ -10,6 +10,13 @@ ADMIN_ITEMS = [
     ('Настройки', 'fa-cog', 'base_setup.action_general_configuration'),
     ('Модели и поля', 'fa-database', 'base.action_model_model'),
     ('Журнал действий', 'fa-history', 'base.action_ir_logging'),
+    # Справочники узла — правовые формы, специализации, сферы
+    # деятельности, рубрики ресурсов, способы передачи. Пункт ведёт на
+    # первый из них, остальные стоят вкладками того же раздела
+    # (`coop_base.menu_coop_reference_root`). Ссылка мягкая: `env.ref`
+    # ниже с `raise_if_not_found=False`, и без `coop_orgs` пункт просто
+    # не появится.
+    ('Справочники', 'fa-book', 'coop_orgs.action_coop_legal_form'),
 ]
 
 

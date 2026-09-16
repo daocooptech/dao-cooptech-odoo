@@ -352,12 +352,14 @@
     <field name="name">Категории ресурсов</field>
     <field name="res_model">coop.resource.category</field>
     <field name="view_mode">list,form</field>
+    <field name="context">{'coop_section': True}</field>
   </record>
 
   <record id="action_coop_resource_method" model="ir.actions.act_window">
     <field name="name">Способы передачи</field>
     <field name="res_model">coop.resource.method</field>
     <field name="view_mode">list,form</field>
+    <field name="context">{'coop_section': True}</field>
   </record>
 
   <record id="view_coop_promotion_slot_list" model="ir.ui.view">
@@ -536,16 +538,16 @@
   <!--
     Справочников в разделе нет: рубрики и способы передачи — настройка
     узла, а не то, чем участник пользуется каждый день. Вкладка убрана
-    решением владельца от 2026-09-14; сами справочники остаются
-    доступными через настройки и по прямой ссылке.
+    решением владельца от 2026-09-14, а 16 сентября 2026 сами справочники
+    переехали в общий раздел `coop_base.menu_coop_reference_root`, где
+    стоят рядом со справочниками организаций. Погашенный пустой пункт
+    убран вместе с ними.
   -->
-  <menuitem id="menu_coop_resources_config" name="Справочники"
-            parent="menu_coop_resources_root" sequence="90" active="False"/>
   <menuitem id="menu_coop_resource_category" name="Категории ресурсов"
-            parent="menu_coop_resources_config" action="action_coop_resource_category"
-            sequence="10"/>
+            parent="coop_base.menu_coop_reference_root"
+            action="action_coop_resource_category" sequence="40"/>
   <menuitem id="menu_coop_resource_method" name="Способы передачи"
-            parent="menu_coop_resources_config" action="action_coop_resource_method"
-            sequence="20"/>
+            parent="coop_base.menu_coop_reference_root"
+            action="action_coop_resource_method" sequence="50"/>
 
 </odoo>
