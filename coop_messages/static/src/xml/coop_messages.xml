@@ -210,6 +210,14 @@
             t-att-class="store.discuss.activeTab === 'channel' ? 'fw-bold o-active shadow-sm' : 'text-muted'"
             type="button" role="tab"
             t-on-click="() => store.discuss.activeTab = 'channel'">Групповые</button>
+    <!-- Переписки с самой платформой: помощник и извещения системы.
+         Отдельной вкладкой по решению владельца — в общем списке они
+         стоят наравне с живыми людьми и занимают верх, потому что пишут
+         чаще всех. -->
+    <button class="o-mail-MessagingMenu-headerFilter btn btn-link o-px-1_5 py-1 m-1 lh-1"
+            t-att-class="store.discuss.activeTab === 'coop_service' ? 'fw-bold o-active shadow-sm' : 'text-muted'"
+            type="button" role="tab"
+            t-on-click="() => store.discuss.activeTab = 'coop_service'">Служебные</button>
   </xpath>
 </t>
 

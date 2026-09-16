@@ -12,6 +12,7 @@ import { ActionList } from "@mail/core/common/action_list";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { threadActionsRegistry, useThreadActions } from "@mail/core/common/thread_actions";
 import { Store } from "@mail/core/common/store_service";
+import { MessagingMenu } from "@mail/core/public_web/messaging_menu";
 import { Thread } from "@mail/core/common/thread_model";
 import { composerActionsRegistry } from "@mail/core/common/composer_actions";
 
@@ -188,6 +189,32 @@ patch(Store.prototype, {
             return ["channel", "group"];
         }
         return super.tabToThreadType(...arguments);
+    },
+});
+
+// Служебные переписки — своей вкладкой.
+//
+// Решение владельца 16 сентября 2026: «служебные можно вынести в
+// отдельную вкладку». Это переписки с самой платформой — помощник,
+// извещения системы; человеческого разговора в них нет, а в общем
+// списке они стоят наравне с живыми людьми и занимают верх, потому что
+// пишут чаще всех.
+//
+// Вид переписки у нас свой (`coop_kind`), а движок отбирает вкладки по
+// своему виду канала — сопоставлением их не связать. Поэтому список
+// для этой вкладки собирается здесь, а из остальных вкладок служебные
+// убираются.
+const ВКЛАДКА_СЛУЖЕБНЫЕ = "coop_service";
+
+patch(MessagingMenu.prototype, {
+    get threads() {
+        if (this.store.discuss.activeTab !== ВКЛАДКА_СЛУЖЕБНЫЕ) {
+            return super.threads.filter((т) => т.coop_kind !== "service");
+        }
+        const свежесть = (т) => т.newestPersistentOfAllMessage?.datetime || 0;
+        return Object.values(this.store.Thread.records)
+            .filter((т) => т.coop_kind === "service" && т.displayToSelf)
+            .sort((а, б) => (свежесть(б) > свежесть(а) ? 1 : -1));
     },
 });
 
