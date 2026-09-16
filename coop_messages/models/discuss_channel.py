@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 from odoo.addons.mail.tools.discuss import Store
 
 _logger = logging.getLogger(__name__)
@@ -143,6 +144,44 @@ class DiscussChannel(models.Model):
 
     # Модели, чьи переписки ведёт платформа. Списком, а не цепочкой
     # условий: новый раздел добавляется одной строкой.
+    coop_owner_partner_ids = fields.Many2many(
+        'res.partner', 'coop_channel_owner_rel', 'channel_id', 'partner_id',
+        string='Хозяева переписки', compute='_compute_coop_owner',
+        store=True, readonly=True,
+        help='Кто может переименовать переписку. У сделки — обе стороны, '
+             'у проекта — инициатор, у организации — те, кто ведёт состав '
+             'или подписывает от её имени.')
+
+    @api.depends('coop_res_model', 'coop_res_id', 'coop_kind')
+    def _compute_coop_owner(self):
+        """Хозяева переписки — хранимым полем, а не вычислением на лету.
+
+        Правило доступа сравнивает поле с тем, кем человек является, а
+        ссылка-справочник (`coop_res_model` плюс номер) в условии правила
+        не соединяется с таблицей — по ней отбирать нельзя.
+        """
+        for channel in self:
+            хозяева = self.env['res.partner']
+            запись = channel._coop_record()
+            # Не у всякой записи с перепиской есть примесь: чат сообщества
+            # заводит организатор, и модель сообщества про хозяев ничего
+            # не знает. Без этой проверки вычисление падало на первом же
+            # таком канале, и с ним не поднималась вся база — ошибка в
+            # вычисляемом поле останавливает загрузку целиком.
+            if запись is not None and hasattr(запись, '_coop_channel_owners'):
+                хозяева = запись._coop_channel_owners(channel.coop_kind)
+            channel.coop_owner_partner_ids = [(6, 0, хозяева.ids)]
+
+    def _coop_record(self):
+        """Запись, из которой выросла переписка."""
+        self.ensure_one()
+        if not self.coop_res_model or not self.coop_res_id:
+            return None
+        if self.coop_res_model not in self.env:
+            return None
+        запись = self.env[self.coop_res_model].sudo().browse(self.coop_res_id)
+        return запись if запись.exists() else None
+
     MANAGED_MODELS = ('coop.deal', 'coop.project', 'res.partner')
 
     # Виды переписок, которые ведёт платформа. Личная переписка тоже
@@ -150,6 +189,27 @@ class DiscussChannel(models.Model):
     # чата организации не отличить: пометив по модели, я записал в
     # «ведёт платформа» все сорок шесть личных.
     MANAGED_KINDS = ('deal', 'project', 'org', 'shareholders')
+
+    def _action_unfollow(self, partner=None, guest=None, post_leave_message=True):
+        """Из переписки платформы не выходят.
+
+        Решение владельца 16 сентября 2026: запретить явно. Состав такой
+        переписки следует за записью, и вышедшего вернул бы обратно
+        первый же пересчёт — кнопка обещала бы то, что отменяется само.
+
+        Пока человек сторона сделки или член кооператива, разговор его.
+        Перестал быть — платформа уберёт его сама, и просить об этом не
+        придётся.
+        """
+        for channel in self:
+            if channel.coop_managed:
+                raise UserError(_(
+                    'Из этой переписки нельзя выйти: её состав следует за '
+                    'записью. «%(что)s» — разговор тех, кто в деле; выйти '
+                    'из него можно, только перестав в нём участвовать.',
+                    что=channel.display_name))
+        return super()._action_unfollow(
+            partner=partner, guest=guest, post_leave_message=post_leave_message)
 
     @api.model
     def coop_resync_managed(self):
@@ -223,4 +283,5 @@ class DiscussChannel(models.Model):
             'coop_res_id',
             'coop_link_label',
             'coop_pinned',
+            'coop_managed',
         ]

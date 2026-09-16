@@ -1,702 +1,1528 @@
 [
- {
-  "file": "dotsu-domain-logo.png",
-  "title": "DotSU domain logo.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:DotSU_domain_logo.svg",
-  "author": "Unknown authorUnknown author"
- },
- {
-  "file": "elfa-logo-1972.png",
-  "title": "Elfa logo (1972).svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Elfa_logo_(1972).svg",
-  "author": "Retired electrician"
- },
- {
-  "file": "elfa-logo-1980s-border.png",
-  "title": "Elfa logo (1980s, border).svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Elfa_logo_(1980s,_border).svg",
-  "author": "Retired electrician"
- },
- {
-  "file": "elfa-logo-1980s-no-border.png",
-  "title": "Elfa logo (1980s, no border).svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Elfa_logo_(1980s,_no_border).svg",
-  "author": "Retired electrician"
- },
- {
-  "file": "jupiter-logo-late-1980s.png",
-  "title": "Jupiter logo (late 1980s).svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Jupiter_logo_(late_1980s).svg",
-  "author": "Retired electrician"
- },
- {
-  "file": "lmz-logo.png",
-  "title": "Lmz logo.jpg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Lmz_logo.jpg",
-  "author": "Віктор Ходєєв"
- },
- {
-  "file": "nota-203-1-logo.png",
-  "title": "Nota-203-1 logo.jpg",
-  "license": "CC0",
-  "source": "https://commons.wikimedia.org/wiki/File:Nota-203-1_logo.jpg",
-  "author": "Retired electrician"
- },
- {
-  "file": "pao-saturn-omsk-logo-bw.png",
-  "title": "PAO Saturn (Omsk) logo bw.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:PAO_Saturn_(Omsk)_logo_bw.svg",
-  "author": "Омский электротехнический завод имени Карла Маркса"
- },
- {
-  "file": "pribor-rostov-logo-late-1980s.png",
-  "title": "Pribor Rostov logo (late 1980s).svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Pribor_Rostov_logo_(late_1980s).svg",
-  "author": "Retired electrician"
- },
- {
-  "file": "red-international-of-labor-unions-1922-logo.png",
-  "title": "Red International of Labor Unions (1922 logo).gif",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Red_International_of_Labor_Unions_(1922_logo).gif",
-  "author": "Unknown, probably Russian"
- },
- {
-  "file": "red-international-of-labor-unions-logo.png",
-  "title": "Red International of Labor Unions logo.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Red_International_of_Labor_Unions_logo.svg",
-  "author": "Red International of Labor Unions (1922 logo).gif: Unknown (probably Russian)\nvector version: VectorVoyager"
- },
- {
-  "file": "rostov-emblem-old.png",
-  "title": "Rostov emblem old.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Rostov_emblem_old.svg",
-  "author": "d:Q123188976 (original manufacturer)"
- },
- {
-  "file": "rostov-logo-text-late-1980s-to-1990s.png",
-  "title": "Rostov logo (text, late 1980s to 1990s).svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Rostov_logo_(text,_late_1980s_to_1990s).svg",
-  "author": "d:Q123188976 (original manufacturer)"
- },
- {
-  "file": "vilma-logo-narrow.png",
-  "title": "Vilma logo narrow.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Vilma_logo_narrow.svg",
-  "author": "Retired electrician"
- },
- {
-  "file": "vilma-logo-wide.png",
-  "title": "Vilma logo wide.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Vilma_logo_wide.svg",
-  "author": "Retired electrician"
- },
- {
-  "file": "radiotehnika.png",
-  "title": "Логотип производственного объединения Radiotehnika.jpg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:%D0%9B%D0%BE%D0%B3%D0%BE%D1%82%D0%B8%D0%BF_%D0%BF%D1%80%D0%BE%D0%B8%D0%B7%D0%B2%D0%BE%D0%B4%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D0%BE%D0%B3%D0%BE_%D0%BE%D0%B1%D1%8A%D0%B5%D0%B4%D0%B8%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F_Radiotehnika.jpg",
-  "author": "ПО Radiotehnika Riga"
- },
- {
-  "file": "aass-logo.png",
-  "title": "AASS-logo.jpg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:AASS-logo.jpg",
-  "author": "PaoloPRO1"
- },
- {
-  "file": "ag-chem-logo.png",
-  "title": "Ag chem logo.jpg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Ag_chem_logo.jpg",
-  "author": "Ag-Chem Equipment Company prior to acquisition by AGCO in 2001"
- },
- {
-  "file": "axion-logo.png",
-  "title": "Axion logo.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Axion_logo.svg",
-  "author": "Cable Axion"
- },
- {
-  "file": "bertrams-logo.png",
-  "title": "Bertrams Logo.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Bertrams_Logo.svg",
-  "author": "Bertrams Group"
- },
- {
-  "file": "chorus-clean-energy-logo.png",
-  "title": "Chorus Clean Energy logo.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Chorus_Clean_Energy_logo.svg",
-  "author": "Chorus Clean Energy AG"
- },
- {
-  "file": "conwert-immobilien-invest-logo.png",
-  "title": "Conwert Immobilien Invest logo.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Conwert_Immobilien_Invest_logo.svg",
-  "author": "Conwert Immobilen Invest SE"
- },
- {
-  "file": "dynabyte-logo-from-1995-to-1995.png",
-  "title": "Dynabyte - Logo from 1995 to 1995..png",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Dynabyte_-_Logo_from_1995_to_1995..png",
-  "author": "Salewan"
- },
- {
-  "file": "oldemporiumlogo.png",
-  "title": "Oldemporiumlogo.PNG",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Oldemporiumlogo.PNG",
-  "author": "Caldorwards4 at en.wikipedia"
- },
- {
-  "file": "etoys-logo.png",
-  "title": "EToys logo.png",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:EToys_logo.png",
-  "author": "eToys"
- },
- {
-  "file": "expotechnik-logo.png",
-  "title": "Expotechnik Logo.jpg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Expotechnik_Logo.jpg",
-  "author": "Expotechnik"
- },
- {
-  "file": "garfinckel-s-logo.png",
-  "title": "Garfinckel's (logo).jpg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Garfinckel%27s_(logo).jpg",
-  "author": "Pubdog at en.wikipedia"
- },
- {
-  "file": "gottslogoblack.png",
-  "title": "GottsLogoBlack.PNG",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:GottsLogoBlack.PNG",
-  "author": "The original uploader was Caldorwards4 at English Wikipedia."
- },
- {
-  "file": "icesave-logo.png",
-  "title": "Icesave logo.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Icesave_logo.svg",
-  "author": "Unknown authorUnknown author"
- },
- {
-  "file": "infocom-logo.png",
-  "title": "Infocom logo.png",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Infocom_logo.png",
-  "author": "The original uploader was Brian0918 at English Wikipedia."
- },
- {
-  "file": "kp-logo-1950s.png",
-  "title": "KP LOGO 1950s.jpg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:KP_LOGO_1950s.jpg",
-  "author": "Kempthorne Prosser"
- },
- {
-  "file": "logo-ab-m.png",
-  "title": "Logo AB&M.jpg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Logo_AB%26M.jpg",
-  "author": ""
- },
- {
-  "file": "logo-of-enron-corporation-1997.png",
-  "title": "Logo of Enron Corporation (1997).svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Logo_of_Enron_Corporation_(1997).svg",
-  "author": "Paul Rand"
- },
- {
-  "file": "logo-of-the-pan-am-petroleum-company-pan-gas.png",
-  "title": "Logo of the Pan-Am petroleum company PAN-GAS.png",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Logo_of_the_Pan-Am_petroleum_company_PAN-GAS.png",
-  "author": "Unknown authorUnknown author"
- },
- {
-  "file": "logo-shurgard.png",
-  "title": "Logo shurgard.gif",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Logo_shurgard.gif",
-  "author": "Seatex"
- },
- {
-  "file": "logo2-b-m.png",
-  "title": "Logo2 B&M.jpg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Logo2_B%26M.jpg",
-  "author": ""
- },
- {
-  "file": "nob-logotipo.png",
-  "title": "NOB-Logotipo.png",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:NOB-Logotipo.png",
-  "author": "No machine-readable author provided. Dalton~commonswiki assumed (based on copyright claims)."
- },
- {
-  "file": "phelps-dodge-logo.png",
-  "title": "Phelps Dodge logo.png",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Phelps_Dodge_logo.png",
-  "author": "The original uploader was Flamurai at English Wikipedia."
- },
- {
-  "file": "salomon-brothers-logo.png",
-  "title": "Salomon Brothers logo.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Salomon_Brothers_logo.svg",
-  "author": "Salomon Brothers"
- },
- {
-  "file": "sterns1980slogo.png",
-  "title": "Sterns1980slogo.png",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Sterns1980slogo.png",
-  "author": "The original uploader was Caldorwards4 at English Wikipedia."
- },
- {
-  "file": "sternslogo.png",
-  "title": "Sternslogo.png",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Sternslogo.png",
-  "author": "The original uploader was Whoasuckaa at English Wikipedia."
- },
- {
-  "file": "testa-hurwitz-logo.png",
-  "title": "Testa-hurwitz-logo.JPG",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Testa-hurwitz-logo.JPG",
-  "author": "The original uploader was Lamro at English Wikipedia."
- },
- {
-  "file": "thacher-proffitt-logo.png",
-  "title": "Thacher-proffitt-logo.JPG",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Thacher-proffitt-logo.JPG",
-  "author": "The original uploader was Lamro at English Wikipedia."
- },
- {
-  "file": "thq-logo-2011.png",
-  "title": "THQ logo 2011.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:THQ_logo_2011.svg",
-  "author": "THQ.\n\nOriginal uploader was AxG at en.wikipedia"
- },
- {
-  "file": "trident-microsystems-logo.png",
-  "title": "Trident Microsystems logo.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Trident_Microsystems_logo.svg",
-  "author": "Unknown authorUnknown author"
- },
- {
-  "file": "vivendi-games-logo.png",
-  "title": "Vivendi Games Logo.png",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Vivendi_Games_Logo.png",
-  "author": "Vivendi"
- },
- {
-  "file": "walker-auto-1906-logo.png",
-  "title": "Walker-auto 1906 logo.jpg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Walker-auto_1906_logo.jpg",
-  "author": "Walker Motor Car Company"
- },
- {
-  "file": "court-line-logo-march-1974.png",
-  "title": "Court Line Logo, March 1974.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Court_Line_Logo,_March_1974.svg",
-  "author": "Court Line Aviation Ltd"
- },
- {
-  "file": "sa-logo.png",
-  "title": "ČSA logo.png",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:%C4%8CSA_logo.png",
-  "author": "Czech Airlines"
- },
- {
-  "file": "ifa-trabant-logo.png",
-  "title": "IFA Trabant Logo.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:IFA_Trabant_Logo.svg",
-  "author": "Unknown authorUnknown author"
- },
- {
-  "file": "aa-housman-1917-logo.png",
-  "title": "AA Housman 1917 logo.png",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:AA_Housman_1917_logo.png",
-  "author": "Unknown authorUnknown author"
- },
- {
-  "file": "maxtor-logo.png",
-  "title": "Maxtor-Logo.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Maxtor-Logo.svg",
-  "author": "Unknown authorUnknown author"
- },
- {
-  "file": "ocz-technology-2014-logo.png",
-  "title": "OCZ Technology 2014 logo.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:OCZ_Technology_2014_logo.svg",
-  "author": "OCZ Storage Solutions Limited"
- },
- {
-  "file": "ocz-technology-logo.png",
-  "title": "OCZ Technology Logo.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:OCZ_Technology_Logo.svg",
-  "author": "unbekanntOCZ Technology"
- },
- {
-  "file": "savin-logo.png",
-  "title": "Savin logo.png",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Savin_logo.png",
-  "author": "Ricoh"
- },
- {
-  "file": "standard-oil-ohio-logo.png",
-  "title": "Standard oil ohio logo.png",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Standard_oil_ohio_logo.png",
-  "author": "Unknown authorUnknown author"
- },
- {
-  "file": "baumax-logo.png",
-  "title": "Baumax logo.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Baumax_logo.svg",
-  "author": "Baumax AG"
- },
- {
-  "file": "famous-barr-department-store-final-logo.png",
-  "title": "Famous-Barr Department Store Final Logo.png",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Famous-Barr_Department_Store_Final_Logo.png",
-  "author": "Famous-Barr"
- },
- {
-  "file": "british-railways-logo-on-west-somerset-railway-9.png",
-  "title": "British Railways logo on West Somerset Railway 9351 2025-07-27.jpg",
-  "license": "CC0",
-  "source": "https://commons.wikimedia.org/wiki/File:British_Railways_logo_on_West_Somerset_Railway_9351_2025-07-27.jpg",
-  "author": "Andy Li"
- },
- {
-  "file": "regional-railways-logo-122100.png",
-  "title": "Regional Railways logo 122100.JPG",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Regional_Railways_logo_122100.JPG",
-  "author": "37427 at English Wikipedia"
- },
- {
-  "file": "ferranti-international-logo.png",
-  "title": "Ferranti International logo.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Ferranti_International_logo.svg",
-  "author": "™/®Ferranti International plc"
- },
- {
-  "file": "gulf-logo.png",
-  "title": "Gulf logo.png",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Gulf_logo.png",
-  "author": "Gulf"
- },
- {
-  "file": "gulf-oil-logo.png",
-  "title": "Gulf Oil logo.png",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Gulf_Oil_logo.png",
-  "author": "Gulf Oil LP"
- },
- {
-  "file": "gulflogo1920.png",
-  "title": "Gulflogo1920.JPG",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Gulflogo1920.JPG",
-  "author": "Gulf Oil"
- },
- {
-  "file": "royal-enfield-logo-on-motorcycle.png",
-  "title": "Royal Enfield logo on motorcycle.JPG",
-  "license": "CC0",
-  "source": "https://commons.wikimedia.org/wiki/File:Royal_Enfield_logo_on_motorcycle.JPG",
-  "author": "Alf van Beem"
- },
- {
-  "file": "royal-enfield-logo.png",
-  "title": "Royal Enfield logo.jpg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Royal_Enfield_logo.jpg",
-  "author": "Michel 67"
- },
- {
-  "file": "gateway-1998-wordmark.png",
-  "title": "Gateway 1998 wordmark.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Gateway_1998_wordmark.svg",
-  "author": "Gateway, Inc."
- },
- {
-  "file": "gateway-2000-logo-slogan.png",
-  "title": "Gateway 2000 Logo Slogan.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Gateway_2000_Logo_Slogan.svg",
-  "author": "Gateway 2000"
- },
- {
-  "file": "gateway-2000-logo.png",
-  "title": "Gateway 2000 Logo.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Gateway_2000_Logo.svg",
-  "author": "Gateway 2000"
- },
- {
-  "file": "gw2k-2004-logo-horizontal.png",
-  "title": "Gw2k 2004 logo horizontal.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Gw2k_2004_logo_horizontal.svg",
-  "author": "Gateway, Inc."
- },
- {
-  "file": "gw2k-2004-logo.png",
-  "title": "Gw2k 2004 logo.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Gw2k_2004_logo.svg",
-  "author": "Gateway, Inc."
- },
- {
-  "file": "gateway-logo.png",
-  "title": "Gateway-logo.jpg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Gateway-logo.jpg",
-  "author": "Gump1993"
- },
- {
-  "file": "avangard-spb-logo-small-2020s.png",
-  "title": "Avangard SPB logo small (2020s).png",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Avangard_SPB_logo_small_(2020s).png",
-  "author": "ЗАО Авангард"
- },
- {
-  "file": "box-of-200-soviet-1t305-transistors-made-in-mins.png",
-  "title": "Box of 200 Soviet 1T305 transistors, made in Minsk, 1986 - factory logo.jpg",
-  "license": "CC0",
-  "source": "https://commons.wikimedia.org/wiki/File:Box_of_200_Soviet_1T305_transistors,_made_in_Minsk,_1986_-_factory_logo.jpg",
-  "author": "Retired electrician"
- },
- {
-  "file": "elektronmash-logo.png",
-  "title": "Elektronmash logo.jpg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Elektronmash_logo.jpg",
-  "author": "Unknown authorUnknown author"
- },
- {
-  "file": "lepse-kirov-logo.png",
-  "title": "Lepse-Kirov logo.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Lepse-Kirov_logo.svg",
-  "author": "Own work, original by АО \"Электромашиностроительный завод \"ЛЕПСЕ\", г.Киров"
- },
- {
-  "file": "logo-factory-meteor.png",
-  "title": "Logo Factory Meteor.gif",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Logo_Factory_Meteor.gif",
-  "author": "ОАО «Завод „Метеор“»"
- },
- {
-  "file": "tehpribor-logo-1970s.png",
-  "title": "Tehpribor logo 1970s.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:Tehpribor_logo_1970s.svg",
-  "author": "Own work / d:Q123150998"
- },
- {
-  "file": "1980.png",
-  "title": "Азон Баку вторая эмблема (1980е).svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:%D0%90%D0%B7%D0%BE%D0%BD_%D0%91%D0%B0%D0%BA%D1%83_%D0%B2%D1%82%D0%BE%D1%80%D0%B0%D1%8F_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_(1980%D0%B5).svg",
-  "author": "Минэлектропром СССР / завод Азон"
- },
- {
-  "file": "1982-2010.png",
-  "title": "Воронежский завод полупроводниковых приборов, эмблема 1982-2010е.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:%D0%92%D0%BE%D1%80%D0%BE%D0%BD%D0%B5%D0%B6%D1%81%D0%BA%D0%B8%D0%B9_%D0%B7%D0%B0%D0%B2%D0%BE%D0%B4_%D0%BF%D0%BE%D0%BB%D1%83%D0%BF%D1%80%D0%BE%D0%B2%D0%BE%D0%B4%D0%BD%D0%B8%D0%BA%D0%BE%D0%B2%D1%8B%D1%85_%D0%BF%D1%80%D0%B8%D0%B1%D0%BE%D1%80%D0%BE%D0%B2,_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_1982-2010%D0%B5.svg",
-  "author": "Воронежский ЗПП"
- },
- {
-  "file": "2020.png",
-  "title": "Воронежский завод полупроводниковых приборов, эмблема 2020е.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:%D0%92%D0%BE%D1%80%D0%BE%D0%BD%D0%B5%D0%B6%D1%81%D0%BA%D0%B8%D0%B9_%D0%B7%D0%B0%D0%B2%D0%BE%D0%B4_%D0%BF%D0%BE%D0%BB%D1%83%D0%BF%D1%80%D0%BE%D0%B2%D0%BE%D0%B4%D0%BD%D0%B8%D0%BA%D0%BE%D0%B2%D1%8B%D1%85_%D0%BF%D1%80%D0%B8%D0%B1%D0%BE%D1%80%D0%BE%D0%B2,_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_2020%D0%B5.svg",
-  "author": "Воронежский ЗПП"
- },
- {
-  "file": "1974-2011.png",
-  "title": "Зонд Звенигово (филиал ПО Изотоп) эмблема 1974-2011.svg",
-  "license": "CC0",
-  "source": "https://commons.wikimedia.org/wiki/File:%D0%97%D0%BE%D0%BD%D0%B4_%D0%97%D0%B2%D0%B5%D0%BD%D0%B8%D0%B3%D0%BE%D0%B2%D0%BE_(%D1%84%D0%B8%D0%BB%D0%B8%D0%B0%D0%BB_%D0%9F%D0%9E_%D0%98%D0%B7%D0%BE%D1%82%D0%BE%D0%BF)_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_1974-2011.svg",
-  "author": "Retired electrician"
- },
- {
-  "file": ".png",
-  "title": "Логотип ПО Эркон, Нижний Новгород.png",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:%D0%9B%D0%BE%D0%B3%D0%BE%D1%82%D0%B8%D0%BF_%D0%9F%D0%9E_%D0%AD%D1%80%D0%BA%D0%BE%D0%BD,_%D0%9D%D0%B8%D0%B6%D0%BD%D0%B8%D0%B9_%D0%9D%D0%BE%D0%B2%D0%B3%D0%BE%D1%80%D0%BE%D0%B4.png",
-  "author": "ПО Эркон"
- },
- {
-  "file": "1950-1998.png",
-  "title": "МЭЛЗ, историческая эмблема 1950-1998.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:%D0%9C%D0%AD%D0%9B%D0%97,_%D0%B8%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_1950-1998.svg",
-  "author": "МЭЛЗ"
- },
- {
-  "file": "1962-1969.png",
-  "title": "Полярон Львов историческая эмблема 1962-1969.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:%D0%9F%D0%BE%D0%BB%D1%8F%D1%80%D0%BE%D0%BD_%D0%9B%D1%8C%D0%B2%D0%BE%D0%B2_%D0%B8%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_1962-1969.svg",
-  "author": "Минэлектронпром СССР / ПО Полярон"
- },
- {
-  "file": "1971-2002.png",
-  "title": "Полярон Львов историческая эмблема 1971-2002.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:%D0%9F%D0%BE%D0%BB%D1%8F%D1%80%D0%BE%D0%BD_%D0%9B%D1%8C%D0%B2%D0%BE%D0%B2_%D0%B8%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_1971-2002.svg",
-  "author": "Минэлектронпром СССР / ПО Поляронв"
- },
- {
-  "file": "1972-1998.png",
-  "title": "Радиодеталь Харьков, эмблема (1972-1998).svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:%D0%A0%D0%B0%D0%B4%D0%B8%D0%BE%D0%B4%D0%B5%D1%82%D0%B0%D0%BB%D1%8C_%D0%A5%D0%B0%D1%80%D1%8C%D0%BA%D0%BE%D0%B2,_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_(1972-1998).svg",
-  "author": "Завод Радиодеталь"
- },
- {
-  "file": "1954.png",
-  "title": "Светлана, логотип и заводское клеймо 1954-н.в..svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:%D0%A1%D0%B2%D0%B5%D1%82%D0%BB%D0%B0%D0%BD%D0%B0,_%D0%BB%D0%BE%D0%B3%D0%BE%D1%82%D0%B8%D0%BF_%D0%B8_%D0%B7%D0%B0%D0%B2%D0%BE%D0%B4%D1%81%D0%BA%D0%BE%D0%B5_%D0%BA%D0%BB%D0%B5%D0%B9%D0%BC%D0%BE_1954-%D0%BD.%D0%B2..svg",
-  "author": "Светлана"
- },
- {
-  "file": "1969-1990.png",
-  "title": "Херсонский ЗПП (Днепр) историческая эмблема 1969-1990.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:%D0%A5%D0%B5%D1%80%D1%81%D0%BE%D0%BD%D1%81%D0%BA%D0%B8%D0%B9_%D0%97%D0%9F%D0%9F_(%D0%94%D0%BD%D0%B5%D0%BF%D1%80)_%D0%B8%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_1969-1990.svg",
-  "author": "Минэлектронпром СССР / ПО Днепр / Херсонский завод полупроводниковых приборов"
- },
- {
-  "file": ".png",
-  "title": "Электро-технический трест слабых токов эмблема.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:%D0%AD%D0%BB%D0%B5%D0%BA%D1%82%D1%80%D0%BE-%D1%82%D0%B5%D1%85%D0%BD%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D0%B9_%D1%82%D1%80%D0%B5%D1%81%D1%82_%D1%81%D0%BB%D0%B0%D0%B1%D1%8B%D1%85_%D1%82%D0%BE%D0%BA%D0%BE%D0%B2_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0.svg",
-  "author": "Retired electrician"
- },
- {
-  "file": "1978-2011.png",
-  "title": "Элькор Нальчик историческая эмблема (1978-2011).svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:%D0%AD%D0%BB%D1%8C%D0%BA%D0%BE%D1%80_%D0%9D%D0%B0%D0%BB%D1%8C%D1%87%D0%B8%D0%BA_%D0%B8%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_(1978-2011).svg",
-  "author": "Минэлектронпром СССР / Нальчикский завод полупроводниковых приборов"
- },
- {
-  "file": "1970.png",
-  "title": "Азон Баку первая эмблема (1970е).svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:%D0%90%D0%B7%D0%BE%D0%BD_%D0%91%D0%B0%D0%BA%D1%83_%D0%BF%D0%B5%D1%80%D0%B2%D0%B0%D1%8F_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_(1970%D0%B5).svg",
-  "author": "Минэлектропром СССР / завод Азон"
- },
- {
-  "file": "1970-2020.png",
-  "title": "Алмаз Котовск, эмблема (1970-2020-е).svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:%D0%90%D0%BB%D0%BC%D0%B0%D0%B7_%D0%9A%D0%BE%D1%82%D0%BE%D0%B2%D1%81%D0%BA,_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_(1970-2020-%D0%B5).svg",
-  "author": "Минэлектронпром СССР / завод Алмаз"
- },
- {
-  "file": "1978-1991.png",
-  "title": "Биллур Ганджа историческая эмблема (1978-1991).svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:%D0%91%D0%B8%D0%BB%D0%BB%D1%83%D1%80_%D0%93%D0%B0%D0%BD%D0%B4%D0%B6%D0%B0_%D0%B8%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_(1978-1991).svg",
-  "author": "Миэлектропром СССР / завод Биллур"
- },
- {
-  "file": "1980.png",
-  "title": "Гравитон Черновцы, историческая (1980е) эмблема.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:%D0%93%D1%80%D0%B0%D0%B2%D0%B8%D1%82%D0%BE%D0%BD_%D0%A7%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D1%86%D1%8B,_%D0%B8%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_(1980%D0%B5)_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0.svg",
-  "author": "Минэлектронпром СССР / завод Гравитон"
- },
- {
-  "file": "1990.png",
-  "title": "Измеритель Черновцы, историческая (1990е) эмблема.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:%D0%98%D0%B7%D0%BC%D0%B5%D1%80%D0%B8%D1%82%D0%B5%D0%BB%D1%8C_%D0%A7%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D1%86%D1%8B,_%D0%B8%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_(1990%D0%B5)_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0.svg",
-  "author": "Министерство электронной промышленности СССР / Завод Измеритель"
- },
- {
-  "file": "1982-1990.png",
-  "title": "Континент Зеленодольск, эмблема 1982-1990х.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:%D0%9A%D0%BE%D0%BD%D1%82%D0%B8%D0%BD%D0%B5%D0%BD%D1%82_%D0%97%D0%B5%D0%BB%D0%B5%D0%BD%D0%BE%D0%B4%D0%BE%D0%BB%D1%8C%D1%81%D0%BA,_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_1982-1990%D1%85.svg",
-  "author": "МЭП СССР / завод Континент в Зеленодольске (Днепропетровская область)"
- },
- {
-  "file": "1965-2011.png",
-  "title": "Фрязинский завод полупроводниковых приборов, эмблема 1965-2011.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:%D0%A4%D1%80%D1%8F%D0%B7%D0%B8%D0%BD%D1%81%D0%BA%D0%B8%D0%B9_%D0%B7%D0%B0%D0%B2%D0%BE%D0%B4_%D0%BF%D0%BE%D0%BB%D1%83%D0%BF%D1%80%D0%BE%D0%B2%D0%BE%D0%B4%D0%BD%D0%B8%D0%BA%D0%BE%D0%B2%D1%8B%D1%85_%D0%BF%D1%80%D0%B8%D0%B1%D0%BE%D1%80%D0%BE%D0%B2,_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_1965-2011.svg",
-  "author": "Минэлектропром СССР / Фрязинский завод полупроводниковых приборов / ПО \"Электронприбор\""
- },
- {
-  "file": "gulag-logo.png",
-  "title": "GULAG Logo.svg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:GULAG_Logo.svg",
-  "author": "ГУЛАГ НКВД СССР"
- },
- {
-  "file": ".png",
-  "title": "ГУЛАГ НКВД СССР товарный знак.jpg",
-  "license": "Public domain",
-  "source": "https://commons.wikimedia.org/wiki/File:%D0%93%D0%A3%D0%9B%D0%90%D0%93_%D0%9D%D0%9A%D0%92%D0%94_%D0%A1%D0%A1%D0%A1%D0%A0_%D1%82%D0%BE%D0%B2%D0%B0%D1%80%D0%BD%D1%8B%D0%B9_%D0%B7%D0%BD%D0%B0%D0%BA.jpg",
-  "author": "ГУЛАГ НКВД СССР, г. Москва"
- }
+  {
+    "file": "dotsu-domain-logo.png",
+    "title": "DotSU domain logo.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:DotSU_domain_logo.svg",
+    "author": "Unknown authorUnknown author"
+  },
+  {
+    "file": "elfa-logo-1972.png",
+    "title": "Elfa logo (1972).svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Elfa_logo_(1972).svg",
+    "author": "Retired electrician"
+  },
+  {
+    "file": "elfa-logo-1980s-border.png",
+    "title": "Elfa logo (1980s, border).svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Elfa_logo_(1980s,_border).svg",
+    "author": "Retired electrician"
+  },
+  {
+    "file": "elfa-logo-1980s-no-border.png",
+    "title": "Elfa logo (1980s, no border).svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Elfa_logo_(1980s,_no_border).svg",
+    "author": "Retired electrician"
+  },
+  {
+    "file": "jupiter-logo-late-1980s.png",
+    "title": "Jupiter logo (late 1980s).svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Jupiter_logo_(late_1980s).svg",
+    "author": "Retired electrician"
+  },
+  {
+    "file": "lmz-logo.png",
+    "title": "Lmz logo.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Lmz_logo.jpg",
+    "author": "Віктор Ходєєв"
+  },
+  {
+    "file": "nota-203-1-logo.png",
+    "title": "Nota-203-1 logo.jpg",
+    "license": "CC0",
+    "source": "https://commons.wikimedia.org/wiki/File:Nota-203-1_logo.jpg",
+    "author": "Retired electrician"
+  },
+  {
+    "file": "pao-saturn-omsk-logo-bw.png",
+    "title": "PAO Saturn (Omsk) logo bw.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:PAO_Saturn_(Omsk)_logo_bw.svg",
+    "author": "Омский электротехнический завод имени Карла Маркса"
+  },
+  {
+    "file": "pribor-rostov-logo-late-1980s.png",
+    "title": "Pribor Rostov logo (late 1980s).svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Pribor_Rostov_logo_(late_1980s).svg",
+    "author": "Retired electrician"
+  },
+  {
+    "file": "red-international-of-labor-unions-1922-logo.png",
+    "title": "Red International of Labor Unions (1922 logo).gif",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Red_International_of_Labor_Unions_(1922_logo).gif",
+    "author": "Unknown, probably Russian"
+  },
+  {
+    "file": "red-international-of-labor-unions-logo.png",
+    "title": "Red International of Labor Unions logo.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Red_International_of_Labor_Unions_logo.svg",
+    "author": "Red International of Labor Unions (1922 logo).gif: Unknown (probably Russian)\nvector version: VectorVoyager"
+  },
+  {
+    "file": "rostov-emblem-old.png",
+    "title": "Rostov emblem old.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Rostov_emblem_old.svg",
+    "author": "d:Q123188976 (original manufacturer)"
+  },
+  {
+    "file": "rostov-logo-text-late-1980s-to-1990s.png",
+    "title": "Rostov logo (text, late 1980s to 1990s).svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Rostov_logo_(text,_late_1980s_to_1990s).svg",
+    "author": "d:Q123188976 (original manufacturer)"
+  },
+  {
+    "file": "vilma-logo-narrow.png",
+    "title": "Vilma logo narrow.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Vilma_logo_narrow.svg",
+    "author": "Retired electrician"
+  },
+  {
+    "file": "vilma-logo-wide.png",
+    "title": "Vilma logo wide.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Vilma_logo_wide.svg",
+    "author": "Retired electrician"
+  },
+  {
+    "file": "radiotehnika.png",
+    "title": "Логотип производственного объединения Radiotehnika.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%9B%D0%BE%D0%B3%D0%BE%D1%82%D0%B8%D0%BF_%D0%BF%D1%80%D0%BE%D0%B8%D0%B7%D0%B2%D0%BE%D0%B4%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D0%BE%D0%B3%D0%BE_%D0%BE%D0%B1%D1%8A%D0%B5%D0%B4%D0%B8%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F_Radiotehnika.jpg",
+    "author": "ПО Radiotehnika Riga"
+  },
+  {
+    "file": "aass-logo.png",
+    "title": "AASS-logo.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:AASS-logo.jpg",
+    "author": "PaoloPRO1"
+  },
+  {
+    "file": "ag-chem-logo.png",
+    "title": "Ag chem logo.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Ag_chem_logo.jpg",
+    "author": "Ag-Chem Equipment Company prior to acquisition by AGCO in 2001"
+  },
+  {
+    "file": "axion-logo.png",
+    "title": "Axion logo.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Axion_logo.svg",
+    "author": "Cable Axion"
+  },
+  {
+    "file": "bertrams-logo.png",
+    "title": "Bertrams Logo.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Bertrams_Logo.svg",
+    "author": "Bertrams Group"
+  },
+  {
+    "file": "chorus-clean-energy-logo.png",
+    "title": "Chorus Clean Energy logo.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Chorus_Clean_Energy_logo.svg",
+    "author": "Chorus Clean Energy AG"
+  },
+  {
+    "file": "conwert-immobilien-invest-logo.png",
+    "title": "Conwert Immobilien Invest logo.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Conwert_Immobilien_Invest_logo.svg",
+    "author": "Conwert Immobilen Invest SE"
+  },
+  {
+    "file": "dynabyte-logo-from-1995-to-1995.png",
+    "title": "Dynabyte - Logo from 1995 to 1995..png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Dynabyte_-_Logo_from_1995_to_1995..png",
+    "author": "Salewan"
+  },
+  {
+    "file": "oldemporiumlogo.png",
+    "title": "Oldemporiumlogo.PNG",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Oldemporiumlogo.PNG",
+    "author": "Caldorwards4 at en.wikipedia"
+  },
+  {
+    "file": "etoys-logo.png",
+    "title": "EToys logo.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:EToys_logo.png",
+    "author": "eToys"
+  },
+  {
+    "file": "expotechnik-logo.png",
+    "title": "Expotechnik Logo.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Expotechnik_Logo.jpg",
+    "author": "Expotechnik"
+  },
+  {
+    "file": "garfinckel-s-logo.png",
+    "title": "Garfinckel's (logo).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Garfinckel%27s_(logo).jpg",
+    "author": "Pubdog at en.wikipedia"
+  },
+  {
+    "file": "gottslogoblack.png",
+    "title": "GottsLogoBlack.PNG",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:GottsLogoBlack.PNG",
+    "author": "The original uploader was Caldorwards4 at English Wikipedia."
+  },
+  {
+    "file": "icesave-logo.png",
+    "title": "Icesave logo.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Icesave_logo.svg",
+    "author": "Unknown authorUnknown author"
+  },
+  {
+    "file": "infocom-logo.png",
+    "title": "Infocom logo.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Infocom_logo.png",
+    "author": "The original uploader was Brian0918 at English Wikipedia."
+  },
+  {
+    "file": "kp-logo-1950s.png",
+    "title": "KP LOGO 1950s.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:KP_LOGO_1950s.jpg",
+    "author": "Kempthorne Prosser"
+  },
+  {
+    "file": "logo-ab-m.png",
+    "title": "Logo AB&M.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Logo_AB%26M.jpg",
+    "author": ""
+  },
+  {
+    "file": "logo-of-enron-corporation-1997.png",
+    "title": "Logo of Enron Corporation (1997).svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Logo_of_Enron_Corporation_(1997).svg",
+    "author": "Paul Rand"
+  },
+  {
+    "file": "logo-of-the-pan-am-petroleum-company-pan-gas.png",
+    "title": "Logo of the Pan-Am petroleum company PAN-GAS.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Logo_of_the_Pan-Am_petroleum_company_PAN-GAS.png",
+    "author": "Unknown authorUnknown author"
+  },
+  {
+    "file": "logo-shurgard.png",
+    "title": "Logo shurgard.gif",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Logo_shurgard.gif",
+    "author": "Seatex"
+  },
+  {
+    "file": "logo2-b-m.png",
+    "title": "Logo2 B&M.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Logo2_B%26M.jpg",
+    "author": ""
+  },
+  {
+    "file": "nob-logotipo.png",
+    "title": "NOB-Logotipo.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:NOB-Logotipo.png",
+    "author": "No machine-readable author provided. Dalton~commonswiki assumed (based on copyright claims)."
+  },
+  {
+    "file": "phelps-dodge-logo.png",
+    "title": "Phelps Dodge logo.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Phelps_Dodge_logo.png",
+    "author": "The original uploader was Flamurai at English Wikipedia."
+  },
+  {
+    "file": "salomon-brothers-logo.png",
+    "title": "Salomon Brothers logo.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Salomon_Brothers_logo.svg",
+    "author": "Salomon Brothers"
+  },
+  {
+    "file": "sterns1980slogo.png",
+    "title": "Sterns1980slogo.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Sterns1980slogo.png",
+    "author": "The original uploader was Caldorwards4 at English Wikipedia."
+  },
+  {
+    "file": "sternslogo.png",
+    "title": "Sternslogo.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Sternslogo.png",
+    "author": "The original uploader was Whoasuckaa at English Wikipedia."
+  },
+  {
+    "file": "testa-hurwitz-logo.png",
+    "title": "Testa-hurwitz-logo.JPG",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Testa-hurwitz-logo.JPG",
+    "author": "The original uploader was Lamro at English Wikipedia."
+  },
+  {
+    "file": "thacher-proffitt-logo.png",
+    "title": "Thacher-proffitt-logo.JPG",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Thacher-proffitt-logo.JPG",
+    "author": "The original uploader was Lamro at English Wikipedia."
+  },
+  {
+    "file": "thq-logo-2011.png",
+    "title": "THQ logo 2011.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:THQ_logo_2011.svg",
+    "author": "THQ.\n\nOriginal uploader was AxG at en.wikipedia"
+  },
+  {
+    "file": "trident-microsystems-logo.png",
+    "title": "Trident Microsystems logo.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Trident_Microsystems_logo.svg",
+    "author": "Unknown authorUnknown author"
+  },
+  {
+    "file": "vivendi-games-logo.png",
+    "title": "Vivendi Games Logo.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Vivendi_Games_Logo.png",
+    "author": "Vivendi"
+  },
+  {
+    "file": "walker-auto-1906-logo.png",
+    "title": "Walker-auto 1906 logo.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Walker-auto_1906_logo.jpg",
+    "author": "Walker Motor Car Company"
+  },
+  {
+    "file": "court-line-logo-march-1974.png",
+    "title": "Court Line Logo, March 1974.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Court_Line_Logo,_March_1974.svg",
+    "author": "Court Line Aviation Ltd"
+  },
+  {
+    "file": "sa-logo.png",
+    "title": "ČSA logo.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:%C4%8CSA_logo.png",
+    "author": "Czech Airlines"
+  },
+  {
+    "file": "ifa-trabant-logo.png",
+    "title": "IFA Trabant Logo.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:IFA_Trabant_Logo.svg",
+    "author": "Unknown authorUnknown author"
+  },
+  {
+    "file": "aa-housman-1917-logo.png",
+    "title": "AA Housman 1917 logo.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:AA_Housman_1917_logo.png",
+    "author": "Unknown authorUnknown author"
+  },
+  {
+    "file": "maxtor-logo.png",
+    "title": "Maxtor-Logo.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Maxtor-Logo.svg",
+    "author": "Unknown authorUnknown author"
+  },
+  {
+    "file": "ocz-technology-2014-logo.png",
+    "title": "OCZ Technology 2014 logo.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:OCZ_Technology_2014_logo.svg",
+    "author": "OCZ Storage Solutions Limited"
+  },
+  {
+    "file": "ocz-technology-logo.png",
+    "title": "OCZ Technology Logo.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:OCZ_Technology_Logo.svg",
+    "author": "unbekanntOCZ Technology"
+  },
+  {
+    "file": "savin-logo.png",
+    "title": "Savin logo.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Savin_logo.png",
+    "author": "Ricoh"
+  },
+  {
+    "file": "standard-oil-ohio-logo.png",
+    "title": "Standard oil ohio logo.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Standard_oil_ohio_logo.png",
+    "author": "Unknown authorUnknown author"
+  },
+  {
+    "file": "baumax-logo.png",
+    "title": "Baumax logo.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Baumax_logo.svg",
+    "author": "Baumax AG"
+  },
+  {
+    "file": "famous-barr-department-store-final-logo.png",
+    "title": "Famous-Barr Department Store Final Logo.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Famous-Barr_Department_Store_Final_Logo.png",
+    "author": "Famous-Barr"
+  },
+  {
+    "file": "british-railways-logo-on-west-somerset-railway-9.png",
+    "title": "British Railways logo on West Somerset Railway 9351 2025-07-27.jpg",
+    "license": "CC0",
+    "source": "https://commons.wikimedia.org/wiki/File:British_Railways_logo_on_West_Somerset_Railway_9351_2025-07-27.jpg",
+    "author": "Andy Li"
+  },
+  {
+    "file": "regional-railways-logo-122100.png",
+    "title": "Regional Railways logo 122100.JPG",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Regional_Railways_logo_122100.JPG",
+    "author": "37427 at English Wikipedia"
+  },
+  {
+    "file": "ferranti-international-logo.png",
+    "title": "Ferranti International logo.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Ferranti_International_logo.svg",
+    "author": "™/®Ferranti International plc"
+  },
+  {
+    "file": "gulf-logo.png",
+    "title": "Gulf logo.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Gulf_logo.png",
+    "author": "Gulf"
+  },
+  {
+    "file": "gulf-oil-logo.png",
+    "title": "Gulf Oil logo.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Gulf_Oil_logo.png",
+    "author": "Gulf Oil LP"
+  },
+  {
+    "file": "gulflogo1920.png",
+    "title": "Gulflogo1920.JPG",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Gulflogo1920.JPG",
+    "author": "Gulf Oil"
+  },
+  {
+    "file": "royal-enfield-logo-on-motorcycle.png",
+    "title": "Royal Enfield logo on motorcycle.JPG",
+    "license": "CC0",
+    "source": "https://commons.wikimedia.org/wiki/File:Royal_Enfield_logo_on_motorcycle.JPG",
+    "author": "Alf van Beem"
+  },
+  {
+    "file": "royal-enfield-logo.png",
+    "title": "Royal Enfield logo.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Royal_Enfield_logo.jpg",
+    "author": "Michel 67"
+  },
+  {
+    "file": "gateway-1998-wordmark.png",
+    "title": "Gateway 1998 wordmark.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Gateway_1998_wordmark.svg",
+    "author": "Gateway, Inc."
+  },
+  {
+    "file": "gateway-2000-logo-slogan.png",
+    "title": "Gateway 2000 Logo Slogan.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Gateway_2000_Logo_Slogan.svg",
+    "author": "Gateway 2000"
+  },
+  {
+    "file": "gateway-2000-logo.png",
+    "title": "Gateway 2000 Logo.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Gateway_2000_Logo.svg",
+    "author": "Gateway 2000"
+  },
+  {
+    "file": "gw2k-2004-logo-horizontal.png",
+    "title": "Gw2k 2004 logo horizontal.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Gw2k_2004_logo_horizontal.svg",
+    "author": "Gateway, Inc."
+  },
+  {
+    "file": "gw2k-2004-logo.png",
+    "title": "Gw2k 2004 logo.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Gw2k_2004_logo.svg",
+    "author": "Gateway, Inc."
+  },
+  {
+    "file": "gateway-logo.png",
+    "title": "Gateway-logo.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Gateway-logo.jpg",
+    "author": "Gump1993"
+  },
+  {
+    "file": "avangard-spb-logo-small-2020s.png",
+    "title": "Avangard SPB logo small (2020s).png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Avangard_SPB_logo_small_(2020s).png",
+    "author": "ЗАО Авангард"
+  },
+  {
+    "file": "box-of-200-soviet-1t305-transistors-made-in-mins.png",
+    "title": "Box of 200 Soviet 1T305 transistors, made in Minsk, 1986 - factory logo.jpg",
+    "license": "CC0",
+    "source": "https://commons.wikimedia.org/wiki/File:Box_of_200_Soviet_1T305_transistors,_made_in_Minsk,_1986_-_factory_logo.jpg",
+    "author": "Retired electrician"
+  },
+  {
+    "file": "elektronmash-logo.png",
+    "title": "Elektronmash logo.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Elektronmash_logo.jpg",
+    "author": "Unknown authorUnknown author"
+  },
+  {
+    "file": "lepse-kirov-logo.png",
+    "title": "Lepse-Kirov logo.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Lepse-Kirov_logo.svg",
+    "author": "Own work, original by АО \"Электромашиностроительный завод \"ЛЕПСЕ\", г.Киров"
+  },
+  {
+    "file": "logo-factory-meteor.png",
+    "title": "Logo Factory Meteor.gif",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Logo_Factory_Meteor.gif",
+    "author": "ОАО «Завод „Метеор“»"
+  },
+  {
+    "file": "tehpribor-logo-1970s.png",
+    "title": "Tehpribor logo 1970s.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Tehpribor_logo_1970s.svg",
+    "author": "Own work / d:Q123150998"
+  },
+  {
+    "file": "1980.png",
+    "title": "Азон Баку вторая эмблема (1980е).svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%90%D0%B7%D0%BE%D0%BD_%D0%91%D0%B0%D0%BA%D1%83_%D0%B2%D1%82%D0%BE%D1%80%D0%B0%D1%8F_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_(1980%D0%B5).svg",
+    "author": "Минэлектропром СССР / завод Азон"
+  },
+  {
+    "file": "1982-2010.png",
+    "title": "Воронежский завод полупроводниковых приборов, эмблема 1982-2010е.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%92%D0%BE%D1%80%D0%BE%D0%BD%D0%B5%D0%B6%D1%81%D0%BA%D0%B8%D0%B9_%D0%B7%D0%B0%D0%B2%D0%BE%D0%B4_%D0%BF%D0%BE%D0%BB%D1%83%D0%BF%D1%80%D0%BE%D0%B2%D0%BE%D0%B4%D0%BD%D0%B8%D0%BA%D0%BE%D0%B2%D1%8B%D1%85_%D0%BF%D1%80%D0%B8%D0%B1%D0%BE%D1%80%D0%BE%D0%B2,_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_1982-2010%D0%B5.svg",
+    "author": "Воронежский ЗПП"
+  },
+  {
+    "file": "2020.png",
+    "title": "Воронежский завод полупроводниковых приборов, эмблема 2020е.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%92%D0%BE%D1%80%D0%BE%D0%BD%D0%B5%D0%B6%D1%81%D0%BA%D0%B8%D0%B9_%D0%B7%D0%B0%D0%B2%D0%BE%D0%B4_%D0%BF%D0%BE%D0%BB%D1%83%D0%BF%D1%80%D0%BE%D0%B2%D0%BE%D0%B4%D0%BD%D0%B8%D0%BA%D0%BE%D0%B2%D1%8B%D1%85_%D0%BF%D1%80%D0%B8%D0%B1%D0%BE%D1%80%D0%BE%D0%B2,_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_2020%D0%B5.svg",
+    "author": "Воронежский ЗПП"
+  },
+  {
+    "file": "1974-2011.png",
+    "title": "Зонд Звенигово (филиал ПО Изотоп) эмблема 1974-2011.svg",
+    "license": "CC0",
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%97%D0%BE%D0%BD%D0%B4_%D0%97%D0%B2%D0%B5%D0%BD%D0%B8%D0%B3%D0%BE%D0%B2%D0%BE_(%D1%84%D0%B8%D0%BB%D0%B8%D0%B0%D0%BB_%D0%9F%D0%9E_%D0%98%D0%B7%D0%BE%D1%82%D0%BE%D0%BF)_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_1974-2011.svg",
+    "author": "Retired electrician"
+  },
+  {
+    "file": ".png",
+    "title": "Логотип ПО Эркон, Нижний Новгород.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%9B%D0%BE%D0%B3%D0%BE%D1%82%D0%B8%D0%BF_%D0%9F%D0%9E_%D0%AD%D1%80%D0%BA%D0%BE%D0%BD,_%D0%9D%D0%B8%D0%B6%D0%BD%D0%B8%D0%B9_%D0%9D%D0%BE%D0%B2%D0%B3%D0%BE%D1%80%D0%BE%D0%B4.png",
+    "author": "ПО Эркон"
+  },
+  {
+    "file": "1950-1998.png",
+    "title": "МЭЛЗ, историческая эмблема 1950-1998.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%9C%D0%AD%D0%9B%D0%97,_%D0%B8%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_1950-1998.svg",
+    "author": "МЭЛЗ"
+  },
+  {
+    "file": "1962-1969.png",
+    "title": "Полярон Львов историческая эмблема 1962-1969.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%9F%D0%BE%D0%BB%D1%8F%D1%80%D0%BE%D0%BD_%D0%9B%D1%8C%D0%B2%D0%BE%D0%B2_%D0%B8%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_1962-1969.svg",
+    "author": "Минэлектронпром СССР / ПО Полярон"
+  },
+  {
+    "file": "1971-2002.png",
+    "title": "Полярон Львов историческая эмблема 1971-2002.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%9F%D0%BE%D0%BB%D1%8F%D1%80%D0%BE%D0%BD_%D0%9B%D1%8C%D0%B2%D0%BE%D0%B2_%D0%B8%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_1971-2002.svg",
+    "author": "Минэлектронпром СССР / ПО Поляронв"
+  },
+  {
+    "file": "1972-1998.png",
+    "title": "Радиодеталь Харьков, эмблема (1972-1998).svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%A0%D0%B0%D0%B4%D0%B8%D0%BE%D0%B4%D0%B5%D1%82%D0%B0%D0%BB%D1%8C_%D0%A5%D0%B0%D1%80%D1%8C%D0%BA%D0%BE%D0%B2,_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_(1972-1998).svg",
+    "author": "Завод Радиодеталь"
+  },
+  {
+    "file": "1954.png",
+    "title": "Светлана, логотип и заводское клеймо 1954-н.в..svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%A1%D0%B2%D0%B5%D1%82%D0%BB%D0%B0%D0%BD%D0%B0,_%D0%BB%D0%BE%D0%B3%D0%BE%D1%82%D0%B8%D0%BF_%D0%B8_%D0%B7%D0%B0%D0%B2%D0%BE%D0%B4%D1%81%D0%BA%D0%BE%D0%B5_%D0%BA%D0%BB%D0%B5%D0%B9%D0%BC%D0%BE_1954-%D0%BD.%D0%B2..svg",
+    "author": "Светлана"
+  },
+  {
+    "file": "1969-1990.png",
+    "title": "Херсонский ЗПП (Днепр) историческая эмблема 1969-1990.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%A5%D0%B5%D1%80%D1%81%D0%BE%D0%BD%D1%81%D0%BA%D0%B8%D0%B9_%D0%97%D0%9F%D0%9F_(%D0%94%D0%BD%D0%B5%D0%BF%D1%80)_%D0%B8%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_1969-1990.svg",
+    "author": "Минэлектронпром СССР / ПО Днепр / Херсонский завод полупроводниковых приборов"
+  },
+  {
+    "file": ".png",
+    "title": "Электро-технический трест слабых токов эмблема.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%AD%D0%BB%D0%B5%D0%BA%D1%82%D1%80%D0%BE-%D1%82%D0%B5%D1%85%D0%BD%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D0%B9_%D1%82%D1%80%D0%B5%D1%81%D1%82_%D1%81%D0%BB%D0%B0%D0%B1%D1%8B%D1%85_%D1%82%D0%BE%D0%BA%D0%BE%D0%B2_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0.svg",
+    "author": "Retired electrician"
+  },
+  {
+    "file": "1978-2011.png",
+    "title": "Элькор Нальчик историческая эмблема (1978-2011).svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%AD%D0%BB%D1%8C%D0%BA%D0%BE%D1%80_%D0%9D%D0%B0%D0%BB%D1%8C%D1%87%D0%B8%D0%BA_%D0%B8%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_(1978-2011).svg",
+    "author": "Минэлектронпром СССР / Нальчикский завод полупроводниковых приборов"
+  },
+  {
+    "file": "1970.png",
+    "title": "Азон Баку первая эмблема (1970е).svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%90%D0%B7%D0%BE%D0%BD_%D0%91%D0%B0%D0%BA%D1%83_%D0%BF%D0%B5%D1%80%D0%B2%D0%B0%D1%8F_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_(1970%D0%B5).svg",
+    "author": "Минэлектропром СССР / завод Азон"
+  },
+  {
+    "file": "1970-2020.png",
+    "title": "Алмаз Котовск, эмблема (1970-2020-е).svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%90%D0%BB%D0%BC%D0%B0%D0%B7_%D0%9A%D0%BE%D1%82%D0%BE%D0%B2%D1%81%D0%BA,_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_(1970-2020-%D0%B5).svg",
+    "author": "Минэлектронпром СССР / завод Алмаз"
+  },
+  {
+    "file": "1978-1991.png",
+    "title": "Биллур Ганджа историческая эмблема (1978-1991).svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%91%D0%B8%D0%BB%D0%BB%D1%83%D1%80_%D0%93%D0%B0%D0%BD%D0%B4%D0%B6%D0%B0_%D0%B8%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_(1978-1991).svg",
+    "author": "Миэлектропром СССР / завод Биллур"
+  },
+  {
+    "file": "1980.png",
+    "title": "Гравитон Черновцы, историческая (1980е) эмблема.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%93%D1%80%D0%B0%D0%B2%D0%B8%D1%82%D0%BE%D0%BD_%D0%A7%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D1%86%D1%8B,_%D0%B8%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_(1980%D0%B5)_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0.svg",
+    "author": "Минэлектронпром СССР / завод Гравитон"
+  },
+  {
+    "file": "1990.png",
+    "title": "Измеритель Черновцы, историческая (1990е) эмблема.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%98%D0%B7%D0%BC%D0%B5%D1%80%D0%B8%D1%82%D0%B5%D0%BB%D1%8C_%D0%A7%D0%B5%D1%80%D0%BD%D0%BE%D0%B2%D1%86%D1%8B,_%D0%B8%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_(1990%D0%B5)_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0.svg",
+    "author": "Министерство электронной промышленности СССР / Завод Измеритель"
+  },
+  {
+    "file": "1982-1990.png",
+    "title": "Континент Зеленодольск, эмблема 1982-1990х.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%9A%D0%BE%D0%BD%D1%82%D0%B8%D0%BD%D0%B5%D0%BD%D1%82_%D0%97%D0%B5%D0%BB%D0%B5%D0%BD%D0%BE%D0%B4%D0%BE%D0%BB%D1%8C%D1%81%D0%BA,_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_1982-1990%D1%85.svg",
+    "author": "МЭП СССР / завод Континент в Зеленодольске (Днепропетровская область)"
+  },
+  {
+    "file": "1965-2011.png",
+    "title": "Фрязинский завод полупроводниковых приборов, эмблема 1965-2011.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%A4%D1%80%D1%8F%D0%B7%D0%B8%D0%BD%D1%81%D0%BA%D0%B8%D0%B9_%D0%B7%D0%B0%D0%B2%D0%BE%D0%B4_%D0%BF%D0%BE%D0%BB%D1%83%D0%BF%D1%80%D0%BE%D0%B2%D0%BE%D0%B4%D0%BD%D0%B8%D0%BA%D0%BE%D0%B2%D1%8B%D1%85_%D0%BF%D1%80%D0%B8%D0%B1%D0%BE%D1%80%D0%BE%D0%B2,_%D1%8D%D0%BC%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_1965-2011.svg",
+    "author": "Минэлектропром СССР / Фрязинский завод полупроводниковых приборов / ПО \"Электронприбор\""
+  },
+  {
+    "file": "gulag-logo.png",
+    "title": "GULAG Logo.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:GULAG_Logo.svg",
+    "author": "ГУЛАГ НКВД СССР"
+  },
+  {
+    "file": ".png",
+    "title": "ГУЛАГ НКВД СССР товарный знак.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%93%D0%A3%D0%9B%D0%90%D0%93_%D0%9D%D0%9A%D0%92%D0%94_%D0%A1%D0%A1%D0%A1%D0%A0_%D1%82%D0%BE%D0%B2%D0%B0%D1%80%D0%BD%D1%8B%D0%B9_%D0%B7%D0%BD%D0%B0%D0%BA.jpg",
+    "author": "ГУЛАГ НКВД СССР, г. Москва"
+  },
+  {
+    "file": "confederation-of-cooperative-companies-of-the-basque-country.png",
+    "title": "Confederation of Cooperative Companies of the Basque Country KONFEKOOP Logo.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AConfederation_of_Cooperative_Companies_of_the_Basque_Country_KONFEKOOP_Logo.png",
+    "author": "Confederation of Cooperative Companies of the Basque Country KONFEKOOP"
+  },
+  {
+    "file": "cooperative-bank-nz.png",
+    "title": "Cooperative-Bank-NZ.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ACooperative-Bank-NZ.png",
+    "author": "The Co-operative Bank"
+  },
+  {
+    "file": "dwg-deutsche-wohnungsbaugenossenschaft-eg-logo.png",
+    "title": "DWG Deutsche Wohnungsbaugenossenschaft eG logo.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ADWG_Deutsche_Wohnungsbaugenossenschaft_eG_logo.png",
+    "author": "Unknown authorUnknown author"
+  },
+  {
+    "file": "logo-le-gouessant.png",
+    "title": "Logo-le-gouessant.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ALogo-le-gouessant.png",
+    "author": "Le Gouessant"
+  },
+  {
+    "file": "logo-bank-sulselbar.png",
+    "title": "Logo Bank Sulselbar.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ALogo_Bank_Sulselbar.png",
+    "author": "PT. Bank Pembangunan Daerah Sulawesi Selatan dan Sulawesi Barat"
+  },
+  {
+    "file": "logo-superunie.png",
+    "title": "Logo superunie.jpg",
+    "license": "CC0",
+    "source": "https://commons.wikimedia.org/wiki/File%3ALogo_superunie.jpg",
+    "author": "Paul vH"
+  },
+  {
+    "file": "ministry-of-agriculture-and-cooperative-logo-2022-green-line.png",
+    "title": "Ministry of Agriculture and Cooperative Logo 2022 Green Line.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AMinistry_of_Agriculture_and_Cooperative_Logo_2022_Green_Line.png",
+    "author": "กระทรวงเกษตรและสหกรณ์, รัฐบาลไทย\n\nMinistry of Agriculture and Cooperatives, Government of Thailand."
+  },
+  {
+    "file": "national-weather-service-cooperative-observing-program-logo.png",
+    "title": "National Weather Service Cooperative Observing Program logo.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ANational_Weather_Service_Cooperative_Observing_Program_logo.png",
+    "author": "United States Federal Government, Department of Commerce, National Oceanic and Atmospheric Administration, National Weat"
+  },
+  {
+    "file": "original-sun-maid-painting.png",
+    "title": "Original Sun-Maid painting.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AOriginal_Sun-Maid_painting.png",
+    "author": "Fanny Scafford"
+  },
+  {
+    "file": "program-for-cooperative-cataloging-logo.png",
+    "title": "Program for Cooperative Cataloging logo.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AProgram_for_Cooperative_Cataloging_logo.jpg",
+    "author": "Program for Cooperative Cataloging"
+  },
+  {
+    "file": "sun-maid-1915-logo.png",
+    "title": "Sun-Maid 1915 logo.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ASun-Maid_1915_logo.jpg",
+    "author": "Sun-Maid"
+  },
+  {
+    "file": "sun-maid-raisins-newspaper-1921.png",
+    "title": "Sun-Maid Raisins newspaper 1921.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ASun-Maid_Raisins_newspaper_1921.png",
+    "author": "Sun Maid"
+  },
+  {
+    "file": "sun-maid-raisins-the-wingham-advance-1922-07-06-page-2.png",
+    "title": "Sun Maid Raisins-The Wingham Advance, 1922-07-06, Page 2.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ASun_Maid_Raisins-The_Wingham_Advance%2C_1922-07-06%2C_Page_2.png",
+    "author": "Sun Maid"
+  },
+  {
+    "file": "letter-from-mikhail-denisov-to-the-head-of-construction-of-f.png",
+    "title": "Letter from Mikhail Denisov to the head of construction of Factory No. 34, 1941.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ALetter_from_Mikhail_Denisov_to_the_head_of_construction_of_Factory_No._34%2C_1941.jpg",
+    "author": "People's Commissariat of the Chemical Industry of the USSR; signed by Mikhail F. Denisov"
+  },
+  {
+    "file": "postal-stationery-envelope-of-ryazhsk-factory-of-goznak-1991.png",
+    "title": "Postal stationery envelope of Ryazhsk Factory of Goznak 1991.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3APostal_stationery_envelope_of_Ryazhsk_Factory_of_Goznak_1991.jpg",
+    "author": "Ю. Косоруков"
+  },
+  {
+    "file": "russia-elektrostal-book-factory-no-1-img-02.png",
+    "title": "Russia. Elektrostal. Book factory No 1. img 02.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ARussia._Elektrostal._Book_factory_No_1._img_02.jpg",
+    "author": "Scanning Dmitry Makeev, scan date - 2020 year."
+  },
+  {
+    "file": "soviet-union-1963-stamp-arctica-and-antarctica-12k.png",
+    "title": "Soviet Union-1963-stamp-Arctica and Antarctica-12K.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ASoviet_Union-1963-stamp-Arctica_and_Antarctica-12K.jpg",
+    "author": "Unknown author"
+  },
+  {
+    "file": "the-soviet-union-1947-cpa-1203-stamp-stalingrad-tractor-plan.png",
+    "title": "The Soviet Union 1947 CPA 1203 stamp (Stalingrad Tractor Plant).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AThe_Soviet_Union_1947_CPA_1203_stamp_%28Stalingrad_Tractor_Plant%29.jpg",
+    "author": "USSR Post"
+  },
+  {
+    "file": "the-soviet-union-1947-cpa-1206-stamp-rostov-factory-for-agri.png",
+    "title": "The Soviet Union 1947 CPA 1206 stamp (Rostov factory for agricultural machines).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AThe_Soviet_Union_1947_CPA_1206_stamp_%28Rostov_factory_for_agricultural_machines%29.jpg",
+    "author": "USSR Post"
+  },
+  {
+    "file": "the-soviet-union-1957-cpa-1985-stamp-assembly-line.png",
+    "title": "The Soviet Union 1957 CPA 1985 stamp (Assembly Line).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AThe_Soviet_Union_1957_CPA_1985_stamp_%28Assembly_Line%29.jpg",
+    "author": "Post of USSR"
+  },
+  {
+    "file": "the-soviet-union-1964-cpa-3085-proof-souvenir-sheet-1964-sum.png",
+    "title": "The Soviet Union 1964 CPA 3085 proof souvenir sheet (1964 Summer Olympics, Tokyo. Woman gymnast and stadium) large resolution 2.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AThe_Soviet_Union_1964_CPA_3085_proof_souvenir_sheet_%281964_Summer_Olympics%2C_Tokyo._Woman_gymnast_and_stadium%29_large_resolution_2.jpg",
+    "author": "Post of the Soviet Union (E. D. Aniskin)."
+  },
+  {
+    "file": "the-soviet-union-1964-cpa-3101-stamp-socialist-countries-15t.png",
+    "title": "The Soviet Union 1964 CPA 3101 stamp (Socialist countries. 15th anniversary of German Democratic Republic. Arms of East Germany, factories, ship and train).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AThe_Soviet_Union_1964_CPA_3101_stamp_%28Socialist_countries._15th_anniversary_of_German_Democratic_Republic._Arms_of_East_Germany%2C_factories%2C_ship_and_train%29.jpg",
+    "author": "Post of the Soviet Union (E. D. Aniskin)."
+  },
+  {
+    "file": "the-soviet-union-1964-cpa-3108-stamp-47th-anniversary-of-oct.png",
+    "title": "The Soviet Union 1964 CPA 3108 stamp (47th anniversary of October Revolution. The hammer and sickle, factory, bayonet of rifle, flag and wheat).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AThe_Soviet_Union_1964_CPA_3108_stamp_%2847th_anniversary_of_October_Revolution._The_hammer_and_sickle%2C_factory%2C_bayonet_of_rifle%2C_flag_and_wheat%29.jpg",
+    "author": "Post of the Soviet Union (I. A. Kominarets)."
+  },
+  {
+    "file": "the-soviet-union-1966-cpa-3304-stamp-porcelain-figurines-pos.png",
+    "title": "The Soviet Union 1966 CPA 3304 stamp (Porcelain Figurines. Postman and Girl with Yoke, 19th Century (Based on Alexey Venetsianov's Drawings, 1815-1822)).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AThe_Soviet_Union_1966_CPA_3304_stamp_%28Porcelain_Figurines._Postman_and_Girl_with_Yoke%2C_19th_Century_%28Based_on_Alexey_Venetsianov%27s_Drawings%2C_1815-1822%29%29.jpg",
+    "author": "Ministry of Communications of the USSR. The design of the stamp by N. Akimushkin.Scanned by Dmitry Ivanov."
+  },
+  {
+    "file": "the-soviet-union-1966-cpa-3305-stamp-modern-tea-set.png",
+    "title": "The Soviet Union 1966 CPA 3305 stamp (Modern Tea Set).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AThe_Soviet_Union_1966_CPA_3305_stamp_%28Modern_Tea_Set%29.jpg",
+    "author": "Ministry of Communications of the USSR. The design of the stamp by N. Akimushkin.Scanned by Dmitry Ivanov."
+  },
+  {
+    "file": "the-soviet-union-1967-cpa-3466-3467-stamps-factory-ship-cher.png",
+    "title": "The Soviet Union 1967 CPA 3466 - 3467 stamps (Factory Ship 'Chernyshevsky' (type 'Mayakovsky'), Refrigerator Ship (type 'Siberia') and Fish) large resolution.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AThe_Soviet_Union_1967_CPA_3466_-_3467_stamps_%28Factory_Ship_%27Chernyshevsky%27_%28type_%27Mayakovsky%27%29%2C_Refrigerator_Ship_%28type_%27Siberia%27%29_and_Fish%29_large_resolution.jpg",
+    "author": "Bin im Garten"
+  },
+  {
+    "file": "the-soviet-union-1967-cpa-3466-3470-se-tenant-strip-of-5-fis.png",
+    "title": "The Soviet Union 1967 CPA 3466 - 3470 se-tenant strip of 5 (Fishing Industry).png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AThe_Soviet_Union_1967_CPA_3466_-_3470_se-tenant_strip_of_5_%28Fishing_Industry%29.png",
+    "author": "USSR Post"
+  },
+  {
+    "file": "the-soviet-union-1967-cpa-3466-stamp-factory-ship-chernyshev.png",
+    "title": "The Soviet Union 1967 CPA 3466 stamp (Factory Ship 'Chernyshevsky' (type 'Mayakovsky') and Fish).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AThe_Soviet_Union_1967_CPA_3466_stamp_%28Factory_Ship_%27Chernyshevsky%27_%28type_%27Mayakovsky%27%29_and_Fish%29.jpg",
+    "author": "USSR Post"
+  },
+  {
+    "file": "the-soviet-union-1967-cpa-3468-stamp-crab-cannery-ship-type-.png",
+    "title": "The Soviet Union 1967 CPA 3468 stamp (Crab Cannery Ship (type 'Andrey Zakharov') and Fish) cancelled light.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AThe_Soviet_Union_1967_CPA_3468_stamp_%28Crab_Cannery_Ship_%28type_%27Andrey_Zakharov%27%29_and_Fish%29_cancelled_light.jpg",
+    "author": "Post of the Soviet Union"
+  },
+  {
+    "file": "the-soviet-union-1969-cpa-3745-stamp-telephone-radio-set-and.png",
+    "title": "The Soviet Union 1969 CPA 3745 stamp (Telephone, Radio Set and Trademark).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AThe_Soviet_Union_1969_CPA_3745_stamp_%28Telephone%2C_Radio_Set_and_Trademark%29.jpg",
+    "author": "USSR Post"
+  },
+  {
+    "file": "the-soviet-union-1970-cpa-3928-stamp-lock-operator-and-canal.png",
+    "title": "The Soviet Union 1970 CPA 3928 stamp (Lock Operator and Canal ('Irrigation and Chemical Research')).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AThe_Soviet_Union_1970_CPA_3928_stamp_%28Lock_Operator_and_Canal_%28%27Irrigation_and_Chemical_Research%27%29%29.jpg",
+    "author": "USSR Post"
+  },
+  {
+    "file": "the-soviet-union-1971-cpa-4050-stamp-mechanical-engineering-.png",
+    "title": "The Soviet Union 1971 CPA 4050 stamp (Mechanical Engineering Plant (Increased Productivity)).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AThe_Soviet_Union_1971_CPA_4050_stamp_%28Mechanical_Engineering_Plant_%28Increased_Productivity%29%29.jpg",
+    "author": "USSR Post"
+  },
+  {
+    "file": "the-soviet-union-1988-cpa-6034-stamp-19th-communist-party-co.png",
+    "title": "The Soviet Union 1988 CPA 6034 stamp (19th Communist Party Conference. 'The factories to the workers!' Hammer and Sickle and girders).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AThe_Soviet_Union_1988_CPA_6034_stamp_%2819th_Communist_Party_Conference._%27The_factories_to_the_workers%21%27_Hammer_and_Sickle_and_girders%29.jpg",
+    "author": "USSR Post"
+  },
+  {
+    "file": "one-big-union-of-all-the-workers-the-greatest-thing-on-earth.png",
+    "title": "\"One Big Union of All the Workers\" \"The Greatest Thing On Earth\" \"For information address IWW 1001 W. Madison St. Chicago, ILL. USA\" I.W.W. logo in 1919 (cropped).tif",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3A%22One_Big_Union_of_All_the_Workers%22_%22The_Greatest_Thing_On_Earth%22_%22For_information_address_IWW_1001_W._Madison_St._Chicago%2C_ILL._USA%22_I.W.W._logo_in_1919_%28cropped%29.tif",
+    "author": "Industrial Workers of the World"
+  },
+  {
+    "file": "amalgamated-association-of-iron-and-steel-workers-emblem-bef.png",
+    "title": "Amalgamated Association of Iron and Steel Workers emblem before the union added tin workers to the union in 1900.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AAmalgamated_Association_of_Iron_and_Steel_Workers_emblem_before_the_union_added_tin_workers_to_the_union_in_1900.png",
+    "author": "Unknown authorUnknown author"
+  },
+  {
+    "file": "caesar-chavez-migrant-workers-union-leader-nara-544069.png",
+    "title": "CAESAR CHAVEZ, MIGRANT WORKERS UNION LEADER - NARA - 544069.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ACAESAR_CHAVEZ%2C_MIGRANT_WORKERS_UNION_LEADER_-_NARA_-_544069.jpg",
+    "author": "Cornelius M. Keyes"
+  },
+  {
+    "file": "caesar-chavez-migrant-workers-union-leader-nara-544069-tif.png",
+    "title": "CAESAR CHAVEZ, MIGRANT WORKERS UNION LEADER - NARA - 544069.tif",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ACAESAR_CHAVEZ%2C_MIGRANT_WORKERS_UNION_LEADER_-_NARA_-_544069.tif",
+    "author": "Cornelius M. Keyes"
+  },
+  {
+    "file": "construction-workers-industrial-union-number-573-let-s-go-i-.png",
+    "title": "Construction Workers Industrial Union number 573 \"LET'S GO!\" I.W.W. logo in 1919 (cropped).tif",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AConstruction_Workers_Industrial_Union_number_573_%22LET%27S_GO%21%22_I.W.W._logo_in_1919_%28cropped%29.tif",
+    "author": "Industrial Workers of the World"
+  },
+  {
+    "file": "construction-workers-industrial-union-number-573-put-your-sh.png",
+    "title": "Construction Workers Industrial Union number 573 \"Put Your Shoulder to the Wheel\" I.W.W. logo in 1919 (cropped).tif",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AConstruction_Workers_Industrial_Union_number_573_%22Put_Your_Shoulder_to_the_Wheel%22_I.W.W._logo_in_1919_%28cropped%29.tif",
+    "author": "Industrial Workers of the World"
+  },
+  {
+    "file": "european-sex-workers-rights-alliance-eswa-logo.png",
+    "title": "European Sex Workers' Rights Alliance (ESWA) logo.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AEuropean_Sex_Workers%27_Rights_Alliance_%28ESWA%29_logo.png",
+    "author": "European Sex Workers' Rights Alliance (ESWA)"
+  },
+  {
+    "file": "marine-transport-workers-international-union-number-8-mtwiu-.png",
+    "title": "Marine Transport Workers International Union number 8 (MTWIU No. 8) \"Line up!!\" \"When Transportation Stops Industry Stops\" I.W.W. \"Universal\" logo in 1919 (cropped).tif",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AMarine_Transport_Workers_International_Union_number_8_%28MTWIU_No._8%29_%22Line_up%21%21%22_%22When_Transportation_Stops_Industry_Stops%22_I.W.W._%22Universal%22_logo_in_1919_%28cropped%29.tif",
+    "author": "Industrial Workers of the World"
+  },
+  {
+    "file": "proud-logo.png",
+    "title": "PROUD logo.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3APROUD_logo.jpg",
+    "author": "PROUD"
+  },
+  {
+    "file": "rmt-trade-union-logo.png",
+    "title": "RMT (trade union) logo.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ARMT_%28trade_union%29_logo.png",
+    "author": "RMT (trade union)"
+  },
+  {
+    "file": "the-soviet-union-1970-cpa-3872-stamp-worker-books-hemisphere.png",
+    "title": "The Soviet Union 1970 CPA 3872 stamp (Worker, Books, Hemispheres of the Earth and UNESCO Emblem).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AThe_Soviet_Union_1970_CPA_3872_stamp_%28Worker%2C_Books%2C_Hemispheres_of_the_Earth_and_UNESCO_Emblem%29.jpg",
+    "author": "USSR Post"
+  },
+  {
+    "file": "workers-at-the-union-carbide-uranium-mill-nara-543651.png",
+    "title": "WORKERS AT THE UNION CARBIDE URANIUM MILL - NARA - 543651.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AWORKERS_AT_THE_UNION_CARBIDE_URANIUM_MILL_-_NARA_-_543651.jpg",
+    "author": "Bill Gillette"
+  },
+  {
+    "file": "workers-at-the-union-carbide-uranium-mill-nara-543651-tif.png",
+    "title": "WORKERS AT THE UNION CARBIDE URANIUM MILL - NARA - 543651.tif",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AWORKERS_AT_THE_UNION_CARBIDE_URANIUM_MILL_-_NARA_-_543651.tif",
+    "author": "Bill Gillette"
+  },
+  {
+    "file": "peonies-for-pleasure-16209793339.png",
+    "title": "Peonies for pleasure (16209793339).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3APeonies_for_pleasure_%2816209793339%29.jpg",
+    "author": "Ella V. Baines (Firm); Henry G. Gilbert Nursery and Seed Trade Catalog Collection."
+  },
+  {
+    "file": "arizona-s-declining-groundwater-154567-waterstorage-grc-2014.png",
+    "title": "Arizona’s Declining Groundwater (154567 - waterstorage grc 2014 lrg).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AArizona%E2%80%99s_Declining_Groundwater_%28154567_-_waterstorage_grc_2014_lrg%29.jpg",
+    "author": "NASA Earth Observatory images by Wanmei Liang, using data from Abdelmohsen, K., et al. (2025), boundary data from Colora"
+  },
+  {
+    "file": "arizona-s-declining-groundwater-154567-waterstorage-grc-2024.png",
+    "title": "Arizona’s Declining Groundwater (154567 - waterstorage grc 2024 lrg).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AArizona%E2%80%99s_Declining_Groundwater_%28154567_-_waterstorage_grc_2024_lrg%29.jpg",
+    "author": "NASA Earth Observatory images by Wanmei Liang, using data from Abdelmohsen, K., et al. (2025), boundary data from Colora"
+  },
+  {
+    "file": "moscow-free-uht-milk-issued-to-large-families-july-2026-02.png",
+    "title": "Moscow, free UHT milk issued to large families, July 2026 02.jpg",
+    "license": "CC0",
+    "source": "https://commons.wikimedia.org/wiki/File%3AMoscow%2C_free_UHT_milk_issued_to_large_families%2C_July_2026_02.jpg",
+    "author": "Retired electrician"
+  },
+  {
+    "file": "moscow-free-uht-milk-issued-to-large-families-july-2026-07.png",
+    "title": "Moscow, free UHT milk issued to large families, July 2026 07.jpg",
+    "license": "CC0",
+    "source": "https://commons.wikimedia.org/wiki/File%3AMoscow%2C_free_UHT_milk_issued_to_large_families%2C_July_2026_07.jpg",
+    "author": "Retired electrician"
+  },
+  {
+    "file": "trademark-of-novocherkassk-dairy-plant.png",
+    "title": "Trademark of Novocherkassk Dairy Plant.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ATrademark_of_Novocherkassk_Dairy_Plant.png",
+    "author": "Николай Симагин"
+  },
+  {
+    "file": "dolly-madison-bakery-logo.png",
+    "title": "Dolly Madison Bakery logo.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ADolly_Madison_Bakery_logo.png",
+    "author": "Old HB"
+  },
+  {
+    "file": "logo-of-cooper-s-bakery.png",
+    "title": "Logo of Cooper's Bakery.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ALogo_of_Cooper%27s_Bakery.png",
+    "author": "Cooper's Bakery Bangladesh"
+  },
+  {
+    "file": "zippendorfer.png",
+    "title": "Zippendorfer.jpg",
+    "license": "CC0",
+    "source": "https://commons.wikimedia.org/wiki/File%3AZippendorfer.jpg",
+    "author": "Florean Fortescue"
+  },
+  {
+    "file": "bakery.png",
+    "title": "베이커리 bakery.jpg",
+    "license": "CC0",
+    "source": "https://commons.wikimedia.org/wiki/File%3A%EB%B2%A0%EC%9D%B4%EC%BB%A4%EB%A6%AC_bakery.jpg",
+    "author": "Hippietrail"
+  },
+  {
+    "file": "boott-cotton-mills-postcard-d377bd9e-c0c4-4d2f-9bf6-fbccb65d.png",
+    "title": "Boott Cotton Mills Postcard (d377bd9e-c0c4-4d2f-9bf6-fbccb65d7be9).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ABoott_Cotton_Mills_Postcard_%28d377bd9e-c0c4-4d2f-9bf6-fbccb65d7be9%29.jpg",
+    "author": "NPS"
+  },
+  {
+    "file": "interior-vestibule-floor-mosaic-buffalo-mills-company-logo-b.png",
+    "title": "INTERIOR, VESTIBULE FLOOR, MOSAIC BUFFALO MILLS COMPANY LOGO - Buffalo Cotton Textile Mill, Mill Building, SC Route 215, Buffalo, Union County, SC HAER SC,44-BUF,1-4.tif",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AINTERIOR%2C_VESTIBULE_FLOOR%2C_MOSAIC_BUFFALO_MILLS_COMPANY_LOGO_-_Buffalo_Cotton_Textile_Mill%2C_Mill_Building%2C_SC_Route_215%2C_Buffalo%2C_Union_County%2C_SC_HAER_SC%2C44-BUF%2C1-4.tif",
+    "author": "Jack Boucher"
+  },
+  {
+    "file": "museum-of-linen-manufacture-by-merchants-lokalov-logo-2025-0.png",
+    "title": "Museum of Linen manufacture by merchants Lokalov - logo - 2025-08 - p1.jpg",
+    "license": "CC0",
+    "source": "https://commons.wikimedia.org/wiki/File%3AMuseum_of_Linen_manufacture_by_merchants_Lokalov_-_logo_-_2025-08_-_p1.jpg",
+    "author": "Александр Сигачёв"
+  },
+  {
+    "file": "sapphire-textile-mills-logo-2024.png",
+    "title": "Sapphire Textile Mills logo (2024).png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ASapphire_Textile_Mills_logo_%282024%29.png",
+    "author": "Sapphire Textile"
+  },
+  {
+    "file": "stara-zna-ka-akove-ke-tekstilne-industrije-ateks-croatia.png",
+    "title": "Stara značka čakovečke tekstilne industrije 'Čateks' (Croatia).jpg",
+    "license": "CC0",
+    "source": "https://commons.wikimedia.org/wiki/File%3AStara_zna%C4%8Dka_%C4%8Dakove%C4%8Dke_tekstilne_industrije_%27%C4%8Cateks%27_%28Croatia%29.jpg",
+    "author": "Silverije"
+  },
+  {
+    "file": "textile-mill-on-pawtuxet-river-nara-547529.png",
+    "title": "TEXTILE MILL ON PAWTUXET RIVER - NARA - 547529.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ATEXTILE_MILL_ON_PAWTUXET_RIVER_-_NARA_-_547529.jpg",
+    "author": "Hope Alexander"
+  },
+  {
+    "file": "textile-mill-on-pawtuxet-river-nara-547529-tif.png",
+    "title": "TEXTILE MILL ON PAWTUXET RIVER - NARA - 547529.tif",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ATEXTILE_MILL_ON_PAWTUXET_RIVER_-_NARA_-_547529.tif",
+    "author": "Hope Alexander"
+  },
+  {
+    "file": "textile-mill-on-the-pawtuxet-river-nara-547519.png",
+    "title": "TEXTILE MILL ON THE PAWTUXET RIVER - NARA - 547519.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ATEXTILE_MILL_ON_THE_PAWTUXET_RIVER_-_NARA_-_547519.jpg",
+    "author": "Hope Alexander"
+  },
+  {
+    "file": "textile-mill-on-the-pawtuxet-river-nara-547519-tif.png",
+    "title": "TEXTILE MILL ON THE PAWTUXET RIVER - NARA - 547519.tif",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ATEXTILE_MILL_ON_THE_PAWTUXET_RIVER_-_NARA_-_547519.tif",
+    "author": "Hope Alexander"
+  },
+  {
+    "file": "2006-block-hi12612404864b2d00a6b13d9.png",
+    "title": "2006. Марка России block hi12612404864b2d00a6b13d9.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3A2006._%D0%9C%D0%B0%D1%80%D0%BA%D0%B0_%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D0%B8_block_hi12612404864b2d00a6b13d9.jpg",
+    "author": "Почта России"
+  },
+  {
+    "file": "c-780-capt-james-h-page-los-angeles-california-attached-to-t.png",
+    "title": "C-780 - Capt. James H. Page, Los Angeles, California, attached to the 92nd (Negro) Div., Medical Supply, stands in an incompleted ship turret bearing Nazi emblem in a shipyard near Viareggo, Italy. (52286508892).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AC-780_-_Capt._James_H._Page%2C_Los_Angeles%2C_California%2C_attached_to_the_92nd_%28Negro%29_Div.%2C_Medical_Supply%2C_stands_in_an_incompleted_ship_turret_bearing_Nazi_emblem_in_a_shipyard_near_Viareggo%2C_Italy._%2852286508892%29.jpg",
+    "author": "Signal Corps Archive from United States"
+  },
+  {
+    "file": "exterior-decorative-emblem-over-entrance-mare-island-naval-s.png",
+    "title": "EXTERIOR, DECORATIVE EMBLEM OVER ENTRANCE - Mare Island Naval Shipyard, Magazine No. 1, Railroad Avenue, west side near Maseda Road, Vallejo, Solano County, CA HABS CAL,48-MARI,1B-4.tif",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AEXTERIOR%2C_DECORATIVE_EMBLEM_OVER_ENTRANCE_-_Mare_Island_Naval_Shipyard%2C_Magazine_No._1%2C_Railroad_Avenue%2C_west_side_near_Maseda_Road%2C_Vallejo%2C_Solano_County%2C_CA_HABS_CAL%2C48-MARI%2C1B-4.tif",
+    "author": "Unknown author"
+  },
+  {
+    "file": "gulf-of-izmit-turkey.png",
+    "title": "Gulf of Izmit, Turkey.JPG",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AGulf_of_Izmit%2C_Turkey.JPG",
+    "author": "ISS Expedition 24 crew"
+  },
+  {
+    "file": "hamengkubuwono-ix-and-moenadi-in-purwokerto-1971.png",
+    "title": "Hamengkubuwono IX and Moenadi in Purwokerto 1971.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AHamengkubuwono_IX_and_Moenadi_in_Purwokerto_1971.jpg",
+    "author": "Yogyakarta provincial government"
+  },
+  {
+    "file": "kal-kadet-6-after-launching.png",
+    "title": "KAL Kadet-6 after launching.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AKAL_Kadet-6_after_launching.jpg",
+    "author": "Komite Kebijakan Industri Pertahanan (Defense Industry Policy Committee}"
+  },
+  {
+    "file": "kal-kadet-7-at-shipyard-in-batam.png",
+    "title": "KAL Kadet-7 at shipyard in Batam.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AKAL_Kadet-7_at_shipyard_in_Batam.jpg",
+    "author": "Komite Kebijakan Industri Pertahanan (Defense Industry Policy Committee}"
+  },
+  {
+    "file": "kri-balaputradewa-322-launching-2.png",
+    "title": "KRI Balaputradewa (322) launching (2).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AKRI_Balaputradewa_%28322%29_launching_%282%29.jpg",
+    "author": "Ministry of Defense of the Republic of Indonesia"
+  },
+  {
+    "file": "kri-brawijaya-320-renaming-ceremony.png",
+    "title": "KRI Brawijaya-320 renaming ceremony.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AKRI_Brawijaya-320_renaming_ceremony.jpg",
+    "author": "Indonesian Navy"
+  },
+  {
+    "file": "kri-bung-hatta-370-in-the-slipway.png",
+    "title": "KRI Bung Hatta-370 in the slipway.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AKRI_Bung_Hatta-370_in_the_slipway.jpg",
+    "author": "Lantamal IV / Batam"
+  },
+  {
+    "file": "kri-bung-karno-369-launched.png",
+    "title": "KRI Bung Karno (369) launched.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AKRI_Bung_Karno_%28369%29_launched.jpg",
+    "author": "Indonesian Navy 1st Fleet Command Information Service"
+  },
+  {
+    "file": "kri-lukas-rumkorem-392-launching-ceremony.png",
+    "title": "KRI Lukas Rumkorem (392) launching ceremony.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AKRI_Lukas_Rumkorem_%28392%29_launching_ceremony.jpg",
+    "author": "Kementerian Pertahanan Republik Indonesia"
+  },
+  {
+    "file": "kri-prabu-siliwangi-321-renaming-ceremony.png",
+    "title": "KRI Prabu Siliwangi-321 renaming ceremony.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AKRI_Prabu_Siliwangi-321_renaming_ceremony.jpg",
+    "author": "Indonesian Navy"
+  },
+  {
+    "file": "kapal-borobudur-samudra-raksa-di-galangan-pagerungan-tampak-.png",
+    "title": "Kapal Borobudur (Samudra Raksa) di galangan Pagerungan, tampak muka.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AKapal_Borobudur_%28Samudra_Raksa%29_di_galangan_Pagerungan%2C_tampak_muka.jpg",
+    "author": "Yusi Avianto Pareanom (book)Publisher: Kementerian Kebudayaan dan Pariwisata (Ministry of Culture and Tourism)"
+  },
+  {
+    "file": "nasa-s-pegasus-barge-in-south-louisiana-maf-202000928-pegasu.png",
+    "title": "NASA's Pegasus Barge in South Louisiana (MAF 202000928 Pegasus2).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ANASA%27s_Pegasus_Barge_in_South_Louisiana_%28MAF_202000928_Pegasus2%29.jpg",
+    "author": "NASA Michoud Assembly Facility / Michael DeMocker"
+  },
+  {
+    "file": "nsa-mechanicsburg-philadelphia-logo.png",
+    "title": "NSA Mechanicsburg - Philadelphia logo.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ANSA_Mechanicsburg_-_Philadelphia_logo.jpg",
+    "author": "United States Navy"
+  },
+  {
+    "file": "opv-90m-391-launching-ceremony.png",
+    "title": "OPV 90M (391) launching ceremony.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AOPV_90M_%28391%29_launching_ceremony.jpg",
+    "author": "Biro Humas Setjen Kemhan"
+  },
+  {
+    "file": "opv-90m-391-launching-ceremony-2.png",
+    "title": "OPV 90M (391) launching ceremony 2.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AOPV_90M_%28391%29_launching_ceremony_2.jpg",
+    "author": "Kementerian Pertahanan Republik Indonesia"
+  },
+  {
+    "file": "palindo-marine-bho-ocean-going-launching-ceremony.png",
+    "title": "Palindo Marine BHO ocean going launching ceremony.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3APalindo_Marine_BHO_ocean_going_launching_ceremony.jpg",
+    "author": "Kementerian Pertahanan Republik Indonesia"
+  },
+  {
+    "file": "phila-marinebarracks02.png",
+    "title": "Phila MarineBarracks02.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3APhila_MarineBarracks02.png",
+    "author": "Davidt8"
+  },
+  {
+    "file": "rol-5-1966-reverse.png",
+    "title": "ROL 5 1966 reverse.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AROL_5_1966_reverse.jpg",
+    "author": "Unknown author"
+  },
+  {
+    "file": "submarine-hunter-dorang-jalesveva-jayamahe-p37.png",
+    "title": "Submarine hunter Dorang, Jalesveva Jayamahe, p37.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ASubmarine_hunter_Dorang%2C_Jalesveva_Jayamahe%2C_p37.jpg",
+    "author": "Indonesian Navy"
+  },
+  {
+    "file": "the-soviet-union-1949-cpa-1408-stamp-centenary-of-krasnoe-so.png",
+    "title": "The Soviet Union 1949 CPA 1408 stamp (Centenary of Krasnoe Sormovo Shipyard No. 112 named after Andrei Zhdanov. River tugboat).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AThe_Soviet_Union_1949_CPA_1408_stamp_%28Centenary_of_Krasnoe_Sormovo_Shipyard_No._112_named_after_Andrei_Zhdanov._River_tugboat%29.jpg",
+    "author": "USSR Post"
+  },
+  {
+    "file": "the-soviet-union-1949-cpa-1409-stamp-centenary-of-krasnoe-so.png",
+    "title": "The Soviet Union 1949 CPA 1409 stamp (Centenary of Krasnoe Sormovo Shipyard No. 112 named after Andrei Zhdanov. Freighler. motorship 'Bolshaya Volga').jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AThe_Soviet_Union_1949_CPA_1409_stamp_%28Centenary_of_Krasnoe_Sormovo_Shipyard_No._112_named_after_Andrei_Zhdanov._Freighler._motorship_%27Bolshaya_Volga%27%29.jpg",
+    "author": "USSR Post"
+  },
+  {
+    "file": "the-soviet-union-1964-cpa-3072-t-te-b-che-stamp-pair-sociali.png",
+    "title": "The Soviet Union 1964 CPA 3072 tête-bêche stamp pair (Socialist countries. 20th anniversary of Polish People's Republic).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AThe_Soviet_Union_1964_CPA_3072_t%C3%AAte-b%C3%AAche_stamp_pair_%28Socialist_countries._20th_anniversary_of_Polish_People%27s_Republic%29.jpg",
+    "author": "Post of the Soviet Union (N. I. Shevtsov)."
+  },
+  {
+    "file": "03.png",
+    "title": "Удостоверения семьи Семёновых 03.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3A%D0%A3%D0%B4%D0%BE%D1%81%D1%82%D0%BE%D0%B2%D0%B5%D1%80%D0%B5%D0%BD%D0%B8%D1%8F_%D1%81%D0%B5%D0%BC%D1%8C%D0%B8_%D0%A1%D0%B5%D0%BC%D1%91%D0%BD%D0%BE%D0%B2%D1%8B%D1%85_03.jpg",
+    "author": "Anastasiya Lvova"
+  },
+  {
+    "file": "27.png",
+    "title": "Удостоверения семьи Семёновых 27.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3A%D0%A3%D0%B4%D0%BE%D1%81%D1%82%D0%BE%D0%B2%D0%B5%D1%80%D0%B5%D0%BD%D0%B8%D1%8F_%D1%81%D0%B5%D0%BC%D1%8C%D0%B8_%D0%A1%D0%B5%D0%BC%D1%91%D0%BD%D0%BE%D0%B2%D1%8B%D1%85_27.jpg",
+    "author": "Anastasiya Lvova"
+  },
+  {
+    "file": "28.png",
+    "title": "Удостоверения семьи Семёновых 28.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3A%D0%A3%D0%B4%D0%BE%D1%81%D1%82%D0%BE%D0%B2%D0%B5%D1%80%D0%B5%D0%BD%D0%B8%D1%8F_%D1%81%D0%B5%D0%BC%D1%8C%D0%B8_%D0%A1%D0%B5%D0%BC%D1%91%D0%BD%D0%BE%D0%B2%D1%8B%D1%85_28.jpg",
+    "author": "Anastasiya Lvova"
+  },
+  {
+    "file": "1985-construction-complete-4526307938.png",
+    "title": "1985- Construction Complete (4526307938).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3A1985-_Construction_Complete_%284526307938%29.jpg",
+    "author": "NASA APPEL Knowledge Services"
+  },
+  {
+    "file": "aig-headquarters.png",
+    "title": "AIG Headquarters.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AAIG_Headquarters.jpg",
+    "author": "Marc Bryan-Brown"
+  },
+  {
+    "file": "astronaut-dave-williams-4615696702.png",
+    "title": "Astronaut Dave Williams (4615696702).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AAstronaut_Dave_Williams_%284615696702%29.jpg",
+    "author": "NASA APPEL Knowledge Services"
+  },
+  {
+    "file": "clay-anderson-flight-engineer-4615079663.png",
+    "title": "Clay Anderson, Flight Engineer (4615079663).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AClay_Anderson%2C_Flight_Engineer_%284615079663%29.jpg",
+    "author": "NASA APPEL Knowledge Services"
+  },
+  {
+    "file": "construction-on-lower-manhattan-s-west-side-just-north-of-th.png",
+    "title": "Construction on Lower Manhattan's West Side, Just North of the World Trade Center (28807471814).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AConstruction_on_Lower_Manhattan%27s_West_Side%2C_Just_North_of_the_World_Trade_Center_%2828807471814%29.jpg",
+    "author": "Wil Blanche / EPA Documerica Project"
+  },
+  {
+    "file": "iss-57-serena-au-n-chancellor-works-in-the-destiny-lab-4.png",
+    "title": "ISS-57 Serena Auñón-Chancellor works in the Destiny lab (4).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AISS-57_Serena_Au%C3%B1%C3%B3n-Chancellor_works_in_the_Destiny_lab_%284%29.jpg",
+    "author": "NASA"
+  },
+  {
+    "file": "pirs-under-construction-at-energia-in-moscow.png",
+    "title": "Pirs under construction at Energia in Moscow.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3APirs_under_construction_at_Energia_in_Moscow.jpg",
+    "author": "NASA"
+  },
+  {
+    "file": "jpg.png",
+    "title": "לוגו החברה לנכסי קיסריה.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3A%D7%9C%D7%95%D7%92%D7%95_%D7%94%D7%97%D7%91%D7%A8%D7%94_%D7%9C%D7%A0%D7%9B%D7%A1%D7%99_%D7%A7%D7%99%D7%A1%D7%A8%D7%99%D7%94.jpg",
+    "author": "http://www.caesarea-assets.com/"
+  },
+  {
+    "file": "a-landsat-flyby-8454307910.png",
+    "title": "A Landsat Flyby (8454307910).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AA_Landsat_Flyby_%288454307910%29.jpg",
+    "author": "NASA Goddard Space Flight Center from Greenbelt, MD, USA"
+  },
+  {
+    "file": "fires-and-burn-scar-in-pilliga-national-park-new-south-wales.png",
+    "title": "Fires and burn scar in Pilliga National Park, New South Wales (false color) (MODIS 2018-01-27).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AFires_and_burn_scar_in_Pilliga_National_Park%2C_New_South_Wales_%28false_color%29_%28MODIS_2018-01-27%29.jpg",
+    "author": "Jeff Schmaltz, MODIS Land Rapid Response Team, NASA GSFC"
+  },
+  {
+    "file": "fires-in-south-sudan-modis-2018-12-21.png",
+    "title": "Fires in South Sudan (MODIS 2018-12-21).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AFires_in_South_Sudan_%28MODIS_2018-12-21%29.jpg",
+    "author": "MODIS Land Rapid Response Team, NASA GSFC"
+  },
+  {
+    "file": "lakshadweep-islands-india-modis-2015-01-14.png",
+    "title": "Lakshadweep Islands, India (MODIS 2015-01-14).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ALakshadweep_Islands%2C_India_%28MODIS_2015-01-14%29.jpg",
+    "author": "Jeff Schmaltz, MODIS Land Rapid Response Team, NASA GSFC"
+  },
+  {
+    "file": "smap-five-up-in-11-mos-16436837711.png",
+    "title": "SMAP Five Up in 11 Mos (16436837711).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ASMAP_Five_Up_in_11_Mos_%2816436837711%29.jpg",
+    "author": "NASA Earth RIght Now"
+  },
+  {
+    "file": "1974-year-employment-record-books-of-the-soviet-union-img-10.png",
+    "title": "1974 year. Employment record books of the Soviet Union. img 10.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3A1974_year._Employment_record_books_of_the_Soviet_Union._img_10.jpg",
+    "author": "I, the copyright holder of this work, hereby publish it under the following license:"
+  },
+  {
+    "file": "detail-of-keystone-emblem-over-the-main-entrance-to-the-carp.png",
+    "title": "Detail of keystone emblem over the main entrance to the Carpenter's Union Hall. The inscription translates 'Labor conquers all.' - Butte Historic District, Bounded by Copper, HAER MONT,47-BUT,1-72.tif",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ADetail_of_keystone_emblem_over_the_main_entrance_to_the_Carpenter%27s_Union_Hall._The_inscription_translates_%27Labor_conquers_all.%27_-_Butte_Historic_District%2C_Bounded_by_Copper%2C_HAER_MONT%2C47-BUT%2C1-72.tif",
+    "author": "Related names:\n\nGilbert, Cass; Patterson, H M; Owsley, William; Kees, Frederick; Heinze, F Augustus; Link and Haire; Sha"
+  },
+  {
+    "file": "emblem-of-central-election-commission-of-russia.png",
+    "title": "Emblem of Central Election Commission of Russia.png",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AEmblem_of_Central_Election_Commission_of_Russia.png",
+    "author": "Дмитрий-5-Аверин"
+  },
+  {
+    "file": "rr3009-0033r-soviet-union-1989-coin-1-175-years-shevchenko.png",
+    "title": "RR3009-0033R Soviet Union-1989-Coin-1-175 Years Shevchenko.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ARR3009-0033R_Soviet_Union-1989-Coin-1-175_Years_Shevchenko.jpg",
+    "author": "Вадим Лапин"
+  },
+  {
+    "file": "the-soviet-union-1959-cpa-2304-stamp.png",
+    "title": "The Soviet Union 1959 CPA 2304 stamp.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AThe_Soviet_Union_1959_CPA_2304_stamp.jpg",
+    "author": "Bin im Garten"
+  },
+  {
+    "file": "the-soviet-union-1971-cpa-4069-stamp-shah-diamond-16th-centu.png",
+    "title": "The Soviet Union 1971 CPA 4069 stamp (Shah Diamond, 16th Century) large resolution.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AThe_Soviet_Union_1971_CPA_4069_stamp_%28Shah_Diamond%2C_16th_Century%29_large_resolution.jpg",
+    "author": "Bin im Garten"
+  },
+  {
+    "file": "detail-of-denver-disc-filter-in-co-91-107-suction-end-note-b.png",
+    "title": "DETAIL OF DENVER DISC FILTER IN CO-91-107, SUCTION END. NOTE BEARING HOUSING WITH CAST LOGO, SUCTION PIPE GOING OFF TO THE RIGHT, AND FILTER DISC IN BACKGROUND. VACUUM INSIDE DISCS HAER CO-91-108.tif",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ADETAIL_OF_DENVER_DISC_FILTER_IN_CO-91-107%2C_SUCTION_END._NOTE_BEARING_HOUSING_WITH_CAST_LOGO%2C_SUCTION_PIPE_GOING_OFF_TO_THE_RIGHT%2C_AND_FILTER_DISC_IN_BACKGROUND._VACUUM_INSIDE_DISCS_HAER_CO-91-108.tif",
+    "author": "Lowe, Jet\nRelated names:\n\nSan Juan County Historical Society; Minerals Separation Incorporated; Chase, Charles A; Oldham"
+  },
+  {
+    "file": "flotation-room-looking-southwest-with-lead-rougher-cells-at-.png",
+    "title": "FLOTATION ROOM, LOOKING SOUTHWEST, WITH LEAD ROUGHER CELLS AT RIGHT AND LEAD CLEANER CELLS AT LEFT. NOTE SUNNYSIDE GOLD CORP. \"SG\" LOGO ON ROUGHER CELL LAUNDER. - Shenandoah-Dives Mill, HAER CO-91-95.tif",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AFLOTATION_ROOM%2C_LOOKING_SOUTHWEST%2C_WITH_LEAD_ROUGHER_CELLS_AT_RIGHT_AND_LEAD_CLEANER_CELLS_AT_LEFT._NOTE_SUNNYSIDE_GOLD_CORP._%22SG%22_LOGO_ON_ROUGHER_CELL_LAUNDER._-_Shenandoah-Dives_Mill%2C_HAER_CO-91-95.tif",
+    "author": "Lowe, Jet\nRelated names:\n\nSan Juan County Historical Society; Minerals Separation Incorporated; Chase, Charles A; Oldham"
+  },
+  {
+    "file": "new-pittsburgh-coal-co-mine-no-9-headframe-and-tipple-nelson.png",
+    "title": "New Pittsburgh Coal Co. Mine No. 9 headframe and tipple, Nelsonville, Athens County, Ohio, circa 1916 - DPLA - 4b8b997f0a8f0db879e20e878568f46b.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ANew_Pittsburgh_Coal_Co._Mine_No._9_headframe_and_tipple%2C_Nelsonville%2C_Athens_County%2C_Ohio%2C_circa_1916_-_DPLA_-_4b8b997f0a8f0db879e20e878568f46b.jpg",
+    "author": "Unknown author"
+  },
+  {
+    "file": "strip-mining-operation-of-peabody-coal-company-nara-543639.png",
+    "title": "STRIP MINING OPERATION OF PEABODY COAL COMPANY - NARA - 543639.jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3ASTRIP_MINING_OPERATION_OF_PEABODY_COAL_COMPANY_-_NARA_-_543639.jpg",
+    "author": "Bill Gillette"
+  },
+  {
+    "file": "key-to-certificate-of-membership-of-the-amalgamated-society-.png",
+    "title": "Key to Certificate of Membership of the Amalgamated Society of Engineers, Machinists, Millwrights, Smiths and Pattern Makers (BM 2019,7004.1).jpg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File%3AKey_to_Certificate_of_Membership_of_the_Amalgamated_Society_of_Engineers%2C_Machinists%2C_Millwrights%2C_Smiths_and_Pattern_Makers_%28BM_2019%2C7004.1%29.jpg",
+    "author": "After: James Sharples\n\nPrinted by: Butterfield &amp; Mason"
+  },
+  {
+    "file": "r-mer-k-lsch-r-mer-brauerei-thorr-germany.png",
+    "title": "RÖMER KÖLSCH Römer-Brauerei Thorr, Germany.jpg",
+    "license": "CC0",
+    "source": "https://commons.wikimedia.org/wiki/File%3AR%C3%96MER_K%C3%96LSCH_R%C3%B6mer-Brauerei_Thorr%2C_Germany.jpg",
+    "author": "Römer-Brauerei Bergheim-Thorr, Germany"
+  }
 ]

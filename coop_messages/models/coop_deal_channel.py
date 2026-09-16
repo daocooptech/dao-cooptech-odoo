@@ -70,6 +70,16 @@ class CoopDeal(models.Model):
             'partners': self._coop_channel_partners(),
         }]
 
+    def _coop_channel_owners(self, kind=None):
+        """Обе стороны — решение владельца 16 сентября 2026.
+
+        Сделка симметрична по замыслу: «первая сторона» — это порядок
+        полей, а не старшинство, и давать право одной странно. Люди те же,
+        что и в переписке: подписант и ведущий с каждой стороны.
+        """
+        self.ensure_one()
+        return self._coop_channel_partners()
+
     @api.model_create_multi
     def create(self, vals_list):
         """Новая сделка получает переписку сразу.

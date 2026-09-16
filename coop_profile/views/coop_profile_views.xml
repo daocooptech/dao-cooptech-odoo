@@ -476,46 +476,6 @@
                 </div>
               </div>
 
-              <div class="o_coop_band"
-                   invisible="not coop_achievement_ids and not coop_is_self">
-                <div class="o_coop_band_head">
-                  <span>Достижения</span>
-                </div>
-                <div class="o_coop_band_body">
-                  <!--
-                    Плиткой, как остальные полосы, а не таблицей: две
-                    таблицы среди восьми полос с плитками читались как
-                    чужой кусок интерфейса. Картинки у достижения нет —
-                    вместо неё год крупно: он и есть то, чем достижения
-                    отличаются друг от друга в ряду.
-                  -->
-                  <field name="coop_achievement_ids" nolabel="1"
-                         readonly="not coop_is_self">
-                    <kanban class="o_coop_band_kanban" records_draggable="false">
-                      <templates>
-                        <t t-name="card">
-                          <div class="o_coop_mini o_coop_mini_text">
-                            <div class="o_coop_mini_year">
-                              <t t-esc="record.year.raw_value"/>
-                            </div>
-                            <div class="o_coop_mini_label">
-                              <field name="name"/>
-                            </div>
-                          </div>
-                        </t>
-                      </templates>
-                    </kanban>
-                    <form>
-                      <group>
-                        <field name="name"/>
-                        <field name="year"/>
-                        <field name="proof_url" widget="url"/>
-                        <field name="description"/>
-                      </group>
-                    </form>
-                  </field>
-                </div>
-              </div>
 
               <!--
                 Потребности — собственные объявления спроса, а не новая
@@ -561,8 +521,15 @@
                   <span>Организации</span>
                 </div>
                 <div class="o_coop_band_body">
-                  <field name="coop_membership_ids" readonly="1" nolabel="1"
-                         domain="[('state', '=', 'active')]">
+                  <!--
+                    По действующим членствам, а не по всем с доменом:
+                    домен у поля в карточке отбирает то, что можно
+                    выбрать, а не то, что показано. С ним полка рисовала
+                    все сорок девять членств — тридцать два прекращённых,
+                    два заявления и одну организацию четырежды: человек
+                    уходил и возвращался.
+                  -->
+                  <field name="coop_active_membership_ids" readonly="1" nolabel="1">
                     <kanban class="o_coop_band_kanban" records_draggable="false">
                       <field name="organization_id"/>
                       <field name="role"/>

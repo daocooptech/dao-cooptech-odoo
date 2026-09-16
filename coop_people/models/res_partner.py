@@ -62,6 +62,31 @@ class ResPartner(models.Model):
             else:
                 record.coop_age = 0
 
+    # Действующие членства, по одному на организацию.
+    #
+    # Полка «Организации» на своей странице рисовалась по всем членствам с
+    # доменом «действующее» — а домен у поля в карточке отбирает то, что
+    # можно выбрать, а не то, что показано. На боевом это дало сорок
+    # девять плиток вместо четырнадцати: тридцать два прекращённых
+    # членства, два заявления и одна организация четырежды — человек
+    # уходил и возвращался.
+    coop_active_membership_ids = fields.Many2many(
+        'coop.membership', string='Действующее членство',
+        compute='_compute_active_memberships')
+
+    @api.depends('coop_membership_ids.state', 'coop_membership_ids.organization_id')
+    def _compute_active_memberships(self):
+        for record in self:
+            видели = set()
+            отобранные = record.coop_membership_ids.browse()
+            for членство in record.coop_membership_ids.filtered(
+                    lambda m: m.state == 'active'):
+                if членство.organization_id.id in видели:
+                    continue
+                видели.add(членство.organization_id.id)
+                отобранные |= членство
+            record.coop_active_membership_ids = отобранные
+
     @api.depends('coop_membership_ids.state')
     def _compute_membership_count(self):
         for record in self:

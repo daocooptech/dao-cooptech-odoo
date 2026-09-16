@@ -23,6 +23,21 @@ class ResPartner(models.Model):
     # владеет, и в паевом разговоре ему нечего делать.
     ПАЕВЫЕ_РОЛИ = ('founder', 'member', 'associate', 'board')
 
+    def _coop_channel_owners(self, kind=None):
+        """Кто ведёт состав или подписывает от имени организации.
+
+        Решение владельца 16 сентября 2026. Это те же люди, что решают,
+        кто в организации состоит, — переименование её чата того же
+        порядка. Полномочие «Переписка и заявки» сюда не годится: его
+        поручают многим, и тогда рабочий чат переименовывал бы любой из
+        семи.
+        """
+        self.ensure_one()
+        if not self.is_company:
+            return self.env['res.partner']
+        return (self.coop_power_holders('roster')
+                | self.coop_power_holders('sign'))
+
     def _coop_channel_specs(self):
         self.ensure_one()
         if not self.is_company:

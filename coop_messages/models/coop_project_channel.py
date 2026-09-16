@@ -31,6 +31,12 @@ class CoopProject(models.Model):
             'partners': self._coop_channel_partners(),
         }]
 
+    def _coop_channel_owners(self, kind=None):
+        """Инициатор проекта: он завёл проект, ему и отвечать за его
+        переписку. Вкладчики в ней участвуют, но не распоряжаются."""
+        self.ensure_one()
+        return self.partner_id
+
     @api.model_create_multi
     def create(self, vals_list):
         проекты = super().create(vals_list)

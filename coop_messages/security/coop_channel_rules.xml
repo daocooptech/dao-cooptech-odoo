@@ -43,4 +43,52 @@
     <field name="perm_unlink" eval="False"/>
   </record>
 
+  <!--
+    Переименовать переписку может хозяин записи или тот, кто её завёл.
+
+    До 16 сентября 2026 право записи на переписку было у всех внутренних
+    пользователей: переименовать чужой чат мог кто угодно, и остальные
+    участники узнавали об этом по изменившемуся названию.
+
+    Правило снова глобальное — по той же причине, что и правило
+    видимости: правила, выданные группе, движок объединяет по ИЛИ, и
+    ограничение, выданное группе, доступ бы расширило.
+
+    Что при этом не ломается, проверено по исходникам движка: отправка
+    сообщения двигает служебное поле переписки через `sudo`, а прочтения,
+    закрепление, «печатает…» и своё имя чата пишутся в запись участника,
+    а не в саму переписку.
+  -->
+  <record id="rule_channel_write_owner" model="ir.rule">
+    <field name="name">Переименовать переписку может хозяин записи или её создатель</field>
+    <field name="model_id" ref="mail.model_discuss_channel"/>
+    <field name="groups" eval="[]"/>
+    <field name="domain_force">[(1, '=', 1)] if user.has_group('base.group_system') else ['|', ('create_uid', '=', user.id), ('coop_owner_partner_ids', 'in', user.partner_id.ids)]</field>
+    <field name="perm_read" eval="False"/>
+    <field name="perm_write" eval="True"/>
+    <field name="perm_create" eval="False"/>
+    <field name="perm_unlink" eval="False"/>
+  </record>
+
+  <!--
+    Переписку, которую ведёт платформа, не удаляет никто.
+
+    Решение владельца 16 сентября 2026: «нельзя никому». Чат живёт, пока
+    жива запись: удалённые переговоры по сделке — это исчезнувшие
+    доказательства, на которые ссылаются в споре.
+
+    Свои переписки, заведённые руками, удаляются по общему правилу —
+    хозяином записи или тем, кто завёл.
+  -->
+  <record id="rule_channel_unlink" model="ir.rule">
+    <field name="name">Переписку платформы не удаляют</field>
+    <field name="model_id" ref="mail.model_discuss_channel"/>
+    <field name="groups" eval="[]"/>
+    <field name="domain_force">[(1, '=', 1)] if user.has_group('base.group_system') else ['&amp;', ('coop_managed', '=', False), '|', ('create_uid', '=', user.id), ('coop_owner_partner_ids', 'in', user.partner_id.ids)]</field>
+    <field name="perm_read" eval="False"/>
+    <field name="perm_write" eval="False"/>
+    <field name="perm_create" eval="False"/>
+    <field name="perm_unlink" eval="True"/>
+  </record>
+
 </odoo>

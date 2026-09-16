@@ -96,6 +96,7 @@ patch(Thread.prototype, {
         this.coop_res_id = fields.Attr(false);
         this.coop_link_label = fields.Attr("");
         this.coop_pinned = fields.Attr(false);
+        this.coop_managed = fields.Attr(false);
     },
 
     /**
@@ -447,8 +448,15 @@ export class CoopMessages extends Component {
     /** Всё остальное — под многоточием, в порядке движка. */
     get moreActions() {
         const наружу = new Set(this.quickActions.map((a) => a.id));
+        // Из переписки, которую ведёт платформа, выйти нельзя: её состав
+        // следует за записью, и вышедшего вернул бы первый же пересчёт.
+        // Кнопку убираем, а не оставляем отвечать отказом: обещание,
+        // которое отменяется само, хуже отсутствующего.
+        const ведётПлатформа = this.activeThread?.coop_managed;
         return this.threadActions.actions.filter(
-            (a) => !наружу.has(a.id) && !ДЕЙСТВИЯ_НЕ_ПОКАЗЫВАЕМ.has(a.id));
+            (a) => !наружу.has(a.id)
+                && !ДЕЙСТВИЯ_НЕ_ПОКАЗЫВАЕМ.has(a.id)
+                && !(ведётПлатформа && a.id === "leave"));
     }
 
     get activeThread() {
