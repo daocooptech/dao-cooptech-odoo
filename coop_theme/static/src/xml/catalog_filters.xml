@@ -2,18 +2,21 @@
 <templates xml:space="preserve">
 
   <t t-name="coop_theme.CatalogFilters">
-    <aside class="o_coop_filters" t-att-class="{ 'o_coop_filters_open': state.open }">
-      <!-- На узком экране панель свёрнута в кнопку: колонки сбоку там
-           нет, а прятать фильтры совсем нельзя. -->
-      <button type="button" class="o_coop_filters_toggle"
-              aria-controls="coop_filters_body"
-              t-att-aria-expanded="state.open ? 'true' : 'false'"
-              t-on-click="() => this.toggleOpen()">
-        Фильтр
-      </button>
+    <aside class="o_coop_filters" t-att-class="{ 'o_coop_filters_open': ui.open }">
+      <!-- Затемнение нижней шторки. Только на узком экране: на большом
+           панель стоит колонкой справа и ничего не перекрывает. -->
+      <div class="o_coop_filters_scrim" t-if="ui.open"
+           t-on-click="() => this.toggleOpen()"/>
 
       <div class="o_coop_filters_body" id="coop_filters_body">
-        <div class="o_coop_filters_title">Фильтр</div>
+        <div class="o_coop_filters_title">
+          Фильтр
+          <!-- Закрыть шторку, ничего не применяя. Кнопка видна только
+               на узком экране: на большом закрывать нечего. -->
+          <button type="button" class="o_coop_filters_close"
+                  aria-label="Закрыть фильтр"
+                  t-on-click="() => this.toggleOpen()">×</button>
+        </div>
 
         <!-- Порядок — первым: он определяет, что человек увидит на
              первой странице, ещё до всякого отбора. -->

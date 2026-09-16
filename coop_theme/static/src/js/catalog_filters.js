@@ -2,7 +2,7 @@
 
 import { useService } from "@web/core/utils/hooks";
 import { coopSort, coopSortOptionsFor, setCoopSort } from "@coop_theme/js/catalog_sort";
-import { Component, onWillStart, useState } from "@odoo/owl";
+import { Component, onWillStart, reactive, useState } from "@odoo/owl";
 
 /**
  * Панель фильтров каталога — та же, что в макете.
@@ -16,6 +16,17 @@ import { Component, onWillStart, useState } from "@odoo/owl";
  * его целиком: поиск по строке и фильтры должны работать вместе, а не
  * отменять друг друга.
  */
+/**
+ * Раскрыта ли панель отбора на узком экране.
+ *
+ * Состояние общее, потому что кнопка и панель стоят в разных местах
+ * разметки: кнопка — в строке каталога рядом с переключателем вида
+ * (`coop_theme.ControlPanel`), сама панель — ниже, в области содержимого.
+ * Так же, как в макете: `.filter-sheet-btn` в строке поиска открывает
+ * нижнюю шторку.
+ */
+export const coopFiltersUi = reactive({ open: false });
+
 export class CoopFilters extends Component {
     static template = "coop_theme.CatalogFilters";
     static props = {
@@ -30,13 +41,14 @@ export class CoopFilters extends Component {
         this.orm = useService("orm");
         this.notification = useService("notification");
         this.groupId = null;
+        // Раскрытие общее с кнопкой в строке каталога — см. `coopFiltersUi`.
+        this.ui = useState(coopFiltersUi);
         this.state = useState({
             blocks: [],
             values: {},
             quick: [],
             saved: [],
             savedOpen: false,
-            open: false,
             // Сколько найдётся, если применить набранное. Показывается
             // на кнопке: иначе «Показать результаты» — прыжок в темноту.
             preview: null,
@@ -250,8 +262,8 @@ export class CoopFilters extends Component {
     async showResults() {
         clearTimeout(this.previewTimer);
         await this.apply();
-        if (this.state.open) {
-            this.state.open = false;
+        if (this.ui.open) {
+            this.ui.open = false;
         }
     }
 
@@ -301,6 +313,6 @@ export class CoopFilters extends Component {
     }
 
     toggleOpen() {
-        this.state.open = !this.state.open;
+        this.ui.open = !this.ui.open;
     }
 }

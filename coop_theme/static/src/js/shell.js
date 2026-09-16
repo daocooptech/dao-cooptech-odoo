@@ -1,12 +1,13 @@
 /** @odoo-module **/
 
-import { Component, useState, onWillStart, onWillUnmount } from "@odoo/owl";
+import { Component, reactive, useState, onWillStart, onWillUnmount } from "@odoo/owl";
 import { patch } from "@web/core/utils/patch";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { browser } from "@web/core/browser/browser";
 import { router, routerBus } from "@web/core/browser/router";
 import { WebClient } from "@web/webclient/webclient";
+import { NavBar } from "@web/webclient/navbar/navbar";
 
 /**
  * Боковое меню и подвал — как в прототипе.
@@ -115,6 +116,27 @@ export class CoopTabs extends Component {
     }
 }
 
+/**
+ * Открыто ли выдвижное меню разделов.
+ *
+ * Состояние общее, потому что кнопка и само меню живут в разных местах
+ * разметки: кнопка — в шапке движка (`coop_theme.NavBar`), меню — в
+ * рабочей области (`coop_theme.Sidebar`). Через общий реактивный объект
+ * обе стороны видят одно и то же: нажатие открывает панель, а панель
+ * возвращает кнопке правильный `aria-expanded`.
+ */
+export const coopShellUi = reactive({ open: false });
+
+/**
+ * Разделы нижней панели на телефоне — те же пять, что в макете
+ * (`app.js`, блок «Нижняя таб-панель»).
+ *
+ * Список короткий и намеренно: панель отвечает на вопрос «где я и куда
+ * можно уйти одним нажатием», а не заменяет меню. Остальные разделы — за
+ * кнопкой меню в шапке.
+ */
+const TABBAR_LABELS = ["Моя страница", "Сообщения", "Ресурсы", "Проекты", "Кошелёк"];
+
 export class CoopSidebar extends Component {
     static template = "coop_theme.Sidebar";
     static props = {};
@@ -123,8 +145,10 @@ export class CoopSidebar extends Component {
         this.action = useService("action");
         this.orm = useService("orm");
         this.boot = useService("coopBoot");
+        // Открытие панели общее с кнопкой в шапке — см. `coopShellUi`.
+        this.ui = useState(coopShellUi);
         this.state = useState({
-            main: [], extensions: [], admin: [], current: null, model: null, open: false,
+            main: [], extensions: [], admin: [], current: null, model: null,
             acting: null, actors: [],
             route: router.current?.action ?? null,
             soonLabel: null,
@@ -476,13 +500,29 @@ export class CoopSidebar extends Component {
 
     /** Бургер узкого экрана: 216 пикселей из 360 — это меню вместо страницы. */
     toggle() {
-        this.state.open = !this.state.open;
+        this.ui.open = !this.ui.open;
+    }
+
+    /**
+     * Состав нижней панели: пять разделов из меню участника, в порядке
+     * макета.
+     *
+     * Берём из уже загруженного меню, а не заводим свой список адресов:
+     * подсветка, переход и «скоро» тогда работают ровно так же, как в
+     * боковом меню, одним кодом. Раздела, которого у участника нет,
+     * в панели не появится.
+     */
+    get tabbar() {
+        const main = this.state.main || [];
+        return TABBAR_LABELS
+            .map((label) => main.find((item) => item.label === label))
+            .filter(Boolean);
     }
 
     open(item) {
         // Выбрали раздел — панель на узком экране закрывается сама: она
         // перекрывает страницу, ради которой её и открывали.
-        this.state.open = false;
+        this.ui.open = false;
         // Переход по боковому меню начинает новый путь, а не продолжает
         // старый: раздел — это верхний уровень, и «Люди» внутри «Сделок»
         // в хлебных крошках означали бы вложенность, которой нет.
@@ -523,6 +563,27 @@ registry.category("actions").add("coop_soon", CoopSoon);
 
 patch(WebClient, {
     components: { ...WebClient.components, CoopSidebar, CoopFooter },
+});
+
+/**
+ * Кнопка меню разделов стоит в шапке слева, как в макете.
+ *
+ * Раньше она висела кружком в левом нижнем углу поверх содержимого. Там
+ * она перекрывала ссылки подвала и ничего не говорила о том, где человек
+ * находится; низ экрана теперь занимает панель пяти разделов, и место
+ * под неё зарезервировано было давно — 84 точки в `.o_coop_main`.
+ */
+patch(NavBar.prototype, {
+    setup() {
+        super.setup();
+        this.coopShell = useState(coopShellUi);
+    },
+
+    /** Методом, а не присваиванием прямо в шаблоне: присваивание в
+     *  выражении шаблона молча ничего не делает. */
+    coopToggleSidebar() {
+        this.coopShell.open = !this.coopShell.open;
+    },
 });
 
 /**

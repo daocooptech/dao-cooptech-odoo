@@ -2,7 +2,16 @@
 <templates xml:space="preserve">
 
   <t t-name="coop_search.TopbarSearch">
-    <div class="o_coop_search">
+    <div class="o_coop_search" t-att-class="{ 'o_coop_search_expanded': state.expanded }">
+      <!-- Кнопка вместо поля на узком экране: само поле там прячется и
+           возвращается строкой под шапкой, как в макете. -->
+      <button type="button" class="o_coop_search_btn"
+              aria-label="Поиск по платформе"
+              t-att-aria-expanded="state.expanded ? 'true' : 'false'"
+              t-on-click="() => this.toggleExpanded()">
+        <i class="fa fa-search" role="img" aria-hidden="true"/>
+      </button>
+
       <div class="o_coop_search_field">
         <i class="fa fa-search" aria-hidden="true"/>
         <input type="search" t-ref="input" class="o_coop_search_input"

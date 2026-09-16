@@ -11,7 +11,7 @@ import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { SearchBar } from "@web/search/search_bar/search_bar";
 import { Pager } from "@web/core/pager/pager";
 import { CoopTabs } from "@coop_theme/js/shell";
-import { CoopFilters } from "@coop_theme/js/catalog_filters";
+import { CoopFilters, coopFiltersUi } from "@coop_theme/js/catalog_filters";
 import { CoopMap } from "@coop_theme/js/catalog_map";
 import { CoopShelves } from "@coop_theme/js/catalog_shelves";
 import { coopSort, parseOrder } from "@coop_theme/js/catalog_sort";
@@ -207,6 +207,31 @@ registry.category("views").add("coop_catalog_kanban", {
 ControlPanel.components = { ...ControlPanel.components, CoopTabs };
 
 patch(ControlPanel.prototype, {
+    /**
+     * Кнопка отбора стоит здесь, а не над каталогом.
+     *
+     * На узком экране панель отбора становилась карточкой во всю ширину
+     * прямо над списком: полоса вкладок, строка поиска, кнопка
+     * добавления, кнопка фильтра — и только потом первое объявление.
+     * Фильтр нужен раз на десяток открытий каталога, а место занимал
+     * всегда и всегда сверху. Теперь он открывается нижней шторкой, как
+     * в макете, а кнопка живёт в строке каталога.
+     */
+    setup() {
+        super.setup(...arguments);
+        // Через `useState`, а не напрямую: иначе кнопка не узнает, что
+        // шторку закрыли затемнением или кнопкой «Показать результаты», —
+        // и `aria-expanded` остался бы `true` при закрытой панели.
+        this.coopFilters = useState(coopFiltersUi);
+    },
+
+    /** Открыть или убрать шторку отбора. Методом, а не присваиванием
+     *  прямо в шаблоне: присваивание в выражении шаблона молча ничего не
+     *  делало — кнопка нажималась, состояние не менялось. */
+    coopToggleFilters() {
+        this.coopFilters.open = !this.coopFilters.open;
+    },
+
     /**
      * Каталог платформы узнаётся по признаку в контексте действия. Признак
      * стоит на самом действии, поэтому виден и в канбане, и в списке — в

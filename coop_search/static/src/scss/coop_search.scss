@@ -119,14 +119,65 @@
   align-items: baseline;
 }
 
-// На узком экране поле сжимается до значка: 320 пикселей в шапке
-// телефона не остаётся.
+// Кнопка поиска нужна только на узком экране: на большом поле стоит в
+// шапке целиком и открывать его нечем.
+.o_coop_search_btn {
+  display: none;
+}
+
+// ── Узкий экран ──────────────────────────────────────────────────────────
+//
+// Раньше поле сжималось до 150 точек. Сжатое поле не показывает даже
+// введённого, а место в шапке всё равно занимает — вместе с колоколом,
+// тумблером темы, переключателем полномочий и значками движка их там
+// восемь на 390 точек. В макете поиск на телефоне прячется целиком и
+// возвращается по кнопке строкой под шапкой во всю ширину
+// (`theme.css`, `html.search-open .topbar-search`).
 @media (max-width: 900px) {
+  .o_coop_search_btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    background: none;
+    color: inherit;
+    font-size: 15px;
+  }
+
   .o_coop_search_field {
-    width: 150px;
+    display: none;
+  }
+
+  .o_coop_search_expanded .o_coop_search_field {
+    display: flex;
+    position: fixed;
+    top: 56px;
+    left: 0;
+    right: 0;
+    z-index: 58;
+    width: auto;
+    max-width: none;
+    padding: 13px 14px;
+    border-radius: 0;
+    border-bottom: 1px solid var(--coop-line, #e6e6e1);
+    background: var(--coop-white, #fff);
+  }
+
+  // Кегль поля — не меньше 16 точек: меньше, и Safari на iPhone
+  // увеличивает страницу при фокусе, а обратно сам не возвращает.
+  .o_coop_search_input {
+    font-size: 16px;
   }
 
   .o_coop_search_panel {
-    width: 92vw;
+    position: fixed;
+    top: 110px;
+    left: 8px;
+    right: 8px;
+    width: auto;
+    max-width: none;
   }
 }

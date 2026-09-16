@@ -27,13 +27,8 @@
   -->
   <t t-name="coop_theme.Sidebar">
     <div class="o_coop_sidebar_wrap">
-      <button type="button" class="o_coop_burger" aria-label="Меню разделов"
-              t-att-aria-expanded="state.open ? 'true' : 'false'"
-              t-on-click="() => this.toggle()">
-        <i class="fa fa-bars" role="img" aria-hidden="true"/>
-      </button>
-      <div class="o_coop_scrim" t-if="state.open" t-on-click="() => this.toggle()"/>
-      <aside class="o_coop_sidebar" t-att-class="{ 'o_coop_sidebar_open': state.open }">
+      <div class="o_coop_scrim" t-if="ui.open" t-on-click="() => this.toggle()"/>
+      <aside class="o_coop_sidebar" t-att-class="{ 'o_coop_sidebar_open': ui.open }">
       <nav aria-label="Разделы платформы">
         <a t-foreach="state.main" t-as="item" t-key="item.label"
            href="#" class="o_coop_nav_item"
@@ -72,6 +67,26 @@
         <button type="button" class="o_coop_nav_settings"
                 t-on-click="() => this.openSettings()">Настроить меню</button>
       </aside>
+
+      <!--
+        Нижняя панель разделов на телефоне — пять пунктов, как в макете.
+        Место под неё внизу страницы отведено давно (`.o_coop_main`,
+        нижнее поле 84 точки): до сих пор там была пустота, через которую
+        просвечивал подвал.
+
+        Переход и подсветка — те же, что в боковом меню: один обработчик,
+        одно правило активности.
+      -->
+      <nav class="o_coop_tabbar" aria-label="Быстрые разделы">
+        <a t-foreach="tabbar" t-as="item" t-key="item.label"
+           href="#" class="o_coop_tabbar_item"
+           t-att-class="{ 'active': isActive(item) }"
+           t-att-aria-current="isActive(item) ? 'page' : undefined"
+           t-on-click.prevent="() => this.open(item)">
+          <i class="fa fa-fw" t-att-class="item.icon" role="img" aria-hidden="true"/>
+          <span t-esc="item.label"/>
+        </a>
+      </nav>
     </div>
   </t>
 
@@ -90,6 +105,11 @@
   -->
   <t t-name="coop_theme.NavBar" t-inherit="web.NavBar" t-inherit-mode="extension">
     <xpath expr="//div[hasclass('o_navbar_breadcrumbs')]" position="before">
+      <button type="button" class="o_coop_burger" aria-label="Меню разделов"
+              t-att-aria-expanded="coopShell.open ? 'true' : 'false'"
+              t-on-click="() => this.coopToggleSidebar()">
+        <i class="fa fa-bars" role="img" aria-hidden="true"/>
+      </button>
       <a class="o_coop_logo" href="/odoo/my-page" title="На свою страницу">
         <img src="/coop_theme/static/src/img/cooptech-logo.png"
              alt="ДАО КООПТЕХ" width="100" height="32"/>

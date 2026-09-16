@@ -27,6 +27,12 @@ export class CoopSearch extends Component {
         this.state = useState({
             term: "",
             open: false,
+            // Раскрыто ли поле на узком экране. В шапке телефона 390
+            // точек и восемь органов управления; поле в 150 точек не
+            // показывало даже введённого. В макете поиск на телефоне
+            // прячется целиком и возвращается строкой под шапкой
+            // (`theme.css`, `html.search-open .topbar-search`).
+            expanded: false,
             busy: false,
             tooShort: false,
             groups: [],
@@ -34,6 +40,18 @@ export class CoopSearch extends Component {
             total: 0,
         });
         this.timer = null;
+    }
+
+    /** Раскрыть или убрать поле на узком экране. */
+    toggleExpanded() {
+        this.state.expanded = !this.state.expanded;
+        if (this.state.expanded) {
+            // Фокус — следующим кадром: в момент нажатия поле ещё
+            // скрыто, а скрытому элементу фокус не ставится.
+            requestAnimationFrame(() => this.inputRef.el?.focus());
+        } else {
+            this.state.open = false;
+        }
     }
 
     onInput(ev) {

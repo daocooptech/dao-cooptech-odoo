@@ -124,6 +124,20 @@
     </xpath>
 
     <!--
+      Кнопка отбора — в строке каталога, рядом с переключателем вида, как
+      `.filter-sheet-btn` в макете. Показывается только на узком экране:
+      на большом панель стоит колонкой справа и открывать её не нужно.
+    -->
+    <xpath expr="//div[hasclass('o_control_panel_navigation')]" position="inside">
+      <button type="button" class="o_coop_filters_toggle" t-if="coopIsCatalog"
+              aria-controls="coop_filters_body"
+              t-att-aria-expanded="coopFilters.open ? 'true' : 'false'"
+              t-on-click="() => this.coopToggleFilters()">
+        Фильтр
+      </button>
+    </xpath>
+
+    <!--
       Переключатель записей над единственной записью показывает «1 / 1»:
       переключать нечего, а полосу он держит.
     -->
