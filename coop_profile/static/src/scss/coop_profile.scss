@@ -781,3 +781,89 @@
     background: var(--coop-white) !important;
   }
 }
+
+// ── Блок «О себе»: чтение, карандаш, правка ──────────────────────────
+//
+// Поле рисует шапку и тело полосы само, поэтому обёртка виджета должна
+// исчезнуть из раскладки: иначе между полосой и её шапкой встаёт лишний
+// блок, и скругления с границами расходятся по двум слоям.
+.o_coop_about_band > .o_field_widget {
+  display: contents;
+}
+
+// Кнопки в шапке полосы: карандаш в чтении, галочка и крестик в правке.
+// Размер и цвет — как у стрелки сворачивания рядом, это один ряд
+// органов управления, а не два разных.
+.o_coop_about_btn {
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  color: var(--coop-slate, #4a4a44);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--coop-teal-dark, #0f6b63);
+  }
+
+  &:disabled {
+    opacity: .5;
+    cursor: default;
+  }
+}
+
+// Галочка зелёная, крестик обычный: опубликовать — действие, отменить —
+// выход из него. Красным крестик не красим: ничего не разрушается, из
+// правки просто выходят.
+.o_coop_about_ok {
+  color: var(--coop-teal-dark, #0f6b63);
+}
+
+// Карандаш и стрелка сворачивания — одна связка у правого края.
+//
+// У шапки `justify-content: space-between`, и три элемента она
+// расставляет по всей ширине: заголовок слева, карандаш посередине,
+// стрелка справа. Поэтому к правому краю отжимается первая кнопка, а
+// собственный отступ стрелки здесь снимается — иначе она отъезжает от
+// карандаша на сотню точек, и связка читается как два разных органа
+// управления.
+.o_coop_about_band {
+  .o_coop_about_btn:first-of-type {
+    margin-left: auto;
+  }
+
+  .o_coop_band_arrow {
+    margin-left: 0;
+  }
+}
+
+.o_coop_about_text {
+  font: 400 13.5px/1.5 'Manrope', sans-serif;
+  color: var(--coop-ink, #14171a);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+// Подсказка на пустом блоке — своему. Тем же кеглем, что и текст: иначе
+// после первой же записи блок меняет высоту.
+.o_coop_about_empty {
+  font: 400 13.5px/1.5 'Manrope', sans-serif;
+  color: var(--coop-slate-light, #8a8a80);
+}
+
+.o_coop_about_input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--coop-line-strong, var(--coop-line, #e6e6e1));
+  border-radius: 8px;
+  background: var(--coop-paper, #fff);
+  font: 400 13.5px/1.5 'Manrope', sans-serif;
+  color: var(--coop-ink, #14171a);
+
+  &:focus {
+    outline: 2px solid var(--coop-focus, var(--coop-teal, #2ba79a));
+    outline-offset: 1px;
+    border-color: var(--coop-teal, #2ba79a);
+  }
+}

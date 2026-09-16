@@ -36,6 +36,8 @@
     'assets': {
         'web.assets_backend': [
             'coop_profile/static/src/scss/coop_profile.scss',
+            'coop_profile/static/src/js/about_field.js',
+            'coop_profile/static/src/xml/about_field.xml',
         ],
     },
     'installable': True,

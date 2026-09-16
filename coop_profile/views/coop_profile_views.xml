@@ -312,16 +312,16 @@
                 занимаюсь»; лента, портфолио и файлы на платформе есть
                 свои. Длина ограничена самим полем — 280 знаков.
               -->
+              <!--
+                Шапку и тело рисует само поле: в шапке стоит карандаш, и
+                держать кнопку в представлении, а её состояние — в
+                виджете значило бы связывать их через разметку.
+              -->
               <div class="o_coop_band o_coop_about_band"
                    invisible="not coop_about and not coop_is_self">
-                <div class="o_coop_band_head">
-                  <span>О себе</span>
-                </div>
-                <div class="o_coop_band_body">
-                  <field name="coop_about" nolabel="1"
-                         placeholder="Чем занимаетесь, что умеете, чем готовы помочь — до 280 знаков"
-                         readonly="not coop_is_self"/>
-                </div>
+                <field name="coop_about" widget="coop_about" nolabel="1"
+                       placeholder="Чем занимаетесь, что умеете, чем готовы помочь — до 280 знаков"
+                       readonly="not coop_is_self"/>
               </div>
 
               <!--

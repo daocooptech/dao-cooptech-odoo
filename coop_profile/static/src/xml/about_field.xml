@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!--
+    Шапка и тело полосы — те же классы, что у остальных полос страницы:
+    по ним работает сворачивание (`coop_theme/static/src/js/bands.js`), и
+    полоса «О себе» должна сворачиваться наравне с прочими.
+
+    Кнопки — настоящие `button`: сворачивание намеренно пропускает клики
+    по кнопкам в шапке, кроме собственной стрелки, поэтому карандаш не
+    схлопывает полосу.
+  -->
+  <t t-name="coop_profile.AboutField">
+    <div class="o_coop_band_head">
+      <span>О себе</span>
+      <button type="button" class="o_coop_about_btn o_coop_about_start"
+              t-if="canEdit and !ui.editing"
+              title="Изменить" aria-label="Изменить"
+              t-on-click="() => this.start()">
+        <i class="fa fa-pencil" role="img" aria-hidden="true"/>
+      </button>
+      <t t-if="ui.editing">
+        <button type="button" class="o_coop_about_btn o_coop_about_ok"
+                t-att-disabled="ui.busy"
+                title="Опубликовать" aria-label="Опубликовать"
+                t-on-click="() => this.accept()">
+          <i class="fa fa-check" role="img" aria-hidden="true"/>
+        </button>
+        <button type="button" class="o_coop_about_btn o_coop_about_cancel"
+                t-att-disabled="ui.busy"
+                title="Отменить" aria-label="Отменить"
+                t-on-click="() => this.cancel()">
+          <i class="fa fa-times" role="img" aria-hidden="true"/>
+        </button>
+      </t>
+    </div>
+
+    <div class="o_coop_band_body">
+      <input t-if="ui.editing" type="text" class="o_input o_coop_about_input"
+             t-ref="input"
+             t-att-value="ui.draft"
+             t-att-maxlength="maxlength"
+             t-att-placeholder="props.placeholder"
+             t-on-input="onInput"
+             t-on-keydown="onKeydown"/>
+      <t t-else="">
+        <span class="o_coop_about_text" t-if="value" t-esc="value"/>
+        <!--
+          Пустой блок говорит, что писать, только своему: чужая страница
+          без заметки — это просто страница без заметки, а не приглашение
+          её заполнить.
+        -->
+        <span class="o_coop_about_empty" t-elif="canEdit"
+              t-esc="props.placeholder"/>
+      </t>
+    </div>
+  </t>
+
+</templates>
