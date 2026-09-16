@@ -34,7 +34,13 @@ MODEL_HINTS = {
 
 MAIN_ITEMS = [
     ('Моя страница', 'fa-user-circle-o', 'coop_profile.action_coop_my_page'),
-    ('Сообщения', 'fa-comments-o', 'mail.action_discuss'),
+    # Экран платформы, а не штатная переписка движка. Пункт меню движка
+    # перевешен на него же (`coop_messages/views/coop_messages_views.xml`),
+    # и до 16 сентября 2026 эти два пути расходились: из меню приложений
+    # человек попадал на экран из макета, а из бокового меню и с телефона —
+    # в переписку Odoo. На платформе меню приложений убрано, так что
+    # экран платформы был достижим только там, где его не ищут.
+    ('Сообщения', 'fa-comments-o', 'coop_messages.action_coop_messages'),
     ('Люди', 'fa-users', 'coop_people.action_coop_people'),
     ('Навыки', 'fa-wrench', 'coop_skills.action_coop_skills'),
     ('Вакансии', 'fa-briefcase', 'coop_vacancies.action_coop_vacancies'),
