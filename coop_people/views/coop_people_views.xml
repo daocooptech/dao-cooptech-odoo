@@ -135,7 +135,12 @@
     <field name="res_model">res.partner</field>
     <field name="path">people</field>
     <field name="view_mode">kanban,list,form</field>
-    <field name="domain">[('coop_is_participant', '=', True), ('is_company', '=', False)]</field>
+    <!--
+      Скрывшие профиль в каталог не попадают: они не удалены и
+      остаются в своих сделках, составе и переписке — просто не выставлены
+      на витрину.
+    -->
+    <field name="domain">[('coop_is_participant', '=', True), ('is_company', '=', False), ('coop_profile_hidden', '=', False)]</field>
     <field name="context">{'bin_size': True,'coop_catalog': True, 'default_coop_is_participant': True, 'default_is_company': False, 'coop_create_label': 'Пригласить человека', 'coop_shelf_field': 'coop_specialization_category_id'}</field>
     <field name="search_view_id" ref="view_coop_people_search"/>
     <!-- Явная привязка представлений. res.partner — общая модель, и без

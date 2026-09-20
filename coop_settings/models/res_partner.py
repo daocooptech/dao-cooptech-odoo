@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
+import base64
+import json
+
 from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 
 
 class ResPartner(models.Model):
@@ -24,7 +28,131 @@ class ResPartner(models.Model):
                 дата = fields.Date.to_date(partner.create_date)
             partner.coop_member_since = дата
 
-    @api.model
+    def action_coop_export_archive(self):
+        """Выгрузка своих данных одним файлом.
+
+        Собирается здесь, а не штатной выгрузкой Odoo: та отдаёт одну
+        модель в таблицу, а человеку нужно всё своё разом и в виде,
+        который можно прочитать без платформы.
+
+        Сделки и извещения берутся через sudo: часть их видна правилами
+        только сторонам, а в своей выгрузке человек вправе видеть своё.
+        """
+        self.ensure_one()
+        if self != self.env.user._coop_acting_partner():
+            raise UserError(_('Выгрузить можно только свои данные.'))
+
+        собранное = {
+            'карточка': self._coop_archive_card(),
+            'членства': self._coop_archive_memberships(),
+            'извещения': self._coop_archive_notifications(),
+        }
+        содержимое = json.dumps(собранное, ensure_ascii=False, indent=2,
+                                default=str)
+        файл = self.env['ir.attachment'].sudo().create({
+            'name': 'cooptech-%s-%s.json' % (
+                self.id, fields.Date.today().isoformat()),
+            'type': 'binary',
+            'datas': base64.b64encode(содержимое.encode('utf-8')),
+            'res_model': 'res.partner',
+            'res_id': self.id,
+            'public': False,
+        })
+        return {
+            'type': 'ir.actions.act_url',
+            'url': '/web/content/%s?download=true' % файл.id,
+            'target': 'self',
+        }
+
+    def _coop_archive_card(self):
+        """Карточка — то, что человек о себе написал."""
+        self.ensure_one()
+        поля = ['name', 'email', 'phone', 'city', 'website', 'coop_about',
+                'coop_languages', 'coop_birthdate', 'coop_trust',
+                'coop_verification_level']
+        карточка = {
+            поле: self[поле] for поле in поля if поле in self._fields
+        }
+        карточка['способы_связи'] = [
+            {'название': строка.name, 'значение': строка.value}
+            for строка in self.coop_contact_line_ids
+        ]
+        return карточка
+
+    def _coop_archive_memberships(self):
+        self.ensure_one()
+        Membership = self.env['coop.membership'].sudo()
+        return [
+            {
+                'организация': запись.organization_id.display_name,
+                'роль': запись.role,
+                'должность': запись.job_title,
+                'вступил': запись.joined_on,
+                'состояние': запись.state,
+            }
+            for запись in Membership.search([('partner_id', '=', self.id)])
+        ]
+
+    def _coop_archive_notifications(self):
+        self.ensure_one()
+        Notification = self.env['coop.notification'].sudo()
+        return [
+            {
+                'когда': запись.create_date,
+                'о чём': запись.kind,
+                'событие': запись.body,
+            }
+            for запись in Notification.search(
+                [('partner_id', '=', self.id)], limit=500)
+        ]
+
+    def action_coop_hide_profile(self):
+        """Скрыть себя из каталога — но не стереть.
+
+        Не `active`: снятая запись исчезает и из чужих сделок, и из
+        состава организаций, и из переписки, а человек просил всего лишь
+        не показывать себя в каталоге.
+        """
+        self.ensure_one()
+        self._coop_check_own()
+        self.sudo().coop_profile_hidden = True
+        return {'type': 'ir.actions.client', 'tag': 'reload'}
+
+    def action_coop_show_profile(self):
+        self.ensure_one()
+        self._coop_check_own()
+        self.sudo().coop_profile_hidden = False
+        return {'type': 'ir.actions.client', 'tag': 'reload'}
+
+    def action_coop_request_deletion(self):
+        """Заявление об удалении — правлению узла, а не кнопка стирания.
+
+        У участника кооператива есть пай, обязательства и незакрытые
+        сделки; стереть его запись, пока они живы, значит оборвать чужие
+        расчёты. Поэтому профиль скрывается сразу, а само удаление
+        проходит через правление — как выход из кооператива.
+        """
+        self.ensure_one()
+        self._coop_check_own()
+        self.sudo().coop_profile_hidden = True
+        # Кому заявление: тем, кто ведёт узел. Не всем администраторам
+        # Odoo, а держателям платформенных полномочий: решает
+        # вопрос о выходе участника правление, а не техническая служба.
+        группа = self.env.ref('coop_base.group_coop_platform',
+                                 raise_if_not_found=False)
+        получатели = группа.sudo().all_user_ids.partner_id if группа else None
+        if получатели:
+            self.env['coop.notification'].sudo()._notify(
+                получатели,
+                _('Участник %s подал заявление об удалении аккаунта.')
+                % self.display_name,
+                record=self, kind='org')
+        return {'type': 'ir.actions.client', 'tag': 'reload'}
+
+    def _coop_check_own(self):
+        if self != self.env.user._coop_acting_partner():
+            raise UserError(_('Это можно сделать только со своим профилем.'))
+
     @api.model
     def action_coop_open_notifications(self):
         """Вкладка «Уведомления».

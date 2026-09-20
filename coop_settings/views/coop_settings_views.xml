@@ -134,6 +134,50 @@
               </div>
             </div>
           </div>
+
+          <!--
+            Вторая половина вкладки по макету (`settings.html`): выгрузка
+            своих данных и опасная зона.
+          -->
+          <div class="o_coop_band">
+            <div class="o_coop_band_head">
+              <span>Мои данные</span>
+            </div>
+            <div class="o_coop_band_body">
+              <button name="action_coop_export_archive" type="object"
+                      string="Скачать архив" class="btn-secondary"/>
+              <div class="text-muted">
+                Выгрузка содержит карточку, ваши объявления, членства,
+                сделки и извещения — одним файлом JSON. Записи в реестре
+                сделок остаются неизменными: убрать их нельзя ни вам, ни
+                платформе.
+              </div>
+            </div>
+          </div>
+
+          <div class="o_coop_band o_coop_danger_zone" invisible="is_company">
+            <div class="o_coop_band_head">
+              <span>Опасная зона</span>
+            </div>
+            <div class="o_coop_band_body">
+              <button name="action_coop_hide_profile" type="object"
+                      string="Скрыть профиль" class="btn-secondary"
+                      confirm="Скрыть профиль? Вас перестанут находить в каталоге «Люди». Ваши объявления, сделки и переписка останутся на месте, а вернуть показ можно здесь же."/>
+              <button name="action_coop_show_profile" type="object"
+                      string="Вернуть показ" class="btn-secondary"
+                      invisible="not coop_profile_hidden"/>
+              <field name="coop_profile_hidden" invisible="1"/>
+              <button name="action_coop_request_deletion" type="object"
+                      string="Удалить аккаунт" class="btn-danger"
+                      confirm="Удаление проходит через правление узла: заявление уйдёт ему, профиль скроется сразу. Сделки, расчёты и отзывы остаются — они касаются не только вас. Подать заявление?"/>
+              <div class="text-muted">
+                Удаление — заявление правлению узла, а не нажатие кнопки:
+                у участника кооператива есть паи, обязательства и
+                незакрытые сделки, и стереть его запись, пока они живы,
+                значит оборвать чужие расчёты.
+              </div>
+            </div>
+          </div>
         </sheet>
       </form>
     </field>
