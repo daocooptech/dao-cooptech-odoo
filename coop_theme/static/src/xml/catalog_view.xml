@@ -67,7 +67,7 @@
       лента остаётся: там полок нет.
     -->
     <xpath expr="//t[@t-component='props.Renderer']" position="attributes">
-      <attribute name="t-if">model.isReady and coopLayout.mode !== 'map' and !coopShelvesVisible</attribute>
+      <attribute name="t-if">model.isReady and coopLayout.mode !== 'map' and !coopShelvesFilled</attribute>
     </xpath>
 
     <!--

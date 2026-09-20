@@ -13,7 +13,7 @@ import { Pager } from "@web/core/pager/pager";
 import { CoopTabs } from "@coop_theme/js/shell";
 import { CoopFilters, coopFiltersUi } from "@coop_theme/js/catalog_filters";
 import { CoopMap } from "@coop_theme/js/catalog_map";
-import { CoopShelves } from "@coop_theme/js/catalog_shelves";
+import { CoopShelves, coopShelvesState } from "@coop_theme/js/catalog_shelves";
 import { coopSort, parseOrder } from "@coop_theme/js/catalog_sort";
 import { reactive, useEffect, useState } from "@odoo/owl";
 
@@ -99,6 +99,19 @@ export class CoopCatalogKanbanController extends KanbanController {
             && this.coopSearchIsClean;
     }
 
+    /** Есть ли полки на самом деле.
+     *
+     *  «Полки включены» и «полки собрались» — разные вещи: рубрик может
+     *  быть меньше двух, и тогда полок нет. Лента под ними смотрит
+     *  именно сюда, иначе экран остаётся пустым — ни полок, ни ленты.
+     *  Пока полки грузятся, лента тоже ждёт: иначе она мелькнёт и
+     *  исчезнет. */
+    get coopShelvesFilled() {
+        const состояние = this.coopShelvesState || coopShelvesState;
+        return this.coopShelvesVisible
+            && (состояние.loading || состояние.count > 0);
+    }
+
     /** Порядок для полок.
      *
      *  Полки грузят записи своей моделью, и порядок им надо передать
@@ -177,6 +190,10 @@ export class CoopCatalogKanbanController extends KanbanController {
     setup() {
         super.setup();
         this.coopLayout = useState(coopLayout);
+        // Через `useState`, а не напрямую: чтение реактивного объекта
+        // без подписки не перерисовывает экран, и лента оставалась
+        // скрытой после того, как полки сообщили, что не собрались.
+        this.coopShelvesState = useState(coopShelvesState);
         this.coopSort = useState(coopSort);
         // Перезагружаем список, когда сменили признак сортировки. Через
         // общее состояние, а не через событие: порядок выбирают в панели

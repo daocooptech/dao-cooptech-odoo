@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, onWillStart, useState } from "@odoo/owl";
+import { Component, onWillStart, onWillUnmount, reactive, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { RelationalModel } from "@web/model/relational_model/relational_model";
 import { addFieldDependencies, extractFieldsFromArchInfo } from "@web/model/relational_model/utils";
@@ -23,6 +23,21 @@ import { KanbanRecord } from "@web/views/kanban/kanban_record";
  * город. Полка отвечает «что здесь бывает», а не «какая именно запись
  * мне нужна»; для второго есть сам каталог ниже.
  */
+/**
+ * Собрались ли полки — наружу, для ленты под ними.
+ *
+ * Лента пряталась по одному признаку «полки включены», а включены они и
+ * тогда, когда собрать их не из чего: рубрик меньше двух, и полок нет.
+ * Экран оставался пустым — ни полок, ни ленты. Так было видно на полке
+ * «Друзья»: шесть человек, счётчик в отборе показывает шесть, а
+ * карточек ноль.
+ *
+ * Поэтому лента смотрит не на настройку, а на итог: пока полки грузятся
+ * — ждём (иначе лента мелькнёт и исчезнет), собрались — лента не нужна,
+ * не собрались — лента возвращается.
+ */
+export const coopShelvesState = reactive({ loading: false, count: 0 });
+
 export class CoopShelves extends Component {
     static template = "coop_theme.CatalogShelves";
     static components = { KanbanRecord };
@@ -74,6 +89,8 @@ export class CoopShelves extends Component {
             // formattedReadGroup, — и вместо каталога был пустой экран.
             // Поэтому вся загрузка обёрнута: не вышло собрать полки —
             // их просто не будет.
+            coopShelvesState.loading = true;
+            coopShelvesState.count = 0;
             try {
                 await this.load();
             } catch (e) {
@@ -81,6 +98,15 @@ export class CoopShelves extends Component {
                 this.state.shelves = [];
             }
             this.state.loading = false;
+            coopShelvesState.count = this.state.shelves.length;
+            coopShelvesState.loading = false;
+        });
+
+        // Уходя с экрана, полки снимают свой след: иначе следующий
+        // каталог решил бы, что они уже собраны, и спрятал бы ленту.
+        onWillUnmount(() => {
+            coopShelvesState.loading = false;
+            coopShelvesState.count = 0;
         });
     }
 
