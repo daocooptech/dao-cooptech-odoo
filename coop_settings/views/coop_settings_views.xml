@@ -254,6 +254,105 @@
     </field>
   </record>
 
+  <!--
+    Безопасность. Всё, кроме ключей кошелька, у движка уже есть: смена
+    пароля, двухфакторная и список устройств. Здесь они собраны в одном
+    месте и названы теми же словами, что в макете (`settings.html`,
+    вкладка «Безопасность»): до этого сменить пароль на платформе было
+    негде — штатные кнопки лежат в окне настроек пользователя Odoo, куда
+    участник не ходит.
+
+    Даты последней смены пароля в базе нет, и выдумывать её из
+    `write_date` значило бы показывать любую правку анкеты как смену
+    пароля — лучше не показывать ничего.
+  -->
+  <record id="view_coop_settings_security_form" model="ir.ui.view">
+    <field name="name">coop.settings.security.form</field>
+    <field name="model">res.users</field>
+    <field name="priority">102</field>
+    <field name="arch" type="xml">
+      <form string="Безопасность" create="false" duplicate="false"
+            class="o_coop_profile o_coop_settings">
+        <sheet>
+          <div class="oe_title">
+            <h1>Безопасность</h1>
+          </div>
+
+          <div class="o_coop_band">
+            <div class="o_coop_band_head">
+              <span>Пароль</span>
+            </div>
+            <div class="o_coop_band_body">
+              <button name="preference_change_password" type="object"
+                      string="Сменить пароль" class="btn-primary"/>
+              <div class="text-muted">
+                Потребуется текущий пароль: иначе чужими руками за
+                оставленным открытым экраном у вас отобрали бы доступ.
+              </div>
+            </div>
+          </div>
+
+          <div class="o_coop_band">
+            <div class="o_coop_band_head">
+              <span>Двухфакторная проверка</span>
+            </div>
+            <div class="o_coop_band_body">
+              <field name="totp_enabled" invisible="1"/>
+              <div class="text-muted" invisible="totp_enabled">
+                Подключите приложение-аутентификатор: второй фактор
+                спрашивается при входе с нового устройства.
+              </div>
+              <div class="text-muted" invisible="not totp_enabled">
+                Двухфакторная проверка включена.
+              </div>
+              <button name="action_totp_enable_wizard" type="object"
+                      string="Подключить" class="btn-primary"
+                      invisible="totp_enabled"/>
+              <button name="action_totp_disable" type="object"
+                      string="Отключить" class="btn-secondary"
+                      invisible="not totp_enabled"
+                      confirm="Отключить двухфакторную проверку?"/>
+            </div>
+          </div>
+
+          <div class="o_coop_band">
+            <div class="o_coop_band_head">
+              <span>Активные сеансы</span>
+            </div>
+            <div class="o_coop_band_body">
+              <field name="device_ids" nolabel="1" readonly="1">
+                <list string="Устройства" create="false" delete="false">
+                  <field name="display_name" string="Устройство"/>
+                  <field name="city" string="Город" optional="show"/>
+                  <field name="ip_address" string="Адрес" optional="hide"/>
+                  <field name="last_activity" string="Последний раз"/>
+                  <field name="is_current" string="Этот"/>
+                </list>
+              </field>
+              <button name="action_revoke_all_devices" type="object"
+                      string="Завершить все, кроме текущего"
+                      class="btn-secondary"
+                      confirm="Завершить все сеансы, кроме текущего?"/>
+            </div>
+          </div>
+
+          <div class="o_coop_band">
+            <div class="o_coop_band_head">
+              <span>Ключи кошелька</span>
+            </div>
+            <div class="o_coop_band_body">
+              <div class="text-muted">
+                Кошелёк некастодиальный: секретная фраза хранится только
+                у вас — платформа её не знает и восстановить не сможет.
+                Проверьте, что резервная копия сделана.
+              </div>
+            </div>
+          </div>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
   <record id="action_coop_settings_privacy" model="ir.actions.server">
     <field name="name">Приватность</field>
     <field name="path">my-privacy</field>
@@ -265,9 +364,9 @@
   <record id="action_coop_settings_region" model="ir.actions.server">
     <field name="name">Язык и регион</field>
     <field name="path">my-region</field>
-    <field name="model_id" ref="base.model_res_users"/>
+    <field name="model_id" ref="base.model_res_partner"/>
     <field name="state">code</field>
-    <field name="code">action = model.action_coop_open_region_settings()</field>
+    <field name="code">action = env['res.users'].action_coop_open_region_settings()</field>
   </record>
 
   <menuitem id="menu_coop_settings_root" name="Настройки" sequence="950"/>
@@ -277,6 +376,24 @@
   <menuitem id="menu_coop_settings_privacy" name="Приватность"
             parent="menu_coop_settings_root" action="action_coop_settings_privacy"
             sequence="20"/>
+  <!--
+    Действие висит на res.partner, а не на res.users: движок отказывает
+    в серверном действии, если у человека нет доступа к его модели, а
+    список пользователей участнику недоступен. Открываемая форма — всё
+    равно его собственная запись пользователя, и её он читает и правит.
+  -->
+  <record id="action_coop_settings_security" model="ir.actions.server">
+    <field name="name">Безопасность</field>
+    <field name="path">my-security</field>
+    <field name="model_id" ref="base.model_res_partner"/>
+    <field name="state">code</field>
+    <field name="code">action = env['res.users'].action_coop_open_user_settings('coop_settings.view_coop_settings_security_form', 'Безопасность')</field>
+  </record>
+
+  <menuitem id="menu_coop_settings_security" name="Безопасность"
+            parent="menu_coop_settings_root" action="action_coop_settings_security"
+            sequence="40"/>
+
   <menuitem id="menu_coop_settings_region" name="Язык и регион"
             parent="menu_coop_settings_root" action="action_coop_settings_region"
             sequence="30"/>
