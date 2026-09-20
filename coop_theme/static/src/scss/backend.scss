@@ -369,11 +369,14 @@
   align-items: baseline;
   min-width: 0;
 
+  // Значение переносится, а не обрезается: адрес с многоточием
+  // не адрес. У постоянных строк иначе — там значение известного
+  // вида и помещается в строку.
   .o_coop_inline_value {
     flex: 1 1 auto;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    white-space: normal;
   }
 
   .o_coop_inline_start,
