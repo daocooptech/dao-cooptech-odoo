@@ -41,18 +41,24 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 IMG_DIR = os.path.join(os.path.dirname(HERE), 'static', 'img')
 
 # Каталоги, которым снимок положен: модель, поле снимка, поле
-# специализации (если у записи есть род занятий).
+# специализации (если у записи есть род занятий) и признак «переклеивать
+# ли стоящий снимок».
 КАТАЛОГИ = (
-    ('coop.vacancy', 'image_1920', 'coop_specialization_id'),
-    ('coop.skill.offer', 'image_1920', 'coop_specialization_id'),
-    ('coop.resource', 'image_1920', None),
-    ('coop.intangible', 'image_1920', None),
-    ('coop.event', 'image_1920', None),
-    ('coop.program', 'image_1920', None),
-    ('coop.groupbuy', 'image_1920', None),
-    ('coop.deal', 'image_512', None),
-    ('coop.auction', 'image_512', None),
-    ('coop.warehouse.offer', 'image_1920', None),
+    ('coop.vacancy', 'image_1920', 'coop_specialization_id', True),
+    ('coop.skill.offer', 'image_1920', 'coop_specialization_id', True),
+    ('coop.resource', 'image_1920', None, True),
+    ('coop.intangible', 'image_1920', None, True),
+    ('coop.event', 'image_1920', None, True),
+    ('coop.program', 'image_1920', None, True),
+    ('coop.groupbuy', 'image_1920', None, True),
+    # У сделок и аукционов снимок хранится сразу малым, и движок
+    # пережимает его при записи: отпечаток вложения перестаёт совпадать
+    # с файлом набора, и сверка каждый раз считает снимок чужим. Таким
+    # каталогам снимок ставится только в пустое поле — иначе каждый
+    # прогон переклеивал пятьсот записей заново.
+    ('coop.deal', 'image_512', None, False),
+    ('coop.auction', 'image_512', None, False),
+    ('coop.warehouse.offer', 'image_1920', None, True),
 )
 
 
@@ -122,7 +128,7 @@ def ensure_photos(env):
     наши = _отпечатки()
     итог = {'поставлено': 0, 'переклеено': 0, 'знаком': 0}
 
-    for модель, поле, поле_спец in КАТАЛОГИ:
+    for модель, поле, поле_спец, переклеивать in КАТАЛОГИ:
         if модель not in env:
             continue
         Модель = env[модель].sudo()
@@ -147,6 +153,8 @@ def ensure_photos(env):
                 годные = _годные_для(запись.name, специализация)
                 текущий = стоят.get(запись.id)
 
+                if текущий and not переклеивать:
+                    continue
                 if текущий and годные:
                     если_наш = наши.get(текущий)
                     if если_наш and если_наш in годные:
