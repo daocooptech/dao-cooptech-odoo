@@ -68,6 +68,21 @@ AGENT = 'dao-cooptech-demo/1.0 (emblems for demo catalogue)'
            'icon set', 'diagram', 'chart', 'portrait', 'photograph')
 
 
+
+# Отвергнутые при просмотре: знаки известных марок, обрывки документов и
+# фотографии, которые поиск приносит снова и снова. Без этого списка
+# следующий добор скачивает их заново — манифест-то их уже не помнит.
+# Владелец 20 сентября 2026: «максимальная приближенность к реальности».
+# Кроссовки и кондиционеры к кооперативу отношения не имеют.
+НЕ_БРАТЬ = (
+    'adidas', 'daikin', 'fischer', 'fivethirtyeight', 'nabisco', 'amfam',
+    'pforzheim', 'tokyo-university', 'phi-rho-sigma', 'dror-habonim',
+    'international-fur', 'pr-t-pour-le-travail', 'yauza-209',
+    'european-sleeper', 'badge-of-mackenzie', 'plan-de-recuperac', '5-lei',
+    'a-desk-book',
+)
+
+
 def манифест():
     if not os.path.exists(MANIFEST):
         return []
@@ -130,6 +145,96 @@ def спросить(запрос, сколько):
     return найденное
 
 
+# Категории Викисклада, где лежат заводские знаки — те самые монограммы,
+# которые в каталоге читаются как эмблема предприятия. Поиск словами
+# такого не находит: у этих файлов в названии стоит имя завода, а не
+# слово «logo». Добавлено 20 сентября 2026, когда в наборе оказалось
+# семьдесят восемь фотографий вместо знаков — спутниковые снимки,
+# развороты удостоверений, портреты.
+КАТЕГОРИИ = [
+    'Category:Factory logos of Soviet electronics industry',
+    'Category:Factory logos of Soviet integrated circuits',
+    'Category:Factory logos of Soviet vacuum tubes',
+    'Category:Logos of the Soviet Union',
+    'Category:Logos of organizations of the Soviet Union',
+    'Category:Logos of cooperatives',
+    'Category:Monograms',
+    'Category:Black triangular logos',
+]
+
+
+def из_категории(категория, сколько):
+    """Знаки из категории Викисклада — вместе с лицензией каждого."""
+    параметры = urllib.parse.urlencode({
+        'action': 'query',
+        'generator': 'categorymembers',
+        'gcmtitle': категория,
+        'gcmtype': 'file',
+        'gcmlimit': str(min(max(сколько * 2, 20), 200)),
+        'prop': 'imageinfo',
+        'iiprop': 'url|size|extmetadata',
+        'iiurlwidth': '512',
+        'format': 'json',
+    })
+    запрос_http = urllib.request.Request(API + '?' + параметры,
+                                         headers={'User-Agent': AGENT})
+    with urllib.request.urlopen(запрос_http, timeout=30) as ответ:
+        данные = json.load(ответ)
+    страницы = (данные.get('query') or {}).get('pages') or {}
+    найденное = []
+    for стр in страницы.values():
+        сведения = (стр.get('imageinfo') or [{}])[0]
+        адрес = сведения.get('thumburl') or сведения.get('url')
+        название = стр.get('title') or ''
+        мета = сведения.get('extmetadata') or {}
+        лицензия = (значение(мета, 'LicenseShortName')
+                    or значение(мета, 'License'))
+        if not адрес or not re.search(r'\.(png|jpg|jpeg)(\?|$)', адрес, re.I):
+            continue
+        if not any(с in лицензия.lower() for с in СВОБОДНЫЕ):
+            continue
+        if any(с in название.lower() for с in НЕ_ЗНАК):
+            continue
+        найденное.append({
+            'title': название[5:] if название.startswith('File:') else название,
+            'url': адрес,
+            'license': лицензия,
+            'author': значение(мета, 'Artist')[:120] or 'Unknown author',
+            'source': 'https://commons.wikimedia.org/wiki/%s'
+                      % urllib.parse.quote(название.replace(' ', '_')),
+        })
+    return найденное
+
+
+def плоский(путь):
+    """Знак это или фотография.
+
+    Знак нарисован: в нём считанные цвета и большое одноцветное поле.
+    Фотография — сотни оттенков. Порог в сорок квантованных цветов
+    отделяет одно от другого на всём наборе: монограммы укладываются в
+    десяток, спутниковый снимок даёт за сотню.
+    """
+    try:
+        from PIL import Image
+    except ImportError:
+        return True
+    try:
+        with Image.open(путь) as рисунок:
+            маленький = рисунок.convert('RGB').resize((64, 64))
+            цвета = {}
+            for r, g, b in list(маленький.getdata()):
+                ключ = (r // 32, g // 32, b // 32)
+                цвета[ключ] = цвета.get(ключ, 0) + 1
+            return len(цвета) < 40
+    except Exception:
+        return False
+
+
+def отвергнут(имя):
+    """Знак из списка отвергнутых — не берём его и при следующем доборе."""
+    return any(с in имя for с in НЕ_БРАТЬ)
+
+
 def имя_файла(название):
     основа = re.sub(r'[^a-z0-9]+', '-', название.lower()).strip('-')
     основа = re.sub(r'-(png|jpg|jpeg|svg)$', '', основа)
@@ -145,6 +250,9 @@ def скачать(адрес, путь):
         return False
     with open(путь, 'wb') as fh:
         fh.write(данные)
+    if not плоский(путь):
+        os.remove(путь)
+        return False
     return True
 
 
@@ -164,6 +272,39 @@ def main():
         return
 
     добавлено = 0
+    for категория in КАТЕГОРИИ:
+        if добавлено >= нужно:
+            break
+        try:
+            найденное = из_категории(категория, нужно - добавлено)
+        except Exception as ошибка:
+            print('  %s: не спросилось — %s' % (категория, ошибка))
+            continue
+        взято = 0
+        for знак in найденное:
+            if добавлено >= нужно:
+                break
+            имя = имя_файла(знак['title'])
+            if имя in имена or отвергнут(имя):
+                continue
+            путь = os.path.join(MARKS, имя)
+            try:
+                if not скачать(знак['url'], путь):
+                    continue
+            except Exception:
+                continue
+            имена.add(имя)
+            записи.append({
+                'file': имя,
+                'title': знак['title'],
+                'license': знак['license'],
+                'source': знак['source'],
+                'author': знак['author'],
+            })
+            добавлено += 1
+            взято += 1
+        print('  %s: взято %s' % (категория, взято))
+
     for запрос in ЗАПРОСЫ:
         if добавлено >= нужно:
             break
@@ -177,7 +318,7 @@ def main():
             if добавлено >= нужно:
                 break
             имя = имя_файла(знак['title'])
-            if имя in имена:
+            if имя in имена or отвергнут(имя):
                 continue
             путь = os.path.join(MARKS, имя)
             try:

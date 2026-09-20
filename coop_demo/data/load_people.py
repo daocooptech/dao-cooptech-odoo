@@ -17,7 +17,6 @@
 Имена же здесь уникальны по построению: и у профессии, и у категории есть
 ограничение уникальности в базе, а человек в каталоге ровно один.
 """
-import base64
 import json
 import logging
 import os
@@ -26,7 +25,7 @@ from datetime import date
 _logger = logging.getLogger(__name__)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-AVATAR_DIR = os.path.join(os.path.dirname(HERE), 'static', 'img')
+
 
 def _upsert(env, model, key, values):
     """Найти запись по ключевым полям или создать её.
@@ -108,10 +107,10 @@ def load_people(env, specializations):
         # число здесь означало бы, что на странице человека стоит
         # оценка, за которой ничего нет.
 
-        avatar = os.path.join(AVATAR_DIR, person['avatar'].replace('/', os.sep))
-        if os.path.exists(avatar):
-            with open(avatar, 'rb') as fh:
-                values['image_1920'] = base64.b64encode(fh.read())
+        # Снимка здесь нет намеренно: в `people.json` он проставлен
+        # случайно — из ста человек шестидесяти одному достался снимок
+        # чужого пола, ребёнок или клоунская рожа. Лица раздаёт
+        # `load_faces` по полу, и делает это один раз.
 
         # Часть людей из макета уже заведена вручную в reference-данных, и
         # на них ссылаются членство, сделка и учётная запись пайщика.

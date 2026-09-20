@@ -3,7 +3,7 @@ import logging
 
 from odoo import api, models
 
-from ..data import photos, rubrics
+from ..data import rubrics
 from ..data import load_project_updates
 from ..data import load_okved
 from ..data import load_accounts
@@ -23,7 +23,8 @@ from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_promotions,
                     load_reference, load_resources, load_skills,
                     load_project_needs, load_project_tasks,
-                    load_vacancy_photos,
+                    load_photos,
+                    load_spread,
                     load_vacancies, load_verification, load_wallets,
                     load_warehouses)
 
@@ -74,12 +75,9 @@ class CoopDemoLoader(models.AbstractModel):
         load_biography.load_biography(self.env)
         load_biography.age_listings(self.env)
         load_biography.add_followers(self.env)
-        load_faces.load_faces(self.env)
-        # И сразу же перестановка по полу: на узле, где снимки раздались
-        # старым порядком, половине женщин досталось мужское лицо,
-        # и одной раздачи новым порядком это не правит: у них фото
-        # уже есть.
-        load_faces.regender_faces(self.env)
+        # Лица: раздача и перестановка по полу одним проходом — двумя
+        # они перебирали снимок заново на каждой выкатке.
+        load_faces.ensure_faces(self.env)
         # Последним: дополняет то, чего не досталось витринной
         # странице при обычной раздаче.
         load_biography.enrich_showcase(self.env)
@@ -199,13 +197,18 @@ class CoopDemoLoader(models.AbstractModel):
         # Рубрики — до снимков: и то и другое выводится из названия, но
         # рубрика ещё и решает, в какой полке запись окажется.
         self._load_rubrics()
-        self._load_photos()
-        # Снимки вакансий — последним и отдельно: у вакансий,
-        # заведённых под трудовые потребности проектов, поля
-        # снимка не было вовсе, и полка «Вакансии» на витринной
-        # странице стояла из четырнадцати пустых плиток.
-        if 'coop.vacancy' in self.env:
-            load_vacancy_photos.load(self.env)
+        # Выравнивание полок на страницах людей — до снимков: оно заводит
+        # личные потребности, и снимок им нужен такой же, как всем.
+        load_memberships.trim_memberships(self.env)
+        load_spread.spread_all(self.env)
+        # Снимки — последним шагом и одним проходом по всем каталогам:
+        # раздача только в пустые поля оставляла записи с тем, что им
+        # досталось при первом прогоне, и правка правила до них не
+        # доезжала никогда.
+        load_photos.ensure_photos(self.env)
+        # Знаки организаций — тем же порядком: набор эмблем чистили от
+        # того, что знаком не было, и у карточек это осталось стоять.
+        load_photos.ensure_marks(self.env)
         return True
 
     def _load_rubrics(self):
@@ -230,28 +233,3 @@ class CoopDemoLoader(models.AbstractModel):
             _logger.info('Вакансии: специализация проставлена %s, '
                          'не выведена %s', поставлено, мимо)
 
-    # Каталог, поле снимка и модель. Поле разное: где-то снимок хранится
-    # большим и уменьшается связанным полем, где-то сразу малым.
-    PHOTO_TARGETS = [
-        ('coop.deal', 'image_512'),
-        ('coop.auction', 'image_512'),
-        ('coop.intangible', 'image_1920'),
-        ('coop.groupbuy', 'image_1920'),
-        ('coop.program', 'image_1920'),
-        ('coop.event', 'image_1920'),
-    ]
-
-    def _load_photos(self):
-        for модель, поле in self.PHOTO_TARGETS:
-            if модель not in self.env:
-                continue
-            Модель = self.env[модель].sudo()
-            if поле not in Модель._fields:
-                continue
-            записи = Модель.search([(поле, '=', False)])
-            if not записи:
-                continue
-            поставлено = photos.fill(записи, field=поле)
-            if поставлено:
-                _logger.info('%s: снимков проставлено %s из %s',
-                             модель, поставлено, len(записи))

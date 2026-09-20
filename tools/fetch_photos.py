@@ -68,7 +68,7 @@ AGENT = 'dao-cooptech-demo-photos/1.0 (+https://github.com/daocooptech)'
     'cctv-camera': 'security camera',
     'cement-bag': 'cement bags',
     'central-market': 'farmers market',
-    'cheese-making': 'cheese making',
+    'cheese-making': 'cheese dairy production',
     'coding-class': 'classroom training',
     'cold-storage': 'cold storage warehouse',
     'concrete-mixer': 'concrete mixer',
@@ -126,6 +126,101 @@ AGENT = 'dao-cooptech-demo-photos/1.0 (+https://github.com/daocooptech)'
 }
 
 
+# Дополнено 20 сентября 2026. Владелец: «в вакансиях нет картинок на
+# нескольких позициях, а в потребностях у бетономешалки картинка
+# моркови… сделай раз и навсегда всё качественно». Пересчёт по боевой
+# базе показал 2102 записи без снимка, и 1375 из них — с названиями, под
+# которые правила не было вовсе: крепёж, кабель, топливо, страхование,
+# собрания, десятки профессий. Предметы взяты из этого пересчёта, а не
+# придуманы.
+ЗАПРОСЫ.update({
+    # Материалы и расходники
+    'fasteners': 'screws bolts nuts',
+    'cable-coil': 'cable drum electric',
+    'electrical-supplies': 'electrical installation material',
+    'spare-parts': 'spare parts shelf',
+    'sugar-sacks': 'sugar sack',
+    'fuel-cans': 'jerrycan petrol fuel',
+    'glass-jars': 'glass jars preserving',
+    'plastic-crates': 'plastic crates',
+    'sheet-metal': 'sheet metal stack',
+    'clay-lump': 'potter working clay',
+    'yarn-threads': 'yarn spools',
+    'first-aid': 'first aid bandage medical supplies',
+    'beehive-frames': 'beehive frames',
+    # Энергия и сети
+    'solar-panels': 'solar panels roof',
+    'battery-inverter': 'battery energy storage',
+    'ev-charger': 'electric car charging station',
+    'power-meter': 'electricity meter',
+    'network-switch': 'network switch rack',
+    # Помещения и оснастка
+    'sectional-gate': 'sectional overhead door',
+    'library-shelves': 'library reading room',
+    'office-furniture': 'office room chairs tables',
+    'rubber-surface': 'rubber playground surface',
+    'modular-building': 'modular container building',
+    'ventilation-duct': 'ventilation duct industrial',
+    'drip-irrigation': 'drip irrigation',
+    'fish-pond': 'fish farm pond',
+    'climbing-wall': 'climbing wall gym',
+    # Станки и техника
+    'woodworking-machine': 'woodworking machine workshop',
+    'loom': 'weaving loom',
+    'sewing-machine': 'industrial sewing machine',
+    'dough-mixer': 'dough mixer bakery',
+    'proofing-cabinet': 'bakery proofing cabinet',
+    'deck-oven': 'bakery deck oven',
+    'flour-mill-machine': 'flour milling machine grain',
+    'washing-line': 'vegetable washing machine',
+    'sorting-line': 'waste sorting conveyor',
+    'baling-press': 'baling press waste',
+    'lab-equipment': 'laboratory testing equipment',
+    'mobile-crane': 'mobile crane truck',
+    'van-delivery': 'delivery van',
+    'camera-rig': 'video camera tripod',
+    'cnc-machine': 'cnc lathe metalworking workshop',
+    'printing-press': 'printing press machine',
+    'blacksmith-forge': 'blacksmith anvil hammer',
+    # Бумаги и услуги
+    'documents-stamp': 'official documents stamp',
+    'bank-office': 'bank office counter',
+    'law-books': 'law books',
+    'site-supervisor': 'construction site engineer',
+    # Собрания и события
+    'assembly-hall': 'conference hall audience seats',
+    'community-gathering': 'community meeting people',
+    'harvest-festival': 'harvest festival',
+    'workshop-class': 'workshop class learning',
+    'folk-dance': 'folk dance',
+    'seed-swap': 'seeds exchange',
+    'volunteer-cleanup': 'volunteers cleanup',
+    'video-call': 'video conference',
+    # Люди за делом
+    'shop-counter': 'shop counter seller',
+    'security-guard': 'security guard',
+    'translator-desk': 'dictionary translation',
+    'nurse': 'nurse patient care',
+    'massage': 'massage back therapist',
+    'ui-design': 'user interface design',
+    'data-analytics': 'dashboard charts monitor',
+    'editing-desk': 'editor proofreading',
+    'code-review': 'software developer computer screen',
+    'confectioner': 'pastry chef cake',
+    'stone-restoration': 'stone mason restoration',
+    'factory-operator': 'factory worker machine',
+    'call-center': 'call center headset',
+    'beekeeper-work': 'beekeeper hive',
+    'electrician-work': 'electrician wiring',
+    'vegetable-field': 'vegetable field harvest',
+    # Нематериальное: знак, сорт, чертёж, методика
+    'brand-design': 'logo design sketch',
+    'blueprint': 'technical drawing',
+    'wheat-field': 'wheat field',
+    'coffee-roasting': 'coffee roasting',
+})
+
+
 def уже_есть(основа):
     """Сколько снимков этого предмета уже лежит."""
     счёт = 0
@@ -150,6 +245,14 @@ def уже_есть(основа):
     'patent', 'chart', 'graph', 'icon', 'coat of arms', 'seal', 'emblem',
     'banknote', 'postcard', 'cartoon', 'comic', 'book', 'page', 'manuscript',
     'титул', 'плакат',
+    # Дополнено 20 сентября 2026 по просмотру трёхсот скачанных
+    # снимков: под «cheese making» пришли чертежи сыроварни и
+    # микрофотографии плесени, под «pottery clay» — музейные
+    # горшки, под «first aid kit» — фотографии шведского дуэта с
+    # таким названием.
+    'museum', 'archaeolog', 'artifact', 'micrograph', 'microscope',
+    'blueprint', 'schematic', 'technical drawing', 'render',
+    'model of', 'scale model', 'mockup', 'exhibit', 'collection of',
     # По запросу «programmer computer» пришло изображение обнажённой
     # натуры — и прошло все проверки, потому что цветное и крупное.
     # Просмотр глазами это поймал, но полагаться на него нельзя.
