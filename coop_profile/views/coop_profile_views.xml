@@ -68,6 +68,17 @@
                   invisible="coop_is_self or coop_is_following"/>
           <button name="action_coop_follow" type="object" string="Отписаться"
                   invisible="coop_is_self or not coop_is_following"/>
+          <!--
+            Блокировка — последней и без выделения: это редкое
+            действие, и яркая кнопка рядом с «Написать» предлагала бы
+            его наравне с разговором.
+          -->
+          <field name="coop_is_blocked_by_me" invisible="1"/>
+          <button name="action_coop_block" type="object" string="Заблокировать"
+                  invisible="coop_is_self or coop_is_blocked_by_me"
+                  confirm="Заблокировать участника? Он не сможет вам писать. Извещения об этом он не получит."/>
+          <button name="action_coop_unblock" type="object" string="Разблокировать"
+                  invisible="coop_is_self or not coop_is_blocked_by_me"/>
         </header>
         <sheet class="o_coop_profile_sheet">
           <!--

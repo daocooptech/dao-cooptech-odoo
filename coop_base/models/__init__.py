@@ -12,6 +12,7 @@ from . import coop_menu_order
 from . import coop_setup
 from . import coop_notification
 from . import coop_notification_pref
+from . import coop_block
 from . import coop_admit_wizard
 from . import coop_favorite
 from . import coop_contact_line

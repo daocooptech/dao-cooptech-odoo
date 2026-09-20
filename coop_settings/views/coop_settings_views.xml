@@ -244,6 +244,30 @@
 
           <div class="o_coop_band">
             <div class="o_coop_band_head">
+              <span>Чёрный список</span>
+            </div>
+            <div class="o_coop_band_body">
+              <field name="coop_block_ids" nolabel="1"
+                     invisible="not coop_block_ids">
+                <list string="Заблокированные" create="false" editable="bottom">
+                  <field name="blocked_id" string="Участник" readonly="1"/>
+                  <field name="blocked_on" string="Заблокирован" readonly="1"/>
+                </list>
+              </field>
+              <div class="text-muted" invisible="coop_block_ids">
+                Список пуст. Заблокировать можно на странице участника.
+              </div>
+              <div class="text-muted" invisible="not coop_block_ids">
+                Заблокированный не напишет вам и не откликнется на ваши
+                объявления. Он об этом не извещается и узнаёт, только когда
+                попробует написать. Чтобы разблокировать, уберите строку
+                крестиком справа.
+              </div>
+            </div>
+          </div>
+
+          <div class="o_coop_band">
+            <div class="o_coop_band_head">
               <span>Что показывать в профиле</span>
             </div>
             <div class="o_coop_band_body">

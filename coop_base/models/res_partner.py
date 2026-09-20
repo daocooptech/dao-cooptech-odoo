@@ -2,6 +2,7 @@
 import logging
 
 from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 from odoo.tools import html2plaintext
 
 _logger = logging.getLogger(__name__)
@@ -179,6 +180,43 @@ class ResPartner(models.Model):
     coop_show_orgs = fields.Boolean(
         string='Показывать организации', default=True,
         help='Организации, в которых вы состоите.')
+
+    coop_block_ids = fields.One2many(
+        'coop.block', 'partner_id', string='Чёрный список')
+    coop_is_blocked_by_me = fields.Boolean(
+        string='В моём чёрном списке',
+        compute='_compute_coop_is_blocked_by_me')
+
+    @api.depends_context('uid')
+    def _compute_coop_is_blocked_by_me(self):
+        я = self.env.user.partner_id
+        закрытые = set(self.env['coop.block'].sudo().search([
+            ('partner_id', '=', я.id),
+            ('blocked_id', 'in', self.ids),
+        ]).mapped('blocked_id').ids)
+        for record in self:
+            record.coop_is_blocked_by_me = record.id in закрытые
+
+    def action_coop_block(self):
+        """Закрыть человеку дорогу к себе."""
+        self.ensure_one()
+        я = self.env.user.partner_id
+        if self == я:
+            raise UserError(_('Себя заблокировать нельзя.'))
+        self.env['coop.block'].sudo().create({
+            'partner_id': я.id,
+            'blocked_id': self.id,
+        })
+        return {'type': 'ir.actions.client', 'tag': 'reload'}
+
+    def action_coop_unblock(self):
+        self.ensure_one()
+        я = self.env.user.partner_id
+        self.env['coop.block'].sudo().search([
+            ('partner_id', '=', я.id),
+            ('blocked_id', '=', self.id),
+        ]).unlink()
+        return {'type': 'ir.actions.client', 'tag': 'reload'}
 
     coop_notification_pref_ids = fields.One2many(
         'coop.notification.pref', 'partner_id',

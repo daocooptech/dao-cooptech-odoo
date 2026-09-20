@@ -142,6 +142,33 @@ class DiscussChannel(models.Model):
             })
         return channels
 
+    def message_post(self, **kwargs):
+        """Заблокировавшему не пишут.
+
+        Проверка стоит на отправке, а не только на заведении переписки:
+        закрыть дорогу можно и после того, как разговор уже начался, и
+        тогда старый канал остался бы лазейкой.
+
+        Только личные переписки: в переписке сделки, проекта или
+        организации стороны связаны делом, и личная неприязнь одного не
+        должна обрывать общий разговор.
+        """
+        self._coop_check_not_blocked()
+        return super().message_post(**kwargs)
+
+    def _coop_check_not_blocked(self):
+        Block = self.env['coop.block']
+        я = self.env.user.partner_id
+        for channel in self:
+            if channel.channel_type != 'chat':
+                continue
+            собеседники = channel.channel_partner_ids - я
+            закрывшие = [p for p in собеседники if Block._blocks(p, я)]
+            if закрывшие:
+                raise UserError(_(
+                    'Участник %s не принимает от вас сообщений.'
+                ) % закрывшие[0].display_name)
+
     # Модели, чьи переписки ведёт платформа. Списком, а не цепочкой
     # условий: новый раздел добавляется одной строкой.
     coop_owner_partner_ids = fields.Many2many(
