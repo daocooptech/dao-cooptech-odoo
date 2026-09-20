@@ -75,8 +75,21 @@ function setupBand(band) {
     head.addEventListener("click", (event) => {
         // Переходы в шапке («смотреть все») открывают каталог, а не
         // сворачивают полосу.
+        //
+        // Проверяется и цель события, и точка нажатия. Одной цели мало:
+        // движок отключает кнопки действия на время выполнения, у
+        // отключённой кнопки `pointer-events: none`, и нажатие
+        // проваливается сквозь неё в шапку. Владелец 20 сентября 2026:
+        // «нажимаю смотреть все — полка просто сворачивается».
         if (event.target.closest("button:not(.o_coop_band_arrow)")) {
             return;
+        }
+        for (const btn of head.querySelectorAll("button:not(.o_coop_band_arrow)")) {
+            const r = btn.getBoundingClientRect();
+            if (event.clientX >= r.left && event.clientX <= r.right
+                && event.clientY >= r.top && event.clientY <= r.bottom) {
+                return;
+            }
         }
         const now = readClosed();
         if (now.has(name)) {
