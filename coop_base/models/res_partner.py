@@ -129,6 +129,57 @@ class ResPartner(models.Model):
         string='Могу править карточку', compute='_compute_coop_can_edit_card',
         help='Своя карточка и карточки организаций с полномочием на страницу.')
 
+    # ── Что показывать на своей странице ─────────────────────────────
+    #
+    # Пять переключателей, а не один «закрытый профиль»: человек охотно
+    # показывает, что умеет, и не охотно — сколько у него денег. Каждый
+    # относится к своей полосе страницы, и каждый действует сразу — полоса
+    # просто не рисуется. Настройка, которая ничего не меняет, хуже её
+    # отсутствия.
+    #
+    # По умолчанию показывается всё, кроме баланса: остаток на счету —
+    # единственное, что человек обычно не готов показывать посторонним, и
+    # умолчание здесь важнее свободы выбора.
+    coop_show_balance = fields.Boolean(
+        string='Показывать баланс', default=False,
+        help='Остаток на счету виден посторонним. Сами операции не видны '
+             'никогда — только вам.')
+    coop_show_trust = fields.Boolean(
+        string='Показывать уровень доверия', default=True)
+    coop_show_deals = fields.Boolean(
+        string='Показывать число сделок', default=True)
+    coop_show_friends = fields.Boolean(
+        string='Показывать друзей', default=True)
+    coop_show_followers = fields.Boolean(
+        string='Показывать подписчиков', default=True)
+
+    # Вторая половина — контакты и личное, по макету (`settings.html`,
+    # вкладка «Приватность»). Умолчания оттуда же: телефон, почта
+    # и день рождения скрыты, город и способы связи показываются.
+    #
+    # Это видимость на странице, а не запрет чтения: каталог людей
+    # читают все, и закрыть поле правилом значило бы закрыть его и
+    # для поиска, и для самой карточки. Запрет чтения — отдельная
+    # работа вместе с «Кто видит мою страницу».
+    coop_show_phone = fields.Boolean(
+        string='Показывать телефон', default=False,
+        help='Стороны активной сделки видят телефон в любом случае.')
+    coop_show_email = fields.Boolean(
+        string='Показывать почту', default=False)
+    coop_show_contacts = fields.Boolean(
+        string='Показывать сайт и способы связи', default=True,
+        help='Сайт и свободные строки контактов, которые вы завели сами.')
+    coop_show_birthdate = fields.Boolean(
+        string='Показывать день рождения', default=False,
+        help='Возраст остаётся видным: по нему выбирают исполнителя, '
+             'а точная дата для этого не нужна.')
+    coop_show_city = fields.Boolean(
+        string='Показывать город', default=True,
+        help='Только город, без точного адреса.')
+    coop_show_orgs = fields.Boolean(
+        string='Показывать организации', default=True,
+        help='Организации, в которых вы состоите.')
+
     @api.depends_context('uid')
     def _compute_coop_can_edit_card(self):
         allowed = self.env.user.coop_site_partner_ids
@@ -185,6 +236,27 @@ class ResPartner(models.Model):
                 (текст[:280], идентификатор))
         _logger.info('«О себе»: перенесено из комментария %s записей',
                      len(строки))
+        self._coop_fill_privacy_defaults()
+
+    def _coop_fill_privacy_defaults(self):
+        """Умолчания приватности — тем, кто заведён до нового поля.
+
+        `default` действует только на новые записи: у старых в
+        столбце остаётся NULL, а он читается как «нет». Для города,
+        способов связи и организаций это означало бы, что новое поле
+        одним обновлением опустошило бы карточки всех участников
+        разом.
+        """
+        включено = ('coop_show_trust', 'coop_show_deals', 'coop_show_friends',
+                    'coop_show_followers', 'coop_show_contacts',
+                    'coop_show_city', 'coop_show_orgs')
+        выключено = ('coop_show_balance', 'coop_show_phone',
+                      'coop_show_email', 'coop_show_birthdate')
+        for значение, поля in ((True, включено), (False, выключено)):
+            for поле in поля:
+                self.env.cr.execute(
+                    'UPDATE res_partner SET %s = %%s WHERE %s IS NULL'
+                    % (поле, поле), (значение,))
 
 
     def _message_get_suggested_recipients_batch(self, *args, **kwargs):

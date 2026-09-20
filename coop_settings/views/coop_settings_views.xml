@@ -184,7 +184,21 @@
               <span>Что показывать в профиле</span>
             </div>
             <div class="o_coop_band_body">
-              <group>
+              <div class="text-muted">
+                Скрытое остаётся в вашей карточке — его просто не видит
+                посторонний. Сами вы видите свою страницу целиком всегда.
+              </div>
+              <group string="Контакты">
+                <field name="coop_show_phone"/>
+                <field name="coop_show_email"/>
+                <field name="coop_show_contacts"/>
+              </group>
+              <group string="Личное">
+                <field name="coop_show_city"/>
+                <field name="coop_show_birthdate"/>
+                <field name="coop_show_orgs"/>
+              </group>
+              <group string="Репутация и связи">
                 <field name="coop_show_trust"/>
                 <field name="coop_show_deals"/>
                 <field name="coop_show_balance"/>
@@ -192,8 +206,10 @@
                 <field name="coop_show_followers"/>
               </group>
               <div class="text-muted">
-                Сами операции по счёту не видны никому, кроме вас, — и это
-                не настройка, а устройство платформы.
+                Если скрыть уровень доверия и число сделок, откликаться на
+                ваши объявления будут заметно реже. Сами операции по счёту
+                не видны никому, кроме вас, — и это не настройка, а устройство
+                платформы.
               </div>
             </div>
           </div>

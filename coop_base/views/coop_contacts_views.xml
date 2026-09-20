@@ -20,12 +20,24 @@
       <form string="Контакты" create="false" edit="false">
         <sheet class="o_coop_contacts_dialog">
           <group>
+            <field name="coop_show_phone" invisible="1"/>
+            <field name="coop_show_email" invisible="1"/>
+            <field name="coop_show_contacts" invisible="1"/>
+            <field name="coop_show_city" invisible="1"/>
             <field name="name" readonly="1"/>
-            <field name="city" readonly="1" invisible="not city"/>
-            <field name="phone" readonly="1" invisible="not phone"/>
-            <field name="email" readonly="1" invisible="not email"/>
+            <!--
+              Окно слушается тех же переключателей, что и страница:
+              иначе скрытый на карточке телефон открывался бы отсюда
+              в одно нажатие, и настройка ничего бы не значила.
+            -->
+            <field name="city" readonly="1"
+                   invisible="not city or not coop_show_city"/>
+            <field name="phone" readonly="1"
+                   invisible="not phone or not coop_show_phone"/>
+            <field name="email" readonly="1"
+                   invisible="not email or not coop_show_email"/>
             <field name="website" readonly="1" widget="url"
-                   invisible="not website"/>
+                   invisible="not website or not coop_show_contacts"/>
             <!--
               Без вида строки показываются таблицей — это честно и 
               работает без оформления. Вид как на карточке добавляет
@@ -33,7 +45,7 @@
               должна о нём знать.
             -->
             <field name="coop_contact_line_ids" readonly="1" nolabel="1"
-                   invisible="not coop_contact_line_ids">
+                   invisible="not coop_contact_line_ids or not coop_show_contacts">
               <list string="Ещё" create="false" delete="false">
                 <field name="name"/>
                 <field name="value"/>
@@ -45,8 +57,8 @@
             поломка, а не как «человек контактов не оставил».
           -->
           <div class="alert alert-info" role="status"
-               invisible="phone or email or website or coop_contact_line_ids">
-            Участник не указал способов связи. Напишите ему в сообщениях —
+               invisible="(phone and coop_show_phone) or (email and coop_show_email) or (website and coop_show_contacts) or (coop_contact_line_ids and coop_show_contacts)">
+            Участник не открыл способов связи. Напишите ему в сообщениях —
             это работает всегда.
           </div>
         </sheet>

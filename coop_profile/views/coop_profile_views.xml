@@ -163,19 +163,23 @@
                   ли карандаш, а не будет ли поле рамкой.
                 -->
                 <div class="o_coop_infobox_body">
-                  <div><span class="o_coop_key">Город</span>
+                  <div invisible="not coop_is_self and not coop_show_city">
+                    <span class="o_coop_key">Город</span>
                     <field name="city" widget="coop_inline"
                            readonly="not coop_is_self"
                            placeholder="не указан"/></div>
-                  <div><span class="o_coop_key">Почта</span>
+                  <div invisible="not coop_is_self and not coop_show_email">
+                    <span class="o_coop_key">Почта</span>
                     <field name="email" widget="coop_inline"
                            readonly="not coop_is_self"
                            placeholder="не указана"/></div>
-                  <div><span class="o_coop_key">Телефон</span>
+                  <div invisible="not coop_is_self and not coop_show_phone">
+                    <span class="o_coop_key">Телефон</span>
                     <field name="phone" widget="coop_inline"
                            readonly="not coop_is_self"
                            placeholder="не указан"/></div>
-                  <div><span class="o_coop_key">Сайт</span>
+                  <div invisible="not coop_is_self and not coop_show_contacts">
+                    <span class="o_coop_key">Сайт</span>
                     <field name="website" widget="coop_inline"
                            readonly="not coop_is_self" placeholder="нет"/></div>
                   <!--
@@ -183,7 +187,8 @@
                     значение», сколько нужно строк. Подписи у них нет: подпись
                     и есть то, что набрали в левой колонке.
                   -->
-                  <div class="o_coop_contact_extra">
+                  <div class="o_coop_contact_extra"
+                       invisible="not coop_is_self and not coop_show_contacts">
                     <field name="coop_contact_line_ids" nolabel="1"
                            widget="coop_contact_lines"
                            readonly="not coop_is_self"/>
@@ -203,7 +208,7 @@
                     правке выбор даты. Виджет один на все виды полей,
                     разница только в том, чем набирают (решение 332).
                   -->
-                  <div invisible="not coop_is_self">
+                  <div invisible="not coop_is_self and not coop_show_birthdate">
                     <span class="o_coop_key">Родился</span>
                     <field name="coop_birthdate" widget="coop_inline"
                            readonly="not coop_is_self"
@@ -290,6 +295,12 @@
                 <field name="coop_show_balance" invisible="1"/>
                 <field name="coop_show_friends" invisible="1"/>
                 <field name="coop_show_followers" invisible="1"/>
+                <field name="coop_show_phone" invisible="1"/>
+                <field name="coop_show_email" invisible="1"/>
+                <field name="coop_show_contacts" invisible="1"/>
+                <field name="coop_show_birthdate" invisible="1"/>
+                <field name="coop_show_city" invisible="1"/>
+                <field name="coop_show_orgs" invisible="1"/>
                 <field name="coop_specialization_id"
                        readonly="not coop_is_self"
                        placeholder="Чем занимаетесь"/>
@@ -549,7 +560,8 @@
                 </div>
               </div>
 
-              <div class="o_coop_band" invisible="coop_membership_count == 0">
+              <div class="o_coop_band"
+                   invisible="coop_membership_count == 0 or (not coop_is_self and not coop_show_orgs)">
                 <div class="o_coop_band_head">
                   <span>Организации</span>
                 </div>
