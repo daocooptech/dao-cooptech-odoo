@@ -244,6 +244,22 @@
 
           <div class="o_coop_band">
             <div class="o_coop_band_head">
+              <span>Кто может мне писать</span>
+            </div>
+            <div class="o_coop_band_body">
+              <group>
+                <field name="coop_message_audience" nolabel="1" widget="radio"/>
+              </group>
+              <div class="text-muted">
+                Тому, кто писать не может, кнопка «Написать» на вашей
+                странице отвечает уведомлением, а переписка не заводится.
+                Заблокированные не могут написать в любом случае.
+              </div>
+            </div>
+          </div>
+
+          <div class="o_coop_band">
+            <div class="o_coop_band_head">
               <span>Чёрный список</span>
             </div>
             <div class="o_coop_band_body">

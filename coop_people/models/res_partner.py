@@ -174,17 +174,34 @@ class ResPartner(models.Model):
         return True
 
     def action_coop_message(self):
-        """Написать участнику.
+        """Написать участнику — открыть с ним диалог в разделе «Сообщения».
 
-        Открывает переписку, а не форму письма: на платформе договариваются
-        в чате, и след договорённости должен остаться там же, где сделка.
+        Раньше кнопка открывала форму канала движка: всплывало окно
+        «Название группы», «Описание», «Группы автоподписки» — то есть
+        предложение завести группу вместо разговора с человеком.
+        Владелец 20 сентября 2026: «когда я нажимаю написать должна
+        открываться страница сообщения и диалог с этим участником».
+
+        Если участник принимает письма не от всех — всплывает уведомление
+        и диалог не заводится. Проверка живёт в `coop_base`, чтобы
+        отвечать одинаково отовсюду.
         """
         self.ensure_one()
+        if not self.coop_can_message_me():
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'type': 'warning',
+                    'title': self.display_name,
+                    'message': _('Участник принимает сообщения только от '
+                                 'друзей и сторон совместных сделок.'),
+                    'sticky': False,
+                },
+            }
         return {
-            'type': 'ir.actions.act_window',
-            'res_model': 'discuss.channel',
-            'view_mode': 'form',
-            'target': 'new',
-            'context': {'default_channel_partner_ids': [(4, self.id)]},
-            'name': 'Написать: %s' % self.name,
+            'type': 'ir.actions.client',
+            'tag': 'coop_messages.messages',
+            'name': _('Сообщения'),
+            'params': {'coop_partner_id': self.id},
         }

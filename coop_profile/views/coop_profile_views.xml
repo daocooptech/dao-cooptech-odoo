@@ -103,9 +103,9 @@
             <h2><field name="name" nolabel="1" readonly="1"/></h2>
             <p>Участник открывает свою страницу только своим связям и
                сторонам совместных сделок.</p>
-            <p class="text-muted">Напишите ему в сообщениях — это работает
-               всегда. Появится общая сделка или он примет ваше
-               предложение дружбы — страница откроется.</p>
+            <p class="text-muted">Напишите ему в сообщениях, если он
+               принимает письма от всех. Появится общая сделка или он
+               примет ваше предложение дружбы — страница откроется.</p>
             <button name="action_coop_message" type="object"
                     string="Написать" class="btn-primary"/>
           </div>
@@ -265,10 +265,15 @@
                 например СФУ и год окончания, ниже профессиональное…
                 ниже среднее».
 
-                Так же, как «Контакты» и «Личная информация» рядом:
-                метка слева, значение справа. Списком записей блок
-                выбивался из ряда, а названия заведений в узкой колонке
-                ломались посреди слова.
+                Ступень — подзаголовком, заведение — строкой во всю
+                ширину под ним. Меткой слева, как в «Контактах», было
+                нельзя: в колонку шириной девяносто точек не помещается
+                ни «МГТУ им. Баумана — 1997 г.», ни «КМС — 2015 г.,
+                ПК № 8 — 1991 г.», и строка ломалась посреди названия.
+                Владелец 20 сентября 2026: «в блоке образование как то
+                всё не красиво, давай сделаем так что есть подзаголовок
+                например высшее, а ниже строчка полностью под название
+                учреждения».
 
                 Сокращение — из справочника учебных заведений; вписанное
                 вручную показывается как есть.
@@ -277,19 +282,19 @@
                    invisible="not coop_education_ids and not coop_is_self">
                 <div class="o_coop_infobox_head">Образование</div>
                 <div class="o_coop_infobox_body">
-                  <div invisible="not coop_edu_higher">
+                  <div class="o_coop_edu_row" invisible="not coop_edu_higher">
                     <span class="o_coop_key">Высшее</span>
                     <field name="coop_edu_higher" readonly="1"/>
                   </div>
-                  <div invisible="not coop_edu_college">
+                  <div class="o_coop_edu_row" invisible="not coop_edu_college">
                     <span class="o_coop_key">Профессиональное</span>
                     <field name="coop_edu_college" readonly="1"/>
                   </div>
-                  <div invisible="not coop_edu_school">
+                  <div class="o_coop_edu_row" invisible="not coop_edu_school">
                     <span class="o_coop_key">Среднее</span>
                     <field name="coop_edu_school" readonly="1"/>
                   </div>
-                  <div invisible="not coop_edu_courses">
+                  <div class="o_coop_edu_row" invisible="not coop_edu_courses">
                     <span class="o_coop_key">Доп. образование</span>
                     <field name="coop_edu_courses" readonly="1"/>
                   </div>

@@ -325,6 +325,7 @@ export class CoopMessages extends Component {
             // не нужны. Штатный Discuss просит их при открытии — просим и
             // мы, иначе список пуст при полной базе.
             await this.store.channels.fetch();
+            await this.openRequestedDialog();
         });
     }
 
@@ -486,6 +487,26 @@ export class CoopMessages extends Component {
         this.state.jump++;
     }
 
+    /**
+     * Диалог, ради которого экран и открыли.
+     *
+     * Кнопка «Написать» на странице человека передаёт сюда его номер:
+     * раздел «Сообщения» открывается сразу на переписке с ним, а не на
+     * первой попавшейся. Заводить канал заранее нечем — `joinChat`
+     * находит уже существующий или создаёт новый, и оба случая для
+     * экрана выглядят одинаково.
+     */
+    async openRequestedDialog() {
+        const кто = this.props.action?.params?.coop_partner_id;
+        if (!кто) {
+            return;
+        }
+        const thread = await this.store.joinChat(кто, false);
+        if (thread) {
+            this.select(thread);
+        }
+    }
+
     /** Открыть/закрыть панель «Добавить диалог» и сбросить её состояние. */
     toggleNewDialog() {
         this.state.newDialogOpen = !this.state.newDialogOpen;
@@ -515,6 +536,10 @@ export class CoopMessages extends Component {
                 ["is_company", "=", false],
                 ["id", "!=", this.store.self.id],
                 ["name", "ilike", needle],
+                // Тех, кто принимает письма только от друзей, в выдаче нет:
+                // иначе запрет, о котором кнопка «Написать» честно
+                // предупреждает, обходится этой панелью за два щелчка.
+                ["coop_accepts_my_message", "=", true],
             ],
             ["id", "name", "city"],
             { limit: 20 }

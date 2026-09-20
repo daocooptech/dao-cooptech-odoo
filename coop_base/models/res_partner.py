@@ -243,6 +243,42 @@ class ResPartner(models.Model):
         string='Страница мне видна', compute='_compute_coop_page_visible',
         search='_search_coop_page_visible')
 
+    # Кто может мне писать. Отдельно от видимости страницы: страницу
+    # человек часто показывает всем, а получать письма от кого угодно не
+    # хочет. Владелец 20 сентября 2026: «если у этого участника
+    # настройками приватности запрещено писать сообщение (например
+    # только друзьям) то при нажатии всплывает уведомление, что
+    # пользователь принимает сообщения только от друзей».
+    #
+    # Два ответа, а не три: «никому» на платформе, где договариваются в
+    # переписке, означает выключить себя из неё целиком — для этого есть
+    # чёрный список и уход с платформы.
+    coop_message_audience = fields.Selection(
+        [('members', 'Все участники платформы'),
+         ('links', 'Только друзья и стороны совместных сделок')],
+        string='Кто может мне писать', default='members', required=True)
+
+    def coop_can_message_me(self, sender=None):
+        """Может ли этот человек написать мне.
+
+        Проверка одна на всё: и кнопка «Написать» на странице, и
+        будущий отклик из каталога должны отвечать одинаково, иначе
+        запрет обходится через соседний экран.
+        """
+        self.ensure_one()
+        отправитель = sender or self.env.user.partner_id
+        if not отправитель or отправитель == self:
+            return True
+        if 'coop.block' in self.env:
+            блок = self.env['coop.block'].sudo().search_count([
+                ('partner_id', '=', self.id),
+                ('blocked_id', '=', отправитель.id)])
+            if блок:
+                return False
+        if self.coop_message_audience != 'links':
+            return True
+        return self.id in self._coop_linked_to(отправитель)
+
     @api.depends_context('uid')
     def _compute_coop_page_visible(self):
         я = self.env.user.partner_id
@@ -311,6 +347,40 @@ class ResPartner(models.Model):
         связанные = закрытые._coop_linked_to(я)
         спрятанные = [p.id for p in закрытые if p.id not in связанные]
         return [('id', 'not in', спрятанные)] if видно else [('id', 'in', спрятанные)]
+
+    coop_accepts_my_message = fields.Boolean(
+        string='Принимает моё письмо',
+        compute='_compute_coop_accepts_my_message',
+        search='_search_coop_accepts_my_message',
+        help='Учитывает настройку «Кто может мне писать» и чёрный список.')
+
+    @api.depends_context('uid')
+    def _compute_coop_accepts_my_message(self):
+        for record in self:
+            record.coop_accepts_my_message = record.coop_can_message_me()
+
+    def _search_coop_accepts_my_message(self, operator, value):
+        """Отбор по тому, кому я могу написать.
+
+        Нужен панели «Добавить диалог» в разделе «Сообщения»: если
+        запрет проверять только у кнопки «Написать», он обходится
+        соседним экраном за два щелчка.
+        """
+        if operator not in ('=', '!=') or not isinstance(value, bool):
+            raise NotImplementedError
+        принимает = (operator == '=') == value
+        я = self.env.user.partner_id
+        закрытые = self.sudo().search([('coop_message_audience', '=', 'links')])
+        закрытые = закрытые.filtered(lambda p: p != я)
+        связанные = закрытые._coop_linked_to(я)
+        нельзя = {p.id for p in закрытые if p.id not in связанные}
+        if 'coop.block' in self.env and я:
+            for блок in self.env['coop.block'].sudo().search(
+                    [('blocked_id', '=', я.id)]):
+                нельзя.add(блок.partner_id.id)
+        нельзя = list(нельзя)
+        return ([('id', 'not in', нельзя)] if принимает
+                else [('id', 'in', нельзя)])
 
     coop_profile_hidden = fields.Boolean(
         string='Профиль скрыт', default=False, copy=False,
