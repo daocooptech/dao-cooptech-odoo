@@ -75,6 +75,11 @@ class CoopDemoLoader(models.AbstractModel):
         load_biography.age_listings(self.env)
         load_biography.add_followers(self.env)
         load_faces.load_faces(self.env)
+        # И сразу же перестановка по полу: на узле, где снимки раздались
+        # старым порядком, половине женщин досталось мужское лицо,
+        # и одной раздачи новым порядком это не правит: у них фото
+        # уже есть.
+        load_faces.regender_faces(self.env)
         # Последним: дополняет то, чего не досталось витринной
         # странице при обычной раздаче.
         load_biography.enrich_showcase(self.env)
