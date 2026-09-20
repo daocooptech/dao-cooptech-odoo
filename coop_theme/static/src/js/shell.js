@@ -36,7 +36,7 @@ export class CoopTabs extends Component {
     setup() {
         this.menus = useService("menu");
         this.action = useService("action");
-        this.state = useState({ tabs: [], current: null });
+        this.state = useState({ tabs: [], current: null, label: null });
         this.lastActionId = null;
         this.refresh();
         // Какое действие открыто, панель управления знает не всегда: у
@@ -76,7 +76,32 @@ export class CoopTabs extends Component {
         return this.env.config?.actionId || this.lastActionId || null;
     }
 
+    /**
+     * Имя выборки, если человек пришёл не в раздел, а в свой список.
+     *
+     * «Смотреть все» у полки страницы открывает тот же раздел с узким
+     * отбором — мои друзья, мои ресурсы. Вкладки при этом показывали
+     * подразделы раздела («Каталог людей»), и человек читал их как
+     * название того, на что смотрит. Владелец 20 сентября 2026: «вместо
+     * каталога людей тут должно быть мои друзья».
+     */
+    get screenLabel() {
+        const context = this.action?.currentController?.action?.context;
+        return (context && context.coop_screen_label) || null;
+    }
+
     refresh() {
+        const label = this.screenLabel;
+        if (label) {
+            // Вкладок нет: показывать подразделы раздела рядом с именем
+            // выборки значит предлагать уйти туда, откуда человек только
+            // что пришёл своим путём.
+            this.state.tabs = [];
+            this.state.current = null;
+            this.state.label = label;
+            return;
+        }
+        this.state.label = null;
         const actionId = this.actionId;
         const own = this.menus.getAll().find((menu) => menu.actionID === actionId);
         // Меню, которого нет у участника в браузере, здесь не

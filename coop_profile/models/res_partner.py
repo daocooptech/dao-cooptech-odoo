@@ -467,9 +467,19 @@ class ResPartner(models.Model):
             context = safe_eval(context, {'uid': self.env.uid})
         return dict(context)
 
-    def _coop_holdings_action(self, xml_id, domain, name):
+    def _coop_holdings_action(self, xml_id, domain, name, own_name=None):
+        """Экран «смотреть все» у полки страницы.
+
+        `own_name` — как этот экран называется, когда человек смотрит
+        своё: «Мои друзья», а не «Друзья — Дашкевич Данил Игоревич».
+        Владелец 20 сентября 2026: «вместо каталога людей тут должно
+        быть мои друзья».
+        """
         self.ensure_one()
         action = self.env['ir.actions.act_window']._for_xml_id(xml_id)
+        свой = self == self.env.user._coop_acting_partner()
+        if свой and own_name:
+            name = own_name
         action['domain'] = domain
         action['name'] = name
         context = self._coop_action_context(action)
@@ -484,43 +494,51 @@ class ResPartner(models.Model):
         # друзей, по нажатию открывается каталог моих друзей (аналог
         # вк)» — то есть список, а не витрина.
         context.pop('coop_shelf_field', None)
+        # Название экрана — вкладкам оболочки: они показывают подразделы
+        # раздела, а человек пришёл не в раздел, а в свою выборку.
+        context['coop_screen_label'] = name
         action['context'] = context
         return action
 
     def action_coop_my_offers(self):
         return self._coop_holdings_action(
             'coop_skills.action_coop_skills',
-            [('partner_id', '=', self.id)], _('Навыки — %s') % self.display_name)
+            [('partner_id', '=', self.id)], _('Навыки — %s') % self.display_name,
+            own_name=_('Мои навыки'))
 
     def action_coop_my_resources(self):
         return self._coop_holdings_action(
             'coop_resources.action_coop_resources',
             [('owner_id', '=', self.id), ('listing_type', '=', 'offer'),
              ('project_id', '=', False)],
-            _('Ресурсы — %s') % self.display_name)
+            _('Ресурсы — %s') % self.display_name, own_name=_('Мои ресурсы'))
 
     def action_coop_my_vacancies(self):
         return self._coop_holdings_action(
             'coop_vacancies.action_coop_vacancies',
-            [('partner_id', '=', self.id)], _('Вакансии — %s') % self.display_name)
+            [('partner_id', '=', self.id)], _('Вакансии — %s') % self.display_name,
+            own_name=_('Мои вакансии'))
 
     def action_coop_my_projects(self):
         return self._coop_holdings_action(
             'coop_projects.action_coop_projects',
-            [('partner_id', '=', self.id)], _('Проекты — %s') % self.display_name)
+            [('partner_id', '=', self.id)], _('Проекты — %s') % self.display_name,
+            own_name=_('Мои проекты'))
 
     def action_coop_my_communities(self):
         return self._coop_holdings_action(
             'coop_communities.action_coop_communities',
             [('member_ids', 'any', [('partner_id', '=', self.id),
                                     ('state', '=', 'active')])],
-            _('Сообщества — %s') % self.display_name)
+            _('Сообщества — %s') % self.display_name,
+            own_name=_('Мои сообщества'))
 
     def action_coop_my_deals(self):
         return self._coop_holdings_action(
             'coop_deals.action_coop_deals',
             ['|', ('party_a_id', '=', self.id), ('party_b_id', '=', self.id)],
-            _('Сделки — %s') % self.display_name)
+            _('Сделки — %s') % self.display_name,
+            own_name=_('Мои сделки'))
 
     def action_coop_my_wallet(self):
         """«История операций» ведёт в тот же кошелёк, что и меню.
@@ -537,14 +555,15 @@ class ResPartner(models.Model):
             'coop_resources.action_coop_resources',
             [('owner_id', '=', self.id), ('listing_type', '=', 'request'),
              ('project_id', '=', False)],
-            _('Потребности — %s') % self.display_name)
+            _('Потребности — %s') % self.display_name,
+            own_name=_('Мои потребности'))
 
     def action_coop_my_friends(self):
         self.ensure_one()
         return self._coop_holdings_action(
             'coop_people.action_coop_people',
             [('id', 'in', self.coop_friend_ids.ids)],
-            _('Друзья — %s') % self.display_name)
+            _('Друзья — %s') % self.display_name, own_name=_('Мои друзья'))
 
     # ── Залежавшееся объявление ─────────────────────────────────────────
     #

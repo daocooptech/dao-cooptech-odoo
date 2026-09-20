@@ -121,7 +121,14 @@
   </t>
 
   <t t-name="coop_theme.Tabs">
-    <div class="o_coop_tabs" t-if="state.tabs.length">
+    <!--
+      Имя выборки вместо вкладок: человек смотрит свой список, а не
+      раздел, и подразделы раздела здесь только сбивают.
+    -->
+    <div class="o_coop_tabs" t-if="state.label">
+      <span class="o_coop_tab o_coop_tab_label" t-esc="state.label"/>
+    </div>
+    <div class="o_coop_tabs" t-elif="state.tabs.length">
       <a t-foreach="state.tabs" t-as="tab" t-key="tab.id"
          href="#" class="o_coop_tab"
          t-att-class="{ 'active': tab.id === state.current }"
