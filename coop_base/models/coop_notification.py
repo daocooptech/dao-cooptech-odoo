@@ -87,7 +87,65 @@ class CoopNotification(models.Model):
             значения.append(строка)
         if not значения:
             return self.browse()
-        return self.sudo().create(значения)
+        return self._coop_deliver(значения, kind)
+
+    @api.model
+    def _coop_deliver(self, значения, kind):
+        """Разложить извещения по каналам, которые человек оставил себе.
+
+        Настройка спрашивается по каждому получателю: одно и то же
+        событие одному приходит и в колокольчик, и письмом, другому —
+        никуда, и решать это за них нельзя.
+        """
+        Pref = self.env['coop.notification.pref']
+        Partner = self.env['res.partner'].sudo()
+        созданные = []
+        почтой = []
+        for строка in значения:
+            partner = Partner.browse(строка['partner_id'])
+            в_платформе, письмом = Pref._allowed(partner, kind)
+            if в_платформе:
+                созданные.append(строка)
+            if письмом and partner.email:
+                почтой.append((partner, строка))
+        записи = self.sudo().create(созданные) if созданные else self.browse()
+        for partner, строка in почтой:
+            self._coop_send_email(partner, строка)
+        return записи
+
+    @api.model
+    def _coop_send_email(self, partner, строка):
+        """Письмо о событии — если сейчас не тихий час.
+
+        В тихие часы письмо не отправляется вовсе, а не откладывается:
+        событие уже лежит в колокольчике, и утреннее письмо о ночной
+        ставке сообщило бы то, что человек прочитал до него.
+        """
+        if partner.coop_quiet_hours and self._coop_is_quiet(partner):
+            return False
+        self.env['mail.mail'].sudo().create({
+            'subject': _('ДАО КООПТЕХ: событие'),
+            'body_html': строка['body'],
+            'email_to': partner.email,
+            'auto_delete': True,
+        })
+        return True
+
+    @api.model
+    def _coop_is_quiet(self, partner):
+        """Тихий час считается по часовому поясу самого человека."""
+        user = self.env['res.users'].sudo().search(
+            [('partner_id', '=', partner.id)], limit=1)
+        сейчас = fields.Datetime.context_timestamp(
+            user.with_user(user) if user else self.env.user, fields.Datetime.now())
+        час = сейчас.hour + сейчас.minute / 60.0
+        начало, конец = partner.coop_quiet_from, partner.coop_quiet_to
+        if начало == конец:
+            return False
+        if начало < конец:
+            return начало <= час < конец
+        # Тишина через полночь: с 22 до 8 — это «после 22 или до 8».
+        return час >= начало or час < конец
 
     @api.model
     def unread_count(self):

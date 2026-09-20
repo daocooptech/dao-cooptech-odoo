@@ -25,6 +25,21 @@ class ResPartner(models.Model):
             partner.coop_member_since = дата
 
     @api.model
+    @api.model
+    def action_coop_open_notifications(self):
+        """Вкладка «Уведомления».
+
+        Строки настроек заводятся здесь, при первом заходе: девять строк
+        на каждого из трёх с половиной тысяч участников, большинство из
+        которых сюда не зайдёт, — это три десятка тысяч записей ради
+        умолчания, которое и так известно.
+        """
+        partner = self.env.user.partner_id
+        self.env['coop.notification.pref']._ensure_rows(partner)
+        return self.action_coop_open_settings(
+            'coop_settings.view_coop_settings_notifications_form',
+            'Уведомления')
+
     def action_coop_open_settings(self, view_xmlid='coop_settings.view_coop_settings_account_form',
                                   name=None):
         """Настройки — свои, и решается это при каждом открытии.

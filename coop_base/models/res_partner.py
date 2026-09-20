@@ -180,6 +180,23 @@ class ResPartner(models.Model):
         string='Показывать организации', default=True,
         help='Организации, в которых вы состоите.')
 
+    coop_notification_pref_ids = fields.One2many(
+        'coop.notification.pref', 'partner_id',
+        string='Настройки извещений')
+
+    # ── Тихие часы ───────────────────────────────────────────────────
+    #
+    # Извещения на платформе копятся всегда — они никого не будят.
+    # Тихие часы держат письма: ночное письмо о ставке будит телефон, а
+    # утром оно прочитается ровно так же.
+    coop_quiet_hours = fields.Boolean(
+        string='Тихие часы', default=True,
+        help='Ночью письма не отправляются — они уходят утром.')
+    coop_quiet_from = fields.Float(
+        string='Тишина с', default=22.0)
+    coop_quiet_to = fields.Float(
+        string='Тишина до', default=8.0)
+
     @api.depends_context('uid')
     def _compute_coop_can_edit_card(self):
         allowed = self.env.user.coop_site_partner_ids

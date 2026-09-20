@@ -32,6 +32,7 @@
         'security/ir.model.access.csv',
         'security/coop_verification_rules.xml',
         'security/coop_notification_rules.xml',
+        'security/coop_notification_pref_rules.xml',
         'security/coop_favorite_rules.xml',
         'security/coop_contact_line_rules.xml',
         'views/coop_membership_views.xml',

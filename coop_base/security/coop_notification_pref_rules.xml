@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Без noupdate — правила доступа должны доезжать до узла обновлением
+  модуля.
+-->
+<odoo>
+  <data>
+
+    <!--
+      Чужие настройки извещений не касаются никого: по ним видно, что
+      человеку важно, а что он отключил, — и это его дело.
+    -->
+    <record id="rule_notification_pref_own" model="ir.rule">
+      <field name="name">Настройки извещений видит и правит их хозяин</field>
+      <field name="model_id" ref="model_coop_notification_pref"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="True"/>
+      <field name="perm_create" eval="True"/>
+      <field name="perm_unlink" eval="True"/>
+    </record>
+
+  </data>
+</odoo>

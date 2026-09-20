@@ -404,6 +404,71 @@
     </field>
   </record>
 
+  <!--
+    Уведомления. Матрица «о чём — куда», как в макете (`settings.html`),
+    но столбцов два, а не три: браузерных уведомлений на платформе нет,
+    и переключатель push обещал бы несуществующее.
+
+    Виды событий — те же, что у самих извещений: второй перечень
+    разошёлся бы с первым при первом же новом разделе.
+  -->
+  <record id="view_coop_settings_notifications_form" model="ir.ui.view">
+    <field name="name">coop.settings.notifications.form</field>
+    <field name="model">res.partner</field>
+    <field name="priority">104</field>
+    <field name="arch" type="xml">
+      <form string="Уведомления" create="false" duplicate="false"
+            class="o_coop_profile o_coop_settings">
+        <sheet>
+          <div class="oe_title">
+            <h1>Уведомления</h1>
+          </div>
+
+          <div class="o_coop_band">
+            <div class="o_coop_band_head">
+              <span>О чём и куда сообщать</span>
+            </div>
+            <div class="o_coop_band_body">
+              <field name="coop_notification_pref_ids" nolabel="1">
+                <list string="События" create="false" delete="false"
+                      editable="bottom">
+                  <field name="kind" string="О чём" readonly="1"/>
+                  <field name="in_app" string="На платформе"/>
+                  <field name="by_email" string="Почтой"/>
+                </list>
+              </field>
+              <div class="text-muted">
+                «На платформе» — колокольчик в шапке. Письма уходят на
+                адрес из вашей карточки; пока он не указан, письма не
+                отправляются.
+              </div>
+            </div>
+          </div>
+
+          <div class="o_coop_band">
+            <div class="o_coop_band_head">
+              <span>Тихие часы</span>
+            </div>
+            <div class="o_coop_band_body">
+              <group>
+                <field name="coop_quiet_hours"/>
+                <field name="coop_quiet_from" widget="float_time"
+                       invisible="not coop_quiet_hours"/>
+                <field name="coop_quiet_to" widget="float_time"
+                       invisible="not coop_quiet_hours"/>
+              </group>
+              <div class="text-muted">
+                Тихие часы держат письма, а не извещения: колокольчик
+                копит их всегда и никого не будит. Время — по вашему
+                часовому поясу из вкладки «Язык и регион».
+              </div>
+            </div>
+          </div>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
   <record id="action_coop_settings_privacy" model="ir.actions.server">
     <field name="name">Приватность</field>
     <field name="path">my-privacy</field>
@@ -456,6 +521,18 @@
   <menuitem id="menu_coop_settings_appearance" name="Оформление"
             parent="menu_coop_settings_root" action="action_coop_settings_appearance"
             sequence="50"/>
+
+  <record id="action_coop_settings_notifications" model="ir.actions.server">
+    <field name="name">Уведомления</field>
+    <field name="path">my-notifications</field>
+    <field name="model_id" ref="base.model_res_partner"/>
+    <field name="state">code</field>
+    <field name="code">action = model.action_coop_open_notifications()</field>
+  </record>
+
+  <menuitem id="menu_coop_settings_notifications" name="Уведомления"
+            parent="menu_coop_settings_root" action="action_coop_settings_notifications"
+            sequence="25"/>
 
   <menuitem id="menu_coop_settings_region" name="Язык и регион"
             parent="menu_coop_settings_root" action="action_coop_settings_region"
