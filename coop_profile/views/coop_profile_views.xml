@@ -149,35 +149,35 @@
 
               <div class="o_coop_infobox">
                 <div class="o_coop_infobox_head">Контакты</div>
+                <!--
+                  Четыре строки вместо восьми. Skype, мессенджеры, соцсети
+                  и приложения убраны: перечень видов связи устаревает
+                  быстрее, чем платформа обновляется, и каждый новый
+                  требовал бы своего поля. Вместо перечня — «добавить
+                  поле» ниже: человек сам называет, чем с ним связаться.
+                  Решение владельца 332.
+
+                  Правка по месту: карандаш у самой строки, галочка
+                  публикует, крестик отменяет. Право правки — то же
+                  условие, что и раньше, только теперь оно решает, будет
+                  ли карандаш, а не будет ли поле рамкой.
+                -->
                 <div class="o_coop_infobox_body">
                   <div><span class="o_coop_key">Город</span>
-                    <field name="city" readonly="not coop_is_self"
+                    <field name="city" widget="coop_inline"
+                           readonly="not coop_is_self"
                            placeholder="не указан"/></div>
                   <div><span class="o_coop_key">Почта</span>
-                    <field name="email" readonly="not coop_is_self"
+                    <field name="email" widget="coop_inline"
+                           readonly="not coop_is_self"
                            placeholder="не указана"/></div>
                   <div><span class="o_coop_key">Телефон</span>
-                    <field name="phone" readonly="not coop_is_self"
+                    <field name="phone" widget="coop_inline"
+                           readonly="not coop_is_self"
                            placeholder="не указан"/></div>
                   <div><span class="o_coop_key">Сайт</span>
-                    <field name="website" widget="url"
+                    <field name="website" widget="coop_inline"
                            readonly="not coop_is_self" placeholder="нет"/></div>
-                  <div invisible="not coop_skype and not coop_is_self">
-                    <span class="o_coop_key">Skype</span>
-                    <field name="coop_skype" readonly="not coop_is_self"
-                           placeholder="нет"/></div>
-                  <div invisible="not coop_messengers and not coop_is_self">
-                    <span class="o_coop_key">Мессенджеры</span>
-                    <field name="coop_messengers" readonly="not coop_is_self"
-                           placeholder="Telegram, WhatsApp"/></div>
-                  <div invisible="not coop_socials and not coop_is_self">
-                    <span class="o_coop_key">Соцсети</span>
-                    <field name="coop_socials" readonly="not coop_is_self"
-                           placeholder="нет"/></div>
-                  <div invisible="not coop_apps and not coop_is_self">
-                    <span class="o_coop_key">Приложения</span>
-                    <field name="coop_apps" readonly="not coop_is_self"
-                           placeholder="GitHub, Habr"/></div>
                 </div>
               </div>
 
