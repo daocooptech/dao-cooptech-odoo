@@ -457,3 +457,51 @@
     text-decoration: underline;
   }
 }
+
+// ── Оформление: выбор темы и вида каталогов ──────────────────────────
+//
+// Переключатели стоят строками, а не в ряд: в макете у каждого варианта
+// есть пояснение, и в ряд они не читаются.
+.o_coop_appearance {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.o_coop_appearance_head {
+  margin-bottom: 6px;
+  font-weight: 600;
+  font-size: 12.5px;
+  color: var(--coop-ink, #14171a);
+}
+
+.o_coop_appearance_choices {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.o_coop_appearance_choice {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-weight: 400;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--coop-wash, rgba(15, 107, 99, .06));
+  }
+
+  input {
+    margin: 0;
+    accent-color: var(--coop-teal-dark, #0f6b63);
+  }
+}
+
+.o_coop_appearance_note {
+  color: var(--coop-slate-light, #8f8f88);
+  font-size: 12px;
+}

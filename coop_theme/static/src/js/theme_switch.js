@@ -41,6 +41,31 @@ export function applyCoopTheme(dark) {
 }
 
 /**
+ * Выбор темы: "system", "light" или "dark".
+ *
+ * Хранится в браузере, а не в учётной записи, и в этом суть: на рабочем
+ * столе человек сидит в светлой, на ночном телефоне — в тёмной, и общая
+ * настройка на обоих устройствах была бы неверной ровно в половине
+ * случаев. Так же и в макете: «Применяется сразу, сохранять не нужно».
+ */
+export function readCoopThemeChoice() {
+    return readChoice() || "system";
+}
+
+export function setCoopThemeChoice(choice) {
+    try {
+        if (choice === "system") {
+            browser.localStorage.removeItem(STORAGE_KEY);
+        } else {
+            browser.localStorage.setItem(STORAGE_KEY, choice);
+        }
+    } catch {
+        // Не сохранилось — тема всё равно переключится, просто забудется.
+    }
+    applyCoopTheme(choice === "system" ? preferredDark() : choice === "dark");
+}
+
+/**
  * Ставится на этапе загрузки пакета, до отрисовки клиента: иначе
  * страница успевает мигнуть светлым, а потом перекраситься.
  */

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!--
+    Выбор темы и вида каталогов. Кнопки-переключатели, а не поля: выбор
+    применяется в тот же миг, и кнопка «Сохранить» рядом с ним обещала бы
+    несделанное.
+  -->
+  <t t-name="coop_theme.Appearance">
+    <div class="o_coop_appearance">
+
+      <div class="o_coop_appearance_group">
+        <div class="o_coop_appearance_head">Тема</div>
+        <div class="o_coop_appearance_choices">
+          <label t-foreach="themes" t-as="item" t-key="item[0]"
+                 class="o_coop_appearance_choice"
+                 t-att-class="{ 'o_coop_chosen': ui.theme === item[0] }">
+            <input type="radio" name="coop-theme-choice"
+                   t-att-value="item[0]"
+                   t-att-checked="ui.theme === item[0]"
+                   t-on-change="() => this.pickTheme(item[0])"/>
+            <span class="o_coop_appearance_label" t-esc="item[1]"/>
+            <span class="o_coop_appearance_note" t-if="item[2]" t-esc="item[2]"/>
+          </label>
+        </div>
+      </div>
+
+      <div class="o_coop_appearance_group">
+        <div class="o_coop_appearance_head">Вид каталогов по умолчанию</div>
+        <div class="o_coop_appearance_choices">
+          <label t-foreach="layouts" t-as="item" t-key="item[0]"
+                 class="o_coop_appearance_choice"
+                 t-att-class="{ 'o_coop_chosen': ui.layout === item[0] }">
+            <input type="radio" name="coop-layout-choice"
+                   t-att-value="item[0]"
+                   t-att-checked="ui.layout === item[0]"
+                   t-on-change="() => this.pickLayout(item[0])"/>
+            <span class="o_coop_appearance_label" t-esc="item[1]"/>
+            <span class="o_coop_appearance_note" t-if="item[2]" t-esc="item[2]"/>
+          </label>
+        </div>
+      </div>
+
+      <div class="text-muted">
+        Тема и вид каталогов хранятся в этом браузере: на другом
+        устройстве они свои. Применяются сразу, сохранять не нужно.
+      </div>
+
+    </div>
+  </t>
+
+</templates>

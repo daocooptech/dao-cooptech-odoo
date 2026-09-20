@@ -61,6 +61,8 @@
             'coop_theme/static/src/js/inline_field.js',
             'coop_theme/static/src/xml/inline_field.xml',
             'coop_theme/static/src/js/contact_lines.js',
+            'coop_theme/static/src/js/appearance_widget.js',
+            'coop_theme/static/src/xml/appearance_widget.xml',
             'coop_theme/static/src/xml/contact_lines.xml',
             'coop_theme/static/src/js/breadcrumb.js',
             'coop_theme/static/src/xml/breadcrumb.xml',

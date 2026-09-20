@@ -353,6 +353,57 @@
     </field>
   </record>
 
+  <!--
+    Оформление. Тема и вид каталогов живут в браузере, поэтому здесь не
+    поля записи, а виджет: он пишет туда же, куда тумблер в шапке и
+    переключатель вида в каталоге, и применяет выбранное сразу.
+
+    «Открывать при входе» — наоборот, настройка учётной записи: это
+    свойство человека, а не устройства. Берём штатное поле движка, а не
+    заводим своё: оно уже решает, что показать после входа.
+  -->
+  <record id="view_coop_settings_appearance_form" model="ir.ui.view">
+    <field name="name">coop.settings.appearance.form</field>
+    <field name="model">res.users</field>
+    <field name="priority">103</field>
+    <field name="arch" type="xml">
+      <form string="Оформление" create="false" duplicate="false"
+            class="o_coop_profile o_coop_settings">
+        <sheet>
+          <div class="oe_title">
+            <h1>Оформление</h1>
+          </div>
+
+          <div class="o_coop_band">
+            <div class="o_coop_band_head">
+              <span>Тема и каталоги</span>
+            </div>
+            <div class="o_coop_band_body">
+              <widget name="coop_appearance"/>
+            </div>
+          </div>
+
+          <div class="o_coop_band">
+            <div class="o_coop_band_head">
+              <span>Начало работы</span>
+            </div>
+            <div class="o_coop_band_body">
+              <group>
+                <field name="action_id" string="Открывать при входе"
+                       options="{'no_create': True, 'no_open': True}"
+                       placeholder="Моя страница"/>
+              </group>
+              <div class="text-muted">
+                Пусто — платформа открывает то, чем вы пользовались в
+                прошлый раз.
+              </div>
+            </div>
+          </div>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
   <record id="action_coop_settings_privacy" model="ir.actions.server">
     <field name="name">Приватность</field>
     <field name="path">my-privacy</field>
@@ -393,6 +444,18 @@
   <menuitem id="menu_coop_settings_security" name="Безопасность"
             parent="menu_coop_settings_root" action="action_coop_settings_security"
             sequence="40"/>
+
+  <record id="action_coop_settings_appearance" model="ir.actions.server">
+    <field name="name">Оформление</field>
+    <field name="path">my-appearance</field>
+    <field name="model_id" ref="base.model_res_partner"/>
+    <field name="state">code</field>
+    <field name="code">action = env['res.users'].action_coop_open_user_settings('coop_settings.view_coop_settings_appearance_form', 'Оформление')</field>
+  </record>
+
+  <menuitem id="menu_coop_settings_appearance" name="Оформление"
+            parent="menu_coop_settings_root" action="action_coop_settings_appearance"
+            sequence="50"/>
 
   <menuitem id="menu_coop_settings_region" name="Язык и регион"
             parent="menu_coop_settings_root" action="action_coop_settings_region"
