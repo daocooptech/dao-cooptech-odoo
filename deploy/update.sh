@@ -149,9 +149,11 @@ changed=$(run git diff --name-only "$before" "$after" \
 # упавшим, и отрицание превращает «код изменился» в «изменений нет».
 # Молча: в журнале осталась строка про static, и загрузчик данных не
 # выполнялся вовсе.
-не_static=$(run git diff --name-only "$before" "$after" \
+# Имя переменной латиницей: bash не принимает кириллицу в имени и
+# выполняет такую строку как команду — «не_static=…: нет такого файла».
+non_static=$(run git diff --name-only "$before" "$after" \
             | grep -v '/static/' | head -1 || true)
-if [ -n "$changed" ] && [ -z "$не_static" ]; then
+if [ -n "$changed" ] && [ -z "$non_static" ]; then
     say "Изменения только в static — обновление модулей не нужно"
     changed=""
 fi
