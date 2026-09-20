@@ -252,8 +252,12 @@ def ensure_marks(env):
     занято = set()
     нужны = []
     for org in организации:
-        имя = отпечатки.get(стоят.get(org.id))
-        if имя and имя not in занято:
+        отпечаток, откуда = стоят.get(org.id, (None, ''))
+        # Метка источника надёжнее отпечатка: знак мог быть пережат при
+        # записи. Без разбора пары сверка не находила ничего — и раздача
+        # переставляла знаки всем двумстам организациям на каждом прогоне.
+        имя = os.path.basename(откуда) if откуда else отпечатки.get(отпечаток)
+        if имя and имя in файлы and имя not in занято:
             занято.add(имя)
         else:
             нужны.append(org)
@@ -263,8 +267,15 @@ def ensure_marks(env):
     for счёт, (org, имя) in enumerate(zip(нужны, свободные)):
         if счёт and not счёт % 50:
             env.invalidate_all()
-        with open(os.path.join(emblems.MARK_DIR, имя), 'rb') as fh:
+        путь = os.path.join(emblems.MARK_DIR, имя)
+        with open(путь, 'rb') as fh:
             org.image_1920 = base64.b64encode(fh.read())
+        org.flush_recordset()
+        вложение = env['ir.attachment'].sudo().search([
+            ('res_model', '=', 'res.partner'), ('res_field', '=', 'image_1920'),
+            ('res_id', '=', org.id)], limit=1)
+        if вложение:
+            вложение.description = путь
         выдано += 1
 
     _logger.info('Знаки организаций: выдано %s, без знака осталось %s',
