@@ -188,6 +188,13 @@
           <field name="coop_member_label" invisible="1"/>
           <field name="coop_project_count" invisible="1"/>
           <field name="coop_symbol_mark" invisible="1"/>
+          <!--
+            Право править карточку решает, будет ли у строки карандаш.
+            До 20 сентября 2026 карандаши видели все, а запись
+            правило пускало только своих: человек правил чужую
+            организацию и получал отказ только при сохранении.
+          -->
+          <field name="coop_can_edit_card" invisible="1"/>
 
           <div class="o_coop_profile_layout">
 
@@ -234,20 +241,26 @@
                 <div class="o_coop_infobox_head">Контакты</div>
                 <div class="o_coop_infobox_body">
                   <div><span class="o_coop_key">Город</span>
-                    <field name="city" widget="coop_inline" placeholder="не указан"/></div>
+                    <field name="city" widget="coop_inline" readonly="not coop_can_edit_card" placeholder="не указан"/></div>
                   <div><span class="o_coop_key">Адрес</span>
-                    <field name="street" widget="coop_inline" placeholder="улица, дом"/></div>
+                    <field name="street" widget="coop_inline" readonly="not coop_can_edit_card" placeholder="улица, дом"/></div>
                   <div><span class="o_coop_key">Индекс</span>
-                    <field name="zip" widget="coop_inline" placeholder="нет"/></div>
+                    <field name="zip" widget="coop_inline" readonly="not coop_can_edit_card" placeholder="нет"/></div>
                   <div><span class="o_coop_key">Страна</span>
-                    <field name="country_id" options="{'no_create': True}"
+                    <field name="country_id" widget="coop_inline" readonly="not coop_can_edit_card"
                            placeholder="не указана"/></div>
                   <div><span class="o_coop_key">Телефон</span>
-                    <field name="phone" widget="coop_inline" placeholder="не указан"/></div>
+                    <field name="phone" widget="coop_inline" readonly="not coop_can_edit_card" placeholder="не указан"/></div>
                   <div><span class="o_coop_key">Почта</span>
-                    <field name="email" widget="coop_inline" placeholder="не указана"/></div>
+                    <field name="email" widget="coop_inline" readonly="not coop_can_edit_card" placeholder="не указана"/></div>
                   <div><span class="o_coop_key">Сайт</span>
-                    <field name="website" widget="coop_inline" placeholder="нет"/></div>
+                    <field name="website" widget="coop_inline" readonly="not coop_can_edit_card" placeholder="нет"/></div>
+                  <!-- То же, что у человека: способ связи организация
+                       называет сама, а не выбирает из нашего перечня. -->
+                  <div class="o_coop_contact_extra">
+                    <field name="coop_contact_line_ids" nolabel="1"
+                           widget="coop_contact_lines" readonly="not coop_can_edit_card"/>
+                  </div>
                 </div>
               </div>
 
@@ -255,24 +268,24 @@
                 <div class="o_coop_infobox_head">Реквизиты</div>
                 <div class="o_coop_infobox_body">
                   <div><span class="o_coop_key">ИНН</span>
-                    <field name="coop_inn" widget="coop_inline" placeholder="не указан"/></div>
+                    <field name="coop_inn" widget="coop_inline" readonly="not coop_can_edit_card" placeholder="не указан"/></div>
                   <div><span class="o_coop_key">КПП</span>
-                    <field name="coop_kpp" widget="coop_inline" placeholder="нет"/></div>
+                    <field name="coop_kpp" widget="coop_inline" readonly="not coop_can_edit_card" placeholder="нет"/></div>
                   <div><span class="o_coop_key">ОГРН</span>
-                    <field name="coop_ogrn" widget="coop_inline" placeholder="не указан"/></div>
+                    <field name="coop_ogrn" widget="coop_inline" readonly="not coop_can_edit_card" placeholder="не указан"/></div>
                   <div><span class="o_coop_key">Зарегистрирована</span>
-                    <field name="coop_registered_on" widget="coop_inline" placeholder="не указано"/></div>
+                    <field name="coop_registered_on" widget="coop_inline" readonly="not coop_can_edit_card" placeholder="не указано"/></div>
                   <div><span class="o_coop_key">Устав</span>
-                    <field name="coop_charter_url" widget="url"
+                    <field name="coop_charter_url" widget="coop_inline" readonly="not coop_can_edit_card"
                            placeholder="нет"/></div>
                   <!-- Вид деятельности стоит среди реквизитов, а не в
                        блоке «На платформе»: это выписка, а не то, что
                        организация о себе рассказала. -->
                   <div><span class="o_coop_key">Вид деятельности</span>
-                    <field name="coop_okved_id" options="{'no_create': True}"
+                    <field name="coop_okved_id" widget="coop_inline" readonly="not coop_can_edit_card"
                            placeholder="не указан"/></div>
                   <div><span class="o_coop_key">Код ОКВЭД</span>
-                    <field name="coop_okved_code" placeholder="не указан"/></div>
+                    <field name="coop_okved_code" widget="coop_inline" readonly="not coop_can_edit_card" placeholder="не указан"/></div>
                 </div>
               </div>
 
@@ -280,13 +293,12 @@
                 <div class="o_coop_infobox_head">На платформе</div>
                 <div class="o_coop_infobox_body">
                   <div><span class="o_coop_key">Специализация</span>
-                    <field name="coop_specialization_id"
-                           options="{'no_create': True}"
+                    <field name="coop_specialization_id" widget="coop_inline" readonly="not coop_can_edit_card"
                            placeholder="не указана"/></div>
                   <div><span class="o_coop_key">Сфера</span>
                     <field name="coop_specialization_category_id" readonly="1"/></div>
                   <div><span class="o_coop_key">Участник</span>
-                    <field name="coop_is_participant"/></div>
+                    <field name="coop_is_participant" readonly="not coop_can_edit_card"/></div>
                 </div>
               </div>
             </div>
@@ -294,13 +306,14 @@
             <!-- ── Правая колонка ────────────────────────────────── -->
             <div class="o_coop_profile_main">
               <div class="o_coop_name_row">
-                <h1><field name="name" placeholder="Название организации"/></h1>
+                <h1><field name="name" widget="coop_inline" readonly="not coop_can_edit_card"
+                           placeholder="Название организации"/></h1>
                 <span class="o_coop_verified" invisible="not coop_is_cooperative">
                   Кооперативная организация
                 </span>
               </div>
               <div class="o_coop_role">
-                <field name="coop_legal_form_id" options="{'no_create': True}"
+                <field name="coop_legal_form_id" widget="coop_inline" readonly="not coop_can_edit_card"
                        placeholder="Правовая форма"/>
               </div>
 
@@ -315,8 +328,8 @@
                 <field name="coop_card_label" nolabel="1" readonly="1"/>
               </div>
 
-              <div class="o_coop_about" invisible="not coop_about">
-                <field name="coop_about" nolabel="1"
+              <div class="o_coop_about">
+                <field name="coop_about" nolabel="1" widget="coop_about" readonly="not coop_can_edit_card"
                        placeholder="Чем занимается организация — до 280 знаков"/>
               </div>
 

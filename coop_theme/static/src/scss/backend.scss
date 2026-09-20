@@ -289,6 +289,45 @@
   gap: 4px;
   min-width: 0;
   max-width: 100%;
+  position: relative;
+}
+
+// Подсказки справочника висят над страницей, а не раздвигают её:
+// иначе каждая буква в поиске пересобирала бы весь столбец.
+.o_coop_inline_hints {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 10;
+  min-width: 100%;
+  max-width: 260px;
+  margin: 2px 0 0;
+  padding: 2px 0;
+  list-style: none;
+  border: 1px solid var(--coop-line-strong, var(--coop-line, #e6e6e1));
+  border-radius: 6px;
+  background: var(--coop-paper, #fff);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .12);
+
+  button {
+    display: block;
+    width: 100%;
+    padding: 3px 8px;
+    border: 0;
+    background: none;
+    color: var(--coop-ink, #14171a);
+    font: inherit;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      background: var(--coop-wash, rgba(15, 107, 99, .08));
+    }
+  }
 }
 
 .o_coop_inline_value,

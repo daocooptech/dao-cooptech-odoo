@@ -44,6 +44,10 @@ class ResUsers(models.Model):
         'res.partner', string='Чьими счетами можно распоряжаться',
         compute='_compute_coop_partner_ids',
         help='Свой профиль и организации с полномочием на счета.')
+    coop_site_partner_ids = fields.Many2many(
+        'res.partner', string='Чью страницу можно править',
+        compute='_compute_coop_partner_ids',
+        help='Свой профиль и организации с полномочием на страницу.')
 
     # Полномочия, при которых человек вообще действует от имени
     # организации: он что-то создаёт или меняет от её лица. «Переписка» в
@@ -73,6 +77,7 @@ class ResUsers(models.Model):
             acting = self.env['res.partner']
             publishers = self.env['res.partner']
             treasury = self.env['res.partner']
+            site = self.env['res.partner']
             for membership in memberships:
                 codes = set(membership.power_ids.mapped('code'))
                 if codes & set(self.ACTING_POWERS):
@@ -81,9 +86,12 @@ class ResUsers(models.Model):
                     publishers |= membership.organization_id
                 if 'treasury' in codes:
                     treasury |= membership.organization_id
+                if 'site' in codes:
+                    site |= membership.organization_id
             user.coop_actor_partner_ids = partner | acting
             user.coop_publisher_partner_ids = partner | publishers
             user.coop_treasury_partner_ids = partner | treasury
+            user.coop_site_partner_ids = partner | site
 
     def coop_has_power(self, code, partner=None):
         """Есть ли у человека полномочие в организации.

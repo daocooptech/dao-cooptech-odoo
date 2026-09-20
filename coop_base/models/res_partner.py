@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from odoo import _, fields, models
+from odoo import _, api, fields, models
 from odoo.tools import html2plaintext
 
 _logger = logging.getLogger(__name__)
@@ -119,6 +119,21 @@ class ResPartner(models.Model):
     coop_contact_line_ids = fields.One2many(
         'coop.contact.line', 'partner_id', string='Способы связи',
         help='Свободные строки контактов: название и значение.')
+
+    # Право править карточку — отдельным полем, а не проверкой при
+    # сохранении. Владелец 16 сентября 2026 об аукционах: «ты даёшь
+    # возможность править поля, а потом при сохранении выводишь ошибку».
+    # На странице организации было ровно так: карандаши видели все,
+    # а запись правило пускало только своих.
+    coop_can_edit_card = fields.Boolean(
+        string='Могу править карточку', compute='_compute_coop_can_edit_card',
+        help='Своя карточка и карточки организаций с полномочием на страницу.')
+
+    @api.depends_context('uid')
+    def _compute_coop_can_edit_card(self):
+        allowed = self.env.user.coop_site_partner_ids
+        for record in self:
+            record.coop_can_edit_card = record in allowed
 
     def action_coop_show_contacts(self):
         """Показать контакты участника.

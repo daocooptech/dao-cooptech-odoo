@@ -10,7 +10,7 @@
     по кнопкам в шапке, кроме собственной стрелки, поэтому карандаш не
     схлопывает полосу.
   -->
-  <t t-name="coop_profile.AboutField">
+  <t t-name="coop_theme.AboutField">
     <div class="o_coop_band_head">
       <span>О себе</span>
       <button type="button" class="o_coop_about_btn o_coop_about_start"

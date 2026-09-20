@@ -27,7 +27,7 @@ import { Component, useEffect, useRef, useState } from "@odoo/owl";
  * связывать их через DOM.
  */
 export class CoopAboutField extends Component {
-    static template = "coop_profile.AboutField";
+    static template = "coop_theme.AboutField";
     // Наследовать штатное поле не выходит: оно заводит свою работу с
     // полем ввода — ссылку на него, слежение за значением, разбор на
     // лету, — а ввода в чтении нет вовсе. Ссылка оказывалась пустой, и

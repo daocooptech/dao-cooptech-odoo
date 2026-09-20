@@ -2,6 +2,7 @@
 
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
+import { useService } from "@web/core/utils/hooks";
 import { Component, useEffect, useRef, useState } from "@odoo/owl";
 
 /**
@@ -27,7 +28,12 @@ export class CoopInlineField extends Component {
     };
 
     setup() {
-        this.ui = useState({ editing: false, draft: "", busy: false });
+        this.orm = useService("orm");
+        // `options` — подсказки для связи: пусто, пока не начали набирать.
+        // `chosen` — что выбрали из подсказок, до галочки ещё не записано.
+        this.ui = useState({
+            editing: false, draft: "", busy: false, options: [], chosen: null,
+        });
         this.input = useRef("input");
         useEffect(
             (el) => {
@@ -57,7 +63,14 @@ export class CoopInlineField extends Component {
             return "";
         }
         if (this.field.type === "date") {
-            return this.props.record.data[this.props.name].toFormat("dd.MM.yyyy");
+            return value.toFormat("dd.MM.yyyy");
+        }
+        if (this.field.type === "many2one") {
+            return value.display_name || "";
+        }
+        if (this.field.type === "selection") {
+            const option = (this.field.selection || []).find(([key]) => key === value);
+            return option ? option[1] : String(value);
         }
         return String(value);
     }
@@ -74,6 +87,20 @@ export class CoopInlineField extends Component {
         return "text";
     }
 
+    /** Выбор из списка — свой вид правки: не набирают, а выбирают. */
+    get isSelection() {
+        return this.field.type === "selection";
+    }
+
+    /** Связь — набирают и выбирают из подсказок. */
+    get isRelation() {
+        return this.field.type === "many2one";
+    }
+
+    get selectionOptions() {
+        return this.field.selection || [];
+    }
+
     get canEdit() {
         return !this.props.readonly;
     }
@@ -84,10 +111,45 @@ export class CoopInlineField extends Component {
 
     start() {
         const value = this.value;
-        this.ui.draft = this.field.type === "date" && value
-            ? value.toFormat("yyyy-MM-dd")
-            : (value || "");
+        this.ui.options = [];
+        this.ui.chosen = null;
+        if (this.field.type === "date" && value) {
+            this.ui.draft = value.toFormat("yyyy-MM-dd");
+        } else if (this.isRelation) {
+            // В строке — то, что уже выбрано: правка начинается с
+            // прежнего ответа, а не с чистого листа.
+            this.ui.draft = value ? value.display_name || "" : "";
+            this.ui.chosen = value || null;
+        } else {
+            this.ui.draft = value || "";
+        }
         this.ui.editing = true;
+    }
+
+    /**
+     * Подсказки для связи. Справочник может быть на тысячи строк —
+     * выпадающий список со всеми не годится: его не пролистать. Поэтому
+     * спрашиваем у сервера по набранному, как это делает сам движок.
+     *
+     * Отбор поля здесь не передаётся (`domain` у `name_search`): на
+     * карточке все связи — простые справочники без условий. Появится
+     * условие — передавать придётся, иначе подскажем то, чего выбрать
+     * нельзя.
+     */
+    async suggest(term) {
+        const pairs = await this.orm.call(
+            this.field.relation, "name_search", [], {
+                name: term || "",
+                limit: 8,
+            });
+        this.ui.options = pairs.map(([id, display_name]) => ({ id, display_name }));
+    }
+
+    pick(option) {
+        this.ui.chosen = option;
+        this.ui.draft = option ? option.display_name : "";
+        this.ui.options = [];
+        this.accept();
     }
 
     async accept() {
@@ -96,7 +158,17 @@ export class CoopInlineField extends Component {
         }
         this.ui.busy = true;
         try {
-            await this.props.record.update({ [this.props.name]: this.parse(this.ui.draft) });
+            const value = this.isRelation
+                ? (this.ui.draft ? this.ui.chosen : false)
+                : this.parse(this.ui.draft);
+            // Связь без выбора из подсказок — не значение: набранное
+            // руками название может не совпасть ни с одной записью, и
+            // молча стереть прежнее было бы хуже, чем ничего не делать.
+            if (this.isRelation && this.ui.draft && !this.ui.chosen) {
+                this.ui.busy = false;
+                return;
+            }
+            await this.props.record.update({ [this.props.name]: value });
             const saved = await this.props.record.save();
             if (saved !== false) {
                 this.ui.editing = false;
@@ -125,6 +197,17 @@ export class CoopInlineField extends Component {
 
     onInput(event) {
         this.ui.draft = event.target.value;
+        if (this.isRelation) {
+            // Набрали своё — прежний выбор больше не в счёт.
+            this.ui.chosen = null;
+            this.suggest(this.ui.draft);
+        }
+    }
+
+    /** Выбор из списка записывается сразу: выбрали — значит ответили. */
+    async onSelect(event) {
+        this.ui.draft = event.target.value;
+        await this.accept();
     }
 
     onKeydown(event) {
@@ -141,7 +224,7 @@ export class CoopInlineField extends Component {
 export const coopInlineField = {
     component: CoopInlineField,
     displayName: "Правка по месту",
-    supportedTypes: ["char", "date", "integer", "float"],
+    supportedTypes: ["char", "date", "integer", "float", "selection", "many2one"],
     extractProps: ({ attrs }) => ({ placeholder: attrs.placeholder }),
 };
 

@@ -9,13 +9,37 @@
   <t t-name="coop_theme.InlineField">
     <span class="o_coop_inline" t-att-class="{ 'o_coop_inline_editing': ui.editing }">
       <t t-if="ui.editing">
-        <input class="o_input o_coop_inline_input" t-ref="input"
+        <!--
+          Выбор из списка — не набор: варианты известны заранее,
+          и выбранное записывается сразу: выбрали — значит ответили.
+        -->
+        <select t-if="isSelection" class="o_input o_coop_inline_input"
+                t-ref="input"
+                t-att-disabled="ui.busy"
+                t-on-change="onSelect">
+          <option value=""/>
+          <option t-foreach="selectionOptions" t-as="option" t-key="option[0]"
+                  t-att-value="option[0]"
+                  t-att-selected="option[0] === value"
+                  t-esc="option[1]"/>
+        </select>
+        <input t-else="" class="o_input o_coop_inline_input" t-ref="input"
                t-att-type="inputType"
                t-att-value="ui.draft"
                t-att-maxlength="maxlength"
                t-att-placeholder="props.placeholder"
                t-on-input="onInput"
                t-on-keydown="onKeydown"/>
+        <!--
+          Подсказки для связи. Справочник бывает на тысячи
+          строк — выпадающий список со всеми не пролистать.
+        -->
+        <ul t-if="ui.options.length" class="o_coop_inline_hints">
+          <li t-foreach="ui.options" t-as="option" t-key="option.id">
+            <button type="button" t-on-click="() => this.pick(option)"
+                    t-esc="option.display_name"/>
+          </li>
+        </ul>
         <button type="button" class="o_coop_inline_btn o_coop_inline_ok"
                 t-att-disabled="ui.busy"
                 title="Опубликовать" aria-label="Опубликовать"
