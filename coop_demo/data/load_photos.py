@@ -32,6 +32,7 @@ import base64
 import hashlib
 import logging
 import os
+import zlib
 
 from . import emblems, load_resources, photos, professions
 
@@ -115,12 +116,23 @@ def _годные_для(имя, специализация):
 
 
 def _подобрать(имя, специализация):
-    """Снимок записи: сначала род занятий, потом название."""
+    """Путь и содержимое снимка: сначала род занятий, потом название."""
     if специализация:
-        снимок = professions.photo_for(имя, специализация)
-        if снимок:
-            return снимок
-    return photos.photo_for(имя)
+        годные = professions.файлы(специализация)
+        if годные:
+            номер = zlib.crc32((имя or '').encode('utf-8')) % len(годные)
+            путь = os.path.join(IMG_DIR, годные[номер])
+            with open(путь, 'rb') as fh:
+                return путь, base64.b64encode(fh.read())
+    правило = load_resources._photo_by_name(имя or '')
+    if правило:
+        варианты = photos._variants(правило)
+        if варианты:
+            номер = zlib.crc32((имя or '').encode('utf-8')) % len(варианты)
+            путь = os.path.join(photos.PHOTO_DIR, варианты[номер])
+            with open(путь, 'rb') as fh:
+                return путь, base64.b64encode(fh.read())
+    return None, None
 
 
 def ensure_photos(env):
@@ -160,9 +172,20 @@ def ensure_photos(env):
                     if если_наш and если_наш in годные:
                         continue
 
-                снимок = _подобрать(запись.name, специализация)
+                путь, снимок = _подобрать(запись.name, специализация)
                 if снимок:
                     запись.write({поле: снимок})
+                    # Движок пережимает снимок при записи — отпечаток в
+                    # базе не совпадает с отпечатком файла, и следующий
+                    # прогон считал бы его чужим и переклеивал заново.
+                    # Запоминаем отпечаток уже уложенного: набор наших
+                    # снимков дополняется по ходу дела.
+                    запись.flush_recordset()
+                    уложен = env['ir.attachment'].sudo().search([
+                        ('res_model', '=', модель), ('res_field', '=', поле),
+                        ('res_id', '=', запись.id)], limit=1).checksum
+                    if уложен:
+                        наши[уложен] = путь
                     if текущий:
                         переклеено += 1
                     else:
