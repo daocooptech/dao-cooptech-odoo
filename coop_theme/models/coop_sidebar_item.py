@@ -283,6 +283,14 @@ class CoopSidebarItem(models.Model):
                     continue
                 if values['name'] in REQUIRES_PROJECT and not self._has_project(user):
                     # Участие кончилось — раздел уходит вместе с ним.
+                    #
+                    # Пометку обязательности снимаем и здесь, тем же
+                    # порядком, что двадцатью строками выше: обязательный
+                    # раздел удалить нельзя. Там это уже было починено, а
+                    # здесь осталось — и обновление упало ровно тут, как
+                    # только участие в проектах у части людей кончилось
+                    # (20 сентября 2026, выравнивание полок).
+                    item.sudo().write({'is_required': False})
                     item.sudo().unlink()
                     continue
                 if item.sequence != values['sequence']:
