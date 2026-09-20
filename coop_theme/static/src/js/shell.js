@@ -86,8 +86,25 @@ export class CoopTabs extends Component {
      * каталога людей тут должно быть мои друзья».
      */
     get screenLabel() {
-        const context = this.action?.currentController?.action?.context;
-        return (context && context.coop_screen_label) || null;
+        // Спрашиваем в трёх местах: контекст действия доходит до клиента
+        // (проверено по ответу сервера), но до самой панели добирается
+        // по-разному на разных экранах.
+        const из = (context) => (context && context.coop_screen_label) || null;
+        const метка = из(this.env.searchModel?.globalContext)
+            || из(this.env.searchModel?.context)
+            || из(this.env.config?.context)
+            || из(this.action?.currentController?.action?.context);
+        if (метка) {
+            return метка;
+        }
+        // Запасной признак: у выборки собственное имя, а у самого
+        // раздела оно совпадает с названием действия в базе.
+        const action = this.action?.currentController?.action;
+        if (action?.name && action?.display_name
+                && action.name !== action.display_name) {
+            return action.name;
+        }
+        return null;
     }
 
     refresh() {
