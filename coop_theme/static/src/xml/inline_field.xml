@@ -6,7 +6,7 @@
     только своему (условие в самом поле представления), при правке
     подменяется галочкой и крестиком.
   -->
-  <t t-name="coop_profile.InlineField">
+  <t t-name="coop_theme.InlineField">
     <span class="o_coop_inline" t-att-class="{ 'o_coop_inline_editing': ui.editing }">
       <t t-if="ui.editing">
         <input class="o_input o_coop_inline_input" t-ref="input"

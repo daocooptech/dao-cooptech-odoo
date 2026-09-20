@@ -188,16 +188,23 @@
                     <span class="o_coop_key">Возраст</span>
                     <field name="coop_age" readonly="1"/>
                   </div>
+                  <!--
+                    Дата — тем же приёмом, что и строки: карандаш, а при
+                    правке выбор даты. Виджет один на все виды полей,
+                    разница только в том, чем набирают (решение 332).
+                  -->
                   <div invisible="not coop_is_self">
                     <span class="o_coop_key">Родился</span>
-                    <field name="coop_birthdate" readonly="not coop_is_self"
+                    <field name="coop_birthdate" widget="coop_inline"
+                           readonly="not coop_is_self"
                            placeholder="не указано"/>
                   </div>
                   <div><span class="o_coop_key">Проверка</span>
                     <field name="coop_verification_level" readonly="1"/></div>
                   <div invisible="not coop_languages and not coop_is_self">
                     <span class="o_coop_key">Языки</span>
-                    <field name="coop_languages" readonly="not coop_is_self"
+                    <field name="coop_languages" widget="coop_inline"
+                           readonly="not coop_is_self"
                            placeholder="русский, английский"/>
                   </div>
                   <div invisible="not coop_registered_on">

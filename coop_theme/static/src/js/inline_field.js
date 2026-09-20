@@ -20,7 +20,7 @@ import { Component, useEffect, useRef, useState } from "@odoo/owl";
  * поведение для всех, а разница только в том, чем набирают.
  */
 export class CoopInlineField extends Component {
-    static template = "coop_profile.InlineField";
+    static template = "coop_theme.InlineField";
     static props = {
         ...standardFieldProps,
         placeholder: { type: String, optional: true },

@@ -277,3 +277,80 @@
     font-weight: 500;
   }
 }
+
+// ── Строка, которая правится по месту ────────────────────────────────
+//
+// Карандаш стоит у самой строки, а не у блока: правят одно поле, а не
+// всю карточку. Появляется он только при наведении на строку — иначе
+// столбец значений превращается в столбец карандашей.
+.o_coop_inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.o_coop_inline_value,
+.o_coop_inline_empty {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.o_coop_inline_empty {
+  color: var(--coop-slate-light, #8a8a80);
+}
+
+.o_coop_inline_btn {
+  flex: 0 0 auto;
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  color: var(--coop-slate-light, #8a8a80);
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--coop-teal-dark, #0f6b63);
+  }
+
+  &:disabled {
+    opacity: .5;
+    cursor: default;
+  }
+}
+
+.o_coop_inline_ok {
+  color: var(--coop-teal-dark, #0f6b63);
+}
+
+// Карандаш прячется, пока на строку не навели: он подсказка, а не
+// украшение. На узком экране наведения нет — там он виден всегда.
+.o_coop_inline_start {
+  opacity: 0;
+  transition: opacity .12s;
+}
+
+.o_coop_inline:hover .o_coop_inline_start,
+.o_coop_inline_start:focus-visible {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .o_coop_inline_start {
+    opacity: 1;
+  }
+}
+
+.o_coop_inline_input {
+  width: 100%;
+  min-width: 0;
+  padding: 2px 6px;
+  border: 1px solid var(--coop-line-strong, var(--coop-line, #e6e6e1));
+  border-radius: 6px;
+  background: var(--coop-paper, #fff);
+  color: var(--coop-ink, #14171a);
+  font: inherit;
+}

@@ -55,6 +55,8 @@
             'coop_theme/static/src/js/catalog_shelves.js',
             'coop_theme/static/src/xml/catalog_shelves.xml',
             'coop_theme/static/src/scss/catalog_shelves.scss',
+            'coop_theme/static/src/js/inline_field.js',
+            'coop_theme/static/src/xml/inline_field.xml',
             'coop_theme/static/src/js/breadcrumb.js',
             'coop_theme/static/src/xml/breadcrumb.xml',
             'coop_theme/static/src/js/catalog_view.js',

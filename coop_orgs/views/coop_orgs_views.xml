@@ -234,20 +234,20 @@
                 <div class="o_coop_infobox_head">Контакты</div>
                 <div class="o_coop_infobox_body">
                   <div><span class="o_coop_key">Город</span>
-                    <field name="city" placeholder="не указан"/></div>
+                    <field name="city" widget="coop_inline" placeholder="не указан"/></div>
                   <div><span class="o_coop_key">Адрес</span>
-                    <field name="street" placeholder="улица, дом"/></div>
+                    <field name="street" widget="coop_inline" placeholder="улица, дом"/></div>
                   <div><span class="o_coop_key">Индекс</span>
-                    <field name="zip" placeholder="нет"/></div>
+                    <field name="zip" widget="coop_inline" placeholder="нет"/></div>
                   <div><span class="o_coop_key">Страна</span>
                     <field name="country_id" options="{'no_create': True}"
                            placeholder="не указана"/></div>
                   <div><span class="o_coop_key">Телефон</span>
-                    <field name="phone" widget="phone" placeholder="не указан"/></div>
+                    <field name="phone" widget="coop_inline" placeholder="не указан"/></div>
                   <div><span class="o_coop_key">Почта</span>
-                    <field name="email" widget="email" placeholder="не указана"/></div>
+                    <field name="email" widget="coop_inline" placeholder="не указана"/></div>
                   <div><span class="o_coop_key">Сайт</span>
-                    <field name="website" widget="url" placeholder="нет"/></div>
+                    <field name="website" widget="coop_inline" placeholder="нет"/></div>
                 </div>
               </div>
 
@@ -255,13 +255,13 @@
                 <div class="o_coop_infobox_head">Реквизиты</div>
                 <div class="o_coop_infobox_body">
                   <div><span class="o_coop_key">ИНН</span>
-                    <field name="coop_inn" placeholder="не указан"/></div>
+                    <field name="coop_inn" widget="coop_inline" placeholder="не указан"/></div>
                   <div><span class="o_coop_key">КПП</span>
-                    <field name="coop_kpp" placeholder="нет"/></div>
+                    <field name="coop_kpp" widget="coop_inline" placeholder="нет"/></div>
                   <div><span class="o_coop_key">ОГРН</span>
-                    <field name="coop_ogrn" placeholder="не указан"/></div>
+                    <field name="coop_ogrn" widget="coop_inline" placeholder="не указан"/></div>
                   <div><span class="o_coop_key">Зарегистрирована</span>
-                    <field name="coop_registered_on" placeholder="не указано"/></div>
+                    <field name="coop_registered_on" widget="coop_inline" placeholder="не указано"/></div>
                   <div><span class="o_coop_key">Устав</span>
                     <field name="coop_charter_url" widget="url"
                            placeholder="нет"/></div>
