@@ -225,6 +225,25 @@
           </div>
           <div class="o_coop_band">
             <div class="o_coop_band_head">
+              <span>Кто видит мою страницу</span>
+            </div>
+            <div class="o_coop_band_body">
+              <group>
+                <field name="coop_page_audience" nolabel="1" widget="radio"/>
+              </group>
+              <div class="text-muted">
+                Закрытую страницу посторонний не открывает и не находит в
+                каталоге «Люди», но по-прежнему видит вас там, где вы
+                действуете вместе: в составе организации, в общей сделке,
+                в переписке. Публичной витрины для незарегистрированных у
+                платформы пока нет — первые два ответа сегодня действуют
+                одинаково.
+              </div>
+            </div>
+          </div>
+
+          <div class="o_coop_band">
+            <div class="o_coop_band_head">
               <span>Что показывать в профиле</span>
             </div>
             <div class="o_coop_band_body">

@@ -867,3 +867,21 @@
     border-color: var(--coop-teal, #2ba79a);
   }
 }
+
+// Закрытая страница: короткое объяснение вместо полок. Ширина ограничена
+// — три строки во всю страницу читаются хуже, чем в колонку.
+.o_coop_closed_page {
+  max-width: 520px;
+  padding: 24px 0;
+
+  h2 {
+    margin-bottom: 10px;
+    font-size: 20px;
+  }
+
+  p {
+    margin-bottom: 10px;
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+}

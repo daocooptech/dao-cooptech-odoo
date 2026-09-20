@@ -80,7 +80,26 @@
             участник приходит из полос владений ниже, где рядом стоят и
             опубликованные.
           -->
-          <div class="o_coop_profile_layout">
+          <field name="coop_page_visible" invisible="1"/>
+          <field name="coop_page_audience" invisible="1"/>
+
+          <!--
+            Закрытая страница. Не отказ доступа и не пустой экран:
+            человек имеет право не показывать себя, и об этом надо
+            сказать словами, а не оборванной вёрсткой.
+          -->
+          <div class="o_coop_closed_page" invisible="coop_page_visible">
+            <h2><field name="name" nolabel="1" readonly="1"/></h2>
+            <p>Участник открывает свою страницу только своим связям и
+               сторонам совместных сделок.</p>
+            <p class="text-muted">Напишите ему в сообщениях — это работает
+               всегда. Появится общая сделка или он примет ваше
+               предложение дружбы — страница откроется.</p>
+            <button name="action_coop_message" type="object"
+                    string="Написать" class="btn-primary"/>
+          </div>
+
+          <div class="o_coop_profile_layout" invisible="not coop_page_visible">
 
             <!-- ── Левая колонка ─────────────────────────────────── -->
             <div class="o_coop_profile_side">
@@ -661,7 +680,8 @@
           двести пикселей, где плитки идут столбиком. Сторону задаёт
           `static/src/js/wall.js`.
         -->
-        <chatter reload_on_post="True"/>
+        <!-- Лента закрытой страницы — такая же её часть, как полки. -->
+        <chatter reload_on_post="True" invisible="not coop_page_visible"/>
       </form>
     </field>
   </record>

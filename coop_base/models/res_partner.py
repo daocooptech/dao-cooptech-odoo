@@ -184,6 +184,96 @@ class ResPartner(models.Model):
         'coop.notification.pref', 'partner_id',
         string='Настройки извещений')
 
+    # ── Кто видит мою страницу ───────────────────────────────────────
+    #
+    # Три ответа из макета (`settings.html`). «Все, включая
+    # незарегистрированных» и «только участники» сегодня различаются
+    # только на словах: публичной витрины у платформы ещё нет, и
+    # посторонний без входа не видит ничего. Выбор всё равно хранится:
+    # витрина появится, а переучивать человека потом — хуже.
+    #
+    # Закрытая страница — это поведение страницы, а не правило чтения
+    # записи. Правилом чтения карточка исчезла бы и из чужих сделок, где
+    # человек сторона, и из состава организаций, и из переписки: право
+    # читать контакт на платформе держит слишком многое.
+    coop_page_audience = fields.Selection(
+        [('all', 'Все, включая незарегистрированных'),
+         ('members', 'Только участники платформы'),
+         ('links', 'Только мои связи и стороны совместных сделок')],
+        string='Кто видит мою страницу', default='all', required=True)
+    coop_page_visible = fields.Boolean(
+        string='Страница мне видна', compute='_compute_coop_page_visible',
+        search='_search_coop_page_visible')
+
+    @api.depends_context('uid')
+    def _compute_coop_page_visible(self):
+        я = self.env.user.partner_id
+        закрытые = self.filtered(lambda p: p.coop_page_audience == 'links'
+                                 and p != я)
+        связанные = закрытые._coop_linked_to(я) if закрытые else set()
+        for record in self:
+            record.coop_page_visible = (
+                record.coop_page_audience != 'links'
+                or record == я
+                or record.id in связанные)
+
+    def _coop_linked_to(self, partner):
+        """Кто из `self` связан с человеком: дружба или общая сделка.
+
+        Оба вопроса решаются двумя запросами на весь набор, а не по
+        записи: страница открывается одна, но каталог спрашивает про
+        полторы сотни разом.
+        """
+        if not partner:
+            return set()
+        связанные = set()
+        # Дружба и сделки живут в соседних модулях, которые зависят от
+        # основы, а не наоборот. Спрашиваем их, только если они есть:
+        # узел с одной основой тоже должен подниматься.
+        if 'coop.friendship' not in self.env:
+            return связанные
+        дружбы = self.env['coop.friendship'].sudo().search([
+            ('state', '=', 'accepted'),
+            '|',
+            '&', ('requester_id', '=', partner.id),
+            ('addressee_id', 'in', self.ids),
+            '&', ('addressee_id', '=', partner.id),
+            ('requester_id', 'in', self.ids),
+        ])
+        for связь in дружбы:
+            другой = (связь.addressee_id if связь.requester_id == partner
+                      else связь.requester_id)
+            связанные.add(другой.id)
+        if 'coop.deal' not in self.env:
+            return связанные
+        сделки = self.env['coop.deal'].sudo().search([
+            '|',
+            '&', ('party_a_id', '=', partner.id), ('party_b_id', 'in', self.ids),
+            '&', ('party_b_id', '=', partner.id), ('party_a_id', 'in', self.ids),
+        ])
+        for сделка in сделки:
+            другой = (сделка.party_b_id if сделка.party_a_id == partner
+                      else сделка.party_a_id)
+            связанные.add(другой.id)
+        return связанные
+
+    def _search_coop_page_visible(self, operator, value):
+        """Отбор по видимости — для каталога.
+
+        Вычисляемое поле без хранения само по себе в домен не годится;
+        здесь считается множество закрытых страниц, которые смотрящему
+        не положены, и они исключаются по номеру.
+        """
+        if operator not in ('=', '!=') or not isinstance(value, bool):
+            raise NotImplementedError
+        видно = (operator == '=') == value
+        я = self.env.user.partner_id
+        закрытые = self.sudo().search([('coop_page_audience', '=', 'links')])
+        закрытые = закрытые.filtered(lambda p: p != я)
+        связанные = закрытые._coop_linked_to(я)
+        спрятанные = [p.id for p in закрытые if p.id not in связанные]
+        return [('id', 'not in', спрятанные)] if видно else [('id', 'in', спрятанные)]
+
     coop_profile_hidden = fields.Boolean(
         string='Профиль скрыт', default=False, copy=False,
         help='Скрытого участника не показывает каталог «Люди». Его '
