@@ -51,10 +51,40 @@ LANGUAGES = [
     'русский, якутский', 'русский, башкирский', 'русский, армянский',
 ]
 
-MESSENGERS = ['Telegram', 'Telegram, WhatsApp', 'WhatsApp, Viber',
-              'Telegram, Viber', 'Telegram, WhatsApp, Viber']
+# Свободные строки контактов: название человек выбирает сам,
+# поэтому и в демонстрации они разные, а не одного образца.
+CONTACT_WAYS = [
+    ('Telegram', '@%s'),
+    ('WhatsApp', '+7 9%s'),
+    ('Viber', '+7 9%s'),
+    ('GitHub', 'github.com/%s'),
+    ('Хабр', 'habr.com/ru/users/%s'),
+    ('Дзен', 'dzen.ru/%s'),
+    ('VK', 'vk.com/%s'),
+    ('Max', '@%s'),
+]
 
-APPS = ['GitHub', 'GitHub, Habr', 'Habr', 'Дзен', 'GitHub, Хабр, Дзен']
+
+def contact_lines(env, partner, rnd, count=None):
+    """Завести человеку несколько свободных строк связи."""
+    Line = env['coop.contact.line']
+    if Line.search_count([('partner_id', '=', partner.id)]):
+        return 0
+    made = 0
+    handle = 'coop%s' % partner.id
+    number = '%02d %s-%02d-%02d' % (rnd.randint(10, 99),
+                                    rnd.randint(100, 999),
+                                    rnd.randint(10, 99), rnd.randint(10, 99))
+    for index, (name, shape) in enumerate(
+            rnd.sample(CONTACT_WAYS, k=count or rnd.randint(1, 3))):
+        Line.create({
+            'partner_id': partner.id,
+            'sequence': 10 + index,
+            'name': name,
+            'value': shape % (number if shape.startswith('+') else handle),
+        })
+        made += 1
+    return made
 
 
 def load_biography(env):
@@ -108,14 +138,11 @@ def load_biography(env):
                                  if has_proof else False,
                 })
 
-        values = {'coop_languages': rnd.choice(LANGUAGES)}
-        if rnd.random() < 0.7:
-            values['coop_messengers'] = rnd.choice(MESSENGERS)
-        if rnd.random() < 0.3:
-            values['coop_apps'] = rnd.choice(APPS)
-        if rnd.random() < 0.25:
-            values['coop_skype'] = 'coop-%s' % partner.id
-        partner.write(values)
+        # Мессенджеры, приложения и Skype больше не поля карточки:
+        # человек заводит их сам свободными полями контакта.
+        partner.write({'coop_languages': rnd.choice(LANGUAGES)})
+        if rnd.random() < 0.75:
+            contact_lines(env, partner, rnd)
         touched += 1
 
     _logger.info('Биография: заполнено у %s участников из %s',
@@ -389,14 +416,10 @@ def enrich_showcase(env, login='dashkevich'):
 
     # Способы связи: без них колонка «Контакты» пуста, а в макете она
     # стоит первой, и пустой читается как поломка, а не как выбор.
-    contacts = {}
     if not partner.coop_languages:
-        contacts['coop_languages'] = rnd.choice(LANGUAGES)
-    if not partner.coop_messengers:
-        contacts['coop_messengers'] = rnd.choice(MESSENGERS)
-    if contacts:
-        partner.write(contacts)
+        partner.write({'coop_languages': rnd.choice(LANGUAGES)})
         touched += 1
+    touched += contact_lines(env, partner, rnd, count=2)
 
     _logger.info('Витрина: дополнено записей — %s', touched)
     return touched

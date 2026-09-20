@@ -19,3 +19,4 @@ access_coop_notification_user,Извещения — участник,model_coop
 access_coop_notification_admin,Извещения — администратор узла,model_coop_notification,base.group_system,1,1,1,1
 access_coop_membership_admit,Окно приёма — участник,model_coop_membership_admit,base.group_user,1,1,1,1
 access_coop_favorite_user,Избранное — участник,model_coop_favorite,base.group_user,1,0,0,0
+access_coop_contact_line_user,Строки контактов — участник,model_coop_contact_line,base.group_user,1,1,1,1

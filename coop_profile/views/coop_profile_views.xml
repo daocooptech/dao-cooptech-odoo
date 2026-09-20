@@ -178,6 +178,16 @@
                   <div><span class="o_coop_key">Сайт</span>
                     <field name="website" widget="coop_inline"
                            readonly="not coop_is_self" placeholder="нет"/></div>
+                  <!--
+                    Дальше — то, что человек дописал сам: пара «название —
+                    значение», сколько нужно строк. Подписи у них нет: подпись
+                    и есть то, что набрали в левой колонке.
+                  -->
+                  <div class="o_coop_contact_extra">
+                    <field name="coop_contact_line_ids" nolabel="1"
+                           widget="coop_contact_lines"
+                           readonly="not coop_is_self"/>
+                  </div>
                 </div>
               </div>
 

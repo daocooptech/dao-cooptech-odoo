@@ -111,12 +111,14 @@ class ResPartner(models.Model):
     # или мессенджеров завёл бы работу по его ведению без всякой отдачи.
     coop_languages = fields.Char(
         'Языки', help='Через запятую: русский, украинский, якутский.')
-    coop_skype = fields.Char('Skype')
-    coop_messengers = fields.Char(
-        'Мессенджеры', help='Через запятую: Telegram, WhatsApp, Viber.')
-    coop_socials = fields.Char('Социальные сети')
-    coop_apps = fields.Char(
-        'Приложения', help='Профили в чужих сервисах: GitHub, Habr и другие.')
+    # Skype, мессенджеры, соцсети и приложения убраны 20 сентября 2026
+    # вместе со значениями: перечень видов связи устаревает быстрее, чем
+    # платформа обновляется, и каждый новый требовал бы своего поля.
+    # Вместо перечня — свободные поля контакта (`coop.contact.line`):
+    # человек сам называет, чем с ним связаться. Решение владельца 332.
+    coop_contact_line_ids = fields.One2many(
+        'coop.contact.line', 'partner_id', string='Способы связи',
+        help='Свободные строки контактов: название и значение.')
 
     def action_coop_show_contacts(self):
         """Показать контакты участника.

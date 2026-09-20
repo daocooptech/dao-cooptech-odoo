@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Оформление окна «Показать контакты».
+
+  Основа показывает свободные строки таблицей — она не знает про наши
+  виджеты и не должна. Здесь та же пара «название — значение» получает
+  вид, в котором её читают на карточке: строка за строкой, без шапки
+  таблицы и без обрезанных адресов.
+-->
+<odoo>
+
+  <record id="view_coop_contacts_dialog_theme" model="ir.ui.view">
+    <field name="name">coop.contacts.dialog.theme</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="coop_base.view_coop_contacts_dialog"/>
+    <field name="arch" type="xml">
+      <field name="coop_contact_line_ids" position="replace">
+        <field name="coop_contact_line_ids" readonly="1" nolabel="1"
+               widget="coop_contact_lines"
+               invisible="not coop_contact_line_ids"/>
+      </field>
+    </field>
+  </record>
+
+</odoo>

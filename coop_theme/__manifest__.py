@@ -30,6 +30,7 @@
         'security/coop_sidebar_rules.xml',
         'views/coop_theme_boot.xml',
         'views/coop_sidebar_views.xml',
+        'views/coop_contacts_views.xml',
         'data/coop_sidebar_resync.xml',
     ],
     'assets': {
@@ -57,6 +58,8 @@
             'coop_theme/static/src/scss/catalog_shelves.scss',
             'coop_theme/static/src/js/inline_field.js',
             'coop_theme/static/src/xml/inline_field.xml',
+            'coop_theme/static/src/js/contact_lines.js',
+            'coop_theme/static/src/xml/contact_lines.xml',
             'coop_theme/static/src/js/breadcrumb.js',
             'coop_theme/static/src/xml/breadcrumb.xml',
             'coop_theme/static/src/js/catalog_view.js',

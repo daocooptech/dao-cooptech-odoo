@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Без noupdate — правила доступа должны доезжать до узла обновлением
+  модуля.
+-->
+<odoo>
+  <data>
+
+    <!--
+      Способ связи затем и указывают, чтобы по нему связались: строки
+      видны всем.
+    -->
+    <record id="rule_contact_line_read" model="ir.rule">
+      <field name="name">Строки контактов видны всем</field>
+      <field name="model_id" ref="model_coop_contact_line"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="False"/>
+      <field name="perm_create" eval="False"/>
+      <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!--
+      А правит их только хозяин карточки. Иначе любой участник дописал
+      бы чужому человеку строку «Telegram» со своим адресом, и связь
+      ушла бы не туда.
+    -->
+    <record id="rule_contact_line_own" model="ir.rule">
+      <field name="name">Свои строки контактов правит хозяин</field>
+      <field name="model_id" ref="model_coop_contact_line"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+      <field name="perm_read" eval="False"/>
+      <field name="perm_write" eval="True"/>
+      <field name="perm_create" eval="True"/>
+      <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!--
+      Администратору узла строки нужны целиком: чинить чужую карточку
+      он не станет, а вот убрать из неё мусор или подлог — его работа.
+    -->
+    <record id="rule_contact_line_admin" model="ir.rule">
+      <field name="name">Администратор узла ведёт все строки контактов</field>
+      <field name="model_id" ref="model_coop_contact_line"/>
+      <field name="groups" eval="[(4, ref('coop_base.group_coop_platform'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="True"/>
+      <field name="perm_create" eval="True"/>
+      <field name="perm_unlink" eval="True"/>
+    </record>
+
+  </data>
+</odoo>

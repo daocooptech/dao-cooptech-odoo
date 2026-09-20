@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!--
+    Свободные строки контактов. Читаются так же, как соседние строки
+    блока: слева название, справа значение. Карандаш и крестик — только
+    хозяину, и только он видит «добавить поле».
+  -->
+  <t t-name="coop_theme.ContactLines">
+    <div class="o_coop_contact_lines">
+
+      <div t-foreach="lines" t-as="line" t-key="line.resId"
+           class="o_coop_contact_line">
+        <t t-if="ui.editing === line.resId">
+          <input class="o_input o_coop_inline_input o_coop_contact_name"
+                 t-model="ui.name" placeholder="название"
+                 t-on-keydown="onKeydown"/>
+          <input class="o_input o_coop_inline_input"
+                 t-model="ui.value" placeholder="значение"
+                 t-on-keydown="onKeydown"/>
+          <button type="button" class="o_coop_inline_btn o_coop_inline_ok"
+                  t-att-disabled="ui.busy or !filled"
+                  title="Опубликовать" aria-label="Опубликовать"
+                  t-on-click="() => this.accept()">
+            <i class="fa fa-check" role="img" aria-hidden="true"/>
+          </button>
+          <button type="button" class="o_coop_inline_btn o_coop_inline_cancel"
+                  t-att-disabled="ui.busy"
+                  title="Отменить" aria-label="Отменить"
+                  t-on-click="() => this.cancel()">
+            <i class="fa fa-times" role="img" aria-hidden="true"/>
+          </button>
+        </t>
+        <t t-else="">
+          <span class="o_coop_key" t-esc="line.data.name"/>
+          <span class="o_coop_inline_value" t-esc="line.data.value"/>
+          <t t-if="canEdit">
+            <button type="button" class="o_coop_inline_btn o_coop_inline_start"
+                    title="Изменить" aria-label="Изменить"
+                    t-on-click="() => this.start(line)">
+              <i class="fa fa-pencil" role="img" aria-hidden="true"/>
+            </button>
+            <button type="button" class="o_coop_inline_btn o_coop_inline_drop"
+                    t-att-disabled="ui.busy"
+                    title="Убрать" aria-label="Убрать"
+                    t-on-click="() => this.remove(line)">
+              <i class="fa fa-trash-o" role="img" aria-hidden="true"/>
+            </button>
+          </t>
+        </t>
+      </div>
+
+      <div t-if="ui.editing === 'new'" class="o_coop_contact_line">
+        <input class="o_input o_coop_inline_input o_coop_contact_name"
+               t-model="ui.name" placeholder="название" autofocus="autofocus"
+               t-on-keydown="onKeydown"/>
+        <input class="o_input o_coop_inline_input"
+               t-model="ui.value" placeholder="значение"
+               t-on-keydown="onKeydown"/>
+        <button type="button" class="o_coop_inline_btn o_coop_inline_ok"
+                t-att-disabled="ui.busy or !filled"
+                title="Опубликовать" aria-label="Опубликовать"
+                t-on-click="() => this.accept()">
+          <i class="fa fa-check" role="img" aria-hidden="true"/>
+        </button>
+        <button type="button" class="o_coop_inline_btn o_coop_inline_cancel"
+                t-att-disabled="ui.busy"
+                title="Отменить" aria-label="Отменить"
+                t-on-click="() => this.cancel()">
+          <i class="fa fa-times" role="img" aria-hidden="true"/>
+        </button>
+      </div>
+
+      <button type="button" class="o_coop_contact_add btn btn-link"
+              t-if="canEdit and ui.editing !== 'new'"
+              t-on-click="() => this.startNew()">
+        <i class="fa fa-plus" role="img" aria-hidden="true"/> добавить поле
+      </button>
+
+    </div>
+  </t>
+
+</templates>

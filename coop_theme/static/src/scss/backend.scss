@@ -354,3 +354,64 @@
   color: var(--coop-ink, #14171a);
   font: inherit;
 }
+
+// Свободные строки контактов стоят в той же сетке, что и постоянные:
+// читать их надо одним столбцом, а не двумя разными.
+.o_coop_contact_lines {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.o_coop_contact_line {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  min-width: 0;
+
+  .o_coop_inline_value {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .o_coop_inline_start,
+  .o_coop_inline_drop {
+    opacity: 0;
+    transition: opacity .12s;
+  }
+
+  &:hover .o_coop_inline_start,
+  &:hover .o_coop_inline_drop,
+  .o_coop_inline_start:focus-visible,
+  .o_coop_inline_drop:focus-visible {
+    opacity: 1;
+  }
+}
+
+@media (hover: none) {
+  .o_coop_contact_line .o_coop_inline_start,
+  .o_coop_contact_line .o_coop_inline_drop {
+    opacity: 1;
+  }
+}
+
+// У добавляемой строки название занимает ту же колонку, что и подпись.
+.o_coop_contact_name {
+  flex: 0 0 92px;
+}
+
+.o_coop_contact_add {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--coop-teal-dark, #0f6b63);
+  font-size: 12px;
+  line-height: 1.9;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

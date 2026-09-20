@@ -26,18 +26,26 @@
             <field name="email" readonly="1" invisible="not email"/>
             <field name="website" readonly="1" widget="url"
                    invisible="not website"/>
-            <field name="coop_messengers" readonly="1"
-                   invisible="not coop_messengers"/>
-            <field name="coop_skype" readonly="1" invisible="not coop_skype"/>
-            <field name="coop_socials" readonly="1"
-                   invisible="not coop_socials"/>
+            <!--
+              Без вида строки показываются таблицей — это честно и 
+              работает без оформления. Вид как на карточке добавляет
+              оформление (`coop_theme`): виджет живёт там, и основа не
+              должна о нём знать.
+            -->
+            <field name="coop_contact_line_ids" readonly="1" nolabel="1"
+                   invisible="not coop_contact_line_ids">
+              <list string="Ещё" create="false" delete="false">
+                <field name="name"/>
+                <field name="value"/>
+              </list>
+            </field>
           </group>
           <!--
             Пусто — говорим словами. Окно без единой строки читается как
             поломка, а не как «человек контактов не оставил».
           -->
           <div class="alert alert-info" role="status"
-               invisible="phone or email or website or coop_messengers or coop_skype or coop_socials">
+               invisible="phone or email or website or coop_contact_line_ids">
             Участник не указал способов связи. Напишите ему в сообщениях —
             это работает всегда.
           </div>
