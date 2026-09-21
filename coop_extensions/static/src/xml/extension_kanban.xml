@@ -21,7 +21,8 @@
       `order: 2` в теме.
     -->
     <xpath expr="//t[@t-component='props.Renderer']" position="after">
-      <CoopFilters resModel="props.resModel" baseDomain="coopBaseDomain"/>
+      <CoopFilters t-key="'coop_filters'"
+                   resModel="props.resModel" baseDomain="coopBaseDomain"/>
     </xpath>
 
   </t>

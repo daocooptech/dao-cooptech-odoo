@@ -42,8 +42,25 @@
       как только человек искал или отбирал, витрина по рубрикам мешает,
       он уже знает, что ищет.
     -->
+    <!--
+      Ключи у всех соседей списка обязательны, и это не украшение.
+
+      Owl раздаёт соседям по блоку позиционные ключи. Стоит любому
+      `t-if` в этом ряду переключиться — а их здесь четыре: полки,
+      сам список, карта и пагинатор, — как ряд пересобирается целиком,
+      и соседи создаются заново. Дальше начинается круг: полки при
+      создании поднимают признак «грузятся», от него прячется список,
+      от этого ряд пересобирается, полки создаются заново — и так
+      дважды в секунду. Со стороны это выглядит как «ничего не
+      грузится»: на экране пусто, а сервер получает по три сотни
+      запросов в минуту. Измерено 21 сентября 2026 на боевой: раздел
+      «Навыки», 343 запроса в минуту, страница пустая.
+
+      Явный ключ закрепляет за каждым соседом своё место, и переключение
+      чужого `t-if` его больше не трогает.
+    -->
     <xpath expr="//t[@t-component='props.Renderer']" position="before">
-      <CoopShelves t-if="coopShelvesVisible"
+      <CoopShelves t-if="coopShelvesVisible" t-key="'coop_shelves'"
                    resModel="props.resModel"
                    field="coopShelfField"
                    domain="props.domain or []"
@@ -68,6 +85,7 @@
     -->
     <xpath expr="//t[@t-component='props.Renderer']" position="attributes">
       <attribute name="t-if">model.isReady and coopLayout.mode !== 'map' and !coopShelvesFilled</attribute>
+      <attribute name="t-key">'coop_renderer'</attribute>
     </xpath>
 
     <!--
@@ -76,13 +94,15 @@
       обратный тому, что видно на экране.
     -->
     <xpath expr="//t[@t-component='props.Renderer']" position="after">
-      <CoopMap t-if="coopLayout.mode === 'map'"
+      <CoopMap t-if="coopLayout.mode === 'map'" t-key="'coop_map'"
                resModel="props.resModel" domain="model.root.domain"
                showTiles.bind="coopShowTiles"/>
-      <CoopFilters resModel="props.resModel" baseDomain="coopBaseDomain"/>
+      <CoopFilters t-key="'coop_filters'"
+                   resModel="props.resModel" baseDomain="coopBaseDomain"/>
       <!-- Постраничная навигация вместе с лентой: листать нечего, когда
            весь каталог разложен по полкам. -->
-      <div class="o_coop_pager" t-if="env.config.pagerProps and coopLayout.mode !== 'map' and !coopShelvesVisible">
+      <div class="o_coop_pager" t-key="'coop_pager'"
+           t-if="env.config.pagerProps and coopLayout.mode !== 'map' and !coopShelvesVisible">
         <Pager t-props="env.config.pagerProps"/>
       </div>
     </xpath>
