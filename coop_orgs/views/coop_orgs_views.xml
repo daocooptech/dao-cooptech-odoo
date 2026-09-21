@@ -375,6 +375,8 @@
               <div class="o_coop_band" invisible="not coop_org_resource_ids">
                 <div class="o_coop_band_head">
                   <span>Ресурсы</span>
+                  <button name="action_coop_org_resources" type="object"
+                          class="o_coop_band_all">смотреть все</button>
                 </div>
                 <div class="o_coop_band_body">
                   <field name="coop_org_resource_ids" readonly="1" nolabel="1">
@@ -400,6 +402,8 @@
               <div class="o_coop_band" invisible="not coop_org_project_ids">
                 <div class="o_coop_band_head">
                   <span>Проекты</span>
+                  <button name="action_coop_org_projects" type="object"
+                          class="o_coop_band_all">смотреть все</button>
                 </div>
                 <div class="o_coop_band_body">
                   <field name="coop_org_project_ids" readonly="1" nolabel="1">
@@ -432,6 +436,8 @@
               <div class="o_coop_band" invisible="not coop_org_service_ids">
                 <div class="o_coop_band_head">
                   <span>Услуги</span>
+                  <button name="action_coop_org_services" type="object"
+                          class="o_coop_band_all">смотреть все</button>
                 </div>
                 <div class="o_coop_band_body">
                   <field name="coop_org_service_ids" readonly="1" nolabel="1">
@@ -509,6 +515,8 @@
               <div class="o_coop_band" invisible="not coop_related_org_ids">
                 <div class="o_coop_band_head">
                   <span>Связанные организации</span>
+                  <button name="action_coop_org_related" type="object"
+                          class="o_coop_band_all">смотреть все</button>
                 </div>
                 <div class="o_coop_band_body">
                   <field name="coop_related_org_ids" readonly="1" nolabel="1">
@@ -534,6 +542,8 @@
               <div class="o_coop_band" invisible="not coop_org_vacancy_ids">
                 <div class="o_coop_band_head">
                   <span>Вакансии</span>
+                  <button name="action_coop_org_vacancies" type="object"
+                          class="o_coop_band_all">смотреть все</button>
                 </div>
                 <div class="o_coop_band_body">
                   <field name="coop_org_vacancy_ids" readonly="1" nolabel="1">
@@ -564,6 +574,8 @@
               <div class="o_coop_band" invisible="not coop_org_need_ids">
                 <div class="o_coop_band_head">
                   <span>Потребности</span>
+                  <button name="action_coop_org_needs" type="object"
+                          class="o_coop_band_all">смотреть все</button>
                 </div>
                 <div class="o_coop_band_body">
                   <field name="coop_org_need_ids" readonly="1" nolabel="1">

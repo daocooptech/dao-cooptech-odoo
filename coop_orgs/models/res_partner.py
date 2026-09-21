@@ -321,6 +321,60 @@ class ResPartner(models.Model):
             'context': {'default_organization_id': self.id},
         }
 
+    # ── «Смотреть все» у полок карточки организации ──────────────────
+    #
+    # На странице человека такая ссылка есть у каждой полки, а здесь была
+    # только у состава: остальные шесть полок обрывались на пяти плитках
+    # без выхода в полный список. Владелец 21 сентября 2026: «проверь что
+    # бы все эти ссылки работали корректно и открывались страницы с
+    # нужными данными».
+    #
+    # Отбор тот же, что у самой полки: список и полка должны показывать
+    # одно и то же, иначе «смотреть все» открывает не то, что обещало.
+    def action_coop_org_resources(self):
+        self.ensure_one()
+        return self._coop_holdings_action(
+            'coop_resources.action_coop_resources',
+            [('owner_id', '=', self.id), ('listing_type', '=', 'offer'),
+             ('project_id', '=', False)],
+            _('Ресурсы — %s') % self.display_name)
+
+    def action_coop_org_needs(self):
+        self.ensure_one()
+        return self._coop_holdings_action(
+            'coop_resources.action_coop_resources',
+            [('owner_id', '=', self.id), ('listing_type', '=', 'request'),
+             ('project_id', '=', False)],
+            _('Потребности — %s') % self.display_name)
+
+    def action_coop_org_projects(self):
+        self.ensure_one()
+        return self._coop_holdings_action(
+            'coop_projects.action_coop_projects',
+            [('partner_id', '=', self.id)],
+            _('Проекты — %s') % self.display_name)
+
+    def action_coop_org_vacancies(self):
+        self.ensure_one()
+        return self._coop_holdings_action(
+            'coop_vacancies.action_coop_vacancies',
+            [('partner_id', '=', self.id)],
+            _('Вакансии — %s') % self.display_name)
+
+    def action_coop_org_services(self):
+        self.ensure_one()
+        return self._coop_holdings_action(
+            'coop_skills.action_coop_skills',
+            [('partner_id', '=', self.id), ('state', '=', 'published')],
+            _('Услуги — %s') % self.display_name)
+
+    def action_coop_org_related(self):
+        self.ensure_one()
+        return self._coop_holdings_action(
+            'coop_orgs.action_coop_orgs',
+            [('id', 'in', self.coop_related_org_ids.ids)],
+            _('Связанные организации — %s') % self.display_name)
+
     def action_coop_org_message(self):
         """Написать организации."""
         self.ensure_one()

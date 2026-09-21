@@ -4,6 +4,7 @@ import logging
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.tools import html2plaintext
+from odoo.tools.safe_eval import safe_eval
 
 _logger = logging.getLogger(__name__)
 
@@ -234,6 +235,58 @@ class ResPartner(models.Model):
     # записи. Правилом чтения карточка исчезла бы и из чужих сделок, где
     # человек сторона, и из состава организаций, и из переписки: право
     # читать контакт на платформе держит слишком многое.
+    # ── Экран «смотреть все» у полки ─────────────────────────────────
+    #
+    # Живёт в основе, а не в модуле страницы участника: такая же
+    # кнопка есть у полок карточки организации, и звать помощника
+    # через голову — из модуля, от которого не зависишь, — значит
+    # получить работающую кнопку только там, где рядом случайно
+    # оказался соседний модуль.
+    def _coop_action_context(self, action):
+        """Контекст действия словарём.
+
+        В базе он лежит строкой — так его задают в разметке, — и
+        `_for_xml_id` отдаёт его как есть. `dict()` на строке падает, и
+        падает молча под кнопкой, а не при загрузке модуля.
+        """
+        context = action.get('context') or {}
+        if isinstance(context, str):
+            context = safe_eval(context, {'uid': self.env.uid})
+        return dict(context)
+
+    def _coop_holdings_action(self, xml_id, domain, name, own_name=None):
+        """Экран «смотреть все» у полки страницы.
+
+        `own_name` — как этот экран называется, когда человек смотрит
+        своё: «Мои друзья», а не «Друзья — Дашкевич Данил Игоревич».
+        Владелец 20 сентября 2026: «вместо каталога людей тут должно
+        быть мои друзья».
+        """
+        self.ensure_one()
+        action = self.env['ir.actions.act_window']._for_xml_id(xml_id)
+        свой = self == self.env.user._coop_acting_partner()
+        if свой and own_name:
+            name = own_name
+        action['domain'] = domain
+        action['name'] = name
+        context = self._coop_action_context(action)
+        context.pop('search_default_published', None)
+        # Полки здесь не нужны и мешают. «Смотреть все» открывает не
+        # витрину раздела, а готовый список: мои друзья, мои ресурсы,
+        # мои вакансии. Рубрикация на шести записях либо не собирается
+        # вовсе (рубрик меньше двух — полок нет), либо разрезает шесть
+        # карточек на три полки по две.
+        #
+        # Владелец 20 сентября 2026 об этом прямо: «почини список моих
+        # друзей, по нажатию открывается каталог моих друзей (аналог
+        # вк)» — то есть список, а не витрина.
+        context.pop('coop_shelf_field', None)
+        # Название экрана — вкладкам оболочки: они показывают подразделы
+        # раздела, а человек пришёл не в раздел, а в свою выборку.
+        context['coop_screen_label'] = name
+        action['context'] = context
+        return action
+
     coop_page_audience = fields.Selection(
         [('all', 'Все, включая незарегистрированных'),
          ('members', 'Только участники платформы'),
