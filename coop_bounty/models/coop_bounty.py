@@ -19,7 +19,7 @@ class CoopBountyTask(models.Model):
     """
     _name = 'coop.bounty.task'
     _description = 'Задание за вознаграждение'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin']
     _order = 'state, deadline, id desc'
 
     name = fields.Char(string='Задача', required=True, tracking=True)

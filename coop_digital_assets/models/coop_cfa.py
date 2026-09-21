@@ -24,6 +24,7 @@ class CoopCfaOperator(models.Model):
     """
     _name = 'coop.cfa.operator'
     _description = 'Оператор ЦФА из реестра ЦБ'
+    _inherit = ['coop.page.mixin']
     _order = 'sequence, name'
 
     name = fields.Char(string='Оператор', required=True)
@@ -72,7 +73,7 @@ class CoopCfaIssue(models.Model):
     """
     _name = 'coop.cfa.issue'
     _description = 'Заявка на выпуск ЦФА'
-    _inherit = ['mail.thread']
+    _inherit = ['mail.thread', 'coop.page.mixin']
     _order = 'create_date desc, id desc'
     _rec_name = 'display_name'
 

@@ -107,6 +107,7 @@
                  statusbar_visible="draft,published,negotiating,done"/>
         </header>
         <sheet>
+          <field name="coop_can_edit" invisible="1"/>
           <div class="oe_title">
             <h1><field name="display_name" readonly="1"/></h1>
           </div>
@@ -114,15 +115,15 @@
             <group string="Требование">
               <field name="deal_id"
                      options="{'no_create': True}"
-                     readonly="state != 'draft'"/>
-              <field name="creditor_id" readonly="state != 'draft'"/>
-              <field name="debtor_id" readonly="state != 'draft'"/>
-              <field name="due_date" readonly="state != 'draft'"/>
+                     readonly="state != 'draft'" widget="coop_inline"/>
+              <field name="creditor_id" readonly="state != 'draft'" widget="coop_inline"/>
+              <field name="debtor_id" readonly="state != 'draft'" widget="coop_inline"/>
+              <field name="due_date" readonly="state != 'draft'" widget="coop_inline"/>
               <field name="currency_id" invisible="1"/>
             </group>
             <group string="Условия">
-              <field name="amount" readonly="state != 'draft'"/>
-              <field name="price" readonly="state != 'draft'"/>
+              <field name="amount" readonly="state != 'draft'" widget="coop_inline"/>
+              <field name="price" readonly="state != 'draft'" widget="coop_inline"/>
               <field name="discount"/>
               <field name="discount_percent" digits="[5, 1]"/>
             </group>
@@ -135,7 +136,7 @@
           </group>
           <notebook>
             <page string="Условия словами" name="note">
-              <field name="note" placeholder="«Готов уступить с рассрочкой оплаты в две недели» — то, чего не выразить одной ценой."/>
+              <field name="note" placeholder="«Готов уступить с рассрочкой оплаты в две недели» — то, чего не выразить одной ценой." widget="coop_block" readonly="not coop_can_edit"/>
             </page>
             <page string="Отклики" name="responses">
               <field name="response_ids" readonly="1">

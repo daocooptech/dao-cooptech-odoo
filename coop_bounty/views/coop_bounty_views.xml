@@ -38,14 +38,15 @@
                  statusbar_visible="draft,published,assigned,submitted,accepted"/>
         </header>
         <sheet>
+          <field name="coop_can_edit" invisible="1"/>
           <div class="oe_title">
-            <h1><field name="name" placeholder="Что нужно сделать"/></h1>
+            <h1><field name="name" placeholder="Что нужно сделать" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/></h1>
           </div>
           <group>
             <group>
-              <field name="reward_tokens"/>
-              <field name="coop_specialization_id" options="{'no_create': True}"/>
-              <field name="deadline"/>
+              <field name="reward_tokens" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="coop_specialization_id" options="{'no_create': True}" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="deadline" widget="coop_inline" readonly="not coop_can_edit"/>
             </group>
             <group>
               <field name="manager_id" readonly="1"/>
@@ -59,7 +60,7 @@
           </group>
           <notebook>
             <page string="Описание" name="description">
-              <field name="description" placeholder="Опишите результат, а не процесс: по этому тексту исполнитель поймёт, когда работа считается выполненной."/>
+              <field name="description" placeholder="Опишите результат, а не процесс: по этому тексту исполнитель поймёт, когда работа считается выполненной." widget="coop_block" readonly="not coop_can_edit"/>
             </page>
             <page string="Заявки" name="applications">
               <field name="application_ids" nolabel="1" readonly="1">

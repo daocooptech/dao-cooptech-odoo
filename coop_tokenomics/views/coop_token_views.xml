@@ -208,18 +208,19 @@
                  statusbar_visible="draft,open,partial,done"/>
         </header>
         <sheet>
+          <field name="coop_can_edit" invisible="1"/>
           <div class="oe_title"><h1><field name="display_name" readonly="1"/></h1></div>
           <group>
             <group string="Требование">
-              <field name="claim_id" options="{'no_create': True}"/>
-              <field name="kind"/>
-              <field name="side"/>
+              <field name="claim_id" options="{'no_create': True}" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="kind" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="side" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="delivery_date" readonly="1"/>
             </group>
             <group string="Условия">
-              <field name="quantity"/>
+              <field name="quantity" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="quantity_left" readonly="1"/>
-              <field name="price_per_unit"/>
+              <field name="price_per_unit" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="total_price" readonly="1"/>
               <field name="premium_percent" readonly="1" digits="[5, 1]"/>
               <field name="settlement_currency" readonly="1"/>
@@ -365,21 +366,21 @@
           <group>
             <group string="Что обещано">
               <field name="resource_id" options="{'no_create': True}"
-                     readonly="state != 'draft'"/>
-              <field name="issuer_id" readonly="state != 'draft'"/>
-              <field name="quantity" readonly="state != 'draft'"/>
-              <field name="unit_label" readonly="state != 'draft'"/>
-              <field name="quality" readonly="state != 'draft'"/>
-              <field name="delivery_place" readonly="state != 'draft'"/>
-              <field name="delivery_date" readonly="state != 'draft'"/>
+                     readonly="state != 'draft'" widget="coop_inline"/>
+              <field name="issuer_id" readonly="state != 'draft'" widget="coop_inline"/>
+              <field name="quantity" readonly="state != 'draft'" widget="coop_inline"/>
+              <field name="unit_label" readonly="state != 'draft'" widget="coop_inline"/>
+              <field name="quality" readonly="state != 'draft'" widget="coop_inline"/>
+              <field name="delivery_place" readonly="state != 'draft'" widget="coop_inline"/>
+              <field name="delivery_date" readonly="state != 'draft'" widget="coop_inline"/>
               <field name="is_future" readonly="state != 'draft'"/>
             </group>
             <group string="Деньги">
-              <field name="price_per_unit" readonly="state != 'draft'"/>
-              <field name="settlement_currency" readonly="state != 'draft'"/>
+              <field name="price_per_unit" readonly="state != 'draft'" widget="coop_inline"/>
+              <field name="settlement_currency" readonly="state != 'draft'" widget="coop_inline"/>
               <field name="total_price" readonly="1"/>
-              <field name="deposit_percent" readonly="state != 'draft'"/>
-              <field name="mint_cost" readonly="state != 'draft'"/>
+              <field name="deposit_percent" readonly="state != 'draft'" widget="coop_inline"/>
+              <field name="mint_cost" readonly="state != 'draft'" widget="coop_inline"/>
               <field name="deposit_amount" readonly="1"/>
               <field name="deposit_paid" readonly="1"/>
               <field name="deposit_paid_on" readonly="1" invisible="not deposit_paid"/>

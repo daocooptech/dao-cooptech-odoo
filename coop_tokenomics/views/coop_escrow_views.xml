@@ -59,23 +59,23 @@
           </div>
           <group>
             <group string="Кто и сколько">
-              <field name="claim_id"/>
-              <field name="seller_id"/>
-              <field name="buyer_id"/>
-              <field name="quantity"/>
-              <field name="amount"/>
+              <field name="claim_id" widget="coop_inline"/>
+              <field name="seller_id" widget="coop_inline"/>
+              <field name="buyer_id" widget="coop_inline"/>
+              <field name="quantity" widget="coop_inline"/>
+              <field name="amount" widget="coop_inline"/>
             </group>
             <group string="Сроки">
-              <field name="due_date"/>
+              <field name="due_date" widget="coop_inline"/>
               <field name="days_left"/>
-              <field name="delivered_on"/>
-              <field name="accepted_on"/>
-              <field name="settled_on"/>
+              <field name="delivered_on" widget="coop_inline"/>
+              <field name="accepted_on" widget="coop_inline"/>
+              <field name="settled_on" widget="coop_inline"/>
             </group>
           </group>
           <group string="Спор" invisible="not disputed">
             <field name="disputed" readonly="1"/>
-            <field name="dispute_note" placeholder="Что именно не так с поставкой"/>
+            <field name="dispute_note" placeholder="Что именно не так с поставкой" widget="coop_block"/>
           </group>
           <div class="alert alert-info" role="status" invisible="state != 'held'">
             Деньги лежат до поставки. Когда поставщик отметит, что привёз,

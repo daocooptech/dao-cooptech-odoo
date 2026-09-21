@@ -38,7 +38,7 @@ class CoopCession(models.Model):
     """
     _name = 'coop.cession'
     _description = 'Предложение об уступке требования'
-    _inherit = ['mail.thread']
+    _inherit = ['mail.thread', 'coop.page.mixin']
     _order = 'published_on desc, id desc'
     _rec_name = 'display_name'
 

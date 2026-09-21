@@ -27,7 +27,7 @@ class CoopTokenOrder(models.Model):
     """
     _name = 'coop.token.order'
     _description = 'Заявка на бирже токенов'
-    _inherit = ['mail.thread']
+    _inherit = ['mail.thread', 'coop.page.mixin']
     _order = 'price_per_unit, id'
     _rec_name = 'display_name'
 

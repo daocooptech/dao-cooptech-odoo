@@ -33,6 +33,7 @@ class CoopWallet(models.Model):
     """
     _name = 'coop.wallet'
     _description = 'Кошелёк участника'
+    _inherit = ['coop.page.mixin']
     _order = 'id'
     _rec_name = 'display_name'
 

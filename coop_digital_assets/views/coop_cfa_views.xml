@@ -149,6 +149,7 @@
                  statusbar_visible="draft,submitted,accepted,issued"/>
         </header>
         <sheet>
+          <field name="coop_can_edit" invisible="1"/>
           <field name="can_buy" invisible="1"/>
           <div class="alert alert-info" role="status">
             Платформа сама ЦФА не выпускает. Выпуск и обращение возможны
@@ -157,25 +158,25 @@
             оператор.
           </div>
           <div class="oe_title">
-            <h1><field name="name" placeholder="Требование по поставке зерна урожая 2027"/></h1>
+            <h1><field name="name" placeholder="Требование по поставке зерна урожая 2027" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/></h1>
           </div>
           <group>
             <group string="Кто и через кого">
-              <field name="issuer_id"/>
-              <field name="operator_id" options="{'no_create': True}"/>
-              <field name="rights_kind"/>
+              <field name="issuer_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="operator_id" options="{'no_create': True}" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="rights_kind" widget="coop_inline" readonly="not coop_can_edit"/>
             </group>
             <group string="Параметры выпуска">
-              <field name="amount"/>
-              <field name="unit_count"/>
+              <field name="amount" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="unit_count" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="unit_price" readonly="1"/>
-              <field name="maturity_date"/>
+              <field name="maturity_date" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="currency_id" invisible="1"/>
             </group>
           </group>
           <group string="Обеспечение">
-            <field name="collateral" placeholder="Залог техники, поручительство кооператива"/>
-            <field name="intangible_id" options="{'no_create': True}"/>
+            <field name="collateral" placeholder="Залог техники, поручительство кооператива" widget="coop_inline" readonly="not coop_can_edit"/>
+            <field name="intangible_id" options="{'no_create': True}" widget="coop_inline" readonly="not coop_can_edit"/>
             <div colspan="2" class="text-muted small" invisible="collateral or intangible_id">
               Обеспечения нет. Покупатель должен видеть это прямо, а не
               догадываться по отсутствию строки.
@@ -189,7 +190,7 @@
           </group>
           <notebook>
             <page string="Описание" name="description">
-              <field name="description"/>
+              <field name="description" widget="coop_block" readonly="not coop_can_edit"/>
             </page>
           </notebook>
         </sheet>
@@ -281,24 +282,25 @@
     <field name="arch" type="xml">
       <form string="Оператор ЦФА">
         <sheet>
-          <div class="oe_title"><h1><field name="name"/></h1></div>
+          <field name="coop_can_edit" invisible="1"/>
+          <div class="oe_title"><h1><field name="name" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/></h1></div>
           <group>
             <group string="В реестре ЦБ">
-              <field name="registry_number"/>
-              <field name="registered_on"/>
-              <field name="inn"/>
+              <field name="registry_number" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="registered_on" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="inn" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="website" widget="url"/>
             </group>
             <group string="Условия">
-              <field name="issues_what"/>
-              <field name="fee_note"/>
-              <field name="unqualified_limit"/>
+              <field name="issues_what" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="fee_note" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="unqualified_limit" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="currency_id" invisible="1"/>
               <field name="active"/>
             </group>
           </group>
           <group string="Примечание">
-            <field name="note" nolabel="1"/>
+            <field name="note" nolabel="1" widget="coop_block" readonly="not coop_can_edit"/>
           </group>
           <notebook>
             <page string="Заявки" name="issues">
