@@ -189,7 +189,7 @@
           <field name="coop_can_edit" invisible="1"/>
           <div class="oe_title">
             <h1><field name="name" placeholder="Что разыгрываем"
-                       readonly="not coop_can_edit" widget="coop_inline" options="{'wrap': true}"/></h1>
+                       readonly="not coop_can_edit" widget="coop_inline" options="{'wrap': True}"/></h1>
           </div>
           <group>
             <group string="Что и кто">

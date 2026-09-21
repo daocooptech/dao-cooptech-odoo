@@ -296,12 +296,12 @@
                 полностью, описание тоже самое».
               -->
               <h1><field name="name" widget="coop_inline" nolabel="1"
-                         options="{'wrap': true}"
+                         options="{'wrap': True}"
                          readonly="not coop_can_edit"
                          placeholder="Название проекта"/></h1>
               <field name="summary" class="o_coop_hero_summary"
                      widget="coop_inline" nolabel="1"
-                     options="{'wrap': true}"
+                     options="{'wrap': True}"
                      readonly="not coop_can_edit"
                      placeholder="Одна строка, которую видно в каталоге"/>
               <div class="o_coop_hero_tags">

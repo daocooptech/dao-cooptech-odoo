@@ -221,7 +221,7 @@
           <field name="coop_can_edit" invisible="1"/>
           <field name="image_1920" widget="image" class="oe_avatar"/>
           <div class="oe_title">
-            <h1><field name="name" placeholder="Что предлагаете или ищете" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/></h1>
+            <h1><field name="name" placeholder="Что предлагаете или ищете" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/></h1>
           </div>
           <group>
             <group string="Что это">

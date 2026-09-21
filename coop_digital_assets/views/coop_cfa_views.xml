@@ -158,7 +158,7 @@
             оператор.
           </div>
           <div class="oe_title">
-            <h1><field name="name" placeholder="Требование по поставке зерна урожая 2027" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/></h1>
+            <h1><field name="name" placeholder="Требование по поставке зерна урожая 2027" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/></h1>
           </div>
           <group>
             <group string="Кто и через кого">
@@ -283,7 +283,7 @@
       <form string="Оператор ЦФА">
         <sheet>
           <field name="coop_can_edit" invisible="1"/>
-          <div class="oe_title"><h1><field name="name" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/></h1></div>
+          <div class="oe_title"><h1><field name="name" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/></h1></div>
           <group>
             <group string="В реестре ЦБ">
               <field name="registry_number" widget="coop_inline" readonly="not coop_can_edit"/>

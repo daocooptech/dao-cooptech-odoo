@@ -169,14 +169,14 @@
           <field name="can_join" invisible="1"/>
           <field name="my_order_id" invisible="1"/>
           <div class="oe_title">
-            <h1><field name="name" placeholder="Что закупаем" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/></h1>
+            <h1><field name="name" placeholder="Что закупаем" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/></h1>
           </div>
           <group>
             <group string="Кто и где">
               <field name="organizer_id" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="supplier_name" placeholder="У кого закупаем" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/>
+              <field name="supplier_name" placeholder="У кого закупаем" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/>
               <field name="city" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="pickup_point" placeholder="Куда приезжать за своим" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/>
+              <field name="pickup_point" placeholder="Куда приезжать за своим" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/>
             </group>
             <group string="Объём и цена">
               <label for="min_volume"/>

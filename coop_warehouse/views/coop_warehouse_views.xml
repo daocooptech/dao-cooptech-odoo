@@ -141,15 +141,15 @@
         <sheet>
           <field name="coop_can_edit" invisible="1"/>
           <div class="oe_title">
-            <h1><field name="name" placeholder="Как называется склад" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/></h1>
+            <h1><field name="name" placeholder="Как называется склад" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/></h1>
           </div>
           <group>
             <group string="Кто и где">
               <field name="owner_id" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="keeper_id" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="city" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="address" placeholder="Улица, дом, как заезжать" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/>
-              <field name="schedule" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/>
+              <field name="address" placeholder="Улица, дом, как заезжать" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/>
+              <field name="schedule" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/>
             </group>
             <group string="Что за склад">
               <field name="storage_kind" widget="coop_inline" readonly="not coop_can_edit"/>

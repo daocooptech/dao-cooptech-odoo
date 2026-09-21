@@ -113,13 +113,13 @@
         <sheet>
           <field name="coop_can_edit" invisible="1"/>
           <div class="oe_title">
-            <h1><field name="name" placeholder="Название программы" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/></h1>
+            <h1><field name="name" placeholder="Название программы" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/></h1>
           </div>
           <group>
             <group string="Кто и где">
               <field name="organizer_id" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="city" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="geography" placeholder="участие удалённо по всей РФ" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/>
+              <field name="geography" placeholder="участие удалённо по всей РФ" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/>
               <field name="industry" widget="coop_inline" readonly="not coop_can_edit"/>
             </group>
             <group string="Сколько и как долго">
