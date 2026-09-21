@@ -25,14 +25,15 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 
 # Виджеты правки по месту: карандаш, галочка, крестик.
-ПО_МЕСТУ = ('coop_inline', 'coop_about', 'coop_contact_lines')
+ПО_МЕСТУ = ('coop_inline', 'coop_block', 'coop_about', 'coop_contact_lines')
 
 # Поля, которые правятся не строкой, а своим управлением, и карандаш им
 # не нужен: изображение меняется щелчком по себе, состояние — кнопками
 # в шапке, переключатель — самим переключателем.
 СВОИ_УПРАВЛЕНИЯ = ('image', 'image_url', 'statusbar', 'boolean_toggle',
                    'progressbar', 'priority', 'radio', 'many2many_tags',
-                   'coop_readiness_ring', 'coop_favorite')
+                   'coop_readiness_ring', 'coop_favorite', 'badge',
+                   'percentage', 'monetary', 'float_time')
 
 
 def вычисляемые():
@@ -80,9 +81,15 @@ def формы(путь):
 
 
 def правимые(форма, вычисленные=()):
-    """Поля формы, которые человек правит на странице."""
-    внутри_списка = {id(узел) for список in форма.iter('list')
-                     for узел in список.iter('field')}
+    """Поля формы, которые человек правит на странице.
+
+    Полки на карточке — это встроенные канбаны, и поля в их шаблонах
+    объявлены для показа, а не для правки: карандаш там был бы на
+    плитке каталога. Список правится строкой, поиск — не правится вовсе.
+    """
+    внутри_списка = {id(узел) for тег in ('list', 'kanban', 'search', 'templates')
+                     for вложенный in форма.iter(тег)
+                     for узел in вложенный.iter('field')}
     строки = []
     for поле in форма.iter('field'):
         if id(поле) in внутри_списка:

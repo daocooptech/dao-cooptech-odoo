@@ -71,6 +71,9 @@ export class CoopInlineField extends Component {
         if (this.field.type === "date") {
             return value.toFormat("dd.MM.yyyy");
         }
+        if (this.field.type === "datetime") {
+            return value.toFormat("dd.MM.yyyy HH:mm");
+        }
         if (this.field.type === "many2one") {
             return value.display_name || "";
         }
@@ -92,7 +95,10 @@ export class CoopInlineField extends Component {
         if (type === "date") {
             return "date";
         }
-        if (type === "integer" || type === "float") {
+        if (type === "datetime") {
+            return "datetime-local";
+        }
+        if (type === "integer" || type === "float" || type === "monetary") {
             return "number";
         }
         return "text";
@@ -126,6 +132,10 @@ export class CoopInlineField extends Component {
         this.ui.chosen = null;
         if (this.field.type === "date" && value) {
             this.ui.draft = value.toFormat("yyyy-MM-dd");
+        } else if (this.field.type === "datetime" && value) {
+            // Поле ввода времени понимает только такой вид, без пояса:
+            // «2026-09-21T18:30».
+            this.ui.draft = value.toFormat("yyyy-MM-dd'T'HH:mm");
         } else if (this.isRelation) {
             // В строке — то, что уже выбрано: правка начинается с
             // прежнего ответа, а не с чистого листа.
@@ -196,7 +206,7 @@ export class CoopInlineField extends Component {
         if (this.field.type === "integer") {
             return parseInt(draft, 10) || 0;
         }
-        if (this.field.type === "float") {
+        if (this.field.type === "float" || this.field.type === "monetary") {
             return parseFloat(draft) || 0;
         }
         return draft;
@@ -240,8 +250,8 @@ export class CoopInlineField extends Component {
 export const coopInlineField = {
     component: CoopInlineField,
     displayName: "Правка по месту",
-    supportedTypes: ["char", "text", "date", "integer", "float", "selection",
-                     "many2one"],
+    supportedTypes: ["char", "text", "date", "datetime", "integer", "float",
+                     "monetary", "selection", "many2one"],
     extractProps: ({ attrs, options }) => ({
         placeholder: attrs.placeholder,
         wrap: options.wrap === true || options.wrap === "true",
