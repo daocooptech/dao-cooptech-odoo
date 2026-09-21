@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!--
+    Сохранение уходит из шапки вниз, к содержимому.
+
+    Наверху остаётся кнопка возврата и больше ничего: путь убран
+    решением 348, штатное «Меню действий» — решениями 349 и 350, пара
+    «сохранить/отменить» — здесь. Полоса внизу появляется только тогда,
+    когда есть что сохранять, и ловит любое изменение — из встроенного
+    списка, из изображения, из поля, до которого правка по месту ещё не
+    дошла.
+
+    Прицел xpath'ов проверен на исходном шаблоне движка до правки:
+    оба дают ровно одно совпадение. Промах здесь стоит не «полоса не
+    появилась», а сорванного разбора шаблона и пустого экрана на всём
+    портале — такое уже случалось.
+
+    Отрисовщик формы в шаблоне встречается дважды: второй раз — внутри
+    слота кнопок, для формы в окне. Отличаем не порядковым номером, а
+    признаком: у главного `archInfo="archInfo"`, у оконного
+    `archInfo="footerArchInfo"`. Номер сместился бы при первой же правке
+    движка, и полоса уехала бы в подвал диалога.
+  -->
+  <t t-name="coop_theme.FormView" t-inherit="web.FormView" t-inherit-mode="extension">
+
+    <xpath expr="//t[@t-set-slot='control-panel-status-indicator']/t[@t-if='canEdit']"
+           position="attributes">
+      <attribute name="t-if">canEdit and !coopIsPlatformPage</attribute>
+    </xpath>
+
+    <xpath expr="//t[@t-component='props.Renderer'][@archInfo='archInfo']"
+           position="after">
+      <div t-if="coopIsPlatformPage and coopHasChanges" class="o_coop_save_bar">
+        <span class="o_coop_save_note">Есть несохранённые правки</span>
+        <button type="button" class="btn btn-secondary o_coop_save_discard"
+                data-hotkey="j"
+                t-on-click.stop="() => this.discard()">Отменить</button>
+        <button type="button" class="btn btn-primary o_coop_save_apply"
+                data-hotkey="s"
+                t-on-click.stop="() => this.saveButtonClicked({ closable: true })">Сохранить</button>
+      </div>
+    </xpath>
+
+  </t>
+
+</templates>

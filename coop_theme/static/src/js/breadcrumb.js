@@ -4,6 +4,7 @@ import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
 import { Breadcrumbs } from "@web/search/breadcrumbs/breadcrumbs";
 import { useState } from "@odoo/owl";
+import { coopIsPlatformModel } from "@coop_theme/js/platform_page";
 
 /**
  * Путь и кнопка возврата.
@@ -229,15 +230,9 @@ patch(Breadcrumbs.prototype, {
      * платный сервис — всё это про таблицу в базе, а не про человека,
      * ресурс или сделку.
      *
-     * Правило по имени модели, а не по списку разделов. Список разделов
-     * у каждого участника свой: обязательные он переставляет, а
-     * расширения убирает совсем, — и меню, опознанное по нему,
-     * возвращало бы шестерёнку тому, кто спрятал раздел. Имя модели не
-     * зависит ни от чьих настроек: всё, что платформа завела сама,
-     * называется `coop.*`, а люди и организации стоят на `res.partner`.
-     *
-     * Чужие экраны движка — настройки, пользователи, модули — правилом
-     * не задеты: там шестерёнка на месте, и администратору она нужна.
+     * Само правило — в `platform_page.js`, общее с полосой сохранения
+     * внизу формы: два списка правды разошлись бы при первой же правке,
+     * и разошлись бы молча.
      *
      * Печать при этом наружу выведена отдельно: у сделки договор и акт
      * были только в этом меню, и на форму добавлены свои кнопки. Если
@@ -254,10 +249,7 @@ patch(Breadcrumbs.prototype, {
                 this.env.searchModel?.resModel ||
                 this.coopActionService?.currentController?.action?.res_model ||
                 this.env.config?.resModel;
-            if (!model) {
-                return false;
-            }
-            return model.startsWith("coop.") || model === "res.partner";
+            return coopIsPlatformModel(model);
         } catch (ошибка) {
             console.warn("[крошка] не удалось решить, прятать ли меню:", ошибка);
             return false;
