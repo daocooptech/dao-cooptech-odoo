@@ -42,10 +42,10 @@
     <!--
       Путь предков — только там, где он что-то объясняет. На странице
       человека он называет кого угодно, кроме того, кто перед глазами;
-      см. `coopHidePath` в `breadcrumb.js`.
+      см. `coopIsPersonPage` в `breadcrumb.js`.
     -->
     <xpath expr="//ol[hasclass('breadcrumb')]" position="attributes">
-      <attribute name="t-if">!coopHidePath</attribute>
+      <attribute name="t-if">!coopIsPersonPage</attribute>
     </xpath>
 
     <!--
@@ -54,7 +54,22 @@
       остаётся один значок настроек, висящий в пустоте.
     -->
     <xpath expr="//div[hasclass('o_last_breadcrumb_item')][hasclass('gap-2')]" position="attributes">
-      <attribute name="t-if">!coopHidePath</attribute>
+      <attribute name="t-if">!coopIsPersonPage</attribute>
+    </xpath>
+
+    <!--
+      Шестерёнка — штатное «Меню действий» записи. На карточке участника
+      она предлагает отправить SMS, выгрузить vCard и выдать доступ к
+      порталу: ни одно из трёх к странице человека отношения не имеет.
+      Убирается в обеих ветках шаблона — и когда есть предки, и когда
+      карточка открыта по прямой ссылке.
+    -->
+    <xpath expr="(//t[@t-call='web.Breadcrumb.Actions'])[1]" position="attributes">
+      <attribute name="t-if">!coopIsPersonPage</attribute>
+    </xpath>
+
+    <xpath expr="(//t[@t-call='web.Breadcrumb.Actions'])[2]" position="attributes">
+      <attribute name="t-if">!coopIsPersonPage</attribute>
     </xpath>
 
     <!--
