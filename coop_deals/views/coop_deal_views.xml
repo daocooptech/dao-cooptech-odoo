@@ -147,6 +147,27 @@
                   groups="base.group_system"/>
           <button name="action_cancel" type="object" string="Отменить"
                   invisible="state in ('done', 'cancelled')"/>
+          <!--
+            Печать своими кнопками, а не шестерёнкой движка.
+
+            Обе бумаги были только в штатном «Меню действий» — том самом,
+            которое владелец велел убрать со страниц платформы (решение
+            349). Убрать его со сделки, не выведя печать наружу, значит
+            отнять у сторон договор и акт: другого пути к ним на странице
+            нет.
+
+            Договор появляется, как только сделка согласована: до этого
+            печатать нечего, идут переговоры. Акт — только когда его
+            подтвердили обе стороны: в самой бумаге стоит дата подписания,
+            и напечатанный раньше акт — это лист с пустой датой, который
+            выглядит как документ.
+          -->
+          <button name="%(coop_deals.action_report_deal_agreement)d"
+                  type="action" string="Договор"
+                  invisible="state == 'draft'"/>
+          <button name="%(coop_deals.action_report_deal_act)d"
+                  type="action" string="Акт"
+                  invisible="not act_confirmed_on"/>
           <field name="state" widget="statusbar"
                  statusbar_visible="draft,agreed,active,acceptance,done"/>
         </header>

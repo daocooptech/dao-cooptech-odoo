@@ -58,18 +58,21 @@
     </xpath>
 
     <!--
-      Шестерёнка — штатное «Меню действий» записи. На карточке участника
-      она предлагает отправить SMS, выгрузить vCard и выдать доступ к
-      порталу: ни одно из трёх к странице человека отношения не имеет.
-      Убирается в обеих ветках шаблона — и когда есть предки, и когда
-      карточка открыта по прямой ссылке.
+      Шестерёнка — штатное «Меню действий» записи: «Дублировать»,
+      «Удалить», «Отправить SMS», «Выгрузить vCard», «Предоставить
+      доступ к порталу». Это действия над строкой таблицы, а не над
+      человеком, ресурсом или сделкой, и в языке платформы их нет.
+
+      Убирается на всех страницах записей платформы — см.
+      `coopHideActions` в `breadcrumb.js`, — и в обеих ветках шаблона: и
+      когда есть предки, и когда карточка открыта по прямой ссылке.
     -->
     <xpath expr="(//t[@t-call='web.Breadcrumb.Actions'])[1]" position="attributes">
-      <attribute name="t-if">!coopIsPersonPage</attribute>
+      <attribute name="t-if">!coopHideActions</attribute>
     </xpath>
 
     <xpath expr="(//t[@t-call='web.Breadcrumb.Actions'])[2]" position="attributes">
-      <attribute name="t-if">!coopIsPersonPage</attribute>
+      <attribute name="t-if">!coopHideActions</attribute>
     </xpath>
 
     <!--
