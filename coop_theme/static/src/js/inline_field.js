@@ -25,6 +25,12 @@ export class CoopInlineField extends Component {
     static props = {
         ...standardFieldProps,
         placeholder: { type: String, optional: true },
+        // Длинное значение переносится, а не обрезается многоточием.
+        // Название проекта в одну строку не помещается: владелец
+        // 21 сентября 2026 — «в проектах название включает очень мало
+        // символов, из-за этого не видно название полностью».
+        wrap: { type: Boolean, optional: true },
+        rows: { type: Number, optional: true },
     };
 
     setup() {
@@ -73,6 +79,11 @@ export class CoopInlineField extends Component {
             return option ? option[1] : String(value);
         }
         return String(value);
+    }
+
+    /** Набирают в несколько строк: длинный текст и всё, что переносится. */
+    get isMultiline() {
+        return this.field.type === "text" || this.props.wrap === true;
     }
 
     /** Чем набирают: строка, дата, число. */
@@ -212,6 +223,11 @@ export class CoopInlineField extends Component {
 
     onKeydown(event) {
         if (event.key === "Enter") {
+            // В многострочном поле перевод строки — это перевод строки, а
+            // не «готово»: иначе абзац не набрать. Там сохраняет Ctrl+Enter.
+            if (this.isMultiline && !event.ctrlKey && !event.metaKey) {
+                return;
+            }
             event.preventDefault();
             this.accept();
         } else if (event.key === "Escape") {
@@ -224,8 +240,13 @@ export class CoopInlineField extends Component {
 export const coopInlineField = {
     component: CoopInlineField,
     displayName: "Правка по месту",
-    supportedTypes: ["char", "date", "integer", "float", "selection", "many2one"],
-    extractProps: ({ attrs }) => ({ placeholder: attrs.placeholder }),
+    supportedTypes: ["char", "text", "date", "integer", "float", "selection",
+                     "many2one"],
+    extractProps: ({ attrs, options }) => ({
+        placeholder: attrs.placeholder,
+        wrap: options.wrap === true || options.wrap === "true",
+        rows: options.rows ? Number(options.rows) : undefined,
+    }),
 };
 
 registry.category("fields").add("coop_inline", coopInlineField);

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!--
+    Описание карточки: в чтении — абзацы, в правке — поле на несколько
+    строк с галочкой и крестиком. Карандаш стоит над текстом справа, а не
+    в шапке полосы: полоса может быть не своя (её рисует представление), а
+    кнопка относится к самому полю.
+  -->
+  <t t-name="coop_theme.BlockField">
+    <div class="o_coop_block" t-att-class="{ 'o_coop_block_editing': ui.editing }">
+      <t t-if="ui.editing">
+        <textarea class="o_input o_coop_block_input" t-ref="input"
+                  t-att-rows="props.rows or 6"
+                  t-att-placeholder="props.placeholder"
+                  t-on-input="onInput"
+                  t-on-keydown="onKeydown"><t t-esc="ui.draft"/></textarea>
+        <div class="o_coop_block_actions">
+          <button type="button" class="o_coop_block_btn o_coop_block_ok"
+                  t-att-disabled="ui.busy"
+                  title="Опубликовать" aria-label="Опубликовать"
+                  t-on-click="() => this.accept()">
+            <i class="fa fa-check" role="img" aria-hidden="true"/>
+          </button>
+          <button type="button" class="o_coop_block_btn o_coop_block_cancel"
+                  t-att-disabled="ui.busy"
+                  title="Отменить" aria-label="Отменить"
+                  t-on-click="() => this.cancel()">
+            <i class="fa fa-times" role="img" aria-hidden="true"/>
+          </button>
+        </div>
+      </t>
+      <t t-else="">
+        <div class="o_coop_block_text" t-if="paragraphs.length">
+          <p t-foreach="paragraphs" t-as="абзац" t-key="абзац_index"
+             t-esc="абзац"/>
+        </div>
+        <!--
+          Пустое описание зовёт заполнить только своего: на чужой
+          странице это просто карточка без описания.
+        -->
+        <div class="o_coop_block_empty" t-elif="canEdit"
+             t-esc="props.placeholder or 'Описания пока нет'"/>
+        <button type="button" class="o_coop_block_btn o_coop_block_start"
+                t-if="canEdit"
+                title="Изменить" aria-label="Изменить"
+                t-on-click="() => this.start()">
+          <i class="fa fa-pencil" role="img" aria-hidden="true"/>
+        </button>
+      </t>
+    </div>
+  </t>
+
+</templates>

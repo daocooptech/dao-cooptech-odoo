@@ -7,7 +7,9 @@
     подменяется галочкой и крестиком.
   -->
   <t t-name="coop_theme.InlineField">
-    <span class="o_coop_inline" t-att-class="{ 'o_coop_inline_editing': ui.editing }">
+    <span class="o_coop_inline"
+          t-att-class="{ 'o_coop_inline_editing': ui.editing,
+                         'o_coop_inline_wrap': props.wrap or isMultiline }">
       <t t-if="ui.editing">
         <!--
           Выбор из списка — не набор: варианты известны заранее,
@@ -23,6 +25,18 @@
                   t-att-selected="option[0] === value"
                   t-esc="option[1]"/>
         </select>
+        <!--
+          Длинный текст набирают в несколько строк: в однострочном поле
+          видно только хвост, а начало уезжает за край. Именно это
+          владелец и увидел на названии проекта.
+        -->
+        <textarea t-elif="isMultiline" class="o_input o_coop_inline_input o_coop_inline_area"
+                  t-ref="input"
+                  t-att-rows="props.rows or 2"
+                  t-att-maxlength="maxlength"
+                  t-att-placeholder="props.placeholder"
+                  t-on-input="onInput"
+                  t-on-keydown="onKeydown"><t t-esc="ui.draft"/></textarea>
         <input t-else="" class="o_input o_coop_inline_input" t-ref="input"
                t-att-type="inputType"
                t-att-value="ui.draft"

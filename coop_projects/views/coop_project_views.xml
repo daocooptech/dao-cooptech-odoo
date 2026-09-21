@@ -286,8 +286,23 @@
                      options="{'preview_image': 'image_512'}"/>
             </div>
             <div class="o_coop_hero_main">
-              <h1><field name="name" placeholder="Название проекта"/></h1>
+              <!--
+                Название и строка каталога правятся по карандашу и
+                переносятся целиком. В поле ввода во всю ширину шапки
+                помещалось около сорока знаков, и «Ретроактивный фонд
+                открытого кода» читался как «ектов с открытым кодом»:
+                владелец 21 сентября 2026 — «в проектах название включает
+                очень мало символов, из-за этого не видно название
+                полностью, описание тоже самое».
+              -->
+              <h1><field name="name" widget="coop_inline" nolabel="1"
+                         options="{'wrap': true}"
+                         readonly="not coop_can_edit"
+                         placeholder="Название проекта"/></h1>
               <field name="summary" class="o_coop_hero_summary"
+                     widget="coop_inline" nolabel="1"
+                     options="{'wrap': true}"
+                     readonly="not coop_can_edit"
                      placeholder="Одна строка, которую видно в каталоге"/>
               <div class="o_coop_hero_tags">
                 <field name="kind" widget="badge"
@@ -317,43 +332,48 @@
             <group>
               <field name="date_start" readonly="1"
                      invisible="not date_start"/>
-              <field name="date_deadline"/>
+              <field name="date_deadline" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="days_left" invisible="state != 'gathering'"/>
-              <field name="funding_rule"/>
-              <field name="funding_threshold"
+              <field name="funding_rule" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="funding_threshold" widget="coop_inline"
+                     readonly="not coop_can_edit"
                      invisible="funding_rule != 'threshold'"/>
             </group>
             <group>
-              <field name="contribution_basis"/>
-              <field name="payment_route"
+              <field name="contribution_basis" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="payment_route" widget="coop_inline"
+                     readonly="not coop_can_edit"
                      invisible="not contribution_basis"/>
             </group>
           </group>
           <group string="Если соберём не всё" class="o_coop_fallback"
                  invisible="funding_rule == 'all_or_nothing' or state == 'draft'">
-            <field name="fallback_plan" nolabel="1"
+            <field name="fallback_plan" nolabel="1" widget="coop_block"
+                   readonly="not coop_can_edit"
                    placeholder="Что именно будет сделано на неполном сборе"/>
           </group>
           <group>
             <group string="О проекте">
-              <field name="kind"/>
-              <field name="category_id"/>
-              <field name="subcategory_id"/>
-              <field name="city"/>
+              <field name="kind" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="category_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="subcategory_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="city" widget="coop_inline" readonly="not coop_can_edit"
+                     placeholder="не указан"/>
             </group>
             <group string="Кто собирает">
-              <field name="partner_id"/>
-              <field name="author_id"/>
+              <field name="partner_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="author_id" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="project_id" readonly="1"/>
             </group>
           </group>
           <group>
             <group string="Ресурсы">
-              <field name="required_total"/>
+              <field name="required_total" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="contribution_total"/>
               <field name="readiness" widget="progressbar"/>
               <field name="contributor_count"/>
               <field name="currency_id" invisible="1"/>
+          <field name="coop_can_edit" invisible="1"/>
             </group>
           </group>
 
@@ -513,7 +533,9 @@
           </div>
           <notebook>
             <page string="Описание" name="description">
-              <field name="description"/>
+              <field name="description" widget="coop_block" nolabel="1"
+                     readonly="not coop_can_edit"
+                     placeholder="Расскажите, что за проект и зачем он"/>
             </page>
             <page string="Вклады" name="contributions">
               <div class="alert alert-info" role="status">

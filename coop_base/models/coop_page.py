@@ -21,13 +21,29 @@
 страница, если не своя.
 """
 
-from odoo import _, models
+from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 
 
 class CoopPageMixin(models.AbstractModel):
     _name = 'coop.page.mixin'
     _description = 'Переход с полки на страницу записи'
+
+    # Могу ли я править эту запись — один ответ на все страницы портала.
+    #
+    # Нужен карандашам: правка по месту показывает кнопку только тому,
+    # кто может писать, а спрашивать об этом каждое поле по-своему значит
+    # получить столько ответов, сколько полей. Право берём у самого
+    # движка — у прав доступа и правил записи, — а не выводим из
+    # владельца: правило уже описано в `security/`, и второе описание
+    # рядом рано или поздно разойдётся с первым.
+    coop_can_edit = fields.Boolean(
+        string='Могу править', compute='_compute_coop_can_edit')
+
+    @api.depends_context('uid')
+    def _compute_coop_can_edit(self):
+        for record in self:
+            record.coop_can_edit = bool(record.id) and record.has_access('write')
 
     # Представление страницы по внешнему идентификатору. Пусто — движок
     # возьмёт форму по умолчанию. Задавать стоит везде, где у модели форм

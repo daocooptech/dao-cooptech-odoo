@@ -337,6 +337,118 @@
   white-space: nowrap;
 }
 
+// Длинное значение переносится, а не обрезается: в узкой колонке справок
+// многоточие уместно («не указан», «+7 903…»), а название проекта или
+// строка «коротко о проекте» обязаны читаться целиком. Владелец
+// 21 сентября 2026: «название включает очень мало символов, из-за этого
+// не видно название полностью, описание тоже самое».
+.o_coop_inline_wrap {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+
+  .o_coop_inline_value,
+  .o_coop_inline_empty {
+    overflow: visible;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .o_coop_inline_btn {
+    margin-top: 2px;
+  }
+}
+
+// ── Описание, которое правится по карандашу ──────────────────────────
+//
+// Карандаш в правом верхнем углу самого текста: полоса вокруг может быть
+// не своя, и вешать на неё кнопку значило бы связывать поле с чужой
+// разметкой через DOM.
+.o_coop_block {
+  position: relative;
+  width: 100%;
+
+  &:hover .o_coop_block_start,
+  .o_coop_block_start:focus-visible {
+    opacity: 1;
+  }
+}
+
+.o_coop_block_text {
+  p {
+    margin: 0 0 8px;
+    white-space: pre-wrap;
+    word-break: break-word;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.o_coop_block_empty {
+  color: var(--coop-slate-light, #8a8a80);
+}
+
+.o_coop_block_input {
+  width: 100%;
+  resize: vertical;
+  font: inherit;
+  line-height: 1.5;
+}
+
+.o_coop_block_actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.o_coop_block_btn {
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--coop-slate-light, #8a8a80);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--coop-teal-dark, #0f6b63);
+  }
+
+  &:disabled {
+    opacity: .5;
+    cursor: default;
+  }
+}
+
+.o_coop_block_ok {
+  color: var(--coop-teal-dark, #0f6b63);
+}
+
+.o_coop_block_start {
+  position: absolute;
+  top: 0;
+  right: 0;
+  opacity: 0;
+  transition: opacity .12s;
+}
+
+@media (hover: none) {
+  .o_coop_block_start {
+    opacity: 1;
+  }
+}
+
+.o_coop_inline_area {
+  width: 100%;
+  min-height: 2.6em;
+  resize: vertical;
+  font: inherit;
+  line-height: 1.4;
+}
+
 .o_coop_inline_empty {
   color: var(--coop-slate-light, #8a8a80);
 }
