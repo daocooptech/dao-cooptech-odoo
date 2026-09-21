@@ -19,7 +19,7 @@ from odoo.exceptions import UserError
 class CoopProgram(models.Model):
     _name = 'coop.program'
     _description = 'Целевая программа кооперации'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin']
     _order = 'create_date desc, id desc'
 
     name = fields.Char(string='Название', required=True, tracking=True)

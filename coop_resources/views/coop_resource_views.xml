@@ -218,25 +218,26 @@
                  statusbar_visible="draft,published,closed"/>
         </header>
         <sheet>
+          <field name="coop_can_edit" invisible="1"/>
           <field name="image_1920" widget="image" class="oe_avatar"/>
           <div class="oe_title">
-            <h1><field name="name" placeholder="Что предлагаете или ищете"/></h1>
+            <h1><field name="name" placeholder="Что предлагаете или ищете" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/></h1>
           </div>
           <group>
             <group string="Что это">
               <field name="listing_type" widget="radio" options="{'horizontal': True}"/>
-              <field name="resource_type"/>
-              <field name="category_id" options="{'no_create': True}"/>
+              <field name="resource_type" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="category_id" options="{'no_create': True}" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="method_ids" widget="many2many_tags"
                      options="{'no_create': True}"/>
             </group>
             <group string="Условия">
-              <field name="price_kind"/>
+              <field name="price_kind" widget="coop_inline" readonly="not coop_can_edit"/>
               <label for="price"/>
               <div class="o_row">
-                <field name="price" readonly="price_kind == 'none'"/>
+                <field name="price" readonly="price_kind == 'none'" widget="coop_inline"/>
                 <field name="price_unit_label" placeholder="кг, шт., сутки"
-                       readonly="price_kind == 'none'"/>
+                       readonly="price_kind == 'none'" widget="coop_inline"/>
               </div>
               <field name="currency_id" invisible="1"/>
               <field name="price_display" readonly="1"/>
@@ -244,8 +245,8 @@
           </group>
           <group>
             <group string="Кто и где">
-              <field name="owner_id"/>
-              <field name="city"/>
+              <field name="owner_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="city" widget="coop_inline" readonly="not coop_can_edit"/>
             </group>
             <group string="Продвижение">
               <field name="is_promoted" readonly="1"/>
@@ -259,7 +260,7 @@
           <notebook>
             <page string="Описание" name="description">
               <field name="description"
-                     placeholder="Что это, в каком состоянии, на каких условиях."/>
+                     placeholder="Что это, в каком состоянии, на каких условиях." widget="coop_block" readonly="not coop_can_edit"/>
             </page>
           </notebook>
         </sheet>
@@ -423,18 +424,18 @@
         <sheet>
           <group>
             <group string="Что и где">
-              <field name="resource_id"/>
-              <field name="slot_id"/>
-              <field name="partner_id"/>
+              <field name="resource_id" widget="coop_inline"/>
+              <field name="slot_id" widget="coop_inline"/>
+              <field name="partner_id" widget="coop_inline"/>
             </group>
             <group string="Срок и плата">
-              <field name="date_from"/>
-              <field name="date_to"/>
-              <field name="days"/>
-              <field name="price_per_day"/>
+              <field name="date_from" widget="coop_inline"/>
+              <field name="date_to" widget="coop_inline"/>
+              <field name="days" widget="coop_inline"/>
+              <field name="price_per_day" widget="coop_inline"/>
               <field name="total_tokens"/>
               <field name="is_running"/>
-              <field name="transaction_id"/>
+              <field name="transaction_id" widget="coop_inline"/>
             </group>
           </group>
         </sheet>

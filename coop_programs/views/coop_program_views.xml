@@ -111,20 +111,21 @@
                  statusbar_visible="draft,collecting,active,finished"/>
         </header>
         <sheet>
+          <field name="coop_can_edit" invisible="1"/>
           <div class="oe_title">
-            <h1><field name="name" placeholder="Название программы"/></h1>
+            <h1><field name="name" placeholder="Название программы" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/></h1>
           </div>
           <group>
             <group string="Кто и где">
-              <field name="organizer_id"/>
-              <field name="city"/>
-              <field name="geography" placeholder="участие удалённо по всей РФ"/>
-              <field name="industry"/>
+              <field name="organizer_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="city" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="geography" placeholder="участие удалённо по всей РФ" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/>
+              <field name="industry" widget="coop_inline" readonly="not coop_can_edit"/>
             </group>
             <group string="Сколько и как долго">
-              <field name="fund_amount"/>
+              <field name="fund_amount" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="currency_id" invisible="1"/>
-              <field name="duration_months"/>
+              <field name="duration_months" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="participant_count"/>
               <field name="is_participant" invisible="1"/>
               <field name="is_subscribed" invisible="1"/>
@@ -136,21 +137,21 @@
                интересна ли она ему. -->
           <group string="Научная основа">
             <group>
-              <field name="source_author" placeholder="А.В. Чаянов"/>
+              <field name="source_author" placeholder="А.В. Чаянов" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="source_title"
-                     placeholder="Организация крестьянского хозяйства"/>
-              <field name="source_year" placeholder="1925–1927"/>
+                     placeholder="Организация крестьянского хозяйства" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="source_year" placeholder="1925–1927" widget="coop_inline" readonly="not coop_can_edit"/>
             </group>
             <group>
               <field name="source_summary" nolabel="1"
-                     placeholder="Какая именно механика взята из работы"/>
+                     placeholder="Какая именно механика взята из работы" widget="coop_block" readonly="not coop_can_edit"/>
             </group>
           </group>
 
           <notebook>
             <page string="О программе" name="description">
               <field name="description"
-                     placeholder="Что объединяет участников и что они делают сообща"/>
+                     placeholder="Что объединяет участников и что они делают сообща" widget="coop_block" readonly="not coop_can_edit"/>
             </page>
             <page string="Механика" name="steps">
               <field name="step_ids">

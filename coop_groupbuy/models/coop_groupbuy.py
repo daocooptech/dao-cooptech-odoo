@@ -25,7 +25,7 @@ from odoo.exceptions import UserError
 class CoopGroupBuy(models.Model):
     _name = 'coop.groupbuy'
     _description = 'Совместная закупка'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin']
     _order = 'stop_date, id desc'
 
     name = fields.Char(string='Что закупаем', required=True, tracking=True)

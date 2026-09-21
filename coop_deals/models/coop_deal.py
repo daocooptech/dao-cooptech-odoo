@@ -24,7 +24,7 @@ class CoopDeal(models.Model):
     """
     _name = 'coop.deal'
     _description = 'Сделка'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin']
     _order = 'signed_on desc, id desc'
     _rec_name = 'display_name'
 

@@ -24,7 +24,7 @@ from odoo.exceptions import UserError
 class CoopAuction(models.Model):
     _name = 'coop.auction'
     _description = 'Аукцион'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin']
     _order = 'date_end, id desc'
 
     name = fields.Char(string='Лот', required=True, tracking=True)

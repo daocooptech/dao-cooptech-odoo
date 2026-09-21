@@ -25,7 +25,7 @@ class CoopIntangible(models.Model):
     """
     _name = 'coop.intangible'
     _description = 'Нематериальный актив'
-    _inherit = ['mail.thread']
+    _inherit = ['mail.thread', 'coop.page.mixin']
     # Каталог открывается новыми записями, а не алфавитом: по алфавиту
     # рядом встают однотипные права одного вида («База данных
     # поставщиков» у восьми хозяйств подряд), и первый экран выглядит

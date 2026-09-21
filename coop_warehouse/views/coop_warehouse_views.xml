@@ -139,26 +139,27 @@
                   string="Договорённости"/>
         </header>
         <sheet>
+          <field name="coop_can_edit" invisible="1"/>
           <div class="oe_title">
-            <h1><field name="name" placeholder="Как называется склад"/></h1>
+            <h1><field name="name" placeholder="Как называется склад" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/></h1>
           </div>
           <group>
             <group string="Кто и где">
-              <field name="owner_id"/>
-              <field name="keeper_id"/>
-              <field name="city"/>
-              <field name="address" placeholder="Улица, дом, как заезжать"/>
-              <field name="schedule"/>
+              <field name="owner_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="keeper_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="city" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="address" placeholder="Улица, дом, как заезжать" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/>
+              <field name="schedule" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/>
             </group>
             <group string="Что за склад">
-              <field name="storage_kind"/>
-              <field name="capacity_unit"/>
-              <field name="capacity"/>
-              <field name="used_own"/>
+              <field name="storage_kind" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="capacity_unit" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="capacity" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="used_own" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="used_rented" readonly="1"/>
               <field name="free" readonly="1"/>
               <field name="load_percent" widget="progressbar" readonly="1"/>
-              <field name="resource_id"/>
+              <field name="resource_id" widget="coop_inline" readonly="not coop_can_edit"/>
             </group>
           </group>
 
@@ -209,7 +210,7 @@
             </page>
             <page string="Описание" name="description">
               <field name="description"
-                     placeholder="Пандус, высота потолков, допуск машин, что хранить нельзя"/>
+                     placeholder="Пандус, высота потолков, допуск машин, что хранить нельзя" widget="coop_block" readonly="not coop_can_edit"/>
             </page>
           </notebook>
         </sheet>

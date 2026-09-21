@@ -157,6 +157,7 @@
                  statusbar_visible="draft,published,archived"/>
         </header>
         <sheet>
+          <field name="coop_can_edit" invisible="1"/>
           <field name="image_1920" widget="image" class="oe_avatar"/>
           <div class="oe_button_box" name="button_box">
             <button name="action_open_applications" type="object"
@@ -166,31 +167,31 @@
             </button>
           </div>
           <div class="oe_title">
-            <h1><field name="name" placeholder="Название сообщества"/></h1>
-            <field name="summary" placeholder="Чем сообщество занято — одной строкой"/>
+            <h1><field name="name" placeholder="Название сообщества" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/></h1>
+            <field name="summary" placeholder="Чем сообщество занято — одной строкой" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/>
           </div>
           <group>
             <group>
-              <field name="kind"/>
-              <field name="city" placeholder="Город или «Удалённо»"/>
-              <field name="icon" placeholder="👥"/>
-              <field name="access"/>
+              <field name="kind" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="city" placeholder="Город или «Удалённо»" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="icon" placeholder="👥" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="access" widget="coop_inline" readonly="not coop_can_edit"/>
             </group>
             <group>
-              <field name="partner_id"/>
+              <field name="partner_id" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="member_count"/>
-              <field name="project_id"/>
-              <field name="organization_id"/>
+              <field name="project_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="organization_id" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="channel_id" readonly="1"/>
             </group>
           </group>
           <notebook>
             <page string="О сообществе" name="about">
-              <field name="description" placeholder="Подробное описание"/>
+              <field name="description" placeholder="Подробное описание" widget="coop_block" readonly="not coop_can_edit"/>
             </page>
             <page string="Правила" name="rules">
               <field name="rules"
-                     placeholder="С чем соглашается человек, подавая заявку"/>
+                     placeholder="С чем соглашается человек, подавая заявку" widget="coop_block" readonly="not coop_can_edit"/>
             </page>
             <page string="Участники" name="members">
               <field name="member_ids" readonly="1">
@@ -313,24 +314,25 @@
           <field name="state" widget="statusbar"/>
         </header>
         <sheet>
+          <field name="coop_can_edit" invisible="1"/>
           <group>
             <group>
-              <field name="community_id"/>
-              <field name="partner_id"/>
-              <field name="role"/>
+              <field name="community_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="partner_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="role" widget="coop_inline" readonly="not coop_can_edit"/>
             </group>
             <group>
-              <field name="applied_on"/>
-              <field name="joined_on"/>
-              <field name="left_on"/>
-              <field name="decided_by_id"/>
-              <field name="decided_on"/>
+              <field name="applied_on" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="joined_on" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="left_on" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="decided_by_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="decided_on" widget="coop_inline" readonly="not coop_can_edit"/>
             </group>
           </group>
           <group>
-            <field name="application_note" placeholder="Что человек написал в заявке"/>
+            <field name="application_note" placeholder="Что человек написал в заявке" widget="coop_block" readonly="not coop_can_edit"/>
             <field name="decision_reason"
-                   placeholder="Почему приняли, отклонили или исключили"/>
+                   placeholder="Почему приняли, отклонили или исключили" widget="coop_inline" readonly="not coop_can_edit"/>
           </group>
         </sheet>
         <chatter/>

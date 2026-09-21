@@ -18,7 +18,7 @@ from odoo.exceptions import UserError
 class CoopEvent(models.Model):
     _name = 'coop.event'
     _description = 'Событие кооперативной жизни'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin']
     _order = 'date_start desc, id desc'
 
     name = fields.Char(string='Название', required=True, tracking=True)

@@ -124,28 +124,29 @@
                  statusbar_visible="draft,published,matched"/>
         </header>
         <sheet>
+          <field name="coop_can_edit" invisible="1"/>
           <field name="can_respond" invisible="1"/>
           <div class="oe_title">
-            <h1><field name="name" placeholder="Что предлагаете или что ищете"/></h1>
+            <h1><field name="name" placeholder="Что предлагаете или что ищете" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/></h1>
           </div>
           <group>
             <group string="Кто и что">
-              <field name="side"/>
-              <field name="owner_id"/>
+              <field name="side" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="owner_id" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="warehouse_id"
                      required="side == 'offer'"
-                     invisible="side == 'request'"/>
-              <field name="city"/>
-              <field name="storage_kind"/>
+                     invisible="side == 'request'" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="city" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="storage_kind" widget="coop_inline" readonly="not coop_can_edit"/>
             </group>
             <group string="Сколько и когда">
               <label for="volume"/>
               <div class="o_row">
-                <field name="volume"/>
-                <field name="capacity_unit"/>
+                <field name="volume" widget="coop_inline" readonly="not coop_can_edit"/>
+                <field name="capacity_unit" widget="coop_inline" readonly="not coop_can_edit"/>
               </div>
-              <field name="date_from"/>
-              <field name="date_to"/>
+              <field name="date_from" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="date_to" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="published_on" readonly="1"/>
               <field name="main_price_label" readonly="1"/>
             </group>
@@ -170,8 +171,8 @@
             </page>
             <page string="Описание" name="description">
               <field name="description"
-                     placeholder="Что за место, что рядом, чего нельзя хранить"/>
-              <field name="contact_note" placeholder="Как связаться и когда приезжать"/>
+                     placeholder="Что за место, что рядом, чего нельзя хранить" widget="coop_block" readonly="not coop_can_edit"/>
+              <field name="contact_note" placeholder="Как связаться и когда приезжать" widget="coop_inline" readonly="not coop_can_edit"/>
             </page>
             <page string="Сделки" name="deals">
               <field name="deal_ids">

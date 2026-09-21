@@ -139,6 +139,7 @@
                  statusbar_visible="draft,published,closed"/>
         </header>
         <sheet>
+          <field name="coop_can_edit" invisible="1"/>
           <div class="oe_button_box" name="button_box">
             <button name="action_open_applications" type="object"
                     class="oe_stat_button" icon="fa-users">
@@ -148,37 +149,37 @@
 
           <field name="image_1920" widget="image" class="oe_avatar"/>
           <div class="oe_title">
-            <h1><field name="name" placeholder="Кто нужен"/></h1>
+            <h1><field name="name" placeholder="Кто нужен" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/></h1>
           </div>
 
           <group>
             <group string="Кто ищет">
-              <field name="partner_id"/>
-              <field name="author_id"/>
-              <field name="project_id" options="{'no_create': True}"/>
-              <field name="city"/>
-              <field name="coop_specialization_id" options="{'no_create': True}"/>
+              <field name="partner_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="author_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="project_id" options="{'no_create': True}" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="city" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="coop_specialization_id" options="{'no_create': True}" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="coop_specialization_category_id" readonly="1"/>
             </group>
             <group string="Условия">
-              <field name="employment"/>
-              <field name="experience_level"/>
-              <field name="reward_kind"/>
+              <field name="employment" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="experience_level" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="reward_kind" widget="coop_inline" readonly="not coop_can_edit"/>
               <label for="pay_from" string="Оплата"
                      invisible="reward_kind in ('barter', 'volunteer')"/>
               <div class="o_row" invisible="reward_kind in ('barter', 'volunteer')">
-                <field name="pay_from"/>
+                <field name="pay_from" widget="coop_inline" readonly="not coop_can_edit"/>
                 <span>–</span>
-                <field name="pay_to"/>
-                <field name="pay_period"/>
+                <field name="pay_to" widget="coop_inline" readonly="not coop_can_edit"/>
+                <field name="pay_period" widget="coop_inline" readonly="not coop_can_edit"/>
               </div>
               <field name="currency_id" invisible="1"/>
               <!-- Доля вводится оценкой вклада, а не процентом: процент
                    считается от суммы вкладов проекта и меняется, когда в
                    проект вносят что-то ещё. -->
-              <field name="contribution_value" invisible="reward_kind != 'share'"/>
+              <field name="contribution_value" invisible="reward_kind != 'share'" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="share_percent" readonly="1" invisible="reward_kind != 'share'"/>
-              <field name="reward_note"/>
+              <field name="reward_note" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/>
               <field name="reward_display" readonly="1" string="В каталоге"/>
               <field name="is_mine" invisible="1"/>
               <field name="my_application_state" invisible="1"/>
@@ -194,7 +195,7 @@
           <notebook>
             <page string="Что делать" name="description">
               <field name="description"
-                     placeholder="Задача и условия. Конкретнее, чем «работа в дружном коллективе»."/>
+                     placeholder="Задача и условия. Конкретнее, чем «работа в дружном коллективе»." widget="coop_block" readonly="not coop_can_edit"/>
             </page>
             <page string="Отклики" name="applications" invisible="not is_mine">
               <field name="application_ids" nolabel="1" readonly="1">

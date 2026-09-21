@@ -109,36 +109,37 @@
                  statusbar_visible="draft,active"/>
         </header>
         <sheet>
+          <field name="coop_can_edit" invisible="1"/>
           <field name="can_request_license" invisible="1"/>
           <field name="image_1920" widget="image" class="oe_avatar"/>
           <div class="oe_title">
-            <h1><field name="name" placeholder="Рецептура сыра «Дербентский»"/></h1>
+            <h1><field name="name" placeholder="Рецептура сыра «Дербентский»" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/></h1>
           </div>
           <group>
             <group string="Что это">
-              <field name="kind"/>
-              <field name="owner_id"/>
+              <field name="kind" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="owner_id" widget="coop_inline" readonly="not coop_can_edit"/>
             </group>
             <group string="Правовая охрана">
               <field name="legal_basis"
-                     placeholder="Режим коммерческой тайны, приказ от 12.03.2025"/>
-              <field name="registration_number"/>
-              <field name="registered_on"/>
-              <field name="protection_until"/>
+                     placeholder="Режим коммерческой тайны, приказ от 12.03.2025" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="registration_number" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="registered_on" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="protection_until" widget="coop_inline" readonly="not coop_can_edit"/>
             </group>
           </group>
           <group>
             <group string="Учёт по ФСБУ 14/2022">
-              <field name="initial_cost"/>
-              <field name="useful_life_months"/>
-              <field name="accumulated_depreciation"/>
+              <field name="initial_cost" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="useful_life_months" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="accumulated_depreciation" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="residual_value" readonly="1"/>
               <field name="currency_id" invisible="1"/>
             </group>
             <group string="Залог">
-              <field name="pledge_state"/>
-              <field name="pledge_reference" invisible="pledge_state == 'none'"/>
-              <field name="pledge_holder_id" invisible="pledge_state == 'none'"/>
+              <field name="pledge_state" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="pledge_reference" invisible="pledge_state == 'none'" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="pledge_holder_id" invisible="pledge_state == 'none'" widget="coop_inline" readonly="not coop_can_edit"/>
               <div colspan="2" class="text-muted small"
                    invisible="pledge_state != 'none'">
                 Оценка показывает стоимость актива, но сама по себе ничего
@@ -151,7 +152,7 @@
           </group>
           <notebook>
             <page string="Описание" name="description">
-              <field name="description"/>
+              <field name="description" widget="coop_block" readonly="not coop_can_edit"/>
             </page>
             <page string="Лицензии" name="licenses">
               <field name="license_ids">
@@ -374,9 +375,9 @@
           <div class="oe_title"><h1><field name="display_name" readonly="1"/></h1></div>
           <group>
             <group string="Что и кому">
-              <field name="intangible_id" options="{'no_create': True}"/>
+              <field name="intangible_id" options="{'no_create': True}" widget="coop_inline"/>
               <field name="licensor_id" readonly="1"/>
-              <field name="licensee_id"/>
+              <field name="licensee_id" widget="coop_inline"/>
               <field name="is_share_of_right"/>
               <div colspan="2" class="alert alert-warning small" role="status"
                    invisible="not is_share_of_right">
@@ -389,17 +390,17 @@
             </group>
             <group string="Условия">
               <field name="is_exclusive"/>
-              <field name="territory"/>
-              <field name="starts_on"/>
-              <field name="ends_on"/>
-              <field name="volume_limit"/>
-              <field name="volume_unit"/>
+              <field name="territory" widget="coop_inline"/>
+              <field name="starts_on" widget="coop_inline"/>
+              <field name="ends_on" widget="coop_inline"/>
+              <field name="volume_limit" widget="coop_inline"/>
+              <field name="volume_unit" widget="coop_inline"/>
               <field name="volume_used" readonly="1"/>
             </group>
           </group>
           <group string="Деньги">
-            <field name="price"/>
-            <field name="royalty_percent"/>
+            <field name="price" widget="coop_inline"/>
+            <field name="royalty_percent" widget="coop_inline"/>
             <field name="currency_id" invisible="1"/>
           </group>
           <group string="Токен" invisible="not jetton_master_address">

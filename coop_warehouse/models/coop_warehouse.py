@@ -78,7 +78,7 @@ def amount_with_unit(value, unit):
 class CoopWarehouse(models.Model):
     _name = 'coop.warehouse'
     _description = 'Склад'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin']
     _order = 'name'
 
     name = fields.Char(string='Название', required=True, tracking=True)

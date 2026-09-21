@@ -165,26 +165,27 @@
                  statusbar_visible="collecting,stopped,delivering,handout,done"/>
         </header>
         <sheet>
+          <field name="coop_can_edit" invisible="1"/>
           <field name="can_join" invisible="1"/>
           <field name="my_order_id" invisible="1"/>
           <div class="oe_title">
-            <h1><field name="name" placeholder="Что закупаем"/></h1>
+            <h1><field name="name" placeholder="Что закупаем" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/></h1>
           </div>
           <group>
             <group string="Кто и где">
-              <field name="organizer_id"/>
-              <field name="supplier_name" placeholder="У кого закупаем"/>
-              <field name="city"/>
-              <field name="pickup_point" placeholder="Куда приезжать за своим"/>
+              <field name="organizer_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="supplier_name" placeholder="У кого закупаем" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/>
+              <field name="city" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="pickup_point" placeholder="Куда приезжать за своим" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/>
             </group>
             <group string="Объём и цена">
               <label for="min_volume"/>
               <div class="o_row">
-                <field name="min_volume"/>
-                <field name="unit_label" placeholder="кг, шт."/>
+                <field name="min_volume" widget="coop_inline" readonly="not coop_can_edit"/>
+                <field name="unit_label" placeholder="кг, шт." widget="coop_inline" readonly="not coop_can_edit"/>
               </div>
-              <field name="base_price"/>
-              <field name="org_fee_percent"/>
+              <field name="base_price" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="org_fee_percent" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="current_price" readonly="1"/>
               <field name="total_quantity" readonly="1"/>
               <field name="progress" widget="progressbar" readonly="1"/>
@@ -192,8 +193,8 @@
           </group>
           <group>
             <group string="Сроки">
-              <field name="stop_date"/>
-              <field name="delivery_date"/>
+              <field name="stop_date" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="delivery_date" widget="coop_inline" readonly="not coop_can_edit"/>
             </group>
             <group string="Итоги">
               <field name="participant_count"/>
@@ -205,7 +206,7 @@
           <notebook>
             <page string="Условия" name="description">
               <field name="description"
-                     placeholder="Что за товар, чем подтверждено качество, как считается оргсбор"/>
+                     placeholder="Что за товар, чем подтверждено качество, как считается оргсбор" widget="coop_block" readonly="not coop_can_edit"/>
             </page>
             <page string="Уровни цены" name="tiers">
               <field name="tier_ids">

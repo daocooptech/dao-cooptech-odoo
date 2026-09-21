@@ -151,34 +151,35 @@
                  statusbar_visible="draft,agreed,active,acceptance,done"/>
         </header>
         <sheet>
+          <field name="coop_can_edit" invisible="1"/>
           <div class="oe_title">
             <span class="o_form_label">Сделка</span>
             <h1><field name="number" readonly="1"/></h1>
-            <field name="name" placeholder="Что передаётся"/>
+            <field name="name" placeholder="Что передаётся" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/>
           </div>
           <group>
             <group string="Стороны">
-              <field name="party_a_id"/>
-              <field name="role_a" placeholder="продавец, арендатор, исполнитель"/>
-              <field name="party_b_id"/>
-              <field name="role_b" placeholder="покупатель, арендодатель, заказчик"/>
-              <field name="author_id"/>
+              <field name="party_a_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="role_a" placeholder="продавец, арендатор, исполнитель" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/>
+              <field name="party_b_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="role_b" placeholder="покупатель, арендодатель, заказчик" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/>
+              <field name="author_id" widget="coop_inline" readonly="not coop_can_edit"/>
             </group>
             <group string="Условия">
-              <field name="subject"/>
-              <field name="way"/>
-              <field name="city"/>
-              <field name="signed_on"/>
-              <field name="closed_on"/>
-              <field name="amount"/>
+              <field name="subject" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/>
+              <field name="way" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="city" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="signed_on" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="closed_on" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="amount" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="currency_id" invisible="1"/>
             </group>
           </group>
           <group string="Предмет" col="4">
-            <field name="resource_id" invisible="subject != 'resource'"/>
-            <field name="skill_offer_id" invisible="subject != 'service'"/>
-            <field name="vacancy_id" invisible="subject != 'work'"/>
-            <field name="project_id" invisible="subject != 'project'"/>
+            <field name="resource_id" invisible="subject != 'resource'" widget="coop_inline" readonly="not coop_can_edit"/>
+            <field name="skill_offer_id" invisible="subject != 'service'" widget="coop_inline" readonly="not coop_can_edit"/>
+            <field name="vacancy_id" invisible="subject != 'work'" widget="coop_inline" readonly="not coop_can_edit"/>
+            <field name="project_id" invisible="subject != 'project'" widget="coop_inline" readonly="not coop_can_edit"/>
           </group>
           <notebook>
             <page string="Спецификация" name="lines">
@@ -265,9 +266,9 @@
                   <field name="dispute_resolved_on" readonly="1"/>
                 </group>
               </group>
-              <field name="dispute_reason" placeholder="Существо спора"/>
+              <field name="dispute_reason" placeholder="Существо спора" widget="coop_block" readonly="not coop_can_edit"/>
               <field name="dispute_resolution" placeholder="Решение по спору"
-                     groups="base.group_system"/>
+                     groups="base.group_system" widget="coop_block" readonly="not coop_can_edit"/>
             </page>
           </notebook>
         </sheet>

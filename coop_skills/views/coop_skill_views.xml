@@ -139,29 +139,30 @@
                  statusbar_visible="draft,published,paused"/>
         </header>
         <sheet>
+          <field name="coop_can_edit" invisible="1"/>
           <field name="image_1920" widget="image" class="oe_avatar"/>
           <div class="oe_title">
-            <h1><field name="name" placeholder="Чем занимаетесь"/></h1>
+            <h1><field name="name" placeholder="Чем занимаетесь" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/></h1>
           </div>
           <group>
             <group string="Кто и где">
-              <field name="partner_id"/>
-              <field name="city"/>
+              <field name="partner_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="city" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="ready_to_travel"/>
-              <field name="coop_specialization_id" options="{'no_create': True}"/>
+              <field name="coop_specialization_id" options="{'no_create': True}" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="coop_specialization_category_id" readonly="1"/>
             </group>
             <group string="Условия">
-              <field name="rate_kind"/>
+              <field name="rate_kind" widget="coop_inline" readonly="not coop_can_edit"/>
               <label for="rate"/>
               <div class="o_row">
-                <field name="rate" readonly="rate_kind == 'piece'"/>
-                <field name="rate_period" readonly="rate_kind == 'piece'"/>
+                <field name="rate" readonly="rate_kind == 'piece'" widget="coop_inline"/>
+                <field name="rate_period" readonly="rate_kind == 'piece'" widget="coop_inline"/>
               </div>
               <field name="currency_id" invisible="1"/>
               <field name="rate_display" readonly="1" string="В каталоге"/>
               <field name="experience_months"
-                     help="Полных месяцев работы по этому направлению. Ниже видно, как это будет написано в каталоге."/>
+                     help="Полных месяцев работы по этому направлению. Ниже видно, как это будет написано в каталоге." widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="experience_display" readonly="1" string="В каталоге"/>
             </group>
           </group>
@@ -175,7 +176,7 @@
           <notebook>
             <page string="Описание" name="description">
               <field name="description"
-                     placeholder="Что именно готовы делать, с каким оборудованием, какие есть допуски."/>
+                     placeholder="Что именно готовы делать, с каким оборудованием, какие есть допуски." widget="coop_block" readonly="not coop_can_edit"/>
             </page>
           </notebook>
         </sheet>

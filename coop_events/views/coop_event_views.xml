@@ -128,25 +128,26 @@
                  statusbar_visible="draft,open,closed,held"/>
         </header>
         <sheet>
+          <field name="coop_can_edit" invisible="1"/>
           <div class="oe_title">
             <h1>
-              <field name="icon" class="oe_inline" style="width: 3ch"/>
-              <field name="name" class="oe_inline" placeholder="Что за событие"/>
+              <field name="icon" class="oe_inline" style="width: 3ch" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="name" class="oe_inline" placeholder="Что за событие" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/>
             </h1>
           </div>
           <group>
             <group string="Когда и где">
-              <field name="date_start"/>
-              <field name="date_end"/>
-              <field name="format"/>
-              <field name="city"/>
-              <field name="place" placeholder="Адрес или ссылка на созвон"/>
+              <field name="date_start" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="date_end" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="format" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="city" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="place" placeholder="Адрес или ссылка на созвон" widget="coop_inline" options="{'wrap': true}" readonly="not coop_can_edit"/>
             </group>
             <group string="Кто и сколько">
-              <field name="category"/>
-              <field name="organizer_id"/>
-              <field name="community_id"/>
-              <field name="capacity"/>
+              <field name="category" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="organizer_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="community_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="capacity" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="signup_count"/>
               <field name="seats_left" invisible="not capacity"/>
               <field name="am_i_signed" invisible="1"/>
@@ -156,7 +157,7 @@
           <notebook>
             <page string="Описание" name="description">
               <field name="description"
-                     placeholder="Что будет, для кого, что взять с собой"/>
+                     placeholder="Что будет, для кого, что взять с собой" widget="coop_block" readonly="not coop_can_edit"/>
             </page>
             <page string="Записались" name="signups">
               <field name="signup_ids">
