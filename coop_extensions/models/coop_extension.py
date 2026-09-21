@@ -154,3 +154,56 @@ class CoopExtension(models.Model):
 
     def action_archive_listing(self):
         self.write({'publication_state': 'archived'})
+
+
+class CoopExtensionCatalogFilters(models.Model):
+    """Панель отбора каталога расширений.
+
+    Та же панель, что у остальных каталогов платформы: набор полей
+    объявляет сам раздел, а тема рисует его и считает по нему записи.
+    Штатная панель Odoo здесь не годится — она берёт фиксированный
+    список полей из разметки и работает только со ссылками и списками
+    значений, без диапазона цены.
+
+    Что отбирают в каталоге расширений: раздел, условия, цену и
+    состояние — подключено ли, чьё, готово ли к установке. Состояние
+    вынесено в быстрые значки: это ярлыки к тому, что человек и так
+    видит на карточке, и нажимаются они чаще, чем открывается список
+    выбора.
+    """
+
+    _inherit = 'coop.extension'
+
+    def _coop_catalog_filters(self, domain):
+        def выбор(имя):
+            return [{'value': code, 'label': label}
+                    for code, label in self._fields[имя].selection]
+
+        return [
+            {'code': 'category', 'label': 'Раздел',
+             'hint': 'Учёт, процессы, сбыт, финансы, сообщество, интеграции.',
+             'widget': 'select', 'field': 'category', 'placeholder': 'Любой',
+             'options': выбор('category')},
+            {'code': 'pricing', 'label': 'Условия',
+             'hint': 'Условия назначает автор расширения, а не платформа.',
+             'widget': 'select', 'field': 'pricing', 'placeholder': 'Любые',
+             'options': выбор('pricing')},
+            {'code': 'price', 'label': 'Цена, ₽',
+             'hint': 'Пустое поле — без ограничения. У бесплатных цена нулевая, '
+                     'и «от» их отсекает.',
+             'widget': 'range', 'field': 'price'},
+            {'code': 'quick', 'label': 'Быстрые фильтры', 'widget': 'quick',
+             'options': [
+                 {'value': 'installed', 'label': '✓ Подключено',
+                  'domain': [('is_installed', '=', True)]},
+                 {'value': 'available', 'label': '⬇ Можно подключить',
+                  'domain': [('is_installed', '=', False),
+                             ('module_name', '!=', False)]},
+                 {'value': 'planned', 'label': '🕓 Заявлено',
+                  'domain': [('module_name', '=', False)]},
+                 {'value': 'official', 'label': '🏛 Платформы',
+                  'domain': [('is_official', '=', True)]},
+                 {'value': 'third', 'label': '🧩 Стороннее',
+                  'domain': [('is_official', '=', False)]},
+             ]},
+        ]

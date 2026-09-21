@@ -20,6 +20,7 @@
         держит расширения одного раздела рядом.
       -->
       <kanban class="o_coop_ext" quick_create="false"
+              js_class="coop_extension_kanban"
               default_order="category, sequence, name">
         <!-- Поля, которые участвуют только в условиях шаблона, всё равно
              надо объявить: иначе Odoo их не подгрузит, и карточка упадёт
@@ -190,6 +191,7 @@
     <field name="name">Установленные</field>
     <field name="path">extensions-installed</field>
     <field name="res_model">coop.extension</field>
+    <field name="context">{'coop_filters': True}</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('is_installed', '=', True)]</field>
     <field name="help" type="html">
@@ -203,6 +205,7 @@
     <field name="name">Общий каталог</field>
     <field name="res_model">coop.extension</field>
     <field name="path">extensions</field>
+    <field name="context">{'coop_filters': True}</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('publication_state', '=', 'published')]</field>
     <field name="help" type="html">
@@ -218,7 +221,7 @@
     <field name="path">my-extensions</field>
     <field name="view_mode">list,kanban,form</field>
     <field name="domain">[('author_id.user_ids', 'in', [uid])]</field>
-    <field name="context">{'default_publication_state': 'draft'}</field>
+    <field name="context">{'default_publication_state': 'draft', 'coop_filters': True}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Вы ещё ничего не публиковали</p>
       <p>Расширение — обычный модуль Odoo. Опишите, что он даёт участнику,

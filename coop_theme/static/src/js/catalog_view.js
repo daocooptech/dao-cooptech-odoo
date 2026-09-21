@@ -203,7 +203,20 @@ export class CoopCatalogKanbanController extends KanbanController {
             () => {
                 const order = this.coopSort.orders[this.props.resModel];
                 if (order) {
-                    this.model.load({ orderBy: parseOrder(order) });
+                    // Домен передаётся вместе с порядком, и это не
+                    // лишнее слово. «Сбросить» в панели меняет разом два
+                    // условия: снимает отбор и возвращает порядок по
+                    // умолчанию. Отбор снимается через модель поиска —
+                    // она сообщит об этом следующим кадром, — а порядок
+                    // перезагружает список сразу же. Без домена эта
+                    // перезагрузка успевала взять старый, ещё отобранный,
+                    // и приходила второй: панель показывала «Показать
+                    // результаты · 20», а в каталоге оставалось три
+                    // карточки от снятого фильтра.
+                    this.model.load({
+                        orderBy: parseOrder(order),
+                        domain: this.props.domain,
+                    });
                 }
             },
             () => [this.coopSort.orders[this.props.resModel]]
@@ -256,6 +269,22 @@ patch(ControlPanel.prototype, {
      */
     get coopIsCatalog() {
         return Boolean(this.env.searchModel?.globalContext?.coop_catalog);
+    },
+
+    /**
+     * Панель отбора нужна не только каталогам с плитками.
+     *
+     * Кнопка, открывающая её на узком экране, показывалась ровно там,
+     * где стоит признак каталога, — а каталог расширений собран без
+     * него: от общего каталога ему нужен отбор, но не переключатель
+     * «плиткой / списком / на карте» (карты у модуля не бывает) и не
+     * плиточная геометрия карточки. Признак у панели поэтому свой:
+     * `coop_filters` значит «есть чем отбирать», `coop_catalog`
+     * по-прежнему включает его заодно.
+     */
+    get coopHasFilters() {
+        const context = this.env.searchModel?.globalContext || {};
+        return Boolean(context.coop_catalog || context.coop_filters);
     },
 
     /**

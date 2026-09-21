@@ -19,7 +19,9 @@
     'category': 'Cooperative',
     'version': '19.0.1.0.0',
     'license': 'LGPL-3',
-    'depends': ['base', 'mail', 'coop_base'],
+    # coop_theme — панель отбора каталога: вид расширений берёт её
+    # поведение и компонент, а не только css-класс.
+    'depends': ['base', 'mail', 'coop_base', 'coop_theme'],
     'data': [
         'security/ir.model.access.csv',
         'views/coop_extension_views.xml',
@@ -29,6 +31,8 @@
     'assets': {
         'web.assets_backend': [
             'coop_extensions/static/src/scss/coop_extensions.scss',
+            'coop_extensions/static/src/js/extension_kanban.js',
+            'coop_extensions/static/src/xml/extension_kanban.xml',
         ],
     },
     'installable': True,

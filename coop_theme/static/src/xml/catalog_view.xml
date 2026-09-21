@@ -129,7 +129,7 @@
       на большом панель стоит колонкой справа и открывать её не нужно.
     -->
     <xpath expr="//div[hasclass('o_control_panel_navigation')]" position="inside">
-      <button type="button" class="o_coop_filters_toggle" t-if="coopIsCatalog"
+      <button type="button" class="o_coop_filters_toggle" t-if="coopHasFilters"
               aria-controls="coop_filters_body"
               t-att-aria-expanded="coopFilters.open ? 'true' : 'false'"
               t-on-click="() => this.coopToggleFilters()">

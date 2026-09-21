@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!--
+    Штатная канбановая разметка плюс панель отбора справа. Класс на
+    корне нужен затем, чтобы разложить область содержимого в две
+    колонки: в теме то же самое сделано под `o_coop_tiles`, но вместе с
+    ним приехала бы и плиточная геометрия карточки.
+  -->
+  <t t-name="coop_extensions.ExtensionKanbanView" t-inherit="web.KanbanView"
+     t-inherit-mode="primary">
+
+    <xpath expr="//div[@t-ref='root']" position="attributes">
+      <attribute name="t-attf-class">{{ className }} {{ hasSelectedRecords ? 'o_kanban_selection_active' : 'o_kanban_selection_available' }} o_coop_ext_catalog</attribute>
+    </xpath>
+
+    <!--
+      Панель после списка, а не до него: в разметке порядок задаёт то,
+      что читает голосовой доступ, — сначала сам каталог, потом то, чем
+      его отбирают. На экране она стоит справа, за это отвечает
+      `order: 2` в теме.
+    -->
+    <xpath expr="//t[@t-component='props.Renderer']" position="after">
+      <CoopFilters resModel="props.resModel" baseDomain="coopBaseDomain"/>
+    </xpath>
+
+  </t>
+
+</templates>
