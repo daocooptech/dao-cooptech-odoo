@@ -104,6 +104,7 @@ sed -i "s|^db_password = .*|db_password = $DB_PASS|" /etc/coop-odoo.conf
 install -m 644 "$ODOO_HOME/coop-addons/deploy/coop-odoo.service" /etc/systemd/system/
 install -m 644 "$ODOO_HOME/coop-addons/deploy/coop-update.service" /etc/systemd/system/
 install -m 644 "$ODOO_HOME/coop-addons/deploy/coop-update.timer" /etc/systemd/system/
+install -m 644 "$ODOO_HOME/coop-addons/deploy/logrotate-coop" /etc/logrotate.d/coop
 install -m 644 "$ODOO_HOME/coop-addons/deploy/nginx-coop.conf" /etc/nginx/sites-available/coop
 ln -sf /etc/nginx/sites-available/coop /etc/nginx/sites-enabled/coop
 rm -f /etc/nginx/sites-enabled/default
