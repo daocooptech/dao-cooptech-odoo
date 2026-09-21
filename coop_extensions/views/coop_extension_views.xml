@@ -11,7 +11,16 @@
     <field name="name">coop.extension.kanban</field>
     <field name="model">coop.extension</field>
     <field name="arch" type="xml">
-      <kanban class="o_coop_ext" default_group_by="category" quick_create="false">
+      <!--
+        Без группировки по разделу. Колонки канбана растут вправо, и
+        каталог из шести разделов уезжал за правый край: чтобы увидеть
+        «Интеграции», надо было прокручивать экран вбок. Плитки в один
+        поток переносятся по ширине области и листаются только вниз, а
+        раздел у карточки написан над названием. Порядок при этом
+        держит расширения одного раздела рядом.
+      -->
+      <kanban class="o_coop_ext" quick_create="false"
+              default_order="category, sequence, name">
         <!-- Поля, которые участвуют только в условиях шаблона, всё равно
              надо объявить: иначе Odoo их не подгрузит, и карточка упадёт
              на чтении undefined. -->
