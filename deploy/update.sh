@@ -13,6 +13,38 @@ CONF=/etc/coop-odoo.conf
 DB=koopeh
 USER=odoo
 
+# Запуск службы — только когда память освободилась.
+#
+# Обновление модулей запускает второй питон рядом с работающей службой, и
+# на машине с гигабайтом оперативной памяти они вдвоём выбирают её почти
+# целиком. Систему это не убивает, но следующий запуск падает на самом
+# первом импорте: «ModuleNotFoundError: No module named 'passlib'» при
+# том, что passlib на месте и всегда был. Измерено 21 сентября 2026 —
+# три таких падения за день, все сразу после обновления модулей.
+#
+# Службу поднимает systemd своим перезапуском через пять секунд, поэтому
+# беда самозалечивалась и в глаза не бросалась. Цена всё же есть: лишние
+# секунды страницы «Платформа обновляется» на каждой выкатке и риск, что
+# однажды не поднимется и со второго раза.
+#
+# Ждём не время, а условие: сколько памяти доступно на самом деле.
+# Двести мегабайт — с запасом от измеренных 341 МБ рабочего процесса при
+# холодном старте, когда общего с родителем ещё нет.
+запустить_службу() {
+    local нужно=200000   # килобайт
+    local ждём=0
+    while [ "$ждём" -lt 30 ]; do
+        local есть
+        есть=$(awk '/^MemAvailable:/ {print $2}' /proc/meminfo)
+        [ -z "$есть" ] && break
+        [ "$есть" -ge "$нужно" ] && break
+        sleep 1
+        ждём=$((ждём + 1))
+    done
+    [ "$ждём" -gt 0 ] && say "Ждал память $ждём с"
+    systemctl "$@" coop-odoo
+}
+
 say() { printf '\n\033[1m== %s\033[0m\n' "$*"; }
 run() { sudo -u "$USER" "$@"; }
 
@@ -187,10 +219,10 @@ if [ -n "$new_modules" ]; then
     systemctl stop coop-odoo
     if ! run "$ODOO_HOME/venv/bin/python" "$ODOO_HOME/odoo/odoo-bin"             -c "$CONF" -d "$DB" -i "$new_modules" --stop-after-init --no-http; then
         say "УСТАНОВКА УПАЛА: $new_modules"
-        systemctl start coop-odoo || true
+        запустить_службу start || true
         exit 1
     fi
-    systemctl start coop-odoo
+    запустить_службу start
 fi
 
 if [ -z "$changed" ]; then
@@ -224,7 +256,7 @@ else
     if ! run "$ODOO_HOME/venv/bin/python" "$ODOO_HOME/odoo/odoo-bin"             -c "$CONF" -d "$DB" -u "$changed" --stop-after-init --no-http; then
         say "ОБНОВЛЕНИЕ УПАЛО. База могла остаться в половинчатом виде."
         say "Откат: bash $ODOO_HOME/coop-addons/deploy/restore.sh $snapshot"
-        systemctl start coop-odoo || true
+        запустить_службу start || true
         exit 1
     fi
 fi
@@ -243,7 +275,7 @@ fi
 # Пересоберётся ровно то, что изменилось: правка стилей не тянет
 # за собой пересборку семи мегабайт скриптов.
 
-systemctl restart coop-odoo
+запустить_службу restart
 
 # Прогрев: собрать пакеты стилей и скриптов сразу, а не при первом
 # заходе участника.
