@@ -13,7 +13,7 @@ import { Pager } from "@web/core/pager/pager";
 import { CoopTabs } from "@coop_theme/js/shell";
 import { CoopFilters, coopFiltersUi } from "@coop_theme/js/catalog_filters";
 import { CoopMap } from "@coop_theme/js/catalog_map";
-import { CoopShelves, coopShelvesState } from "@coop_theme/js/catalog_shelves";
+import { CoopShelves } from "@coop_theme/js/catalog_shelves";
 import { coopSort, parseOrder } from "@coop_theme/js/catalog_sort";
 import { reactive, useEffect, useState } from "@odoo/owl";
 
@@ -87,14 +87,6 @@ export class CoopCatalogKanbanController extends KanbanController {
      *  каждого раздела своя рубрикация, и промах здесь виден сразу всем.
      *  Не объявлено — полок нет, каталог работает как раньше. */
     get coopShelfField() {
-        // ВРЕМЕННО: полки выключены, пока ищется причина круга
-        // перезагрузок. 21 сентября 2026 разделы с полками на боевой не
-        // открывались вовсе: пустая область и 500 запросов в минуту из
-        // одной вкладки. Каталог расширений — единственный без полок —
-        // открывался нормально. Это выключение и есть опыт: если круг
-        // прекратится, причина в полках; вернуть строку обратно.
-        return false;
-        // eslint-disable-next-line no-unreachable
         return this.props.context?.coop_shelf_field || false;
     }
 
@@ -115,9 +107,15 @@ export class CoopCatalogKanbanController extends KanbanController {
      *  Пока полки грузятся, лента тоже ждёт: иначе она мелькнёт и
      *  исчезнет. */
     get coopShelvesFilled() {
-        const состояние = this.coopShelvesState || coopShelvesState;
         return this.coopShelvesVisible
-            && (состояние.loading || состояние.count > 0);
+            && (this.coopShelves.status === "loading" || this.coopShelves.count > 0);
+    }
+
+    /** Полки сообщили, сколько их собралось. Зовётся ими после того, как
+     *  они встали на экран, — раньше нельзя: см. `catalog_shelves.js`. */
+    coopShelvesLoaded(count) {
+        this.coopShelves.status = "ready";
+        this.coopShelves.count = count;
     }
 
     /** Порядок для полок.
@@ -198,10 +196,16 @@ export class CoopCatalogKanbanController extends KanbanController {
     setup() {
         super.setup();
         this.coopLayout = useState(coopLayout);
-        // Через `useState`, а не напрямую: чтение реактивного объекта
-        // без подписки не перерисовывает экран, и лента оставалась
-        // скрытой после того, как полки сообщили, что не собрались.
-        this.coopShelvesState = useState(coopShelvesState);
+        // Состояние полок держит сам каталог, а не общая переменная, в
+        // которую писали полки. Общая переменная давала круг: запись из
+        // ещё не отрисованного потомка отменяла отрисовку родителя, и
+        // всё начиналось заново — пятьсот запросов в минуту при пустом
+        // экране. Теперь полки сообщают итог вызовом, после появления
+        // на экране; подробности — в `catalog_shelves.js`.
+        //
+        // «loading» с самого начала: пока полки не сказали своё число,
+        // лента не показывается, иначе она мелькнёт и исчезнет.
+        this.coopShelves = useState({ status: "loading", count: 0 });
         this.coopSort = useState(coopSort);
         // Перезагружаем список, когда сменили признак сортировки. Через
         // общее состояние, а не через событие: порядок выбирают в панели

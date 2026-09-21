@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, onWillStart, onWillUnmount, reactive, useState } from "@odoo/owl";
+import { Component, onMounted, onWillStart, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { RelationalModel } from "@web/model/relational_model/relational_model";
 import { addFieldDependencies, extractFieldsFromArchInfo } from "@web/model/relational_model/utils";
@@ -35,8 +35,24 @@ import { KanbanRecord } from "@web/views/kanban/kanban_record";
  * Поэтому лента смотрит не на настройку, а на итог: пока полки грузятся
  * — ждём (иначе лента мелькнёт и исчезнет), собрались — лента не нужна,
  * не собрались — лента возвращается.
+ *
+ * Итог сообщается вызовом `onLoaded` и только после того, как полки
+ * встали на экран, а не общей переменной, в которую они писали из
+ * `onWillStart` и `onWillUnmount`.
+ *
+ * Разница не стилистическая. Переменную читал каталог — родитель этих
+ * же полок. Запись в неё из ещё не отрисованного потомка отменяла
+ * отрисовку родителя, тот начинал её заново и создавал полки заново,
+ * полки снова писали в переменную — и так до бесконечности. 21 сентября
+ * 2026 на боевой это выглядело так: пятьсот запросов в минуту из одной
+ * вкладки, на экране пусто, служба раз за разом перезапускалась по
+ * пределу памяти. Единственный каталог без полок, расширения,
+ * открывался нормально — им и был поставлен опыт.
+ *
+ * Правило общее: потомок не трогает состояние, от которого зависит
+ * отрисовка родителя, пока эта отрисовка идёт. После `onMounted` —
+ * можно: там перерисовка родителя обычная, а не отмена незаконченной.
  */
-export const coopShelvesState = reactive({ loading: false, count: 0 });
 
 export class CoopShelves extends Component {
     static template = "coop_theme.CatalogShelves";
@@ -57,6 +73,9 @@ export class CoopShelves extends Component {
         archInfo: { type: Object },
         fields: { type: Object },
         openRecord: { type: Function, optional: true },
+        // Сколько полок собралось. Зовётся один раз, после появления на
+        // экране: по этому числу каталог решает, показывать ли ленту.
+        onLoaded: { type: Function, optional: true },
     };
 
     setup() {
@@ -89,8 +108,6 @@ export class CoopShelves extends Component {
             // formattedReadGroup, — и вместо каталога был пустой экран.
             // Поэтому вся загрузка обёрнута: не вышло собрать полки —
             // их просто не будет.
-            coopShelvesState.loading = true;
-            coopShelvesState.count = 0;
             try {
                 await this.load();
             } catch (e) {
@@ -98,15 +115,13 @@ export class CoopShelves extends Component {
                 this.state.shelves = [];
             }
             this.state.loading = false;
-            coopShelvesState.count = this.state.shelves.length;
-            coopShelvesState.loading = false;
         });
 
-        // Уходя с экрана, полки снимают свой след: иначе следующий
-        // каталог решил бы, что они уже собраны, и спрятал бы ленту.
-        onWillUnmount(() => {
-            coopShelvesState.loading = false;
-            coopShelvesState.count = 0;
+        // Итог — каталогу, и только теперь: загрузка к этому времени
+        // закончена (она вся в `onWillStart`), а отрисовка родителя уже
+        // завершилась, и сообщение её не отменяет.
+        onMounted(() => {
+            this.props.onLoaded?.(this.state.shelves.length);
         });
     }
 

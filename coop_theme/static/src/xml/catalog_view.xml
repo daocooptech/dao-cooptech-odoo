@@ -67,7 +67,8 @@
                    orderBy="coopShelfOrder"
                    archInfo="props.archInfo"
                    fields="props.fields"
-                   openRecord="(record) => this.openRecord(record)"/>
+                   openRecord="(record) => this.openRecord(record)"
+                   onLoaded="(count) => this.coopShelvesLoaded(count)"/>
     </xpath>
 
     <!--
