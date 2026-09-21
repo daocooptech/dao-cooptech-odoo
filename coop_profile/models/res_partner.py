@@ -558,6 +558,26 @@ class ResPartner(models.Model):
             _('Потребности — %s') % self.display_name,
             own_name=_('Мои потребности'))
 
+    def action_coop_my_organizations(self):
+        """«Смотреть все» у полки «Организации».
+
+        Полка была единственной без этой ссылки: у остальных семи она
+        есть, и человек, привыкший к ней, упирался в полку из пяти
+        плиток без выхода в полный список. Владелец 21 сентября 2026:
+        «в полке организации нет ссылки смотреть все».
+
+        Отбор — по действующему членству, как и сама полка: организации,
+        откуда человек вышел или куда только подал заявление, в его
+        списке организаций делать нечего.
+        """
+        self.ensure_one()
+        организации = self.coop_active_membership_ids.mapped('organization_id')
+        return self._coop_holdings_action(
+            'coop_orgs.action_coop_orgs',
+            [('id', 'in', организации.ids)],
+            _('Организации — %s') % self.display_name,
+            own_name=_('Мои организации'))
+
     def action_coop_my_friends(self):
         self.ensure_one()
         return self._coop_holdings_action(

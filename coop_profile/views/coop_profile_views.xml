@@ -599,6 +599,8 @@
                    invisible="coop_membership_count == 0 or (not coop_is_self and not coop_show_orgs)">
                 <div class="o_coop_band_head">
                   <span>Организации</span>
+                  <button name="action_coop_my_organizations" type="object"
+                          class="o_coop_band_all">смотреть все</button>
                 </div>
                 <div class="o_coop_band_body">
                   <!--
