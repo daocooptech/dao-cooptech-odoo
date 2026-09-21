@@ -821,3 +821,99 @@ body.o_dark_mode .o_coop_logo img {
     font-size: 16px;
   }
 }
+
+// ── Заставка первой загрузки ─────────────────────────────────────────
+//
+// Владелец 21 сентября 2026: «секунд 5 точно грузится, а можно сделать
+// подвал с ссылками был внизу пока грузится и по центру была гифка
+// загрузки в стиле платформы».
+//
+// Заставка растягивается на всю свободную высоту — этим и прижимается
+// подвал к низу экрана. Раньше на пустой области он подпирал шапку, и
+// страница выглядела сломанной, а не загружающейся.
+//
+// Высота считается от окна за вычетом шапки (56) и отступов `.o_coop_main`
+// (22 сверху, 40 снизу) — иначе на коротком экране появлялась лишняя
+// прокрутка, а на длинном подвал всё равно оставался посередине.
+.o_coop_loader {
+  flex: 1 1 auto;
+  min-height: calc(100vh - 56px - 62px);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+
+.o_coop_loader_art {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  display: grid;
+  place-items: center;
+}
+
+.o_coop_loader_ring {
+  position: absolute;
+  inset: 0;
+  width: 96px;
+  height: 96px;
+  animation: coop-loader-spin 1.6s linear infinite;
+
+  circle {
+    fill: none;
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
+}
+
+.o_coop_loader_track {
+  stroke: var(--coop-line, #e6e6e1);
+}
+
+// Дуга примерно в четверть окружности: 2πr ≈ 176, значит 44 закрашено,
+// остальное пусто.
+.o_coop_loader_arc {
+  stroke: var(--coop-teal, #1f9e8f);
+  stroke-dasharray: 44 132;
+}
+
+// Знак платформы тот же, что в шапке: к этому моменту он уже загружен
+// браузером и ничего не стоит. Дышит медленнее, чем крутится дуга, —
+// два движения в одном темпе сливаются в мельтешение.
+.o_coop_loader_mark {
+  width: 52px;
+  height: auto;
+  opacity: .9;
+  animation: coop-loader-breath 2.4s ease-in-out infinite;
+}
+
+html[data-bs-theme="dark"] .o_coop_loader_mark,
+body.o_dark_mode .o_coop_loader_mark {
+  filter: invert(1);
+}
+
+.o_coop_loader_text {
+  margin: 0;
+  font-size: 13px;
+  color: var(--coop-slate, #64748b);
+}
+
+@keyframes coop-loader-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes coop-loader-breath {
+  0%, 100% { opacity: .55; transform: scale(.97); }
+  50%      { opacity: 1;   transform: scale(1); }
+}
+
+// Кому движение мешает — тому его нет: заставка остаётся, но замирает.
+// Правило системное, не наше изобретение, и стоит одной строки.
+@media (prefers-reduced-motion: reduce) {
+  .o_coop_loader_ring,
+  .o_coop_loader_mark {
+    animation: none;
+  }
+}
