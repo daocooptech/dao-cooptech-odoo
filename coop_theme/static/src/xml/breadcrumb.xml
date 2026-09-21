@@ -40,6 +40,24 @@
     </xpath>
 
     <!--
+      Путь предков — только там, где он что-то объясняет. На странице
+      человека он называет кого угодно, кроме того, кто перед глазами;
+      см. `coopHidePath` в `breadcrumb.js`.
+    -->
+    <xpath expr="//ol[hasclass('breadcrumb')]" position="attributes">
+      <attribute name="t-if">!coopHidePath</attribute>
+    </xpath>
+
+    <!--
+      Вместе с путём убирается и последняя крошка: это имя открытой
+      записи, и на странице человека оно приходит пустым — от него
+      остаётся один значок настроек, висящий в пустоте.
+    -->
+    <xpath expr="//div[hasclass('o_last_breadcrumb_item')][hasclass('gap-2')]" position="attributes">
+      <attribute name="t-if">!coopHidePath</attribute>
+    </xpath>
+
+    <!--
       Вторая ветка шаблона: крошка одна, предков нет. Кнопка нужна и
       здесь — это случай прямой ссылки на запись, откуда наружу не ведёт
       ничего.
