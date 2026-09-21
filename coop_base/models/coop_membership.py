@@ -34,6 +34,21 @@ class CoopMembership(models.Model):
     # открыть, решает сам контакт — см. `_coop_page_view_ref`.
     _coop_page_field = 'organization_id'
 
+    def action_coop_open_person(self):
+        """Открыть страницу участника — для полки состава организации.
+
+        Полка «Организации» на странице человека ведёт на организацию, а
+        полка состава на карточке организации — наоборот, на человека:
+        обе показывают то, чего на текущей странице нет. Одного
+        `_coop_page_field` на модель для этого мало — он один, а сторон
+        у членства две.
+        """
+        self.ensure_one()
+        человек = self.partner_id
+        if not человек:
+            raise UserError(_('У этой записи состава нет участника.'))
+        return человек.action_coop_open_page()
+
     partner_id = fields.Many2one(
         'res.partner', string='Участник', required=True, index=True,
         ondelete='restrict', tracking=True,

@@ -317,7 +317,11 @@ class ResPartner(models.Model):
             'name': _('Состав: %s') % self.name,
             'res_model': 'coop.membership',
             'view_mode': 'list,form',
-            'domain': [('organization_id', '=', self.id)],
+            # Только действующие: полка показывает их же, а список,
+            # где к пяти пайщикам добавляются тридцать вышедших, — это
+            # уже не «смотреть все», а другой ответ на тот же вопрос.
+            'domain': [('organization_id', '=', self.id),
+                       ('state', '=', 'active')],
             'context': {'default_organization_id': self.id},
         }
 
