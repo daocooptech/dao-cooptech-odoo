@@ -468,7 +468,8 @@ patch(FormController.prototype, подписьСоздания);
  *
  * Имена латиницей: решение 352.
  */
-const coopOwnCreate = {
+function coopOwnCreate() {
+    return {
     async createRecord() {
         const action = this.env.services.action?.currentAction;
         const method =
@@ -491,17 +492,24 @@ const coopOwnCreate = {
             return super.createRecord(...arguments);
         }
     },
-};
+    };
+}
 
-// Каждому прототипу — свой объект заплатки, а не один на двоих.
+// Каждому прототипу — свой объект, и создаёт его функция.
 //
-// Внутри есть вызов `super.createRecord`, а `super` в заплатке
-// разрешается по тому прототипу, к которому её приложили. Один объект,
-// приложенный дважды, оставляет внутри себя ссылку на последний из них —
-// и в канбане `super` уводит в реализацию списка. Одинаковый на вид код,
-// разное поведение, и ловится это только на живом экране.
-patch(KanbanController.prototype, { ...coopOwnCreate });
-patch(ListController.prototype, { ...coopOwnCreate });
+// Так прямо написано в документации движка
+// (`developer/reference/frontend/patching_code`, раздел «Applying the same
+// patch to multiple objects»): объект заплатки можно приложить только
+// один раз, и **копировать его нельзя** — при копии `super` перестаёт
+// указывать куда надо. Там же пример падения: после клонированной
+// заплатки вызов метода даёт «is not a function».
+//
+// Я прошёл мимо обоих запретов подряд: сперва приложил один объект к
+// двум прототипам, потом «починил» это копией через расширение — то
+// самое, что документация запрещает отдельным предупреждением. Отсюда и
+// падение каталогов.
+patch(KanbanController.prototype, coopOwnCreate());
+patch(ListController.prototype, coopOwnCreate());
 
 // Строка поиска каталога: без штатного выпадающего меню и со своей
 // подсказкой. Признак каталога тот же, что у панели управления, — из
