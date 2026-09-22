@@ -38,6 +38,10 @@ class CoopJoinWizard(models.TransientModel):
     allowed_role_ids = fields.Many2many(
         'coop.membership.role', string='Из чего выбирать',
         compute='_compute_allowed_role_ids')
+    # Код выбранной роли — для условий в виде: должность спрашивают у
+    # сотрудника, а про пай рассказывают пайщику. Условие вида не умеет
+    # заглядывать в `role_id.code`, поэтому код приходит отдельно.
+    role_code = fields.Char(related='role_id.code', readonly=True)
     job_title = fields.Char(
         string='Должность',
         help='Как называется место в организации. На права не влияет.')

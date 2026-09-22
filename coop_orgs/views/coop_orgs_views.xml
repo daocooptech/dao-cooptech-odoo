@@ -111,20 +111,21 @@
         <field name="is_cooperative" invisible="1"/>
         <group>
           <field name="allowed_role_ids" invisible="1"/>
+          <field name="role_code" invisible="1"/>
           <field name="role_id" widget="radio"
                  options="{'no_create': True}"/>
           <field name="job_title" placeholder="Бухгалтер, механик, менеджер по продажам"
-                 invisible="role != 'staff'"/>
+                 invisible="role_code != 'staff'"/>
           <field name="note" placeholder="Необязательно"/>
         </group>
         <div class="alert alert-info" role="status"
-             invisible="role != 'member'">
+             invisible="role_code != 'member'">
           Пайщик вносит пай и получает голос на собрании: один член —
           один голос, независимо от размера пая. Решение о приёме
           принимает тот, кто ведёт состав организации.
         </div>
         <div class="alert alert-info" role="status"
-             invisible="role != 'staff'">
+             invisible="role_code != 'staff'">
           Наёмный сотрудник пая не вносит и голоса на собрании не имеет.
           Что ему позволено делать от имени организации, задают
           полномочия — их выдают при приёме.
