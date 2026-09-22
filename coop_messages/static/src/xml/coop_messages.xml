@@ -7,7 +7,7 @@
   правой колонки — компоненты Discuss без изменений.
 -->
 <t t-name="coop_messages.Messages">
-  <div class="o_coop_messages">
+  <div class="o_coop_messages" t-att-class="props.className">
     <div class="o_coop_tabs o_coop_tabs_page">
       <span class="o_coop_tab active">Сообщения</span>
       <div class="o_coop_new_dialog" t-ref="newDialog">

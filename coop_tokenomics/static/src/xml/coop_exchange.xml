@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
   <t t-name="coop_tokenomics.Exchange">
-    <div class="o_coop_dex">
+    <div class="o_coop_dex" t-att-class="props.className">
 
       <!-- Шапка: кошелёк слева, потому что без него нельзя ни купить, ни
            продать, и узнать об этом лучше до выбора партии. -->

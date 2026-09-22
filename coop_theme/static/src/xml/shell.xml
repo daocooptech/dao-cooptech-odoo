@@ -173,7 +173,7 @@
   </t>
 
   <t t-name="coop_theme.Soon">
-    <div class="o_coop_soon">
+    <div class="o_coop_soon" t-att-class="props.className">
       <div class="o_coop_soon_box">
         <h2 t-esc="label"/>
         <p>
