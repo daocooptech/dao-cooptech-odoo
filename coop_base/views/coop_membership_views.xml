@@ -55,7 +55,8 @@
           <field name="allowed_role_ids" invisible="1"/>
           <field name="role_id" domain="[('id', 'in', allowed_role_ids)]"
                  options="{'no_create': True}"/>
-          <field name="job_title" invisible="role != 'staff'"/>
+          <field name="role_code" invisible="1"/>
+          <field name="job_title" invisible="role_code != 'staff'"/>
           <field name="has_vote"/>
           <field name="admission_basis"
                  placeholder="Протокол общего собрания № 12 от 03.09.2026"/>

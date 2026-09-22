@@ -39,6 +39,11 @@ class CoopAdmitWizard(models.TransientModel):
     allowed_role_ids = fields.Many2many(
         related='membership_id.allowed_role_ids',
         string='Подходящие роли', readonly=True)
+    # Код роли — для условий в виде: должность спрашивают у наёмного
+    # сотрудника и не спрашивают у пайщика. Условие вида не умеет
+    # заглядывать в `role_id.code`, поэтому код приходит отдельным полем.
+    role_code = fields.Char(
+        related='membership_id.role', string='Код основания', readonly=True)
     job_title = fields.Char(
         related='membership_id.job_title', string='Должность', readonly=False)
     admission_basis = fields.Char(
