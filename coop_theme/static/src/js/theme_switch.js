@@ -26,12 +26,36 @@ function preferredDark() {
 
 function readChoice() {
     // Хранилище может быть недоступно — в приватном окне или при запрете.
-    // Тогда своего выбора просто нет, и тема идёт за системной.
+    // Тогда своего выбора просто нет, и открывается светлая.
     try {
         return browser.localStorage.getItem(STORAGE_KEY);
     } catch {
         return null;
     }
+}
+
+/**
+ * Тёмная ли тема при таком выборе.
+ *
+ * Пустой выбор — светлая, и это решение владельца от 3 сентября 2026:
+ * «без явного выбора пользователя платформа всегда открывается в светлой
+ * теме, слежение за системной убрано». В макете оно исполнено, на движок
+ * не переносилось — там тема до сих пор шла за настройкой устройства, и
+ * владелец 22 сентября увидел тёмную: «по умолчанию грузится тёмная
+ * тема, а надо чтобы была светлая».
+ *
+ * Почему светлая, а не системная: платформу показывают людям, и первое,
+ * что они видят, должно быть одинаковым. Тёмная тема — выбор, а не
+ * случайность настройки чужого телефона.
+ */
+function darkFor(choice) {
+    if (choice === "dark") {
+        return true;
+    }
+    if (choice === "system") {
+        return preferredDark();
+    }
+    return false;
 }
 
 export function applyCoopTheme(dark) {
@@ -49,20 +73,24 @@ export function applyCoopTheme(dark) {
  * случаев. Так же и в макете: «Применяется сразу, сохранять не нужно».
  */
 export function readCoopThemeChoice() {
-    return readChoice() || "system";
+    // Пустой выбор показывается в настройках как «Светлая»: она и
+    // открывается. Показать здесь «Системная» значило бы обещать то,
+    // чего платформа не делает.
+    return readChoice() || "light";
 }
 
 export function setCoopThemeChoice(choice) {
     try {
-        if (choice === "system") {
-            browser.localStorage.removeItem(STORAGE_KEY);
-        } else {
-            browser.localStorage.setItem(STORAGE_KEY, choice);
-        }
+        // «Системная» сохраняется наравне с остальными, а не стиранием
+        // ключа. Прежде её стирали — и после перезагрузки выбор пропадал
+        // вместе с ключом: человек выбрал «следовать за устройством», а
+        // платформа об этом не помнила. Настройка, которая молча не
+        // работает, хуже отсутствующей.
+        browser.localStorage.setItem(STORAGE_KEY, choice);
     } catch {
         // Не сохранилось — тема всё равно переключится, просто забудется.
     }
-    applyCoopTheme(choice === "system" ? preferredDark() : choice === "dark");
+    applyCoopTheme(darkFor(choice));
 }
 
 /**
@@ -70,14 +98,12 @@ export function setCoopThemeChoice(choice) {
  * страница успевает мигнуть светлым, а потом перекраситься.
  */
 function initCoopTheme() {
-    const choice = readChoice();
-    applyCoopTheme(choice ? choice === "dark" : preferredDark());
+    applyCoopTheme(darkFor(readChoice()));
 
-    // Пока своего выбора нет, идём за системной темой и переключаемся
-    // вместе с ней на лету — как в прототипе.
+    // За системной темой идём только там, где человек это выбрал сам.
     const media = browser.matchMedia?.("(prefers-color-scheme: dark)");
     media?.addEventListener?.("change", (event) => {
-        if (!readChoice()) {
+        if (readChoice() === "system") {
             applyCoopTheme(event.matches);
         }
     });
