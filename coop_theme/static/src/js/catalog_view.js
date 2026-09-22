@@ -175,22 +175,22 @@ export class CoopCatalogKanbanController extends KanbanController {
         // Через `?.`: до готовности подокружения `searchModel` может ещё
         // не быть, а падать в геттере, от которого зависит весь экран,
         // нельзя.
-        const модель = this.env.searchModel;
-        if (!модель) {
+        const model = this.env.searchModel;
+        if (!model) {
             return true;
         }
-        const подпись = (фасет) => JSON.stringify(
-            [фасет.type, фасет.title, фасет.values || []]);
-        const сейчас = (модель.facets || []).map(подпись);
+        const facetSignature = (facet) => JSON.stringify(
+            [facet.type, facet.title, facet.values || []]);
+        const currentFacets = (model.facets || []).map(facetSignature);
         // Отбор раздела снимается один раз — при первом же обращении, то
         // есть на первой отрисовке, когда умолчания действия уже
         // применены, а человек ещё ничего не нажимал.
-        if (this.фасетыРаздела === undefined) {
-            this.фасетыРаздела = сейчас;
+        if (this.sectionFacets === undefined) {
+            this.sectionFacets = currentFacets;
         }
         // Подмножество, а не равенство: сняв умолчание раздела, человек
         // тоже оказывается на чистом экране, и полки должны вернуться.
-        return сейчас.every((с) => this.фасетыРаздела.includes(с));
+        return currentFacets.every((key) => this.sectionFacets.includes(key));
     }
 
     setup() {
@@ -433,7 +433,7 @@ patch(ControlPanel.prototype, {
 // objects»). Здесь внутри нет `super`, и до поры это сходило с рук, но
 // правило движка не про «когда заметно», а про то, как заплатка
 // устроена.
-function подписьСоздания() {
+function createLabelPatch() {
     return {
     get coopCreateLabel() {
         // Из действия, а не из `props.context`. Списку достаётся контекст
@@ -443,16 +443,16 @@ function подписьСоздания() {
         // измерено 15 сентября 2026, подпись просто не доезжала. В
         // плитке контекст свой, поэтому там подпись работала с самого
         // начала, и расхождение выглядело необъяснимым.
-        const действие = this.env.services.action?.currentAction;
-        return действие?.context?.coop_create_label
+        const action = this.env.services.action?.currentAction;
+        return action?.context?.coop_create_label
             || this.props.context?.coop_create_label
             || "Новое";
     },
     };
 }
 
-patch(ListController.prototype, подписьСоздания());
-patch(FormController.prototype, подписьСоздания());
+patch(ListController.prototype, createLabelPatch());
+patch(FormController.prototype, createLabelPatch());
 
 /**
  * Своя страница добавления вместо штатного режима создания.

@@ -89,13 +89,13 @@ export class CoopTabs extends Component {
         // Спрашиваем в трёх местах: контекст действия доходит до клиента
         // (проверено по ответу сервера), но до самой панели добирается
         // по-разному на разных экранах.
-        const из = (context) => (context && context.coop_screen_label) || null;
-        const метка = из(this.env.searchModel?.globalContext)
-            || из(this.env.searchModel?.context)
-            || из(this.env.config?.context)
-            || из(this.action?.currentController?.action?.context);
-        if (метка) {
-            return метка;
+        const fromContext = (context) => (context && context.coop_screen_label) || null;
+        const label = fromContext(this.env.searchModel?.globalContext)
+            || fromContext(this.env.searchModel?.context)
+            || fromContext(this.env.config?.context)
+            || fromContext(this.action?.currentController?.action?.context);
+        if (label) {
+            return label;
         }
         // Запасной признак: у выборки собственное имя, а у самого
         // раздела оно совпадает с названием действия в базе.
@@ -465,9 +465,9 @@ export class CoopSidebar extends Component {
             return true;
         }
         const id = action.id || action.tag;
-        const все = [].concat(this.state.main || [], this.state.extensions || [],
+        const allItems = [].concat(this.state.main || [], this.state.extensions || [],
                               this.state.admin || []);
-        return все.some((item) => item.actionId === id);
+        return allItems.some((item) => item.actionId === id);
     }
 
     isActive(item) {
@@ -510,10 +510,10 @@ export class CoopSidebar extends Component {
         // несколько разделов: и «Люди», и «Организации» стоят на res.partner.
         // Тогда не подсвечиваем ничего: пустая подсветка честнее ложной.
         if (!current && this.state.model && item.model === this.state.model) {
-            const сколько = [].concat(this.state.main || [], this.state.extensions || [],
+            const count = [].concat(this.state.main || [], this.state.extensions || [],
                                       this.state.admin || [])
                 .filter((i) => i.model === this.state.model).length;
-            return сколько === 1;
+            return count === 1;
         }
         return false;
     }

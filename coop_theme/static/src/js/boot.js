@@ -17,28 +17,28 @@ import { registry } from "@web/core/registry";
 export const coopBootService = {
     dependencies: ["orm"],
     start(env, { orm }) {
-        let обещание = null;
+        let promise = null;
 
-        function загрузить() {
-            if (!обещание) {
-                обещание = orm.call("coop.shell", "boot", []).catch((ошибка) => {
+        function load() {
+            if (!promise) {
+                promise = orm.call("coop.shell", "boot", []).catch((error) => {
                     // Сорвалось — отпускаем обещание, чтобы следующий
                     // спросивший попробовал заново, а не получил навсегда
                     // застрявшую ошибку.
-                    обещание = null;
-                    throw ошибка;
+                    promise = null;
+                    throw error;
                 });
             }
-            return обещание;
+            return promise;
         }
 
         return {
             /** Данные запуска; второй и последующие вызовы бесплатны. */
-            get: загрузить,
+            get: load,
             /** Спросить заново — например, после действия, меняющего счётчики. */
             refresh() {
-                обещание = null;
-                return загрузить();
+                promise = null;
+                return load();
             },
         };
     },

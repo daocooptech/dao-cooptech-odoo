@@ -21,46 +21,46 @@ import { standardFieldProps } from "@web/views/fields/standard_field_props";
 export const coopFavoriteService = {
     dependencies: ["orm"],
     start(env, { orm }) {
-        const пометки = {};      // модель → Set номеров
-        const обещания = {};     // модель → обещание загрузки
+        const marks = {};      // модель → Set номеров
+        const promises = {};     // модель → обещание загрузки
 
-        async function загрузить(модель) {
-            if (!обещания[модель]) {
-                обещания[модель] = orm
-                    .call("coop.favorite", "coop_ids_for", [модель])
+        async function load(model) {
+            if (!promises[model]) {
+                promises[model] = orm
+                    .call("coop.favorite", "coop_ids_for", [model])
                     .then((ids) => {
-                        пометки[модель] = new Set(ids);
-                        return пометки[модель];
+                        marks[model] = new Set(ids);
+                        return marks[model];
                     })
                     .catch(() => {
                         // Избранное не имеет права ронять каталог: не
                         // загрузилось — значит сердец не будет, а записи
                         // на месте.
-                        обещания[модель] = null;
-                        пометки[модель] = new Set();
-                        return пометки[модель];
+                        promises[model] = null;
+                        marks[model] = new Set();
+                        return marks[model];
                     });
             }
-            return обещания[модель];
+            return promises[model];
         }
 
         return {
-            ready: загрузить,
-            has(модель, номер) {
-                return !!пометки[модель] && пометки[модель].has(номер);
+            ready: load,
+            has(model, recordId) {
+                return !!marks[model] && marks[model].has(recordId);
             },
-            async toggle(модель, номер) {
-                const стоит = await orm.call(
-                    "coop.favorite", "coop_toggle", [модель, номер]);
-                await загрузить(модель);
-                if (пометки[модель]) {
-                    if (стоит) {
-                        пометки[модель].add(номер);
+            async toggle(model, recordId) {
+                const isFavorite = await orm.call(
+                    "coop.favorite", "coop_toggle", [model, recordId]);
+                await load(model);
+                if (marks[model]) {
+                    if (isFavorite) {
+                        marks[model].add(recordId);
                     } else {
-                        пометки[модель].delete(номер);
+                        marks[model].delete(recordId);
                     }
                 }
-                return стоит;
+                return isFavorite;
             },
         };
     },

@@ -25,7 +25,7 @@ import { Component, useEffect, useRef, useState } from "@odoo/owl";
  * показывается вовсе: молча превратить таблицу в текст хуже, чем не дать
  * её править отсюда.
  */
-const ПРОСТЫЕ_ТЕГИ = new Set(["p", "br", "div", "span"]);
+const SIMPLE_TAGS = new Set(["p", "br", "div", "span"]);
 
 export class CoopBlockField extends Component {
     static template = "coop_theme.BlockField";
@@ -71,9 +71,9 @@ export class CoopBlockField extends Component {
             return [];
         }
         if (!this.isHtml) {
-            return value.split(/\n{2,}/).filter((кусок) => кусок.trim());
+            return value.split(/\n{2,}/).filter((chunk) => chunk.trim());
         }
-        return this.toText(value).split(/\n{2,}/).filter((кусок) => кусок.trim());
+        return this.toText(value).split(/\n{2,}/).filter((chunk) => chunk.trim());
     }
 
     /** Разметка → текст: абзац становится строкой, `<br>` — переносом. */
@@ -92,15 +92,15 @@ export class CoopBlockField extends Component {
 
     /** Текст → разметка: строка становится абзацем. */
     toHtml(text) {
-        const абзацы = String(text || "")
+        const paragraphs = String(text || "")
             .split(/\n{2,}/)
-            .map((кусок) => кусок.trim())
+            .map((chunk) => chunk.trim())
             .filter(Boolean);
-        if (!абзацы.length) {
+        if (!paragraphs.length) {
             return false;
         }
-        return абзацы
-            .map((абзац) => "<p>" + this.escape(абзац).replace(/\n/g, "<br>") + "</p>")
+        return paragraphs
+            .map((paragraph) => "<p>" + this.escape(paragraph).replace(/\n/g, "<br>") + "</p>")
             .join("");
     }
 
@@ -122,8 +122,8 @@ export class CoopBlockField extends Component {
         if (!this.isHtml) {
             return true;
         }
-        const теги = String(this.value || "").match(/<\s*([a-zA-Z0-9]+)/g) || [];
-        return теги.every((тег) => ПРОСТЫЕ_ТЕГИ.has(тег.replace(/[<\s]/g, "").toLowerCase()));
+        const tags = String(this.value || "").match(/<\s*([a-zA-Z0-9]+)/g) || [];
+        return tags.every((tag) => SIMPLE_TAGS.has(tag.replace(/[<\s]/g, "").toLowerCase()));
     }
 
     start() {
@@ -137,12 +137,12 @@ export class CoopBlockField extends Component {
         }
         this.ui.busy = true;
         try {
-            const значение = this.isHtml
+            const newValue = this.isHtml
                 ? this.toHtml(this.ui.draft)
                 : (this.ui.draft || false);
-            await this.props.record.update({ [this.props.name]: значение });
-            const записано = await this.props.record.save();
-            if (записано !== false) {
+            await this.props.record.update({ [this.props.name]: newValue });
+            const saved = await this.props.record.save();
+            if (saved !== false) {
                 this.ui.editing = false;
             }
         } finally {

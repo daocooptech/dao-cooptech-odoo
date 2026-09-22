@@ -94,8 +94,8 @@ export class CoopShelves extends Component {
         // Одна на шесть полок, а не шесть по одной: столько же запросов
         // ушло бы на счётчики, а записи всё равно берутся одним
         // запросом с отбором по списку рубрик.
-        this.модельПолок = new RelationalModel(
-            this.env, this.параметрыМодели, {
+        this.shelvesModel = new RelationalModel(
+            this.env, this.modelParams, {
                 action: useService("action"),
                 dialog: useService("dialog"),
                 notification: useService("notification"),
@@ -125,17 +125,17 @@ export class CoopShelves extends Component {
         });
     }
 
-    get параметрыМодели() {
+    get modelParams() {
         const { activeFields, fields } = extractFieldsFromArchInfo(
             this.props.archInfo, this.props.fields);
         // Поле рубрики карточке не нужно и в разборе представления его
         // может не быть — у закупок «Раздел» в канбане не показывается.
         // А разложить записи по полкам без него нечем: значение приходит
         // пустым, полки выходят с заголовками и без карточек.
-        const описание = this.props.fields[this.props.field];
-        if (описание && !activeFields[this.props.field]) {
+        const description = this.props.fields[this.props.field];
+        if (description && !activeFields[this.props.field]) {
             addFieldDependencies(activeFields, fields,
-                [{ name: this.props.field, type: описание.type }]);
+                [{ name: this.props.field, type: description.type }]);
         }
         // `groupBy` и `orderBy` пустыми списками, а не пропущенными:
         // модель их не подставляет, а `_getNextConfig` по ним проходит
@@ -206,20 +206,20 @@ export class CoopShelves extends Component {
                 [this.props.field], { limit: 40 }
             );
         }
-        const считать = (g) => g.__count ?? g[this.props.field + "_count"] ?? 0;
-        const подпись = (значение) => {
+        const countOf = (g) => g.__count ?? g[this.props.field + "_count"] ?? 0;
+        const labelOf = (value) => {
             // У списка выбора сервер отдаёт техническое значение —
             // `equipment`, `barter`, `running`, — и на полке стояло бы
             // именно оно. Метки берём у самой модели, одним запросом на
             // каталог.
-            if (Array.isArray(значение)) {
-                return значение[1];
+            if (Array.isArray(value)) {
+                return value[1];
             }
-            return this.labels[значение] || значение;
+            return this.labels[value] || value;
         };
-        const годные = groups
-            .filter((g) => g[this.props.field] && считать(g) >= this.minPerShelf)
-            .sort((a, b) => считать(b) - считать(a))
+        const eligible = groups
+            .filter((g) => g[this.props.field] && countOf(g) >= this.minPerShelf)
+            .sort((a, b) => countOf(b) - countOf(a))
             .slice(0, this.maxShelves);
 
         // Всё, что не стало полкой: пустая рубрика и рубрики, в которых
@@ -229,84 +229,84 @@ export class CoopShelves extends Component {
         // туда». Полка «Другое» и есть эта категория — собранная на
         // лету, чтобы каталог не оставлял записей за витриной даже
         // тогда, когда рубрику проставить не успели.
-        const взятые = годные.map((g) => {
-            const значение = g[this.props.field];
-            return Array.isArray(значение) ? значение[0] : значение;
+        const takenIds = eligible.map((g) => {
+            const value = g[this.props.field];
+            return Array.isArray(value) ? value[0] : value;
         });
-        const остаток = groups
+        const remainder = groups
             .filter((g) => {
-                const значение = g[this.props.field];
-                const id = Array.isArray(значение) ? значение[0] : значение;
-                return !взятые.includes(id);
+                const value = g[this.props.field];
+                const id = Array.isArray(value) ? value[0] : value;
+                return !takenIds.includes(id);
             })
-            .reduce((сумма, g) => сумма + считать(g), 0);
-        const условиеОстатка = ["!", [this.props.field, "in", взятые]];
+            .reduce((sum, g) => sum + countOf(g), 0);
+        const remainderDomain = ["!", [this.props.field, "in", takenIds]];
 
         // Одна полка — это не витрина, а тот же каталог с заголовком.
         // Так выходит там, где правила доступа оставили человеку
         // несколько записей одного вида: полок нет, каталог работает
         // как обычно.
-        if (годные.length + (остаток ? 1 : 0) < 2) {
+        if (eligible.length + (remainder ? 1 : 0) < 2) {
             return;
         }
 
         // Записи всех полок одним запросом: модель грузит их отбором по
         // списку рубрик, а разложить по полкам можно уже здесь. Шесть
         // запросов вместо одного полка не стоит.
-        const рубрики = взятые;
-        await this.модельПолок.load({
-            domain: domain.concat([[this.props.field, "in", рубрики]]),
+        const categoryIds = takenIds;
+        await this.shelvesModel.load({
+            domain: domain.concat([[this.props.field, "in", categoryIds]]),
             orderBy: this.props.orderBy || [],
             limit: this.perShelf * this.maxShelves,
         });
-        const записи = this.модельПолок.root.records || [];
-        const поПолкам = new Map(рубрики.map((id) => [id, []]));
-        for (const запись of записи) {
+        const records = this.shelvesModel.root.records || [];
+        const recordsByShelf = new Map(categoryIds.map((id) => [id, []]));
+        for (const record of records) {
             // Значение поля у записи модели приходит в трёх видах: пара
             // [номер, название] у старых сборок, объект с `id` у
             // нынешних, простое значение у списка выбора. Разбираем все
             // три здесь, иначе полка пустая, а ошибки нет.
-            const значение = запись.data[this.props.field];
-            const id = Array.isArray(значение) ? значение[0]
-                : (значение && typeof значение === "object" ? значение.id : значение);
-            const полка = поПолкам.get(id);
-            if (полка && полка.length < this.perShelf) {
-                полка.push(запись);
+            const value = record.data[this.props.field];
+            const id = Array.isArray(value) ? value[0]
+                : (value && typeof value === "object" ? value.id : value);
+            const shelf = recordsByShelf.get(id);
+            if (shelf && shelf.length < this.perShelf) {
+                shelf.push(record);
             }
         }
 
-        for (const g of годные) {
-            const значение = g[this.props.field];
-            const id = Array.isArray(значение) ? значение[0] : значение;
+        for (const g of eligible) {
+            const value = g[this.props.field];
+            const id = Array.isArray(value) ? value[0] : value;
             this.state.shelves.push({
                 id,
-                label: подпись(значение),
-                count: считать(g),
-                records: поПолкам.get(id) || [],
+                label: labelOf(value),
+                count: countOf(g),
+                records: recordsByShelf.get(id) || [],
                 domain: domain.concat([[this.props.field, "=", id]]),
             });
         }
 
-        if (остаток) {
+        if (remainder) {
             // Вторым заходом, а не первым: домен «всё, кроме взятых»
             // объединить с доменом полок одним запросом нельзя, а
             // грузить остаток всегда, когда его нет, — лишний запрос
             // на каждый каталог.
-            await this.модельПолок.load({
-                domain: domain.concat(условиеОстатка),
+            await this.shelvesModel.load({
+                domain: domain.concat(remainderDomain),
                 orderBy: this.props.orderBy || [],
                 limit: this.perShelf,
             });
             this.state.shelves.push({
                 id: "__other__",
                 label: this.otherLabel,
-                count: остаток,
+                count: remainder,
                 // Обрезаем здесь, а не пределом загрузки: `load` предел
                 // в параметрах не всегда соблюдает, и в полку приходили
                 // все шестьдесят записей остатка. Лишние карточки ряд
                 // прячет, но собирать их всё равно незачем.
-                records: (this.модельПолок.root.records || []).slice(0, this.perShelf),
-                domain: domain.concat(условиеОстатка),
+                records: (this.shelvesModel.root.records || []).slice(0, this.perShelf),
+                domain: domain.concat(remainderDomain),
             });
         }
     }
@@ -325,9 +325,9 @@ export class CoopShelves extends Component {
         const info = await this.orm.call(
             this.props.resModel, "fields_get",
             [[this.props.field], ["type", "selection"]]);
-        const поле = info[this.props.field] || {};
-        for (const [код, метка] of поле.selection || []) {
-            this.labels[код] = метка;
+        const field = info[this.props.field] || {};
+        for (const [code, label] of field.selection || []) {
+            this.labels[code] = label;
         }
     }
 

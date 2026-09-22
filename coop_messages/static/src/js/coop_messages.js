@@ -136,8 +136,8 @@ patch(Thread.prototype, {
         }
         const actionService = this.store.env.services.action;
         this.setAsDiscussThread(false);
-        const открытоСейчас = actionService.currentController?.action?.tag;
-        if (открытоСейчас === "coop_messages.messages") {
+        const openedNow = actionService.currentController?.action?.tag;
+        if (openedNow === "coop_messages.messages") {
             return true;
         }
         actionService.doAction("coop_messages.action_coop_messages",
@@ -172,8 +172,8 @@ const CATEGORIES = [
 // Поиск по сообщениям — самое частое действие внутри переписки. Звонок
 // ищут глазами, а не в меню. Третий значок разный: в групповой переписке
 // «кто здесь» спрашивают до первого сообщения, в личной участников нет.
-const ЗНАЧКИ_НАРУЖУ_В_ГРУППЕ = ["search-messages", "call", "member-list"];
-const ЗНАЧКИ_НАРУЖУ_В_ЛИЧНОЙ = ["search-messages", "call", "attachments"];
+const GROUP_QUICK_ACTIONS = ["search-messages", "call", "member-list"];
+const PERSONAL_QUICK_ACTIONS = ["search-messages", "call", "attachments"];
 
 // Действия движка, которых на экране платформы быть не должно.
 //
@@ -182,7 +182,7 @@ const ЗНАЧКИ_НАРУЖУ_В_ЛИЧНОЙ = ["search-messages", "call", "a
 // переписки поверх страницы, которых у платформы нет, или открывают
 // форму настроек словами движка — нужное из неё вынесено отдельными
 // пунктами.
-const ДЕЙСТВИЯ_НЕ_ПОКАЗЫВАЕМ = new Set([
+const HIDDEN_ACTIONS = new Set([
     "expand-discuss", "show-threads", "fold-chat-window", "close",
     "advanced-settings",
 ]);
@@ -226,17 +226,17 @@ patch(Store.prototype, {
 // своему виду канала — сопоставлением их не связать. Поэтому список
 // для этой вкладки собирается здесь, а из остальных вкладок служебные
 // убираются.
-const ВКЛАДКА_СЛУЖЕБНЫЕ = "coop_service";
+const SERVICE_TAB = "coop_service";
 
 patch(MessagingMenu.prototype, {
     get threads() {
-        if (this.store.discuss.activeTab !== ВКЛАДКА_СЛУЖЕБНЫЕ) {
-            return super.threads.filter((т) => т.coop_kind !== "service");
+        if (this.store.discuss.activeTab !== SERVICE_TAB) {
+            return super.threads.filter((thread) => thread.coop_kind !== "service");
         }
-        const свежесть = (т) => т.newestPersistentOfAllMessage?.datetime || 0;
+        const freshness = (thread) => thread.newestPersistentOfAllMessage?.datetime || 0;
         return Object.values(this.store.Thread.records)
-            .filter((т) => т.coop_kind === "service" && т.displayToSelf)
-            .sort((а, б) => (свежесть(б) > свежесть(а) ? 1 : -1));
+            .filter((thread) => thread.coop_kind === "service" && thread.displayToSelf)
+            .sort((a, b) => (freshness(b) > freshness(a) ? 1 : -1));
     },
 });
 
@@ -246,7 +246,7 @@ patch(MessagingMenu.prototype, {
 // чужой язык: у него чат сообщества, переписка и люди. Подписи
 // переопределяются у самих действий, а не переводом: перевод один на всю
 // установку, а здесь нужен язык платформы в одном разделе.
-const ПОДПИСИ_ДЕЙСТВИЙ = {
+const ACTION_LABELS = {
     "search-messages": "Поиск по переписке",
     "call": "Позвонить",
     "camera-call": "Видеозвонок",
@@ -261,10 +261,10 @@ const ПОДПИСИ_ДЕЙСТВИЙ = {
     "delete-thread": "Удалить переписку",
 };
 
-for (const [id, подпись] of Object.entries(ПОДПИСИ_ДЕЙСТВИЙ)) {
-    const определение = threadActionsRegistry.get(id, null);
-    if (определение) {
-        определение.name = подпись;
+for (const [id, label] of Object.entries(ACTION_LABELS)) {
+    const definition = threadActionsRegistry.get(id, null);
+    if (definition) {
+        definition.name = label;
     }
 }
 
@@ -480,32 +480,32 @@ export class CoopMessages extends Component {
 
     /** Групповая ли переписка: от этого зависит третий значок в шапке. */
     get isGroupThread() {
-        const тип = this.activeThread?.channel_type;
-        return тип === "channel" || тип === "group";
+        const type = this.activeThread?.channel_type;
+        return type === "channel" || type === "group";
     }
 
     /** Значки, которые стоят в шапке наружу. */
     get quickActions() {
-        const наружу = this.isGroupThread
-            ? ЗНАЧКИ_НАРУЖУ_В_ГРУППЕ
-            : ЗНАЧКИ_НАРУЖУ_В_ЛИЧНОЙ;
-        return наружу
+        const visibleIds = this.isGroupThread
+            ? GROUP_QUICK_ACTIONS
+            : PERSONAL_QUICK_ACTIONS;
+        return visibleIds
             .map((id) => this.threadActions.actions.find((a) => a.id === id))
             .filter(Boolean);
     }
 
     /** Всё остальное — под многоточием, в порядке движка. */
     get moreActions() {
-        const наружу = new Set(this.quickActions.map((a) => a.id));
+        const quickIds = new Set(this.quickActions.map((a) => a.id));
         // Из переписки, которую ведёт платформа, выйти нельзя: её состав
         // следует за записью, и вышедшего вернул бы первый же пересчёт.
         // Кнопку убираем, а не оставляем отвечать отказом: обещание,
         // которое отменяется само, хуже отсутствующего.
-        const ведётПлатформа = this.activeThread?.coop_managed;
+        const managedByPlatform = this.activeThread?.coop_managed;
         return this.threadActions.actions.filter(
-            (a) => !наружу.has(a.id)
-                && !ДЕЙСТВИЯ_НЕ_ПОКАЗЫВАЕМ.has(a.id)
-                && !(ведётПлатформа && a.id === "leave"));
+            (a) => !quickIds.has(a.id)
+                && !HIDDEN_ACTIONS.has(a.id)
+                && !(managedByPlatform && a.id === "leave"));
     }
 
     get activeThread() {
@@ -545,11 +545,11 @@ export class CoopMessages extends Component {
      * экрана выглядят одинаково.
      */
     async openRequestedDialog() {
-        const кто = this.props.action?.params?.coop_partner_id;
-        if (!кто) {
+        const partnerId = this.props.action?.params?.coop_partner_id;
+        if (!partnerId) {
             return;
         }
-        const thread = await this.store.joinChat(кто, false);
+        const thread = await this.store.joinChat(partnerId, false);
         if (thread) {
             this.select(thread);
         }

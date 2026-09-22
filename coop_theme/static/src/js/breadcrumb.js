@@ -175,10 +175,10 @@ patch(Breadcrumbs.prototype, {
         if (!model) {
             return null;
         }
-        const подходящие = (this.coopItems.list || []).filter(
+        const matching = (this.coopItems.list || []).filter(
             (item) => item.model === model && item.actionId
         );
-        return подходящие.length === 1 ? подходящие[0] : null;
+        return matching.length === 1 ? matching[0] : null;
     },
 
     /**
@@ -213,8 +213,8 @@ patch(Breadcrumbs.prototype, {
                 this.coopActionService?.currentController?.action?.res_model ||
                 this.env.config?.resModel;
             return model === "res.partner";
-        } catch (ошибка) {
-            console.warn("[крошка] не удалось решить, прятать ли путь:", ошибка);
+        } catch (error) {
+            console.warn("[крошка] не удалось решить, прятать ли путь:", error);
             return false;
         }
     },
@@ -250,8 +250,8 @@ patch(Breadcrumbs.prototype, {
                 this.coopActionService?.currentController?.action?.res_model ||
                 this.env.config?.resModel;
             return coopIsPlatformModel(model);
-        } catch (ошибка) {
-            console.warn("[крошка] не удалось решить, прятать ли меню:", ошибка);
+        } catch (error) {
+            console.warn("[крошка] не удалось решить, прятать ли меню:", error);
             return false;
         }
     },
@@ -279,8 +279,8 @@ patch(Breadcrumbs.prototype, {
             if (byModel) {
                 return { label: byModel.label, title: `В ${byModel.label}` };
             }
-        } catch (ошибка) {
-            console.warn("[крошка] кнопка возврата не сосчиталась:", ошибка);
+        } catch (error) {
+            console.warn("[крошка] кнопка возврата не сосчиталась:", error);
         }
         return null;
     },

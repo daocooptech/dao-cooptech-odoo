@@ -14,8 +14,8 @@ import { Component } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 
-const РАДИУС = 26;
-const ДЛИНА = 2 * Math.PI * РАДИУС;
+const RADIUS = 26;
+const LENGTH = 2 * Math.PI * RADIUS;
 
 export class CoopReadinessRing extends Component {
     static template = "coop_projects.ReadinessRing";
@@ -26,13 +26,13 @@ export class CoopReadinessRing extends Component {
     }
 
     get dashArray() {
-        return ДЛИНА.toFixed(1);
+        return LENGTH.toFixed(1);
     }
 
     /** Непройденная часть круга. Сто процентов и больше — круг целиком. */
     get dashOffset() {
-        const доля = Math.min(Math.max(this.percent, 0), 100) / 100;
-        return (ДЛИНА * (1 - доля)).toFixed(1);
+        const share = Math.min(Math.max(this.percent, 0), 100) / 100;
+        return (LENGTH * (1 - share)).toFixed(1);
     }
 
     /** Цвет отвечает на «успевает ли»: до трети — тревожный. */
