@@ -6,6 +6,18 @@
 уровням по мере набора, к дате «стопа» сбор закрывается, товар приходит
 одной партией и раздаётся через точку самовывоза.
 
+**Ролей пять, и живут они на одном экране.** Заказчик, организатор,
+поставщик, оператор пункта выдачи, администратор витрины (решение 260).
+Отдельных «столов» под каждую роль нет и переключателя «я заказчик / я
+поставщик» тоже: человек видит свою роль, а не выбирает её из списка.
+Чужие участки показаны **состоянием, а не кнопками** — заказчик читает
+«поставщик отгрузил 3 сентября», а не жмёт «подтвердить отгрузку»
+(решение 77).
+
+Пятая роль — организатор — наше расхождение со столом заказов
+Coopenomics, и расхождение осознанное: там закупку открывает
+администрация, у нас — любой пайщик. Инициатива идёт снизу.
+
 Два решения, которые стоит держать в голове при чтении кода.
 
 **Цена пересчитывается для всех сразу, а не для тех, кто заказал
@@ -25,8 +37,14 @@
 Одно число вместо трёх выглядит как сокрытие: покупатель не понимает,
 сколько он платит кооперативу, и подозревает худшее.
 """
+import base64
+import logging
+import secrets
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+
+_logger = logging.getLogger(__name__)
 
 
 class CoopGroupBuy(models.Model):
@@ -44,9 +62,36 @@ class CoopGroupBuy(models.Model):
         tracking=True,
         help='Находит поставщика, ведёт сбор заказов, принимает партию и '
              'раздаёт её участникам.')
+    # Поставщик двумя полями, а не одним. Участник платформы — связью:
+    # тогда у него своя роль, свои кнопки и своя карточка. Не участник —
+    # просто названием: закупают у кого придётся, и требовать от каждого
+    # поставщика регистрации значило бы запретить половину закупок.
+    supplier_id = fields.Many2one(
+        'res.partner', string='Поставщик на платформе', index=True,
+        tracking=True,
+        help='Если поставщик — участник платформы, он отмечает отгрузку '
+             'сам и видит закупку у себя.')
     supplier_name = fields.Char(
         string='Поставщик', help='У кого закупаем. Может не быть участником '
                                  'платформы — это обычное дело.')
+
+    pickup_operator_id = fields.Many2one(
+        'res.partner', string='Оператор пункта выдачи', index=True,
+        tracking=True,
+        help='Принимает партию и выдаёт заказы. Если не указан, принимает '
+             'и выдаёт сам организатор.')
+    showcase_admin_id = fields.Many2one(
+        'res.partner', string='Администратор витрины', index=True,
+        help='Решает, попадёт ли закупка в общий каталог.')
+
+    # Сообщество, которому закупка интересна. Решение 7 от 2 сентября:
+    # экономические события сообщества идут в его ленту отдельным видом
+    # записи. Без этой связи «набрано 7 из 12» не видел никто, кроме
+    # тех, кто уже открыл карточку закупки, — то есть тех, кому об этом
+    # сообщать поздно.
+    community_id = fields.Many2one(
+        'coop.community', string='Сообщество', index=True,
+        help='Ход закупки попадает в ленту этого сообщества.')
     city = fields.Char(string='Город', index=True)
 
     # Снимок. Заводится тем же образом, что у объявлений о ресурсах:
@@ -96,6 +141,25 @@ class CoopGroupBuy(models.Model):
         help='До этого дня можно заказывать; после — сбор закрыт.')
     delivery_date = fields.Date(string='Ожидаемый довоз')
 
+    # Отметки участков. Дата, а не галочка: «поставщик отгрузил» без
+    # числа не отвечает на вопрос, который задаёт ждущий заказчик.
+    shipped_on = fields.Date(
+        string='Отгружено', readonly=True, copy=False, tracking=True)
+    received_on = fields.Date(
+        string='Партия принята', readonly=True, copy=False, tracking=True)
+
+    showcase_state = fields.Selection([
+        ('draft', 'Не на витрине'),
+        ('published', 'На витрине'),
+        ('rejected', 'Отклонена'),
+    ], string='Витрина', default='draft', required=True, index=True,
+        tracking=True,
+        help='Попадает ли закупка в общий каталог. Решает администратор '
+             'витрины.')
+    showcase_note = fields.Char(
+        string='Почему отклонена', copy=False,
+        help='Отказ без причины участник читает как произвол.')
+
     description = fields.Html(string='Условия')
 
     tier_ids = fields.One2many(
@@ -141,6 +205,12 @@ class CoopGroupBuy(models.Model):
 
     my_quantity = fields.Float(
         string='Мой заказ', compute='_compute_my_order', digits=(16, 3))
+    my_pickup_code = fields.Char(
+        string='Мой код выдачи', compute='_compute_my_order',
+        help='Назовите его на пункте выдачи.')
+    my_pickup_qr = fields.Binary(
+        string='Код картинкой', compute='_compute_my_pickup_qr',
+        help='Тот же код выдачи — чтобы не диктовать вслух.')
 
     # Две роли в складчине — не одно и то же, и человеку они видны
     # по-разному. Организатор следит за набором объёма, договором с
@@ -153,6 +223,12 @@ class CoopGroupBuy(models.Model):
     is_participant = fields.Boolean(
         string='Я участвую', compute='_compute_my_roles',
         search='_search_is_participant')
+    is_supplier = fields.Boolean(
+        string='Я поставщик', compute='_compute_my_roles')
+    is_pickup_operator = fields.Boolean(
+        string='Я выдаю', compute='_compute_my_roles')
+    is_showcase_admin = fields.Boolean(
+        string='Я веду витрину', compute='_compute_my_roles')
 
     _min_volume_positive = models.Constraint(
         'check(min_volume > 0)',
@@ -212,6 +288,31 @@ class CoopGroupBuy(models.Model):
             mine = record.order_ids.filtered(
                 lambda o: o.partner_id == me and o.state != 'cancelled')
             record.my_quantity = sum(mine.mapped('quantity'))
+            record.my_pickup_code = mine[:1].pickup_code or False
+
+    @api.depends('my_pickup_code')
+    def _compute_my_pickup_qr(self):
+        """Код выдачи картинкой.
+
+        Через отчётный механизм движка, а не ссылкой `/report/barcode/`
+        в разметке: вид формы — не шаблон QWeb, и подстановка значения в
+        `src` там просто не выполняется. Поле же приходит на экран
+        готовой картинкой и работает одинаково и в форме, и в печати.
+        """
+        reports = self.env['ir.actions.report']
+        for record in self:
+            if not record.my_pickup_code:
+                record.my_pickup_qr = False
+                continue
+            try:
+                image = reports.barcode(
+                    'QR', record.my_pickup_code, width=180, height=180)
+                record.my_pickup_qr = base64.b64encode(image)
+            except Exception as error:
+                # Картинка — удобство, а код и так виден рядом числом.
+                # Уронить из-за неё весь экран было бы несоразмерно.
+                _logger.warning('Код выдачи не нарисовался: %s', error)
+                record.my_pickup_qr = False
 
     @api.depends_context('uid')
     def _compute_my_roles(self):
@@ -222,6 +323,15 @@ class CoopGroupBuy(models.Model):
             record.is_organizer = record.organizer_id.id in mine
             record.is_participant = bool(record.order_ids.filtered(
                 lambda o: o.partner_id.id in mine and o.state != 'cancelled'))
+            record.is_supplier = record.supplier_id.id in mine
+            # Пункта выдачи может не быть вовсе — тогда выдаёт
+            # организатор, и кнопки приёмки должны достаться ему, а не
+            # пропасть.
+            record.is_pickup_operator = (
+                record.pickup_operator_id.id in mine
+                if record.pickup_operator_id
+                else record.organizer_id.id in mine)
+            record.is_showcase_admin = record.showcase_admin_id.id in mine
 
     def _wants(self, operator, value):
         """Что именно спросили: «да» или «нет».
@@ -298,6 +408,34 @@ class CoopGroupBuy(models.Model):
             'context': {'default_groupbuy_id': self.id},
         }
 
+    def _post_to_community(self, body):
+        """Сказать сообществу, что произошло.
+
+        Отдельным видом записи (`subtype` «Событие»), а не обычным
+        сообщением: иначе ход закупок утонет в разговорах, и отличить
+        одно от другого в общей ленте будет нечем.
+
+        Молчит, если сообщество не указано, и не падает, если запись не
+        прошла: лента — это рассказ о событии, а не само событие.
+        Уронить закрытие сбора из-за неудачной записи в ленту было бы
+        несоразмерно.
+        """
+        self.ensure_one()
+        if not self.community_id:
+            return
+        try:
+            subtype = self.env.ref(
+                'coop_communities.mt_community_economics',
+                raise_if_not_found=False)
+            self.community_id.message_post(
+                body=body,
+                subtype_id=subtype.id if subtype else None,
+                message_type='comment')
+        except Exception as error:
+            _logger.warning(
+                'Событие закупки %s не попало в ленту сообщества: %s',
+                self.id, error)
+
     def action_stop(self):
         """Закрыть сбор заказов.
 
@@ -316,6 +454,11 @@ class CoopGroupBuy(models.Model):
                     got=record.total_quantity, need=record.min_volume,
                     unit=record.unit_label))
                 record.order_ids.write({'state': 'cancelled'})
+                record._post_to_community(_(
+                    'Закупка «%(name)s» не состоялась: набрано %(got)s из '
+                    '%(need)s %(unit)s.',
+                    name=record.name, got=record.total_quantity,
+                    need=record.min_volume, unit=record.unit_label))
                 continue
             record.write({'state': 'stopped'})
             record.order_ids.filtered(lambda o: o.state == 'draft').write(
@@ -324,19 +467,77 @@ class CoopGroupBuy(models.Model):
                 'Сбор закрыт: %(got)s %(unit)s по цене %(price)s ₽.',
                 got=record.total_quantity, unit=record.unit_label,
                 price=record.current_price))
+            record._post_to_community(_(
+                'Закупка «%(name)s» набралась: %(got)s %(unit)s, '
+                '%(people)s участников, цена %(price)s ₽ за %(unit)s.',
+                name=record.name, got=record.total_quantity,
+                unit=record.unit_label, people=record.participant_count,
+                price=record.current_price))
         return True
 
     def action_delivering(self):
-        self.write({'state': 'delivering'})
+        """Поставщик отгрузил партию.
+
+        Действие поставщика, а не безликий переход состояния. Отмечает
+        его сам поставщик, если он на платформе, либо организатор —
+        поставщик может быть и не зарегистрирован.
+        """
+        today = fields.Date.context_today(self)
+        for record in self:
+            if record.state != 'stopped':
+                raise UserError(_(
+                    'Отгружать нечего: сбор по этой закупке ещё не '
+                    'закрыт или партия уже в пути.'))
+            record.write({'state': 'delivering', 'shipped_on': today})
+            record.message_post(body=_(
+                'Поставщик отгрузил партию %(when)s. Ждём довоз%(eta)s.',
+                when=today,
+                eta=_(' к %s') % record.delivery_date
+                if record.delivery_date else ''))
         return True
 
     def action_handout(self):
-        """Партия пришла — начинается раздача."""
+        """Оператор пункта выдачи принял партию — начинается раздача."""
+        today = fields.Date.context_today(self)
         for record in self:
-            record.write({'state': 'handout'})
-            record.message_post(body=_(
-                'Партия пришла. Забирать: %(where)s.',
+            if record.state != 'delivering':
+                raise UserError(_(
+                    'Принимать нечего: партия ещё не отгружена.'))
+            record.write({'state': 'handout', 'received_on': today})
+            record._post_to_community(_(
+                'Закупка «%(name)s»: партия пришла, раздача началась. '
+                'Забирать: %(where)s.',
+                name=record.name,
                 where=record.pickup_point or _('уточняется')))
+            record.message_post(body=_(
+                'Партия принята %(when)s. Забирать: %(where)s. Назовите '
+                'свой код выдачи — он есть в вашем заказе.',
+                when=today,
+                where=record.pickup_point or _('уточняется')))
+        return True
+
+    def action_showcase_publish(self):
+        """Администратор витрины пускает закупку в общий каталог."""
+        for record in self:
+            record.write({'showcase_state': 'published',
+                          'showcase_note': False})
+            record.message_post(body=_('Закупка выставлена на витрину.'))
+        return True
+
+    def action_showcase_reject(self):
+        """Отклонить закупку с витрины.
+
+        Причина обязательна: отказ без причины участник читает как
+        произвол, и следующую закупку он просто не заведёт.
+        """
+        for record in self:
+            if not (record.showcase_note or '').strip():
+                raise UserError(_(
+                    'Напишите, почему закупка не идёт на витрину. Отказ '
+                    'без причины читается как произвол.'))
+            record.write({'showcase_state': 'rejected'})
+            record.message_post(body=_(
+                'Закупка снята с витрины: %s', record.showcase_note))
         return True
 
     def action_done(self):
@@ -408,6 +609,13 @@ class CoopGroupBuyOrder(models.Model):
         ('cancelled', 'Отменён'),
     ], string='Состояние', default='draft', required=True, index=True)
 
+    # Код выдачи. Короткий и читаемый вслух: в пункте выдачи телефон с
+    # экраном достают не все и не всегда, а продиктовать шесть знаков
+    # может каждый. QR — это тот же код картинкой, чтобы не диктовать.
+    pickup_code = fields.Char(
+        string='Код выдачи', readonly=True, copy=False, index=True,
+        help='Назовите его на пункте выдачи. QR — тот же код картинкой.')
+
     _quantity_positive = models.Constraint(
         'check(quantity > 0)',
         'Заказать можно только положительное количество.',
@@ -431,6 +639,31 @@ class CoopGroupBuyOrder(models.Model):
             record.supplier_amount = round(
                 record.quantity * buy.supplier_price, 2)
             record.fee_amount = round(record.quantity * buy.org_fee_amount, 2)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Код выдачи заводится вместе с заказом.
+
+        Сразу, а не в момент раздачи: участник должен знать его заранее
+        и не бегать за ним, когда очередь уже стоит.
+        """
+        for vals in vals_list:
+            if not vals.get('pickup_code'):
+                vals['pickup_code'] = self._new_pickup_code()
+        return super().create(vals_list)
+
+    @api.model
+    def _new_pickup_code(self):
+        """Шесть знаков без похожих друг на друга.
+
+        Ни `0` и `O`, ни `1` и `I`: код диктуют вслух и набирают руками,
+        и пара неразличимых знаков превращает выдачу в спор.
+        """
+        alphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'
+        while True:
+            code = ''.join(secrets.choice(alphabet) for _unused in range(6))
+            if not self.sudo().search_count([('pickup_code', '=', code)]):
+                return code
 
     def action_take(self):
         """Отметить, что заказ забран."""

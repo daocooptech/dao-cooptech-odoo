@@ -24,6 +24,7 @@
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_projects', 'mail'],
     'data': [
+        'data/mail_subtypes.xml',
         'security/ir.model.access.csv',
         'security/coop_community_rules.xml',
         'views/coop_community_views.xml',

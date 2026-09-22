@@ -157,31 +157,66 @@
                До него все действия раздела были организаторскими. -->
           <button name="action_join" type="object" string="Участвовать"
                   class="btn-primary" invisible="not can_join"/>
+          <!-- Кнопка появляется только у того, чьё это действие
+               (решение 77). Остальные видят его состоянием в блоке
+               ролей ниже: «поставщик отгрузил 3 сентября», а не кнопку
+               «подтвердить отгрузку», на которую нет права. -->
           <button name="action_stop" type="object" string="Закрыть сбор"
-                  class="btn-primary" invisible="state != 'collecting'"
+                  class="btn-primary"
+                  invisible="state != 'collecting' or not is_organizer"
                   confirm="После стопа заказы отменять нельзя, а партия заказывается у поставщика. Закрыть сбор?"/>
-          <button name="action_delivering" type="object" string="Заказано у поставщика"
-                  invisible="state != 'stopped'"/>
-          <button name="action_handout" type="object" string="Партия пришла"
-                  class="btn-primary" invisible="state != 'delivering'"/>
+          <button name="action_delivering" type="object" string="Отгрузил партию"
+                  invisible="state != 'stopped' or not (is_supplier or is_organizer)"/>
+          <button name="action_handout" type="object" string="Партия принята"
+                  class="btn-primary"
+                  invisible="state != 'delivering' or not is_pickup_operator"/>
           <button name="action_done" type="object" string="Завершить"
-                  invisible="state != 'handout'"/>
+                  invisible="state != 'handout' or not is_organizer"/>
+          <button name="action_showcase_publish" type="object" string="На витрину"
+                  invisible="showcase_state == 'published' or not is_showcase_admin"/>
+          <button name="action_showcase_reject" type="object" string="Снять с витрины"
+                  invisible="showcase_state == 'rejected' or not is_showcase_admin"/>
           <field name="state" widget="statusbar"
                  statusbar_visible="collecting,stopped,delivering,handout,done"/>
         </header>
         <sheet>
           <field name="coop_can_edit" invisible="1"/>
           <field name="can_join" invisible="1"/>
+          <field name="is_organizer" invisible="1"/>
+          <field name="is_supplier" invisible="1"/>
+          <field name="is_pickup_operator" invisible="1"/>
+          <field name="is_showcase_admin" invisible="1"/>
           <field name="my_order_id" invisible="1"/>
           <div class="oe_title">
             <h1><field name="name" placeholder="Что закупаем" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/></h1>
           </div>
           <group>
-            <group string="Кто и где">
+            <!-- Пять ролей одним блоком (решения 260 и 77): видно,
+                 где сейчас заказ и кто следующий должен что-то сделать.
+                 Отдельных «столов» под каждую роль нет. -->
+            <group string="Кто ведёт закупку">
               <field name="organizer_id" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="supplier_name" placeholder="У кого закупаем" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/>
+              <field name="supplier_id" widget="coop_inline" readonly="not coop_can_edit"
+                     placeholder="Если поставщик на платформе"/>
+              <field name="supplier_name" placeholder="У кого закупаем" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"
+                     invisible="supplier_id != False"/>
+              <field name="pickup_operator_id" widget="coop_inline" readonly="not coop_can_edit"
+                     placeholder="Если выдаёт не организатор"/>
+              <field name="showcase_admin_id" widget="coop_inline" readonly="not coop_can_edit"
+                     groups="base.group_system"/>
+              <field name="community_id" widget="coop_inline" readonly="not coop_can_edit"
+                     placeholder="Кому рассказывать о ходе закупки"/>
+            </group>
+            <group string="Где и в каком состоянии">
               <field name="city" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="pickup_point" placeholder="Куда приезжать за своим" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/>
+              <!-- Чужие участки — состоянием, а не кнопкой. -->
+              <field name="shipped_on" readonly="1" invisible="not shipped_on"/>
+              <field name="received_on" readonly="1" invisible="not received_on"/>
+              <field name="showcase_state" readonly="1" widget="badge"/>
+              <field name="showcase_note" readonly="not is_showcase_admin"
+                     invisible="showcase_state != 'rejected' and not is_showcase_admin"
+                     placeholder="Почему закупка не идёт на витрину"/>
             </group>
             <group string="Объём и цена">
               <label for="min_volume"/>
@@ -211,6 +246,18 @@
               <field name="participant_count"/>
               <field name="total_amount"/>
               <field name="my_quantity"/>
+              <!-- Свой код выдачи и он же картинкой. Показываем только
+                   на раздаче: до неё он не нужен и лишь отвлекает, а на
+                   раздаче за ним не надо никуда идти — он тут. -->
+              <label for="my_pickup_code"
+                     invisible="state != 'handout' or not my_pickup_code"/>
+              <div class="o_row"
+                   invisible="state != 'handout' or not my_pickup_code">
+                <field name="my_pickup_code" readonly="1" nolabel="1"
+                       class="fw-bold fs-5 me-3"/>
+                <field name="my_pickup_qr" widget="image" nolabel="1"
+                       readonly="1" options="{'size': [120, 120]}"/>
+              </div>
             </group>
           </group>
 
@@ -239,6 +286,8 @@
                       decoration-success="state == 'taken'">
                   <field name="partner_id"/>
                   <field name="quantity"/>
+                  <field name="pickup_code" readonly="1" string="Код"
+                         invisible="state in ('draft', 'cancelled')"/>
                   <field name="supplier_amount" readonly="1" sum="Поставщику"
                          optional="show"/>
                   <field name="fee_amount" readonly="1" sum="Оргсбор"

@@ -94,6 +94,101 @@ def _set_categories(Buy):
             {'category': section})
 
 
+REJECTIONS = [
+    'Поставщик не подтвердил объём — цена в карточке не обеспечена.',
+    'Нет договора с поставщиком: на витрину такое не пускаем.',
+    'Точка самовывоза не указана, забирать негде.',
+    'Дубль уже идущей закупки того же товара в том же городе.',
+]
+
+
+def _set_roles(env):
+    """Проставить роли на уже заведённых закупках.
+
+    Роли появились позже самих закупок (решение 379 от 22 сентября), и у
+    наполненной базы они пусты. Без этого прохода блок ролей на боевой
+    показывал бы одного организатора — то есть ровно то, что решение и
+    называло недоделкой.
+
+    Разброс намеренный, а не для красоты. У части закупок поставщика на
+    платформе нет вовсе — так и бывает: закупают у кого придётся, и
+    требовать от каждого поставщика регистрации значило бы запретить
+    половину закупок. У части нет отдельного оператора выдачи — выдаёт
+    сам организатор. На витрине есть и отклонённые: раздел, где всё
+    одобрено, не показывает, что модерация вообще работает.
+    """
+    Buy = env['coop.groupbuy'].sudo()
+    Partner = env['res.partner'].sudo()
+    buys = Buy.search([], order='id')
+    if not buys:
+        return
+
+    companies = Partner.search([
+        ('coop_is_participant', '=', True), ('is_company', '=', True)],
+        order='id')
+    people = Partner.search([
+        ('coop_is_participant', '=', True), ('is_company', '=', False)],
+        order='id')
+    if not companies:
+        return
+
+    admin = env['res.users'].sudo().search(
+        [('login', '=', 'dashkevich')], limit=1).partner_id
+
+    rnd = random.Random(20260922)
+    touched = 0
+    for index, buy in enumerate(buys):
+        values = {}
+
+        if not buy.supplier_id and rnd.random() < 0.6:
+            fit = companies.filtered(lambda c: c != buy.organizer_id)
+            if fit:
+                values['supplier_id'] = fit[index % len(fit)].id
+
+        if not buy.pickup_operator_id and rnd.random() < 0.45:
+            # Оператор — из своего города: за партией ездят, а не летают.
+            near = (people.filtered(lambda p: p.city and p.city == buy.city)
+                    or people)
+            if near:
+                values['pickup_operator_id'] = near[index % len(near)].id
+
+        if admin and not buy.showcase_admin_id:
+            values['showcase_admin_id'] = admin.id
+
+        if buy.showcase_state == 'draft':
+            chance = rnd.random()
+            if chance < 0.8:
+                values['showcase_state'] = 'published'
+            elif chance < 0.88:
+                values['showcase_state'] = 'rejected'
+                values['showcase_note'] = REJECTIONS[index % len(REJECTIONS)]
+            # Остальные так и остаются не выставленными — их ещё не
+            # смотрели, и это тоже настоящее состояние.
+
+        # Отметки участков — только там, где партия действительно ушла.
+        if buy.state in ('delivering', 'handout', 'done') and not buy.shipped_on:
+            values['shipped_on'] = buy.stop_date
+        if buy.state in ('handout', 'done') and not buy.received_on:
+            values['received_on'] = buy.delivery_date or buy.stop_date
+
+        if values:
+            buy.write(values)
+            touched += 1
+
+    _logger.info('Совместные закупки: роли проставлены у %s', touched)
+
+
+def _set_pickup_codes(env):
+    """Коды выдачи тем заказам, что были заведены до кодов."""
+    Order = env['coop.groupbuy.order'].sudo()
+    empty = Order.search(['|', ('pickup_code', '=', False),
+                          ('pickup_code', '=', '')])
+    for order in empty:
+        order.pickup_code = Order._new_pickup_code()
+    if empty:
+        _logger.info('Совместные закупки: коды выдачи у %s заказов', len(empty))
+
+
 def load_groupbuy(env, target=TARGET):
     Buy = env['coop.groupbuy'].sudo()
     Tier = env['coop.groupbuy.tier'].sudo()
@@ -106,6 +201,8 @@ def load_groupbuy(env, target=TARGET):
         # пуст. Проставляем на уже заведённых — иначе полки каталога
         # увидит только тот, кто начал с чистой базы.
         _set_categories(Buy)
+        _set_roles(env)
+        _set_pickup_codes(env)
         return
 
     companies = Partner.search([
@@ -203,6 +300,8 @@ def load_groupbuy(env, target=TARGET):
         created += 1
 
     _spread_created(env, rnd)
+    _set_roles(env)
+    _set_pickup_codes(env)
     _logger.info('Совместные закупки: создано %s', created)
 
 
