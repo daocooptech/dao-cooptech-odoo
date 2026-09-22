@@ -2,7 +2,7 @@
 import logging
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -220,6 +220,42 @@ class CoopResource(models.Model):
              'этого спор «кто это разместил» разбирать нечем.')
     city = fields.Char(string='Город', index=True)
 
+    # ── Кто делает и из чего ─────────────────────────────────────────────
+    #
+    # Решение 370 от 22 сентября 2026. Владелец: «зависит всё от
+    # количества модулей установленных у производителя… например если
+    # стоит производственный модуль, то мы можем показывать
+    # технологический и производственный процесс, состав, сотрудников
+    # производивших конкретную партию».
+    #
+    # Отсюда главное для чтения этого куска: **карточка ресурса — не
+    # фиксированный набор блоков, а витрина того, что участник
+    # согласился показать из своих систем**. Пустой блок здесь не
+    # недоделка, а честный ответ: у этого производителя такого учёта
+    # нет. Поэтому ни одно из полей ниже не обязательное.
+
+    manufacturer_ids = fields.Many2many(
+        'res.partner', 'coop_resource_manufacturer_rel',
+        'resource_id', 'partner_id', string='Производители',
+        help='Кто это делает. Их может быть несколько: кооперация тем и '
+             'живёт, что одно изделие собирают из разных рук.')
+
+    # Сырьё и оборудование — связями на такие же объявления, а не
+    # текстом. Текстом «доска сосновая» — это слово; связью — живая
+    # карточка с владельцем, ценой и городом, по которой видно, у кого
+    # это взять. Ради этого различия связи и заводятся.
+    material_ids = fields.Many2many(
+        'coop.resource', 'coop_resource_material_rel',
+        'resource_id', 'material_id', string='Сырьё',
+        help='Из чего сделано — объявлениями о тех же ресурсах.')
+    equipment_ids = fields.Many2many(
+        'coop.resource', 'coop_resource_equipment_rel',
+        'resource_id', 'equipment_id', string='Оборудование',
+        help='На чём сделано.')
+
+    made_of_count = fields.Integer(
+        string='Состав', compute='_compute_made_of_count')
+
     # ── Цена ─────────────────────────────────────────────────────────────
     #
     # Хранится рублёвая оценка, даже когда расчёта деньгами нет. Она нужна
@@ -328,6 +364,32 @@ class CoopResource(models.Model):
             'coop_resources.action_coop_resource_add')
         action['res_id'] = draft.id
         return action
+
+    @api.depends('material_ids', 'equipment_ids')
+    def _compute_made_of_count(self):
+        for record in self:
+            record.made_of_count = (
+                len(record.material_ids) + len(record.equipment_ids))
+
+    @api.constrains('material_ids', 'equipment_ids')
+    def _check_not_made_of_itself(self):
+        """Ресурс не может быть сделан из самого себя.
+
+        Прямое кольцо проверяем обязательно: «доска сделана из доски» —
+        это не рекурсия материалов, а опечатка, и она портит и вид, и
+        любой обход состава.
+
+        Кольца длиннее двух звеньев не ловим намеренно. Состав ресурса —
+        не дерево счетов: «мука из зерна, зерно с поля, на поле трактор,
+        трактор из стали, сталь на печи, печь из кирпича» — цепочка
+        может честно замкнуться через десяток звеньев в настоящем
+        производстве, и запрещать это значило бы решать за участника,
+        как устроено его дело.
+        """
+        for record in self:
+            if record in record.material_ids | record.equipment_ids:
+                raise ValidationError(_(
+                    'Ресурс не может быть сделан из самого себя.'))
 
     @api.constrains('method_ids', 'price', 'price_kind')
     def _check_price_required(self):

@@ -257,10 +257,58 @@
               <field name="catalog_rank" readonly="1" groups="base.group_no_one"/>
             </group>
           </group>
+          <field name="made_of_count" invisible="1"/>
           <notebook>
             <page string="Описание" name="description">
               <field name="description"
                      placeholder="Что это, в каком состоянии, на каких условиях." widget="coop_block" readonly="not coop_can_edit"/>
+            </page>
+            <!--
+              Кто делает и из чего. Вкладка прячется, когда ничего не
+              заполнено и править нельзя: у большинства объявлений состава
+              нет и не будет, и пустая вкладка читалась бы как недоделка
+              платформы, а не как «у этого производителя такого учёта нет»
+              (решение 370).
+            -->
+            <page string="Кто делает и из чего" name="making"
+                  invisible="not coop_can_edit and made_of_count == 0 and not manufacturer_ids">
+              <group>
+                <field name="manufacturer_ids" widget="many2many_tags"
+                       readonly="not coop_can_edit"
+                       placeholder="Кто это делает — их может быть несколько"/>
+              </group>
+              <group>
+                <group string="Сырьё">
+                  <field name="material_ids" nolabel="1" colspan="2"
+                         readonly="not coop_can_edit"
+                         context="{'coop_catalog': True}">
+                    <list>
+                      <field name="name"/>
+                      <field name="owner_id"/>
+                      <field name="city"/>
+                      <field name="price"/>
+                    </list>
+                  </field>
+                </group>
+                <group string="Оборудование">
+                  <field name="equipment_ids" nolabel="1" colspan="2"
+                         readonly="not coop_can_edit"
+                         context="{'coop_catalog': True}">
+                    <list>
+                      <field name="name"/>
+                      <field name="owner_id"/>
+                      <field name="city"/>
+                      <field name="price"/>
+                    </list>
+                  </field>
+                </group>
+              </group>
+              <div class="text-muted mt-2">
+                Сырьё и оборудование — объявлениями о тех же ресурсах, а не
+                текстом: по связи видно, у кого это взять, а по слову — нет.
+                Дальше сюда же придут техпроцесс, партия и остаток на складе —
+                у тех, кто подключит свои системы учёта.
+              </div>
             </page>
           </notebook>
         </sheet>

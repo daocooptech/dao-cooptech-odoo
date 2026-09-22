@@ -14,6 +14,7 @@ import base64
 import json
 import logging
 import os
+import random
 
 _logger = logging.getLogger(__name__)
 
@@ -482,6 +483,108 @@ def _extra_rows(rows, extra):
     return extras
 
 
+# Из чего что делают. Ключ — начало названия ресурса, значения — слова,
+# по которым ищется сырьё и оборудование среди тех же объявлений.
+#
+# Словарь, а не случайная раздача: «пельмени из доски сосновой» — это не
+# разнообразие данных, а мусор, на котором не видно ни связи, ни смысла.
+# Правдоподобие здесь дороже объёма.
+MADE_OF = {
+    'Пельмени': (['мука', 'мясо', 'фарш', 'яйц'], ['тестомес', 'холодильн', 'морозил']),
+    'Хлеб': (['мука', 'дрожж', 'зерно'], ['печь', 'тестомес']),
+    'Мёд': (['улей', 'рамк', 'воск'], ['медогон', 'центрифуг']),
+    'Сыр': (['молоко', 'закваск', 'фермент'], ['ванн', 'холодильн', 'пресс']),
+    'Молоко': (['корм', 'сено'], ['доильн', 'охладител']),
+    'Мебель': (['доск', 'фанер', 'брус', 'лак', 'фурнитур'], ['станок', 'пил', 'фрезер', 'шлифов']),
+    'Стол': (['доск', 'брус', 'лак'], ['станок', 'пил', 'шлифов']),
+    'Сруб': (['бревн', 'брус', 'доск'], ['бензопил', 'станок']),
+    'Окна': (['профил', 'стекл', 'фурнитур'], ['станок', 'пил']),
+    'Двери': (['доск', 'фанер', 'фурнитур'], ['станок', 'фрезер']),
+    'Кирпич': (['глин', 'песок'], ['печь', 'пресс']),
+    'Бетон': (['цемент', 'песок', 'щебен'], ['бетономеш', 'миксер']),
+    'Одежда': (['ткан', 'нитк', 'пряж'], ['швейн', 'оверлок']),
+    'Валенки': (['шерст', 'войлок'], ['вал', 'пресс']),
+    'Керамика': (['глин', 'глазур'], ['печь', 'гончарн', 'круг']),
+    'Свечи': (['воск', 'парафин', 'фитил'], ['форм', 'плавил']),
+}
+
+
+def _fill_making(env):
+    """Проставить производителей и состав на уже заведённых ресурсах.
+
+    Решение 370 от 22 сентября 2026: карточка ресурса показывает, кто это
+    делает и из чего. Поля появились позже самих объявлений, и у
+    наполненной базы они пусты — а пустая вкладка на всех ста объявлениях
+    читается как недоделка платформы, а не как «у этого производителя
+    такого учёта нет».
+
+    Заполняем **не всё подряд**. Состав бывает у изделия, а не у
+    квартиры, машины или услуги: у них его нет и быть не может, и
+    выдумывать его значило бы учить читателя не верить карточке.
+    """
+    Resource = env['coop.resource'].sudo()
+    Partner = env['res.partner'].sudo()
+
+    made = 0
+    for prefix, (material_words, equipment_words) in MADE_OF.items():
+        goods = Resource.search([('name', '=like', prefix + '%')])
+        if not goods:
+            continue
+        materials = Resource
+        for word in material_words:
+            materials |= Resource.search([('name', 'ilike', word)], limit=3)
+        equipment = Resource
+        for word in equipment_words:
+            equipment |= Resource.search([('name', 'ilike', word)], limit=2)
+
+        for item in goods:
+            values = {}
+            # Из себя ничего не делают — и связь на себя же уронила бы
+            # проверку в модели.
+            fit_materials = materials - item
+            fit_equipment = equipment - item
+            if fit_materials and not item.material_ids:
+                values['material_ids'] = [(6, 0, fit_materials[:4].ids)]
+            if fit_equipment and not item.equipment_ids:
+                values['equipment_ids'] = [(6, 0, fit_equipment[:3].ids)]
+            if values:
+                item.write(values)
+                made += 1
+
+    # Производители. Ставим владельца-организацию и иногда второго:
+    # кооперация тем и живёт, что одно изделие собирают из разных рук, и
+    # каталог, где у каждого изделия ровно один производитель, этого не
+    # показывает.
+    companies = Partner.search([
+        ('coop_is_participant', '=', True), ('is_company', '=', True)],
+        order='id')
+    # Производитель бывает у вещи и у станка. У труда и у денег его нет:
+    # труд не производят, а выполняют. Поставить там производителя —
+    # значит приучить читателя не верить этому полю.
+    goods = Resource.search([
+        ('resource_type', 'in', ('material', 'equipment')),
+        ('manufacturer_ids', '=', False),
+    ])
+
+    rnd = random.Random(20260922)
+    named = 0
+    for index, item in enumerate(goods):
+        makers = []
+        if item.owner_id and item.owner_id.is_company:
+            makers.append(item.owner_id.id)
+        # Второй производитель у каждого третьего — и только если есть
+        # кому им быть.
+        if companies and rnd.random() < 0.33:
+            other = companies[index % len(companies)]
+            if other.id not in makers:
+                makers.append(other.id)
+        if makers:
+            item.manufacturer_ids = [(6, 0, makers)]
+            named += 1
+
+    _logger.info('Ресурсы: состав у %s, производители у %s', made, named)
+
+
 def load_resources(env, extra=45):
     with open(os.path.join(HERE, 'resources.json'), encoding='utf-8') as fh:
         rows = json.load(fh)
@@ -566,3 +669,4 @@ def load_resources(env, extra=45):
 
     _logger.info('Каталог ресурсов: %s записей, создано %s, обновлено %s, '
                  'категорий %s', len(rows), created, updated, len(categories))
+    _fill_making(env)
