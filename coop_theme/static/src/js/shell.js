@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, reactive, useState, onWillStart, onWillUnmount } from "@odoo/owl";
+import { Component, reactive, useState, onMounted, onWillStart, onWillUnmount } from "@odoo/owl";
 import { patch } from "@web/core/utils/patch";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
@@ -633,15 +633,17 @@ patch(WebClient, {
 });
 
 /**
- * Идёт ли ещё первая загрузка.
+ * Пусто ли сейчас в рабочей области.
  *
  * Состояние снаружи компонента и одно на всё приложение: заставку
- * показывает оболочка, а гасит её событие движка об отрисовке действия,
- * и связать их иначе нечем.
+ * показывает оболочка, а знает о пустоте наблюдатель за разметкой.
  *
- * Гаснет один раз и навсегда — на первом же показанном экране. Между
- * разделами ничего не мигает: переход внутри приложения занимает доли
- * секунды, и заставка на нём была бы не помощью, а морганием.
+ * Сначала заставка гасла один раз и навсегда — на первом показанном
+ * экране. Владелец 22 сентября 2026, показав снимок перехода между
+ * разделами: «теперь примени это ко всем страницам и каталогам». И
+ * правда: щёлкнув «Ресурсы» из «Вакансий», человек видит то же, что и
+ * при первой загрузке — пустоту и подвал, подпирающий шапку. Разницы
+ * между «грузится впервые» и «грузится раздел» для смотрящего нет.
  */
 export const coopBootUi = reactive({ loading: true });
 
@@ -685,21 +687,59 @@ patch(WebClient.prototype, {
     setup() {
         super.setup();
         this.coopBoot = useState(coopBootUi);
-        // Страховка от вечной заставки: если первый экран почему-то не
-        // соберётся, человек должен увидеть хотя бы оболочку и подвал, а
-        // не крутящуюся дугу до конца времён. Пятнадцать секунд — втрое
-        // больше измеренной загрузки.
-        this.coopBootGuard = browser.setTimeout(() => {
-            coopBootUi.loading = false;
-        }, 15000);
-        onWillUnmount(() => browser.clearTimeout(this.coopBootGuard));
+
+        // Заставка смотрит не на события, а на саму разметку.
+        //
+        // Событий у движка два — «действие меняется» и «отрисовано», — и
+        // по ним пришлось бы угадывать, опустела область или нет: первое
+        // приходит и тогда, когда старый экран остаётся на месте, второе
+        // молчит про диалоги и про ошибки. Пустота же наблюдается прямо:
+        // в `.o_action_manager` либо есть собранный экран, либо нет.
+        //
+        // Наблюдатель дешёвый: только за списком детей и без углубления
+        // в поддерево. Он просыпается, когда экран появился или исчез, —
+        // считанные разы за переход, а не на каждый набранный символ в
+        // поиске каталога.
+        this.coopLoaderWatcher = null;
+        onMounted(() => {
+            const область = document.querySelector(".o_action_manager");
+            if (!область) {
+                // Не нашлось — значит разметка движка изменилась.
+                // Заставку в этом случае гасим совсем: лучше без неё, чем
+                // навсегда поверх работающего портала.
+                coopBootUi.loading = false;
+                return;
+            }
+            const пересчитать = () => {
+                const пусто = область.children.length === 0;
+                if (пусто === coopBootUi.loading) {
+                    return;
+                }
+                coopBootUi.loading = пусто;
+                browser.clearTimeout(this.coopLoaderGuard);
+                if (пусто) {
+                    // Страховка от вечной заставки: если экран почему-то
+                    // не соберётся, человек увидит хотя бы оболочку и
+                    // подвал, а не крутящуюся дугу до конца времён.
+                    // Пятнадцать секунд — втрое больше измеренной
+                    // загрузки.
+                    this.coopLoaderGuard = browser.setTimeout(() => {
+                        coopBootUi.loading = false;
+                    }, 15000);
+                }
+            };
+            this.coopLoaderWatcher = new MutationObserver(пересчитать);
+            this.coopLoaderWatcher.observe(область, { childList: true });
+            пересчитать();
+        });
+        onWillUnmount(() => {
+            this.coopLoaderWatcher?.disconnect();
+            browser.clearTimeout(this.coopLoaderGuard);
+        });
+
         useBus(this.env.bus, "ACTION_MANAGER:UI-UPDATED", ({ detail: mode }) => {
             if (mode === "new") {
                 return;
-            }
-            if (coopBootUi.loading) {
-                coopBootUi.loading = false;
-                browser.clearTimeout(this.coopBootGuard);
             }
             // Сброс — следующим кадром: в момент события разметка новой
             // страницы ещё не на месте, и слой короче, чем станет.
