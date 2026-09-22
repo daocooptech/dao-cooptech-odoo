@@ -205,12 +205,18 @@
   списка, а не по вкладке.
 -->
 <t t-name="coop_messages.MessagingMenuHeader" t-inherit="mail.MessagingMenu.content" t-inherit-mode="extension">
-  <xpath expr="//button[contains(@t-on-click, &quot;activeTab = 'chat'&quot;)]" position="replace">
-    <button class="o-mail-MessagingMenu-headerFilter btn btn-link o-px-1_5 py-1 m-1 lh-1"
-            t-att-class="store.discuss.activeTab === 'chat' ? 'fw-bold o-active shadow-sm' : 'text-muted'"
-            type="button" role="tab"
-            t-on-click="() => store.discuss.activeTab = 'chat'">Личные</button>
-  </xpath>
+  <!--
+    Здесь были два правила, переименовывавшие вкладки всплывающего меню
+    сообщений: «Личные», «Групповые», «Служебные». Они целились в
+    отдельные кнопки с `t-on-click`, а движок с тех пор собирает вкладки
+    перебором по списку — кнопок таких больше нет, и правила молча не
+    применялись неизвестно с какого обновления.
+
+    Убраны 22 сентября 2026, когда это нашла проверка
+    `tools/check_theme.py`: прицел попадал в ноль узлов. Вкладки пока
+    называются словами движка; как вернуть свои — записано открытым
+    вопросом.
+  -->
   <!--
     Строка списка говорит, к чему привязан чат: сделка, проект,
     сообщество, организация. Без этого все чаты разделов сваливались в
@@ -230,20 +236,6 @@
           t-esc="coopKindLabels[thread.coop_kind]"/>
   </xpath>
 
-  <xpath expr="//button[contains(@t-on-click, &quot;activeTab = 'channel'&quot;)]" position="replace">
-    <button class="o-mail-MessagingMenu-headerFilter btn btn-link o-px-1_5 py-1 m-1 lh-1"
-            t-att-class="store.discuss.activeTab === 'channel' ? 'fw-bold o-active shadow-sm' : 'text-muted'"
-            type="button" role="tab"
-            t-on-click="() => store.discuss.activeTab = 'channel'">Групповые</button>
-    <!-- Переписки с самой платформой: помощник и извещения системы.
-         Отдельной вкладкой по решению владельца — в общем списке они
-         стоят наравне с живыми людьми и занимают верх, потому что пишут
-         чаще всех. -->
-    <button class="o-mail-MessagingMenu-headerFilter btn btn-link o-px-1_5 py-1 m-1 lh-1"
-            t-att-class="store.discuss.activeTab === 'coop_service' ? 'fw-bold o-active shadow-sm' : 'text-muted'"
-            type="button" role="tab"
-            t-on-click="() => store.discuss.activeTab = 'coop_service'">Служебные</button>
-  </xpath>
 </t>
 
 </templates>

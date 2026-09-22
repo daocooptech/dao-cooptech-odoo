@@ -428,7 +428,13 @@ patch(ControlPanel.prototype, {
 // действии нет, остаётся штатное «Новое».
 // Тот же геттер списку и форме: «Новое» встречается и там, и там, а
 // подпись у раздела одна.
-const подписьСоздания = {
+// Функцией, а не объектом: движок запрещает прикладывать один объект
+// заплатки дважды (`patching_code`, «Applying the same patch to multiple
+// objects»). Здесь внутри нет `super`, и до поры это сходило с рук, но
+// правило движка не про «когда заметно», а про то, как заплатка
+// устроена.
+function подписьСоздания() {
+    return {
     get coopCreateLabel() {
         // Из действия, а не из `props.context`. Списку достаётся контекст
         // поиска, а не действия: `WithSearch` передаёт вниз
@@ -442,10 +448,11 @@ const подписьСоздания = {
             || this.props.context?.coop_create_label
             || "Новое";
     },
-};
+    };
+}
 
-patch(ListController.prototype, подписьСоздания);
-patch(FormController.prototype, подписьСоздания);
+patch(ListController.prototype, подписьСоздания());
+patch(FormController.prototype, подписьСоздания());
 
 /**
  * Своя страница добавления вместо штатного режима создания.
