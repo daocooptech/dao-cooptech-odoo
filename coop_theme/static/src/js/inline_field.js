@@ -20,6 +20,14 @@ import { Component, useEffect, useRef, useState } from "@odoo/owl";
  * Тип ввода берётся у самого поля — строка, дата, число: одно и то же
  * поведение для всех, а разница только в том, чем набирают.
  */
+/** Номер из ссылки, как бы её ни прислали: запись, пара или число. */
+function valueOfPair(link) {
+    if (Array.isArray(link)) {
+        return link[0];
+    }
+    return typeof link === "number" ? link : undefined;
+}
+
 export class CoopInlineField extends Component {
     static template = "coop_theme.InlineField";
     static props = {
@@ -80,6 +88,43 @@ export class CoopInlineField extends Component {
         if (this.field.type === "selection") {
             const option = (this.field.selection || []).find(([key]) => key === value);
             return option ? option[1] : String(value);
+        }
+        // Числа и деньги — форматировщиком движка, а не как есть.
+        //
+        // Владелец 22 сентября 2026 про страницу проекта: «в блоке
+        // ресурсы "нужно" написано цифрами слитно и без валюты, сделать
+        // как ниже в "собрано"». Так и было: «собрано» рисует движок и
+        // получается «1 455 000,00 ₽», а «нужно» правится по месту, и
+        // наш виджет печатал `String(value)` — «1455000».
+        //
+        // Берём тот же реестр `formatters`, которым движок форматирует
+        // поля (документация, `frontend/registries`). Свой разбор разрядов
+        // и валют писать нельзя: он разойдётся с движком на первой же
+        // настройке языка, и два числа на одной странице будут выглядеть
+        // по-разному — ровно то, что владелец и заметил.
+        if (["monetary", "float", "integer"].includes(this.field.type)) {
+            const format = registry.category("formatters").get(this.field.type, null);
+            if (format) {
+                const options = {};
+                if (this.field.digits) {
+                    options.digits = this.field.digits;
+                }
+                if (this.field.type === "monetary") {
+                    const поле = this.field.currency_field || "currency_id";
+                    const валюта = this.props.record.data[поле];
+                    // Ссылка приходит то записью, то парой, то числом —
+                    // смотря как поле объявлено. Берём номер из любого.
+                    const номер = валюта && (валюта.id ?? valueOfPair(валюта));
+                    if (номер) {
+                        options.currencyId = номер;
+                    }
+                }
+                try {
+                    return format(value, options);
+                } catch (ошибка) {
+                    console.warn("[правка по месту] не отформатировалось:", ошибка);
+                }
+            }
         }
         return String(value);
     }
