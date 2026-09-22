@@ -22,7 +22,15 @@
     `archInfo="footerArchInfo"`. Номер сместился бы при первой же правке
     движка, и полоса уехала бы в подвал диалога.
   -->
-  <t t-name="coop_theme.FormView" t-inherit="web.FormView" t-inherit-mode="extension">
+  <!--
+    Имя своё, а не `coop_theme.FormView`: такое уже занято в
+    `catalog_view.xml`, где той же формой правится подпись кнопки
+    создания. Два шаблона под одним именем — это не два правила, а
+    гонка: кто зарегистрируется последним, тот и остался, а порядок
+    задаётся строчками в манифесте и молча меняется при первой же
+    вставке файла в список.
+  -->
+  <t t-name="coop_theme.FormViewSaveBar" t-inherit="web.FormView" t-inherit-mode="extension">
 
     <xpath expr="//t[@t-set-slot='control-panel-status-indicator']/t[@t-if='canEdit']"
            position="attributes">
