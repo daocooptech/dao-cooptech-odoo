@@ -86,6 +86,9 @@
                 <span class="o_coop_gb_price">
                   <field name="current_price"/> ₽ / <t t-esc="record.unit_label.value"/>
                 </span>
+                <span class="o_coop_gb_meta" title="Из чего сложилась цена">
+                  в т. ч. оргсбор <field name="org_fee_amount"/> ₽
+                </span>
                 <span class="o_coop_gb_meta">
                   стоп <t t-esc="record.stop_date.value"/>
                 </span>
@@ -130,6 +133,8 @@
         <field name="name"/>
         <field name="organizer_id" string="Организатор"/>
         <field name="city"/>
+        <field name="supplier_price" string="Поставщику" optional="hide"/>
+        <field name="org_fee_amount" string="Оргсбор" optional="hide"/>
         <field name="current_price" string="Цена сейчас"/>
         <field name="unit_label" string="Единица"/>
         <field name="total_quantity" string="Набрано"/>
@@ -186,7 +191,13 @@
               </div>
               <field name="base_price" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="org_fee_percent" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="current_price" readonly="1"/>
+              <!-- Разбивка цены. Владелец требовал её трижды: решения 70
+                   и 76 от 8 сентября и ещё раз 22 сентября. Одно число
+                   вместо трёх читается как сокрытие — покупатель не
+                   понимает, сколько платит кооперативу. -->
+              <field name="supplier_price" readonly="1"/>
+              <field name="org_fee_amount" readonly="1"/>
+              <field name="current_price" readonly="1" class="fw-bold"/>
               <field name="total_quantity" readonly="1"/>
               <field name="progress" widget="progressbar" readonly="1"/>
             </group>
@@ -228,6 +239,10 @@
                       decoration-success="state == 'taken'">
                   <field name="partner_id"/>
                   <field name="quantity"/>
+                  <field name="supplier_amount" readonly="1" sum="Поставщику"
+                         optional="show"/>
+                  <field name="fee_amount" readonly="1" sum="Оргсбор"
+                         optional="show"/>
                   <field name="amount" readonly="1" sum="Всего"/>
                   <field name="state" widget="badge"/>
                   <button name="action_take" type="object" string="Забран"

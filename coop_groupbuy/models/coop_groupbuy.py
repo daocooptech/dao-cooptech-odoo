@@ -13,10 +13,17 @@
 заказали дорого, последние сбили цену и получили её только себе. В
 складчине так нельзя — она перестаёт быть складчиной.
 
-**Оргсбор входит в цену, а не добавляется сверху.** Участник видит одно
-число и сравнивает его с магазином, а не считает в уме, сколько выйдет с
-надбавкой. Размер сбора при этом виден в карточке: скрывать его — значит
-делать вид, что организатор работает даром.
+**Оргсбор входит в цену, но показывается разбивкой.** Участник видит
+одно число и сравнивает его с магазином, а не считает в уме, сколько
+выйдет с надбавкой, — и тут же видит, из чего это число сложилось: цена
+поставщика, оргсбор, итого.
+
+Владелец требовал этого трижды: решениями 70 и 76 от 8 сентября и ещё
+раз 22 сентября, разбирая расхождения. Прежде здесь была записана
+обратная формулировка — «оргсбор входит в цену, а не добавляется
+сверху», — и следующий читатель кода делал по ней, а не по решению.
+Одно число вместо трёх выглядит как сокрытие: покупатель не понимает,
+сколько он платит кооперативу, и подозревает худшее.
 """
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
@@ -77,11 +84,12 @@ class CoopGroupBuy(models.Model):
         help='Меньше этого объёма поставщик партию не отгрузит.')
     base_price = fields.Float(
         string='Цена при минимальном объёме', digits=(16, 2), required=True,
-        help='Оргсбор уже включён.')
+        help='Итоговая цена за единицу: оргсбор уже внутри. Из чего она '
+             'сложилась, участник видит разбивкой.')
     org_fee_percent = fields.Float(
         string='Оргсбор, %', default=7.0, digits=(5, 2),
-        help='Доля организатора внутри цены. Показывается участнику: '
-             'скрывать её — делать вид, что организатор работает даром.')
+        help='Доля кооператива внутри цены. Кооперативная наценка и '
+             'оргсбор — одно и то же (решение 76).')
 
     stop_date = fields.Date(
         string='Стоп', required=True, index=True, tracking=True,
@@ -118,6 +126,18 @@ class CoopGroupBuy(models.Model):
     progress = fields.Float(
         string='Набрано, %', compute='_compute_current_price', store=True,
         digits=(5, 1))
+
+    # Разбивка цены. Хранимая, а не считаемая на лету: по ней ищут и
+    # сортируют, и она попадает в печатные формы, где пересчитывать
+    # поздно.
+    supplier_price = fields.Float(
+        string='Цена поставщика', compute='_compute_price_breakdown',
+        store=True, digits=(16, 2),
+        help='Сколько из цены уходит поставщику — без оргсбора.')
+    org_fee_amount = fields.Float(
+        string='Оргсбор, ₽', compute='_compute_price_breakdown',
+        store=True, digits=(16, 2),
+        help='Сколько с единицы получает кооператив.')
 
     my_quantity = fields.Float(
         string='Мой заказ', compute='_compute_my_order', digits=(16, 3))
@@ -169,6 +189,20 @@ class CoopGroupBuy(models.Model):
             record.progress = (
                 min(record.total_quantity / record.min_volume * 100, 999.9)
                 if record.min_volume else 0.0)
+
+    @api.depends('current_price', 'org_fee_percent')
+    def _compute_price_breakdown(self):
+        """Из чего сложилась цена: поставщику и кооперативу.
+
+        Считается от итоговой цены назад, а не от цены поставщика
+        вперёд: итог — то, о чём организатор договорился с поставщиком и
+        что видит участник, и он не должен «плыть» из-за округления
+        доли. Округляем составляющие, а не итог.
+        """
+        for record in self:
+            fee = record.current_price * (record.org_fee_percent or 0.0) / 100.0
+            record.org_fee_amount = round(fee, 2)
+            record.supplier_price = round(record.current_price - fee, 2)
 
     @api.depends_context('uid')
     @api.depends('order_ids.quantity', 'order_ids.partner_id', 'order_ids.state')
@@ -358,6 +392,14 @@ class CoopGroupBuyOrder(models.Model):
     amount = fields.Float(
         string='К оплате', compute='_compute_amount', store=True,
         digits=(16, 2))
+    supplier_amount = fields.Float(
+        string='Поставщику', compute='_compute_amount', store=True,
+        digits=(16, 2),
+        help='Сколько из вашей суммы уходит поставщику.')
+    fee_amount = fields.Float(
+        string='Оргсбор', compute='_compute_amount', store=True,
+        digits=(16, 2),
+        help='Сколько из вашей суммы получает кооператив.')
 
     state = fields.Selection([
         ('draft', 'В сборе'),
@@ -371,16 +413,24 @@ class CoopGroupBuyOrder(models.Model):
         'Заказать можно только положительное количество.',
     )
 
-    @api.depends('quantity', 'groupbuy_id.current_price')
+    @api.depends('quantity', 'groupbuy_id.current_price',
+                 'groupbuy_id.supplier_price', 'groupbuy_id.org_fee_amount')
     def _compute_amount(self):
         """Сумма считается по текущей цене — она общая для всех.
 
         Поэтому заказавший первым платит столько же, сколько заказавший
         последним: набранный объём удешевляет партию целиком, а не
         отдельные заказы.
+
+        Разбивка считается тут же: человеку важнее не общий процент, а
+        сколько из его собственных денег уходит кооперативу.
         """
         for record in self:
-            record.amount = record.quantity * record.groupbuy_id.current_price
+            buy = record.groupbuy_id
+            record.amount = record.quantity * buy.current_price
+            record.supplier_amount = round(
+                record.quantity * buy.supplier_price, 2)
+            record.fee_amount = round(record.quantity * buy.org_fee_amount, 2)
 
     def action_take(self):
         """Отметить, что заказ забран."""
