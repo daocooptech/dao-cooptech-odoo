@@ -43,6 +43,7 @@ export class CoopInlineField extends Component {
 
     setup() {
         this.orm = useService("orm");
+        this.notification = useService("notification");
         // `options` — подсказки для связи: пусто, пока не начали набирать.
         // `chosen` — что выбрали из подсказок, до галочки ещё не записано.
         this.ui = useState({
@@ -110,19 +111,19 @@ export class CoopInlineField extends Component {
                     options.digits = this.field.digits;
                 }
                 if (this.field.type === "monetary") {
-                    const поле = this.field.currency_field || "currency_id";
-                    const валюта = this.props.record.data[поле];
+                    const currencyField = this.field.currency_field || "currency_id";
+                    const currency = this.props.record.data[currencyField];
                     // Ссылка приходит то записью, то парой, то числом —
                     // смотря как поле объявлено. Берём номер из любого.
-                    const номер = валюта && (валюта.id ?? valueOfPair(валюта));
-                    if (номер) {
-                        options.currencyId = номер;
+                    const currencyId = currency && (currency.id ?? valueOfPair(currency));
+                    if (currencyId) {
+                        options.currencyId = currencyId;
                     }
                 }
                 try {
                     return format(value, options);
-                } catch (ошибка) {
-                    console.warn("[правка по месту] не отформатировалось:", ошибка);
+                } catch (error) {
+                    console.warn("[правка по месту] не отформатировалось:", error);
                 }
             }
         }
@@ -245,7 +246,33 @@ export class CoopInlineField extends Component {
             const saved = await this.props.record.save();
             if (saved !== false) {
                 this.ui.editing = false;
+                return;
             }
+            // Не сохранилось, и движок промолчал.
+            //
+            // Владелец 22 сентября 2026: «хотел изменить название
+            // проекта… и он не сохранил, хотя я нажал на галочку».
+            // Прежде отказ выглядел ровно так: поле оставалось открытым,
+            // и всё. Человеку это читается как «нажал не туда», а не как
+            // «платформа не дала», и он жмёт ещё раз.
+            //
+            // Молчаливый отказ хуже отказа: он тратит время и подрывает
+            // доверие к тому, что вообще сохраняется.
+            this.notification.add(
+                "Не сохранилось. Проверьте, ваша ли это запись и можно ли " +
+                "её сейчас менять.",
+                { type: "warning" });
+        } catch (error) {
+            // Отказ по правам приходит исключением. Движок показывает
+            // своё окно не всегда — например, когда запись идёт из
+            // обработчика, который никто не ждёт. Поэтому говорим сами и
+            // оставляем набранное на месте: человек не должен набирать
+            // заново из-за того, что мы не сумели сохранить.
+            this.notification.add(
+                (error && error.data && error.data.message) ||
+                "Не сохранилось. Похоже, эту запись вам менять нельзя.",
+                { type: "danger" });
+            console.warn("[правка по месту] не сохранилось:", error);
         } finally {
             this.ui.busy = false;
         }
