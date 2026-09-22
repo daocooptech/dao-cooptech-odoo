@@ -92,6 +92,15 @@ class CoopResourceMethod(models.Model):
     )
 
 
+# Имя, с которым заводится пустой черновик.
+#
+# Название у объявления обязательно на уровне базы, а черновик заводится
+# до того, как человек что-нибудь напишет, — значит без заготовки его не
+# создать. Заготовка одна и в коде одна: создание подставляет её, а
+# публикация по ней же узнаёт, что название так и не заменили.
+DRAFT_NAME = 'Новое объявление'
+
+
 class CoopResource(models.Model):
     """Ресурс платформы — предложение или запрос.
 
@@ -314,7 +323,7 @@ class CoopResource(models.Model):
         и никому не виден: черновики в каталог не выходят. Чистка старых
         пустых черновиков — отдельная работа, пока её нет.
         """
-        draft = self.create({'state': 'draft'})
+        draft = self.create({'state': 'draft', 'name': DRAFT_NAME})
         действие = self.env['ir.actions.act_window']._for_xml_id(
             'coop_resources.action_coop_resource_add')
         действие['res_id'] = draft.id
@@ -505,6 +514,14 @@ class CoopResource(models.Model):
         участник только смотрит.
         """
         for record in self:
+            # Название так и не написали. Объявление «Новое объявление» в
+            # каталоге бесполезно всем: его не найдут поиском, не поймут
+            # в полке и не откроют. Отказ здесь дешевле, чем сто таких
+            # строк в каталоге потом.
+            if not record.name or record.name.strip() == DRAFT_NAME:
+                raise UserError(_(
+                    'Напишите, что вы размещаете. «%s» — это заготовка, '
+                    'по ней объявление не найдут.') % DRAFT_NAME)
             record.owner_id.coop_require_level(
                 'contact', _('опубликовать объявление'))
         self.write({'state': 'published'})
