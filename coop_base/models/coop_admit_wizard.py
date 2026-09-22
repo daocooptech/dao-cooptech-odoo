@@ -33,6 +33,12 @@ class CoopAdmitWizard(models.TransientModel):
     role_id = fields.Many2one(
         related='membership_id.role_id', string='Основание участия',
         readonly=False)
+    # Чем ограничен выбор — берём у самого членства, чтобы правило
+    # «пайщик бывает в кооперативе» было одно на всю платформу, а не
+    # переписывалось в каждом мастере заново.
+    allowed_role_ids = fields.Many2many(
+        related='membership_id.allowed_role_ids',
+        string='Подходящие роли', readonly=True)
     job_title = fields.Char(
         related='membership_id.job_title', string='Должность', readonly=False)
     admission_basis = fields.Char(
