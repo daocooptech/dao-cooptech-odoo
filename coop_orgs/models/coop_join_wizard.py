@@ -51,8 +51,11 @@ class CoopJoinWizard(models.TransientModel):
 
     @api.model
     def _default_join_role(self):
-        return self.env['coop.membership.role'].search(
-            [('code', '=', 'member')], limit=1)
+        # Мастер — временная модель, столбцов у неё нет, и беды
+        # `coop.membership` с обязательным столбцом тут быть не может.
+        # Но справочник может быть ещё не заведён на свежей базе.
+        Role = self.env['coop.membership.role']
+        return Role.search([('code', '=', 'member')], limit=1)
 
     @api.depends('organization_id')
     def _compute_allowed_role_ids(self):

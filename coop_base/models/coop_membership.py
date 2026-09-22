@@ -3,6 +3,7 @@ import logging
 
 from odoo import _, api, fields, models, tools
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools import sql
 
 _logger = logging.getLogger(__name__)
 
@@ -88,8 +89,22 @@ class CoopMembership(models.Model):
 
     @api.model
     def _default_role(self):
-        return self.env['coop.membership.role'].search(
-            [('code', '=', 'member')], limit=1)
+        """Основание по умолчанию — пайщик, если справочник уже есть.
+
+        Проверка на существование таблицы тут не перестраховка. Поле
+        `role_id` обязательное, и движок, добавляя обязательный столбец
+        к таблице, где уже есть записи, зовёт это значение по умолчанию
+        — **в тот момент, когда справочник ещё не создан**. Без проверки
+        обновление падает на `relation does not exist`, и падает оно на
+        `coop_base`, то есть на всей платформе сразу.
+
+        Найдено прогоном обновления на копии боевой базы 22 сентября
+        2026, до выкатки. На копии это стоило пяти минут.
+        """
+        Role = self.env['coop.membership.role']
+        if not sql.table_exists(self.env.cr, Role._table):
+            return Role
+        return Role.search([('code', '=', 'member')], limit=1)
 
     @api.depends('role_id')
     def _compute_role(self):
