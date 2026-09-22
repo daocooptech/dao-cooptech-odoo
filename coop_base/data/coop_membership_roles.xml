@@ -37,6 +37,23 @@
     <field name="group_ids" eval="[(6, 0, [ref('legal_group_cooperative')])]"/>
   </record>
 
+  <!--
+    Участник НКО — не пайщик. В некоммерческой организации паёв нет, и
+    называть её членов пайщиками значит обещать то, чего не будет: пай
+    можно вернуть, а членский взнос в НКО — нет.
+
+    Роль заведена 22 сентября 2026, когда проверка на копии боевой базы
+    нашла четырнадцать «пайщиков» в некоммерческих организациях. Ровно
+    этот случай решение 180 и называло проблемой.
+  -->
+  <record id="membership_role_participant" model="coop.membership.role">
+    <field name="name">Участник</field>
+    <field name="code">participant</field>
+    <field name="sequence">25</field>
+    <field name="description">Член некоммерческой организации. Платит взносы, голосует, но пая не имеет.</field>
+    <field name="group_ids" eval="[(6, 0, [ref('legal_group_nonprofit'), ref('legal_group_decentralized')])]"/>
+  </record>
+
   <record id="membership_role_board" model="coop.membership.role">
     <field name="name">Правление</field>
     <field name="code">board</field>
