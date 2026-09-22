@@ -269,6 +269,120 @@
     </field>
   </record>
 
+  <!--
+    Страница размещения объявления.
+
+    Отдельным видом, а не режимом создания у обычной формы записи. Это
+    разные экраны по смыслу: на форме записи человек смотрит чужое
+    объявление и изредка правит своё, а здесь — заполняет пустое, и
+    порядок блоков ведёт его за руку: что размещаете → что это → на каких
+    условиях → где и как связаться.
+
+    Сделано по странице `add-resource.html` из дизайн-макета. Владелец 22
+    сентября 2026 выбрал «одной страницей, но с автосохранением
+    черновика» — поэтому ни шагов, ни мастера: всё на виду сразу, а
+    сохранность держится на том, что каждое поле сохраняет себя само.
+
+    Кнопки «Опубликовать» до публикации и «Продвинуть» после: пока
+    объявление черновик, продвигать нечего, а после публикации
+    публиковать нечего. Ленты переписки здесь нет — на странице создания
+    обсуждать ещё нечего.
+  -->
+  <record id="view_coop_resource_add" model="ir.ui.view">
+    <field name="name">coop.resource.add</field>
+    <field name="model">coop.resource</field>
+    <field name="arch" type="xml">
+      <form string="Разместить объявление">
+        <header>
+          <button name="action_publish" type="object" string="Опубликовать"
+                  class="btn-primary" invisible="state != 'draft'"/>
+          <button name="%(action_coop_resource_promote)d" type="action"
+                  string="Продвинуть" invisible="state != 'published'"
+                  context="{'default_resource_id': id}"/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="draft,published"/>
+        </header>
+        <sheet>
+          <field name="image_1920" widget="image" class="oe_avatar"/>
+          <div class="oe_title">
+            <span class="o_form_label">Разместить объявление</span>
+            <h1>
+              <field name="name" widget="coop_inline" options="{'wrap': True}"
+                     placeholder="Например, Пельмени домашней лепки, 1 кг"/>
+            </h1>
+          </div>
+          <group>
+            <group string="Что размещаете">
+              <field name="listing_type" widget="radio"/>
+              <field name="resource_type" widget="coop_inline"/>
+              <field name="category_id" widget="coop_inline"
+                     options="{'no_create': True}"/>
+              <field name="condition" widget="radio"
+                     options="{'horizontal': True}"/>
+            </group>
+            <group string="Сколько">
+              <label for="quantity"/>
+              <div class="o_row">
+                <field name="quantity" widget="coop_inline"/>
+                <field name="uom_label" widget="coop_inline"
+                       placeholder="шт., кг, м², сутки…"/>
+              </div>
+            </group>
+          </group>
+          <group>
+            <group string="На каких условиях">
+              <field name="method_ids" widget="many2many_tags"
+                     options="{'no_create': True}"/>
+              <field name="price_kind" widget="coop_inline"/>
+              <label for="price"/>
+              <div class="o_row">
+                <field name="price" widget="coop_inline"
+                       readonly="price_kind == 'none'"/>
+                <field name="price_unit_label" widget="coop_inline"
+                       placeholder="кг, шт., сутки"
+                       readonly="price_kind == 'none'"/>
+              </div>
+              <field name="currency_id" invisible="1"/>
+              <field name="bargain"/>
+            </group>
+            <group string="Где и как связаться">
+              <field name="city" widget="coop_inline"
+                     placeholder="Начните вводить город"/>
+              <field name="pickup_point" widget="coop_inline"
+                     placeholder="Адрес или ориентир"/>
+              <field name="contact_method" widget="radio"/>
+            </group>
+          </group>
+          <notebook>
+            <page string="Описание" name="description">
+              <field name="description" widget="coop_block"
+                     placeholder="Что это, в каком состоянии, на каких условиях."/>
+              <div class="text-muted mt-2">
+                Главные характеристики — в первом абзаце: размер, материал,
+                состояние. Честное описание вызывает больше доверия и меньше
+                лишних вопросов.
+              </div>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!--
+    Действие открывает уже заведённый черновик: номер записи подставляет
+    `action_new_listing`. Само по себе, без номера, оно открыло бы пустую
+    форму создания — и автосохранение в ней не работало бы, сохранять
+    себя полю некуда.
+  -->
+  <record id="action_coop_resource_add" model="ir.actions.act_window">
+    <field name="name">Разместить объявление</field>
+    <field name="res_model">coop.resource</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="view_coop_resource_add"/>
+    <field name="target">current</field>
+  </record>
+
   <record id="view_coop_resource_search" model="ir.ui.view">
     <field name="name">coop.resource.search</field>
     <field name="model">coop.resource</field>
@@ -309,7 +423,7 @@
     <field name="name">Ресурсы</field>
     <field name="res_model">coop.resource</field>
     <field name="path">resources</field>
-    <field name="context">{'bin_size': True,'coop_catalog': True, 'coop_create_label': 'Добавить ресурс', 'coop_shelf_field': 'category_id'}</field>
+    <field name="context">{'bin_size': True,'coop_catalog': True, 'coop_create_label': 'Добавить ресурс', 'coop_create_method': 'action_new_listing', 'coop_shelf_field': 'category_id'}</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('state', '=', 'published')]</field>
     <field name="search_view_id" ref="view_coop_resource_search"/>
