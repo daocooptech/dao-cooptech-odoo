@@ -898,11 +898,20 @@ body.o_dark_mode .o_coop_logo img {
   height: auto;
   opacity: .9;
   animation: coop-loader-breath 2.4s ease-in-out infinite;
+
+  // Инверсия по умолчанию, как в шапке: файл знака нарисован белым, под
+  // тёмную тему. На светлой его надо перевернуть, на тёмной оставить как
+  // есть. Сначала я сделал наоборот, и знак пропадал на белом фоне.
+  // Инвертировать можно без потерь: в файле ровно два цвета, полутонов
+  // нет.
+  filter: invert(1);
 }
 
+// Тёмная тема помечается двумя способами сразу; слушаем оба — так же,
+// как для знака в шапке.
 html[data-bs-theme="dark"] .o_coop_loader_mark,
 body.o_dark_mode .o_coop_loader_mark {
-  filter: invert(1);
+  filter: none;
 }
 
 .o_coop_loader_text {
