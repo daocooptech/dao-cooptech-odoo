@@ -337,7 +337,7 @@ class CoopDeal(models.Model):
                 'signed_on': record.signed_on or fields.Date.context_today(record),
             })
             record._notify_other(_(
-                'Сделка %(номер)s согласована: «%(предмет)s».',
+                'Сделка %(number)s согласована: «%(subject)s».',
                 number=record.display_name, subject=record.name))
         return True
 
@@ -541,7 +541,7 @@ class CoopDealPayment(models.Model):
             # они. Отмечает получение вторая сторона, и только она может
             # об этом сообщить.
             record.deal_id._notify_other(_(
-                'Платёж по сделке %(номер)s получен: %(сумма)s.',
+                'Платёж по сделке %(number)s получен: %(amount)s.',
                 number=record.deal_id.display_name, amount=record.amount))
         return True
 

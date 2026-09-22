@@ -27,8 +27,11 @@ class CoopAdmitWizard(models.TransientModel):
     organization_id = fields.Many2one(
         related='membership_id.organization_id', string='В организацию',
         readonly=True)
-    role = fields.Selection(
-        related='membership_id.role', string='Основание участия',
+    # Показываем запись справочника, а не код: роль стала
+    # `coop.membership.role` (решение 371), и связанное поле
+    # обязано иметь тот же тип, что источник.
+    role_id = fields.Many2one(
+        related='membership_id.role_id', string='Основание участия',
         readonly=False)
     job_title = fields.Char(
         related='membership_id.job_title', string='Должность', readonly=False)

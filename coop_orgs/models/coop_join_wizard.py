@@ -31,14 +31,44 @@ class CoopJoinWizard(models.TransientModel):
     # становятся при создании, в правление и ревизию выбирает собрание,
     # рабочая группа платформы к кооперативу отношения не имеет — ни одно
     # из этих оснований не возникает по заявлению.
-    role = fields.Selection([
-        ('member', 'Пайщиком'),
-        ('staff', 'Наёмным сотрудником'),
-    ], string='Кем вступаете', required=True, default='member')
+    role_id = fields.Many2one(
+        'coop.membership.role', string='Кем вступаете', required=True,
+        ondelete='restrict', domain="[('id', 'in', allowed_role_ids)]",
+        default=lambda self: self._default_join_role())
+    allowed_role_ids = fields.Many2many(
+        'coop.membership.role', string='Из чего выбирать',
+        compute='_compute_allowed_role_ids')
     job_title = fields.Char(
         string='Должность',
         help='Как называется место в организации. На права не влияет.')
     note = fields.Text(string='Пара слов о себе')
+
+    # По заявлению возникают только эти два основания. Пайщиком берут
+    # в кооператив, сотрудником — куда угодно; а вот учредителем
+    # становятся при создании, в правление и ревизию выбирает собрание,
+    # и рабочая группа платформы к кооперативу отношения не имеет.
+    BY_APPLICATION = ('member', 'staff')
+
+    @api.model
+    def _default_join_role(self):
+        return self.env['coop.membership.role'].search(
+            [('code', '=', 'member')], limit=1)
+
+    @api.depends('organization_id')
+    def _compute_allowed_role_ids(self):
+        """Из чего выбирать — по правовой форме организации.
+
+        В ООО пайщиком не вступают: паёв там нет. Прежде этот выбор
+        предлагался всем одинаково, и человек узнавал о запрете уже
+        отказом (решения 180 и 371). Выбор, которого нет, лучше не
+        показывать вовсе.
+        """
+        roles = self.env['coop.membership.role'].search(
+            [('code', 'in', self.BY_APPLICATION)])
+        for record in self:
+            group = record.organization_id.coop_legal_form_group_id
+            record.allowed_role_ids = roles.filtered(
+                lambda r: r.fits_group(group))
 
     def action_apply(self):
         self.ensure_one()
@@ -60,23 +90,23 @@ class CoopJoinWizard(models.TransientModel):
         ], limit=1)
         if open_one:
             raise UserError(_(
-                'У вас уже есть открытое членство в «%(орг)s»: %(что)s.',
+                'У вас уже есть открытое членство в «%(org)s»: %(what)s.',
                 org=organization.display_name,
                 what=dict(open_one._fields['state'].selection)[open_one.state]))
 
         membership = Membership.create({
             'partner_id': me.id,
             'organization_id': organization.id,
-            'role': self.role,
+            'role_id': self.role_id.id,
             'job_title': self.job_title or False,
             'state': 'applied',
             # Пая и голоса до приёма нет: заявление ещё не решение.
-            'has_vote': self.role == 'member',
+            'has_vote': self.role_id.code == 'member',
         })
 
-        body = _('Заявление о вступлении в «%(орг)s»: %(кто)s, %(кем)s.',
+        body = _('Заявление о вступлении в «%(org)s»: %(who)s, %(by_whom)s.',
                  org=organization.display_name, who=me.display_name,
-                 by_whom=dict(self._fields['role'].selection)[self.role])
+                 by_whom=self.role_id.name)
         if self.note:
             body = '%s %s' % (body, self.note)
         # Тем, кто вправе принимать, а не всей организации: у кооператива

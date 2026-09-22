@@ -65,7 +65,7 @@ class CoopGroupbuyJoin(models.TransientModel):
             'state': 'draft',
         })
 
-        body = _('Заказ в складчине «%(что)s»: %(сколько)s от %(кто)s.',
+        body = _('Заказ в складчине «%(what)s»: %(how_many)s от %(who)s.',
                  what=groupbuy.name, how_many=self.quantity,
                  who=me.display_name)
         if self.note:

@@ -1376,8 +1376,8 @@ class CoopProjectContribution(models.Model):
             # страницу проекта по своей воле.
             record.env['coop.notification']._notify(
                 record.partner_id,
-                _('Ваш вклад в проект «%(проект)s» принят: '
-                  '%(что)s, оценка %(сколько)s ₽.',
+                _('Ваш вклад в проект «%(project)s» принят: '
+                  '%(what)s, оценка %(how_many)s ₽.',
                   project=record.project_id.name, what=record.name,
                   how_many=record.value),
                 record=record.project_id, kind='project')
@@ -1413,7 +1413,7 @@ class CoopProjectContribution(models.Model):
             # другому проекту.
             record.env['coop.notification']._notify(
                 record.partner_id,
-                _('Вклад в проект «%(проект)s» отклонён: %(что)s.',
+                _('Вклад в проект «%(project)s» отклонён: %(what)s.',
                   project=record.project_id.name, what=record.name),
                 record=record.project_id, kind='project')
         return True

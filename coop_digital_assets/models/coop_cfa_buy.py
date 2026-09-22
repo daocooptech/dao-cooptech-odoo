@@ -65,8 +65,8 @@ class CoopCfaBuy(models.TransientModel):
             'value': self.total,
         })
 
-        body = _('Приобретение «%(что)s»: %(сколько)s ед. на %(сумма)s ₽ '
-                 'от %(кто)s.',
+        body = _('Приобретение «%(what)s»: %(how_many)s ед. на %(amount)s ₽ '
+                 'от %(who)s.',
                  what=issue.display_name, how_many=self.quantity,
                  amount=self.total, who=me.display_name)
         self.env['coop.notification']._notify(

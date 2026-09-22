@@ -232,7 +232,7 @@ class DiscussChannel(models.Model):
             if channel.coop_managed:
                 raise UserError(_(
                     'Из этой переписки нельзя выйти: её состав следует за '
-                    'записью. «%(что)s» — разговор тех, кто в деле; выйти '
+                    'записью. «%(what)s» — разговор тех, кто в деле; выйти '
                     'из него можно, только перестав в нём участвовать.',
                     what=channel.display_name))
         return super()._action_unfollow(

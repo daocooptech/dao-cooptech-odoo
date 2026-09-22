@@ -82,8 +82,8 @@ class CoopContributeWizard(models.TransientModel):
 
         # Инициатору — иначе предложение лежит в проекте, и о нём никто
         # не знает: вкладчик ждёт ответа, проект стоит недособранным.
-        body = _('Вклад в проект «%(проект)s»: %(что)s на %(сколько)s ₽ '
-                 'от %(кто)s.',
+        body = _('Вклад в проект «%(project)s»: %(what)s на %(how_many)s ₽ '
+                 'от %(who)s.',
                  project=project.name, what=self.name, how_many=self.value,
                  who=me.display_name)
         if self.note:

@@ -496,7 +496,7 @@ class CoopMembership(models.Model):
                            'joined_on': fields.Date.context_today(self)})
         for record in self:
             record._notify_member(_(
-                'Вы приняты в «%(орг)s»: %(кем)s.',
+                'Вы приняты в «%(org)s»: %(by_whom)s.',
                 org=record.organization_id.display_name,
                 by_whom=dict(record._fields['role'].selection)[record.role]))
         return True
@@ -529,7 +529,7 @@ class CoopMembership(models.Model):
         for record in self:
             record.env['coop.notification']._notify(
                 record._roster_deciders(),
-                _('Заявление о выходе из «%(орг)s»: %(кто)s.',
+                _('Заявление о выходе из «%(org)s»: %(who)s.',
                   org=record.organization_id.display_name,
                   who=record.partner_id.display_name),
                 record=record.organization_id, kind='org')

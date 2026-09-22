@@ -52,7 +52,7 @@
                      invisible="not coop_active_membership_ids">
                 <list string="Членства" create="false" delete="false">
                   <field name="organization_id"/>
-                  <field name="role"/>
+                  <field name="role_id"/>
                   <field name="job_title" optional="show"/>
                   <field name="joined_on"/>
                   <field name="has_vote" optional="show"/>
@@ -87,7 +87,7 @@
                      invisible="not coop_member_ids">
                 <list string="Состав" create="false" delete="false">
                   <field name="partner_id"/>
-                  <field name="role"/>
+                  <field name="role_id"/>
                   <field name="job_title" optional="show"/>
                   <field name="joined_on"/>
                   <field name="state"/>

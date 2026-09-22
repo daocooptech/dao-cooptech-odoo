@@ -289,7 +289,7 @@ class CoopVacancy(models.Model):
         # тех же, кто вправе утвердить.
         self.env['coop.notification']._notify(
             self.partner_id | self._need_deciders(),
-            _('Отклик на вашу вакансию «%(лот)s» — %(кто)s.',
+            _('Отклик на вашу вакансию «%(lot)s» — %(who)s.',
               lot=self.name, who=me.display_name),
             record=self, kind='vacancy')
         return True

@@ -337,7 +337,7 @@ class CoopAuction(models.Model):
         if previous:
             self.env['coop.notification']._notify(
                 previous,
-                _('Вашу ставку на «%(лот)s» перебили: теперь %(цена)s.',
+                _('Вашу ставку на «%(lot)s» перебили: теперь %(price)s.',
                   lot=self.name, price=amount),
                 record=self, kind='auction')
 

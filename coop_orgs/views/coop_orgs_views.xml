@@ -110,7 +110,9 @@
         <field name="organization_id" invisible="1"/>
         <field name="is_cooperative" invisible="1"/>
         <group>
-          <field name="role" widget="radio"/>
+          <field name="allowed_role_ids" invisible="1"/>
+          <field name="role_id" widget="radio"
+                 options="{'no_create': True}"/>
           <field name="job_title" placeholder="Бухгалтер, механик, менеджер по продажам"
                  invisible="role != 'staff'"/>
           <field name="note" placeholder="Необязательно"/>
@@ -351,7 +353,7 @@
                     <kanban class="o_coop_band_kanban" records_draggable="false"
                             action="action_coop_open_person" type="object">
                       <field name="partner_id"/>
-                      <field name="role"/>
+                      <field name="role_id"/>
                       <templates>
                         <t t-name="card">
                           <div class="o_coop_mini">
@@ -363,7 +365,7 @@
                               <field name="partner_id"/>
                             </div>
                             <div class="o_coop_mini_note">
-                              <field name="role"/>
+                              <field name="role_id"/>
                             </div>
                           </div>
                         </t>
@@ -485,7 +487,7 @@
                          domain="[('state', '=', 'active')]">
                     <kanban class="o_coop_band_kanban" records_draggable="false"
                             action="action_coop_open_person" type="object">
-                      <field name="role"/>
+                      <field name="role_id"/>
                       <field name="job_title"/>
                       <templates>
                         <t t-name="card">

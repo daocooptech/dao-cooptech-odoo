@@ -229,7 +229,7 @@ class CoopIntangible(models.Model):
             'licensor_id': self.owner_id.id,
             'state': 'offered',
         })
-        body = _('Запрос лицензии на «%(что)s» от %(кто)s.',
+        body = _('Запрос лицензии на «%(what)s» от %(who)s.',
                  what=self.name, who=me.display_name)
         self.env['coop.notification']._notify(
             self.owner_id, body, record=self, kind='other')

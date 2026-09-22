@@ -615,7 +615,7 @@
                     <kanban class="o_coop_band_kanban" records_draggable="false"
                             action="action_coop_open_page" type="object">
                       <field name="organization_id"/>
-                      <field name="role"/>
+                      <field name="role_id"/>
                       <templates>
                         <t t-name="card">
                           <div class="o_coop_mini">
@@ -627,7 +627,7 @@
                               <field name="organization_id"/>
                             </div>
                             <div class="o_coop_mini_note">
-                              <field name="role"/>
+                              <field name="role_id"/>
                             </div>
                           </div>
                         </t>
@@ -649,7 +649,7 @@
                     <kanban class="o_coop_band_kanban" records_draggable="false"
                             action="action_coop_open_page" type="object">
                       <field name="community_id"/>
-                      <field name="role"/>
+                      <field name="role_id"/>
                       <templates>
                         <t t-name="card">
                           <div class="o_coop_mini">
@@ -661,7 +661,7 @@
                               <field name="community_id"/>
                             </div>
                             <div class="o_coop_mini_note">
-                              <field name="role"/>
+                              <field name="role_id"/>
                             </div>
                           </div>
                         </t>

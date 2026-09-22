@@ -263,8 +263,8 @@ class CoopWarehouseOffer(models.Model):
             'amount': self.main_price or 0.0,
             'state': 'draft',
         })
-        body = _('Отклик на свободные мощности склада «%(склад)s» от '
-                 '%(кто)s. Заведены переговоры по сделке %(номер)s.',
+        body = _('Отклик на свободные мощности склада «%(warehouse)s» от '
+                 '%(who)s. Заведены переговоры по сделке %(number)s.',
                  warehouse=self.warehouse_id.name, who=me.display_name,
                  number=deal.number or '')
         self.env['coop.notification']._notify(

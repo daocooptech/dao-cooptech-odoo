@@ -114,8 +114,8 @@ class CoopResourceRespond(models.TransientModel):
             'state': 'draft',
         })
 
-        body = _('Отклик на объявление «%(что)s» от %(кто)s. '
-                 'Заведены переговоры по сделке %(номер)s.',
+        body = _('Отклик на объявление «%(what)s» от %(who)s. '
+                 'Заведены переговоры по сделке %(number)s.',
                  what=listing.name, who=me.display_name,
                  number=deal.number or '')
         if self.note:
