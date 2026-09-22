@@ -15,6 +15,11 @@ USER=odoo
 
 # Запуск службы — только когда память освободилась.
 #
+# Имена здесь латиницей не по вкусу, а по необходимости: `local` в
+# bash кириллические имена не принимает вовсе — «недопустимый
+# идентификатор», и выкатка обрывается на первом же вызове. Ровно
+# тот случай, ради которого записано решение 352.
+#
 # Обновление модулей запускает второй питон рядом с работающей службой, и
 # на машине с гигабайтом оперативной памяти они вдвоём выбирают её почти
 # целиком. Систему это не убивает, но следующий запуск падает на самом
@@ -30,18 +35,18 @@ USER=odoo
 # Ждём не время, а условие: сколько памяти доступно на самом деле.
 # Двести мегабайт — с запасом от измеренных 341 МБ рабочего процесса при
 # холодном старте, когда общего с родителем ещё нет.
-запустить_службу() {
-    local нужно=200000   # килобайт
-    local ждём=0
-    while [ "$ждём" -lt 30 ]; do
-        local есть
-        есть=$(awk '/^MemAvailable:/ {print $2}' /proc/meminfo)
-        [ -z "$есть" ] && break
-        [ "$есть" -ge "$нужно" ] && break
+start_service() {
+    local need=200000   # килобайт
+    local waited=0
+    while [ "$waited" -lt 30 ]; do
+        local free_kb
+        free_kb=$(awk '/^MemAvailable:/ {print $2}' /proc/meminfo)
+        [ -z "$free_kb" ] && break
+        [ "$free_kb" -ge "$need" ] && break
         sleep 1
-        ждём=$((ждём + 1))
+        waited=$((waited + 1))
     done
-    [ "$ждём" -gt 0 ] && say "Ждал память $ждём с"
+    [ "$waited" -gt 0 ] && say "Ждал память $waited с"
     systemctl "$@" coop-odoo
 }
 
@@ -219,10 +224,10 @@ if [ -n "$new_modules" ]; then
     systemctl stop coop-odoo
     if ! run "$ODOO_HOME/venv/bin/python" "$ODOO_HOME/odoo/odoo-bin"             -c "$CONF" -d "$DB" -i "$new_modules" --stop-after-init --no-http; then
         say "УСТАНОВКА УПАЛА: $new_modules"
-        запустить_службу start || true
+        start_service start || true
         exit 1
     fi
-    запустить_службу start
+    start_service start
 fi
 
 if [ -z "$changed" ]; then
@@ -256,7 +261,7 @@ else
     if ! run "$ODOO_HOME/venv/bin/python" "$ODOO_HOME/odoo/odoo-bin"             -c "$CONF" -d "$DB" -u "$changed" --stop-after-init --no-http; then
         say "ОБНОВЛЕНИЕ УПАЛО. База могла остаться в половинчатом виде."
         say "Откат: bash $ODOO_HOME/coop-addons/deploy/restore.sh $snapshot"
-        запустить_службу start || true
+        start_service start || true
         exit 1
     fi
 fi
@@ -275,7 +280,7 @@ fi
 # Пересоберётся ровно то, что изменилось: правка стилей не тянет
 # за собой пересборку семи мегабайт скриптов.
 
-запустить_службу restart
+start_service restart
 
 # Прогрев: собрать пакеты стилей и скриптов сразу, а не при первом
 # заходе участника.
