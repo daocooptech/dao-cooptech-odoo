@@ -233,7 +233,10 @@ class CoopMembership(models.Model):
 
     @api.depends('partner_id', 'organization_id', 'role')
     def _compute_display_name(self):
-        labels = dict(self._fields['role'].selection)
+        # Названия ролей берём из справочника: перечисления больше
+        # нет, роль стала записью (решение 371).
+        labels = {role.code: role.name
+                  for role in self.env['coop.membership.role'].search([])}
         for record in self:
             if record.partner_id and record.organization_id:
                 record.display_name = '%s — %s (%s)' % (
@@ -513,7 +516,7 @@ class CoopMembership(models.Model):
             record._notify_member(_(
                 'Вы приняты в «%(org)s»: %(by_whom)s.',
                 org=record.organization_id.display_name,
-                by_whom=dict(record._fields['role'].selection)[record.role]))
+                by_whom=record.role_id.name))
         return True
 
     def action_decline(self):
