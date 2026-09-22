@@ -10,7 +10,7 @@
         <field name="partner_id"/>
         <field name="organization_id"/>
         <field name="job_title"/>
-        <field name="role"/>
+        <field name="role_id"/>
         <field name="power_ids" widget="many2many_tags"/>
         <field name="joined_on"/>
         <field name="has_vote" widget="boolean_toggle" readonly="1"/>
@@ -48,7 +48,13 @@
         <group>
           <field name="partner_id"/>
           <field name="organization_id"/>
-          <field name="role"/>
+          <!-- Подходящие роли считаются от правовой формы организации:
+               пайщик бывает в кооперативе, а не в ООО (решения 180 и
+               371). Список сужается сам, а не серыми строками: выбор,
+               которого нет, лучше не показывать вовсе. -->
+          <field name="allowed_role_ids" invisible="1"/>
+          <field name="role_id" domain="[('id', 'in', allowed_role_ids)]"
+                 options="{'no_create': True}"/>
           <field name="job_title" invisible="role != 'staff'"/>
           <field name="has_vote"/>
           <field name="admission_basis"
@@ -106,7 +112,9 @@
               <field name="partner_id"/>
               <field name="organization_id"/>
               <field name="job_title" placeholder="Бухгалтер"/>
-              <field name="role"/>
+              <field name="allowed_role_ids" invisible="1"/>
+              <field name="role_id" domain="[('id', 'in', allowed_role_ids)]"
+                     options="{'no_create': True}"/>
               <field name="has_vote"/>
             </group>
             <group string="Сроки и основания">
@@ -156,7 +164,7 @@
         <group>
           <filter name="by_org" string="По организации"
                   context="{'group_by': 'organization_id'}"/>
-          <filter name="by_role" string="По роли" context="{'group_by': 'role'}"/>
+          <filter name="by_role" string="По роли" context="{'group_by': 'role_id'}"/>
         </group>
       </search>
     </field>

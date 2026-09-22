@@ -22,3 +22,5 @@ access_coop_favorite_user,Избранное — участник,model_coop_fav
 access_coop_contact_line_user,Строки контактов — участник,model_coop_contact_line,base.group_user,1,1,1,1
 access_coop_notification_pref_user,Настройка извещений — участник,model_coop_notification_pref,base.group_user,1,1,1,1
 access_coop_block_user,Чёрный список — участник,model_coop_block,base.group_user,1,1,1,1
+access_coop_membership_role_user,Основания участия — чтение,model_coop_membership_role,base.group_user,1,0,0,0
+access_coop_membership_role_admin,Основания участия — ведение,model_coop_membership_role,coop_base.group_coop_platform,1,1,1,1

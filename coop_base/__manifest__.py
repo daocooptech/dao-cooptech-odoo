@@ -16,7 +16,7 @@
     'author': 'ДАО КООПТЕХ',
     'website': 'https://github.com/daocooptech/dao-cooptech',
     'category': 'Cooperative',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'license': 'LGPL-3',
     'depends': [
         'base',
@@ -28,6 +28,7 @@
         'data/coop_powers.xml',
         'data/coop_membership_powers.xml',
         'data/coop_legal_forms.xml',
+        'data/coop_membership_roles.xml',
         'data/coop_setup.xml',
         'security/ir.model.access.csv',
         'security/coop_verification_rules.xml',

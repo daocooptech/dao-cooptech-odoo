@@ -58,21 +58,92 @@ class CoopMembership(models.Model):
         ondelete='restrict', tracking=True,
         domain=[('is_company', '=', True)])
 
-    role = fields.Selection([
-        ('founder', 'Учредитель'),
-        ('member', 'Пайщик'),
-        ('associate', 'Ассоциированный член'),
-        ('board', 'Правление'),
-        ('audit', 'Ревизионная комиссия'),
-        ('staff', 'Наёмный сотрудник'),
-        ('platform', 'Рабочая группа платформы'),
-    ], string='Основание участия', required=True, default='member', tracking=True,
+    role_id = fields.Many2one(
+        'coop.membership.role', string='Основание участия', required=True,
+        ondelete='restrict', index=True, tracking=True,
+        default=lambda self: self._default_role(),
         help='Роль определяет, что участник вправе видеть и решать, '
-             'а не его должность.\n\n'
-             'Рабочая группа платформы — это не роль в кооперативе. '
-             'Администратор платформы не пайщик и никаких прав в чужих '
-             'кооперативах не получает: правила доступа ниже перечисляют '
-             'пайщика, правление и ревизию, и его среди них нет.')
+             'а не его должность. Выбор ограничен правовой формой '
+             'организации: пайщик бывает в кооперативе, а не в ООО. '
+             'Рабочая группа платформы — это не роль в кооперативе: '
+             'администратор платформы не пайщик и никаких прав в чужих '
+             'кооперативах не получает.')
+
+    # Код роли строкой. Поле осталось затем, что на него опираются правила
+    # доступа в четырёх модулях (`('role', '=', 'audit')` и подобные) и
+    # демонстрационные данные, которые пишут `role` напрямую. Обратная
+    # запись ниже позволяет и дальше писать `role='member'`: значение
+    # найдёт свою запись справочника само.
+    #
+    # Переписывать семьдесят с лишним мест ради переименования поля
+    # значило бы трогать права там, где к ним нет вопросов.
+    role = fields.Char(
+        string='Код основания', compute='_compute_role',
+        inverse='_inverse_role', store=True, index=True, readonly=False)
+
+    allowed_role_ids = fields.Many2many(
+        'coop.membership.role', string='Подходящие роли',
+        compute='_compute_allowed_role_ids',
+        help='Чем ограничен выбор — по правовой форме организации.')
+
+    @api.model
+    def _default_role(self):
+        return self.env['coop.membership.role'].search(
+            [('code', '=', 'member')], limit=1)
+
+    @api.depends('role_id')
+    def _compute_role(self):
+        for record in self:
+            record.role = record.role_id.code or False
+
+    def _inverse_role(self):
+        """Написали код — нашли запись справочника.
+
+        Нужно для демонстрационных данных и прежнего кода, которые пишут
+        `role='member'` строкой. Неизвестный код молча проглатывать
+        нельзя: членство без основания участия — запись, которой не место
+        ни в одном правиле доступа.
+        """
+        Role = self.env['coop.membership.role']
+        for record in self:
+            if not record.role or record.role_id.code == record.role:
+                continue
+            found = Role.search([('code', '=', record.role)], limit=1)
+            if not found:
+                raise ValidationError(_(
+                    'Основания участия с кодом «%s» нет в справочнике.')
+                    % record.role)
+            record.role_id = found
+
+    @api.depends('org_group_id')
+    def _compute_allowed_role_ids(self):
+        roles = self.env['coop.membership.role'].search([])
+        for record in self:
+            record.allowed_role_ids = roles.filtered(
+                lambda r: r.fits_group(record.org_group_id))
+
+    @api.constrains('role_id', 'organization_id')
+    def _check_role_fits_form(self):
+        """Роль должна подходить правовой форме организации.
+
+        Решение 180 от 2 сентября 2026 называло проблемой ровно это:
+        пайщик заводился в ООО беспрепятственно. Проверка стоит здесь, а
+        не только в виде: интерфейс ограничивает выбор, но записи
+        приходят и из загрузчиков, и из переноса данных, и из чужого
+        кода — а правило должно быть одно.
+        """
+        for record in self:
+            if not record.role_id or not record.organization_id:
+                continue
+            group = record.org_group_id
+            if not group or record.role_id.fits_group(group):
+                continue
+            raise ValidationError(_(
+                '«%(role)s» — не основание участия для организации такой '
+                'формы. %(org)s: %(group)s.',
+                role=record.role_id.name,
+                org=record.organization_id.display_name,
+                group=group.name))
 
     power_ids = fields.Many2many(
         'coop.power', string='Полномочия', tracking=True,

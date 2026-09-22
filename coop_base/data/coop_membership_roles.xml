@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!--
+    Основания участия в организации.
+
+    Решение 371 от 22 сентября 2026, исполняющее решение 180 от 2 сентября:
+    роль ограничивается правовой формой. До этого пайщик заводился в ООО
+    беспрепятственно — ровно то, что решение 180 называло проблемой.
+
+    Пустой список форм означает «годится везде». Заполненный — только там.
+    Новая правовая форма не потребует правки модуля: роли для неё заводятся
+    записями, а не строчками в перечислении.
+
+    Коды прежние: на них опираются правила доступа в четырёх модулях.
+  -->
+
+  <record id="membership_role_founder" model="coop.membership.role">
+    <field name="name">Учредитель</field>
+    <field name="code">founder</field>
+    <field name="sequence">10</field>
+    <field name="description">Создал организацию. Бывает в любой форме.</field>
+  </record>
+
+  <record id="membership_role_member" model="coop.membership.role">
+    <field name="name">Пайщик</field>
+    <field name="code">member</field>
+    <field name="sequence">20</field>
+    <field name="description">Внёс пай и голосует. Только в кооперативе: в ООО паёв нет.</field>
+    <field name="group_ids" eval="[(6, 0, [ref('legal_group_cooperative')])]"/>
+  </record>
+
+  <record id="membership_role_associate" model="coop.membership.role">
+    <field name="name">Ассоциированный член</field>
+    <field name="code">associate</field>
+    <field name="sequence">30</field>
+    <field name="description">Внёс пай, но в делах не участвует и голоса не имеет.</field>
+    <field name="group_ids" eval="[(6, 0, [ref('legal_group_cooperative')])]"/>
+  </record>
+
+  <record id="membership_role_board" model="coop.membership.role">
+    <field name="name">Правление</field>
+    <field name="code">board</field>
+    <field name="sequence">40</field>
+    <field name="description">Ведёт дела между собраниями.</field>
+    <field name="group_ids" eval="[(6, 0, [ref('legal_group_cooperative'), ref('legal_group_nonprofit'), ref('legal_group_decentralized')])]"/>
+  </record>
+
+  <record id="membership_role_audit" model="coop.membership.role">
+    <field name="name">Ревизионная комиссия</field>
+    <field name="code">audit</field>
+    <field name="sequence">50</field>
+    <field name="description">Проверяет, как ведутся дела и деньги. Избирается собранием.</field>
+    <field name="group_ids" eval="[(6, 0, [ref('legal_group_cooperative'), ref('legal_group_nonprofit')])]"/>
+  </record>
+
+  <record id="membership_role_staff" model="coop.membership.role">
+    <field name="name">Наёмный сотрудник</field>
+    <field name="code">staff</field>
+    <field name="sequence">60</field>
+    <field name="description">Работает по договору. Пая не вносит и не голосует — права ему дают полномочия, а не роль.</field>
+  </record>
+
+  <record id="membership_role_platform" model="coop.membership.role">
+    <field name="name">Рабочая группа платформы</field>
+    <field name="code">platform</field>
+    <field name="sequence">70</field>
+    <field name="description">Не роль в кооперативе. Администратор платформы не пайщик и прав в чужих организациях не получает.</field>
+  </record>
+</odoo>
