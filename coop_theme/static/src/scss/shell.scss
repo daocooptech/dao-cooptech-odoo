@@ -920,6 +920,34 @@ body.o_dark_mode .o_coop_loader_mark {
   color: var(--coop-slate, #64748b);
 }
 
+// Мелкий вид — для заставки внутри панели, а не на всю страницу.
+// Размер задаётся в одном месте: кольцо и знак считаются от него, иначе
+// при следующей правке они разъедутся.
+.o_coop_loader_small {
+    width: 56px;
+    height: 56px;
+
+    .o_coop_loader_ring {
+        width: 56px;
+        height: 56px;
+    }
+
+    .o_coop_loader_mark {
+        width: 30px;
+    }
+}
+
+// Заставка на месте списка переписок: по центру своей панели, с тем же
+// воздухом, что и пустое состояние рядом.
+.o_coop_thread_loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 48px 16px;
+}
+
 @keyframes coop-loader-spin {
   to { transform: rotate(360deg); }
 }
