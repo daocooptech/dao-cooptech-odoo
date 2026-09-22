@@ -129,6 +129,13 @@ export class CoopInlineField extends Component {
         return String(value);
     }
 
+    /** Число ли это. Нужно, чтобы набрать его тем же шрифтом, каким
+     *  движок набирает свои числа: в столбце сумм цифры разной ширины
+     *  глазом не сравниваются. */
+    get isNumeric() {
+        return ["monetary", "float", "integer"].includes(this.field.type);
+    }
+
     /** Набирают в несколько строк: длинный текст и всё, что переносится. */
     get isMultiline() {
         return this.field.type === "text" || this.props.wrap === true;

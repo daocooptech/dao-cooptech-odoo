@@ -272,6 +272,11 @@
   .o_field_monetary span,
   .o_field_float input,
   .o_field_integer input,
+  // Числа, которые правятся по месту, набираются так же. Владелец 22
+  // сентября 2026 просил «сделать как ниже в собрано» — а «как» это не
+  // только разряды и валюта, но и шрифт: рядом стояли две суммы, набранные
+  // по-разному, и это было заметнее самих цифр.
+  .o_coop_inline_number,
   .oe_stat_button .o_stat_value {
     font-family: 'JetBrains Mono', ui-monospace, monospace;
     font-weight: 500;

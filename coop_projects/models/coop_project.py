@@ -223,7 +223,7 @@ class CoopProject(models.Model):
         'res.currency', string='Валюта',
         default=lambda self: self.env.company.currency_id)
     required_total = fields.Monetary(
-        string='Нужно, ₽', currency_field='currency_id', tracking=True,
+        string='Нужно', currency_field='currency_id', tracking=True,
         help='Денежная оценка всего, что проекту нужно: деньгами, '
              'ресурсами и трудом. Готовность считается от неё.')
     contribution_ids = fields.One2many(
@@ -232,13 +232,13 @@ class CoopProject(models.Model):
         string='Можно вложиться', compute='_compute_can_contribute',
         help='Проект собирает, и я не его инициатор.')
     contribution_total = fields.Monetary(
-        string='Собрано, ₽', currency_field='currency_id',
+        string='Собрано', currency_field='currency_id',
         compute='_compute_contribution_total', store=True,
         help='Сумма подтверждённых вкладов. От неё считается доля каждого.')
     contributor_count = fields.Integer(
         string='Участников', compute='_compute_contribution_total', store=True)
     readiness = fields.Integer(
-        string='Готовность, %', compute='_compute_readiness', store=True,
+        string='Готовность', compute='_compute_readiness', store=True,
         help='Собрано против нужного. Не оценка, а следствие вкладов.')
 
     # ── Связь с управлением проектами ────────────────────────────────────

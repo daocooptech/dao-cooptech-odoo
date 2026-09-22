@@ -68,7 +68,8 @@
         </button>
       </t>
       <t t-else="">
-        <span class="o_coop_inline_value" t-if="display" t-esc="display"/>
+        <span class="o_coop_inline_value" t-if="display" t-esc="display"
+              t-att-class="{ o_coop_inline_number: isNumeric }"/>
         <span class="o_coop_inline_empty" t-else="" t-esc="props.placeholder or '—'"/>
         <button type="button" class="o_coop_inline_btn o_coop_inline_start"
                 t-if="canEdit"
