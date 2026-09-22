@@ -42,31 +42,31 @@ class CoopJoinWizard(models.TransientModel):
 
     def action_apply(self):
         self.ensure_one()
-        организация = self.organization_id
-        я = self.env.user.partner_id
-        if not организация.is_company:
+        organization = self.organization_id
+        me = self.env.user.partner_id
+        if not organization.is_company:
             raise UserError(_('Вступают в организацию, а не к человеку.'))
-        if организация == я:
+        if organization == me:
             raise UserError(_('Это ваша собственная карточка.'))
 
         Membership = self.env['coop.membership'].sudo()
         # Открытое членство уже есть — второе завести нельзя, и проверка
         # базы это не пропустит. Говорим об этом словами, а не ошибкой
         # уникального индекса.
-        открытое = Membership.search([
-            ('partner_id', '=', я.id),
-            ('organization_id', '=', организация.id),
+        open_one = Membership.search([
+            ('partner_id', '=', me.id),
+            ('organization_id', '=', organization.id),
             ('state', 'in', ('applied', 'active', 'leaving')),
         ], limit=1)
-        if открытое:
+        if open_one:
             raise UserError(_(
                 'У вас уже есть открытое членство в «%(орг)s»: %(что)s.',
-                орг=организация.display_name,
-                что=dict(открытое._fields['state'].selection)[открытое.state]))
+                org=organization.display_name,
+                what=dict(open_one._fields['state'].selection)[open_one.state]))
 
-        членство = Membership.create({
-            'partner_id': я.id,
-            'organization_id': организация.id,
+        membership = Membership.create({
+            'partner_id': me.id,
+            'organization_id': organization.id,
             'role': self.role,
             'job_title': self.job_title or False,
             'state': 'applied',
@@ -74,15 +74,15 @@ class CoopJoinWizard(models.TransientModel):
             'has_vote': self.role == 'member',
         })
 
-        тело = _('Заявление о вступлении в «%(орг)s»: %(кто)s, %(кем)s.',
-                 орг=организация.display_name, кто=я.display_name,
-                 кем=dict(self._fields['role'].selection)[self.role])
+        body = _('Заявление о вступлении в «%(орг)s»: %(кто)s, %(кем)s.',
+                 org=organization.display_name, who=me.display_name,
+                 by_whom=dict(self._fields['role'].selection)[self.role])
         if self.note:
-            тело = '%s %s' % (тело, self.note)
+            body = '%s %s' % (body, self.note)
         # Тем, кто вправе принимать, а не всей организации: у кооператива
         # на полторы сотни пайщиков заявление иначе уходит в пустоту.
         self.env['coop.notification']._notify(
-            членство._roster_deciders(), тело,
-            record=организация, kind='org')
-        организация.sudo().message_post(body=тело)
+            membership._roster_deciders(), body,
+            record=organization, kind='org')
+        organization.sudo().message_post(body=body)
         return {'type': 'ir.actions.act_window_close'}

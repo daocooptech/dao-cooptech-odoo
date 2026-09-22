@@ -30,8 +30,8 @@ export class CoopBell extends Component {
         // колокольчик спрашивал сервер отдельно, впереди раздела.
         // Дальше опрашивает сам, раз в минуту.
         onWillStart(() => this.first());
-        this.таймер = setInterval(() => this.refresh(), 60000);
-        onWillUnmount(() => clearInterval(this.таймер));
+        this.timer = setInterval(() => this.refresh(), 60000);
+        onWillUnmount(() => clearInterval(this.timer));
     }
 
     async first() {

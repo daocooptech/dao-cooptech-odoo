@@ -143,23 +143,23 @@ OFFER_KIND = {
 TARGET_NEEDS = 130
 
 
-def _рубрика_ресурса(env, name):
+def _resource_rubric(env, name):
     """Номер рубрики по названию, или ложь — как ждёт `create`."""
-    имя = rubrics.category_for(name)
-    if not имя:
+    item_name = rubrics.category_for(name)
+    if not item_name:
         return False
-    рубрика = env['coop.resource.category'].sudo().search(
-        [('name', '=', имя)], limit=1)
-    return рубрика.id or False
+    rubric = env['coop.resource.category'].sudo().search(
+        [('name', '=', item_name)], limit=1)
+    return rubric.id or False
 
 
-def _специализация(env, name):
-    имя = rubrics.specialization_for(name)
-    if not имя:
+def _specialization(env, name):
+    item_name = rubrics.specialization_for(name)
+    if not item_name:
         return False
-    спец = env['coop.specialization'].sudo().search(
-        [('name', '=', имя)], limit=1)
-    return спец.id or False
+    spec = env['coop.specialization'].sudo().search(
+        [('name', '=', item_name)], limit=1)
+    return spec.id or False
 
 
 def load_project_needs(env, target=TARGET_NEEDS):
@@ -277,7 +277,7 @@ def load_project_needs(env, target=TARGET_NEEDS):
                     # раздела не находится отбором и попадает на витрине в
                     # полку «Другое». Раньше её не ставили вовсе, и таких
                     # объявлений накопилось двести семнадцать.
-                    'category_id': _рубрика_ресурса(env, title),
+                    'category_id': _resource_rubric(env, title),
                 })
                 made_needs += 1
 
@@ -350,7 +350,7 @@ def _make_vacancy(env, project, title, price, manager, rnd, today, people,
             'reward_kind': 'share',
             'state': 'published',
             'description': '<p>Работа нужна проекту «%s».</p>' % project.name,
-            'coop_specialization_id': _специализация(env, title),
+            'coop_specialization_id': _specialization(env, title),
         })
 
     applicants = []
@@ -412,7 +412,7 @@ def _make_vacancy(env, project, title, price, manager, rnd, today, people,
 # Ниже — шаг, который дополняет уже заведённые потребности, не трогая их:
 # по каждому проекту в сборе или запуске считает, чего не хватает по
 # видам и по сумме, и добавляет недостающее.
-_ЕД = {
+_UNITS = {
     'шт': 'шт.', 'м': 'м', 'м2': 'м²', 'кг': 'кг', 'тонна': 'тонна',
     'смена': 'смена', 'месяц': 'месяц', 'неделя': 'неделя',
 }
@@ -420,7 +420,7 @@ _ЕД = {
 # Числительное согласуется с существительным только в тексте названия;
 # в price_unit_label форма всегда словарная — это подпись к цифре, а не
 # часть предложения.
-_ПАДЕЖИ = {
+_CASES = {
     'тонна': ('тонна', 'тонны', 'тонн'),
     'смена': ('смена', 'смены', 'смен'),
     'месяц': ('месяц', 'месяца', 'месяцев'),
@@ -428,19 +428,19 @@ _ПАДЕЖИ = {
 }
 
 
-def _форма_числа(qty, ключ):
-    формы = _ПАДЕЖИ.get(ключ)
-    if формы is None:
-        return _ЕД[ключ]
+def _number_form(qty, key):
+    forms = _CASES.get(key)
+    if forms is None:
+        return _UNITS[key]
     n = abs(qty) % 100
     n1 = n % 10
     if 10 < n < 20:
-        return формы[2]
+        return forms[2]
     if n1 == 1:
-        return формы[0]
+        return forms[0]
     if 2 <= n1 <= 4:
-        return формы[1]
-    return формы[2]
+        return forms[1]
+    return forms[2]
 
 
 def _round_nice(x):
@@ -449,16 +449,16 @@ def _round_nice(x):
     не нужна и выдаёт себя как сгенерированную."""
     x = max(x, 500)
     if x < 3000:
-        шаг = 100
+        step = 100
     elif x < 20000:
-        шаг = 500
+        step = 500
     elif x < 100000:
-        шаг = 1000
+        step = 1000
     elif x < 1000000:
-        шаг = 5000
+        step = 5000
     else:
-        шаг = 10000
-    return int(round(x / шаг) * шаг)
+        step = 10000
+    return int(round(x / step) * step)
 
 
 # Позиция: (название, единица или None, цена_от, цена_до, кол-во_от,
@@ -466,7 +466,7 @@ def _round_nice(x):
 # резерв): кол-во не участвует, название не меняется. Иначе цена и
 # название считаются от количества — так один шаблон каждый раз даёт
 # разное число и разную сумму, а не копию строки.
-ПРОФИЛИ = {
+PROFILES = {
     'general': {
         'material': [
             ('Кабельная продукция', 'м', 60, 150, 100, 600),
@@ -826,7 +826,7 @@ def _round_nice(x):
 # (та же причина, что и в BY_TOPIC выше): «Мост к оператору ЦФА» должен
 # уйти в ИТ, а не в мостовой профиль, хотя слово «мост» встречается в
 # обоих.
-ТЕМЫ = [
+TOPICS = [
     (('теплиц', 'биовегетари', 'овощехранилищ', 'питомник саженц'), 'agro'),
     (('пекарн', 'хлебопекарн', 'хлебозавод'), 'bakery'),
     (('сыроварн', 'молочный цех', 'молокозавод'), 'cheese'),
@@ -854,15 +854,15 @@ def _round_nice(x):
     (('мельница',), 'mill'),
     (('музей', 'библиотек', 'медиацентр'), 'culture'),
 ]
-_ТЕМЫ_ПЛОСКО = sorted(
-    ((token, profile) for tokens, profile in ТЕМЫ for token in tokens),
+_TOPICS_FLAT = sorted(
+    ((token, profile) for tokens, profile in TOPICS for token in tokens),
     key=lambda pair: -len(pair[0]))
 
 
-def _профиль_проекта(project):
-    имя = (project.name or '').lower()
-    for token, profile in _ТЕМЫ_ПЛОСКО:
-        if token in имя:
+def _project_profile(project):
+    item_name = (project.name or '').lower()
+    for token, profile in _TOPICS_FLAT:
+        if token in item_name:
             return profile
     if project.kind == 'dao':
         return 'it'
@@ -873,47 +873,47 @@ def _профиль_проекта(project):
 # всё. Без этого у пекарни после трёх своих материалов сразу начинались
 # «Материалы под нужды проекта», хотя упаковка и тара нужны любому
 # пищевому производству.
-РОДИТЕЛЬ = {'bakery': 'food', 'cheese': 'food', 'fish': 'food'}
+PARENT = {'bakery': 'food', 'cheese': 'food', 'fish': 'food'}
 
 
-def _собрать_позиции(profile, rtype, исключить):
-    цепочка = [profile]
-    родитель = РОДИТЕЛЬ.get(profile)
-    if родитель:
-        цепочка.append(родитель)
-    if 'general' not in цепочка:
-        цепочка.append('general')
-    кандидаты = []
-    for тема in цепочка:
-        кандидаты += ПРОФИЛИ.get(тема, {}).get(rtype, [])
-    return [к for к in кандидаты if к[0] not in исключить]
+def _collect_positions(profile, rtype, exclude):
+    chain = [profile]
+    parent = PARENT.get(profile)
+    if parent:
+        chain.append(parent)
+    if 'general' not in chain:
+        chain.append('general')
+    candidates = []
+    for topic in chain:
+        candidates += PROFILES.get(topic, {}).get(rtype, [])
+    return [k for k in candidates if k[0] not in exclude]
 
 
-def _цена_позиции(позиция, rnd):
+def _position_price(position, rnd):
     """Название с числом, цена, единица для price_unit_label."""
-    title, unit, pmin, pmax, qmin, qmax = позиция
+    title, unit, pmin, pmax, qmin, qmax = position
     if unit is None:
         return title, _round_nice(rnd.uniform(pmin, pmax)), ''
     qty = rnd.randint(qmin, qmax)
-    за_единицу = rnd.uniform(pmin, pmax)
-    имя = '%s, %s %s' % (title, qty, _форма_числа(qty, unit))
-    return имя, _round_nice(qty * за_единицу), _ЕД[unit]
+    per_unit = rnd.uniform(pmin, pmax)
+    item_name = '%s, %s %s' % (title, qty, _number_form(qty, unit))
+    return item_name, _round_nice(qty * per_unit), _UNITS[unit]
 
 
-def _цена_под_остаток(позиция, остаток, rnd):
+def _price_for_rest(position, rest_amount, rnd):
     """Позиция, чья цена подогнана под нужную сумму — растёт вместе с
     проектом за счёт количества, а не выдуманной цены за единицу."""
-    title, unit, pmin, pmax, qmin, qmax = позиция
+    title, unit, pmin, pmax, qmin, qmax = position
     if unit is None:
-        return title, _round_nice(остаток), ''
-    за_единицу = rnd.uniform(pmin, pmax)
-    qty = max(1, round(остаток / за_единицу)) if за_единицу else 1
-    имя = '%s, %s %s' % (title, qty, _форма_числа(qty, unit))
-    return имя, _round_nice(qty * за_единицу), _ЕД[unit]
+        return title, _round_nice(rest_amount), ''
+    per_unit = rnd.uniform(pmin, pmax)
+    qty = max(1, round(rest_amount / per_unit)) if per_unit else 1
+    item_name = '%s, %s %s' % (title, qty, _number_form(qty, unit))
+    return item_name, _round_nice(qty * per_unit), _UNITS[unit]
 
 
-РЕЗЕРВ = 'Резерв на непредвиденные расходы'
-РЕЗЕРВ_ЗАПАСНОЙ = 'Оборотные средства на закупку и логистику'
+FALLBACK = 'Резерв на непредвиденные расходы'
+SPARE_FALLBACK = 'Оборотные средства на закупку и логистику'
 
 # Когда тема и общий список исчерпаны — на проекте с двенадцатью
 # потребностями это случается с материалами и оборудованием, — берём
@@ -923,14 +923,14 @@ def _цена_под_остаток(позиция, остаток, rnd):
 #
 # С единицей, а не общей суммой: две такие строки в одном проекте иначе
 # выходят с одинаковым названием, и список читается как ошибка ввода.
-_ЖЁСТКИЙ_ЗАПАСНОЙ = {
+_HARD_FALLBACK = {
     'material': ('Материалы под нужды проекта', 'шт', 20000, 60000, 1, 6),
     'equipment': ('Оборудование под нужды проекта', 'шт', 40000, 120000, 1, 4),
     'labour': ('Дополнительные трудовые ресурсы', 'смена', 1500, 3000, 10, 60),
     # С единицей: без неё все финансовые слоты проекта сходились к
     # одному названию, и в семи строках подряд стояло «Оборотные
     # средства на закупку и логистику».
-    'financial': (РЕЗЕРВ_ЗАПАСНОЙ, 'месяц', 30000, 120000, 1, 12),
+    'financial': (SPARE_FALLBACK, 'месяц', 30000, 120000, 1, 12),
 }
 
 
@@ -956,7 +956,7 @@ def diversify_project_needs(env, min_needs=4, max_needs=12):
         return 0
 
     rnd = random.Random(20260915)
-    сделано = пропущено = 0
+    done = skipped = 0
 
     for project in projects:
         if not project.required_total:
@@ -966,7 +966,7 @@ def diversify_project_needs(env, min_needs=4, max_needs=12):
             ('project_id', '=', project.id),
             ('listing_type', '=', 'request'),
         ])
-        типы = set(existing.mapped('resource_type'))
+        type_codes = set(existing.mapped('resource_type'))
         # Условие пропуска — только число потребностей. Раньше оно
         # требовало ещё и оба вида, труд и деньги, а заводятся они с
         # долей вероятности: у кого не выпало, тот при каждом следующем
@@ -974,7 +974,7 @@ def diversify_project_needs(env, min_needs=4, max_needs=12):
         # повторе — а он идёт из `load_all`, то есть при каждом
         # `-u coop_demo`.
         if len(existing) >= min_needs:
-            пропущено += 1
+            skipped += 1
             continue
 
         existing_sum = sum(existing.mapped('price'))
@@ -986,28 +986,28 @@ def diversify_project_needs(env, min_needs=4, max_needs=12):
         # количество в названии записано по-разному — «две тонны» у
         # старых записей и «1 тонна» у новых, — и «Мука высшего сорта»
         # заводилась вторым разом, потому что строки не совпали посимвольно.
-        занято = set(existing.mapped('name'))
-        занято |= {имя.split(',')[0].strip()
-                   for имя in existing.mapped('name') if имя}
+        taken = set(existing.mapped('name'))
+        taken |= {item_name.split(',')[0].strip()
+                   for item_name in existing.mapped('name') if item_name}
         target = rnd.randint(min_needs, max_needs)
 
-        хотим_труд = 'labour' not in типы and rnd.random() < 0.92
-        хотим_деньги = 'financial' not in типы and rnd.random() < 0.92
-        слоты = []
-        if хотим_труд:
-            слоты.append('labour')
-        if хотим_деньги:
-            слоты.append('financial')
-        новых = max(target - len(existing), len(слоты))
-        веса_видов = ['material'] * 3 + ['equipment'] * 3 + ['labour'] * 2 + ['financial']
-        while len(слоты) < новых:
-            вид = rnd.choice(веса_видов)
+        want_labour = 'labour' not in type_codes and rnd.random() < 0.92
+        want_money = 'financial' not in type_codes and rnd.random() < 0.92
+        slots = []
+        if want_labour:
+            slots.append('labour')
+        if want_money:
+            slots.append('financial')
+        new_ids = max(target - len(existing), len(slots))
+        kind_weights = ['material'] * 3 + ['equipment'] * 3 + ['labour'] * 2 + ['financial']
+        while len(slots) < new_ids:
+            kind = rnd.choice(kind_weights)
             # Деньги — не больше двух строк на проект. Список финансовых
             # позиций короткий, и при пяти-шести слотах он исчерпывался,
             # после чего все они получали одно и то же название.
-            if вид == 'financial' and слоты.count('financial') >= 2:
-                вид = rnd.choice(['material', 'equipment', 'labour'])
-            слоты.append(вид)
+            if kind == 'financial' and slots.count('financial') >= 2:
+                kind = rnd.choice(['material', 'equipment', 'labour'])
+            slots.append(kind)
 
         # Сумма потребностей должна сходиться с `required_total` — от
         # него считается пай. Раньше остаток бюджета целиком уходил в
@@ -1020,138 +1020,138 @@ def diversify_project_needs(env, min_needs=4, max_needs=12):
         # Поэтому остаток расходится по всем строкам сразу — количеством,
         # а не ценой за единицу. Проекту вдвое дороже нужно вдвое больше
         # цемента и вдвое больше смен, а не тот же цемент по двойной цене.
-        profile = _профиль_проекта(project)
+        profile = _project_profile(project)
         pools = {}
-        сырые = []
+        raw = []
 
-        for rtype in слоты:
+        for rtype in slots:
             if rtype not in pools:
-                pools[rtype] = _собрать_позиции(profile, rtype, занято)
+                pools[rtype] = _collect_positions(profile, rtype, taken)
                 rnd.shuffle(pools[rtype])
-            кандидаты = pools[rtype]
-            if кандидаты:
-                позиция = кандидаты.pop()
+            candidates = pools[rtype]
+            if candidates:
+                position = candidates.pop()
             else:
                 # Список темы и общий исчерпаны. Запасная строка годится
                 # один раз: вторая такая же в том же проекте читается не
                 # как вторая потребность, а как ошибка ввода. Слот тогда
                 # пропускаем — его деньги разойдутся по остальным при
                 # выравнивании суммы, оно идёт следом.
-                позиция = _ЖЁСТКИЙ_ЗАПАСНОЙ[rtype]
-                if позиция[0] in занято:
+                position = _HARD_FALLBACK[rtype]
+                if position[0] in taken:
                     continue
-            занято.add(позиция[0])
-            _, unit, pmin, pmax, qmin, qmax = позиция
-            за_единицу = rnd.uniform(pmin, pmax)
+            taken.add(position[0])
+            _, unit, pmin, pmax, qmin, qmax = position
+            per_unit = rnd.uniform(pmin, pmax)
             qty = rnd.randint(qmin, qmax) if unit is not None else 0
-            сырые.append([rtype, позиция, qty, за_единицу])
+            raw.append([rtype, position, qty, per_unit])
 
-        if not сырые:
+        if not raw:
             continue
 
-        def _сумма(строки_сырые):
-            итог = 0.0
-            for _rtype, поз, qty, ед_цена in строки_сырые:
-                итог += ед_цена * qty if поз[1] is not None else ед_цена
-            return итог
+        def _amount(raw_lines):
+            total = 0.0
+            for _rtype, pos, qty, unit_price in raw_lines:
+                total += unit_price * qty if pos[1] is not None else unit_price
+            return total
 
-        подытог = _сумма(сырые)
-        if подытог > 0:
-            растяжка = remaining / подытог
-            for row in сырые:
+        subtotal = _amount(raw)
+        if subtotal > 0:
+            spread = remaining / subtotal
+            for row in raw:
                 if row[1][1] is not None:
-                    row[2] = max(1, int(round(row[2] * растяжка)))
+                    row[2] = max(1, int(round(row[2] * spread)))
                 else:
-                    row[3] = row[3] * растяжка
+                    row[3] = row[3] * spread
 
         # Потолок на строку. Растяжка сохраняет пропорции, но если у
         # одной позиции цена от природы много выше прочих, она и после
         # неё заберёт полсметы. Излишек раздаётся остальным.
-        ПОТОЛОК = 0.35
-        предел = remaining * ПОТОЛОК
-        for _проход in range(3):
-            цены = [(ед_цена * qty if поз[1] is not None else ед_цена)
-                    for _rtype, поз, qty, ед_цена in сырые]
-            слишком = [i for i, ц in enumerate(цены) if ц > предел]
-            if not слишком or len(сырые) < 2:
+        CEILING = 0.35
+        limit = remaining * CEILING
+        for _pass in range(3):
+            prices = [(unit_price * qty if pos[1] is not None else unit_price)
+                    for _rtype, pos, qty, unit_price in raw]
+            too_big = [i for i, pr in enumerate(prices) if pr > limit]
+            if not too_big or len(raw) < 2:
                 break
-            излишек = sum(цены[i] - предел for i in слишком)
-            остальные = [i for i in range(len(сырые)) if i not in слишком]
-            if not остальные:
+            surplus = sum(prices[i] - limit for i in too_big)
+            others = [i for i in range(len(raw)) if i not in too_big]
+            if not others:
                 break
-            for i in слишком:
-                доля = предел / цены[i]
-                поз = сырые[i][1]
-                if поз[1] is not None and сырые[i][2] > 1:
-                    новое_кол = max(1, int(round(сырые[i][2] * доля)))
+            for i in too_big:
+                share = limit / prices[i]
+                pos = raw[i][1]
+                if pos[1] is not None and raw[i][2] > 1:
+                    new_qty = max(1, int(round(raw[i][2] * share)))
                     # Количество упёрлось в единицу — дальше срезаем цену
                     # за единицу. Иначе «Модульные конструкции, 1 шт.»
                     # оставались дороже всей сметы: делить было нечего.
-                    сырые[i][3] *= (сырые[i][2] * доля) / новое_кол
-                    сырые[i][2] = новое_кол
+                    raw[i][3] *= (raw[i][2] * share) / new_qty
+                    raw[i][2] = new_qty
                 else:
-                    сырые[i][3] = сырые[i][3] * доля
-            добавка = излишек / len(остальные)
-            for i in остальные:
-                поз = сырые[i][1]
-                if поз[1] is not None:
-                    прибавка = добавка / сырые[i][3] if сырые[i][3] else 0
-                    сырые[i][2] = max(1, int(round(сырые[i][2] + прибавка)))
+                    raw[i][3] = raw[i][3] * share
+            addition = surplus / len(others)
+            for i in others:
+                pos = raw[i][1]
+                if pos[1] is not None:
+                    increment = addition / raw[i][3] if raw[i][3] else 0
+                    raw[i][2] = max(1, int(round(raw[i][2] + increment)))
                 else:
-                    сырые[i][3] += добавка
+                    raw[i][3] += addition
 
         # После потолка сумма уезжает: количества округлялись, часть
         # упёрлась в единицу. Выравниваем в последний раз — ценой за
         # единицу, чтобы не ломать уже расставленные количества.
-        подытог = _сумма(сырые)
-        if подытог > 0:
-            поправка = remaining / подытог
-            for row in сырые:
-                row[3] *= поправка
+        subtotal = _amount(raw)
+        if subtotal > 0:
+            correction = remaining / subtotal
+            for row in raw:
+                row[3] *= correction
 
-        строки = []
-        for rtype, позиция, qty, за_единицу in сырые:
-            title, unit = позиция[0], позиция[1]
+        lines = []
+        for rtype, position, qty, per_unit in raw:
+            title, unit = position[0], position[1]
             if unit is None:
-                имя = title
-                цена = _round_nice(за_единицу)
-                ед = ''
+                item_name = title
+                price = _round_nice(per_unit)
+                unit_label = ''
             else:
-                имя = '%s, %s %s' % (title, qty, _форма_числа(qty, unit))
-                цена = _round_nice(qty * за_единицу)
-                ед = _ЕД[unit]
-            строки.append((rtype, имя, цена, ед))
+                item_name = '%s, %s %s' % (title, qty, _number_form(qty, unit))
+                price = _round_nice(qty * per_unit)
+                unit_label = _UNITS[unit]
+            lines.append((rtype, item_name, price, unit_label))
 
-        участники = project.contribution_ids.mapped('partner_id') - project.partner_id
-        if not участники:
-            участники = Partner.search([
+        participants = project.contribution_ids.mapped('partner_id') - project.partner_id
+        if not participants:
+            participants = Partner.search([
                 ('coop_is_participant', '=', True), ('is_company', '=', False),
                 ('id', '!=', project.partner_id.id)], limit=20)
 
-        for row in строки:
+        for row in lines:
             if row is None:
                 continue
-            rtype, имя, цена, ед = row
-            manager = (участники[rnd.randrange(len(участники))]
-                       if участники and rnd.random() < 0.33 else False)
+            rtype, item_name, price, unit_label = row
+            manager = (participants[rnd.randrange(len(participants))]
+                       if participants and rnd.random() < 0.33 else False)
             with env.cr.savepoint():
                 Resource.create({
-                    'name': имя,
+                    'name': item_name,
                     'listing_type': 'request',
                     'resource_type': rtype,
                     'project_id': project.id,
                     'owner_id': project.partner_id.id,
                     'need_manager_id': manager.id if manager else False,
                     'city': project.city,
-                    'price': цена,
+                    'price': price,
                     'price_kind': 'to',
-                    'price_unit_label': ед,
+                    'price_unit_label': unit_label,
                     'description': '<p>Потребность проекта «%s».</p>' % project.name,
                     'state': 'published',
-                    'category_id': _рубрика_ресурса(env, имя),
+                    'category_id': _resource_rubric(env, item_name),
                 })
-                сделано += 1
+                done += 1
 
     _logger.info('Разброс потребностей: заведено %s, проектов пропущено %s',
-                 сделано, пропущено)
-    return сделано
+                 done, skipped)
+    return done

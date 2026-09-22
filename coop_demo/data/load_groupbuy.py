@@ -88,10 +88,10 @@ TARGET = 120
 def _set_categories(Buy):
     """Раздел по названию товара. Название начинается с самого товара —
     город приписан после тире, — поэтому сверяем по началу строки."""
-    for название, раздел in CATEGORY.items():
-        Buy.search([('name', '=like', название + '%'),
+    for title, section in CATEGORY.items():
+        Buy.search([('name', '=like', title + '%'),
                     ('category', 'in', (False, 'other'))]).write(
-            {'category': раздел})
+            {'category': section})
 
 
 def load_groupbuy(env, target=TARGET):

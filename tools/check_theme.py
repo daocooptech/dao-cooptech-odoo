@@ -132,10 +132,10 @@ def expand_hasclass(expr):
     должна знать её, иначе половина прицелов не проверится вовсе.
     """
     def replace(m):
-        классы = [c.strip().strip('\'"') for c in m.group(1).split(',')]
-        куски = ["contains(concat(' ', normalize-space(@class), ' '), ' %s ')"
-                 % c for c in классы if c]
-        return ' and '.join(куски) if куски else 'true()'
+        classes = [c.strip().strip('\'"') for c in m.group(1).split(',')]
+        chunks = ["contains(concat(' ', normalize-space(@class), ' '), ' %s ')"
+                 % c for c in classes if c]
+        return ' and '.join(chunks) if chunks else 'true()'
     return HASCLASS.sub(replace, expr)
 
 
@@ -203,23 +203,23 @@ def patch_calls(text):
             i += 6  # `unpatch(`, `coopPatch(` — не наш вызов
             continue
         j = i + 6
-        глубина = 1
-        запятая = None
-        while j < len(text) and глубина:
+        depth = 1
+        comma = None
+        while j < len(text) and depth:
             c = text[j]
             if c in '([{':
-                глубина += 1
+                depth += 1
             elif c in ')]}':
-                глубина -= 1
-            elif c == ',' and глубина == 1 and запятая is None:
-                запятая = j
+                depth -= 1
+            elif c == ',' and depth == 1 and comma is None:
+                comma = j
             j += 1
-        if глубина or запятая is None:
+        if depth or comma is None:
             return out
-        строка = text[:i].count('\n') + 1
-        out.append((строка,
-                    text[i + 6:запятая].strip(),
-                    text[запятая + 1:j - 1].strip()))
+        line = text[:i].count('\n') + 1
+        out.append((line,
+                    text[i + 6:comma].strip(),
+                    text[comma + 1:j - 1].strip()))
         i = j
 
 
@@ -233,38 +233,38 @@ def check_patches(problems):
     """
     for path in our_js_files():
         text = io.open(path, encoding='utf-8').read()
-        вызовы = patch_calls(text)
-        имена = {чем for _, _, чем in вызовы if чем.isidentifier()}
-        использовано = {}
-        for строка, куда, чем in вызовы:
+        calls = patch_calls(text)
+        names = {by_what for _, _, by_what in calls if by_what.isidentifier()}
+        used = {}
+        for line, to_where, by_what in calls:
             # Копия объекта, который где-то здесь же прикладывают заплаткой.
-            копия = None
-            if чем.startswith('{'):
-                for имя in имена:
-                    if '...' + имя in чем.replace(' ', ''):
-                        копия = имя
+            copy_of = None
+            if by_what.startswith('{'):
+                for name in names:
+                    if '...' + name in by_what.replace(' ', ''):
+                        copy_of = name
                         break
-            if копия:
+            if copy_of:
                 problems.append(
                     '%s:%d: заплатка собрана копией «...%s».\n'
                     '    Движок это запрещает: при копии `super` перестаёт '
                     'указывать куда надо.\n'
                     '    Нужна функция, возвращающая каждый раз новый объект '
                     '— см. patching_code, «Applying the same patch to '
-                    'multiple objects».' % (path, строка, копия))
+                    'multiple objects».' % (path, line, copy_of))
                 continue
-            if not чем.isidentifier():
+            if not by_what.isidentifier():
                 # Литерал на месте или вызов функции — каждый раз своё.
                 continue
-            if чем in использовано:
+            if by_what in used:
                 problems.append(
                     '%s:%d: объект «%s» уже приложен заплаткой в строке %d.\n'
                     '    Один объект можно приложить только один раз: `super` '
                     'внутри него запомнит последний прототип.\n'
                     '    Сделайте функцию, возвращающую новый объект.'
-                    % (path, строка, чем, использовано[чем]))
+                    % (path, line, by_what, used[by_what]))
             else:
-                использовано[чем] = строка
+                used[by_what] = line
 
 
 def main():

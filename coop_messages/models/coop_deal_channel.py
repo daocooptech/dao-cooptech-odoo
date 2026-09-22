@@ -33,34 +33,34 @@ class CoopDeal(models.Model):
         нужде зовут руками — и такой чат платформа уже не трогает.
         """
         self.ensure_one()
-        люди = self.env['res.partner']
-        for сторона in (self.party_a_id | self.party_b_id):
-            if not сторона.is_company:
-                люди |= сторона
+        people = self.env['res.partner']
+        for side in (self.party_a_id | self.party_b_id):
+            if not side.is_company:
+                people |= side
                 continue
-            люди |= сторона.coop_power_holders('sign')
-            люди |= сторона.coop_power_holders('deal')
+            people |= side.coop_power_holders('sign')
+            people |= side.coop_power_holders('deal')
         # Заведший сделку — в чате всегда: он с ней и работает. Если он
         # человек со стороны, он уже попал выше; если вёл её от имени
         # организации без полномочий, без этой строки он остался бы вне
         # разговора, который сам и начал.
         if self.author_id and not self.author_id.is_company:
-            люди |= self.author_id
-        return люди
+            people |= self.author_id
+        return people
 
     # Состояния, в которых сделке ещё есть о чём говорить. Решение
     # владельца 16 сентября 2026: переписку заводим только действующим —
     # завершённой и отменённой она больше не нужна, а заводить её задним
     # числом пяти сотням закрытых сделок значит засыпать список мёртвыми
     # разговорами.
-    ЖИВЫЕ_СОСТОЯНИЯ = ('draft', 'agreed', 'active', 'acceptance', 'disputed')
+    LIVE_STATES = ('draft', 'agreed', 'active', 'acceptance', 'disputed')
 
     def _coop_channel_specs(self):
         """Одна переписка на сделку: номер и предмет в названии, стороны
         в подписи — по ней в списке отличают одну поставку от другой, не
         открывая."""
         self.ensure_one()
-        if self.state not in self.ЖИВЫЕ_СОСТОЯНИЯ:
+        if self.state not in self.LIVE_STATES:
             return []
         return [{
             'kind': 'deal',
@@ -87,10 +87,10 @@ class CoopDeal(models.Model):
         Не отложенно и не по первой реплике: стороны должны увидеть, где
         договариваться, в тот же момент, когда сделка появилась.
         """
-        сделки = super().create(vals_list)
-        сделки._coop_ensure_channel()
-        сделки._coop_sync_channels()
-        return сделки
+        deals = super().create(vals_list)
+        deals._coop_ensure_channel()
+        deals._coop_sync_channels()
+        return deals
 
     def write(self, vals):
         """Сменились стороны — сменился и состав переписки.

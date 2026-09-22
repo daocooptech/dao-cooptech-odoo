@@ -175,19 +175,19 @@ class CoopExtensionCatalogFilters(models.Model):
     _inherit = 'coop.extension'
 
     def _coop_catalog_filters(self, domain):
-        def выбор(имя):
+        def choice(name):
             return [{'value': code, 'label': label}
-                    for code, label in self._fields[имя].selection]
+                    for code, label in self._fields[name].selection]
 
         return [
             {'code': 'category', 'label': 'Раздел',
              'hint': 'Учёт, процессы, сбыт, финансы, сообщество, интеграции.',
              'widget': 'select', 'field': 'category', 'placeholder': 'Любой',
-             'options': выбор('category')},
+             'options': choice('category')},
             {'code': 'pricing', 'label': 'Условия',
              'hint': 'Условия назначает автор расширения, а не платформа.',
              'widget': 'select', 'field': 'pricing', 'placeholder': 'Любые',
-             'options': выбор('pricing')},
+             'options': choice('pricing')},
             {'code': 'price', 'label': 'Цена, ₽',
              'hint': 'Пустое поле — без ограничения. У бесплатных цена нулевая, '
                      'и «от» их отсекает.',

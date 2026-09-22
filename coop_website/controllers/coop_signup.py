@@ -40,9 +40,9 @@ class CoopAuthSignupHome(AuthSignupHome):
         return super().web_auth_signup(*args, **kw)
 
     def _coop_signup_mail_enabled(self):
-        значение = request.env['ir.config_parameter'].sudo().get_param(
+        value = request.env['ir.config_parameter'].sudo().get_param(
             'coop.signup_send_email', 'False')
-        return str(значение).strip().lower() in ('1', 'true', 'да')
+        return str(value).strip().lower() in ('1', 'true', 'да')
 
     def get_auth_signup_qcontext(self):
         qcontext = super().get_auth_signup_qcontext()

@@ -41,7 +41,7 @@ AGENT = 'dao-cooptech-demo/1.0 (emblems for demo catalogue)'
 # Запросы подобраны так, чтобы приходили знаки предприятий и обществ, а
 # не гербы городов и не значки приложений: и то и другое в каталоге
 # кооперативов читается как ошибка.
-ЗАПРОСЫ = [
+REQUESTS = [
     'logo cooperative',
     'logo artel',
     'emblem factory soviet',
@@ -62,9 +62,9 @@ AGENT = 'dao-cooptech-demo/1.0 (emblems for demo catalogue)'
     'logo brewery historical',
 ]
 
-СВОБОДНЫЕ = ('public domain', 'cc0', 'pd-')
+FREE = ('public domain', 'cc0', 'pd-')
 
-НЕ_ЗНАК = ('coat of arms', 'flag of', 'seal of', 'map of', 'screenshot',
+NOT_MARK = ('coat of arms', 'flag of', 'seal of', 'map of', 'screenshot',
            'icon set', 'diagram', 'chart', 'portrait', 'photograph')
 
 
@@ -74,7 +74,7 @@ AGENT = 'dao-cooptech-demo/1.0 (emblems for demo catalogue)'
 # следующий добор скачивает их заново — манифест-то их уже не помнит.
 # Владелец 20 сентября 2026: «максимальная приближенность к реальности».
 # Кроссовки и кондиционеры к кооперативу отношения не имеют.
-НЕ_БРАТЬ = (
+SKIP = (
     'adidas', 'daikin', 'fischer', 'fivethirtyeight', 'nabisco', 'amfam',
     'pforzheim', 'tokyo-university', 'phi-rho-sigma', 'dror-habonim',
     'international-fur', 'pr-t-pour-le-travail', 'yauza-209',
@@ -83,66 +83,66 @@ AGENT = 'dao-cooptech-demo/1.0 (emblems for demo catalogue)'
 )
 
 
-def манифест():
+def manifest():
     if not os.path.exists(MANIFEST):
         return []
     with open(MANIFEST, encoding='utf-8') as fh:
         return json.load(fh)
 
 
-def значение(мета, ключ):
-    значение_поля = мета.get(ключ, {}).get('value')
-    if not isinstance(значение_поля, str):
+def value(meta, key):
+    field_value = meta.get(key, {}).get('value')
+    if not isinstance(field_value, str):
         return ''
-    return re.sub('<[^>]+>', '', значение_поля).strip()
+    return re.sub('<[^>]+>', '', field_value).strip()
 
 
-def спросить(запрос, сколько):
+def ask(request, how_many):
     """Знаки по запросу вместе с лицензией каждого файла.
 
     Лицензия спрашивается тем же запросом, а не отдельным походом на
     каждый файл: их тут сотни, и второй запрос на каждый удвоил бы время
     и нагрузку на чужой сервер.
     """
-    параметры = urllib.parse.urlencode({
+    params = urllib.parse.urlencode({
         'action': 'query',
         'generator': 'search',
-        'gsrsearch': 'filetype:bitmap %s' % запрос,
+        'gsrsearch': 'filetype:bitmap %s' % request,
         'gsrnamespace': '6',
-        'gsrlimit': str(min(max(сколько * 3, 20), 50)),
+        'gsrlimit': str(min(max(how_many * 3, 20), 50)),
         'prop': 'imageinfo',
         'iiprop': 'url|size|extmetadata',
         'iiurlwidth': '512',
         'format': 'json',
     })
-    запрос_http = urllib.request.Request(API + '?' + параметры,
+    http_request = urllib.request.Request(API + '?' + params,
                                          headers={'User-Agent': AGENT})
-    with urllib.request.urlopen(запрос_http, timeout=30) as ответ:
-        данные = json.load(ответ)
-    страницы = (данные.get('query') or {}).get('pages') or {}
-    найденное = []
-    for стр in страницы.values():
-        сведения = (стр.get('imageinfo') or [{}])[0]
-        адрес = сведения.get('thumburl') or сведения.get('url')
-        название = стр.get('title') or ''
-        мета = сведения.get('extmetadata') or {}
-        лицензия = (значение(мета, 'LicenseShortName')
-                    or значение(мета, 'License'))
-        if not адрес or not re.search(r'\.(png|jpg|jpeg)(\?|$)', адрес, re.I):
+    with urllib.request.urlopen(http_request, timeout=30) as answer:
+        data = json.load(answer)
+    pages = (data.get('query') or {}).get('pages') or {}
+    found_one = []
+    for page in pages.values():
+        info = (page.get('imageinfo') or [{}])[0]
+        address = info.get('thumburl') or info.get('url')
+        title = page.get('title') or ''
+        meta = info.get('extmetadata') or {}
+        license = (value(meta, 'LicenseShortName')
+                    or value(meta, 'License'))
+        if not address or not re.search(r'\.(png|jpg|jpeg)(\?|$)', address, re.I):
             continue
-        if not any(с in лицензия.lower() for с in СВОБОДНЫЕ):
+        if not any(ch in license.lower() for ch in FREE):
             continue
-        if any(с in название.lower() for с in НЕ_ЗНАК):
+        if any(ch in title.lower() for ch in NOT_MARK):
             continue
-        найденное.append({
-            'title': название[5:] if название.startswith('File:') else название,
-            'url': адрес,
-            'license': лицензия,
-            'author': значение(мета, 'Artist')[:120] or 'Unknown author',
+        found_one.append({
+            'title': title[5:] if title.startswith('File:') else title,
+            'url': address,
+            'license': license,
+            'author': value(meta, 'Artist')[:120] or 'Unknown author',
             'source': 'https://commons.wikimedia.org/wiki/%s'
-                      % urllib.parse.quote(название.replace(' ', '_')),
+                      % urllib.parse.quote(title.replace(' ', '_')),
         })
-    return найденное
+    return found_one
 
 
 # Категории Викисклада, где лежат заводские знаки — те самые монограммы,
@@ -151,7 +151,7 @@ def спросить(запрос, сколько):
 # слово «logo». Добавлено 20 сентября 2026, когда в наборе оказалось
 # семьдесят восемь фотографий вместо знаков — спутниковые снимки,
 # развороты удостоверений, портреты.
-КАТЕГОРИИ = [
+CATEGORIES = [
     'Category:Factory logos of Soviet electronics industry',
     'Category:Factory logos of Soviet integrated circuits',
     'Category:Factory logos of Soviet vacuum tubes',
@@ -163,50 +163,50 @@ def спросить(запрос, сколько):
 ]
 
 
-def из_категории(категория, сколько):
+def from_category(category, how_many):
     """Знаки из категории Викисклада — вместе с лицензией каждого."""
-    параметры = urllib.parse.urlencode({
+    params = urllib.parse.urlencode({
         'action': 'query',
         'generator': 'categorymembers',
-        'gcmtitle': категория,
+        'gcmtitle': category,
         'gcmtype': 'file',
-        'gcmlimit': str(min(max(сколько * 2, 20), 200)),
+        'gcmlimit': str(min(max(how_many * 2, 20), 200)),
         'prop': 'imageinfo',
         'iiprop': 'url|size|extmetadata',
         'iiurlwidth': '512',
         'format': 'json',
     })
-    запрос_http = urllib.request.Request(API + '?' + параметры,
+    http_request = urllib.request.Request(API + '?' + params,
                                          headers={'User-Agent': AGENT})
-    with urllib.request.urlopen(запрос_http, timeout=30) as ответ:
-        данные = json.load(ответ)
-    страницы = (данные.get('query') or {}).get('pages') or {}
-    найденное = []
-    for стр in страницы.values():
-        сведения = (стр.get('imageinfo') or [{}])[0]
-        адрес = сведения.get('thumburl') or сведения.get('url')
-        название = стр.get('title') or ''
-        мета = сведения.get('extmetadata') or {}
-        лицензия = (значение(мета, 'LicenseShortName')
-                    or значение(мета, 'License'))
-        if not адрес or not re.search(r'\.(png|jpg|jpeg)(\?|$)', адрес, re.I):
+    with urllib.request.urlopen(http_request, timeout=30) as answer:
+        data = json.load(answer)
+    pages = (data.get('query') or {}).get('pages') or {}
+    found_one = []
+    for page in pages.values():
+        info = (page.get('imageinfo') or [{}])[0]
+        address = info.get('thumburl') or info.get('url')
+        title = page.get('title') or ''
+        meta = info.get('extmetadata') or {}
+        license = (value(meta, 'LicenseShortName')
+                    or value(meta, 'License'))
+        if not address or not re.search(r'\.(png|jpg|jpeg)(\?|$)', address, re.I):
             continue
-        if not any(с in лицензия.lower() for с in СВОБОДНЫЕ):
+        if not any(ch in license.lower() for ch in FREE):
             continue
-        if any(с in название.lower() for с in НЕ_ЗНАК):
+        if any(ch in title.lower() for ch in NOT_MARK):
             continue
-        найденное.append({
-            'title': название[5:] if название.startswith('File:') else название,
-            'url': адрес,
-            'license': лицензия,
-            'author': значение(мета, 'Artist')[:120] or 'Unknown author',
+        found_one.append({
+            'title': title[5:] if title.startswith('File:') else title,
+            'url': address,
+            'license': license,
+            'author': value(meta, 'Artist')[:120] or 'Unknown author',
             'source': 'https://commons.wikimedia.org/wiki/%s'
-                      % urllib.parse.quote(название.replace(' ', '_')),
+                      % urllib.parse.quote(title.replace(' ', '_')),
         })
-    return найденное
+    return found_one
 
 
-def плоский(путь):
+def flat(path):
     """Знак это или фотография.
 
     Знак нарисован: в нём считанные цвета и большое одноцветное поле.
@@ -219,128 +219,128 @@ def плоский(путь):
     except ImportError:
         return True
     try:
-        with Image.open(путь) as рисунок:
-            маленький = рисунок.convert('RGB').resize((64, 64))
-            цвета = {}
-            for r, g, b in list(маленький.getdata()):
-                ключ = (r // 32, g // 32, b // 32)
-                цвета[ключ] = цвета.get(ключ, 0) + 1
-            return len(цвета) < 40
+        with Image.open(path) as image:
+            small = image.convert('RGB').resize((64, 64))
+            colors = {}
+            for r, g, b in list(small.getdata()):
+                key = (r // 32, g // 32, b // 32)
+                colors[key] = colors.get(key, 0) + 1
+            return len(colors) < 40
     except Exception:
         return False
 
 
-def отвергнут(имя):
+def rejected(name):
     """Знак из списка отвергнутых — не берём его и при следующем доборе."""
-    return any(с in имя for с in НЕ_БРАТЬ)
+    return any(ch in name for ch in SKIP)
 
 
-def имя_файла(название):
-    основа = re.sub(r'[^a-z0-9]+', '-', название.lower()).strip('-')
-    основа = re.sub(r'-(png|jpg|jpeg|svg)$', '', основа)
-    return (основа or 'mark')[:60] + '.png'
+def file_name(title):
+    base = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
+    base = re.sub(r'-(png|jpg|jpeg|svg)$', '', base)
+    return (base or 'mark')[:60] + '.png'
 
 
-def скачать(адрес, путь):
-    запрос_http = urllib.request.Request(адрес, headers={'User-Agent': AGENT})
-    with urllib.request.urlopen(запрос_http, timeout=60) as ответ:
-        данные = ответ.read()
+def download(address, path):
+    http_request = urllib.request.Request(address, headers={'User-Agent': AGENT})
+    with urllib.request.urlopen(http_request, timeout=60) as answer:
+        data = answer.read()
     # Мельче трёх килобайт — это заглушка, а не знак.
-    if len(данные) < 3000:
+    if len(data) < 3000:
         return False
-    with open(путь, 'wb') as fh:
-        fh.write(данные)
-    if not плоский(путь):
-        os.remove(путь)
+    with open(path, 'wb') as fh:
+        fh.write(data)
+    if not flat(path):
+        os.remove(path)
         return False
     return True
 
 
 def main():
-    разбор = argparse.ArgumentParser()
-    разбор.add_argument('--target', type=int, default=220,
+    parsed = argparse.ArgumentParser()
+    parsed.add_argument('--target', type=int, default=220,
                         help='сколько знаков должно быть в наборе')
-    разбор.add_argument('--dry', action='store_true')
-    аргументы = разбор.parse_args()
+    parsed.add_argument('--dry', action='store_true')
+    args = parsed.parse_args()
 
-    записи = манифест()
-    было = len(записи)
-    имена = {з.get('file') for з in записи}
-    нужно = аргументы.target - было
-    print('в наборе %s, нужно добрать %s' % (было, max(нужно, 0)))
-    if нужно <= 0 or аргументы.dry:
+    records = manifest()
+    was = len(records)
+    names = {entry.get('file') for entry in records}
+    needed = args.target - was
+    print('в наборе %s, нужно добрать %s' % (was, max(needed, 0)))
+    if needed <= 0 or args.dry:
         return
 
-    добавлено = 0
-    for категория in КАТЕГОРИИ:
-        if добавлено >= нужно:
+    added = 0
+    for category in CATEGORIES:
+        if added >= needed:
             break
         try:
-            найденное = из_категории(категория, нужно - добавлено)
-        except Exception as ошибка:
-            print('  %s: не спросилось — %s' % (категория, ошибка))
+            found_one = from_category(category, needed - added)
+        except Exception as error:
+            print('  %s: не спросилось — %s' % (category, error))
             continue
-        взято = 0
-        for знак in найденное:
-            if добавлено >= нужно:
+        taken_count = 0
+        for mark in found_one:
+            if added >= needed:
                 break
-            имя = имя_файла(знак['title'])
-            if имя in имена or отвергнут(имя):
+            name = file_name(mark['title'])
+            if name in names or rejected(name):
                 continue
-            путь = os.path.join(MARKS, имя)
+            path = os.path.join(MARKS, name)
             try:
-                if not скачать(знак['url'], путь):
+                if not download(mark['url'], path):
                     continue
             except Exception:
                 continue
-            имена.add(имя)
-            записи.append({
-                'file': имя,
-                'title': знак['title'],
-                'license': знак['license'],
-                'source': знак['source'],
-                'author': знак['author'],
+            names.add(name)
+            records.append({
+                'file': name,
+                'title': mark['title'],
+                'license': mark['license'],
+                'source': mark['source'],
+                'author': mark['author'],
             })
-            добавлено += 1
-            взято += 1
-        print('  %s: взято %s' % (категория, взято))
+            added += 1
+            taken_count += 1
+        print('  %s: взято %s' % (category, taken_count))
 
-    for запрос in ЗАПРОСЫ:
-        if добавлено >= нужно:
+    for request in REQUESTS:
+        if added >= needed:
             break
         try:
-            найденное = спросить(запрос, нужно - добавлено)
-        except Exception as ошибка:
-            print('  %s: не спросилось — %s' % (запрос, ошибка))
+            found_one = ask(request, needed - added)
+        except Exception as error:
+            print('  %s: не спросилось — %s' % (request, error))
             continue
-        взято = 0
-        for знак in найденное:
-            if добавлено >= нужно:
+        taken_count = 0
+        for mark in found_one:
+            if added >= needed:
                 break
-            имя = имя_файла(знак['title'])
-            if имя in имена or отвергнут(имя):
+            name = file_name(mark['title'])
+            if name in names or rejected(name):
                 continue
-            путь = os.path.join(MARKS, имя)
+            path = os.path.join(MARKS, name)
             try:
-                if not скачать(знак['url'], путь):
+                if not download(mark['url'], path):
                     continue
             except Exception:
                 continue
-            имена.add(имя)
-            записи.append({
-                'file': имя,
-                'title': знак['title'],
-                'license': знак['license'],
-                'source': знак['source'],
-                'author': знак['author'],
+            names.add(name)
+            records.append({
+                'file': name,
+                'title': mark['title'],
+                'license': mark['license'],
+                'source': mark['source'],
+                'author': mark['author'],
             })
-            добавлено += 1
-            взято += 1
-        print('  %s: взято %s' % (запрос, взято))
+            added += 1
+            taken_count += 1
+        print('  %s: взято %s' % (request, taken_count))
 
     with open(MANIFEST, 'w', encoding='utf-8') as fh:
-        json.dump(записи, fh, ensure_ascii=False, indent=2)
-    print('стало %s знаков (+%s)' % (len(записи), добавлено))
+        json.dump(records, fh, ensure_ascii=False, indent=2)
+    print('стало %s знаков (+%s)' % (len(records), added))
 
 
 if __name__ == '__main__':

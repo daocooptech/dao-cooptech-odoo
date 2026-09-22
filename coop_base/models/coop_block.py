@@ -34,24 +34,24 @@ class CoopBlock(models.Model):
 
     @api.constrains('partner_id', 'blocked_id')
     def _check_not_self(self):
-        for запись in self:
-            if запись.partner_id == запись.blocked_id:
+        for record in self:
+            if record.partner_id == record.blocked_id:
                 raise UserError(_('Себя заблокировать нельзя.'))
 
     def _compute_display_name(self):
-        for запись in self:
-            запись.display_name = запись.blocked_id.display_name or ''
+        for record in self:
+            record.display_name = record.blocked_id.display_name or ''
 
     @api.model
-    def _blocks(self, партнёр, другой):
+    def _blocks(self, partner, other):
         """Закрыл ли `партнёр` дорогу `другому`.
 
         Спрашивается на каждое сообщение, поэтому запрос один и по двум
         номерам, а не выборка всего списка.
         """
-        if not партнёр or not другой or партнёр == другой:
+        if not partner or not other or partner == other:
             return False
         return bool(self.sudo().search_count([
-            ('partner_id', '=', партнёр.id),
-            ('blocked_id', '=', другой.id),
+            ('partner_id', '=', partner.id),
+            ('blocked_id', '=', other.id),
         ]))

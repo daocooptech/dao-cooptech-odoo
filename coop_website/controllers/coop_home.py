@@ -27,8 +27,8 @@ class CoopHome(Website):
         # `site=1` — осознанный просмотр лендинга вошедшим: владельцу
         # нужно видеть, что показывают постороннему.
         if not kw.get('site'):
-            пользователь = request.env.user
-            if пользователь and not пользователь._is_public() \
-                    and пользователь._is_internal():
+            user = request.env.user
+            if user and not user._is_public() \
+                    and user._is_internal():
                 return request.redirect('/odoo/my-page')
         return super().index(**kw)

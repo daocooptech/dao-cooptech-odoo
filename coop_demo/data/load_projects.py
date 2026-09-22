@@ -219,15 +219,15 @@ def _it_photo(name):
     # добор по запросам про сервера и разработку лёг к ресурсам — их там
     # три десятка. Двадцати ДАО-проектам четырёх мало: владелец просил
     # «сделай все разные».
-    папки = [PHOTO_DIR, os.path.join(os.path.dirname(PHOTO_DIR), 'resources')]
-    файлы = []
-    for папка in папки:
-        for основа in IT_PHOTO_STEMS:
-            файлы.extend(sorted(glob.glob(os.path.join(папка, основа + '*.jpg'))))
-    if not файлы:
+    folders = [PHOTO_DIR, os.path.join(os.path.dirname(PHOTO_DIR), 'resources')]
+    files = []
+    for folder in folders:
+        for base in IT_PHOTO_STEMS:
+            files.extend(sorted(glob.glob(os.path.join(folder, base + '*.jpg'))))
+    if not files:
         return None
-    путь = файлы[zlib.crc32((name or '').encode('utf-8')) % len(файлы)]
-    with open(путь, 'rb') as fh:
+    path = files[zlib.crc32((name or '').encode('utf-8')) % len(files)]
+    with open(path, 'rb') as fh:
         return base64.b64encode(fh.read())
 
 
@@ -409,7 +409,7 @@ def _realign_required(project, readiness):
         return 0
     if abs(project.readiness - readiness) <= 5:
         return 0
-    новое = round(project.contribution_total * 100.0 / readiness)
+    new_one = round(project.contribution_total * 100.0 / readiness)
     # Предохранитель. Расчёт «нужно» от вкладов сам по себе верен, но он
     # делается при каждом прогоне наполнения, а `project.readiness` в
     # этот момент может быть ещё не пересчитан — и тогда каждый прогон
@@ -419,13 +419,13 @@ def _realign_required(project, readiness):
     #
     # Кооперативный проект в двадцать раз дороже самого дорогого шага
     # наполнения — это уже не проект, а сбой. Такое не пишем.
-    предел = REQUIRED_STEPS[-1] * 3
-    if новое > предел:
+    limit = REQUIRED_STEPS[-1] * 3
+    if new_one > limit:
         _logger.warning(
             'Проект «%s»: расчёт «нужно» дал %s — это больше предела, '
-            'оставляю как было', project.name, новое)
+            'оставляю как было', project.name, new_one)
         return 0
-    project.required_total = новое
+    project.required_total = new_one
     return 1
 
 
@@ -445,33 +445,33 @@ def repair_scales(env):
     # Втрое дороже самого дорогого шага наполнения — уже не проект, а
     # накопленный разгон: в макете самый крупный просит двенадцать
     # миллионов, и тридцать шесть это щедрый запас.
-    предел = REQUIRED_STEPS[-1] * 3
-    проекты = env['coop.project'].sudo().search(
-        [('required_total', '>', предел)])
-    исправлено = 0
-    for проект in проекты:
-        ключ = проект.import_key or ''
-        номер = 0
-        if '#' in ключ:
+    limit = REQUIRED_STEPS[-1] * 3
+    projects = env['coop.project'].sudo().search(
+        [('required_total', '>', limit)])
+    fixed = 0
+    for project in projects:
+        key = project.import_key or ''
+        number = 0
+        if '#' in key:
             try:
-                номер = int(ключ.rsplit('#', 1)[1])
+                number = int(key.rsplit('#', 1)[1])
             except ValueError:
-                номер = 0
-        нужно = REQUIRED_STEPS[номер % len(REQUIRED_STEPS)]
-        готовность = max(1, min(300, проект.readiness or 100))
-        собрать = round(нужно * готовность / 100.0)
-        вклады = проект.contribution_ids
-        было = sum(вклады.mapped('value')) or 1
+                number = 0
+        needed = REQUIRED_STEPS[number % len(REQUIRED_STEPS)]
+        readiness = max(1, min(300, project.readiness or 100))
+        collect = round(needed * readiness / 100.0)
+        contributions = project.contribution_ids
+        was = sum(contributions.mapped('value')) or 1
         # Пропорция сохраняется: у кого вклад был вдвое больше соседнего,
         # таким и останется. Переписывать вклады поровну значило бы
         # стереть след того, кто внёс больше всех.
-        for вклад in вклады:
-            вклад.value = round(вклад.value * собрать / было)
-        проект.required_total = нужно
-        исправлено += 1
-    if исправлено:
-        _logger.info('Суммы проектов приведены в порядок: %s', исправлено)
-    return исправлено
+        for contribution in contributions:
+            contribution.value = round(contribution.value * collect / was)
+        project.required_total = needed
+        fixed += 1
+    if fixed:
+        _logger.info('Суммы проектов приведены в порядок: %s', fixed)
+    return fixed
 
 
 def _make_contributions(Contribution, project, required, readiness, people, rnd, index):

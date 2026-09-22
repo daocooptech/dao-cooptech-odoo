@@ -228,15 +228,15 @@ class CoopDemoLoader(models.AbstractModel):
         """
         # Двойники — до наполнения: иначе часть записей уедет в рубрику,
         # которую через шаг удалим.
-        сведено = rubrics.merge_duplicate_categories(self.env)
-        if сведено:
-            _logger.info('Рубрики: сведено двойников %s', сведено)
-        поставлено, мимо = rubrics.fill_resources(self.env)
-        if поставлено or мимо:
+        merged = rubrics.merge_duplicate_categories(self.env)
+        if merged:
+            _logger.info('Рубрики: сведено двойников %s', merged)
+        placed, missed = rubrics.fill_resources(self.env)
+        if placed or missed:
             _logger.info('Ресурсы: рубрика проставлена %s, не выведена %s',
-                         поставлено, мимо)
-        поставлено, мимо = rubrics.fill_vacancies(self.env)
-        if поставлено or мимо:
+                         placed, missed)
+        placed, missed = rubrics.fill_vacancies(self.env)
+        if placed or missed:
             _logger.info('Вакансии: специализация проставлена %s, '
-                         'не выведена %s', поставлено, мимо)
+                         'не выведена %s', placed, missed)
 

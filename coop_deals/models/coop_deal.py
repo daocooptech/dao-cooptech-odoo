@@ -205,8 +205,8 @@ class CoopDeal(models.Model):
         «ожидается». Проверено 15 сентября 2026 на сделке СД-2026-000271.
         """
         for record in self:
-            стороны = set(record.review_ids.mapped('side'))
-            record.reviews_visible = {'a', 'b'} <= стороны
+            sides = set(record.review_ids.mapped('side'))
+            record.reviews_visible = {'a', 'b'} <= sides
 
     @api.depends('state', 'reviews_visible', 'review_ids.rating')
     def _compute_outcome(self):
@@ -262,9 +262,9 @@ class CoopDeal(models.Model):
     def _other_partner(self):
         """Вторая сторона сделки — та, что не я."""
         self.ensure_one()
-        мои = self.env.user.coop_actor_partner_ids
-        другая = (self.party_a_id | self.party_b_id) - мои
-        return другая[:1]
+        mine = self.env.user.coop_actor_partner_ids
+        other_item = (self.party_a_id | self.party_b_id) - mine
+        return other_item[:1]
 
     @api.depends_context('uid')
     @api.depends('state', 'review_ids.author_id')
@@ -274,14 +274,14 @@ class CoopDeal(models.Model):
         Признак считается теми же условиями, что и проверка при записи
         отзыва, — иначе кнопка отвечала бы отказом.
         """
-        мои = self.env.user.coop_actor_partner_ids
+        mine = self.env.user.coop_actor_partner_ids
         for record in self:
-            уже = bool(record.review_ids.filtered(
-                lambda r: r.author_id in мои))
+            already = bool(record.review_ids.filtered(
+                lambda r: r.author_id in mine))
             record.can_review = bool(
                 record.state == 'done'
-                and not уже
-                and (record.party_a_id | record.party_b_id) & мои)
+                and not already
+                and (record.party_a_id | record.party_b_id) & mine)
 
     def action_review(self):
         """Открыть окно отзыва."""
@@ -314,11 +314,11 @@ class CoopDeal(models.Model):
         ему вычитать нечего, и извещение уходит обоим.
         """
         self.ensure_one()
-        мои = self.env.user.coop_actor_partner_ids
-        другая = (self.party_a_id | self.party_b_id) - мои
-        if другая:
+        mine = self.env.user.coop_actor_partner_ids
+        other_item = (self.party_a_id | self.party_b_id) - mine
+        if other_item:
             self.env['coop.notification']._notify(
-                другая, body, record=self, kind='deal')
+                other_item, body, record=self, kind='deal')
 
     # ── Действия ─────────────────────────────────────────────────────────
 
@@ -338,7 +338,7 @@ class CoopDeal(models.Model):
             })
             record._notify_other(_(
                 'Сделка %(номер)s согласована: «%(предмет)s».',
-                номер=record.display_name, предмет=record.name))
+                number=record.display_name, subject=record.name))
         return True
 
     def action_start(self):
@@ -542,7 +542,7 @@ class CoopDealPayment(models.Model):
             # об этом сообщить.
             record.deal_id._notify_other(_(
                 'Платёж по сделке %(номер)s получен: %(сумма)s.',
-                номер=record.deal_id.display_name, сумма=record.amount))
+                number=record.deal_id.display_name, amount=record.amount))
         return True
 
     @api.model
@@ -619,12 +619,12 @@ class CoopDealReview(models.Model):
         # ней не знают: признак раскрытия и итог сделки остались бы
         # прежними. Пересчитываем их явно — иначе триста отзывов
         # проставлены, а на экране по-прежнему «ожидается».
-        сделки = self.env['coop.deal'].sudo().search([
+        deals = self.env['coop.deal'].sudo().search([
             ('review_ids', '!=', False)])
-        if сделки:
-            сделки._compute_reviews_visible()
-            сделки._compute_outcome()
-            сделки.flush_recordset(['reviews_visible', 'outcome'])
+        if deals:
+            deals._compute_reviews_visible()
+            deals._compute_outcome()
+            deals.flush_recordset(['reviews_visible', 'outcome'])
     _not_self = models.Constraint(
         'check(author_id != target_id)',
         'Оценивать самого себя не имеет смысла.',
@@ -634,8 +634,8 @@ class CoopDealReview(models.Model):
     def create(self, vals_list):
         for vals in vals_list:
             if not vals.get('side') and vals.get('deal_id'):
-                сделка = self.env['coop.deal'].browse(vals['deal_id'])
-                vals['side'] = сделка._my_side() or 'a'
+                deal = self.env['coop.deal'].browse(vals['deal_id'])
+                vals['side'] = deal._my_side() or 'a'
         records = super().create(vals_list)
         for record in records:
             if record.deal_id.state != 'done':

@@ -77,15 +77,15 @@ class ResPartner(models.Model):
     @api.depends('coop_membership_ids.state', 'coop_membership_ids.organization_id')
     def _compute_active_memberships(self):
         for record in self:
-            видели = set()
-            отобранные = record.coop_membership_ids.browse()
-            for членство in record.coop_membership_ids.filtered(
+            seen = set()
+            picked_list = record.coop_membership_ids.browse()
+            for membership in record.coop_membership_ids.filtered(
                     lambda m: m.state == 'active'):
-                if членство.organization_id.id in видели:
+                if membership.organization_id.id in seen:
                     continue
-                видели.add(членство.organization_id.id)
-                отобранные |= членство
-            record.coop_active_membership_ids = отобранные
+                seen.add(membership.organization_id.id)
+                picked_list |= membership
+            record.coop_active_membership_ids = picked_list
 
     @api.depends('coop_membership_ids.state')
     def _compute_membership_count(self):

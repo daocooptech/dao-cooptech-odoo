@@ -68,22 +68,22 @@ class CoopPageMixin(models.AbstractModel):
     def action_coop_open_page(self):
         """Открыть страницу записи вместо всплывающего окна."""
         self.ensure_one()
-        запись = self[self._coop_page_field] if self._coop_page_field else self
-        if not запись:
+        record = self[self._coop_page_field] if self._coop_page_field else self
+        if not record:
             raise UserError(_('Запись, на которую ведёт карточка, не найдена.'))
-        имя = (запись._coop_page_view_ref()
-               if hasattr(запись, '_coop_page_view_ref') else self._coop_page_view)
+        name = (record._coop_page_view_ref()
+               if hasattr(record, '_coop_page_view_ref') else self._coop_page_view)
         # Ссылка мягкая: модель и представление живут в разных модулях, и
         # зависимости между ними может не быть. Без представления страница
         # откроется формой по умолчанию — это хуже вида, но не ошибка
         # «внешний идентификатор не найден» вместо страницы.
-        вид = self.env.ref(имя, raise_if_not_found=False) if имя else None
+        kind = self.env.ref(name, raise_if_not_found=False) if name else None
         return {
             'type': 'ir.actions.act_window',
-            'name': запись.display_name,
-            'res_model': запись._name,
-            'res_id': запись.id,
+            'name': record.display_name,
+            'res_model': record._name,
+            'res_id': record.id,
             'view_mode': 'form',
-            'views': [(вид.id if вид else False, 'form')],
+            'views': [(kind.id if kind else False, 'form')],
             'target': 'current',
         }

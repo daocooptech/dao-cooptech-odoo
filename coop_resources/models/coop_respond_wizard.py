@@ -24,7 +24,7 @@ from odoo.exceptions import UserError
 # Способ передачи из объявления — в способ сделки. Наборы разные:
 # объявление говорит, как владелец готов расстаться с вещью, сделка —
 # как она передаётся на самом деле.
-СПОСОБ = {
+WAY = {
     'sale': 'sale',
     'rent': 'rent',
     'installment': 'sale',
@@ -75,62 +75,62 @@ class CoopResourceRespond(models.TransientModel):
 
     def action_respond(self):
         self.ensure_one()
-        объявление = self.resource_id
-        я = self.env.user._coop_acting_partner()
+        listing = self.resource_id
+        me = self.env.user._coop_acting_partner()
 
-        if объявление.state != 'published':
+        if listing.state != 'published':
             raise UserError(_(
                 'Откликаться можно на опубликованное объявление. Это в '
                 'состоянии «%s».') % dict(
-                    объявление._fields['state'].selection)[объявление.state])
-        if объявление.owner_id == я:
+                    listing._fields['state'].selection)[listing.state])
+        if listing.owner_id == me:
             raise UserError(_(
                 'Это ваше объявление. Откликаются на чужие.'))
 
         # Сторону определяет вид объявления, а не кто нажал кнопку.
-        if объявление.listing_type == 'offer':
-            сторона_а, сторона_б = объявление.owner_id, я
-            роль_а, роль_б = _('Передаёт'), _('Принимает')
+        if listing.listing_type == 'offer':
+            side_a, side_b = listing.owner_id, me
+            role_a, role_b = _('Передаёт'), _('Принимает')
         else:
-            сторона_а, сторона_б = я, объявление.owner_id
-            роль_а, роль_б = _('Передаёт'), _('Принимает')
+            side_a, side_b = me, listing.owner_id
+            role_a, role_b = _('Передаёт'), _('Принимает')
 
-        способ = СПОСОБ.get(self.method_id.code or '', 'sale')
+        way = WAY.get(self.method_id.code or '', 'sale')
         # Сделку заводим через sudo: вторая сторона чужая, и права
         # заводить запись, где она стоит стороной, у откликнувшегося нет.
         # Проверки выше — вместо этих прав.
-        сделка = self.env['coop.deal'].sudo().create({
-            'name': объявление.name,
+        deal = self.env['coop.deal'].sudo().create({
+            'name': listing.name,
             'subject': 'resource',
-            'way': способ,
-            'party_a_id': сторона_а.id,
-            'party_b_id': сторона_б.id,
-            'role_a': роль_а,
-            'role_b': роль_б,
+            'way': way,
+            'party_a_id': side_a.id,
+            'party_b_id': side_b.id,
+            'role_a': role_a,
+            'role_b': role_b,
             'author_id': self.env.user.partner_id.id,
-            'resource_id': объявление.id,
-            'city': объявление.city or '',
-            'amount': self.amount or объявление.price or 0.0,
+            'resource_id': listing.id,
+            'city': listing.city or '',
+            'amount': self.amount or listing.price or 0.0,
             'state': 'draft',
         })
 
-        тело = _('Отклик на объявление «%(что)s» от %(кто)s. '
+        body = _('Отклик на объявление «%(что)s» от %(кто)s. '
                  'Заведены переговоры по сделке %(номер)s.',
-                 что=объявление.name, кто=я.display_name,
-                 номер=сделка.number or '')
+                 what=listing.name, who=me.display_name,
+                 number=deal.number or '')
         if self.note:
-            тело = '%s %s' % (тело, self.note)
+            body = '%s %s' % (body, self.note)
         self.env['coop.notification']._notify(
-            объявление.owner_id, тело, record=сделка, kind='deal')
-        сделка.message_post(body=тело)
+            listing.owner_id, body, record=deal, kind='deal')
+        deal.message_post(body=body)
 
         # Открываем заведённую сделку: договариваются дальше в ней, а не
         # в переписке, и человек должен увидеть, куда его отклик попал.
         return {
             'type': 'ir.actions.act_window',
-            'name': _('Сделка %s') % (сделка.number or ''),
+            'name': _('Сделка %s') % (deal.number or ''),
             'res_model': 'coop.deal',
-            'res_id': сделка.id,
+            'res_id': deal.id,
             'view_mode': 'form',
             'target': 'current',
         }

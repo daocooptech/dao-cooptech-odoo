@@ -21,7 +21,7 @@ class ResPartner(models.Model):
     # Роли, дающие место в паевом чате: пайщик, учредитель,
     # ассоциированный член и правление. Наёмный сотрудник паем не
     # владеет, и в паевом разговоре ему нечего делать.
-    ПАЕВЫЕ_РОЛИ = ('founder', 'member', 'associate', 'board')
+    SHARE_ROLES = ('founder', 'member', 'associate', 'board')
 
     def _coop_channel_owners(self, kind=None):
         """Кто ведёт состав или подписывает от имени организации.
@@ -42,30 +42,30 @@ class ResPartner(models.Model):
         self.ensure_one()
         if not self.is_company:
             return []
-        Членство = self.env['coop.membership'].sudo()
-        действующие = Членство.search([
+        Membership = self.env['coop.membership'].sudo()
+        active_ones = Membership.search([
             ('organization_id', '=', self.id), ('state', '=', 'active')])
-        if not действующие:
+        if not active_ones:
             # Организация-визитка без единого человека: заводить ей
             # переписку не из кого. Появится состав — появится и чат.
             return []
-        спецификации = [{
+        specs = [{
             'kind': 'org',
             'name': 'Рабочий чат — %s' % self.display_name,
             'subtitle': self.city or False,
-            'partners': действующие.mapped('partner_id'),
+            'partners': active_ones.mapped('partner_id'),
         }]
         if self.coop_is_cooperative:
-            пайщики = действующие.filtered(
-                lambda m: m.role in self.ПАЕВЫЕ_РОЛИ).mapped('partner_id')
-            if пайщики:
-                спецификации.append({
+            shareholders = active_ones.filtered(
+                lambda m: m.role in self.SHARE_ROLES).mapped('partner_id')
+            if shareholders:
+                specs.append({
                     'kind': 'shareholders',
                     'name': 'Пайщики — %s' % self.display_name,
                     'subtitle': self.city or False,
-                    'partners': пайщики,
+                    'partners': shareholders,
                 })
-        return спецификации
+        return specs
 
 
 class CoopMembership(models.Model):
@@ -85,33 +85,33 @@ class CoopMembership(models.Model):
         return self.mapped('organization_id')
 
     @api.model
-    def _coop_after_change(self, организации):
-        организации._coop_ensure_channel()
-        организации._coop_sync_channels()
-        Сделка = self.env['coop.deal'].sudo()
-        сделки = Сделка.search([
-            '|', ('party_a_id', 'in', организации.ids),
-            ('party_b_id', 'in', организации.ids)])
-        сделки._coop_sync_channels()
+    def _coop_after_change(self, organizations):
+        organizations._coop_ensure_channel()
+        organizations._coop_sync_channels()
+        Deal = self.env['coop.deal'].sudo()
+        deals = Deal.search([
+            '|', ('party_a_id', 'in', organizations.ids),
+            ('party_b_id', 'in', organizations.ids)])
+        deals._coop_sync_channels()
         return True
 
     @api.model_create_multi
     def create(self, vals_list):
-        членства = super().create(vals_list)
-        членства._coop_after_change(членства._coop_touched_partners())
-        return членства
+        memberships = super().create(vals_list)
+        memberships._coop_after_change(memberships._coop_touched_partners())
+        return memberships
 
     def write(self, vals):
-        было = self._coop_touched_partners()
+        was = self._coop_touched_partners()
         res = super().write(vals)
         if {'state', 'role', 'power_ids', 'organization_id', 'partner_id'} & set(vals):
-            self._coop_after_change(было | self._coop_touched_partners())
+            self._coop_after_change(was | self._coop_touched_partners())
         return res
 
     def unlink(self):
         # Организации запоминаем до удаления: после него спросить уже
         # не у кого.
-        организации = self._coop_touched_partners()
+        organizations = self._coop_touched_partners()
         res = super().unlink()
-        self.env['coop.membership']._coop_after_change(организации)
+        self.env['coop.membership']._coop_after_change(organizations)
         return res

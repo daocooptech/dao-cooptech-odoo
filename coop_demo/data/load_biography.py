@@ -248,24 +248,24 @@ def enrich_showcase(env, login='dashkevich'):
     # Добираем до четырёх, а не «если ни одного»: с единственной плиткой
     # полка выглядит остатком, а не разделом, — и показывать на ней
     # нечего, ради чего полка и заведена.
-    своих = Project.search_count([('partner_id', '=', partner.id)])
-    if своих < 4:
+    own_ids = Project.search_count([('partner_id', '=', partner.id)])
+    if own_ids < 4:
         # С картинкой и заполненные: полоса плиток без фотографий
         # выглядит сломанной.
         projects = Project.search([('image_512', '!=', False),
                                    ('partner_id', '!=', partner.id)],
-                                  limit=4 - своих)
+                                  limit=4 - own_ids)
         if projects:
             projects.write({'partner_id': partner.id})
             touched += len(projects)
 
     # ── Вакансии ───────────────────────────────────────────────────────
     Vacancy = env['coop.vacancy'].sudo()
-    моих_вакансий = Vacancy.search_count([('partner_id', '=', partner.id)])
-    if моих_вакансий < 4:
+    my_vacancies = Vacancy.search_count([('partner_id', '=', partner.id)])
+    if my_vacancies < 4:
         vacancies = Vacancy.search([('state', '=', 'published'),
                                     ('partner_id', '!=', partner.id)],
-                                   limit=4 - моих_вакансий)
+                                   limit=4 - my_vacancies)
         if vacancies:
             vacancies.write({'partner_id': partner.id})
             touched += len(vacancies)
@@ -277,26 +277,26 @@ def enrich_showcase(env, login='dashkevich'):
     # половина строк блока пустовала.
     Education = env['coop.education'].sudo()
     Institution = env['coop.institution'].sudo()
-    есть = set(Education.search(
+    exists = set(Education.search(
         [('partner_id', '=', partner.id)]).mapped('level'))
-    город = partner.city or ''
-    for ступень, год in (('higher', 2009), ('school', 2004)):
-        if ступень in есть:
+    city = partner.city or ''
+    for edu_level, year in (('higher', 2009), ('school', 2004)):
+        if edu_level in exists:
             continue
-        заведение = Institution.search(
-            [('kind', '=', ступень), ('city', '=', город)], limit=1)
-        if not заведение:
-            заведение = Institution.search([('kind', '=', ступень)], limit=1)
-        if not заведение:
+        institution = Institution.search(
+            [('kind', '=', edu_level), ('city', '=', city)], limit=1)
+        if not institution:
+            institution = Institution.search([('kind', '=', edu_level)], limit=1)
+        if not institution:
             continue
         with env.cr.savepoint():
             Education.create({
                 'partner_id': partner.id,
-                'institution_id': заведение.id,
-                'level': ступень,
-                'year_from': год - 5 if ступень == 'higher' else год - 11,
-                'year_to': год,
-                'speciality': ('Электроснабжение' if ступень == 'higher'
+                'institution_id': institution.id,
+                'level': edu_level,
+                'year_from': year - 5 if edu_level == 'higher' else year - 11,
+                'year_to': year,
+                'speciality': ('Электроснабжение' if edu_level == 'higher'
                                else False),
             })
         touched += 1
@@ -307,18 +307,18 @@ def enrich_showcase(env, login='dashkevich'):
     # «Потребности»; полка «Ресурсы» отвечает на другой вопрос — что у
     # человека есть, — и без единого предложения пряталась целиком.
     Resource = env['coop.resource'].sudo()
-    свои = Resource.search_count([('owner_id', '=', partner.id),
+    own_list = Resource.search_count([('owner_id', '=', partner.id),
                                   ('listing_type', '=', 'offer')])
-    if not свои:
-        ресурсы = Resource.search([
+    if not own_list:
+        resources = Resource.search([
             ('listing_type', '=', 'offer'),
             ('state', '=', 'published'),
             ('image_512', '!=', False),
             ('project_id', '=', False),
         ], limit=4)
-        if ресурсы:
-            ресурсы.write({'owner_id': partner.id})
-            touched += len(ресурсы)
+        if resources:
+            resources.write({'owner_id': partner.id})
+            touched += len(resources)
 
     # ── Навыки ─────────────────────────────────────────────────────────
     #
@@ -326,16 +326,16 @@ def enrich_showcase(env, login='dashkevich'):
     # как раздел выглядит наполненным, и четырёх хватает, чтобы ряд
     # читался рядом, а не остатком.
     Offer = env['coop.skill.offer'].sudo()
-    моих = Offer.search_count([('partner_id', '=', partner.id)])
-    if моих < 4:
-        навыки = Offer.search([
+    mine_ids = Offer.search_count([('partner_id', '=', partner.id)])
+    if mine_ids < 4:
+        skills = Offer.search([
             ('partner_id', '!=', partner.id),
             ('state', '=', 'published'),
             ('image_512', '!=', False),
-        ], limit=4 - моих)
-        if навыки:
-            навыки.write({'partner_id': partner.id})
-            touched += len(навыки)
+        ], limit=4 - mine_ids)
+        if skills:
+            skills.write({'partner_id': partner.id})
+            touched += len(skills)
 
     # ── Друзья ─────────────────────────────────────────────────────────
     #
@@ -442,37 +442,37 @@ def link_education(env):
     """
     Institution = env['coop.institution'].sudo()
     Education = env['coop.education'].sudo()
-    справочник = Institution.search([])
-    if not справочник:
+    reference = Institution.search([])
+    if not reference:
         _logger.info('Образование: справочник заведений пуст')
         return 0
 
-    по_названию = {(з.name or '').strip().lower(): з for з in справочник}
-    по_городу = {}
-    for з in справочник:
-        по_городу.setdefault((з.city or '', з.kind), []).append(з)
-    по_ступени = {}
-    for з in справочник:
-        по_ступени.setdefault(з.kind, []).append(з)
+    by_title = {(entry.name or '').strip().lower(): entry for entry in reference}
+    by_city = {}
+    for entry in reference:
+        by_city.setdefault((entry.city or '', entry.kind), []).append(entry)
+    by_level = {}
+    for entry in reference:
+        by_level.setdefault(entry.kind, []).append(entry)
 
     rnd = random.Random(20260915)
-    связано = 0
-    for запись in Education.search([('institution_id', '=', False)]):
-        найдено = по_названию.get((запись.name or '').strip().lower())
-        if not найдено:
-            город = запись.partner_id.city or ''
-            свои = по_городу.get((город, запись.level)) or []
-            если_нет = по_ступени.get(запись.level) or []
-            набор = свои or если_нет
-            if not набор:
+    linked_count = 0
+    for record in Education.search([('institution_id', '=', False)]):
+        found = by_title.get((record.name or '').strip().lower())
+        if not found:
+            city = record.partner_id.city or ''
+            own_list = by_city.get((city, record.level)) or []
+            if_none = by_level.get(record.level) or []
+            set_of = own_list or if_none
+            if not set_of:
                 continue
             # Выбор по номеру записи, а не наугад: повторный прогон
             # наполнения должен дать то же самое, иначе каталог меняется
             # на ровном месте.
-            найдено = набор[запись.id % len(набор)]
+            found = set_of[record.id % len(set_of)]
         with env.cr.savepoint():
-            запись.write({'institution_id': найдено.id, 'name': False})
-        связано += 1
+            record.write({'institution_id': found.id, 'name': False})
+        linked_count += 1
 
-    _logger.info('Образование: привязано к справочнику %s записей', связано)
-    return связано
+    _logger.info('Образование: привязано к справочнику %s записей', linked_count)
+    return linked_count

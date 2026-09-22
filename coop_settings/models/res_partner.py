@@ -23,10 +23,10 @@ class ResPartner(models.Model):
 
     def _compute_coop_member_since(self):
         for partner in self:
-            дата = partner.coop_registered_on if 'coop_registered_on' in partner._fields else False
-            if not дата and partner.create_date:
-                дата = fields.Date.to_date(partner.create_date)
-            partner.coop_member_since = дата
+            date_value = partner.coop_registered_on if 'coop_registered_on' in partner._fields else False
+            if not date_value and partner.create_date:
+                date_value = fields.Date.to_date(partner.create_date)
+            partner.coop_member_since = date_value
 
     def action_coop_export_archive(self):
         """Выгрузка своих данных одним файлом.
@@ -42,55 +42,55 @@ class ResPartner(models.Model):
         if self != self.env.user._coop_acting_partner():
             raise UserError(_('Выгрузить можно только свои данные.'))
 
-        собранное = {
+        collected_value = {
             'карточка': self._coop_archive_card(),
             'членства': self._coop_archive_memberships(),
             'извещения': self._coop_archive_notifications(),
         }
-        содержимое = json.dumps(собранное, ensure_ascii=False, indent=2,
+        content = json.dumps(collected_value, ensure_ascii=False, indent=2,
                                 default=str)
-        файл = self.env['ir.attachment'].sudo().create({
+        file = self.env['ir.attachment'].sudo().create({
             'name': 'cooptech-%s-%s.json' % (
                 self.id, fields.Date.today().isoformat()),
             'type': 'binary',
-            'datas': base64.b64encode(содержимое.encode('utf-8')),
+            'datas': base64.b64encode(content.encode('utf-8')),
             'res_model': 'res.partner',
             'res_id': self.id,
             'public': False,
         })
         return {
             'type': 'ir.actions.act_url',
-            'url': '/web/content/%s?download=true' % файл.id,
+            'url': '/web/content/%s?download=true' % file.id,
             'target': 'self',
         }
 
     def _coop_archive_card(self):
         """Карточка — то, что человек о себе написал."""
         self.ensure_one()
-        поля = ['name', 'email', 'phone', 'city', 'website', 'coop_about',
+        field_names = ['name', 'email', 'phone', 'city', 'website', 'coop_about',
                 'coop_languages', 'coop_birthdate', 'coop_trust',
                 'coop_verification_level']
-        карточка = {
-            поле: self[поле] for поле in поля if поле in self._fields
+        card = {
+            field: self[field] for field in field_names if field in self._fields
         }
-        карточка['способы_связи'] = [
-            {'название': строка.name, 'значение': строка.value}
-            for строка in self.coop_contact_line_ids
+        card['способы_связи'] = [
+            {'название': line.name, 'значение': line.value}
+            for line in self.coop_contact_line_ids
         ]
-        return карточка
+        return card
 
     def _coop_archive_memberships(self):
         self.ensure_one()
         Membership = self.env['coop.membership'].sudo()
         return [
             {
-                'организация': запись.organization_id.display_name,
-                'роль': запись.role,
-                'должность': запись.job_title,
-                'вступил': запись.joined_on,
-                'состояние': запись.state,
+                'организация': record.organization_id.display_name,
+                'роль': record.role,
+                'должность': record.job_title,
+                'вступил': record.joined_on,
+                'состояние': record.state,
             }
-            for запись in Membership.search([('partner_id', '=', self.id)])
+            for record in Membership.search([('partner_id', '=', self.id)])
         ]
 
     def _coop_archive_notifications(self):
@@ -98,11 +98,11 @@ class ResPartner(models.Model):
         Notification = self.env['coop.notification'].sudo()
         return [
             {
-                'когда': запись.create_date,
-                'о чём': запись.kind,
-                'событие': запись.body,
+                'когда': record.create_date,
+                'о чём': record.kind,
+                'событие': record.body,
             }
-            for запись in Notification.search(
+            for record in Notification.search(
                 [('partner_id', '=', self.id)], limit=500)
         ]
 
@@ -138,12 +138,12 @@ class ResPartner(models.Model):
         # Кому заявление: тем, кто ведёт узел. Не всем администраторам
         # Odoo, а держателям платформенных полномочий: решает
         # вопрос о выходе участника правление, а не техническая служба.
-        группа = self.env.ref('coop_base.group_coop_platform',
+        group = self.env.ref('coop_base.group_coop_platform',
                                  raise_if_not_found=False)
-        получатели = группа.sudo().all_user_ids.partner_id if группа else None
-        if получатели:
+        receivers = group.sudo().all_user_ids.partner_id if group else None
+        if receivers:
             self.env['coop.notification'].sudo()._notify(
-                получатели,
+                receivers,
                 _('Участник %s подал заявление об удалении аккаунта.')
                 % self.display_name,
                 record=self, kind='org')

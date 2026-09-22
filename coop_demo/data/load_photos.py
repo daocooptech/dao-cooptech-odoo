@@ -44,7 +44,7 @@ IMG_DIR = os.path.join(os.path.dirname(HERE), 'static', 'img')
 # Каталоги, которым снимок положен: модель, поле снимка, поле
 # специализации (если у записи есть род занятий) и признак «переклеивать
 # ли стоящий снимок».
-КАТАЛОГИ = (
+CATALOGS = (
     ('coop.vacancy', 'image_1920', 'coop_specialization_id', True),
     ('coop.skill.offer', 'image_1920', 'coop_specialization_id', True),
     ('coop.resource', 'image_1920', None, True),
@@ -63,7 +63,7 @@ IMG_DIR = os.path.join(os.path.dirname(HERE), 'static', 'img')
 )
 
 
-def _отпечатки():
+def _prints():
     """Отпечаток файла → путь, по всем нашим наборам снимков.
 
     Отпечаток — sha1, как у движка: вложение хранит `checksum` того же
@@ -72,32 +72,32 @@ def _отпечатки():
     поднимал в память по сотне килобайт на каждую и заканчивался
     MemoryError на боевой, где памяти гигабайт на всё вместе с базой.
     """
-    таблица = {}
+    table = {}
     for dirpath, _dirs, names in os.walk(IMG_DIR):
-        for имя in names:
-            if not имя.lower().endswith(('.jpg', '.jpeg', '.png')):
+        for name in names:
+            if not name.lower().endswith(('.jpg', '.jpeg', '.png')):
                 continue
-            путь = os.path.join(dirpath, имя)
-            with open(путь, 'rb') as fh:
-                таблица[hashlib.sha1(fh.read()).hexdigest()] = путь
-    return таблица
+            path = os.path.join(dirpath, name)
+            with open(path, 'rb') as fh:
+                table[hashlib.sha1(fh.read()).hexdigest()] = path
+    return table
 
 
-def _стоящие_снимки(env, модель, поле):
+def _good_photos(env, model, field):
     """Номер записи → отпечаток снимка, который у неё стоит.
 
     Спрашиваем вложения, а не поле записи: у поля изображение приходит
     целиком, а нам нужен только отпечаток. Одним запросом на каталог
     вместо тысячи чтений.
     """
-    вложения = env['ir.attachment'].sudo().search_read(
-        [('res_model', '=', модель), ('res_field', '=', поле)],
+    attachments = env['ir.attachment'].sudo().search_read(
+        [('res_model', '=', model), ('res_field', '=', field)],
         ['res_id', 'checksum', 'description'])
-    return {в['res_id']: (в['checksum'], в['description'] or '')
-            for в in вложения}
+    return {att['res_id']: (att['checksum'], att['description'] or '')
+            for att in attachments}
 
 
-def _годные_для(имя, специализация):
+def _fit_for(name, specialization):
     """Снимки, которые записи подходят: путь на диске → отпечаток.
 
     Не один снимок, а все допустимые: у предмета есть варианты
@@ -105,118 +105,118 @@ def _годные_для(имя, специализация):
     снимков. Пока стоит любой из них, менять нечего: иначе каждый прогон
     переставлял бы карточки с места на место.
     """
-    пути = []
-    if специализация:
-        пути = [os.path.join(IMG_DIR, п) for п in professions.файлы(специализация)]
-    if not пути:
-        правило = load_resources._photo_by_name(имя or '')
-        if правило:
-            пути = [os.path.join(photos.PHOTO_DIR, в)
-                    for в in photos._variants(правило)]
-    return [п for п in пути if os.path.exists(п)]
+    paths = []
+    if specialization:
+        paths = [os.path.join(IMG_DIR, p) for p in professions.files(specialization)]
+    if not paths:
+        rule = load_resources._photo_by_name(name or '')
+        if rule:
+            paths = [os.path.join(photos.PHOTO_DIR, att)
+                    for att in photos._variants(rule)]
+    return [p for p in paths if os.path.exists(p)]
 
 
-def _подобрать(имя, специализация):
+def _pick(name, specialization):
     """Путь и содержимое снимка: сначала род занятий, потом название."""
-    if специализация:
-        годные = professions.файлы(специализация)
-        if годные:
-            номер = zlib.crc32((имя or '').encode('utf-8')) % len(годные)
-            путь = os.path.join(IMG_DIR, годные[номер])
-            with open(путь, 'rb') as fh:
-                return путь, base64.b64encode(fh.read())
-    правило = load_resources._photo_by_name(имя or '')
-    if правило:
-        варианты = photos._variants(правило)
-        if варианты:
-            номер = zlib.crc32((имя or '').encode('utf-8')) % len(варианты)
-            путь = os.path.join(photos.PHOTO_DIR, варианты[номер])
-            with open(путь, 'rb') as fh:
-                return путь, base64.b64encode(fh.read())
+    if specialization:
+        fit = professions.files(specialization)
+        if fit:
+            number = zlib.crc32((name or '').encode('utf-8')) % len(fit)
+            path = os.path.join(IMG_DIR, fit[number])
+            with open(path, 'rb') as fh:
+                return path, base64.b64encode(fh.read())
+    rule = load_resources._photo_by_name(name or '')
+    if rule:
+        options = photos._variants(rule)
+        if options:
+            number = zlib.crc32((name or '').encode('utf-8')) % len(options)
+            path = os.path.join(photos.PHOTO_DIR, options[number])
+            with open(path, 'rb') as fh:
+                return path, base64.b64encode(fh.read())
     return None, None
 
 
 def ensure_photos(env):
     """Проставить и переклеить снимки во всех каталогах."""
-    наши = _отпечатки()
-    итог = {'поставлено': 0, 'переклеено': 0, 'знаком': 0}
+    ours = _prints()
+    total = {'поставлено': 0, 'переклеено': 0, 'знаком': 0}
 
-    for модель, поле, поле_спец, переклеивать in КАТАЛОГИ:
-        if модель not in env:
+    for model, field, spec_field, reglue in CATALOGS:
+        if model not in env:
             continue
-        Модель = env[модель].sudo()
-        if поле not in Модель._fields:
+        Model = env[model].sudo()
+        if field not in Model._fields:
             continue
-        стоят = _стоящие_снимки(env, модель, поле)
-        поставлено = переклеено = знаком = 0
-        for счёт, запись in enumerate(Модель.search([])):
+        cost = _good_photos(env, model, field)
+        placed = reglued = with_mark = 0
+        for account, record in enumerate(Model.search([])):
             # Кэш ORM держит всё прочитанное; на трёх тысячах записей
             # этого хватает, чтобы съесть память целиком. Сбрасываем
             # часто и мелко.
-            if счёт and not счёт % 50:
+            if account and not account % 50:
                 env.invalidate_all()
             # Savepoint на запись: PostgreSQL обрывает транзакцию на
             # первой ошибке, и одна негодная запись тихо отменила бы все
             # снимки этого прогона.
             with env.cr.savepoint():
-                специализация = ''
-                if поле_спец and поле_спец in запись._fields:
-                    значение = запись[поле_спец]
-                    специализация = значение.display_name if значение else ''
-                годные = _годные_для(запись.name, специализация)
-                отпечаток, откуда = стоят.get(запись.id, (None, ''))
-                текущий = bool(отпечаток or откуда)
+                specialization = ''
+                if spec_field and spec_field in record._fields:
+                    value = record[spec_field]
+                    specialization = value.display_name if value else ''
+                fit = _fit_for(record.name, specialization)
+                print_one, from_where = cost.get(record.id, (None, ''))
+                current = bool(print_one or from_where)
 
-                if текущий and not переклеивать:
+                if current and not reglue:
                     continue
-                if текущий and годные:
+                if current and fit:
                     # Сначала по метке источника: движок пережимает
                     # снимок при записи, и отпечаток вложения перестаёт
                     # совпадать с отпечатком файла. Метка переживает
                     # пережатие, а отпечаток — нет, и без неё каждый
                     # прогон переклеивал полторы сотни записей заново.
-                    if откуда and откуда in годные:
+                    if from_where and from_where in fit:
                         continue
-                    если_наш = наши.get(отпечаток)
-                    if если_наш and если_наш in годные:
+                    if_ours = ours.get(print_one)
+                    if if_ours and if_ours in fit:
                         continue
 
-                путь, снимок = _подобрать(запись.name, специализация)
-                if снимок:
-                    запись.write({поле: снимок})
+                path, photo = _pick(record.name, specialization)
+                if photo:
+                    record.write({field: photo})
                     # Движок пережимает снимок при записи — отпечаток в
                     # базе не совпадает с отпечатком файла, и следующий
                     # прогон считал бы его чужим и переклеивал заново.
                     # Запоминаем отпечаток уже уложенного: набор наших
                     # снимков дополняется по ходу дела.
-                    запись.flush_recordset()
-                    вложение = env['ir.attachment'].sudo().search([
-                        ('res_model', '=', модель), ('res_field', '=', поле),
-                        ('res_id', '=', запись.id)], limit=1)
-                    if вложение:
-                        вложение.description = путь
-                    if текущий:
-                        переклеено += 1
+                    record.flush_recordset()
+                    attachment = env['ir.attachment'].sudo().search([
+                        ('res_model', '=', model), ('res_field', '=', field),
+                        ('res_id', '=', record.id)], limit=1)
+                    if attachment:
+                        attachment.description = path
+                    if current:
+                        reglued += 1
                     else:
-                        поставлено += 1
+                        placed += 1
                     continue
 
-                if not текущий:
+                if not current:
                     # Предмет не опознан — знак организации честнее
                     # чужой фотографии.
-                    род = специализация or запись.name
-                    запись.write({поле: emblems.emblem(запись.name, род)})
-                    знаком += 1
+                    gender_form = specialization or record.name
+                    record.write({field: emblems.emblem(record.name, gender_form)})
+                    with_mark += 1
 
         _logger.info('Снимки %s: поставлено %s, переклеено %s, знаком %s',
-                     модель, поставлено, переклеено, знаком)
-        итог['поставлено'] += поставлено
-        итог['переклеено'] += переклеено
-        итог['знаком'] += знаком
+                     model, placed, reglued, with_mark)
+        total['поставлено'] += placed
+        total['переклеено'] += reglued
+        total['знаком'] += with_mark
 
     _logger.info('Снимки каталогов: поставлено %(поставлено)s, '
-                 'переклеено %(переклеено)s, знаком %(знаком)s', итог)
-    return итог['поставлено'] + итог['переклеено'] + итог['знаком']
+                 'переклеено %(переклеено)s, знаком %(знаком)s', total)
+    return total['поставлено'] + total['переклеено'] + total['знаком']
 
 
 def ensure_marks(env):
@@ -232,52 +232,52 @@ def ensure_marks(env):
     получает следующий свободный. Занятые считаются по самим карточкам,
     чтобы один знак не достался двоим.
     """
-    файлы = [имя for имя in sorted(os.listdir(emblems.MARK_DIR))
-             if имя.lower().endswith('.png')] if os.path.isdir(emblems.MARK_DIR) else []
-    if not файлы:
+    files = [name for name in sorted(os.listdir(emblems.MARK_DIR))
+             if name.lower().endswith('.png')] if os.path.isdir(emblems.MARK_DIR) else []
+    if not files:
         return 0
-    отпечатки = {}
-    for имя in файлы:
-        путь = os.path.join(emblems.MARK_DIR, имя)
-        with open(путь, 'rb') as fh:
-            отпечатки[hashlib.sha1(fh.read()).hexdigest()] = имя
+    prints = {}
+    for name in files:
+        path = os.path.join(emblems.MARK_DIR, name)
+        with open(path, 'rb') as fh:
+            prints[hashlib.sha1(fh.read()).hexdigest()] = name
 
     Partner = env['res.partner'].sudo()
-    организации = Partner.search([('is_company', '=', True)], order='id')
+    organizations = Partner.search([('is_company', '=', True)], order='id')
 
     # Отпечаток из вложения, а не из самого поля: знаков две сотни, и
     # читать каждый ради сверки незачем — движок уже хранит `checksum`.
-    стоят = _стоящие_снимки(env, 'res.partner', 'image_1920')
+    cost = _good_photos(env, 'res.partner', 'image_1920')
 
-    занято = set()
-    нужны = []
-    for org in организации:
-        отпечаток, откуда = стоят.get(org.id, (None, ''))
+    taken = set()
+    is_needed = []
+    for org in organizations:
+        print_one, from_where = cost.get(org.id, (None, ''))
         # Метка источника надёжнее отпечатка: знак мог быть пережат при
         # записи. Без разбора пары сверка не находила ничего — и раздача
         # переставляла знаки всем двумстам организациям на каждом прогоне.
-        имя = os.path.basename(откуда) if откуда else отпечатки.get(отпечаток)
-        if имя and имя in файлы and имя not in занято:
-            занято.add(имя)
+        name = os.path.basename(from_where) if from_where else prints.get(print_one)
+        if name and name in files and name not in taken:
+            taken.add(name)
         else:
-            нужны.append(org)
+            is_needed.append(org)
 
-    свободные = [имя for имя in файлы if имя not in занято]
-    выдано = 0
-    for счёт, (org, имя) in enumerate(zip(нужны, свободные)):
-        if счёт and not счёт % 50:
+    free = [name for name in files if name not in taken]
+    granted = 0
+    for account, (org, name) in enumerate(zip(is_needed, free)):
+        if account and not account % 50:
             env.invalidate_all()
-        путь = os.path.join(emblems.MARK_DIR, имя)
-        with open(путь, 'rb') as fh:
+        path = os.path.join(emblems.MARK_DIR, name)
+        with open(path, 'rb') as fh:
             org.image_1920 = base64.b64encode(fh.read())
         org.flush_recordset()
-        вложение = env['ir.attachment'].sudo().search([
+        attachment = env['ir.attachment'].sudo().search([
             ('res_model', '=', 'res.partner'), ('res_field', '=', 'image_1920'),
             ('res_id', '=', org.id)], limit=1)
-        if вложение:
-            вложение.description = путь
-        выдано += 1
+        if attachment:
+            attachment.description = path
+        granted += 1
 
     _logger.info('Знаки организаций: выдано %s, без знака осталось %s',
-                 выдано, max(0, len(нужны) - len(свободные)))
-    return выдано
+                 granted, max(0, len(is_needed) - len(free)))
+    return granted

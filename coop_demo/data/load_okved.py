@@ -19,7 +19,7 @@ _logger = logging.getLogger(__name__)
 # Ключ в названии → класс ОКВЭД. Порядок значим: от частного к общему.
 # «Молочный путь» это переработка молока, а не перевозка, хотя слово
 # «путь» в названии есть.
-ПО_НАЗВАНИЮ = [
+BY_TITLE = [
     (('сыровар', 'молочн', 'маслодел', 'сыродел'), '10'),
     (('пекарн', 'хлеб', 'мельниц', 'мука'), '10'),
     (('мясн', 'колбас', 'забой'), '10'),
@@ -68,7 +68,7 @@ _logger = logging.getLogger(__name__)
 # следует. Форма говорит о роде занятий меньше названия, но не молчит
 # вовсе: садоводческое товарищество занимается землёй, гаражный
 # кооператив — стоянками, а союз — представительством.
-ПО_ФОРМЕ = [
+BY_FORM = [
     (('садовод', 'огородн', 'дачн'), '01'),
     (('гаражн',), '52'),
     (('жилищн', 'жск', 'тсж', 'товарищество собственников'), '81'),
@@ -82,26 +82,26 @@ _logger = logging.getLogger(__name__)
 # Если не сказало ни название, ни форма. Общественная организация —
 # самое честное умолчание для объединения людей, о котором больше
 # ничего не известно.
-ПО_УМОЛЧАНИЮ = '94'
+BY_DEFAULT = '94'
 
 
-def _класс(строки, текст):
-    низ = (текст or '').lower()
-    for ключи, код in строки:
-        if any(ключ in низ for ключ in ключи):
-            return код
+def _klass(lines, text):
+    bottom = (text or '').lower()
+    for keys, code in lines:
+        if any(key in bottom for key in keys):
+            return code
     return None
 
 
 def okved_for(organization):
     """Класс ОКВЭД для организации: по названию, потом по форме."""
-    код = _класс(ПО_НАЗВАНИЮ, organization.name)
-    if код:
-        return код
-    форма = organization.coop_legal_form_id.name if \
+    code = _klass(BY_TITLE, organization.name)
+    if code:
+        return code
+    form = organization.coop_legal_form_id.name if \
         'coop_legal_form_id' in organization._fields else ''
-    код = _класс(ПО_ФОРМЕ, форма)
-    return код or ПО_УМОЛЧАНИЮ
+    code = _klass(BY_FORM, form)
+    return code or BY_DEFAULT
 
 
 def load_okved(env):
@@ -115,27 +115,27 @@ def load_okved(env):
     """
     if 'coop.okved' not in env:
         return 0
-    Оквэд = env['coop.okved'].sudo()
-    классы = {к.code: к for к in Оквэд.search([('parent_id', '!=', False)])}
-    if not классы:
+    Okved = env['coop.okved'].sudo()
+    classes = {k.code: k for k in Okved.search([('parent_id', '!=', False)])}
+    if not classes:
         _logger.warning('Справочник ОКВЭД пуст — вид деятельности не ставлю')
         return 0
 
-    организации = env['res.partner'].sudo().search([
+    organizations = env['res.partner'].sudo().search([
         ('coop_is_participant', '=', True), ('is_company', '=', True),
         ('coop_okved_id', '=', False),
     ])
-    поставлено = 0
-    for организация in организации:
-        код = okved_for(организация)
-        класс = классы.get(код)
-        if not класс:
+    placed = 0
+    for organization in organizations:
+        code = okved_for(organization)
+        klass = classes.get(code)
+        if not klass:
             continue
-        организация.write({
-            'coop_okved_id': класс.id,
-            'coop_okved_code': '%s.00' % код,
+        organization.write({
+            'coop_okved_id': klass.id,
+            'coop_okved_code': '%s.00' % code,
         })
-        поставлено += 1
-    if поставлено:
-        _logger.info('ОКВЭД: проставлен %s организациям', поставлено)
-    return поставлено
+        placed += 1
+    if placed:
+        _logger.info('ОКВЭД: проставлен %s организациям', placed)
+    return placed

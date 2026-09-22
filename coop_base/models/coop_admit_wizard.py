@@ -41,10 +41,10 @@ class CoopAdmitWizard(models.TransientModel):
 
     def action_confirm(self):
         self.ensure_one()
-        членство = self.membership_id
+        membership = self.membership_id
         # Полномочие проверяет сама модель — одной проверкой и для кнопки,
         # и для вызова со стороны.
-        членство._check_can_decide()
-        членство.sudo().write({'admission_basis': self.admission_basis})
-        членство.action_admit()
+        membership._check_can_decide()
+        membership.sudo().write({'admission_basis': self.admission_basis})
+        membership.action_admit()
         return {'type': 'ir.actions.act_window_close'}

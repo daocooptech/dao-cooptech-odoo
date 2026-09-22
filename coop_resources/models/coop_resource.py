@@ -324,10 +324,10 @@ class CoopResource(models.Model):
         пустых черновиков — отдельная работа, пока её нет.
         """
         draft = self.create({'state': 'draft', 'name': DRAFT_NAME})
-        действие = self.env['ir.actions.act_window']._for_xml_id(
+        action = self.env['ir.actions.act_window']._for_xml_id(
             'coop_resources.action_coop_resource_add')
-        действие['res_id'] = draft.id
-        return действие
+        action['res_id'] = draft.id
+        return action
 
     @api.constrains('method_ids', 'price', 'price_kind')
     def _check_price_required(self):
@@ -451,12 +451,12 @@ class CoopResource(models.Model):
                 # Спрос: разместивший ищет, откликнувшийся отдаёт.
                 record.respond_label = 'Предложить своё'
                 continue
-            коды = set(record.method_ids.mapped('code'))
-            if 'free' in коды and not (коды - {'free'}):
+            codes = set(record.method_ids.mapped('code'))
+            if 'free' in codes and not (codes - {'free'}):
                 record.respond_label = 'Принять в дар'
-            elif 'barter' in коды and not (коды - {'barter'}):
+            elif 'barter' in codes and not (codes - {'barter'}):
                 record.respond_label = 'Предложить обмен'
-            elif коды and not (коды - {'rent', 'leasing'}):
+            elif codes and not (codes - {'rent', 'leasing'}):
                 record.respond_label = 'Арендовать'
             else:
                 record.respond_label = 'Купить в один клик'
@@ -487,10 +487,10 @@ class CoopResource(models.Model):
 
         Разойдись они — и человек увидел бы кнопку, отвечающую ошибкой.
         """
-        мои = self.env.user.coop_actor_partner_ids
+        mine = self.env.user.coop_actor_partner_ids
         for record in self:
             record.can_respond = bool(
-                record.state == 'published' and record.owner_id not in мои)
+                record.state == 'published' and record.owner_id not in mine)
 
     def action_respond(self):
         """Окно отклика: завести переговоры по сделке."""

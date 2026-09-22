@@ -106,26 +106,26 @@ class ResPartner(models.Model):
         Несколько заведений одной ступени — через запятую: два высших у
         человека бывают, и прятать второе неправильно.
         """
-        поля = {'higher': 'coop_edu_higher', 'college': 'coop_edu_college',
+        field_names = {'higher': 'coop_edu_higher', 'college': 'coop_edu_college',
                 'school': 'coop_edu_school', 'courses': 'coop_edu_courses'}
         for record in self:
-            собрано = {ключ: [] for ключ in поля}
+            collected = {key: [] for key in field_names}
             # Свежее первым: последнее оконченное заведение человек и
             # называет, когда его спрашивают об образовании.
-            записи = record.coop_education_ids.sorted(
-                key=lambda з: (з.year_to or 0), reverse=True)
-            for запись in записи:
-                если = поля.get(запись.level)
-                if not если:
+            records = record.coop_education_ids.sorted(
+                key=lambda entry: (entry.year_to or 0), reverse=True)
+            for rec in records:
+                cond = field_names.get(rec.level)
+                if not cond:
                     continue
-                имя = (запись.short_name or запись.name or '').strip()
-                if not имя:
+                name = (rec.short_name or rec.name or '').strip()
+                if not name:
                     continue
-                собрано[запись.level].append(
-                    '%s — %s г.' % (имя, запись.year_to) if запись.year_to
-                    else имя)
-            for ключ, поле in поля.items():
-                record[поле] = ', '.join(собрано[ключ])
+                collected[rec.level].append(
+                    '%s — %s г.' % (name, rec.year_to) if rec.year_to
+                    else name)
+            for key, field in field_names.items():
+                record[field] = ', '.join(collected[key])
     coop_achievement_ids = fields.One2many(
         'coop.achievement', 'partner_id', string='Достижения')
 
@@ -525,10 +525,10 @@ class ResPartner(models.Model):
         списке организаций делать нечего.
         """
         self.ensure_one()
-        организации = self.coop_active_membership_ids.mapped('organization_id')
+        organizations = self.coop_active_membership_ids.mapped('organization_id')
         return self._coop_holdings_action(
             'coop_orgs.action_coop_orgs',
-            [('id', 'in', организации.ids)],
+            [('id', 'in', organizations.ids)],
             _('Организации — %s') % self.display_name,
             own_name=_('Мои организации'))
 

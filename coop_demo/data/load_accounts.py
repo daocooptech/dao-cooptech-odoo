@@ -28,7 +28,7 @@ _logger = logging.getLogger(__name__)
 
 # Транслитерация по ГОСТ-подобной таблице: логин должен читаться, а не
 # быть номером. «Беляева Вера Петровна» → `belyaeva-vp`.
-ТАБЛИЦА = {
+TABLE = {
     'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'e',
     'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
     'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
@@ -37,18 +37,18 @@ _logger = logging.getLogger(__name__)
 }
 
 
-def латиницей(текст):
-    return ''.join(ТАБЛИЦА.get(с, с if с.isalnum() else '') for с in (текст or '').lower())
+def to_latin(text):
+    return ''.join(TABLE.get(ch, ch if ch.isalnum() else '') for ch in (text or '').lower())
 
 
-def логин_для(имя):
+def login_for(name):
     """Фамилия и инициалы: `belyaeva-vp`."""
-    части = [ч for ч in re.split(r'\s+', (имя or '').strip()) if ч]
-    if not части:
+    parts = [part for part in re.split(r'\s+', (name or '').strip()) if part]
+    if not parts:
         return ''
-    фамилия = латиницей(части[0])
-    инициалы = ''.join(латиницей(ч[0]) for ч in части[1:3])
-    return '-'.join(filter(None, [фамилия, инициалы]))
+    surname = to_latin(parts[0])
+    initials = ''.join(to_latin(part[0]) for part in parts[1:3])
+    return '-'.join(filter(None, [surname, initials]))
 
 
 def load_accounts(env):
@@ -56,15 +56,15 @@ def load_accounts(env):
     Partner = env['res.partner'].sudo()
     Users = env['res.users'].sudo()
 
-    группа = env.ref('base.group_user', raise_if_not_found=False)
-    if not группа:
+    group = env.ref('base.group_user', raise_if_not_found=False)
+    if not group:
         _logger.warning('Учётные записи: нет группы base.group_user')
         return 0
 
     # Только люди и только те, кто состоит хоть в одной организации или
     # имеет специализацию: в справочнике есть и технические карточки, и
     # контрагенты без отношения к платформе.
-    участники = Partner.search([
+    participants = Partner.search([
         ('is_company', '=', False),
         ('user_ids', '=', False),
         '|', ('coop_specialization_id', '!=', False),
@@ -72,31 +72,31 @@ def load_accounts(env):
             'partner_id').ids),
     ])
 
-    занятые = set(Users.with_context(active_test=False).search([]).mapped('login'))
-    заведено = 0
-    for partner in участники:
-        основа = логин_для(partner.name)
-        if not основа:
-            основа = 'uchastnik-%s' % partner.id
-        логин, номер = основа, 1
+    taken_list = set(Users.with_context(active_test=False).search([]).mapped('login'))
+    created = 0
+    for partner in participants:
+        base = login_for(partner.name)
+        if not base:
+            base = 'uchastnik-%s' % partner.id
+        login, number = base, 1
         # Однофамильцы с одинаковыми инициалами в каталоге есть, и
         # второй такой же логин упал бы на ограничении уникальности,
         # оборвав загрузку на середине.
-        while логин in занятые:
-            номер += 1
-            логин = '%s-%s' % (основа, номер)
-        занятые.add(логин)
+        while login in taken_list:
+            number += 1
+            login = '%s-%s' % (base, number)
+        taken_list.add(login)
         try:
             Users.create({
-                'login': логин,
+                'login': login,
                 'partner_id': partner.id,
-                'group_ids': [(6, 0, [группа.id])],
+                'group_ids': [(6, 0, [group.id])],
             })
-            заведено += 1
-        except Exception as ошибка:  # noqa: BLE001
+            created += 1
+        except Exception as error:  # noqa: BLE001
             # Одна карточка не должна ронять загрузку остальных трёхсот.
-            _logger.warning('Учётные записи: %s — %s', partner.name, ошибка)
+            _logger.warning('Учётные записи: %s — %s', partner.name, error)
 
     _logger.info('Учётные записи: заведено %s, всего участников %s',
-                 заведено, len(участники))
-    return заведено
+                 created, len(participants))
+    return created

@@ -43,8 +43,8 @@ patch(FormController.prototype, {
             return coopIsPlatformModel(
                 this.props?.resModel || this.model?.root?.resModel
             );
-        } catch (ошибка) {
-            console.warn("[форма] не удалось решить, чья это страница:", ошибка);
+        } catch (error) {
+            console.warn("[форма] не удалось решить, чья это страница:", error);
             return false;
         }
     },
@@ -62,8 +62,8 @@ patch(FormController.prototype, {
         try {
             const root = this.model?.root;
             return Boolean(root && (root.dirty || root.isNew));
-        } catch (ошибка) {
-            console.warn("[форма] не удалось решить, есть ли правки:", ошибка);
+        } catch (error) {
+            console.warn("[форма] не удалось решить, есть ли правки:", error);
             return false;
         }
     },

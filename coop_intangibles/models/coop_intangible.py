@@ -195,11 +195,11 @@ class CoopIntangible(models.Model):
     @api.depends('state', 'owner_id')
     def _compute_can_request_license(self):
         """Лицензию просят у чужого действующего актива, который её даёт."""
-        мои = self.env.user.coop_actor_partner_ids
+        mine = self.env.user.coop_actor_partner_ids
         for record in self:
             record.can_request_license = bool(
                 record.state == 'active'
-                and record.owner_id not in мои)
+                and record.owner_id not in mine)
 
     def action_request_license(self):
         """«Запросить лицензию» — как в макете (`nma-asset.html`).
@@ -213,32 +213,32 @@ class CoopIntangible(models.Model):
         if not self.can_request_license:
             raise UserError(_(
                 'Лицензию просят у действующего актива, и не у своего.'))
-        я = self.env.user._coop_acting_partner()
+        me = self.env.user._coop_acting_partner()
         License = self.env['coop.intangible.license'].sudo()
-        уже = License.search([
+        already = License.search([
             ('intangible_id', '=', self.id),
-            ('licensee_id', '=', я.id),
+            ('licensee_id', '=', me.id),
             ('state', 'in', ('offered', 'active')),
         ], limit=1)
-        if уже:
+        if already:
             raise UserError(_(
                 'Вы уже просили лицензию на «%s» — она в работе.') % self.name)
-        лицензия = License.create({
+        license = License.create({
             'intangible_id': self.id,
-            'licensee_id': я.id,
+            'licensee_id': me.id,
             'licensor_id': self.owner_id.id,
             'state': 'offered',
         })
-        тело = _('Запрос лицензии на «%(что)s» от %(кто)s.',
-                 что=self.name, кто=я.display_name)
+        body = _('Запрос лицензии на «%(что)s» от %(кто)s.',
+                 what=self.name, who=me.display_name)
         self.env['coop.notification']._notify(
-            self.owner_id, тело, record=self, kind='other')
-        self.sudo().message_post(body=тело)
+            self.owner_id, body, record=self, kind='other')
+        self.sudo().message_post(body=body)
         return {
             'type': 'ir.actions.act_window',
             'name': _('Лицензия на «%s»') % self.name,
             'res_model': 'coop.intangible.license',
-            'res_id': лицензия.id,
+            'res_id': license.id,
             'view_mode': 'form',
             'target': 'current',
         }

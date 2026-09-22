@@ -44,10 +44,10 @@ class CoopMembership(models.Model):
         у членства две.
         """
         self.ensure_one()
-        человек = self.partner_id
-        if not человек:
+        person = self.partner_id
+        if not person:
             raise UserError(_('У этой записи состава нет участника.'))
-        return человек.action_coop_open_page()
+        return person.action_coop_open_page()
 
     partner_id = fields.Many2one(
         'res.partner', string='Участник', required=True, index=True,
@@ -352,17 +352,17 @@ class CoopMembership(models.Model):
         представляет её вовне: иначе заявление уходит в пустоту.
         """
         self.ensure_one()
-        организация = self.organization_id
-        действующие = self.sudo().search([
-            ('organization_id', '=', организация.id),
+        organization = self.organization_id
+        active_ones = self.sudo().search([
+            ('organization_id', '=', organization.id),
             ('state', '=', 'active'),
         ])
-        ведут = действующие.filtered(
+        lead_to = active_ones.filtered(
             lambda m: 'roster' in m.power_ids.mapped('code'))
-        if not ведут:
-            ведут = действующие.filtered(
+        if not lead_to:
+            lead_to = active_ones.filtered(
                 lambda m: 'represent' in m.power_ids.mapped('code'))
-        return ведут.mapped('partner_id') or организация
+        return lead_to.mapped('partner_id') or organization
 
     @api.depends_context('uid')
     @api.depends('organization_id', 'state')
@@ -426,8 +426,8 @@ class CoopMembership(models.Model):
         for record in self:
             record._notify_member(_(
                 'Вы приняты в «%(орг)s»: %(кем)s.',
-                орг=record.organization_id.display_name,
-                кем=dict(record._fields['role'].selection)[record.role]))
+                org=record.organization_id.display_name,
+                by_whom=dict(record._fields['role'].selection)[record.role]))
         return True
 
     def action_decline(self):
@@ -459,8 +459,8 @@ class CoopMembership(models.Model):
             record.env['coop.notification']._notify(
                 record._roster_deciders(),
                 _('Заявление о выходе из «%(орг)s»: %(кто)s.',
-                  орг=record.organization_id.display_name,
-                  кто=record.partner_id.display_name),
+                  org=record.organization_id.display_name,
+                  who=record.partner_id.display_name),
                 record=record.organization_id, kind='org')
         return True
 

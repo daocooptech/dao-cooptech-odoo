@@ -124,41 +124,41 @@ def _promote_project_initiators(env, add):
     владельце.
     """
     Project = env['coop.project'].sudo()
-    живые = Project.search([('state', 'in', ('gathering', 'running'))])
-    поднято = 0
-    for индекс, кто in enumerate(живые.mapped('partner_id')):
-        if кто.coop_level_at_least('identity'):
+    live_ones = Project.search([('state', 'in', ('gathering', 'running'))])
+    raised = 0
+    for index, who in enumerate(live_ones.mapped('partner_id')):
+        if who.coop_level_at_least('identity'):
             continue
         # Проверка может уже существовать — отклонённая или ожидающая.
         # `add` такую пропускает: он заводит недостающее, а не правит
         # заведённое. Здесь правим: у инициатора живого проекта
         # отклонённая личность — то же противоречие правилам, что и её
         # отсутствие.
-        нужные = (['registry'] if кто.is_company
+        needed_list = (['registry'] if who.is_company
                   else ['email', 'phone', 'identity'])
-        неподтверждённые = кто.coop_verification_ids.filtered(
-            lambda v: v.kind in нужные and v.state != 'confirmed')
-        if неподтверждённые:
-            неподтверждённые.write({'state': 'confirmed'})
-        if кто.is_company:
-            add(кто, 'registry', 'registry', index=индекс)
+        unverified = who.coop_verification_ids.filtered(
+            lambda v: v.kind in needed_list and v.state != 'confirmed')
+        if unverified:
+            unverified.write({'state': 'confirmed'})
+        if who.is_company:
+            add(who, 'registry', 'registry', index=index)
         else:
-            add(кто, 'email', 'self', index=индекс)
-            add(кто, 'phone', 'self', index=индекс)
-            add(кто, 'identity',
-                IDENTITY_METHODS[индекс % len(IDENTITY_METHODS)], index=индекс)
-        поднято += 1
+            add(who, 'email', 'self', index=index)
+            add(who, 'phone', 'self', index=index)
+            add(who, 'identity',
+                IDENTITY_METHODS[index % len(IDENTITY_METHODS)], index=index)
+        raised += 1
 
     # Вернуть в каталог потребности этих проектов.
     env['coop.resource'].sudo().search([
-        ('project_id', 'in', живые.ids),
+        ('project_id', 'in', live_ones.ids),
         ('listing_type', '=', 'request'),
         ('state', '=', 'draft'),
     ]).write({'state': 'published'})
-    if поднято:
+    if raised:
         _logger.info('Личность подтверждена инициаторам живых проектов: %s',
-                     поднято)
-    return поднято
+                     raised)
+    return raised
 
 
 def _demote_unpublishable(env):

@@ -140,7 +140,7 @@ def load_people(env, specializations):
 
 # Города для тех, кому город не достался. Список тот же, что у остальных
 # каталогов платформы: написание сверено, «ё» и дефисы на месте.
-ГОРОДА_ЗАПАСНЫЕ = [
+SPARE_CITIES = [
     'Москва', 'Санкт-Петербург', 'Новосибирск', 'Екатеринбург', 'Казань',
     'Нижний Новгород', 'Челябинск', 'Самара', 'Уфа', 'Ростов-на-Дону',
     'Пермь', 'Воронеж', 'Волгоград', 'Краснодар', 'Тюмень', 'Ярославль',
@@ -170,14 +170,14 @@ def ensure_cities(env):
     не должен переставлять людей по стране.
     """
     Partner = env['res.partner'].sudo()
-    безгородние = Partner.search([
+    cityless = Partner.search([
         ('coop_is_participant', '=', True),
         '|', ('city', '=', False), ('city', '=', ''),
     ])
-    for партнёр in безгородние:
-        партнёр.city = ГОРОДА_ЗАПАСНЫЕ[партнёр.id % len(ГОРОДА_ЗАПАСНЫЕ)]
-    if безгородние:
+    for partner in cityless:
+        partner.city = SPARE_CITIES[partner.id % len(SPARE_CITIES)]
+    if cityless:
         _logger.info('Город проставлен %s участникам без города: %s',
-                     len(безгородние),
-                     ', '.join(безгородние[:5].mapped('name')))
-    return len(безгородние)
+                     len(cityless),
+                     ', '.join(cityless[:5].mapped('name')))
+    return len(cityless)

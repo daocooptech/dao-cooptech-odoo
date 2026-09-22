@@ -36,13 +36,13 @@ class ResUsers(models.Model):
         user = super()._signup_create_user(values)
         if not self._coop_signup_makes_participant():
             return user
-        внутренняя = self.env.ref('base.group_user', raise_if_not_found=False)
-        портальная = self.env.ref('base.group_portal', raise_if_not_found=False)
-        if внутренняя:
-            команды = [(4, внутренняя.id)]
-            if портальная:
-                команды.append((3, портальная.id))
-            user.sudo().write({'group_ids': команды})
+        internal = self.env.ref('base.group_user', raise_if_not_found=False)
+        portal_one = self.env.ref('base.group_portal', raise_if_not_found=False)
+        if internal:
+            commands = [(4, internal.id)]
+            if portal_one:
+                commands.append((3, portal_one.id))
+            user.sudo().write({'group_ids': commands})
         if user.partner_id:
             user.partner_id.sudo().write({'coop_is_participant': True})
         # Домашний экран ставится в `create`, но там учётная запись была
@@ -54,6 +54,6 @@ class ResUsers(models.Model):
 
     @api.model
     def _coop_signup_makes_participant(self):
-        значение = self.env['ir.config_parameter'].sudo().get_param(
+        value = self.env['ir.config_parameter'].sudo().get_param(
             'coop.signup_creates_participant', 'True')
-        return str(значение).strip().lower() not in ('0', 'false', 'нет')
+        return str(value).strip().lower() not in ('0', 'false', 'нет')

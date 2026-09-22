@@ -66,14 +66,14 @@ class CoopChannelSync(models.AbstractModel):
         self.ensure_one()
         if not self.id:
             return self.env['discuss.channel']
-        условие = [
+        condition = [
             ('coop_res_model', '=', self._name),
             ('coop_res_id', '=', self.id),
             ('coop_managed', '=', True),
         ]
         if kind:
-            условие.append(('coop_kind', '=', kind))
-        return self.env['discuss.channel'].sudo().search(условие)
+            condition.append(('coop_kind', '=', kind))
+        return self.env['discuss.channel'].sudo().search(condition)
 
     def _coop_channel_partners(self):
         """Состав единственной переписки. Устаревшая точка входа.
@@ -92,21 +92,21 @@ class CoopChannelSync(models.AbstractModel):
         вклад, в кооператив вступил пайщик).
         """
         Channel = self.env['discuss.channel'].sudo()
-        заведено = self.env['discuss.channel']
+        created = self.env['discuss.channel']
         for record in self:
-            for спец in record._coop_channel_specs():
-                if record._coop_channels(спец['kind']):
+            for spec in record._coop_channel_specs():
+                if record._coop_channels(spec['kind']):
                     continue
-                заведено |= Channel.create({
-                    'name': спец['name'],
-                    'coop_kind': спец['kind'],
-                    'coop_subtitle': спец.get('subtitle') or False,
+                created |= Channel.create({
+                    'name': spec['name'],
+                    'coop_kind': spec['kind'],
+                    'coop_subtitle': spec.get('subtitle') or False,
                     'channel_type': 'group',
                     'coop_res_model': record._name,
                     'coop_res_id': record.id,
                     'coop_managed': True,
                 })
-        return заведено
+        return created
 
     def _coop_sync_channels(self):
         """Привести состав переписок в соответствие с записью.
@@ -116,9 +116,9 @@ class CoopChannelSync(models.AbstractModel):
         ровно до того, как об этом узнает эта строка.
         """
         for record in self:
-            for спец in record._coop_channel_specs():
-                for канал in record._coop_channels(спец['kind']):
-                    record._coop_apply_members(канал, спец['partners'])
+            for spec in record._coop_channel_specs():
+                for channel in record._coop_channels(spec['kind']):
+                    record._coop_apply_members(channel, spec['partners'])
         return True
 
     @api.model
@@ -158,16 +158,16 @@ class CoopChannelSync(models.AbstractModel):
         """Разница между тем, кто есть, и тем, кто должен быть."""
         self._coop_ensure_group(channel, partners)
         Member = self.env['discuss.channel.member'].sudo()
-        есть = channel.sudo().channel_member_ids
-        есть_партнёры = есть.mapped('partner_id')
-        лишние = есть.filtered(
+        exists = channel.sudo().channel_member_ids
+        has_partners = exists.mapped('partner_id')
+        extra = exists.filtered(
             lambda m: m.partner_id and m.partner_id not in partners)
-        недостающие = partners - есть_партнёры
-        if лишние:
-            лишние.unlink()
-        if недостающие:
+        missing_list = partners - has_partners
+        if extra:
+            extra.unlink()
+        if missing_list:
             Member.create([{
                 'channel_id': channel.id,
-                'partner_id': партнёр.id,
-            } for партнёр in недостающие])
-        return len(недостающие), len(лишние)
+                'partner_id': partner.id,
+            } for partner in missing_list])
+        return len(missing_list), len(extra)

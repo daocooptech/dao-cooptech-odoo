@@ -25,7 +25,7 @@ from odoo import api, models
 # ровно то, чего ждут по умолчанию, и записывать её в плюс значит
 # ставить знак равенства между «сделал как договорились» и «сделал
 # хорошо».
-ПОЛОЖИТЕЛЬНЫЕ = ('4', '5')
+POSITIVE = ('4', '5')
 
 
 class ResPartner(models.Model):
@@ -36,23 +36,23 @@ class ResPartner(models.Model):
         Deal = self.env['coop.deal'].sudo()
         Review = self.env['coop.deal.review'].sudo()
         for partner in self:
-            завершённых = Deal.search_count([
+            finished_count = Deal.search_count([
                 ('state', '=', 'done'),
                 '|', ('party_a_id', '=', partner.id),
                 ('party_b_id', '=', partner.id),
             ])
             # Считаем отзывы о человеке, а не сделки с отзывом: у сделки
             # их два, и каждый относится к своей стороне.
-            с_отзывом = Review.search_count([
+            with_review = Review.search_count([
                 ('target_id', '=', partner.id),
             ])
-            хорошие = Review.search_count([
+            good = Review.search_count([
                 ('target_id', '=', partner.id),
-                ('rating', 'in', ПОЛОЖИТЕЛЬНЫЕ),
+                ('rating', 'in', POSITIVE),
             ])
-            partner.coop_deals_done = завершённых
-            partner.coop_deals_reviewed = с_отзывом
-            partner.coop_deals_positive = хорошие
+            partner.coop_deals_done = finished_count
+            partner.coop_deals_reviewed = with_review
+            partner.coop_deals_positive = good
             # Знаменатель — сделки с отзывом, а не все завершённые:
             # решение владельца от 15 сентября 2026. Молчание второй
             # стороны не должно снижать оценку тому, кто ничего не
@@ -64,12 +64,12 @@ class ResPartner(models.Model):
             # никто не высказался. На странице тогда стоит «доверие
             # пока не считается».
             partner.coop_trust = (
-                round(хорошие * 100.0 / с_отзывом) if с_отзывом else 0)
+                round(good * 100.0 / with_review) if with_review else 0)
         return True
 
     @api.model
     def _coop_recompute_all_deal_stats(self):
         """Разовый пересчёт по всем — после загрузки данных и переноса."""
-        участники = self.sudo().search([])
-        участники._coop_recompute_deal_stats()
-        return len(участники)
+        participants = self.sudo().search([])
+        participants._coop_recompute_deal_stats()
+        return len(participants)

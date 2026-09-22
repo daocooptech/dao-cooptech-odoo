@@ -69,7 +69,7 @@ STATES = (['active'] * 16) + ['applied', 'leaving', 'ended']
 # 1 проект и куча сообществ и организаций? Можно как то равномерно
 # между аккаунтами распределять?» У неё было 28 членств, у рекордсмена —
 # 661.
-ПРЕДЕЛ_НА_ЧЕЛОВЕКА = 5
+LIMIT_PER_PERSON = 5
 
 
 def trim_memberships(env):
@@ -86,64 +86,64 @@ def trim_memberships(env):
     проверка, что организация не осталась без состава.
     """
     Membership = env['coop.membership'].sudo()
-    все = Membership.search([], order='id')
+    all_items = Membership.search([], order='id')
 
     # Двойники: оставляем самую раннюю запись пары.
-    видели = set()
-    двойники = Membership
-    for членство in все:
-        ключ = (членство.partner_id.id, членство.organization_id.id)
-        if ключ in видели:
-            двойники |= членство
+    seen = set()
+    dupes = Membership
+    for membership in all_items:
+        key = (membership.partner_id.id, membership.organization_id.id)
+        if key in seen:
+            dupes |= membership
         else:
-            видели.add(ключ)
-    if двойники:
-        двойников = len(двойники)
-        двойники.unlink()
+            seen.add(key)
+    if dupes:
+        dupe_count = len(dupes)
+        dupes.unlink()
     else:
-        двойников = 0
+        dupe_count = 0
 
     # Перебор у человека. Держим действующие и те, где человек что-то
     # решает: страница, на которой видно только «ассоциированный член»,
     # ничего не показывает о правах.
-    def вес(членство):
-        порядок = {'active': 0, 'applied': 1, 'leaving': 2, 'ended': 3}
-        главный = 0 if членство.role in ('board', 'founder', 'staff') else 1
-        return (порядок.get(членство.state, 4), главный, членство.id)
+    def weight(membership):
+        sort_order = {'active': 0, 'applied': 1, 'leaving': 2, 'ended': 3}
+        main = 0 if membership.role in ('board', 'founder', 'staff') else 1
+        return (sort_order.get(membership.state, 4), main, membership.id)
 
-    по_людям = {}
-    for членство in Membership.search([]):
-        партнёр = членство.partner_id
-        if партнёр.is_company:
+    by_people = {}
+    for membership in Membership.search([]):
+        partner = membership.partner_id
+        if partner.is_company:
             continue
-        по_людям.setdefault(партнёр.id, []).append(членство)
+        by_people.setdefault(partner.id, []).append(membership)
 
-    лишние = Membership
-    for записи in по_людям.values():
-        записи.sort(key=вес)
-        for членство in записи[ПРЕДЕЛ_НА_ЧЕЛОВЕКА:]:
-            лишние |= членство
+    extra = Membership
+    for records in by_people.values():
+        records.sort(key=weight)
+        for membership in records[LIMIT_PER_PERSON:]:
+            extra |= membership
 
     # Организация без состава — хуже, чем человек с лишним членством:
     # у неё пустеет карточка и некому решать заявления.
-    осталось = {}
-    for членство in Membership.search([]):
-        осталось.setdefault(членство.organization_id.id, 0)
-        осталось[членство.organization_id.id] += 1
-    к_удалению = Membership
-    for членство in лишние:
-        орг = членство.organization_id.id
-        if осталось.get(орг, 0) <= 3:
+    left = {}
+    for membership in Membership.search([]):
+        left.setdefault(membership.organization_id.id, 0)
+        left[membership.organization_id.id] += 1
+    to_delete = Membership
+    for membership in extra:
+        org = membership.organization_id.id
+        if left.get(org, 0) <= 3:
             continue
-        осталось[орг] -= 1
-        к_удалению |= членство
-    убрано = len(к_удалению)
-    if к_удалению:
-        к_удалению.unlink()
+        left[org] -= 1
+        to_delete |= membership
+    removed = len(to_delete)
+    if to_delete:
+        to_delete.unlink()
 
     _logger.info('Состав организаций: убрано двойников %s, лишних %s',
-                 двойников, убрано)
-    return двойников + убрано
+                 dupe_count, removed)
+    return dupe_count + removed
 
 
 def load_memberships(env, target=180):
@@ -201,7 +201,7 @@ def load_memberships(env, target=180):
                     ('organization_id', '=', organization.id)]):
                 continue
             if Membership.search_count([
-                    ('partner_id', '=', person.id)]) >= ПРЕДЕЛ_НА_ЧЕЛОВЕКА:
+                    ('partner_id', '=', person.id)]) >= LIMIT_PER_PERSON:
                 continue
             title, role, codes, vote = JOBS[job]
             state = STATES[(index + offset) % len(STATES)]
@@ -263,14 +263,14 @@ def _ensure_roster_holder(env):
     roster = env.ref('coop_base.power_roster', raise_if_not_found=False)
     if not roster:
         return 0
-    действующие = Membership.search([('state', '=', 'active')])
-    по_организациям = {}
-    for членство in действующие:
-        по_организациям.setdefault(членство.organization_id.id, []).append(членство)
+    active_ones = Membership.search([('state', '=', 'active')])
+    by_organizations = {}
+    for membership in active_ones:
+        by_organizations.setdefault(membership.organization_id.id, []).append(membership)
 
-    выдано = 0
-    for записи in по_организациям.values():
-        if any('roster' in м.power_ids.mapped('code') for м in записи):
+    granted = 0
+    for records in by_organizations.values():
+        if any('roster' in m.power_ids.mapped('code') for m in records):
             continue
         # Ревизор в кандидаты не годится: модель не даёт выдать
         # ревизионной комиссии исполнительное полномочие — проверяющий не
@@ -278,21 +278,21 @@ def _ensure_roster_holder(env):
         # было пятеро, ревизор до последней строки перебора не доходил; а
         # после чистки лишних членств нашлись организации, где он остался
         # один, — и обновление модуля упало на этой записи целиком.
-        годные = [м for м in записи if м.role != 'audit']
-        if not годные:
+        fit = [m for m in records if m.role != 'audit']
+        if not fit:
             continue
         # Правление первым: вести состав — его дело по уставу. Если
         # правления нет (общество, а не кооператив) — тот, кто
         # представляет организацию вовне.
-        кандидат = next(
-            (м for м in годные if м.role == 'board'),
-            next((м for м in годные
-                  if 'represent' in м.power_ids.mapped('code')), годные[0]))
+        candidate = next(
+            (m for m in fit if m.role == 'board'),
+            next((m for m in fit
+                  if 'represent' in m.power_ids.mapped('code')), fit[0]))
         with env.cr.savepoint():
-            кандидат.write({'power_ids': [(4, roster.id)]})
-            кандидат.flush_recordset()
-        выдано += 1
-    if выдано:
+            candidate.write({'power_ids': [(4, roster.id)]})
+            candidate.flush_recordset()
+        granted += 1
+    if granted:
         _logger.info('Полномочие «Ведение состава» выдано в %s организациях',
-                     выдано)
-    return выдано
+                     granted)
+    return granted

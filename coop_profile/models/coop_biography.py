@@ -54,8 +54,8 @@ class CoopEducation(models.Model):
     @api.depends('institution_id.short_name', 'institution_id.name', 'name')
     def _compute_short_name(self):
         for record in self:
-            заведение = record.institution_id
-            record.short_name = (заведение.short_name or заведение.name
+            institution = record.institution_id
+            record.short_name = (institution.short_name or institution.name
                                  or record.name or '')
 
     @api.onchange('institution_id')

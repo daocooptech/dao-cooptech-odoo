@@ -76,11 +76,11 @@ class CoopResource(models.Model):
     @api.depends('price', 'project_id.required_total')
     def _compute_need_share(self):
         for record in self:
-            всего = record.project_id.required_total
-            доля = (record.price * 100.0 / всего
-                    if всего and record.price else 0.0)
-            record.need_share_percent = доля
-            record.need_share_ratio = доля
+            count_all = record.project_id.required_total
+            share = (record.price * 100.0 / count_all
+                    if count_all and record.price else 0.0)
+            record.need_share_percent = share
+            record.need_share_ratio = share
 
     @api.depends_context('uid')
     @api.depends('state', 'project_id.state', 'need_accepted_id',
@@ -90,20 +90,20 @@ class CoopResource(models.Model):
 
         Разойдись они — и человек увидел бы кнопку, отвечающую ошибкой.
         """
-        мои = self.env.user.coop_actor_partner_ids
+        mine = self.env.user.coop_actor_partner_ids
         for record in self:
             record.need_can_join = bool(
                 record.project_id
                 and record.project_id.state == 'gathering'
                 and record.state == 'published'
                 and not record.need_accepted_id
-                and record.project_id.partner_id not in мои)
+                and record.project_id.partner_id not in mine)
 
     # Чем закрывается потребность того или иного вида. Окно вклада
     # спрашивает то же самое; подставляем ответ заранее, чтобы человек,
     # пришедший из строки «Двигатель асинхронный», не выбирал вид вклада
     # руками.
-    ВИД_ВКЛАДА = {
+    CONTRIBUTION_KIND = {
         'material': 'material',
         'equipment': 'resource',
         'labour': 'labour',
@@ -124,7 +124,7 @@ class CoopResource(models.Model):
                 'default_need_id': self.id,
                 'default_name': self.name,
                 'default_value': self.price,
-                'default_kind': self.ВИД_ВКЛАДА.get(
+                'default_kind': self.CONTRIBUTION_KIND.get(
                     self.resource_type, 'resource'),
             },
         }

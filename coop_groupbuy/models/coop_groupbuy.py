@@ -189,33 +189,33 @@ class CoopGroupBuy(models.Model):
             record.is_participant = bool(record.order_ids.filtered(
                 lambda o: o.partner_id.id in mine and o.state != 'cancelled'))
 
-    def _хочет(self, operator, value):
+    def _wants(self, operator, value):
         """Что именно спросили: «да» или «нет».
 
         Odoo приводит `= True` к `in {True}` и передаёт множество, а не
         список — значение разбирается как последовательность.
         """
         if isinstance(value, (list, tuple, set, frozenset)):
-            хотят = True in value
+            want = True in value
         else:
-            хотят = bool(value)
+            want = bool(value)
         if operator in ('!=', 'not in'):
-            хотят = not хотят
-        return хотят
+            want = not want
+        return want
 
     def _search_is_organizer(self, operator, value):
         mine = list(self.env.user._coop_partner_ids())
-        да = self._хочет(operator, value)
-        return [('organizer_id', 'in' if да else 'not in', mine)]
+        yes = self._wants(operator, value)
+        return [('organizer_id', 'in' if yes else 'not in', mine)]
 
     def _search_is_participant(self, operator, value):
         mine = list(self.env.user._coop_partner_ids())
-        да = self._хочет(operator, value)
-        условие = [('order_ids.partner_id', 'in', mine),
+        yes = self._wants(operator, value)
+        condition = [('order_ids.partner_id', 'in', mine),
                    ('order_ids.state', '!=', 'cancelled')]
-        if да:
-            return условие
-        return ['!', ('id', 'in', self.search(условие).ids)]
+        if yes:
+            return condition
+        return ['!', ('id', 'in', self.search(condition).ids)]
 
     # ── Действия ─────────────────────────────────────────────────────────
 
@@ -234,15 +234,15 @@ class CoopGroupBuy(models.Model):
         Заодно находим свой заказ: у кого он уже есть, тому показываем
         его, а не вторую кнопку «участвовать».
         """
-        мои = self.env.user.coop_actor_partner_ids
+        mine = self.env.user.coop_actor_partner_ids
         for record in self:
-            свой = record.order_ids.filtered(
-                lambda з: з.partner_id in мои and з.state != 'cancelled')[:1]
-            record.my_order_id = свой
+            own = record.order_ids.filtered(
+                lambda entry: entry.partner_id in mine and entry.state != 'cancelled')[:1]
+            record.my_order_id = own
             record.can_join = bool(
                 record.state == 'collecting'
-                and record.organizer_id not in мои
-                and not свой)
+                and record.organizer_id not in mine
+                and not own)
 
     def action_join(self):
         """«Участвовать» — как в макете (`ext-group-buying.html`).

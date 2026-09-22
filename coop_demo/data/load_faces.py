@@ -86,39 +86,39 @@ def _read(path):
         return base64.b64encode(handle.read())
 
 
-def _заглушка(данные):
+def _stub(data):
     """Служебный значок вместо фотографии.
 
     Движок кладёт в карточку SVG с буквой — триста байт разметки.
     Поле при этом не пусто, и человек мимо раздачи проходит дважды:
     и как «фото есть», и как «чужое фото, не трогаем».
     """
-    начало = (данные or b'')[:64].lstrip()
-    return начало.startswith(b'<?xml') or начало.startswith(b'<svg')
+    start = (data or b'')[:64].lstrip()
+    return start.startswith(b'<?xml') or start.startswith(b'<svg')
 
 
-def _наши_снимки():
+def _our_photos():
     """Отпечаток файла → папка, в которой он лежит.
 
     По отпечатку раздаваемый снимок узнаётся в базе: своё фото,
     загруженное участником, в наборе не числится и остаётся на месте.
     """
-    отпечатки = {}
+    prints = {}
     for directory in (AVATAR_DIR, WOMEN_DIR, MEN_DIR):
         for name in _files(directory):
             path = os.path.join(directory, name)
             with open(path, 'rb') as handle:
-                отпечатки[hashlib.sha256(handle.read()).hexdigest()] = directory
-    return отпечатки
+                prints[hashlib.sha256(handle.read()).hexdigest()] = directory
+    return prints
 
 
-def _участники(env):
+def _participants(env):
     """Люди, которым полагается лицо: участники и те, кто состоит в
     организациях. Организации сюда не попадают — у них знак, не лицо."""
-    члены = env['coop.membership'].sudo().search([]).mapped('partner_id')
+    members = env['coop.membership'].sudo().search([]).mapped('partner_id')
     return env['res.partner'].sudo().search([
         ('is_company', '=', False),
-        '|', ('coop_is_participant', '=', True), ('id', 'in', члены.ids),
+        '|', ('coop_is_participant', '=', True), ('id', 'in', members.ids),
     ])
 
 
@@ -136,42 +136,42 @@ def ensure_faces(env):
         _logger.info('Фотографии: наборы по полу не найдены в %s', AVATAR_DIR)
         return 0
 
-    наши = _наши_снимки()
-    роздано = переставлено = закреплено = 0
+    ours = _our_photos()
+    handed_out = moved = pinned = 0
 
-    for partner in _участники(env):
-        файл = PINNED.get(partner.name)
-        if файл:
-            путь = os.path.join(AVATAR_DIR, файл)
-            if os.path.exists(путь):
-                снимок = _read(путь)
-                if partner.image_1920 != снимок:
-                    partner.image_1920 = снимок
-                    закреплено += 1
+    for partner in _participants(env):
+        file = PINNED.get(partner.name)
+        if file:
+            path = os.path.join(AVATAR_DIR, file)
+            if os.path.exists(path):
+                photo = _read(path)
+                if partner.image_1920 != photo:
+                    partner.image_1920 = photo
+                    pinned += 1
             continue
 
-        пол = coop_gender(partner.name)
-        if пол not in ('w', 'm'):
+        gender = coop_gender(partner.name)
+        if gender not in ('w', 'm'):
             continue
-        нужная = WOMEN_DIR if пол == 'w' else MEN_DIR
-        набор = women if пол == 'w' else men
+        needed_item = WOMEN_DIR if gender == 'w' else MEN_DIR
+        set_of = women if gender == 'w' else men
 
-        сырой = partner.image_1920
-        if сырой:
-            данные = base64.b64decode(сырой)
-            откуда = наши.get(hashlib.sha256(данные).hexdigest())
-            if откуда is None and not _заглушка(данные):
+        raw_one = partner.image_1920
+        if raw_one:
+            data = base64.b64decode(raw_one)
+            from_where = ours.get(hashlib.sha256(data).hexdigest())
+            if from_where is None and not _stub(data):
                 # Не из наших наборов — фотография самого участника.
                 continue
-            if откуда == нужная:
+            if from_where == needed_item:
                 continue
-            partner.image_1920 = _read(_pick(нужная, набор, partner.id))
-            переставлено += 1
+            partner.image_1920 = _read(_pick(needed_item, set_of, partner.id))
+            moved += 1
             continue
 
-        partner.image_1920 = _read(_pick(нужная, набор, partner.id))
-        роздано += 1
+        partner.image_1920 = _read(_pick(needed_item, set_of, partner.id))
+        handed_out += 1
 
     _logger.info('Фотографии: роздано %s, переставлено %s, закреплено %s',
-                 роздано, переставлено, закреплено)
-    return роздано + переставлено + закреплено
+                 handed_out, moved, pinned)
+    return handed_out + moved + pinned

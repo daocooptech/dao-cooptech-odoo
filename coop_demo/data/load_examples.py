@@ -293,7 +293,7 @@ def _share_cases(env):
 # помещения, работа. Двадцать пять и больше на способ — чтобы при
 # добавлении двадцати пяти записей не повторилось ни одно название.
 
-ПУТИ = [
+PATHS = [
     ('rent', 'resource'),
     ('purchase', 'resource'),
     ('gift', 'resource'),
@@ -304,7 +304,7 @@ def _share_cases(env):
     ('share', 'project'),
 ]
 
-ЦЕНЫ_ПУТИ = {
+PRICE_PATHS = {
     'rent': (6000, 84000),
     'purchase': (12000, 190000),
     'gift': (0, 0),
@@ -316,7 +316,7 @@ def _share_cases(env):
     'sale': (8000, 220000),
 }
 
-ПРЕДМЕТЫ_ПУТИ = {
+SUBJECT_PATHS = {
     'rent': [
         'Погрузчик вилочный на неделю',
         'Трактор МТЗ с прицепом на посевную',
@@ -551,7 +551,7 @@ def _share_cases(env):
 # пять сделок, и каждое состояние берёт свой кусок списка (см. сдвиг в
 # `_предмет`). На пуле короче ста «Отменена» и «На приёмке» вышли бы под
 # одним названием — та же беда, что чинится, только с другой стороны.
-ПРОДАЖА = [
+SALE = [
     'Дизельное топливо, бочка 200 литров',
     'Запасные части к трактору',
     'Шины на грузовой прицеп',
@@ -658,13 +658,13 @@ def _share_cases(env):
     'Микроавтобус для развоза бригад',
 ]
 
-ПРЕДМЕТЫ_ПУТИ['sale'] = ПРОДАЖА
+SUBJECT_PATHS['sale'] = SALE
 
 # Сдвиг по списку продаж: своё окно на каждое состояние. Окна не
 # пересекаются и не пересекаются со списками способов — иначе одна и та
 # же «Косилка роторная» досталась бы и спорной сделке, и отменённой, и
 # каталог снова читался бы как один текст с разными значками.
-СДВИГ_СОСТОЯНИЯ = {
+STATE_SHIFT = {
     'draft': 0,
     'acceptance': 26,
     'disputed': 52,
@@ -674,7 +674,7 @@ def _share_cases(env):
 # Что стояло в названии до починки. По этому списку опознаются записи,
 # которые надо переименовать; всё остальное — правка человека, её не
 # трогаем.
-СТАРЫЕ_НАЗВАНИЯ = {
+OLD_TITLES = {
     'Аренда: погрузчик на неделю',
     'Покупка: комплект досок обрезных',
     'Передача в дар: комплект инструмента',
@@ -689,7 +689,7 @@ def _share_cases(env):
     'Отменена по соглашению сторон',
 }
 
-ГОРОДА_СДЕЛОК = [
+DEAL_CITIES = [
     'Москва', 'Пермь', 'Казань', 'Омск', 'Тюмень', 'Воронеж',
     'Ростов-на-Дону', 'Новосибирск', 'Екатеринбург', 'Уфа', 'Самара',
     'Челябинск', 'Ярославль', 'Владивосток', 'Краснодар', 'Вологда',
@@ -714,22 +714,22 @@ def _deal_cases(env):
     rnd = _rnd()
     made = {}
 
-    for way, subject in ПУТИ:
+    for way, subject in PATHS:
         need = _need(env, 'coop.deal', [('way', '=', way)])
         for index in range(need):
             first = people[index % len(people)]
             second = companies[index % len(companies)]
-            название, сумма = _предмет(way, index, rnd)
+            title, amount = _subject(way, index, rnd)
             Deal.create({
-                'name': название,
+                'name': title,
                 'subject': subject,
                 'way': way,
                 'party_a_id': first.id,
                 'party_b_id': second.id,
                 'role_a': 'сторона',
                 'role_b': 'вторая сторона',
-                'city': ГОРОДА_СДЕЛОК[index % len(ГОРОДА_СДЕЛОК)],
-                'amount': сумма,
+                'city': DEAL_CITIES[index % len(DEAL_CITIES)],
+                'amount': amount,
                 'signed_on': '2026-%02d-%02d' % (1 + index % 9, 1 + index % 27),
                 'state': 'active',
                 'import_key': 'examples.way.%s.%s' % (way, index),
@@ -741,18 +741,18 @@ def _deal_cases(env):
         for index in range(need):
             first = people[(index + 7) % len(people)]
             second = companies[(index + 3) % len(companies)]
-            название, сумма = _предмет(
-                'sale', index + СДВИГ_СОСТОЯНИЯ[state], rnd)
+            title, amount = _subject(
+                'sale', index + STATE_SHIFT[state], rnd)
             values = {
-                'name': название,
+                'name': title,
                 'subject': 'resource',
                 'way': 'sale',
                 'party_a_id': first.id,
                 'party_b_id': second.id,
                 'role_a': 'продавец',
                 'role_b': 'покупатель',
-                'city': ГОРОДА_СДЕЛОК[(index + 5) % len(ГОРОДА_СДЕЛОК)],
-                'amount': сумма,
+                'city': DEAL_CITIES[(index + 5) % len(DEAL_CITIES)],
+                'amount': amount,
                 'signed_on': '2026-%02d-%02d' % (1 + index % 9, 1 + index % 27),
                 'state': state,
                 'import_key': 'examples.state.%s.%s' % (state, index),
@@ -770,11 +770,11 @@ def _deal_cases(env):
             Deal.create(values)
         made['сделка %s' % state] = need
 
-    made.update(_переименовать_сделки(env, rnd))
+    made.update(_rename_deals(env, rnd))
     return made
 
 
-def _переименовать_сделки(env, rnd):
+def _rename_deals(env, rnd):
     """Починить названия у сделок, заведённых прежней версией загрузчика.
 
     Загрузчик добирает, а не пересоздаёт, — значит новые названия сами
@@ -786,41 +786,41 @@ def _переименовать_сделки(env, rnd):
     Переименовал человек — имя остаётся: его правка дороже нашей ровности.
     """
     Deal = env['coop.deal'].sudo()
-    записи = Deal.search([('import_key', '=like', 'examples.%')])
-    починено = 0
-    for сделка in записи:
-        if сделка.name not in СТАРЫЕ_НАЗВАНИЯ:
+    records = Deal.search([('import_key', '=like', 'examples.%')])
+    fixed_count = 0
+    for deal in records:
+        if deal.name not in OLD_TITLES:
             continue
-        ключ = сделка.import_key or ''
+        key = deal.import_key or ''
         try:
-            index = int(ключ.rsplit('.', 1)[-1])
+            index = int(key.rsplit('.', 1)[-1])
         except ValueError:
             index = 0
-        if ключ.startswith('examples.state.'):
+        if key.startswith('examples.state.'):
             # examples.state.<состояние>.<номер> — сдвиг берётся из ключа,
             # а не из поля состояния: состояние сделки участник меняет
             # своими действиями, и после согласования спорная сделка
             # перестала бы опознаваться собственным окном списка.
-            состояние = ключ.split('.')[2] if len(ключ.split('.')) > 3 else ''
+            state = key.split('.')[2] if len(key.split('.')) > 3 else ''
             way = 'sale'
-            index += СДВИГ_СОСТОЯНИЯ.get(состояние, 0)
+            index += STATE_SHIFT.get(state, 0)
         else:
-            way = сделка.way if сделка.way in ПРЕДМЕТЫ_ПУТИ else 'sale'
-        название, сумма = _предмет(way, index, rnd)
-        значения = {'name': название}
+            way = deal.way if deal.way in SUBJECT_PATHS else 'sale'
+        title, amount = _subject(way, index, rnd)
+        values = {'name': title}
         # Сумма переписывается только там, где она была одинаковой у всех
         # двадцати пяти: у сделок по состоянию разброс был и раньше, и
         # менять его — значит терять уже показанное.
-        if ключ.startswith('examples.way.'):
-            значения['amount'] = сумма
-        if not сделка.city:
-            значения['city'] = ГОРОДА_СДЕЛОК[index % len(ГОРОДА_СДЕЛОК)]
-        сделка.write(значения)
-        починено += 1
-    return {'сделка переименована': починено} if починено else {}
+        if key.startswith('examples.way.'):
+            values['amount'] = amount
+        if not deal.city:
+            values['city'] = DEAL_CITIES[index % len(DEAL_CITIES)]
+        deal.write(values)
+        fixed_count += 1
+    return {'сделка переименована': fixed_count} if fixed_count else {}
 
 
-def _предмет(way, index, rnd):
+def _subject(way, index, rnd):
     """Название предмета сделки и сумма под него.
 
     Название — предмет, а не исход. «Отменена по соглашению сторон» —
@@ -829,14 +829,14 @@ def _предмет(way, index, rnd):
     каталог читается как журнал, и картинку такой карточке не подобрать —
     искать нечего.
     """
-    предметы = ПРЕДМЕТЫ_ПУТИ.get(way) or ПРЕДМЕТЫ_ПУТИ['sale']
-    название = предметы[index % len(предметы)]
-    низ, верх = ЦЕНЫ_ПУТИ.get(way, (8000, 220000))
-    if верх == 0:
-        return название, 0
+    subjects = SUBJECT_PATHS.get(way) or SUBJECT_PATHS['sale']
+    title = subjects[index % len(subjects)]
+    bottom, top = PRICE_PATHS.get(way, (8000, 220000))
+    if top == 0:
+        return title, 0
     # Шаг в пятьсот рублей: суммы в объявлениях круглые, и случайное
     # число до рубля выдаёт машинное происхождение с первого взгляда.
-    return название, rnd.randrange(низ, верх + 1, 500)
+    return title, rnd.randrange(bottom, top + 1, 500)
 
 
 def _payment_cases(env):
@@ -1061,7 +1061,7 @@ def _newcomers_for_verification(env, kind, state, method, need):
     # и в каталоге людей стояли «Белкина Ольга Викторович» и «Жукова
     # Инна Сергеевич» — четырнадцать таких. Ошибки нет, запись
     # создаётся, и видно это только глазами в каталоге.
-    основа = {
+    base = {
         ('identity', 'pending'): ('Сергеевич', 'Сергеевна'),
         ('identity', 'rejected'): ('Викторович', 'Викторовна'),
         ('phone', 'pending'): ('Данилович', 'Даниловна'),
@@ -1079,14 +1079,14 @@ def _newcomers_for_verification(env, kind, state, method, need):
     cities = ['Пермь', 'Омск', 'Тула', 'Казань', 'Ижевск', 'Курск', 'Псков']
     created = 0
     for index in range(need):
-        фио = names[index % len(names)]
+        full_name = names[index % len(names)]
         # Пол определяется по фамилии: русская женская фамилия кончается
         # на «-ова», «-ева», «-ина», «-ская». Способ не универсальный —
         # «Черных» и «Шевченко» он не различит, — но в этом списке
         # фамилии обычные, и здесь его хватает.
-        женская = фио.split()[0].endswith(('ова', 'ева', 'ёва', 'ина',
+        female = full_name.split()[0].endswith(('ова', 'ева', 'ёва', 'ина',
                                            'ская', 'ая'))
-        name = '%s %s' % (фио, основа[1] if женская else основа[0])
+        name = '%s %s' % (full_name, base[1] if female else base[0])
         partner = Partner.search([('name', '=', name)], limit=1)
         if not partner:
             partner = Partner.create({

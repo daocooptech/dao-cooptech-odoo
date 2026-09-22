@@ -290,7 +290,7 @@ class CoopVacancy(models.Model):
         self.env['coop.notification']._notify(
             self.partner_id | self._need_deciders(),
             _('Отклик на вашу вакансию «%(лот)s» — %(кто)s.',
-              лот=self.name, кто=me.display_name),
+              lot=self.name, who=me.display_name),
             record=self, kind='vacancy')
         return True
 
@@ -387,12 +387,12 @@ class CoopVacancyApplication(models.Model):
         месте с правилом намеренно — разойдись они, и человек увидел бы
         кнопку, которая отвечает отказом в доступе.
         """
-        мои = self.env.user.coop_actor_partner_ids
+        mine = self.env.user.coop_actor_partner_ids
         for record in self:
-            вакансия = record.vacancy_id
+            vacancy = record.vacancy_id
             record.can_decide = bool(
-                вакансия.partner_id in мои
-                or вакансия.need_manager_id in мои)
+                vacancy.partner_id in mine
+                or vacancy.need_manager_id in mine)
 
     @api.depends('vacancy_id.name', 'partner_id.display_name')
     def _compute_display_name(self):

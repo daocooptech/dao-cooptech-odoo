@@ -30,15 +30,15 @@ class CoopGroupbuyJoin(models.TransientModel):
 
     def action_join(self):
         self.ensure_one()
-        складчина = self.groupbuy_id
-        я = self.env.user._coop_acting_partner()
+        groupbuy = self.groupbuy_id
+        me = self.env.user._coop_acting_partner()
 
-        if складчина.state != 'collecting':
+        if groupbuy.state != 'collecting':
             raise UserError(_(
                 'Участвовать можно в идущем сборе. Сейчас он в состоянии '
                 '«%s».') % dict(
-                    складчина._fields['state'].selection)[складчина.state])
-        if складчина.organizer_id == я:
+                    groupbuy._fields['state'].selection)[groupbuy.state])
+        if groupbuy.organizer_id == me:
             raise UserError(_(
                 'Это ваша складчина. Организатор считает себя отдельно, а не '
                 'заказом наравне с участниками.'))
@@ -46,33 +46,33 @@ class CoopGroupbuyJoin(models.TransientModel):
             raise UserError(_('Количество должно быть больше нуля.'))
 
         Order = self.env['coop.groupbuy.order'].sudo()
-        уже = Order.search([
-            ('groupbuy_id', '=', складчина.id),
-            ('partner_id', '=', я.id),
+        already = Order.search([
+            ('groupbuy_id', '=', groupbuy.id),
+            ('partner_id', '=', me.id),
             ('state', '!=', 'cancelled'),
         ], limit=1)
-        if уже:
+        if already:
             raise UserError(_(
                 'Вы уже участвуете в этой складчине. Поправьте свой заказ, а '
                 'не заводите второй.'))
 
         # Через sudo: заказ ссылается на чужую складчину, и права писать в
         # неё у участника нет. Проверки выше — вместо этих прав.
-        заказ = Order.create({
-            'groupbuy_id': складчина.id,
-            'partner_id': я.id,
+        order = Order.create({
+            'groupbuy_id': groupbuy.id,
+            'partner_id': me.id,
             'quantity': self.quantity,
             'state': 'draft',
         })
 
-        тело = _('Заказ в складчине «%(что)s»: %(сколько)s от %(кто)s.',
-                 что=складчина.name, сколько=self.quantity,
-                 кто=я.display_name)
+        body = _('Заказ в складчине «%(что)s»: %(сколько)s от %(кто)s.',
+                 what=groupbuy.name, how_many=self.quantity,
+                 who=me.display_name)
         if self.note:
-            тело = '%s %s' % (тело, self.note)
+            body = '%s %s' % (body, self.note)
         # Организатору: он ведёт сбор и без извещения о новом заказе не
         # узнает, что ступень цены сдвинулась.
         self.env['coop.notification']._notify(
-            складчина.organizer_id, тело, record=складчина, kind='other')
-        складчина.sudo().message_post(body=тело)
+            groupbuy.organizer_id, body, record=groupbuy, kind='other')
+        groupbuy.sudo().message_post(body=body)
         return {'type': 'ir.actions.act_window_close'}

@@ -246,20 +246,20 @@ def load():
 
 def stats(g=None):
     g = g or load()
-    поля = sum(len(m["поля"]) for m in g["модели"])
-    связи = (поля
+    fields = sum(len(m["поля"]) for m in g["модели"])
+    links = (fields
              + sum(len(m["зависит"]) for m in g["модули"])
              + sum(len(v["классы"]) for v in g["представления"])
              + sum(len(v) for v in g["использование_классов"].values()))
     print("модулей:", len(g["модули"]))
     print("моделей:", len({m["модель"] for m in g["модели"] if m["модель"]}),
           "· описаний классов:", len(g["модели"]))
-    print("полей:", поля)
+    print("полей:", fields)
     print("представлений:", len(g["представления"]),
           "· действий:", len(g["действия"]))
     print("селекторов:", len(g["селекторы"]),
           "· классов в разметке:", len(g["использование_классов"]))
-    print("связей:", связи)
+    print("связей:", links)
     if g["ошибки"]:
         print("не разобрано файлов:", len(g["ошибки"]))
         for e in g["ошибки"][:5]:
@@ -271,13 +271,13 @@ def stats(g=None):
 def q_model(g, name):
     for m in g["модели"]:
         if m["модель"] == name:
-            метка = "объявлена" if m["объявлена"] else "дополняет"
+            label = "объявлена" if m["объявлена"] else "дополняет"
             print("%s %s · %s:%d · модуль %s"
-                  % (метка, m["класс"], m["файл"], m["строка"], m["модуль"]))
+                  % (label, m["класс"], m["файл"], m["строка"], m["модуль"]))
             for f in m["поля"]:
-                вычисл = " ← %s" % f["вычисляемое"] if f["вычисляемое"] else ""
+                comp = " ← %s" % f["вычисляемое"] if f["вычисляемое"] else ""
                 print("   %-28s %-12s %s%s"
-                      % (f["имя"], f["тип"], f["подпись"] or "", вычисл))
+                      % (f["имя"], f["тип"], f["подпись"] or "", comp))
     views = [v for v in g["представления"] if v["модель"] == name]
     if views:
         print("\nпредставления:")
@@ -305,33 +305,33 @@ def q_view(g, name):
 
 
 def q_class(g, name):
-    места = g["селекторы"].get(name)
-    if места:
+    places = g["селекторы"].get(name)
+    if places:
         print("задан:")
-        for m in места:
+        for m in places:
             print("   %s:%d" % (m["файл"], m["строка"]))
     else:
         print("в стилях не найден")
-    польз = g["использование_классов"].get(name)
-    if польз:
+    usr = g["использование_классов"].get(name)
+    if usr:
         print("используется в разметке:")
-        for f in польз:
+        for f in usr:
             print("  ", f)
 
 
 def q_cards(g):
     """Кто каким семейством карточек рисует канбан — главный вопрос дня."""
-    семьи = {}
+    families = {}
     for v in g["представления"]:
         if v["вид"] != "kanban" or not v["карточка"]:
             continue
-        семьи.setdefault(v["карточка"], []).append(
+        families.setdefault(v["карточка"], []).append(
             "%s (%s)" % (v["модель"], v["модуль"]))
-    for корень in sorted(семьи, key=lambda k: -len(семьи[k])):
-        где = g["селекторы"].get(корень)
-        адрес = где[0]["файл"] if где else "стиль не найден"
+    for root in sorted(families, key=lambda k: -len(families[k])):
+        where = g["селекторы"].get(root)
+        address = where[0]["файл"] if where else "стиль не найден"
         print("%-22s %-42s %d: %s"
-              % (корень, адрес, len(семьи[корень]), ", ".join(семьи[корень])))
+              % (root, address, len(families[root]), ", ".join(families[root])))
 
 
 def q_naked(g):
@@ -345,15 +345,15 @@ def q_naked(g):
     при o_coop_listing_meta) правил не требует, оформление ему приходит
     от соседа. Смотреть надо те, у которых соседа нет.
     """
-    селекторы = set(g["селекторы"])
-    голые = {c: f for c, f in g["использование_классов"].items()
-             if c not in селекторы and not c.endswith("_")}
-    print("ссылок без своих правил:", len(голые))
-    for cls in sorted(голые):
-        соседи = [s for s in селекторы if cls.startswith(s) or s.startswith(cls)]
-        пометка = "" if соседи else "  ← правил нет и рядом"
+    selectors = set(g["селекторы"])
+    bare = {c: f for c, f in g["использование_классов"].items()
+             if c not in selectors and not c.endswith("_")}
+    print("ссылок без своих правил:", len(bare))
+    for cls in sorted(bare):
+        neighbours = [s for s in selectors if cls.startswith(s) or s.startswith(cls)]
+        note_mark = "" if neighbours else "  ← правил нет и рядом"
         print("  %-32s %-28s%s" % (cls, ", ".join(sorted({f.split("/")[0]
-              for f in голые[cls]}))[:26], пометка))
+              for f in bare[cls]}))[:26], note_mark))
 
 
 def q_action(g, name):
@@ -375,9 +375,9 @@ def q_grep(g, needle):
     for v in g["представления"]:
         if n in (v["xmlid"] or "").lower():
             print("вид     %s  %s" % (v["xmlid"], v["файл"]))
-    for cls, места in g["селекторы"].items():
+    for cls, places in g["селекторы"].items():
         if n in cls.lower():
-            print("класс   %s  %s:%d" % (cls, места[0]["файл"], места[0]["строка"]))
+            print("класс   %s  %s:%d" % (cls, places[0]["файл"], places[0]["строка"]))
 
 
 COMMANDS = {

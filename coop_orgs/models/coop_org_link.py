@@ -24,7 +24,7 @@ from odoo.exceptions import UserError, ValidationError
 # Первое слово — от лица того, кто связь завёл (сторона «А»), второе —
 # от лица второй. «Входит в союз» с одной стороны и «Член союза» с
 # другой — это одна и та же запись, а не две.
-ВИДЫ = [
+KINDS = [
     ('union', 'Входит в союз'),
     ('member', 'Член объединения'),
     ('founder', 'Учредитель'),
@@ -34,7 +34,7 @@ from odoo.exceptions import UserError, ValidationError
     ('partner', 'Партнёр'),
 ]
 
-ОБРАТНО = {
+BACK = {
     'union': 'member',
     'member': 'union',
     'founder': 'subsidiary',
@@ -57,7 +57,7 @@ class CoopOrgLink(models.Model):
         'res.partner', string='Связанная организация', required=True,
         index=True, ondelete='cascade', domain=[('is_company', '=', True)])
     kind = fields.Selection(
-        ВИДЫ, string='Вид связи', required=True, default='partner',
+        KINDS, string='Вид связи', required=True, default='partner',
         help='Как первая организация относится ко второй. Обратное '
              'отношение выводится само.')
     note = fields.Char(string='Пояснение')
@@ -83,10 +83,10 @@ class CoopOrgLink(models.Model):
     def kind_from(self, partner):
         """Как эта связь читается со стороны данной организации."""
         self.ensure_one()
-        подписи = dict(ВИДЫ)
+        captions = dict(KINDS)
         if partner == self.org_id:
-            return подписи.get(self.kind, '')
-        return подписи.get(ОБРАТНО.get(self.kind, self.kind), '')
+            return captions.get(self.kind, '')
+        return captions.get(BACK.get(self.kind, self.kind), '')
 
     def action_confirm(self):
         """Подтвердить связь со второй стороны."""

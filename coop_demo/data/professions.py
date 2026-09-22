@@ -32,7 +32,7 @@ IMG_DIR = os.path.join(os.path.dirname(HERE), 'static', 'img')
 
 # Специализация → снимки, «папка/файл». Порядок внутри значения не
 # важен: какой достанется записи, решает её название.
-СНИМКИ = {
+PHOTOS = {
     'HR-менеджер': ('vacancies/business-meeting.jpg', 'vacancies/coworking.jpg',
                     'skills/office-desk.jpg'),
     'SMM': ('vacancies/smm-specialist.jpg', 'skills/marketer.jpg',
@@ -172,10 +172,10 @@ IMG_DIR = os.path.join(os.path.dirname(HERE), 'static', 'img')
 }
 
 
-def файлы(specialization):
+def files(specialization):
     """Снимки, годные этой специализации, — только те, что есть на диске."""
-    пути = СНИМКИ.get(specialization or '', ())
-    return [п for п in пути if os.path.exists(os.path.join(IMG_DIR, п))]
+    paths = PHOTOS.get(specialization or '', ())
+    return [p for p in paths if os.path.exists(os.path.join(IMG_DIR, p))]
 
 
 def photo_for(name, specialization):
@@ -185,17 +185,17 @@ def photo_for(name, specialization):
     должен быть один и тот же при каждом прогоне, иначе каталог меняется
     на ровном месте и отличить правку от шума нельзя.
     """
-    годные = файлы(specialization)
-    if not годные:
+    fit = files(specialization)
+    if not fit:
         return None
-    номер = zlib.crc32((name or '').encode('utf-8')) % len(годные)
-    with open(os.path.join(IMG_DIR, годные[номер]), 'rb') as fh:
+    number = zlib.crc32((name or '').encode('utf-8')) % len(fit)
+    with open(os.path.join(IMG_DIR, fit[number]), 'rb') as fh:
         return base64.b64encode(fh.read())
 
 
-def все_файлы():
+def all_files():
     """Все снимки занятий — по ним узнаётся раздача в базе."""
-    пути = set()
-    for значения in СНИМКИ.values():
-        пути.update(значения)
-    return sorted(пути)
+    paths = set()
+    for values in PHOTOS.values():
+        paths.update(values)
+    return sorted(paths)

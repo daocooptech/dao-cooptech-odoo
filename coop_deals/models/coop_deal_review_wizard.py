@@ -39,14 +39,14 @@ class CoopDealReviewWizard(models.TransientModel):
 
     def action_send(self):
         self.ensure_one()
-        сделка = self.deal_id
-        цель = сделка._other_partner()
-        if not цель:
+        deal = self.deal_id
+        target = deal._other_partner()
+        if not target:
             raise UserError(_('Не видно второй стороны сделки.'))
         self.env['coop.deal.review'].create({
-            'deal_id': сделка.id,
+            'deal_id': deal.id,
             'author_id': self.env.user._coop_acting_partner().id,
-            'target_id': цель.id,
+            'target_id': target.id,
             'rating': self.rating,
             'body': self.body,
         })

@@ -38,7 +38,7 @@ class CoopLegalFormGroup(models.Model):
         help='Подпись полки состава: «Пайщики», «Сотрудники», «Участники».')
 
     # Значения по коду группы — на случай, когда их ещё нет.
-    ПОДПИСИ = {
+    CAPTIONS = {
         'commercial': ('Коммерческая организация', 'Сотрудники'),
         'cooperative': ('Кооперативная организация', 'Пайщики'),
         'nonprofit': ('Некоммерческая организация', 'Участники'),
@@ -58,13 +58,13 @@ class CoopLegalFormGroup(models.Model):
         трогает, а повторный запуск ничего не портит.
         """
         super().init()
-        for код, (вид, состав) in self.ПОДПИСИ.items():
+        for form_code, (kind, composition) in self.CAPTIONS.items():
             self.env.cr.execute("""
                 UPDATE coop_legal_form_group
                    SET card_label = COALESCE(NULLIF(card_label, ''), %s),
                        member_label = COALESCE(NULLIF(member_label, ''), %s)
                  WHERE code = %s
-            """, (вид, состав, код))
+            """, (kind, composition, form_code))
 
     _code_uniq = models.Constraint(
         'unique(code)',

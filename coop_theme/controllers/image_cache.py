@@ -36,43 +36,43 @@ from odoo.addons.web.controllers.binary import Binary
 # Десяти минут хватает, чтобы убрать переспрашивание внутри одного
 # сеанса работы (ради него всё и делалось), и мало, чтобы застой успел
 # кого-то запутать.
-СРОК_ПО_УМОЛЧАНИЮ = 600
+DEFAULT_DEADLINE = 600
 
 
 class CoopBinary(Binary):
 
     @http.route()
     def content_image(self, *args, **kwargs):
-        ответ = super().content_image(*args, **kwargs)
+        answer = super().content_image(*args, **kwargs)
         if kwargs.get('unique') or kwargs.get('nocache'):
             # Об этих Odoo уже позаботилась: первым выдан вечный срок,
             # вторым он снят намеренно.
-            return ответ
-        if ответ.status_code not in (200, 304):
-            return ответ
-        срок = self._coop_image_max_age(kwargs)
-        if not срок:
-            return ответ
-        ответ.cache_control.pop('no-cache', None)
-        ответ.cache_control.pop('public', None)
-        ответ.cache_control.private = True
-        ответ.cache_control.max_age = срок
-        return ответ
+            return answer
+        if answer.status_code not in (200, 304):
+            return answer
+        deadline = self._coop_image_max_age(kwargs)
+        if not deadline:
+            return answer
+        answer.cache_control.pop('no-cache', None)
+        answer.cache_control.pop('public', None)
+        answer.cache_control.private = True
+        answer.cache_control.max_age = deadline
+        return answer
 
     def _coop_image_max_age(self, kwargs):
         """Сколько браузеру можно не переспрашивать про эту картинку."""
         env = http.request.env
-        параметр = env['ir.config_parameter'].sudo().get_param(
-            'coop.image_cache_seconds', СРОК_ПО_УМОЛЧАНИЮ)
+        param = env['ir.config_parameter'].sudo().get_param(
+            'coop.image_cache_seconds', DEFAULT_DEADLINE)
         try:
-            срок = int(параметр)
+            deadline = int(param)
         except (TypeError, ValueError):
-            срок = СРОК_ПО_УМОЛЧАНИЮ
-        if срок <= 0:
+            deadline = DEFAULT_DEADLINE
+        if deadline <= 0:
             return 0
         if self._coop_is_my_own(kwargs):
             return 0
-        return срок
+        return deadline
 
     def _coop_is_my_own(self, kwargs):
         """Это моя собственная карточка?
@@ -83,14 +83,14 @@ class CoopBinary(Binary):
         if kwargs.get('model') != 'res.partner':
             return False
         try:
-            кто = int(kwargs.get('id') or 0)
+            who = int(kwargs.get('id') or 0)
         except (TypeError, ValueError):
             return False
-        if not кто:
+        if not who:
             return False
-        пользователь = http.request.env.user
-        мои = пользователь.partner_id.ids
+        user = http.request.env.user
+        mine = user.partner_id.ids
         # Действие от имени организации: её карточка тоже «своя».
-        if 'coop_actor_partner_ids' in пользователь._fields:
-            мои = мои + пользователь.coop_actor_partner_ids.ids
-        return кто in мои
+        if 'coop_actor_partner_ids' in user._fields:
+            mine = mine + user.coop_actor_partner_ids.ids
+        return who in mine

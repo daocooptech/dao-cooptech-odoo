@@ -31,58 +31,58 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 IMG_DIR = os.path.join(ROOT, 'coop_demo', 'static', 'img')
 
 
-def заменить(цель, запрос):
+def replace(target, request):
     """Скачать снимок по запросу и положить вместо `цель`."""
-    путь = os.path.join(IMG_DIR, цель.replace('/', os.sep))
-    if not путь.lower().endswith(('.jpg', '.jpeg', '.png')):
-        путь += '.jpg'
-    os.makedirs(os.path.dirname(путь), exist_ok=True)
-    временный = путь + '.new'
+    path = os.path.join(IMG_DIR, target.replace('/', os.sep))
+    if not path.lower().endswith(('.jpg', '.jpeg', '.png')):
+        path += '.jpg'
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    temp = path + '.new'
     try:
-        адреса = fetch_photos.спросить(запрос, 4)
+        addresses = fetch_photos.ask(request, 4)
     except Exception as e:
-        print('%-34s не спросилось: %s' % (цель, e))
+        print('%-34s не спросилось: %s' % (target, e))
         return False
-    for адрес in адреса:
+    for address in addresses:
         try:
-            if fetch_photos.скачать(адрес, временный):
-                os.replace(временный, путь)
-                print('%-34s заменён' % цель)
+            if fetch_photos.download(address, temp):
+                os.replace(temp, path)
+                print('%-34s заменён' % target)
                 return True
         except Exception:
             continue
         finally:
-            if os.path.exists(временный):
-                os.remove(временный)
+            if os.path.exists(temp):
+                os.remove(temp)
         time.sleep(0.2)
-    print('%-34s не нашлось ничего годного' % цель)
+    print('%-34s не нашлось ничего годного' % target)
     return False
 
 
 def main():
-    разбор = argparse.ArgumentParser()
-    разбор.add_argument('цель', nargs='?', help='папка/имя снимка')
-    разбор.add_argument('запрос', nargs='?', help='что искать по-английски')
-    разбор.add_argument('--list', dest='список',
+    parsed = argparse.ArgumentParser()
+    parsed.add_argument('цель', nargs='?', help='папка/имя снимка')
+    parsed.add_argument('запрос', nargs='?', help='что искать по-английски')
+    parsed.add_argument('--list', dest='список',
                         help='файл со списком «цель<TAB>запрос»')
-    аргументы = разбор.parse_args()
+    args = parsed.parse_args()
 
-    задания = []
-    if аргументы.список:
-        with io.open(аргументы.список, encoding='utf-8') as fh:
-            for строка in fh:
-                строка = строка.strip()
-                if not строка or строка.startswith('#'):
+    tasks = []
+    if args.items:
+        with io.open(args.items, encoding='utf-8') as fh:
+            for line in fh:
+                line = line.strip()
+                if not line or line.startswith('#'):
                     continue
-                цель, _, запрос = строка.partition('\t')
-                задания.append((цель.strip(), запрос.strip()))
-    elif аргументы.цель and аргументы.запрос:
-        задания.append((аргументы.цель, аргументы.запрос))
+                target, _, request = line.partition('\t')
+                tasks.append((target.strip(), request.strip()))
+    elif args.target and args.request:
+        tasks.append((args.target, args.request))
     else:
-        разбор.error('нужны цель и запрос либо --list')
+        parsed.error('нужны цель и запрос либо --list')
 
-    заменено = sum(1 for цель, запрос in задания if заменить(цель, запрос))
-    print('\nзаменено: %s из %s' % (заменено, len(задания)))
+    replaced = sum(1 for target, request in tasks if replace(target, request))
+    print('\nзаменено: %s из %s' % (replaced, len(tasks)))
     return 0
 
 

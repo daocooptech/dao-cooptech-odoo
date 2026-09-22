@@ -231,11 +231,11 @@ class CoopWarehouseOffer(models.Model):
     @api.depends('state', 'warehouse_id.owner_id')
     def _compute_can_respond(self):
         """Тот же вопрос, что решает кнопку, и тот же, что решает отказ."""
-        мои = self.env.user.coop_actor_partner_ids
+        mine = self.env.user.coop_actor_partner_ids
         for record in self:
             record.can_respond = bool(
                 record.state == 'published'
-                and record.warehouse_id.owner_id not in мои)
+                and record.warehouse_id.owner_id not in mine)
 
     def action_respond(self):
         """«Отправить отклик» — как в макете (`ext-warehouse.html`).
@@ -248,14 +248,14 @@ class CoopWarehouseOffer(models.Model):
         if not self.can_respond:
             raise UserError(_(
                 'Откликнуться можно на выставленные мощности, и не на свои.'))
-        я = self.env.user._coop_acting_partner()
-        владелец = self.warehouse_id.owner_id
-        сделка = self.env['coop.deal'].sudo().create({
+        me = self.env.user._coop_acting_partner()
+        owner = self.warehouse_id.owner_id
+        deal = self.env['coop.deal'].sudo().create({
             'name': _('Место на складе «%s»') % self.warehouse_id.name,
             'subject': 'resource',
             'way': 'rent',
-            'party_a_id': владелец.id,
-            'party_b_id': я.id,
+            'party_a_id': owner.id,
+            'party_b_id': me.id,
             'role_a': _('Передаёт'),
             'role_b': _('Принимает'),
             'author_id': self.env.user.partner_id.id,
@@ -263,18 +263,18 @@ class CoopWarehouseOffer(models.Model):
             'amount': self.main_price or 0.0,
             'state': 'draft',
         })
-        тело = _('Отклик на свободные мощности склада «%(склад)s» от '
+        body = _('Отклик на свободные мощности склада «%(склад)s» от '
                  '%(кто)s. Заведены переговоры по сделке %(номер)s.',
-                 склад=self.warehouse_id.name, кто=я.display_name,
-                 номер=сделка.number or '')
+                 warehouse=self.warehouse_id.name, who=me.display_name,
+                 number=deal.number or '')
         self.env['coop.notification']._notify(
-            владелец, тело, record=сделка, kind='deal')
-        сделка.message_post(body=тело)
+            owner, body, record=deal, kind='deal')
+        deal.message_post(body=body)
         return {
             'type': 'ir.actions.act_window',
-            'name': _('Сделка %s') % (сделка.number or ''),
+            'name': _('Сделка %s') % (deal.number or ''),
             'res_model': 'coop.deal',
-            'res_id': сделка.id,
+            'res_id': deal.id,
             'view_mode': 'form',
             'target': 'current',
         }

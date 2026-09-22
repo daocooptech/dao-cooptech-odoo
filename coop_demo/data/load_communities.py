@@ -190,8 +190,8 @@ def load_communities(env):
         # сообщества (их было по двенадцать на брата), а этот шаг видел
         # «состав разошёлся» и набирал их заново. Тысяча сто участий
         # заводилась и удалялась на каждом прогоне.
-        ведущий = community.member_ids.filtered(lambda m: m.role == 'owner')
-        if not community.member_ids or not ведущий:
+        leader = community.member_ids.filtered(lambda m: m.role == 'owner')
+        if not community.member_ids or not leader:
             # Пока состав перебирается, сообщество возвращается в
             # черновик: у опубликованного обязан быть ведущий, а он в
             # этот момент как раз удаляется.

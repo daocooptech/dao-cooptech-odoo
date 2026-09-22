@@ -191,56 +191,56 @@ def link_organizations(env):
     """
     Link = env['coop.org.link'].sudo()
     Partner = env['res.partner'].sudo()
-    организации = Partner.search([
+    organizations = Partner.search([
         ('is_company', '=', True), ('coop_is_participant', '=', True)],
         order='id')
-    if len(организации) < 4:
+    if len(organizations) < 4:
         return 0
 
     # Союзы и объединения — те, у кого в названии это сказано прямо.
-    союзы = организации.filtered(
-        lambda о: any(слово in (о.name or '').lower()
-                      for слово in ('союз', 'ассоциац', 'объединен', 'федерац')))
-    прочие = организации - союзы
+    unions = organizations.filtered(
+        lambda o: any(word in (o.name or '').lower()
+                      for word in ('союз', 'ассоциац', 'объединен', 'федерац')))
+    rest = organizations - unions
 
     rnd = random.Random(20260915)
-    заведено = 0
-    for номер, организация in enumerate(прочие):
-        если_есть = Link.search_count(['|',
-            ('org_id', '=', организация.id),
-            ('other_id', '=', организация.id)])
-        if если_есть:
+    created = 0
+    for number, organization in enumerate(rest):
+        if_any = Link.search_count(['|',
+            ('org_id', '=', organization.id),
+            ('other_id', '=', organization.id)])
+        if if_any:
             continue
 
-        связи = []
+        links = []
         # В союз входит примерно каждая третья: не все кооперативы
         # состоят в объединениях, и показывать обратное было бы неправдой.
-        if союзы and номер % 3 == 0:
-            связи.append((союзы[номер % len(союзы)], 'union'))
+        if unions and number % 3 == 0:
+            links.append((unions[number % len(unions)], 'union'))
         # Поставщик и покупатель — из своего же города, если есть: связи
         # чаще складываются по соседству.
-        соседи = прочие.filtered(
-            lambda о: о.city == организация.city and о != организация)
-        набор = соседи or (прочие - организация)
-        if набор:
-            связи.append((набор[номер % len(набор)], 'supplier'))
-        if len(набор) > 1 and номер % 2 == 0:
-            связи.append((набор[(номер + 1) % len(набор)], 'partner'))
+        neighbours = rest.filtered(
+            lambda o: o.city == organization.city and o != organization)
+        set_of = neighbours or (rest - organization)
+        if set_of:
+            links.append((set_of[number % len(set_of)], 'supplier'))
+        if len(set_of) > 1 and number % 2 == 0:
+            links.append((set_of[(number + 1) % len(set_of)], 'partner'))
 
-        for вторая, вид in связи:
-            if вторая == организация:
+        for other_org, kind in links:
+            if other_org == organization:
                 continue
             with env.cr.savepoint():
                 Link.create({
-                    'org_id': организация.id,
-                    'other_id': вторая.id,
-                    'kind': вид,
+                    'org_id': organization.id,
+                    'other_id': other_org.id,
+                    'kind': kind,
                     'confirmed': True,
                 })
-            заведено += 1
+            created += 1
 
-    _logger.info('Связи организаций: заведено %s', заведено)
-    return заведено
+    _logger.info('Связи организаций: заведено %s', created)
+    return created
 
 def give_services(env):
     """Отдать часть предложений навыков организациям.
@@ -263,42 +263,42 @@ def give_services(env):
     """
     Offer = env['coop.skill.offer'].sudo()
     Partner = env['res.partner'].sudo()
-    организации = Partner.search([
+    organizations = Partner.search([
         ('is_company', '=', True), ('coop_is_participant', '=', True)],
         order='id')
-    if not организации:
+    if not organizations:
         return 0
 
     # Только у людей и только опубликованные: у организации уже может
     # быть своё, а снятое с публикации на витрине не показывается.
-    свободные = Offer.search([
+    free = Offer.search([
         ('state', '=', 'published'),
         ('partner_id.is_company', '=', False),
     ], order='id')
-    if not свободные:
+    if not free:
         _logger.info('Услуги организаций: свободных предложений нет')
         return 0
 
     # Примерно каждой третьей организации — одна-две услуги. Не всем:
     # услуги оказывает не всякий кооператив, и полка у всех подряд
     # выглядела бы одинаково выдуманной.
-    отдано = 0
-    поток = iter(свободные)
-    for номер, организация in enumerate(организации):
-        if номер % 3:
+    given = 0
+    stream = iter(free)
+    for number, organization in enumerate(organizations):
+        if number % 3:
             continue
-        if Offer.search_count([('partner_id', '=', организация.id)]):
+        if Offer.search_count([('partner_id', '=', organization.id)]):
             continue
-        сколько = 1 + (номер % 2)
-        for _ in range(сколько):
-            предложение = next(поток, None)
-            if предложение is None:
+        how_many = 1 + (number % 2)
+        for _ in range(how_many):
+            offer = next(stream, None)
+            if offer is None:
                 _logger.info('Услуги организаций: отдано %s, предложения кончились',
-                             отдано)
-                return отдано
+                             given)
+                return given
             with env.cr.savepoint():
-                предложение.write({'partner_id': организация.id})
-            отдано += 1
+                offer.write({'partner_id': organization.id})
+            given += 1
 
-    _logger.info('Услуги организаций: отдано %s предложений', отдано)
-    return отдано
+    _logger.info('Услуги организаций: отдано %s предложений', given)
+    return given

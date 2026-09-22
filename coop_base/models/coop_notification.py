@@ -70,27 +70,27 @@ class CoopNotification(models.Model):
         partners = partners.exists() if partners else partners
         if not partners:
             return self.browse()
-        я = self.env.user._coop_acting_partner() if hasattr(
+        me = self.env.user._coop_acting_partner() if hasattr(
             self.env.user, '_coop_acting_partner') else self.env.user.partner_id
-        значения = []
+        values = []
         for partner in partners:
-            if partner == я:
+            if partner == me:
                 continue
-            строка = {
+            line = {
                 'partner_id': partner.id,
                 'body': body,
                 'kind': kind,
             }
             if record is not None and record:
-                строка['res_model'] = record._name
-                строка['res_id'] = record.id
-            значения.append(строка)
-        if not значения:
+                line['res_model'] = record._name
+                line['res_id'] = record.id
+            values.append(line)
+        if not values:
             return self.browse()
-        return self._coop_deliver(значения, kind)
+        return self._coop_deliver(values, kind)
 
     @api.model
-    def _coop_deliver(self, значения, kind):
+    def _coop_deliver(self, values, kind):
         """Разложить извещения по каналам, которые человек оставил себе.
 
         Настройка спрашивается по каждому получателю: одно и то же
@@ -99,22 +99,22 @@ class CoopNotification(models.Model):
         """
         Pref = self.env['coop.notification.pref']
         Partner = self.env['res.partner'].sudo()
-        созданные = []
-        почтой = []
-        for строка in значения:
-            partner = Partner.browse(строка['partner_id'])
-            в_платформе, письмом = Pref._allowed(partner, kind)
-            if в_платформе:
-                созданные.append(строка)
-            if письмом and partner.email:
-                почтой.append((partner, строка))
-        записи = self.sudo().create(созданные) if созданные else self.browse()
-        for partner, строка in почтой:
-            self._coop_send_email(partner, строка)
-        return записи
+        created_list = []
+        by_mail = []
+        for line in values:
+            partner = Partner.browse(line['partner_id'])
+            in_platform, by_letter = Pref._allowed(partner, kind)
+            if in_platform:
+                created_list.append(line)
+            if by_letter and partner.email:
+                by_mail.append((partner, line))
+        records = self.sudo().create(created_list) if created_list else self.browse()
+        for partner, line in by_mail:
+            self._coop_send_email(partner, line)
+        return records
 
     @api.model
-    def _coop_send_email(self, partner, строка):
+    def _coop_send_email(self, partner, line):
         """Письмо о событии — если сейчас не тихий час.
 
         В тихие часы письмо не отправляется вовсе, а не откладывается:
@@ -125,7 +125,7 @@ class CoopNotification(models.Model):
             return False
         self.env['mail.mail'].sudo().create({
             'subject': _('ДАО КООПТЕХ: событие'),
-            'body_html': строка['body'],
+            'body_html': line['body'],
             'email_to': partner.email,
             'auto_delete': True,
         })
@@ -136,16 +136,16 @@ class CoopNotification(models.Model):
         """Тихий час считается по часовому поясу самого человека."""
         user = self.env['res.users'].sudo().search(
             [('partner_id', '=', partner.id)], limit=1)
-        сейчас = fields.Datetime.context_timestamp(
+        now = fields.Datetime.context_timestamp(
             user.with_user(user) if user else self.env.user, fields.Datetime.now())
-        час = сейчас.hour + сейчас.minute / 60.0
-        начало, конец = partner.coop_quiet_from, partner.coop_quiet_to
-        if начало == конец:
+        hour = now.hour + now.minute / 60.0
+        start, end = partner.coop_quiet_from, partner.coop_quiet_to
+        if start == end:
             return False
-        if начало < конец:
-            return начало <= час < конец
+        if start < end:
+            return start <= hour < end
         # Тишина через полночь: с 22 до 8 — это «после 22 или до 8».
-        return час >= начало or час < конец
+        return hour >= start or hour < end
 
     @api.model
     def unread_count(self):
@@ -175,9 +175,9 @@ class CoopNotification(models.Model):
         }
 
     def mark_read(self):
-        непрочитанные = self.filtered(lambda n: not n.is_read)
-        if непрочитанные:
-            непрочитанные.write({
+        unread = self.filtered(lambda n: not n.is_read)
+        if unread:
+            unread.write({
                 'is_read': True,
                 'read_on': fields.Datetime.now(),
             })

@@ -446,19 +446,19 @@ PHOTO_RULES = [
 
 def _photo_by_name(name):
     """Имя файла снимка по названию объявления, или пусто."""
-    низ = name.lower()
-    for ключи, файл in PHOTO_RULES:
-        if any(ключ in низ for ключ in ключи):
-            return файл
+    bottom = name.lower()
+    for keys, file in PHOTO_RULES:
+        if any(key in bottom for key in keys):
+            return file
     return ''
 
 
 def _category_by_name(name):
     """Рубрика и её корень по названию объявления, или пара пустых."""
-    низ = name.lower()
-    for ключи, рубрика in CATEGORY_RULES:
-        if any(ключ in низ for ключ in ключи):
-            return CATEGORY_PARENTS.get(рубрика), рубрика
+    bottom = name.lower()
+    for keys, rubric in CATEGORY_RULES:
+        if any(key in bottom for key in keys):
+            return CATEGORY_PARENTS.get(rubric), rubric
     return None, None
 
 
@@ -506,10 +506,10 @@ def load_resources(env, extra=45):
         # Рубрика по названию, а из строки — только если название ни о чём
         # не говорит. Строке верить нельзя: там и наугад проставленные
         # рубрики макета, и копии образца у доборных записей.
-        корень, рубрика = _category_by_name(row['name'])
-        if рубрика:
-            parent = _category(env, categories, корень) if корень else None
-            category = _category(env, categories, рубрика, parent)
+        root, rubric = _category_by_name(row['name'])
+        if rubric:
+            parent = _category(env, categories, root) if root else None
+            category = _category(env, categories, rubric, parent)
         else:
             parent = _category(env, categories, row['category']) if row['category'] else None
             category = (_category(env, categories, row['subcategory'], parent)
@@ -542,9 +542,9 @@ def load_resources(env, extra=45):
         # Снимок по названию, а из строки — только если правила нет.
         # Строке верить нельзя по той же причине, что и с рубрикой: у
         # доборных записей там снимок образца.
-        файл = _photo_by_name(row['name']) or (
+        file = _photo_by_name(row['name']) or (
             os.path.basename(row['image']) if row['image'] else '')
-        photo = os.path.join(PHOTO_DIR, файл) if файл else ''
+        photo = os.path.join(PHOTO_DIR, file) if file else ''
         if photo and os.path.exists(photo):
             with open(photo, 'rb') as fh:
                 values['image_1920'] = base64.b64encode(fh.read())

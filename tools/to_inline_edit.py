@@ -31,57 +31,57 @@ if hasattr(sys.stdout, 'reconfigure'):
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 
-СТРОКОЙ = {'Char', 'Date', 'Datetime', 'Integer', 'Float', 'Monetary',
+AS_LINE = {'Char', 'Date', 'Datetime', 'Integer', 'Float', 'Monetary',
            'Selection', 'Many2one'}
-БЛОКОМ = {'Text', 'Html'}
+AS_BLOCK = {'Text', 'Html'}
 
 
-def граф():
-    путь = os.path.join(HERE, 'graph.json')
-    with io.open(путь, encoding='utf-8') as fh:
-        данные = json.load(fh)
-    поля, вычисляемые, со_страницей = {}, {}, set()
-    for запись in данные.get('модели', []):
-        модель = запись.get('модель')
-        if not модель:
+def graph():
+    path = os.path.join(HERE, 'graph.json')
+    with io.open(path, encoding='utf-8') as fh:
+        data = json.load(fh)
+    fields, computed, with_page = {}, {}, set()
+    for record in data.get('модели', []):
+        model = record.get('модель')
+        if not model:
             continue
-        наследует = запись.get('наследует') or []
-        if isinstance(наследует, str):
-            наследует = [наследует]
-        if 'coop.page.mixin' in наследует:
-            со_страницей.add(модель)
-        свои = поля.setdefault(модель, {})
-        счёт = вычисляемые.setdefault(модель, set())
-        for поле in запись.get('поля', []):
-            свои[поле.get('имя')] = поле.get('тип')
-            if поле.get('вычисляемое'):
-                счёт.add(поле.get('имя'))
-    return поля, вычисляемые, со_страницей
+        inherits = record.get('наследует') or []
+        if isinstance(inherits, str):
+            inherits = [inherits]
+        if 'coop.page.mixin' in inherits:
+            with_page.add(model)
+        own_list = fields.setdefault(model, {})
+        account = computed.setdefault(model, set())
+        for field in record.get('поля', []):
+            own_list[field.get('имя')] = field.get('тип')
+            if field.get('вычисляемое'):
+                account.add(field.get('имя'))
+    return fields, computed, with_page
 
 
-def модель_формы(текст, позиция):
+def form_model(text, position):
     """Модель той записи представления, внутри которой лежит форма.
 
     По первой модели в файле определять нельзя: рядом со страницей в том
     же файле живут окна мастеров, и у них своя модель. На складчине из-за
     этого страница разбиралась по полям окна «Присоединиться».
     """
-    начало = текст.rfind('<record', 0, позиция)
-    if начало < 0:
+    start = text.rfind('<record', 0, position)
+    if start < 0:
         return ''
-    кусок = текст[начало:позиция]
-    совпадение = re.search(r'<field name="model">([^<]+)</field>', кусок)
-    return совпадение.group(1) if совпадение else ''
+    chunk = text[start:position]
+    match = re.search(r'<field name="model">([^<]+)</field>', chunk)
+    return match.group(1) if match else ''
 
 
-def в_чужом(текст, позиция):
+def in_foreign(text, position):
     """Лежит ли поле в канбане, списке или поиске — там правки нет."""
-    for тег in ('list', 'kanban', 'search', 'templates'):
-        открыт = текст.rfind('<%s' % тег, 0, позиция)
-        if открыт < 0:
+    for tag in ('list', 'kanban', 'search', 'templates'):
+        is_open = text.rfind('<%s' % tag, 0, position)
+        if is_open < 0:
             continue
-        закрыт = текст.rfind('</%s>' % тег, 0, позиция)
-        if закрыт < открыт:
+        is_closed = text.rfind('</%s>' % tag, 0, position)
+        if is_closed < is_open:
             return True
     return False
 
@@ -90,98 +90,98 @@ def в_чужом(текст, позиция):
 # нажимают «Сохранить» внизу, и карандаш у каждого поля означал бы, что
 # запись уже есть. Узнаём по `<footer>` — в Odoo это признак диалога — и
 # по имени представления.
-ОКНО = re.compile(r'wizard|create|add_|_add|respond|apply|contribute|quick|join',
+WINDOW = re.compile(r'wizard|create|add_|_add|respond|apply|contribute|quick|join',
                   re.I)
 
 
-def страничные_формы(текст):
+def page_forms(text):
     """Куски текста, относящиеся к формам-страницам, парами (начало, конец)."""
-    куски = []
-    for совпадение in re.finditer(r'<form[^>]*>.*?</form>', текст, re.S):
-        кусок = совпадение.group(0)
-        if '<footer' in кусок:
+    chunks = []
+    for match in re.finditer(r'<form[^>]*>.*?</form>', text, re.S):
+        chunk = match.group(0)
+        if '<footer' in chunk:
             continue
         # Имя записи представления ищем перед формой — по нему видно
         # мастера и окна добавления.
-        начало = текст.rfind('<record', 0, совпадение.start())
-        заголовок = текст[начало:совпадение.start()] if начало >= 0 else ''
-        if ОКНО.search(заголовок):
+        start = text.rfind('<record', 0, match.start())
+        heading = text[start:match.start()] if start >= 0 else ''
+        if WINDOW.search(heading):
             continue
-        куски.append((совпадение.start(), совпадение.end()))
-    return куски
+        chunks.append((match.start(), match.end()))
+    return chunks
 
 
-def перевести(путь, тип_поля, вычисляемые, со_страницей, dry=False):
-    with io.open(путь, encoding='utf-8') as fh:
-        текст = fh.read()
-    страницы = страничные_формы(текст)
-    модели = {начало: модель_формы(текст, начало) for начало, _ in страницы}
-    модель = ', '.join(sorted({м for м in модели.values() if м})) or '—'
+def translate(path, field_type, computed, with_page, dry=False):
+    with io.open(path, encoding='utf-8') as fh:
+        text = fh.read()
+    pages = page_forms(text)
+    models = {start: form_model(text, start) for start, _ in pages}
+    model = ', '.join(sorted({m for m in models.values() if m})) or '—'
     # Право правки есть там, где подмешана «страница записи»: поле
     # `coop_can_edit` объявлено в самой примеси, и в разборе модели его
     # не видно — видно только саму примесь в списке наследования.
-    правки = []
-    for совпадение in re.finditer(r'<field\s+name="([a-z_0-9]+)"([^>]*?)(/?)>', текст):
-        имя, хвост, закрыт = совпадение.group(1), совпадение.group(2), совпадение.group(3)
-        if 'widget=' in хвост or 'invisible="1"' in хвост:
+    edits = []
+    for match in re.finditer(r'<field\s+name="([a-z_0-9]+)"([^>]*?)(/?)>', text):
+        name, tail, is_closed = match.group(1), match.group(2), match.group(3)
+        if 'widget=' in tail or 'invisible="1"' in tail:
             continue
         # `readonly="1"` — поле показывают, а не правят; условие вида
         # `readonly="not coop_can_edit"` карандашу не мешает: виджет
         # сам прячет кнопку, когда править нельзя.
-        if 'readonly="1"' in хвост:
+        if 'readonly="1"' in tail:
             continue
-        if в_чужом(текст, совпадение.start()):
+        if in_foreign(text, match.start()):
             continue
-        своя = [начало for начало, конец in страницы
-                if начало <= совпадение.start() < конец]
-        if not своя:
+        own_item = [start for start, end in pages
+                if start <= match.start() < end]
+        if not own_item:
             continue
-        модель_поля = модели.get(своя[0], '')
-        типы = тип_поля.get(модель_поля, {})
-        считаются = вычисляемые.get(модель_поля, set())
-        правится = модель_поля in со_страницей or 'coop_can_edit' in типы
-        if имя in считаются or имя not in типы:
+        field_model = models.get(own_item[0], '')
+        type_codes = field_type.get(field_model, {})
+        counted = computed.get(field_model, set())
+        is_editable = field_model in with_page or 'coop_can_edit' in type_codes
+        if name in counted or name not in type_codes:
             continue
-        тип = типы.get(имя)
-        if тип in СТРОКОЙ:
-            виджет = 'coop_inline'
-        elif тип in БЛОКОМ:
-            виджет = 'coop_block'
+        type_code = type_codes.get(name)
+        if type_code in AS_LINE:
+            widget = 'coop_inline'
+        elif type_code in AS_BLOCK:
+            widget = 'coop_block'
         else:
             continue
-        добавка = ' widget="%s"' % виджет
+        addition = ' widget="%s"' % widget
         # Своё условие у поля уже есть — второе `readonly` в том же теге
         # это сломанный XML, а не двойная проверка.
-        if правится and 'readonly=' not in хвост:
-            добавка += ' readonly="not coop_can_edit"'
-        новое = '<field name="%s"%s%s%s>' % (имя, хвост, добавка, закрыт)
-        правки.append((совпадение.start(), совпадение.end(), новое,
-                       имя, тип, виджет))
+        if is_editable and 'readonly=' not in tail:
+            addition += ' readonly="not coop_can_edit"'
+        new_one = '<field name="%s"%s%s%s>' % (name, tail, addition, is_closed)
+        edits.append((match.start(), match.end(), new_one,
+                       name, type_code, widget))
 
     # Заменяем с конца и по месту: одно и то же объявление поля
     # встречается и в канбане, и в списке, и в форме, а замена по
     # строке попала бы в первое вхождение — то есть в карточку
     # каталога, где карандашу не место.
-    for начало, конец, новое, *_ in reversed(правки):
-        текст = текст[:начало] + новое + текст[конец:]
-    if правки and not dry:
-        with io.open(путь, 'w', encoding='utf-8', newline='\n') as fh:
-            fh.write(текст)
-    print('%s — %s (%s)' % (os.path.relpath(путь, ROOT), модель, len(правки)))
-    for _начало, _конец, _новое, имя, тип, виджет in правки:
-        print('    %-28s %-10s -> %s' % (имя, тип, виджет))
-    return len(правки)
+    for start, end, new_one, *_ in reversed(edits):
+        text = text[:start] + new_one + text[end:]
+    if edits and not dry:
+        with io.open(path, 'w', encoding='utf-8', newline='\n') as fh:
+            fh.write(text)
+    print('%s — %s (%s)' % (os.path.relpath(path, ROOT), model, len(edits)))
+    for _start, _end, _new, name, type_code, widget in edits:
+        print('    %-28s %-10s -> %s' % (name, type_code, widget))
+    return len(edits)
 
 
 def main():
-    аргументы = [а for а in sys.argv[1:] if not а.startswith('--')]
+    args = [a for a in sys.argv[1:] if not a.startswith('--')]
     dry = '--dry' in sys.argv
-    типы, считаются, со_страницей = граф()
-    всего = 0
-    for путь in аргументы:
-        полный = путь if os.path.isabs(путь) else os.path.join(ROOT, путь)
-        всего += перевести(полный, типы, считаются, со_страницей, dry)
-    print('\nвсего полей переведено: %s%s' % (всего, ' (показ)' if dry else ''))
+    type_codes, counted, with_page = graph()
+    count_all = 0
+    for path in args:
+        full = path if os.path.isabs(path) else os.path.join(ROOT, path)
+        count_all += translate(full, type_codes, counted, with_page, dry)
+    print('\nвсего полей переведено: %s%s' % (count_all, ' (показ)' if dry else ''))
     return 0
 
 

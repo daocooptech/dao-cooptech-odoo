@@ -34,15 +34,15 @@ class CoopShell(models.AbstractModel):
         """
         env = self.env
         Users = env['res.users']
-        данные = {'acting': self.acting_options()}
+        data = {'acting': self.acting_options()}
 
         if 'coop.sidebar.item' in env:
-            данные['sidebar'] = env['coop.sidebar.item'].items_for_current_user()
+            data['sidebar'] = env['coop.sidebar.item'].items_for_current_user()
         if 'coop.notification' in env:
-            данные['unread'] = env['coop.notification'].unread_count()
+            data['unread'] = env['coop.notification'].unread_count()
         if hasattr(Users, 'coop_admin_state'):
-            данные['admin'] = Users.coop_admin_state()
-        return данные
+            data['admin'] = Users.coop_admin_state()
+        return data
 
     @api.model
     def resolve_actions(self, xmlids):

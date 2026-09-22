@@ -58,22 +58,22 @@ class CoopContributeWizard(models.TransientModel):
 
     def action_offer(self):
         self.ensure_one()
-        проект = self.project_id
-        if проект.state != 'gathering':
+        project = self.project_id
+        if project.state != 'gathering':
             raise UserError(_(
                 'Вложиться можно в проект, который собирает. Сейчас он в '
                 'состоянии «%s».') % dict(
-                    проект._fields['state'].selection).get(проект.state))
-        я = self.env.user._coop_acting_partner()
-        if проект.partner_id == я:
+                    project._fields['state'].selection).get(project.state))
+        me = self.env.user._coop_acting_partner()
+        if project.partner_id == me:
             raise UserError(_(
                 'Это ваш проект. Вклад инициатора учитывается сметой, а не '
                 'предложением самому себе.'))
 
-        вклад = self.env['coop.project.contribution'].sudo().create({
-            'project_id': проект.id,
+        contribution = self.env['coop.project.contribution'].sudo().create({
+            'project_id': project.id,
             'need_id': self.need_id.id,
-            'partner_id': я.id,
+            'partner_id': me.id,
             'kind': self.kind,
             'name': self.name,
             'value': self.value,
@@ -82,21 +82,21 @@ class CoopContributeWizard(models.TransientModel):
 
         # Инициатору — иначе предложение лежит в проекте, и о нём никто
         # не знает: вкладчик ждёт ответа, проект стоит недособранным.
-        тело = _('Вклад в проект «%(проект)s»: %(что)s на %(сколько)s ₽ '
+        body = _('Вклад в проект «%(проект)s»: %(что)s на %(сколько)s ₽ '
                  'от %(кто)s.',
-                 проект=проект.name, что=self.name, сколько=self.value,
-                 кто=я.display_name)
+                 project=project.name, what=self.name, how_many=self.value,
+                 who=me.display_name)
         if self.note:
-            тело = '%s %s' % (тело, self.note)
+            body = '%s %s' % (body, self.note)
         # Ответственному за потребность — если участие пришло на
         # строку. Инициатор проекта с тремя десятками потребностей
         # иначе остаётся единственным, кто вообще об этом узнает.
-        кому = проект.partner_id
+        to_whom = project.partner_id
         if self.need_id:
-            кому |= self.need_id._need_deciders()
+            to_whom |= self.need_id._need_deciders()
         self.env['coop.notification']._notify(
-            кому, тело, record=проект, kind='project')
+            to_whom, body, record=project, kind='project')
         # След в ленте проекта — через sudo: проект чужой, и права писать
         # в него у вкладчика нет.
-        проект.sudo().message_post(body=тело)
+        project.sudo().message_post(body=body)
         return {'type': 'ir.actions.act_window_close'}

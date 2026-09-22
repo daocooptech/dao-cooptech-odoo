@@ -103,19 +103,19 @@ class CoopExchange(models.AbstractModel):
             #
             # Берём только три поля витрины: название, вид и город. Это то,
             # что и так напечатано на карточке торгуемого требования.
-            ресурс = claim.resource_id.sudo()
+            resource = claim.resource_id.sudo()
 
             rows.append({
                 'id': claim.id,
-                'name': ресурс.name or claim.display_name,
+                'name': resource.name or claim.display_name,
                 'issuer': claim.issuer_id.name,
                 'issuer_id': claim.issuer_id.id,
-                'type': ресурс.resource_type or 'material',
+                'type': resource.resource_type or 'material',
                 'type_label': TYPE_LABELS.get(
-                    ресурс.resource_type or 'material', 'Прочее'),
+                    resource.resource_type or 'material', 'Прочее'),
                 'quality': claim.quality,
                 'place': claim.delivery_place,
-                'city': (ресурс.city or '').strip() or '—',
+                'city': (resource.city or '').strip() or '—',
                 'due': claim.delivery_date and claim.delivery_date.isoformat(),
                 'days_left': days_left,
                 'age_days': age_days,

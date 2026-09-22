@@ -22,7 +22,7 @@ from . import load_resources
 PHOTO_DIR = load_resources.PHOTO_DIR
 
 
-def _variants(файл):
+def _variants(file):
     """Все снимки того же предмета: `wood-planks.jpg` и рядом
     `wood-planks-2.jpg`, `-3.jpg` и далее.
 
@@ -34,31 +34,31 @@ def _variants(файл):
     Список читается с диска один раз и запоминается: он не меняется,
     пока идёт наполнение.
     """
-    if файл in _КЭШ:
-        return _КЭШ[файл]
-    основа = os.path.splitext(файл)[0]
+    if file in _CACHE:
+        return _CACHE[file]
+    base = os.path.splitext(file)[0]
     # Читаем каталог, а не перебираем номера подряд: негодные снимки
     # удаляются вручную после просмотра, и в нумерации остаются дыры —
     # перебор обрывался бы на первой.
-    образец = re.compile(r'^%s(-\d+)?\.jpg$' % re.escape(основа))
-    найдены = sorted(имя for имя in os.listdir(PHOTO_DIR)
-                     if образец.match(имя))
-    _КЭШ[файл] = найдены
-    return _КЭШ[файл]
-    основа = os.path.splitext(файл)[0]
-    найдены = [файл] if os.path.exists(os.path.join(PHOTO_DIR, файл)) else []
+    sample = re.compile(r'^%s(-\d+)?\.jpg$' % re.escape(base))
+    found_list = sorted(name for name in os.listdir(PHOTO_DIR)
+                     if sample.match(name))
+    _CACHE[file] = found_list
+    return _CACHE[file]
+    base = os.path.splitext(file)[0]
+    found_list = [file] if os.path.exists(os.path.join(PHOTO_DIR, file)) else []
     n = 2
     while True:
-        следующий = '%s-%s.jpg' % (основа, n)
-        if not os.path.exists(os.path.join(PHOTO_DIR, следующий)):
+        next_one = '%s-%s.jpg' % (base, n)
+        if not os.path.exists(os.path.join(PHOTO_DIR, next_one)):
             break
-        найдены.append(следующий)
+        found_list.append(next_one)
         n += 1
-    _КЭШ[файл] = найдены
-    return найдены
+    _CACHE[file] = found_list
+    return found_list
 
 
-_КЭШ = {}
+_CACHE = {}
 
 
 def photo_for(name):
@@ -67,18 +67,18 @@ def photo_for(name):
     Возвращает готовое к записи в поле `Image` значение: Odoo ждёт
     base64, а не путь.
     """
-    правило = load_resources._photo_by_name(name or '')
-    if not правило:
+    rule = load_resources._photo_by_name(name or '')
+    if not rule:
         return None
-    варианты = _variants(правило)
-    if not варианты:
+    options = _variants(rule)
+    if not options:
         return None
     # Выбор по названию, а не наугад: у одной и той же записи снимок
     # должен быть один и тот же при каждом прогоне наполнения, иначе
     # каталог меняется на ровном месте и отличить правку от шума нельзя.
-    номер = zlib.crc32((name or '').encode('utf-8')) % len(варианты)
-    путь = os.path.join(PHOTO_DIR, варианты[номер])
-    with open(путь, 'rb') as fh:
+    number = zlib.crc32((name or '').encode('utf-8')) % len(options)
+    path = os.path.join(PHOTO_DIR, options[number])
+    with open(path, 'rb') as fh:
         return base64.b64encode(fh.read())
 
 
@@ -91,13 +91,13 @@ def fill(records, field='image_1920', name_field='name'):
 
     Пишет по одной записи: снимки разные, общего `write` тут не выйдет.
     """
-    поставлено = 0
-    for запись in records:
-        if запись[field]:
+    placed = 0
+    for record in records:
+        if record[field]:
             continue
-        снимок = photo_for(запись[name_field])
-        if not снимок:
+        photo = photo_for(record[name_field])
+        if not photo:
             continue
-        запись.sudo().write({field: снимок})
-        поставлено += 1
-    return поставлено
+        record.sudo().write({field: photo})
+        placed += 1
+    return placed

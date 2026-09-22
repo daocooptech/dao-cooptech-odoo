@@ -16,10 +16,10 @@ class CoopProject(models.Model):
         пускает: пока вклад не принят, человек в проекте не участвует.
         """
         self.ensure_one()
-        люди = self.partner_id
-        вклады = self.contribution_ids.filtered(lambda c: c.state == 'accepted')
-        люди |= вклады.mapped('partner_id')
-        return люди.coop_power_holders('represent')
+        people = self.partner_id
+        contributions = self.contribution_ids.filtered(lambda c: c.state == 'accepted')
+        people |= contributions.mapped('partner_id')
+        return people.coop_power_holders('represent')
 
     def _coop_channel_specs(self):
         """Одна переписка на проект: название — как в каталоге."""
@@ -39,10 +39,10 @@ class CoopProject(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        проекты = super().create(vals_list)
-        проекты._coop_ensure_channel()
-        проекты._coop_sync_channels()
-        return проекты
+        projects = super().create(vals_list)
+        projects._coop_ensure_channel()
+        projects._coop_sync_channels()
+        return projects
 
     def write(self, vals):
         res = super().write(vals)
@@ -62,19 +62,19 @@ class CoopProjectContribution(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        вклады = super().create(vals_list)
-        вклады.mapped('project_id')._coop_sync_channels()
-        return вклады
+        contributions = super().create(vals_list)
+        contributions.mapped('project_id')._coop_sync_channels()
+        return contributions
 
     def write(self, vals):
-        проекты_до = self.mapped('project_id')
+        projects_before = self.mapped('project_id')
         res = super().write(vals)
         if {'state', 'partner_id', 'project_id'} & set(vals):
-            (проекты_до | self.mapped('project_id'))._coop_sync_channels()
+            (projects_before | self.mapped('project_id'))._coop_sync_channels()
         return res
 
     def unlink(self):
-        проекты = self.mapped('project_id')
+        projects = self.mapped('project_id')
         res = super().unlink()
-        проекты._coop_sync_channels()
+        projects._coop_sync_channels()
         return res

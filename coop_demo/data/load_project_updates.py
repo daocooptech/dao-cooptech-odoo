@@ -25,7 +25,7 @@ _logger = logging.getLogger(__name__)
 
 # Заголовок и описание по состоянию. Текст короткий и по делу: отчёт о
 # ходе читают те, кто вложился, и вода в нём хуже молчания.
-ТЕКСТЫ = {
+TEXTS = {
     'on_track': [
         ('Работы идут по плану',
          'Сделано то, что намечали на этот этап. Сроки держим, '
@@ -68,30 +68,30 @@ _logger = logging.getLogger(__name__)
 }
 
 
-def _состояние(проект):
+def _state(project):
     """Каким должен быть последний отчёт у этого проекта.
 
     Выводится из положения дел, а не назначается наугад: отчёт «идёт по
     плану» у замороженного проекта — ложь, которую видно сразу.
     """
-    if проект.state == 'done':
+    if project.state == 'done':
         return 'done'
-    if проект.state == 'frozen':
+    if project.state == 'frozen':
         return 'on_hold'
-    if проект.state in ('cancelled', 'failed'):
+    if project.state in ('cancelled', 'failed'):
         return 'off_track'
     # Запущенный. Смотрим на то, что о нём известно, а не бросаем
     # жребий: отчёт «есть риск» у проекта, который идёт как надо, —
     # такая же ложь, как «по плану» у замороженного.
-    if проект.project_id.stage_id.name == 'Остановлен':
+    if project.project_id.stage_id.name == 'Остановлен':
         return 'on_hold'
     # Срок сбора вышел, а проект всё ещё в работе: значит, работы идут
     # дольше, чем на них отводили. Это и есть риск по срокам.
-    if проект.date_deadline and проект.date_deadline < fields.Date.today():
+    if project.date_deadline and project.date_deadline < fields.Date.today():
         return 'at_risk'
-    if проект.readiness >= 100:
+    if project.readiness >= 100:
         return 'on_track'
-    if проект.readiness >= 70:
+    if project.readiness >= 70:
         return 'at_risk'
     return 'off_track'
 
@@ -101,50 +101,50 @@ def load_project_updates(env):
         _logger.info('Отчёты о ходе: модуля проектов нет, пропускаю')
         return 0
 
-    Отчёт = env['project.update'].sudo()
-    проекты = env['coop.project'].sudo().search([
+    Report = env['project.update'].sudo()
+    projects = env['coop.project'].sudo().search([
         ('project_id', '!=', False),
         ('state', 'in', ('running', 'done', 'frozen', 'cancelled')),
     ], order='id')
-    проекты = проекты.filtered(
-        lambda p: not Отчёт.search_count([('project_id', '=', p.project_id.id)]))
-    if not проекты:
+    projects = projects.filtered(
+        lambda p: not Report.search_count([('project_id', '=', p.project_id.id)]))
+    if not projects:
         _logger.info('Отчёты о ходе: все проекты наполнены, пропускаю')
         return 0
 
     rnd = random.Random(20260915)
-    сегодня = fields.Date.today()
-    создано = 0
-    for проект in проекты:
-        итог = _состояние(проект)
+    today = fields.Date.today()
+    built = 0
+    for project in projects:
+        total = _state(project)
         # История: от одного до трёх отчётов, последний — нынешнее
         # положение. Промежуточные всегда «по плану»: если бы дела шли
         # плохо с самого начала, проект бы не дожил до запуска.
-        сколько = rnd.randint(1, 3)
-        начало = проект.date_start or (сегодня - timedelta(days=90))
-        for шаг in range(сколько):
-            последний = шаг == сколько - 1
-            состояние = итог if последний else 'on_track'
-            заголовок, описание = rnd.choice(ТЕКСТЫ[состояние])
-            доля = int(round((шаг + 1) * 100.0 / сколько))
-            дата = начало + timedelta(days=int(30 * шаг) + rnd.randint(1, 20))
-            if дата > сегодня:
-                дата = сегодня
-            Отчёт.create({
-                'name': заголовок,
-                'project_id': проект.project_id.id,
-                'status': состояние,
-                'progress': 100 if состояние == 'done' else min(доля, 95),
-                'date': дата,
+        how_many = rnd.randint(1, 3)
+        start = project.date_start or (today - timedelta(days=90))
+        for step in range(how_many):
+            last_one = step == how_many - 1
+            state = total if last_one else 'on_track'
+            heading, description = rnd.choice(TEXTS[state])
+            share = int(round((step + 1) * 100.0 / how_many))
+            date_value = start + timedelta(days=int(30 * step) + rnd.randint(1, 20))
+            if date_value > today:
+                date_value = today
+            Report.create({
+                'name': heading,
+                'project_id': project.project_id.id,
+                'status': state,
+                'progress': 100 if state == 'done' else min(share, 95),
+                'date': date_value,
                 # Автор — тот, кто проект затеял, если у него есть
                 # учётная запись. У большинства демо-участников её нет:
                 # они карточки, а не пользователи, — и тогда автором
                 # становится администратор узла.
-                'user_id': (проект.partner_id.user_ids[:1].id
+                'user_id': (project.partner_id.user_ids[:1].id
                             or env.ref('base.user_admin').id),
-                'description': '<p>%s</p>' % описание,
+                'description': '<p>%s</p>' % description,
             })
-            создано += 1
+            built += 1
     _logger.info('Отчёты о ходе: создано %s на %s проектов',
-                 создано, len(проекты))
-    return создано
+                 built, len(projects))
+    return built

@@ -50,7 +50,7 @@ AGENT = 'dao-cooptech-demo-photos/1.0 (+https://github.com/daocooptech)'
 # стоит в правилах подбора; значение — запрос по-английски: свободных
 # снимков с русскими подписями на порядок меньше, а предмет от языка
 # запроса не меняется.
-ЗАПРОСЫ = {
+REQUESTS = {
     'air-compressor': 'air compressor',
     'apiary-hives': 'beehive apiary',
     'apple-orchard': 'apple orchard',
@@ -133,7 +133,7 @@ AGENT = 'dao-cooptech-demo-photos/1.0 (+https://github.com/daocooptech)'
 # которые правила не было вовсе: крепёж, кабель, топливо, страхование,
 # собрания, десятки профессий. Предметы взяты из этого пересчёта, а не
 # придуманы.
-ЗАПРОСЫ.update({
+REQUESTS.update({
     # Материалы и расходники
     'fasteners': 'screws bolts nuts',
     'cable-coil': 'cable drum electric',
@@ -221,16 +221,16 @@ AGENT = 'dao-cooptech-demo-photos/1.0 (+https://github.com/daocooptech)'
 })
 
 
-def уже_есть(основа):
+def already_there(base):
     """Сколько снимков этого предмета уже лежит."""
-    счёт = 0
-    if os.path.exists(os.path.join(PHOTO_DIR, основа + '.jpg')):
-        счёт = 1
+    account = 0
+    if os.path.exists(os.path.join(PHOTO_DIR, base + '.jpg')):
+        account = 1
     n = 2
-    while os.path.exists(os.path.join(PHOTO_DIR, '%s-%s.jpg' % (основа, n))):
-        счёт += 1
+    while os.path.exists(os.path.join(PHOTO_DIR, '%s-%s.jpg' % (base, n))):
+        account += 1
         n += 1
-    return счёт
+    return account
 
 
 # Чего на карточке каталога быть не должно, как бы точно оно ни
@@ -238,7 +238,7 @@ def уже_есть(основа):
 # приходит рекламный плакат тридцатых годов, под «carrots» — гравюра из
 # ботанического атласа. Владелец: «главное чтобы смотрелось максимально
 # реально». Отсекаем по названию файла: у Викисклада оно говорящее.
-НЕ_ФОТО = (
+NOT_PHOTO = (
     'poster', 'advert', 'drawing', 'engraving', 'illustration', 'map',
     'diagram', 'logo', 'label', 'sign ', 'signboard', 'print', 'painting',
     'card', 'cover', 'plate', 'sketch', 'etching', 'lithograph', 'stamp',
@@ -261,50 +261,50 @@ def уже_есть(основа):
 )
 
 
-def спросить(запрос, сколько):
+def ask(request, how_many):
     """Адреса снимков по предмету.
 
     Берутся уменьшённые до 640 точек, а не исходники: в каталоге снимок
     показывается карточкой, а полноразмерные сканы Викисклада весят по
     несколько мегабайт и раздули бы хранилище на порядок.
     """
-    параметры = urllib.parse.urlencode({
+    params = urllib.parse.urlencode({
         'action': 'query',
         'generator': 'search',
-        'gsrsearch': 'filetype:bitmap %s' % запрос,
+        'gsrsearch': 'filetype:bitmap %s' % request,
         'gsrnamespace': '6',
-        'gsrlimit': str(min(max(сколько * 3, 10), 50)),
+        'gsrlimit': str(min(max(how_many * 3, 10), 50)),
         'prop': 'imageinfo',
         'iiprop': 'url|size',
         'iiurlwidth': '640',
         'format': 'json',
     })
-    запрос_http = urllib.request.Request(API + '?' + параметры,
+    http_request = urllib.request.Request(API + '?' + params,
                                          headers={'User-Agent': AGENT})
-    with urllib.request.urlopen(запрос_http, timeout=30) as ответ:
-        данные = json.load(ответ)
-    страницы = (данные.get('query') or {}).get('pages') or {}
+    with urllib.request.urlopen(http_request, timeout=30) as answer:
+        data = json.load(answer)
+    pages = (data.get('query') or {}).get('pages') or {}
     # Поиск по Викискладу отвечает широко: под «cement bags» приходит
     # улица, на краю которой лежат мешки. Отбираем по названию файла —
     # оно у Викисклада осмысленное и содержит предмет съёмки. Владелец
     # сказал про картинки прямо: «что бы совпадали с названием».
-    слова = [с for с in re.split(r'\W+', запрос.lower()) if len(с) > 3]
-    адреса = []
-    for стр in страницы.values():
-        сведения = (стр.get('imageinfo') or [{}])[0]
-        адрес = сведения.get('thumburl') or сведения.get('url')
-        название = (стр.get('title') or '').lower()
-        if not адрес or not re.search(r'\.(jpg|jpeg|png)(\?|$)', адрес, re.I):
+    words = [ch for ch in re.split(r'\W+', request.lower()) if len(ch) > 3]
+    addresses = []
+    for page in pages.values():
+        info = (page.get('imageinfo') or [{}])[0]
+        address = info.get('thumburl') or info.get('url')
+        title = (page.get('title') or '').lower()
+        if not address or not re.search(r'\.(jpg|jpeg|png)(\?|$)', address, re.I):
             continue
-        if слова and not any(с in название for с in слова):
+        if words and not any(ch in title for ch in words):
             continue
-        if any(с in название for с in НЕ_ФОТО):
+        if any(ch in title for ch in NOT_PHOTO):
             continue
-        адреса.append(адрес)
-    return адреса
+        addresses.append(address)
+    return addresses
 
 
-def годится(путь):
+def fits(path):
     """Похож ли файл на снимок предмета, а не на что попало.
 
     Свободные хранилища — это во многом музейные оцифровки: под запросом
@@ -327,95 +327,95 @@ def годится(путь):
     except ImportError:
         return True                                 # нет чем проверить — берём
     try:
-        with Image.open(путь) as рисунок:
-            ширина, высота = рисунок.size
-            if min(ширина, высота) < 400:
+        with Image.open(path) as image:
+            width, height = image.size
+            if min(width, height) < 400:
                 return False
-            отношение = ширина / float(высота)
-            if отношение < 0.5 or отношение > 2.2:
+            ratio = width / float(height)
+            if ratio < 0.5 or ratio > 2.2:
                 return False
-            малый = рисунок.convert('RGB').resize((64, 64))
-            сумма = 0
-            точки = list(малый.getdata())
-            for r, g, b in точки:
-                сумма += max(r, g, b) - min(r, g, b)
-            насыщенность = сумма / float(len(точки))
-            return насыщенность >= 18
+            small_one = image.convert('RGB').resize((64, 64))
+            amount = 0
+            points = list(small_one.getdata())
+            for r, g, b in points:
+                amount += max(r, g, b) - min(r, g, b)
+            saturation = amount / float(len(points))
+            return saturation >= 18
     except Exception:
         return False
 
 
-def скачать(адрес, путь):
-    запрос_http = urllib.request.Request(адрес, headers={'User-Agent': AGENT})
-    with urllib.request.urlopen(запрос_http, timeout=60) as ответ:
-        данные = ответ.read()
+def download(address, path):
+    http_request = urllib.request.Request(address, headers={'User-Agent': AGENT})
+    with urllib.request.urlopen(http_request, timeout=60) as answer:
+        data = answer.read()
     # Слишком мелкое — это значок или заглушка, а не снимок предмета.
-    if len(данные) < 8000:
+    if len(data) < 8000:
         return False
-    with open(путь, 'wb') as fh:
-        fh.write(данные)
-    if not годится(путь):
-        os.remove(путь)
+    with open(path, 'wb') as fh:
+        fh.write(data)
+    if not fits(path):
+        os.remove(path)
         return False
     return True
 
 
 def main():
-    разбор = argparse.ArgumentParser()
-    разбор.add_argument('--per', type=int, default=12,
+    parsed = argparse.ArgumentParser()
+    parsed.add_argument('--per', type=int, default=12,
                         help='сколько снимков держать на предмет')
-    разбор.add_argument('--only', default='',
+    parsed.add_argument('--only', default='',
                         help='через запятую: только эти предметы')
-    разбор.add_argument('--dry', action='store_true',
+    parsed.add_argument('--dry', action='store_true',
                         help='посчитать, но не качать')
-    аргументы = разбор.parse_args()
+    args = parsed.parse_args()
 
-    только = {s.strip() for s in аргументы.only.split(',') if s.strip()}
-    итог = {'добавлено': 0, 'хватало': 0, 'не нашлось': []}
+    only = {s.strip() for s in args.only.split(',') if s.strip()}
+    total = {'добавлено': 0, 'хватало': 0, 'не нашлось': []}
 
-    for основа, запрос in sorted(ЗАПРОСЫ.items()):
-        if только and основа not in только:
+    for base, request in sorted(REQUESTS.items()):
+        if only and base not in only:
             continue
-        есть = уже_есть(основа)
-        нужно = аргументы.per - есть
-        if нужно <= 0:
-            итог['хватало'] += 1
+        exists = already_there(base)
+        needed = args.per - exists
+        if needed <= 0:
+            total['хватало'] += 1
             continue
-        if аргументы.dry:
-            print('%-24s есть %-3s нужно ещё %s' % (основа, есть, нужно))
+        if args.dry:
+            print('%-24s есть %-3s нужно ещё %s' % (base, exists, needed))
             continue
         try:
-            адреса = спросить(запрос, нужно)
+            addresses = ask(request, needed)
         except Exception as e:                      # сеть, а не наша логика
-            print('%-24s не спросилось: %s' % (основа, e))
+            print('%-24s не спросилось: %s' % (base, e))
             continue
-        добавлено = 0
-        n = есть + 1 if есть else 1
-        for адрес in адреса:
-            if добавлено >= нужно:
+        added = 0
+        n = exists + 1 if exists else 1
+        for address in addresses:
+            if added >= needed:
                 break
-            имя = ('%s.jpg' % основа) if n == 1 else ('%s-%s.jpg' % (основа, n))
-            путь = os.path.join(PHOTO_DIR, имя)
-            if os.path.exists(путь):
+            name = ('%s.jpg' % base) if n == 1 else ('%s-%s.jpg' % (base, n))
+            path = os.path.join(PHOTO_DIR, name)
+            if os.path.exists(path):
                 n += 1
                 continue
             try:
-                if скачать(адрес, путь):
-                    добавлено += 1
+                if download(address, path):
+                    added += 1
                     n += 1
             except Exception:
                 continue
             time.sleep(0.2)                         # не частить с чужим сервером
-        итог['добавлено'] += добавлено
-        if добавлено < нужно:
-            итог['не нашлось'].append('%s (+%s из %s)' % (основа, добавлено, нужно))
-        print('%-24s было %-3s добавлено %s' % (основа, есть, добавлено))
+        total['добавлено'] += added
+        if added < needed:
+            total['не нашлось'].append('%s (+%s из %s)' % (base, added, needed))
+        print('%-24s было %-3s добавлено %s' % (base, exists, added))
 
-    if not аргументы.dry:
-        print('\nвсего добавлено: %s' % итог['добавлено'])
-        if итог['не нашлось']:
+    if not args.dry:
+        print('\nвсего добавлено: %s' % total['добавлено'])
+        if total['не нашлось']:
             print('свободных снимков не хватило: %s'
-                  % ', '.join(итог['не нашлось']))
+                  % ', '.join(total['не нашлось']))
     return 0
 
 

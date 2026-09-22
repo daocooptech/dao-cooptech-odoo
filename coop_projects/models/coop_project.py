@@ -8,13 +8,13 @@ from odoo.exceptions import UserError, ValidationError
 _logger = logging.getLogger(__name__)
 
 
-def _деньги(сумма):
+def _money(amount):
     """Сумма для названия вехи: без копеек и с пробелами по три знака.
 
     Штатная веха — это строка, а не денежное поле, и форматировать её
     некому. «120000.0 ₽» в названии читается как ошибка ввода.
     """
-    return '{:,.0f}'.format(сумма or 0).replace(',', ' ')
+    return '{:,.0f}'.format(amount or 0).replace(',', ' ')
 
 
 class CoopProjectCategory(models.Model):
@@ -292,20 +292,20 @@ class CoopProject(models.Model):
     #
     # Отбор вида задан здесь, а не в представлении: тогда пустой раздел
     # прячется сам по пустоте поля, и держать четыре счётчика не нужно.
-    ОТБОР_ПОТРЕБНОСТИ = [('listing_type', '=', 'request'),
+    NEED_PICK = [('listing_type', '=', 'request'),
                          ('state', '=', 'published')]
     need_material_ids = fields.One2many(
         'coop.resource', 'project_id', string='Материальные потребности',
-        domain=ОТБОР_ПОТРЕБНОСТИ + [('resource_type', '=', 'material')])
+        domain=NEED_PICK + [('resource_type', '=', 'material')])
     need_equipment_ids = fields.One2many(
         'coop.resource', 'project_id', string='Потребности в оборудовании',
-        domain=ОТБОР_ПОТРЕБНОСТИ + [('resource_type', '=', 'equipment')])
+        domain=NEED_PICK + [('resource_type', '=', 'equipment')])
     need_labour_ids = fields.One2many(
         'coop.resource', 'project_id', string='Трудовые потребности',
-        domain=ОТБОР_ПОТРЕБНОСТИ + [('resource_type', '=', 'labour')])
+        domain=NEED_PICK + [('resource_type', '=', 'labour')])
     need_financial_ids = fields.One2many(
         'coop.resource', 'project_id', string='Финансовые потребности',
-        domain=ОТБОР_ПОТРЕБНОСТИ + [('resource_type', '=', 'financial')])
+        domain=NEED_PICK + [('resource_type', '=', 'financial')])
 
     # ── Срок сбора и правило закрытия ────────────────────────────────────
     #
@@ -590,11 +590,11 @@ class CoopProject(models.Model):
         Кнопку показывает он, отказ выдаёт окно вклада. Разойдись они
         — и человек увидел бы кнопку, которая отвечает ошибкой.
         """
-        мои = self.env.user.coop_actor_partner_ids
+        mine = self.env.user.coop_actor_partner_ids
         for record in self:
             record.can_contribute = bool(
                 record.state == 'gathering'
-                and record.partner_id not in мои)
+                and record.partner_id not in mine)
 
     def action_contribute(self):
         """Открыть окно вклада.
@@ -712,18 +712,18 @@ class CoopProject(models.Model):
         """
         if 'project.milestone' not in self.env:
             return 0
-        Веха = self.env['project.milestone'].sudo()
-        сделано = 0
-        for сбор in self.search([('project_id', '!=', False)]):
-            if Веха.search_count([('project_id', '=', сбор.project_id.id)]):
+        Milestone = self.env['project.milestone'].sudo()
+        done = 0
+        for fee in self.search([('project_id', '!=', False)]):
+            if Milestone.search_count([('project_id', '=', fee.project_id.id)]):
                 continue
-            сбор._create_milestones(сбор.project_id)
-            if not сбор.project_id.allow_milestones:
-                сбор.project_id.sudo().allow_milestones = True
-            сделано += 1
-        if сделано:
-            _logger.info('Вехи заведены проектам: %s', сделано)
-        return сделано
+            fee._create_milestones(fee.project_id)
+            if not fee.project_id.allow_milestones:
+                fee.project_id.sudo().allow_milestones = True
+            done += 1
+        if done:
+            _logger.info('Вехи заведены проектам: %s', done)
+        return done
 
     def _create_milestones(self, project):
         """Перенести ступени сбора в вехи проекта.
@@ -745,26 +745,26 @@ class CoopProject(models.Model):
         self.ensure_one()
         if 'project.milestone' not in self.env:
             return
-        Веха = self.env['project.milestone'].sudo()
-        порог = self.required_total * (self.funding_threshold or 100) / 100.0
-        ступени = [
-            ('Порог запуска — %s ₽' % _деньги(порог), порог, 10),
-            ('Полный сбор — %s ₽' % _деньги(self.required_total),
+        Milestone = self.env['project.milestone'].sudo()
+        threshold = self.required_total * (self.funding_threshold or 100) / 100.0
+        levels = [
+            ('Порог запуска — %s ₽' % _money(threshold), threshold, 10),
+            ('Полный сбор — %s ₽' % _money(self.required_total),
              self.required_total, 20),
         ]
         # При стопроцентном пороге обе ступени совпадают — вторую не
         # заводим: две одинаковые вехи в управлении выглядят ошибкой.
         if self.funding_threshold and self.funding_threshold >= 100:
-            ступени = ступени[1:]
-        for название, сумма, порядок in ступени:
-            Веха.create({
-                'name': название,
+            levels = levels[1:]
+        for title, amount, sort_order in levels:
+            Milestone.create({
+                'name': title,
                 'project_id': project.id,
-                'sequence': порядок,
+                'sequence': sort_order,
                 'deadline': self.date_deadline or False,
                 # Достигнута — если к моменту запуска собрано столько.
                 # Это не оценка, а факт вкладов на сегодня.
-                'is_reached': self.contribution_total >= сумма,
+                'is_reached': self.contribution_total >= amount,
             })
 
     def _project_followers(self):
@@ -1118,15 +1118,15 @@ class CoopProject(models.Model):
     def _compute_update_count(self):
         # Считаем одним запросом на всю выборку: у каталога карточек
         # двести, и по запросу на каждую он встанет.
-        по_проектам = {}
-        проекты = self.mapped('project_id')
-        if проекты:
-            группы = self.env['project.update'].sudo()._read_group(
-                [('project_id', 'in', проекты.ids)], ['project_id'],
+        by_projects = {}
+        projects = self.mapped('project_id')
+        if projects:
+            groups = self.env['project.update'].sudo()._read_group(
+                [('project_id', 'in', projects.ids)], ['project_id'],
                 ['__count'])
-            по_проектам = {проект.id: сколько for проект, сколько in группы}
+            by_projects = {project.id: how_many for project, how_many in groups}
         for record in self:
-            record.update_count = по_проектам.get(record.project_id.id, 0)
+            record.update_count = by_projects.get(record.project_id.id, 0)
 
     def action_open_updates(self):
         """Отчёты о ходе проекта — штатные, Odoo.
@@ -1378,8 +1378,8 @@ class CoopProjectContribution(models.Model):
                 record.partner_id,
                 _('Ваш вклад в проект «%(проект)s» принят: '
                   '%(что)s, оценка %(сколько)s ₽.',
-                  проект=record.project_id.name, что=record.name,
-                  сколько=record.value),
+                  project=record.project_id.name, what=record.name,
+                  how_many=record.value),
                 record=record.project_id, kind='project')
         return True
 
@@ -1414,7 +1414,7 @@ class CoopProjectContribution(models.Model):
             record.env['coop.notification']._notify(
                 record.partner_id,
                 _('Вклад в проект «%(проект)s» отклонён: %(что)s.',
-                  проект=record.project_id.name, что=record.name),
+                  project=record.project_id.name, what=record.name),
                 record=record.project_id, kind='project')
         return True
 

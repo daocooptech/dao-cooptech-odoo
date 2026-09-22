@@ -46,17 +46,17 @@ class CoopFavorite(models.Model):
         завести отметку от чужого имени. Партнёр берётся из учётной
         записи, а не из вызова.
         """
-        мой = self.env.user.partner_id
-        нашлось = self.sudo().search([
-            ('partner_id', '=', мой.id),
+        my_item = self.env.user.partner_id
+        was_found = self.sudo().search([
+            ('partner_id', '=', my_item.id),
             ('res_model', '=', res_model),
             ('res_id', '=', int(res_id)),
         ], limit=1)
-        if нашлось:
-            нашлось.unlink()
+        if was_found:
+            was_found.unlink()
             return False
         self.sudo().create({
-            'partner_id': мой.id,
+            'partner_id': my_item.id,
             'res_model': res_model,
             'res_id': int(res_id),
         })
@@ -69,8 +69,8 @@ class CoopFavorite(models.Model):
         Одним запросом на весь экран: иначе канбан из сотни карточек
         спрашивает сервер сто раз.
         """
-        записи = self.sudo().search([
+        records = self.sudo().search([
             ('partner_id', '=', self.env.user.partner_id.id),
             ('res_model', '=', res_model),
         ])
-        return записи.mapped('res_id')
+        return records.mapped('res_id')

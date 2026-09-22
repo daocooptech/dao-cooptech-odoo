@@ -41,19 +41,19 @@ _logger = logging.getLogger(__name__)
 
 # Сколько чего полагается человеку. Нижняя граница — чтобы полка не
 # выглядела пустой, верхняя — чтобы не выглядела свалкой.
-ДРУЗЕЙ = (4, 12)
-СООБЩЕСТВ = 5
-ПОТРЕБНОСТЕЙ = 2
-ПРЕДЛОЖЕНИЙ = 2
-НАВЫКОВ = 2
-ВАКАНСИЙ = 2
-ПРОЕКТОВ = 2
-РЕСУРСОВ = 5
+FRIENDS_COUNT = (4, 12)
+COMMUNITIES_COUNT = 5
+NEEDS_COUNT = 2
+OFFERS_COUNT = 2
+SKILLS_COUNT = 2
+VACANCIES_COUNT = 2
+PROJECTS_COUNT = 2
+RESOURCES_COUNT = 5
 
 # Личные потребности: чего человек ищет для себя, а не для проекта.
 # Взяты бытовые и ремесленные нужды — то, с чем человек приходит на
 # платформу сам, а не по работе.
-НУЖДЫ = [
+NEEDS = [
     'Ищу бетономешалку в аренду на выходные',
     'Нужен мотоблок на один сезон',
     'Ищу пиломатериал на баню',
@@ -91,7 +91,7 @@ _logger = logging.getLogger(__name__)
 # «Ресурсы» на странице показывает именно такие объявления —
 # предложения без проекта. На платформе их было 114 на всех, и у 171
 # человека из 172 полка пустовала.
-ПРЕДЛОЖЕНИЯ = [
+OFFERS = [
     'Отдам излишки урожая, самовывоз',
     'Сдам бетономешалку на выходные',
     'Продам саженцы со своего питомника',
@@ -125,7 +125,7 @@ _logger = logging.getLogger(__name__)
 ]
 
 
-def _люди(env):
+def _people(env):
     return env['res.partner'].sudo().search([
         ('is_company', '=', False),
         ('coop_is_participant', '=', True),
@@ -143,50 +143,50 @@ def ensure_friends(env):
     повторном прогоне выходят те же пары, и каталог не пляшет.
     """
     Friendship = env['coop.friendship'].sudo()
-    люди = _люди(env)
-    if len(люди) < 10:
+    people = _people(env)
+    if len(people) < 10:
         return 0
-    ids = люди.ids
-    всего = len(ids)
+    ids = people.ids
+    count_all = len(ids)
 
-    связи = set()
-    for дружба in Friendship.search([]):
-        связи.add(tuple(sorted((дружба.requester_id.id,
-                                дружба.addressee_id.id))))
+    links = set()
+    for friendship in Friendship.search([]):
+        links.add(tuple(sorted((friendship.requester_id.id,
+                                friendship.addressee_id.id))))
 
-    сколько = {}
-    for кто in ids:
-        сколько[кто] = sum(1 for пара in связи if кто in пара)
+    how_many = {}
+    for who in ids:
+        how_many[who] = sum(1 for pair in links if who in pair)
 
-    заведено = 0
-    for место, кто in enumerate(ids):
+    created = 0
+    for place, who in enumerate(ids):
         # Разное число у разных людей: страница с четырьмя друзьями и
         # страница с двенадцатью должны обе попасться при проверке.
-        нужно = ДРУЗЕЙ[0] + (место * 5) % (ДРУЗЕЙ[1] - ДРУЗЕЙ[0] + 1)
-        шаг = 1
-        while сколько[кто] < нужно and шаг < всего:
-            другой = ids[(место + шаг * 7 + 3) % всего]
-            шаг += 1
-            if другой == кто:
+        needed = FRIENDS_COUNT[0] + (place * 5) % (FRIENDS_COUNT[1] - FRIENDS_COUNT[0] + 1)
+        step = 1
+        while how_many[who] < needed and step < count_all:
+            other = ids[(place + step * 7 + 3) % count_all]
+            step += 1
+            if other == who:
                 continue
-            пара = tuple(sorted((кто, другой)))
-            if пара in связи:
+            pair = tuple(sorted((who, other)))
+            if pair in links:
                 continue
-            if сколько[другой] >= ДРУЗЕЙ[1]:
+            if how_many[other] >= FRIENDS_COUNT[1]:
                 continue
             with env.cr.savepoint():
                 Friendship.create({
-                    'requester_id': пара[0],
-                    'addressee_id': пара[1],
+                    'requester_id': pair[0],
+                    'addressee_id': pair[1],
                     'state': 'accepted',
                 })
-            связи.add(пара)
-            сколько[кто] += 1
-            сколько[другой] += 1
-            заведено += 1
+            links.add(pair)
+            how_many[who] += 1
+            how_many[other] += 1
+            created += 1
 
-    _logger.info('Друзья: заведено связей %s', заведено)
-    return заведено
+    _logger.info('Друзья: заведено связей %s', created)
+    return created
 
 
 def trim_communities(env):
@@ -198,80 +198,80 @@ def trim_communities(env):
     человек с шестью.
     """
     Member = env['coop.community.member'].sudo()
-    по_людям, по_сообществам = {}, {}
-    for запись in Member.search([], order='id'):
-        if запись.partner_id.is_company:
+    by_people, by_communities = {}, {}
+    for record in Member.search([], order='id'):
+        if record.partner_id.is_company:
             continue
-        по_людям.setdefault(запись.partner_id.id, []).append(запись)
-        по_сообществам[запись.community_id.id] = \
-            по_сообществам.get(запись.community_id.id, 0) + 1
+        by_people.setdefault(record.partner_id.id, []).append(record)
+        by_communities[record.community_id.id] = \
+            by_communities.get(record.community_id.id, 0) + 1
 
-    убрать = Member
-    for записи in по_людям.values():
+    drop = Member
+    for records in by_people.values():
         # Сначала те, где человек что-то значит: в остатке от чистки
         # должны остаться роли, а не только «участник».
-        записи.sort(key=lambda з: (0 if з.role in ('owner', 'moderator') else 1,
-                                   0 if з.state == 'active' else 1, з.id))
-        for запись in записи[СООБЩЕСТВ:]:
-            сообщество = запись.community_id.id
-            if по_сообществам.get(сообщество, 0) <= 4:
+        records.sort(key=lambda entry: (0 if entry.role in ('owner', 'moderator') else 1,
+                                   0 if entry.state == 'active' else 1, entry.id))
+        for record in records[COMMUNITIES_COUNT:]:
+            community = record.community_id.id
+            if by_communities.get(community, 0) <= 4:
                 continue
-            по_сообществам[сообщество] -= 1
-            убрать |= запись
+            by_communities[community] -= 1
+            drop |= record
 
-    убрано = len(убрать)
-    if убрать:
-        убрать.unlink()
-    _logger.info('Сообщества: убрано лишних участий %s', убрано)
-    return убрано
+    removed = len(drop)
+    if drop:
+        drop.unlink()
+    _logger.info('Сообщества: убрано лишних участий %s', removed)
+    return removed
 
 
-def _раздать(env, модель, поле, предел, отбор=None):
+def _hand_out(env, model, field, limit, picked=None):
     """Раздать записи каталога людям поровну.
 
     Берём то, что уже принадлежит людям, и перекладываем излишек тем, у
     кого пусто. Записи организаций не трогаем: каталог, где всё
     принадлежит частным лицам, выглядел бы неправдой.
     """
-    Модель = env[модель].sudo()
-    люди = _люди(env)
-    if not люди:
+    Model = env[model].sudo()
+    people = _people(env)
+    if not people:
         return 0
-    ids = люди.ids
-    свои = set(ids)
+    ids = people.ids
+    own_list = set(ids)
 
-    записи = Модель.search(отбор or [], order='id')
-    людские = [з for з in записи if з[поле] and з[поле].id in свои]
-    сколько = {i: 0 for i in ids}
-    for з in людские:
-        сколько[з[поле].id] += 1
+    records = Model.search(picked or [], order='id')
+    human_ids = [entry for entry in records if entry[field] and entry[field].id in own_list]
+    how_many = {i: 0 for i in ids}
+    for entry in human_ids:
+        how_many[entry[field].id] += 1
 
     # Кому не хватает — тем и отдаём, начиная с тех, у кого пусто.
-    очередь = [i for i in ids if сколько[i] == 0] + \
-              [i for i in ids if сколько[i] == 1]
-    переложено = 0
-    for з in людские:
-        владелец = з[поле].id
-        if сколько[владелец] <= предел:
+    queue = [i for i in ids if how_many[i] == 0] + \
+              [i for i in ids if how_many[i] == 1]
+    relaid = 0
+    for entry in human_ids:
+        owner = entry[field].id
+        if how_many[owner] <= limit:
             continue
-        while очередь:
-            новый = очередь.pop(0)
-            if новый == владелец or сколько[новый] >= предел:
+        while queue:
+            new = queue.pop(0)
+            if new == owner or how_many[new] >= limit:
                 continue
             with env.cr.savepoint():
-                з.write({поле: новый})
-            сколько[владелец] -= 1
-            сколько[новый] += 1
-            переложено += 1
+                entry.write({field: new})
+            how_many[owner] -= 1
+            how_many[new] += 1
+            relaid += 1
             break
         else:
             break
 
-    _logger.info('%s: переложено записей %s', модель, переложено)
-    return переложено
+    _logger.info('%s: переложено записей %s', model, relaid)
+    return relaid
 
 
-def _добрать_людям(env, модель, поле, оставить_организациям):
+def _top_up_people(env, model, field, keep_for_organizations):
     """Отдать людям записи, которых у них нет, — из числа организаций.
 
     Перекладывание внутри людей не помогает, когда людям принадлежит
@@ -282,32 +282,32 @@ def _добрать_людям(env, модель, поле, оставить_о�
     начат организацией, выглядел бы так же неправдоподобно, как
     нынешний перекос.
     """
-    Модель = env[модель].sudo()
-    люди = _люди(env)
-    if not люди:
+    Model = env[model].sudo()
+    people = _people(env)
+    if not people:
         return 0
-    свои = set(люди.ids)
-    записи = Модель.search([], order='id')
-    у_людей = {}
-    организациям = []
-    for з in записи:
-        владелец = з[поле]
-        if владелец and владелец.id in свои:
-            у_людей.setdefault(владелец.id, 0)
-            у_людей[владелец.id] += 1
-        elif владелец:
-            организациям.append(з)
+    own_list = set(people.ids)
+    records = Model.search([], order='id')
+    for_people = {}
+    to_organizations = []
+    for entry in records:
+        owner = entry[field]
+        if owner and owner.id in own_list:
+            for_people.setdefault(owner.id, 0)
+            for_people[owner.id] += 1
+        elif owner:
+            to_organizations.append(entry)
 
-    пустые = [i for i in люди.ids if not у_людей.get(i)]
-    можно_забрать = max(len(организациям) - оставить_организациям, 0)
-    отдано = 0
-    for человек, запись in zip(пустые, организациям[:можно_забрать]):
+    empty_ones = [i for i in people.ids if not for_people.get(i)]
+    can_take = max(len(to_organizations) - keep_for_organizations, 0)
+    given = 0
+    for person, record in zip(empty_ones, to_organizations[:can_take]):
         with env.cr.savepoint():
-            запись.write({поле: человек})
-            запись.flush_recordset()
-        отдано += 1
-    _logger.info('%s: отдано людям %s из числа организаций', модель, отдано)
-    return отдано
+            record.write({field: person})
+            record.flush_recordset()
+        given += 1
+    _logger.info('%s: отдано людям %s из числа организаций', model, given)
+    return given
 
 
 def ensure_personal_offers(env):
@@ -318,53 +318,53 @@ def ensure_personal_offers(env):
     платформе было 114 на всех.
     """
     Resource = env['coop.resource'].sudo()
-    люди = _люди(env)
-    методы = {m.code: m for m in env['coop.resource.method'].search([])}
+    people = _people(env)
+    methods = {m.code: m for m in env['coop.resource.method'].search([])}
 
-    заведено = 0
-    for место, человек in enumerate(люди):
-        есть = Resource.search_count([
-            ('owner_id', '=', человек.id),
+    created = 0
+    for place, person in enumerate(people):
+        exists = Resource.search_count([
+            ('owner_id', '=', person.id),
             ('listing_type', '=', 'offer'),
             ('project_id', '=', False),
         ])
-        for сдвиг in range(max(ПРЕДЛОЖЕНИЙ - есть, 0)):
-            название = ПРЕДЛОЖЕНИЯ[(место * 7 + сдвиг * 11) % len(ПРЕДЛОЖЕНИЯ)]
-            if Resource.search_count([('owner_id', '=', человек.id),
-                                      ('name', '=', название)]):
+        for shift in range(max(OFFERS_COUNT - exists, 0)):
+            title = OFFERS[(place * 7 + shift * 11) % len(OFFERS)]
+            if Resource.search_count([('owner_id', '=', person.id),
+                                      ('name', '=', title)]):
                 continue
             # Способ передачи — по первому слову: «сдам» это аренда,
             # «отдам» безвозмездно, «помогу» и «свяжу» — труд.
-            низ = название.lower()
-            if низ.startswith('сдам'):
-                код, вид = 'rent', 'equipment'
-            elif низ.startswith('отдам'):
-                код, вид = 'free', 'material'
-            elif низ.startswith(('помогу', 'свяжу', 'сложу')):
-                код, вид = 'sale', 'labour'
+            bottom = title.lower()
+            if bottom.startswith('сдам'):
+                code, kind = 'rent', 'equipment'
+            elif bottom.startswith('отдам'):
+                code, kind = 'free', 'material'
+            elif bottom.startswith(('помогу', 'свяжу', 'сложу')):
+                code, kind = 'sale', 'labour'
             else:
-                код, вид = 'sale', 'material'
-            договорная = (место + сдвиг) % 4 == 0 or код == 'free'
+                code, kind = 'sale', 'material'
+            negotiable = (place + shift) % 4 == 0 or code == 'free'
             values = {
-                'name': название,
-                'owner_id': человек.id,
+                'name': title,
+                'owner_id': person.id,
                 'listing_type': 'offer',
-                'city': человек.city or '',
-                'resource_type': вид,
+                'city': person.city or '',
+                'resource_type': kind,
                 'state': 'published',
-                'price_kind': 'none' if договорная else 'from',
-                'price': 0 if договорная else 300 * (1 + (место + сдвиг) % 15),
+                'price_kind': 'none' if negotiable else 'from',
+                'price': 0 if negotiable else 300 * (1 + (place + shift) % 15),
             }
-            метод = методы.get(код) or (list(методы.values())[0] if методы else None)
-            if метод:
-                values['method_ids'] = [(6, 0, [метод.id])]
+            method = methods.get(code) or (list(methods.values())[0] if methods else None)
+            if method:
+                values['method_ids'] = [(6, 0, [method.id])]
             with env.cr.savepoint():
-                запись = Resource.create(values)
-                запись.flush_recordset()
-            заведено += 1
+                record = Resource.create(values)
+                record.flush_recordset()
+            created += 1
 
-    _logger.info('Ресурсы: заведено личных предложений %s', заведено)
-    return заведено
+    _logger.info('Ресурсы: заведено личных предложений %s', created)
+    return created
 
 
 def ensure_personal_needs(env):
@@ -375,75 +375,75 @@ def ensure_personal_needs(env):
     проектов сюда не считаются — у них своя полка и свой смысл.
     """
     Resource = env['coop.resource'].sudo()
-    люди = _люди(env)
-    методы = {m.code: m for m in env['coop.resource.method'].search([])}
-    метод = методы.get('sale') or (list(методы.values())[0] if методы else None)
+    people = _people(env)
+    methods = {m.code: m for m in env['coop.resource.method'].search([])}
+    method = methods.get('sale') or (list(methods.values())[0] if methods else None)
     # Способов передачи у объявления может быть несколько — поле
     # множественное, и одиночное присваивание сюда не подходит.
 
-    заведено = 0
-    for место, человек in enumerate(люди):
-        есть = Resource.search_count([
-            ('owner_id', '=', человек.id),
+    created = 0
+    for place, person in enumerate(people):
+        exists = Resource.search_count([
+            ('owner_id', '=', person.id),
             ('listing_type', '=', 'request'),
             ('project_id', '=', False),
         ])
-        нужно = ПОТРЕБНОСТЕЙ - есть
-        for сдвиг in range(max(нужно, 0)):
-            название = НУЖДЫ[(место * 3 + сдвиг * 7) % len(НУЖДЫ)]
-            if Resource.search_count([('owner_id', '=', человек.id),
-                                      ('name', '=', название)]):
+        needed = NEEDS_COUNT - exists
+        for shift in range(max(needed, 0)):
+            title = NEEDS[(place * 3 + shift * 7) % len(NEEDS)]
+            if Resource.search_count([('owner_id', '=', person.id),
+                                      ('name', '=', title)]):
                 continue
             # Цена у спроса — сколько человек готов заплатить. Без неё
             # запись не проходит проверку: «для способа „Продажа“ нужна
             # цена или оценка». Каждая пятая — договорная: пустая цена
             # тоже должна попадаться при проверке экрана.
-            договорная = (место + сдвиг) % 5 == 0
+            negotiable = (place + shift) % 5 == 0
             values = {
-                'name': название,
-                'owner_id': человек.id,
+                'name': title,
+                'owner_id': person.id,
                 'listing_type': 'request',
-                'city': человек.city or '',
+                'city': person.city or '',
                 'resource_type': 'material',
                 'state': 'published',
-                'price_kind': 'none' if договорная else 'to',
-                'price': 0 if договорная else 500 * (1 + (место + сдвиг) % 12),
+                'price_kind': 'none' if negotiable else 'to',
+                'price': 0 if negotiable else 500 * (1 + (place + shift) % 12),
             }
-            if метод:
-                values['method_ids'] = [(6, 0, [метод.id])]
+            if method:
+                values['method_ids'] = [(6, 0, [method.id])]
             with env.cr.savepoint():
-                запись = Resource.create(values)
+                record = Resource.create(values)
                 # Проверки полей срабатывают при сбросе на диск, а он по
                 # умолчанию откладывается до конца транзакции — то есть
                 # за пределы точки отката. Тогда одна негодная запись
                 # роняет всё обновление модуля, а не себя одну; так и
                 # вышло 20 сентября 2026 с ценой у спроса.
-                запись.flush_recordset()
-            заведено += 1
+                record.flush_recordset()
+            created += 1
 
-    _logger.info('Потребности: заведено личных объявлений %s', заведено)
-    return заведено
+    _logger.info('Потребности: заведено личных объявлений %s', created)
+    return created
 
 
 def spread_all(env):
     """Выровнять полки на страницах людей."""
-    итог = {}
-    итог['друзья'] = ensure_friends(env)
-    итог['сообщества'] = trim_communities(env)
-    итог['потребности'] = ensure_personal_needs(env)
-    итог['ресурсы'] = _раздать(
-        env, 'coop.resource', 'owner_id', РЕСУРСОВ,
+    total = {}
+    total['друзья'] = ensure_friends(env)
+    total['сообщества'] = trim_communities(env)
+    total['потребности'] = ensure_personal_needs(env)
+    total['ресурсы'] = _hand_out(
+        env, 'coop.resource', 'owner_id', RESOURCES_COUNT,
         [('listing_type', '=', 'offer'), ('project_id', '=', False)])
-    итог['предложения'] = ensure_personal_offers(env)
+    total['предложения'] = ensure_personal_offers(env)
     # Навыки и проекты добираются у организаций: перекладывать внутри
     # людей нечего — записей у них меньше, чем самих людей.
-    итог['навыки у людей'] = _добрать_людям(
-        env, 'coop.skill.offer', 'partner_id', оставить_организациям=40)
-    итог['проекты у людей'] = _добрать_людям(
-        env, 'coop.project', 'partner_id', оставить_организациям=70)
-    итог['навыки'] = _раздать(env, 'coop.skill.offer', 'partner_id', НАВЫКОВ)
-    итог['вакансии'] = _раздать(env, 'coop.vacancy', 'partner_id', ВАКАНСИЙ,
+    total['навыки у людей'] = _top_up_people(
+        env, 'coop.skill.offer', 'partner_id', keep_for_organizations=40)
+    total['проекты у людей'] = _top_up_people(
+        env, 'coop.project', 'partner_id', keep_for_organizations=70)
+    total['навыки'] = _hand_out(env, 'coop.skill.offer', 'partner_id', SKILLS_COUNT)
+    total['вакансии'] = _hand_out(env, 'coop.vacancy', 'partner_id', VACANCIES_COUNT,
                                 [('project_id', '=', False)])
-    итог['проекты'] = _раздать(env, 'coop.project', 'partner_id', ПРОЕКТОВ)
-    _logger.info('Выравнивание полок: %s', итог)
-    return итог
+    total['проекты'] = _hand_out(env, 'coop.project', 'partner_id', PROJECTS_COUNT)
+    _logger.info('Выравнивание полок: %s', total)
+    return total

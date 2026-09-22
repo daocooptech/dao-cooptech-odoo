@@ -190,31 +190,31 @@ class ResPartner(models.Model):
 
     @api.depends_context('uid')
     def _compute_coop_is_blocked_by_me(self):
-        я = self.env.user.partner_id
-        закрытые = set(self.env['coop.block'].sudo().search([
-            ('partner_id', '=', я.id),
+        me = self.env.user.partner_id
+        closed = set(self.env['coop.block'].sudo().search([
+            ('partner_id', '=', me.id),
             ('blocked_id', 'in', self.ids),
         ]).mapped('blocked_id').ids)
         for record in self:
-            record.coop_is_blocked_by_me = record.id in закрытые
+            record.coop_is_blocked_by_me = record.id in closed
 
     def action_coop_block(self):
         """Закрыть человеку дорогу к себе."""
         self.ensure_one()
-        я = self.env.user.partner_id
-        if self == я:
+        me = self.env.user.partner_id
+        if self == me:
             raise UserError(_('Себя заблокировать нельзя.'))
         self.env['coop.block'].sudo().create({
-            'partner_id': я.id,
+            'partner_id': me.id,
             'blocked_id': self.id,
         })
         return {'type': 'ir.actions.client', 'tag': 'reload'}
 
     def action_coop_unblock(self):
         self.ensure_one()
-        я = self.env.user.partner_id
+        me = self.env.user.partner_id
         self.env['coop.block'].sudo().search([
-            ('partner_id', '=', я.id),
+            ('partner_id', '=', me.id),
             ('blocked_id', '=', self.id),
         ]).unlink()
         return {'type': 'ir.actions.client', 'tag': 'reload'}
@@ -264,8 +264,8 @@ class ResPartner(models.Model):
         """
         self.ensure_one()
         action = self.env['ir.actions.act_window']._for_xml_id(xml_id)
-        свой = self == self.env.user._coop_acting_partner()
-        if свой and own_name:
+        own = self == self.env.user._coop_acting_partner()
+        if own and own_name:
             name = own_name
         action['domain'] = domain
         action['name'] = name
@@ -319,30 +319,30 @@ class ResPartner(models.Model):
         запрет обходится через соседний экран.
         """
         self.ensure_one()
-        отправитель = sender or self.env.user.partner_id
-        if not отправитель or отправитель == self:
+        from_partner = sender or self.env.user.partner_id
+        if not from_partner or from_partner == self:
             return True
         if 'coop.block' in self.env:
-            блок = self.env['coop.block'].sudo().search_count([
+            block = self.env['coop.block'].sudo().search_count([
                 ('partner_id', '=', self.id),
-                ('blocked_id', '=', отправитель.id)])
-            if блок:
+                ('blocked_id', '=', from_partner.id)])
+            if block:
                 return False
         if self.coop_message_audience != 'links':
             return True
-        return self.id in self._coop_linked_to(отправитель)
+        return self.id in self._coop_linked_to(from_partner)
 
     @api.depends_context('uid')
     def _compute_coop_page_visible(self):
-        я = self.env.user.partner_id
-        закрытые = self.filtered(lambda p: p.coop_page_audience == 'links'
-                                 and p != я)
-        связанные = закрытые._coop_linked_to(я) if закрытые else set()
+        me = self.env.user.partner_id
+        closed = self.filtered(lambda p: p.coop_page_audience == 'links'
+                                 and p != me)
+        linked = closed._coop_linked_to(me) if closed else set()
         for record in self:
             record.coop_page_visible = (
                 record.coop_page_audience != 'links'
-                or record == я
-                or record.id in связанные)
+                or record == me
+                or record.id in linked)
 
     def _coop_linked_to(self, partner):
         """Кто из `self` связан с человеком: дружба или общая сделка.
@@ -353,13 +353,13 @@ class ResPartner(models.Model):
         """
         if not partner:
             return set()
-        связанные = set()
+        linked = set()
         # Дружба и сделки живут в соседних модулях, которые зависят от
         # основы, а не наоборот. Спрашиваем их, только если они есть:
         # узел с одной основой тоже должен подниматься.
         if 'coop.friendship' not in self.env:
-            return связанные
-        дружбы = self.env['coop.friendship'].sudo().search([
+            return linked
+        friendships = self.env['coop.friendship'].sudo().search([
             ('state', '=', 'accepted'),
             '|',
             '&', ('requester_id', '=', partner.id),
@@ -367,22 +367,22 @@ class ResPartner(models.Model):
             '&', ('addressee_id', '=', partner.id),
             ('requester_id', 'in', self.ids),
         ])
-        for связь in дружбы:
-            другой = (связь.addressee_id if связь.requester_id == partner
-                      else связь.requester_id)
-            связанные.add(другой.id)
+        for link in friendships:
+            other = (link.addressee_id if link.requester_id == partner
+                      else link.requester_id)
+            linked.add(other.id)
         if 'coop.deal' not in self.env:
-            return связанные
-        сделки = self.env['coop.deal'].sudo().search([
+            return linked
+        deals = self.env['coop.deal'].sudo().search([
             '|',
             '&', ('party_a_id', '=', partner.id), ('party_b_id', 'in', self.ids),
             '&', ('party_b_id', '=', partner.id), ('party_a_id', 'in', self.ids),
         ])
-        for сделка in сделки:
-            другой = (сделка.party_b_id if сделка.party_a_id == partner
-                      else сделка.party_a_id)
-            связанные.add(другой.id)
-        return связанные
+        for deal in deals:
+            other = (deal.party_b_id if deal.party_a_id == partner
+                      else deal.party_a_id)
+            linked.add(other.id)
+        return linked
 
     def _search_coop_page_visible(self, operator, value):
         """Отбор по видимости — для каталога.
@@ -393,13 +393,13 @@ class ResPartner(models.Model):
         """
         if operator not in ('=', '!=') or not isinstance(value, bool):
             raise NotImplementedError
-        видно = (operator == '=') == value
-        я = self.env.user.partner_id
-        закрытые = self.sudo().search([('coop_page_audience', '=', 'links')])
-        закрытые = закрытые.filtered(lambda p: p != я)
-        связанные = закрытые._coop_linked_to(я)
-        спрятанные = [p.id for p in закрытые if p.id not in связанные]
-        return [('id', 'not in', спрятанные)] if видно else [('id', 'in', спрятанные)]
+        visible = (operator == '=') == value
+        me = self.env.user.partner_id
+        closed = self.sudo().search([('coop_page_audience', '=', 'links')])
+        closed = closed.filtered(lambda p: p != me)
+        linked = closed._coop_linked_to(me)
+        hidden = [p.id for p in closed if p.id not in linked]
+        return [('id', 'not in', hidden)] if visible else [('id', 'in', hidden)]
 
     coop_accepts_my_message = fields.Boolean(
         string='Принимает моё письмо',
@@ -421,19 +421,19 @@ class ResPartner(models.Model):
         """
         if operator not in ('=', '!=') or not isinstance(value, bool):
             raise NotImplementedError
-        принимает = (operator == '=') == value
-        я = self.env.user.partner_id
-        закрытые = self.sudo().search([('coop_message_audience', '=', 'links')])
-        закрытые = закрытые.filtered(lambda p: p != я)
-        связанные = закрытые._coop_linked_to(я)
-        нельзя = {p.id for p in закрытые if p.id not in связанные}
-        if 'coop.block' in self.env and я:
-            for блок in self.env['coop.block'].sudo().search(
-                    [('blocked_id', '=', я.id)]):
-                нельзя.add(блок.partner_id.id)
-        нельзя = list(нельзя)
-        return ([('id', 'not in', нельзя)] if принимает
-                else [('id', 'in', нельзя)])
+        accepts = (operator == '=') == value
+        me = self.env.user.partner_id
+        closed = self.sudo().search([('coop_message_audience', '=', 'links')])
+        closed = closed.filtered(lambda p: p != me)
+        linked = closed._coop_linked_to(me)
+        forbidden = {p.id for p in closed if p.id not in linked}
+        if 'coop.block' in self.env and me:
+            for block in self.env['coop.block'].sudo().search(
+                    [('blocked_id', '=', me.id)]):
+                forbidden.add(block.partner_id.id)
+        forbidden = list(forbidden)
+        return ([('id', 'not in', forbidden)] if accepts
+                else [('id', 'in', forbidden)])
 
     coop_profile_hidden = fields.Boolean(
         string='Профиль скрыт', default=False, copy=False,
@@ -497,18 +497,18 @@ class ResPartner(models.Model):
             WHERE comment IS NOT NULL AND comment <> ''
               AND (coop_about IS NULL OR coop_about = '')
         """)
-        строки = self.env.cr.fetchall()
-        if not строки:
+        lines = self.env.cr.fetchall()
+        if not lines:
             return
-        for идентификатор, разметка in строки:
-            текст = html2plaintext(разметка or '').strip()
-            if not текст:
+        for identifier, markup in lines:
+            text = html2plaintext(markup or '').strip()
+            if not text:
                 continue
             self.env.cr.execute(
                 "UPDATE res_partner SET coop_about = %s WHERE id = %s",
-                (текст[:280], идентификатор))
+                (text[:280], identifier))
         _logger.info('«О себе»: перенесено из комментария %s записей',
-                     len(строки))
+                     len(lines))
         self._coop_fill_privacy_defaults()
 
     def _coop_fill_privacy_defaults(self):
@@ -520,16 +520,16 @@ class ResPartner(models.Model):
         одним обновлением опустошило бы карточки всех участников
         разом.
         """
-        включено = ('coop_show_trust', 'coop_show_deals', 'coop_show_friends',
+        enabled = ('coop_show_trust', 'coop_show_deals', 'coop_show_friends',
                     'coop_show_followers', 'coop_show_contacts',
                     'coop_show_city', 'coop_show_orgs')
-        выключено = ('coop_show_balance', 'coop_show_phone',
+        disabled = ('coop_show_balance', 'coop_show_phone',
                       'coop_show_email', 'coop_show_birthdate')
-        for значение, поля in ((True, включено), (False, выключено)):
-            for поле in поля:
+        for value, field_names in ((True, enabled), (False, disabled)):
+            for field in field_names:
                 self.env.cr.execute(
                     'UPDATE res_partner SET %s = %%s WHERE %s IS NULL'
-                    % (поле, поле), (значение,))
+                    % (field, field), (value,))
 
 
     def _message_get_suggested_recipients_batch(self, *args, **kwargs):
@@ -580,15 +580,15 @@ class ResPartner(models.Model):
         ведёт состав, а вот в переписку сажать некого.
         """
         Membership = self.env['coop.membership'].sudo()
-        люди = self.env['res.partner']
+        people = self.env['res.partner']
         for record in self:
             if not record.is_company:
-                люди |= record
+                people |= record
                 continue
-            членства = Membership.search([
+            memberships = Membership.search([
                 ('organization_id', '=', record.id),
                 ('state', '=', 'active'),
             ])
-            люди |= членства.filtered(
+            people |= memberships.filtered(
                 lambda m: code in m.power_ids.mapped('code')).mapped('partner_id')
-        return люди
+        return people

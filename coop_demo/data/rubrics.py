@@ -14,7 +14,7 @@
 """
 
 # Название объявления → рубрика каталога ресурсов.
-РЕСУРСЫ = [
+RESOURCES = [
     (('перевозк', 'доставк', 'вывоз', 'самосвал', 'грузовик'),
      'Грузовики и спецтехника'),
     (('помещение', 'хранилищ', 'склад', 'ангар', 'площадк под'),
@@ -49,7 +49,7 @@
 
 # Название вакансии → специализация из общего справочника. Сфера
 # деятельности — рубрика каталога — считается от неё сама.
-ВАКАНСИИ = [
+VACANCIES = [
     (('разнорабоч', 'подготовка площадк', 'подсобн'), 'Разнорабочий'),
     (('бухгалтер', 'первичк', 'учёт'), 'Бухгалтерия'),
     (('юрист', 'юридическ', 'лицензи на по', 'правов'), 'Юрисконсульт'),
@@ -97,22 +97,22 @@
 ]
 
 
-def _по_названию(правила, name):
-    низ = (name or '').lower()
-    for ключи, значение in правила:
-        if any(ключ in низ for ключ in ключи):
-            return значение
+def _by_title(rules, name):
+    bottom = (name or '').lower()
+    for keys, value in rules:
+        if any(key in bottom for key in keys):
+            return value
     return None
 
 
 def category_for(name):
     """Рубрика каталога ресурсов по названию объявления, или пусто."""
-    return _по_названию(РЕСУРСЫ, name)
+    return _by_title(RESOURCES, name)
 
 
 def specialization_for(name):
     """Специализация по названию вакансии, или пусто."""
-    return _по_названию(ВАКАНСИИ, name)
+    return _by_title(VACANCIES, name)
 
 
 def merge_duplicate_categories(env):
@@ -132,64 +132,64 @@ def merge_duplicate_categories(env):
     """
     from . import load_resources
 
-    Категория = env['coop.resource.category'].sudo()
-    все = Категория.search([])
-    по_именам = {}
-    for рубрика in все:
-        по_именам.setdefault(рубрика.name, []).append(рубрика)
+    Category = env['coop.resource.category'].sudo()
+    all_items = Category.search([])
+    by_names = {}
+    for rubric in all_items:
+        by_names.setdefault(rubric.name, []).append(rubric)
 
-    сведено = 0
-    for имя, двойники in по_именам.items():
-        if len(двойники) < 2:
+    merged = 0
+    for name, dupes in by_names.items():
+        if len(dupes) < 2:
             continue
-        родитель = load_resources.CATEGORY_PARENTS.get(имя)
-        def годится(р):
-            if родитель:
-                return р.parent_id.name == родитель
-            return not р.parent_id
+        parent = load_resources.CATEGORY_PARENTS.get(name)
+        def fits(r):
+            if parent:
+                return r.parent_id.name == parent
+            return not r.parent_id
         # Если по карте не выбрать — оставляем ту, где больше записей:
         # меньше переносить и меньше шансов задеть чужие ссылки.
-        главная = next((р for р in двойники if годится(р)), None)
-        if главная is None:
-            главная = max(двойники, key=lambda р: len(р.resource_ids)
-                          if 'resource_ids' in р._fields else 0)
-        for двойник in двойники:
-            if двойник == главная:
+        main_one = next((r for r in dupes if fits(r)), None)
+        if main_one is None:
+            main_one = max(dupes, key=lambda r: len(r.resource_ids)
+                          if 'resource_ids' in r._fields else 0)
+        for dupe in dupes:
+            if dupe == main_one:
                 continue
             env['coop.resource'].sudo().search(
-                [('category_id', '=', двойник.id)]).write(
-                    {'category_id': главная.id})
-            Категория.search([('parent_id', '=', двойник.id)]).write(
-                {'parent_id': главная.id})
+                [('category_id', '=', dupe.id)]).write(
+                    {'category_id': main_one.id})
+            Category.search([('parent_id', '=', dupe.id)]).write(
+                {'parent_id': main_one.id})
             # Назначения характеристик уникальны парой «характеристика
             # плюс рубрика»: у главной такая пара уже может быть, и
             # перенос падает на ограничении. Совпавшие просто удаляем —
             # они означают ровно то же самое.
             if 'coop.attribute.assignment' in env:
-                Назначение = env['coop.attribute.assignment'].sudo()
-                занятые = set(Назначение.search(
-                    [('category_id', '=', главная.id)]).mapped('attribute_id').ids)
-                for назначение in Назначение.search(
-                        [('category_id', '=', двойник.id)]):
-                    if назначение.attribute_id.id in занятые:
-                        назначение.unlink()
+                Assignment = env['coop.attribute.assignment'].sudo()
+                taken_list = set(Assignment.search(
+                    [('category_id', '=', main_one.id)]).mapped('attribute_id').ids)
+                for purpose in Assignment.search(
+                        [('category_id', '=', dupe.id)]):
+                    if purpose.attribute_id.id in taken_list:
+                        purpose.unlink()
                     else:
-                        назначение.category_id = главная.id
-                        занятые.add(назначение.attribute_id.id)
-            for модель, поле in (('coop.token.claim', 'resource_category_id'),
+                        purpose.category_id = main_one.id
+                        taken_list.add(purpose.attribute_id.id)
+            for model, field in (('coop.token.claim', 'resource_category_id'),
                                  ('coop.token.order', 'resource_category_id')):
-                if модель not in env:
+                if model not in env:
                     continue
                 # Связанные поля пересчитаются сами — трогаем только те,
                 # что хранят свой выбор.
-                поле_модели = env[модель]._fields.get(поле)
-                if поле_модели is None or поле_модели.related:
+                model_field = env[model]._fields.get(field)
+                if model_field is None or model_field.related:
                     continue
-                env[модель].sudo().search([(поле, '=', двойник.id)]).write(
-                    {поле: главная.id})
-            двойник.unlink()
-            сведено += 1
-    return сведено
+                env[model].sudo().search([(field, '=', dupe.id)]).write(
+                    {field: main_one.id})
+            dupe.unlink()
+            merged += 1
+    return merged
 
 
 def fill_resources(env):
@@ -199,23 +199,23 @@ def fill_resources(env):
     Возвращает, скольким поставили и скольким не нашлось: второе важнее —
     по нему видно, каких правил не хватает.
     """
-    Категория = env['coop.resource.category'].sudo()
-    кэш = {}
-    поставлено = не_нашлось = 0
-    for запись in env['coop.resource'].sudo().search(
+    Category = env['coop.resource.category'].sudo()
+    cache = {}
+    placed = not_found = 0
+    for record in env['coop.resource'].sudo().search(
             [('category_id', '=', False)]):
-        имя = category_for(запись.name)
-        рубрика = None
-        if имя:
-            if имя not in кэш:
-                кэш[имя] = Категория.search([('name', '=', имя)], limit=1)
-            рубрика = кэш[имя]
-        if not рубрика:
-            не_нашлось += 1
+        name = category_for(record.name)
+        rubric = None
+        if name:
+            if name not in cache:
+                cache[name] = Category.search([('name', '=', name)], limit=1)
+            rubric = cache[name]
+        if not rubric:
+            not_found += 1
             continue
-        запись.write({'category_id': рубрика.id})
-        поставлено += 1
-    return поставлено, не_нашлось
+        record.write({'category_id': rubric.id})
+        placed += 1
+    return placed, not_found
 
 
 def fill_vacancies(env):
@@ -227,20 +227,20 @@ def fill_vacancies(env):
     """
     if 'coop.vacancy' not in env:
         return 0, 0
-    Спец = env['coop.specialization'].sudo()
-    кэш = {}
-    поставлено = не_нашлось = 0
-    for запись in env['coop.vacancy'].sudo().search(
+    Spec = env['coop.specialization'].sudo()
+    cache = {}
+    placed = not_found = 0
+    for record in env['coop.vacancy'].sudo().search(
             [('coop_specialization_id', '=', False)]):
-        имя = specialization_for(запись.name)
-        спец = None
-        if имя:
-            if имя not in кэш:
-                кэш[имя] = Спец.search([('name', '=', имя)], limit=1)
-            спец = кэш[имя]
-        if not спец:
-            не_нашлось += 1
+        name = specialization_for(record.name)
+        spec = None
+        if name:
+            if name not in cache:
+                cache[name] = Spec.search([('name', '=', name)], limit=1)
+            spec = cache[name]
+        if not spec:
+            not_found += 1
             continue
-        запись.write({'coop_specialization_id': спец.id})
-        поставлено += 1
-    return поставлено, не_нашлось
+        record.write({'coop_specialization_id': spec.id})
+        placed += 1
+    return placed, not_found

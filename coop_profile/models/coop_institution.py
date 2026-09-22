@@ -58,9 +58,9 @@ class CoopInstitution(models.Model):
         а убеждаются, что не перепутали, по второму.
         """
         for record in self:
-            части = [record.short_name or record.name or '']
+            parts = [record.short_name or record.name or '']
             if record.name and record.name != record.short_name:
-                части.append('— %s' % record.name)
+                parts.append('— %s' % record.name)
             if record.city:
-                части.append('· %s' % record.city)
-            record.display_name = ' '.join(части)
+                parts.append('· %s' % record.city)
+            record.display_name = ' '.join(parts)

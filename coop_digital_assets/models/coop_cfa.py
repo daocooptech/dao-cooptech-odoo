@@ -209,10 +209,10 @@ class CoopCfaIssue(models.Model):
     @api.depends('state', 'issuer_id')
     def _compute_can_buy(self):
         """Приобрести можно выпущенное и не своё."""
-        мои = self.env.user.coop_actor_partner_ids
+        mine = self.env.user.coop_actor_partner_ids
         for record in self:
             record.can_buy = bool(
-                record.state == 'issued' and record.issuer_id not in мои)
+                record.state == 'issued' and record.issuer_id not in mine)
 
     def action_buy(self):
         """«Приобрести» — как в макете (`cfa-asset.html`).

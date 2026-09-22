@@ -158,16 +158,16 @@ class DiscussChannel(models.Model):
 
     def _coop_check_not_blocked(self):
         Block = self.env['coop.block']
-        я = self.env.user.partner_id
+        me = self.env.user.partner_id
         for channel in self:
             if channel.channel_type != 'chat':
                 continue
-            собеседники = channel.channel_partner_ids - я
-            закрывшие = [p for p in собеседники if Block._blocks(p, я)]
-            if закрывшие:
+            interlocutors = channel.channel_partner_ids - me
+            closers = [p for p in interlocutors if Block._blocks(p, me)]
+            if closers:
                 raise UserError(_(
                     'Участник %s не принимает от вас сообщений.'
-                ) % закрывшие[0].display_name)
+                ) % closers[0].display_name)
 
     # Модели, чьи переписки ведёт платформа. Списком, а не цепочкой
     # условий: новый раздел добавляется одной строкой.
@@ -188,16 +188,16 @@ class DiscussChannel(models.Model):
         не соединяется с таблицей — по ней отбирать нельзя.
         """
         for channel in self:
-            хозяева = self.env['res.partner']
-            запись = channel._coop_record()
+            owners = self.env['res.partner']
+            record = channel._coop_record()
             # Не у всякой записи с перепиской есть примесь: чат сообщества
             # заводит организатор, и модель сообщества про хозяев ничего
             # не знает. Без этой проверки вычисление падало на первом же
             # таком канале, и с ним не поднималась вся база — ошибка в
             # вычисляемом поле останавливает загрузку целиком.
-            if запись is not None and hasattr(запись, '_coop_channel_owners'):
-                хозяева = запись._coop_channel_owners(channel.coop_kind)
-            channel.coop_owner_partner_ids = [(6, 0, хозяева.ids)]
+            if record is not None and hasattr(record, '_coop_channel_owners'):
+                owners = record._coop_channel_owners(channel.coop_kind)
+            channel.coop_owner_partner_ids = [(6, 0, owners.ids)]
 
     def _coop_record(self):
         """Запись, из которой выросла переписка."""
@@ -206,8 +206,8 @@ class DiscussChannel(models.Model):
             return None
         if self.coop_res_model not in self.env:
             return None
-        запись = self.env[self.coop_res_model].sudo().browse(self.coop_res_id)
-        return запись if запись.exists() else None
+        record = self.env[self.coop_res_model].sudo().browse(self.coop_res_id)
+        return record if record.exists() else None
 
     MANAGED_MODELS = ('coop.deal', 'coop.project', 'res.partner')
 
@@ -234,7 +234,7 @@ class DiscussChannel(models.Model):
                     'Из этой переписки нельзя выйти: её состав следует за '
                     'записью. «%(что)s» — разговор тех, кто в деле; выйти '
                     'из него можно, только перестав в нём участвовать.',
-                    что=channel.display_name))
+                    what=channel.display_name))
         return super()._action_unfollow(
             partner=partner, guest=guest, post_leave_message=post_leave_message)
 
@@ -252,48 +252,48 @@ class DiscussChannel(models.Model):
         сентября 2026 его не было, и переписки, заведённые платформой, от
         заведённых руками ничем не отличались.
         """
-        Каналы = self.sudo()
-        сведено = {'каналов': 0, 'добавлено': 0, 'убрано': 0}
+        Channels = self.sudo()
+        merged = {'каналов': 0, 'добавлено': 0, 'убрано': 0}
         # Снять пометку с того, что платформа не ведёт: личные переписки
         # пометились по ошибке, когда признак ставился по модели записи.
-        чужие = Каналы.search([('coop_managed', '=', True),
+        foreign = Channels.search([('coop_managed', '=', True),
                                ('coop_kind', 'not in', list(self.MANAGED_KINDS))])
-        if чужие:
-            чужие.write({'coop_managed': False})
-        for модель in self.MANAGED_MODELS:
-            if модель not in self.env:
+        if foreign:
+            foreign.write({'coop_managed': False})
+        for model in self.MANAGED_MODELS:
+            if model not in self.env:
                 continue
-            Модель = self.env[модель].sudo()
+            Model = self.env[model].sudo()
             # Сначала помечаем уже заведённые: до 16 сентября 2026
             # признака не было, и переписки платформы от заведённых
             # руками ничем не отличались.
-            свои = Каналы.search([('coop_res_model', '=', модель),
+            own_list = Channels.search([('coop_res_model', '=', model),
                                   ('coop_kind', 'in', self.MANAGED_KINDS),
                                   ('coop_managed', '=', False)])
-            if свои:
-                свои.write({'coop_managed': True})
+            if own_list:
+                own_list.write({'coop_managed': True})
             # Потом заводим недостающие и сводим составы. Порядок важен:
             # заведение ищет переписку по признаку, и без пометки выше
             # оно завело бы вторую рядом с существующей.
-            записи = Модель.search([])
-            записи._coop_ensure_channel()
-            for канал in Каналы.search([('coop_res_model', '=', модель),
+            records = Model.search([])
+            records._coop_ensure_channel()
+            for channel in Channels.search([('coop_res_model', '=', model),
                                         ('coop_kind', 'in', self.MANAGED_KINDS)]):
-                запись = Модель.browse(канал.coop_res_id)
-                if not запись.exists():
+                record = Model.browse(channel.coop_res_id)
+                if not record.exists():
                     continue
-                спецификации = {с['kind']: с for с in запись._coop_channel_specs()}
-                спец = спецификации.get(канал.coop_kind)
-                if not спец:
+                specs = {ch['kind']: ch for ch in record._coop_channel_specs()}
+                spec = specs.get(channel.coop_kind)
+                if not spec:
                     continue
-                добавлено, убрано = запись._coop_apply_members(
-                    канал, спец['partners'])
-                сведено['каналов'] += 1
-                сведено['добавлено'] += добавлено
-                сведено['убрано'] += убрано
+                added, removed = record._coop_apply_members(
+                    channel, spec['partners'])
+                merged['каналов'] += 1
+                merged['добавлено'] += added
+                merged['убрано'] += removed
         _logger.info(
             'Состав переписок сведён с записями: каналов %(каналов)s, '
-            'добавлено %(добавлено)s, убрано %(убрано)s', сведено)
+            'добавлено %(добавлено)s, убрано %(убрано)s', merged)
         return True
 
     def _to_store_defaults(self, target: Store.Target):

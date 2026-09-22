@@ -170,7 +170,7 @@ class CoopAuction(models.Model):
         стояли одни завершённые, а все семь идущих не попадали на экран
         вовсе. Раздел, где нельзя сделать ставку, — не торги, а архив.
         """
-        порядок = {
+        sort_order = {
             'running': 0,     # идут — ради них сюда и заходят
             'draft': 1,       # вот-вот начнутся
             'no_bids': 2,     # закончились, но лот свободен
@@ -178,7 +178,7 @@ class CoopAuction(models.Model):
             'cancelled': 4,
         }
         for record in self:
-            record.live_rank = порядок.get(record.state, 9)
+            record.live_rank = sort_order.get(record.state, 9)
 
     @api.depends_context('uid')
     @api.depends('state', 'owner_id')
@@ -323,7 +323,7 @@ class CoopAuction(models.Model):
 
         # Прежнего лидера запоминаем до ставки: после неё поле уже
         # пересчитано, и известить вытесненного будет некого.
-        прежний = self.leader_id
+        previous = self.leader_id
 
         bid = self.env['coop.auction.bid'].create({
             'auction_id': self.id,
@@ -334,11 +334,11 @@ class CoopAuction(models.Model):
         # Не зная, что его перебили, участник не поднимет ставку — и торг
         # выигрывает не тот, кто больше готов заплатить, а тот, кто
         # случайно заглянул на страницу последним.
-        if прежний:
+        if previous:
             self.env['coop.notification']._notify(
-                прежний,
+                previous,
                 _('Вашу ставку на «%(лот)s» перебили: теперь %(цена)s.',
-                  лот=self.name, цена=amount),
+                  lot=self.name, price=amount),
                 record=self, kind='auction')
 
         # Антиснайпинг: ставка на последних минутах отодвигает конец.
@@ -351,12 +351,12 @@ class CoopAuction(models.Model):
         if self.extend_minutes:
             edge = self.date_end - timedelta(minutes=self.extend_minutes)
             if now >= edge:
-                продлённый = self.date_end + timedelta(
+                extended = self.date_end + timedelta(
                     minutes=self.extend_minutes)
-                self.sudo().date_end = продлённый
+                self.sudo().date_end = extended
                 self.sudo().message_post(body=_(
                     'Ставка на последних минутах — торг продлён до %(until)s.',
-                    until=fields.Datetime.to_string(продлённый)))
+                    until=fields.Datetime.to_string(extended)))
         return bid
 
     def action_finish(self):

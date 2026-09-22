@@ -37,15 +37,15 @@ class CoopCfaBuy(models.TransientModel):
 
     def action_buy(self):
         self.ensure_one()
-        выпуск = self.issue_id
-        я = self.env.user._coop_acting_partner()
+        issue = self.issue_id
+        me = self.env.user._coop_acting_partner()
 
-        if выпуск.state != 'issued':
+        if issue.state != 'issued':
             raise UserError(_(
                 'Приобрести можно выпущенный актив. Сейчас он в состоянии '
                 '«%s».') % dict(
-                    выпуск._fields['state'].selection)[выпуск.state])
-        if выпуск.issuer_id == я:
+                    issue._fields['state'].selection)[issue.state])
+        if issue.issuer_id == me:
             raise UserError(_(
                 'Это ваш выпуск. Эмитент не приобретает собственный актив: '
                 'невыкупленное и так остаётся за ним.'))
@@ -56,27 +56,27 @@ class CoopCfaBuy(models.TransientModel):
         # запись о владении заводится от его имени. Но начинается
         # приобретение здесь: иначе выпуск некому купить.
         Holding = self.env['coop.cfa.holding'].sudo()
-        владение = Holding.create({
-            'partner_id': я.id,
-            'issue_id': выпуск.id,
-            'operator_id': выпуск.operator_id.id,
-            'name': выпуск.display_name,
+        ownership = Holding.create({
+            'partner_id': me.id,
+            'issue_id': issue.id,
+            'operator_id': issue.operator_id.id,
+            'name': issue.display_name,
             'quantity': self.quantity,
             'value': self.total,
         })
 
-        тело = _('Приобретение «%(что)s»: %(сколько)s ед. на %(сумма)s ₽ '
+        body = _('Приобретение «%(что)s»: %(сколько)s ед. на %(сумма)s ₽ '
                  'от %(кто)s.',
-                 что=выпуск.display_name, сколько=self.quantity,
-                 сумма=self.total, кто=я.display_name)
+                 what=issue.display_name, how_many=self.quantity,
+                 amount=self.total, who=me.display_name)
         self.env['coop.notification']._notify(
-            выпуск.issuer_id, тело, record=выпуск, kind='other')
-        выпуск.sudo().message_post(body=тело)
+            issue.issuer_id, body, record=issue, kind='other')
+        issue.sudo().message_post(body=body)
         return {
             'type': 'ir.actions.act_window',
             'name': _('Моё владение'),
             'res_model': 'coop.cfa.holding',
-            'res_id': владение.id,
+            'res_id': ownership.id,
             'view_mode': 'form',
             'target': 'current',
         }

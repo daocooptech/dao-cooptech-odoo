@@ -155,10 +155,10 @@ class ResPartner(models.Model):
         объявил бы себя учредителем чужого кооператива.
         """
         for record in self:
-            прямые = record.coop_org_link_ids.filtered('confirmed')
-            обратные = record.coop_org_backlink_ids.filtered('confirmed')
+            direct = record.coop_org_link_ids.filtered('confirmed')
+            reverse = record.coop_org_backlink_ids.filtered('confirmed')
             record.coop_related_org_ids = (
-                прямые.mapped('other_id') | обратные.mapped('org_id'))
+                direct.mapped('other_id') | reverse.mapped('org_id'))
 
     def _compute_coop_project_count(self):
         """Сколько проектов ведёт организация.
@@ -167,14 +167,14 @@ class ResPartner(models.Model):
         карточке у всех, и права на сами проекты тут ни при чём.
         """
         Project = self.env['coop.project'].sudo()
-        счёт = {}
+        account = {}
         if self.ids:
-            for организация, число in Project._read_group(
+            for organization, number_value in Project._read_group(
                     [('partner_id', 'in', self.ids)],
                     groupby=['partner_id'], aggregates=['__count']):
-                счёт[организация.id] = число
+                account[organization.id] = number_value
         for record in self:
-            record.coop_project_count = счёт.get(record.id, 0)
+            record.coop_project_count = account.get(record.id, 0)
     coop_has_members = fields.Boolean(
         string='Форма предполагает членство',
         related='coop_legal_form_id.has_members', store=True,
@@ -225,35 +225,35 @@ class ResPartner(models.Model):
     def _compute_coop_my_membership(self):
         """Четыре ответа одним проходом: все нужны одной шапке разом."""
         user = self.env.user
-        я = user.partner_id
+        me = user.partner_id
         Membership = self.env['coop.membership'].sudo()
-        моё = {}
-        заявлений = {}
+        my_one = {}
+        applications_count = {}
         if self.ids:
-            for запись in Membership.search([
+            for rec in Membership.search([
                     ('organization_id', 'in', self.ids),
-                    ('partner_id', '=', я.id),
+                    ('partner_id', '=', me.id),
                     ('state', 'in', ('applied', 'active', 'leaving'))]):
-                моё[запись.organization_id.id] = запись.state
-            for организация, число in Membership._read_group(
+                my_one[rec.organization_id.id] = rec.state
+            for organization, number_value in Membership._read_group(
                     [('organization_id', 'in', self.ids),
                      ('state', '=', 'applied')],
                     groupby=['organization_id'], aggregates=['__count']):
-                заявлений[организация.id] = число
+                applications_count[organization.id] = number_value
         for record in self:
-            состояние = моё.get(record.id, 'none')
-            record.coop_my_membership_state = состояние
-            ведёт = bool(record.is_company
+            state = my_one.get(record.id, 'none')
+            record.coop_my_membership_state = state
+            leads_to = bool(record.is_company
                          and user.coop_has_power('roster', record))
-            record.coop_can_manage_roster = ведёт
+            record.coop_can_manage_roster = leads_to
             record.coop_application_count = (
-                заявлений.get(record.id, 0) if ведёт else 0)
+                applications_count.get(record.id, 0) if leads_to else 0)
             # Вступают в организацию, основанную на членстве, и не в свою
             # собственную карточку. У фонда и АНО членства нет вовсе —
             # предлагать туда вступить значило бы обещать несуществующее.
             record.coop_can_join = bool(
                 record.is_company and record.coop_has_members
-                and record != я and состояние == 'none')
+                and record != me and state == 'none')
 
     def action_coop_join(self):
         """Окно заявления о вступлении."""
@@ -279,21 +279,21 @@ class ResPartner(models.Model):
     def action_coop_leave(self):
         """Подать заявление о выходе."""
         self.ensure_one()
-        членство = self._coop_my_membership()
-        if not членство:
+        membership = self._coop_my_membership()
+        if not membership:
             raise UserError(_('Вы не состоите в «%s».') % self.name)
-        членство.action_apply_to_leave()
+        membership.action_apply_to_leave()
         return True
 
     def action_coop_withdraw(self):
         """Отозвать своё заявление, пока его не рассмотрели."""
         self.ensure_one()
-        членство = self._coop_my_membership()
-        if not членство:
+        membership = self._coop_my_membership()
+        if not membership:
             raise UserError(_('Заявления нет.'))
         # Проверка «своё» и «ещё не рассмотрено» — в самой модели, чтобы
         # она была одна и для кнопки, и для вызова со стороны.
-        членство.sudo().with_user(self.env.user).action_withdraw()
+        membership.sudo().with_user(self.env.user).action_withdraw()
         return True
 
     def action_coop_applications(self):

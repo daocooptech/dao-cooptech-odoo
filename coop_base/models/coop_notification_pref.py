@@ -61,24 +61,24 @@ class CoopNotificationPref(models.Model):
         половиной тысячи на узле, притом что большинство их никогда не
         откроет.
         """
-        существующие = set(self.sudo().search(
+        existing = set(self.sudo().search(
             [('partner_id', '=', partner.id)]).mapped('kind'))
-        новые = [{'partner_id': partner.id, 'kind': код,
-                  'sequence': 10 * (номер + 1)}
-                 for номер, (код, _) in enumerate(KINDS)
-                 if код not in существующие]
-        if новые:
-            self.sudo().create(новые)
-        строки = self.sudo().search([('partner_id', '=', partner.id)])
+        new_list = [{'partner_id': partner.id, 'kind': code,
+                  'sequence': 10 * (number + 1)}
+                 for number, (code, _) in enumerate(KINDS)
+                 if code not in existing]
+        if new_list:
+            self.sudo().create(new_list)
+        lines = self.sudo().search([('partner_id', '=', partner.id)])
         # Порядок приводится к перечню каждый раз: строки, заведённые
         # до появления поля, иначе остались бы в алфавитном беспорядке.
-        порядок = {код: 10 * (номер + 1)
-                   for номер, (код, _) in enumerate(KINDS)}
-        for строка in строки:
-            нужный = порядок.get(строка.kind)
-            if нужный and строка.sequence != нужный:
-                строка.sequence = нужный
-        return строки
+        sort_order = {code: 10 * (number + 1)
+                   for number, (code, _) in enumerate(KINDS)}
+        for line in lines:
+            needed_one = sort_order.get(line.kind)
+            if needed_one and line.sequence != needed_one:
+                line.sequence = needed_one
+        return lines
 
     @api.model
     def _allowed(self, partner, kind):
