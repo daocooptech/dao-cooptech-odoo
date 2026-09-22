@@ -436,16 +436,19 @@
                 <list class="o_coop_needs_list" create="false" delete="false">
                   <field name="need_can_join" column_invisible="1"/>
                   <field name="name" string="Ресурс"/>
-                  <field name="price" string="Стоимость"/>
+                  <field name="price" string="Стоимость"
+                         options="{'hide_trailing_zeros': true}"/>
                   <!-- Пай, доля или ничего — по виду проекта. Решение
                        владельца 15 сентября 2026. Поле-двойник, потому
                        что подпись колонки задаётся разметкой, а одно и
                        то же поле дважды в списке движок не берёт. -->
                   <field name="need_share_percent" string="Пай, %"
-                         widget="float" digits="[5,2]"
+                         widget="float" digits="[5,1]"
+                         options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind != 'cooperative'"/>
                   <field name="need_share_ratio" string="Доля, %"
-                         widget="float" digits="[5,2]"
+                         widget="float" digits="[5,1]"
+                         options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind not in ('commercial', 'dao')"/>
                   <field name="need_offer_count" string="Откликов"/>
                   <button name="action_join_need" type="object"
@@ -461,16 +464,19 @@
                 <list class="o_coop_needs_list" create="false" delete="false">
                   <field name="need_can_join" column_invisible="1"/>
                   <field name="name" string="Ресурс"/>
-                  <field name="price" string="Стоимость"/>
+                  <field name="price" string="Стоимость"
+                         options="{'hide_trailing_zeros': true}"/>
                   <!-- Пай, доля или ничего — по виду проекта. Решение
                        владельца 15 сентября 2026. Поле-двойник, потому
                        что подпись колонки задаётся разметкой, а одно и
                        то же поле дважды в списке движок не берёт. -->
                   <field name="need_share_percent" string="Пай, %"
-                         widget="float" digits="[5,2]"
+                         widget="float" digits="[5,1]"
+                         options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind != 'cooperative'"/>
                   <field name="need_share_ratio" string="Доля, %"
-                         widget="float" digits="[5,2]"
+                         widget="float" digits="[5,1]"
+                         options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind not in ('commercial', 'dao')"/>
                   <field name="need_offer_count" string="Откликов"/>
                   <button name="action_join_need" type="object"
@@ -486,16 +492,19 @@
                 <list class="o_coop_needs_list" create="false" delete="false">
                   <field name="need_can_join" column_invisible="1"/>
                   <field name="name" string="Ресурс"/>
-                  <field name="price" string="Стоимость"/>
+                  <field name="price" string="Стоимость"
+                         options="{'hide_trailing_zeros': true}"/>
                   <!-- Пай, доля или ничего — по виду проекта. Решение
                        владельца 15 сентября 2026. Поле-двойник, потому
                        что подпись колонки задаётся разметкой, а одно и
                        то же поле дважды в списке движок не берёт. -->
                   <field name="need_share_percent" string="Пай, %"
-                         widget="float" digits="[5,2]"
+                         widget="float" digits="[5,1]"
+                         options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind != 'cooperative'"/>
                   <field name="need_share_ratio" string="Доля, %"
-                         widget="float" digits="[5,2]"
+                         widget="float" digits="[5,1]"
+                         options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind not in ('commercial', 'dao')"/>
                   <field name="need_offer_count" string="Откликов"/>
                   <button name="action_join_need" type="object"
@@ -511,16 +520,19 @@
                 <list class="o_coop_needs_list" create="false" delete="false">
                   <field name="need_can_join" column_invisible="1"/>
                   <field name="name" string="Ресурс"/>
-                  <field name="price" string="Стоимость"/>
+                  <field name="price" string="Стоимость"
+                         options="{'hide_trailing_zeros': true}"/>
                   <!-- Пай, доля или ничего — по виду проекта. Решение
                        владельца 15 сентября 2026. Поле-двойник, потому
                        что подпись колонки задаётся разметкой, а одно и
                        то же поле дважды в списке движок не берёт. -->
                   <field name="need_share_percent" string="Пай, %"
-                         widget="float" digits="[5,2]"
+                         widget="float" digits="[5,1]"
+                         options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind != 'cooperative'"/>
                   <field name="need_share_ratio" string="Доля, %"
-                         widget="float" digits="[5,2]"
+                         widget="float" digits="[5,1]"
+                         options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind not in ('commercial', 'dao')"/>
                   <field name="need_offer_count" string="Откликов"/>
                   <button name="action_join_need" type="object"
