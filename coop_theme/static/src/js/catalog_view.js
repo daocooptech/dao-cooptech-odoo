@@ -493,8 +493,15 @@ const coopOwnCreate = {
     },
 };
 
-patch(KanbanController.prototype, coopOwnCreate);
-patch(ListController.prototype, coopOwnCreate);
+// Каждому прототипу — свой объект заплатки, а не один на двоих.
+//
+// Внутри есть вызов `super.createRecord`, а `super` в заплатке
+// разрешается по тому прототипу, к которому её приложили. Один объект,
+// приложенный дважды, оставляет внутри себя ссылку на последний из них —
+// и в канбане `super` уводит в реализацию списка. Одинаковый на вид код,
+// разное поведение, и ловится это только на живом экране.
+patch(KanbanController.prototype, { ...coopOwnCreate });
+patch(ListController.prototype, { ...coopOwnCreate });
 
 // Строка поиска каталога: без штатного выпадающего меню и со своей
 // подсказкой. Признак каталога тот же, что у панели управления, — из
