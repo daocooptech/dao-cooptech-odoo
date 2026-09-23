@@ -24,6 +24,11 @@
         'security/coop_document_rules.xml',
         'views/coop_document_views.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'coop_documents/static/src/scss/coop_documents.scss',
+        ],
+    },
     'installable': True,
     'auto_install': False,
 }

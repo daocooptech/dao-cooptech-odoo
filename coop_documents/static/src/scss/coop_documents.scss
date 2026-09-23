@@ -1,0 +1,92 @@
+// Карточка документа.
+//
+// Не копия карточки ресурса: там главное снимок, здесь снимка нет и
+// быть не может. Узнают документ по виду, предмету и второй стороне —
+// в этом порядке, и карточка построена так же.
+
+.o_coop_doc_card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 14px;
+    min-height: 130px;
+}
+
+.o_coop_doc_head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.o_coop_doc_icon {
+    font-size: 18px;
+    // Значок вида заменяет снимок ровно в одной роли: отличить акт от
+    // договора, не читая. Поэтому он крупный и стоит первым.
+    opacity: 0.75;
+}
+
+.o_coop_doc_kind {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    opacity: 0.7;
+}
+
+.o_coop_doc_state {
+    margin-left: auto;
+}
+
+.o_coop_doc_name {
+    font-weight: 600;
+    line-height: 1.35;
+    // Три строки, дальше многоточие: названия документов длинные —
+    // «Акт приёма-передачи — Складское место: Отапливаемое хранилище
+    // семян, Пермь». Обрезать до одной строки значит показать только
+    // вид, который и так написан выше.
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.o_coop_doc_meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 12px;
+    opacity: 0.75;
+    margin-top: auto;
+}
+
+.o_coop_doc_date {
+    white-space: nowrap;
+}
+
+.o_coop_doc_foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    opacity: 0.65;
+    padding-top: 6px;
+    border-top: 1px solid var(--o-coop-line, rgba(0, 0, 0, 0.08));
+}
+
+.o_coop_doc_folder,
+.o_coop_doc_print,
+.o_coop_doc_nofile {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+// «Без файла» — не украшение и не ошибка оформления: документ, который
+// нечем сверить, должен быть виден с первого взгляда.
+.o_coop_doc_nofile {
+    opacity: 0.9;
+    color: var(--o-coop-warn, #b26a00);
+}

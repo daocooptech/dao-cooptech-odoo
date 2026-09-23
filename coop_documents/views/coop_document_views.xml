@@ -1,6 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+  <!--
+    Плиткой, чтобы переключатель вида был как в каталогах — владелец
+    23 сентября: «можно менять вид, так же как у каталогов».
+
+    Карточка документа не такая, как карточка ресурса, и это намеренно.
+    В каталоге главное — снимок: по нему узнают вещь. У документа снимка
+    нет и быть не может, а узнают его по виду, предмету и второй
+    стороне. Значок вида заменяет снимок ровно в этой роли: по нему
+    отличают акт от договора, не читая.
+  -->
+  <record id="view_coop_document_kanban" model="ir.ui.view">
+    <field name="name">coop.document.kanban</field>
+    <field name="model">coop.document</field>
+    <field name="arch" type="xml">
+      <kanban class="o_coop_documents" quick_create="false">
+        <field name="kind"/>
+        <field name="state"/>
+        <field name="party_b_id"/>
+        <field name="signed_on"/>
+        <field name="number"/>
+        <field name="folder_id"/>
+        <field name="fingerprint"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_doc_card">
+              <div class="o_coop_doc_head">
+                <i class="fa fa-file-text-o o_coop_doc_icon"
+                   t-if="record.kind.raw_value == 'contract'"/>
+                <i class="fa fa-handshake-o o_coop_doc_icon"
+                   t-elif="record.kind.raw_value == 'act'"/>
+                <i class="fa fa-check-square-o o_coop_doc_icon"
+                   t-elif="record.kind.raw_value == 'closing'"/>
+                <i class="fa fa-gavel o_coop_doc_icon"
+                   t-elif="record.kind.raw_value == 'protocol'"/>
+                <i class="fa fa-file-o o_coop_doc_icon" t-else=""/>
+                <span class="o_coop_doc_kind"><field name="kind"/></span>
+                <field name="state" widget="badge"
+                       class="o_coop_doc_state"/>
+              </div>
+
+              <div class="o_coop_doc_name"><field name="name"/></div>
+
+              <div class="o_coop_doc_meta">
+                <span t-if="record.party_b_id.value">
+                  <field name="party_b_id"/>
+                </span>
+                <span class="o_coop_doc_date"><field name="signed_on"/></span>
+              </div>
+
+              <div class="o_coop_doc_foot">
+                <span t-if="record.folder_id.value" class="o_coop_doc_folder">
+                  <i class="fa fa-folder-o"/> <field name="folder_id"/>
+                </span>
+                <!-- Отпечаток на карточке коротко: полностью его не
+                     читают, а вот «он есть» — видно сразу, и это
+                     главное, что карточка обязана сказать. -->
+                <span t-if="record.fingerprint.value" class="o_coop_doc_print"
+                      title="Отпечаток посчитан — документ можно сверить">
+                  <i class="fa fa-lock"/> сверяемый
+                </span>
+                <span t-else="" class="o_coop_doc_nofile">
+                  <i class="fa fa-exclamation-triangle"/> без файла
+                </span>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
   <record id="view_coop_document_list" model="ir.ui.view">
     <field name="name">coop.document.list</field>
     <field name="model">coop.document</field>
@@ -112,6 +183,28 @@
         <field name="folder_id" string="Папка"/>
         <field name="fingerprint" string="Отпечаток"/>
 
+        <!--
+          Папки слева деревом — владелец 23 сентября: «я думал будет как
+          в виндовс папки и вложенные документы».
+
+          Это не то же самое, что группировка. Группировка складывает
+          список в стопки и заставляет их раскрывать; панель показывает
+          **дерево** и оставляет список списком. Вложенные папки видны
+          сразу, и по ним ходят, а не разворачивают.
+
+          `hierarchize` строит дерево по `parent_id`, `enable_counters`
+          ставит число рядом с папкой: пустая полка видна до того, как в
+          неё зайдёшь.
+        -->
+        <searchpanel view_types="list,kanban">
+          <field name="folder_id" string="Папки" icon="fa-folder"
+                 enable_counters="1" hierarchize="1" expand="1"/>
+          <field name="kind" string="Вид" icon="fa-file-text-o"
+                 select="multi" enable_counters="1"/>
+          <field name="state" string="Состояние" icon="fa-check-circle-o"
+                 select="multi" enable_counters="1"/>
+        </searchpanel>
+
         <filter name="signed" string="Подписанные"
                 domain="[('state', '=', 'signed')]"/>
         <filter name="draft" string="Черновики"
@@ -197,13 +290,12 @@
     <field name="name">Документы</field>
     <field name="path">documents</field>
     <field name="res_model">coop.document</field>
-    <field name="view_mode">list,form</field>
+    <field name="view_mode">kanban,list,form</field>
     <!--
-      Сразу сгруппировано по папкам: документ без папки виден в группе
-      «Не разложено» и не теряется, а разложенные сразу лежат по полкам.
-      Порядок группировки человек меняет одним нажатием.
+      Группировку по папкам по умолчанию не включаем: слева и так стоит
+      дерево папок. Две вещи об одном сразу — это не вдвое понятнее, а
+      вдвое теснее.
     -->
-    <field name="context">{'search_default_by_folder': 1}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiley_face">Документов пока нет</p>
       <p>Акты, договоры и закрывающие. У каждого считается отпечаток, и
