@@ -36,6 +36,7 @@
 второй прогон ничего не меняет.
 """
 import logging
+import random
 
 _logger = logging.getLogger(__name__)
 
