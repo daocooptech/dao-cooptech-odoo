@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!--
+    Валюты, в которых платформа умеет считать цену.
+
+    Решение 392: расчёты между резидентом и нерезидентом обязательны —
+    без них не бывает ни международной сделки, ни расчёта внутри БРИКС.
+    Юрист подтвердил: между резидентом и нерезидентом валютные операции
+    разрешены без ограничений (ст. 6 ФЗ-173), и валюта платежа тут
+    свободна.
+
+    Включаем валюты стран БРИКС и ближайших торговых партнёров. Они есть
+    в справочнике движка, но выключены: Odoo из коробки держит включёнными
+    доллар и валюту установки.
+
+    **Курс не подставляем.** Платформа не биржа валют и не банк: курс на
+    дату платежа определяет банк, и обещать свой значило бы обещать то,
+    чего мы не исполняем. Цена в валюте — это цена по п. 2 ст. 317 ГК,
+    выраженная в валюте; платёж идёт по курсу банка.
+  -->
+  <record id="currency_cny" model="res.currency">
+    <field name="id" ref="base.CNY"/>
+    <field name="active" eval="True"/>
+  </record>
+  <record id="currency_inr" model="res.currency">
+    <field name="id" ref="base.INR"/>
+    <field name="active" eval="True"/>
+  </record>
+  <record id="currency_brl" model="res.currency">
+    <field name="id" ref="base.BRL"/>
+    <field name="active" eval="True"/>
+  </record>
+  <record id="currency_zar" model="res.currency">
+    <field name="id" ref="base.ZAR"/>
+    <field name="active" eval="True"/>
+  </record>
+  <record id="currency_aed" model="res.currency">
+    <field name="id" ref="base.AED"/>
+    <field name="active" eval="True"/>
+  </record>
+  <record id="currency_try" model="res.currency">
+    <field name="id" ref="base.TRY"/>
+    <field name="active" eval="True"/>
+  </record>
+  <record id="currency_kzt" model="res.currency">
+    <field name="id" ref="base.KZT"/>
+    <field name="active" eval="True"/>
+  </record>
+  <record id="currency_byn" model="res.currency">
+    <field name="id" ref="base.BYN"/>
+    <field name="active" eval="True"/>
+  </record>
+</odoo>

@@ -26,6 +26,7 @@
         'security/ir.model.access.csv',
         'security/coop_wallet_rules.xml',
         'data/coop_networks.xml',
+        'data/coop_currencies.xml',
         'data/coop_settlement_methods.xml',
         'views/coop_wallet_views.xml',
     ],
