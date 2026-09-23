@@ -45,7 +45,11 @@
 (`Матчасть/accountant/2026-09-22 — Во что обходится каждый способ расчёта`).
 Она сквозная: всё, что уходит в бюджет с обеих сторон вместе.
 """
+import logging
+
 from odoo import fields, models
+
+_logger = logging.getLogger(__name__)
 
 
 class CoopSettlementMethod(models.Model):
@@ -94,3 +98,35 @@ class CoopSettlementMethod(models.Model):
         'unique(code)',
         'Код способа расчёта занят.',
     )
+
+
+class ResCurrency(models.Model):
+    _inherit = 'res.currency'
+
+    # Валюты стран БРИКС и ближайших торговых партнёров. Решение 392:
+    # расчёты между резидентом и нерезидентом обязательны, а между ними
+    # валютные операции разрешены без ограничений (ст. 6 ФЗ-173), и
+    # валюта платежа свободна.
+    COOP_CURRENCIES = ('CNY', 'INR', 'BRL', 'ZAR', 'AED', 'TRY', 'KZT', 'BYN')
+
+    def coop_enable_currencies(self):
+        """Включить валюты, в которых платформа умеет считать цену.
+
+        Вызовом, а не записью в файле данных. Записи валют движок
+        помечает «не обновлять», и правка из чужого модуля до них просто
+        не доезжает: обновление проходит, а валюта как была выключена,
+        так и остаётся. Проверено 23 сентября 2026 — дважды, прежде чем
+        стало понятно, что дело не в разметке.
+
+        Курс не подставляем. Платформа не биржа валют и не банк: курс на
+        дату платежа определяет банк. Цена в валюте — это цена по п. 2
+        ст. 317 ГК, выраженная в валюте; платёж идёт по курсу банка.
+        """
+        found = self.with_context(active_test=False).search(
+            [('name', 'in', list(self.COOP_CURRENCIES))])
+        off = found.filtered(lambda c: not c.active)
+        if off:
+            off.write({'active': True})
+            _logger.info('Валюты включены: %s',
+                         ', '.join(sorted(off.mapped('name'))))
+        return True

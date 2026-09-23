@@ -18,43 +18,10 @@
     чего мы не исполняем. Цена в валюте — это цена по п. 2 ст. 317 ГК,
     выраженная в валюте; платёж идёт по курсу банка.
   -->
-  <!-- юань -->
-  <record id="base.CNY" model="res.currency">
-    <field name="active" eval="True"/>
-  </record>
-
-  <!-- рупия -->
-  <record id="base.INR" model="res.currency">
-    <field name="active" eval="True"/>
-  </record>
-
-  <!-- реал -->
-  <record id="base.BRL" model="res.currency">
-    <field name="active" eval="True"/>
-  </record>
-
-  <!-- ранд -->
-  <record id="base.ZAR" model="res.currency">
-    <field name="active" eval="True"/>
-  </record>
-
-  <!-- дирхам -->
-  <record id="base.AED" model="res.currency">
-    <field name="active" eval="True"/>
-  </record>
-
-  <!-- лира -->
-  <record id="base.TRY" model="res.currency">
-    <field name="active" eval="True"/>
-  </record>
-
-  <!-- тенге -->
-  <record id="base.KZT" model="res.currency">
-    <field name="active" eval="True"/>
-  </record>
-
-  <!-- белорусский рубль -->
-  <record id="base.BYN" model="res.currency">
-    <field name="active" eval="True"/>
-  </record>
+  <!--
+    Вызовом, а не записями. Валюты движок помечает «не обновлять», и
+    правка `<record id="base.CNY">` из чужого модуля до них не доезжает:
+    обновление проходит без ошибки, а валюта остаётся выключенной.
+  -->
+  <function model="res.currency" name="coop_enable_currencies"/>
 </odoo>
