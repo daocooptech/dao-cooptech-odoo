@@ -25,5 +25,17 @@
       <field name="domain_force">[(1, '=', 1)]</field>
       <field name="groups" eval="[(4, ref('coop_base.group_coop_platform'))]"/>
     </record>
+    <!--
+      Папка личная: своя полка не показывается никому, даже стороне того
+      же документа. Порядок у каждого свой, и чужой порядок не только
+      бесполезен, но и рассказывает о делах больше, чем стоило бы.
+    -->
+    <record id="rule_coop_document_folder_own" model="ir.rule">
+      <field name="name">Папки документов: только свои</field>
+      <field name="model_id" ref="model_coop_document_folder"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[('partner_id', 'in', user.coop_actor_partner_ids.ids)]</field>
+    </record>
+
   </data>
 </odoo>

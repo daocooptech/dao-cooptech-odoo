@@ -49,6 +49,69 @@ def _body(kind_label, number, when, party_a, party_b, subject, amount):
     return '\n'.join(lines)
 
 
+# Папки, которые люди заводят на самом деле. Не «Документы 1»,
+# «Документы 2»: полка называется по делу, а не по порядку.
+FOLDERS = [
+    ('Закупки', ['2026', '2025']),
+    ('Поставщики', []),
+    ('Налоговая', []),
+    ('Спорные', []),
+]
+
+
+def _spread_folders(env, documents, rnd):
+    """Разложить часть документов по папкам их владельца.
+
+    **Часть, а не все.** Папка — личный порядок, и в жизни он всегда
+    неполон: свежее лежит непонятно где, руки доходят позже. Каталог, в
+    котором разложено всё до последней записи, показывает не порядок, а
+    то, что его расставила программа.
+
+    Группа «Не разложено» нужна не меньше остальных: по ней человек
+    находит то, до чего не дошли руки.
+    """
+    Folder = env['coop.document.folder'].sudo()
+    made = 0
+    by_owner = {}
+    for document in documents:
+        by_owner.setdefault(document.party_a_id, env['coop.document'].sudo())
+        by_owner[document.party_a_id] |= document
+
+    for owner, papers in by_owner.items():
+        if not owner or len(papers) < 3:
+            continue
+        shelves = env['coop.document.folder'].sudo()
+        for name, children in FOLDERS:
+            top = Folder.search([('partner_id', '=', owner.id),
+                                 ('name', '=', name),
+                                 ('parent_id', '=', False)], limit=1)
+            if not top:
+                top = Folder.create({'name': name, 'partner_id': owner.id})
+            shelves |= top
+            for child in children:
+                inside = Folder.search([('partner_id', '=', owner.id),
+                                        ('name', '=', child),
+                                        ('parent_id', '=', top.id)], limit=1)
+                if not inside:
+                    inside = Folder.create({
+                        'name': child, 'partner_id': owner.id,
+                        'parent_id': top.id})
+                shelves |= inside
+
+        for document in papers:
+            if rnd.random() < 0.3:
+                continue  # до этого руки не дошли — так и бывает
+            fit = shelves
+            if document.kind == 'closing':
+                closing = shelves.filtered(
+                    lambda f: f.parent_id and f.parent_id.name == 'Закупки')
+                fit = closing or shelves
+            document.folder_id = fit[rnd.randrange(len(fit))]
+            made += 1
+    _logger.info('Документы: разложено по папкам %s', made)
+    return made
+
+
 def load_documents(env, target=TARGET):
     Document = env['coop.document'].sudo()
     if Document.search_count([]) >= target // 2:
@@ -131,6 +194,7 @@ def load_documents(env, target=TARGET):
         values.append(line)
 
     created = Document.create(values)
+    _spread_folders(env, created, rnd)
     signed = sum(1 for v in values if v['state'] == 'signed')
     _logger.info('Документы: создано %s, подписанных %s', len(created), signed)
     return len(created)

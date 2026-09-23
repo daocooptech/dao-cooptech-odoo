@@ -14,6 +14,7 @@
         <field name="kind" string="Вид"/>
         <field name="party_a_id" string="Сторона"/>
         <field name="party_b_id" string="Вторая сторона"/>
+        <field name="folder_id" string="Папка" optional="show"/>
         <field name="res_label" string="К чему" optional="show"/>
         <field name="fingerprint" string="Отпечаток" optional="hide"/>
         <field name="state" widget="badge"/>
@@ -50,6 +51,10 @@
               <field name="party_a_id"/>
               <field name="party_b_id"/>
               <field name="res_label" placeholder="Сделка, закупка, проект"/>
+              <field name="folder_id"
+                     options="{'no_quick_create': False}"
+                     placeholder="Ваша полка: «Стройка 2026», «Налоговая»"/>
+              <field name="year" invisible="1"/>
               <field name="res_model" invisible="1"/>
               <field name="res_id" invisible="1"/>
             </group>
@@ -85,22 +90,60 @@
     <field name="model">coop.document</field>
     <field name="arch" type="xml">
       <search string="Документы">
-        <field name="name"/>
-        <field name="number"/>
-        <field name="party_b_id"/>
+        <!--
+          Отпечаток ищется наравне с названием и номером. Это не
+          украшение: к вам приходят с файлом и спрашивают «что это у
+          нас» — по отпечатку документ находится за один шаг, по
+          названию его пришлось бы угадывать.
+        -->
+        <field name="name" string="Название или номер"
+               filter_domain="['|', '|', ('name', 'ilike', self), ('number', 'ilike', self), ('res_label', 'ilike', self)]"/>
+        <field name="party_b_id" string="Вторая сторона"/>
+        <field name="folder_id" string="Папка"/>
         <field name="fingerprint" string="Отпечаток"/>
+
         <filter name="signed" string="Подписанные"
                 domain="[('state', '=', 'signed')]"/>
         <filter name="draft" string="Черновики"
                 domain="[('state', '=', 'draft')]"/>
+        <filter name="cancelled" string="Отменённые"
+                domain="[('state', '=', 'cancelled')]"/>
         <separator/>
+        <filter name="kind_contract" string="Договоры"
+                domain="[('kind', '=', 'contract')]"/>
+        <filter name="kind_act" string="Акты"
+                domain="[('kind', '=', 'act')]"/>
+        <filter name="kind_closing" string="Закрывающие"
+                domain="[('kind', '=', 'closing')]"/>
+        <separator/>
+        <!--
+          «Без файла» и «без папки» — не придирка, а рабочий отбор:
+          первое находит записи, которые нечем проверить, второе —
+          то, что ещё не разложено.
+        -->
         <filter name="no_file" string="Без файла"
                 domain="[('file', '=', False)]"/>
-        <group>
+        <filter name="no_folder" string="Не разложено"
+                domain="[('folder_id', '=', False)]"/>
+        <separator/>
+        <filter name="this_year" string="В этом году"
+                domain="[('signed_on', '&gt;=', (context_today() + relativedelta(month=1, day=1)).strftime('%Y-%m-%d'))]"/>
+        <filter name="last_year" string="В прошлом году"
+                domain="[('signed_on', '&gt;=', (context_today() + relativedelta(years=-1, month=1, day=1)).strftime('%Y-%m-%d')), ('signed_on', '&lt;', (context_today() + relativedelta(month=1, day=1)).strftime('%Y-%m-%d'))]"/>
+
+        <group expand="0" string="Сгруппировать">
+          <filter name="by_folder" string="По папкам"
+                  context="{'group_by': 'folder_id'}"/>
           <filter name="by_kind" string="По виду"
                   context="{'group_by': 'kind'}"/>
           <filter name="by_party" string="По второй стороне"
                   context="{'group_by': 'party_b_id'}"/>
+          <filter name="by_year" string="По годам"
+                  context="{'group_by': 'year'}"/>
+          <filter name="by_state" string="По состоянию"
+                  context="{'group_by': 'state'}"/>
+          <filter name="by_month" string="По месяцам"
+                  context="{'group_by': 'signed_on:month'}"/>
         </group>
       </search>
     </field>
@@ -135,6 +178,12 @@
     <field name="path">documents</field>
     <field name="res_model">coop.document</field>
     <field name="view_mode">list,form</field>
+    <!--
+      Сразу сгруппировано по папкам: документ без папки виден в группе
+      «Не разложено» и не теряется, а разложенные сразу лежат по полкам.
+      Порядок группировки человек меняет одним нажатием.
+    -->
+    <field name="context">{'search_default_by_folder': 1}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiley_face">Документов пока нет</p>
       <p>Акты, договоры и закрывающие. У каждого считается отпечаток, и
@@ -142,7 +191,44 @@
     </field>
   </record>
 
+  <!-- Папки: свой экран, чтобы их можно было завести и переименовать
+       заранее, не открывая документ. -->
+  <record id="view_coop_document_folder_list" model="ir.ui.view">
+    <field name="name">coop.document.folder.list</field>
+    <field name="model">coop.document.folder</field>
+    <field name="arch" type="xml">
+      <list string="Папки" editable="bottom">
+        <field name="complete_name" string="Папка" readonly="1"/>
+        <field name="name" string="Название"/>
+        <field name="parent_id" string="Внутри папки"/>
+        <field name="document_count" string="Документов" readonly="1"/>
+        <field name="partner_id" column_invisible="1"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="action_coop_document_folders" model="ir.actions.act_window">
+    <field name="name">Папки документов</field>
+    <field name="res_model">coop.document.folder</field>
+    <field name="view_mode">list</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiley_face">Папок пока нет</p>
+      <p>Папка — ваш порядок, а не свойство документа. Платформа сама
+         раскладывает по виду, году и второй стороне; папка нужна там,
+         где связь знаете только вы: «Стройка 2026», «Налоговая»,
+         «Спорные».</p>
+    </field>
+  </record>
+
   <menuitem id="menu_coop_documents_root" name="Документы"
             action="action_coop_documents" sequence="78"/>
+
+  <menuitem id="menu_coop_documents_all" name="Все документы"
+            parent="menu_coop_documents_root"
+            action="action_coop_documents" sequence="10"/>
+
+  <menuitem id="menu_coop_document_folders" name="Папки"
+            parent="menu_coop_documents_root"
+            action="action_coop_document_folders" sequence="20"/>
 
 </odoo>

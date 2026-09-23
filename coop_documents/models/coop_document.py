@@ -63,6 +63,18 @@ class CoopDocument(models.Model):
     res_id = fields.Integer(string='Номер записи')
     res_label = fields.Char(string='К чему относится')
 
+    folder_id = fields.Many2one(
+        'coop.document.folder', string='Папка', index=True,
+        ondelete='set null',
+        help='Ваш порядок. Папка личная: один и тот же документ вы и '
+             'вторая сторона держите у себя по-разному.')
+
+    # Год отдельным полем — для группировки и отбора. Считать его от даты
+    # на лету нельзя: группировать и искать движок умеет только по
+    # хранимому, а «документы за 2024» спрашивают чаще всего.
+    year = fields.Integer(
+        string='Год', compute='_compute_year', store=True, index=True)
+
     file = fields.Binary(string='Файл', attachment=True)
     file_name = fields.Char(string='Имя файла')
 
@@ -79,6 +91,11 @@ class CoopDocument(models.Model):
         tracking=True)
 
     note = fields.Text(string='Пояснение')
+
+    @api.depends('signed_on')
+    def _compute_year(self):
+        for record in self:
+            record.year = record.signed_on.year if record.signed_on else 0
 
     @api.depends('file')
     def _compute_fingerprint(self):
