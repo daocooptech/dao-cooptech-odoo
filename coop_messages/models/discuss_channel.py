@@ -253,7 +253,7 @@ class DiscussChannel(models.Model):
         заведённых руками ничем не отличались.
         """
         Channels = self.sudo()
-        merged = {'каналов': 0, 'добавлено': 0, 'убрано': 0}
+        merged = {'channels': 0, 'added': 0, 'removed': 0}
         # Снять пометку с того, что платформа не ведёт: личные переписки
         # пометились по ошибке, когда признак ставился по модели записи.
         foreign = Channels.search([('coop_managed', '=', True),
@@ -288,12 +288,12 @@ class DiscussChannel(models.Model):
                     continue
                 added, removed = record._coop_apply_members(
                     channel, spec['partners'])
-                merged['каналов'] += 1
-                merged['добавлено'] += added
-                merged['убрано'] += removed
+                merged['channels'] += 1
+                merged['added'] += added
+                merged['removed'] += removed
         _logger.info(
-            'Состав переписок сведён с записями: каналов %(каналов)s, '
-            'добавлено %(добавлено)s, убрано %(убрано)s', merged)
+            'Состав переписок сведён с записями: каналов %(channels)s, '
+            'добавлено %(added)s, убрано %(removed)s', merged)
         return True
 
     def _to_store_defaults(self, target: Store.Target):

@@ -42,10 +42,14 @@ class ResPartner(models.Model):
         if self != self.env.user._coop_acting_partner():
             raise UserError(_('Выгрузить можно только свои данные.'))
 
+        # Ключи латиницей, значения по-русски. Файл читает и человек, и
+        # программа — но ключ в нём остаётся машинным именем, а
+        # содержательное там значение. Кириллица в именах запрещена
+        # решением 368; кавычки вокруг имени не превращают его в текст.
         collected_value = {
-            'карточка': self._coop_archive_card(),
-            'членства': self._coop_archive_memberships(),
-            'извещения': self._coop_archive_notifications(),
+            'card': self._coop_archive_card(),
+            'memberships': self._coop_archive_memberships(),
+            'notifications': self._coop_archive_notifications(),
         }
         content = json.dumps(collected_value, ensure_ascii=False, indent=2,
                                 default=str)
@@ -73,8 +77,12 @@ class ResPartner(models.Model):
         card = {
             field: self[field] for field in field_names if field in self._fields
         }
-        card['способы_связи'] = [
-            {'название': line.name, 'значение': line.value}
+        # Ключи латиницей: это выгрузка, её читает программа, а не
+        # человек. Кириллица в машинных именах запрещена решением 368, и
+        # ключ внутри кавычек остаётся именем — то, что он в кавычках, не
+        # делает его текстом.
+        card['contacts'] = [
+            {'label': line.name, 'value': line.value}
             for line in self.coop_contact_line_ids
         ]
         return card
@@ -84,11 +92,11 @@ class ResPartner(models.Model):
         Membership = self.env['coop.membership'].sudo()
         return [
             {
-                'организация': record.organization_id.display_name,
-                'роль': record.role,
-                'должность': record.job_title,
-                'вступил': record.joined_on,
-                'состояние': record.state,
+                'organization': record.organization_id.display_name,
+                'role': record.role_id.name,
+                'job_title': record.job_title,
+                'joined_on': record.joined_on,
+                'state': record.state,
             }
             for record in Membership.search([('partner_id', '=', self.id)])
         ]
@@ -98,9 +106,9 @@ class ResPartner(models.Model):
         Notification = self.env['coop.notification'].sudo()
         return [
             {
-                'когда': record.create_date,
-                'о чём': record.kind,
-                'событие': record.body,
+                'when': record.create_date,
+                'about': record.kind,
+                'event': record.body,
             }
             for record in Notification.search(
                 [('partner_id', '=', self.id)], limit=500)

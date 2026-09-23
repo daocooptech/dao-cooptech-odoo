@@ -428,22 +428,22 @@ def ensure_personal_needs(env):
 def spread_all(env):
     """Выровнять полки на страницах людей."""
     total = {}
-    total['друзья'] = ensure_friends(env)
-    total['сообщества'] = trim_communities(env)
-    total['потребности'] = ensure_personal_needs(env)
-    total['ресурсы'] = _hand_out(
+    total['friends'] = ensure_friends(env)
+    total['communities'] = trim_communities(env)
+    total['needs'] = ensure_personal_needs(env)
+    total['resources'] = _hand_out(
         env, 'coop.resource', 'owner_id', RESOURCES_COUNT,
         [('listing_type', '=', 'offer'), ('project_id', '=', False)])
-    total['предложения'] = ensure_personal_offers(env)
+    total['offers'] = ensure_personal_offers(env)
     # Навыки и проекты добираются у организаций: перекладывать внутри
     # людей нечего — записей у них меньше, чем самих людей.
-    total['навыки у людей'] = _top_up_people(
+    total['skills_of_people'] = _top_up_people(
         env, 'coop.skill.offer', 'partner_id', keep_for_organizations=40)
-    total['проекты у людей'] = _top_up_people(
+    total['projects_of_people'] = _top_up_people(
         env, 'coop.project', 'partner_id', keep_for_organizations=70)
-    total['навыки'] = _hand_out(env, 'coop.skill.offer', 'partner_id', SKILLS_COUNT)
-    total['вакансии'] = _hand_out(env, 'coop.vacancy', 'partner_id', VACANCIES_COUNT,
+    total['skills'] = _hand_out(env, 'coop.skill.offer', 'partner_id', SKILLS_COUNT)
+    total['vacancies'] = _hand_out(env, 'coop.vacancy', 'partner_id', VACANCIES_COUNT,
                                 [('project_id', '=', False)])
-    total['проекты'] = _hand_out(env, 'coop.project', 'partner_id', PROJECTS_COUNT)
+    total['projects'] = _hand_out(env, 'coop.project', 'partner_id', PROJECTS_COUNT)
     _logger.info('Выравнивание полок: %s', total)
     return total

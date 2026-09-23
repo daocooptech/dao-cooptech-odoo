@@ -139,7 +139,7 @@ def _pick(name, specialization):
 def ensure_photos(env):
     """Проставить и переклеить снимки во всех каталогах."""
     ours = _prints()
-    total = {'поставлено': 0, 'переклеено': 0, 'знаком': 0}
+    total = {'placed': 0, 'reglued': 0, 'with_mark': 0}
 
     for model, field, spec_field, reglue in CATALOGS:
         if model not in env:
@@ -210,13 +210,13 @@ def ensure_photos(env):
 
         _logger.info('Снимки %s: поставлено %s, переклеено %s, знаком %s',
                      model, placed, reglued, with_mark)
-        total['поставлено'] += placed
-        total['переклеено'] += reglued
-        total['знаком'] += with_mark
+        total['placed'] += placed
+        total['reglued'] += reglued
+        total['with_mark'] += with_mark
 
-    _logger.info('Снимки каталогов: поставлено %(поставлено)s, '
-                 'переклеено %(переклеено)s, знаком %(знаком)s', total)
-    return total['поставлено'] + total['переклеено'] + total['знаком']
+    _logger.info('Снимки каталогов: поставлено %(placed)s, '
+                 'переклеено %(reglued)s, знаком %(with_mark)s', total)
+    return total['placed'] + total['reglued'] + total['with_mark']
 
 
 def ensure_marks(env):

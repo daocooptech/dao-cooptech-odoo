@@ -27,11 +27,16 @@ _logger = logging.getLogger(__name__)
 
 # Этапы общие для всех проектов платформы: свои этапы у каждого проекта
 # превратили бы сводку по узлу в кашу из сорока названий одного и того же.
+# Этапы работ: код, видимое название, порядок.
+#
+# Код нужен затем, что искать запись по подписи — ловушка: переименуют
+# этап в интерфейсе, и загрузчик упадёт, а причина будет выглядеть как
+# его поломка, а не как переименование в соседнем месте.
 STAGES = [
-    ('Идея', 10),
-    ('В работе', 20),
-    ('На проверке', 30),
-    ('Готово', 40),
+    ('idea', 'Идея', 10),
+    ('doing', 'В работе', 20),
+    ('review', 'На проверке', 30),
+    ('done', 'Готово', 40),
 ]
 
 # Ход работ: что делают в кооперативном проекте от начала до запуска.
@@ -134,13 +139,13 @@ def load_project_tasks(env, per_project=None):
             done = progress >= milestone
             checking = not done and progress >= milestone - 0.12
             if done:
-                stage = stages['Готово']
+                stage = stages['done']
             elif checking:
-                stage = stages['На проверке']
+                stage = stages['review']
             elif progress >= milestone - 0.3:
-                stage = stages['В работе']
+                stage = stages['doing']
             else:
-                stage = stages['Идея']
+                stage = stages['idea']
 
             deadline = started + timedelta(days=offset + days)
             offset += days
@@ -215,13 +220,13 @@ def _spread_project_stages(env):
 def _ensure_stages(Stage, projects):
     """Этапы заводятся один раз и привязываются ко всем проектам сразу."""
     found = {}
-    for name, sequence in STAGES:
+    for code, name, sequence in STAGES:
         stage = Stage.search([('name', '=', name)], limit=1)
         if not stage:
             stage = Stage.create({'name': name, 'sequence': sequence})
         # Этап виден в проекте, только если проект указан в его списке.
         stage.write({'project_ids': [(4, project.id) for project in projects]})
-        found[name] = stage.id
+        found[code] = stage.id
     return found
 
 
