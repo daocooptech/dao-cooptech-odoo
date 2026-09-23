@@ -280,7 +280,7 @@
     </field>
   </record>
 
-  <menuitem id="menu_coop_warehouse_root" name="Склад" sequence="148"/>
+  <menuitem id="menu_coop_warehouse_root" name="Склады" sequence="148"/>
   <!-- Порядок вкладок задан владельцем 2026-08-31: сначала своё
        хозяйство и текущие обязательства, потом рынок. -->
   <menuitem id="menu_coop_warehouse_mine" name="Мои склады"

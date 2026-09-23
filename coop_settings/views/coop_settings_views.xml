@@ -176,12 +176,22 @@
                 вместе. Платформа этих денег не берёт — она их называет,
                 чтобы выбор был осознанным.
               </div>
-              <separator string="Чего на платформе нет и не будет"/>
-              <field name="coop_denied_settlement_ids" nolabel="1"
+              <separator string="Работает при условии"/>
+              <field name="coop_conditional_settlement_ids" nolabel="1"
                      readonly="1" options="{'no_open': True}">
                 <list create="false" delete="false">
                   <field name="name"/>
-                  <field name="deny_reason" string="Отчего нельзя"/>
+                  <field name="condition" string="Что нужно, чтобы работало"/>
+                  <field name="cross_border" string="Международные"
+                         widget="boolean_toggle"/>
+                </list>
+              </field>
+              <separator string="Готовится"/>
+              <field name="coop_planned_settlement_ids" nolabel="1"
+                     readonly="1" options="{'no_open': True}">
+                <list create="false" delete="false">
+                  <field name="name"/>
+                  <field name="condition" string="Что это будет"/>
                 </list>
               </field>
             </div>

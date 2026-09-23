@@ -75,27 +75,76 @@
     <field name="cost_note">На УСН доходом признаётся весь номинал, а расход на покупку права в закрытый перечень ст. 346.16 не входит вовсе. Купили за 90 000, получили 100 000, заработали 10 000 — заплатили 6 000. Убыток не учитывается никак.</field>
   </record>
 
+  <!--
+    Ниже — не запреты, а условия.
+
+    Владелец 23 сентября 2026: «крипта тоже не запрещена, запрещена
+    оплата, мы делаем функционал биржи… расчеты между резидентами и не
+    резидентами тоже надо продумать, это должно быть реализовано, иначе
+    как происходят международные сделки или сделки между участниками
+    брикс».
+
+    Прежняя запись называла запрещённым инструмент. Запрещено применение:
+    оплата товаров цифровой валютой внутри России — да; владение, обмен и
+    биржа — нет. Из «нельзя» не следует плана, из условия следует.
+  -->
+
   <record id="settlement_cfa" model="coop.settlement.method">
-    <field name="name">ЦФА как оплата внутри страны</field>
-    <field name="code">cfa_domestic</field>
+    <field name="name">ЦФА</field>
+    <field name="code">cfa</field>
     <field name="sequence">80</field>
-    <field name="status">denied</field>
-    <field name="deny_reason">Запрещено ч. 3 ст. 1 ФЗ-259: внутри России ЦФА средством платежа быть не может. За границу — можно, но через оператора из реестра ЦБ.</field>
+    <field name="status">conditional</field>
+    <field name="cross_border" eval="True"/>
+    <field name="legal_basis">259-ФЗ; ч. 3 ст. 1 в ред. 45-ФЗ — по внешнеторговым договорам</field>
+    <field name="condition">Внутри страны ЦФА не средство платежа: ими не расплачиваются за товар. Зато они законны как встречное предоставление по внешнеторговому договору — и это прямой путь к расчётам с БРИКС. Выпуск и обращение идут через оператора информационной системы из реестра ЦБ. Платформа таким оператором пока не является; до этого работаем через стороннего.</field>
+    <field name="cost_hint">зависит от оператора</field>
+    <field name="cost_note">Комиссию берёт оператор информационной системы, а не платформа. Налогообложение — как у имущественного права.</field>
   </record>
 
   <record id="settlement_crypto" model="coop.settlement.method">
-    <field name="name">Криптовалюта</field>
+    <field name="name">Цифровая валюта</field>
     <field name="code">crypto</field>
     <field name="sequence">90</field>
-    <field name="status">denied</field>
-    <field name="deny_reason">Запрещена в расчётах на территории РФ (282-ФЗ). Запрет распространён и на показ такой возможности, поэтому способа нет и в списке.</field>
+    <field name="status">conditional</field>
+    <field name="cross_border" eval="True"/>
+    <field name="legal_basis">259-ФЗ: запрет касается приёма как оплаты за товары и услуги в РФ, не владения и не обмена</field>
+    <field name="condition">Расплачиваться цифровой валютой за товары и услуги внутри России нельзя. Владеть, хранить, обменивать и торговать — можно, и биржа платформы это именно обмен, а не оплата. Для внешнеторговых расчётов действует отдельный режим. Что платформа делает сейчас: учёт и обмен; чего не делает: приём как оплаты внутри страны.</field>
+    <field name="cost_hint">комиссия обмена</field>
+    <field name="cost_note">Доход от продажи облагается на общих основаниях; момент признания — дата реализации.</field>
   </record>
 
-  <record id="settlement_fx_between_residents" model="coop.settlement.method">
+  <record id="settlement_fx_cross" model="coop.settlement.method">
+    <field name="name">Валюта с нерезидентом</field>
+    <field name="code">fx_cross</field>
+    <field name="sequence">100</field>
+    <field name="status">conditional</field>
+    <field name="cross_border" eval="True"/>
+    <field name="legal_basis">ст. 6 ФЗ-173 — операции между резидентом и нерезидентом без ограничений; 181-И — учёт контракта</field>
+    <field name="condition">Между резидентом и нерезидентом валютные операции разрешены и идут через уполномоченный банк. Контракт от 3 млн рублей (импорт) и 10 млн (экспорт) ставится банком на учёт. Действует репатриация выручки — ст. 19: зачёт и уступка вне узкого перечня её нарушают. Это основной путь международной сделки, и платформа обязана его поддерживать.</field>
+    <field name="cost_hint">комиссия банка и курс</field>
+    <field name="cost_note">Курсовые разницы идут в доход или расход; у НДС место реализации определяется отдельно.</field>
+  </record>
+
+  <record id="settlement_fx_residents" model="coop.settlement.method">
     <field name="name">Валюта между двумя резидентами</field>
     <field name="code">fx_residents</field>
-    <field name="sequence">100</field>
-    <field name="status">denied</field>
-    <field name="deny_reason">Запрещено ч. 1 ст. 9 ФЗ-173. Гражданин России за границей остаётся резидентом. Штраф 20–40 % с обеих сторон.</field>
+    <field name="sequence">110</field>
+    <field name="status">conditional</field>
+    <field name="legal_basis">ч. 1 ст. 9 ФЗ-173 — общий запрет, с перечнем исключений в той же статье</field>
+    <field name="condition">Между двумя резидентами валютные операции запрещены, кроме случаев из перечня ч. 1 ст. 9. Гражданин России за границей остаётся резидентом — это чаще всего и упускают. Платформа такую пару не предлагает и предупреждает о штрафе 20–40 % с обеих сторон.</field>
+    <field name="cost_hint">штраф 20–40 % вне исключений</field>
   </record>
+
+  <record id="settlement_clearing_cross" model="coop.settlement.method">
+    <field name="name">Многосторонний зачёт</field>
+    <field name="code">clearing</field>
+    <field name="sequence">120</field>
+    <field name="status">planned</field>
+    <field name="cross_border" eval="False"/>
+    <field name="legal_basis">п. 2 ст. 421 ГК; Пленум ВС № 6 от 11.06.2020</field>
+    <field name="condition">Зачёт по кругу участников: А должен Б, Б должен В, В должен А — и все расходятся без денег. Между резидентами законен и требует подписи каждого участника круга. С нерезидентом упирается в репатриацию выручки (ст. 19 ФЗ-173) и вне перечня ч. 2 ст. 19 не применяется. На платформе готовится.</field>
+    <field name="cost_hint">0 %</field>
+    <field name="cost_note">Сверху не добавляет ничего — переносит дату. Дата акта, а не дата денег.</field>
+  </record>
+
 </odoo>

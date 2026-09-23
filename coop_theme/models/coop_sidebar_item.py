@@ -98,7 +98,7 @@ EXTENSION_ITEMS = [
     # мощностей. Пока здесь стояла пустая строка, участник открывал
     # «Склад» и видел «раздел ещё не перенесён», хотя в нём сто
     # пятнадцать складов и сто шестьдесят пять объявлений.
-    ('Склад', 'fa-archive', 'coop_warehouse.action_coop_warehouse_offer'),
+    ('Склады', 'fa-archive', 'coop_warehouse.action_coop_warehouse_offer'),
     ('События', 'fa-calendar', 'coop_events.action_coop_event'),
     ('Аналитика', 'fa-bar-chart', ''),
     ('Образование', 'fa-graduation-cap', ''),

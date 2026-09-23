@@ -36,36 +36,46 @@ class ResPartner(models.Model):
     coop_settlement_method_ids = fields.Many2many(
         'coop.settlement.method', 'coop_partner_settlement_rel',
         'partner_id', 'method_id', string='Принимаю расчёт',
-        domain="[('status', '!=', 'denied')]",
+        domain="[('status', '!=', 'planned')]",
         help='Чем с вами можно рассчитаться. Рядом с каждым способом '
-             'написано, во что он обходится сторонам.')
+             'написано, во что он обходится и что нужно, чтобы он '
+             'работал.')
 
-    coop_denied_settlement_ids = fields.Many2many(
-        'coop.settlement.method', compute='_compute_denied_settlements',
-        string='Чего нет и не будет',
-        help='Запрещённые способы показываются отдельно, с нормой. Через '
-             'год кто-нибудь спросит, почему способа нет, и ответ должен '
-             'лежать рядом с вопросом, а не в переписке.')
+    coop_conditional_settlement_ids = fields.Many2many(
+        'coop.settlement.method', compute='_compute_other_settlements',
+        string='Работает при условии',
+        help='Способы, законные не при всяких обстоятельствах: нужен '
+             'статус, посредник или определённый вид сделки. Условие '
+             'написано рядом.')
+    coop_planned_settlement_ids = fields.Many2many(
+        'coop.settlement.method', compute='_compute_other_settlements',
+        string='Готовится',
+        help='Платформа этого ещё не умеет. Пункт стоит, чтобы было '
+             'видно, чего ждать.')
 
-    def _compute_denied_settlements(self):
-        denied = self.env['coop.settlement.method'].search(
-            [('status', '=', 'denied')])
+    def _compute_other_settlements(self):
+        Method = self.env['coop.settlement.method']
+        conditional = Method.search([('status', '=', 'conditional')])
+        planned = Method.search([('status', '=', 'planned')])
         for record in self:
-            record.coop_denied_settlement_ids = denied
+            record.coop_conditional_settlement_ids = conditional
+            record.coop_planned_settlement_ids = planned
 
     @api.constrains('coop_settlement_method_ids')
-    def _check_settlement_allowed(self):
-        """Запрещённый способ нельзя выбрать даже вручную.
+    def _check_settlement_ready(self):
+        """Нельзя пообещать то, чего платформа ещё не умеет.
 
-        Отбор в поле сужает список, но записи приходят и из загрузчиков,
-        и из переноса. Решение 387 разделяет дорогое и запрещённое:
-        дорогое показываем с ценой, запрещённого нет ни с какой ценой.
+        Проверяется только готовность, не законность. Способ «при
+        условии» выбрать можно: условие — часть договорённости сторон, и
+        решать, выполнимо ли оно, им, а не платформе. А вот способ,
+        которого на платформе физически нет, в списке «принимаю расчёт»
+        означал бы обещание, которое некому исполнить.
         """
         for record in self:
-            denied = record.coop_settlement_method_ids.filtered(
-                lambda m: m.status == 'denied')
-            if denied:
+            planned = record.coop_settlement_method_ids.filtered(
+                lambda m: m.status == 'planned')
+            if planned:
                 raise ValidationError(_(
-                    'Так рассчитываться нельзя: %(what)s. %(why)s',
-                    what=', '.join(denied.mapped('name')),
-                    why=denied[0].deny_reason or ''))
+                    'Платформа этого ещё не умеет: %(what)s. Обещать '
+                    'такой расчёт рано.',
+                    what=', '.join(planned.mapped('name'))))
