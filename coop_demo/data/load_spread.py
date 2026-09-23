@@ -470,6 +470,27 @@ def ensure_extra_specializations(env):
     Partner = env['res.partner'].sudo()
     Specialization = env['coop.specialization'].sudo()
 
+    # Сперва — главная специализация тем, у кого её нет вовсе. Померено
+    # 23 сентября 2026: из 191 участника специализация стояла у 103, и
+    # остальные 88 валились одной кучей в полку «Другое». Полка, в
+    # которой лежит половина каталога, отвечает на вопрос «что здесь
+    # бывает» хуже, чем отсутствие полок.
+    #
+    # Раздаётся по кругу, а не случайно: так полки получаются
+    # сопоставимого размера, и ни одна не вырождается в одну карточку.
+    nameless = Partner.search([
+        ('coop_is_participant', '=', True),
+        ('is_company', '=', False),
+        ('coop_specialization_id', '=', False),
+    ])
+    if nameless:
+        all_specializations = Specialization.search([], order='id')
+        if all_specializations:
+            for index, person in enumerate(nameless):
+                person.coop_specialization_id =                     all_specializations[index % len(all_specializations)]
+            _logger.info('Специализации: главная проставлена %s людям',
+                         len(nameless))
+
     people = Partner.search([
         ('coop_is_participant', '=', True),
         ('is_company', '=', False),
