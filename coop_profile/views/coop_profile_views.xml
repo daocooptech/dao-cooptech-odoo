@@ -112,27 +112,6 @@
 
           <div class="o_coop_profile_layout" invisible="not coop_page_visible">
 
-            <!--
-              Имя стоит первым во всей раскладке, а не внутри правой
-              колонки.
-
-              Владелец 23 сентября 2026: «над фото нужно сделать ФИО».
-              На телефоне колонки складываются одна под другую, и имя,
-              живя в правой колонке, оказывалось ниже снимка, показателей
-              и контактов — страница открывалась без единого указания,
-              чья она. На большом экране ничего не меняется: раскладка
-              стала сеткой, и имя по-прежнему стоит сверху правой
-              колонки, рядом со снимком.
-            -->
-            <div class="o_coop_name_row">
-              <h1><field name="name" readonly="not coop_is_self"
-                         placeholder="Имя и фамилия"/></h1>
-              <span class="o_coop_verified"
-                    invisible="coop_verification_level != 'identity'">
-                Личность подтверждена
-              </span>
-            </div>
-
             <!-- ── Левая колонка ─────────────────────────────────── -->
             <div class="o_coop_profile_side">
               <div class="o_coop_cover">
@@ -336,6 +315,14 @@
 
             <!-- ── Правая колонка ────────────────────────────────── -->
             <div class="o_coop_profile_main">
+              <div class="o_coop_name_row">
+                <h1><field name="name" readonly="not coop_is_self"
+                           placeholder="Имя и фамилия"/></h1>
+                <span class="o_coop_verified"
+                      invisible="coop_verification_level != 'identity'">
+                  Личность подтверждена
+                </span>
+              </div>
               <div class="o_coop_role">
                 <!-- Признаки приватности: условия выше считаются по ним. -->
                 <field name="coop_show_trust" invisible="1"/>
