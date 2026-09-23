@@ -144,8 +144,15 @@ def load_documents(env, target=TARGET):
         label = 'Акт приёма-передачи' if closed else 'Договор'
         when = deal.signed_on or fields.Date.context_today(Document)
         number = deal.number or str(deal.id)
+        # Предмет, а не номер: номер стоит своей колонкой.
+        # `subject` у сделки — перечисление, и наружу оно отдаёт код.
+        # Человеческое название лежит в `name`, а полное имя записи
+        # начинается с номера: «СД-2026-000481 — Складское место…».
+        about = (deal.name or deal.display_name or '').strip()
+        if about.startswith(number):
+            about = about[len(number):].lstrip(' —-:')
         lines.append({
-            'name': '%s по сделке %s' % (label, number),
+            'name': '%s — %s' % (label, about) if about else label,
             'kind': kind,
             'party_a_id': deal.party_a_id.id,
             'party_b_id': deal.party_b_id.id,
@@ -167,7 +174,7 @@ def load_documents(env, target=TARGET):
         when = buy.received_on or buy.stop_date
         number = 'ЗК-%s' % buy.id
         lines.append({
-            'name': 'Закрывающий документ по закупке «%s»' % buy.name,
+            'name': 'Закрывающий документ — %s' % buy.name,
             'kind': 'closing',
             'party_a_id': buy.organizer_id.id,
             'party_b_id': (buy.supplier_id.id if buy.supplier_id else False),

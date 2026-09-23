@@ -8,16 +8,26 @@
       <list string="Документы"
             decoration-muted="state == 'cancelled'"
             decoration-success="state == 'signed'">
-        <field name="signed_on" string="Дата"/>
-        <field name="number" string="Номер"/>
-        <field name="name"/>
-        <field name="kind" string="Вид"/>
-        <field name="party_a_id" string="Сторона"/>
-        <field name="party_b_id" string="Вторая сторона"/>
-        <field name="folder_id" string="Папка" optional="show"/>
-        <field name="res_label" string="К чему" optional="show"/>
+        <!--
+          Пять колонок по умолчанию, остальные за «оптиональными».
+          Девять не помещались: область у платформы ограничена по ширине,
+          и каждое название обрезалось до «Договор по сделке СД-20…» —
+          то есть до той части, которая у всех одинакова.
+
+          Убраны из умолчания: «Номер» (он и так в названии), «Сторона»
+          (это почти всегда вы), «К чему» (длинная строка, ради которой
+          сжималось всё остальное), «Папка» (по ней и так группировка).
+        -->
+        <field name="signed_on" string="Дата" width="110"/>
+        <field name="name" string="Документ"/>
+        <field name="kind" string="Вид" width="150"/>
+        <field name="party_b_id" string="Вторая сторона" width="200"/>
+        <field name="state" widget="badge" width="120"/>
+        <field name="number" string="Номер" optional="hide"/>
+        <field name="party_a_id" string="Сторона" optional="hide"/>
+        <field name="folder_id" string="Папка" optional="hide"/>
+        <field name="res_label" string="К чему" optional="hide"/>
         <field name="fingerprint" string="Отпечаток" optional="hide"/>
-        <field name="state" widget="badge"/>
       </list>
     </field>
   </record>
