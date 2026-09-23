@@ -78,7 +78,11 @@ def _spread_folders(env, documents, rnd):
         by_owner[document.party_a_id] |= document
 
     for owner, papers in by_owner.items():
-        if not owner or len(papers) < 3:
+        # Папки заводим тому, у кого есть что раскладывать. Порог в две
+        # бумаги, а не в три: при трёх без полок оставалось четыре пятых
+        # каталога, и группировка по папкам показывала одну огромную
+        # кучу «Не разложено» — то есть ровно то, от чего папки и спасают.
+        if not owner or len(papers) < 2:
             continue
         shelves = env['coop.document.folder'].sudo()
         for name, children in FOLDERS:
@@ -99,7 +103,7 @@ def _spread_folders(env, documents, rnd):
                 shelves |= inside
 
         for document in papers:
-            if rnd.random() < 0.3:
+            if rnd.random() < 0.22:
                 continue  # до этого руки не дошли — так и бывает
             fit = shelves
             if document.kind == 'closing':
