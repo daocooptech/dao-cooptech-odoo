@@ -18,36 +18,43 @@
     чего мы не исполняем. Цена в валюте — это цена по п. 2 ст. 317 ГК,
     выраженная в валюте; платёж идёт по курсу банка.
   -->
-  <record id="currency_cny" model="res.currency">
-    <field name="id" ref="base.CNY"/>
+  <!-- юань -->
+  <record id="base.CNY" model="res.currency">
     <field name="active" eval="True"/>
   </record>
-  <record id="currency_inr" model="res.currency">
-    <field name="id" ref="base.INR"/>
+
+  <!-- рупия -->
+  <record id="base.INR" model="res.currency">
     <field name="active" eval="True"/>
   </record>
-  <record id="currency_brl" model="res.currency">
-    <field name="id" ref="base.BRL"/>
+
+  <!-- реал -->
+  <record id="base.BRL" model="res.currency">
     <field name="active" eval="True"/>
   </record>
-  <record id="currency_zar" model="res.currency">
-    <field name="id" ref="base.ZAR"/>
+
+  <!-- ранд -->
+  <record id="base.ZAR" model="res.currency">
     <field name="active" eval="True"/>
   </record>
-  <record id="currency_aed" model="res.currency">
-    <field name="id" ref="base.AED"/>
+
+  <!-- дирхам -->
+  <record id="base.AED" model="res.currency">
     <field name="active" eval="True"/>
   </record>
-  <record id="currency_try" model="res.currency">
-    <field name="id" ref="base.TRY"/>
+
+  <!-- лира -->
+  <record id="base.TRY" model="res.currency">
     <field name="active" eval="True"/>
   </record>
-  <record id="currency_kzt" model="res.currency">
-    <field name="id" ref="base.KZT"/>
+
+  <!-- тенге -->
+  <record id="base.KZT" model="res.currency">
     <field name="active" eval="True"/>
   </record>
-  <record id="currency_byn" model="res.currency">
-    <field name="id" ref="base.BYN"/>
+
+  <!-- белорусский рубль -->
+  <record id="base.BYN" model="res.currency">
     <field name="active" eval="True"/>
   </record>
 </odoo>
