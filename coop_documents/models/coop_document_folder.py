@@ -19,6 +19,8 @@
 он у каждого свой: организатор закупки, бухгалтер кооператива и
 участник раскладывают одни и те же документы по-разному.
 """
+import re
+
 from odoo import api, fields, models
 
 
@@ -68,11 +70,31 @@ class CoopDocumentFolder(models.Model):
         различать, и мешает там, где нечего.
         """
         for record in self:
-            if record.partner_id.is_company:
-                record.display_name = '%s · %s' % (
-                    record.partner_id.name, record.complete_name or '')
-            else:
-                record.display_name = record.complete_name or ''
+            path = record.complete_name or ''
+            if not record.partner_id.is_company:
+                record.display_name = path
+                continue
+            # Название впереди, чья — следом и коротко. Панель папок
+            # узкая: с приписки начинать нельзя, она съедает ровно то,
+            # ради чего человек в панель и смотрит. Проверено глазами на
+            # боевой — с приписки спереди все папки читались как
+            # «Кооператив «Борозда» ·».
+            record.display_name = '%s · %s' % (
+                path, self._short_owner(record.partner_id.name))
+
+    @api.model
+    def _short_owner(self, name):
+        """Коротко о владельце: то, что в кавычках, либо первое слово.
+
+        «Кооператив «Борозда»» → «Борозда», «ОАО «Вектор Инжиниринг»» →
+        «Вектор Инжиниринг». Правовая форма в приписке не нужна: человек
+        отличает свои организации по имени, а не по форме, и форма
+        занимает место, которого в панели нет.
+        """
+        found = re.search(r'«([^»]+)»', name or '')
+        if found:
+            return found.group(1)
+        return (name or '').split(',')[0].strip()
 
     @api.depends('name', 'parent_id.complete_name')
     def _compute_complete_name(self):
