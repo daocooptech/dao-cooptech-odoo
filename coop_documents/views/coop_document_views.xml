@@ -126,10 +126,14 @@
         <filter name="no_folder" string="Не разложено"
                 domain="[('folder_id', '=', False)]"/>
         <separator/>
-        <filter name="this_year" string="В этом году"
-                domain="[('signed_on', '&gt;=', (context_today() + relativedelta(month=1, day=1)).strftime('%Y-%m-%d'))]"/>
-        <filter name="last_year" string="В прошлом году"
-                domain="[('signed_on', '&gt;=', (context_today() + relativedelta(years=-1, month=1, day=1)).strftime('%Y-%m-%d')), ('signed_on', '&lt;', (context_today() + relativedelta(month=1, day=1)).strftime('%Y-%m-%d'))]"/>
+        <!--
+          Отбор по дате — штатным средством движка, а не своими
+          доменами. Оно само даёт «этот месяц», «этот квартал», «этот
+          год» и «прошлый год», умеет складывать периоды и переживает
+          смену года без правок. Мои самодельные фильтры сюда же и не
+          встали: поисковый вид отказался их разбирать.
+        -->
+        <filter name="by_date" date="signed_on" string="Дата"/>
 
         <group expand="0" string="Сгруппировать">
           <filter name="by_folder" string="По папкам"
