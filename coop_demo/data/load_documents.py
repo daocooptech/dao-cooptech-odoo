@@ -115,7 +115,14 @@ def _spread_folders(env, documents, rnd):
 def load_documents(env, target=TARGET):
     Document = env['coop.document'].sudo()
     if Document.search_count([]) >= target // 2:
-        _logger.info('Документы: уже наполнены, пропускаю')
+        # Папки появились позже самих документов, и у наполненной базы их
+        # нет. Раскладываем на уже заведённых — иначе группировку по
+        # папкам увидит только тот, кто начал с чистой базы.
+        #
+        # Ровно эта ловушка была с ролями закупок: ранний выход
+        # пропускал не только создание, но и всё, что добавили потом.
+        _spread_folders(env, Document.search([]), random.Random(20260923))
+        _logger.info('Документы: уже наполнены, разложил по папкам')
         return 0
 
     rnd = random.Random(20260923)
