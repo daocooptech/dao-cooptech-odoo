@@ -125,7 +125,13 @@
     <field name="cost_note">Курсовые разницы идут в доход или расход; у НДС место реализации определяется отдельно.</field>
   </record>
 
-  <record id="settlement_fx_residents" model="coop.settlement.method">
+  <!--
+    Имя записи прежнее, хотя смысл сменился. Так надо: под ним уже лежит
+    запись с кодом `fx_residents`, и новая под другим именем упёрлась бы
+    в уникальность кода — 23 сентября 2026 на этом встало обновление и
+    легла служба.
+  -->
+  <record id="settlement_fx_between_residents" model="coop.settlement.method">
     <field name="name">Валюта между двумя резидентами</field>
     <field name="code">fx_residents</field>
     <field name="sequence">110</field>
