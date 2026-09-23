@@ -46,10 +46,9 @@
                   <span class="o_coop_deal_no"><t t-esc="record.number.value"/></span>
                 </div>
                 <div class="o_coop_listing_title"><field name="name"/></div>
-                <!-- Город не повторяется: он стоит полосой на снимке,
-                     как во всех каталогах платформы. -->
                 <div class="o_coop_listing_meta">
                   <t t-esc="record.way.value"/>
+                  <t t-if="record.city.raw_value"> · <t t-esc="record.city.value"/></t>
                 </div>
                 <div class="o_coop_deal_parties">
                   <field name="party_a_id"/> ↔ <field name="party_b_id"/>

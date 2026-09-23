@@ -70,7 +70,6 @@
             'coop_theme/static/src/xml/contact_lines.xml',
             'coop_theme/static/src/js/breadcrumb.js',
             'coop_theme/static/src/xml/breadcrumb.xml',
-            'coop_theme/static/src/js/control_panel.js',
             'coop_theme/static/src/js/form_save.js',
             'coop_theme/static/src/xml/form_save.xml',
             'coop_theme/static/src/js/catalog_view.js',

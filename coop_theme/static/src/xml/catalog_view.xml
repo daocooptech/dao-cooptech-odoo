@@ -159,35 +159,6 @@
     </xpath>
 
     <!--
-      Шестерёнка «Действия» на узком экране.
-
-      Со страниц записей платформы штатное меню записи убрано ещё
-      21 сентября 2026 (решение 349), но убрано оно было в шаблоне крошки
-      (`breadcrumb.xml`, обе ветки `web.Breadcrumb.Actions`). На телефоне
-      панель управления до крошки не доходит: у неё своя ветка
-      (`t-elif="env.isSmall"`), и меню она рисует сама — прямо в
-      `section.o_control_panel_breadcrumbs_actions`. Поэтому на большом
-      экране шестерёнки не было, а на телефоне она стояла над карточкой;
-      владелец 23 сентября 2026 прислал снимок своей страницы с ней.
-
-      Условие то же, что у крошки, и считается тем же способом —
-      `coopHideActions` в `control_panel.js`.
-
-      Обе ветки, а не одна: вторая (`env.config.noBreadcrumbs`) рисует ту
-      же секцию на экранах без пути, и оставить её значило бы вернуть
-      шестерёнку там же через полгода.
-    -->
-    <xpath expr="(//section[hasclass('o_control_panel_breadcrumbs_actions')]/t[@t-slot='control-panel-additional-actions'])[1]"
-           position="attributes">
-      <attribute name="t-if">!coopHideActions</attribute>
-    </xpath>
-
-    <xpath expr="(//section[hasclass('o_control_panel_breadcrumbs_actions')]/t[@t-slot='control-panel-additional-actions'])[2]"
-           position="attributes">
-      <attribute name="t-if">!coopHideActions</attribute>
-    </xpath>
-
-    <!--
       Переключатель записей над единственной записью показывает «1 / 1»:
       переключать нечего, а полосу он держит.
     -->
