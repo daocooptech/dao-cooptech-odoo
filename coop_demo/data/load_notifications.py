@@ -70,7 +70,10 @@ def _sources(env):
         ('deal', 'coop.deal', ('party_a_id', 'party_b_id')),
         ('project', 'coop.project.contribution', ('partner_id',)),
         ('vacancy', 'coop.vacancy.application', ('partner_id',)),
-        ('resource', 'coop.resource.respond', ('partner_id',)),
+        # Отклик на объявление — временная модель: она заводит сделку и
+        # исчезает. Поэтому извещения о ресурсах берём у самих
+        # объявлений, по владельцу.
+        ('resource', 'coop.resource', ('owner_id',)),
         ('org', 'coop.membership', ('partner_id',)),
         ('community', 'coop.community.member', ('partner_id',)),
         ('auction', 'coop.auction.bid', ('partner_id',)),
