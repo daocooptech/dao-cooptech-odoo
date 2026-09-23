@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="view_coop_document_list" model="ir.ui.view">
+    <field name="name">coop.document.list</field>
+    <field name="model">coop.document</field>
+    <field name="arch" type="xml">
+      <list string="Документы"
+            decoration-muted="state == 'cancelled'"
+            decoration-success="state == 'signed'">
+        <field name="signed_on" string="Дата"/>
+        <field name="number" string="Номер"/>
+        <field name="name"/>
+        <field name="kind" string="Вид"/>
+        <field name="party_a_id" string="Сторона"/>
+        <field name="party_b_id" string="Вторая сторона"/>
+        <field name="res_label" string="К чему" optional="show"/>
+        <field name="fingerprint" string="Отпечаток" optional="hide"/>
+        <field name="state" widget="badge"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_document_form" model="ir.ui.view">
+    <field name="name">coop.document.form</field>
+    <field name="model">coop.document</field>
+    <field name="arch" type="xml">
+      <form string="Документ">
+        <header>
+          <button name="action_sign" type="object" string="Подписан"
+                  class="btn-primary" invisible="state != 'draft'"/>
+          <button name="action_check" type="object" string="Сверить свой экземпляр"
+                  invisible="not fingerprint"/>
+          <button name="action_cancel" type="object" string="Отменить"
+                  invisible="state == 'cancelled'"/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="draft,signed"/>
+        </header>
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Акт приёма-передачи"/></h1>
+          </div>
+          <group>
+            <group string="Что это">
+              <field name="kind"/>
+              <field name="number" placeholder="№ 14"/>
+              <field name="signed_on"/>
+            </group>
+            <group string="Между кем">
+              <field name="party_a_id"/>
+              <field name="party_b_id"/>
+              <field name="res_label" placeholder="Сделка, закупка, проект"/>
+              <field name="res_model" invisible="1"/>
+              <field name="res_id" invisible="1"/>
+            </group>
+          </group>
+          <group string="Файл и отпечаток">
+            <field name="file" filename="file_name"/>
+            <field name="file_name" invisible="1"/>
+            <!--
+              Отпечаток показывается всегда, а не прячется в служебные
+              поля: он и есть то, ради чего раздел затевался. Человек
+              должен видеть его рядом с файлом, а не искать.
+            -->
+            <field name="fingerprint" readonly="1" widget="CopyClipboardChar"
+                   invisible="not fingerprint"/>
+          </group>
+          <div class="text-muted" invisible="not fingerprint">
+            Отпечаток посчитан от содержимого файла по SHA-256. Он не
+            зависит от имени файла и меняется при любой правке содержимого
+            — даже при пересохранении в другой программе.
+          </div>
+          <group string="Пояснение">
+            <field name="note" nolabel="1" colspan="2"
+                   placeholder="Что важно знать об этом документе"/>
+          </group>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_document_search" model="ir.ui.view">
+    <field name="name">coop.document.search</field>
+    <field name="model">coop.document</field>
+    <field name="arch" type="xml">
+      <search string="Документы">
+        <field name="name"/>
+        <field name="number"/>
+        <field name="party_b_id"/>
+        <field name="fingerprint" string="Отпечаток"/>
+        <filter name="signed" string="Подписанные"
+                domain="[('state', '=', 'signed')]"/>
+        <filter name="draft" string="Черновики"
+                domain="[('state', '=', 'draft')]"/>
+        <separator/>
+        <filter name="no_file" string="Без файла"
+                domain="[('file', '=', False)]"/>
+        <group>
+          <filter name="by_kind" string="По виду"
+                  context="{'group_by': 'kind'}"/>
+          <filter name="by_party" string="По второй стороне"
+                  context="{'group_by': 'party_b_id'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="view_coop_document_check_form" model="ir.ui.view">
+    <field name="name">coop.document.check.form</field>
+    <field name="model">coop.document.check</field>
+    <field name="arch" type="xml">
+      <form string="Сверить свой экземпляр">
+        <group>
+          <field name="document_id" readonly="1"/>
+          <field name="file" filename="file_name"
+                 string="Файл, который у вас на руках"/>
+          <field name="file_name" invisible="1"/>
+        </group>
+        <field name="verdict" nolabel="1" readonly="1"/>
+        <group string="Отпечатки" invisible="not file">
+          <field name="known_fingerprint" string="На платформе" readonly="1"/>
+          <field name="mine_fingerprint" string="Ваш файл" readonly="1"/>
+          <field name="matches" invisible="1"/>
+        </group>
+        <footer>
+          <button string="Закрыть" special="cancel" class="btn-secondary"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_coop_documents" model="ir.actions.act_window">
+    <field name="name">Документы</field>
+    <field name="path">documents</field>
+    <field name="res_model">coop.document</field>
+    <field name="view_mode">list,form</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiley_face">Документов пока нет</p>
+      <p>Акты, договоры и закрывающие. У каждого считается отпечаток, и
+         любую сторону можно попросить сверить свой экземпляр.</p>
+    </field>
+  </record>
+
+  <menuitem id="menu_coop_documents_root" name="Документы"
+            action="action_coop_documents" sequence="78"/>
+
+</odoo>

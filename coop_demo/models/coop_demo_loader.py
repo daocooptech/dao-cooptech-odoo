@@ -24,6 +24,7 @@ from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_reference, load_resources, load_skills,
                     load_project_needs, load_project_tasks,
                     load_photos,
+                    load_documents,
                     load_notifications,
                     load_spread,
                     load_vacancies, load_verification, load_wallets,
@@ -217,6 +218,7 @@ class CoopDemoLoader(models.AbstractModel):
         # Извещения — самым последним: они порождаются из того, что уже
         # произошло, и до того, как события заведены, порождать их не из
         # чего (решение 375).
+        load_documents.load_documents(self.env)
         load_notifications.load_notifications(self.env)
         # Знаки организаций — тем же порядком: набор эмблем чистили от
         # того, что знаком не было, и у карточек это осталось стоять.

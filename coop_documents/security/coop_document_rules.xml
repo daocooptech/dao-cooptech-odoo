@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data noupdate="0">
+    <!--
+      Документ видят только его стороны.
+
+      Не «все участники платформы»: акт приёма-передачи между двумя
+      кооперативами — не публичное чтение. Рабочая группа платформы видит
+      всё, потому что спор разбирает администратор (решение 194).
+    -->
+    <record id="rule_coop_document_parties" model="ir.rule">
+      <field name="name">Документы: только свои стороны</field>
+      <field name="model_id" ref="model_coop_document"/>
+      <field name="domain_force">['|', ('party_a_id', 'in', user.coop_actor_partner_ids.ids), ('party_b_id', 'in', user.coop_actor_partner_ids.ids)]</field>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="True"/>
+      <field name="perm_create" eval="True"/>
+      <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_coop_document_platform" model="ir.rule">
+      <field name="name">Документы: рабочая группа видит всё</field>
+      <field name="model_id" ref="model_coop_document"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+      <field name="groups" eval="[(4, ref('coop_base.group_coop_platform'))]"/>
+    </record>
+  </data>
+</odoo>
