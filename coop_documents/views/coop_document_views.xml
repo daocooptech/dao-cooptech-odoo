@@ -135,7 +135,14 @@
         -->
         <filter name="by_date" date="signed_on" string="Дата"/>
 
-        <group expand="0" string="Сгруппировать">
+        <!--
+          Группировки без обёртки `<group>`: у движка она описана общей
+          схемой, где ни `string`, ни `expand` не допускаются, и
+          поисковый вид с ними не проходит проверку. Разделы
+          «Группировать по» движок собирает сам, по наличию `group_by` в
+          контексте.
+        -->
+        <separator/>
           <filter name="by_folder" string="По папкам"
                   context="{'group_by': 'folder_id'}"/>
           <filter name="by_kind" string="По виду"
@@ -148,7 +155,6 @@
                   context="{'group_by': 'state'}"/>
           <filter name="by_month" string="По месяцам"
                   context="{'group_by': 'signed_on:month'}"/>
-        </group>
       </search>
     </field>
   </record>
