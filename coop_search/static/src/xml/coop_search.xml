@@ -9,7 +9,14 @@
               aria-label="Поиск по платформе"
               t-att-aria-expanded="state.expanded ? 'true' : 'false'"
               t-on-click="() => this.toggleExpanded()">
-        <i class="fa fa-search" role="img" aria-hidden="true"/>
+        <!-- Значок из дизайн-макета (`app.js`, `I.search`): ряд в шапке
+             набран одним почерком — линия в 1.9 на 18 точках. -->
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.9" stroke-linecap="round"
+             aria-hidden="true">
+          <circle cx="10.8" cy="10.8" r="6.4"/>
+          <path d="M15.6 15.6l4 4"/>
+        </svg>
       </button>
 
       <div class="o_coop_search_field">

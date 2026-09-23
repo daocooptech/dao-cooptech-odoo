@@ -5,7 +5,16 @@
 
 .o_coop_search {
   position: relative;
-  margin-right: 10px;
+}
+
+// Поле — не клетка со значком, а прямоугольник с видимой подложкой: до
+// соседнего значка ему не хватает того же поля, что тумблеру темы. На
+// телефоне поле прячется, от поиска остаётся клетка со значком, и поле
+// здесь только помешало бы ровному ряду.
+@media (min-width: 901px) {
+  .o_coop_search {
+    margin-right: 8px;
+  }
 }
 
 .o_coop_search_field {
@@ -121,7 +130,13 @@
 
 // Кнопка поиска нужна только на узком экране: на большом поле стоит в
 // шапке целиком и открывать его нечем.
-.o_coop_search_btn {
+//
+// Селектор длиннее необходимого: общее правило ряда в шапке
+// (`coop_theme/static/src/scss/shell.scss`) задаёт клеткам `display`,
+// и весит оно больше простого имени класса — короткое правило кнопку
+// не прятало, и на большом экране рядом с полем поиска стоял ещё и
+// значок поиска.
+.o_web_client .o_main_navbar .o_menu_systray > div > .o_coop_search_btn {
   display: none;
 }
 
@@ -134,17 +149,11 @@
 // возвращается по кнопке строкой под шапкой во всю ширину
 // (`theme.css`, `html.search-open .topbar-search`).
 @media (max-width: 900px) {
-  .o_coop_search_btn {
+  // Размер, поля и скругление — общие для всего ряда шапки
+  // (`coop_theme/static/src/scss/shell.scss`, «Ровный ряд в шапке»):
+  // клетка поиска ничем не отличается от клетки колокола.
+  .o_web_client .o_main_navbar .o_menu_systray > div > .o_coop_search_btn {
     display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border: none;
-    border-radius: 8px;
-    background: none;
-    color: inherit;
-    font-size: 15px;
   }
 
   .o_coop_search_field {

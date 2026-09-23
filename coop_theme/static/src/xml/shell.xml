@@ -133,7 +133,12 @@
       <button type="button" class="o_coop_burger" aria-label="Меню разделов"
               t-att-aria-expanded="coopShell.open ? 'true' : 'false'"
               t-on-click="() => this.coopToggleSidebar()">
-        <i class="fa fa-bars" role="img" aria-hidden="true"/>
+        <!-- Значок из дизайн-макета (`app.js`, `I.burger`). -->
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+             aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16"/>
+        </svg>
       </button>
       <a class="o_coop_logo" href="/odoo/my-page" title="На свою страницу">
         <img src="/coop_theme/static/src/img/cooptech-logo.png"
