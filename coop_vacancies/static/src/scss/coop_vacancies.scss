@@ -109,28 +109,6 @@
     background: var(--coop-teal-dark, #0e4f4a);
   }
 
-  .o_coop_locbar {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(20, 23, 26, .72);
-    color: #fff;
-    font-size: 11.5px;
-    font-weight: 600;
-    padding: 7px 10px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-
-    .fa {
-      font-size: 11px;
-      flex: none;
-    }
-  }
 
   .o_coop_vac_body {
     display: flex;
