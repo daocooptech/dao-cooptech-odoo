@@ -14,3 +14,5 @@ access_coop_signature_user,Подписи — участник,model_coop_credit
 access_coop_share_account_user,Паевые счета — участник,model_coop_share_account,base.group_user,1,1,1,0
 access_coop_share_move_user,Движения по паю — участник,model_coop_share_move,base.group_user,1,1,1,0
 access_coop_wallet_tx_user,Операции в сетях — участник,model_coop_wallet_tx,base.group_user,1,1,1,0
+access_coop_settlement_method_user,Способы расчёта — чтение,model_coop_settlement_method,base.group_user,1,0,0,0
+access_coop_settlement_method_admin,Способы расчёта — ведение,model_coop_settlement_method,coop_base.group_coop_platform,1,1,1,1

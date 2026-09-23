@@ -4,3 +4,4 @@ from . import coop_credit_line
 from . import coop_share
 from . import coop_wallet
 from . import coop_wallet_tx
+from . import coop_settlement_method

@@ -641,4 +641,129 @@
             parent="menu_coop_settings_root" action="action_coop_settings_region"
             sequence="30"/>
 
+  <!--
+    Деньги и реквизиты — вкладка из состава, отобранного владельцем
+    22 сентября 2026 (решение 377).
+
+    Цена рядом со способом, а не в справке: решение 387 — «показывать
+    всё, но с ценой». Спрятанный способ не исчезает, он уходит наружу,
+    где никто не предупредит о шестидесяти процентах.
+  -->
+  <record id="view_coop_settings_money_form" model="ir.ui.view">
+    <field name="name">coop.settings.money.form</field>
+    <field name="model">res.partner</field>
+    <field name="arch" type="xml">
+      <form string="Деньги и реквизиты" create="false" duplicate="false">
+        <sheet>
+          <div class="oe_title">
+            <h1>Деньги и реквизиты</h1>
+          </div>
+          <group>
+            <group string="Как принимаете">
+              <field name="coop_payout_currency_id"/>
+              <field name="coop_tax_regime"/>
+            </group>
+          </group>
+          <separator string="Чем с вами можно рассчитаться"/>
+          <field name="coop_settlement_method_ids" nolabel="1"
+                 widget="many2many"
+                 options="{'no_create': True, 'no_open': True}">
+            <list>
+              <field name="name"/>
+              <field name="cost_hint" string="Во что обходится"/>
+              <field name="cost_note" string="Отчего столько"/>
+            </list>
+          </field>
+          <div class="text-muted mt-2">
+            Цена сквозная: всё, что уходит в бюджет с обеих сторон вместе.
+            Платформа не берёт с вас этих денег — она их называет, чтобы
+            выбор был осознанным.
+          </div>
+          <separator string="Чего на платформе нет и не будет"/>
+          <field name="coop_denied_settlement_ids" nolabel="1" readonly="1"
+                 options="{'no_open': True}">
+            <list create="false" delete="false">
+              <field name="name"/>
+              <field name="deny_reason" string="Отчего нельзя"/>
+            </list>
+          </field>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_coop_settings_money" model="ir.actions.server">
+    <field name="name">Деньги и реквизиты</field>
+    <field name="path">my-money</field>
+    <field name="model_id" ref="base.model_res_partner"/>
+    <field name="state">code</field>
+    <field name="code">action = env['res.users'].action_coop_open_user_settings('coop_settings.view_coop_settings_money_form', 'Деньги и реквизиты')</field>
+  </record>
+
+  <menuitem id="menu_coop_settings_money" name="Деньги и реквизиты"
+            parent="menu_coop_settings_root" action="action_coop_settings_money"
+            sequence="35"/>
+
+  <!--
+    Данные и интеграции. Вывоз своих данных и удаление учётной записи —
+    не украшение: это то, что участник вправе потребовать, и место под
+    них лучше завести сразу, чем пришивать сбоку.
+
+    Подключённых систем пока нет ни одной, и вкладка говорит об этом
+    прямо. Пустой список честнее выдуманного: решение 373 ставит 1С
+    первой, но её ещё нет.
+  -->
+  <record id="view_coop_settings_data_form" model="ir.ui.view">
+    <field name="name">coop.settings.data.form</field>
+    <field name="model">res.partner</field>
+    <field name="arch" type="xml">
+      <form string="Данные и интеграции" create="false" duplicate="false">
+        <sheet>
+          <div class="oe_title">
+            <h1>Данные и интеграции</h1>
+          </div>
+
+          <separator string="Подключённые системы"/>
+          <div class="o_coop_empty text-muted">
+            Ни одна система учёта пока не подключена. Когда появится связь
+            с 1С и другими, здесь будет видно, что именно платформа берёт
+            оттуда, и это можно будет выключить по каждому виду данных
+            отдельно.
+          </div>
+
+          <separator string="Свои данные"/>
+          <div>
+            <button name="action_coop_export_archive" type="object"
+                    string="Выгрузить всё своё одним файлом"
+                    class="btn-secondary"/>
+            <div class="text-muted mt-2">
+              Карточка, членства и извещения — в одном файле, который
+              читается и без платформы.
+            </div>
+          </div>
+
+          <separator string="Удаление учётной записи"/>
+          <div class="text-muted">
+            Учётная запись участника кооператива не удаляется нажатием
+            кнопки: выход из кооператива — решение собрания, а сделки и
+            паевые движения остаются в учёте по закону. Напишите в
+            рабочую группу платформы, и вас проведут через выход.
+          </div>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_coop_settings_data" model="ir.actions.server">
+    <field name="name">Данные и интеграции</field>
+    <field name="path">my-data</field>
+    <field name="model_id" ref="base.model_res_partner"/>
+    <field name="state">code</field>
+    <field name="code">action = env['res.users'].action_coop_open_user_settings('coop_settings.view_coop_settings_data_form', 'Данные и интеграции')</field>
+  </record>
+
+  <menuitem id="menu_coop_settings_data" name="Данные и интеграции"
+            parent="menu_coop_settings_root" action="action_coop_settings_data"
+            sequence="60"/>
+
 </odoo>

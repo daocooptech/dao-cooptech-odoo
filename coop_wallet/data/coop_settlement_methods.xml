@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!--
+    Способы расчёта с ценой каждого (решение 387).
+
+    Цены — из разбора бухгалтера от 22 сентября 2026, сквозные: всё, что
+    уходит в бюджет с обеих сторон вместе. Запреты — из разбора юриста
+    того же дня.
+
+    Запрещённые заведены записями, а не выброшены: через год кто-нибудь
+    спросит, почему способа нет, и ответ должен лежать рядом с вопросом,
+    а не в переписке.
+  -->
+
+  <record id="settlement_share" model="coop.settlement.method">
+    <field name="name">Паевой взнос</field>
+    <field name="code">share</field>
+    <field name="sequence">10</field>
+    <field name="status">promoted</field>
+    <field name="cost_hint">0 %</field>
+    <field name="cost_note">Паевые взносы выведены из налоговой базы (пп. 1 п. 2 ст. 251 НК), НДС нет. Условие одно и жёсткое: раздельный учёт целевых поступлений — без него весь паевой фонд становится доходом.</field>
+  </record>
+
+  <record id="settlement_netting" model="coop.settlement.method">
+    <field name="name">Зачёт встречных требований</field>
+    <field name="code">netting</field>
+    <field name="sequence">20</field>
+    <field name="status">promoted</field>
+    <field name="cost_hint">0 %</field>
+    <field name="cost_note">Сверху не добавляет ничего, только переносит дату. Но дата — это дата акта, а не дата денег.</field>
+  </record>
+
+  <record id="settlement_rub" model="coop.settlement.method">
+    <field name="name">Рубли безналом</field>
+    <field name="code">rub</field>
+    <field name="sequence">30</field>
+    <field name="status">promoted</field>
+    <field name="cost_hint">6 %, с эквайрингом 8,5 %</field>
+    <field name="cost_note">При эквайринге доход на УСН — вся сумма, уплаченная участником, а не дошедшая до счёта. Поэтому 6 % превращаются в 8,5 %.</field>
+  </record>
+
+  <record id="settlement_tokens" model="coop.settlement.method">
+    <field name="name">Внутренние токены</field>
+    <field name="code">tokens</field>
+    <field name="sequence">40</field>
+    <field name="status">promoted</field>
+    <field name="cost_hint">0 % при покупке, до 43 % как вознаграждение за труд</field>
+    <field name="cost_note">Купленные за рубли — ничего сверху. Начисленные за труд — натуральный доход: 43 % сверх номинала, и удержать НДФЛ нечем.</field>
+  </record>
+
+  <record id="settlement_barter" model="coop.settlement.method">
+    <field name="name">Бартер</field>
+    <field name="code">barter</field>
+    <field name="sequence">50</field>
+    <field name="status">priced</field>
+    <field name="cost_hint">12–34 %</field>
+    <field name="cost_note">Это две реализации, а не одна. Между двумя УСН — 12 %; если одна сторона платит НДС, а вторая нет, её 22 % невозмещаемы.</field>
+  </record>
+
+  <record id="settlement_gift" model="coop.settlement.method">
+    <field name="name">Безвозмездная передача</field>
+    <field name="code">gift</field>
+    <field name="sequence">60</field>
+    <field name="status">priced</field>
+    <field name="cost_hint">28–47 % между юрлицами</field>
+    <field name="cost_note">Передающий платит НДС и не берёт стоимость в расход, получатель признаёт доход по рыночной цене. Между коммерческими организациями дарение свыше 3000 ₽ вообще запрещено (п. 1 ст. 575 ГК).</field>
+  </record>
+
+  <record id="settlement_cession" model="coop.settlement.method">
+    <field name="name">Уступка требования</field>
+    <field name="code">cession</field>
+    <field name="sequence">70</field>
+    <field name="status">priced</field>
+    <field name="cost_hint">60 % от заработка</field>
+    <field name="cost_note">На УСН доходом признаётся весь номинал, а расход на покупку права в закрытый перечень ст. 346.16 не входит вовсе. Купили за 90 000, получили 100 000, заработали 10 000 — заплатили 6 000. Убыток не учитывается никак.</field>
+  </record>
+
+  <record id="settlement_cfa" model="coop.settlement.method">
+    <field name="name">ЦФА как оплата внутри страны</field>
+    <field name="code">cfa_domestic</field>
+    <field name="sequence">80</field>
+    <field name="status">denied</field>
+    <field name="deny_reason">Запрещено ч. 3 ст. 1 ФЗ-259: внутри России ЦФА средством платежа быть не может. За границу — можно, но через оператора из реестра ЦБ.</field>
+  </record>
+
+  <record id="settlement_crypto" model="coop.settlement.method">
+    <field name="name">Криптовалюта</field>
+    <field name="code">crypto</field>
+    <field name="sequence">90</field>
+    <field name="status">denied</field>
+    <field name="deny_reason">Запрещена в расчётах на территории РФ (282-ФЗ). Запрет распространён и на показ такой возможности, поэтому способа нет и в списке.</field>
+  </record>
+
+  <record id="settlement_fx_between_residents" model="coop.settlement.method">
+    <field name="name">Валюта между двумя резидентами</field>
+    <field name="code">fx_residents</field>
+    <field name="sequence">100</field>
+    <field name="status">denied</field>
+    <field name="deny_reason">Запрещено ч. 1 ст. 9 ФЗ-173. Гражданин России за границей остаётся резидентом. Штраф 20–40 % с обеих сторон.</field>
+  </record>
+</odoo>
