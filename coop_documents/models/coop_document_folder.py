@@ -52,6 +52,28 @@ class CoopDocumentFolder(models.Model):
 
     color = fields.Integer(string='Цвет')
 
+    display_name = fields.Char(compute='_compute_display_name', store=True)
+
+    @api.depends('complete_name', 'partner_id.name', 'partner_id.is_company')
+    def _compute_display_name(self):
+        """Чья папка — видно в названии, если она не ваша личная.
+
+        Человек действует и от себя, и от своих организаций, и папки у
+        всех у них свои. Панель показывает их одним деревом, и без
+        пометки выходит четыре «Закупки» подряд, неотличимые ничем.
+        Проверено на боевой 23 сентября 2026: владелец видел по две
+        папки каждого имени — свои и кооператива «Борозда».
+
+        Свои папки остаются без приписки: она нужна там, где есть что
+        различать, и мешает там, где нечего.
+        """
+        for record in self:
+            if record.partner_id.is_company:
+                record.display_name = '%s · %s' % (
+                    record.partner_id.name, record.complete_name or '')
+            else:
+                record.display_name = record.complete_name or ''
+
     @api.depends('name', 'parent_id.complete_name')
     def _compute_complete_name(self):
         for record in self:
