@@ -339,6 +339,17 @@
                 <field name="coop_specialization_id"
                        readonly="not coop_is_self"
                        placeholder="Чем занимаетесь"/>
+                <!-- Остальные специализации отдельной строкой, ниже
+                     главной. По каждой человек попадает на свою полку
+                     каталога (решение 381): столяр, который ещё и
+                     водитель, виден обоими. Строка прячется у чужих,
+                     когда список пуст, — пустая подпись читается как
+                     недоделка. -->
+                <field name="coop_specialization_ids"
+                       widget="many2many_tags"
+                       readonly="not coop_is_self"
+                       invisible="not coop_is_self and not coop_specialization_ids"
+                       placeholder="Чем ещё занимаетесь"/>
               </div>
 
               <div class="o_coop_notice o_coop_notice_wait"

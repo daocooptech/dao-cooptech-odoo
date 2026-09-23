@@ -94,6 +94,8 @@
         <field name="city"/>
         <field name="coop_specialization_id" string="Специализация" optional="show"/>
         <field name="coop_specialization_category_id" string="Сфера деятельности" optional="hide"/>
+        <field name="coop_specialization_ids" string="Все специализации"
+               widget="many2many_tags" optional="hide"/>
         <field name="coop_age" string="Возраст"/>
         <field name="coop_skill_ids" widget="many2many_tags" optional="show"/>
         <field name="coop_membership_count" string="Кооперативов"/>
@@ -141,7 +143,7 @@
       на витрину.
     -->
     <field name="domain">[('coop_is_participant', '=', True), ('is_company', '=', False), ('coop_profile_hidden', '=', False), ('coop_page_visible', '=', True)]</field>
-    <field name="context">{'bin_size': True,'coop_catalog': True, 'default_coop_is_participant': True, 'default_is_company': False, 'coop_create_label': 'Пригласить человека', 'coop_shelf_field': 'coop_specialization_category_id'}</field>
+    <field name="context">{'bin_size': True,'coop_catalog': True, 'default_coop_is_participant': True, 'default_is_company': False, 'coop_create_label': 'Пригласить человека', 'coop_shelf_field': 'coop_specialization_category_ids'}</field>
     <field name="search_view_id" ref="view_coop_people_search"/>
     <!-- Явная привязка представлений. res.partner — общая модель, и без
          этого списка действие подберёт по приоритету стандартный канбан

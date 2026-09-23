@@ -185,6 +185,47 @@ export class CoopShelves extends Component {
         return "Другое";
     }
 
+    /** Номера полок, на которые попадает запись.
+     *
+     *  Значение поля приходит в пяти видах, и все пять встречаются в
+     *  одном и том же каталоге:
+     *
+     *  * пара `[номер, название]` — связь у старых сборок;
+     *  * объект с `id` — связь у нынешних;
+     *  * простое значение — список выбора;
+     *  * список номеров — множественная связь;
+     *  * объект со списком `records` — она же у модели представления.
+     *
+     *  Разбираем все здесь, а не в цикле раскладки: перепутанный вид
+     *  даёт не ошибку, а пустую полку, и искать причину потом дороже.
+     */
+    shelfIdsOf(record) {
+        const value = record.data[this.props.field];
+        if (value === undefined || value === null || value === false) {
+            return [];
+        }
+        if (Array.isArray(value)) {
+            // Пара `[номер, название]` у связи — именно пара, а не
+            // список из двух номеров: второе значение строка.
+            if (value.length === 2 && typeof value[1] === "string") {
+                return [value[0]];
+            }
+            return value.map((item) => (
+                item && typeof item === "object" ? item.id : item
+            ));
+        }
+        if (typeof value === "object") {
+            if (Array.isArray(value.records)) {
+                return value.records.map((item) => item.resId ?? item.id);
+            }
+            if (Array.isArray(value.resIds)) {
+                return value.resIds;
+            }
+            return value.id === undefined ? [] : [value.id];
+        }
+        return [value];
+    }
+
     async load() {
         const domain = this.props.domain || [];
         await this.readFieldInfo();
@@ -262,16 +303,17 @@ export class CoopShelves extends Component {
         const records = this.shelvesModel.root.records || [];
         const recordsByShelf = new Map(categoryIds.map((id) => [id, []]));
         for (const record of records) {
-            // Значение поля у записи модели приходит в трёх видах: пара
-            // [номер, название] у старых сборок, объект с `id` у
-            // нынешних, простое значение у списка выбора. Разбираем все
-            // три здесь, иначе полка пустая, а ошибки нет.
-            const value = record.data[this.props.field];
-            const id = Array.isArray(value) ? value[0]
-                : (value && typeof value === "object" ? value.id : value);
-            const shelf = recordsByShelf.get(id);
-            if (shelf && shelf.length < this.perShelf) {
-                shelf.push(record);
+            // Запись попадает на КАЖДУЮ свою полку, а не на одну.
+            // Специализаций у человека несколько (решение 381): столяр,
+            // который ещё и водитель, должен быть виден обоими. При
+            // одиночном поле список из одного значения — и поведение то
+            // же, что было.
+            for (const id of this.shelfIdsOf(record)) {
+                const shelf = recordsByShelf.get(id);
+                if (shelf && shelf.length < this.perShelf
+                        && !shelf.includes(record)) {
+                    shelf.push(record);
+                }
             }
         }
 

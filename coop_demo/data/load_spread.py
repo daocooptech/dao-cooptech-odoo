@@ -428,6 +428,7 @@ def ensure_personal_needs(env):
 def spread_all(env):
     """Выровнять полки на страницах людей."""
     total = {}
+    total['specializations'] = ensure_extra_specializations(env)
     total['friends'] = ensure_friends(env)
     total['communities'] = trim_communities(env)
     total['needs'] = ensure_personal_needs(env)
@@ -447,3 +448,81 @@ def spread_all(env):
     total['projects'] = _hand_out(env, 'coop.project', 'partner_id', PROJECTS_COUNT)
     _logger.info('Выравнивание полок: %s', total)
     return total
+
+
+def ensure_extra_specializations(env):
+    """Раздать людям вторые и третьи специализации.
+
+    Решение 381 от 22 сентября 2026: человек виден на всех подходящих
+    полках. Пока у каждого по одной специализации, множественность есть
+    в модели и не видна на экране — а невидимая возможность всё равно
+    что отсутствующая.
+
+    Раздаётся **не всем и не поровну**. У большинства одна специальность,
+    у части две, у немногих три: так и бывает. Каталог, где у каждого
+    ровно по две, выглядит сгенерированным, потому что он такой и есть.
+
+    Вторая специальность берётся из своей же сферы или из соседней, а не
+    откуда попало: «кузнец и веб-разработчик» — не разнообразие данных, а
+    насмешка над ними. Кооперация складывается из смежных умений.
+    """
+    Partner = env['res.partner'].sudo()
+    Specialization = env['coop.specialization'].sudo()
+
+    people = Partner.search([
+        ('coop_is_participant', '=', True),
+        ('is_company', '=', False),
+        ('coop_specialization_id', '!=', False),
+    ])
+    if not people:
+        return 0
+
+    # Специализации, разложенные по сферам: вторая берётся из той же
+    # сферы или из соседней.
+    by_category = {}
+    for specialization in Specialization.search([]):
+        by_category.setdefault(specialization.category_id.id, []).append(
+            specialization)
+    if not by_category:
+        return 0
+    categories = sorted(by_category)
+
+    rnd = random.Random(20260923)
+    given = 0
+    for person in people:
+        if person.coop_specialization_ids:
+            continue
+        main = person.coop_specialization_id
+        chance = rnd.random()
+        if chance < 0.55:
+            # Больше половины людей умеют что-то одно — и это честно.
+            extra_count = 0
+        elif chance < 0.88:
+            extra_count = 1
+        else:
+            extra_count = 2
+
+        picked = main
+        own = list(by_category.get(main.category_id.id, []))
+        for _step in range(extra_count):
+            if rnd.random() < 0.6 and len(own) > 1:
+                pool = own
+            else:
+                # Соседняя сфера: не любая, а следующая по справочнику —
+                # он упорядочен по смыслу, и соседи в нём ближе друг к
+                # другу, чем случайная пара.
+                index = categories.index(main.category_id.id) \
+                    if main.category_id.id in categories else 0
+                neighbour = categories[(index + 1) % len(categories)]
+                pool = by_category.get(neighbour, own)
+            fit = [s for s in pool if s not in picked]
+            if not fit:
+                continue
+            picked |= rnd.choice(fit)
+
+        if len(picked) > 1:
+            person.coop_specialization_ids = [(6, 0, picked.ids)]
+            given += 1
+
+    _logger.info('Специализации: вторая и третья розданы %s людям', given)
+    return given

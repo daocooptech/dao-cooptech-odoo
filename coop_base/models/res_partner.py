@@ -44,10 +44,58 @@ class ResPartner(models.Model):
         'coop.specialization.category', string='Сфера деятельности',
         related='coop_specialization_id.category_id', store=True, index=True)
 
+    # Специализаций у человека несколько (решение 381, исполняющее
+    # решение 71). Люди редко умеют что-то одно, и кооперация держится
+    # ровно на этом: тот же человек нужен в одном проекте столяром, в
+    # другом водителем. Одна полка на человека — упрощение, которое
+    # прячет самое ценное.
+    #
+    # Одиночное поле выше осталось **главной** специализацией: по ней
+    # подписана карточка и идёт сортировка. Убрать его значило бы
+    # ответить «чем вы занимаетесь» списком из пяти строк — а человек
+    # ждёт одного слова.
+    coop_specialization_ids = fields.Many2many(
+        'coop.specialization', 'coop_partner_specialization_rel',
+        'partner_id', 'specialization_id', string='Все специализации',
+        help='Чем ещё занимается. По каждой человек попадает на свою '
+             'полку каталога.')
+    coop_specialization_category_ids = fields.Many2many(
+        'coop.specialization.category',
+        'coop_partner_spec_category_rel', 'partner_id', 'category_id',
+        string='Сферы деятельности', compute='_compute_spec_categories',
+        store=True, index=True,
+        help='Сферы всех специализаций. По ним строятся полки каталога.')
+
     # Признак участника и доверие — общие для людей и организаций: в
     # каталог попадают и те и другие, и доверие считается по одним и тем
     # же завершённым сделкам. Держать их в модуле людей значит закрыть их
     # для организаций, которые о модуле людей ничего не знают.
+    @api.depends('coop_specialization_ids.category_id',
+                 'coop_specialization_id.category_id')
+    def _compute_spec_categories(self):
+        """Сферы всех специализаций, включая главную.
+
+        Главная входит в список всегда, даже если в множественное поле её
+        не добавили: иначе человек, у которого заполнена только она,
+        пропал бы с витрины вовсе — а до множественного поля он там был.
+        """
+        for record in self:
+            specializations = (record.coop_specialization_ids
+                               | record.coop_specialization_id)
+            record.coop_specialization_category_ids =                 specializations.category_id
+
+    @api.onchange('coop_specialization_ids')
+    def _onchange_specializations(self):
+        """Главная берётся из списка, если её ещё не выбрали.
+
+        Без этого человек заполняет список, сохраняет — и видит карточку
+        без специализации, потому что главная осталась пустой. Сам он о
+        существовании двух полей не знает и знать не должен.
+        """
+        for record in self:
+            if not record.coop_specialization_id and record.coop_specialization_ids:
+                record.coop_specialization_id = record.coop_specialization_ids[:1]
+
     coop_is_participant = fields.Boolean(
         string='Участник платформы', default=False, index=True,
         help='Человек или организация зарегистрированы на платформе и видны '
