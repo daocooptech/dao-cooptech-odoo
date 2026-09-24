@@ -262,8 +262,8 @@ def load_wall_thanks(env, login='dashkevich'):
     """Благодарности авторам записей (решение 406) — около ста шестидесяти.
 
     Приём включён примерно у трети людей и у главного участника витрины;
-    телефоны СБП — заведомо учебные, из диапазона +7 900 000-xx-xx. TON —
-    только тем, у кого в кошельке есть адрес TON. Состояния — все пять,
+    телефоны СБП — заведомо учебные, из диапазона +7 900 000-xx-xx. Токенами —
+    только тем, у кого в кошельке есть адрес в сети; сеть и токен — разные. Состояния — все пять,
     неровно: больше подтверждённых, есть заявленные (их автор может
     отметить сам), не пришедшие, возвращённые и спорные. Время — между
     записью и сегодняшним днём.
@@ -294,7 +294,7 @@ def load_wall_thanks(env, login='dashkevich'):
             'coop_thanks_on': True,
             'coop_thanks_sbp': '+7 900 000-%02d-%02d' % (n // 100 % 100, n % 100),
         })
-    ton = {p.id for p in takers if Thanks._coop_ton_address(p)}
+    nets = {p.id: Thanks._coop_networks(p) for p in takers}
 
     posts = list(Message.search([
         ('model', '=', 'res.partner'), ('message_type', '=', 'comment'),
@@ -314,9 +314,10 @@ def load_wall_thanks(env, login='dashkevich'):
             sender = rnd.choice(people)
             if sender == post.author_id:
                 continue
-            channel = 'ton' if post.author_id.id in ton and rnd.random() < 0.3 else 'sbp'
-            amount = (rnd.choice((0.5, 1, 1, 2, 3, 5, 10)) if channel == 'ton'
-                      else rnd.choice((50, 100, 100, 150, 200, 300, 500, 500, 700, 1000, 1500, 2000, 3000)))
+            gift = _token_gift(rnd, nets.get(post.author_id.id)) if rnd.random() < 0.3 else None
+            channel = 'token' if gift else 'sbp'
+            amount = gift['amount'] if gift else rnd.choice(
+                (50, 100, 100, 150, 200, 300, 500, 500, 700, 1000, 1500, 2000, 3000))
             start = post.date or now
             window = min(now - start, timedelta(days=12))
             if window <= timedelta(minutes=10):
@@ -326,6 +327,8 @@ def load_wall_thanks(env, login='dashkevich'):
                 'sender_id': sender.id,
                 'recipient_id': post.author_id.id,
                 'channel': channel,
+                'network_id': gift['network_id'] if gift else False,
+                'token': gift['token'] if gift else False,
                 'amount': amount,
                 'state': rnd.choice(states),
                 'date': start + window * rnd.uniform(0.05, 1.0),
@@ -333,4 +336,87 @@ def load_wall_thanks(env, login='dashkevich'):
     if rows:
         Thanks.create(rows)
     _logger.info("Благодарности: приём у %s человек, заведено %s", len(takers), len(rows))
+    return len(rows)
+
+
+# Сколько обычно дарят в каждом токене — чтобы суммы выглядели как в жизни,
+# а не «1 BTC за запись».
+TOKEN_AMOUNTS = {
+    'BTC': (0.0002, 0.0005, 0.001, 0.002),
+    'ETH': (0.002, 0.005, 0.01, 0.02),
+    'BNB': (0.01, 0.02, 0.05, 0.1),
+    'TON': (0.5, 1, 2, 3, 5, 10),
+    'SOL': (0.05, 0.1, 0.2, 0.5),
+    'USDT': (1, 2, 5, 10, 20, 50),
+    'USDC': (1, 2, 5, 10, 25),
+}
+
+
+def _token_gift(rnd, networks):
+    if not networks:
+        return None
+    network = rnd.choice(networks)
+    token = rnd.choice(network['tokens'])['symbol']
+    return {
+        'network_id': network['id'],
+        'token': token,
+        'amount': rnd.choice(TOKEN_AMOUNTS.get(token, (1, 2, 5))),
+    }
+
+
+def load_wall_thanks_tokens(env):
+    """Подарки токенами во всех сетях (владелец 24 сентября 2026: вкладка
+    «Токенами» с выбором блокчейна). Первое наполнение подарков вышло до
+    вкладки, и токенами там был один TON; здесь — около пятидесяти
+    подарков в BTC, ETH, USDT, USDC, BNB, SOL и TON.
+
+    Прогон один: если подарок токенами не в сети TON уже есть, ничего не
+    делается.
+    """
+    Thanks = env['coop.wall.thanks'].sudo()
+    if Thanks.search_count([('channel', '=', 'token'),
+                            ('network_id.code', '!=', 'ton')], limit=1):
+        _logger.info("Подарки токенами: уже наполнено, пропускаю")
+        return 0
+    Message = env['mail.message'].sudo()
+    Partner = env['res.partner'].sudo()
+    rnd = random.Random(20260924 + 408)
+    now = datetime.now()
+    takers = Partner.search([('coop_thanks_on', '=', True)])
+    nets = {p.id: Thanks._coop_networks(p) for p in takers}
+    authors = [pid for pid, n in nets.items() if n]
+    people = list(Partner.search([
+        ('coop_is_participant', '=', True), ('is_company', '=', False),
+        ('name', 'not in', TEST_NAMES),
+    ]))
+    posts = list(Message.search([
+        ('model', '=', 'res.partner'), ('message_type', '=', 'comment'),
+        ('subtype_id.internal', '=', False), ('author_id', 'in', authors),
+    ]))
+    if not posts or len(people) < 30:
+        return 0
+    states = (['confirmed'] * 11 + ['declared'] * 4 + ['unconfirmed'] * 2
+              + ['returned'] + ['disputed'] * 2)
+    rows = []
+    for post in rnd.sample(posts, min(len(posts), 50)):
+        sender = rnd.choice(people)
+        gift = _token_gift(rnd, nets[post.author_id.id])
+        start = post.date or now
+        window = min(now - start, timedelta(days=12))
+        if sender == post.author_id or not gift or window <= timedelta(minutes=10):
+            continue
+        rows.append({
+            'post_id': post.id,
+            'sender_id': sender.id,
+            'recipient_id': post.author_id.id,
+            'channel': 'token',
+            'network_id': gift['network_id'],
+            'token': gift['token'],
+            'amount': gift['amount'],
+            'state': rnd.choice(states),
+            'date': start + window * rnd.uniform(0.05, 1.0),
+        })
+    if rows:
+        Thanks.create(rows)
+    _logger.info("Подарки токенами: заведено %s", len(rows))
     return len(rows)

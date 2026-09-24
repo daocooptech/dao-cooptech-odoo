@@ -11,7 +11,30 @@ from .coop_wall_comment import WALL_MODELS
 # эти. Слов об оплате и расчётах в сообщениях нет: владелец 24 сентября
 # 2026 — «ни за что мы не рассчитываемся, это же подарок».
 RUB_MIN, RUB_MAX, RUB_MONTH = 10, 5000, 15000
-TON_MAX = 1000
+
+# Токены по сетям. Владелец 24 сентября 2026: «сделай вместо TON вкладку
+# „Токенами“ и там уже выбор блокчейна, сети, комиссии и т. д.». Сеть —
+# из справочника кошелька (`coop.wallet.network`), и только та, где у
+# автора есть адрес. Своя сеть кооператива (`koop`, COOP) в подарки не
+# идёт: COOP между участниками не передаётся (решения 243а, 406).
+#
+# Комиссия — ориентир на осень 2026 года, не котировка: её платит
+# даритель, а точную сумму показывает его кошелёк перед подписью.
+TOKENS = {
+    'btc': [('BTC', 'BTC')],
+    'eth': [('ETH', 'ETH'), ('USDT', 'USDT · ERC-20'), ('USDC', 'USDC · ERC-20')],
+    'bnb': [('BNB', 'BNB'), ('USDT', 'USDT · BEP-20')],
+    'ton': [('TON', 'TON'), ('USDT', 'USDT · TON')],
+    'sol': [('SOL', 'SOL'), ('USDC', 'USDC · SPL')],
+}
+FEE_HINTS = {
+    'btc': 'обычно от 0,5 до 3 $, зависит от загрузки сети',
+    'eth': 'обычно от 0,3 до 3 $; за USDT и USDC — дороже, чем за ETH',
+    'bnb': 'около 0,05 $',
+    'ton': 'около 0,01–0,05 TON',
+    'sol': 'меньше 0,01 $',
+}
+NO_GIFT_NETWORKS = ('koop',)
 
 # Названия — про подарок, а не про благодарность: окно называется
 # «Подарки за запись», и «Заявлена» рядом с ним читалось вразнобой.
@@ -30,7 +53,7 @@ class ResPartner(models.Model):
     coop_thanks_on = fields.Boolean(
         string='Принимаю подарки за записи',
         help='Под вашими записями на стене появится «Поблагодарить»: '
-             'подарок рублями по СБП или в TON. Он приходит вам напрямую, '
+             'подарок рублями по СБП или токенами. Он приходит вам напрямую, '
              'платформа его не получает.')
     coop_thanks_sbp = fields.Char(
         string='Телефон или ссылка СБП',
@@ -42,10 +65,12 @@ class CoopWallThanks(models.Model):
     """Благодарность автору записи на стене.
 
     Владелец 24 сентября 2026 (решение 406): рубли — по ссылке СБП автора,
-    TON — подарком, кнопка «Поблагодарить» со значком подарка.
+    токены — подарком в выбранной сети, кнопка «Поблагодарить» со значком
+    подарка.
 
     Платформа денег не касается. Рубли даритель переводит в своём банке
-    по СБП автора, TON — из своего кошелька на адрес автора; здесь только
+    по СБП автора, токены — из своего кошелька на адрес автора в сети;
+    здесь только
     запись о том, что благодарность заявлена, и отметка автора, пришли ли
     деньги. Иначе, по заключению юриста, это был бы перевод денежных
     средств без лицензии (161-ФЗ).
@@ -68,8 +93,11 @@ class CoopWallThanks(models.Model):
         'res.partner', string='Автор', required=True, index=True,
         ondelete='cascade')
     channel = fields.Selection(
-        [('sbp', 'Рубли по СБП'), ('ton', 'TON')],
+        [('sbp', 'Рублями по СБП'), ('token', 'Токенами')],
         string='Чем', required=True)
+    network_id = fields.Many2one(
+        'coop.wallet.network', string='Сеть', ondelete='restrict')
+    token = fields.Char(string='Токен')
     amount = fields.Float(string='Сколько', required=True)
     currency = fields.Char(
         string='Валюта', compute='_compute_currency', store=True)
@@ -83,10 +111,10 @@ class CoopWallThanks(models.Model):
     _not_self = models.Constraint(
         'CHECK (sender_id != recipient_id)', 'Себя поблагодарить нельзя.')
 
-    @api.depends('channel')
+    @api.depends('channel', 'token')
     def _compute_currency(self):
         for record in self:
-            record.currency = 'TON' if record.channel == 'ton' else '₽'
+            record.currency = record.token if record.channel == 'token' else '₽'
 
     # ── Вспомогательное ─────────────────────────────────────────────
 
@@ -98,14 +126,31 @@ class CoopWallThanks(models.Model):
         return post
 
     @api.model
-    def _coop_ton_address(self, partner):
+    def _coop_networks(self, partner):
+        """Сети, где у автора есть адрес, — с токенами и комиссией."""
         if 'coop.wallet.address' not in self.env:
-            return False
-        address = self.env['coop.wallet.address'].sudo().search([
+            return []
+        addresses = self.env['coop.wallet.address'].sudo().search([
             ('wallet_id.partner_id', '=', partner.id),
-            ('network_id.code', '=', 'ton'),
-        ], limit=1)
-        return address.address or False
+            ('network_id.code', 'not in', NO_GIFT_NETWORKS),
+            ('network_id.active', '=', True),
+        ])
+        result, seen = [], set()
+        for address in addresses.sorted(lambda a: (a.network_id.sequence, a.id)):
+            network = address.network_id
+            if network.id in seen:
+                continue
+            seen.add(network.id)
+            tokens = TOKENS.get(network.code) or [(network.symbol, network.symbol)]
+            result.append({
+                'id': network.id,
+                'code': network.code,
+                'name': network.name,
+                'address': address.address,
+                'tokens': [{'symbol': s, 'label': l} for s, l in tokens],
+                'fee_hint': FEE_HINTS.get(network.code, ''),
+            })
+        return result
 
     def _coop_to_dict(self):
         return [{
@@ -113,6 +158,7 @@ class CoopWallThanks(models.Model):
             'sender_id': t.sender_id.id,
             'sender_name': t.sender_id.name,
             'channel': t.channel,
+            'network': t.network_id.name or '',
             'amount': t.amount,
             'currency': t.currency,
             'state': t.state,
@@ -135,9 +181,9 @@ class CoopWallThanks(models.Model):
             'can_thank': False,
             'reason': '',
             'sbp': False,
-            'ton_address': False,
+            'networks': [],
             'received': [],
-            'limits': {'rub_min': RUB_MIN, 'rub_max': RUB_MAX, 'ton_max': TON_MAX},
+            'limits': {'rub_min': RUB_MIN, 'rub_max': RUB_MAX},
         }
         if own:
             result['received'] = self.sudo().search(
@@ -148,14 +194,15 @@ class CoopWallThanks(models.Model):
             return result
         result['can_thank'] = True
         result['sbp'] = author.sudo().coop_thanks_sbp or False
-        result['ton_address'] = self._coop_ton_address(author)
-        if not result['sbp'] and not result['ton_address']:
+        result['networks'] = self._coop_networks(author)
+        if not result['sbp'] and not result['networks']:
             result['can_thank'] = False
             result['reason'] = _("Автор не указал, куда принимать благодарности.")
         return result
 
     @api.model
-    def coop_declare(self, post_id, channel, amount, understood):
+    def coop_declare(self, post_id, channel, amount, understood,
+                     network_id=False, token=False):
         """Даритель отмечает, что подарок отправлен."""
         if not understood:
             raise UserError(_("Отметьте, что понимаете: это подарок."))
@@ -188,11 +235,15 @@ class CoopWallThanks(models.Model):
                 raise UserError(_(
                     "Одному автору — не больше %(hi)s ₽ подарков за месяц.",
                     hi=RUB_MONTH))
-        elif channel == 'ton':
-            if not self._coop_ton_address(author):
-                raise UserError(_("Автор не указал адрес TON."))
-            if not 0 < amount <= TON_MAX:
-                raise UserError(_("Подарок в TON — не больше %(hi)s.", hi=TON_MAX))
+        elif channel == 'token':
+            network = next((n for n in self._coop_networks(author)
+                            if n['id'] == network_id), None)
+            if not network:
+                raise UserError(_("У автора нет адреса в этой сети."))
+            if token not in [t['symbol'] for t in network['tokens']]:
+                raise UserError(_("Этот токен в выбранной сети не принимается."))
+            if amount <= 0:
+                raise UserError(_("Сумма подарка должна быть больше нуля."))
         else:
             raise UserError(_("Неизвестный способ."))
         thanks = self.sudo().create({
@@ -200,6 +251,8 @@ class CoopWallThanks(models.Model):
             'sender_id': me.id,
             'recipient_id': author.id,
             'channel': channel,
+            'network_id': network_id if channel == 'token' else False,
+            'token': token if channel == 'token' else False,
             'amount': amount,
         })
         return thanks._coop_to_dict()[0]

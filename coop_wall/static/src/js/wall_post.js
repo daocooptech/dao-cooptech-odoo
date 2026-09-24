@@ -277,7 +277,8 @@ export class CoopRepostDialog extends Component {
 
 /**
  * «Поблагодарить» (решение 406). Платформа денег не касается: рубли даритель
- * переводит в своём банке по СБП автора, TON — на адрес автора; здесь он
+ * переводит в своём банке по СБП автора, токены — на адрес автора в
+ * выбранной сети; здесь он
  * только отмечает, что перевод сделан, а автор — пришли ли деньги.
  *
  * Автор своей записи видит в этом же окне, кто и сколько прислал, и
@@ -293,6 +294,7 @@ export class CoopThanksDialog extends Component {
         this.notification = useService("notification");
         this.state = useState({
             info: null, channel: "sbp", amount: "", understood: false, busy: false,
+            networkId: null, token: null,
         });
         this.load();
     }
@@ -300,7 +302,19 @@ export class CoopThanksDialog extends Component {
     async load() {
         const info = await this.orm.call("coop.wall.thanks", "coop_info", [this.props.message.id]);
         this.state.info = info;
-        this.state.channel = info.sbp ? "sbp" : "ton";
+        this.state.channel = info.sbp ? "sbp" : "token";
+        const first = info.networks?.[0];
+        this.state.networkId = first?.id || null;
+        this.state.token = first?.tokens[0]?.symbol || null;
+    }
+
+    get network() {
+        return (this.state.info?.networks || []).find((n) => n.id === this.state.networkId);
+    }
+
+    onNetwork(ev) {
+        this.state.networkId = parseInt(ev.target.value);
+        this.state.token = this.network?.tokens[0]?.symbol || null;
     }
 
     get canSend() {
@@ -319,6 +333,8 @@ export class CoopThanksDialog extends Component {
                 this.state.channel,
                 parseFloat(String(this.state.amount).replace(",", ".")),
                 this.state.understood,
+                this.state.channel === "token" ? this.state.networkId : false,
+                this.state.channel === "token" ? this.state.token : false,
             ]);
             this.notification.add(
                 "Спасибо! Автор увидит подарок у себя и отметит, когда он придёт.",
@@ -344,8 +360,9 @@ export class CoopThanksDialog extends Component {
     }
 
     formatAmount(item) {
-        const n = item.currency === "TON" ? item.amount : Math.round(item.amount);
-        return `${n.toLocaleString("ru-RU")} ${item.currency}`;
+        const n = item.channel === "token" ? item.amount : Math.round(item.amount);
+        const where = item.channel === "token" && item.network ? ` · ${item.network}` : "";
+        return `${n.toLocaleString("ru-RU")} ${item.currency}${where}`;
     }
 }
 

@@ -151,8 +151,8 @@
         <div class="btn-group mb-3 w-100">
           <button class="btn" t-att-class="state.channel === 'sbp' ? 'btn-primary' : 'btn-secondary'"
                   t-att-disabled="!state.info.sbp" t-on-click="() => this.state.channel = 'sbp'">Рублями по СБП</button>
-          <button class="btn" t-att-class="state.channel === 'ton' ? 'btn-primary' : 'btn-secondary'"
-                  t-att-disabled="!state.info.ton_address" t-on-click="() => this.state.channel = 'ton'">TON</button>
+          <button class="btn" t-att-class="state.channel === 'token' ? 'btn-primary' : 'btn-secondary'"
+                  t-att-disabled="!state.info.networks.length" t-on-click="() => this.state.channel = 'token'">Токенами</button>
         </div>
         <p t-if="state.channel === 'sbp'">
           Отправьте подарок в своём банке по СБП:
@@ -161,16 +161,39 @@
             От <t t-out="state.info.limits.rub_min"/> до <t t-out="state.info.limits.rub_max"/> ₽.
           </span>
         </p>
-        <p t-else="">
-          Адрес <t t-out="state.info.author_name"/> в TON:
-          <code class="o_coop_thanks_req" t-out="state.info.ton_address"/>
-          <br/><span class="text-muted">
+        <div t-else="" class="o_coop_thanks_tokens">
+          <div class="o_coop_thanks_pick">
+            <label>
+              <span class="form-label">Блокчейн</span>
+              <select class="form-select" t-on-change="onNetwork">
+                <option t-foreach="state.info.networks" t-as="n" t-key="n.id"
+                        t-att-value="n.id" t-att-selected="n.id === state.networkId" t-out="n.name"/>
+              </select>
+            </label>
+            <label t-if="network">
+              <span class="form-label">Токен</span>
+              <select class="form-select" t-model="state.token">
+                <option t-foreach="network.tokens" t-as="tk" t-key="tk.symbol"
+                        t-att-value="tk.symbol" t-out="tk.label"/>
+              </select>
+            </label>
+          </div>
+          <p t-if="network">
+            Адрес <t t-out="state.info.author_name"/> в сети <t t-out="network.name"/>:
+            <code class="o_coop_thanks_req" t-out="network.address"/>
+          </p>
+          <p t-if="network and network.fee_hint" class="o_coop_thanks_fee">
+            <i class="fa fa-bolt"/>
+            Комиссия сети — <t t-out="network.fee_hint"/>. Платите вы; точную сумму
+            покажет ваш кошелёк перед подписью.
+          </p>
+          <p class="text-muted">
             Отправьте из своего кошелька — отправка из кошелька платформы пока не подключена.
-          </span>
-        </p>
+          </p>
+        </div>
         <label class="form-label">Сумма подарка</label>
         <input class="form-control mb-3" inputmode="decimal" t-model="state.amount"
-               t-att-placeholder="state.channel === 'sbp' ? '500' : '1.5'"/>
+               t-att-placeholder="state.channel === 'sbp' ? '500 ₽' : '10 ' + (state.token or '')"/>
         <label class="o_coop_thanks_understood">
           <input type="checkbox" t-model="state.understood"/>
           <span>Понимаю: это подарок. Автор ничего не должен мне взамен, я не
