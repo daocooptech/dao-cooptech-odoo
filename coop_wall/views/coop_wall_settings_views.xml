@@ -14,7 +14,11 @@
     <field name="model">res.partner</field>
     <field name="inherit_id" ref="coop_settings.view_coop_settings_account_form"/>
     <field name="arch" type="xml">
-      <xpath expr="//separator[@string='Чем с вами можно рассчитаться']" position="before">
+      <!-- Место — после группы «Валюта выплат / Налоговый режим», перед
+           «Чем с вами можно рассчитаться». Искать по подписи разделителя
+           движок не даёт: «View inheritance may not use attribute
+           'string' as a selector» — найдено прогоном на копии. -->
+      <xpath expr="//field[@name='coop_tax_regime']/../.." position="after">
         <separator string="Благодарности за записи"/>
         <group>
           <group>
