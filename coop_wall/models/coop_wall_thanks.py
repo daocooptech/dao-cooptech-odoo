@@ -13,12 +13,14 @@ from .coop_wall_comment import WALL_MODELS
 RUB_MIN, RUB_MAX, RUB_MONTH = 10, 5000, 15000
 TON_MAX = 1000
 
+# Названия — про подарок, а не про благодарность: окно называется
+# «Подарки за запись», и «Заявлена» рядом с ним читалось вразнобой.
 STATES = [
-    ('declared', 'Заявлена'),
-    ('confirmed', 'Подтверждена автором'),
-    ('unconfirmed', 'Не подтверждена'),
-    ('returned', 'Возвращена'),
-    ('disputed', 'Спорная'),
+    ('declared', 'Отправлен'),
+    ('confirmed', 'Пришёл'),
+    ('unconfirmed', 'Не пришёл'),
+    ('returned', 'Возвращён'),
+    ('disputed', 'Спорный'),
 ]
 
 
