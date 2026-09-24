@@ -361,4 +361,29 @@
   <menuitem id="menu_coop_deal_review" name="Отзывы"
             parent="menu_coop_deals_root" action="action_coop_deal_review" sequence="20"/>
 
+
+  <!--
+    «Покупатели» на странице ресурса — решения 10, 14 и 16 журнала
+    владельца, исполненные в дизайн-макете и не перенесённые на движок
+    (ревизия 22 сентября 2026). Число людей, купивших по объявлению, и
+    переход в каталог сделок по нему: отбор по состоянию, городу и
+    группировка там уже есть, второй экран с тем же не заводим.
+  -->
+  <record id="view_coop_resource_form_buyers" model="ir.ui.view">
+    <field name="name">coop.resource.form.buyers</field>
+    <field name="model">coop.resource</field>
+    <field name="inherit_id" ref="coop_resources.view_coop_resource_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='owner_id']/following-sibling::field[@name='city'][1]" position="after">
+        <label for="coop_buyer_count"/>
+        <div class="o_row">
+          <field name="coop_buyer_count" readonly="1"/>
+          <button name="action_coop_buyers" type="object"
+                  class="btn btn-link p-0" string="сделки по ресурсу →"
+                  invisible="not coop_buyer_count"/>
+        </div>
+      </xpath>
+    </field>
+  </record>
+
 </odoo>
