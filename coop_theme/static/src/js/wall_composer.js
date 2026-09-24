@@ -163,6 +163,14 @@ patch(Composer.prototype, {
         return this.ui.isSmall && WALL_MODELS.includes(this.thread?.model) && !this.props.composer.message;
     },
 
+    // Пишут запись: поле в фокусе или черновик не пуст. Второе нужно
+    // затем, что касание галочки снимает фокус с поля раньше, чем
+    // срабатывает само касание, — без него кнопка исчезала бы из-под
+    // пальца.
+    get coopEditing() {
+        return this.props.composer.isFocused || !this.coopDraftEmpty;
+    },
+
     get coopDraftEmpty() {
         return isHtmlEmpty(this.props.composer.composerHtml) && !this.props.composer.attachments.length;
     },

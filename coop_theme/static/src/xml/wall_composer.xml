@@ -8,6 +8,10 @@
     значит сделай иконки, выдели их, галочку и крестик». Под полем записи
     пять кнопок (`js/wall_composer.js`), и с надписью «Опубликовать» ряд в
     ширину телефона не входил. На большом экране надпись остаётся.
+
+    И обе — только пока запись пишут (владелец: «сделай в мобильной
+    версии, чтобы галочка и крестик появлялись только в момент
+    редактирования»): поле в фокусе или в черновике что-то есть.
   -->
   <t t-name="coop_theme.ComposerSendButton" t-inherit="mail.Composer.sendButton" t-inherit-mode="extension">
     <xpath expr="//t[@t-out='SEND_TEXT']" position="attributes">
@@ -18,12 +22,13 @@
     </xpath>
     <xpath expr="//button" position="attributes">
       <attribute name="t-att-title">SEND_TEXT</attribute>
+      <attribute name="t-if">!coopWallSmall or coopEditing</attribute>
     </xpath>
   </t>
 
   <t t-name="coop_theme.ComposerDiscard" t-inherit="mail.Composer" t-inherit-mode="extension">
     <xpath expr="//t[@t-call='mail.Composer.sendButton']" position="after">
-      <button t-if="coopWallSmall" class="o_coop_wall_discard btn btn-secondary btn-sm"
+      <button t-if="coopWallSmall and coopEditing" class="o_coop_wall_discard btn btn-secondary btn-sm"
               title="Очистить" aria-label="Очистить"
               t-att-disabled="coopDraftEmpty"
               t-on-click="coopDiscard">
