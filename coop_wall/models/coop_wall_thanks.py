@@ -6,9 +6,10 @@ from odoo.exceptions import AccessError, UserError
 
 from .coop_wall_comment import WALL_MODELS
 
-# Пороги — предложение экономиста (Матчасть, 24 сентября 2026): не дать
-# благодарностям стать скрытой оплатой в обход сделок. Цифры утверждает
-# сообщество правилом с датой вступления в силу; до тех пор — эти.
+# Пороги — предложение экономиста (Матчасть, 24 сентября 2026). Цифры
+# утверждает сообщество правилом с датой вступления в силу; до тех пор —
+# эти. Слов об оплате и расчётах в сообщениях нет: владелец 24 сентября
+# 2026 — «ни за что мы не рассчитываемся, это же подарок».
 RUB_MIN, RUB_MAX, RUB_MONTH = 10, 5000, 15000
 TON_MAX = 1000
 
@@ -25,14 +26,14 @@ class ResPartner(models.Model):
     _inherit = 'res.partner'
 
     coop_thanks_on = fields.Boolean(
-        string='Принимаю благодарности за записи',
-        help='Под вашими записями на стене можно будет поблагодарить вас '
-             'рублями по СБП или в TON. Деньги идут вам напрямую, платформа '
-             'их не получает.')
+        string='Принимаю подарки за записи',
+        help='Под вашими записями на стене появится «Поблагодарить»: '
+             'подарок рублями по СБП или в TON. Он приходит вам напрямую, '
+             'платформа его не получает.')
     coop_thanks_sbp = fields.Char(
         string='Телефон или ссылка СБП',
-        help='Показывается только тем, кто решил вас поблагодарить, и только '
-             'пока приём благодарностей включён.')
+        help='Видно только тому, кто решил вас поблагодарить, и только '
+             'пока приём подарков включён.')
 
 
 class CoopWallThanks(models.Model):
@@ -153,7 +154,7 @@ class CoopWallThanks(models.Model):
 
     @api.model
     def coop_declare(self, post_id, channel, amount, understood):
-        """Даритель отмечает, что перевод сделан."""
+        """Даритель отмечает, что подарок отправлен."""
         if not understood:
             raise UserError(_("Отметьте, что понимаете: это подарок."))
         post = self._coop_post(post_id)
@@ -168,12 +169,12 @@ class CoopWallThanks(models.Model):
         try:
             amount = float(amount)
         except (TypeError, ValueError):
-            raise UserError(_("Укажите сумму числом."))
+            raise UserError(_("Укажите сумму подарка числом."))
         if channel == 'sbp':
             if not author.sudo().coop_thanks_sbp:
                 raise UserError(_("Автор не указал СБП."))
             if not RUB_MIN <= amount <= RUB_MAX:
-                raise UserError(_("Благодарность рублями — от %(lo)s до %(hi)s ₽.",
+                raise UserError(_("Подарок рублями — от %(lo)s до %(hi)s ₽.",
                                   lo=RUB_MIN, hi=RUB_MAX))
             month = self.sudo().search([
                 ('sender_id', '=', me.id), ('recipient_id', '=', author.id),
@@ -183,13 +184,13 @@ class CoopWallThanks(models.Model):
             ])
             if sum(month.mapped('amount')) + amount > RUB_MONTH:
                 raise UserError(_(
-                    "Одному автору — не больше %(hi)s ₽ за месяц. Если это "
-                    "плата за работу, оформите сделку.", hi=RUB_MONTH))
+                    "Одному автору — не больше %(hi)s ₽ подарков за месяц.",
+                    hi=RUB_MONTH))
         elif channel == 'ton':
             if not self._coop_ton_address(author):
                 raise UserError(_("Автор не указал адрес TON."))
             if not 0 < amount <= TON_MAX:
-                raise UserError(_("Благодарность в TON — не больше %(hi)s.", hi=TON_MAX))
+                raise UserError(_("Подарок в TON — не больше %(hi)s.", hi=TON_MAX))
         else:
             raise UserError(_("Неизвестный способ."))
         thanks = self.sudo().create({

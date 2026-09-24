@@ -43,7 +43,7 @@
           <span class="o_coop_post_count" t-out="list.length"/>
         </button>
         <button class="o_coop_post_act" title="Поделиться у себя на странице" t-on-click="onRepost">
-          <i class="fa fa-retweet"/>
+          <i class="fa fa-share"/>
           <span class="o_coop_post_count" t-out="reposts"/>
         </button>
         <button class="o_coop_post_act" title="Поблагодарить" t-on-click="onThanks">
@@ -124,11 +124,11 @@
   </t>
 
   <t t-name="coop_wall.ThanksDialog">
-    <Dialog title="state.info and state.info.own ? 'Благодарности за запись' : 'Поблагодарить автора'" size="'md'">
+    <Dialog title="state.info and state.info.own ? 'Подарки за запись' : 'Поблагодарить автора'" size="'md'">
       <div t-if="!state.info" class="text-muted">Загрузка…</div>
       <t t-elif="state.info.own">
         <div t-if="!state.info.received.length" class="text-muted">
-          За эту запись вас пока не благодарили.
+          За эту запись подарков пока нет.
         </div>
         <div t-foreach="state.info.received" t-as="t" t-key="t.id" class="o_coop_thanks_row">
           <div class="o_coop_thanks_who">
@@ -155,7 +155,7 @@
                   t-att-disabled="!state.info.ton_address" t-on-click="() => this.state.channel = 'ton'">TON</button>
         </div>
         <p t-if="state.channel === 'sbp'">
-          Переведите в своём банке по СБП:
+          Отправьте подарок в своём банке по СБП:
           <b class="o_coop_thanks_req" t-out="state.info.sbp"/>
           <br/><span class="text-muted">
             От <t t-out="state.info.limits.rub_min"/> до <t t-out="state.info.limits.rub_max"/> ₽.
@@ -165,22 +165,22 @@
           Адрес <t t-out="state.info.author_name"/> в TON:
           <code class="o_coop_thanks_req" t-out="state.info.ton_address"/>
           <br/><span class="text-muted">
-            Переведите из своего кошелька — отправка из кошелька платформы пока не подключена.
+            Отправьте из своего кошелька — отправка из кошелька платформы пока не подключена.
           </span>
         </p>
-        <label class="form-label">Сколько перевели</label>
+        <label class="form-label">Сумма подарка</label>
         <input class="form-control mb-3" inputmode="decimal" t-model="state.amount"
                t-att-placeholder="state.channel === 'sbp' ? '500' : '1.5'"/>
         <label class="o_coop_thanks_understood">
           <input type="checkbox" t-model="state.understood"/>
           <span>Понимаю: это подарок. Автор ничего не должен мне взамен, я не
-          получаю за это доступ, услугу или право. Деньги идут напрямую
-          автору — платформа их не получает и не хранит.</span>
+          получаю за это доступ, услугу или право. Подарок идёт напрямую
+          автору — платформа его не получает и не хранит.</span>
         </label>
       </t>
       <t t-set-slot="footer">
         <button t-if="state.info and !state.info.own and state.info.can_thank"
-                class="btn btn-primary" t-att-disabled="!canSend" t-on-click="declare">Перевод сделан</button>
+                class="btn btn-primary" t-att-disabled="!canSend" t-on-click="declare">Подарок отправлен</button>
         <button class="btn btn-secondary" t-on-click="props.close">Закрыть</button>
       </t>
     </Dialog>

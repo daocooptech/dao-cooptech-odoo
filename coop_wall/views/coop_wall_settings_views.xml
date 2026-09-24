@@ -19,7 +19,7 @@
            движок не даёт: «View inheritance may not use attribute
            'string' as a selector» — найдено прогоном на копии. -->
       <xpath expr="//field[@name='coop_tax_regime']/../.." position="after">
-        <separator string="Благодарности за записи"/>
+        <separator string="Подарки за записи"/>
         <group>
           <group>
             <field name="coop_thanks_on" widget="boolean_toggle"/>
@@ -28,10 +28,10 @@
           </group>
         </group>
         <div class="text-muted mb-3" invisible="not coop_thanks_on">
-          Под вашими записями появится «Поблагодарить». Рубли вам
-          переводят в своём банке по СБП, TON — на адрес TON из вашего
-          кошелька. Платформа этих денег не получает и не хранит; вы
-          отмечаете, пришли ли они.
+          Под вашими записями появится «Поблагодарить». Подарок
+          рублями приходит вам по СБП, в TON — на адрес TON из вашего
+          кошелька. Платформа его не получает и не хранит; вы только
+          отмечаете, пришёл ли он.
         </div>
       </xpath>
     </field>
