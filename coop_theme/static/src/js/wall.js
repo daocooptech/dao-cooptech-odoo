@@ -151,6 +151,12 @@ patch(Thread.prototype, {
         if (!WALL_MODELS.includes(this.props.thread?.model)) {
             return messages;
         }
-        return messages.filter((m) => m.message_type === "comment" && !m.isNote);
+        // По дате, а не по номеру: номер записи — порядок заведения, а
+        // не времени. Записи, заведённые задним числом, шли на стене
+        // вразнобой — «29 мая, 6 сентября, 12 июля».
+        const asc = this.props.order === "asc";
+        return messages
+            .filter((m) => m.message_type === "comment" && !m.isNote)
+            .sort((a, b) => (asc ? 1 : -1) * ((a.datetime - b.datetime) || (a.id - b.id)));
     },
 });

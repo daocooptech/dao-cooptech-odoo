@@ -113,8 +113,12 @@ def load_wall_posts(env, login='dashkevich'):
                     'date': when,
                 })
 
+    # По порядку дат: лента показывает записи по номеру, а не по дате, и
+    # заведённые вразнобой шли на стене как «29 мая, 6 сентября, 12 июля».
+    rows.sort(key=lambda row: row['date'])
     if rows:
         Message.create(rows)
+    _order_walls(env)
 
     # Главный участник витрины — подписчик организаций со стенами: на
     # людей он подписан загрузчиком страниц (`add_followers`), на
@@ -143,3 +147,32 @@ def load_wall_posts(env, login='dashkevich'):
     _logger.info('Стены: записей %s, подписок на организации %s',
                  len(rows), followed)
     return len(rows)
+
+
+def _order_walls(env):
+    """Выровнять даты записей загрузчика с их номерами на каждой стене.
+
+    Лента стены идёт по номеру записи, и первые записи загрузчика,
+    заведённые с датами вразнобой, стояли не по времени. Переставляются
+    только даты записей самого загрузчика (заведены от имени системы);
+    записи людей — как проверочная «123» владельца — не трогаются.
+    Повторный запуск ничего не меняет: где порядок верный, писать нечего.
+    """
+    Message = env['mail.message'].sudo()
+    system = (env.ref('base.user_root') | env.ref('base.user_admin')).ids
+    posts = Message.search([
+        ('model', '=', 'res.partner'), ('message_type', '=', 'comment'),
+        ('create_uid', 'in', system),
+    ], order='res_id, id')
+    fixed = 0
+    by_page = {}
+    for post in posts:
+        by_page.setdefault(post.res_id, []).append(post)
+    for page_posts in by_page.values():
+        dates = sorted(p.date for p in page_posts)
+        for post, date in zip(page_posts, dates):
+            if post.date != date:
+                post.date = date
+                fixed += 1
+    if fixed:
+        _logger.info('Стены: даты выровнены у %s записей', fixed)
