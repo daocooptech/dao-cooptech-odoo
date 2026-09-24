@@ -6,57 +6,6 @@
 //
 // Раскладку (сбоку или снизу) задаёт `js/wall.js`; здесь только вид.
 
-.o_coop_profile,
-.o_coop_org_form,
-.o_coop_wall_form {
-
-  // Полоса кнопок ленты — как заголовок стены в макете: отделена
-  // линией, а не залита серым.
-  .o-mail-Chatter-topbar {
-    padding: 10px 0;
-    border-bottom: 1px solid var(--coop-line, #e6e6e1);
-    background: transparent;
-  }
-
-  .o-mail-Chatter-top {
-    background: transparent;
-  }
-
-  // Запись ленты — карточка, как пост в макете.
-  .o-mail-Message {
-    padding: 12px 14px;
-    border: 1px solid var(--coop-line, #e6e6e1);
-    border-radius: 12px;
-    background: var(--coop-white, #fff);
-    margin-bottom: 10px;
-  }
-
-  .o-mail-Message:hover {
-    background: var(--coop-white, #fff);
-  }
-
-  .o-mail-Message-author {
-    font-family: 'Manrope', sans-serif;
-    font-weight: 700;
-    color: var(--coop-ink, #14171a);
-  }
-
-  .o-mail-Message-date,
-  .o-mail-Message-header small {
-    color: var(--coop-slate-light, #8f8f88);
-  }
-
-  // Поле новой записи — «Опубликовать» из макета.
-  .o-mail-Composer {
-    margin: 12px 0;
-  }
-
-  .o-mail-Composer-input {
-    border: 1px solid var(--coop-line, #e6e6e1);
-    border-radius: 12px;
-    background: var(--coop-white, #fff);
-  }
-}
 
 // Кнопки ленты, которых в макете нет. «Внутренняя заметка» и
 // «Активность» — служебные понятия движка: заметка видна только
@@ -86,9 +35,12 @@
 // левой границе, что и полосы над ней.
 //
 // Лента движка живёт вне листа формы и потому шире его на всю левую
-// колонку. Отступом, а не переносом внутрь листа: `<chatter>` — элемент
-// уровня формы, внутрь `<sheet>` он не ставится, и подмена этого правила
-// стоила бы своего представления формы вместо штатного.
+// колонку — отсюда отступ ниже. Это для организации и прочих форм, где
+// `<chatter>` стоит за листом. На странице участника лента стоит прямым
+// потомком `<sheet>`: движок такую оставляет на месте
+// (`mail/static/src/chatter/web/form_compiler.js`, «if chatter is inside
+// sheet, keep it there»), и её место задаёт сетка листа
+// (`coop_profile.scss`, «Лента в правой колонке»).
 //
 // 300 пикселей колонки и 28 просвета — те же числа, что в раскладке
 // страницы (`coop_profile.scss`). Плюс к ним ещё два слагаемых, которые
@@ -145,7 +97,11 @@
 // уже верно выставляет наш патч (`js/wall.js`): у ленты нет класса
 // `.o-aside`, когда решение — «снизу». Так фикс работает сразу везде,
 // где стоит `<chatter>` в наших формах, без обхода каждой по имени.
-.o_form_renderer:has(> .o-mail-Form-chatter:not(.o-aside)) {
+.o_form_renderer:has(> .o-mail-Form-chatter:not(.o-aside)),
+// Лента внутри листа (страница участника, см. coop_profile.scss) — тот же
+// случай: без этого на экране шире 1534 точек возвращались строчная
+// раскладка и вторая полоса прокрутки.
+.o_form_renderer:has(> .o_form_sheet_bg > .o_form_sheet > .o-mail-Form-chatter) {
   flex-direction: column !important;
 
   // Две полосы прокрутки — следствие той же строчной раскладки: в ней
@@ -164,73 +120,112 @@
 
 // ── Вид стены ─────────────────────────────────────────────────────────
 //
-// Отдельным блоком, в тех же пропорциях, что и полосы владений выше:
-// подложенная заголовком карточка, а не голое поле на фоне страницы.
-// Заголовка своего у `<chatter>` в разметке нет — движок отрисовывает
-// его отдельно от того места в arch, где тег написан, — поэтому шапка
-// «Лента» сделана `::before`, теми же цветом и отступами, что у
-// `.o_coop_band_head`. Padding самого блока и отрицательный margin у
-// заголовка — тот же приём, что даёт полосе владений вид «шапка плюс
-// тело» без двух вложенных элементов, которых здесь взять неоткуда.
+// Предложение дизайнера 24 сентября 2026, по просьбе владельца: «пусть
+// нарисует красивую ленту, чтобы все отступы красиво и грамотно по ui/ux».
+//
+// Анатомия — как у полосы владений: бирюзовая шапка без рамки, тело в
+// рамке с трёх сторон, поля 14. В теле — зона публикации и записи,
+// разделённые волосяной линией, а не карточками внутри карточки.
+//
+// Запись: колонка аватара 48 (круг 36 + просвет 12), справа имя и время
+// одной строкой, под ними текст. Та же колонка у поля ввода, поэтому все
+// аватары стоят на одной вертикали.
 .o_coop_profile,
 .o_coop_org_form,
 .o_coop_wall_form {
 
-  // Лента идёт ровно под карточкой, край в край. Своего отступа у
-  // контейнера ленты нет, а у `.o_form_sheet_bg` он шестнадцать точек —
-  // и лента выходила шире карточки на те же шестнадцать с каждой
-  // стороны. На глаз это читается как съехавшая вёрстка, хотя оба блока
-  // по отдельности стоят правильно.
+  // Для ленты за листом (организация, проект, сообщество): край в край
+  // с карточкой над ней. У участника обнуляется в coop_profile.scss.
   .o-mail-ChatterContainer {
     padding-left: 16px;
     padding-right: 16px;
   }
 
+  // Рамка без верхней стороны, а шапка шире тела на 1 с каждого бока и
+  // перекрывает боковые рамки: шапка лежит край в край, как у полосы, а
+  // не вдавлена на пиксель внутрь рамки.
   .o-mail-Chatter {
+    padding: 0;
     border: 1px solid var(--coop-line, #e6e6e1);
+    border-top: 0;
     border-radius: 10px;
     background: var(--coop-white, #fff);
-    padding: 14px;
 
     &::before {
       content: "Лента";
       display: block;
-      margin: -14px -14px 14px;
+      margin: 0 -1px;
       padding: 9px 14px;
-      background: var(--coop-teal-tint, #e3efed);
       border-radius: 10px 10px 0 0;
+      background: var(--coop-teal-tint, #e3efed);
       font: 600 12.5px/1.4 'Manrope', sans-serif;
       color: var(--coop-ink, #14171a);
     }
   }
 
-  // Полоса кнопок движка: поиск, вложения, подписчики, «Отправить
-  // сообщение». В макете над лентой нет ничего из этого — поле ввода
-  // начинается сразу.
-  .o-mail-Chatter-topbar {
+  // Кнопки движка над лентой и строка «Кому:» — из переписки, не из
+  // стены (см. решение 239).
+  .o-mail-Chatter-topbar,
+  .o-mail-Chatter-top > .d-flex {
     display: none !important;
   }
 
-  // Поле новой записи — во всю ширину, скруглённое, как в макете.
-  .o-mail-Composer {
-    margin: 0 0 18px;
+  // ── Зона публикации ──
+  //
+  // Не липнет к верху окна. У движка шапка ленты «position-sticky»; фон
+  // у нас прозрачный, и длинная стена при прокрутке проезжала бы под
+  // полем ввода насквозь.
+  .o-mail-Chatter-top {
+    position: static !important;
+    padding: 14px;
+    background: transparent;
   }
 
-  .o-mail-Composer-input {
-    min-height: 44px;
-    padding: 12px 14px;
-    border: 1px solid var(--coop-line, #e6e6e1);
-    border-radius: 10px;
+  .o-mail-Chatter-top .o-mail-Composer {
+    margin: 0;
+    padding: 0 !important;
+  }
+
+  .o-mail-Composer.o-hasSelfAvatar {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+
+  .o-mail-Composer-sidebarMain {
+    width: 48px;
+    padding-top: 4px;
+  }
+
+  .o-mail-Composer-avatar {
+    width: 36px;
+    height: 36px;
+    margin: 0 !important;
+    border-radius: 50% !important;
+    object-fit: cover;
+  }
+
+  // Рамка одна — у обёртки, где лежат и поле, и смайлик со скрепкой.
+  // Подсветки при фокусе нет (решение 251).
+  .o-mail-Composer-inputContainer {
+    --border-color: var(--coop-line, #e6e6e1) !important;
+    border-radius: 10px !important;
     background: var(--coop-white, #fff);
   }
 
-  // Рамка-подсветка при фокусе — своя переменная движка (`--border-
-  // color`), выставляемая правилом `:has(textarea:focus)` отдельно от
-  // самого поля. Гасим саму переменную и оба места, откуда мог бы
-  // взяться контур, — тот же приём, что и в композере «Сообщений»
-  // (`coop_messages.scss`).
-  .o-mail-Composer-inputContainer {
-    --border-color: var(--coop-line, #e6e6e1) !important;
+  // Размеры — и полю, и его невидимой копии (.o-mail-Composer-fake):
+  // по копии движок считает высоту поля при наборе, и разные кегль или
+  // поля у них дают обрезанную последнюю строку.
+  .o-mail-Composer-input,
+  .o-mail-Composer-fake {
+    min-height: 44px;
+    padding: 11px 14px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .o-mail-Composer-input {
+    border: 0;
+    background: transparent;
+    color: var(--coop-ink, #14171a);
   }
 
   .o-mail-Composer-input:focus,
@@ -239,33 +234,200 @@
     box-shadow: none !important;
   }
 
-  // «Опубликовать» — тёмная кнопка, единственное действие под полем.
+  .o-mail-Composer-footer {
+    padding-top: 10px;
+
+    > .d-flex > div:first-child {
+      padding-top: 0 !important;
+      margin-top: 0 !important;
+    }
+
+    .text-muted.small {
+      font-size: 12px;
+      color: var(--coop-slate-light, #8f8f88) !important;
+    }
+  }
+
   .o-mail-Composer-send {
-    padding: 7px 16px;
+    min-height: 36px;
+    padding: 0 16px;
     border-radius: 8px;
     background: var(--coop-btn-bg, #14171a);
     border-color: var(--coop-btn-bg, #14171a);
     color: var(--coop-btn-fg, #fff);
-    font-weight: 600;
+    font: 700 12.5px/1 'Manrope', sans-serif;
+
+    &:disabled {
+      opacity: .4;
+    }
   }
 
-  // Строка «Кому:» с выбором получателей — из переписки, а не из стены:
-  // там пишут кому-то, здесь рассказывают всем сразу, и адресат не
-  // выбирается вовсе.
-  //
-  // По месту в разметке, а не по классу: своего класса у этой строки в
-  // движке нет — только `d-flex py-1 ps-3`. Внутри шапки ленты других
-  // таких строк нет, а сама шапка у нас скрыта целиком.
-  .o-mail-Chatter-top > .d-flex {
+  // ── Записи ──
+  .o-mail-Chatter-content {
+    padding: 0 14px;
+  }
+
+  // Низ задаёт нижнее поле последней записи (14 — как тело полосы).
+  .o-mail-Thread {
+    padding-bottom: 0 !important;
+  }
+
+  // День — подпись слева, линия сверху. Она же отделяет записи от поля
+  // ввода: первая дата идёт сразу под ним.
+  .o-mail-DateSection {
+    padding: 12px 0 0 !important;
+    border-top: 1px solid var(--coop-line, #e6e6e1);
+
+    hr {
+      display: none;
+    }
+
+    span {
+      padding: 0 !important;
+      opacity: 1 !important;
+      font: 600 11.5px/1.4 'Manrope', sans-serif;
+      color: var(--coop-slate-light, #8f8f88) !important;
+    }
+  }
+
+  .o-mail-Message {
+    margin: 0 !important;
+    padding: 14px 0 !important;
+    border: 0;
+    border-top: 1px solid var(--coop-line, #e6e6e1);
+    border-radius: 0;
+    background: transparent;
+
+    &:hover {
+      background: transparent;
+    }
+  }
+
+  .o-mail-DateSection + .o-mail-Message {
+    border-top: 0;
+    padding-top: 10px !important;
+  }
+
+  .o-mail-Message-sidebar {
+    flex-basis: 48px;
+    max-width: 48px;
+  }
+
+  .o-mail-Message-avatarContainer {
+    width: 36px;
+    height: 36px;
+    border-radius: 50% !important;
+  }
+
+  .o-mail-Message-avatar {
+    border-radius: 50% !important;
+  }
+
+  .o-mail-Message-header {
+    gap: 2px 8px;
+    margin-bottom: 4px !important;
+    line-height: 1.35 !important;
+  }
+
+  .o-mail-Message-author {
+    font: 600 13.5px/1.35 'Manrope', sans-serif;
+    color: var(--coop-ink, #14171a);
+
+    strong {
+      margin: 0 !important;
+      font-weight: inherit;
+    }
+  }
+
+  .o-mail-Message-date {
+    font-size: 12px;
+    color: var(--coop-slate-light, #8f8f88);
+  }
+
+  // Пузырь переписки снят: его ширина — по тексту, отсюда узкая колонка
+  // в 240 точек при ленте в 640. На стене запись — абзац во всю колонку.
+  .o-mail-Message-bubble,
+  .o-mail-Message-bubbleTail {
     display: none !important;
   }
 
-  // Запись ленты — карточка, как пост в макете.
-  .o-mail-Message {
-    padding: 14px 16px;
-    border: 1px solid var(--coop-line, #e6e6e1);
-    border-radius: 12px;
-    background: var(--coop-white, #fff);
-    margin-bottom: 12px;
+  .o-mail-Message-content {
+    flex: 1 1 auto;
+  }
+
+  .o-mail-Message-textContent > .o-discuss-text-body {
+    display: block !important;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  // Строка не длиннее 72 знаков — как абзац поста в макете.
+  .o-mail-Message-body {
+    max-width: 72ch;
+    padding: 0 !important;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--coop-ink, #14171a);
+
+    p {
+      margin: 0 0 8px;
+    }
+  }
+
+  .o-mail-Message-actions {
+    margin-left: 8px;
+  }
+
+  .o-mail-MessageReactions {
+    margin-top: 8px;
+  }
+}
+
+// Тёмная тема: dark.scss красит ленту движка бумажным (Thread, Top,
+// Composer) и записи белым с !important. Внутри белой карточки это
+// давало бы серые полосы под белыми записями.
+[data-bs-theme="dark"] .o_web_client {
+  .o_coop_profile,
+  .o_coop_org_form,
+  .o_coop_wall_form {
+    .o-mail-Chatter-top,
+    .o-mail-Chatter-content,
+    .o-mail-Thread,
+    .o-mail-Composer,
+    .o-mail-Message,
+    .o-mail-Message-content {
+      background-color: transparent !important;
+    }
+  }
+}
+
+// Телефон: лента на всю ширину, поля 12, «Опубликовать» во всю ширину.
+@media (max-width: 900px) {
+  .o_coop_profile,
+  .o_coop_org_form,
+  .o_coop_wall_form {
+    .o-mail-Chatter::before { padding: 9px 12px; }
+    .o-mail-Chatter-top { padding: 12px; }
+    .o-mail-Chatter-content { padding: 0 12px; }
+
+    // Без своего аватара у поля: 48 точек из ~300 — шестая часть строки.
+    .o-mail-Composer.o-hasSelfAvatar { grid-template-columns: 0 minmax(0, 1fr); }
+    .o-mail-Composer-sidebarMain { display: none !important; }
+
+    // Не меньше 16: при меньшем кегле Safari на iPhone увеличивает
+    // страницу при фокусе и обратно не возвращает.
+    .o-mail-Composer-input,
+    .o-mail-Composer-fake { font-size: 16px; }
+
+    // «Опубликовать» — во всю ширину, 44 в высоту: палец, а не курсор.
+    // Подсказка про сочетание клавиш на телефоне ни к чему.
+    .o-mail-Composer-footer > .d-flex > div:first-child { flex: 1 1 auto; }
+    .o-mail-Composer-send { width: 100%; min-height: 44px; }
+    .o-mail-Composer-footer .text-muted.small { display: none; }
+
+    .o-mail-Message { padding: 12px 0 !important; }
+    .o-mail-Message-sidebar { flex-basis: 40px; max-width: 40px; }
+    .o-mail-Message-avatarContainer { width: 32px; height: 32px; }
+    .o-mail-Message-body { max-width: none; }
   }
 }
