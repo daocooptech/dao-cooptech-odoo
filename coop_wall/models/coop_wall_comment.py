@@ -74,7 +74,7 @@ class CoopWallComment(models.Model):
         """
         posts = self.env['mail.message'].browse(post_ids).exists()
         posts = posts.filtered(lambda m: m.model in WALL_MODELS)
-        posts = posts._filter_access('read')
+        posts = posts._filtered_access('read')
         result = {post_id: [] for post_id in posts.ids}
         comments = self.sudo().search([('post_id', 'in', posts.ids)])
         for data in comments._coop_to_dict():
