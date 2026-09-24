@@ -128,6 +128,7 @@
         <field name="author_id"/>
         <field name="record_name"/>
         <field name="date"/>
+        <field name="res_id"/>
         <templates>
           <t t-name="card">
             <div class="o_coop_feed_post">
@@ -137,8 +138,10 @@
                      alt="" loading="lazy"/>
                 <div class="o_coop_feed_who">
                   <div class="o_coop_feed_project"><t t-esc="record.record_name.value"/></div>
+                  <!-- На своей стене автор и хозяин страницы — одно лицо,
+                       и имя дважды подряд читается как сбой. -->
                   <div class="o_coop_feed_meta">
-                    <t t-esc="record.author_id.value"/> · <field name="date"/>
+                    <t t-if="record.author_id.raw_value != record.res_id.raw_value"><t t-esc="record.author_id.value"/> · </t><field name="date"/>
                   </div>
                 </div>
               </div>
