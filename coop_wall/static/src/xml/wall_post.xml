@@ -3,6 +3,9 @@
 
   <!-- Ряд действий и комментарии под записью стены — `js/wall_post.js`. -->
   <t t-name="coop_wall.MessageWallFooter" t-inherit="mail.Message" t-inherit-mode="extension">
+    <xpath expr="//div[hasclass('o-mail-Message-textContent')]" position="after">
+      <CoopRepostCard t-if="message.coop_repost" repost="message.coop_repost"/>
+    </xpath>
     <xpath expr="//t[@name='after-reactions']" position="after">
       <CoopWallPostFooter t-if="coopIsWallPost" message="message" thread="props.thread"/>
     </xpath>
@@ -39,6 +42,10 @@
           <i class="fa fa-comment-o"/>
           <span class="o_coop_post_count" t-out="list.length"/>
         </button>
+        <button class="o_coop_post_act" title="Поделиться у себя на странице" t-on-click="onRepost">
+          <i class="fa fa-retweet"/>
+          <span class="o_coop_post_count" t-out="reposts"/>
+        </button>
         <button t-if="canStar" class="o_coop_post_act"
                 t-att-class="{ 'o_coop_post_act_on': props.message.starred }"
                 t-att-title="props.message.starred ? 'Убрать из избранного' : 'В избранное'"
@@ -68,7 +75,7 @@
         </div>
         <div t-if="showInput" class="o_coop_comment_form">
           <textarea t-ref="input" class="form-control" rows="1"
-                    placeholder="Написать комментарий…"
+                    placeholder="Комментарий…"
                     t-model="state.draft" t-on-keydown="onKeydown"/>
           <button class="btn btn-primary btn-sm" title="Отправить"
                   t-att-disabled="!state.draft.trim() or state.busy" t-on-click="send">
@@ -76,6 +83,39 @@
           </button>
         </div>
       </div>
+    </div>
+  </t>
+
+  <t t-name="coop_wall.RepostDialog">
+    <Dialog title="'Поделиться у себя на странице'" size="'md'">
+      <textarea class="form-control mb-3" rows="3" t-model="state.comment"
+                placeholder="Пара слов от себя — можно без них"/>
+      <div class="o_coop_repost_preview">
+        <b t-out="preview.author"/>
+        <div t-out="preview.text"/>
+      </div>
+      <t t-set-slot="footer">
+        <button class="btn btn-primary" t-att-disabled="state.busy" t-on-click="share">Поделиться</button>
+        <button class="btn btn-secondary" t-on-click="props.close">Отмена</button>
+      </t>
+    </Dialog>
+  </t>
+
+  <t t-name="coop_wall.RepostCard">
+    <div class="o_coop_repost">
+      <t t-if="props.repost.id">
+        <div class="o_coop_repost_head">
+          <i class="fa fa-retweet"/>
+          <img class="o_coop_comment_avatar" t-att-src="avatarUrl" alt=""/>
+          <b t-out="props.repost.author_name"/>
+          <span class="o_coop_comment_date" t-out="date"/>
+        </div>
+        <div class="o_coop_repost_body" t-out="body"/>
+        <div t-if="props.repost.attachment_count" class="o_coop_repost_files">
+          <i class="fa fa-paperclip"/> вложений: <t t-out="props.repost.attachment_count"/>
+        </div>
+      </t>
+      <div t-else="" class="o_coop_repost_gone">Исходная запись недоступна.</div>
     </div>
   </t>
 </templates>

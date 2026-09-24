@@ -1,11 +1,14 @@
 /** @odoo-module **/
 
-import { Component, reactive, useRef, useState } from "@odoo/owl";
+import { Component, markup, reactive, useRef, useState } from "@odoo/owl";
+import { Dialog } from "@web/core/dialog/dialog";
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
 import { Message } from "@mail/core/common/message";
+import { Message as MessageModel } from "@mail/core/common/message_model";
+import { fields } from "@mail/core/common/record";
 import { MessageReactions } from "@mail/core/common/message_reactions";
 import { WALL_MODELS } from "@coop_theme/js/wall";
 
@@ -19,7 +22,7 @@ import { WALL_MODELS } from "@coop_theme/js/wall";
 // удалить, количество комментариев цифрой, иконка избранного, слово в
 // избранное удалить».
 //
-// Ряд — только значки и числа: 👍 N, 👎 N, 💬 N, ☆. Лайк и дизлайк —
+// Ряд — только значки и числа: 👍 N, 👎 N, 💬 N, ↻ N, ☆. Лайк и дизлайк —
 // реакции движка 👍 и 👎 (`mail.message.reaction`): хранятся, считаются и
 // приходят в браузер тем же путём, что прочие реакции, и из общего
 // списка реакций под записью стены убраны, чтобы не стоять дважды.
@@ -173,6 +176,17 @@ export class CoopWallPostFooter extends Component {
         setTimeout(() => this.inputRef.el?.focus());
     }
 
+    get reposts() {
+        return this.props.message.coop_repost_count || 0;
+    }
+
+    onRepost() {
+        this.env.services.dialog.add(CoopRepostDialog, {
+            message: this.props.message,
+            thread: this.props.thread,
+        });
+    }
+
     onStar() {
         this.props.message.toggleStar();
     }
@@ -204,8 +218,73 @@ export class CoopWallPostFooter extends Component {
     }
 }
 
+/**
+ * Окно «Поделиться у себя на странице»: пара своих слов (можно без них) и
+ * исходная запись для памяти, о чём речь.
+ */
+export class CoopRepostDialog extends Component {
+    static components = { Dialog };
+    static props = ["message", "thread", "close"];
+    static template = "coop_wall.RepostDialog";
+
+    setup() {
+        this.orm = useService("orm");
+        this.notification = useService("notification");
+        this.state = useState({ comment: "", busy: false });
+    }
+
+    get preview() {
+        const m = this.props.message;
+        const html = m.body ? String(m.body) : "";
+        const text = new DOMParser().parseFromString(html, "text/html").body.textContent.trim();
+        return {
+            author: m.author_id?.name || "",
+            text: text.length > 200 ? text.slice(0, 200) + "…" : text,
+        };
+    }
+
+    async share() {
+        if (this.state.busy) {
+            return;
+        }
+        this.state.busy = true;
+        try {
+            await this.orm.call("mail.message", "coop_repost", [this.props.message.id, this.state.comment]);
+            const m = this.props.message;
+            m.coop_repost_count = (m.coop_repost_count || 0) + 1;
+            this.notification.add("Запись появилась на вашей странице.", { type: "success" });
+            const me = m.store.self_partner || m.store.self;
+            const thread = this.props.thread;
+            if (thread?.model === "res.partner" && me && thread.id === me.id) {
+                thread.fetchNewMessages?.();
+            }
+            this.props.close();
+        } finally {
+            this.state.busy = false;
+        }
+    }
+}
+
+/** Исходная запись карточкой внутри репоста. */
+export class CoopRepostCard extends Component {
+    static props = ["repost"];
+    static template = "coop_wall.RepostCard";
+
+    get body() {
+        return markup(this.props.repost.body || "");
+    }
+
+    get date() {
+        return deserializeDateTime(this.props.repost.date).toFormat("d MMM yyyy, HH:mm");
+    }
+
+    get avatarUrl() {
+        return `/web/image/res.partner/${this.props.repost.author_id}/avatar_128`;
+    }
+}
+
 patch(Message, {
-    components: { ...Message.components, CoopWallPostFooter },
+    components: { ...Message.components, CoopWallPostFooter, CoopRepostCard },
 });
 
 patch(Message.prototype, {
@@ -233,5 +312,21 @@ patch(MessageReactions.prototype, {
             return reactions;
         }
         return reactions.filter((r) => r.content !== LIKE && r.content !== DISLIKE);
+    },
+});
+
+// Репост: карточка исходника и число репостов приходят с сервера
+// (`models/mail_message.py`, `_to_store_defaults`).
+patch(MessageModel.prototype, {
+    setup() {
+        super.setup(...arguments);
+        this.coop_repost = fields.Attr(false);
+        this.coop_repost_count = fields.Attr(0);
+    },
+
+    // Репост без своих слов — не пустая запись: в нём карточка. Иначе
+    // движок показал бы на его месте «сообщение удалено».
+    computeIsEmpty() {
+        return !this.coop_repost && super.computeIsEmpty();
     },
 });

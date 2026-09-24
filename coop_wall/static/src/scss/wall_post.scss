@@ -120,3 +120,45 @@
     flex-shrink: 0;
   }
 }
+
+// ── Репост ──────────────────────────────────────────────────────────
+//
+// Исходная запись — карточкой с полосой слева, как цитата: видно, что
+// это чужое, принесённое, а не слова того, кто поделился.
+
+.o_coop_repost {
+  margin: 6px 0 4px;
+  padding: 8px 12px;
+  border-left: 3px solid var(--border-color, rgba(0, 0, 0, .15));
+  border-radius: 4px;
+  background: var(--o-color-4, rgba(0, 0, 0, .02));
+}
+
+.o_coop_repost_head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 13px;
+
+  .fa-retweet { opacity: .6; }
+}
+
+.o_coop_repost_body {
+  overflow-wrap: anywhere;
+
+  p:last-child { margin-bottom: 0; }
+}
+
+.o_coop_repost_files,
+.o_coop_repost_gone {
+  margin-top: 4px;
+  font-size: 12px;
+  opacity: .7;
+}
+
+.o_coop_repost_preview {
+  padding: 8px 12px;
+  border-left: 3px solid var(--border-color, rgba(0, 0, 0, .15));
+  font-size: 13px;
+}
