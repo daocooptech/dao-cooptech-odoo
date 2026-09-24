@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+  <!-- Ряд действий и комментарии под записью стены — `js/wall_post.js`. -->
+  <t t-name="coop_messages.MessageWallFooter" t-inherit="mail.Message" t-inherit-mode="extension">
+    <xpath expr="//t[@name='after-reactions']" position="after">
+      <CoopWallPostFooter t-if="coopIsWallPost" message="message" thread="props.thread" owner="this"/>
+    </xpath>
+  </t>
+
+  <t t-name="coop_messages.WallPostFooter">
+    <div class="o_coop_post_footer">
+      <div class="o_coop_post_bar">
+        <button t-if="canReact" class="o_coop_post_act" title="Оценить" t-on-click="onReact">
+          <i class="fa fa-smile-o"/><span>Оценить</span>
+        </button>
+        <button class="o_coop_post_act" title="Комментировать" t-on-click="onComment">
+          <i class="fa fa-comment-o"/>
+          <span>Комментировать</span>
+          <b t-if="list.length" class="o_coop_post_count" t-out="list.length"/>
+        </button>
+        <button t-if="canStar" class="o_coop_post_act"
+                t-att-class="{ 'o_coop_post_act_on': props.message.starred }"
+                t-att-title="props.message.starred ? 'Убрать из избранного' : 'В избранное'"
+                t-on-click="onStar">
+          <i t-att-class="props.message.starred ? 'fa fa-star' : 'fa fa-star-o'"/>
+          <span t-out="props.message.starred ? 'В избранном' : 'В избранное'"/>
+        </button>
+      </div>
+
+      <div t-if="list.length or showInput" class="o_coop_comments">
+        <button t-if="hidden" class="o_coop_comments_more btn btn-link p-0"
+                t-on-click="() => this.state.expanded = true">
+          Показать все комментарии — <t t-out="list.length"/>
+        </button>
+        <div t-foreach="shown" t-as="c" t-key="c.id" class="o_coop_comment">
+          <img class="o_coop_comment_avatar" t-att-src="avatarUrl(c)" alt=""/>
+          <div class="o_coop_comment_main">
+            <div class="o_coop_comment_head">
+              <b t-out="c.author_name"/>
+              <span class="o_coop_comment_date" t-out="formatDate(c)"/>
+              <button t-if="c.can_delete" class="o_coop_comment_del" title="Удалить комментарий"
+                      t-on-click="() => this.remove(c)">
+                <i class="fa fa-times"/>
+              </button>
+            </div>
+            <div class="o_coop_comment_body" t-out="c.body"/>
+          </div>
+        </div>
+        <div t-if="showInput" class="o_coop_comment_form">
+          <textarea t-ref="input" class="form-control" rows="1"
+                    placeholder="Написать комментарий…"
+                    t-model="state.draft" t-on-keydown="onKeydown"/>
+          <button class="btn btn-primary btn-sm" title="Отправить"
+                  t-att-disabled="!state.draft.trim() or state.busy" t-on-click="send">
+            <i class="fa fa-paper-plane"/>
+          </button>
+        </div>
+      </div>
+    </div>
+  </t>
+</templates>

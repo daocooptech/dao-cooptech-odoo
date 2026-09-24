@@ -1,0 +1,123 @@
+// Ряд действий и комментарии под записью стены — `js/wall_post.js`.
+//
+// Ряд — как строка «просмотры · репосты · ♥ · комментарии» под записью
+// в макете (`my-page.html`, `.post-engagement`): тихий, серый, не спорит
+// с самой записью. Отмеченное (в избранном) — цветом акцента.
+
+.o_coop_post_footer {
+  margin-top: 6px;
+}
+
+.o_coop_post_bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+}
+
+.o_coop_post_act {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 2px;
+  border: 0;
+  background: none;
+  color: var(--text-muted, #6c757d);
+  font-size: 13px;
+
+  &:hover { color: var(--o-main-text-color, inherit); }
+
+  .fa { font-size: 15px; }
+}
+
+.o_coop_post_act_on {
+  color: var(--o-color-1, #e4a11b);
+}
+
+.o_coop_post_count {
+  font-weight: 600;
+}
+
+// На телефоне подписи у кнопок убираются: четыре значка с подписями в
+// ширину телефона не входят, а значки и так узнаваемы.
+@media (max-width: 575.98px) {
+  .o_coop_post_act > span { display: none; }
+  .o_coop_post_bar { gap: 4px 22px; }
+}
+
+// ── Комментарии ─────────────────────────────────────────────────────
+
+.o_coop_comments {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-color, rgba(0, 0, 0, .08));
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.o_coop_comments_more {
+  align-self: flex-start;
+  font-size: 13px;
+}
+
+.o_coop_comment {
+  display: flex;
+  gap: 8px;
+}
+
+.o_coop_comment_avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.o_coop_comment_main {
+  min-width: 0;
+  flex: 1;
+}
+
+.o_coop_comment_head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.o_coop_comment_date {
+  opacity: .6;
+  font-size: 12px;
+}
+
+.o_coop_comment_del {
+  margin-left: auto;
+  border: 0;
+  background: none;
+  opacity: .5;
+  padding: 0 4px;
+
+  &:hover { opacity: 1; }
+}
+
+.o_coop_comment_body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.o_coop_comment_form {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+
+  textarea {
+    resize: none;
+    min-height: 36px;
+  }
+
+  .btn {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+  }
+}

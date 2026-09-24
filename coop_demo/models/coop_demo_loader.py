@@ -8,6 +8,7 @@ from ..data import load_project_updates
 from ..data import load_project_follows
 from ..data import load_wall_posts
 from ..data import load_wall_media
+from ..data import load_wall_comments
 from ..data import load_okved
 from ..data import load_accounts
 from ..data import (emblems, load_attributes, load_biography, load_bounty,
@@ -200,6 +201,9 @@ class CoopDemoLoader(models.AbstractModel):
         load_wall_posts.load_wall_posts(self.env)
         # Записи с видео, звуком, документом и фото на стене витрины.
         load_wall_media.load_wall_media(self.env)
+        # Комментарии к записям стен (решение 404) — после самих записей.
+        if 'coop.wall.comment' in self.env:
+            load_wall_comments.load_wall_comments(self.env)
         # Суммы проектов — до всего остального, что на них смотрит:
         # готовность, доли и вехи считаются от «нужно».
         load_projects.repair_scales(self.env)

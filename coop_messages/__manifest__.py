@@ -25,6 +25,7 @@
     'depends': ['mail', 'coop_base', 'coop_theme', 'coop_deals', 'coop_projects',
                 'coop_people', 'coop_orgs'],
     'data': [
+        'security/ir.model.access.csv',
         'security/coop_channel_rules.xml',
         'views/coop_messages_views.xml',
         'data/coop_channel_resync.xml',
@@ -34,6 +35,9 @@
             'coop_messages/static/src/js/coop_messages.js',
             'coop_messages/static/src/xml/coop_messages.xml',
             'coop_messages/static/src/scss/coop_messages.scss',
+            'coop_messages/static/src/js/wall_post.js',
+            'coop_messages/static/src/xml/wall_post.xml',
+            'coop_messages/static/src/scss/wall_post.scss',
         ],
     },
     'installable': True,
