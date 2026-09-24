@@ -4,6 +4,7 @@ import { patch } from "@web/core/utils/patch";
 import { FormRenderer } from "@web/views/form/form_renderer";
 import { Chatter } from "@mail/chatter/web_portal/chatter";
 import { Composer } from "@mail/core/common/composer";
+import { Thread } from "@mail/core/common/thread";
 import { coopIsPlatformModel } from "@coop_theme/js/platform_page";
 
 // Записи, у которых лента — публичная стена, а не служебная переписка.
@@ -126,5 +127,30 @@ patch(Composer.prototype, {
             return "Опубликовать";
         }
         return super.SEND_TEXT;
+    },
+});
+
+/**
+ * На стене — только то, что написали люди.
+ *
+ * Лента записи — это и стена, и служебный журнал: туда же движок пишет
+ * «Контакт создан», смену состояния («Сбор → Запущен»), приглашения. В
+ * переписке по сделке или складу журнал к месту, а на стене человека,
+ * организации, проекта, сообщества он читается как чужая запись среди
+ * своих. Владелец 24 сентября 2026: «на моей странице внизу лента и там
+ * только моя запись 123 и сообщение от бота о создании контакта».
+ *
+ * Прячется только на стенах (`WALL_MODELS`) и только из показа: журнал
+ * остаётся в базе, и в обсуждении прочих записей он виден как прежде.
+ * Внутренние заметки (`isNote`) на стене тоже не показываются — они не
+ * для всех, а стена для всех.
+ */
+patch(Thread.prototype, {
+    get orderedMessages() {
+        const messages = super.orderedMessages;
+        if (!WALL_MODELS.includes(this.props.thread?.model)) {
+            return messages;
+        }
+        return messages.filter((m) => m.message_type === "comment" && !m.isNote);
     },
 });

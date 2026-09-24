@@ -27,7 +27,7 @@ PEOPLE = [
     'Меняю работу на материалы: {spec} в обмен на пиломатериал, краску или инструмент.',
     'Отдам даром остатки после прошлого заказа. Самовывоз, {city}.',
     'Личность подтверждена — в сделках со мной теперь меньше лишних вопросов.',
-    'Готов вложиться трудом в проект, если нужен {spec} на несколько смен.',
+    'Могу вложиться трудом в проект, если нужен {spec} на несколько смен.',
     'Первый месяц на платформе: три сделки, два отзыва «отлично». Спасибо всем, кто доверился.',
     'Поделюсь опытом с начинающими: {spec} — дело, где мелочей не бывает. Задавайте вопросы.',
     'Свободна неделя в конце месяца — возьму срочный заказ.',
@@ -88,6 +88,31 @@ def load_wall_posts(env, login='dashkevich'):
                     'body': '<p>%s</p>' % _fill(rnd.choice(texts), page),
                     'date': when,
                 })
+    # Своя стена главного участника витрины. Общий проход её пропускал:
+    # на ней уже была одна запись — проверочная «123» самого владельца, —
+    # и страница, которую открывают первой, оставалась почти пустой.
+    # Владелец 24 сентября 2026: «на моей странице внизу лента и там
+    # только моя запись 123». Своё не трогаем, дописываем до восьми.
+    showcase_page = env['res.users'].sudo().search(
+        [('login', '=', login)], limit=1).partner_id
+    if showcase_page:
+        have = Message.search_count([
+            ('model', '=', 'res.partner'), ('res_id', '=', showcase_page.id),
+            ('message_type', '=', 'comment')])
+        if have < 6:
+            for template in rnd.sample(PEOPLE, k=min(8 - have, len(PEOPLE))):
+                when = now - timedelta(days=rnd.randint(1, 120),
+                                       hours=rnd.randint(0, 12))
+                rows.append({
+                    'model': 'res.partner',
+                    'res_id': showcase_page.id,
+                    'message_type': 'comment',
+                    'subtype_id': comment.id,
+                    'author_id': showcase_page.id,
+                    'body': '<p>%s</p>' % _fill(template, showcase_page),
+                    'date': when,
+                })
+
     if rows:
         Message.create(rows)
 
