@@ -83,6 +83,7 @@
             'coop_theme/static/src/xml/acting_switch.xml',
             'coop_theme/static/src/js/wall.js',
             'coop_theme/static/src/js/wall_photo.js',
+            'coop_theme/static/src/js/wall_composer.js',
             'coop_theme/static/src/xml/wall_photo.xml',
             'coop_theme/static/src/js/bands.js',
             'coop_theme/static/src/scss/wall.scss',
