@@ -198,6 +198,13 @@
             организацию и получал отказ только при сохранении.
           -->
           <field name="coop_can_edit_card" invisible="1"/>
+          <!-- Что видят другие — решение 67 журнала владельца. Переключатели
+               те же, что у человека: настройки открываются на того, от
+               чьего имени действуют, и управляющий, переключившись на
+               организацию, выставляет их в «Приватности». Себе — то есть
+               тому, кто правит карточку, — видно всё. -->
+          <field name="coop_show_trust" invisible="1"/>
+          <field name="coop_show_contacts" invisible="1"/>
 
           <div class="o_coop_profile_layout">
 
@@ -209,7 +216,7 @@
               </div>
 
               <div class="o_coop_stats">
-                <div>Уровень доверия:
+                <div invisible="not coop_can_edit_card and not coop_show_trust">Уровень доверия:
                   <b><field name="coop_trust" nolabel="1" readonly="1"/>%</b>
                 </div>
                 <!-- Где я в этой организации. Без строки человек,
@@ -256,11 +263,12 @@
                     <field name="phone" widget="coop_inline" readonly="not coop_can_edit_card" placeholder="не указан"/></div>
                   <div><span class="o_coop_key">Почта</span>
                     <field name="email" widget="coop_inline" readonly="not coop_can_edit_card" placeholder="не указана"/></div>
-                  <div><span class="o_coop_key">Сайт</span>
+                  <div invisible="not coop_can_edit_card and not coop_show_contacts"><span class="o_coop_key">Сайт</span>
                     <field name="website" widget="coop_inline" readonly="not coop_can_edit_card" placeholder="нет"/></div>
                   <!-- То же, что у человека: способ связи организация
                        называет сама, а не выбирает из нашего перечня. -->
-                  <div class="o_coop_contact_extra">
+                  <div class="o_coop_contact_extra"
+                       invisible="not coop_can_edit_card and not coop_show_contacts">
                     <field name="coop_contact_line_ids" nolabel="1"
                            widget="coop_contact_lines" readonly="not coop_can_edit_card"/>
                   </div>
