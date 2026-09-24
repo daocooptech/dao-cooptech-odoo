@@ -124,12 +124,100 @@
     </div>
   </t>
 
+  <!-- Выбор способа подарка — общий кусок окна «Поблагодарить»: даритель
+       выбирает, автор на своей записи видит его образцом (`preview`). -->
+  <t t-name="coop_wall.ThanksChoice">
+    <div class="btn-group mb-3 w-100 o_coop_thanks_fork">
+      <button class="btn" t-att-class="state.channel === 'sbp' ? 'btn-primary' : 'btn-secondary'"
+              t-on-click="() => this.state.channel = 'sbp'">
+        <i class="fa fa-qrcode me-1"/>СБП по QR-коду
+      </button>
+      <button class="btn" t-att-class="state.channel === 'token' ? 'btn-primary' : 'btn-secondary'"
+              t-on-click="() => this.state.channel = 'token'">
+        <i class="fa fa-cubes me-1"/>Токенами
+      </button>
+    </div>
+
+    <t t-if="state.channel === 'sbp'">
+      <div t-if="!state.info.sbp" class="o_coop_thanks_none">
+        <t t-if="preview">Ссылка СБП не указана.</t>
+        <t t-else="">Автор не указал СБП — подарить можно токенами.</t>
+      </div>
+      <div t-elif="sbpIsLink" class="o_coop_thanks_qr">
+        <img t-att-src="sbpQrUrl" alt="QR-код СБП" width="220" height="220"/>
+        <div>
+          Отсканируйте камерой телефона или в приложении своего банка — откроется
+          перевод по СБП<t t-if="!preview"> автору</t>.
+          <div class="mt-2"><a t-att-href="state.info.sbp" target="_blank" rel="noopener">Открыть ссылку СБП</a></div>
+          <div class="text-muted mt-2">
+            От <t t-out="state.info.limits.rub_min"/> до <t t-out="state.info.limits.rub_max"/> ₽.
+          </div>
+        </div>
+      </div>
+      <p t-else="">
+        По СБП по номеру телефона: <b class="o_coop_thanks_req" t-out="state.info.sbp"/>
+        <br/><span class="text-muted">
+          От <t t-out="state.info.limits.rub_min"/> до <t t-out="state.info.limits.rub_max"/> ₽.
+        </span>
+      </p>
+    </t>
+
+    <div t-else="" class="o_coop_thanks_tokens">
+      <div t-if="!state.info.networks.length" class="o_coop_thanks_none">
+        <t t-if="preview">В кошельке нет адресов в сетях — добавьте их в кошельке.</t>
+        <t t-else="">У автора нет адресов в кошельке — подарить можно по СБП.</t>
+      </div>
+      <t t-else="">
+        <div class="o_coop_thanks_pick">
+          <label>
+            <span class="form-label">Блокчейн</span>
+            <select class="form-select" t-on-change="onNetwork">
+              <option t-foreach="state.info.networks" t-as="n" t-key="n.id"
+                      t-att-value="n.id" t-att-selected="n.id === state.networkId" t-out="n.name"/>
+            </select>
+          </label>
+          <label t-if="network">
+            <span class="form-label">Монета</span>
+            <select class="form-select" t-model="state.token">
+              <option t-foreach="network.tokens" t-as="tk" t-key="tk.symbol"
+                      t-att-value="tk.symbol" t-out="tk.label"/>
+            </select>
+          </label>
+        </div>
+        <p t-if="network">
+          Адрес <t t-if="preview">ваш</t><t t-else="">автора</t> в сети <t t-out="network.name"/>:
+          <code class="o_coop_thanks_req" t-out="network.address"/>
+        </p>
+        <p t-if="network and network.fee_hint" class="o_coop_thanks_fee">
+          <i class="fa fa-bolt"/>
+          Комиссия сети — <t t-out="network.fee_hint"/>. Платит даритель; точную сумму
+          покажет его кошелёк перед подписью.
+        </p>
+      </t>
+    </div>
+  </t>
+
   <t t-name="coop_wall.ThanksDialog">
     <Dialog title="state.info and state.info.own ? 'Подарки за запись' : 'Поблагодарить автора'" size="'md'">
       <div t-if="!state.info" class="text-muted">Загрузка…</div>
       <t t-elif="state.info.own">
+        <!-- Как вас благодарят — образец окна дарителя. -->
+        <div class="o_coop_thanks_preview">
+          <div class="o_coop_thanks_preview_head">
+            <b>Так вас благодарят</b>
+            <span class="text-muted">— себя поблагодарить нельзя, это окно видят другие</span>
+          </div>
+          <div t-if="!state.info.own_thanks_on" class="o_coop_thanks_none">
+            Приём подарков выключен, и «Поблагодарить» под вашими записями другие не видят.
+            <a href="#" t-on-click.prevent="openSettings">Включить в настройках</a>
+            (Деньги и реквизиты → Подарки за записи).
+          </div>
+          <t t-else="" t-call="coop_wall.ThanksChoice"><t t-set="preview" t-value="true"/></t>
+        </div>
+
+        <div class="o_coop_thanks_received_head"><b>Подарки за эту запись</b></div>
         <div t-if="!state.info.received.length" class="text-muted">
-          За эту запись подарков пока нет.
+          Подарков пока нет.
         </div>
         <div t-if="state.info.received_notes.length" class="o_coop_thanks_tax mb-2">
           <i class="fa fa-university"/>
@@ -153,65 +241,25 @@
       </t>
       <div t-elif="!state.info.can_thank" class="text-muted" t-out="state.info.reason"/>
       <t t-else="">
-        <div class="btn-group mb-3 w-100">
-          <button class="btn" t-att-class="state.channel === 'sbp' ? 'btn-primary' : 'btn-secondary'"
-                  t-att-disabled="!state.info.sbp" t-on-click="() => this.state.channel = 'sbp'">Рублями по СБП</button>
-          <button class="btn" t-att-class="state.channel === 'token' ? 'btn-primary' : 'btn-secondary'"
-                  t-att-disabled="!state.info.networks.length" t-on-click="() => this.state.channel = 'token'">Токенами</button>
-        </div>
-        <p t-if="state.channel === 'sbp'">
-          Отправьте подарок в своём банке по СБП:
-          <b class="o_coop_thanks_req" t-out="state.info.sbp"/>
-          <br/><span class="text-muted">
-            От <t t-out="state.info.limits.rub_min"/> до <t t-out="state.info.limits.rub_max"/> ₽.
-          </span>
-        </p>
-        <div t-else="" class="o_coop_thanks_tokens">
-          <div class="o_coop_thanks_pick">
-            <label>
-              <span class="form-label">Блокчейн</span>
-              <select class="form-select" t-on-change="onNetwork">
-                <option t-foreach="state.info.networks" t-as="n" t-key="n.id"
-                        t-att-value="n.id" t-att-selected="n.id === state.networkId" t-out="n.name"/>
-              </select>
-            </label>
-            <label t-if="network">
-              <span class="form-label">Токен</span>
-              <select class="form-select" t-model="state.token">
-                <option t-foreach="network.tokens" t-as="tk" t-key="tk.symbol"
-                        t-att-value="tk.symbol" t-out="tk.label"/>
-              </select>
-            </label>
+        <t t-call="coop_wall.ThanksChoice"><t t-set="preview" t-value="false"/></t>
+        <t t-if="state.channel === 'sbp' ? state.info.sbp : state.info.networks.length">
+          <label class="form-label">Сумма подарка</label>
+          <input class="form-control mb-3" inputmode="decimal" t-model="state.amount"
+                 t-att-placeholder="state.channel === 'sbp' ? '500 ₽' : tokenExample"/>
+          <div t-if="(state.info.taxes[state.channel] or []).length" class="o_coop_thanks_tax mb-3">
+            <i class="fa fa-university"/>
+            <div>
+              <b>Налоги</b>
+              <div t-foreach="state.info.taxes[state.channel]" t-as="line" t-key="line_index" t-out="line"/>
+            </div>
           </div>
-          <p t-if="network">
-            Адрес автора в сети <t t-out="network.name"/>:
-            <code class="o_coop_thanks_req" t-out="network.address"/>
-          </p>
-          <p t-if="network and network.fee_hint" class="o_coop_thanks_fee">
-            <i class="fa fa-bolt"/>
-            Комиссия сети — <t t-out="network.fee_hint"/>. Платите вы; точную сумму
-            покажет ваш кошелёк перед подписью.
-          </p>
-          <p class="text-muted">
-            Отправьте из своего кошелька — отправка из кошелька платформы пока не подключена.
-          </p>
-        </div>
-        <label class="form-label">Сумма подарка</label>
-        <input class="form-control mb-3" inputmode="decimal" t-model="state.amount"
-               t-att-placeholder="state.channel === 'sbp' ? '500 ₽' : tokenExample"/>
-        <div t-if="(state.info.taxes[state.channel] or []).length" class="o_coop_thanks_tax mb-3">
-          <i class="fa fa-university"/>
-          <div>
-            <b>Налоги</b>
-            <div t-foreach="state.info.taxes[state.channel]" t-as="line" t-key="line_index" t-out="line"/>
-          </div>
-        </div>
-        <label class="o_coop_thanks_understood">
-          <input type="checkbox" t-model="state.understood"/>
-          <span>Понимаю: это подарок. Автор ничего не должен мне взамен, я не
-          получаю за это доступ, услугу или право. Подарок идёт напрямую
-          автору — платформа его не получает и не хранит.</span>
-        </label>
+          <label class="o_coop_thanks_understood">
+            <input type="checkbox" t-model="state.understood"/>
+            <span>Понимаю: это подарок. Автор ничего не должен мне взамен, я не
+            получаю за это доступ, услугу или право. Подарок идёт напрямую
+            автору — платформа его не получает и не хранит.</span>
+          </label>
+        </t>
       </t>
       <t t-set-slot="footer">
         <button t-if="state.info and !state.info.own and state.info.can_thank"

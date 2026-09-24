@@ -311,7 +311,7 @@ export class CoopThanksDialog extends Component {
     async load() {
         const info = await this.orm.call("coop.wall.thanks", "coop_info", [this.props.message.id]);
         this.state.info = info;
-        this.state.channel = info.sbp ? "sbp" : "token";
+        this.state.channel = info.sbp || !info.networks?.length ? "sbp" : "token";
         const first = info.networks?.[0];
         this.state.networkId = first?.id || null;
         this.state.token = first?.tokens[0]?.symbol || null;
@@ -328,6 +328,22 @@ export class CoopThanksDialog extends Component {
         return (this.state.info?.networks || []).find((n) => n.id === this.state.networkId);
     }
 
+    // СБП по QR-коду: ссылку СБП движок рисует кодом сам (`/report/barcode`).
+    // По номеру телефона кода не бывает — тогда показываем номер.
+    get sbpIsLink() {
+        return /^https?:\/\//.test(this.state.info?.sbp || "");
+    }
+
+    get sbpQrUrl() {
+        const value = encodeURIComponent(this.state.info.sbp);
+        return `/report/barcode/?barcode_type=QR&value=${value}&width=220&height=220`;
+    }
+
+    openSettings() {
+        this.props.close();
+        this.env.services.action.doAction("coop_settings.action_coop_settings");
+    }
+
     onNetwork(ev) {
         this.state.networkId = parseInt(ev.target.value);
         this.state.token = this.network?.tokens[0]?.symbol || null;
@@ -335,7 +351,8 @@ export class CoopThanksDialog extends Component {
 
     get canSend() {
         const amount = parseFloat(String(this.state.amount).replace(",", "."));
-        return this.state.understood && amount > 0 && !this.state.busy;
+        const ready = this.state.channel === "sbp" ? Boolean(this.state.info?.sbp) : Boolean(this.network);
+        return ready && this.state.understood && amount > 0 && !this.state.busy;
     }
 
     async declare() {

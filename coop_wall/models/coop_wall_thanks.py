@@ -249,6 +249,13 @@ class CoopWallThanks(models.Model):
             result['received_notes'] = [
                 RECEIVED_NOTES[c] for c in ('sbp', 'token')
                 if c in received.mapped('channel')]
+            # Автор видит и то, как его благодарят другие: владелец
+            # 24 сентября 2026 открыл «Поблагодарить» на своей записи и
+            # «вилки, как я могу отблагодарить», не увидел.
+            me_su = me.sudo()
+            result['own_thanks_on'] = bool(me_su.coop_thanks_on)
+            result['sbp'] = me_su.coop_thanks_sbp or False
+            result['networks'] = self._coop_networks(me)
             return result
         if not author or not author.sudo().coop_thanks_on:
             result['reason'] = _("Автор не принимает благодарности.")

@@ -209,6 +209,7 @@ class CoopDemoLoader(models.AbstractModel):
             load_wall_comments.load_wall_reposts(self.env)
             load_wall_comments.load_wall_thanks(self.env)
             load_wall_comments.load_wall_thanks_tokens(self.env)
+            load_wall_comments.load_thanks_sbp_links(self.env)
             load_wall_comments.load_wall_stars(self.env)
         # Суммы проектов — до всего остального, что на них смотрит:
         # готовность, доли и вехи считаются от «нужно».

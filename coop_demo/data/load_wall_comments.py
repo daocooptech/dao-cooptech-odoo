@@ -466,3 +466,42 @@ def load_wall_stars(env, login='dashkevich'):
             total += len(fans)
     _logger.info("Звёздочки на стенах: поставлено %s", total)
     return total
+
+
+# Коды банков в СБП — настоящие участники системы, чтобы ссылка выглядела
+# так, как её выдаёт банк.
+SBP_BANKS = ('100000000111', '100000000004', '100000000008', '100000000005',
+             '100000000007', '100000000015', '100000000001')
+
+
+def load_thanks_sbp_links(env, login='dashkevich'):
+    """Ссылки СБП для QR-кода в окне «Поблагодарить».
+
+    Владелец 24 сентября 2026: «у нас был выбор между СБП по QR-коду или
+    токены». По номеру телефона QR-кода не бывает — нужна ссылка, какую
+    выдаёт банк (`https://qr.nspk.ru/…`). Около двух третей принимающих
+    подарки (и главный участник) получают ссылку, остальные остаются с
+    телефоном — чтобы были видны оба случая. Ссылки учебные: номер
+    перевода случайный, по нему банк ничего не откроет.
+
+    Прогон один: если ссылки уже есть, ничего не делается.
+    """
+    Partner = env['res.partner'].sudo()
+    if Partner.search_count([('coop_thanks_sbp', '=like', 'https://qr.nspk.ru/%')], limit=1):
+        _logger.info("Ссылки СБП: уже наполнено, пропускаю")
+        return 0
+    rnd = random.Random(20260924 + 411)
+    alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+    showcase = env['res.users'].sudo().search([('login', '=', login)], limit=1).partner_id
+    takers = Partner.search([('coop_thanks_on', '=', True)])
+    done = 0
+    for person in takers:
+        if person != showcase and rnd.random() > 0.66:
+            continue
+        code = ''.join(rnd.choice(alphabet) for _n in range(32))
+        crc = ''.join(rnd.choice('0123456789ABCDEF') for _n in range(4))
+        person.coop_thanks_sbp = 'https://qr.nspk.ru/%s?type=01&bank=%s&crc=%s' % (
+            code, rnd.choice(SBP_BANKS), crc)
+        done += 1
+    _logger.info("Ссылки СБП: заведено %s", done)
+    return done

@@ -652,10 +652,14 @@ class CoopResourceCatalogFilters(models.Model):
              'options': [{'value': code, 'label': label}
                          for code, label in
                          self._fields['resource_type'].selection]},
+            # Выпадающим списком, как «Тип»: владелец 24 сентября 2026 —
+            # «в каталоге ресурсов способ получения тоже выпадающий список
+            # с вариантами». Способов десяток, и вводить их по памяти
+            # незачем.
             {'code': 'method_ids', 'label': 'Способ получения',
              'hint': 'Продажа, аренда, обмен, безвозмездно и другие.',
-             'widget': 'suggest', 'field': 'method_ids', 'operator': 'ilike',
-             'placeholder': 'Например, аренда',
+             'widget': 'select', 'field': 'method_ids', 'operator': '=',
+             'placeholder': 'Любой',
              'options': [{'value': m.id, 'label': m.name} for m in methods]},
             {'code': 'quick', 'label': 'Быстрые фильтры', 'widget': 'quick',
              'options': quick},

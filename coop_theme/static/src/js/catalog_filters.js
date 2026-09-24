@@ -174,8 +174,10 @@ export class CoopFilters extends Component {
 
     cast(block, value) {
         // Ссылка приходит из поля выбора строкой; сравнивать её со
-        // строкой нельзя — домен по ссылке ждёт число.
-        return block.field.endsWith("_id") ? Number(value) : value;
+        // строкой нельзя — домен по ссылке ждёт число. То же у списка
+        // ссылок (`_ids`): «способ получения» ресурса выбирается из
+        // выпадающего списка номером способа.
+        return /_ids?$/.test(block.field) ? Number(value) : value;
     }
 
     async apply() {

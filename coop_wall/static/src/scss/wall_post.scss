@@ -239,3 +239,54 @@
   .fa-university { opacity: .55; margin-top: 3px; }
   b { display: block; margin-bottom: 2px; }
 }
+
+// Выбор способа и QR-код СБП (владелец 24 сентября 2026: «вилки, как я
+// могу отблагодарить, я не увидел… выбор между СБП по QR-коду или
+// токенами с выбором сети, монеты, суммы»).
+.o_coop_thanks_qr {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+
+  img {
+    width: 220px;
+    height: 220px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    background: #fff;
+    padding: 6px;
+    box-shadow: 0 1px 3px rgba(20, 23, 26, .12);
+  }
+}
+
+@media (max-width: 575.98px) {
+  .o_coop_thanks_qr { flex-direction: column; align-items: center; text-align: center; }
+}
+
+.o_coop_thanks_none {
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, .035);
+  font-size: 13px;
+}
+
+.o_coop_thanks_preview {
+  padding: 12px;
+  margin-bottom: 16px;
+  border: 1px dashed var(--border-color, rgba(0, 0, 0, .18));
+  border-radius: 8px;
+}
+
+.o_coop_thanks_preview_head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.o_coop_thanks_received_head {
+  margin-bottom: 6px;
+}
