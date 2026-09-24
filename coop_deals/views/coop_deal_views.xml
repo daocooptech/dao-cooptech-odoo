@@ -372,15 +372,17 @@
   <record id="view_coop_resource_form_buyers" model="ir.ui.view">
     <field name="name">coop.resource.form.buyers</field>
     <field name="model">coop.resource</field>
-    <field name="inherit_id" ref="coop_resources.view_coop_resource_form"/>
+    <field name="inherit_id" ref="coop_resources.view_coop_resource_add"/>
     <field name="arch" type="xml">
-      <xpath expr="//field[@name='owner_id']/following-sibling::field[@name='city'][1]" position="after">
-        <label for="coop_buyer_count"/>
-        <div class="o_row">
-          <field name="coop_buyer_count" readonly="1"/>
+      <!-- Страницу ресурса рисует форма размещения — и для нового
+           объявления, и для открытого. Строка под заголовком, как
+           «Сделки: 16 — реестр сделок» на своей странице; у нового
+           объявления покупателей нет, и строки не видно. -->
+      <xpath expr="//div[hasclass('oe_title')]/h1" position="after">
+        <div class="o_coop_buyers_line" invisible="not coop_buyer_count">
+          Покупатели: <b><field name="coop_buyer_count" readonly="1" nolabel="1"/></b>
           <button name="action_coop_buyers" type="object"
-                  class="btn btn-link p-0" string="сделки по ресурсу →"
-                  invisible="not coop_buyer_count"/>
+                  class="btn btn-link p-0 ms-2" string="сделки по ресурсу →"/>
         </div>
       </xpath>
     </field>
