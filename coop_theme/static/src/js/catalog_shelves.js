@@ -4,7 +4,7 @@ import { Component, onMounted, onWillStart, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { RelationalModel } from "@web/model/relational_model/relational_model";
 import { addFieldDependencies, extractFieldsFromArchInfo } from "@web/model/relational_model/utils";
-import { KanbanRecord } from "@web/views/kanban/kanban_record";
+import { CoopCatalogKanbanRecord as KanbanRecord } from "@coop_theme/js/favorite";
 
 /**
  * Полки каталога: ряды по рубрикам над общим списком.

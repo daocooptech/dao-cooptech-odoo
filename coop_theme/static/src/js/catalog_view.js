@@ -5,8 +5,7 @@ import { browser } from "@web/core/browser/browser";
 import { patch } from "@web/core/utils/patch";
 import { kanbanView } from "@web/views/kanban/kanban_view";
 import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
-import { KanbanRecord } from "@web/views/kanban/kanban_record";
-import { COOP_FAVORABLE, CoopFavoriteHeart } from "@coop_theme/js/favorite";
+import { CoopCatalogKanbanRecord } from "@coop_theme/js/favorite";
 import { KanbanController } from "@web/views/kanban/kanban_controller";
 import { ListController } from "@web/views/list/list_controller";
 import { FormController } from "@web/views/form/form_controller";
@@ -256,15 +255,6 @@ CoopCatalogKanbanController.template = "coop_theme.CatalogKanbanView";
  * сердечко своё, в разметке карточки. Лента, сделки, заявки и прочие
  * списки дел — не то, что откладывают «на потом», сердечка там нет.
  */
-export class CoopCatalogKanbanRecord extends KanbanRecord {
-    static template = "coop_theme.CatalogKanbanRecord";
-    static components = { ...KanbanRecord.components, CoopFavoriteHeart };
-
-    get coopFavorable() {
-        return COOP_FAVORABLE.includes(this.props.record.resModel) && this.props.record.resId;
-    }
-}
-
 export class CoopCatalogKanbanRenderer extends KanbanRenderer {
     static components = { ...KanbanRenderer.components, KanbanRecord: CoopCatalogKanbanRecord };
 }

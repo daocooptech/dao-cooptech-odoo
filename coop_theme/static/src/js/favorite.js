@@ -18,6 +18,7 @@ import { Component, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
+import { KanbanRecord } from "@web/views/kanban/kanban_record";
 
 /**
  * Каталоги с сердечком — двенадцать, как в макете (решение 408). У
@@ -124,3 +125,19 @@ registry.category("fields").add("coop_favorite_heart", {
     component: CoopFavoriteHeart,
     supportedTypes: ["boolean", "integer", "char"],
 });
+
+/**
+ * Карточка каталога со звёздочкой «в избранное» — решение 408. Ею
+ * рисуют карточки и общий вид каталогов (`js/catalog_view.js`), и полки
+ * (`js/catalog_shelves.js`): у людей, навыков и прочих каталогов с полками
+ * звёздочки не было вовсе — полки брали карточку движка напрямую.
+ */
+export class CoopCatalogKanbanRecord extends KanbanRecord {
+    static template = "coop_theme.CatalogKanbanRecord";
+    static components = { ...KanbanRecord.components, CoopFavoriteHeart };
+
+    get coopFavorable() {
+        return COOP_FAVORABLE.includes(this.props.record.resModel) && this.props.record.resId;
+    }
+}
+
