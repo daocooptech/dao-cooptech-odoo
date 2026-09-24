@@ -205,3 +205,121 @@ class ResPartner(models.Model):
             'name': _('Сообщения'),
             'params': {'coop_partner_id': self.id},
         }
+
+
+class ResPartnerCatalogFilters(models.Model):
+    """Панель фильтров каталога людей — та же, что в макете.
+
+    Порядок полей и подписи взяты из `people.html`: специализация (сфера),
+    под ней подкатегория, город, навыки, уровень доверия.
+
+    Модель общая с организациями, и каталог организаций смотрит на ту же
+    `res.partner`. Какой каталог спрашивает, видно по основному отбору
+    раздела (`coop_base_domain` в контексте): у людей в нём
+    `is_company = False`. Организациям панель пока не выставлена — их
+    набор полей в макете другой, и без описания лучше честная строка
+    «отбирают поиском», чем чужие поля.
+
+    Счётчики у вариантов считаются здесь, а не темой: тема считает по
+    всей модели, и в число «Информационные технологии · 40» попадали бы
+    организации той же сферы.
+    """
+
+    _inherit = 'res.partner'
+
+    # Пороги — из макета: «от 90 %, от 75 %, от 50 %».
+    _COOP_TRUST_STEPS = (90, 75, 50)
+
+    def _coop_catalog_filters(self, domain):
+        base = list(self.env.context.get('coop_base_domain') or [])
+        if ('is_company', '=', False) not in [
+                tuple(leaf) for leaf in base
+                if isinstance(leaf, (list, tuple)) and len(leaf) == 3]:
+            return []
+
+        def without(*fields_):
+            # Условия панели, кроме условий на само поле: иначе выбор
+            # одной сферы обнулил бы счётчики у остальных, и сменить её
+            # было бы не на что.
+            return base + [leaf for leaf in domain or []
+                           if not (isinstance(leaf, (list, tuple)) and leaf
+                                   and leaf[0] in fields_)]
+
+        # Без sudo: считать надо ровно то, что человеку покажет каталог,
+        # со всеми правилами видимости.
+        people = self
+
+        def counts(field, dom):
+            return {(value.id if hasattr(value, 'id') else value): count
+                    for value, count in people._read_group(
+                        dom, [field], ['__count'])}
+
+        spheres = self.env['coop.specialization.category'].sudo().search(
+            [], order='name')
+        sphere_counts = counts('coop_specialization_category_ids',
+                               without('coop_specialization_category_ids',
+                                       'coop_specialization_ids'))
+        blocks = [{
+            'code': 'sphere', 'label': 'Специализация',
+            'hint': 'Профессиональная область, как на hh.ru.',
+            'widget': 'select', 'field': 'coop_specialization_category_ids',
+            'operator': '=', 'placeholder': 'Любая', 'counted': True,
+            # Подкатегории зависят от выбранной сферы — панель
+            # перечитывается сразу, как в макете, а не после «Показать».
+            'reload': True,
+            'options': [{'value': s.id, 'label': s.name,
+                         'count': sphere_counts.get(s.id, 0)}
+                        for s in spheres],
+        }]
+
+        sphere = next((leaf[2] for leaf in domain or []
+                       if isinstance(leaf, (list, tuple)) and len(leaf) == 3
+                       and leaf[0] == 'coop_specialization_category_ids'), None)
+        if sphere:
+            specs = self.env['coop.specialization'].sudo().search(
+                [('category_id', '=', int(sphere))], order='name')
+            spec_counts = counts('coop_specialization_ids',
+                                 without('coop_specialization_ids'))
+            blocks.append({
+                'code': 'specialization', 'label': 'Подкатегория',
+                'widget': 'select', 'field': 'coop_specialization_ids',
+                'operator': '=', 'placeholder': 'Любая', 'counted': True,
+                'options': [{'value': s.id, 'label': s.name,
+                             'count': spec_counts.get(s.id, 0)}
+                            for s in specs],
+            })
+
+        cities = sorted(c for c in counts('city', base) if c)
+        blocks.append({
+            'code': 'city', 'label': 'Город',
+            'hint': 'Показать участников только из выбранного города.',
+            'widget': 'text', 'field': 'city', 'operator': 'ilike',
+            'placeholder': 'Начните вводить город',
+            'options': [{'value': c, 'label': c} for c in cities],
+        })
+
+        skill_counts = counts('coop_skill_ids', base)
+        skills = self.env['hr.skill'].sudo().browse(
+            [k for k in skill_counts if k]).exists().sorted('name')
+        blocks.append({
+            'code': 'skills', 'label': 'Навыки',
+            'hint': 'Можно выбрать несколько — начните вводить название и '
+                    'выберите из списка. Покажутся люди с любым из них.',
+            'widget': 'tags', 'field': 'coop_skill_ids',
+            'placeholder': 'Например, сварка',
+            'options': [{'value': s.id, 'label': s.name} for s in skills],
+        })
+
+        trust_base = without('coop_trust')
+        blocks.append({
+            'code': 'trust', 'label': 'Уровень доверия',
+            'hint': 'Двусторонние отзывы после сделок, хранятся в блокчейне '
+                    'и неизменны.',
+            'widget': 'select', 'field': 'coop_trust', 'operator': '>=',
+            'number': True, 'placeholder': 'Любой', 'counted': True,
+            'options': [{'value': step, 'label': f'От {step}%',
+                         'count': people.search_count(
+                             trust_base + [('coop_trust', '>=', step)])}
+                        for step in self._COOP_TRUST_STEPS],
+        })
+        return blocks

@@ -81,10 +81,45 @@
               <span class="o_coop_hint" t-if="block.hint" role="img"
                     t-att-title="block.hint" t-att-aria-label="block.hint">ⓘ</span>
             </label>
+            <!-- Подсказка значений, если каталог их дал: город в макете —
+                 свободный ввод со списком известных городов. -->
             <input type="text" class="o_coop_input"
+                   t-att-list="block.options and block.options.length ? 'coop-suggest-' + block.code : undefined"
                    t-att-placeholder="block.placeholder"
                    t-att-value="state.values[block.code] or ''"
                    t-on-change="(ev) => this.onChange(block.code, ev.target.value)"/>
+            <datalist t-if="block.options and block.options.length"
+                      t-att-id="'coop-suggest-' + block.code">
+              <option t-foreach="block.options" t-as="option" t-key="option.value"
+                      t-att-value="option.label"/>
+            </datalist>
+          </div>
+
+          <!-- Несколько значений из длинного списка: ввод с подсказкой,
+               выбранное — чипами под полем, как «Навыки» в макете.
+               Флажками сотню навыков не перебрать. -->
+          <div class="o_coop_field" t-if="block.widget === 'tags'">
+            <label>
+              <t t-esc="block.label"/>
+              <span class="o_coop_hint" t-if="block.hint" role="img"
+                    t-att-title="block.hint" t-att-aria-label="block.hint">ⓘ</span>
+            </label>
+            <input type="text" class="o_coop_input"
+                   t-att-list="'coop-suggest-' + block.code"
+                   t-att-placeholder="block.placeholder"
+                   t-on-input="(ev) => this.onTagInput(block, ev)"/>
+            <datalist t-att-id="'coop-suggest-' + block.code">
+              <option t-foreach="block.options" t-as="option" t-key="option.value"
+                      t-att-value="option.label"/>
+            </datalist>
+            <div class="o_coop_chips o_coop_tags" t-if="pickedOptions(block).length">
+              <button type="button" class="o_coop_chip o_coop_chip_on"
+                      t-foreach="pickedOptions(block)" t-as="option" t-key="option.value"
+                      t-att-aria-label="'Убрать: ' + option.label"
+                      t-on-click="() => this.toggleMulti(block.code, option.value)">
+                <t t-esc="option.label"/> ×
+              </button>
+            </div>
           </div>
 
           <!-- Свободный ввод с подсказкой значений: в макете это поле

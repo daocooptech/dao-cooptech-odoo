@@ -31,8 +31,12 @@ class CoopCatalog(models.AbstractModel):
         if not describe:
             return []
         blocks = describe(domain or [])
+        # `counted` — счётчики уже проставил сам каталог: ему видно то,
+        # чего не видно здесь, например что люди и организации — одна
+        # модель и считать надо только своих.
         counted = [b for b in blocks
-                   if b.get('widget') in ('select', 'chips') and b.get('field')]
+                   if b.get('widget') in ('select', 'chips') and b.get('field')
+                   and not b.get('counted')]
 
         # Характеристики считаются все разом: у каждой свой ключ в одной
         # и той же колонке значений, и разбирать их по отдельным

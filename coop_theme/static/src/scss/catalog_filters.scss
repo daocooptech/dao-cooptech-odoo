@@ -355,3 +355,9 @@
   font-size: 12px;
   color: var(--coop-slate-light, #8f8f88);
 }
+
+// Чипы выбранного под полем с подсказкой («Навыки»): отступ от поля ввода,
+// как у `.filter-chips` в макете.
+.o_coop_tags {
+  margin-top: 8px;
+}

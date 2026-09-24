@@ -124,7 +124,7 @@ export class CoopFilters extends Component {
                 domain.push([block.field, block.operator || "ilike", value]);
             } else if (block.widget === "suggest" && value) {
                 domain.push([`${block.field}.name`, "ilike", value]);
-            } else if (block.widget === "multi") {
+            } else if (block.widget === "multi" || block.widget === "tags") {
                 // Несколько значений разом — «любое из выбранных». Нужен
                 // ленте подписок: проекты в ней выбирают по нескольку
                 // (решение 43 журнала владельца).
@@ -177,7 +177,9 @@ export class CoopFilters extends Component {
         // строкой нельзя — домен по ссылке ждёт число. То же у списка
         // ссылок (`_ids`): «способ получения» ресурса выбирается из
         // выпадающего списка номером способа.
-        return /_ids?$/.test(block.field) ? Number(value) : value;
+        // Число — и у поля-числа с порогом («доверие от 75 %»): значение
+        // из списка выбора приходит строкой.
+        return block.number || /_ids?$/.test(block.field) ? Number(value) : value;
     }
 
     async apply() {
@@ -215,9 +217,54 @@ export class CoopFilters extends Component {
         await this.load();
     }
 
-    onChange(code, value) {
+    async onChange(code, value) {
         this.state.values[code] = value;
         this.previewCount();
+        // От этого поля зависят другие — подкатегория от сферы, как в
+        // макете: их набор перечитывается сразу, не дожидаясь «Показать».
+        const block = this.state.blocks.find((b) => b.code === code);
+        if (block && block.reload) {
+            await this.load();
+            this.dropStale();
+        }
+    }
+
+    /** Забыть значения полей, которых после перечитывания нет, и
+     *  вариантов, которых в них больше нет: подкатегория прежней сферы
+     *  иначе молча оставалась бы в запросе, а в поле стояло бы «Любая». */
+    dropStale() {
+        for (const code of Object.keys(this.state.values)) {
+            const block = this.state.blocks.find((b) => b.code === code);
+            if (!block) {
+                const base = code.replace(/_(from|to)$/, "");
+                if (!this.state.blocks.some((b) => b.code === base)) {
+                    delete this.state.values[code];
+                }
+            } else if (block.widget === "select" && this.state.values[code]
+                       && !block.options.some((o) => this.isSelected(block, o))) {
+                delete this.state.values[code];
+            }
+        }
+        this.previewCount();
+    }
+
+    /** Поле с подсказкой и чипами («Навыки»): выбранное из подсказки
+     *  значение становится чипом, поле ввода очищается. */
+    onTagInput(block, ev) {
+        const text = ev.target.value.trim().toLowerCase();
+        const option = block.options.find((o) => o.label.toLowerCase() === text);
+        if (!option) {
+            return;
+        }
+        if (!this.isPicked(block, option)) {
+            this.toggleMulti(block.code, option.value);
+        }
+        ev.target.value = "";
+    }
+
+    /** Выбранные значения поля с чипами — с подписями, для показа. */
+    pickedOptions(block) {
+        return block.options.filter((o) => this.isPicked(block, o));
     }
 
     toggleMulti(code, value) {
