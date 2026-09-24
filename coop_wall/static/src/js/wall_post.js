@@ -197,8 +197,17 @@ export class CoopWallPostFooter extends Component {
         this.env.services.dialog.add(CoopThanksDialog, { message: this.props.message });
     }
 
-    onStar() {
-        this.props.message.toggleStar();
+    get stars() {
+        return this.props.message.coop_star_count || 0;
+    }
+
+    // Число меняется сразу, не дожидаясь сервера: звёздочка — своя отметка,
+    // и её исход известен заранее.
+    async onStar() {
+        const m = this.props.message;
+        const was = m.starred;
+        await m.toggleStar();
+        m.coop_star_count = Math.max(0, (m.coop_star_count || 0) + (was ? -1 : 1));
     }
 
     onKeydown(ev) {
@@ -431,6 +440,7 @@ patch(MessageModel.prototype, {
         this.coop_repost = fields.Attr(false);
         this.coop_repost_count = fields.Attr(0);
         this.coop_thanks_count = fields.Attr(0);
+        this.coop_star_count = fields.Attr(0);
     },
 
     // Репост без своих слов — не пустая запись: в нём карточка. Иначе

@@ -29,6 +29,7 @@ class MailMessage(models.Model):
             Store.Attr('coop_repost', lambda m: m._coop_repost_data()),
             Store.Attr('coop_repost_count', lambda m: m._coop_repost_count()),
             Store.Attr('coop_thanks_count', lambda m: m._coop_thanks_count()),
+            Store.Attr('coop_star_count', lambda m: m._coop_star_count()),
         ]
 
     def _coop_repost_data(self):
@@ -60,6 +61,15 @@ class MailMessage(models.Model):
         if self.model not in WALL_MODELS or self.message_type != 'comment':
             return 0
         return self.sudo().search_count([('coop_repost_of_id', '=', self.id)])
+
+    def _coop_star_count(self):
+        """Сколько человек сохранили запись в избранное (☆ движка).
+        Владелец 24 сентября 2026: «в ленте цифру забыл к иконке
+        избранного»."""
+        self.ensure_one()
+        if self.model not in WALL_MODELS or self.message_type != 'comment':
+            return 0
+        return len(self.sudo().starred_partner_ids)
 
     def _coop_thanks_count(self):
         """Сколько разных людей поблагодарили, и автор это подтвердил.

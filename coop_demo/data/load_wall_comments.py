@@ -420,3 +420,49 @@ def load_wall_thanks_tokens(env):
         Thanks.create(rows)
     _logger.info("Подарки токенами: заведено %s", len(rows))
     return len(rows)
+
+
+def load_wall_stars(env, login='dashkevich'):
+    """Звёздочки «в избранное» под записями стен (решение 408; число у
+    звёздочки — владелец 24 сентября 2026: «в ленте цифру забыл к иконке
+    избранного»).
+
+    Около трети записей сохранили от одного до восьми человек; у витринных
+    записей — побольше. Главный участник сохранил около тридцати чужих
+    записей — они же вкладка «Записи» на странице «Избранное».
+
+    Прогон один: если звёздочки под записями стен уже есть, ничего не
+    делается.
+    """
+    Message = env['mail.message'].sudo()
+    Partner = env['res.partner'].sudo()
+    posts = Message.search([
+        ('model', '=', 'res.partner'), ('message_type', '=', 'comment'),
+        ('subtype_id.internal', '=', False),
+    ])
+    if posts.filtered('starred_partner_ids')[:1]:
+        _logger.info("Звёздочки на стенах: уже наполнено, пропускаю")
+        return 0
+    rnd = random.Random(20260924 + 409)
+    people = list(Partner.search([
+        ('coop_is_participant', '=', True), ('is_company', '=', False),
+        ('name', 'not in', TEST_NAMES),
+    ]))
+    showcase = env['res.users'].sudo().search(
+        [('login', '=', login)], limit=1).partner_id
+    if len(people) < 30:
+        return 0
+    others = [p for p in posts if not showcase or p.author_id != showcase]
+    mine_saved = set(p.id for p in rnd.sample(others, min(len(others), 30)))
+    total = 0
+    for post in posts:
+        own = showcase and post.author_id == showcase
+        n = rnd.randint(2, 12) if own else (rnd.randint(1, 8) if rnd.random() < 0.33 else 0)
+        fans = {p.id for p in rnd.sample(people, min(n, len(people))) if p != post.author_id}
+        if showcase and post.id in mine_saved:
+            fans.add(showcase.id)
+        if fans:
+            post.write({'starred_partner_ids': [(4, pid) for pid in fans]})
+            total += len(fans)
+    _logger.info("Звёздочки на стенах: поставлено %s", total)
+    return total

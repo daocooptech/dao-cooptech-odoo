@@ -55,6 +55,7 @@
                 t-att-title="props.message.starred ? 'Убрать из избранного' : 'В избранное'"
                 t-on-click="onStar">
           <i t-att-class="props.message.starred ? 'fa fa-star' : 'fa fa-star-o'"/>
+          <span class="o_coop_post_count" t-out="stars"/>
         </button>
       </div>
 
