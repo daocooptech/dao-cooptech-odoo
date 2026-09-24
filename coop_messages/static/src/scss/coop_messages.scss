@@ -690,3 +690,60 @@
   white-space: nowrap;
   vertical-align: middle;
 }
+
+// ── Лента подписок ───────────────────────────────────────────────────
+//
+// Запись ленты — во всю ширину, а не плиткой: это текст, его читают
+// сверху вниз, как в ленте любого сообщества.
+.o_kanban_renderer.o_coop_feed {
+  --KanbanRecord-width: 100%;
+  --KanbanRecord-margin-h: 0px;
+}
+
+.o_coop_feed_post {
+  padding: 14px 16px;
+}
+
+.o_coop_feed_head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.o_coop_feed_avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: none;
+}
+
+.o_coop_feed_project {
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--coop-ink, #14171a);
+}
+
+.o_coop_feed_meta {
+  font-size: 12px;
+  color: var(--coop-slate-light, #8f8f88);
+}
+
+.o_coop_feed_body {
+  font-size: 13.5px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.o_coop_feed_title {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+// Состояние хода — тем же цветом, что точка хода на карточке каталога.
+.o_coop_feed_status_on_track { color: var(--coop-teal, #146b64); }
+.o_coop_feed_status_at_risk { color: var(--coop-gold, #c98a2b); }
+.o_coop_feed_status_off_track { color: #c0392b; }
+.o_coop_feed_status_done { color: var(--coop-slate, #4a4a44); }

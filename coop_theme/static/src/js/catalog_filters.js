@@ -119,6 +119,30 @@ export class CoopFilters extends Component {
                 domain.push([block.field, block.operator || "ilike", value]);
             } else if (block.widget === "suggest" && value) {
                 domain.push([`${block.field}.name`, "ilike", value]);
+            } else if (block.widget === "multi") {
+                // Несколько значений разом — «любое из выбранных». Нужен
+                // ленте подписок: проекты в ней выбирают по нескольку
+                // (решение 43 журнала владельца).
+                const picked = this.state.values[block.code] || [];
+                if (picked.length) {
+                    domain.push([block.field, "in",
+                                 picked.map((v) => this.cast(block, v))]);
+                }
+            } else if (block.widget === "daterange") {
+                // Даты приходят из поля ввода строкой «ГГГГ-ММ-ДД». У поля
+                // со временем (`block.datetime`) конец диапазона включается
+                // целиком, до последней секунды дня; поле-дату время
+                // сломало бы — сравнивать его надо с датой.
+                const from = this.state.values[`${block.code}_from`];
+                const to = this.state.values[`${block.code}_to`];
+                if (from) {
+                    domain.push([block.field, ">=",
+                                 block.datetime ? `${from} 00:00:00` : from]);
+                }
+                if (to) {
+                    domain.push([block.field, "<=",
+                                 block.datetime ? `${to} 23:59:59` : to]);
+                }
             } else if (block.widget === "range") {
                 const from = this.state.values[`${block.code}_from`];
                 const to = this.state.values[`${block.code}_to`];
@@ -187,6 +211,24 @@ export class CoopFilters extends Component {
     onChange(code, value) {
         this.state.values[code] = value;
         this.previewCount();
+    }
+
+    toggleMulti(code, value) {
+        const picked = [...(this.state.values[code] || [])];
+        const index = picked.findIndex((v) => `${v}` === `${value}`);
+        if (index === -1) {
+            picked.push(value);
+        } else {
+            picked.splice(index, 1);
+        }
+        this.state.values[code] = picked;
+        this.previewCount();
+    }
+
+    /** Отмечено ли значение в поле множественного выбора. */
+    isPicked(block, option) {
+        return (this.state.values[block.code] || []).some(
+            (v) => `${v}` === `${option.value}`);
     }
 
     toggleQuick(value) {

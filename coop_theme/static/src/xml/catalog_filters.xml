@@ -106,6 +106,42 @@
             </datalist>
           </div>
 
+          <!-- Несколько значений разом: флажки, а не выпадающий список —
+               в нём за раз выбирается одно. -->
+          <div class="o_coop_field" t-if="block.widget === 'multi'">
+            <label>
+              <t t-esc="block.label"/>
+              <span class="o_coop_hint" t-if="block.hint" role="img"
+                    t-att-title="block.hint" t-att-aria-label="block.hint">ⓘ</span>
+            </label>
+            <div class="o_coop_multi">
+              <label class="o_coop_multi_item" t-foreach="block.options"
+                     t-as="option" t-key="option.value">
+                <input type="checkbox" t-att-checked="isPicked(block, option)"
+                       t-on-change="() => this.toggleMulti(block.code, option.value)"/>
+                <span t-esc="option.label"/>
+              </label>
+              <div class="o_coop_multi_empty" t-if="!block.options.length"
+                   t-esc="block.empty or 'Выбирать пока не из чего'"/>
+            </div>
+          </div>
+
+          <div class="o_coop_field" t-if="block.widget === 'daterange'">
+            <label>
+              <t t-esc="block.label"/>
+              <span class="o_coop_hint" t-if="block.hint" role="img"
+                    t-att-title="block.hint" t-att-aria-label="block.hint">ⓘ</span>
+            </label>
+            <div class="o_coop_range">
+              <input type="date" class="o_coop_input" aria-label="с"
+                     t-att-value="state.values[block.code + '_from'] or ''"
+                     t-on-change="(ev) => this.onChange(block.code + '_from', ev.target.value)"/>
+              <input type="date" class="o_coop_input" aria-label="по"
+                     t-att-value="state.values[block.code + '_to'] or ''"
+                     t-on-change="(ev) => this.onChange(block.code + '_to', ev.target.value)"/>
+            </div>
+          </div>
+
           <div class="o_coop_field" t-if="block.widget === 'range'">
             <label>
               <t t-esc="block.label"/><t t-if="block.unit">, <t t-esc="block.unit"/></t>

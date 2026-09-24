@@ -33,4 +33,80 @@
   -->
   <function model="coop.sidebar.item" name="repoint_obligatory"/>
 
+
+  <!--
+    Лента подписок — решения 40, 42 и 43 журнала владельца: новости
+    проектов, на которые человек подписан, одной хронологической лентой,
+    сбоку — отбор по нескольким проектам и по датам. Новость проекта —
+    штатный отчёт о ходе (`project.update`, разбор архитектора, пункт 14).
+    Панель отбора та же, что у каталогов (`coop_catalog_kanban`), её поля
+    объявлены у модели (`project.update._coop_catalog_filters`).
+
+    Приоритет низкий намеренно: вид не должен стать видом отчётов по
+    умолчанию в управлении проектами.
+  -->
+  <record id="view_coop_feed_kanban" model="ir.ui.view">
+    <field name="name">coop.feed.kanban</field>
+    <field name="model">project.update</field>
+    <field name="priority">100</field>
+    <field name="arch" type="xml">
+      <kanban js_class="coop_catalog_kanban" class="o_coop_feed"
+              default_order="date desc, id desc" create="false"
+              quick_create="false" records_draggable="false"
+              action="action_coop_feed_open" type="object">
+        <field name="project_id"/>
+        <field name="user_id"/>
+        <field name="status"/>
+        <field name="progress"/>
+        <field name="date"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_feed_post">
+              <div class="o_coop_feed_head">
+                <img class="o_coop_feed_avatar" t-if="record.user_id.raw_value"
+                     t-att-src="'/web/image/res.users/' + record.user_id.raw_value + '/avatar_128'"
+                     alt="" loading="lazy"/>
+                <div class="o_coop_feed_who">
+                  <div class="o_coop_feed_project"><t t-esc="record.project_id.value"/></div>
+                  <div class="o_coop_feed_meta">
+                    <t t-esc="record.user_id.value"/> · <field name="date"/>
+                    · <span t-att-class="'o_coop_feed_status o_coop_feed_status_' + record.status.raw_value"><t t-esc="record.status.value"/></span>
+                    · <t t-esc="record.progress.value"/>%
+                  </div>
+                </div>
+              </div>
+              <div class="o_coop_feed_title"><field name="name"/></div>
+              <div class="o_coop_feed_body"><field name="description" widget="html"/></div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="view_coop_feed_search" model="ir.ui.view">
+    <field name="name">coop.feed.search</field>
+    <field name="model">project.update</field>
+    <field name="priority">100</field>
+    <field name="arch" type="xml">
+      <search>
+        <field name="name" string="Заголовок"/>
+        <field name="project_id" string="Проект"/>
+        <field name="user_id" string="Автор"/>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_project_feed" model="ir.actions.server">
+    <field name="name">Лента</field>
+    <field name="model_id" ref="coop_projects.model_coop_project"/>
+    <field name="state">code</field>
+    <field name="path">project-feed</field>
+    <field name="code">action = model.action_coop_project_feed()</field>
+  </record>
+
+  <menuitem id="menu_coop_project_feed" name="Лента"
+            parent="coop_projects.menu_coop_projects_root"
+            action="action_coop_project_feed" sequence="17"/>
+
 </odoo>

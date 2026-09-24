@@ -5,6 +5,7 @@ from odoo import api, models
 
 from ..data import rubrics
 from ..data import load_project_updates
+from ..data import load_project_follows
 from ..data import load_okved
 from ..data import load_accounts
 from ..data import (emblems, load_attributes, load_biography, load_bounty,
@@ -187,6 +188,9 @@ class CoopDemoLoader(models.AbstractModel):
         # должно быть окончательным.
         if 'project.update' in self.env:
             load_project_updates.load_project_updates(self.env)
+        # Подписки на проекты — после отчётов о ходе: главного участника
+        # витрины подписываем на проекты, где новости уже есть.
+        load_project_follows.load_project_follows(self.env)
         # Суммы проектов — до всего остального, что на них смотрит:
         # готовность, доли и вехи считаются от «нужно».
         load_projects.repair_scales(self.env)
