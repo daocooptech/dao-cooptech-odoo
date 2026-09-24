@@ -130,6 +130,10 @@
         <div t-if="!state.info.received.length" class="text-muted">
           За эту запись подарков пока нет.
         </div>
+        <div t-if="state.info.received_notes.length" class="o_coop_thanks_tax mb-2">
+          <i class="fa fa-university"/>
+          <div><div t-foreach="state.info.received_notes" t-as="line" t-key="line_index" t-out="line"/></div>
+        </div>
         <div t-foreach="state.info.received" t-as="t" t-key="t.id" class="o_coop_thanks_row">
           <div class="o_coop_thanks_who">
             <b t-out="t.sender_name"/>
@@ -194,6 +198,13 @@
         <label class="form-label">Сумма подарка</label>
         <input class="form-control mb-3" inputmode="decimal" t-model="state.amount"
                t-att-placeholder="state.channel === 'sbp' ? '500 ₽' : '10 ' + (state.token or '')"/>
+        <div t-if="(state.info.taxes[state.channel] or []).length" class="o_coop_thanks_tax mb-3">
+          <i class="fa fa-university"/>
+          <div>
+            <b>Налоги</b>
+            <div t-foreach="state.info.taxes[state.channel]" t-as="line" t-key="line_index" t-out="line"/>
+          </div>
+        </div>
         <label class="o_coop_thanks_understood">
           <input type="checkbox" t-model="state.understood"/>
           <span>Понимаю: это подарок. Автор ничего не должен мне взамен, я не

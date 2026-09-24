@@ -226,3 +226,16 @@
 
   .fa-bolt { opacity: .6; margin-right: 4px; }
 }
+
+// Налоги в окне подарка — справкой, тише основного текста.
+.o_coop_thanks_tax {
+  display: flex;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, .035);
+  font-size: 13px;
+
+  .fa-university { opacity: .55; margin-top: 3px; }
+  b { display: block; margin-bottom: 2px; }
+}
