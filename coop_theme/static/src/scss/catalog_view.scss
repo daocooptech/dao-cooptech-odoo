@@ -998,6 +998,15 @@
 // Сердечко общего вида каталогов (решение 408) — поверх правого верхнего
 // угла карточки, то есть поверх снимка. Карточке нужна точка отсчёта.
 .o_coop_catalog_kanban_heart_host,
-.o_kanban_renderer .o_kanban_record:has(> .o_coop_fav) {
+.o_kanban_record:has(> .o_coop_fav) {
   position: relative;
+}
+
+// Прямые потомки карточки движок тянет на всю её высоту (карточка —
+// гибкий ряд), и звёздочка становилась белой полосой во всю карточку —
+// 440 точек вместо 28 (замерено 24 сентября 2026 в каталоге людей).
+.o_kanban_record > .o_coop_fav {
+  height: 28px;
+  align-self: flex-start;
+  bottom: auto;
 }
