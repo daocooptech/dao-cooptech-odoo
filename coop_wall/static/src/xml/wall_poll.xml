@@ -23,13 +23,14 @@
 
       <div class="o_coop_poll_options">
         <t t-foreach="poll.options" t-as="option" t-key="option.id">
-          <!-- До голоса — кнопки без чисел: итог не должен подсказывать. -->
-          <button t-if="poll.can_vote" type="button" class="o_coop_poll_choice"
-                  t-att-disabled="state.busy" t-on-click="() => this.vote(option)">
-            <t t-out="option.name"/>
-          </button>
-          <div t-elif="poll.see" class="o_coop_poll_result"
-               t-att-class="{ 'o_coop_poll_mine': poll.mine === option.id }">
+          <!-- Итог — тому, кому его уже можно видеть (сервер решает, кому
+               отдать числа). Автор видит итог и до своего голоса и
+               голосует щелчком по строке. -->
+          <div t-if="poll.see" class="o_coop_poll_result"
+               t-att-class="{ 'o_coop_poll_mine': poll.mine === option.id, 'o_coop_poll_votable': poll.can_vote }"
+               t-att-role="poll.can_vote ? 'button' : undefined"
+               t-att-title="poll.can_vote ? 'Проголосовать за этот вариант' : undefined"
+               t-on-click="() => poll.can_vote and this.vote(option)">
             <div class="o_coop_poll_fill" t-attf-style="width: {{ option.percent }}%"/>
             <span class="o_coop_poll_name">
               <i t-if="poll.mine === option.id" class="fa fa-check-circle" aria-label="Ваш выбор"/>
@@ -39,10 +40,15 @@
             <button t-if="poll.is_public and option.count" type="button"
                     class="o_coop_poll_voters_btn"
                     t-att-title="'Кто выбрал: ' + option.count"
-                    t-on-click="() => this.toggleVoters(option)">
+                    t-on-click.stop="() => this.toggleVoters(option)">
               <i class="fa fa-users"/> <t t-out="option.count"/>
             </button>
           </div>
+          <!-- До голоса — кнопки без чисел: итог не должен подсказывать. -->
+          <button t-elif="poll.can_vote" type="button" class="o_coop_poll_choice"
+                  t-att-disabled="state.busy" t-on-click="() => this.vote(option)">
+            <t t-out="option.name"/>
+          </button>
           <div t-else="" class="o_coop_poll_result o_coop_poll_hidden">
             <span class="o_coop_poll_name" t-out="option.name"/>
           </div>

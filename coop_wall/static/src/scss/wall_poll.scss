@@ -6,6 +6,7 @@
 
 .o_coop_poll {
   margin-top: 8px;
+  width: 100%;
   padding: 12px 14px;
   max-width: 520px;
   border: 1px solid var(--border-color, rgba(0, 0, 0, .1));
@@ -127,4 +128,11 @@
   margin-left: auto;
   padding: 0;
   font-size: 12px;
+}
+
+// Автор голосует щелчком по строке итога.
+.o_coop_poll_votable {
+  cursor: pointer;
+
+  &:hover { outline: 1px solid var(--coop-teal, #146b64); }
 }
