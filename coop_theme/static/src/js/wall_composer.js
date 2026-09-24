@@ -2,6 +2,9 @@
 
 import { toRaw } from "@odoo/owl";
 import { checkFileSize } from "@web/core/utils/files";
+import { isHtmlEmpty } from "@web/core/utils/html";
+import { patch } from "@web/core/utils/patch";
+import { Composer } from "@mail/core/common/composer";
 import { markEventHandled } from "@web/core/utils/misc";
 import {
     composerActionsRegistry,
@@ -146,3 +149,28 @@ for (const id of ["add-canned-response", "open-full-composer"]) {
         condition: (p) => !onWall(p) && (typeof d.condition === "function" ? d.condition(p) : true),
     }));
 }
+
+/**
+ * Телефон: «Опубликовать» — галочкой, рядом крестик «Очистить».
+ * Разметка — `xml/wall_composer.xml`.
+ *
+ * Крестик снимает и загруженные в черновик файлы — тем же путём, что
+ * корзинка на самом вложении: иначе они остались бы на сервере
+ * ничьими. Движковый `clear()` чистит только поле в браузере.
+ */
+patch(Composer.prototype, {
+    get coopWallSmall() {
+        return this.ui.isSmall && WALL_MODELS.includes(this.thread?.model) && !this.props.composer.message;
+    },
+
+    get coopDraftEmpty() {
+        return isHtmlEmpty(this.props.composer.composerHtml) && !this.props.composer.attachments.length;
+    },
+
+    async coopDiscard() {
+        for (const attachment of [...this.props.composer.attachments]) {
+            await this.attachmentUploader.unlink(attachment);
+        }
+        this.clear();
+    },
+});

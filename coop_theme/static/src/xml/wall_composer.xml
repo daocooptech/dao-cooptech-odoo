@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+  <!--
+    Стена на телефоне: «Опубликовать» — галочкой, рядом крестик «Очистить».
+
+    Владелец 24 сентября 2026: «если на телефоне кнопка не помещается,
+    значит сделай иконки, выдели их, галочку и крестик». Под полем записи
+    пять кнопок (`js/wall_composer.js`), и с надписью «Опубликовать» ряд в
+    ширину телефона не входил. На большом экране надпись остаётся.
+  -->
+  <t t-name="coop_theme.ComposerSendButton" t-inherit="mail.Composer.sendButton" t-inherit-mode="extension">
+    <xpath expr="//t[@t-out='SEND_TEXT']" position="attributes">
+      <attribute name="t-if">thread and thread.model !== 'discuss.channel' and !coopWallSmall</attribute>
+    </xpath>
+    <xpath expr="//t[@t-out='SEND_TEXT']" position="after">
+      <i t-elif="coopWallSmall" class="fa fa-fw fa-check"/>
+    </xpath>
+    <xpath expr="//button" position="attributes">
+      <attribute name="t-att-title">SEND_TEXT</attribute>
+    </xpath>
+  </t>
+
+  <t t-name="coop_theme.ComposerDiscard" t-inherit="mail.Composer" t-inherit-mode="extension">
+    <xpath expr="//t[@t-call='mail.Composer.sendButton']" position="after">
+      <button t-if="coopWallSmall" class="o_coop_wall_discard btn btn-secondary btn-sm"
+              title="Очистить" aria-label="Очистить"
+              t-att-disabled="coopDraftEmpty"
+              t-on-click="coopDiscard">
+        <i class="fa fa-fw fa-times"/>
+      </button>
+    </xpath>
+  </t>
+</templates>

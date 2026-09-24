@@ -557,3 +557,19 @@
     dd { margin: 0; opacity: .8; }
   }
 }
+
+// Галочка и крестик под полем записи на телефоне (`xml/wall_composer.xml`)
+// — квадратные, одного размера, залитые: владелец просил «выдели их».
+.o-mail-Composer-send:has(> .fa-check),
+.o_coop_wall_discard {
+  width: 34px;
+  height: 30px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.o_coop_wall_discard {
+  margin-left: 6px;
+}
