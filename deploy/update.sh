@@ -189,7 +189,9 @@ if [ "${units_changed:-0}" = "1" ]; then
     systemctl enable --now coop-backup.timer || true
 fi
 
-if [ "$before" = "$after" ]; then
+# Принудительная пересборка пакетов работает и без новых коммитов: она
+# нужна как раз тогда, когда код уже на месте, а отдаётся старый пакет.
+if [ "$before" = "$after" ] && [ -z "${COOP_FORCE_ASSETS:-}" ]; then
     say "Изменений нет ($after)"
     exit 0
 fi
