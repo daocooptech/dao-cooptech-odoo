@@ -27,7 +27,10 @@ class CoopProjectFeed(models.Model):
             ('partner_id', '=', partner.id),
             ('res_model', '=', 'coop.project'),
         ]).mapped('res_id')
-        return self.browse(ids).exists()
+        # Только те, что человеку можно читать: подписка переживает смену
+        # состояния проекта, и среди подписанных бывают уже скрытые от
+        # него — лента падала на них «Ошибкой доступа».
+        return self.browse(ids).exists()._filtered_access('read')
 
     @api.model
     def action_coop_project_feed(self):
