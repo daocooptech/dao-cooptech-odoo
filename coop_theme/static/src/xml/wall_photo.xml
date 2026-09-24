@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+  <!-- Окно «картинкой или файлом» — `js/wall_photo.js`. -->
+  <t t-name="coop_theme.PhotoModeDialog">
+    <Dialog title="title" size="'md'" contentClass="'o_coop_photo_mode'">
+      <div class="o_coop_photo_mode_previews">
+        <img t-foreach="previews" t-as="p" t-key="p.url"
+             t-att-src="p.url" t-att-alt="p.file.name"/>
+        <span t-if="more" class="o_coop_photo_mode_more">+<t t-out="more"/></span>
+      </div>
+      <dl class="o_coop_photo_mode_help">
+        <dt>Картинкой</dt>
+        <dd>снимок виден прямо в записи</dd>
+        <dt>Файлом</dt>
+        <dd>в записи карточка с именем, снимок скачивают целиком</dd>
+      </dl>
+      <t t-set-slot="footer">
+        <button class="btn btn-primary" t-on-click="() => this.choose(false)">Картинкой</button>
+        <button class="btn btn-secondary" t-on-click="() => this.choose(true)">Файлом</button>
+      </t>
+    </Dialog>
+  </t>
+</templates>

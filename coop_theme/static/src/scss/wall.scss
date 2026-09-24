@@ -513,3 +513,38 @@
     }
   }
 }
+
+// ── Окно «картинкой или файлом» ──────────────────────────────────────
+//
+// `js/wall_photo.js`. Снимки — рядом, квадратами одной высоты: окно
+// спрашивает «как», и снимки в нём только напоминают, о чём речь.
+.o_coop_photo_mode {
+
+  .o_coop_photo_mode_previews {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 16px;
+
+    img {
+      width: 88px;
+      height: 88px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+  }
+
+  .o_coop_photo_mode_more {
+    font-weight: 600;
+    opacity: .7;
+  }
+
+  .o_coop_photo_mode_help {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 4px 12px;
+    margin: 0;
+
+    dd { margin: 0; opacity: .8; }
+  }
+}

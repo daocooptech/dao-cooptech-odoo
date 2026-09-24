@@ -15,7 +15,7 @@ import { coopIsPlatformModel } from "@coop_theme/js/platform_page";
 // платформы, см. `mailLayout` ниже. Разводить их пришлось потому, что
 // теснота карточки не зависит от того, стена перед нами или журнал, а
 // приглашение публиковать — очень даже.
-const WALL_MODELS = ["res.partner", "coop.project", "coop.community"];
+export const WALL_MODELS = ["res.partner", "coop.project", "coop.community"];
 
 /**
  * Лента — под карточкой, а не сбоку. На всех страницах платформы.
