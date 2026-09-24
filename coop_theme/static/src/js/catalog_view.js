@@ -193,12 +193,22 @@ export class CoopCatalogKanbanController extends KanbanController {
         // Отбор раздела снимается один раз — при первом же обращении, то
         // есть на первой отрисовке, когда умолчания действия уже
         // применены, а человек ещё ничего не нажимал.
-        if (this.sectionFacets === undefined) {
-            this.sectionFacets = currentFacets;
+        //
+        // Пишется в объект, заведённый в `setup`, а не в `this`: геттер
+        // зовёт шаблон, а у шаблона `this` — не сам контроллер, а его
+        // область видимости, новая на каждую отрисовку. Запись в `this`
+        // оседала в ней и терялась, отбор раздела снимался заново каждый
+        // раз — вместе с фильтром панели, — и экран всегда выходил
+        // «чистым»: полки не уходили ни от какого отбора. Измерено
+        // 24 сентября 2026: у контроллера `sectionFacets` не было вовсе,
+        // хотя полки стояли на экране.
+        const section = this.coopSection;
+        if (section.facets === undefined) {
+            section.facets = currentFacets;
         }
         // Подмножество, а не равенство: сняв умолчание раздела, человек
         // тоже оказывается на чистом экране, и полки должны вернуться.
-        return currentFacets.every((key) => this.sectionFacets.includes(key));
+        return currentFacets.every((key) => section.facets.includes(key));
     }
 
     setup() {
@@ -214,6 +224,10 @@ export class CoopCatalogKanbanController extends KanbanController {
         // «loading» с самого начала: пока полки не сказали своё число,
         // лента не показывается, иначе она мелькнёт и исчезнет.
         this.coopShelves = useState({ status: "loading", count: 0 });
+        // Отбор раздела — см. `coopSearchIsClean`. Простой объект, не
+        // `useState`: он пишется во время отрисовки и перерисовку
+        // вызывать не должен.
+        this.coopSection = { facets: undefined };
         this.coopSort = useState(coopSort);
         // Перезагружаем список, когда сменили признак сортировки. Через
         // общее состояние, а не через событие: порядок выбирают в панели
