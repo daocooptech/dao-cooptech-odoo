@@ -2,3 +2,4 @@
 from . import ir_attachment
 from . import coop_wall_comment
 from . import mail_message
+from . import coop_wall_thanks

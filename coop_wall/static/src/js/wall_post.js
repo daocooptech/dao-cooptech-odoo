@@ -22,7 +22,7 @@ import { WALL_MODELS } from "@coop_theme/js/wall";
 // удалить, количество комментариев цифрой, иконка избранного, слово в
 // избранное удалить».
 //
-// Ряд — только значки и числа: 👍 N, 👎 N, 💬 N, ↻ N, ☆. Лайк и дизлайк —
+// Ряд — только значки и числа: 👍 N, 👎 N, 💬 N, ↻ N, 🎁 N, ☆. Лайк и дизлайк —
 // реакции движка 👍 и 👎 (`mail.message.reaction`): хранятся, считаются и
 // приходят в браузер тем же путём, что прочие реакции, и из общего
 // списка реакций под записью стены убраны, чтобы не стоять дважды.
@@ -187,6 +187,14 @@ export class CoopWallPostFooter extends Component {
         });
     }
 
+    get thanks() {
+        return this.props.message.coop_thanks_count || 0;
+    }
+
+    onThanks() {
+        this.env.services.dialog.add(CoopThanksDialog, { message: this.props.message });
+    }
+
     onStar() {
         this.props.message.toggleStar();
     }
@@ -265,7 +273,81 @@ export class CoopRepostDialog extends Component {
     }
 }
 
-/** Исходная запись карточкой внутри репоста. */
+/**
+ * «Поблагодарить» (решение 406). Платформа денег не касается: рубли даритель
+ * переводит в своём банке по СБП автора, TON — на адрес автора; здесь он
+ * только отмечает, что перевод сделан, а автор — пришли ли деньги.
+ *
+ * Автор своей записи видит в этом же окне, кто и сколько прислал, и
+ * отмечает каждую благодарность.
+ */
+export class CoopThanksDialog extends Component {
+    static components = { Dialog };
+    static props = ["message", "close"];
+    static template = "coop_wall.ThanksDialog";
+
+    setup() {
+        this.orm = useService("orm");
+        this.notification = useService("notification");
+        this.state = useState({
+            info: null, channel: "sbp", amount: "", understood: false, busy: false,
+        });
+        this.load();
+    }
+
+    async load() {
+        const info = await this.orm.call("coop.wall.thanks", "coop_info", [this.props.message.id]);
+        this.state.info = info;
+        this.state.channel = info.sbp ? "sbp" : "ton";
+    }
+
+    get canSend() {
+        const amount = parseFloat(String(this.state.amount).replace(",", "."));
+        return this.state.understood && amount > 0 && !this.state.busy;
+    }
+
+    async declare() {
+        if (!this.canSend) {
+            return;
+        }
+        this.state.busy = true;
+        try {
+            await this.orm.call("coop.wall.thanks", "coop_declare", [
+                this.props.message.id,
+                this.state.channel,
+                parseFloat(String(this.state.amount).replace(",", ".")),
+                this.state.understood,
+            ]);
+            this.notification.add(
+                "Благодарность записана. Автор отметит, когда деньги придут.",
+                { type: "success" }
+            );
+            this.props.close();
+        } finally {
+            this.state.busy = false;
+        }
+    }
+
+    async mark(item, state) {
+        const updated = await this.orm.call("coop.wall.thanks", "coop_set_state", [item.id, state]);
+        Object.assign(item, updated);
+        const confirmed = new Set(
+            this.state.info.received.filter((t) => t.state === "confirmed").map((t) => t.sender_id)
+        );
+        this.props.message.coop_thanks_count = confirmed.size;
+    }
+
+    formatDate(item) {
+        return deserializeDateTime(item.date).toFormat("d MMM, HH:mm");
+    }
+
+    formatAmount(item) {
+        const n = item.currency === "TON" ? item.amount : Math.round(item.amount);
+        return `${n.toLocaleString("ru-RU")} ${item.currency}`;
+    }
+}
+
+
 export class CoopRepostCard extends Component {
     static props = ["repost"];
     static template = "coop_wall.RepostCard";
@@ -315,13 +397,14 @@ patch(MessageReactions.prototype, {
     },
 });
 
-// Репост: карточка исходника и число репостов приходят с сервера
+// Репост и благодарности: карточка исходника и числа приходят с сервера
 // (`models/mail_message.py`, `_to_store_defaults`).
 patch(MessageModel.prototype, {
     setup() {
         super.setup(...arguments);
         this.coop_repost = fields.Attr(false);
         this.coop_repost_count = fields.Attr(0);
+        this.coop_thanks_count = fields.Attr(0);
     },
 
     // Репост без своих слов — не пустая запись: в нём карточка. Иначе

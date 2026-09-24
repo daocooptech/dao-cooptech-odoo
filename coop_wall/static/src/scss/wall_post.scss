@@ -162,3 +162,52 @@
   border-left: 3px solid var(--border-color, rgba(0, 0, 0, .15));
   font-size: 13px;
 }
+
+// ── Благодарности (решение 406) ──────────────────────────────────────
+
+.o_coop_thanks_row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-color, rgba(0, 0, 0, .08));
+}
+
+.o_coop_thanks_who {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  align-items: baseline;
+}
+
+.o_coop_thanks_marks {
+  display: flex;
+  gap: 6px;
+}
+
+.o_coop_thanks_state {
+  font-size: 12px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, .06);
+
+  &[data-state="confirmed"] { background: rgba(25, 135, 84, .15); }
+  &[data-state="unconfirmed"],
+  &[data-state="disputed"] { background: rgba(220, 53, 69, .12); }
+}
+
+.o_coop_thanks_req {
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+
+.o_coop_thanks_understood {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 13px;
+
+  input { margin-top: 3px; flex-shrink: 0; }
+}

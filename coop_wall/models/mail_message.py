@@ -28,6 +28,7 @@ class MailMessage(models.Model):
         return super()._to_store_defaults(target) + [
             Store.Attr('coop_repost', lambda m: m._coop_repost_data()),
             Store.Attr('coop_repost_count', lambda m: m._coop_repost_count()),
+            Store.Attr('coop_thanks_count', lambda m: m._coop_thanks_count()),
         ]
 
     def _coop_repost_data(self):
@@ -59,6 +60,16 @@ class MailMessage(models.Model):
         if self.model not in WALL_MODELS or self.message_type != 'comment':
             return 0
         return self.sudo().search_count([('coop_repost_of_id', '=', self.id)])
+
+    def _coop_thanks_count(self):
+        """Сколько разных людей поблагодарили, и автор это подтвердил.
+        Без сумм: суммы видит только автор (решение 406)."""
+        self.ensure_one()
+        if self.model not in WALL_MODELS or self.message_type != 'comment':
+            return 0
+        thanks = self.env['coop.wall.thanks'].sudo().search([
+            ('post_id', '=', self.id), ('state', '=', 'confirmed')])
+        return len(thanks.mapped('sender_id'))
 
     # ── Для браузера ─────────────────────────────────────────────────
 

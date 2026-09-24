@@ -46,6 +46,10 @@
           <i class="fa fa-retweet"/>
           <span class="o_coop_post_count" t-out="reposts"/>
         </button>
+        <button class="o_coop_post_act" title="Поблагодарить" t-on-click="onThanks">
+          <i class="fa fa-gift"/>
+          <span class="o_coop_post_count" t-out="thanks"/>
+        </button>
         <button t-if="canStar" class="o_coop_post_act"
                 t-att-class="{ 'o_coop_post_act_on': props.message.starred }"
                 t-att-title="props.message.starred ? 'Убрать из избранного' : 'В избранное'"
@@ -117,5 +121,68 @@
       </t>
       <div t-else="" class="o_coop_repost_gone">Исходная запись недоступна.</div>
     </div>
+  </t>
+
+  <t t-name="coop_wall.ThanksDialog">
+    <Dialog title="state.info and state.info.own ? 'Благодарности за запись' : 'Поблагодарить автора'" size="'md'">
+      <div t-if="!state.info" class="text-muted">Загрузка…</div>
+      <t t-elif="state.info.own">
+        <div t-if="!state.info.received.length" class="text-muted">
+          За эту запись вас пока не благодарили.
+        </div>
+        <div t-foreach="state.info.received" t-as="t" t-key="t.id" class="o_coop_thanks_row">
+          <div class="o_coop_thanks_who">
+            <b t-out="t.sender_name"/>
+            <span t-out="formatAmount(t)"/>
+            <span class="text-muted" t-out="formatDate(t)"/>
+            <span class="o_coop_thanks_state" t-att-data-state="t.state" t-out="t.state_label"/>
+          </div>
+          <div t-if="t.state === 'declared'" class="o_coop_thanks_marks">
+            <button class="btn btn-sm btn-primary" t-on-click="() => this.mark(t, 'confirmed')">Пришло</button>
+            <button class="btn btn-sm btn-secondary" t-on-click="() => this.mark(t, 'unconfirmed')">Не пришло</button>
+          </div>
+          <div t-elif="t.state === 'confirmed'" class="o_coop_thanks_marks">
+            <button class="btn btn-sm btn-link p-0" t-on-click="() => this.mark(t, 'returned')">Вернуть</button>
+          </div>
+        </div>
+      </t>
+      <div t-elif="!state.info.can_thank" class="text-muted" t-out="state.info.reason"/>
+      <t t-else="">
+        <div class="btn-group mb-3 w-100">
+          <button class="btn" t-att-class="state.channel === 'sbp' ? 'btn-primary' : 'btn-secondary'"
+                  t-att-disabled="!state.info.sbp" t-on-click="() => this.state.channel = 'sbp'">Рублями по СБП</button>
+          <button class="btn" t-att-class="state.channel === 'ton' ? 'btn-primary' : 'btn-secondary'"
+                  t-att-disabled="!state.info.ton_address" t-on-click="() => this.state.channel = 'ton'">TON</button>
+        </div>
+        <p t-if="state.channel === 'sbp'">
+          Переведите в своём банке по СБП:
+          <b class="o_coop_thanks_req" t-out="state.info.sbp"/>
+          <br/><span class="text-muted">
+            От <t t-out="state.info.limits.rub_min"/> до <t t-out="state.info.limits.rub_max"/> ₽.
+          </span>
+        </p>
+        <p t-else="">
+          Адрес <t t-out="state.info.author_name"/> в TON:
+          <code class="o_coop_thanks_req" t-out="state.info.ton_address"/>
+          <br/><span class="text-muted">
+            Переведите из своего кошелька — отправка из кошелька платформы пока не подключена.
+          </span>
+        </p>
+        <label class="form-label">Сколько перевели</label>
+        <input class="form-control mb-3" inputmode="decimal" t-model="state.amount"
+               t-att-placeholder="state.channel === 'sbp' ? '500' : '1.5'"/>
+        <label class="o_coop_thanks_understood">
+          <input type="checkbox" t-model="state.understood"/>
+          <span>Понимаю: это подарок. Автор ничего не должен мне взамен, я не
+          получаю за это доступ, услугу или право. Деньги идут напрямую
+          автору — платформа их не получает и не хранит.</span>
+        </label>
+      </t>
+      <t t-set-slot="footer">
+        <button t-if="state.info and !state.info.own and state.info.can_thank"
+                class="btn btn-primary" t-att-disabled="!canSend" t-on-click="declare">Перевод сделан</button>
+        <button class="btn btn-secondary" t-on-click="props.close">Закрыть</button>
+      </t>
+    </Dialog>
   </t>
 </templates>

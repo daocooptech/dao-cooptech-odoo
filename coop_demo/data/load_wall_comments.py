@@ -256,3 +256,81 @@ def load_wall_reposts(env):
         Message.create(rows)
     _logger.info("Репосты на стенах: заведено %s", len(rows))
     return len(rows)
+
+
+def load_wall_thanks(env, login='dashkevich'):
+    """Благодарности авторам записей (решение 406) — около ста шестидесяти.
+
+    Приём включён примерно у трети людей и у главного участника витрины;
+    телефоны СБП — заведомо учебные, из диапазона +7 900 000-xx-xx. TON —
+    только тем, у кого в кошельке есть адрес TON. Состояния — все пять,
+    неровно: больше подтверждённых, есть заявленные (их автор может
+    отметить сам), не пришедшие, возвращённые и спорные. Время — между
+    записью и сегодняшним днём.
+
+    Прогон один: если благодарности уже есть, ничего не делается.
+    """
+    Thanks = env['coop.wall.thanks'].sudo()
+    if Thanks.search_count([], limit=1):
+        _logger.info("Благодарности: уже наполнено, пропускаю")
+        return 0
+    Message = env['mail.message'].sudo()
+    Partner = env['res.partner'].sudo()
+    rnd = random.Random(20260924 + 407)
+    now = datetime.now()
+    people = list(Partner.search([
+        ('coop_is_participant', '=', True), ('is_company', '=', False),
+        ('name', 'not in', TEST_NAMES),
+    ]))
+    if len(people) < 30:
+        return 0
+    showcase = env['res.users'].sudo().search(
+        [('login', '=', login)], limit=1).partner_id
+    takers = [p for p in people if rnd.random() < 0.35]
+    if showcase and showcase not in takers:
+        takers.append(showcase)
+    for n, person in enumerate(takers):
+        person.write({
+            'coop_thanks_on': True,
+            'coop_thanks_sbp': '+7 900 000-%02d-%02d' % (n // 100 % 100, n % 100),
+        })
+    ton = {p.id for p in takers if Thanks._coop_ton_address(p)}
+
+    posts = list(Message.search([
+        ('model', '=', 'res.partner'), ('message_type', '=', 'comment'),
+        ('subtype_id.internal', '=', False),
+        ('author_id', 'in', [p.id for p in takers]),
+    ]))
+    if not posts:
+        return 0
+    mine = [p for p in posts if showcase and p.author_id == showcase]
+    others = [p for p in posts if p not in mine]
+    chosen = mine + rnd.sample(others, min(len(others), 95))
+    states = (['confirmed'] * 11 + ['declared'] * 4 + ['unconfirmed'] * 2
+              + ['returned'] + ['disputed'] * 2)
+    rows = []
+    for post in chosen:
+        for _n in range(rnd.choice((1, 1, 1, 2, 2, 3)) + (1 if post in mine else 0)):
+            sender = rnd.choice(people)
+            if sender == post.author_id:
+                continue
+            channel = 'ton' if post.author_id.id in ton and rnd.random() < 0.3 else 'sbp'
+            amount = (rnd.choice((0.5, 1, 1, 2, 3, 5, 10)) if channel == 'ton'
+                      else rnd.choice((50, 100, 100, 150, 200, 300, 500, 500, 700, 1000, 1500, 2000, 3000)))
+            start = post.date or now
+            window = min(now - start, timedelta(days=12))
+            if window <= timedelta(minutes=10):
+                continue
+            rows.append({
+                'post_id': post.id,
+                'sender_id': sender.id,
+                'recipient_id': post.author_id.id,
+                'channel': channel,
+                'amount': amount,
+                'state': rnd.choice(states),
+                'date': start + window * rnd.uniform(0.05, 1.0),
+            })
+    if rows:
+        Thanks.create(rows)
+    _logger.info("Благодарности: приём у %s человек, заведено %s", len(takers), len(rows))
+    return len(rows)
