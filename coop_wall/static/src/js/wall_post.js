@@ -6,19 +6,28 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
 import { Message } from "@mail/core/common/message";
+import { MessageReactions } from "@mail/core/common/message_reactions";
 import { WALL_MODELS } from "@coop_theme/js/wall";
 
 // Под записью на стене — ряд действий и комментарии.
 //
 // Владелец 24 сентября 2026 (решение 404): «сделать комментарии к
-// постам на стене, оценку смайликом, иконку вознаграждение … и сделать
-// репост или сохранить в избранное».
+// постам на стене, оценку смайликом … и сделать репост или сохранить в
+// избранное». Следом, о виде ряда: «надпись оценить надо убрать, вместо
+// неё цифрами количество лайков, иконка лайка, иконка дизлайка,
+// количество дизлайков, иконка комментария, слово комментировать
+// удалить, количество комментариев цифрой, иконка избранного, слово в
+// избранное удалить».
 //
-// Реакция смайликом и звёздочка «в избранное» у движка есть, но прячутся
-// в меню, которое появляется только при наведении мыши, — на телефоне их
-// не найти вовсе. Здесь они вынесены в ряд под записью, как в соцсетях,
-// и вызывают то же самое, что меню движка. Комментарии — свои
-// (`coop.wall.comment`, почему — в модели).
+// Ряд — только значки и числа: 👍 N, 👎 N, 💬 N, ☆. Лайк и дизлайк —
+// реакции движка 👍 и 👎 (`mail.message.reaction`): хранятся, считаются и
+// приходят в браузер тем же путём, что прочие реакции, и из общего
+// списка реакций под записью стены убраны, чтобы не стоять дважды.
+// Звёздочка — избранное движка. Комментарии — свои (`coop.wall.comment`,
+// почему — в модели).
+
+export const LIKE = "👍";
+export const DISLIKE = "👎";
 
 /**
  * Комментарии всех записей экрана — одним запросом.
@@ -79,8 +88,11 @@ registry.category("services").add("coop_wall_comments", coopWallCommentsService)
 const SHOWN = 2;
 
 export class CoopWallPostFooter extends Component {
-    static props = ["message", "thread", "owner"];
+    static props = ["message", "thread"];
     static template = "coop_wall.WallPostFooter";
+
+    LIKE = LIKE;
+    DISLIKE = DISLIKE;
 
     setup() {
         this.comments = useService("coop_wall_comments");
@@ -107,6 +119,38 @@ export class CoopWallPostFooter extends Component {
         return this.props.message.canAddReaction(this.props.thread);
     }
 
+    reaction(content) {
+        return this.props.message.reactions.find((r) => r.content === content);
+    }
+
+    count(content) {
+        return this.reaction(content)?.count || 0;
+    }
+
+    mine(content) {
+        const reaction = this.reaction(content);
+        return Boolean(reaction && this.props.message.effectiveSelf.in(reaction.personas));
+    }
+
+    /**
+     * Лайк и дизлайк взаимно исключают друг друга: поставил один — второй,
+     * если был, снимается. Повторное нажатие снимает свой.
+     */
+    async toggle(content) {
+        if (!this.canReact) {
+            return;
+        }
+        if (this.mine(content)) {
+            await this.reaction(content).remove();
+            return;
+        }
+        const other = content === LIKE ? DISLIKE : LIKE;
+        if (this.mine(other)) {
+            await this.reaction(other).remove();
+        }
+        await this.props.message.react(content);
+    }
+
     get canStar() {
         return this.props.message.canToggleStar;
     }
@@ -121,10 +165,6 @@ export class CoopWallPostFooter extends Component {
 
     formatDate(comment) {
         return deserializeDateTime(comment.date).toFormat("d MMM, HH:mm");
-    }
-
-    onReact(ev) {
-        this.props.owner.reactionPicker?.open({ el: ev.currentTarget });
     }
 
     onComment() {
@@ -180,5 +220,18 @@ patch(Message.prototype, {
             !this.message.isNote &&
             this.message.id > 0
         );
+    },
+});
+
+// Лайк и дизлайк на стене стоят в ряду под записью со своими числами —
+// в общем списке реакций движка они были бы вторым разом.
+patch(MessageReactions.prototype, {
+    get coopReactions() {
+        const reactions = this.props.message.reactions;
+        const thread = this.props.message.thread;
+        if (!this.env.inChatter || !WALL_MODELS.includes(thread?.model)) {
+            return reactions;
+        }
+        return reactions.filter((r) => r.content !== LIKE && r.content !== DISLIKE);
     },
 });

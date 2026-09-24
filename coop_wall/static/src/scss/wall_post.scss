@@ -8,10 +8,12 @@
   margin-top: 6px;
 }
 
+// Только значки и числа — подписей нет (владелец: «слово комментировать
+// удалить», «слово в избранное удалить»).
 .o_coop_post_bar {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 14px;
+  gap: 4px 18px;
 }
 
 .o_coop_post_act {
@@ -34,14 +36,11 @@
 }
 
 .o_coop_post_count {
-  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
-// На телефоне подписи у кнопок убираются: четыре значка с подписями в
-// ширину телефона не входят, а значки и так узнаваемы.
-@media (max-width: 575.98px) {
-  .o_coop_post_act > span { display: none; }
-  .o_coop_post_bar { gap: 4px 22px; }
+.o_coop_post_act:disabled {
+  opacity: .6;
 }
 
 // ── Комментарии ─────────────────────────────────────────────────────

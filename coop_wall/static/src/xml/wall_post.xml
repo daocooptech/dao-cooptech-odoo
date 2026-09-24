@@ -4,27 +4,41 @@
   <!-- Ряд действий и комментарии под записью стены — `js/wall_post.js`. -->
   <t t-name="coop_wall.MessageWallFooter" t-inherit="mail.Message" t-inherit-mode="extension">
     <xpath expr="//t[@name='after-reactions']" position="after">
-      <CoopWallPostFooter t-if="coopIsWallPost" message="message" thread="props.thread" owner="this"/>
+      <CoopWallPostFooter t-if="coopIsWallPost" message="message" thread="props.thread"/>
+    </xpath>
+  </t>
+
+  <!-- Лайк и дизлайк на стене — в ряду под записью, не в общем списке. -->
+  <t t-name="coop_wall.MessageReactionsNoLikes" t-inherit="mail.MessageReactions" t-inherit-mode="extension">
+    <xpath expr="//t[@t-foreach='props.message.reactions']" position="attributes">
+      <attribute name="t-foreach">coopReactions</attribute>
     </xpath>
   </t>
 
   <t t-name="coop_wall.WallPostFooter">
     <div class="o_coop_post_footer">
       <div class="o_coop_post_bar">
-        <button t-if="canReact" class="o_coop_post_act" title="Оценить" t-on-click="onReact">
-          <i class="fa fa-smile-o"/><span>Оценить</span>
+        <button class="o_coop_post_act" title="Нравится"
+                t-att-class="{ 'o_coop_post_act_on': mine(LIKE) }"
+                t-att-disabled="!canReact" t-on-click="() => this.toggle(LIKE)">
+          <i t-att-class="mine(LIKE) ? 'fa fa-thumbs-up' : 'fa fa-thumbs-o-up'"/>
+          <span class="o_coop_post_count" t-out="count(LIKE)"/>
         </button>
-        <button class="o_coop_post_act" title="Комментировать" t-on-click="onComment">
+        <button class="o_coop_post_act" title="Не нравится"
+                t-att-class="{ 'o_coop_post_act_on': mine(DISLIKE) }"
+                t-att-disabled="!canReact" t-on-click="() => this.toggle(DISLIKE)">
+          <i t-att-class="mine(DISLIKE) ? 'fa fa-thumbs-down' : 'fa fa-thumbs-o-down'"/>
+          <span class="o_coop_post_count" t-out="count(DISLIKE)"/>
+        </button>
+        <button class="o_coop_post_act" title="Комментарии" t-on-click="onComment">
           <i class="fa fa-comment-o"/>
-          <span>Комментировать</span>
-          <b t-if="list.length" class="o_coop_post_count" t-out="list.length"/>
+          <span class="o_coop_post_count" t-out="list.length"/>
         </button>
         <button t-if="canStar" class="o_coop_post_act"
                 t-att-class="{ 'o_coop_post_act_on': props.message.starred }"
                 t-att-title="props.message.starred ? 'Убрать из избранного' : 'В избранное'"
                 t-on-click="onStar">
           <i t-att-class="props.message.starred ? 'fa fa-star' : 'fa fa-star-o'"/>
-          <span t-out="props.message.starred ? 'В избранном' : 'В избранное'"/>
         </button>
       </div>
 

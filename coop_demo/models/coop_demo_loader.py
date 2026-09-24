@@ -204,6 +204,7 @@ class CoopDemoLoader(models.AbstractModel):
         # Комментарии к записям стен (решение 404) — после самих записей.
         if 'coop.wall.comment' in self.env:
             load_wall_comments.load_wall_comments(self.env)
+            load_wall_comments.load_wall_likes(self.env)
         # Суммы проектов — до всего остального, что на них смотрит:
         # готовность, доли и вехи считаются от «нужно».
         load_projects.repair_scales(self.env)

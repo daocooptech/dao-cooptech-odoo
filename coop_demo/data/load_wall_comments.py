@@ -129,3 +129,60 @@ def load_wall_comments(env, login='dashkevich'):
         Comment.create(rows)
     _logger.info("Комментарии к стенам: заведено %s", len(rows))
     return len(rows)
+
+
+def load_wall_likes(env):
+    """Лайки и дизлайки под записями стен (решение 404, вид ряда — со слов
+    владельца: «цифрами количество лайков … количество дизлайков»).
+
+    Лайк и дизлайк — реакции движка 👍 и 👎. Раскладка неровная: у
+    половины записей лайков нет вовсе; у остальных — от одного до двух
+    десятков, у витринных записей побольше; дизлайки редки — у одной
+    записи из десяти, по одному-три. Один человек не ставит и то и другое
+    сразу. Ставят участники, не автор записи.
+
+    Прогон один: если под записями стен уже есть 👍 или 👎, ничего не
+    делается (урок комментариев — жребий по «ещё пустым» удваивал
+    наполнение).
+    """
+    Reaction = env['mail.message.reaction'].sudo()
+    Message = env['mail.message'].sudo()
+    Partner = env['res.partner'].sudo()
+    if Reaction.search_count([
+            ('content', 'in', ('👍', '👎')),
+            ('message_id.model', '=', 'res.partner')], limit=1):
+        _logger.info("Лайки на стенах: уже наполнено, пропускаю")
+        return 0
+    rnd = random.Random(20260924 + 405)
+    posts = Message.search([
+        ('model', '=', 'res.partner'), ('message_type', '=', 'comment'),
+        ('subtype_id.internal', '=', False),
+    ])
+    people = list(Partner.search([
+        ('coop_is_participant', '=', True), ('is_company', '=', False),
+        ('name', 'not in', TEST_NAMES),
+    ]))
+    showcase = env['res.users'].sudo().search(
+        [('login', '=', 'dashkevich')], limit=1).partner_id
+    if not posts or len(people) < 30:
+        return 0
+    rows = []
+    for post in posts:
+        mine = showcase and post.res_id == showcase.id
+        likes = rnd.randint(4, 28) if mine else (
+            0 if rnd.random() < 0.5 else rnd.randint(1, 20))
+        dislikes = rnd.randint(1, 3) if rnd.random() < 0.1 else 0
+        if not likes and not dislikes:
+            continue
+        crowd = [p for p in rnd.sample(people, min(len(people), likes + dislikes + 1))
+                 if p != post.author_id][:likes + dislikes]
+        for n, person in enumerate(crowd):
+            rows.append({
+                'message_id': post.id,
+                'content': '👍' if n < likes else '👎',
+                'partner_id': person.id,
+            })
+    if rows:
+        Reaction.create(rows)
+    _logger.info("Лайки на стенах: поставлено %s", len(rows))
+    return len(rows)
