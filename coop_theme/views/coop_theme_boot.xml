@@ -26,12 +26,19 @@
                 coopChoice = window.localStorage.getItem("coop-theme");
             } catch (error) {
                 // Хранилище недоступно — в приватном окне или при
-                // запрете. Тогда идём за системной темой.
+                // запрете. Тогда выбора нет, и открывается светлая.
             }
-            var coopDark = coopChoice
-                ? coopChoice === "dark"
-                : Boolean(window.matchMedia
-                    &amp;&amp; window.matchMedia("(prefers-color-scheme: dark)").matches);
+            // Без явного выбора — светлая, а не системная: решение
+            // владельца от 3 сентября 2026. Переключатель темы
+            // (theme_switch.js) исполнил его 22 сентября, а этот скрипт
+            // остался прежним и на телефоне или в браузере с тёмной
+            // системной темой открывал платформу тёмной — владелец
+            // 24 сентября: «почему ты всегда открываешь тёмную тему?».
+            // За системной темой идём, только если человек выбрал это сам.
+            var coopDark = coopChoice === "dark"
+                || (coopChoice === "system"
+                    &amp;&amp; Boolean(window.matchMedia
+                        &amp;&amp; window.matchMedia("(prefers-color-scheme: dark)").matches));
             document.documentElement.setAttribute(
                 "data-bs-theme", coopDark ? "dark" : "light");
         }
