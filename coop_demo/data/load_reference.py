@@ -49,6 +49,20 @@ def load_specializations(env):
                     {'name': name, 'category_id': category.id})
             specializations[name] = record
 
+    # Сферы, которых в справочнике больше нет и в которых не осталось ни
+    # одной специализации, — убираем. Владелец 24 сентября 2026: «в
+    # каталоге людей есть рабочий персонал, не понятно, что это,
+    # расформируй… справочник тоже поправь». Семь специализаций
+    # «Рабочего персонала» стали своими сферами, а сама сфера опустела.
+    # Всё, что на неё ссылалось, ссылается через специализацию и
+    # пересчитывается само.
+    stale = Category.search([('name', 'not in', list(tree))]).filtered(
+        lambda c: not c.specialization_ids)
+    if stale:
+        _logger.info('Справочник специализаций: убраны пустые сферы %s',
+                     ', '.join(stale.mapped('name')))
+        stale.unlink()
+
     _logger.info('Справочник специализаций: %s сфер, %s специализаций',
                  len(categories), len(specializations))
     return categories, specializations
