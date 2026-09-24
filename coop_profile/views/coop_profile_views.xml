@@ -125,7 +125,12 @@
               колонки, рядом со снимком.
             -->
             <div class="o_coop_name_row">
-              <h1><field name="name" readonly="not coop_is_self"
+              <!-- Правка по месту, как у контактов ниже: обычное поле
+                   ввода строку не переносит, и на телефоне имя
+                   обрезалось — «Дашкевич Данил Игорев». -->
+              <h1><field name="name" widget="coop_inline"
+                         options="{'wrap': True}"
+                         readonly="not coop_is_self"
                          placeholder="Имя и фамилия"/></h1>
               <span class="o_coop_verified"
                     invisible="coop_verification_level != 'identity'">
