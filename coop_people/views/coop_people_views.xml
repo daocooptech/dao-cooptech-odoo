@@ -143,7 +143,7 @@
       на витрину.
     -->
     <field name="domain">[('coop_is_participant', '=', True), ('is_company', '=', False), ('coop_profile_hidden', '=', False), ('coop_page_visible', '=', True)]</field>
-    <field name="context">{'bin_size': True,'coop_catalog': True, 'default_coop_is_participant': True, 'default_is_company': False, 'coop_create_label': 'Пригласить человека', 'coop_shelf_field': 'coop_specialization_category_ids'}</field>
+    <field name="context">{'bin_size': True,'coop_catalog': True, 'default_coop_is_participant': True, 'default_is_company': False, 'coop_create_label': 'Пригласить человека', 'coop_shelf_field': 'coop_specialization_category_ids', 'coop_shelf_split': {'names': ['Рабочий персонал'], 'field': 'coop_specialization_ids', 'parent': 'category_id', 'other': 'Другие рабочие специальности'}}</field>
     <field name="search_view_id" ref="view_coop_people_search"/>
     <!-- Явная привязка представлений. res.partner — общая модель, и без
          этого списка действие подберёт по приоритету стандартный канбан

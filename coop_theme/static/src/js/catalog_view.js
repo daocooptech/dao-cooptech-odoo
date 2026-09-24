@@ -92,6 +92,12 @@ export class CoopCatalogKanbanController extends KanbanController {
         return this.props.context?.coop_shelf_field || false;
     }
 
+    /** Какие полки раскладывать глубже — `coop_shelf_split` в контексте
+     *  действия каталога (`js/catalog_shelves.js`, `splitShelf`). */
+    get coopShelfSplit() {
+        return this.props.context?.coop_shelf_split || false;
+    }
+
     /** Полки только на чистом экране: без поиска, без отбора, без
      *  группировки и только в плитке. В списке витрина по рубрикам
      *  спорит с самим списком. */

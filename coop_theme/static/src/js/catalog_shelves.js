@@ -73,6 +73,14 @@ export class CoopShelves extends Component {
         archInfo: { type: Object },
         fields: { type: Object },
         openRecord: { type: Function, optional: true },
+        // Какие рубрики раскладывать глубже — по своим подрубрикам
+        // (`coop_shelf_split` в контексте действия каталога). Владелец
+        // 24 сентября 2026: «в каталоге людей есть рабочий персонал, не
+        // понятно, что это, расформируй этот блок по конкретным
+        // специализациям». Вид: `{names: [рубрики], field: поле подрубрик
+        // у записи, parent: поле рубрики у подрубрики, other: имя полки
+        // для мелких подрубрик}`.
+        split: { type: [Object, Boolean], optional: true },
         // Сколько полок собралось. Зовётся один раз, после появления на
         // экране: по этому числу каталог решает, показывать ли ленту.
         onLoaded: { type: Function, optional: true },
@@ -132,10 +140,12 @@ export class CoopShelves extends Component {
         // может не быть — у закупок «Раздел» в канбане не показывается.
         // А разложить записи по полкам без него нечем: значение приходит
         // пустым, полки выходят с заголовками и без карточек.
-        const description = this.props.fields[this.props.field];
-        if (description && !activeFields[this.props.field]) {
-            addFieldDependencies(activeFields, fields,
-                [{ name: this.props.field, type: description.type }]);
+        for (const name of [this.props.field, this.props.split?.field]) {
+            const description = name && this.props.fields[name];
+            if (description && !activeFields[name]) {
+                addFieldDependencies(activeFields, fields,
+                    [{ name, type: description.type }]);
+            }
         }
         // `groupBy` и `orderBy` пустыми списками, а не пропущенными:
         // модель их не подставляет, а `_getNextConfig` по ним проходит
@@ -199,8 +209,8 @@ export class CoopShelves extends Component {
      *  Разбираем все здесь, а не в цикле раскладки: перепутанный вид
      *  даёт не ошибку, а пустую полку, и искать причину потом дороже.
      */
-    shelfIdsOf(record) {
-        const value = record.data[this.props.field];
+    shelfIdsOf(record, field = this.props.field) {
+        const value = record.data[field];
         if (value === undefined || value === null || value === false) {
             return [];
         }
@@ -317,16 +327,25 @@ export class CoopShelves extends Component {
             }
         }
 
+        const split = this.props.split;
         for (const g of eligible) {
             const value = g[this.props.field];
             const id = Array.isArray(value) ? value[0] : value;
-            this.state.shelves.push({
+            const shelf = {
                 id,
                 label: labelOf(value),
                 count: countOf(g),
                 records: recordsByShelf.get(id) || [],
                 domain: domain.concat([[this.props.field, "=", id]]),
-            });
+            };
+            if (split?.names?.includes(shelf.label)) {
+                const parts = await this.splitShelf(shelf, id, countOf);
+                if (parts.length) {
+                    this.state.shelves.push(...parts);
+                    continue;
+                }
+            }
+            this.state.shelves.push(shelf);
         }
 
         if (remainder) {
@@ -351,6 +370,78 @@ export class CoopShelves extends Component {
                 domain: domain.concat(remainderDomain),
             });
         }
+    }
+
+    /**
+     * Одна рубрика — несколькими полками, по своим подрубрикам.
+     *
+     * «Рабочий персонал» в каталоге людей — сфера, а не профессия: за ней
+     * столяры, сварщики, электромонтажники, и полка с таким именем ничего
+     * не говорила тому, кто ищет сварщика. Подрубрики — только этой
+     * рубрики: у человека могут быть специализации и из других сфер, и
+     * полкой «Водитель» внутри «Рабочего персонала» они стать не должны.
+     * Мелкие подрубрики (меньше трёх записей) — одной полкой `other`.
+     */
+    async splitShelf(shelf, id, countOf) {
+        const split = this.props.split;
+        const field = split.field;
+        const relation = this.props.fields[field]?.relation;
+        if (!relation || !this.orm.formattedReadGroup) {
+            return [];
+        }
+        const own = await this.orm.search(relation, [[split.parent, "=", id]]);
+        const base = shelf.domain;
+        const groups = await this.orm.formattedReadGroup(
+            this.props.resModel, base, [field], ["__count"], { limit: 80 });
+        const idOf = (value) => (Array.isArray(value) ? value[0] : value);
+        const mine = groups.filter((g) => g[field] && own.includes(idOf(g[field])));
+        const big = mine.filter((g) => countOf(g) >= this.minPerShelf)
+            .sort((a, b) => countOf(b) - countOf(a));
+        if (big.length < 2) {
+            return [];
+        }
+        const bigIds = big.map((g) => idOf(g[field]));
+        await this.shelvesModel.load({
+            domain: base.concat([[field, "in", bigIds]]),
+            orderBy: this.props.orderBy || [],
+            limit: this.perShelf * big.length,
+        });
+        const byPart = new Map(bigIds.map((pid) => [pid, []]));
+        for (const record of this.shelvesModel.root.records || []) {
+            for (const pid of this.shelfIdsOf(record, field)) {
+                const list = byPart.get(pid);
+                if (list && list.length < this.perShelf && !list.includes(record)) {
+                    list.push(record);
+                }
+            }
+        }
+        const parts = big.map((g) => {
+            const pid = idOf(g[field]);
+            return {
+                id: `${id}:${pid}`,
+                label: Array.isArray(g[field]) ? g[field][1] : String(pid),
+                count: countOf(g),
+                records: byPart.get(pid) || [],
+                domain: base.concat([[field, "=", pid]]),
+            };
+        });
+        const restDomain = base.concat(["!", [field, "in", bigIds]]);
+        const restCount = await this.orm.searchCount(this.props.resModel, restDomain);
+        if (restCount) {
+            await this.shelvesModel.load({
+                domain: restDomain,
+                orderBy: this.props.orderBy || [],
+                limit: this.perShelf,
+            });
+            parts.push({
+                id: `${id}:rest`,
+                label: split.other || `${shelf.label}: другое`,
+                count: restCount,
+                records: (this.shelvesModel.root.records || []).slice(0, this.perShelf),
+                domain: restDomain,
+            });
+        }
+        return parts;
     }
 
     /**

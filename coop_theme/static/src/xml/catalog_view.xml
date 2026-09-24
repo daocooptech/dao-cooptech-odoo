@@ -71,6 +71,7 @@
       <CoopShelves t-if="coopShelvesVisible" t-key="'coop_shelves'"
                    resModel="props.resModel"
                    field="coopShelfField"
+                   split="coopShelfSplit"
                    domain="props.domain or []"
                    orderBy="coopShelfOrder"
                    archInfo="props.archInfo"
