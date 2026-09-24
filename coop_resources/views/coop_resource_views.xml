@@ -72,12 +72,14 @@
                      откликаться нельзя, — иначе карточки с кнопкой и без
                      неё расходятся по высоте ровно на её строку. То же
                      было у торгов и у проектов, и лечится тем же. -->
+                <!-- На витрине — «Подробнее» на каждой карточке. Владелец
+                     24 сентября 2026: «в каталоге ресурсов все кнопки сделай
+                     „подробнее“ вместо „купить в один клик“, „арендовать“ и
+                     т. д.». Покупка, аренда, обмен и дар — на странице
+                     ресурса (`respond_label` там), где видно, что именно
+                     берёшь и на каких условиях. -->
                 <div class="o_coop_tile_act">
-                  <button name="action_respond" type="object"
-                          class="btn o_coop_btn o_coop_tile_respond"
-                          t-if="record.can_respond.raw_value">
-                    <t t-esc="record.respond_label.value"/>
-                  </button>
+                  <a type="open" class="btn o_coop_btn o_coop_tile_respond">Подробнее</a>
                 </div>
               </div>
             </div>

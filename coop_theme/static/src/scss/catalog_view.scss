@@ -1005,8 +1005,12 @@
 // Прямые потомки карточки движок тянет на всю её высоту (карточка —
 // гибкий ряд), и звёздочка становилась белой полосой во всю карточку —
 // 440 точек вместо 28 (замерено 24 сентября 2026 в каталоге людей).
+// Растягивает их правило общего вида — `.o_coop_catalog_kanban_view
+// .o_kanban_record > * { min-height: 100% }`, — его и снимаем, той же силой.
+.o_coop_catalog_kanban_view .o_kanban_record > .o_coop_fav,
 .o_kanban_record > .o_coop_fav {
   height: 28px;
+  min-height: 0;
   align-self: flex-start;
   bottom: auto;
 }
