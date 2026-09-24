@@ -42,6 +42,12 @@ export class CoopTabs extends Component {
         this.orm = useService("orm");
         this.state = useState({ tabs: [], current: null, label: null, fav: null });
         useBus(this.env.bus, "COOP_FAVORITE_CHANGED", () => this.refreshFav());
+        // Строка вкладок рисуется раньше, чем открывается сам каталог, и
+        // первый расчёт вкладки «Избранное» не находил действия — вкладка
+        // не появлялась вовсе (найдено глазами 24 сентября 2026). Считаем
+        // ещё раз, когда экран дорисован, и когда сама строка на месте.
+        useBus(this.env.bus, "ACTION_MANAGER:UI-UPDATED", () => this.refreshFav());
+        onMounted(() => this.refreshFav());
         this.lastActionId = null;
         this.refresh();
         // Какое действие открыто, панель управления знает не всегда: у

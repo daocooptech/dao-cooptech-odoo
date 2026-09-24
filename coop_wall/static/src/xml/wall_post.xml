@@ -185,7 +185,7 @@
           </label>
         </div>
         <p t-if="network">
-          Адрес <t t-if="preview">ваш</t><t t-else="">автора</t> в сети <t t-out="network.name"/>:
+          <t t-if="preview">Ваш адрес</t><t t-else="">Адрес автора</t> в сети <t t-out="network.name"/>:
           <code class="o_coop_thanks_req" t-out="network.address"/>
         </p>
         <p t-if="network and network.fee_hint" class="o_coop_thanks_fee">
