@@ -128,7 +128,7 @@
               <!-- Правка по месту, как у контактов ниже: обычное поле
                    ввода строку не переносит, и на телефоне имя
                    обрезалось — «Дашкевич Данил Игорев». -->
-              <h1><field name="name" widget="coop_inline"
+              <h1><field name="coop_name_edit" widget="coop_inline"
                          options="{'wrap': True}"
                          readonly="not coop_is_self"
                          placeholder="Имя и фамилия"/></h1>
