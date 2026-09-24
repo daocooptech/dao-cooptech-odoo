@@ -28,7 +28,10 @@ class CoopResource(models.Model):
         # Раньше считались обе стороны за вычетом хозяина объявления, и
         # у сварочного полуавтомата с семью сделками выходило четырнадцать
         # покупателей: продавцом в сделке бывает не хозяин объявления.
-        groups = self.env['coop.deal'].sudo()._read_group(
+        # Без обхода прав: число должно совпадать с тем, что человек увидит,
+        # перейдя по ссылке. Сделка видна только её сторонам, и со счётом
+        # в обход прав выходило «Покупатели: 7» при одной сделке в списке.
+        groups = self.env['coop.deal']._read_group(
             [('resource_id', 'in', self.ids), ('party_b_id', '!=', False)],
             ['resource_id'], ['party_b_id:count_distinct'])
         counts = {resource.id: count for resource, count in groups}
