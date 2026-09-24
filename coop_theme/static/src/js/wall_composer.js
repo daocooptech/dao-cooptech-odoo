@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { toRaw } from "@odoo/owl";
+import { toRaw, useState } from "@odoo/owl";
 import { checkFileSize } from "@web/core/utils/files";
 import { isHtmlEmpty } from "@web/core/utils/html";
 import { patch } from "@web/core/utils/patch";
@@ -159,6 +159,29 @@ for (const id of ["add-canned-response", "open-full-composer"]) {
  * ничьими. Движковый `clear()` чистит только поле в браузере.
  */
 patch(Composer.prototype, {
+    setup() {
+        super.setup(...arguments);
+        // Свой признак фокуса: движковый `composer.isFocused` при входе в
+        // поле ставится мимо реактивности (`toRaw`) — нарочно, чтобы не
+        // перерисовывать поле на каждый фокус, — и кнопки по нему не
+        // появлялись, пока не набран первый знак.
+        this.coopFocus = useState({ on: false });
+    },
+
+    onFocusin(ev) {
+        super.onFocusin(ev);
+        if (WALL_MODELS.includes(this.thread?.model)) {
+            this.coopFocus.on = true;
+        }
+    },
+
+    onFocusout(ev) {
+        super.onFocusout(ev);
+        if (this.coopFocus.on) {
+            this.coopFocus.on = false;
+        }
+    },
+
     get coopWallSmall() {
         return this.ui.isSmall && WALL_MODELS.includes(this.thread?.model) && !this.props.composer.message;
     },
@@ -168,7 +191,7 @@ patch(Composer.prototype, {
     // срабатывает само касание, — без него кнопка исчезала бы из-под
     // пальца.
     get coopEditing() {
-        return this.props.composer.isFocused || !this.coopDraftEmpty;
+        return this.coopFocus.on || !this.coopDraftEmpty;
     },
 
     get coopDraftEmpty() {
