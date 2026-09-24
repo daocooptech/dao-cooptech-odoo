@@ -471,4 +471,43 @@
     border-radius: 10px !important;
     overflow: hidden;
   }
+
+  // PDF — крупное превью первой страницы, а не марка 182×140, на которой
+  // текста не прочесть. Владелец 24 сентября 2026: «если можно, чтобы был
+  // предпросмотр документа или pdf-файла». Превью строит сам движок при
+  // первом показе тому, кто может править запись; щелчок открывает
+  // документ целиком.
+  .o-mail-AttachmentContainer[data-mimetype="application/pdf"] {
+    width: 100% !important;
+    max-width: 340px;
+    height: auto !important;
+    border-radius: 10px !important;
+    overflow: hidden;
+
+    .o-mail-AttachmentCard > div:first-child {
+      height: 300px;
+      overflow: hidden;
+      background: var(--coop-white, #fff);
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top;
+      }
+    }
+  }
+
+  // Голосовое — одна строка проигрывателя. Над ним движок оставлял пустое
+  // поле карточки со значком динамика: превью у звука нет.
+  .o-mail-AttachmentContainer[data-mimetype^="audio/"] {
+    width: 100% !important;
+    max-width: 360px;
+    height: auto !important;
+    border-radius: 10px !important;
+
+    .o-mail-AttachmentCard > div:first-child {
+      display: none !important;
+    }
+  }
 }
