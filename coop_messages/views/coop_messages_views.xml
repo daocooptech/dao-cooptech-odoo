@@ -109,4 +109,82 @@
             parent="coop_projects.menu_coop_projects_root"
             action="action_coop_project_feed" sequence="17"/>
 
+
+  <!--
+    Ленты подписок на людей и на организации — решение 65: у каждого
+    каталога своя лента. Новость человека или организации — запись на
+    стене их страницы (обсуждение контакта). Приоритет низкий: вид не
+    должен стать видом сообщений по умолчанию где-то ещё.
+  -->
+  <record id="view_coop_wall_feed_kanban" model="ir.ui.view">
+    <field name="name">coop.wall.feed.kanban</field>
+    <field name="model">mail.message</field>
+    <field name="priority">100</field>
+    <field name="arch" type="xml">
+      <kanban js_class="coop_catalog_kanban" class="o_coop_feed"
+              default_order="date desc, id desc" create="false"
+              quick_create="false" records_draggable="false"
+              action="action_coop_feed_open" type="object">
+        <field name="author_id"/>
+        <field name="record_name"/>
+        <field name="date"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_feed_post">
+              <div class="o_coop_feed_head">
+                <img class="o_coop_feed_avatar" t-if="record.author_id.raw_value"
+                     t-att-src="'/web/image/res.partner/' + record.author_id.raw_value + '/avatar_128'"
+                     alt="" loading="lazy"/>
+                <div class="o_coop_feed_who">
+                  <div class="o_coop_feed_project"><t t-esc="record.record_name.value"/></div>
+                  <div class="o_coop_feed_meta">
+                    <t t-esc="record.author_id.value"/> · <field name="date"/>
+                  </div>
+                </div>
+              </div>
+              <div class="o_coop_feed_body"><field name="body" widget="html"/></div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="view_coop_wall_feed_search" model="ir.ui.view">
+    <field name="name">coop.wall.feed.search</field>
+    <field name="model">mail.message</field>
+    <field name="priority">100</field>
+    <field name="arch" type="xml">
+      <search>
+        <field name="body" string="Текст"/>
+        <field name="record_name" string="Чья страница"/>
+        <field name="author_id" string="Автор"/>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_people_feed" model="ir.actions.server">
+    <field name="name">Лента</field>
+    <field name="model_id" ref="base.model_res_partner"/>
+    <field name="state">code</field>
+    <field name="path">people-feed</field>
+    <field name="code">action = model.action_coop_people_feed()</field>
+  </record>
+
+  <record id="action_coop_orgs_feed" model="ir.actions.server">
+    <field name="name">Лента</field>
+    <field name="model_id" ref="base.model_res_partner"/>
+    <field name="state">code</field>
+    <field name="path">orgs-feed</field>
+    <field name="code">action = model.action_coop_orgs_feed()</field>
+  </record>
+
+  <menuitem id="menu_coop_people_feed" name="Лента"
+            parent="coop_people.menu_coop_people_root"
+            action="action_coop_people_feed" sequence="17"/>
+
+  <menuitem id="menu_coop_orgs_feed" name="Лента"
+            parent="coop_orgs.menu_coop_orgs_root"
+            action="action_coop_orgs_feed" sequence="17"/>
+
 </odoo>

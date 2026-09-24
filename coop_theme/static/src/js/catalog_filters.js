@@ -94,8 +94,13 @@ export class CoopFilters extends Component {
     }
 
     async load() {
+        // Основной отбор раздела уходит в контексте: по нему модель может
+        // решить, из чего предлагать выбор. Лента людей и лента
+        // организаций — одна модель сообщений, а предлагать им надо
+        // разное: подписки на людей и подписки на организации.
         this.state.blocks = await this.orm.call(
-            "coop.catalog", "catalog_filters", [this.props.resModel, this.domain]
+            "coop.catalog", "catalog_filters", [this.props.resModel, this.domain],
+            { context: { coop_base_domain: this.props.baseDomain || [] } }
         );
     }
 

@@ -6,6 +6,7 @@ from odoo import api, models
 from ..data import rubrics
 from ..data import load_project_updates
 from ..data import load_project_follows
+from ..data import load_wall_posts
 from ..data import load_okved
 from ..data import load_accounts
 from ..data import (emblems, load_attributes, load_biography, load_bounty,
@@ -193,6 +194,9 @@ class CoopDemoLoader(models.AbstractModel):
         # Подписки на проекты — после отчётов о ходе: главного участника
         # витрины подписываем на проекты, где новости уже есть.
         load_project_follows.load_project_follows(self.env)
+        # Записи на стенах людей и организаций — для их лент подписок
+        # (решение 65); подписки на людей к этому моменту уже есть.
+        load_wall_posts.load_wall_posts(self.env)
         # Суммы проектов — до всего остального, что на них смотрит:
         # готовность, доли и вехи считаются от «нужно».
         load_projects.repair_scales(self.env)
