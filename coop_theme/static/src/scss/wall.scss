@@ -424,6 +424,9 @@
     // Обёртка кнопки — по содержимому: первой в ряду она не стоит, и
     // правило по «первому потомку» её не находило.
     .o-mail-Composer-footer > .d-flex > div:has(> .o-mail-Composer-send) { flex: 1 1 auto; }
+    // Рядом стоит пустая распорка движка (flex-grow-1) и делит место с
+    // кнопкой пополам. Прячется только пустая: значки вложений остаются.
+    .o-mail-Composer-footer > .d-flex > .flex-grow-1:empty { display: none; }
     .o-mail-Composer-send { width: 100%; min-height: 44px; }
     .o-mail-Composer-footer .text-muted.small { display: none; }
 
