@@ -21,4 +21,26 @@
     </xpath>
   </t>
 
+
+  <!--
+    Видео в ленте записи — проигрывателем прямо в записи, а не карточкой с
+    именем файла. Владелец 24 сентября 2026: «добавь разного вида контент
+    на стену и чтобы это красиво смотрелось, например видео, аудиозапись
+    или документ». Картинки, документы и голосовые движок показывает сам
+    (миниатюра, превью первой страницы, проигрыватель с волной); видео он
+    показывает только карточкой.
+
+    Только в ленте записи (`env.inChatter`): в переписках вид прежний.
+    Щелчок по проигрывателю не всплывает до карточки — иначе он открывал
+    бы поверх ещё и окно просмотра файла.
+  -->
+  <t t-name="coop_theme.AttachmentListVideo" t-inherit="mail.AttachmentList" t-inherit-mode="extension">
+    <xpath expr="//Gif" position="after">
+      <video t-elif="env.inChatter and attachment.mimetype and attachment.mimetype.startsWith('video/')"
+             class="o_coop_wall_video"
+             controls="controls" preload="metadata"
+             t-att-src="'/web/content/' + attachment.id"
+             t-on-click.stop=""/>
+    </xpath>
+  </t>
 </templates>

@@ -7,6 +7,7 @@ from ..data import rubrics
 from ..data import load_project_updates
 from ..data import load_project_follows
 from ..data import load_wall_posts
+from ..data import load_wall_media
 from ..data import load_okved
 from ..data import load_accounts
 from ..data import (emblems, load_attributes, load_biography, load_bounty,
@@ -197,6 +198,8 @@ class CoopDemoLoader(models.AbstractModel):
         # Записи на стенах людей и организаций — для их лент подписок
         # (решение 65); подписки на людей к этому моменту уже есть.
         load_wall_posts.load_wall_posts(self.env)
+        # Записи с видео, звуком, документом и фото на стене витрины.
+        load_wall_media.load_wall_media(self.env)
         # Суммы проектов — до всего остального, что на них смотрит:
         # готовность, доли и вехи считаются от «нужно».
         load_projects.repair_scales(self.env)

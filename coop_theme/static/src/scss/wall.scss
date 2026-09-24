@@ -436,3 +436,39 @@
     .o-mail-Message-body { max-width: none; }
   }
 }
+
+// ── Вложения на стене ────────────────────────────────────────────────
+//
+// Видео — проигрывателем во всю колонку текста (шаблон в chatter.xml),
+// картинки и документы — как рисует движок, но с тем же скруглением, что
+// у ленты, и без серой рамки вокруг картинки.
+.o_coop_profile,
+.o_coop_org_form,
+.o_coop_wall_form {
+  .o-mail-AttachmentList {
+    margin-top: 8px !important;
+  }
+
+  .o-mail-AttachmentContainer[data-mimetype^="video/"] {
+    width: 100%;
+    max-width: 520px;
+    border: 0 !important;
+    background: #000;
+    border-radius: 10px !important;
+    overflow: hidden;
+  }
+
+  .o_coop_wall_video {
+    display: block;
+    width: 100%;
+    max-height: 320px;
+    border-radius: 10px;
+    background: #000;
+  }
+
+  .o-mail-AttachmentContainer.o-isImage {
+    border: 0 !important;
+    border-radius: 10px !important;
+    overflow: hidden;
+  }
+}
