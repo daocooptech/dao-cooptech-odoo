@@ -186,3 +186,73 @@ def load_wall_likes(env):
         Reaction.create(rows)
     _logger.info("Лайки на стенах: поставлено %s", len(rows))
     return len(rows)
+
+
+REPOST_WORDS = [
+    '', '', '',
+    'Полезно, сохраняю себе.',
+    'Кому нужно — обращайтесь, рекомендую.',
+    'Делюсь: вдруг кому-то из знакомых пригодится.',
+    'Хороший пример, как надо.',
+    'Поддержим!',
+    'Коллеги, обратите внимание.',
+    'Тоже ищем такое — может, объединимся?',
+]
+
+
+def load_wall_reposts(env):
+    """Репосты записей со стен (решение 404).
+
+    Около полутора сотен: участник приносит к себе на стену чужую запись,
+    иногда со своими словами, чаще без них. Одну запись к себе дважды не
+    приносят; своё не репостят. Время — после исходной записи, не позже
+    сегодняшнего дня. Записи заводятся прямо сообщениями, минуя рассылку
+    подписчикам, как и сами записи стен.
+
+    Прогон один: если репосты уже есть, ничего не делается.
+    """
+    Message = env['mail.message'].sudo()
+    Partner = env['res.partner'].sudo()
+    if Message.search_count([('coop_repost_of_id', '!=', False)], limit=1):
+        _logger.info("Репосты на стенах: уже наполнено, пропускаю")
+        return 0
+    rnd = random.Random(20260924 + 406)
+    now = datetime.now()
+    comment = env.ref('mail.mt_comment')
+    posts = list(Message.search([
+        ('model', '=', 'res.partner'), ('message_type', '=', 'comment'),
+        ('subtype_id.internal', '=', False),
+    ]))
+    people = list(Partner.search([
+        ('coop_is_participant', '=', True), ('is_company', '=', False),
+        ('name', 'not in', TEST_NAMES),
+    ]))
+    if len(posts) < 50 or len(people) < 30:
+        return 0
+    rows, seen = [], set()
+    for post in rnd.sample(posts, min(len(posts), 110)):
+        for _n in range(rnd.choice((1, 1, 1, 2, 3))):
+            person = rnd.choice(people)
+            if person == post.author_id or (post.id, person.id) in seen:
+                continue
+            seen.add((post.id, person.id))
+            start = post.date or now
+            window = min(now - start, timedelta(days=14))
+            if window <= timedelta(minutes=10):
+                continue
+            words = rnd.choice(REPOST_WORDS)
+            rows.append({
+                'model': 'res.partner',
+                'res_id': person.id,
+                'message_type': 'comment',
+                'subtype_id': comment.id,
+                'author_id': person.id,
+                'body': '<p>%s</p>' % words if words else '',
+                'date': start + window * rnd.uniform(0.05, 1.0),
+                'coop_repost_of_id': post.id,
+            })
+    rows.sort(key=lambda row: row['date'])
+    if rows:
+        Message.create(rows)
+    _logger.info("Репосты на стенах: заведено %s", len(rows))
+    return len(rows)

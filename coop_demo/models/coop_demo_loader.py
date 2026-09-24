@@ -205,6 +205,7 @@ class CoopDemoLoader(models.AbstractModel):
         if 'coop.wall.comment' in self.env:
             load_wall_comments.load_wall_comments(self.env)
             load_wall_comments.load_wall_likes(self.env)
+            load_wall_comments.load_wall_reposts(self.env)
         # Суммы проектов — до всего остального, что на них смотрит:
         # готовность, доли и вехи считаются от «нужно».
         load_projects.repair_scales(self.env)
