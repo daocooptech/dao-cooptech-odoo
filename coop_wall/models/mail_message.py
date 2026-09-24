@@ -77,12 +77,15 @@ class MailMessage(models.Model):
                 ('model', '=', 'res.partner'), ('res_id', '=', me.id)], limit=1):
             raise UserError(_("Эта запись уже есть на вашей странице."))
         comment = (comment or '').strip()[:4000]
+        # Своё поле в публикацию не передать: движок принимает там только
+        # известные ему параметры (`_raise_for_invalid_parameters`). Ссылка
+        # на исходник ставится сразу после.
         message = me.sudo().message_post(
             body=comment,
             message_type='comment',
             subtype_xmlid='mail.mt_comment',
             author_id=me.id,
-            coop_repost_of_id=original.id,
         )
+        message.sudo().coop_repost_of_id = original
         return message.id
 
