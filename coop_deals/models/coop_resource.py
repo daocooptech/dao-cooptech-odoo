@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import _, api, fields, models
+from odoo import _, fields, models
 
 
 class CoopResource(models.Model):
@@ -19,24 +19,21 @@ class CoopResource(models.Model):
     coop_buyer_count = fields.Integer(
         string='Покупатели', compute='_compute_coop_buyer_count')
 
-    @api.depends('owner_id')
     def _compute_coop_buyer_count(self):
-        # Покупатель — вторая сторона сделки по этому ресурсу, то есть
-        # любая сторона, кроме хозяина объявления. Считаем людей, а не
-        # сделки: один покупатель, купивший трижды, — один покупатель.
-        Deal = self.env['coop.deal'].sudo()
-        groups = Deal._read_group(
-            [('resource_id', 'in', self.ids)],
-            ['resource_id', 'party_a_id', 'party_b_id'])
-        buyers = {}
-        for resource, party_a, party_b in groups:
-            for party in (party_a, party_b):
-                if party:
-                    buyers.setdefault(resource.id, set()).add(party.id)
+        # Покупатель — вторая сторона сделки (`party_b_id`): так сделка
+        # сама раскладывает роли — «покупатель, арендатор, заказчик»
+        # (подсказка у `role_b`). Считаем людей, а не сделки: один
+        # покупатель, купивший трижды, — один покупатель.
+        #
+        # Раньше считались обе стороны за вычетом хозяина объявления, и
+        # у сварочного полуавтомата с семью сделками выходило четырнадцать
+        # покупателей: продавцом в сделке бывает не хозяин объявления.
+        groups = self.env['coop.deal'].sudo()._read_group(
+            [('resource_id', 'in', self.ids), ('party_b_id', '!=', False)],
+            ['resource_id'], ['party_b_id:count_distinct'])
+        counts = {resource.id: count for resource, count in groups}
         for resource in self:
-            parties = buyers.get(resource.id, set())
-            parties.discard(resource.owner_id.id)
-            resource.coop_buyer_count = len(parties)
+            resource.coop_buyer_count = counts.get(resource.id, 0)
 
     def action_coop_buyers(self):
         """Сделки по ресурсу — в обычном каталоге сделок, с его отборами.
