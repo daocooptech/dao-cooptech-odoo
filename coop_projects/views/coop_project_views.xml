@@ -549,6 +549,43 @@
                      readonly="not coop_can_edit"
                      placeholder="Расскажите, что за проект и зачем он"/>
             </page>
+            <!--
+              Участники — решение 33 журнала владельца: у каждого роль в
+              проекте перед городом. Роль — основная специализация
+              человека («Чем занимаетесь»): в макете она так же бралась
+              из его навыков. Карточки те же, что в составе организации;
+              щелчок ведёт на страницу человека.
+            -->
+            <page string="Участники" name="participants"
+                  invisible="not coop_participant_ids">
+              <div class="o_coop_participants"><div class="o_coop_band_body">
+              <field name="coop_participant_ids" readonly="1" nolabel="1">
+                <kanban class="o_coop_band_kanban" records_draggable="false"
+                        action="action_coop_open_page" type="object">
+                  <field name="id"/>
+                  <field name="name"/>
+                  <field name="coop_specialization_id"/>
+                  <field name="city"/>
+                  <templates>
+                    <t t-name="card">
+                      <div class="o_coop_mini">
+                        <div class="o_coop_mini_img">
+                          <img t-att-src="'/web/image/res.partner/' + record.id.raw_value + '/avatar_256'"
+                               t-att-alt="record.name.value" loading="lazy"/>
+                        </div>
+                        <div class="o_coop_mini_label"><field name="name"/></div>
+                        <div class="o_coop_mini_note">
+                          <t t-esc="record.coop_specialization_id.value"/>
+                          <t t-if="record.coop_specialization_id.raw_value and record.city.raw_value"> · </t>
+                          <t t-esc="record.city.value"/>
+                        </div>
+                      </div>
+                    </t>
+                  </templates>
+                </kanban>
+              </field>
+              </div></div>
+            </page>
             <page string="Вклады" name="contributions">
               <div class="alert alert-info" role="status">
                 Краудресурсинг: скидываются не только деньгами. Смена

@@ -228,6 +228,15 @@ class CoopProject(models.Model):
              'ресурсами и трудом. Готовность считается от неё.')
     contribution_ids = fields.One2many(
         'coop.project.contribution', 'project_id', string='Вклады')
+    # Участники проекта — люди, чей вклад не отклонён, не отозван и не
+    # истёк. Отдельной модели участия нет, и заводить её незачем: в
+    # проекте участвуют тем, что вкладывают, — трудом, деньгами,
+    # оборудованием. Решение 33 журнала владельца: в списке участников
+    # у каждого роль в проекте перед городом; в макете роль бралась из
+    # навыков человека, здесь — из его основной специализации.
+    coop_participant_ids = fields.Many2many(
+        'res.partner', string='Участники',
+        compute='_compute_coop_participant_ids')
     can_contribute = fields.Boolean(
         string='Можно вложиться', compute='_compute_can_contribute',
         help='Проект собирает, и я не его инициатор.')
@@ -581,6 +590,13 @@ class CoopProject(models.Model):
         if self.funding_rule == 'threshold':
             return self.funding_threshold
         return 0
+
+    @api.depends('contribution_ids.partner_id', 'contribution_ids.state')
+    def _compute_coop_participant_ids(self):
+        gone = ('declined', 'expired', 'withdrawn')
+        for project in self:
+            project.coop_participant_ids = project.contribution_ids.filtered(
+                lambda c: c.state not in gone).partner_id
 
     @api.depends_context('uid')
     @api.depends('state', 'partner_id')

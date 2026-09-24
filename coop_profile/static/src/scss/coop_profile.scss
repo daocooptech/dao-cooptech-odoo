@@ -344,6 +344,41 @@
     }
   }
 
+
+  // ── Пустая страница ────────────────────────────────────────────────
+
+  .o_coop_empty {
+    margin: 16px 0;
+    padding: 18px 20px;
+    border: 1px dashed var(--coop-line, #e6e6e1);
+    border-radius: 10px;
+    background: var(--coop-white, #fff);
+  }
+
+  .o_coop_empty_title {
+    font: 700 14px/1.35 'Manrope', sans-serif;
+    color: var(--coop-ink, #14171a);
+    margin-bottom: 4px;
+  }
+
+  .o_coop_empty_text {
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--coop-slate, #4a4a44);
+    max-width: 560px;
+  }
+}
+
+// ── Полоса с мини-карточками людей ─────────────────────────────────
+//
+// Общая для страниц людей и организаций (класс `o_coop_profile` на
+// форме) и для участников проекта (`o_coop_participants` вокруг поля).
+// Вынесена из блока `.o_coop_profile`, а не скопирована: проекту
+// подключать весь вид страницы человека ради одних карточек нельзя, а
+// вторая копия разошлась бы с первой при первой правке — как было с
+// полосой города на снимке карточки (решение 398).
+.o_coop_profile,
+.o_coop_participants {
   .o_coop_band_body {
     // Ширина карточки канбана задаётся переменной, а не свойством:
     // штатное правило берёт её оттуда, и обычное «width» проигрывало —
@@ -456,29 +491,12 @@
     font-size: 10.5px;
     color: var(--coop-slate, #4a4a44);
   }
+}
 
-  // ── Пустая страница ────────────────────────────────────────────────
-
-  .o_coop_empty {
-    margin: 16px 0;
-    padding: 18px 20px;
-    border: 1px dashed var(--coop-line, #e6e6e1);
-    border-radius: 10px;
-    background: var(--coop-white, #fff);
-  }
-
-  .o_coop_empty_title {
-    font: 700 14px/1.35 'Manrope', sans-serif;
-    color: var(--coop-ink, #14171a);
-    margin-bottom: 4px;
-  }
-
-  .o_coop_empty_text {
-    font-size: 12.5px;
-    line-height: 1.5;
-    color: var(--coop-slate, #4a4a44);
-    max-width: 560px;
-  }
+// На вкладке проекта полоса стоит без шапки — рамка нужна целиком.
+.o_coop_participants .o_coop_band_body {
+  border-top: 1px solid var(--coop-line, #e6e6e1);
+  border-radius: 10px;
 }
 
 // На узком экране колонки становятся друг под другом, обложка ниже:
