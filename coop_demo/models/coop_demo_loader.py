@@ -170,6 +170,7 @@ class CoopDemoLoader(models.AbstractModel):
         # Кошельки последними: состав вкладок зависит от членства, а
         # сальдо по контрагентам считается из платежей по сделкам.
         load_wallets.load_wallets(self.env)
+        load_wallets.repair_addresses(self.env)
         # Последним — добор примеров по случаям: он смотрит, чего в
         # данных не хватает, и потому должен видеть всё остальное.
         load_examples.load_examples(self.env)

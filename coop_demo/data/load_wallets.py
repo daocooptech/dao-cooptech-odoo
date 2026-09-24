@@ -171,22 +171,67 @@ def _fill_crypto(env, wallet, networks, rnd, index):
     return created
 
 
+# Алфавиты адресов: bech32 у биткоина и своей сети, base58 у Соланы,
+# base64url у TON. Шестнадцатеричный хвост у всех подряд выдавал подделку
+# с первого взгляда — тем более что короткое число давало в нём сплошные
+# нули: «bc1q0000…».
+_BECH32 = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l'
+_BASE58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+_BASE64URL = ('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+              '0123456789-_')
+
+
 def _address_for(code, seed):
     """Вымышленный публичный адрес, похожий на настоящий.
 
     Настоящих адресов в демонстрационных данных быть не должно: на них
-    можно случайно отправить деньги.
+    можно случайно отправить деньги. Поэтому адрес собран из случайных
+    знаков алфавита сети — формат и длина настоящие, контрольная сумма
+    нет, и кошелёк такой адрес не примет.
+
+    Жребий — от кошелька и сети, а не общий: адрес не меняется от
+    прогона к прогону (встроенный `hash` строки меняется).
     """
-    tail = '%040x' % (seed * 7919 + hash(code) % 100000)
+    rnd = random.Random('%s:%s' % (code, seed))
+
+    def pick(alphabet, n):
+        return ''.join(rnd.choice(alphabet) for _ in range(n))
+
     if code == 'btc':
-        return 'bc1q' + tail[:38]
-    if code == 'ton':
-        return 'EQ' + tail[:46]
-    if code == 'sol':
-        return tail[:44]
+        return 'bc1q' + pick(_BECH32, 38)
     if code == 'koop':
-        return 'koop1' + tail[:38]
-    return '0x' + tail[:40]
+        return 'koop1' + pick(_BECH32, 38)
+    if code == 'ton':
+        # Адрес для людей: «UQ» — кошелёк без возврата при ошибке.
+        # Третий знак — от байта рабочей цепочки: у основной это «A»–«D».
+        return 'UQ' + pick('ABCD', 1) + pick(_BASE64URL, 45)
+    if code == 'sol':
+        return pick(_BASE58[1:], 1) + pick(_BASE58, rnd.choice([42, 43]))
+    return '0x' + pick('0123456789abcdef', 40)
+
+
+def repair_addresses(env):
+    """Переписать адреса, заведённые прежним способом.
+
+    Прежние адреса узнаются по хвосту из нулей; у настоящего адреса
+    такого не бывает, и адреса, внесённые людьми, этим не задеваются.
+    Загрузчик адресов у уже наполненного кошелька не трогает, поэтому
+    без этого прохода нули остались бы на боевой навсегда.
+    """
+    if 'coop.wallet.address' not in env:
+        return 0
+    stale = env['coop.wallet.address'].sudo().with_context(
+        active_test=False).search([('address', 'like', '%00000000%')])
+    fixed = 0
+    for address in stale:
+        code = address.network_id.code
+        if not code:
+            continue
+        address.address = _address_for(code, address.wallet_id.id)
+        fixed += 1
+    if fixed:
+        _logger.info('Кошельки: переписано адресов из нулей — %s', fixed)
+    return fixed
 
 
 def _fill_methods(env, wallet, index):
