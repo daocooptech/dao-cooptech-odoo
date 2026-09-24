@@ -3,7 +3,7 @@
 
 Каталог наполняется не менее чем сотней-двумя примеров: на пяти
 комментариях не видно ни «Показать все», ни длинной ветки, ни записи
-без единого отклика. Здесь около двухсот.
+без единого отклика. Здесь около трёхсот.
 
 Раскладка неровная, как в жизни: у большинства записей комментариев
 нет; у части — один-два; у витринных записей главного участника — ветки
@@ -12,8 +12,10 @@
 после записи и не позже сегодняшнего дня. Тексты без рода в глаголах:
 среди комментаторов и мужчины, и женщины.
 
-Повторный запуск ничего не удваивает: запись, у которой уже есть
-комментарии, пропускается.
+Повторный запуск ничего не добавляет: если комментарии уже есть,
+загрузчик не делает ничего. Пропускать только записи с комментариями
+было мало — каждый прогон заново бросал жребий по записям без них, и
+24 сентября второй прогон удвоил наполнение.
 """
 import logging
 import random
@@ -38,7 +40,7 @@ REPLIES = [
     'Хорошая новость, поздравляю!',
     'Есть вопрос по гарантии — напишу лично.',
     'Подписка оформлена, жду продолжения.',
-    'Не согласен с ценой, но качество видно.',
+    'С ценой поспорю, но качество видно.',
     'А доставка до области возможна?',
     'Ещё актуально?',
     'Можно контакт того, кто делал проект?',
@@ -72,7 +74,9 @@ def load_wall_comments(env, login='dashkevich'):
         ('model', '=', 'res.partner'), ('message_type', '=', 'comment'),
         ('subtype_id.internal', '=', False),
     ], order='date desc, id desc')
-    done = set(Comment.search([]).mapped('post_id').ids)
+    if Comment.search_count([], limit=1):
+        _logger.info("Комментарии к стенам: уже наполнено, пропускаю")
+        return 0
     people = Partner.search([
         ('coop_is_participant', '=', True), ('is_company', '=', False),
         ('name', 'not in', TEST_NAMES),
@@ -86,21 +90,26 @@ def load_wall_comments(env, login='dashkevich'):
 
     rows = []
     for post in posts:
-        if post.id in done:
-            continue
         mine = showcase and post.res_id == showcase.id
         if mine:
             count = rnd.choice((0, 2, 3, 4, 5, 7))
         else:
-            # Три записи из четырёх — без комментариев.
+            # Большинство записей — без комментариев.
             roll = rnd.random()
             count = 0 if roll < 0.87 else (1 if roll < 0.94 else rnd.randint(2, 4))
         if not count:
             continue
+        # Время комментариев — между записью и сегодняшним днём, не дальше
+        # десяти дней от записи. Шагами от записи вперёд было нельзя: у
+        # свежей записи шаги упирались в «сейчас», и вся ветка получала
+        # одно и то же время.
         start = post.date or now
-        when = start
-        for n in range(count):
-            when = min(now, when + timedelta(minutes=rnd.randint(7, 60 * 30)))
+        window = min(now - start, timedelta(days=10))
+        if window <= timedelta(minutes=10):
+            continue
+        offsets = sorted(rnd.uniform(0.02, 1.0) for _n in range(count))
+        for n, share in enumerate(offsets):
+            when = start + window * share
             author_answers = n > 0 and post.author_id and rnd.random() < 0.2
             if author_answers:
                 author = post.author_id
