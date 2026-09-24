@@ -13,6 +13,11 @@
     <xpath expr="//t[@t-foreach='props.message.reactions']" position="attributes">
       <attribute name="t-foreach">coopReactions</attribute>
     </xpath>
+    <!-- Остались одни лайки — списка нет вовсе: иначе от него висел бы
+         бледный значок «добавить реакцию» над рядом. -->
+    <xpath expr="//div[hasclass('o-mail-MessageReactions')]" position="attributes">
+      <attribute name="t-if">coopReactions.length</attribute>
+    </xpath>
   </t>
 
   <t t-name="coop_wall.WallPostFooter">
