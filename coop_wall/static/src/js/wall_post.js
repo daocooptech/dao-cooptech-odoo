@@ -80,7 +80,7 @@ const SHOWN = 2;
 
 export class CoopWallPostFooter extends Component {
     static props = ["message", "thread", "owner"];
-    static template = "coop_messages.WallPostFooter";
+    static template = "coop_wall.WallPostFooter";
 
     setup() {
         this.comments = useService("coop_wall_comments");

@@ -35,7 +35,7 @@ import { WALL_MODELS } from "@coop_theme/js/wall";
 class CoopPhotoModeDialog extends Component {
     static components = { Dialog };
     static props = ["batch", "choose", "close"];
-    static template = "coop_theme.PhotoModeDialog";
+    static template = "coop_wall.PhotoModeDialog";
 
     setup() {
         this.batch = useState(this.props.batch);

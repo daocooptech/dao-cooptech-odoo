@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
   <!-- Окно «картинкой или файлом» — `js/wall_photo.js`. -->
-  <t t-name="coop_theme.PhotoModeDialog">
+  <t t-name="coop_wall.PhotoModeDialog">
     <Dialog title="title" size="'md'" contentClass="'o_coop_photo_mode'">
       <div class="o_coop_photo_mode_previews">
         <img t-foreach="previews" t-as="p" t-key="p.url"

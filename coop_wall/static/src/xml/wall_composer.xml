@@ -13,7 +13,7 @@
     версии, чтобы галочка и крестик появлялись только в момент
     редактирования»): поле в фокусе или в черновике что-то есть.
   -->
-  <t t-name="coop_theme.ComposerSendButton" t-inherit="mail.Composer.sendButton" t-inherit-mode="extension">
+  <t t-name="coop_wall.ComposerSendButton" t-inherit="mail.Composer.sendButton" t-inherit-mode="extension">
     <xpath expr="//t[@t-out='SEND_TEXT']" position="attributes">
       <attribute name="t-if">thread and thread.model !== 'discuss.channel' and !coopWallSmall</attribute>
     </xpath>
@@ -26,7 +26,7 @@
     </xpath>
   </t>
 
-  <t t-name="coop_theme.ComposerDiscard" t-inherit="mail.Composer" t-inherit-mode="extension">
+  <t t-name="coop_wall.ComposerDiscard" t-inherit="mail.Composer" t-inherit-mode="extension">
     <xpath expr="//t[@t-call='mail.Composer.sendButton']" position="after">
       <button t-if="coopWallSmall and coopEditing" class="o_coop_wall_discard btn btn-secondary btn-sm"
               title="Очистить" aria-label="Очистить"

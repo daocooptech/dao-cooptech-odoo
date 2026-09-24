@@ -2,13 +2,13 @@
 <templates xml:space="preserve">
 
   <!-- Ряд действий и комментарии под записью стены — `js/wall_post.js`. -->
-  <t t-name="coop_messages.MessageWallFooter" t-inherit="mail.Message" t-inherit-mode="extension">
+  <t t-name="coop_wall.MessageWallFooter" t-inherit="mail.Message" t-inherit-mode="extension">
     <xpath expr="//t[@name='after-reactions']" position="after">
       <CoopWallPostFooter t-if="coopIsWallPost" message="message" thread="props.thread" owner="this"/>
     </xpath>
   </t>
 
-  <t t-name="coop_messages.WallPostFooter">
+  <t t-name="coop_wall.WallPostFooter">
     <div class="o_coop_post_footer">
       <div class="o_coop_post_bar">
         <button t-if="canReact" class="o_coop_post_act" title="Оценить" t-on-click="onReact">
