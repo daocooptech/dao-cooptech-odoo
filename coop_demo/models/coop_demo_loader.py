@@ -9,6 +9,7 @@ from ..data import load_project_follows
 from ..data import load_wall_posts
 from ..data import load_wall_media
 from ..data import load_wall_comments
+from ..data import load_wall_polls
 from ..data import load_favorites
 from ..data import load_okved
 from ..data import load_accounts
@@ -212,6 +213,11 @@ class CoopDemoLoader(models.AbstractModel):
             load_wall_comments.load_wall_thanks_tokens(self.env)
             load_wall_comments.load_thanks_sbp_links(self.env)
             load_wall_comments.load_wall_stars(self.env)
+        # Опросы и отложенные записи (решение 410) — после записей стен:
+        # дата опроса ставится позже последней записи на той же стене.
+        if 'coop.wall.poll' in self.env:
+            load_wall_polls.load_wall_polls(self.env)
+            load_wall_polls.load_wall_scheduled(self.env)
         # Суммы проектов — до всего остального, что на них смотрит:
         # готовность, доли и вехи считаются от «нужно».
         load_projects.repair_scales(self.env)

@@ -2,3 +2,9 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_coop_wall_comment_user,coop.wall.comment user,model_coop_wall_comment,base.group_user,1,0,0,0
 access_coop_wall_comment_system,coop.wall.comment system,model_coop_wall_comment,base.group_system,1,1,1,1
 access_coop_wall_thanks_system,coop.wall.thanks system,model_coop_wall_thanks,base.group_system,1,1,1,1
+access_coop_wall_poll_user,coop.wall.poll user,model_coop_wall_poll,base.group_user,1,0,0,0
+access_coop_wall_poll_system,coop.wall.poll system,model_coop_wall_poll,base.group_system,1,1,1,1
+access_coop_wall_poll_option_user,coop.wall.poll.option user,model_coop_wall_poll_option,base.group_user,1,0,0,0
+access_coop_wall_poll_option_system,coop.wall.poll.option system,model_coop_wall_poll_option,base.group_system,1,1,1,1
+access_coop_wall_poll_vote_user,coop.wall.poll.vote user,model_coop_wall_poll_vote,base.group_user,1,0,0,0
+access_coop_wall_poll_vote_system,coop.wall.poll.vote system,model_coop_wall_poll_vote,base.group_system,1,1,1,1

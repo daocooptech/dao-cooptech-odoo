@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+  <!-- Опрос в записи — сразу под её текстом, как карточка репоста. -->
+  <t t-name="coop_wall.MessagePoll" t-inherit="mail.Message" t-inherit-mode="extension">
+    <xpath expr="//div[hasclass('o-mail-Message-textContent')]" position="after">
+      <CoopWallPoll t-if="message.coop_poll" message="message"/>
+    </xpath>
+  </t>
+
+  <t t-name="coop_wall.Poll">
+    <div class="o_coop_poll">
+      <div class="o_coop_poll_q">
+        <i class="fa fa-bar-chart" aria-hidden="true"/>
+        <span t-out="poll.question"/>
+      </div>
+      <div class="o_coop_poll_kind">
+        <t t-if="poll.is_public">Открытое голосование</t>
+        <t t-else="">Анонимный опрос</t>
+        <t t-if="deadline"> · <t t-out="deadline"/></t>
+        <t t-elif="poll.closed"> · Завершён</t>
+      </div>
+
+      <div class="o_coop_poll_options">
+        <t t-foreach="poll.options" t-as="option" t-key="option.id">
+          <!-- До голоса — кнопки без чисел: итог не должен подсказывать. -->
+          <button t-if="poll.can_vote" type="button" class="o_coop_poll_choice"
+                  t-att-disabled="state.busy" t-on-click="() => this.vote(option)">
+            <t t-out="option.name"/>
+          </button>
+          <div t-elif="poll.see" class="o_coop_poll_result"
+               t-att-class="{ 'o_coop_poll_mine': poll.mine === option.id }">
+            <div class="o_coop_poll_fill" t-attf-style="width: {{ option.percent }}%"/>
+            <span class="o_coop_poll_name">
+              <i t-if="poll.mine === option.id" class="fa fa-check-circle" aria-label="Ваш выбор"/>
+              <t t-out="option.name"/>
+            </span>
+            <span class="o_coop_poll_pct"><t t-out="option.percent"/>%</span>
+            <button t-if="poll.is_public and option.count" type="button"
+                    class="o_coop_poll_voters_btn"
+                    t-att-title="'Кто выбрал: ' + option.count"
+                    t-on-click="() => this.toggleVoters(option)">
+              <i class="fa fa-users"/> <t t-out="option.count"/>
+            </button>
+          </div>
+          <div t-else="" class="o_coop_poll_result o_coop_poll_hidden">
+            <span class="o_coop_poll_name" t-out="option.name"/>
+          </div>
+          <div t-if="state.voters === option.id and option.voters" class="o_coop_poll_voters">
+            <t t-foreach="option.voters" t-as="voter" t-key="voter.id">
+              <span class="o_coop_poll_voter">
+                <img t-att-src="'/web/image/res.partner/' + voter.id + '/avatar_128'" alt=""/>
+                <t t-out="voter.name"/>
+              </span>
+            </t>
+            <span t-if="option.count > option.voters.length" class="o_coop_poll_more">
+              и ещё <t t-out="option.count - option.voters.length"/>
+            </span>
+          </div>
+        </t>
+      </div>
+
+      <div class="o_coop_poll_foot">
+        <span t-out="totalLabel"/>
+        <span t-if="poll.mine"> · голос записан, отозвать нельзя</span>
+        <span t-elif="!poll.see and !poll.closed"> · итог — после вашего голоса</span>
+        <button t-if="poll.is_author and !poll.closed" type="button"
+                class="btn btn-link btn-sm o_coop_poll_close" t-on-click="close">
+          Завершить опрос
+        </button>
+      </div>
+    </div>
+  </t>
+
+  <t t-name="coop_wall.PollDialog">
+    <Dialog title="'Опрос'" size="'md'">
+      <label class="form-label" for="coop_poll_q">Вопрос</label>
+      <input id="coop_poll_q" class="form-control mb-3" maxlength="300"
+             placeholder="О чём спросить?" t-model="state.question"/>
+
+      <label class="form-label">Варианты ответа</label>
+      <t t-foreach="state.options" t-as="option" t-key="option_index">
+        <div class="input-group mb-2">
+          <input class="form-control" maxlength="200"
+                 t-att-placeholder="'Вариант ' + (option_index + 1)"
+                 t-att-value="option"
+                 t-on-input="(ev) => this.setOption(option_index, ev)"/>
+          <button t-if="state.options.length > 2" type="button" class="btn btn-outline-secondary"
+                  title="Убрать вариант" t-on-click="() => this.removeOption(option_index)">
+            <i class="fa fa-times"/>
+          </button>
+        </div>
+      </t>
+      <button t-if="canAdd" type="button" class="btn btn-link px-0 mb-3" t-on-click="addOption">
+        <i class="fa fa-plus"/> Добавить вариант
+      </button>
+
+      <div class="form-check mb-3">
+        <input id="coop_poll_public" type="checkbox" class="form-check-input" t-model="state.isPublic"/>
+        <label class="form-check-label" for="coop_poll_public">
+          Открытое голосование — видно, кто что выбрал
+        </label>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-sm-6">
+          <label class="form-label">Окончание — по желанию</label>
+          <DateTimeInput type="'datetime'" value="state.closeAt" minDate="now"
+                         placeholder="'Без срока'"
+                         onChange="(value) => this.state.closeAt = value"/>
+        </div>
+        <div class="col-sm-6">
+          <label class="form-label">Опубликовать позже</label>
+          <DateTimeInput type="'datetime'" value="state.scheduledAt" minDate="now"
+                         placeholder="'Сразу'"
+                         onChange="(value) => this.state.scheduledAt = value"/>
+        </div>
+      </div>
+      <div class="form-text mt-2">Голос один, отозвать его нельзя. Итог видят проголосовавшие, автор и все — после окончания.</div>
+
+      <t t-set-slot="footer">
+        <button class="btn btn-primary" t-att-disabled="state.busy" t-on-click="publish">
+          <t t-if="state.scheduledAt">Запланировать</t>
+          <t t-else="">Опубликовать</t>
+        </button>
+        <button class="btn btn-secondary" t-on-click="props.close">Отмена</button>
+      </t>
+    </Dialog>
+  </t>
+
+  <t t-name="coop_wall.ScheduleDialog">
+    <Dialog title="'Отложить запись'" size="'sm'">
+      <label class="form-label">Когда опубликовать</label>
+      <DateTimeInput type="'datetime'" value="state.at" minDate="now"
+                     onChange="(value) => this.state.at = value"/>
+      <div class="form-text mt-2">
+        До выхода запись видите только вы — в списке «Запланировано» над лентой:
+        там её можно отправить сразу, изменить или отменить.
+      </div>
+      <t t-set-slot="footer">
+        <button class="btn btn-primary" t-att-disabled="state.busy or !state.at" t-on-click="schedule">
+          Запланировать
+        </button>
+        <button class="btn btn-secondary" t-on-click="props.close">Отмена</button>
+      </t>
+    </Dialog>
+  </t>
+</templates>

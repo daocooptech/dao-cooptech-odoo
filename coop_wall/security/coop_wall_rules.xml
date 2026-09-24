@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!--
+    Отложенную запись на стене видит только её автор.
+
+    Движок показывает отложенные сообщения всем, кто может писать в ленту
+    записи (`mail.scheduled.message._search`). Для карточки сделки это
+    верно — там это общая работа. На стене нет: пока запись не вышла, она
+    черновик автора (решение 410). Прочие отложенные сообщения — как у
+    движка.
+  -->
+  <record id="rule_coop_wall_scheduled_own" model="ir.rule">
+    <field name="name">Отложенная запись на стене — только автору</field>
+    <field name="model_id" ref="mail.model_mail_scheduled_message"/>
+    <field name="groups" eval="[(4, ref('base.group_user')), (4, ref('base.group_portal'))]"/>
+    <field name="domain_force">['|', ('model', 'not in', ['res.partner', 'coop.project', 'coop.community']), ('author_id', '=', user.partner_id.id)]</field>
+  </record>
+</odoo>

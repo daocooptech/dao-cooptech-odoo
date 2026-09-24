@@ -1,0 +1,130 @@
+// Опрос в записи стены — `js/wall_poll.js`.
+//
+// Карточка — рамкой, как карточка репоста: это часть записи, а не
+// отдельный блок ленты. До голоса варианты — кнопками во всю ширину, после
+// — полосами с процентом; свой выбор — отметкой и цветом акцента.
+
+.o_coop_poll {
+  margin-top: 8px;
+  padding: 12px 14px;
+  max-width: 520px;
+  border: 1px solid var(--border-color, rgba(0, 0, 0, .1));
+  border-radius: 10px;
+}
+
+.o_coop_poll_q {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.35;
+
+  .fa { color: var(--coop-teal, #146b64); }
+}
+
+.o_coop_poll_kind,
+.o_coop_poll_foot {
+  font-size: 12px;
+  color: var(--text-muted, #6c757d);
+}
+
+.o_coop_poll_kind { margin: 2px 0 10px 22px; }
+
+.o_coop_poll_options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.o_coop_poll_choice {
+  width: 100%;
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 13px;
+  border: 1px solid var(--coop-teal, #146b64);
+  border-radius: 8px;
+  background: none;
+  color: var(--coop-teal-dark, #0e4f4a);
+
+  &:hover:not(:disabled) { background: var(--coop-teal-tint, #e3efed); }
+}
+
+.o_coop_poll_result {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: var(--o-gray-100, rgba(0, 0, 0, .03));
+  overflow: hidden;
+  font-size: 13px;
+
+  > * { position: relative; }
+}
+
+// Полоса доли — подложкой под подписью, а не отдельной линейкой: так
+// вариант и его доля читаются одной строкой.
+.o_coop_poll_fill {
+  position: absolute !important;
+  inset: 0 auto 0 0;
+  background: var(--o-gray-200, rgba(0, 0, 0, .07));
+  transition: width .3s;
+}
+
+.o_coop_poll_mine .o_coop_poll_fill { background: var(--coop-teal-tint, #e3efed); }
+.o_coop_poll_mine .fa-check-circle { color: var(--coop-teal, #146b64); }
+
+.o_coop_poll_name { flex: 1 1 auto; min-width: 0; }
+
+.o_coop_poll_pct {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.o_coop_poll_voters_btn {
+  border: 0;
+  background: none;
+  padding: 0 2px;
+  font-size: 12px;
+  color: var(--text-muted, #6c757d);
+}
+
+.o_coop_poll_voters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  padding: 4px 4px 6px;
+  font-size: 12px;
+}
+
+.o_coop_poll_voter {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  img {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+}
+
+.o_coop_poll_more { color: var(--text-muted, #6c757d); }
+
+.o_coop_poll_foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 4px;
+  margin-top: 10px;
+}
+
+.o_coop_poll_close {
+  margin-left: auto;
+  padding: 0;
+  font-size: 12px;
+}

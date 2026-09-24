@@ -17,7 +17,8 @@
 своя модель `coop.wall.comment` (решение 404); репост; «Поблагодарить»
 — рубли по СБП автора и токены в выбранной сети, платформа денег не
 касается (решение 406).
-Дальше сюда же — опросы и отложенная публикация.
+Опросы (`coop.wall.poll`, голос не отзывается, журналом с хэшами) и
+отложенная публикация на движке отложенных сообщений (решение 410).
 
 Отдельный модуль по слову владельца 24 сентября 2026: «может эффективнее
 сделать отдельный модуль» — стена не переписка (`coop_messages`) и не
@@ -25,11 +26,12 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '19.0.1.1.0',
+    'version': '19.0.1.2.0',
     'license': 'LGPL-3',
     'depends': ['mail', 'coop_base', 'coop_theme', 'coop_wallet', 'coop_settings'],
     'data': [
         'security/ir.model.access.csv',
+        'security/coop_wall_rules.xml',
         'views/coop_wall_settings_views.xml',
     ],
     'assets': {
@@ -43,6 +45,9 @@
             'coop_wall/static/src/xml/wall_post.xml',
             'coop_wall/static/src/scss/wall_post.scss',
             'coop_wall/static/src/js/wall_reaction.js',
+            'coop_wall/static/src/js/wall_poll.js',
+            'coop_wall/static/src/xml/wall_poll.xml',
+            'coop_wall/static/src/scss/wall_poll.scss',
         ],
     },
     'installable': True,

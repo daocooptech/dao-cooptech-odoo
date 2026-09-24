@@ -11,6 +11,7 @@ import { Message as MessageModel } from "@mail/core/common/message_model";
 import { fields } from "@mail/core/common/record";
 import { MessageReactions } from "@mail/core/common/message_reactions";
 import { WALL_MODELS } from "@coop_theme/js/wall";
+import { CoopWallPoll } from "@coop_wall/js/wall_poll";
 
 // Под записью на стене — ряд действий и комментарии.
 //
@@ -418,7 +419,7 @@ export class CoopRepostCard extends Component {
 }
 
 patch(Message, {
-    components: { ...Message.components, CoopWallPostFooter, CoopRepostCard },
+    components: { ...Message.components, CoopWallPostFooter, CoopRepostCard, CoopWallPoll },
 });
 
 patch(Message.prototype, {
@@ -458,11 +459,13 @@ patch(MessageModel.prototype, {
         this.coop_repost_count = fields.Attr(0);
         this.coop_thanks_count = fields.Attr(0);
         this.coop_star_count = fields.Attr(0);
+        this.coop_poll = fields.Attr(false);
     },
 
     // Репост без своих слов — не пустая запись: в нём карточка. Иначе
-    // движок показал бы на его месте «сообщение удалено».
+    // движок показал бы на его месте «сообщение удалено». Опрос — тоже:
+    // его вопрос в карточке, а не в тексте записи.
     computeIsEmpty() {
-        return !this.coop_repost && super.computeIsEmpty();
+        return !this.coop_repost && !this.coop_poll && super.computeIsEmpty();
     },
 });

@@ -21,6 +21,8 @@ class MailMessage(models.Model):
     coop_repost_of_id = fields.Many2one(
         'mail.message', string='Репост записи', index=True,
         ondelete='set null')
+    coop_poll_ids = fields.One2many(
+        'coop.wall.poll', 'message_id', string='Опрос')
 
     # ── В браузер ───────────────────────────────────────────────────
 
@@ -30,7 +32,14 @@ class MailMessage(models.Model):
             Store.Attr('coop_repost_count', lambda m: m._coop_repost_count()),
             Store.Attr('coop_thanks_count', lambda m: m._coop_thanks_count()),
             Store.Attr('coop_star_count', lambda m: m._coop_star_count()),
+            Store.Attr('coop_poll', lambda m: m._coop_poll_data()),
         ]
+
+    def _coop_poll_data(self):
+        """Опрос записи глазами смотрящего — или False (`coop_wall_poll.py`)."""
+        self.ensure_one()
+        poll = self.sudo().coop_poll_ids[:1]
+        return poll.with_env(self.env)._coop_data() if poll else False
 
     def _coop_repost_data(self):
         """Карточка исходной записи — или False, если это не репост."""
