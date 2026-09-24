@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!-- Звёздочка в шапке — `js/favorites_page.js`. -->
+  <t t-name="coop_theme.FavoritesButton">
+    <button class="o_coop_bell o_coop_fav_btn" type="button" title="Избранное"
+            aria-label="Избранное" t-on-click="() => this.open()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
+           stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 3.6l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/>
+      </svg>
+    </button>
+  </t>
+
+  <!-- Страница «Избранное» — `js/favorites_page.js`. -->
+  <t t-name="coop_theme.FavoritesPage">
+    <div class="o_coop_favorites o_action">
+      <div class="o_coop_favorites_head">
+        <h1>Избранное</h1>
+        <span t-if="state.loaded" class="o_coop_favorites_total" t-out="total"/>
+      </div>
+      <div t-if="!state.loaded" class="text-muted">Загрузка…</div>
+      <t t-else="">
+        <div class="o_coop_tabs o_coop_favorites_tabs">
+          <a t-foreach="state.tabs" t-as="t" t-key="t.key" href="#" class="o_coop_tab"
+             t-att-class="{ 'active': t.key === state.current }"
+             t-on-click.prevent="() => this.state.current = t.key">
+            <t t-out="t.label"/> <span class="o_coop_favorites_count" t-out="t.items.length"/>
+          </a>
+        </div>
+
+        <t t-if="tab and !tab.items.length">
+          <div class="o_coop_favorites_empty">
+            <t t-if="tab.key === 'posts'">
+              Сохранённых записей нет. Нажмите ☆ под записью на стене — она появится здесь.
+            </t>
+            <t t-else="">
+              Здесь пока пусто. Отмечайте сердечком карточки в каталоге — они появятся здесь.
+            </t>
+          </div>
+        </t>
+
+        <!-- Записи со стен -->
+        <div t-elif="tab and tab.key === 'posts'" class="o_coop_favorites_posts">
+          <div t-foreach="tab.items" t-as="p" t-key="p.id" class="o_coop_favorites_post"
+               t-on-click="() => this.openPost(p)">
+            <img class="o_coop_favorites_avatar" t-att-src="'/web/image/res.partner/' + p.author_id + '/avatar_128'" alt=""/>
+            <div class="o_coop_favorites_post_main">
+              <div class="o_coop_favorites_post_head">
+                <b t-out="p.author_name"/>
+                <span t-if="p.page_name and p.page_name !== p.author_name" class="text-muted">
+                  на странице <t t-out="p.page_name"/>
+                </span>
+                <span class="text-muted" t-out="formatDate(p)"/>
+              </div>
+              <div class="o_coop_favorites_post_text" t-out="p.text"/>
+              <div t-if="p.files" class="o_coop_favorites_post_files">
+                <i class="fa fa-paperclip"/> вложений: <t t-out="p.files"/>
+              </div>
+            </div>
+            <img t-if="p.image" class="o_coop_favorites_post_img" t-att-src="p.image" alt="" loading="lazy"/>
+            <button class="o_coop_favorites_unstar" title="Убрать из избранного"
+                    t-on-click.stop="() => this.unstar(p)">
+              <i class="fa fa-star"/>
+            </button>
+          </div>
+        </div>
+
+        <!-- Карточки каталогов -->
+        <div t-elif="tab" class="o_coop_favorites_grid">
+          <div t-foreach="tab.items" t-as="c" t-key="c.model + c.id" class="o_coop_favorites_card"
+               t-on-click="() => this.open(c)">
+            <div class="o_coop_favorites_media">
+              <img t-if="c.image" t-att-src="c.image" alt="" loading="lazy"/>
+              <span t-else="" class="o_coop_favorites_noimg" t-out="c.name.slice(0, 1)"/>
+              <span class="o_coop_fav o_coop_fav_on" role="button" title="Убрать из избранного"
+                    t-on-click.stop="() => this.unheart(c)">
+                <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 20.3l-1.3-1.2C6 15 3 12.3 3 8.9 3 6.2 5.1 4 7.8 4c1.5 0 3 .7 4 1.9C12.8 4.7 14.3 4 15.8 4 18.5 4 20.6 6.2 20.6 8.9c0 3.4-3 6.1-7.7 10.2z"/>
+                </svg>
+              </span>
+            </div>
+            <div class="o_coop_favorites_title" t-out="c.name"/>
+            <div t-if="c.subtitle" class="o_coop_favorites_sub" t-out="c.subtitle"/>
+          </div>
+        </div>
+      </t>
+    </div>
+  </t>
+</templates>

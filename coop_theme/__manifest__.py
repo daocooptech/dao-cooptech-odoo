@@ -31,6 +31,7 @@
         'views/coop_theme_boot.xml',
         'views/coop_sidebar_views.xml',
         'views/coop_contacts_views.xml',
+        'views/coop_favorites_views.xml',
         'data/coop_sidebar_resync.xml',
     ],
     'assets': {
@@ -49,6 +50,9 @@
             'coop_theme/static/src/js/platform_page.js',
             'coop_theme/static/src/js/favorite.js',
             'coop_theme/static/src/xml/favorite.xml',
+            'coop_theme/static/src/js/favorites_page.js',
+            'coop_theme/static/src/xml/favorites_page.xml',
+            'coop_theme/static/src/scss/favorites_page.scss',
             'coop_theme/static/src/js/catalog_sort.js',
             'coop_theme/static/src/js/catalog_map.js',
             'coop_theme/static/src/xml/catalog_map.xml',

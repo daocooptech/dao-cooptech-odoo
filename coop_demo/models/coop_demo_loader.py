@@ -9,6 +9,7 @@ from ..data import load_project_follows
 from ..data import load_wall_posts
 from ..data import load_wall_media
 from ..data import load_wall_comments
+from ..data import load_favorites
 from ..data import load_okved
 from ..data import load_accounts
 from ..data import (emblems, load_attributes, load_biography, load_bounty,
@@ -207,8 +208,8 @@ class CoopDemoLoader(models.AbstractModel):
             load_wall_comments.load_wall_likes(self.env)
             load_wall_comments.load_wall_reposts(self.env)
             load_wall_comments.load_wall_thanks(self.env)
-            load_wall_comments.load_wall_stars(self.env)
             load_wall_comments.load_wall_thanks_tokens(self.env)
+            load_wall_comments.load_wall_stars(self.env)
         # Суммы проектов — до всего остального, что на них смотрит:
         # готовность, доли и вехи считаются от «нужно».
         load_projects.repair_scales(self.env)
@@ -245,6 +246,9 @@ class CoopDemoLoader(models.AbstractModel):
         # Знаки организаций — тем же порядком: набор эмблем чистили от
         # того, что знаком не было, и у карточек это осталось стоять.
         load_photos.ensure_marks(self.env)
+        # Избранное (решение 408) — после всех каталогов: отмечать можно
+        # только то, что уже заведено.
+        load_favorites.load_favorites(self.env)
         return True
 
     def _load_rubrics(self):

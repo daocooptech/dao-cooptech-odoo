@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+  <!-- Страница «Избранное» — решение 408. Адрес `/odoo/favorites`;
+       вход — звёздочка в шапке (`js/favorites_page.js`). -->
+  <record id="action_coop_favorites" model="ir.actions.client">
+    <field name="name">Избранное</field>
+    <field name="tag">coop_theme.favorites</field>
+    <field name="path">favorites</field>
+  </record>
+</odoo>
