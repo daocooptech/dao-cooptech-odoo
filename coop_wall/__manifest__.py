@@ -42,6 +42,7 @@
             'coop_wall/static/src/js/wall_post.js',
             'coop_wall/static/src/xml/wall_post.xml',
             'coop_wall/static/src/scss/wall_post.scss',
+            'coop_wall/static/src/js/wall_reaction.js',
         ],
     },
     'installable': True,
