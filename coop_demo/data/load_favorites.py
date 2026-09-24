@@ -48,10 +48,14 @@ def load_favorites(env, login='dashkevich'):
         ('coop_is_participant', '=', True), ('is_company', '=', False),
         ('name', 'not in', TEST_NAMES), ('id', '!=', showcase.id)])
     rows = []
+    user = env['res.users'].sudo().search([('login', '=', login)], limit=1)
     for model, domain, count in PLAN:
         if model not in env:
             continue
-        Model = env[model].sudo()
+        # Только то, что главный участник действительно видит: закрытое
+        # от него в избранном не показалось бы, и числа вкладок разошлись
+        # бы с тем, что отмечено (прогон на копии: из 16 вакансий видно 8).
+        Model = env[model].with_user(user)
         extra = [('name', 'not in', TEST_NAMES), ('id', '!=', showcase.id)] if model == 'res.partner' else []
         ids = Model.search(domain + extra).ids
         if not ids:
