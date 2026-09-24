@@ -695,9 +695,17 @@
 //
 // Запись ленты — во всю ширину, а не плиткой: это текст, его читают
 // сверху вниз, как в ленте любого сообщества.
-.o_kanban_renderer.o_coop_feed {
+// Класс вида ставится на контроллер, а не на сам список карточек, и
+// каталог добавляет туда свой `o_coop_tiles` с шириной плитки — отсюда
+// двойной класс в селекторе.
+.o_coop_feed.o_coop_tiles .o_kanban_renderer {
   --KanbanRecord-width: 100%;
   --KanbanRecord-margin-h: 0px;
+
+  .o_kanban_record {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
 }
 
 .o_coop_feed_post {

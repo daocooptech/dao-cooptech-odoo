@@ -12,7 +12,7 @@
 * инициатор проекта подписан на свой проект;
 * вкладчик подписан на проекты, куда вложился, — кроме отклонённых,
   отозванных и истёкших вкладов;
-* главный участник витрины — ещё и на дюжину проектов с новостями, где
+* главный участник витрины — ещё и на все проекты с новостями, где
   он не участвует: лента под его учётной записью — та, которую открывают
   первой.
 
@@ -20,7 +20,6 @@
 человек» пропускаются.
 """
 import logging
-import random
 
 _logger = logging.getLogger(__name__)
 
@@ -59,9 +58,10 @@ def load_project_follows(env, login='dashkevich'):
     if showcase:
         with_news = projects.filtered(
             lambda p: p.project_id and p.project_id.update_ids)
-        rnd = random.Random(20260924)
-        picked = rnd.sample(with_news.ids, k=min(12, len(with_news)))
-        for project_id in picked:
+        # На все проекты с новостями: лента под его учётной записью —
+        # та, которую открывают первой, и в ней должно быть видно и
+        # отбор, и листание. Дюжины проектов на это не хватало.
+        for project_id in with_news.ids:
             add(project_id, showcase.id)
 
     if rows:

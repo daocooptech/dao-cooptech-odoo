@@ -188,6 +188,8 @@ class CoopDemoLoader(models.AbstractModel):
         # должно быть окончательным.
         if 'project.update' in self.env:
             load_project_updates.load_project_updates(self.env)
+            load_project_updates.densify(self.env)
+            load_project_updates.repair_authors(self.env)
         # Подписки на проекты — после отчётов о ходе: главного участника
         # витрины подписываем на проекты, где новости уже есть.
         load_project_follows.load_project_follows(self.env)
