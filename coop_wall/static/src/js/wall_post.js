@@ -308,6 +308,13 @@ export class CoopThanksDialog extends Component {
         this.state.token = first?.tokens[0]?.symbol || null;
     }
 
+    // Пример суммы — по токену: «10 BTC» в подсказке смотрелось нелепо.
+    get tokenExample() {
+        const examples = { BTC: "0,001", ETH: "0,01", BNB: "0,05", TON: "2", SOL: "0,2", USDT: "10", USDC: "10" };
+        const token = this.state.token || "";
+        return `${examples[token] || "1"} ${token}`;
+    }
+
     get network() {
         return (this.state.info?.networks || []).find((n) => n.id === this.state.networkId);
     }

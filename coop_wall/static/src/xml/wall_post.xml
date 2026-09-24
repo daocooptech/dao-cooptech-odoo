@@ -183,7 +183,7 @@
             </label>
           </div>
           <p t-if="network">
-            Адрес <t t-out="state.info.author_name"/> в сети <t t-out="network.name"/>:
+            Адрес автора в сети <t t-out="network.name"/>:
             <code class="o_coop_thanks_req" t-out="network.address"/>
           </p>
           <p t-if="network and network.fee_hint" class="o_coop_thanks_fee">
@@ -197,7 +197,7 @@
         </div>
         <label class="form-label">Сумма подарка</label>
         <input class="form-control mb-3" inputmode="decimal" t-model="state.amount"
-               t-att-placeholder="state.channel === 'sbp' ? '500 ₽' : '10 ' + (state.token or '')"/>
+               t-att-placeholder="state.channel === 'sbp' ? '500 ₽' : tokenExample"/>
         <div t-if="(state.info.taxes[state.channel] or []).length" class="o_coop_thanks_tax mb-3">
           <i class="fa fa-university"/>
           <div>
