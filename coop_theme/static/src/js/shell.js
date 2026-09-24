@@ -5,6 +5,9 @@ import { patch } from "@web/core/utils/patch";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { browser } from "@web/core/browser/browser";
+import { Domain } from "@web/core/domain";
+import { user } from "@web/core/user";
+import { COOP_FAVORITE_CATALOGS } from "@coop_theme/js/favorite";
 import { router, routerBus } from "@web/core/browser/router";
 import { WebClient } from "@web/webclient/webclient";
 import { NavBar } from "@web/webclient/navbar/navbar";
@@ -36,7 +39,9 @@ export class CoopTabs extends Component {
     setup() {
         this.menus = useService("menu");
         this.action = useService("action");
-        this.state = useState({ tabs: [], current: null, label: null });
+        this.orm = useService("orm");
+        this.state = useState({ tabs: [], current: null, label: null, fav: null });
+        useBus(this.env.bus, "COOP_FAVORITE_CHANGED", () => this.refreshFav());
         this.lastActionId = null;
         this.refresh();
         // Какое действие открыто, панель управления знает не всегда: у
@@ -151,6 +156,52 @@ export class CoopTabs extends Component {
         // строке вкладок не показан, и подсвечивать было нечего.
         const active = children.find((tab) => tab.actionID === actionId);
         this.state.current = active ? active.id : (children[0] || {}).id;
+        this.refreshFav();
+    }
+
+    /**
+     * Вкладка «Избранное N» — как в макете (`people.html?tab=favorites`),
+     * решение 408. Не отдельный экран, а тот же каталог, суженный до
+     * отмеченных карточек: отбор, сортировка и вид остаются прежними.
+     * Сам отбор каталога запоминается в контексте, чтобы число и
+     * повторное нажатие считались от каталога, а не от уже суженного.
+     */
+    async refreshFav() {
+        const action = this.action?.currentController?.action;
+        const model = action?.res_model;
+        if (action?.type !== "ir.actions.act_window" || !COOP_FAVORITE_CATALOGS.includes(model)
+                || this.state.label) {
+            this.state.fav = null;
+            return;
+        }
+        const on = Boolean(action.context?.coop_fav_tab);
+        const base = on ? action.context.coop_fav_base_domain || [] : action.domain || [];
+        try {
+            const ids = await this.orm.call("coop.favorite", "coop_ids_for", [model]);
+            const domain = Domain.and([base, [["id", "in", ids]]]).toList({ ...user.context });
+            const count = await this.orm.searchCount(model, domain);
+            this.state.fav = { on, count, action, base, domain };
+            if (on) {
+                this.state.current = null;
+            }
+        } catch {
+            // Избранное не имеет права ронять строку вкладок.
+            this.state.fav = null;
+        }
+    }
+
+    openFav() {
+        const fav = this.state.fav;
+        if (!fav || fav.on) {
+            return;
+        }
+        const { action } = fav;
+        this.action.doAction({
+            ...action,
+            id: undefined,
+            domain: fav.domain,
+            context: { ...(action.context || {}), coop_fav_tab: true, coop_fav_base_domain: fav.base },
+        }, { stackPosition: "replaceCurrentAction" });
     }
 
     open(tab) {

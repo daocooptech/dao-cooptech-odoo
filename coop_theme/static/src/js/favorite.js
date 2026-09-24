@@ -18,6 +18,19 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 
+/**
+ * Каталоги с сердечком — двенадцать, как в макете (решение 408). У
+ * ресурсов сердечко своё, в разметке карточки; остальным его ставит общий
+ * вид каталогов (`js/catalog_view.js`). Вкладка «Избранное N» — у всех
+ * двенадцати (`js/shell.js`, `CoopTabs`).
+ */
+export const COOP_FAVORABLE = [
+    "res.partner", "coop.project", "coop.community", "coop.skill.offer",
+    "coop.vacancy", "coop.event", "coop.program", "coop.warehouse.offer",
+    "coop.intangible", "coop.cfa.issue",
+];
+export const COOP_FAVORITE_CATALOGS = [...COOP_FAVORABLE, "coop.resource"];
+
 export const coopFavoriteService = {
     dependencies: ["orm"],
     start(env, { orm }) {
@@ -52,6 +65,9 @@ export const coopFavoriteService = {
             async toggle(model, recordId) {
                 const isFavorite = await orm.call(
                     "coop.favorite", "coop_toggle", [model, recordId]);
+                // Число на вкладке «Избранное» каталога — сразу, без
+                // перезагрузки страницы.
+                env.bus.trigger("COOP_FAVORITE_CHANGED", { model });
                 await load(model);
                 if (marks[model]) {
                     if (isFavorite) {

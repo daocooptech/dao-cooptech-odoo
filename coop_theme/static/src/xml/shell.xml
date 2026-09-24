@@ -165,6 +165,12 @@
          t-on-click.prevent="() => this.open(tab)">
         <t t-esc="tab.name"/>
       </a>
+      <!-- «Избранное N» — как в макете, решение 408 (`js/shell.js`). -->
+      <a t-if="state.fav" href="#" class="o_coop_tab o_coop_tab_fav"
+         t-att-class="{ 'active': state.fav.on }"
+         t-on-click.prevent="() => this.openFav()">
+        Избранное <span class="o_coop_tab_count" t-esc="state.fav.count"/>
+      </a>
     </div>
   </t>
 

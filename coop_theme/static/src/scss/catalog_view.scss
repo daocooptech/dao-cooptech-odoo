@@ -993,3 +993,10 @@
         min-width: 6rem;
     }
 }
+
+// Сердечко общего вида каталогов (решение 408) — поверх правого верхнего
+// угла карточки, то есть поверх снимка. Карточке нужна точка отсчёта.
+.o_coop_catalog_kanban_heart_host,
+.o_kanban_renderer .o_kanban_record:has(> .o_coop_fav) {
+  position: relative;
+}

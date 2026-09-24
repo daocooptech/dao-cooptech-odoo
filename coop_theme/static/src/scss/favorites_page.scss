@@ -153,3 +153,18 @@
   .o_coop_favorites_grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .o_coop_favorites_post_img { width: 64px; height: 48px; }
 }
+
+// Число на вкладке «Избранное» каталога — как бейдж в макете
+// (`badge outline fav-tab-count`).
+.o_coop_tab_count {
+  display: inline-block;
+  min-width: 20px;
+  margin-left: 4px;
+  padding: 0 6px;
+  border: 1px solid currentColor;
+  border-radius: 10px;
+  font-size: 11px;
+  line-height: 16px;
+  text-align: center;
+  opacity: .7;
+}

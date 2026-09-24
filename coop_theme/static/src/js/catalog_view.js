@@ -4,6 +4,9 @@ import { registry } from "@web/core/registry";
 import { browser } from "@web/core/browser/browser";
 import { patch } from "@web/core/utils/patch";
 import { kanbanView } from "@web/views/kanban/kanban_view";
+import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
+import { KanbanRecord } from "@web/views/kanban/kanban_record";
+import { COOP_FAVORABLE, CoopFavoriteHeart } from "@coop_theme/js/favorite";
 import { KanbanController } from "@web/views/kanban/kanban_controller";
 import { ListController } from "@web/views/list/list_controller";
 import { FormController } from "@web/views/form/form_controller";
@@ -238,9 +241,38 @@ export class CoopCatalogKanbanController extends KanbanController {
 
 CoopCatalogKanbanController.template = "coop_theme.CatalogKanbanView";
 
+/**
+ * Сердечко «в избранное» на карточке — решение 408.
+ *
+ * В макете оно стоит на каждой карточке в двенадцати каталогах (15
+ * сентября 2026, `69c9afe`), в MVP было только у ресурсов — строкой в
+ * разметке их карточки. Чтобы не править разметку одиннадцати модулей по
+ * одной строке, сердечко ставит сам общий вид каталогов: карточка —
+ * `article` движка, сердечко — поверх её правого верхнего угла, то есть
+ * поверх снимка, как в макете.
+ *
+ * Список — те же каталоги, что вкладки страницы «Избранное»
+ * (`models/coop_favorite_page.py`, `KINDS`). Ресурсов здесь нет: у них
+ * сердечко своё, в разметке карточки. Лента, сделки, заявки и прочие
+ * списки дел — не то, что откладывают «на потом», сердечка там нет.
+ */
+export class CoopCatalogKanbanRecord extends KanbanRecord {
+    static template = "coop_theme.CatalogKanbanRecord";
+    static components = { ...KanbanRecord.components, CoopFavoriteHeart };
+
+    get coopFavorable() {
+        return COOP_FAVORABLE.includes(this.props.record.resModel) && this.props.record.resId;
+    }
+}
+
+export class CoopCatalogKanbanRenderer extends KanbanRenderer {
+    static components = { ...KanbanRenderer.components, KanbanRecord: CoopCatalogKanbanRecord };
+}
+
 registry.category("views").add("coop_catalog_kanban", {
     ...kanbanView,
     Controller: CoopCatalogKanbanController,
+    Renderer: CoopCatalogKanbanRenderer,
 });
 
 // Вкладки раздела рисуются самой панелью: только так они попадают в одну

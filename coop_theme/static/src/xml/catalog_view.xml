@@ -7,6 +7,14 @@
     `tile-mode`. Своих кнопок здесь нет — переключатель один, штатный,
     справа.
   -->
+  <!-- Карточка каталога с сердечком «в избранное» — `js/catalog_view.js`,
+       `CoopCatalogKanbanRecord` (решение 408). -->
+  <t t-name="coop_theme.CatalogKanbanRecord" t-inherit="web.KanbanRecord" t-inherit-mode="primary">
+    <xpath expr="//t[@t-call='{{ this.constructor.menuTemplate }}']" position="before">
+      <CoopFavoriteHeart t-if="coopFavorable" record="props.record" name="'id'"/>
+    </xpath>
+  </t>
+
   <t t-name="coop_theme.CatalogKanbanView" t-inherit="web.KanbanView" t-inherit-mode="primary">
     <xpath expr="//div[@t-ref='root']" position="attributes">
       <attribute name="t-attf-class">{{ className }} {{ hasSelectedRecords ? 'o_kanban_selection_active' : 'o_kanban_selection_available' }} o_coop_{{ coopLayout.mode }}</attribute>
