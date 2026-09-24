@@ -225,11 +225,16 @@ export class CoopShelves extends Component {
             ));
         }
         if (typeof value === "object") {
-            if (Array.isArray(value.records)) {
-                return value.records.map((item) => item.resId ?? item.id);
-            }
+            // Полный список номеров — в `resIds`; в `records` у списка
+            // связей лежит только подгруженная часть (у человека с двумя
+            // специализациями — одна), и полка по специализациям
+            // недосчитывалась: «Столяр, плотник 13», на полке — одна
+            // карточка (24 сентября 2026).
             if (Array.isArray(value.resIds)) {
                 return value.resIds;
+            }
+            if (Array.isArray(value.records)) {
+                return value.records.map((item) => item.resId ?? item.id);
             }
             return value.id === undefined ? [] : [value.id];
         }
