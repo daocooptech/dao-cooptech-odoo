@@ -10,11 +10,16 @@
   background: var(--coop-teal-tint, #e3efed);
 }
 
-.o_coop_trade_flag {
-  width: 96px;
+// Флаг — по центру плашки, а не во всю её ширину: тема растягивает
+// снимок карточки (`.o_coop_media img`, `object-fit: cover`), и ряд
+// одинаковых флагов во всю плитку читался как ошибка раскладки.
+.o_coop_media.o_coop_trade_media img.o_coop_trade_flag {
+  width: 45%;
   height: auto;
+  max-height: 60%;
+  object-fit: contain;
   border-radius: 6px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, .15);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, .18);
 }
 
 .o_coop_trade_head {
