@@ -43,4 +43,23 @@
              t-on-click.stop=""/>
     </xpath>
   </t>
+
+
+  <!--
+    Пустая стена — «Записей пока нет.» (решение 410, п. 8), а не «Беседа
+    пуста» со смайликом: стена — не переписка, и пустота у неё своя.
+    Только у стен (люди и организации, проекты, сообщества — те же модели,
+    что WALL_MODELS в js/wall.js); в переписке записи — как у движка.
+    Текст появляется после загрузки: условие `isLoaded` — у движка, выше.
+  -->
+  <t t-name="coop_theme.ThreadWallEmpty" t-inherit="mail.Thread" t-inherit-mode="extension">
+    <xpath expr="//t[@name='empty-message']/div" position="attributes">
+      <attribute name="t-elif">!['res.partner', 'coop.project', 'coop.community'].includes(props.thread.model)</attribute>
+      <attribute name="t-else"></attribute>
+    </xpath>
+    <xpath expr="//t[@name='empty-message']" position="inside">
+      <div t-else="" class="o_coop_wall_empty text-muted">Записей пока нет.</div>
+    </xpath>
+  </t>
+
 </templates>
