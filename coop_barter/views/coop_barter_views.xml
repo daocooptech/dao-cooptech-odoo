@@ -285,13 +285,13 @@
           </group>
           <field name="leg_ids" readonly="1">
             <list>
-              <field name="giver_id"/>
-              <field name="offer_id" string="Отдаёт"/>
-              <field name="receiver_id"/>
-              <field name="value"/>
-              <field name="accepted"/>
-              <field name="deal_id"/>
-              <field name="deal_state" widget="badge"/>
+              <field name="giver_id" string="Кто"/>
+              <field name="offer_id" string="Что отдаёт"/>
+              <field name="receiver_id" string="Кому"/>
+              <field name="value" string="Оценка, ₽" width="110px"/>
+              <field name="accepted" string="Согласие" width="80px"/>
+              <field name="deal_id" string="Сделка" optional="show"/>
+              <field name="deal_state" string="Ход сделки" widget="badge" optional="show"/>
             </list>
           </field>
           <group string="Сообщение участникам" invisible="not note">
