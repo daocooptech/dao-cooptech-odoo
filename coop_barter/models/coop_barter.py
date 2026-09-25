@@ -126,10 +126,14 @@ class CoopBarterOffer(models.Model):
         for offer in self:
             offer.is_mine = offer.partner_id in mine
 
+    # Признак в Odoo 19 ищется оператором `in` ([True]); отрицание и прочее
+    # движок выводит сам из NotImplemented — как `_search_is_ongoing` у
+    # событий движка. Проверка `operator == '='` здесь переворачивала
+    # смысл: «Мои объявления» показывали всё, кроме моих.
     def _search_is_mine(self, operator, value):
-        positive = (operator == '=') == bool(value)
-        return [('partner_id', 'in' if positive else 'not in',
-                 self.env.user.coop_actor_partner_ids.ids)]
+        if operator != 'in':
+            return NotImplemented
+        return [('partner_id', 'in', self.env.user.coop_actor_partner_ids.ids)]
 
     def _my_wants(self):
         """Что хочу я — объединение «приму взамен» всех моих объявлений."""
@@ -144,11 +148,10 @@ class CoopBarterOffer(models.Model):
             offer.fits_me = offer.category_id in wants and offer.partner_id not in mine
 
     def _search_fits_me(self, operator, value):
-        positive = (operator == '=') == bool(value)
-        wants = self._my_wants()
-        domain = [('category_id', 'in', wants.ids),
-                  ('partner_id', 'not in', self.env.user.coop_actor_partner_ids.ids)]
-        return domain if positive else ['!', '&'] + domain
+        if operator != 'in':
+            return NotImplemented
+        return [('category_id', 'in', self._my_wants().ids),
+                ('partner_id', 'not in', self.env.user.coop_actor_partner_ids.ids)]
 
     def _compute_exchange_count(self):
         for offer in self:
@@ -398,9 +401,9 @@ class CoopBarterExchange(models.Model):
                 exchange.leg_ids.filtered(lambda l: l.giver_id in mine and not l.accepted))
 
     def _search_is_participant(self, operator, value):
-        positive = (operator == '=') == bool(value)
-        ids = self.env.user.coop_actor_partner_ids.ids
-        return [('participant_ids', 'in' if positive else 'not in', ids)]
+        if operator != 'in':
+            return NotImplemented
+        return [('participant_ids', 'in', self.env.user.coop_actor_partner_ids.ids)]
 
     def _compute_notice(self):
         """Что стоит знать до согласия — из разборов юриста и бухгалтера."""
