@@ -517,6 +517,10 @@
 // Пустая стена — «Записей пока нет.» (решение 410, п. 8): строкой под
 // полем публикации, с тем же полем слева, что у записей.
 .o_coop_wall_empty {
-  padding: 16px 0 4px;
+  padding: 14px 14px 4px;
   font-size: 13.5px;
+}
+
+@media (max-width: 900px) {
+  .o_coop_wall_empty { padding: 12px 12px 4px; }
 }
