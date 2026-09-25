@@ -16,6 +16,9 @@
     <field name="model">coop.document</field>
     <field name="arch" type="xml">
       <kanban class="o_coop_documents" quick_create="false">
+        <field name="id"/>
+        <field name="is_pdf"/>
+        <field name="file_name"/>
         <field name="kind"/>
         <field name="state"/>
         <field name="party_b_id"/>
@@ -26,6 +29,12 @@
         <templates>
           <t t-name="card">
             <div class="o_coop_doc_card">
+              <!-- Первая страница PDF — плиткой (разбор дисков, п. 2):
+                   рисует браузер, сервер снимков не хранит. -->
+              <div class="o_coop_doc_thumb" t-if="record.is_pdf.raw_value">
+                <field name="id" widget="coop_pdf_thumb" nolabel="1"/>
+              </div>
+              <div class="o_coop_doc_fav"><field name="id" widget="coop_favorite_heart" nolabel="1"/></div>
               <div class="o_coop_doc_head">
                 <i class="fa fa-file-text-o o_coop_doc_icon"
                    t-if="record.kind.raw_value == 'contract'"/>
@@ -113,12 +122,26 @@
                   class="btn-primary" invisible="state != 'draft'"/>
           <button name="action_check" type="object" string="Сверить свой экземпляр"
                   invisible="not fingerprint"/>
+          <button name="action_download" type="object" string="Скачать"
+                  invisible="not file" icon="fa-download"/>
+          <button name="action_share" type="object" string="Ссылка для внешней стороны"
+                  invisible="not file or not active" icon="fa-link"/>
           <button name="action_cancel" type="object" string="Отменить"
                   invisible="state == 'cancelled'"/>
+          <button name="action_trash" type="object" string="В корзину"
+                  invisible="not active or state == 'signed'" icon="fa-trash-o"/>
+          <button name="action_restore" type="object" string="Восстановить"
+                  class="btn-primary" invisible="active"/>
           <field name="state" widget="statusbar"
                  statusbar_visible="draft,signed"/>
         </header>
         <sheet>
+          <field name="active" invisible="1"/>
+          <field name="is_pdf" invisible="1"/>
+          <div class="alert alert-warning" invisible="active">
+            Документ в корзине с <field name="trashed_on" readonly="1" class="d-inline"/> —
+            удалится насовсем <field name="purge_on" readonly="1" class="d-inline"/>, если не восстановить.
+          </div>
           <div class="oe_title">
             <h1><field name="name" placeholder="Акт приёма-передачи"/></h1>
           </div>
@@ -160,6 +183,53 @@
             <field name="note" nolabel="1" colspan="2"
                    placeholder="Что важно знать об этом документе"/>
           </group>
+          <notebook>
+            <page string="Просмотр" name="preview" invisible="not file">
+              <field name="preview_html" nolabel="1" readonly="1"/>
+            </page>
+            <page string="Редакции" name="versions">
+              <div class="text-muted mb-2">
+                Новая редакция не затирает прежнюю: у каждой свой отпечаток, и
+                сверка узнаёт любую. Подписанная редакция закреплена — её не удалить.
+              </div>
+              <field name="version_ids" readonly="1" nolabel="1">
+                <list create="0" delete="0">
+                  <field name="number" string="№" width="50"/>
+                  <field name="date"/>
+                  <field name="author_id" widget="many2one_avatar"/>
+                  <field name="file_name"/>
+                  <field name="fingerprint" class="font-monospace text-muted"/>
+                  <field name="pinned" width="90"/>
+                  <field name="note"/>
+                </list>
+              </field>
+            </page>
+            <page string="Журнал" name="log">
+              <field name="log_ids" readonly="1" nolabel="1">
+                <list create="0" delete="0">
+                  <field name="date"/>
+                  <field name="partner_id" widget="many2one_avatar"/>
+                  <field name="action"/>
+                  <field name="note"/>
+                </list>
+              </field>
+            </page>
+            <page string="Ссылки" name="shares">
+              <field name="share_ids" nolabel="1" readonly="1">
+                <list create="0" delete="0">
+                  <field name="create_date" string="Выдана"/>
+                  <field name="url" widget="CopyClipboardChar"/>
+                  <field name="expires_on"/>
+                  <field name="has_password" string="Пароль"/>
+                  <field name="allow_download"/>
+                  <field name="views"/>
+                  <field name="state" widget="badge"/>
+                  <button name="action_revoke" type="object" string="Отозвать"
+                          invisible="state != 'active'"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
         </sheet>
         <chatter/>
       </form>
@@ -224,6 +294,11 @@
           первое находит записи, которые нечем проверить, второе —
           то, что ещё не разложено.
         -->
+        <filter name="favorite" string="☆ Избранное" domain="[('coop_is_favorite', '=', True)]"/>
+        <filter name="awaits" string="Жду подписи" domain="[('awaits_me', '=', True)]"/>
+        <filter name="shared" string="Доступные мне" domain="[('shared_with_me', '=', True)]"/>
+        <filter name="trash" string="Корзина" domain="[('active', '=', False)]"/>
+        <separator/>
         <filter name="no_file" string="Без файла"
                 domain="[('file', '=', False)]"/>
         <filter name="no_folder" string="Не разложено"
@@ -280,6 +355,7 @@
           <field name="matches" invisible="1"/>
         </group>
         <footer>
+          <button name="action_done" type="object" string="Готово" class="btn-primary"/>
           <button string="Закрыть" special="cancel" class="btn-secondary"/>
         </footer>
       </form>
@@ -345,8 +421,20 @@
             parent="menu_coop_documents_root"
             action="action_coop_documents" sequence="10"/>
 
+  <menuitem id="menu_coop_documents_recent" name="Недавние" parent="menu_coop_documents_root"
+            action="action_coop_documents_recent" sequence="12"/>
+  <menuitem id="menu_coop_documents_favorite" name="Избранное" parent="menu_coop_documents_root"
+            action="action_coop_documents_favorite" sequence="13"/>
+  <menuitem id="menu_coop_documents_awaits" name="Жду подписи" parent="menu_coop_documents_root"
+            action="action_coop_documents_awaits" sequence="14"/>
+  <menuitem id="menu_coop_documents_shared" name="Доступные мне" parent="menu_coop_documents_root"
+            action="action_coop_documents_shared" sequence="15"/>
   <menuitem id="menu_coop_document_folders" name="Папки"
             parent="menu_coop_documents_root"
             action="action_coop_document_folders" sequence="20"/>
+  <menuitem id="menu_coop_documents_upload" name="Загрузить" parent="menu_coop_documents_root"
+            action="action_coop_documents_upload" sequence="25"/>
+  <menuitem id="menu_coop_documents_trash" name="Корзина" parent="menu_coop_documents_root"
+            action="action_coop_documents_trash" sequence="30"/>
 
 </odoo>

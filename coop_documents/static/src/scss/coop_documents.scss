@@ -90,3 +90,129 @@
     opacity: 0.9;
     color: var(--o-coop-warn, #b26a00);
 }
+
+// ── Как у облачных дисков (разбор 25.09.2026) ───────────────────────
+
+// Первая страница PDF на плитке — сверху карточки, как снимок у ресурса.
+.o_coop_doc_card { position: relative; }
+
+.o_coop_doc_thumb {
+  margin: -12px -14px 8px;
+  height: 150px;
+  overflow: hidden;
+  border-radius: 8px 8px 0 0;
+  background: var(--o-gray-100, #f4f4f1);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.o_coop_doc_thumb_img {
+  width: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+.o_coop_doc_thumb_wait {
+  align-self: center;
+  font-size: 40px;
+  color: #c0392b;
+  opacity: .35;
+}
+
+.o_coop_doc_fav {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1;
+}
+
+// Просмотр во вкладке карточки — во всю ширину листа.
+.o_coop_doc_preview {
+  width: 100%;
+  height: 75vh;
+  border: 1px solid var(--border-color, rgba(0, 0, 0, .1));
+  border-radius: 8px;
+  background: #fff;
+}
+
+// Экран «Загрузить».
+.o_coop_doc_upload {
+  overflow: auto;
+  padding: 24px 16px;
+}
+
+.o_coop_doc_upload_inner {
+  max-width: 760px;
+  margin: 0 auto;
+
+  h2 { font-size: 20px; margin-bottom: 16px; }
+  h3 { font-size: 16px; margin: 28px 0 4px; }
+}
+
+.o_coop_doc_drop {
+  padding: 28px 16px;
+  border: 2px dashed var(--border-color, rgba(0, 0, 0, .2));
+  border-radius: 12px;
+  text-align: center;
+  color: var(--text-muted, #6c757d);
+
+  > .fa { font-size: 36px; margin-bottom: 8px; }
+}
+
+.o_coop_doc_drop_over {
+  border-color: var(--coop-teal, #146b64);
+  background: var(--coop-teal-tint, #e3efed);
+}
+
+.o_coop_doc_drop_btns {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.o_coop_doc_queue {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0;
+  max-height: 320px;
+  overflow: auto;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border-color, rgba(0, 0, 0, .06));
+  }
+}
+
+.o_coop_doc_queue_path {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.o_coop_doc_scans {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 8px 0 12px;
+}
+
+.o_coop_doc_scan {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 12px;
+
+  img {
+    width: 96px;
+    height: 128px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--border-color, rgba(0, 0, 0, .1));
+  }
+}

@@ -16,17 +16,20 @@
     'author': 'ДАО КООПТЕХ',
     'website': 'https://daocooptech.ru',
     'category': 'Cooperative',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'license': 'LGPL-3',
-    'depends': ['coop_base', 'mail'],
+    'depends': ['coop_base', 'coop_theme', 'mail'],
     'data': [
         'security/ir.model.access.csv',
         'security/coop_document_rules.xml',
+        'views/coop_document_more_views.xml',
         'views/coop_document_views.xml',
     ],
     'assets': {
         'web.assets_backend': [
             'coop_documents/static/src/scss/coop_documents.scss',
+            'coop_documents/static/src/js/documents.js',
+            'coop_documents/static/src/xml/documents.xml',
         ],
     },
     'installable': True,

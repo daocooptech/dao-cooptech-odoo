@@ -37,5 +37,44 @@
       <field name="domain_force">[('partner_id', 'in', user.coop_actor_partner_ids.ids)]</field>
     </record>
 
+    <!-- Редакции, журнал и ссылки — у тех, кто видит сам документ. -->
+    <record id="rule_coop_document_version_parties" model="ir.rule">
+      <field name="name">Редакции: стороны документа</field>
+      <field name="model_id" ref="model_coop_document_version"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">['|', ('document_id.party_a_id', 'in', user.coop_actor_partner_ids.ids), ('document_id.party_b_id', 'in', user.coop_actor_partner_ids.ids)]</field>
+    </record>
+    <record id="rule_coop_document_log_parties" model="ir.rule">
+      <field name="name">Журнал: стороны документа</field>
+      <field name="model_id" ref="model_coop_document_log"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">['|', ('document_id.party_a_id', 'in', user.coop_actor_partner_ids.ids), ('document_id.party_b_id', 'in', user.coop_actor_partner_ids.ids)]</field>
+    </record>
+    <record id="rule_coop_document_share_parties" model="ir.rule">
+      <field name="name">Ссылки: стороны документа</field>
+      <field name="model_id" ref="model_coop_document_share"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">['|', ('document_id.party_a_id', 'in', user.coop_actor_partner_ids.ids), ('document_id.party_b_id', 'in', user.coop_actor_partner_ids.ids)]</field>
+    </record>
+
+    <record id="rule_coop_document_version_platform" model="ir.rule">
+      <field name="name">Редакции: рабочая группа видит всё</field>
+      <field name="model_id" ref="model_coop_document_version"/>
+      <field name="groups" eval="[(4, ref('coop_base.group_coop_platform'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+    <record id="rule_coop_document_log_platform" model="ir.rule">
+      <field name="name">Журнал: рабочая группа видит всё</field>
+      <field name="model_id" ref="model_coop_document_log"/>
+      <field name="groups" eval="[(4, ref('coop_base.group_coop_platform'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+    <record id="rule_coop_document_share_platform" model="ir.rule">
+      <field name="name">Ссылки: рабочая группа видит всё</field>
+      <field name="model_id" ref="model_coop_document_share"/>
+      <field name="groups" eval="[(4, ref('coop_base.group_coop_platform'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
   </data>
 </odoo>

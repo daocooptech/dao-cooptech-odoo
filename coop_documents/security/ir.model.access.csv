@@ -3,3 +3,9 @@ access_coop_document_user,Документы — участник,model_coop_doc
 access_coop_document_admin,Документы — рабочая группа,model_coop_document,coop_base.group_coop_platform,1,1,1,1
 access_coop_document_check_user,Сверка документа,model_coop_document_check,base.group_user,1,1,1,1
 access_coop_document_folder_user,Папки документов — участник,model_coop_document_folder,base.group_user,1,1,1,1
+access_coop_document_version_user,Редакции документов — участник,model_coop_document_version,base.group_user,1,0,0,0
+access_coop_document_version_admin,Редакции документов — рабочая группа,model_coop_document_version,coop_base.group_coop_platform,1,1,1,1
+access_coop_document_log_user,Журнал документов — участник,model_coop_document_log,base.group_user,1,0,0,0
+access_coop_document_share_user,Ссылки на документы — участник,model_coop_document_share,base.group_user,1,1,0,0
+access_coop_document_share_wizard_user,Выдать ссылку — участник,model_coop_document_share_wizard,base.group_user,1,1,1,1
+access_coop_document_move_wizard_user,Переложить в папку — участник,model_coop_document_move_wizard,base.group_user,1,1,1,1

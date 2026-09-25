@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!--
+    Разделы слева, как у облачных дисков (разбор 25.09.2026, п. 3), —
+    вкладками раздела «Документы». Файл грузится раньше основного вида:
+    пункты меню там ссылаются на эти действия.
+  -->
+  <record id="action_coop_documents_recent" model="ir.actions.act_window">
+    <field name="name">Недавние</field>
+    <field name="path">documents-recent</field>
+    <field name="res_model">coop.document</field>
+    <field name="view_mode">list,kanban,form</field>
+    <field name="domain">[('write_date', '>=', (context_today() - relativedelta(days=30)).strftime('%Y-%m-%d'))]</field>
+    <field name="help" type="html"><p class="o_view_nocontent_smiling_face">За месяц ничего не менялось</p></field>
+  </record>
+
+  <record id="action_coop_documents_favorite" model="ir.actions.act_window">
+    <field name="name">Избранное</field>
+    <field name="path">documents-favorite</field>
+    <field name="res_model">coop.document</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="domain">[('coop_is_favorite', '=', True)]</field>
+    <field name="help" type="html"><p class="o_view_nocontent_smiling_face">Отмеченных документов нет</p>
+      <p>Звёздочка на карточке документа кладёт его сюда.</p></field>
+  </record>
+
+  <record id="action_coop_documents_awaits" model="ir.actions.act_window">
+    <field name="name">Жду подписи</field>
+    <field name="path">documents-awaiting</field>
+    <field name="res_model">coop.document</field>
+    <field name="view_mode">list,kanban,form</field>
+    <field name="domain">[('awaits_me', '=', True)]</field>
+    <field name="help" type="html"><p class="o_view_nocontent_smiling_face">Подписывать нечего</p>
+      <p>Здесь черновики с файлом, где вы — сторона.</p></field>
+  </record>
+
+  <record id="action_coop_documents_shared" model="ir.actions.act_window">
+    <field name="name">Доступные мне</field>
+    <field name="path">documents-shared</field>
+    <field name="res_model">coop.document</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="domain">[('shared_with_me', '=', True)]</field>
+    <field name="help" type="html"><p class="o_view_nocontent_smiling_face">Пока ничего</p>
+      <p>Документы, которые завела вторая сторона, а вы в них — сторона.</p></field>
+  </record>
+
+  <record id="action_coop_documents_trash" model="ir.actions.act_window">
+    <field name="name">Корзина</field>
+    <field name="path">documents-trash</field>
+    <field name="res_model">coop.document</field>
+    <field name="view_mode">list,form</field>
+    <field name="domain">[('active', '=', False)]</field>
+    <field name="context">{'active_test': False}</field>
+    <field name="help" type="html"><p class="o_view_nocontent_smiling_face">Корзина пуста</p>
+      <p>Документ лежит здесь 30 дней, потом удаляется насовсем. Подписанные в
+         корзину не попадают — они хранятся.</p></field>
+  </record>
+
+  <record id="action_coop_documents_upload" model="ir.actions.client">
+    <field name="name">Загрузить</field>
+    <field name="tag">coop_documents_upload</field>
+    <field name="path">documents-upload</field>
+  </record>
+
+  <record id="view_coop_document_share_wizard" model="ir.ui.view">
+    <field name="name">coop.document.share.wizard.form</field>
+    <field name="model">coop.document.share.wizard</field>
+    <field name="arch" type="xml">
+      <form string="Ссылка для внешней стороны">
+        <div class="text-muted mb-3">
+          По ссылке документ открывают без учётной записи — посмотреть и сверить
+          свой экземпляр. Отозвать ссылку можно в любой момент на вкладке «Ссылки».
+        </div>
+        <group invisible="url">
+          <field name="document_id" readonly="1"/>
+          <field name="expires_on"/>
+          <field name="password" password="True"/>
+          <field name="allow_download"/>
+        </group>
+        <group invisible="not url">
+          <field name="url" widget="CopyClipboardChar"/>
+        </group>
+        <footer>
+          <button name="action_create" type="object" string="Выдать ссылку"
+                  class="btn-primary" invisible="url"/>
+          <button string="Готово" special="cancel" class="btn-secondary"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_document_move_wizard" model="ir.ui.view">
+    <field name="name">coop.document.move.wizard.form</field>
+    <field name="model">coop.document.move.wizard</field>
+    <field name="arch" type="xml">
+      <form string="Переложить в папку">
+        <group>
+          <field name="folder_id" placeholder="Пусто — вынуть из папки"/>
+          <field name="document_ids" widget="many2many_tags" readonly="1"/>
+        </group>
+        <footer>
+          <button name="action_move" type="object" string="Переложить" class="btn-primary"/>
+          <button string="Отмена" special="cancel" class="btn-secondary"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <!-- Действия над многими документами (разбор, п. 7). -->
+  <record id="action_coop_documents_zip" model="ir.actions.server">
+    <field name="name">Скачать архивом</field>
+    <field name="model_id" ref="model_coop_document"/>
+    <field name="binding_model_id" ref="model_coop_document"/>
+    <field name="binding_view_types">list,kanban</field>
+    <field name="state">code</field>
+    <field name="code">action = {'type': 'ir.actions.act_url', 'target': 'self', 'url': '/coop/documents/zip?ids=' + ','.join(str(i) for i in records.ids)}</field>
+  </record>
+
+  <record id="action_coop_documents_move" model="ir.actions.act_window">
+    <field name="name">Переложить в папку</field>
+    <field name="res_model">coop.document.move.wizard</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+    <field name="binding_model_id" ref="model_coop_document"/>
+    <field name="binding_view_types">list,kanban</field>
+  </record>
+
+  <record id="action_coop_documents_to_trash" model="ir.actions.server">
+    <field name="name">В корзину</field>
+    <field name="model_id" ref="model_coop_document"/>
+    <field name="binding_model_id" ref="model_coop_document"/>
+    <field name="binding_view_types">list,kanban</field>
+    <field name="state">code</field>
+    <field name="code">records.action_trash()</field>
+  </record>
+
+  <record id="cron_coop_documents_purge" model="ir.cron">
+    <field name="name">Документы: очистить корзину старше 30 дней</field>
+    <field name="model_id" ref="model_coop_document"/>
+    <field name="state">code</field>
+    <field name="code">model._cron_purge_trash()</field>
+    <field name="interval_number">1</field>
+    <field name="interval_type">days</field>
+  </record>
+</odoo>

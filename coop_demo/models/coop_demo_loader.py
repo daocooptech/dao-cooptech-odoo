@@ -13,6 +13,7 @@ from ..data import load_wall_polls
 from ..data import load_trade
 from ..data import load_crypto
 from ..data import load_mining
+from ..data import load_documents_more
 from ..data import load_favorites
 from ..data import load_okved
 from ..data import load_accounts
@@ -269,6 +270,11 @@ class CoopDemoLoader(models.AbstractModel):
         # произошло, и до того, как события заведены, порождать их не из
         # чего (решение 375).
         load_documents.load_documents(self.env)
+        # Документы как у облачных дисков (разбор 25.09.2026): PDF вместо
+        # текста, редакции, журнал, ссылки, корзина, избранное.
+        if 'coop.document.version' in self.env:
+            load_documents_more.pdf_documents(self.env)
+            load_documents_more.enrich_documents(self.env)
         load_notifications.load_notifications(self.env)
         # Знаки организаций — тем же порядком: набор эмблем чистили от
         # того, что знаком не было, и у карточек это осталось стоять.
