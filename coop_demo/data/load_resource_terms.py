@@ -34,8 +34,8 @@ BARTER_NOTES = ['на стройматериалы', 'на инструмент 
 FREE_NOTES = ['забрать самому до конца месяца', 'только своим транспортом',
               'отдам тому, кому нужнее', 'самовывоз, помогу погрузить']
 
-SPACE_NOTES = ['коммунальные включены', 'свет по счётчику', 'договор от полугода',
-               'доступ круглосуточно', 'охрана и видеонаблюдение']
+SPACE_NOTES = ['коммунальные включены', 'свет по счётчику', 'доступ круглосуточно',
+               'охрана и видеонаблюдение']
 RENT_UNITS = ('сутки', 'день', 'смена', 'час', 'месяц', 'неделя', 'выходные')
 
 MONTHLY_WORDS = ('дом', 'дача', 'квартир', 'гараж', 'склад', 'помещен', 'участ', 'цех')
@@ -43,6 +43,44 @@ MONTHLY_WORDS = ('дом', 'дача', 'квартир', 'гараж', 'скла
 
 def _money(value, step=100):
     return round(value / step) * step
+
+
+def _rent_priced(resource):
+    name = (resource.name or '').lower()
+    return name.startswith(('сдам', 'сдаю', 'аренда', 'прокат')) or         (resource.price_unit_label or '').lower() in RENT_UNITS
+
+
+def _value_of(resource):
+    """Оценка вещи по арендной цене: сутки — примерно два месяца
+    аренды, месяц — два года."""
+    per = 24 if (resource.price_unit_label or '').lower() == 'месяц' else 60
+    return _money((resource.price or 0) * per, 1000)
+
+
+def repair_resource_terms(env):
+    """Первое заполнение (`91c5b63`) ставило продаже, рассрочке и лизингу
+    арендную цену («12 000 ₽ за сутки»), а аренде помещений — «договор от
+    полугода» при сроке в месяц. Правит только такие строки; повторный
+    запуск ничего не меняет."""
+    if 'coop.resource.term' not in env:
+        return 0
+    Term = env['coop.resource.term'].sudo()
+    fixed = 0
+    for term in Term.search([('code', 'in', ('sale', 'installment', 'leasing', 'project'))]):
+        resource = term.resource_id
+        if not _rent_priced(resource) or not resource.price:
+            continue
+        if term.price == resource.price or (term.price_unit_label or '').lower() in RENT_UNITS:
+            term.write({'price': _value_of(resource),
+                        'price_unit_label': resource.uom_label or False})
+            fixed += 1
+    odd = Term.search([('code', '=', 'rent'), ('note', '=', 'договор от полугода'),
+                       ('min_term', '!=', 'полгода')])
+    odd.write({'note': 'свет по счётчику'})
+    fixed += len(odd)
+    if fixed:
+        _logger.info('Ресурсы: условия поправлены у %s строк', fixed)
+    return fixed
 
 
 def fill_resource_terms(env):
@@ -60,6 +98,10 @@ def fill_resource_terms(env):
         resource = term.resource_id
         base = resource.price or 0
         unit = resource.price_unit_label or resource.uom_label or ''
+        if code != 'rent' and _rent_priced(resource):
+            # Цена объявления арендная («12 000 ₽ за сутки»): продажа,
+            # рассрочка и лизинг — от оценки самой вещи, а не от суток.
+            base, unit = _value_of(resource), resource.uom_label or ''
         request = resource.listing_type == 'request'
         vals = {}
         code = term.code
@@ -71,8 +113,7 @@ def fill_resource_terms(env):
             monthly = any(w in name for w in MONTHLY_WORDS)
             # У «Сдам…» цена в объявлении уже арендная; у вещи на продажу
             # аренда считается от её цены.
-            rent_priced = name.startswith(('сдам', 'сдаю', 'аренда', 'прокат')) or                 (resource.price_unit_label or '').lower() in RENT_UNITS
-            if rent_priced and base:
+            if _rent_priced(resource) and base:
                 price = base
                 unit = resource.price_unit_label or ('месяц' if monthly else 'сутки')
             else:

@@ -445,7 +445,8 @@
                    invisible="coop_can_edit or not terms_html"/>
           </group>
           <notebook>
-            <page string="Описание" name="description">
+            <page string="Описание" name="description"
+                  invisible="not coop_can_edit and not description">
               <field readonly="not coop_can_edit" name="description" widget="coop_block"
                      placeholder="Что это, в каком состоянии, на каких условиях."/>
               <div class="text-muted mt-2" invisible="not coop_can_edit">
