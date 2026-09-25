@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_coop_miner_user,Майнер — участник,model_coop_miner,base.group_user,1,1,1,0
+access_coop_miner_system,Майнер — администратор,model_coop_miner,base.group_system,1,1,1,1
+access_coop_mining_offer_user,Предложение мощностей — участник,model_coop_mining_offer,base.group_user,1,1,1,1
+access_coop_mining_offer_system,Предложение мощностей — администратор,model_coop_mining_offer,base.group_system,1,1,1,1

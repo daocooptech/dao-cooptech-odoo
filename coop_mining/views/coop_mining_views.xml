@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ── Биржа мощностей ─────────────────────────────────────────── -->
+
+  <record id="view_coop_mining_offer_kanban" model="ir.ui.view">
+    <field name="name">coop.mining.offer.kanban</field>
+    <field name="model">coop.mining.offer</field>
+    <field name="arch" type="xml">
+      <kanban js_class="coop_catalog_kanban" class="o_coop_mining_offers" quick_create="false">
+        <field name="icon"/>
+        <field name="side"/>
+        <field name="kind"/>
+        <field name="city"/>
+        <field name="author_id"/>
+        <field name="price_label"/>
+        <field name="capacity_label"/>
+        <field name="min_term"/>
+        <field name="energy_source"/>
+        <field name="infra_registered"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_listing o_coop_mining_card">
+              <div class="o_coop_media o_coop_mining_media">
+                <span class="o_coop_mining_sign"><t t-esc="record.icon.value"/></span>
+                <span class="o_coop_locbar" t-if="record.city.raw_value">
+                  <i class="fa fa-map-marker" role="img" aria-label="Город"/> <t t-esc="record.city.value"/>
+                </span>
+              </div>
+              <div class="o_coop_listing_body">
+                <div class="o_coop_mining_head">
+                  <span class="o_coop_badge"><field name="side"/></span>
+                  <span class="o_coop_badge"><field name="kind"/></span>
+                </div>
+                <div class="o_coop_listing_title"><field name="name"/></div>
+                <div class="o_coop_mining_price"><t t-esc="record.price_label.value"/></div>
+                <div class="o_coop_mining_meta">
+                  <t t-esc="record.capacity_label.value"/>
+                  <t t-if="record.energy_source.raw_value"> · <field name="energy_source"/></t>
+                  <t t-if="record.min_term.raw_value"> · от <t t-esc="record.min_term.value"/></t>
+                </div>
+                <div class="o_coop_listing_foot o_coop_mining_foot">
+                  <span><t t-esc="record.author_id.value"/></span>
+                  <span t-if="record.infra_registered.raw_value">в реестре операторов</span>
+                </div>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="view_coop_mining_offer_list" model="ir.ui.view">
+    <field name="name">coop.mining.offer.list</field>
+    <field name="model">coop.mining.offer</field>
+    <field name="arch" type="xml">
+      <list string="Биржа майнинговых мощностей" decoration-muted="state == 'closed'">
+        <field name="name"/>
+        <field name="side"/>
+        <field name="kind"/>
+        <field name="author_id"/>
+        <field name="city"/>
+        <field name="capacity_label" string="Объём"/>
+        <field name="price_label" string="Цена"/>
+        <field name="energy_source"/>
+        <field name="infra_registered"/>
+        <field name="state" widget="badge"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_mining_offer_form" model="ir.ui.view">
+    <field name="name">coop.mining.offer.form</field>
+    <field name="model">coop.mining.offer</field>
+    <field name="arch" type="xml">
+      <form string="Предложение мощностей">
+        <header>
+          <button name="action_close" type="object" string="Снять"
+                  invisible="not is_mine or state == 'closed'"/>
+          <button name="action_publish" type="object" string="Опубликовать"
+                  class="btn-primary" invisible="not is_mine or state == 'published'"/>
+          <field name="state" widget="statusbar"/>
+        </header>
+        <sheet>
+          <field name="is_mine" invisible="1"/>
+          <div class="alert alert-info mb-3">
+            Аренда места и электроэнергии, оборудования и хешрейта — обычные
+            услуги и статуса не требуют. Намайненное платформа на хранение не
+            берёт; продают его в разделе «Обмен цифровой валюты».
+          </div>
+          <div class="oe_title"><h1><field name="name" placeholder="Например, место под 20 асиков у ГЭС"/></h1></div>
+          <group>
+            <group>
+              <field name="side" widget="radio" options="{'horizontal': true}"/>
+              <field name="kind"/>
+              <field name="author_id"/>
+              <field name="miner_id"/>
+              <field name="city"/>
+              <field name="energy_source"/>
+            </group>
+            <group>
+              <label for="capacity"/>
+              <div class="o_row">
+                <field name="capacity"/>
+                <field name="capacity_unit"/>
+              </div>
+              <label for="price"/>
+              <div class="o_row">
+                <field name="price"/>
+                <field name="price_unit"/>
+              </div>
+              <field name="min_term"/>
+              <field name="infra_registered"/>
+              <field name="published_on" readonly="1"/>
+            </group>
+          </group>
+          <group string="Подробности">
+            <field name="description" nolabel="1" colspan="2"/>
+          </group>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_mining_offer_search" model="ir.ui.view">
+    <field name="name">coop.mining.offer.search</field>
+    <field name="model">coop.mining.offer</field>
+    <field name="arch" type="xml">
+      <search string="Биржа майнинговых мощностей">
+        <field name="name"/>
+        <field name="author_id"/>
+        <field name="city"/>
+        <filter name="offer" string="Предлагают" domain="[('side', '=', 'offer')]"/>
+        <filter name="request" string="Ищут" domain="[('side', '=', 'request')]"/>
+        <separator/>
+        <filter name="mine" string="Мои предложения" domain="[('is_mine', '=', True)]"/>
+        <group>
+          <filter name="by_kind" string="По виду" context="{'group_by': 'kind'}"/>
+          <filter name="by_city" string="По городу" context="{'group_by': 'city'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_mining_offer" model="ir.actions.act_window">
+    <field name="name">Биржа майнинговых мощностей</field>
+    <field name="res_model">coop.mining.offer</field>
+    <field name="path">mining</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="domain">[('state', '=', 'published')]</field>
+    <field name="search_view_id" ref="view_coop_mining_offer_search"/>
+    <field name="context">{'bin_size': True, 'coop_catalog': 1, 'coop_create_label': 'Разместить предложение', 'coop_shelf_field': 'kind'}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Предложений пока нет</p>
+      <p>Место под оборудование, аренда асиков и хешрейта, ремонт — обычные
+         услуги между участниками.</p>
+    </field>
+  </record>
+
+  <!-- ── Майнеры ──────────────────────────────────────────────────── -->
+
+  <record id="view_coop_miner_kanban" model="ir.ui.view">
+    <field name="name">coop.miner.kanban</field>
+    <field name="model">coop.miner</field>
+    <field name="arch" type="xml">
+      <kanban js_class="coop_catalog_kanban" class="o_coop_miners" quick_create="false">
+        <field name="partner_id"/>
+        <field name="kind"/>
+        <field name="registry_state"/>
+        <field name="city"/>
+        <field name="power_kw"/>
+        <field name="hashrate"/>
+        <field name="coins"/>
+        <field name="energy_source"/>
+        <field name="over_limit"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_listing o_coop_mining_card">
+              <div class="o_coop_media">
+                <img class="o_coop_media_logo" t-if="record.partner_id.raw_value" loading="lazy"
+                     t-attf-src="/web/image/res.partner/#{record.partner_id.raw_value}/image_512"
+                     t-att-alt="record.partner_id.value"/>
+                <span class="o_coop_locbar" t-if="record.city.raw_value">
+                  <i class="fa fa-map-marker" role="img" aria-label="Город"/> <t t-esc="record.city.value"/>
+                </span>
+              </div>
+              <div class="o_coop_listing_body">
+                <div class="o_coop_mining_head">
+                  <span class="o_coop_badge"
+                        t-att-class="{'o_coop_mining_reg': record.registry_state.raw_value in ['registered', 'not_required'],
+                                      'o_coop_mining_pending': record.registry_state.raw_value == 'pending',
+                                      'o_coop_mining_missing': record.registry_state.raw_value == 'missing'}">
+                    <field name="registry_state"/>
+                  </span>
+                  <span class="o_coop_badge o_coop_mining_missing" t-if="record.over_limit.raw_value">сверх лимита</span>
+                </div>
+                <div class="o_coop_listing_title"><field name="name"/></div>
+                <div class="o_coop_mining_meta"><field name="kind"/> · <t t-esc="record.coins.value"/></div>
+                <div class="o_coop_mining_price">
+                  <t t-esc="record.power_kw.value"/> кВт<t t-if="record.hashrate.raw_value"> · <t t-esc="record.hashrate.value"/> TH/s</t>
+                </div>
+                <div class="o_coop_listing_foot o_coop_mining_foot">
+                  <span t-if="record.energy_source.raw_value"><field name="energy_source"/></span>
+                </div>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="view_coop_miner_list" model="ir.ui.view">
+    <field name="name">coop.miner.list</field>
+    <field name="model">coop.miner</field>
+    <field name="arch" type="xml">
+      <list string="Майнеры" decoration-danger="over_limit">
+        <field name="name"/>
+        <field name="kind"/>
+        <field name="registry_state"/>
+        <field name="registry_number" optional="show"/>
+        <field name="city"/>
+        <field name="power_kw" sum="Всего"/>
+        <field name="monthly_kwh"/>
+        <field name="hashrate"/>
+        <field name="coins"/>
+        <field name="over_limit" column_invisible="1"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_miner_form" model="ir.ui.view">
+    <field name="name">coop.miner.form</field>
+    <field name="model">coop.miner</field>
+    <field name="arch" type="xml">
+      <form string="Майнер">
+        <sheet>
+          <field name="warning_html" nolabel="1"/>
+          <div class="oe_title"><h1><field name="partner_id"/></h1></div>
+          <group>
+            <group string="Статус">
+              <field name="kind"/>
+              <field name="registry_state"/>
+              <field name="registry_number" invisible="registry_state != 'registered'"/>
+              <field name="registry_date" invisible="registry_state != 'registered'"/>
+              <field name="restricted_region"/>
+            </group>
+            <group string="Площадка">
+              <field name="city"/>
+              <field name="region"/>
+              <field name="energy_source"/>
+              <field name="power_kw"/>
+              <field name="monthly_kwh"/>
+              <field name="hashrate"/>
+              <field name="coins"/>
+            </group>
+          </group>
+          <group string="Оборудование">
+            <field name="equipment" nolabel="1" colspan="2"/>
+          </group>
+          <group string="Предложения на бирже">
+            <field name="offer_ids" nolabel="1" colspan="2" readonly="1">
+              <list>
+                <field name="name"/>
+                <field name="kind"/>
+                <field name="price_label" string="Цена"/>
+                <field name="state" widget="badge"/>
+              </list>
+            </field>
+          </group>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_coop_miner" model="ir.actions.act_window">
+    <field name="name">Майнеры</field>
+    <field name="res_model">coop.miner</field>
+    <field name="path">miners</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="context">{'bin_size': True, 'coop_catalog': 1, 'coop_create_label': 'Завести карточку майнера', 'coop_shelf_field': 'registry_state'}</field>
+  </record>
+
+  <menuitem id="menu_coop_mining_root" name="Майнинг" sequence="147"/>
+  <menuitem id="menu_coop_mining_offers" name="Биржа мощностей"
+            parent="menu_coop_mining_root" action="action_coop_mining_offer" sequence="10"/>
+  <menuitem id="menu_coop_miners" name="Майнеры"
+            parent="menu_coop_mining_root" action="action_coop_miner" sequence="20"/>
+</odoo>

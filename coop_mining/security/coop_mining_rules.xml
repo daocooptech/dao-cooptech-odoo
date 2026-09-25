@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+    <!-- Каталог видят все вошедшие участники, правит — тот, чья карточка. -->
+    <record id="rule_miner_read" model="ir.rule">
+      <field name="name">Майнеры — читают участники</field>
+      <field name="model_id" ref="model_coop_miner"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="False"/>
+      <field name="perm_create" eval="False"/>
+      <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_miner_own" model="ir.rule">
+      <field name="name">Майнеры — правит свою карточку</field>
+      <field name="model_id" ref="model_coop_miner"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[('partner_id', 'in', user.coop_actor_partner_ids.ids)]</field>
+      <field name="perm_read" eval="False"/>
+    </record>
+    <record id="rule_mining_offer_read" model="ir.rule">
+      <field name="name">Мощности — читают участники</field>
+      <field name="model_id" ref="model_coop_mining_offer"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="False"/>
+      <field name="perm_create" eval="False"/>
+      <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_mining_offer_own" model="ir.rule">
+      <field name="name">Мощности — правит автор</field>
+      <field name="model_id" ref="model_coop_mining_offer"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[('author_id', 'in', user.coop_actor_partner_ids.ids)]</field>
+      <field name="perm_read" eval="False"/>
+    </record>
+    <record id="rule_miner_admin" model="ir.rule">
+      <field name="name">Майнеры — администратор</field>
+      <field name="model_id" ref="model_coop_miner"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+    <record id="rule_mining_offer_admin" model="ir.rule">
+      <field name="name">Мощности — администратор</field>
+      <field name="model_id" ref="model_coop_mining_offer"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+  </data>
+</odoo>

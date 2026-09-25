@@ -94,8 +94,11 @@ EXTENSION_ITEMS = [
     # контракт, порог учёта в банке, аккредитив, ЦФА по договору.
     ('Международные сделки', 'fa-globe', 'coop_trade.action_coop_trade_contract'),
     # Решение 392: обмен цифровой валюты — доской объявлений, платформа
-    # не сторона (разбор юриста, 2.6).
-    ('Обмен цифровой валюты', 'fa-exchange', 'coop_crypto_exchange.action_coop_crypto_offer'),
+    # не сторона (разбор юриста, 2.6). Название — владелец 25.09.2026;
+    # прежнее «Обмен цифровой валюты» — в RETIRED_EXTENSIONS.
+    ('DEX биржа', 'fa-exchange', 'coop_crypto_exchange.action_coop_crypto_offer'),
+    # Каталог майнеров и биржа майнинговых мощностей (разбор юриста, 2.4).
+    ('Майнинг', 'fa-microchip', 'coop_mining.action_coop_mining_offer'),
     ('Нематериальные активы', 'fa-lightbulb-o', 'coop_intangibles.action_coop_intangibles'),
     ('Целевые программы ПК', 'fa-bullseye', 'coop_programs.action_coop_program'),
     ('Совместные закупки', 'fa-shopping-basket', 'coop_groupbuy.action_coop_groupbuy'),
@@ -133,7 +136,7 @@ MAIN_BY_NAME = {name: xmlid for name, _icon, xmlid in MAIN_ITEMS}
 # Пункты, стоявшие в умолчаниях раньше и убранные из них. Перечислены
 # поимённо, а не выведены вычитанием: иначе снос затронул бы и то, что
 # участник подключил себе сам.
-RETIRED_EXTENSIONS = {'Каталог расширений', 'Помощь проекту'}
+RETIRED_EXTENSIONS = {'Каталог расширений', 'Помощь проекту', 'Обмен цифровой валюты'}
 
 
 class CoopSidebarItem(models.Model):

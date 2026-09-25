@@ -59,7 +59,7 @@
     <field name="name">coop.crypto.offer.list</field>
     <field name="model">coop.crypto.offer</field>
     <field name="arch" type="xml">
-      <list string="Обмен цифровой валюты" decoration-muted="state != 'active'">
+      <list string="DEX биржа" decoration-muted="state != 'active'">
         <field name="side"/>
         <field name="asset"/>
         <field name="network_id"/>
@@ -102,8 +102,9 @@
               <field name="asset"/>
               <field name="network_id"/>
               <field name="price"/>
-              <field name="amount_min"/>
-              <field name="amount_max"/>
+              <field name="amount_min" invisible="not is_mine and id"/>
+              <field name="amount_max" invisible="not is_mine and id"/>
+              <field name="limits_label" string="Пределы" invisible="is_mine or not id"/>
               <field name="rub_max"/>
             </group>
             <group string="Как и кто">
@@ -130,7 +131,7 @@
     <field name="name">coop.crypto.offer.search</field>
     <field name="model">coop.crypto.offer</field>
     <field name="arch" type="xml">
-      <search string="Обмен цифровой валюты">
+      <search string="DEX биржа">
         <field name="author_id"/>
         <field name="city"/>
         <filter name="sell" string="Продают" domain="[('side', '=', 'sell')]"/>
@@ -146,7 +147,7 @@
   </record>
 
   <record id="action_coop_crypto_offer" model="ir.actions.act_window">
-    <field name="name">Обмен цифровой валюты</field>
+    <field name="name">DEX биржа</field>
     <field name="res_model">coop.crypto.offer</field>
     <field name="path">crypto-exchange</field>
     <field name="view_mode">kanban,list,form</field>
@@ -268,7 +269,7 @@
     </field>
   </record>
 
-  <menuitem id="menu_coop_crypto_root" name="Обмен цифровой валюты" sequence="147"/>
+  <menuitem id="menu_coop_crypto_root" name="DEX биржа" sequence="147"/>
   <menuitem id="menu_coop_crypto_offers" name="Объявления"
             parent="menu_coop_crypto_root" action="action_coop_crypto_offer" sequence="10"/>
   <menuitem id="menu_coop_crypto_trades" name="Мои обмены"
