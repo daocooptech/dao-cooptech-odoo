@@ -29,7 +29,7 @@ import { KanbanRecord } from "@web/views/kanban/kanban_record";
 export const COOP_FAVORABLE = [
     "res.partner", "coop.project", "coop.community", "coop.skill.offer",
     "coop.vacancy", "coop.event", "coop.program", "coop.warehouse.offer",
-    "coop.intangible", "coop.cfa.issue",
+    "coop.intangible", "coop.cfa.issue", "coop.barter.offer",
 ];
 export const COOP_FAVORITE_CATALOGS = [...COOP_FAVORABLE, "coop.resource"];
 

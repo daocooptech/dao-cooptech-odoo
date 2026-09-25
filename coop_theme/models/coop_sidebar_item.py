@@ -102,6 +102,10 @@ EXTENSION_ITEMS = [
     ('Нематериальные активы', 'fa-lightbulb-o', 'coop_intangibles.action_coop_intangibles'),
     ('Целевые программы ПК', 'fa-bullseye', 'coop_programs.action_coop_program'),
     ('Совместные закупки', 'fa-shopping-basket', 'coop_groupbuy.action_coop_groupbuy'),
+    # Решение 412 (Н7): «в расширения перед аукционом добавь вкладку
+    # бартер». Объявления «отдаю — хочу взамен», подбор встречных и
+    # цепочек на троих (разбор «Бартерона» и других площадок).
+    ('Бартер', 'fa-retweet', 'coop_barter.action_coop_barter_offer'),
     ('Аукционы', 'fa-gavel', 'coop_auctions.action_coop_auction'),
     # Раздел перенесён на движок 14 сентября 2026 — биржа складских
     # мощностей. Пока здесь стояла пустая строка, участник открывал

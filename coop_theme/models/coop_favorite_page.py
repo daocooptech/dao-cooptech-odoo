@@ -29,6 +29,7 @@ KINDS = [
     ('warehouse', 'coop.warehouse.offer', 'Склады'),
     ('intangibles', 'coop.intangible', 'НМА'),
     ('cfa', 'coop.cfa.issue', 'ЦФА'),
+    ('barter', 'coop.barter.offer', 'Бартер'),
 ]
 
 # Подпись под названием — первое непустое из этих полей.

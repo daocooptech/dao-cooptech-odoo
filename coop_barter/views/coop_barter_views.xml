@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ── Объявления ──────────────────────────────────────────────── -->
+
+  <record id="view_coop_barter_offer_kanban" model="ir.ui.view">
+    <field name="name">coop.barter.offer.kanban</field>
+    <field name="model">coop.barter.offer</field>
+    <field name="arch" type="xml">
+      <kanban js_class="coop_catalog_kanban" class="o_coop_barter_offers" quick_create="false">
+        <field name="icon"/>
+        <field name="city"/>
+        <field name="partner_id"/>
+        <field name="category_id"/>
+        <field name="resource_id"/>
+        <field name="has_photo"/>
+        <field name="value_label"/>
+        <field name="want_label"/>
+        <field name="handover_label"/>
+        <field name="condition"/>
+        <field name="surcharge_ok"/>
+        <field name="state"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_listing o_coop_barter_card">
+              <div class="o_coop_media" t-att-class="{'o_coop_barter_media': !record.has_photo.raw_value}">
+                <img t-if="record.has_photo.raw_value" loading="lazy"
+                     t-attf-src="/web/image/coop.resource/#{record.resource_id.raw_value}/image_512"
+                     t-att-alt="record.name.value"/>
+                <span t-else="" class="o_coop_barter_sign"><t t-esc="record.icon.value"/></span>
+                <img class="o_coop_face" loading="lazy" t-if="record.partner_id.raw_value"
+                     t-attf-src="/web/image/res.partner/#{record.partner_id.raw_value}/avatar_128"
+                     t-att-alt="record.partner_id.value"/>
+                <span class="o_coop_locbar" t-if="record.city.raw_value">
+                  <i class="fa fa-map-marker" role="img" aria-label="Город"/> <t t-esc="record.city.value"/>
+                </span>
+              </div>
+              <div class="o_coop_listing_body">
+                <div class="o_coop_barter_head">
+                  <span class="o_coop_badge"><t t-esc="record.icon.value"/> <field name="category_id"/></span>
+                  <span class="o_coop_badge o_coop_barter_busy" t-if="record.state.raw_value == 'reserved'">идёт обмен</span>
+                  <span class="o_coop_badge" t-if="record.state.raw_value == 'done'">обменяно</span>
+                </div>
+                <div class="o_coop_listing_title"><field name="name"/></div>
+                <div class="o_coop_barter_want">
+                  <i class="fa fa-exchange" role="img" aria-label="Взамен"/> <t t-esc="record.want_label.value"/>
+                </div>
+                <div class="o_coop_barter_value">
+                  <t t-esc="record.value_label.value"/>
+                  <span class="o_coop_barter_meta" t-if="record.surcharge_ok.raw_value"> · возможна доплата</span>
+                </div>
+                <div class="o_coop_listing_foot o_coop_barter_foot">
+                  <span><t t-esc="record.partner_id.value"/></span>
+                  <span t-if="record.handover_label.raw_value"><t t-esc="record.handover_label.value"/></span>
+                </div>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="view_coop_barter_offer_list" model="ir.ui.view">
+    <field name="name">coop.barter.offer.list</field>
+    <field name="model">coop.barter.offer</field>
+    <field name="arch" type="xml">
+      <list string="Бартер" decoration-muted="state in ('closed', 'done')">
+        <field name="name"/>
+        <field name="category_id"/>
+        <field name="want_label" string="Взамен"/>
+        <field name="value" sum="Всего"/>
+        <field name="partner_id"/>
+        <field name="city"/>
+        <field name="published_on" widget="date"/>
+        <field name="state" widget="badge"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_barter_offer_form" model="ir.ui.view">
+    <field name="name">coop.barter.offer.form</field>
+    <field name="model">coop.barter.offer</field>
+    <field name="arch" type="xml">
+      <form string="Объявление об обмене">
+        <header>
+          <button name="action_find_matches" type="object" string="Подобрать обмен"
+                  class="btn-primary" invisible="not is_mine or state != 'active'"/>
+          <button name="action_publish" type="object" string="Опубликовать"
+                  class="btn-primary" invisible="not is_mine or state not in ('draft', 'closed')"/>
+          <button name="action_close" type="object" string="Снять"
+                  invisible="not is_mine or state not in ('draft', 'active')"/>
+          <field name="state" widget="statusbar" statusbar_visible="active,reserved,done"/>
+        </header>
+        <sheet>
+          <field name="is_mine" invisible="1"/>
+          <field name="is_service" invisible="1"/>
+          <div class="oe_button_box" name="button_box">
+            <button name="action_open_exchanges" type="object" class="oe_stat_button"
+                    icon="fa-exchange" invisible="not exchange_count">
+              <field name="exchange_count" widget="statinfo" string="Обмены"/>
+            </button>
+          </div>
+          <div class="oe_title">
+            <label for="name"/>
+            <h1><field name="name" placeholder="Например, мёд липовый, 20 кг"/></h1>
+          </div>
+          <group>
+            <group string="Отдаю">
+              <field name="category_id" options="{'no_create': True, 'no_open': True}"/>
+              <field name="quantity"/>
+              <field name="condition" invisible="is_service"/>
+              <field name="value"/>
+              <field name="resource_id" domain="[('owner_id', '=', partner_id)]"
+                     invisible="is_service"/>
+              <field name="partner_id" readonly="1"/>
+              <field name="city"/>
+            </group>
+            <group string="Хочу взамен">
+              <field name="want_category_ids" widget="many2many_tags"
+                     options="{'no_create': True}"/>
+              <field name="want_text" placeholder="Например, дрова или помощь с крышей"/>
+              <field name="surcharge_ok"/>
+              <label for="handover_pickup" string="Как передам"/>
+              <div class="o_coop_barter_ways">
+                <!-- Опубликованное показывает только выбранное (решение 412, Н6). -->
+                <div invisible="not handover_pickup and not is_mine"><field name="handover_pickup" readonly="not is_mine"/> самовывоз</div>
+                <div invisible="not handover_delivery and not is_mine"><field name="handover_delivery" readonly="not is_mine"/> привезу</div>
+                <div invisible="not handover_post and not is_mine"><field name="handover_post" readonly="not is_mine"/> почтой или ТК</div>
+              </div>
+              <field name="published_on" readonly="1"/>
+            </group>
+          </group>
+          <group string="Подробности">
+            <field name="description" nolabel="1" colspan="2"/>
+          </group>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_barter_offer_search" model="ir.ui.view">
+    <field name="name">coop.barter.offer.search</field>
+    <field name="model">coop.barter.offer</field>
+    <field name="arch" type="xml">
+      <search string="Бартер">
+        <field name="name"/>
+        <field name="want_text"/>
+        <field name="partner_id"/>
+        <field name="city"/>
+        <field name="category_id"/>
+        <filter name="fits" string="🎯 Подходит мне" domain="[('fits_me', '=', True)]"/>
+        <filter name="mine" string="Мои объявления" domain="[('is_mine', '=', True)]"/>
+        <separator/>
+        <filter name="surcharge" string="Возможна доплата" domain="[('surcharge_ok', '=', True)]"/>
+        <filter name="delivery" string="Привезут" domain="[('handover_delivery', '=', True)]"/>
+        <group>
+          <filter name="by_category" string="По категории" context="{'group_by': 'category_id'}"/>
+          <filter name="by_city" string="По городу" context="{'group_by': 'city'}"/>
+          <filter name="by_state" string="По состоянию" context="{'group_by': 'state'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_barter_offer" model="ir.actions.act_window">
+    <field name="name">Бартер</field>
+    <field name="res_model">coop.barter.offer</field>
+    <field name="path">barter</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="domain">[('state', '=', 'active')]</field>
+    <field name="search_view_id" ref="view_coop_barter_offer_search"/>
+    <field name="context">{'bin_size': True, 'coop_catalog': 1, 'coop_create_label': 'Предложить обмен', 'coop_shelf_field': 'category_id'}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Объявлений об обмене пока нет</p>
+      <p>Напишите, что отдаёте и что хотите взамен, — платформа подберёт
+         встречный обмен или цепочку на троих.</p>
+    </field>
+  </record>
+
+  <record id="action_coop_barter_fits" model="ir.actions.act_window">
+    <field name="name">Подходит мне</field>
+    <field name="res_model">coop.barter.offer</field>
+    <field name="path">barter-fits</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="domain">[('state', '=', 'active'), ('fits_me', '=', True)]</field>
+    <field name="search_view_id" ref="view_coop_barter_offer_search"/>
+    <field name="context">{'bin_size': True, 'coop_section': 1, 'coop_create_label': 'Предложить обмен'}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Пока ничего не подходит</p>
+      <p>Здесь объявления из категорий, которые вы готовы взять взамен в своих
+         объявлениях. Нет своих — начните с «Предложить обмен».</p>
+    </field>
+  </record>
+
+  <record id="action_coop_barter_mine" model="ir.actions.act_window">
+    <field name="name">Мои объявления</field>
+    <field name="res_model">coop.barter.offer</field>
+    <field name="path">barter-mine</field>
+    <field name="view_mode">list,kanban,form</field>
+    <field name="domain">[('is_mine', '=', True)]</field>
+    <field name="search_view_id" ref="view_coop_barter_offer_search"/>
+    <field name="context">{'bin_size': True, 'coop_section': 1, 'coop_create_label': 'Предложить обмен'}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">У вас нет объявлений об обмене</p>
+    </field>
+  </record>
+
+  <!-- ── Подбор ──────────────────────────────────────────────────── -->
+
+  <record id="view_coop_barter_match_list" model="ir.ui.view">
+    <field name="name">coop.barter.match.list</field>
+    <field name="model">coop.barter.match</field>
+    <field name="arch" type="xml">
+      <list string="Варианты обмена" create="false" edit="false" delete="false">
+        <field name="kind" widget="badge"/>
+        <field name="summary"/>
+        <field name="gap" string="Разница оценок, ₽"/>
+        <field name="same_city"/>
+        <button name="action_propose" type="object" string="Предложить" class="btn-primary"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- ── Обмены ──────────────────────────────────────────────────── -->
+
+  <record id="view_coop_barter_exchange_list" model="ir.ui.view">
+    <field name="name">coop.barter.exchange.list</field>
+    <field name="model">coop.barter.exchange</field>
+    <field name="arch" type="xml">
+      <list string="Обмены" create="false"
+            decoration-muted="state in ('declined', 'cancelled')" decoration-success="state == 'done'">
+        <field name="name"/>
+        <field name="kind"/>
+        <field name="participant_label"/>
+        <field name="total_value" sum="Всего"/>
+        <field name="progress_label"/>
+        <field name="create_date" string="Предложен" widget="date"/>
+        <field name="state" widget="badge"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_barter_exchange_form" model="ir.ui.view">
+    <field name="name">coop.barter.exchange.form</field>
+    <field name="model">coop.barter.exchange</field>
+    <field name="arch" type="xml">
+      <form string="Обмен" create="false">
+        <header>
+          <button name="action_accept" type="object" string="Согласен на обмен"
+                  class="btn-primary" invisible="not can_accept"/>
+          <button name="action_decline" type="object" string="Отклонить"
+                  invisible="not can_accept"/>
+          <button name="action_cancel" type="object" string="Отозвать предложение"
+                  invisible="state != 'proposed' or can_accept"/>
+          <field name="state" widget="statusbar" statusbar_visible="proposed,agreed,done"/>
+        </header>
+        <sheet>
+          <div class="oe_button_box" name="button_box">
+            <button name="action_open_deals" type="object" class="oe_stat_button"
+                    icon="fa-handshake-o" invisible="not deal_ids">
+              <div class="o_stat_info"><span class="o_stat_text">Сделки</span></div>
+            </button>
+          </div>
+          <field name="notice_html" nolabel="1" invisible="state not in ('proposed', 'agreed')"/>
+          <div class="oe_title">
+            <h1><field name="name" readonly="1"/></h1>
+            <div class="text-muted"><field name="kind" readonly="1"/> · <field name="progress_label"/></div>
+          </div>
+          <group>
+            <group>
+              <field name="initiator_id"/>
+              <field name="participant_ids" widget="many2many_tags"/>
+            </group>
+            <group>
+              <field name="total_value"/>
+              <field name="value_gap"/>
+              <field name="agreed_on" invisible="not agreed_on"/>
+              <field name="closed_on" invisible="not closed_on"/>
+            </group>
+          </group>
+          <field name="leg_ids" readonly="1">
+            <list>
+              <field name="giver_id"/>
+              <field name="offer_id" string="Отдаёт"/>
+              <field name="receiver_id"/>
+              <field name="value"/>
+              <field name="accepted"/>
+              <field name="deal_id"/>
+              <field name="deal_state" widget="badge"/>
+            </list>
+          </field>
+          <group string="Сообщение участникам" invisible="not note">
+            <field name="note" nolabel="1" colspan="2"/>
+          </group>
+          <field name="deal_ids" invisible="1"/>
+          <field name="can_accept" invisible="1"/>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_barter_exchange_search" model="ir.ui.view">
+    <field name="name">coop.barter.exchange.search</field>
+    <field name="model">coop.barter.exchange</field>
+    <field name="arch" type="xml">
+      <search string="Обмены">
+        <field name="name"/>
+        <field name="participant_ids"/>
+        <filter name="waiting" string="Ждут ответа" domain="[('state', '=', 'proposed')]"/>
+        <filter name="running" string="Исполняются" domain="[('state', '=', 'agreed')]"/>
+        <filter name="done" string="Завершены" domain="[('state', '=', 'done')]"/>
+        <separator/>
+        <filter name="chain" string="Цепочки на троих" domain="[('kind', '=', 'chain')]"/>
+        <group>
+          <filter name="by_state" string="По состоянию" context="{'group_by': 'state'}"/>
+          <filter name="by_kind" string="По виду" context="{'group_by': 'kind'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_barter_exchange" model="ir.actions.act_window">
+    <field name="name">Обмены</field>
+    <field name="res_model">coop.barter.exchange</field>
+    <field name="path">barter-exchanges</field>
+    <field name="view_mode">list,form</field>
+    <field name="domain">[('is_participant', '=', True)]</field>
+    <field name="search_view_id" ref="view_coop_barter_exchange_search"/>
+    <field name="context">{'coop_section': 1, 'create': False}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Обменов пока нет</p>
+      <p>Откройте своё объявление и нажмите «Подобрать обмен».</p>
+    </field>
+  </record>
+
+  <menuitem id="menu_coop_barter_root" name="Бартер" sequence="148"/>
+  <menuitem id="menu_coop_barter_offers" name="Объявления"
+            parent="menu_coop_barter_root" action="action_coop_barter_offer" sequence="10"/>
+  <menuitem id="menu_coop_barter_fits" name="Подходит мне"
+            parent="menu_coop_barter_root" action="action_coop_barter_fits" sequence="20"/>
+  <menuitem id="menu_coop_barter_mine" name="Мои объявления"
+            parent="menu_coop_barter_root" action="action_coop_barter_mine" sequence="30"/>
+  <menuitem id="menu_coop_barter_exchanges" name="Обмены"
+            parent="menu_coop_barter_root" action="action_coop_barter_exchange" sequence="40"/>
+</odoo>

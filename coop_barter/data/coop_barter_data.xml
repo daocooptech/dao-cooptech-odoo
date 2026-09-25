@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data noupdate="1">
+    <record id="seq_coop_barter_exchange" model="ir.sequence">
+      <field name="name">Обмен</field>
+      <field name="code">coop.barter.exchange</field>
+      <field name="prefix">ОБ-%(year)s-</field>
+      <field name="padding">4</field>
+    </record>
+  </data>
+
+  <!-- Категории обмена — метки «что это» и «что приму взамен». -->
+  <record id="cat_food" model="coop.barter.category">
+    <field name="name">Продукты питания</field><field name="code">food</field>
+    <field name="icon">🥕</field><field name="sequence">10</field>
+  </record>
+  <record id="cat_farm" model="coop.barter.category">
+    <field name="name">Сельхозпродукция и корма</field><field name="code">farm</field>
+    <field name="icon">🌾</field><field name="sequence">20</field>
+  </record>
+  <record id="cat_seeds" model="coop.barter.category">
+    <field name="name">Семена и саженцы</field><field name="code">seeds</field>
+    <field name="icon">🌱</field><field name="sequence">30</field>
+  </record>
+  <record id="cat_building" model="coop.barter.category">
+    <field name="name">Стройматериалы</field><field name="code">building</field>
+    <field name="icon">🧱</field><field name="sequence">40</field>
+  </record>
+  <record id="cat_tools" model="coop.barter.category">
+    <field name="name">Инструмент</field><field name="code">tools</field>
+    <field name="icon">🔧</field><field name="sequence">50</field>
+  </record>
+  <record id="cat_equipment" model="coop.barter.category">
+    <field name="name">Оборудование</field><field name="code">equipment</field>
+    <field name="icon">⚙️</field><field name="sequence">60</field>
+  </record>
+  <record id="cat_vehicles" model="coop.barter.category">
+    <field name="name">Техника и транспорт</field><field name="code">vehicles</field>
+    <field name="icon">🚜</field><field name="sequence">70</field>
+  </record>
+  <record id="cat_electronics" model="coop.barter.category">
+    <field name="name">Электроника</field><field name="code">electronics</field>
+    <field name="icon">💻</field><field name="sequence">80</field>
+  </record>
+  <record id="cat_home" model="coop.barter.category">
+    <field name="name">Для дома и дачи</field><field name="code">home</field>
+    <field name="icon">🏡</field><field name="sequence">90</field>
+  </record>
+  <record id="cat_clothes" model="coop.barter.category">
+    <field name="name">Одежда и обувь</field><field name="code">clothes</field>
+    <field name="icon">👕</field><field name="sequence">100</field>
+  </record>
+  <record id="cat_kids" model="coop.barter.category">
+    <field name="name">Детские товары</field><field name="code">kids</field>
+    <field name="icon">🧸</field><field name="sequence">110</field>
+  </record>
+  <record id="cat_hobby" model="coop.barter.category">
+    <field name="name">Хобби и спорт</field><field name="code">hobby</field>
+    <field name="icon">🎣</field><field name="sequence">120</field>
+  </record>
+  <record id="cat_craft" model="coop.barter.category">
+    <field name="name">Ремесло и хендмейд</field><field name="code">craft</field>
+    <field name="icon">🧶</field><field name="sequence">130</field>
+  </record>
+  <record id="cat_space" model="coop.barter.category">
+    <field name="name">Площади и жильё на время</field><field name="code">space</field>
+    <field name="icon">🏠</field><field name="sequence">140</field>
+  </record>
+  <record id="cat_services" model="coop.barter.category">
+    <field name="name">Работа и услуги</field><field name="code">services</field>
+    <field name="icon">🛠</field><field name="sequence">150</field>
+    <field name="is_service" eval="True"/>
+  </record>
+  <record id="cat_teaching" model="coop.barter.category">
+    <field name="name">Обучение и консультации</field><field name="code">teaching</field>
+    <field name="icon">🎓</field><field name="sequence">160</field>
+    <field name="is_service" eval="True"/>
+  </record>
+</odoo>

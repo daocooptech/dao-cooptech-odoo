@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_coop_barter_category_user,Категория обмена — участник,model_coop_barter_category,base.group_user,1,0,0,0
+access_coop_barter_category_system,Категория обмена — администратор,model_coop_barter_category,base.group_system,1,1,1,1
+access_coop_barter_offer_user,Объявление об обмене — участник,model_coop_barter_offer,base.group_user,1,1,1,1
+access_coop_barter_offer_system,Объявление об обмене — администратор,model_coop_barter_offer,base.group_system,1,1,1,1
+access_coop_barter_match_user,Вариант обмена — участник,model_coop_barter_match,base.group_user,1,1,1,1
+access_coop_barter_exchange_user,Обмен — участник,model_coop_barter_exchange,base.group_user,1,1,1,0
+access_coop_barter_exchange_system,Обмен — администратор,model_coop_barter_exchange,base.group_system,1,1,1,1
+access_coop_barter_leg_user,Передача в обмене — участник,model_coop_barter_leg,base.group_user,1,0,0,0
+access_coop_barter_leg_system,Передача в обмене — администратор,model_coop_barter_leg,base.group_system,1,1,1,1
