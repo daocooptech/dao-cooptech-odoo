@@ -413,3 +413,15 @@ class ResPartner(models.Model):
         me = self.env.user.partner_id
         for record in self:
             record.coop_org_is_following = me in record.message_partner_ids
+
+    # Телефон и почта организации открыты по умолчанию (решение 410,
+    # п. 12): организация — не частное лицо, её телефон и так публичен.
+    # Переключатели общие с человеком, а у человека умолчание — «скрыто»
+    # (`coop_base`), поэтому новой организации «показывать» ставится здесь.
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('is_company'):
+                vals.setdefault('coop_show_phone', True)
+                vals.setdefault('coop_show_email', True)
+        return super().create(vals_list)

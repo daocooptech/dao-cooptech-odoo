@@ -205,6 +205,8 @@
                тому, кто правит карточку, — видно всё. -->
           <field name="coop_show_trust" invisible="1"/>
           <field name="coop_show_contacts" invisible="1"/>
+          <field name="coop_show_phone" invisible="1"/>
+          <field name="coop_show_email" invisible="1"/>
 
           <div class="o_coop_profile_layout">
 
@@ -259,9 +261,12 @@
                   <div><span class="o_coop_key">Страна</span>
                     <field name="country_id" widget="coop_inline" readonly="not coop_can_edit_card"
                            placeholder="не указана"/></div>
-                  <div><span class="o_coop_key">Телефон</span>
+                  <!-- Телефон и почта — по переключателям видимости, как у
+                       человека; у организации по умолчанию открыты
+                       (решение 410, п. 12). -->
+                  <div invisible="not coop_can_edit_card and not coop_show_phone"><span class="o_coop_key">Телефон</span>
                     <field name="phone" widget="coop_inline" readonly="not coop_can_edit_card" placeholder="не указан"/></div>
-                  <div><span class="o_coop_key">Почта</span>
+                  <div invisible="not coop_can_edit_card and not coop_show_email"><span class="o_coop_key">Почта</span>
                     <field name="email" widget="coop_inline" readonly="not coop_can_edit_card" placeholder="не указана"/></div>
                   <div invisible="not coop_can_edit_card and not coop_show_contacts"><span class="o_coop_key">Сайт</span>
                     <field name="website" widget="coop_inline" readonly="not coop_can_edit_card" placeholder="нет"/></div>
