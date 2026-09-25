@@ -14,6 +14,7 @@ from ..data import load_trade
 from ..data import load_crypto
 from ..data import load_mining
 from ..data import load_barter
+from ..data import load_resource_terms
 from ..data import load_documents_more
 from ..data import load_favorites
 from ..data import load_okved
@@ -193,6 +194,7 @@ class CoopDemoLoader(models.AbstractModel):
             load_mining.repair_mining_titles(self.env)
         if 'coop.barter.offer' in self.env:
             load_barter.load_barter(self.env)
+        load_resource_terms.fill_resource_terms(self.env)
         # Последним — добор примеров по случаям: он смотрит, чего в
         # данных не хватает, и потому должен видеть всё остальное.
         load_examples.load_examples(self.env)

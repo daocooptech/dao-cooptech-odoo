@@ -227,7 +227,9 @@
           </div>
           <group>
             <group string="Что это">
-              <field name="listing_type" widget="radio" options="{'horizontal': True}"/>
+              <field name="listing_type" widget="radio" options="{'horizontal': True}"
+                     invisible="not coop_can_edit"/>
+              <field name="listing_type" readonly="1" invisible="coop_can_edit"/>
               <field name="resource_type" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="category_id" options="{'no_create': True}" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="method_ids" widget="many2many_tags"
@@ -243,6 +245,7 @@
               </div>
               <field name="currency_id" invisible="1"/>
               <field name="price_display" readonly="1"/>
+              <field name="terms_html" nolabel="1" colspan="2" invisible="not terms_html"/>
             </group>
           </group>
           <group>
@@ -363,7 +366,7 @@
           <field name="coop_can_edit" invisible="1"/>
           <field readonly="not coop_can_edit" name="image_1920" widget="image" class="oe_avatar"/>
           <div class="oe_title">
-            <span class="o_form_label">Разместить объявление</span>
+            <span class="o_form_label" invisible="state != 'draft'">Разместить объявление</span>
             <h1>
               <field readonly="not coop_can_edit" name="name" widget="coop_inline" options="{'wrap': True}"
                      placeholder="Например, Пельмени домашней лепки, 1 кг"/>
@@ -371,26 +374,34 @@
           </div>
           <group>
             <group string="Что размещаете">
-              <field readonly="not coop_can_edit" name="listing_type" widget="radio"/>
+              <!-- На опубликованном — только выбранное (решение 412, Н6):
+                   «Спрос» без серого «Предложения» рядом. Варианты видит тот,
+                   кто может их поменять. -->
+              <field name="listing_type" widget="radio" invisible="not coop_can_edit"/>
+              <field name="listing_type" readonly="1" invisible="coop_can_edit"/>
               <field readonly="not coop_can_edit" name="resource_type" widget="coop_inline"/>
               <field readonly="not coop_can_edit" name="category_id" widget="coop_inline"
                      options="{'no_create': True}"/>
-              <field readonly="not coop_can_edit" name="condition" widget="radio"
-                     options="{'horizontal': True}"/>
+              <field name="condition" widget="radio" options="{'horizontal': True}"
+                     invisible="not coop_can_edit"/>
+              <field name="condition" readonly="1"
+                     invisible="coop_can_edit or not condition or condition == 'na'"/>
             </group>
             <group string="Сколько">
               <label for="quantity"/>
               <div class="o_row">
                 <field readonly="not coop_can_edit" name="quantity" widget="coop_inline"/>
                 <field readonly="not coop_can_edit" name="uom_label" widget="coop_inline"
-                       placeholder="шт., кг, м², сутки…"/>
+                       placeholder="шт., кг, м², сутки…"
+                       invisible="not coop_can_edit and not uom_label"/>
               </div>
             </group>
           </group>
           <group>
             <group string="На каких условиях">
               <field readonly="not coop_can_edit" name="method_ids" widget="many2many_tags"
-                     options="{'no_create': True}"/>
+                     options="{'no_create': True}"
+                     invisible="not coop_can_edit and not method_ids"/>
               <field readonly="not coop_can_edit" name="price_kind" widget="coop_inline"/>
               <label for="price"/>
               <div class="o_row">
@@ -398,24 +409,46 @@
                        readonly="(price_kind == 'none') or not coop_can_edit"/>
                 <field name="price_unit_label" widget="coop_inline"
                        placeholder="кг, шт., сутки"
-                       readonly="(price_kind == 'none') or not coop_can_edit"/>
+                       readonly="(price_kind == 'none') or not coop_can_edit"
+                       invisible="not coop_can_edit and not price_unit_label"/>
               </div>
               <field name="currency_id" invisible="1"/>
-              <field readonly="not coop_can_edit" name="bargain"/>
+              <field readonly="not coop_can_edit" name="bargain"
+                     invisible="not coop_can_edit and not bargain"/>
             </group>
             <group string="Где и как связаться">
               <field readonly="not coop_can_edit" name="city" widget="coop_inline"
                      placeholder="Начните вводить город"/>
               <field readonly="not coop_can_edit" name="pickup_point" widget="coop_inline"
-                     placeholder="Адрес или ориентир"/>
-              <field readonly="not coop_can_edit" name="contact_method" widget="radio"/>
+                     placeholder="Адрес или ориентир"
+                     invisible="not coop_can_edit and not pickup_point"/>
+              <field name="contact_method" widget="radio" invisible="not coop_can_edit"/>
+              <field name="contact_method" readonly="1" invisible="coop_can_edit"/>
             </group>
+          </group>
+          <!-- Условия по каждому способу (решение 412, Н5): у продажи и
+               аренды одной вещи разная цена, у аренды — залог и срок, у
+               обмена — что возьмёшь взамен. -->
+          <group string="Условия по способам" invisible="not method_ids">
+            <field name="term_ids" nolabel="1" colspan="2" invisible="not coop_can_edit">
+              <list editable="bottom" create="false" delete="false">
+                <field name="method_id" readonly="1"/>
+                <field name="price"/>
+                <field name="price_unit_label" placeholder="шт., сутки, месяц"/>
+                <field name="deposit" optional="show"/>
+                <field name="min_term" optional="show"/>
+                <field name="note" placeholder="Оплата, доставка, что возьмёте взамен"/>
+                <field name="currency_id" column_invisible="1"/>
+              </list>
+            </field>
+            <field name="terms_html" nolabel="1" colspan="2"
+                   invisible="coop_can_edit or not terms_html"/>
           </group>
           <notebook>
             <page string="Описание" name="description">
               <field readonly="not coop_can_edit" name="description" widget="coop_block"
                      placeholder="Что это, в каком состоянии, на каких условиях."/>
-              <div class="text-muted mt-2">
+              <div class="text-muted mt-2" invisible="not coop_can_edit">
                 Главные характеристики — в первом абзаце: размер, материал,
                 состояние. Честное описание вызывает больше доверия и меньше
                 лишних вопросов.

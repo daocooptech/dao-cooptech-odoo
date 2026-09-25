@@ -79,5 +79,30 @@
       <field name="domain_force">[(1, '=', 1)]</field>
     </record>
 
+    <!-- Условия по способам (решение 412, Н5) — вслед за объявлением:
+         читает любой, правит тот, кто правит объявление. -->
+    <record id="rule_resource_term_read" model="ir.rule">
+      <field name="name">Условия объявления читают участники</field>
+      <field name="model_id" ref="model_coop_resource_term"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="False"/>
+      <field name="perm_create" eval="False"/>
+      <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_resource_term_own" model="ir.rule">
+      <field name="name">Условия правит хозяин объявления</field>
+      <field name="model_id" ref="model_coop_resource_term"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[('resource_id.owner_id', 'in', user.coop_publisher_partner_ids.ids)]</field>
+      <field name="perm_read" eval="False"/>
+    </record>
+    <record id="rule_resource_term_system" model="ir.rule">
+      <field name="name">Условия объявлений — администратор узла</field>
+      <field name="model_id" ref="model_coop_resource_term"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
   </data>
 </odoo>

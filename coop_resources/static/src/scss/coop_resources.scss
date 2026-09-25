@@ -197,3 +197,13 @@
   min-height: 34px;
   margin-top: 8px;
 }
+
+// Условия по способам на опубликованном объявлении (решение 412, Н5, Н6):
+// только отмеченные способы, по строке на каждый.
+.o_coop_res_terms {
+  margin: 0;
+  padding-left: 18px;
+  line-height: 1.55;
+
+  b { font-weight: 600; }
+}
