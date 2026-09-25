@@ -379,7 +379,7 @@
     -->
     <!-- `coop_section` — вкладки раздела над списком (`coop_theme`,
          `coopHasTabs`): «Недавние», «Жду подписи», «Корзина» и остальные. -->
-    <field name="context">{'coop_section': 1}</field>
+    <field name="context">{'coop_section': 1, 'coop_create_label': 'Загрузить', 'coop_create_method': 'action_open_upload'}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiley_face">Документов пока нет</p>
       <p>Акты, договоры и закрывающие. У каждого считается отпечаток, и
@@ -432,11 +432,9 @@
             action="action_coop_documents_awaits" sequence="14"/>
   <menuitem id="menu_coop_documents_shared" name="Доступные мне" parent="menu_coop_documents_root"
             action="action_coop_documents_shared" sequence="15"/>
-  <menuitem id="menu_coop_document_folders" name="Папки"
-            parent="menu_coop_documents_root"
-            action="action_coop_document_folders" sequence="20"/>
-  <menuitem id="menu_coop_documents_upload" name="Загрузить" parent="menu_coop_documents_root"
-            action="action_coop_documents_upload" sequence="25"/>
+  <!-- «Папки» и «Загрузить» вкладками не стоят (Н10, владелец 25.09):
+       папки — в левой колонке рабочего поля, загрузка — кнопкой
+       «Загрузить» на месте «Нового» (`coop_create_method`). -->
   <menuitem id="menu_coop_documents_trash" name="Корзина" parent="menu_coop_documents_root"
             action="action_coop_documents_trash" sequence="30"/>
 

@@ -340,6 +340,14 @@ class CoopDocument(models.Model):
     # ── Загрузка многих файлов и скан ───────────────────────────────
 
     @api.model
+    def action_open_upload(self):
+        """Кнопка «Загрузить» на месте «Нового» (Н10, владелец 25.09):
+        открывает экран загрузки — файлы и папки перетаскиванием, скан
+        камерой, — а не пустую карточку документа."""
+        return self.env['ir.actions.actions']._for_xml_id(
+            'coop_documents.action_coop_documents_upload')
+
+    @api.model
     def coop_upload(self, files, folder_id=False):
         """Загрузить файлы разом; `path` у файла — путь внутри выбранной
         папки («Стройка/Акты/акт-3.pdf»): недостающие папки заводятся.
