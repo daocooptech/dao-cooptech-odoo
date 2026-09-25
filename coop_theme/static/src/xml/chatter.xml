@@ -60,6 +60,11 @@
     <xpath expr="//t[@name='empty-message']" position="inside">
       <div t-else="" class="o_coop_wall_empty text-muted">Записей пока нет.</div>
     </xpath>
+    <!-- В ленте есть только скрытый на стене журнал — движок считает её
+         непустой (js/wall.js, coopWallEmpty). -->
+    <xpath expr="//t[@name='content']/div" position="inside">
+      <div t-if="coopWallEmpty" class="o_coop_wall_empty text-muted">Записей пока нет.</div>
+    </xpath>
   </t>
 
 </templates>

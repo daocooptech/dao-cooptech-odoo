@@ -159,4 +159,19 @@ patch(Thread.prototype, {
             .filter((m) => m.message_type === "comment" && !m.isNote)
             .sort((a, b) => (asc ? 1 : -1) * ((a.datetime - b.datetime) || (a.id - b.id)));
     },
+
+    /**
+     * Стене показать нечего — «Записей пока нет.» (решение 410, п. 8).
+     * Движок считает ленту непустой, если в ней есть служебный журнал,
+     * который выше скрыт, — и свою строку о пустоте не рисует. Только
+     * после загрузки и когда старее грузить нечего.
+     */
+    get coopWallEmpty() {
+        const thread = this.props.thread;
+        return Boolean(
+            WALL_MODELS.includes(thread?.model) &&
+            thread.isLoaded && !thread.loadOlder &&
+            this.orderedMessages.length === 0
+        );
+    },
 });
