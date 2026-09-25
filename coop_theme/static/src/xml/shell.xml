@@ -91,6 +91,12 @@
            люди договариваются, где что лежит. -->
         <button type="button" class="o_coop_nav_settings"
                 t-on-click="() => this.openSettings()">Настроить меню</button>
+        <!-- Только на телефоне (shell.scss): на большом экране выход — в
+             меню учётной записи в шапке. -->
+        <button type="button" class="o_coop_nav_settings o_coop_nav_logout"
+                t-on-click="() => this.logout()">
+          <i class="fa fa-sign-out fa-fw" role="img" aria-hidden="true"/> Выйти
+        </button>
       </aside>
 
       <!--

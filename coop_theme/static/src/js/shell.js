@@ -597,6 +597,18 @@ export class CoopSidebar extends Component {
         return this.action.doAction(this.settingsId, { clearBreadcrumbs: true });
     }
 
+    /**
+     * «Выйти» последней строкой бокового меню на телефоне (решение 410,
+     * п. 13): меню учётной записи движка на узком экране спрятано, и
+     * выйти было неоткуда. Путь — тот же, что у пункта движка
+     * (`web/.../user_menu_items.js`, `logOutItem`): сообщение
+     * сервис-воркеру и адрес выхода.
+     */
+    logout() {
+        browser.navigator.serviceWorker?.controller?.postMessage("user_logout");
+        browser.location.href = "/web/session/logout";
+    }
+
     /** Бургер узкого экрана: 216 пикселей из 360 — это меню вместо страницы. */
     toggle() {
         this.ui.open = !this.ui.open;

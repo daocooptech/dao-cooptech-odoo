@@ -206,6 +206,16 @@
   }
 }
 
+// «Выйти» — только на телефоне (решение 410, п. 13).
+.o_coop_nav_logout {
+  display: none;
+  margin-top: 4px;
+}
+
+@media (max-width: 900px) {
+  .o_coop_nav_logout { display: block; }
+}
+
 .o_coop_ext_add {
   margin-left: auto;
   width: 24px;
