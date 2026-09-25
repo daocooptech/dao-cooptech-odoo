@@ -40,8 +40,8 @@ class CoopMiner(models.Model):
     registry_state = fields.Selection([
         ('registered', 'В реестре ФНС'),
         ('pending', 'Заявление на рассмотрении'),
-        ('not_required', 'Не требуется — в пределах лимита'),
-        ('missing', 'Нет записи'),
+        ('not_required', 'Физлицо: реестр не нужен (до 6000 кВт·ч/мес)'),
+        ('missing', 'Нужна запись в реестре'),
     ], string='Реестр ФНС', required=True, default='not_required', index=True, tracking=True)
     registry_number = fields.Char(string='Номер записи в реестре')
     registry_date = fields.Date(string='Включён в реестр')
