@@ -495,6 +495,11 @@ function createLabelPatch() {
 
 patch(ListController.prototype, createLabelPatch());
 patch(FormController.prototype, createLabelPatch());
+// И обычной плитке — не каталогу: у документов плитка штатная, и кнопка
+// «Загрузить» (Н10, владелец 25.09) оставалась «Новым». Каталогу подпись
+// даёт свой контроллер (`CoopCatalogKanbanController`), его геттер
+// перекрывает этот.
+patch(KanbanController.prototype, createLabelPatch());
 
 /**
  * Своя страница добавления вместо штатного режима создания.

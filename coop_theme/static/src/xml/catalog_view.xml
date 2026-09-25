@@ -256,6 +256,21 @@
   </t>
 
   <!--
+    То же для обычной плитки (не каталога): у документов она штатная, и
+    «Загрузить» из действия иначе не доезжало до кнопки (Н10).
+  -->
+  <t t-name="coop_theme.KanbanView" t-inherit="web.KanbanView" t-inherit-mode="extension">
+    <xpath expr="//button[hasclass('o-kanban-button-new')]" position="replace">
+      <button t-if="canCreate and props.showButtons" type="button"
+              t-att-disabled="isNewButtonDisabled"
+              class="btn btn-primary o-kanban-button-new" accesskey="c"
+              t-on-click="() => this.createRecord()" data-bounce-button="">
+        <t t-esc="coopCreateLabel"/>
+      </button>
+    </xpath>
+  </t>
+
+  <!--
     То же для формы: кнопка создания там называется так же «Новое», и
     встречается она на каждом экране записи.
   -->
