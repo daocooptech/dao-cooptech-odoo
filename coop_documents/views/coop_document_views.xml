@@ -377,7 +377,9 @@
       то, чего в нём не стало. Прежнее значение так и осталось бы в
       базе — проверено 23 сентября 2026.
     -->
-    <field name="context">{}</field>
+    <!-- `coop_section` — вкладки раздела над списком (`coop_theme`,
+         `coopHasTabs`): «Недавние», «Жду подписи», «Корзина» и остальные. -->
+    <field name="context">{'coop_section': 1}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiley_face">Документов пока нет</p>
       <p>Акты, договоры и закрывающие. У каждого считается отпечаток, и
@@ -405,6 +407,7 @@
     <field name="name">Папки документов</field>
     <field name="res_model">coop.document.folder</field>
     <field name="view_mode">list</field>
+    <field name="context">{'coop_section': 1}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiley_face">Папок пока нет</p>
       <p>Папка — ваш порядок, а не свойство документа. Платформа сама
