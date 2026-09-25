@@ -89,7 +89,8 @@ def load_mining(env, login='dashkevich', miners=110, offers=130):
         power = max(1, round(count * watts / 1000))
         monthly = power * 24 * 30
         if kind == 'person':
-            registry = 'not_required'
+            # Сверх лимита физлицу реестр не «не нужен» — нужен ИП и запись.
+            registry = 'not_required' if monthly <= 6000 else 'missing'
         else:
             registry = rnd.choices(['registered', 'pending', 'missing'], weights=[72, 18, 10])[0]
         vals = {
@@ -118,7 +119,9 @@ def load_mining(env, login='dashkevich', miners=110, offers=130):
         miner = rnd.choice(made)
         side = 'request' if (kind == 'equipment' and rnd.random() < 0.3) or rnd.random() < 0.12 else 'offer'
         n = rnd.choice([5, 10, 20, 40, 80, 150, 300])
-        title = rnd.choice(OFFER_TITLES[kind]).format(n=n)
+        titles = [t for t in OFFER_TITLES[kind]
+                  if 'ГЭС' not in t or miner.energy_source == 'hydro']
+        title = rnd.choice(titles).format(n=n)
         if kind == 'hosting':
             price, unit, cap, cap_unit = round(rnd.uniform(3.8, 6.5), 2), 'kwh', n, 'places'
         elif kind == 'equipment':
@@ -149,3 +152,27 @@ def load_mining(env, login='dashkevich', miners=110, offers=130):
 
     _logger.info('Майнинг: майнеров %s, предложений %s', len(made), offers)
     return len(made)
+
+
+def repair_mining_titles(env):
+    """«У ГЭС» — только у площадок на ГЭС.
+
+    Первый прогон брал заголовок наугад, и «Место под 5 асиков у ГЭС»
+    стояло в Кемерово с питанием от сети. Повторный запуск ничего не меняет.
+    """
+    if 'coop.mining.offer' not in env:
+        return 0
+    wrong = env['coop.mining.offer'].sudo().with_context(tracking_disable=True).search([
+        ('name', 'ilike', ' у ГЭС'), ('energy_source', '!=', 'hydro')])
+    for offer in wrong:
+        offer.name = offer.name.replace(' у ГЭС', '')
+    if wrong:
+        _logger.info('Майнинг: «у ГЭС» снято у %s предложений', len(wrong))
+    # Физлицо сверх лимита стояло «не требуется — в пределах лимита».
+    over = env['coop.miner'].sudo().search([
+        ('kind', '=', 'person'), ('monthly_kwh', '>', 6000),
+        ('registry_state', '=', 'not_required')])
+    over.write({'registry_state': 'missing'})
+    if over:
+        _logger.info('Майнинг: физлиц сверх лимита без записи — %s', len(over))
+    return len(wrong) + len(over)

@@ -94,14 +94,18 @@ class CoopMiner(models.Model):
         for miner in self:
             miner.offer_count = len(miner.offer_ids)
 
-    @api.constrains('kind', 'registry_state')
+    @api.constrains('kind', 'registry_state', 'monthly_kwh')
     def _check_registry(self):
         for miner in self:
-            if miner.kind == 'person' and miner.registry_state == 'registered':
+            if miner.registry_state != 'not_required':
                 continue
-            if miner.kind in ('legal', 'ip') and miner.registry_state == 'not_required':
+            if miner.kind in ('legal', 'ip'):
                 raise ValidationError(_(
                     'Юрлицу и ИП запись в реестре ФНС нужна всегда.'))
+            if (miner.monthly_kwh or 0) > PERSON_KWH_LIMIT:
+                raise ValidationError(_(
+                    'Сверх %(limit)s кВт·ч в месяц физлицу без записи нельзя: нужен '
+                    'ИП или юрлицо и реестр ФНС.', limit=PERSON_KWH_LIMIT))
 
     def _coop_catalog_filters(self, domain):
         def choice(name):

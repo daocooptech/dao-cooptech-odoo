@@ -188,6 +188,7 @@ class CoopDemoLoader(models.AbstractModel):
             load_crypto.load_crypto(self.env)
         if 'coop.miner' in self.env:
             load_mining.load_mining(self.env)
+            load_mining.repair_mining_titles(self.env)
         # Последним — добор примеров по случаям: он смотрит, чего в
         # данных не хватает, и потому должен видеть всё остальное.
         load_examples.load_examples(self.env)
