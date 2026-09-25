@@ -192,6 +192,8 @@ class CoopDemoLoader(models.AbstractModel):
         # Последним — добор примеров по случаям: он смотрит, чего в
         # данных не хватает, и потому должен видеть всё остальное.
         load_examples.load_examples(self.env)
+        # «Administrator» — вон из сделок, имя — по решению 126.
+        load_people.repair_admin(self.env)
         load_bounty.grant_admin_roles(self.env)
         load_bounty.load_bounty(self.env)
         # Переписки в самом конце: они заводятся вокруг сделок,

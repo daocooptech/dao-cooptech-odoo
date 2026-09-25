@@ -246,3 +246,82 @@ def repair_names(env):
         _logger.info('Люди: отчество исправлено у %s, тестовых учёток '
                      'переименовано %s', fixed, renamed)
     return fixed + renamed
+
+
+# Имя служебной учётной записи движка на платформе. Решение 126: рабочая
+# группа — отдельная роль, а не пайщик и не человек; «Administrator» из
+# коробки Odoo стоял в сделках продавцом и в истории прав ресурсов.
+ADMIN_NAME = 'Рабочая группа платформы'
+
+
+def repair_admin(env):
+    """Убрать служебную учётную запись из сделок и назвать её по-человечески.
+
+    Демо-сделки заводились от имени системы, и продавцом в 49 из них стоял
+    «Administrator». Продавцом становится хозяин ресурса, а если он же
+    покупатель или ресурса нет — участник, для которого сделка
+    правдоподобна. История прав по затронутым ресурсам собирается заново
+    с прежними датами: журнал неизменяем, поправить в нём сторону нельзя,
+    можно только переписать цепочку целиком, пока это демо-данные.
+
+    Повторный запуск ничего не меняет.
+    """
+    admin = env.ref('base.partner_admin', raise_if_not_found=False)
+    if not admin:
+        return 0
+    admin = admin.sudo()
+    changed = 0
+    if admin.name != ADMIN_NAME:
+        admin.name = ADMIN_NAME
+        changed += 1
+    if 'coop.deal' not in env:
+        return changed
+    import random
+    rnd = random.Random(20260925 + 126)
+    Deal = env['coop.deal'].sudo().with_context(tracking_disable=True)
+    deals = Deal.search(['|', '|', ('party_a_id', '=', admin.id),
+                         ('party_b_id', '=', admin.id), ('author_id', '=', admin.id)])
+    if not deals:
+        return changed
+    people = env['res.partner'].sudo().search([
+        ('coop_is_participant', '=', True), ('id', '!=', admin.id),
+        ('name', 'not in', ('Danil', 'Proverka Vyhoda', 'Игнатьев Денис Олегович',
+                            'Прохорова Вера Андреевна'))])
+
+    # История прав: запомнить даты и снести цепочки затронутых ресурсов.
+    Transfer = env['coop.resource.transfer'] if 'coop.resource.transfer' in env else None
+    resources = deals.resource_id
+    old = {}
+    if Transfer is not None and resources:
+        for row in Transfer.sudo().search([('resource_id', 'in', resources.ids)]):
+            old.setdefault(row.resource_id.id, {})[row.deal_id.id or 0] = row.date
+        env.cr.execute('DELETE FROM coop_resource_transfer WHERE resource_id IN %s',
+                       [tuple(resources.ids)])
+        env.invalidate_all()
+
+    for deal in deals:
+        vals = {}
+        for field in ('party_a_id', 'party_b_id'):
+            if deal[field] == admin:
+                other = deal.party_b_id if field == 'party_a_id' else deal.party_a_id
+                owner = deal.resource_id.owner_id
+                pick = owner if owner and owner != other and owner != admin else None
+                while not pick or pick == other:
+                    pick = rnd.choice(people)
+                vals[field] = pick.id
+        if deal.author_id == admin:
+            vals['author_id'] = (vals.get('party_a_id') or deal.party_a_id.id)
+        deal.write(vals)
+        changed += 1
+
+    if Transfer is not None:
+        for resource in resources:
+            dates = old.get(resource.id, {})
+            resource._coop_register_rights(date=dates.get(0))
+            done = Deal.search([('resource_id', '=', resource.id), ('state', '=', 'done'),
+                                ('id', 'in', list(dates))])
+            # По порядку прежних дат: цепочка пишется в конец.
+            for deal in done.sorted(key=lambda d: (dates[d.id], d.id)):
+                deal._coop_record_rights(date=dates[deal.id])
+    _logger.info('Служебная учётная запись: сделок исправлено %s', len(deals))
+    return changed

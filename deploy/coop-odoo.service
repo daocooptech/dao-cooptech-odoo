@@ -7,6 +7,12 @@ Requires=postgresql.service
 Type=simple
 User=odoo
 Group=odoo
+# Путь к venv первым: при перезапуске по пределу памяти Odoo делает
+# execv с argv[0] = «python» и ищет его по PATH. Без этой строки находился
+# системный Python без зависимостей (ModuleNotFoundError: passlib), процесс
+# падал, и systemd поднимал его через 5 с — «Соединение потеряно» у
+# участников после каждой выкатки. Владелец разрешил 25.09.2026.
+Environment=PATH=/opt/coop/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ExecStart=/opt/coop/venv/bin/python /opt/coop/odoo/odoo-bin -c /etc/coop-odoo.conf
 KillMode=mixed
 Restart=on-failure
