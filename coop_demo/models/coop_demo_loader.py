@@ -275,6 +275,7 @@ class CoopDemoLoader(models.AbstractModel):
         if 'coop.document.version' in self.env:
             load_documents_more.pdf_documents(self.env)
             load_documents_more.enrich_documents(self.env)
+            load_documents_more.repair_document_logs(self.env)
         load_notifications.load_notifications(self.env)
         # Знаки организаций — тем же порядком: набор эмблем чистили от
         # того, что знаком не было, и у карточек это осталось стоять.

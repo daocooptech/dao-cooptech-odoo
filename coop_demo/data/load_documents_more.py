@@ -183,7 +183,7 @@ def enrich_documents(env, login='dashkevich'):
             vals['password'] = 'кооп%04d' % rnd.randint(0, 9999)
         share = Share.create(vals)
         for _v in range(min(share.views, 3)):
-            Log.create({'document_id': doc.id, 'partner_id': env.ref('base.public_partner').id,
+            Log.create({'document_id': doc.id, 'partner_id': False, 'note': 'по ссылке',
                         'action': 'external',
                         'date': (created(doc) + (now - created(doc)) * rnd.uniform(0.5, 0.99)).replace(microsecond=0)})
 
@@ -227,3 +227,26 @@ def _draft_text(doc):
         'Документ составлен на платформе ДАО КООПТЕХ.',
     ]
     return '\n'.join(lines)
+
+
+def repair_document_logs(env):
+    """Журнал наполнения: ссылки выданы стороной, а не «Bot»; посетитель
+    по ссылке — без имени, а не «Public user». Повторный запуск ничего не
+    меняет."""
+    if 'coop.document.log' not in env:
+        return 0
+    Log = env['coop.document.log'].sudo()
+    bot = env.ref('base.partner_root', raise_if_not_found=False)
+    public = env.ref('base.public_partner', raise_if_not_found=False)
+    fixed = 0
+    if bot:
+        for row in Log.search([('action', '=', 'shared'), ('partner_id', '=', bot.id)]):
+            row.partner_id = row.document_id.party_a_id
+            fixed += 1
+    if public:
+        rows = Log.search([('action', '=', 'external'), ('partner_id', '=', public.id)])
+        rows.write({'partner_id': False, 'note': 'по ссылке'})
+        fixed += len(rows)
+    if fixed:
+        _logger.info('Документы: журнал поправлен у %s строк', fixed)
+    return fixed

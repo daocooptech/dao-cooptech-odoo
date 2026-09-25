@@ -135,7 +135,14 @@ class CoopDocumentsController(http.Controller):
 
         doc = share.document_id
         share.views += 1
-        _log_once(doc, 'external', minutes=30)
+        # Посетитель по ссылке — без имени: «Public user» движка в журнале
+        # читался бы как чей-то аккаунт.
+        Log = request.env['coop.document.log'].sudo()
+        since = datetime.now() - timedelta(minutes=30)
+        if not Log.search_count([('document_id', '=', doc.id), ('action', '=', 'external'),
+                                 ('date', '>=', since)], limit=1):
+            Log.create({'document_id': doc.id, 'action': 'external', 'partner_id': False,
+                        'note': 'по ссылке'})
         parties = ' — '.join(p for p in (doc.party_a_id.name, doc.party_b_id.name) if p)
         file_url = '/coop/doc/%s/file' % token
         body = Markup(
