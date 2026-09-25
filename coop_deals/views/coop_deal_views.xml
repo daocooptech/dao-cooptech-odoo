@@ -388,4 +388,39 @@
     </field>
   </record>
 
+  <!--
+    История передачи прав — вкладка страницы ресурса, как «Трекинг» в
+    макете (`resource-tracking.html`). Журнал неизменяемый: строки
+    заводятся сами — постановкой на учёт и завершённой сделкой
+    (`models/coop_resource_transfer.py`). Сделку в строке не показываем:
+    она видна только сторонам, остальным ссылка вела бы в отказ.
+  -->
+  <record id="view_coop_resource_form_rights" model="ir.ui.view">
+    <field name="name">coop.resource.form.rights</field>
+    <field name="model">coop.resource</field>
+    <field name="inherit_id" ref="coop_resources.view_coop_resource_add"/>
+    <field name="arch" type="xml">
+      <xpath expr="//notebook" position="inside">
+        <page string="История прав" name="rights" invisible="not coop_has_rights_history">
+          <field name="coop_has_rights_history" invisible="1"/>
+          <div class="text-muted mb-2">
+            Каждая смена владельца записывается в момент сделки и больше не
+            меняется: у записи свой номер и хэш, связанный с предыдущей.
+          </div>
+          <field name="coop_transfer_ids" readonly="1" nolabel="1">
+            <list create="0" delete="0" edit="0" default_order="seq desc">
+              <field name="seq" string="№"/>
+              <field name="date"/>
+              <field name="kind"/>
+              <field name="from_partner_id" widget="many2one_avatar"/>
+              <field name="to_partner_id" widget="many2one_avatar"/>
+              <field name="quantity"/>
+              <field name="hash_short" class="font-monospace text-muted"/>
+            </list>
+          </field>
+        </page>
+      </xpath>
+    </field>
+  </record>
+
 </odoo>
