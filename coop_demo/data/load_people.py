@@ -181,3 +181,68 @@ def ensure_cities(env):
                      len(cityless),
                      ', '.join(cityless[:5].mapped('name')))
     return len(cityless)
+
+
+# Женские отчества на замену, если прямое совпадёт с уже заведённым
+# человеком: «Белкина Ольга Сергеевна» есть, второй такой быть не должно.
+SPARE_PATRONYMICS = ('Андреевна', 'Павловна', 'Николаевна', 'Олеговна',
+                     'Дмитриевна', 'Алексеевна', 'Геннадьевна', 'Юрьевна')
+
+# Женские имена в списках загрузчиков. Пол по имени не угадывается
+# вообще — «Илья», «Данила», «Никита» кончаются на «а» и «я», — поэтому
+# только явный список, а не окончание.
+WOMEN_FIRST_NAMES = ('Ольга', 'Вера', 'Инна', 'Раиса', 'Дарья', 'Юлия',
+                     'Алла', 'Ксения', 'Нина', 'Елена', 'Анна', 'Софья',
+                     'Полина')
+
+# Тестовые учётки владельца: не удаляются (через них входят), а
+# называются как люди (решение 410, п. 5).
+TEST_RENAMES = {
+    'Danil': 'Игнатьев Денис Олегович',
+    'Proverka Vyhoda': 'Прохорова Вера Андреевна',
+}
+
+
+def repair_names(env):
+    """Женщинам — женское отчество; тестовым учёткам — человеческие имена.
+
+    Генератор новичков брал одно мужское отчество на всех, и в каталоге
+    стояли «Белкина Ольга Викторович», «Жукова Инна Викторович» —
+    четырнадцать таких. Генератор исправлен (`load_examples`), но уже
+    заведённые записи остались. По отчеству же раздаются фотографии
+    (`load_faces`), поэтому у этих женщин были мужские лица: после
+    правки имени раздача переставит снимок сама — ей и нужно идти после.
+
+    Повторный запуск ничего не меняет: править нечего.
+    """
+    Partner = env['res.partner'].sudo().with_context(active_test=False)
+    fixed = renamed = 0
+    people = Partner.search([('is_company', '=', False),
+                             ('coop_is_participant', '=', True)])
+    taken = set(people.mapped('name'))
+    for partner in people:
+        parts = (partner.name or '').split()
+        if len(parts) != 3 or parts[1] not in WOMEN_FIRST_NAMES:
+            continue
+        patronymic = parts[2]
+        if not patronymic.endswith(('ович', 'евич')):
+            continue
+        base = patronymic[:-2] + 'на'
+        for candidate in (base,) + SPARE_PATRONYMICS:
+            name = '%s %s %s' % (parts[0], parts[1], candidate)
+            if name not in taken:
+                break
+        taken.discard(partner.name)
+        taken.add(name)
+        partner.name = name
+        fixed += 1
+    for old, new in TEST_RENAMES.items():
+        partner = Partner.search([('name', '=', old)], limit=1)
+        if partner and new not in taken:
+            partner.name = new
+            taken.add(new)
+            renamed += 1
+    if fixed or renamed:
+        _logger.info('Люди: отчество исправлено у %s, тестовых учёток '
+                     'переименовано %s', fixed, renamed)
+    return fixed + renamed

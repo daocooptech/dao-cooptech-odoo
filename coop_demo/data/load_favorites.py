@@ -31,7 +31,10 @@ PLAN = [
     ('coop.intangible', [], 7),
     ('coop.cfa.issue', [], 6),
 ]
-TEST_NAMES = ('Danil', 'Proverka Vyhoda')
+# Тестовые учётки владельца — и под прежними именами, и под новыми
+# (`load_people.TEST_RENAMES`).
+TEST_NAMES = ('Danil', 'Proverka Vyhoda',
+              'Игнатьев Денис Олегович', 'Прохорова Вера Андреевна')
 
 
 def load_favorites(env, login='dashkevich'):

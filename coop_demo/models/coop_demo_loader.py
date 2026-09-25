@@ -85,6 +85,8 @@ class CoopDemoLoader(models.AbstractModel):
         load_biography.add_followers(self.env)
         # Лица: раздача и перестановка по полу одним проходом — двумя
         # они перебирали снимок заново на каждой выкатке.
+        # Имена — до лиц: снимок раздаётся по отчеству.
+        load_people.repair_names(self.env)
         load_faces.ensure_faces(self.env)
         # Последним: дополняет то, чего не досталось витринной
         # странице при обычной раздаче.

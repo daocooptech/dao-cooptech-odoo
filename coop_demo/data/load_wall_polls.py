@@ -34,7 +34,10 @@ from datetime import datetime, timedelta
 
 _logger = logging.getLogger(__name__)
 
-TEST_NAMES = ('Danil', 'Proverka Vyhoda')
+# Тестовые учётки владельца — и под прежними именами, и под новыми
+# (`load_people.TEST_RENAMES`).
+TEST_NAMES = ('Danil', 'Proverka Vyhoda',
+              'Игнатьев Денис Олегович', 'Прохорова Вера Андреевна')
 
 # Вопрос и варианты. Без рода в глаголах: голосуют и мужчины, и женщины.
 PEOPLE_POLLS = [

@@ -60,7 +60,10 @@ AUTHOR_REPLIES = [
     'Спасибо за отзыв, рады стараться.',
 ]
 
-TEST_NAMES = ('Danil', 'Proverka Vyhoda')
+# Тестовые учётки владельца — и под прежними именами, и под новыми
+# (`load_people.TEST_RENAMES`).
+TEST_NAMES = ('Danil', 'Proverka Vyhoda',
+              'Игнатьев Денис Олегович', 'Прохорова Вера Андреевна')
 
 
 def load_wall_comments(env, login='dashkevich'):
