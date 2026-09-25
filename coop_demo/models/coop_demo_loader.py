@@ -180,6 +180,7 @@ class CoopDemoLoader(models.AbstractModel):
         if 'coop.trade.contract' in self.env:
             load_trade.load_trade(self.env)
             load_trade.repair_trade_names(self.env)
+            load_trade.repair_trade_dates(self.env)
         # Последним — добор примеров по случаям: он смотрит, чего в
         # данных не хватает, и потому должен видеть всё остальное.
         load_examples.load_examples(self.env)

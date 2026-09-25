@@ -117,7 +117,8 @@
           <field name="missing_count" invisible="1"/>
           <div class="oe_title">
             <div class="text-muted"><field name="number" readonly="1"/></div>
-            <h1><field name="name" placeholder="Например, поставка подсолнечного масла в Китай"/></h1>
+            <h1><field name="name" widget="coop_inline" options="{'wrap': True}"
+                       placeholder="Например, поставка подсолнечного масла в Китай"/></h1>
           </div>
           <field name="warnings_html" nolabel="1"/>
           <group>

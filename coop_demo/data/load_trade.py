@@ -168,6 +168,11 @@ def load_trade(env, login='dashkevich', target=130):
         signed = today - timedelta(days=rnd.randint(5, 540))
         performance = signed + timedelta(days=rnd.randint(30, 200))
         payment_due = performance + timedelta(days=rnd.choice([10, 30, 45, 60, 90]))
+        if state in ('done', 'closed') and payment_due >= today:
+            # Исполненный контракт исполнен в прошлом: все сроки позади.
+            back = (payment_due - today).days + rnd.randint(5, 90)
+            signed, performance, payment_due = (
+                d - timedelta(days=back) for d in (signed, performance, payment_due))
         if index < 22 and showcase_orgs:
             resident = showcase_orgs[index % len(showcase_orgs)]
         else:
@@ -298,4 +303,34 @@ def repair_trade_names(env):
             fixed += 1
     if fixed:
         _logger.info('Международные сделки: страна по-русски в %s названиях', fixed)
+    return fixed
+
+
+def repair_trade_dates(env):
+    """Сроки исполненных и снятых с учёта контрактов — в прошлое.
+
+    Первый прогон ставил сроки от даты заключения вперёд, и у контракта
+    «Снят с учёта» срок оплаты стоял в будущем году. Сдвигаются все даты
+    контракта разом — заключение, учёт, сроки, аккредитив, документы и
+    платежи, — чтобы порядок между ними не нарушился.
+    """
+    if 'coop.trade.contract' not in env:
+        return 0
+    today = date.today()
+    fixed = 0
+    contracts = env['coop.trade.contract'].sudo().with_context(tracking_disable=True).search([
+        ('state', 'in', ('done', 'closed')), ('payment_due', '>=', today)])
+    for contract in contracts:
+        back = timedelta(days=(contract.payment_due - today).days + 10 + contract.id % 60)
+        vals = {}
+        for name in ('signed_on', 'performance_date', 'payment_due', 'unk_on', 'lc_expiry'):
+            if contract[name]:
+                vals[name] = contract[name] - back
+        contract.write(vals)
+        for lines in (contract.document_ids, contract.payment_ids):
+            for line in lines:
+                line.date = line.date - back
+        fixed += 1
+    if fixed:
+        _logger.info('Международные сделки: сроки в прошлое у %s исполненных', fixed)
     return fixed
