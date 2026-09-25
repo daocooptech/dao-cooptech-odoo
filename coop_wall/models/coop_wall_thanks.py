@@ -162,6 +162,11 @@ class CoopWallThanks(models.Model):
         index=True)
     date = fields.Datetime(
         string='Когда', required=True, default=fields.Datetime.now)
+    # Для справки к 3-НДФЛ (решение 410, п. 1): хеш и время зачисления.
+    # Рублёвой стоимости здесь нет и не будет (решение 410, п. 2): её по
+    # котировке и курсу ЦБ на день зачисления считает сам получатель.
+    tx_hash = fields.Char(string='Хеш транзакции')
+    credited_on = fields.Datetime(string='Зачислено')
 
     _positive = models.Constraint('CHECK (amount > 0)', 'Сумма должна быть больше нуля.')
     _not_self = models.Constraint(
@@ -179,6 +184,13 @@ class CoopWallThanks(models.Model):
         if not post or post.model not in WALL_MODELS or post.message_type != 'comment':
             raise UserError(_("Запись не найдена."))
         post.check_access('read')
+        # Подарок под репостом — автору исходной записи (решение 410, п. 4):
+        # благодарят за содержание, а оно его.
+        original = post.sudo().coop_repost_of_id
+        if original:
+            if not original.exists() or not original.sudo(False)._filtered_access('read'):
+                raise UserError(_("Исходная запись недоступна."))
+            return original.sudo(False)
         return post
 
     @api.model
@@ -220,6 +232,9 @@ class CoopWallThanks(models.Model):
             'state': t.state,
             'state_label': dict(STATES)[t.state],
             'date': fields.Datetime.to_string(t.date),
+            'tx_hash': t.tx_hash or '',
+            'ndfl_url': '/coop/wall/thanks/%d/ndfl' % t.id
+            if t.channel == 'token' and t.state == 'confirmed' else False,
         } for t in self]
 
     # ── Для браузера ─────────────────────────────────────────────────
@@ -271,7 +286,7 @@ class CoopWallThanks(models.Model):
 
     @api.model
     def coop_declare(self, post_id, channel, amount, understood,
-                     network_id=False, token=False):
+                     network_id=False, token=False, tx_hash=False):
         """Даритель отмечает, что подарок отправлен."""
         if not understood:
             raise UserError(_("Отметьте, что понимаете: это подарок."))
@@ -323,6 +338,7 @@ class CoopWallThanks(models.Model):
             'network_id': network_id if channel == 'token' else False,
             'token': token if channel == 'token' else False,
             'amount': amount,
+            'tx_hash': (tx_hash or '').strip()[:200] if channel == 'token' else False,
         })
         return thanks._coop_to_dict()[0]
 
@@ -337,4 +353,15 @@ class CoopWallThanks(models.Model):
         if state not in ('confirmed', 'unconfirmed', 'returned'):
             raise UserError(_("Такого состояния автор не ставит."))
         thanks.state = state
+        if state == 'confirmed' and not thanks.credited_on:
+            thanks.credited_on = fields.Datetime.now()
+        return thanks._coop_to_dict()[0]
+
+    @api.model
+    def coop_set_hash(self, thanks_id, tx_hash):
+        """Получатель вписывает хеш, если даритель его не указал."""
+        thanks = self.sudo().browse(thanks_id).exists()
+        if not thanks or thanks.recipient_id != self.env.user.partner_id:
+            raise AccessError(_("Вписать хеш может только получатель."))
+        thanks.tx_hash = (tx_hash or '').strip()[:200]
         return thanks._coop_to_dict()[0]

@@ -198,7 +198,8 @@
   </t>
 
   <t t-name="coop_wall.ThanksDialog">
-    <Dialog title="state.info and state.info.own ? 'Подарки за запись' : 'Поблагодарить автора'" size="'md'">
+    <!-- Заголовок — владелец 25.09.2026 (решение 412). -->
+    <Dialog title="'Понравился пост? Вы можете отправить подарок!'" size="'md'">
       <div t-if="!state.info" class="text-muted">Загрузка…</div>
       <t t-elif="state.info.own">
         <!-- Как вас благодарят — образец окна дарителя. -->
@@ -235,6 +236,10 @@
             <button class="btn btn-sm btn-secondary" t-on-click="() => this.mark(t, 'unconfirmed')">Не пришло</button>
           </div>
           <div t-elif="t.state === 'confirmed'" class="o_coop_thanks_marks">
+            <!-- Справка к 3-НДФЛ — по подаркам токенами (решение 410, п. 1). -->
+            <a t-if="t.ndfl_url" class="btn btn-sm btn-secondary" t-att-href="t.ndfl_url" target="_blank">
+              <i class="fa fa-file-text-o"/> Справка для 3-НДФЛ
+            </a>
             <button class="btn btn-sm btn-link p-0" t-on-click="() => this.mark(t, 'returned')">Вернуть</button>
           </div>
         </div>
@@ -246,6 +251,11 @@
           <label class="form-label">Сумма подарка</label>
           <input class="form-control mb-3" inputmode="decimal" t-model="state.amount"
                  t-att-placeholder="state.channel === 'sbp' ? '500 ₽' : tokenExample"/>
+          <t t-if="state.channel === 'token'">
+            <label class="form-label">Хеш транзакции — по желанию</label>
+            <input class="form-control mb-3" t-model="state.txHash"
+                   placeholder="Из кошелька после отправки: нужен получателю для 3-НДФЛ"/>
+          </t>
           <div t-if="(state.info.taxes[state.channel] or []).length" class="o_coop_thanks_tax mb-3">
             <i class="fa fa-university"/>
             <div>

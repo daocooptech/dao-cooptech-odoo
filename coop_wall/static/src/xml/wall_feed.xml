@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+  <!-- Под текстом записи в ленте подписок — `js/wall_feed.js`. Щелчок
+       внутри не открывает запись: иначе нажатие 👍 уводило бы на стену. -->
+  <t t-name="coop_wall.FeedExtras">
+    <div class="o_coop_feed_extras" t-if="state.ready and message" t-on-click.stop="">
+      <CoopRepostCard t-if="message.coop_repost" repost="message.coop_repost"/>
+      <CoopWallPoll t-if="message.coop_poll" message="message"/>
+      <AttachmentList t-if="attachments.length" attachments="attachments"
+                      unlinkAttachment.bind="noUnlink"/>
+      <CoopWallPostFooter message="message" thread="message.thread"/>
+    </div>
+  </t>
+</templates>

@@ -119,3 +119,16 @@ class MailMessage(models.Model):
         message.sudo().coop_repost_of_id = original
         return message.id
 
+    @api.model
+    def coop_feed_store(self, message_ids):
+        """Записи ленты подписок — в хранилище переписки браузера.
+
+        Лента подписок — канбан по `mail.message`, а ряд под записью,
+        карточка репоста, опрос и вложения — компоненты стены, которым
+        нужна запись хранилища (реакции, звёздочка, вложения). Отдаём тем
+        же путём, каким движок отдаёт сообщения ленты записи.
+        """
+        messages = self.browse(message_ids).exists()._filtered_access('read')
+        messages = messages.filtered(lambda m: m.model in WALL_MODELS)
+        return Store().add(messages).get_result()
+

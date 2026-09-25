@@ -508,3 +508,43 @@ def load_thanks_sbp_links(env, login='dashkevich'):
         done += 1
     _logger.info("Ссылки СБП: заведено %s", done)
     return done
+
+
+_B58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+_B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_'
+
+
+def _tx_hash(code, seed):
+    rnd = random.Random('tx:%s:%s' % (code, seed))
+    hexs = ''.join(rnd.choice('0123456789abcdef') for _ in range(64))
+    if code in ('eth', 'bnb'):
+        return '0x' + hexs
+    if code == 'ton':
+        return ''.join(rnd.choice(_B64) for _ in range(43)) + '='
+    if code == 'sol':
+        return ''.join(rnd.choice(_B58) for _ in range(88))
+    return hexs
+
+
+def repair_thanks_hashes(env):
+    """Подаркам токенами — хеш транзакции и время зачисления (для справки
+    к 3-НДФЛ, решение 410, п. 1). Хеш — в формате своей сети, вымышленный.
+    Повторный запуск ничего не меняет."""
+    if 'coop.wall.thanks' not in env or 'tx_hash' not in env['coop.wall.thanks']._fields:
+        return 0
+    Thanks = env['coop.wall.thanks'].sudo()
+    rnd = random.Random(20260925 + 406)
+    fixed = 0
+    for thanks in Thanks.search([('channel', '=', 'token'), ('tx_hash', '=', False)]):
+        vals = {}
+        # У части подарков хеш даритель не вписал — такое бывает.
+        if rnd.random() < 0.85:
+            vals['tx_hash'] = _tx_hash(thanks.network_id.code or 'btc', thanks.id)
+        if thanks.state == 'confirmed' and not thanks.credited_on:
+            vals['credited_on'] = thanks.date + timedelta(minutes=rnd.randint(1, 180))
+        if vals:
+            thanks.write(vals)
+            fixed += 1
+    if fixed:
+        _logger.info('Подарки токенами: хеш и зачисление у %s', fixed)
+    return fixed

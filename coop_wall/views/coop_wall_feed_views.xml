@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!--
+    Лента подписок на людей и организации — карточкой, как на стене:
+    репост, опрос, вложения и ряд 👍 👎 💬 ↪ 🎁 ☆ (решение 410, п. 3).
+    Всё это рисует виджет под текстом (`js/wall_feed.js`) компонентами
+    самой стены — чтобы запись выглядела одинаково в обоих местах.
+  -->
+  <record id="view_coop_wall_feed_kanban_extras" model="ir.ui.view">
+    <field name="name">coop.wall.feed.kanban.extras</field>
+    <field name="model">mail.message</field>
+    <field name="inherit_id" ref="coop_messages.view_coop_wall_feed_kanban"/>
+    <field name="arch" type="xml">
+      <xpath expr="//div[hasclass('o_coop_feed_body')]" position="after">
+        <field name="id" widget="coop_wall_feed_extras" nolabel="1"/>
+      </xpath>
+    </field>
+  </record>
+</odoo>

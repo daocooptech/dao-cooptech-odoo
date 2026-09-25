@@ -28,11 +28,13 @@
     'category': 'Cooperative',
     'version': '19.0.1.2.0',
     'license': 'LGPL-3',
-    'depends': ['mail', 'coop_base', 'coop_theme', 'coop_wallet', 'coop_settings'],
+    'depends': ['mail', 'coop_base', 'coop_theme', 'coop_wallet', 'coop_settings',
+                'coop_messages'],
     'data': [
         'security/ir.model.access.csv',
         'security/coop_wall_rules.xml',
         'views/coop_wall_settings_views.xml',
+        'views/coop_wall_feed_views.xml',
     ],
     'assets': {
         'web.assets_backend': [
@@ -48,6 +50,8 @@
             'coop_wall/static/src/js/wall_poll.js',
             'coop_wall/static/src/xml/wall_poll.xml',
             'coop_wall/static/src/scss/wall_poll.scss',
+            'coop_wall/static/src/js/wall_feed.js',
+            'coop_wall/static/src/xml/wall_feed.xml',
         ],
     },
     'installable': True,

@@ -304,7 +304,7 @@ export class CoopThanksDialog extends Component {
         this.notification = useService("notification");
         this.state = useState({
             info: null, channel: "sbp", amount: "", understood: false, busy: false,
-            networkId: null, token: null,
+            networkId: null, token: null, txHash: "",
         });
         this.load();
     }
@@ -369,6 +369,7 @@ export class CoopThanksDialog extends Component {
                 this.state.understood,
                 this.state.channel === "token" ? this.state.networkId : false,
                 this.state.channel === "token" ? this.state.token : false,
+                this.state.channel === "token" ? this.state.txHash : false,
             ]);
             this.notification.add(
                 "Спасибо! Автор увидит подарок у себя и отметит, когда он придёт.",
