@@ -78,6 +78,10 @@
 .o_coop_trade_miss em { color: var(--text-muted, #6c757d); }
 
 .o_coop_trade_note {
+  display: block;
+  width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
   margin-top: 12px;
   padding: 10px 12px;
   border-left: 3px solid var(--coop-teal, #146b64);

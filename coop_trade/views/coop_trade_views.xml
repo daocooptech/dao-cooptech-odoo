@@ -186,9 +186,9 @@
 
             <page string="Расчёт" name="settlement">
               <group>
-                <group>
-                  <field name="settlement" widget="radio"/>
-                </group>
+                <field name="settlement" widget="radio"/>
+              </group>
+              <group>
                 <group invisible="settlement != 'lc'" string="Аккредитив">
                   <field name="lc_state"/>
                   <field name="lc_issuing_bank"/>

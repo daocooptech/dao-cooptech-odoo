@@ -100,6 +100,48 @@ def _pick_state(rnd):
         weights=[10, 9, 14, 30, 15, 13, 9])[0]
 
 
+def _ledger(rnd, state, direction, amount, signed, performance, today):
+    """Документы и платежи, сходящиеся между собой.
+
+    Исполненный контракт: исполнено = оплачено = сумма контракта.
+    Исполняемый: исполнена часть, оплачено — от исполненного (иногда
+    аванс сверх него, иногда меньше). Даты — между заключением и
+    сегодняшним днём.
+    """
+    if state not in ('performing', 'done', 'closed'):
+        return [], []
+    last = min(performance, today - timedelta(days=1))
+    span = max((last - signed).days, 2)
+    parts = rnd.randint(1, 4)
+    share = 1.0 if state in ('done', 'closed') else rnd.uniform(0.2, 0.9)
+    shipped = round(amount * share, 2)
+    each = round(shipped / parts, 2)
+    docs = []
+    for n in range(parts):
+        docs.append((0, 0, {
+            'date': signed + timedelta(days=span * (n + 1) // (parts + 1)),
+            'kind': ('declaration' if direction.endswith('_goods') else 'act')
+            if n % 2 == 0 else 'invoice',
+            'number': '%s-%d' % (rnd.randint(1000, 9999), n + 1),
+            'amount': each if n < parts - 1 else round(shipped - each * (parts - 1), 2),
+        }))
+    if state in ('done', 'closed'):
+        paid = shipped
+    else:
+        paid = round(shipped * rnd.choice([0, 0.4, 0.7, 1.0, 1.15]), 2)
+    pays = []
+    if paid:
+        count = rnd.randint(1, 3)
+        part = round(paid / count, 2)
+        for n in range(count):
+            pays.append((0, 0, {
+                'date': signed + timedelta(days=span * (n + 1) // (count + 1) + 3),
+                'amount': part if n < count - 1 else round(paid - part * (count - 1), 2),
+                'note': 'Аванс' if n == 0 and count > 1 else 'Оплата по контракту',
+            }))
+    return docs, pays
+
+
 def load_trade(env, login='dashkevich', target=130):
     if 'coop.trade.contract' not in env:
         return 0
@@ -241,40 +283,13 @@ def load_trade(env, login='dashkevich', target=130):
             })
 
         # Ведомость: документы и платежи по исполнению.
-        docs, pays = [], []
-        if state in ('performing', 'done', 'closed'):
-            parts = rnd.randint(1, 4)
-            share = 1.0 if state in ('done', 'closed') else rnd.uniform(0.2, 0.9)
-            shipped = round(amount * share, 2)
-            step = (performance - signed).days // (parts + 1) or 1
-            for n in range(parts):
-                when = signed + timedelta(days=step * (n + 1))
-                if when > today:
-                    break
-                docs.append((0, 0, {
-                    'date': when,
-                    'kind': ('declaration' if direction.endswith('_goods') else 'act')
-                    if n % 2 == 0 else 'invoice',
-                    'number': '%s-%d' % (rnd.randint(1000, 9999), n + 1),
-                    'amount': round(shipped / parts, 2),
-                }))
-            late_export = (direction.startswith('export') and state == 'performing'
-                           and rnd.random() < 0.35)
-            if state in ('done', 'closed'):
-                paid = shipped
-            elif late_export:
-                paid = round(shipped * rnd.uniform(0, 0.5), 2)
-                vals['payment_due'] = today - timedelta(days=rnd.randint(3, 60))
-            else:
-                paid = round(shipped * rnd.uniform(0.3, 1.0), 2)
-            if paid:
-                count = rnd.randint(1, 3)
-                for n in range(count):
-                    pays.append((0, 0, {
-                        'date': min(today, signed + timedelta(days=rnd.randint(10, 200))),
-                        'amount': round(paid / count, 2),
-                        'note': 'Аванс' if n == 0 and count > 1 else 'Оплата по контракту',
-                    }))
+        docs, pays = _ledger(rnd, state, direction, amount, signed, performance, today)
+        if (direction.startswith('export') and state == 'performing' and docs
+                and sum(p[2]['amount'] for p in pays) < sum(d[2]['amount'] for d in docs)
+                and rnd.random() < 0.5):
+            # Отгружено, денег нет, срок оплаты прошёл — просроченная
+            # репатриация: состояние, которое на работающем узле бывает.
+            vals['payment_due'] = today - timedelta(days=rnd.randint(3, 60))
         vals['document_ids'] = docs
         vals['payment_ids'] = pays
         Contract.create(vals)
@@ -334,3 +349,34 @@ def repair_trade_dates(env):
     if fixed:
         _logger.info('Международные сделки: сроки в прошлое у %s исполненных', fixed)
     return fixed
+
+
+def repair_trade_ledger(env):
+    """Перестроить ведомости, в которых исполненное не сходится с оплатой.
+
+    Первый прогон обрывал документы датой «сегодня», а платежи считал от
+    плана: у исполненного контракта выходило «исполнено 26 млн, оплачено
+    79 млн». Перестраиваются только такие контракты — у исполненных
+    исполнено и оплачено равны сумме контракта; повторный запуск ничего
+    не меняет.
+    """
+    if 'coop.trade.contract' not in env:
+        return 0
+    rnd = random.Random(20260925 + 3921)
+    today = date.today()
+    Contract = env['coop.trade.contract'].sudo().with_context(tracking_disable=True)
+    broken = Contract.search([('state', 'in', ('done', 'closed'))]).filtered(
+        lambda c: round(c.shipped_total, 2) != round(c.amount, 2)
+        or round(c.paid_total, 2) != round(c.amount, 2))
+    broken |= Contract.search([('state', '=', 'performing')]).filtered(
+        lambda c: c.paid_total > c.shipped_total * 1.2 + 1)
+    for contract in broken:
+        contract.document_ids.unlink()
+        contract.payment_ids.unlink()
+        docs, pays = _ledger(rnd, contract.state, contract.direction, contract.amount,
+                             contract.signed_on or today - timedelta(days=200),
+                             contract.performance_date or today, today)
+        contract.write({'document_ids': docs, 'payment_ids': pays})
+    if broken:
+        _logger.info('Международные сделки: ведомость перестроена у %s', len(broken))
+    return len(broken)
