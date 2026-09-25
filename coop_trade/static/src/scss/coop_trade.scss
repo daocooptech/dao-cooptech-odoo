@@ -11,8 +11,10 @@
 }
 
 .o_coop_trade_flag {
-  font-size: 64px;
-  line-height: 1;
+  width: 96px;
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .15);
 }
 
 .o_coop_trade_head {

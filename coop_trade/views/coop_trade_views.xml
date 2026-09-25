@@ -8,7 +8,7 @@
     <field name="model">coop.trade.contract</field>
     <field name="arch" type="xml">
       <kanban js_class="coop_catalog_kanban" class="o_coop_trade_contracts" quick_create="false">
-        <field name="flag"/>
+        <field name="flag_url"/>
         <field name="icon"/>
         <field name="number"/>
         <field name="direction"/>
@@ -26,7 +26,8 @@
           <t t-name="card">
             <div class="o_coop_listing o_coop_trade_card">
               <div class="o_coop_media o_coop_trade_media">
-                <span class="o_coop_trade_flag"><t t-esc="record.flag.value"/></span>
+                <img class="o_coop_trade_flag" t-if="record.flag_url.raw_value" loading="lazy"
+                     t-att-src="record.flag_url.raw_value" t-att-alt="record.foreign_country_id.value"/>
                 <span class="o_coop_locbar">
                   <t t-esc="record.foreign_country_id.value"/>
                 </span>

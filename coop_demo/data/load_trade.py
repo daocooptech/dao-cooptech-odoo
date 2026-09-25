@@ -138,7 +138,7 @@ def load_trade(env, login='dashkevich', target=130):
     for index in range(target):
         code = rnd.choice(list(COUNTRIES))
         names, pay_code, rate = COUNTRIES[code]
-        country = Country.search([('code', '=', code)], limit=1)
+        country = Country.with_context(lang='ru_RU').search([('code', '=', code)], limit=1)
         pay = currency(pay_code) or rub
         # Цена в долларах, платёж в валюте страны — у каждого пятого: ради
         # этого поля валюты цены и платежа и разведены (п. 2 ст. 317 ГК).
@@ -277,3 +277,25 @@ def load_trade(env, login='dashkevich', target=130):
 
     _logger.info('Международные сделки: %s контрактов', made)
     return made
+
+
+def repair_trade_names(env):
+    """Страна в названии контракта — по-русски.
+
+    Первый прогон брал название страны без языка, и в каталоге стояло
+    «Поставка гречневой крупы — Armenia». Повторный запуск ничего не меняет.
+    """
+    if 'coop.trade.contract' not in env:
+        return 0
+    fixed = 0
+    for contract in env['coop.trade.contract'].sudo().with_context(
+            tracking_disable=True).search([]):
+        english = contract.foreign_country_id.with_context(lang='en_US').name
+        russian = contract.foreign_country_id.with_context(lang='ru_RU').name
+        suffix = ' — %s' % english
+        if english != russian and (contract.name or '').endswith(suffix):
+            contract.name = contract.name[:-len(suffix)] + ' — %s' % russian
+            fixed += 1
+    if fixed:
+        _logger.info('Международные сделки: страна по-русски в %s названиях', fixed)
+    return fixed

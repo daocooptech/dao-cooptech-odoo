@@ -89,6 +89,9 @@ class CoopTradeContract(models.Model):
         string='Реквизиты контрагента',
         help='Полное наименование, регистрационный номер, адрес, банк.')
     flag = fields.Char(compute='_compute_flag')
+    # Флаг — картинкой движка, а не символами: на Windows флаги-эмодзи
+    # рисуются двумя буквами («AM»).
+    flag_url = fields.Char(related='foreign_country_id.image_url', string='Флаг')
     city = fields.Char(related='resident_id.city', string='Город', store=True)
 
     # ── 2. Предмет ─────────────────────────────────────────────────────
@@ -291,7 +294,9 @@ class CoopTradeContract(models.Model):
                  'barter': 'Встречная поставка'}
         for record in self:
             record.amount_label = '{:,.0f} {}'.format(
-                record.amount or 0, record.price_currency_id.name or '').replace(',', ' ')
+                record.amount or 0,
+                record.price_currency_id.symbol or record.price_currency_id.name or '',
+            ).replace(',', ' ')
             record.settlement_short = short.get(record.settlement, settlement.get(record.settlement, ''))
             if record.registration == 'unk':
                 record.registration_label = ('УНК %s' % record.unk) if record.unk else 'Нужен УНК'
@@ -429,7 +434,7 @@ class CoopTradeContract(models.Model):
              'field': 'direction', 'placeholder': 'Любое', 'options': choice('direction')},
             {'code': 'country', 'label': 'Страна контрагента', 'widget': 'select',
              'field': 'foreign_country_id', 'placeholder': 'Любая',
-             'options': [{'value': c.id, 'label': '%s %s' % (_flag(c.code), c.name)}
+             'options': [{'value': c.id, 'label': c.name}
                          for c in countries]},
             {'code': 'currency', 'label': 'Валюта платежа', 'widget': 'select',
              'field': 'payment_currency_id', 'placeholder': 'Любая',
