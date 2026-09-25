@@ -409,13 +409,13 @@
           </div>
           <field name="coop_transfer_ids" readonly="1" nolabel="1">
             <list create="0" delete="0" edit="0" default_order="seq desc">
-              <field name="seq" string="№"/>
-              <field name="date"/>
-              <field name="kind"/>
+              <field name="seq" string="№" width="36px"/>
+              <field name="date" width="120px"/>
+              <field name="kind" width="140px"/>
               <field name="from_partner_id" widget="many2one_avatar"/>
               <field name="to_partner_id" widget="many2one_avatar"/>
-              <field name="quantity"/>
-              <field name="hash_short" class="font-monospace text-muted"/>
+              <field name="quantity" width="70px"/>
+              <field name="hash_short" class="font-monospace text-muted" width="120px"/>
             </list>
           </field>
         </page>
