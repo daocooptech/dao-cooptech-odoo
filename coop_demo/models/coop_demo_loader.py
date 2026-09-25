@@ -11,6 +11,7 @@ from ..data import load_wall_media
 from ..data import load_wall_comments
 from ..data import load_wall_polls
 from ..data import load_trade
+from ..data import load_crypto
 from ..data import load_favorites
 from ..data import load_okved
 from ..data import load_accounts
@@ -182,6 +183,8 @@ class CoopDemoLoader(models.AbstractModel):
             load_trade.repair_trade_names(self.env)
             load_trade.repair_trade_dates(self.env)
             load_trade.repair_trade_ledger(self.env)
+        if 'coop.crypto.offer' in self.env:
+            load_crypto.load_crypto(self.env)
         # Последним — добор примеров по случаям: он смотрит, чего в
         # данных не хватает, и потому должен видеть всё остальное.
         load_examples.load_examples(self.env)

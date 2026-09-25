@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Плитка объявления: знак монеты на месте снимка, дальше сторона,
+       цена, пределы, способы рублёвого расчёта и кто разместил. -->
+  <record id="view_coop_crypto_offer_kanban" model="ir.ui.view">
+    <field name="name">coop.crypto.offer.kanban</field>
+    <field name="model">coop.crypto.offer</field>
+    <field name="arch" type="xml">
+      <kanban js_class="coop_catalog_kanban" class="o_coop_crypto_offers" quick_create="false">
+        <field name="side"/>
+        <field name="asset"/>
+        <field name="network_id"/>
+        <field name="author_id"/>
+        <field name="trust"/>
+        <field name="city"/>
+        <field name="price_label"/>
+        <field name="limits_label"/>
+        <field name="methods_label"/>
+        <field name="done_count"/>
+        <field name="state"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_listing o_coop_crypto_card">
+              <div class="o_coop_media o_coop_crypto_media"
+                   t-att-class="'o_coop_crypto_' + record.asset.raw_value">
+                <span class="o_coop_crypto_sign"><t t-esc="record.asset.raw_value"/></span>
+                <span class="o_coop_locbar"><t t-esc="record.network_id.value"/></span>
+              </div>
+              <div class="o_coop_listing_body">
+                <div class="o_coop_crypto_head">
+                  <span class="o_coop_badge o_coop_crypto_side"
+                        t-att-class="'o_coop_crypto_side_' + record.side.raw_value">
+                    <field name="side"/>
+                  </span>
+                  <span class="o_coop_crypto_meta" t-if="record.city.raw_value">
+                    <i class="fa fa-map-marker" aria-hidden="true"/> <t t-esc="record.city.value"/>
+                  </span>
+                </div>
+                <div class="o_coop_crypto_price"><t t-esc="record.price_label.value"/>
+                  <span class="o_coop_crypto_meta"> за 1 <t t-esc="record.asset.raw_value"/></span>
+                </div>
+                <div class="o_coop_crypto_meta"><t t-esc="record.limits_label.value"/></div>
+                <div class="o_coop_crypto_meta"><t t-esc="record.methods_label.value"/></div>
+                <div class="o_coop_listing_foot o_coop_crypto_foot">
+                  <span><t t-esc="record.author_id.value"/></span>
+                  <span t-if="record.trust.raw_value">доверие <t t-esc="record.trust.value"/>%</span>
+                  <span t-if="record.done_count.raw_value">обменов: <t t-esc="record.done_count.value"/></span>
+                </div>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="view_coop_crypto_offer_list" model="ir.ui.view">
+    <field name="name">coop.crypto.offer.list</field>
+    <field name="model">coop.crypto.offer</field>
+    <field name="arch" type="xml">
+      <list string="Обмен цифровой валюты" decoration-muted="state != 'active'">
+        <field name="side"/>
+        <field name="asset"/>
+        <field name="network_id"/>
+        <field name="price"/>
+        <field name="amount_min"/>
+        <field name="amount_max"/>
+        <field name="methods_label" string="Рубли"/>
+        <field name="author_id"/>
+        <field name="trust"/>
+        <field name="city"/>
+        <field name="done_count"/>
+        <field name="state" widget="badge"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_crypto_offer_form" model="ir.ui.view">
+    <field name="name">coop.crypto.offer.form</field>
+    <field name="model">coop.crypto.offer</field>
+    <field name="arch" type="xml">
+      <form string="Объявление об обмене">
+        <header>
+          <button name="action_respond" type="object" string="Обменять"
+                  class="btn-primary" invisible="is_mine or state != 'active'"/>
+          <button name="action_pause" type="object" string="Поставить на паузу"
+                  invisible="not is_mine or state != 'active'"/>
+          <button name="action_activate" type="object" string="Возобновить"
+                  invisible="not is_mine or state == 'active'"/>
+          <button name="action_close" type="object" string="Снять"
+                  invisible="not is_mine or state == 'closed'"/>
+          <field name="state" widget="statusbar" statusbar_visible="active,paused,closed"/>
+        </header>
+        <sheet>
+          <field name="is_mine" invisible="1"/>
+          <field name="notice" nolabel="1"/>
+          <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+          <group>
+            <group string="Что">
+              <field name="side" widget="radio" options="{'horizontal': true}"/>
+              <field name="asset"/>
+              <field name="network_id"/>
+              <field name="price"/>
+              <field name="amount_min"/>
+              <field name="amount_max"/>
+              <field name="rub_max"/>
+            </group>
+            <group string="Как и кто">
+              <field name="rub_sbp"/>
+              <field name="rub_bank"/>
+              <field name="rub_cash"/>
+              <field name="city" invisible="not rub_cash"/>
+              <field name="author_id" readonly="1"/>
+              <field name="trust"/>
+              <field name="done_count"/>
+            </group>
+          </group>
+          <group string="Условия">
+            <field name="terms" nolabel="1" colspan="2"
+                   placeholder="Кто переводит первым, сколько подтверждений сети ждать"/>
+          </group>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_crypto_offer_search" model="ir.ui.view">
+    <field name="name">coop.crypto.offer.search</field>
+    <field name="model">coop.crypto.offer</field>
+    <field name="arch" type="xml">
+      <search string="Обмен цифровой валюты">
+        <field name="author_id"/>
+        <field name="city"/>
+        <filter name="sell" string="Продают" domain="[('side', '=', 'sell')]"/>
+        <filter name="buy" string="Покупают" domain="[('side', '=', 'buy')]"/>
+        <separator/>
+        <filter name="mine" string="Мои объявления" domain="[('is_mine', '=', True)]"/>
+        <group>
+          <filter name="by_asset" string="По валюте" context="{'group_by': 'asset'}"/>
+          <filter name="by_network" string="По сети" context="{'group_by': 'network_id'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_crypto_offer" model="ir.actions.act_window">
+    <field name="name">Обмен цифровой валюты</field>
+    <field name="res_model">coop.crypto.offer</field>
+    <field name="path">crypto-exchange</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="domain">[('state', '=', 'active')]</field>
+    <field name="search_view_id" ref="view_coop_crypto_offer_search"/>
+    <field name="context">{'bin_size': True, 'coop_catalog': 1, 'coop_create_label': 'Разместить объявление', 'coop_shelf_field': 'asset'}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Объявлений пока нет</p>
+      <p>Здесь покупают и продают цифровую валюту как имущество. Расплачиваться
+         цифровой валютой за товары и услуги в России нельзя — ни здесь, ни
+         где-либо ещё.</p>
+    </field>
+  </record>
+
+  <!-- ── Обмены ───────────────────────────────────────────────────── -->
+
+  <record id="view_coop_crypto_trade_list" model="ir.ui.view">
+    <field name="name">coop.crypto.trade.list</field>
+    <field name="model">coop.crypto.trade</field>
+    <field name="arch" type="xml">
+      <list string="Обмены" create="0"
+            decoration-muted="state == 'cancelled'" decoration-danger="state == 'disputed'"
+            decoration-success="state == 'done'">
+        <field name="number"/>
+        <field name="date"/>
+        <field name="side"/>
+        <field name="asset"/>
+        <field name="network_id"/>
+        <field name="amount"/>
+        <field name="price"/>
+        <field name="total" sum="Итого"/>
+        <field name="rub_method"/>
+        <field name="maker_id"/>
+        <field name="taker_id"/>
+        <field name="state" widget="badge"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_crypto_trade_form" model="ir.ui.view">
+    <field name="name">coop.crypto.trade.form</field>
+    <field name="model">coop.crypto.trade</field>
+    <field name="arch" type="xml">
+      <form string="Обмен" create="0">
+        <header>
+          <button name="action_rub_sent" type="object" string="Рубли отправлены"
+                  class="btn-primary" invisible="state != 'agreed'"/>
+          <button name="action_confirm" type="object" string="Подтверждаю: всё получено"
+                  class="btn-primary" invisible="state not in ('agreed', 'rub_sent')"/>
+          <button name="action_dispute" type="object" string="Открыть спор"
+                  invisible="state not in ('agreed', 'rub_sent')"/>
+          <button name="action_cancel" type="object" string="Отменить"
+                  invisible="state not in ('agreed', 'rub_sent')"/>
+          <field name="state" widget="statusbar" statusbar_visible="agreed,rub_sent,done"/>
+        </header>
+        <sheet>
+          <div class="alert alert-info mb-3">
+            Стороны переводят друг другу сами: одна — цифровую валюту со своего
+            кошелька, другая — рубли выбранным способом. Платформа не держит ни
+            ключей, ни денег и фиксирует только то, что обе стороны подтвердили.
+          </div>
+          <div class="oe_title"><h1><field name="number" readonly="1"/></h1></div>
+          <group>
+            <group>
+              <field name="offer_id" readonly="1"/>
+              <field name="side"/>
+              <field name="asset"/>
+              <field name="network_id"/>
+              <field name="amount" readonly="1"/>
+              <field name="price" readonly="1"/>
+              <field name="total"/>
+            </group>
+            <group>
+              <field name="rub_method" readonly="1"/>
+              <field name="maker_id"/>
+              <field name="taker_id" readonly="1"/>
+              <field name="date" readonly="1"/>
+              <field name="maker_confirmed"/>
+              <field name="taker_confirmed"/>
+            </group>
+          </group>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_coop_crypto_trade" model="ir.actions.act_window">
+    <field name="name">Мои обмены</field>
+    <field name="res_model">coop.crypto.trade</field>
+    <field name="path">crypto-trades</field>
+    <field name="view_mode">list,form</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Обменов пока нет</p>
+      <p>Обмен появляется, когда вы откликаетесь на объявление или кто-то
+         откликается на ваше.</p>
+    </field>
+  </record>
+
+  <record id="view_coop_crypto_respond_form" model="ir.ui.view">
+    <field name="name">coop.crypto.respond.form</field>
+    <field name="model">coop.crypto.respond</field>
+    <field name="arch" type="xml">
+      <form string="Обменять">
+        <field name="notice" nolabel="1"/>
+        <group>
+          <field name="offer_id" readonly="1"/>
+          <field name="price"/>
+          <field name="amount"/>
+          <field name="total"/>
+          <field name="rub_method" widget="radio"/>
+        </group>
+        <footer>
+          <button name="action_confirm" type="object" string="Договориться"
+                  class="btn-primary"/>
+          <button string="Отмена" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <menuitem id="menu_coop_crypto_root" name="Обмен цифровой валюты" sequence="147"/>
+  <menuitem id="menu_coop_crypto_offers" name="Объявления"
+            parent="menu_coop_crypto_root" action="action_coop_crypto_offer" sequence="10"/>
+  <menuitem id="menu_coop_crypto_trades" name="Мои обмены"
+            parent="menu_coop_crypto_root" action="action_coop_crypto_trade" sequence="20"/>
+</odoo>

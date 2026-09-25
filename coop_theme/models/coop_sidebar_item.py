@@ -93,6 +93,9 @@ EXTENSION_ITEMS = [
     # Решения 392, 410: расчёты резидента с нерезидентом — внешнеторговый
     # контракт, порог учёта в банке, аккредитив, ЦФА по договору.
     ('Международные сделки', 'fa-globe', 'coop_trade.action_coop_trade_contract'),
+    # Решение 392: обмен цифровой валюты — доской объявлений, платформа
+    # не сторона (разбор юриста, 2.6).
+    ('Обмен цифровой валюты', 'fa-exchange', 'coop_crypto_exchange.action_coop_crypto_offer'),
     ('Нематериальные активы', 'fa-lightbulb-o', 'coop_intangibles.action_coop_intangibles'),
     ('Целевые программы ПК', 'fa-bullseye', 'coop_programs.action_coop_program'),
     ('Совместные закупки', 'fa-shopping-basket', 'coop_groupbuy.action_coop_groupbuy'),

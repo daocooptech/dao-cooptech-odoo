@@ -1,0 +1,59 @@
+// Обмен цифровой валюты — `views/coop_crypto_views.xml`.
+//
+// Плитка — по семейству карточек каталога: знак монеты на цветной
+// плашке вместо снимка. Цвета — узнаваемые у самих монет, приглушённые,
+// чтобы ряд плиток не спорил с остальной платформой.
+
+.o_coop_crypto_media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef0f2;
+}
+
+.o_coop_crypto_sign {
+  font: 800 40px/1 'Manrope', sans-serif;
+  letter-spacing: .02em;
+  color: #fff;
+  padding: 18px 22px;
+  border-radius: 999px;
+  background: #5b6470;
+}
+
+.o_coop_crypto_BTC .o_coop_crypto_sign { background: #d98a1f; }
+.o_coop_crypto_ETH .o_coop_crypto_sign { background: #5c6bc0; }
+.o_coop_crypto_USDT .o_coop_crypto_sign { background: #26a17b; }
+.o_coop_crypto_TON .o_coop_crypto_sign { background: #1e88c7; }
+.o_coop_crypto_SOL .o_coop_crypto_sign { background: #7b4fd6; }
+.o_coop_crypto_BNB .o_coop_crypto_sign { background: #c9a227; }
+
+.o_coop_crypto_head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.o_coop_crypto_side_sell { background: #fdecea; color: #a4281b; }
+.o_coop_crypto_side_buy { background: var(--coop-teal-tint, #e3efed); color: var(--coop-teal-dark, #0e4f4a); }
+
+.o_coop_crypto_price {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin: 2px 0 4px;
+}
+
+.o_coop_crypto_meta {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted, #6c757d);
+}
+
+.o_coop_crypto_foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  font-size: 12px;
+  color: var(--text-muted, #6c757d);
+}

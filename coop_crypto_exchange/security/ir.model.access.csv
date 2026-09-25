@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_coop_crypto_offer_user,Объявление обмена — участник,model_coop_crypto_offer,base.group_user,1,1,1,0
+access_coop_crypto_offer_system,Объявление обмена — администратор,model_coop_crypto_offer,base.group_system,1,1,1,1
+access_coop_crypto_trade_user,Обмен — участник,model_coop_crypto_trade,base.group_user,1,1,0,0
+access_coop_crypto_trade_system,Обмен — администратор,model_coop_crypto_trade,base.group_system,1,1,1,1
+access_coop_crypto_respond_user,Отклик на обмен — участник,model_coop_crypto_respond,base.group_user,1,1,1,1
