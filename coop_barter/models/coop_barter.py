@@ -270,33 +270,37 @@ class CoopBarterMatch(models.TransientModel):
 
     offer_id = fields.Many2one('coop.barter.offer', string='Моё объявление', required=True,
                                ondelete='cascade')
-    kind = fields.Selection([('direct', 'Встречный'), ('chain', 'Цепочка на троих')],
-                            string='Как', required=True)
-    their_offer_id = fields.Many2one('coop.barter.offer', string='Кому отдаю — и что он даёт',
+    kind = fields.Selection([('direct', 'Встречный'), ('chain', 'Втроём')],
+                            string='Обмен', required=True)
+    their_offer_id = fields.Many2one('coop.barter.offer', string='Что отдаёт тот, кому отдаю',
                                      required=True, ondelete='cascade')
     third_offer_id = fields.Many2one('coop.barter.offer', string='Третий — что даёт мне',
                                      ondelete='cascade')
     gap = fields.Float(string='Разница оценок, ₽')
     abs_gap = fields.Float(compute='_compute_abs_gap', store=True)
     same_city = fields.Boolean(string='В моём городе')
-    summary = fields.Char(string='Обмен', compute='_compute_summary')
+    give_to_id = fields.Many2one('res.partner', string='Кому отдаю', compute='_compute_route')
+    get_offer_id = fields.Many2one('coop.barter.offer', string='Что получаю',
+                                   compute='_compute_route')
+    get_from_id = fields.Many2one('res.partner', string='От кого', compute='_compute_route')
+    route = fields.Char(string='Как пойдёт', compute='_compute_route')
 
     @api.depends('gap')
     def _compute_abs_gap(self):
         for match in self:
             match.abs_gap = abs(match.gap)
 
-    def _compute_summary(self):
+    def _compute_route(self):
+        """Кому отдаю, что и от кого получаю. У цепочки — ещё строка о
+        третьем: что он получает, чтобы было видно, почему он согласится."""
         for match in self:
-            mine, their, third = match.offer_id, match.their_offer_id, match.third_offer_id
-            if match.kind == 'direct':
-                match.summary = _('Вы → %(who)s: «%(mine)s»; %(who)s → вам: «%(their)s»',
-                                  who=their.partner_id.name, mine=mine.name, their=their.name)
-            else:
-                match.summary = _(
-                    'Вы → %(b)s: «%(mine)s»; %(b)s → %(c)s: «%(their)s»; %(c)s → вам: «%(third)s»',
-                    b=their.partner_id.name, c=third.partner_id.name,
-                    mine=mine.name, their=their.name, third=third.name)
+            their, third = match.their_offer_id, match.third_offer_id
+            match.give_to_id = their.partner_id
+            match.get_offer_id = third if match.kind == 'chain' else their
+            match.get_from_id = (third or their).partner_id
+            match.route = _('%(b)s отдаёт %(c)s «%(what)s»',
+                            b=their.partner_id.name, c=third.partner_id.name,
+                            what=their.name) if match.kind == 'chain' else ''
 
     def action_propose(self):
         self.ensure_one()

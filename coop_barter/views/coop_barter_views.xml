@@ -214,10 +214,13 @@
     <field name="model">coop.barter.match</field>
     <field name="arch" type="xml">
       <list string="Варианты обмена" create="false" edit="false" delete="false">
-        <field name="kind" widget="badge"/>
-        <field name="summary"/>
-        <field name="gap" string="Разница оценок, ₽"/>
-        <field name="same_city"/>
+        <field name="kind" widget="badge" width="100px"/>
+        <field name="give_to_id"/>
+        <field name="get_offer_id"/>
+        <field name="get_from_id"/>
+        <field name="route" string="Третий в цепочке"/>
+        <field name="gap" string="Разница, ₽" width="100px"/>
+        <field name="same_city" string="Мой город" width="80px"/>
         <button name="action_propose" type="object" string="Предложить" class="btn-primary"/>
       </list>
     </field>

@@ -250,6 +250,21 @@ REVIEW_TEXTS = {
 }
 
 
+# Рубрика «Ресурсов» шире категории обмена: комбикорм лежит в «Крупах»,
+# саженцы — в «Для дома и дачи». Слово в названии точнее рубрики.
+KEYWORDS = [(('корм', 'сено', 'солом', 'зерно', 'ячмен', 'овёс', 'овес', 'отруб'), 'farm'),
+            (('семен', 'саженц', 'рассад', 'черенк'), 'seeds'),
+            (('дров', ), 'home')]
+
+
+def _code_for(resource):
+    name = (resource.name or '').lower()
+    for words, code in KEYWORDS:
+        if any(word in name for word in words):
+            return code
+    return RESOURCE_CATEGORY[resource.category_id.name]
+
+
 def _pick_wants(rnd, own, codes, weights):
     wants = set()
     while len(wants) < rnd.choice([1, 2, 2, 3]):
@@ -259,13 +274,14 @@ def _pick_wants(rnd, own, codes, weights):
     return wants
 
 
-DEMO_VERSION = '2'
+DEMO_VERSION = '3'
 
 
 def _reset_first_fill(env):
-    """Снять первое наполнение (25.09.2026, `7079686`) — оно брало из
+    """Снять прежнее наполнение. Первое (25.09.2026, `7079686`) брало из
     «Ресурсов» шаблонные копии («Сдам бетономешалку на выходные» — 11 раз)
-    и свои объявления по два-три раза.
+    и свои объявления по два-три раза; второе (`a82f623`) оценивало вещь
+    ценой за единицу — «Комбикорм, 100 ₽» — и относило корма к продуктам.
 
     Снимается только наполнение: если хоть одно объявление или обмен
     завёл живой человек, ничего не трогаем. Сделки обмена, их отзывы,
@@ -368,9 +384,17 @@ def load_barter(env, login='dashkevich'):
 
     made = []
     for resource in resources:
-        code = RESOURCE_CATEGORY[resource.category_id.name]
-        value = resource.price if resource.price and resource.price < 5_000_000 else \
-            rnd.randint(8, 400) * 500
+        code = _code_for(resource)
+        # Цена в «Ресурсах» — за единицу («100 ₽ за кг»); оценка обмена —
+        # за всё, что отдаёшь.
+        qty = resource.quantity or 1
+        value = (resource.price or 0) * qty
+        if not 1500 <= value <= 3_000_000:
+            value = rnd.randint(6, 300) * 500
+        quantity = False
+        if resource.quantity:
+            number = ('%d' % qty) if float(qty).is_integer() else ('%.1f' % qty).replace('.', ',')
+            quantity = ('%s %s' % (number, resource.uom_label or '')).strip()
         wants = _pick_wants(rnd, code, codes, weights)
         made.append(Offer.create({
             'name': resource.name,
@@ -389,6 +413,7 @@ def load_barter(env, login='dashkevich'):
             'handover_post': code in ('electronics', 'clothes', 'hobby', 'tools')
             and rnd.random() < 0.5,
             'resource_id': resource.id,
+            'quantity': quantity,
             'published_on': publish_date(),
         }))
 
