@@ -10,6 +10,7 @@ from ..data import load_wall_posts
 from ..data import load_wall_media
 from ..data import load_wall_comments
 from ..data import load_wall_polls
+from ..data import load_trade
 from ..data import load_favorites
 from ..data import load_okved
 from ..data import load_accounts
@@ -174,6 +175,10 @@ class CoopDemoLoader(models.AbstractModel):
         # сальдо по контрагентам считается из платежей по сделкам.
         load_wallets.load_wallets(self.env)
         load_wallets.repair_addresses(self.env)
+        # Международные сделки (решения 392, 410) — после организаций и
+        # операторов ЦФА: российская сторона — организация участника.
+        if 'coop.trade.contract' in self.env:
+            load_trade.load_trade(self.env)
         # Последним — добор примеров по случаям: он смотрит, чего в
         # данных не хватает, и потому должен видеть всё остальное.
         load_examples.load_examples(self.env)

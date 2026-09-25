@@ -1,0 +1,85 @@
+// Международные сделки — `views/coop_trade_views.xml`.
+//
+// Плитка — по семейству карточек каталога (`o_coop_listing`): флаг
+// страны на месте снимка, дальше направление, состояние, сумма.
+
+.o_coop_trade_media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--coop-teal-tint, #e3efed);
+}
+
+.o_coop_trade_flag {
+  font-size: 64px;
+  line-height: 1;
+}
+
+.o_coop_trade_head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.o_coop_trade_price {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin: 4px 0;
+}
+
+.o_coop_trade_meta {
+  font-size: 12px;
+  color: var(--text-muted, #6c757d);
+}
+
+.o_coop_trade_foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-muted, #6c757d);
+}
+
+.o_coop_trade_unk { color: #b45309; font-weight: 600; }
+
+.o_coop_trade_st_cancelled,
+.o_coop_trade_st_closed { opacity: .6; }
+
+// «Шесть полей» — список с отметками, а не таблица: читается сверху вниз
+// как чек-лист, пропущенное видно по красному крестику и цене пропуска.
+.o_coop_trade_checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+}
+
+.o_coop_trade_check {
+  display: flex;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.o_coop_trade_mark {
+  flex: none;
+  width: 18px;
+  font-weight: 700;
+}
+
+.o_coop_trade_ok .o_coop_trade_mark { color: var(--coop-teal, #146b64); }
+.o_coop_trade_miss .o_coop_trade_mark { color: #c0392b; }
+.o_coop_trade_miss em { color: var(--text-muted, #6c757d); }
+
+.o_coop_trade_note {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--coop-teal, #146b64);
+  background: var(--o-gray-100, rgba(0, 0, 0, .03));
+  font-size: 13px;
+}
+
+.o_coop_trade_calc {
+  padding: 12px 14px;
+  border: 1px solid var(--border-color, rgba(0, 0, 0, .1));
+  border-radius: 10px;
+}

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+    <!--
+      Внешнеторговый контракт — дело его сторон, как сделка платформы:
+      по нему читается, кто с кем торгует, почём и через какой банк.
+    -->
+    <record id="rule_trade_contract_parties" model="ir.rule">
+      <field name="name">Свои внешнеторговые контракты</field>
+      <field name="model_id" ref="model_coop_trade_contract"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">
+        ['|', ('resident_id', 'in', user.coop_actor_partner_ids.ids),
+         ('foreign_partner_id', 'in', user.coop_actor_partner_ids.ids)]
+      </field>
+    </record>
+    <record id="rule_trade_contract_admin" model="ir.rule">
+      <field name="name">Внешнеторговые контракты — администратор</field>
+      <field name="model_id" ref="model_coop_trade_contract"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+    <record id="rule_trade_document_parties" model="ir.rule">
+      <field name="name">Документы своих контрактов</field>
+      <field name="model_id" ref="model_coop_trade_document"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">
+        ['|', ('contract_id.resident_id', 'in', user.coop_actor_partner_ids.ids),
+         ('contract_id.foreign_partner_id', 'in', user.coop_actor_partner_ids.ids)]
+      </field>
+    </record>
+    <record id="rule_trade_document_admin" model="ir.rule">
+      <field name="name">Документы контрактов — администратор</field>
+      <field name="model_id" ref="model_coop_trade_document"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+    <record id="rule_trade_payment_parties" model="ir.rule">
+      <field name="name">Платежи своих контрактов</field>
+      <field name="model_id" ref="model_coop_trade_payment"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">
+        ['|', ('contract_id.resident_id', 'in', user.coop_actor_partner_ids.ids),
+         ('contract_id.foreign_partner_id', 'in', user.coop_actor_partner_ids.ids)]
+      </field>
+    </record>
+    <record id="rule_trade_payment_admin" model="ir.rule">
+      <field name="name">Платежи контрактов — администратор</field>
+      <field name="model_id" ref="model_coop_trade_payment"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+  </data>
+</odoo>

@@ -90,6 +90,9 @@ EXTENSION_ITEMS = [
     # служебных начислений.
     ('Токеномика', 'fa-diamond', 'coop_tokenomics.action_coop_exchange_screen'),
     ('Цифровые активы', 'fa-certificate', 'coop_digital_assets.action_coop_cfa_issue'),
+    # Решения 392, 410: расчёты резидента с нерезидентом — внешнеторговый
+    # контракт, порог учёта в банке, аккредитив, ЦФА по договору.
+    ('Международные сделки', 'fa-globe', 'coop_trade.action_coop_trade_contract'),
     ('Нематериальные активы', 'fa-lightbulb-o', 'coop_intangibles.action_coop_intangibles'),
     ('Целевые программы ПК', 'fa-bullseye', 'coop_programs.action_coop_program'),
     ('Совместные закупки', 'fa-shopping-basket', 'coop_groupbuy.action_coop_groupbuy'),

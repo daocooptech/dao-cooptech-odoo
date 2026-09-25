@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Плитка контракта: флаг страны вместо снимка — по нему контракт и
+       ищут глазами; дальше сумма, способ расчёта и что требует банк. -->
+  <record id="view_coop_trade_contract_kanban" model="ir.ui.view">
+    <field name="name">coop.trade.contract.kanban</field>
+    <field name="model">coop.trade.contract</field>
+    <field name="arch" type="xml">
+      <kanban js_class="coop_catalog_kanban" class="o_coop_trade_contracts" quick_create="false">
+        <field name="flag"/>
+        <field name="icon"/>
+        <field name="number"/>
+        <field name="direction"/>
+        <field name="foreign_name"/>
+        <field name="foreign_country_id"/>
+        <field name="resident_id"/>
+        <field name="amount_label"/>
+        <field name="settlement_short"/>
+        <field name="registration"/>
+        <field name="registration_label"/>
+        <field name="repatriation_state"/>
+        <field name="state"/>
+        <field name="signed_on"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_listing o_coop_trade_card">
+              <div class="o_coop_media o_coop_trade_media">
+                <span class="o_coop_trade_flag"><t t-esc="record.flag.value"/></span>
+                <span class="o_coop_locbar">
+                  <t t-esc="record.foreign_country_id.value"/>
+                </span>
+              </div>
+              <div class="o_coop_listing_body">
+                <div class="o_coop_trade_head">
+                  <span class="o_coop_badge o_coop_trade_dir"
+                        t-att-class="'o_coop_trade_' + record.direction.raw_value">
+                    <t t-esc="record.icon.value"/> <field name="direction"/>
+                  </span>
+                  <span class="o_coop_badge o_coop_trade_state"
+                        t-att-class="'o_coop_trade_st_' + record.state.raw_value">
+                    <field name="state"/>
+                  </span>
+                </div>
+                <div class="o_coop_listing_title"><field name="name"/></div>
+                <div class="o_coop_trade_price"><t t-esc="record.amount_label.value"/></div>
+                <div class="o_coop_trade_meta">
+                  <t t-esc="record.resident_id.value"/> → <t t-esc="record.foreign_name.value"/>
+                </div>
+                <div class="o_coop_listing_foot o_coop_trade_foot">
+                  <span><t t-esc="record.settlement_short.value"/></span>
+                  <span t-att-class="record.registration.raw_value === 'unk' ? 'o_coop_trade_unk' : ''">
+                    <t t-esc="record.registration_label.value"/>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="view_coop_trade_contract_list" model="ir.ui.view">
+    <field name="name">coop.trade.contract.list</field>
+    <field name="model">coop.trade.contract</field>
+    <field name="arch" type="xml">
+      <list string="Внешнеторговые контракты"
+            decoration-muted="state in ('closed', 'cancelled')"
+            decoration-danger="repatriation_state == 'late'">
+        <field name="number"/>
+        <field name="name"/>
+        <field name="direction"/>
+        <field name="resident_id"/>
+        <field name="foreign_name"/>
+        <field name="foreign_country_id"/>
+        <field name="amount" sum="Итого"/>
+        <field name="price_currency_id" optional="hide"/>
+        <field name="payment_currency_id" string="Платёж в"/>
+        <field name="amount_rub" optional="show"/>
+        <field name="settlement"/>
+        <field name="registration_label" string="Учёт в банке"/>
+        <field name="repatriation_state" optional="show"/>
+        <field name="state" widget="badge"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_trade_contract_form" model="ir.ui.view">
+    <field name="name">coop.trade.contract.form</field>
+    <field name="model">coop.trade.contract</field>
+    <field name="arch" type="xml">
+      <form string="Внешнеторговый контракт">
+        <header>
+          <button name="action_sign" type="object" string="Контракт заключён"
+                  class="btn-primary" invisible="state != 'draft'"/>
+          <button name="action_register" type="object" string="Поставлен на учёт"
+                  class="btn-primary" invisible="state != 'signed' or registration != 'unk'"/>
+          <button name="action_perform" type="object" string="Начать исполнение"
+                  class="btn-primary"
+                  invisible="state not in ('signed', 'registered') or (state == 'signed' and registration == 'unk')"/>
+          <button name="action_done" type="object" string="Исполнен"
+                  invisible="state != 'performing'"/>
+          <button name="action_close" type="object" string="Снять с учёта"
+                  invisible="state != 'done'"/>
+          <button name="action_cancel" type="object" string="Расторгнуть"
+                  invisible="state in ('closed', 'cancelled')"/>
+          <button name="action_draft" type="object" string="В проект"
+                  invisible="state != 'cancelled'"/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="draft,signed,registered,performing,done,closed"/>
+        </header>
+        <sheet>
+          <field name="is_goods" invisible="1"/>
+          <field name="is_export" invisible="1"/>
+          <field name="missing_count" invisible="1"/>
+          <div class="oe_title">
+            <div class="text-muted"><field name="number" readonly="1"/></div>
+            <h1><field name="name" placeholder="Например, поставка подсолнечного масла в Китай"/></h1>
+          </div>
+          <field name="warnings_html" nolabel="1"/>
+          <group>
+            <group string="Стороны">
+              <field name="direction"/>
+              <field name="resident_id"/>
+              <field name="foreign_name"/>
+              <field name="foreign_country_id"/>
+              <field name="foreign_partner_id"/>
+              <field name="foreign_details" placeholder="Полное наименование, рег. номер, адрес, банк"/>
+            </group>
+            <group string="Сумма и сроки">
+              <field name="amount"/>
+              <field name="price_currency_id"/>
+              <field name="payment_currency_id"/>
+              <field name="amount_rub"/>
+              <field name="signed_on"/>
+              <field name="performance_date"/>
+              <field name="payment_due"/>
+            </group>
+          </group>
+
+          <notebook>
+            <page string="Шесть полей" name="checklist">
+              <div class="text-muted mb-2">
+                Без этих полей банк не примет контракт на обслуживание, а таможня
+                не выпустит товар.
+              </div>
+              <field name="checklist_html" nolabel="1"/>
+              <group>
+                <group string="Предмет">
+                  <field name="subject" nolabel="1" colspan="2"
+                         placeholder="Что именно, сколько, какого качества"/>
+                </group>
+                <group string="Право, споры, поставка">
+                  <field name="governing_law"/>
+                  <field name="dispute_forum"/>
+                  <field name="incoterms" invisible="not is_goods"/>
+                  <field name="incoterms_place" invisible="not is_goods"/>
+                </group>
+              </group>
+            </page>
+
+            <page string="Учёт в банке" name="registration">
+              <group>
+                <group>
+                  <field name="registration"/>
+                  <field name="threshold"/>
+                  <field name="bank_name"/>
+                  <field name="unk" invisible="registration != 'unk'"/>
+                  <field name="unk_on" invisible="registration != 'unk'"/>
+                </group>
+                <group>
+                  <div class="text-muted" colspan="2">
+                    Инструкция Банка России № 181-И. Порог считается по сумме
+                    контракта целиком, включая рамочный: импорт, работы и услуги
+                    от нерезидента — от 3 млн ₽; экспорт — от 10 млн ₽. До 1 млн ₽
+                    — только код вида операции в платёжном поручении. УНК
+                    присваивается до первого платежа или отгрузки; снять контракт
+                    с учёта можно после полного исполнения.
+                  </div>
+                </group>
+              </group>
+            </page>
+
+            <page string="Расчёт" name="settlement">
+              <group>
+                <group>
+                  <field name="settlement" widget="radio"/>
+                </group>
+                <group invisible="settlement != 'lc'" string="Аккредитив">
+                  <field name="lc_state"/>
+                  <field name="lc_issuing_bank"/>
+                  <field name="lc_advising_bank"/>
+                  <field name="lc_amount"/>
+                  <field name="lc_expiry"/>
+                  <field name="lc_documents"/>
+                </group>
+                <group invisible="settlement != 'cfa'" string="ЦФА">
+                  <field name="cfa_operator_id"/>
+                  <field name="cfa_step"/>
+                </group>
+              </group>
+              <div class="o_coop_trade_note" invisible="settlement != 'transfer'">
+                Расчёт резидента с нерезидентом — только через счёт в
+                уполномоченном банке, и рублями тоже: рубли между резидентом и
+                нерезидентом — валютная операция. Наличными — нельзя.
+              </div>
+              <div class="o_coop_trade_note" invisible="settlement != 'lc'">
+                <b>Безотзывный документарный аккредитив</b> (ст. 867–873 ГК, UCP 600):
+                банк покупателя обязуется заплатить продавцу против документов
+                об отгрузке. Платформа в цепочке платежа не участвует, а
+                защищены обе стороны: продавец знает, что деньги есть, покупатель
+                — что заплатят только за отгруженное. Комиссия банков обычно
+                0,15–0,5 % за квартал.
+              </div>
+              <div class="o_coop_trade_note" invisible="settlement != 'cfa'">
+                <b>ЦФА как встречное предоставление по внешнеторговому договору</b> —
+                ч. 3 ст. 1 ФЗ-259 в ред. 45-ФЗ. Четыре шага: (1) выпуск ЦФА у
+                оператора информационной системы из реестра Банка России;
+                (2) нерезидент становится пользователем той же системы — оператор
+                его идентифицирует; (3) ЦФА передаются нерезиденту как оплата по
+                контракту; (4) нерезидент погашает их деньгами или продаёт внутри
+                системы. Обе стороны должны работать у одного оператора.
+                Репатриацию безопасно считать не снятой, пока ЦФА не погашены
+                деньгами на счёт резидента, — планируйте погашение в срок.
+              </div>
+              <div class="o_coop_trade_note" invisible="settlement != 'barter'">
+                <b>Встречная поставка</b> — отдельный режим (ст. 44 ФЗ-164,
+                Указ № 1209): товар в обмен на товар учитывается так же строго,
+                как деньги, и зачёт вместо поступления выручки допускается только
+                в случаях ч. 2 ст. 19 ФЗ-173. Согласуйте схему с банком до
+                подписания.
+              </div>
+            </page>
+
+            <page string="Ведомость" name="ledger">
+              <group>
+                <group>
+                  <field name="shipped_total"/>
+                  <field name="paid_total"/>
+                  <field name="balance"/>
+                </group>
+                <group>
+                  <field name="repatriation_state" invisible="not is_export"/>
+                  <div class="text-muted" colspan="2" invisible="not is_export">
+                    Выручку в валюте надо получить на свой счёт в уполномоченном
+                    банке в срок оплаты по контракту (ст. 19 ФЗ-173). Рублёвая
+                    выручка по несырьевому экспорту от этого освобождена.
+                  </div>
+                </group>
+              </group>
+              <separator string="Подтверждающие документы"/>
+              <field name="document_ids">
+                <list editable="bottom">
+                  <field name="date"/>
+                  <field name="kind"/>
+                  <field name="number"/>
+                  <field name="amount" sum="Итого"/>
+                  <field name="spd_due"/>
+                </list>
+              </field>
+              <separator string="Платежи"/>
+              <field name="payment_ids">
+                <list editable="bottom">
+                  <field name="date"/>
+                  <field name="amount" sum="Итого"/>
+                  <field name="note"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_trade_contract_search" model="ir.ui.view">
+    <field name="name">coop.trade.contract.search</field>
+    <field name="model">coop.trade.contract</field>
+    <field name="arch" type="xml">
+      <search string="Внешнеторговые контракты">
+        <field name="name"/>
+        <field name="number"/>
+        <field name="foreign_name"/>
+        <field name="resident_id"/>
+        <field name="foreign_country_id"/>
+        <filter name="export" string="Экспорт"
+                domain="[('direction', 'in', ('export_goods', 'export_services'))]"/>
+        <filter name="import" string="Импорт"
+                domain="[('direction', 'in', ('import_goods', 'import_services'))]"/>
+        <separator/>
+        <filter name="open" string="Не исполнены"
+                domain="[('state', 'in', ('signed', 'registered', 'performing'))]"/>
+        <filter name="need_unk" string="Нужен УНК"
+                domain="[('registration', '=', 'unk'), ('unk', '=', False)]"/>
+        <group>
+          <filter name="by_country" string="По стране" context="{'group_by': 'foreign_country_id'}"/>
+          <filter name="by_direction" string="По направлению" context="{'group_by': 'direction'}"/>
+          <filter name="by_settlement" string="По способу расчёта" context="{'group_by': 'settlement'}"/>
+          <filter name="by_state" string="По состоянию" context="{'group_by': 'state'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_trade_contract" model="ir.actions.act_window">
+    <field name="name">Международные сделки</field>
+    <field name="res_model">coop.trade.contract</field>
+    <field name="path">trade</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="search_view_id" ref="view_coop_trade_contract_search"/>
+    <field name="context">{'bin_size': True, 'coop_catalog': 1, 'coop_create_label': 'Новый контракт', 'coop_shelf_field': 'foreign_country_id'}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Внешнеторговых контрактов пока нет</p>
+      <p>Контракт с иностранным контрагентом стороны заключают сами и платят
+         через свои банки. Здесь — шесть полей, без которых банк контракт не
+         примет, порог постановки на учёт, способ расчёта и ведомость.</p>
+    </field>
+  </record>
+
+  <record id="view_coop_trade_calculator_form" model="ir.ui.view">
+    <field name="name">coop.trade.calculator.form</field>
+    <field name="model">coop.trade.calculator</field>
+    <field name="arch" type="xml">
+      <form string="Калькулятор порога постановки на учёт">
+        <sheet>
+          <div class="oe_title"><h1>Нужно ли ставить контракт на учёт</h1></div>
+          <group>
+            <group>
+              <field name="direction"/>
+              <field name="amount_rub"/>
+            </group>
+          </group>
+          <field name="result_html" nolabel="1"/>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_coop_trade_calculator" model="ir.actions.act_window">
+    <field name="name">Калькулятор порога</field>
+    <field name="res_model">coop.trade.calculator</field>
+    <field name="path">trade-threshold</field>
+    <field name="view_mode">form</field>
+    <field name="target">current</field>
+  </record>
+
+  <menuitem id="menu_coop_trade_root" name="Международные сделки" sequence="147"/>
+  <menuitem id="menu_coop_trade_contracts" name="Контракты"
+            parent="menu_coop_trade_root" action="action_coop_trade_contract" sequence="10"/>
+  <menuitem id="menu_coop_trade_calculator" name="Калькулятор порога"
+            parent="menu_coop_trade_root" action="action_coop_trade_calculator" sequence="20"/>
+</odoo>

@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_coop_trade_contract_user,Внешнеторговый контракт — участник,model_coop_trade_contract,base.group_user,1,1,1,0
+access_coop_trade_contract_system,Внешнеторговый контракт — администратор,model_coop_trade_contract,base.group_system,1,1,1,1
+access_coop_trade_document_user,Подтверждающий документ — участник,model_coop_trade_document,base.group_user,1,1,1,1
+access_coop_trade_payment_user,Платёж по контракту — участник,model_coop_trade_payment,base.group_user,1,1,1,1
+access_coop_trade_calculator_user,Калькулятор порога — участник,model_coop_trade_calculator,base.group_user,1,1,1,1
