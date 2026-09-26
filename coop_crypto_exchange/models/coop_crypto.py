@@ -134,8 +134,9 @@ class CoopCryptoOffer(models.Model):
             offer.is_mine = offer.author_id == mine
 
     def _search_is_mine(self, operator, value):
-        positive = (operator == '=') == bool(value)
-        return [('author_id', '=' if positive else '!=', self.env.user.partner_id.id)]
+        if operator != 'in':  # Odoo 19: признак — оператором in
+            return NotImplemented
+        return [('author_id', '=', self.env.user.partner_id.id)]
 
     def _compute_labels(self):
         for offer in self:
@@ -294,8 +295,9 @@ class CoopCryptoTrade(models.Model):
     def _search_is_mine(self, operator, value):
         me = self.env.user.partner_id.id
         domain = ['|', ('maker_id', '=', me), ('taker_id', '=', me)]
-        positive = (operator == '=') == bool(value)
-        return domain if positive else ['!'] + domain
+        if operator != 'in':  # Odoo 19: признак — оператором in
+            return NotImplemented
+        return domain
 
     @api.model_create_multi
     def create(self, vals_list):

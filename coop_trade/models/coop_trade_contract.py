@@ -313,8 +313,9 @@ class CoopTradeContract(models.Model):
     def _search_is_mine(self, operator, value):
         ids = self.env.user.coop_actor_partner_ids.ids
         domain = ['|', ('resident_id', 'in', ids), ('foreign_partner_id', 'in', ids)]
-        positive = (operator == '=') == bool(value)
-        return domain if positive else ['!'] + domain
+        if operator != 'in':  # Odoo 19: признак — оператором in
+            return NotImplemented
+        return domain
 
     @api.depends('resident_id', 'foreign_name', 'foreign_country_id', 'foreign_details', 'subject',
                  'price_currency_id', 'payment_currency_id', 'performance_date',

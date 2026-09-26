@@ -334,10 +334,11 @@ class CoopResource(models.Model):
         now = fields.Datetime.now()
         promoted = [('promoted_until', '>', now)]
         not_promoted = ['|', ('promoted_until', '=', False), ('promoted_until', '<=', now)]
-        if operator not in ('=', '!='):
-            raise UserError(_('По этому признаку можно искать только равенством.'))
-        positive = (operator == '=') == bool(value)
-        return promoted if positive else not_promoted
+        # Odoo 19 ищет признак оператором `in` ([True]); «не продвигается»
+        # движок выводит сам из NotImplemented.
+        if operator != 'in':
+            return NotImplemented
+        return promoted
 
     @api.model
     def action_new_listing(self):

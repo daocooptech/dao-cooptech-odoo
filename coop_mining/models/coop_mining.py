@@ -192,8 +192,9 @@ class CoopMiningOffer(models.Model):
             offer.is_mine = offer.author_id == me
 
     def _search_is_mine(self, operator, value):
-        positive = (operator == '=') == bool(value)
-        return [('author_id', '=' if positive else '!=', self.env.user.partner_id.id)]
+        if operator != 'in':  # Odoo 19: признак — оператором in
+            return NotImplemented
+        return [('author_id', '=', self.env.user.partner_id.id)]
 
     def action_close(self):
         self.write({'state': 'closed'})

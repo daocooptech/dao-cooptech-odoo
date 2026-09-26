@@ -218,8 +218,9 @@ class CoopDocument(models.Model):
         ids = self.env.user.coop_actor_partner_ids.ids
         found = self.search([('state', '=', 'draft'), ('file', '!=', False), '|',
                              ('party_a_id', 'in', ids), ('party_b_id', 'in', ids)]).ids
-        positive = (operator == '=') == bool(value)
-        return [('id', 'in' if positive else 'not in', found)]
+        if operator != 'in':  # Odoo 19: признак — оператором in
+            return NotImplemented
+        return [('id', 'in', found)]
 
     def _compute_shared_with_me(self):
         mine = self.env.user.coop_actor_partner_ids
@@ -229,8 +230,9 @@ class CoopDocument(models.Model):
     def _search_shared_with_me(self, operator, value):
         ids = self.env.user.coop_actor_partner_ids.ids
         found = self.search([('party_b_id', 'in', ids), ('party_a_id', 'not in', ids)]).ids
-        positive = (operator == '=') == bool(value)
-        return [('id', 'in' if positive else 'not in', found)]
+        if operator != 'in':  # Odoo 19: признак — оператором in
+            return NotImplemented
+        return [('id', 'in', found)]
 
     def _compute_favorite(self):
         ids = set(self.env['coop.favorite'].coop_ids_for(self._name))
@@ -239,8 +241,9 @@ class CoopDocument(models.Model):
 
     def _search_favorite(self, operator, value):
         ids = self.env['coop.favorite'].coop_ids_for(self._name)
-        positive = (operator == '=') == bool(value)
-        return [('id', 'in' if positive else 'not in', ids)]
+        if operator != 'in':  # Odoo 19: признак — оператором in
+            return NotImplemented
+        return [('id', 'in', ids)]
 
     # ── Журнал и редакции ───────────────────────────────────────────
 
