@@ -23,6 +23,7 @@
     'data': [
         'views/coop_landing.xml',
         'views/coop_signup.xml',
+        'data/coop_website_lang.xml',
     ],
     'assets': {
         'web.assets_frontend': [
