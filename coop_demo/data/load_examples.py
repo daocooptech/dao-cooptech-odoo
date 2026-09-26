@@ -17,6 +17,8 @@ import random
 
 from odoo import fields
 
+from . import load_wallets
+
 _logger = logging.getLogger(__name__)
 
 TARGET = 25
@@ -136,7 +138,7 @@ def _crypto_cases(env):
                 'symbol': symbol,
                 'quantity': sign * quantity,
                 'valuation': round(quantity * rate),
-                'tx_hash': '%s_%040x' % (code, index * 104729 + 7),
+                'tx_hash': load_wallets.tx_hash_for(code, index * 104729 + 7),
                 'state': state,
             }
             if kind == 'fee':

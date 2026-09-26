@@ -183,6 +183,7 @@ class CoopDemoLoader(models.AbstractModel):
         # сальдо по контрагентам считается из платежей по сделкам.
         load_wallets.load_wallets(self.env)
         load_wallets.repair_addresses(self.env)
+        load_wallets.repair_tx_hashes(self.env)
         # Международные сделки (решения 392, 410) — после организаций и
         # операторов ЦФА: российская сторона — организация участника.
         if 'coop.trade.contract' in self.env:

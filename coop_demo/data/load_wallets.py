@@ -210,6 +210,44 @@ def _address_for(code, seed):
     return '0x' + pick('0123456789abcdef', 40)
 
 
+def tx_hash_for(code, seed):
+    """Вымышленный хеш операции в формате своей сети (решение 416).
+
+    Раньше хеши были вида «eth_000…07» — видно, что заглушка. Теперь как
+    у настоящих: BTC и сеть платформы — 64 шестнадцатеричных знака, ETH и
+    совместимые — то же с «0x», TON — base64, Solana — подпись base58.
+    Знаки случайные — настоящей операции с таким хешем нет. Жребий — от
+    сети и номера, чтобы хеш не менялся от прогона к прогону.
+    """
+    rnd = random.Random('tx:%s:%s' % (code, seed))
+
+    def pick(alphabet, n):
+        return ''.join(rnd.choice(alphabet) for _ in range(n))
+
+    if code in ('btc', 'koop'):
+        return pick('0123456789abcdef', 64)
+    if code == 'ton':
+        return pick(_BASE64URL, 43) + '='
+    if code == 'sol':
+        return pick(_BASE58[1:], rnd.choice([87, 88]))
+    return '0x' + pick('0123456789abcdef', 64)
+
+
+def repair_tx_hashes(env):
+    """Переписать хеши операций-заглушки «код_000…» на правдоподобные.
+    Повторный запуск ничего не меняет: заглушек не остаётся."""
+    if 'coop.wallet.tx' not in env:
+        return 0
+    Tx = env['coop.wallet.tx'].sudo()
+    stubs = Tx.search([('tx_hash', '=like', r'%\_00000%')])
+    for tx in stubs:
+        code = (tx.tx_hash or '').split('_', 1)[0] or (tx.network_id.code or '')
+        tx.tx_hash = tx_hash_for(code, tx.id)
+    if stubs:
+        _logger.info('Кошельки: хеши операций переписаны у %s', len(stubs))
+    return len(stubs)
+
+
 def repair_addresses(env):
     """Переписать адреса, заведённые прежним способом.
 
