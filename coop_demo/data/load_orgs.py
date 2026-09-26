@@ -155,6 +155,12 @@ def load_organizations(env, specializations, marks):
             # проставлена осознанно, а в макете — выведена по названию.
             if existing.coop_legal_form_id:
                 values.pop('coop_legal_form_id', None)
+            # Снимок — только при заведении. Раньше он переписывался при
+            # каждом прогоне: каждое обновление заново клало всем
+            # организациям знак из набора и откатывало замену пустых
+            # снимков монограммой (решение 416).
+            values.pop('image_1920', None)
+            values.pop('coop_symbol_mark', None)
             existing.write(values)
         else:
             Partner.create(dict(values, name=org['name']))
@@ -390,3 +396,32 @@ def merge_duplicate_orgs(env):
             merged += len(chunk)
         _logger.info('Организации: «%s» — слито копий %s в №%s', name, len(copies), keep.id)
     return merged
+
+
+def repair_empty_logos(env):
+    """Снимок организации, у которого плитка выходит пустой, — монограммой.
+
+    Части организаций из свободного набора знаков достались чёрные буквы
+    на прозрачном фоне (у «ДАО «ОткрытыйГород»», «ДАО «Цифровой
+    кооператив»»): уменьшенная копия для плитки выходила пустой — сто с
+    небольшим байт, — и в каталоге стоял чёрный квадрат. Им ставится
+    монограмма с цветным фоном, как организациям без логотипа. Повторный
+    запуск ничего не меняет: у монограммы копия полноценная.
+    """
+    with open(os.path.join(HERE, 'organizations.json'), encoding='utf-8') as fh:
+        by_name = {org['name']: org for org in json.load(fh)}
+    Attachment = env['ir.attachment'].sudo()
+    thin = Attachment.search([('res_model', '=', 'res.partner'), ('res_field', '=', 'image_128'),
+                              ('file_size', '<', 400)])
+    Partner = env['res.partner'].sudo()
+    fixed = 0
+    for partner in Partner.browse(thin.mapped('res_id')).exists():
+        if not partner.is_company:
+            continue
+        org = by_name.get(partner.name, {})
+        partner.write({'image_1920': emblems.monogram(partner.name, org.get('specialization', '')),
+                       'coop_symbol_mark': False})
+        fixed += 1
+    if fixed:
+        _logger.info('Организации: пустые снимки заменены монограммой у %s', fixed)
+    return fixed
