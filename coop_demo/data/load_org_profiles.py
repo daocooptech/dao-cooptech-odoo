@@ -242,3 +242,41 @@ def load_org_profiles(env, specializations, marks):
 
     _logger.info('Заполненные карточки организаций: создано %s, дополнено %s, '
                  'форм охвачено %s', created, filled, len(SAMPLES))
+
+
+def fill_org_contacts(env):
+    """Контакты организациям из макета, у которых их нет (решение 416).
+
+    Телефон, почта, сайт и адрес были только у восьмидесяти четырёх
+    организаций из образцов выше; у остальных ста с лишним карточка
+    показывала «не указан» четыре раза подряд. Заполняется тем же
+    способом, что у образцов: номерной домен `.example` — видно, что
+    адрес демонстрационный. ИНН и ОГРН не ставятся — у этих организаций
+    в макете логотипы настоящих компаний (см. `load_orgs`).
+
+    Только пустые поля: что поставил человек, не трогаем.
+    """
+    Partner = env['res.partner'].sudo()
+    orgs = Partner.search([('is_company', '=', True), ('coop_is_participant', '=', True)],
+                          order='id')
+    filled = 0
+    for org in orgs:
+        seed = 500 + org.id
+        vals = {}
+        if not org.phone:
+            vals['phone'] = '+7 (%03d) %03d-%02d-%02d' % (
+                300 + seed % 600, seed * 13 % 1000, seed % 100, (seed * 7) % 100)
+        if not org.email:
+            vals['email'] = 'info@coop-%03d.example' % seed
+        if not org.website:
+            vals['website'] = _domain(org.name, seed)
+        if not org.street:
+            vals['street'] = '%s, %d' % (STREETS[seed % len(STREETS)], (seed * 7) % 90 + 1)
+        if not org.zip:
+            vals['zip'] = '%06d' % (100000 + seed * 137 % 500000)
+        if vals:
+            org.write(vals)
+            filled += 1
+    if filled:
+        _logger.info('Организации: контакты дописаны у %s', filled)
+    return filled

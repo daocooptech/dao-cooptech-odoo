@@ -69,6 +69,7 @@ class CoopDemoLoader(models.AbstractModel):
         load_orgs.merge_duplicate_orgs(self.env)
         load_orgs.load_organizations(self.env, specializations, marks)
         load_org_profiles.load_org_profiles(self.env, specializations, marks)
+        load_org_profiles.fill_org_contacts(self.env)
         # Состав организаций — до каталогов: правила доступа смотрят на
         # полномочия в членстве, и объявления организаций должны попадать
         # к людям, которым эта организация поручила публикации.
