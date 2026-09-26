@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from psycopg2 import IntegrityError
 
 import logging
 
@@ -441,26 +440,47 @@ class CoopSidebarItem(models.Model):
         значит, что две одновременные вкладки заходят в сборку вместе.
         Раньше обе создавали полный набор, и меню удваивалось: на стенде
         четыре одновременных первых захода дали 96 пунктов вместо 24.
-        Уникальности в базе при этом не было вовсе (см. коммит о
-        `models.Constraint`), так что не спасала и она.
 
-        Теперь каждый пункт заводится в своей точке отката: если его уже
-        завела соседняя вкладка, мы просто берём её запись.
+        Потом каждый пункт заводился в своей точке отката и при
+        столкновении брал запись соседней вкладки. Меню собиралось верно,
+        но столкновение доходило до базы, и движок писал его в журнал
+        ошибкой — «нарушение уникальности coop_sidebar_item_coop_sidebar_unique»
+        (находка 25.09, решение 416). Теперь вставка сразу уступает:
+        `ON CONFLICT DO NOTHING` по той же уникальности, столкновения нет.
+
+        Прямым запросом, мимо ORM: у `create` нет «вставь, если нет».
+        Полей у пункта мало, вычисляемых и связанных нет, — обходить
+        нечего.
         """
-        created = self.browse()
+        cr = self.env.cr
+        ids = []
         for value in values:
-            try:
-                with self.env.cr.savepoint():
-                    created |= self.create(value)
-            except IntegrityError:
-                # Только столкновение по уникальности; всё прочее —
-                # настоящая ошибка, и глушить её нельзя: меню молча
-                # соберётся неполным, и понять почему будет неоткуда.
-                created |= self.search([
-                    ('user_id', '=', user.id),
-                    ('section', '=', value['section']),
-                    ('name', '=', value['name']),
-                ], limit=1)
+            cr.execute("""
+                INSERT INTO coop_sidebar_item
+                    (user_id, name, icon, action_id, sequence, section, is_required,
+                     create_uid, create_date, write_uid, write_date)
+                VALUES (%s, %s, %s, %s, %s, %s, %s,
+                        %s, now() at time zone 'UTC', %s, now() at time zone 'UTC')
+                ON CONFLICT (user_id, section, name) DO NOTHING
+                RETURNING id
+            """, [user.id, value['name'], value.get('icon') or None,
+                  value.get('action_id') or None, value.get('sequence', 10),
+                  value.get('section', 'ext'), bool(value.get('is_required')),
+                  self.env.uid, self.env.uid])
+            row = cr.fetchone()
+            if row:
+                ids.append(row[0])
+        self.invalidate_model()
+        created = self.browse(ids)
+        # Уступленные — те, что завела соседняя вкладка; берём её записи.
+        taken = {(item.section, item.name) for item in created}
+        missing = [v for v in values if (v.get('section', 'ext'), v['name']) not in taken]
+        for value in missing:
+            created |= self.search([
+                ('user_id', '=', user.id),
+                ('section', '=', value.get('section', 'ext')),
+                ('name', '=', value['name']),
+            ], limit=1)
         return created
 
     @api.model
