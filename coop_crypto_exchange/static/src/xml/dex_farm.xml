@@ -76,7 +76,7 @@
         <div class="o_coop_fm_grid">
           <article t-foreach="shown" t-as="p" t-key="p.id" t-attf-class="o_coop_fm_card o_coop_fm_{{ p.state }}">
             <div class="o_coop_fm_head">
-              <img t-attf-src="/web/image/coop.project/{{ p.project_id }}/image_128" alt="" loading="lazy"/>
+              <img t-attf-src="/web/image/coop.project/{{ p.project_id }}/image_512" alt="" loading="lazy"/>
               <div class="o_coop_fm_title">
                 <a href="#" t-on-click.prevent="() => this.openProject(p)" t-esc="p.project"/>
                 <div class="o_coop_dx_muted"><t t-esc="p.city"/><t t-if="p.city and p.initiator"> · </t><t t-esc="p.initiator"/></div>
