@@ -132,9 +132,22 @@ def load_organizations(env, specializations, marks):
         # Заодно этот же поиск подхватывает организации из
         # reference-данных («Шукты», «Борозда», «Взаимопомощь», рабочая
         # группа платформы), на которые ссылается членство.
-        existing = Partner.search([
-            ('name', '=', org['name']), ('city', '=', org['city']),
-            ('is_company', '=', True)], limit=1)
+        #
+        # Без города в макете — ДАО, узлы сети — ищем по одному названию:
+        # город им ставит позже другой загрузчик, и поиск «название +
+        # пустой город» при следующем прогоне их уже не находил. Каждое
+        # обновление заводило ещё по три «ДАО КООПТЕХ», «ДАО «ОткрытыйГород»»,
+        # «ДАО «Цифровой кооператив»» — к 26.09.2026 их стало по 110
+        # (решение 416, находка про дубли). Город таким не переписываем.
+        if org['city']:
+            existing = Partner.search([
+                ('name', '=', org['name']), ('city', '=', org['city']),
+                ('is_company', '=', True)], limit=1)
+        else:
+            existing = Partner.search([
+                ('name', '=', org['name']), ('is_company', '=', True)],
+                order='id', limit=1)
+            values.pop('city', None)
         if not existing:
             existing = _renamed(Partner, org)
         if existing:
@@ -302,3 +315,78 @@ def give_services(env):
 
     _logger.info('Услуги организаций: отдано %s предложений', given)
     return given
+
+
+# Уникальные частичные индексы, которых мастер слияния движка не видит
+# (он распознаёт только ограничения): таблица, ключ, колонки-контакты.
+_PARTIAL_UNIQUE = [
+    ('coop_membership', ['partner_id', 'organization_id'], ['partner_id', 'organization_id']),
+    ('coop_community_member', ['community_id', 'partner_id'], ['partner_id']),
+    ('discuss_channel_member', ['channel_id', 'partner_id'], ['partner_id']),
+    ('mail_message_reaction', ['message_id', 'content', 'partner_id'], ['partner_id']),
+    ('mail_notification', ['mail_message_id', 'res_partner_id'], ['res_partner_id']),
+]
+
+
+def _clear_merge_conflicts(env, dst, src):
+    """Убрать строки копий, которые после переноса на исходную запись
+    совпали бы по уникальному ключу с её строками или друг с другом, и
+    строки, где организация оказалась бы в составе самой себя."""
+    cr = env.cr
+    for table, key, partner_cols in _PARTIAL_UNIQUE:
+        cr.execute("SELECT to_regclass(%s)", [table])
+        if not cr.fetchone()[0]:
+            continue
+
+        def mapped(alias, col):
+            if col in partner_cols:
+                return ('(CASE WHEN %(a)s.%(c)s = ANY(%%(src)s) THEN %%(dst)s ELSE %(a)s.%(c)s END)'
+                        % {'a': alias, 'c': col})
+            return '%s.%s' % (alias, col)
+
+        same = ' AND '.join('%s IS NOT DISTINCT FROM %s' % (mapped('d', c), mapped('s', c))
+                            for c in key)
+        touches = ' OR '.join('s.%s = ANY(%%(src)s)' % c for c in partner_cols)
+        cr.execute("""
+            DELETE FROM %(t)s s
+             WHERE (%(touches)s)
+               AND EXISTS (SELECT 1 FROM %(t)s d
+                            WHERE d.id <> s.id AND %(same)s
+                              AND (d.id < s.id OR NOT (%(dtouch)s)))
+        """ % {'t': table, 'touches': touches, 'same': same,
+               'dtouch': touches.replace('s.', 'd.')}, {'src': list(src), 'dst': dst})
+        if len(partner_cols) > 1:
+            a, b = partner_cols[:2]
+            cr.execute("DELETE FROM %s s WHERE %s = %s" % (table, mapped('s', a), mapped('s', b)),
+                       {'src': list(src), 'dst': dst})
+
+
+def merge_duplicate_orgs(env):
+    """Слить размножившиеся организации без города в исходную запись.
+
+    До починки поиска каждое обновление заводило по новой копии ДАО без
+    города (см. `load_organizations`). Копии сливаются штатным слиянием
+    контактов движка: все ссылки на копии — проекты, вакансии, сделки,
+    состав, связи — переходят на исходную (самую раннюю) запись, копии
+    удаляются. Движок сливает не больше трёх за раз — идём тройками.
+    Повторный запуск ничего не делает: копий уже нет.
+    """
+    with open(os.path.join(HERE, 'organizations.json'), encoding='utf-8') as fh:
+        orgs = json.load(fh)
+    names = sorted({org['name'] for org in orgs if not org['city']})
+    Partner = env['res.partner'].sudo().with_context(active_test=False)
+    Wizard = env['base.partner.merge.automatic.wizard'].sudo()
+    merged = 0
+    for name in names:
+        found = Partner.search([('name', '=', name), ('is_company', '=', True),
+                                ('user_ids', '=', False)], order='id')
+        if len(found) < 2:
+            continue
+        keep, copies = found[0], found[1:]
+        _clear_merge_conflicts(env, keep.id, copies.ids)
+        for start in range(0, len(copies), 2):
+            chunk = copies[start:start + 2]
+            Wizard._merge((keep | chunk).ids, keep, extra_checks=False)
+            merged += len(chunk)
+        _logger.info('Организации: «%s» — слито копий %s в №%s', name, len(copies), keep.id)
+    return merged
