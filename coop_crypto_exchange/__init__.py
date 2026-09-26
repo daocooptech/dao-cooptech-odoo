@@ -8,3 +8,5 @@ def _post_init(env):
     if 'coop.demo.loader' in env:
         from odoo.addons.coop_demo.data import load_crypto
         load_crypto.load_crypto(env)
+        from odoo.addons.coop_demo.data import load_farm
+        load_farm.load_dex_farm(env)

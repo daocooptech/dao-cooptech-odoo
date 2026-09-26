@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <!-- Фарминг: пулы ликвидности под проекты (владелец 26.09), js/dex_farm.js.
+       Свои классы — o_coop_fm_*; вкладки и общие — o_coop_dx_*. -->
+  <t t-name="coop_crypto_exchange.DexFarm">
+    <div class="o_coop_dx o_coop_fm">
+      <t t-call="coop_crypto_exchange.DexTabs"><t t-set="tab" t-value="'farm'"/></t>
+
+      <t t-if="state.data">
+        <header class="o_coop_fm_hero">
+          <div>
+            <h2>Фарминг — пулы ликвидности под проекты</h2>
+            <p>
+              Вносите монету в пул настоящего проекта платформы и получайте доход в той же монете:
+              часть — комиссии со сделок, которые пул ведёт в стакане DEX, часть — выплаты проекта
+              из выручки. Не собрали к сроку — каждому возвращается внесённое.
+            </p>
+          </div>
+          <button class="o_coop_fm_new" t-on-click="newPool">
+            <i class="fa fa-plus"/> Открыть пул под свой проект
+          </button>
+        </header>
+
+        <div class="o_coop_fm_stats">
+          <div><span>В пулах</span><b t-esc="rub(state.data.totals.tvl_rub)"/></div>
+          <div><span>Действующих пулов</span><b t-esc="state.data.totals.pools"/></div>
+          <div><span>Участников</span><b t-esc="state.data.totals.stakers"/></div>
+          <div><span>Выплачено дохода</span><b t-esc="rub(state.data.totals.paid_rub)"/></div>
+          <div class="o_coop_fm_stat_mine"><span>Мои вложения</span><b t-esc="rub(state.data.totals.my_rub)"/></div>
+          <div class="o_coop_fm_stat_mine"><span>Доход к получению</span><b class="o_coop_dx_up" t-esc="rub(state.data.totals.my_pending_rub)"/></div>
+        </div>
+
+        <!-- Мои позиции -->
+        <section class="o_coop_dx_panel" t-if="state.data.mine.length">
+          <div class="o_coop_dx_panelhead"><b>Мои позиции · <t t-esc="state.data.mine.length"/></b></div>
+          <table class="o_coop_dx_table">
+            <thead><tr><th>Пул</th><th>Внесено</th><th>Доходность</th><th>Начислено</th><th>К получению</th><th>Заперто до</th><th>Состояние</th><th/></tr></thead>
+            <tbody>
+              <tr t-foreach="state.data.mine" t-as="m" t-key="m.id" t-att-class="{ 'o_coop_fm_gone': m.state === 'withdrawn' }">
+                <td><b t-esc="m.project"/><div class="o_coop_dx_muted" t-esc="m.coin"/></td>
+                <td><t t-esc="amt(m.amount, m.coin)"/><div class="o_coop_dx_muted" t-esc="rub(m.amount_rub)"/></td>
+                <td t-esc="apr(m.apr)"/>
+                <td t-esc="amt(m.earned, m.coin)"/>
+                <td class="o_coop_dx_up" t-esc="amt(m.pending, m.coin)"/>
+                <td t-esc="dmy(m.unlock)"/>
+                <td class="o_coop_dx_muted" t-esc="m.state === 'withdrawn' ? 'выведено' : m.pool_state_label"/>
+                <td class="o_coop_fm_actions">
+                  <button class="o_coop_dex_link" t-if="m.state === 'active' and canHarvest(m)" t-on-click="() => this.harvest(m)">забрать доход</button>
+                  <button class="o_coop_dex_link" t-if="m.can_withdraw" t-on-click="() => this.withdraw(m)">вывести</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Отбор -->
+        <div class="o_coop_fm_filters">
+          <div class="o_coop_dx_seg">
+            <button t-att-class="{ 'o_coop_dx_seg_on': state.filter === 'raising' }" t-on-click="() => this.setFilter('raising')">Идёт сбор · <t t-esc="count('raising')"/></button>
+            <button t-att-class="{ 'o_coop_dx_seg_on': state.filter === 'active' }" t-on-click="() => this.setFilter('active')">Работают · <t t-esc="count('active')"/></button>
+            <button t-att-class="{ 'o_coop_dx_seg_on': state.filter === 'closed' }" t-on-click="() => this.setFilter('closed')">Завершены · <t t-esc="count('closed')"/></button>
+            <button t-att-class="{ 'o_coop_dx_seg_on': state.filter === 'refunded' }" t-on-click="() => this.setFilter('refunded')">Не собраны · <t t-esc="count('refunded')"/></button>
+            <button t-att-class="{ 'o_coop_dx_seg_on': state.filter === 'all' }" t-on-click="() => this.setFilter('all')">Все · <t t-esc="count('all')"/></button>
+          </div>
+          <input type="search" placeholder="Проект, город, назначение" t-att-value="state.query" t-on-input="onQuery"/>
+          <select t-on-change="setCoin">
+            <option value="">Все монеты</option>
+            <option t-foreach="coins" t-as="c" t-key="c" t-att-value="c" t-att-selected="c === state.coin" t-esc="c"/>
+          </select>
+          <select t-on-change="setSort">
+            <option t-foreach="sorts" t-as="s" t-key="s.key" t-att-value="s.key" t-att-selected="s.key === state.sort" t-esc="s.label"/>
+          </select>
+        </div>
+
+        <!-- Пулы -->
+        <div class="o_coop_fm_grid">
+          <article t-foreach="shown" t-as="p" t-key="p.id" t-attf-class="o_coop_fm_card o_coop_fm_{{ p.state }}">
+            <div class="o_coop_fm_head">
+              <img t-attf-src="/web/image/coop.project/{{ p.project_id }}/image_128" alt="" loading="lazy"/>
+              <div class="o_coop_fm_title">
+                <a href="#" t-on-click.prevent="() => this.openProject(p)" t-esc="p.project"/>
+                <div class="o_coop_dx_muted"><t t-esc="p.city"/><t t-if="p.city and p.initiator"> · </t><t t-esc="p.initiator"/></div>
+              </div>
+              <span t-attf-class="o_coop_fm_state o_coop_fm_state_{{ p.state }}" t-esc="p.state_label"/>
+            </div>
+            <div class="o_coop_fm_purpose" t-esc="p.purpose"/>
+            <div class="o_coop_fm_apr">
+              <div>
+                <span>Доходность</span>
+                <b class="o_coop_dx_up" t-esc="apr(p.apr)"/>
+                <small class="o_coop_dx_muted">комиссии <t t-esc="apr(p.apr_fee)"/> + проект <t t-esc="apr(p.apr_project)"/></small>
+              </div>
+              <div>
+                <span>Монета</span>
+                <b t-esc="p.coin"/>
+                <small class="o_coop_dx_muted">срок <t t-esc="p.lock_days"/> <t t-esc="daysWord(p.lock_days)"/></small>
+              </div>
+            </div>
+            <div class="o_coop_fm_progress">
+              <div class="o_coop_fm_track"><span t-attf-style="width: {{ p.progress }}%"/></div>
+              <div class="o_coop_fm_nums">
+                <span><b t-esc="amt(p.tvl, p.coin)"/> из <t t-esc="amt(p.target, p.coin)"/> · <t t-esc="p.progress"/>%</span>
+                <span class="o_coop_dx_muted" t-esc="rub(p.tvl_rub)"/>
+              </div>
+            </div>
+            <div class="o_coop_fm_meta">
+              <span><i class="fa fa-users"/> <t t-esc="p.stakers"/></span>
+              <span t-attf-class="o_coop_fm_risk o_coop_fm_risk_{{ p.risk }}">риск: <t t-esc="p.risk_label"/></span>
+              <span t-if="p.days_left !== null and p.days_left &gt;= 0"><i class="fa fa-clock-o"/> ещё <t t-esc="p.days_left"/> <t t-esc="daysWord(p.days_left)"/></span>
+              <span t-elif="p.state === 'active' and p.date_end">до <t t-esc="dmy(p.date_end)"/></span>
+              <span t-if="p.paid &gt; 0">выплачено <t t-esc="amt(p.paid, p.coin)"/></span>
+            </div>
+            <t t-if="p.open">
+              <button class="o_coop_dx_go o_coop_dx_go_buy" t-if="state.open !== p.id" t-on-click="() => this.toggle(p)">Внести</button>
+              <div class="o_coop_fm_stake" t-else="">
+                <div class="o_coop_dx_field">
+                  <label>Сколько, <t t-esc="p.coin"/> <span class="o_coop_dx_muted" t-if="p.min_stake">· от <t t-esc="qty(p.min_stake)"/></span></label>
+                  <div class="o_coop_fm_amount">
+                    <input type="number" min="0" step="0.00000001" t-att-value="state.amount" t-on-input="onAmount"/>
+                    <button class="o_coop_dex_link" t-on-click="() => this.setMax(p)">до цели</button>
+                  </div>
+                </div>
+                <div class="o_coop_dx_total">
+                  <span>Доход за год</span>
+                  <b class="o_coop_dx_up"><t t-esc="amt(yearIncome(p), p.coin)"/> <t t-esc="p.coin"/></b>
+                </div>
+                <div class="o_coop_fm_stakebtns">
+                  <button class="o_coop_dx_go o_coop_dx_go_buy" t-att-disabled="state.busy or !state.amount" t-on-click="() => this.stake(p)">Внести в пул</button>
+                  <button class="o_coop_dex_link" t-on-click="() => this.toggle(p)">отмена</button>
+                </div>
+              </div>
+            </t>
+          </article>
+        </div>
+        <div class="o_coop_dex_empty" t-if="!pools.length">Пулов по такому отбору нет.</div>
+        <button class="o_coop_fm_more" t-if="!state.showAll and pools.length &gt; shown.length" t-on-click="showAll">
+          Показать все · <t t-esc="pools.length"/>
+        </button>
+
+        <div class="o_coop_dx_note">
+          Доход не гарантирован: его платят проект и сделки пула, и при неудаче проекта он может
+          быть меньше обещанного. Взнос в пул — не вклад и не застрахован. Платформа ключей и
+          средств не держит. Здесь покупают и продают цифровую валюту как имущество;
+          расплачиваться ею за товары и услуги в России нельзя.
+        </div>
+      </t>
+    </div>
+  </t>
+</templates>

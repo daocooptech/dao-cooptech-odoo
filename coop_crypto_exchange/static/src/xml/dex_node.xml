@@ -4,6 +4,7 @@
        формы и списков — общие с экраном DEX биржи; своё — o_coop_kdf_*. -->
   <t t-name="coop_crypto_exchange.KomodoNode">
     <div class="o_coop_kdf">
+      <t t-call="coop_crypto_exchange.DexTabs"><t t-set="tab" t-value="'node'"/></t>
       <div class="o_coop_dext_head">
         <div>
           <h2>Свой узел Komodo</h2>
@@ -13,7 +14,6 @@
             ни ключей, ни заявок.
           </div>
         </div>
-        <button class="o_coop_dex_link" t-on-click="openTerminal">DEX биржа</button>
       </div>
 
       <div class="o_coop_kdf_warn" t-if="!secure">

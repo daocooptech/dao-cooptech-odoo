@@ -4,3 +4,7 @@ access_coop_crypto_offer_system,Объявление обмена — админ
 access_coop_crypto_trade_user,Обмен — участник,model_coop_crypto_trade,base.group_user,1,1,0,0
 access_coop_crypto_trade_system,Обмен — администратор,model_coop_crypto_trade,base.group_system,1,1,1,1
 access_coop_crypto_respond_user,Отклик на обмен — участник,model_coop_crypto_respond,base.group_user,1,1,1,1
+access_coop_farm_pool_user,Пул ликвидности — участник,model_coop_farm_pool,base.group_user,1,1,1,0
+access_coop_farm_pool_system,Пул ликвидности — администратор,model_coop_farm_pool,base.group_system,1,1,1,1
+access_coop_farm_stake_user,Взнос в пул — участник,model_coop_farm_stake,base.group_user,1,0,0,0
+access_coop_farm_stake_system,Взнос в пул — администратор,model_coop_farm_stake,base.group_system,1,1,1,1

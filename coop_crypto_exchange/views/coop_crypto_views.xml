@@ -285,6 +285,70 @@
     <field name="context">{'coop_section': 1}</field>
   </record>
 
+  <!-- Фарминг (владелец 26.09): пулы ликвидности под проекты. Форма —
+       открыть пул для своего проекта; экран — client action. -->
+  <record id="view_coop_farm_pool_form" model="ir.ui.view">
+    <field name="name">coop.farm.pool.form</field>
+    <field name="model">coop.farm.pool</field>
+    <field name="arch" type="xml">
+      <form string="Пул ликвидности">
+        <sheet>
+          <group>
+            <group string="Проект и монета">
+              <field name="project_id" options="{'no_create': True}"/>
+              <field name="asset"/>
+              <field name="network_id" options="{'no_create': True}"/>
+              <field name="purpose" placeholder="Например: закупка станка у поставщика из Китая"/>
+            </group>
+            <group string="Условия">
+              <field name="target"/>
+              <field name="min_stake"/>
+              <field name="apr_fee"/>
+              <field name="apr_project"/>
+              <field name="lock_days"/>
+              <field name="date_deadline"/>
+              <field name="risk"/>
+            </group>
+          </group>
+          <div class="text-muted small">
+            Доход начисляется в той же монете, что вносят участники. Не собрали к сроку —
+            пул закрывается, каждому возвращается внесённое. Платформа ключей и средств не
+            держит: монеты идут между кошельками участников и проекта.
+          </div>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_farm_pool_list" model="ir.ui.view">
+    <field name="name">coop.farm.pool.list</field>
+    <field name="model">coop.farm.pool</field>
+    <field name="arch" type="xml">
+      <list string="Пулы ликвидности">
+        <field name="name"/>
+        <field name="state"/>
+        <field name="apr"/>
+        <field name="target"/>
+        <field name="date_deadline"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="action_coop_farm_pool_new" model="ir.actions.act_window">
+    <field name="name">Открыть пул ликвидности</field>
+    <field name="res_model">coop.farm.pool</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="view_coop_farm_pool_form"/>
+    <field name="target">new</field>
+  </record>
+
+  <record id="action_coop_farm" model="ir.actions.client">
+    <field name="name">Фарминг</field>
+    <field name="tag">coop_crypto_exchange.farm</field>
+    <field name="path">dex-farm</field>
+    <field name="context">{'coop_section': 1}</field>
+  </record>
+
   <menuitem id="menu_coop_crypto_root" name="DEX биржа" sequence="147"
             action="action_coop_dex_terminal"/>
   <menuitem id="menu_coop_dex_terminal" name="Биржа"
@@ -293,6 +357,8 @@
             parent="menu_coop_crypto_root" action="action_coop_crypto_offer" sequence="10"/>
   <menuitem id="menu_coop_crypto_trades" name="Мои обмены"
             parent="menu_coop_crypto_root" action="action_coop_crypto_trade" sequence="20"/>
+  <menuitem id="menu_coop_farm" name="Фарминг"
+            parent="menu_coop_crypto_root" action="action_coop_farm" sequence="8"/>
   <menuitem id="menu_coop_komodo_node" name="Свой узел Komodo"
             parent="menu_coop_crypto_root" action="action_coop_komodo_node" sequence="30"/>
 </odoo>

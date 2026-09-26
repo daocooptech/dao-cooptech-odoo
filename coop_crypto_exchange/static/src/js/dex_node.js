@@ -368,6 +368,16 @@ export class CoopKomodoNode extends Component {
         this.action.doAction("coop_crypto_exchange.action_coop_dex_terminal");
     }
 
+    openFarm() {
+        this.action.doAction("coop_crypto_exchange.action_coop_farm");
+    }
+
+    openNode() {}
+
+    openTrades() {
+        this.action.doAction("coop_crypto_exchange.action_coop_crypto_trade");
+    }
+
     // ── Числа ───────────────────────────────────────────────────────
 
     qty(v) {

@@ -64,12 +64,41 @@ class CoopCryptoMarket(models.AbstractModel):
                 'methods': offer.methods_label, 'mine': offer.author_id == me,
             }
 
-        asks = Offer.sudo().search(live + [('side', '=', 'sell')], order='price asc, id', limit=40)
-        bids = Offer.sudo().search(live + [('side', '=', 'buy')], order='price desc, id', limit=40)
-        trades = Trade.search(domain + [('state', 'in', TRADE_LIVE)], order='date desc', limit=40)
+        asks = Offer.sudo().search(live + [('side', '=', 'sell')], order='price asc, id', limit=60)
+        bids = Offer.sudo().search(live + [('side', '=', 'buy')], order='price desc, id', limit=60)
+        trades = Trade.search(domain + [('state', 'in', TRADE_LIVE)], order='date desc', limit=60)
         ask, bid = Offer._coop_best_prices(domain)
         mine = Offer.sudo().search(live + [('author_id', '=', me.id)], order='id desc')
+        history = Offer.sudo().search(domain + [('author_id', '=', me.id),
+                                                ('state', 'in', ('done', 'closed', 'paused'))],
+                                      order='published_on desc, id desc', limit=30)
+        my_trades = Trade.search(domain + ['|', ('maker_id', '=', me.id), ('taker_id', '=', me.id)],
+                                 order='date desc', limit=30)
+        day_ago = fields.Datetime.now() - timedelta(days=1)
+        day = Trade.search(domain + [('state', 'in', TRADE_LIVE), ('date', '>=', day_ago)])
+        states = dict(Offer._fields['state'].selection)
+        trade_states = dict(Trade._fields['state'].selection)
         return {
+            'stats': {
+                'high': max(day.mapped('price')) if day else 0.0,
+                'low': min(day.mapped('price')) if day else 0.0,
+                'volume': sum(day.mapped('amount')),
+                'volume_rub': sum(day.mapped('total')),
+                'count': len(day),
+            },
+            'history': [{
+                'id': o.id, 'side': o.side, 'price': o.price, 'amount': o.amount_max,
+                'filled': max((o.amount_max or 0) - (o.quantity_left or 0), 0.0),
+                'state': o.state, 'state_label': states.get(o.state),
+                'when': fields.Datetime.to_string(o.published_on)[:16] if o.published_on else '',
+            } for o in history],
+            'my_trades': [{
+                'id': t.id, 'number': t.number, 'price': t.price, 'amount': t.amount,
+                'total': t.total, 'when': fields.Datetime.to_string(t.date)[:16],
+                'side': t.side if t.maker_id == me else ('buy' if t.side == 'sell' else 'sell'),
+                'state': t.state, 'state_label': trade_states.get(t.state),
+                'other': (t.taker_id if t.maker_id == me else t.maker_id).name,
+            } for t in my_trades],
             'asks': [row(o) for o in asks],
             'bids': [row(o) for o in bids],
             'best_ask': ask, 'best_bid': bid,
@@ -79,7 +108,10 @@ class CoopCryptoMarket(models.AbstractModel):
                 'side': 'buy' if t.side == 'sell' else 'sell',
             } for t in trades],
             'candles': self._candles(domain),
-            'mine': [row(o) | {'side': o.side, 'state': o.state} for o in mine],
+            'mine': [row(o) | {'side': o.side, 'state': o.state,
+                               'filled': max((o.amount_max or 0) - (o.quantity_left or 0), 0.0),
+                               'when': fields.Datetime.to_string(o.published_on)[:16]
+                               if o.published_on else ''} for o in mine],
         }
 
     def _candles(self, domain, days=120):

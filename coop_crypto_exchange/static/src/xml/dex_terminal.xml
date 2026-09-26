@@ -1,165 +1,313 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-  <!-- Экран DEX биржи (решение 417), js/dex_terminal.js. Классы o_coop_dex_* —
-       общие с биржей токеномики; своё — o_coop_dext_*. -->
-  <t t-name="coop_crypto_exchange.DexTerminal">
-    <div class="o_coop_dext">
-      <aside class="o_coop_dext_pairs">
-        <div class="o_coop_dext_pairshead">
-          <span>Пара</span><span class="o_coop_dex_num">Цена, ₽</span><span class="o_coop_dex_num">24 ч</span>
-        </div>
-        <div t-foreach="state.markets" t-as="m" t-key="m.key"
-             class="o_coop_dext_pair"
-             t-att-class="{ 'o_coop_dext_pair_on': state.current and state.current.key === m.key }"
-             t-on-click="() => this.select(m)">
-          <span class="o_coop_dext_pairname"><b t-esc="m.label"/> / RUB</span>
-          <span class="o_coop_dex_num" t-esc="rub(m.last)"/>
-          <span class="o_coop_dex_num"
-                t-att-class="{ 'o_coop_dext_up': m.change &gt; 0, 'o_coop_dext_down': m.change &lt; 0 }"
-                t-esc="pct(m.change)"/>
-        </div>
-        <div class="o_coop_dex_empty" t-if="!state.markets.length">Заявок пока нет.</div>
-      </aside>
+  <!-- Вкладки раздела DEX биржа: биржа, фарминг, свой узел. Вызывается из
+       шаблонов трёх экранов; у каждого компонента — openTrades/openFarm/openNode
+       и свой `tab`. -->
+  <t t-name="coop_crypto_exchange.DexTabs">
+    <nav class="o_coop_dx_tabs">
+      <button t-att-class="{ 'o_coop_dx_tab': true, 'o_coop_dx_tab_on': tab === 'trade' }"
+              t-on-click="() => this.openTerminal ? this.openTerminal() : null">Биржа</button>
+      <button t-att-class="{ 'o_coop_dx_tab': true, 'o_coop_dx_tab_on': tab === 'farm' }"
+              t-on-click="() => this.openFarm()">Фарминг</button>
+      <button t-att-class="{ 'o_coop_dx_tab': true, 'o_coop_dx_tab_on': tab === 'node' }"
+              t-on-click="() => this.openNode()">Свой узел Komodo</button>
+      <button class="o_coop_dx_tab" t-on-click="() => this.openTrades()">Мои обмены</button>
+    </nav>
+  </t>
 
-      <section class="o_coop_dext_main" t-if="state.current and state.book">
-        <div class="o_coop_dext_head">
-          <div>
-            <h2><t t-esc="state.current.label"/> / RUB</h2>
-            <div class="o_coop_dex_msub">
-              последняя <b t-esc="rub(state.current.last)"/> ·
-              продают от <t t-esc="state.book.best_ask ? rub(state.book.best_ask) : '—'"/> ·
-              покупают до <t t-esc="state.book.best_bid ? rub(state.book.best_bid) : '—'"/> ·
-              оборот за сутки <t t-esc="rub(state.current.volume)"/>
+  <!-- Экран DEX биржи (решение 417; «современная биржа» — владелец 26.09),
+       js/dex_terminal.js. Свои классы — o_coop_dx_*. -->
+  <t t-name="coop_crypto_exchange.DexTerminal">
+    <div class="o_coop_dx">
+      <t t-call="coop_crypto_exchange.DexTabs"><t t-set="tab" t-value="'trade'"/></t>
+
+      <div class="o_coop_dex_empty" t-if="!state.markets.length">Заявок пока нет.</div>
+
+      <t t-if="state.current and state.book">
+        <!-- Пара и сводка за сутки -->
+        <header class="o_coop_dx_bar">
+          <div class="o_coop_dx_picker">
+            <button class="o_coop_dx_pair" t-on-click="togglePicker">
+              <b t-esc="state.current.label"/><span> / RUB</span>
+              <i t-attf-class="fa fa-chevron-{{ state.pickerOpen ? 'up' : 'down' }}"/>
+            </button>
+            <div class="o_coop_dx_pairs" t-if="state.pickerOpen">
+              <input type="search" placeholder="Найти монету" t-att-value="state.pairQuery"
+                     t-on-input="onPairQuery"/>
+              <div class="o_coop_dx_pairhead"><span>Пара</span><span>Цена</span><span>24 ч</span></div>
+              <div t-foreach="pairs" t-as="m" t-key="m.key"
+                   t-att-class="{ 'o_coop_dx_pairrow': true, 'o_coop_dx_pairrow_on': m.key === state.current.key }"
+                   t-on-click="() => this.select(m)">
+                <span><b t-esc="m.label"/> / RUB</span>
+                <span class="o_coop_dx_num" t-esc="num(m.last)"/>
+                <span t-att-class="{ 'o_coop_dx_num': true, 'o_coop_dx_up': m.change &gt; 0, 'o_coop_dx_down': m.change &lt; 0 }"
+                      t-esc="pct(m.change)"/>
+              </div>
             </div>
           </div>
-          <div class="o_coop_dext_links">
-            <button class="o_coop_dex_link" t-on-click="openTrades">Мои обмены</button>
-            <button class="o_coop_dex_link" t-on-click="openNode">Свой узел Komodo</button>
+          <div class="o_coop_dx_last">
+            <b t-att-class="lastUp ? 'o_coop_dx_up' : 'o_coop_dx_down'" t-esc="rub(state.current.last)"/>
+            <span t-att-class="{ 'o_coop_dx_up': state.current.change &gt; 0, 'o_coop_dx_down': state.current.change &lt; 0 }"
+                  t-esc="pct(state.current.change)"/>
           </div>
-        </div>
+          <div class="o_coop_dx_stat"><span>Макс. 24 ч</span><b t-esc="state.book.stats.high ? num(state.book.stats.high) : '—'"/></div>
+          <div class="o_coop_dx_stat"><span>Мин. 24 ч</span><b t-esc="state.book.stats.low ? num(state.book.stats.low) : '—'"/></div>
+          <div class="o_coop_dx_stat"><span>Объём 24 ч, <t t-esc="state.current.asset"/></span><b t-esc="qty(state.book.stats.volume)"/></div>
+          <div class="o_coop_dx_stat"><span>Оборот 24 ч, ₽</span><b t-esc="big(state.book.stats.volume_rub)"/></div>
+          <div class="o_coop_dx_stat"><span>Сеть</span><b t-esc="state.current.network"/></div>
+        </header>
 
-        <div class="o_coop_dex_chart" t-if="candles.length &gt;= 2">
-          <div class="o_coop_dex_chartlabels">
-            <span>Цена по дням</span>
-            <span class="o_coop_dex_msub">
-              <t t-esc="candles.length"/> дн. · от <t t-esc="rub(candleRange.min)"/>
-              до <t t-esc="rub(candleRange.max)"/>
-            </span>
-          </div>
-          <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="o_coop_dex_svg">
-            <t t-foreach="candleBars" t-as="b" t-key="b.day">
-              <line t-att-x1="b.x" t-att-x2="b.x" t-att-y1="b.yh" t-att-y2="b.yl"
-                    t-att-class="b.up ? 'o_coop_candle_up' : 'o_coop_candle_down'"
-                    stroke-width="1" vector-effect="non-scaling-stroke"/>
-              <rect t-att-x="b.x - b.w / 2" t-att-width="b.w" t-att-y="b.yt" t-att-height="b.hh"
-                    t-att-class="b.up ? 'o_coop_candle_up' : 'o_coop_candle_down'"/>
-            </t>
-          </svg>
-        </div>
-
-        <div class="o_coop_dex_grid">
-          <div class="o_coop_dex_book">
-            <div class="o_coop_dex_bookcol">
-              <div class="o_coop_dex_bookhead">
-                <span>Продают</span><span class="o_coop_dex_num">Цена</span><span class="o_coop_dex_num">Объём</span>
+        <div class="o_coop_dx_grid">
+          <!-- График -->
+          <section class="o_coop_dx_panel o_coop_dx_chart">
+            <div class="o_coop_dx_panelhead">
+              <div class="o_coop_dx_seg">
+                <button t-att-class="{ 'o_coop_dx_seg_on': state.chart === 'candles' }" t-on-click="() => this.setChart('candles')">Свечи</button>
+                <button t-att-class="{ 'o_coop_dx_seg_on': state.chart === 'depth' }" t-on-click="() => this.setChart('depth')">Глубина</button>
               </div>
-              <div t-foreach="state.book.asks" t-as="o" t-key="o.id" class="o_coop_dex_row o_coop_ask"
-                   t-on-click="() => this.pick(o, true)" t-att-title="o.methods">
-                <span class="o_coop_dex_depth o_coop_depth_ask" t-attf-style="width: {{ depth(o, state.book.asks) }}"/>
-                <span class="o_coop_dex_who"><t t-esc="o.partner"/><b t-if="o.mine"> — ваша</b></span>
-                <span class="o_coop_dex_num" t-esc="rub(o.price)"/>
-                <span class="o_coop_dex_num" t-esc="qty(o.amount)"/>
+              <div class="o_coop_dx_seg" t-if="state.chart === 'candles'">
+                <button t-foreach="ranges" t-as="r" t-key="r.key"
+                        t-att-class="{ 'o_coop_dx_seg_on': state.range === r.key }"
+                        t-on-click="() => this.setRange(r.key)" t-esc="r.label"/>
+              </div>
+            </div>
+            <t t-if="state.chart === 'candles'">
+              <div class="o_coop_dx_plot" t-if="candles.length &gt;= 2">
+                <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="o_coop_dx_svg">
+                  <t t-foreach="priceTicks" t-as="tk" t-key="tk_index">
+                    <line x1="0" x2="100" t-att-y1="4 + tk_index * 17.5" t-att-y2="4 + tk_index * 17.5"
+                          class="o_coop_dx_gridline" vector-effect="non-scaling-stroke"/>
+                  </t>
+                  <t t-foreach="candleBars" t-as="b" t-key="b.day">
+                    <rect t-att-x="b.x - b.w / 2" t-att-width="b.w" t-att-y="b.vy" t-att-height="b.vh"
+                          t-att-class="b.up ? 'o_coop_dx_vol_up' : 'o_coop_dx_vol_down'"/>
+                    <line t-att-x1="b.x" t-att-x2="b.x" t-att-y1="b.yh" t-att-y2="b.yl"
+                          t-att-class="b.up ? 'o_coop_candle_up' : 'o_coop_candle_down'"
+                          stroke-width="1" vector-effect="non-scaling-stroke"/>
+                    <rect t-att-x="b.x - b.w / 2" t-att-width="b.w" t-att-y="b.yt" t-att-height="b.hh"
+                          t-att-class="b.up ? 'o_coop_candle_up' : 'o_coop_candle_down'"/>
+                  </t>
+                </svg>
+                <div class="o_coop_dx_ticks">
+                  <span t-foreach="priceTicks" t-as="tk" t-key="tk_index" t-attf-style="top: {{ tk.top }}"
+                        t-esc="num(tk.v)"/>
+                </div>
+                <div class="o_coop_dx_days">
+                  <span t-foreach="dayLabels" t-as="d" t-key="d_index" t-attf-style="left: {{ d.left }}" t-esc="d.label"/>
+                </div>
+              </div>
+              <div class="o_coop_dex_empty" t-else="">Торгов по паре пока мало для графика.</div>
+            </t>
+            <t t-else="">
+              <div class="o_coop_dx_plot" t-if="depth">
+                <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="o_coop_dx_svg">
+                  <path t-att-d="depth.bids" class="o_coop_dx_depth_bid" vector-effect="non-scaling-stroke"/>
+                  <path t-att-d="depth.asks" class="o_coop_dx_depth_ask" vector-effect="non-scaling-stroke"/>
+                </svg>
+                <div class="o_coop_dx_depthlegend">
+                  <span class="o_coop_dx_up">Покупают всего <t t-esc="qty(depth.bidTotal)"/></span>
+                  <span t-if="depth.mid">середина <b t-esc="rub(depth.mid)"/></span>
+                  <span class="o_coop_dx_down">Продают всего <t t-esc="qty(depth.askTotal)"/></span>
+                </div>
+                <div class="o_coop_dx_days">
+                  <span style="left: 3%" t-esc="num(depth.lo)"/>
+                  <span style="left: 97%" t-esc="num(depth.hi)"/>
+                </div>
+              </div>
+              <div class="o_coop_dex_empty" t-else="">Стакан пуст.</div>
+            </t>
+          </section>
+
+          <!-- Стакан -->
+          <section class="o_coop_dx_panel o_coop_dx_book">
+            <div class="o_coop_dx_panelhead">
+              <b>Стакан</b>
+              <div class="o_coop_dx_seg">
+                <button t-att-class="{ 'o_coop_dx_seg_on': state.bookView === 'both' }" title="Покупки и продажи"
+                        t-on-click="() => this.setBookView('both')">Оба</button>
+                <button t-att-class="{ 'o_coop_dx_seg_on': state.bookView === 'bids' }" title="Только покупки"
+                        t-on-click="() => this.setBookView('bids')">Покупки</button>
+                <button t-att-class="{ 'o_coop_dx_seg_on': state.bookView === 'asks' }" title="Только продажи"
+                        t-on-click="() => this.setBookView('asks')">Продажи</button>
+              </div>
+            </div>
+            <div class="o_coop_dx_bookhead">
+              <span>Цена, ₽</span><span>Кол-во, <t t-esc="state.current.asset"/></span><span>Сумма, ₽</span>
+            </div>
+            <div class="o_coop_dx_side" t-if="state.bookView !== 'bids'">
+              <div class="o_coop_dx_sidelabel o_coop_dx_down">Продают · <t t-esc="state.book.asks.length"/></div>
+              <div t-foreach="asksShown" t-as="o" t-key="o.id"
+                   t-att-class="{ 'o_coop_dx_row': true, 'o_coop_dx_ask': true, 'o_coop_dx_row_mine': o.mine }"
+                   t-on-click="() => this.pick(o, true)"
+                   t-att-title="o.partner + ' · доверие ' + o.trust + '% · ' + o.methods">
+                <span class="o_coop_dx_bar_ask" t-attf-style="width: {{ o.depth }}"/>
+                <span class="o_coop_dx_down" t-esc="num(o.price)"/>
+                <span t-esc="qty(o.amount)"/>
+                <span t-esc="big(o.total)"/>
               </div>
               <div class="o_coop_dex_empty" t-if="!state.book.asks.length">Никто не продаёт.</div>
             </div>
-            <div class="o_coop_dex_bookcol">
-              <div class="o_coop_dex_bookhead">
-                <span>Покупают</span><span class="o_coop_dex_num">Цена</span><span class="o_coop_dex_num">Объём</span>
+            <div class="o_coop_dx_mid">
+              <b t-att-class="lastUp ? 'o_coop_dx_up' : 'o_coop_dx_down'">
+                <t t-esc="num(state.current.last)"/>
+                <i t-attf-class="fa fa-arrow-{{ lastUp ? 'up' : 'down' }}"/>
+              </b>
+              <span t-if="spread">спред <t t-esc="num(spread.abs)"/> ₽ · <t t-esc="spread.pct.toFixed(2)"/>%</span>
+            </div>
+            <div class="o_coop_dx_side" t-if="state.bookView !== 'asks'">
+              <div t-foreach="bidsShown" t-as="o" t-key="o.id"
+                   t-att-class="{ 'o_coop_dx_row': true, 'o_coop_dx_bid': true, 'o_coop_dx_row_mine': o.mine }"
+                   t-on-click="() => this.pick(o, false)"
+                   t-att-title="o.partner + ' · доверие ' + o.trust + '% · ' + o.methods">
+                <span class="o_coop_dx_bar_bid" t-attf-style="width: {{ o.depth }}"/>
+                <span class="o_coop_dx_up" t-esc="num(o.price)"/>
+                <span t-esc="qty(o.amount)"/>
+                <span t-esc="big(o.total)"/>
               </div>
-              <div t-foreach="state.book.bids" t-as="o" t-key="o.id" class="o_coop_dex_row o_coop_bid"
-                   t-on-click="() => this.pick(o, false)" t-att-title="o.methods">
-                <span class="o_coop_dex_depth o_coop_depth_bid" t-attf-style="width: {{ depth(o, state.book.bids) }}"/>
-                <span class="o_coop_dex_who"><t t-esc="o.partner"/><b t-if="o.mine"> — ваша</b></span>
-                <span class="o_coop_dex_num" t-esc="rub(o.price)"/>
-                <span class="o_coop_dex_num" t-esc="qty(o.amount)"/>
-              </div>
+              <div class="o_coop_dx_sidelabel o_coop_dx_up">Покупают · <t t-esc="state.book.bids.length"/></div>
               <div class="o_coop_dex_empty" t-if="!state.book.bids.length">Никто не покупает.</div>
             </div>
-          </div>
+          </section>
 
-          <div class="o_coop_dex_form">
-            <div class="o_coop_dex_tabs">
-              <button t-att-class="{ 'o_coop_dex_tab': true, 'o_coop_dex_tab_buy': state.side === 'buy' }"
-                      t-on-click="() => this.setSide('buy')">Купить</button>
-              <button t-att-class="{ 'o_coop_dex_tab': true, 'o_coop_dex_tab_sell': state.side === 'sell' }"
-                      t-on-click="() => this.setSide('sell')">Продать</button>
+          <!-- Лента сделок -->
+          <section class="o_coop_dx_panel o_coop_dx_tape">
+            <div class="o_coop_dx_panelhead"><b>Сделки</b></div>
+            <div class="o_coop_dx_bookhead">
+              <span>Цена, ₽</span><span>Кол-во</span><span>Время</span>
             </div>
-            <div class="o_coop_dex_types">
-              <label><input type="radio" name="coop_dext_type" t-att-checked="state.orderType === 'limit'"
-                            t-on-change="() => this.setType('limit')"/> Лимитная</label>
-              <label><input type="radio" name="coop_dext_type" t-att-checked="state.orderType === 'market'"
-                            t-on-change="() => this.setType('market')"/> По рынку</label>
+            <div class="o_coop_dx_tapebody">
+              <div t-foreach="state.book.trades" t-as="t" t-key="t.id" class="o_coop_dx_row">
+                <span t-att-class="t.side === 'buy' ? 'o_coop_dx_up' : 'o_coop_dx_down'" t-esc="num(t.price)"/>
+                <span t-esc="qty(t.amount)"/>
+                <span class="o_coop_dx_muted" t-att-title="t.when" t-esc="t_index &lt; 12 ? time(t.when) : date(t.when)"/>
+              </div>
+              <div class="o_coop_dex_empty" t-if="!state.book.trades.length">Сделок по паре ещё не было.</div>
             </div>
-            <div class="o_coop_dex_field" t-if="state.orderType === 'limit'">
-              <label>Цена за 1 <t t-esc="state.current.asset"/>, ₽</label>
-              <input type="number" min="0" step="0.01" t-att-value="state.price"
-                     t-on-input="(ev) => this.onNum('price', ev)"/>
-            </div>
-            <div class="o_coop_dex_field" t-else="">
-              <label>Цена</label>
-              <div class="o_coop_dex_value">лучшая встречная — <t t-esc="marketPrice ? rub(marketPrice) : 'нет заявок'"/></div>
-            </div>
-            <div class="o_coop_dex_field">
-              <label>Сколько, <t t-esc="state.current.asset"/></label>
-              <input type="number" min="0" step="0.00000001" t-att-value="state.amount"
-                     t-on-input="(ev) => this.onNum('amount', ev)"/>
-            </div>
-            <div class="o_coop_dex_field">
-              <label>Рубли — как</label>
-              <div class="o_coop_dex_types">
+          </section>
+
+          <!-- Формы -->
+          <section class="o_coop_dx_panel o_coop_dx_forms">
+            <div class="o_coop_dx_panelhead">
+              <div class="o_coop_dx_seg">
+                <button t-att-class="{ 'o_coop_dx_seg_on': state.orderType === 'limit' }" t-on-click="() => this.setType('limit')">Лимитная</button>
+                <button t-att-class="{ 'o_coop_dx_seg_on': state.orderType === 'market' }" t-on-click="() => this.setType('market')">По рынку</button>
+              </div>
+              <div class="o_coop_dx_methods">
+                <span class="o_coop_dx_muted">Рубли:</span>
                 <label><input type="checkbox" t-att-checked="state.methods.sbp" t-on-change="() => this.toggleMethod('sbp')"/> СБП</label>
-                <label><input type="checkbox" t-att-checked="state.methods.bank" t-on-change="() => this.toggleMethod('bank')"/> Перевод</label>
-                <label><input type="checkbox" t-att-checked="state.methods.cash" t-on-change="() => this.toggleMethod('cash')"/> Наличные</label>
+                <label><input type="checkbox" t-att-checked="state.methods.bank" t-on-change="() => this.toggleMethod('bank')"/> перевод</label>
+                <label><input type="checkbox" t-att-checked="state.methods.cash" t-on-change="() => this.toggleMethod('cash')"/> наличные</label>
               </div>
             </div>
-            <div class="o_coop_dex_total">
-              <span><t t-esc="state.side === 'buy' ? 'К оплате' : 'Получите'"/></span>
-              <b t-esc="rub(total)"/>
+            <div class="o_coop_dx_formgrid">
+              <t t-foreach="['buy', 'sell']" t-as="side" t-key="side">
+                <div class="o_coop_dx_form">
+                  <div class="o_coop_dx_field">
+                    <label>Цена, ₽</label>
+                    <input t-if="state.orderType === 'limit'" type="number" min="0" step="0.01"
+                           t-att-value="state[side].price" t-on-input="(ev) => this.onNum(side, 'price', ev)"/>
+                    <div t-else="" class="o_coop_dx_marketprice">
+                      по рынку · <t t-esc="marketPrice(side) ? num(marketPrice(side)) : 'нет встречных'"/>
+                    </div>
+                  </div>
+                  <div class="o_coop_dx_field">
+                    <label>Кол-во, <t t-esc="state.current.asset"/></label>
+                    <input type="number" min="0" step="0.00000001" t-att-value="state[side].amount"
+                           t-on-input="(ev) => this.onNum(side, 'amount', ev)"/>
+                  </div>
+                  <div class="o_coop_dx_total">
+                    <span t-esc="side === 'buy' ? 'К оплате' : 'Получите'"/>
+                    <b t-esc="rub(total(side))"/>
+                  </div>
+                  <button t-att-class="side === 'buy' ? 'o_coop_dx_go o_coop_dx_go_buy' : 'o_coop_dx_go o_coop_dx_go_sell'"
+                          t-att-disabled="!canTrade(side)" t-on-click="() => this.placeOrder(side)">
+                    <t t-esc="(side === 'buy' ? 'Купить ' : 'Продать ') + state.current.asset"/>
+                  </button>
+                </div>
+              </t>
             </div>
-            <button class="o_coop_dex_go" t-att-class="{ 'o_coop_dex_go_sell': state.side === 'sell' }"
-                    t-att-disabled="!canTrade" t-on-click="placeOrder">
-              <t t-esc="state.side === 'buy' ? 'Купить ' + state.current.asset : 'Продать ' + state.current.asset"/>
-            </button>
-            <div class="o_coop_dex_note">
-              Заявка сводится со встречными сразу — с теми, у кого есть общий
-              способ расчёта рублями. Монета идёт с кошелька на кошелёк напрямую,
-              рубли — переводом между сторонами; платформа ключей и денег не держит.
+            <div class="o_coop_dx_note">
+              Заявка сводится со встречными сразу — с теми, у кого есть общий способ расчёта
+              рублями. Монета идёт с кошелька на кошелёк напрямую, рубли — переводом между
+              сторонами; платформа ключей и денег не держит. Щелчок по строке стакана подставит
+              цену и объём.
             </div>
-          </div>
-        </div>
+          </section>
 
-        <div class="o_coop_dext_bottom">
-          <div class="o_coop_dext_list">
-            <div class="o_coop_dext_listhead">Последние сделки</div>
-            <div t-foreach="state.book.trades" t-as="t" t-key="t.id" class="o_coop_dext_trade">
-              <span t-att-class="t.side === 'buy' ? 'o_coop_dext_up' : 'o_coop_dext_down'" t-esc="rub(t.price)"/>
-              <span class="o_coop_dex_num" t-esc="qty(t.amount)"/>
-              <span class="o_coop_dex_msub" t-esc="t.when.slice(0, 16)"/>
+          <!-- Мои заявки и сделки -->
+          <section class="o_coop_dx_panel o_coop_dx_orders">
+            <div class="o_coop_dx_panelhead">
+              <div class="o_coop_dx_seg">
+                <button t-att-class="{ 'o_coop_dx_seg_on': state.bottom === 'open' }" t-on-click="() => this.setBottom('open')">
+                  Открытые заявки · <t t-esc="state.book.mine.length"/>
+                </button>
+                <button t-att-class="{ 'o_coop_dx_seg_on': state.bottom === 'history' }" t-on-click="() => this.setBottom('history')">
+                  История заявок
+                </button>
+                <button t-att-class="{ 'o_coop_dx_seg_on': state.bottom === 'trades' }" t-on-click="() => this.setBottom('trades')">
+                  Мои сделки · <t t-esc="state.book.my_trades.length"/>
+                </button>
+              </div>
             </div>
-            <div class="o_coop_dex_empty" t-if="!state.book.trades.length">Сделок по паре ещё не было.</div>
-          </div>
-          <div class="o_coop_dext_list" t-if="state.book.mine.length">
-            <div class="o_coop_dext_listhead">Мои заявки</div>
-            <div t-foreach="state.book.mine" t-as="o" t-key="o.id" class="o_coop_dext_trade">
-              <span t-att-class="o.side === 'buy' ? 'o_coop_dext_up' : 'o_coop_dext_down'">
-                <t t-esc="o.side === 'buy' ? 'покупка' : 'продажа'"/>
-              </span>
-              <span class="o_coop_dex_num"><t t-esc="qty(o.amount)"/> по <t t-esc="rub(o.price)"/></span>
-              <button class="o_coop_dex_link" t-on-click="() => this.cancelMine(o)">снять</button>
+            <table class="o_coop_dx_table" t-if="state.bottom === 'open' and state.book.mine.length">
+              <thead><tr><th>Когда</th><th>Сторона</th><th>Цена, ₽</th><th>Кол-во</th><th>Исполнено</th><th>Способы</th><th/></tr></thead>
+              <tbody>
+                <tr t-foreach="state.book.mine" t-as="o" t-key="o.id">
+                  <td t-esc="date(o.when)"/>
+                  <td t-att-class="o.side === 'buy' ? 'o_coop_dx_up' : 'o_coop_dx_down'" t-esc="o.side === 'buy' ? 'покупка' : 'продажа'"/>
+                  <td t-esc="num(o.price)"/>
+                  <td t-esc="qty(o.amount + o.filled)"/>
+                  <td t-esc="qty(o.filled)"/>
+                  <td class="o_coop_dx_muted" t-esc="o.methods"/>
+                  <td><button class="o_coop_dex_link" t-on-click="() => this.cancelMine(o)">снять</button></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="o_coop_dex_empty" t-if="state.bottom === 'open' and !state.book.mine.length">
+              Открытых заявок по паре нет. Выставите заявку формой выше.
             </div>
-          </div>
+            <table class="o_coop_dx_table" t-if="state.bottom === 'history' and state.book.history.length">
+              <thead><tr><th>Когда</th><th>Сторона</th><th>Цена, ₽</th><th>Кол-во</th><th>Исполнено</th><th>Состояние</th></tr></thead>
+              <tbody>
+                <tr t-foreach="state.book.history" t-as="o" t-key="o.id">
+                  <td t-esc="date(o.when)"/>
+                  <td t-att-class="o.side === 'buy' ? 'o_coop_dx_up' : 'o_coop_dx_down'" t-esc="o.side === 'buy' ? 'покупка' : 'продажа'"/>
+                  <td t-esc="num(o.price)"/>
+                  <td t-esc="qty(o.amount)"/>
+                  <td t-esc="qty(o.filled)"/>
+                  <td class="o_coop_dx_muted" t-esc="o.state_label"/>
+                </tr>
+              </tbody>
+            </table>
+            <div class="o_coop_dex_empty" t-if="state.bottom === 'history' and !state.book.history.length">
+              Исполненных и снятых заявок по паре нет.
+            </div>
+            <table class="o_coop_dx_table" t-if="state.bottom === 'trades' and state.book.my_trades.length">
+              <thead><tr><th>Когда</th><th>Номер</th><th>Сторона</th><th>Цена, ₽</th><th>Кол-во</th><th>Сумма, ₽</th><th>С кем</th><th>Состояние</th></tr></thead>
+              <tbody>
+                <tr t-foreach="state.book.my_trades" t-as="t" t-key="t.id">
+                  <td t-esc="date(t.when)"/>
+                  <td class="o_coop_dx_muted" t-esc="t.number"/>
+                  <td t-att-class="t.side === 'buy' ? 'o_coop_dx_up' : 'o_coop_dx_down'" t-esc="t.side === 'buy' ? 'покупка' : 'продажа'"/>
+                  <td t-esc="num(t.price)"/>
+                  <td t-esc="qty(t.amount)"/>
+                  <td t-esc="num(t.total)"/>
+                  <td t-esc="t.other"/>
+                  <td class="o_coop_dx_muted" t-esc="t.state_label"/>
+                </tr>
+              </tbody>
+            </table>
+            <div class="o_coop_dex_empty" t-if="state.bottom === 'trades' and !state.book.my_trades.length">
+              Сделок по паре у вас ещё не было.
+            </div>
+          </section>
         </div>
-      </section>
+      </t>
+
+      <div class="o_coop_dx_note">
+        Здесь покупают и продают цифровую валюту как имущество. Расплачиваться цифровой валютой
+        за товары и услуги в России нельзя.
+      </div>
     </div>
   </t>
 </templates>

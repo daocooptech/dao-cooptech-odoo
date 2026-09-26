@@ -19,9 +19,9 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '19.0.1.1.0',
+    'version': '19.0.1.2.0',
     'license': 'LGPL-3',
-    'depends': ['coop_matching', 'coop_base', 'coop_theme', 'coop_wallet', 'mail'],
+    'depends': ['coop_matching', 'coop_base', 'coop_theme', 'coop_wallet', 'coop_projects', 'mail'],
     'data': [
         'security/ir.model.access.csv',
         'security/coop_crypto_rules.xml',
@@ -30,10 +30,13 @@
     'assets': {
         'web.assets_backend': [
             'coop_crypto_exchange/static/src/scss/coop_crypto.scss',
+            'coop_crypto_exchange/static/src/scss/coop_dex.scss',
             'coop_crypto_exchange/static/src/js/dex_terminal.js',
             'coop_crypto_exchange/static/src/xml/dex_terminal.xml',
             'coop_crypto_exchange/static/src/js/dex_node.js',
             'coop_crypto_exchange/static/src/xml/dex_node.xml',
+            'coop_crypto_exchange/static/src/js/dex_farm.js',
+            'coop_crypto_exchange/static/src/xml/dex_farm.xml',
         ],
     },
     'post_init_hook': '_post_init',
