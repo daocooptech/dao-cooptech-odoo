@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Панель по умолчанию и имя действия «Моя панель» — функцией: вид и
+       действие у модуля board помечены noupdate, а виджеты панели
+       ссылаются на действия по числовому id (board_view.js, parseInt). -->
+  <function model="board.board" name="_coop_default_board"/>
+</odoo>

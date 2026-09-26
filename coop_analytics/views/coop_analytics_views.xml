@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Графики и сводные таблицы разделов для «Моей панели» (решение 420).
+    Чужого здесь не видно: сделки, деньги и обмены отбирают правила записей
+    своих модулей, вклады и курсы — отбор действия по участнику. Любой вид
+    можно добавить на панель: меню действий вида → «Добавить на мою панель».
+  -->
+
+  <!-- ── Сделки ─────────────────────────────────────────────────── -->
+  <record id="view_coop_an_deal_graph" model="ir.ui.view">
+    <field name="name">coop.analytics.deal.graph</field>
+    <field name="model">coop.deal</field>
+    <field name="priority">90</field>
+    <field name="arch" type="xml">
+      <graph string="Сделки" type="bar" stacked="1">
+        <field name="signed_on" interval="month"/>
+        <field name="state"/>
+        <field name="amount" type="measure"/>
+      </graph>
+    </field>
+  </record>
+  <record id="view_coop_an_deal_pivot" model="ir.ui.view">
+    <field name="name">coop.analytics.deal.pivot</field>
+    <field name="model">coop.deal</field>
+    <field name="priority">90</field>
+    <field name="arch" type="xml">
+      <pivot string="Сделки">
+        <field name="subject" type="row"/>
+        <field name="state" type="col"/>
+        <field name="amount" type="measure"/>
+        <field name="amount_paid" type="measure"/>
+      </pivot>
+    </field>
+  </record>
+  <record id="action_coop_an_deals" model="ir.actions.act_window">
+    <field name="name">Сделки</field>
+    <field name="res_model">coop.deal</field>
+    <field name="path">analytics-deals</field>
+    <field name="context">{'coop_section': 1}</field>
+    <field name="view_mode">graph,pivot,list</field>
+    <field name="view_ids" eval="[(5, 0, 0),
+           (0, 0, {'sequence': 10, 'view_mode': 'graph', 'view_id': ref('view_coop_an_deal_graph')}),
+           (0, 0, {'sequence': 20, 'view_mode': 'pivot', 'view_id': ref('view_coop_an_deal_pivot')})]"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Сделок пока нет</p>
+      <p>Здесь — ваши сделки по месяцам, суммам и состояниям.</p>
+    </field>
+  </record>
+
+  <!-- ── Деньги ─────────────────────────────────────────────────── -->
+  <record id="view_coop_an_money_graph" model="ir.ui.view">
+    <field name="name">coop.analytics.money.graph</field>
+    <field name="model">coop.wallet.movement</field>
+    <field name="priority">90</field>
+    <field name="arch" type="xml">
+      <graph string="Деньги" type="bar" stacked="1">
+        <field name="date" interval="month"/>
+        <field name="kind"/>
+        <field name="amount" type="measure"/>
+      </graph>
+    </field>
+  </record>
+  <record id="view_coop_an_money_pivot" model="ir.ui.view">
+    <field name="name">coop.analytics.money.pivot</field>
+    <field name="model">coop.wallet.movement</field>
+    <field name="priority">90</field>
+    <field name="arch" type="xml">
+      <pivot string="Деньги">
+        <field name="date" interval="month" type="row"/>
+        <field name="kind" type="col"/>
+        <field name="amount" type="measure"/>
+      </pivot>
+    </field>
+  </record>
+  <record id="action_coop_an_money" model="ir.actions.act_window">
+    <field name="name">Деньги</field>
+    <field name="res_model">coop.wallet.movement</field>
+    <field name="path">analytics-money</field>
+    <field name="context">{'coop_section': 1}</field>
+    <field name="view_mode">graph,pivot,list</field>
+    <field name="view_ids" eval="[(5, 0, 0),
+           (0, 0, {'sequence': 10, 'view_mode': 'graph', 'view_id': ref('view_coop_an_money_graph')}),
+           (0, 0, {'sequence': 20, 'view_mode': 'pivot', 'view_id': ref('view_coop_an_money_pivot')})]"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Движений по кошельку пока нет</p>
+      <p>Пополнения, выводы, переводы и расчёты по сделкам — по месяцам.</p>
+    </field>
+  </record>
+
+  <!-- ── Вклады в проекты ───────────────────────────────────────── -->
+  <record id="view_coop_an_contrib_graph" model="ir.ui.view">
+    <field name="name">coop.analytics.contribution.graph</field>
+    <field name="model">coop.project.contribution</field>
+    <field name="priority">90</field>
+    <field name="arch" type="xml">
+      <graph string="Вклады в проекты" type="bar">
+        <field name="kind"/>
+        <field name="value" type="measure"/>
+      </graph>
+    </field>
+  </record>
+  <record id="view_coop_an_contrib_pivot" model="ir.ui.view">
+    <field name="name">coop.analytics.contribution.pivot</field>
+    <field name="model">coop.project.contribution</field>
+    <field name="priority">90</field>
+    <field name="arch" type="xml">
+      <pivot string="Вклады в проекты">
+        <field name="project_id" type="row"/>
+        <field name="kind" type="col"/>
+        <field name="value" type="measure"/>
+      </pivot>
+    </field>
+  </record>
+  <record id="action_coop_an_contributions" model="ir.actions.act_window">
+    <field name="name">Вклады в проекты</field>
+    <field name="res_model">coop.project.contribution</field>
+    <field name="path">analytics-contributions</field>
+    <field name="context">{'coop_section': 1}</field>
+    <field name="view_mode">graph,pivot,list</field>
+    <field name="domain">[('partner_id.user_ids', 'in', [uid])]</field>
+    <field name="view_ids" eval="[(5, 0, 0),
+           (0, 0, {'sequence': 10, 'view_mode': 'graph', 'view_id': ref('view_coop_an_contrib_graph')}),
+           (0, 0, {'sequence': 20, 'view_mode': 'pivot', 'view_id': ref('view_coop_an_contrib_pivot')})]"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Вкладов пока нет</p>
+      <p>Деньги, труд, ресурсы и знания, вложенные вами в проекты платформы.</p>
+    </field>
+  </record>
+
+  <!-- ── Биржа ──────────────────────────────────────────────────── -->
+  <record id="view_coop_an_dex_graph" model="ir.ui.view">
+    <field name="name">coop.analytics.dex.graph</field>
+    <field name="model">coop.crypto.trade</field>
+    <field name="priority">90</field>
+    <field name="arch" type="xml">
+      <graph string="Обмены на бирже" type="bar" stacked="1">
+        <field name="date" interval="month"/>
+        <field name="asset"/>
+        <field name="total" type="measure"/>
+      </graph>
+    </field>
+  </record>
+  <record id="view_coop_an_dex_pivot" model="ir.ui.view">
+    <field name="name">coop.analytics.dex.pivot</field>
+    <field name="model">coop.crypto.trade</field>
+    <field name="priority">90</field>
+    <field name="arch" type="xml">
+      <pivot string="Обмены на бирже">
+        <field name="asset" type="row"/>
+        <field name="state" type="col"/>
+        <field name="total" type="measure"/>
+        <field name="amount" type="measure"/>
+      </pivot>
+    </field>
+  </record>
+  <record id="action_coop_an_dex" model="ir.actions.act_window">
+    <field name="name">Биржа</field>
+    <field name="res_model">coop.crypto.trade</field>
+    <field name="path">analytics-dex</field>
+    <field name="context">{'coop_section': 1}</field>
+    <field name="view_mode">graph,pivot,list</field>
+    <field name="view_ids" eval="[(5, 0, 0),
+           (0, 0, {'sequence': 10, 'view_mode': 'graph', 'view_id': ref('view_coop_an_dex_graph')}),
+           (0, 0, {'sequence': 20, 'view_mode': 'pivot', 'view_id': ref('view_coop_an_dex_pivot')})]"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Обменов на бирже пока нет</p>
+      <p>Ваши обмены на DEX бирже — по месяцам, монетам и состояниям.</p>
+    </field>
+  </record>
+
+  <!-- ── Обучение ───────────────────────────────────────────────── -->
+  <record id="view_coop_an_course_graph" model="ir.ui.view">
+    <field name="name">coop.analytics.course.graph</field>
+    <field name="model">slide.channel</field>
+    <field name="priority">95</field>
+    <field name="arch" type="xml">
+      <graph string="Мои курсы" type="bar">
+        <field name="coop_topic"/>
+        <field name="coop_level"/>
+      </graph>
+    </field>
+  </record>
+  <record id="view_coop_an_course_pivot" model="ir.ui.view">
+    <field name="name">coop.analytics.course.pivot</field>
+    <field name="model">slide.channel</field>
+    <field name="priority">95</field>
+    <field name="arch" type="xml">
+      <pivot string="Мои курсы">
+        <field name="coop_topic" type="row"/>
+        <field name="coop_level" type="col"/>
+        <field name="total_time" type="measure"/>
+      </pivot>
+    </field>
+  </record>
+  <record id="action_coop_an_courses" model="ir.actions.act_window">
+    <field name="name">Обучение</field>
+    <field name="res_model">slide.channel</field>
+    <field name="path">analytics-courses</field>
+    <field name="context">{'coop_section': 1}</field>
+    <field name="view_mode">graph,pivot,list</field>
+    <field name="domain">[('is_member', '=', True)]</field>
+    <field name="view_ids" eval="[(5, 0, 0),
+           (0, 0, {'sequence': 10, 'view_mode': 'graph', 'view_id': ref('view_coop_an_course_graph')}),
+           (0, 0, {'sequence': 20, 'view_mode': 'pivot', 'view_id': ref('view_coop_an_course_pivot')})]"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Вы ещё не записались ни на один курс</p>
+      <p>Курсы, на которые вы записаны, — по темам и уровням.</p>
+    </field>
+  </record>
+
+  <!-- «Моя панель» — своё действие на штатный вид панели: у штатного
+       действия есть пункт в разделе «Дашборды», и вкладки над панелью
+       брались бы оттуда. Личная разметка хранится по виду, поэтому
+       «Добавить на мою панель» (оно пишет в штатный вид) попадает сюда же. -->
+  <record id="action_coop_my_panel" model="ir.actions.act_window">
+    <field name="name">Моя панель</field>
+    <field name="res_model">board.board</field>
+    <field name="path">analytics</field>
+    <field name="view_mode">form</field>
+    <field name="usage">menu</field>
+    <!-- coop_settings — вкладки раздела над формой (catalog_view.js, coopHasTabs). -->
+    <field name="context">{'disable_toolbar': True, 'coop_settings': 1}</field>
+    <field name="view_id" ref="board.board_my_dash_view"/>
+  </record>
+
+  <!-- ── Меню раздела: вкладки над видом ───────────────────────── -->
+  <menuitem id="menu_coop_analytics_root" name="Аналитика" sequence="153"
+            action="action_coop_my_panel"/>
+  <menuitem id="menu_coop_analytics_board" name="Моя панель"
+            parent="menu_coop_analytics_root" action="action_coop_my_panel" sequence="10"/>
+  <menuitem id="menu_coop_analytics_money" name="Деньги"
+            parent="menu_coop_analytics_root" action="action_coop_an_money" sequence="20"/>
+  <menuitem id="menu_coop_analytics_deals" name="Сделки"
+            parent="menu_coop_analytics_root" action="action_coop_an_deals" sequence="30"/>
+  <menuitem id="menu_coop_analytics_contrib" name="Вклады в проекты"
+            parent="menu_coop_analytics_root" action="action_coop_an_contributions" sequence="40"/>
+  <menuitem id="menu_coop_analytics_dex" name="Биржа"
+            parent="menu_coop_analytics_root" action="action_coop_an_dex" sequence="50"/>
+  <menuitem id="menu_coop_analytics_courses" name="Обучение"
+            parent="menu_coop_analytics_root" action="action_coop_an_courses" sequence="60"/>
+
+</odoo>

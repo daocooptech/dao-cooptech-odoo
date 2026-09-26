@@ -116,7 +116,8 @@ EXTENSION_ITEMS = [
     # Решение 411 (Н3): курсы на штатном eLearning, каталог — coop_education.
     # Выше «Аналитики» — владелец 26.09.2026.
     ('Образование', 'fa-graduation-cap', 'coop_education.action_coop_courses'),
-    ('Аналитика', 'fa-bar-chart', ''),
+    # Решение 420, слой 1: «Моя панель» — личный конструктор (coop_analytics).
+    ('Аналитика', 'fa-bar-chart', 'coop_analytics.action_coop_my_panel'),
     ('Диск', 'fa-folder-open-o', ''),
 ]
 

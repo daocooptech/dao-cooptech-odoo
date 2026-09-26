@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <!-- Вкладки раздела над «Моей панелью» (js/board_tabs.js). -->
+  <t t-inherit="board.BoardView" t-inherit-mode="extension">
+    <xpath expr="//div[hasclass('o_dashboard')]/t[1]" position="before">
+      <div class="o_coop_board_tabs"><CoopTabs/></div>
+    </xpath>
+  </t>
+</templates>
