@@ -698,7 +698,21 @@ def load_resources(env, extra=45):
             ('city', '=', row['city']),
             ('owner_id', '=', owner.id),
         ], limit=1)
+        if not existing:
+            # Одинаковые заголовки делаются различимыми уточнением после
+            # названия (`load_spread.dedupe_resource_titles`): «…, с
+            # доставкой», «… — Тюмень». Без этого поиска загрузчик не узнавал
+            # переименованное и заводил его заново — по 29 объявлений за
+            # каждое обновление (замер 26.09).
+            stem = (row['name'].replace('\\', '\\\\').replace('%', r'\%')
+                    .replace('_', r'\_'))
+            existing = Resource.search([
+                '|', ('name', '=like', stem + ', %'), ('name', '=like', stem + ' — %'),
+                ('city', '=', row['city']),
+                ('owner_id', '=', owner.id),
+            ], limit=1)
         if existing:
+            values.pop('name', None)
             existing.write(values)
             updated += 1
         else:

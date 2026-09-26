@@ -94,8 +94,11 @@ def fill_resource_terms(env):
                                                     or t.note or t.price_unit_label))
     filled = 0
     for term in empty:
-        rnd = random.Random(20260925 + term.id)
+        # Жребий — от объявления и способа, а не от номера строки: строку
+        # пересоздаёт смена способов, и текст не должен от этого меняться.
+        rnd = random.Random("%s:%s" % (term.resource_id.id, term.code))
         resource = term.resource_id
+        code = term.code
         base = resource.price or 0
         unit = resource.price_unit_label or resource.uom_label or ''
         if code != 'rent' and _rent_priced(resource):
@@ -104,7 +107,6 @@ def fill_resource_terms(env):
             base, unit = _value_of(resource), resource.uom_label or ''
         request = resource.listing_type == 'request'
         vals = {}
-        code = term.code
         if code == 'sale':
             vals = {'price': base, 'price_unit_label': unit,
                     'note': rnd.choice(BUY_NOTES if request else SALE_NOTES)}

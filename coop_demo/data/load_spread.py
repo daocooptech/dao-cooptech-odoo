@@ -447,6 +447,7 @@ def spread_all(env):
     total['vacancies'] = _hand_out(env, 'coop.vacancy', 'partner_id', VACANCIES_COUNT,
                                 [('project_id', '=', False)])
     total['projects'] = _hand_out(env, 'coop.project', 'partner_id', PROJECTS_COUNT)
+    total['titles'] = dedupe_resource_titles(env)
     _logger.info('Выравнивание полок: %s', total)
     return total
 
@@ -548,3 +549,81 @@ def ensure_extra_specializations(env):
 
     _logger.info('Специализации: вторая и третья розданы %s людям', given)
     return given
+
+
+# Уточнения к одинаковым объявлениям в одном городе — по первому слову.
+_QUALIFIERS = {
+    'ищу': ['срочно', 'на этой неделе', 'можно б/у', 'недорого', 'рядом с домом',
+            'на выходные', 'с доставкой', 'для дачи'],
+    'куплю': ['недорого', 'можно б/у', 'регулярно', 'с доставкой', 'оптом',
+              'на этой неделе', 'для хозяйства', 'срочно'],
+    'нужен': ['срочно', 'на выходные', 'недорого', 'на сезон', 'с опытом',
+              'на этой неделе', 'рядом с домом', 'по договору'],
+    'нужна': ['срочно', 'на выходные', 'недорого', 'на сезон', 'с опытом',
+              'на этой неделе', 'рядом с домом', 'по договору'],
+    'сдам': ['недорого', 'надолго', 'посуточно', 'с доставкой', 'с залогом',
+             'на выходные', 'помесячно', 'по договору'],
+    'отдам': ['даром', 'срочно', 'самовывоз сегодня', 'в хорошие руки', 'пока есть',
+              'на этой неделе', 'много', 'помогу погрузить'],
+    'продам': ['недорого', 'с доставкой', 'оптом дешевле', 'свежее', 'с документами',
+               'в наличии', 'на заказ', 'от производителя'],
+    'помогу': ['недорого', 'в выходные', 'по вечерам', 'с инструментом', 'с опытом',
+               'за продукты', 'по договору', 'быстро'],
+}
+_DEFAULT_QUALIFIERS = ['недорого', 'в наличии', 'по договору', 'с доставкой', 'срочно',
+                       'на выгодных условиях', 'рядом', 'на заказ']
+
+
+def dedupe_resource_titles(env):
+    """Одинаковые заголовки в «Ресурсах» — различимыми (решение 416).
+
+    Генераторы личных предложений и потребностей брали заголовок из
+    короткого списка, и в каталоге стояло по двадцать «Ищу бетономешалку в
+    аренду на выходные», а у проектов — по девяносто «Расходные материалы
+    для монтажа». Копии одной строки каталогом не считаются.
+
+    Первое объявление с заголовком остаётся как есть. Потребности проекта
+    получают название проекта; личные объявления — город, как уже принято
+    в данных («Генератор на 5 кВт — Екатеринбург»); если и город
+    совпал — уточнение по первому слову («срочно», «можно б/у»).
+    Повторный запуск ничего не меняет: копий не остаётся.
+    """
+    Resource = env['coop.resource'].sudo().with_context(active_test=False,
+                                                        tracking_disable=True)
+    records = Resource.search([], order='id')
+    taken = set()
+    by_name = {}
+    for record in records:
+        by_name.setdefault(record.name, []).append(record)
+    renamed = 0
+    for name, group in by_name.items():
+        taken.add(name)
+    for name, group in by_name.items():
+        if len(group) < 2:
+            continue
+        for index, record in enumerate(group[1:], start=1):
+            base = name
+            if record.project_id:
+                candidates = ['%s — %s' % (base, record.project_id.name)]
+            else:
+                candidates = []
+                if record.city and ('— %s' % record.city) not in base:
+                    candidates.append('%s — %s' % (base, record.city))
+                word = (base.split(' ', 1)[0] or '').lower()
+                # Город уже в заголовке («Генератор — Самара») — второй раз
+                # его не дописываем.
+                city = record.city if record.city and record.city not in base else ''
+                for qualifier in _QUALIFIERS.get(word, _DEFAULT_QUALIFIERS):
+                    candidates.append('%s, %s%s' % (
+                        base, qualifier, (' — %s' % city) if city else ''))
+            new = next((c for c in candidates if c not in taken), None)
+            if not new:
+                new = '%s (%s)' % (candidates[0] if candidates else base, index + 1)
+                if new in taken:
+                    continue
+            taken.add(new)
+            record.name = new
+            renamed += 1
+    if renamed:
+        _logger.info('Ресурсы: одинаковые заголовки сделаны различимыми у %s', renamed)
+    return renamed
