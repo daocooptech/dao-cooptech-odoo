@@ -174,10 +174,32 @@
             </div>
           </div>
 
+          <!-- Дневные свечи по сделкам (решение 417) — когда торгов хватает
+               хотя бы на три дня; иначе — линия по сделкам ниже. -->
+          <div class="o_coop_dex_chart" t-if="candles.length &gt;= 3">
+            <div class="o_coop_dex_chartlabels">
+              <span>Цена по дням</span>
+              <span class="o_coop_dex_msub">
+                <t t-esc="candles.length"/> дн. торгов ·
+                от <t t-esc="money(candleRange.min, current.currency)"/>
+                до <t t-esc="money(candleRange.max, current.currency)"/>
+              </span>
+            </div>
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="o_coop_dex_svg">
+              <t t-foreach="candleBars" t-as="b" t-key="b.day">
+                <line t-att-x1="b.x" t-att-x2="b.x" t-att-y1="b.yh" t-att-y2="b.yl"
+                      t-att-class="b.up ? 'o_coop_candle_up' : 'o_coop_candle_down'"
+                      stroke-width="1" vector-effect="non-scaling-stroke"/>
+                <rect t-att-x="b.x - b.w / 2" t-att-width="b.w" t-att-y="b.yt" t-att-height="b.hh"
+                      t-att-class="b.up ? 'o_coop_candle_up' : 'o_coop_candle_down'"/>
+              </t>
+            </svg>
+          </div>
+
           <!-- Линия цены по сделкам. Свечей нет: по большинству выпусков
                сделок единицы, и свечной график рисовал бы движение,
                которого не было. -->
-          <div class="o_coop_dex_chart" t-if="chartRange and chartRange.count &gt; 1">
+          <div class="o_coop_dex_chart" t-if="candles.length &lt; 3 and chartRange and chartRange.count &gt; 1">
             <div class="o_coop_dex_chartlabels">
               <span>Цена по сделкам</span>
               <span class="o_coop_dex_msub">
@@ -247,41 +269,57 @@
               </div>
             </div>
 
-            <!-- Форма сделки. Не «обменять по рынку», а «купить у
-                 названного участника по его цене»: сведение здесь ручное,
-                 и человек должен видеть, с кем имеет дело. -->
+            <!-- Форма заявки (решение 417): купить или продать, лимитная или
+                 по рынку. Заявка сводится со встречными сразу; исполнение —
+                 сделка, которую подписывают кошельки сторон. Щелчок по
+                 строке стакана подставляет цену и объём. -->
             <div class="o_coop_dex_form">
-              <div class="o_coop_dex_formhead">Сделка</div>
+              <div class="o_coop_dex_tabs">
+                <button t-att-class="{ 'o_coop_dex_tab': true, 'o_coop_dex_tab_buy': state.side === 'buy' }"
+                        t-on-click="() => this.setSide('buy')">Купить</button>
+                <button t-att-class="{ 'o_coop_dex_tab': true, 'o_coop_dex_tab_sell': state.side === 'sell' }"
+                        t-on-click="() => this.setSide('sell')">Продать</button>
+              </div>
+              <div class="o_coop_dex_types">
+                <label><input type="radio" name="coop_dex_type" value="limit"
+                              t-att-checked="state.orderType === 'limit'"
+                              t-on-change="() => this.setType('limit')"/> Лимитная</label>
+                <label><input type="radio" name="coop_dex_type" value="market"
+                              t-att-checked="state.orderType === 'market'"
+                              t-on-change="() => this.setType('market')"/> По рынку</label>
+              </div>
 
-              <div class="o_coop_dex_field">
-                <label>Заявка</label>
-                <div class="o_coop_dex_value" t-if="state.selectedOrder">
-                  <t t-esc="state.selectedOrder.partner"/>,
-                  <t t-esc="money(state.selectedOrder.price, current.currency)"/>
-                  за <t t-esc="current.unit"/>
-                </div>
-                <div class="o_coop_dex_hint" t-else="">
-                  Выберите строку в стакане — цена и объём подставятся сюда.
+              <div class="o_coop_dex_field" t-if="state.orderType === 'limit'">
+                <label>Цена за <t t-esc="current.unit"/></label>
+                <input type="number" min="0" step="0.01"
+                       t-att-value="state.price" t-on-input="onPrice"/>
+              </div>
+              <div class="o_coop_dex_field" t-else="">
+                <label>Цена</label>
+                <div class="o_coop_dex_value">
+                  лучшая встречная —
+                  <t t-esc="marketPrice ? money(marketPrice, current.currency) : 'нет заявок'"/>
                 </div>
               </div>
 
               <div class="o_coop_dex_field">
                 <label>Сколько (<t t-esc="current.unit"/>)</label>
                 <input type="number" min="0" step="0.001"
-                       t-att-value="state.amount" t-on-input="onAmount"
-                       t-att-disabled="!state.selectedOrder"/>
-                <div class="o_coop_dex_hint" t-if="state.selectedOrder">
-                  доступно <t t-esc="qty(state.selectedOrder.quantity)"/>
+                       t-att-value="state.amount" t-on-input="onAmount"/>
+                <div class="o_coop_dex_hint" t-if="state.side === 'sell'">
+                  на руках <t t-esc="qty(state.book.my_holding or 0)"/>
                 </div>
               </div>
 
               <div class="o_coop_dex_total">
-                <span>К оплате</span>
+                <span><t t-esc="state.side === 'buy' ? 'К оплате' : 'Получите'"/></span>
                 <b t-esc="money(total, current.currency)"/>
               </div>
 
-              <button class="o_coop_dex_go" t-att-disabled="!canTrade" t-on-click="trade">
-                Купить
+              <button class="o_coop_dex_go"
+                      t-att-class="{ 'o_coop_dex_go_sell': state.side === 'sell' }"
+                      t-att-disabled="!canTrade" t-on-click="placeOrder">
+                <t t-esc="state.side === 'buy' ? 'Купить' : 'Продать'"/>
               </button>
 
               <div class="o_coop_dex_note" t-if="state.wallet and !state.wallet.connected">
@@ -290,12 +328,9 @@
                 хранит.
               </div>
               <div class="o_coop_dex_note" t-else="">
-                Токены и оплата переходят одной транзакцией. Не поставили в
-                срок — эскроу возвращает деньги без заявления и разбора.
-              </div>
-
-              <div class="o_coop_dex_myline" t-if="state.book.my_holding">
-                На руках: <b t-esc="qty(state.book.my_holding)"/> <t t-esc="current.unit"/>
+                Заявка сводится со встречными сразу. Токены и оплата переходят
+                одной транзакцией после подписи в кошельке; не поставили в
+                срок — эскроу возвращает деньги.
               </div>
             </div>
           </div>

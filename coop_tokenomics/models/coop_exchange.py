@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from datetime import timedelta
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 
 # Категории над списком рынков — то же, что на биржах вкладки «Тренд»,
 # «Новые», «Растущие», только переведённое на товар. Понятие «тренда» у
@@ -329,7 +330,11 @@ class CoopExchange(models.AbstractModel):
             'when': t.confirmed_on and fields.Datetime.to_string(t.confirmed_on),
         } for t in reversed(trades)]
 
+        best_ask, best_bid = Order._coop_best_prices([('claim_id', '=', claim_id)])
         return {
+            'candles': self._candles(claim_id),
+            'best_ask': best_ask,
+            'best_bid': best_bid,
             'claim': {
                 'id': claim.id,
                 # То же, что в списке рынков: название предмета читается от
@@ -366,6 +371,74 @@ class CoopExchange(models.AbstractModel):
             } for t in trades],
             'chart': chart,
             'my_holding': holding[:1].quantity if holding else 0.0,
+        }
+
+    @api.model
+    def _candles(self, claim_id, days=120):
+        """Дневные свечи по сделкам: открытие, максимум, минимум, закрытие,
+        объём. Сделки, не прошедшие в сети, не считаются."""
+        Trade = self.env['coop.token.trade'].sudo()
+        since = fields.Datetime.now() - timedelta(days=days)
+        trades = Trade.search([('claim_id', '=', claim_id), ('state', '!=', 'failed'),
+                               ('create_date', '>=', since)], order='create_date, id')
+        by_day = {}
+        for t in trades:
+            when = t.confirmed_on or t.create_date
+            day = fields.Date.to_string(when.date())
+            c = by_day.get(day)
+            if not c:
+                by_day[day] = {'day': day, 'o': t.price_per_unit, 'h': t.price_per_unit,
+                               'l': t.price_per_unit, 'c': t.price_per_unit,
+                               'v': t.quantity}
+            else:
+                c['h'] = max(c['h'], t.price_per_unit)
+                c['l'] = min(c['l'], t.price_per_unit)
+                c['c'] = t.price_per_unit
+                c['v'] += t.quantity
+        return [by_day[d] for d in sorted(by_day)]
+
+    @api.model
+    def place_order(self, claim_id, side, order_type, quantity, price=None):
+        """Выставить заявку с экрана биржи и сразу свести (решение 417).
+
+        Лимитная ждёт своей цены в стакане; по рынку — исполняется по
+        лучшим встречным и остаток снимается. Возвращает, сколько
+        исполнено и сколько осталось.
+        """
+        claim = self.env['coop.token.claim'].browse(claim_id).exists()
+        if not claim:
+            raise UserError(_('Выпуск не найден.'))
+        me = self.env.user._coop_acting_partner()
+        if not me.coop_ton_address:
+            raise UserError(_('Чтобы торговать, подключите кошелёк TON: расчёт идёт '
+                              'между кошельками напрямую.'))
+        quantity = float(quantity or 0)
+        if quantity <= 0:
+            raise UserError(_('Укажите, сколько.'))
+        Order = self.env['coop.token.order']
+        if order_type == 'market':
+            best_ask, best_bid = Order._coop_best_prices([('claim_id', '=', claim.id)])
+            price = best_ask if side == 'buy' else best_bid
+            if not price:
+                raise UserError(_('Встречных заявок нет — выставьте лимитную, она '
+                                  'дождётся своей цены в стакане.'))
+        price = float(price or 0)
+        if price <= 0:
+            raise UserError(_('Укажите цену.'))
+        kind = 'primary' if (side == 'sell' and me == claim.issuer_id) else 'secondary'
+        order = Order.sudo().create({
+            'claim_id': claim.id, 'kind': kind, 'side': side,
+            'order_type': 'market' if order_type == 'market' else 'limit',
+            'partner_id': me.id, 'quantity': quantity, 'price_per_unit': price,
+        })
+        order.action_open()
+        filled = sum(self.env['coop.token.trade'].sudo().search(
+            [('taker_order_id', '=', order.id)]).mapped('quantity'))
+        return {
+            'order_id': order.id,
+            'filled': filled,
+            'left': order.quantity_left if order.state in ('open', 'partial') else 0.0,
+            'state': order.state,
         }
 
     # ── Кошелёк ──────────────────────────────────────────────────────────

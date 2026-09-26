@@ -27,7 +27,9 @@ class CoopTokenOrder(models.Model):
     """
     _name = 'coop.token.order'
     _description = 'Заявка на бирже токенов'
-    _inherit = ['mail.thread', 'coop.page.mixin']
+    _inherit = ['mail.thread', 'coop.page.mixin', 'coop.matching.mixin']
+    # Сведение заявок (решение 417) — движок `coop_matching`.
+    _coop_price_field = 'price_per_unit'
     _order = 'price_per_unit, id'
     _rec_name = 'display_name'
 
@@ -154,7 +156,32 @@ class CoopTokenOrder(models.Model):
                     'или сорван.'))
             record.write({'state': 'open', 'quantity_left': record.quantity})
             record.claim_id.action_start_trading()
+        # Встречные заявки сводятся сразу (решение 417): исполнение —
+        # сделка «ждёт подписи», расчёт атомарный, как и раньше.
+        self._coop_match()
         return True
+
+    # ── Сведение (coop_matching) ────────────────────────────────────
+
+    def _coop_market_domain(self):
+        return [('claim_id', '=', self.claim_id.id)]
+
+    def _coop_market_key(self):
+        return 'token:%s' % self.claim_id.id
+
+    def _coop_on_fill(self, maker, quantity, price):
+        sell = self if self.side == 'sell' else maker
+        buy = maker if self.side == 'sell' else self
+        return self.env['coop.token.trade'].sudo().create({
+            'order_id': maker.id,
+            'taker_order_id': self.id,
+            'claim_id': self.claim_id.id,
+            'seller_id': sell.partner_id.id,
+            'buyer_id': buy.partner_id.id,
+            'quantity': quantity,
+            'price_per_unit': price,
+            'matched': True,
+        })
 
     def action_cancel(self):
         self.filtered(lambda r: r.state in ('draft', 'open', 'partial')).write(
@@ -210,6 +237,13 @@ class CoopTokenTrade(models.Model):
     order_id = fields.Many2one(
         'coop.token.order', string='Заявка', required=True, index=True,
         ondelete='cascade')
+    taker_order_id = fields.Many2one(
+        'coop.token.order', string='Встречная заявка', index=True, ondelete='set null',
+        help='Заявка, которая пришла второй и исполнилась об стоявшую в стакане.')
+    matched = fields.Boolean(
+        string='Сведена биржей', readonly=True,
+        help='Остатки заявок уменьшены при сведении — подтверждение сети их '
+             'второй раз не трогает.')
     claim_id = fields.Many2one(
         'coop.token.claim', string='Выпуск', required=True, index=True)
     seller_id = fields.Many2one('res.partner', string='Продавец', required=True)
@@ -257,9 +291,10 @@ class CoopTokenTrade(models.Model):
         })
         self._move_holdings()
         self._open_escrow()
-        order = self.order_id
-        order.quantity_left = max(order.quantity_left - self.quantity, 0)
-        order.state = 'done' if order.quantity_left <= 0 else 'partial'
+        if not self.matched:
+            order = self.order_id
+            order.quantity_left = max(order.quantity_left - self.quantity, 0)
+            order.state = 'done' if order.quantity_left <= 0 else 'partial'
         return True
 
     def _open_escrow(self):

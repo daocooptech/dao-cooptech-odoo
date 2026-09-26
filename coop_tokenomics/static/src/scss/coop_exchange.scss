@@ -868,3 +868,47 @@
 }
 
 .o_coop_listing_ico.o_coop_fact_ico { font-size: 20px; }
+
+// ── Форма заявки со сведением (решение 417) ──────────────────────────
+.o_coop_dex_tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.o_coop_dex_tab {
+  border: 1px solid var(--coop-line, #e6e6e1);
+  border-radius: 8px;
+  padding: 8px 0;
+  background: transparent;
+  font: 600 13px/1 'Manrope', sans-serif;
+  cursor: pointer;
+  color: var(--coop-slate, #4a4a44);
+}
+
+.o_coop_dex_tab_buy {
+  background: rgba(20, 107, 100, .12);
+  border-color: var(--coop-teal, #146b64);
+  color: var(--coop-teal, #146b64);
+}
+
+.o_coop_dex_tab_sell {
+  background: rgba(180, 35, 24, .10);
+  border-color: #b42318;
+  color: #b42318;
+}
+
+.o_coop_dex_types {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 10px;
+  font-size: 13px;
+
+  label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+}
+
+.o_coop_dex_go.o_coop_dex_go_sell { background: #b42318; }
+
+.o_coop_candle_up { fill: var(--coop-teal, #146b64); stroke: var(--coop-teal, #146b64); }
+.o_coop_candle_down { fill: #b42318; stroke: #b42318; }

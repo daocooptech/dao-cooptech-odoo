@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_coop_match_fill_user,Исполнение заявок — участник,model_coop_match_fill,base.group_user,1,0,0,0
+access_coop_match_fill_system,Исполнение заявок — администратор,model_coop_match_fill,base.group_system,1,0,0,0

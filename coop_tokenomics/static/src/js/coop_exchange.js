@@ -63,6 +63,9 @@ export class CoopExchange extends Component {
             desc: false,
             openGroups: {},
             amount: 0,
+            price: 0,
+            side: "buy",
+            orderType: "limit",
             selectedOrder: null,
             showScore: false,
             loading: true,
@@ -198,19 +201,28 @@ export class CoopExchange extends Component {
         this.state.showScore = !this.state.showScore;
     }
 
-    /** Выбрать заявку в стакане.
-     *
-     * Щелчок по строке подставляет её цену и остаток в форму — так же,
-     * как на биржах, где клик по стакану заполняет ордер. Своя заявка не
-     * выбирается: купить у себя нельзя, и предлагать это бессмысленно.
-     */
+    /** Щелчок по строке стакана заполняет заявку, как на биржах: по
+     *  продаже — купить по её цене, по покупке — продать. Своя заявка не
+     *  подставляется. */
     pick(order) {
         if (order.mine) {
             this.notification.add("Это ваша собственная заявка.", { type: "warning" });
             return;
         }
+        const isAsk = this.state.book.asks.some((o) => o.id === order.id);
         this.state.selectedOrder = order;
+        this.state.side = isAsk ? "buy" : "sell";
+        this.state.orderType = "limit";
+        this.state.price = order.price;
         this.state.amount = order.quantity;
+    }
+
+    setSide(side) {
+        this.state.side = side;
+    }
+
+    setType(type) {
+        this.state.orderType = type;
     }
 
     onAmount(ev) {
@@ -218,42 +230,52 @@ export class CoopExchange extends Component {
         this.state.amount = isNaN(value) ? 0 : value;
     }
 
+    onPrice(ev) {
+        const value = parseFloat(ev.target.value.replace(",", "."));
+        this.state.price = isNaN(value) ? 0 : value;
+    }
+
+    /** Лучшая встречная цена — по ней исполнится заявка «по рынку». */
+    get marketPrice() {
+        const book = this.state.book || {};
+        return this.state.side === "buy" ? book.best_ask : book.best_bid;
+    }
+
     get total() {
-        if (!this.state.selectedOrder) {
-            return 0;
-        }
-        return this.state.amount * this.state.selectedOrder.price;
+        const price = this.state.orderType === "market" ? this.marketPrice : this.state.price;
+        return (this.state.amount || 0) * (price || 0);
     }
 
     get canTrade() {
-        return (
-            this.state.wallet &&
-            this.state.wallet.connected &&
-            this.state.selectedOrder &&
-            this.state.amount > 0 &&
-            this.state.amount <= this.state.selectedOrder.quantity
+        const price = this.state.orderType === "market" ? this.marketPrice : this.state.price;
+        return Boolean(
+            this.state.wallet && this.state.wallet.connected &&
+            this.state.amount > 0 && price > 0
         );
     }
 
-    /** Подтвердить сделку по выбранной заявке.
-     *
-     * Сервер готовит сделку, подписывает её кошелёк участника. Пока
-     * подпись не пришла из сети, сделка висит в состоянии «ждёт подписи»
-     * — и показывается именно так: считать её состоявшейся по записи в
-     * нашей базе нельзя, база знает лишь то, что ей сказали.
-     */
-    async trade() {
+    /** Выставить заявку и сразу свести со встречными (решение 417). */
+    async placeOrder() {
         if (!this.canTrade) {
             return;
         }
-        const order = this.state.selectedOrder;
         try {
-            await this.orm.call("coop.token.order", "action_prepare_trade",
-                [[order.id], this.state.amount]);
-            this.notification.add(
-                "Сделка подготовлена и ждёт подписи в кошельке.",
-                { type: "success" }
-            );
+            const res = await this.orm.call("coop.exchange", "place_order", [
+                this.state.currentId, this.state.side, this.state.orderType,
+                this.state.amount, this.state.orderType === "limit" ? this.state.price : false,
+            ]);
+            let text;
+            if (res.filled > 0 && res.left > 0) {
+                text = `Исполнено ${this.qty(res.filled)}, остаток ${this.qty(res.left)} ждёт в стакане. Сделки ждут подписи в кошельке.`;
+            } else if (res.filled > 0) {
+                text = `Исполнено ${this.qty(res.filled)}. Сделки ждут подписи в кошельке.`;
+            } else if (res.state === "cancelled") {
+                text = "Встречных заявок не нашлось — заявка по рынку снята.";
+            } else {
+                text = "Заявка выставлена в стакан и ждёт встречной.";
+            }
+            this.notification.add(text, { type: res.filled > 0 ? "success" : "info" });
+            this.state.selectedOrder = null;
             await this.select(this.state.currentId);
             await this.load();
         } catch (error) {
@@ -369,6 +391,42 @@ export class CoopExchange extends Component {
                 return `${i === 0 ? "M" : "L"}${x},${y}`;
             })
             .join(" ");
+    }
+
+    get candles() {
+        return (this.state.book && this.state.book.candles) || [];
+    }
+
+    get candleRange() {
+        const c = this.candles;
+        if (!c.length) {
+            return { min: 0, max: 0 };
+        }
+        return { min: Math.min(...c.map((x) => x.l)), max: Math.max(...c.map((x) => x.h)) };
+    }
+
+    /** Свечи в координатах SVG 100×100: тело — открытие/закрытие, тень —
+     *  максимум/минимум. Своей библиотеки графиков не подключаем. */
+    get candleBars() {
+        const c = this.candles;
+        const { min, max } = this.candleRange;
+        const span = max - min || 1;
+        const step = 100 / Math.max(c.length, 1);
+        const y = (v) => 95 - ((v - min) / span) * 90;
+        return c.map((x, i) => {
+            const top = y(Math.max(x.o, x.c));
+            const bottom = y(Math.min(x.o, x.c));
+            return {
+                day: x.day,
+                x: step * i + step / 2,
+                w: Math.max(step * 0.6, 0.4),
+                yh: y(x.h),
+                yl: y(x.l),
+                yt: top,
+                hh: Math.max(bottom - top, 0.6),
+                up: x.c >= x.o,
+            };
+        });
     }
 
     get chartRange() {
