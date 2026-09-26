@@ -340,13 +340,13 @@ def _clear_merge_conflicts(env, dst, src):
 
         def mapped(alias, col):
             if col in partner_cols:
-                return ('(CASE WHEN %(a)s.%(c)s = ANY(%%(src)s) THEN %%(dst)s ELSE %(a)s.%(c)s END)'
-                        % {'a': alias, 'c': col})
-            return '%s.%s' % (alias, col)
+                return (f'(CASE WHEN {alias}.{col} = ANY(%(src)s) THEN %(dst)s '
+                        f'ELSE {alias}.{col} END)')
+            return f'{alias}.{col}'
 
         same = ' AND '.join('%s IS NOT DISTINCT FROM %s' % (mapped('d', c), mapped('s', c))
                             for c in key)
-        touches = ' OR '.join('s.%s = ANY(%%(src)s)' % c for c in partner_cols)
+        touches = ' OR '.join(f's.{c} = ANY(%(src)s)' for c in partner_cols)
         cr.execute("""
             DELETE FROM %(t)s s
              WHERE (%(touches)s)
