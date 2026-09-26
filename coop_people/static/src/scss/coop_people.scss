@@ -104,6 +104,19 @@
     margin-bottom: 8px;
   }
 
+  // Специализации — одной строкой с многоточием: у кого их пять, тот не
+  // должен сдвигать ряд плиток. Полный список — в подсказке и на странице.
+  .o_coop_spec {
+    color: var(--coop-teal-dark, #0e4f4a);
+    font-size: 12.5px;
+    line-height: 1.35;
+    margin: -2px 0 4px;
+    min-height: 1.35em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .o_coop_muted {
     font-style: italic;
   }

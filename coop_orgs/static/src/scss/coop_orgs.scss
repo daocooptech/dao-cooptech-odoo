@@ -82,6 +82,21 @@
   }
 
 
+  // Вид деятельности — одной строкой с многоточием, цветом строки
+  // специализации на странице участника.
+  .o_coop_org_spec {
+    padding: 2px 12px 12px;
+    min-height: calc(1.35em + 14px);
+    font-size: 12.5px;
+    line-height: 1.35;
+    color: var(--coop-teal-dark, #0e4f4a);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .o_coop_org_text { min-width: 0; }
+
   // Две строки с нижней границей высоты: иначе ряд плиток разъезжается —
   // «АО «Кедр»» в строку, «Союз потребительских обществ Урала» в три.
   .o_coop_org_name {
@@ -139,6 +154,10 @@
   }
 
   .o_coop_org_name {
-    padding: 14px 16px 14px 0;
+    padding: 14px 16px 0 0;
+  }
+
+  .o_coop_org_spec {
+    padding: 2px 16px 14px 0;
   }
 }

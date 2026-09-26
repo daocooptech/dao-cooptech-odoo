@@ -16,6 +16,7 @@
       <kanban class="o_coop_orgs" quick_create="false" js_class="coop_catalog_kanban">
         <field name="avatar_256"/>
         <field name="city"/>
+        <field name="coop_okved_name"/>
         <templates>
           <t t-name="card">
             <div class="o_coop_org">
@@ -26,8 +27,15 @@
                   <field name="city"/>
                 </span>
               </div>
-              <div class="o_coop_org_name">
-                <field name="name"/>
+              <div class="o_coop_org_text">
+                <div class="o_coop_org_name">
+                  <field name="name"/>
+                </div>
+                <!-- Вид деятельности по ОКВЭД под названием — как
+                     специализации под именем у людей (Н1). -->
+                <div class="o_coop_org_spec" t-att-title="record.coop_okved_name.raw_value">
+                  <field name="coop_okved_name"/>
+                </div>
               </div>
             </div>
           </t>

@@ -45,6 +45,11 @@ class ResPartner(models.Model):
     coop_okved_section_id = fields.Many2one(
         'coop.okved', string='Раздел ОКВЭД',
         related='coop_okved_id.parent_id', store=True, index=True)
+    # Строка под названием на плитке каталога — как специализации под
+    # именем у людей (решение 411, Н1; владелец 26.09: «организации можно
+    # по ОКВЭД»). Название класса без кода: код читает бухгалтер, а не
+    # человек, выбирающий, с кем работать.
+    coop_okved_name = fields.Char(related='coop_okved_id.name', string='Вид деятельности')
     coop_okved_code = fields.Char(
         string='Код ОКВЭД', size=8,
         help='Полный код, как он написан в выписке: 01.13.1. Хранится '

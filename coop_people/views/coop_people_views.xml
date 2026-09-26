@@ -24,6 +24,8 @@
         <field name="coop_is_self"/>
         <field name="coop_is_following"/>
         <field name="coop_friend_state"/>
+        <field name="coop_specialization_label"/>
+        <field name="coop_deals_label"/>
         <templates>
           <t t-name="card">
             <div class="o_coop_person">
@@ -43,6 +45,13 @@
                         title="Подтверждены телефон и паспортные данные. На уровень доверия не влияет: это отдельная проверка личности.">✓ Верифицирован</span>
                 </div>
 
+                <!-- Решение 411 (Н1): специализации из настроек — под
+                     именем, как на странице человека (бирюзовая строка под
+                     отметкой о проверке); число сделок — после доверия. -->
+                <div class="o_coop_spec" t-att-title="record.coop_specialization_label.raw_value">
+                  <field name="coop_specialization_label"/>
+                </div>
+
                 <div class="o_coop_meta">
                   <span t-if="record.coop_age.raw_value"><field name="coop_age"/> лет · </span>
                   <span t-if="record.coop_trust.raw_value">Уровень доверия <field name="coop_trust"/>%</span>
@@ -50,6 +59,7 @@
                        считается»: ноль читался бы как плохая репутация,
                        хотя человек просто ещё ничего не делал. -->
                   <span t-if="!record.coop_trust.raw_value" class="o_coop_muted">Доверие пока не считается</span>
+                  <span t-if="record.coop_deals_label.raw_value"> · <field name="coop_deals_label"/></span>
                 </div>
 
                 <div class="o_coop_chips">

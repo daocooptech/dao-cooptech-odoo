@@ -5,6 +5,14 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 
+def _plural(n, one, few, many):
+    n = abs(n) % 100
+    if 11 <= n <= 14:
+        return many
+    n %= 10
+    return one if n == 1 else few if 2 <= n <= 4 else many
+
+
 class ResPartner(models.Model):
     """Человек как участник платформы.
 
@@ -52,6 +60,24 @@ class ResPartner(models.Model):
     # искать нельзя — Odoo не умеет переводить такое в запрос к базе.
     coop_membership_count = fields.Integer(
         string='Кооперативов', compute='_compute_membership_count', store=True)
+
+    # Карточка каталога людей (решение 411, Н1): «каждому добавить
+    # специализации, которые они себе проставляют в настройках, и после
+    # уровня доверия — количество сделок». Строкой, а не чипами: чипы на
+    # плитке уже заняты навыками, и два ряда чипов подряд не различить.
+    coop_specialization_label = fields.Char(
+        string='Специализации', compute='_compute_card_labels')
+    coop_deals_label = fields.Char(
+        string='Сделок', compute='_compute_card_labels')
+
+    @api.depends('coop_specialization_id', 'coop_specialization_ids', 'coop_deals_done')
+    def _compute_card_labels(self):
+        for partner in self:
+            # Главная — первой: по ней человек подписан и отсортирован.
+            specs = partner.coop_specialization_id | partner.coop_specialization_ids
+            partner.coop_specialization_label = ' · '.join(specs.mapped('name'))
+            count = partner.coop_deals_done or 0
+            partner.coop_deals_label = '%s %s' % (count, _plural(count, 'сделка', 'сделки', 'сделок'))                 if count else ''
 
     @api.depends('coop_birthdate')
     def _compute_age(self):
