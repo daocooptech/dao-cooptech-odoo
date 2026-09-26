@@ -95,7 +95,8 @@ EXTENSION_ITEMS = [
     # Решение 392: обмен цифровой валюты — доской объявлений, платформа
     # не сторона (разбор юриста, 2.6). Название — владелец 25.09.2026;
     # прежнее «Обмен цифровой валюты» — в RETIRED_EXTENSIONS.
-    ('DEX биржа', 'fa-exchange', 'coop_crypto_exchange.action_coop_crypto_offer'),
+    # Решение 417: экран биржи со стаканом и сведением, а не доска.
+    ('DEX биржа', 'fa-exchange', 'coop_crypto_exchange.action_coop_dex_terminal'),
     # Каталог майнеров и биржа майнинговых мощностей (разбор юриста, 2.4).
     ('Майнинг', 'fa-microchip', 'coop_mining.action_coop_mining_offer'),
     ('Нематериальные активы', 'fa-lightbulb-o', 'coop_intangibles.action_coop_intangibles'),

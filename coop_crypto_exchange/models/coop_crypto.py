@@ -59,8 +59,15 @@ class CoopCryptoOffer(models.Model):
     """
     _name = 'coop.crypto.offer'
     _description = 'Объявление об обмене цифровой валюты'
-    _inherit = ['mail.thread']
+    _inherit = ['mail.thread', 'coop.matching.mixin']
     _order = 'published_on desc, id desc'
+    # Сведение заявок (решение 417): объявление — заявка в стакане пары
+    # «монета · сеть к рублю»; движок `coop_matching`.
+    _coop_price_field = 'price'
+    _coop_open_states = ('active', 'partial')
+    _coop_partial_state = 'partial'
+    _coop_done_state = 'done'
+    _coop_cancel_state = 'closed'
 
     name = fields.Char(string='Заголовок', compute='_compute_name', store=True)
     side = fields.Selection([
@@ -91,9 +98,14 @@ class CoopCryptoOffer(models.Model):
                              'ждать подтверждений в сети.')
     state = fields.Selection([
         ('active', 'Активно'),
+        ('partial', 'Исполнено частично'),
+        ('done', 'Исполнено'),
         ('paused', 'На паузе'),
         ('closed', 'Снято'),
     ], string='Состояние', default='active', required=True, index=True, tracking=True)
+    partner_id = fields.Many2one(related='author_id', store=True, index=True)
+    quantity_left = fields.Float(string='Осталось, единиц', digits=(16, 8), readonly=True,
+                                 help='Сколько ещё не исполнено сведением.')
     published_on = fields.Datetime(string='Опубликовано', default=fields.Datetime.now,
                                    index=True)
     trade_ids = fields.One2many('coop.crypto.trade', 'offer_id', string='Обмены')
@@ -185,6 +197,46 @@ class CoopCryptoOffer(models.Model):
 
     def action_activate(self):
         self.write({'state': 'active'})
+        self._coop_match()
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            vals.setdefault('quantity_left', vals.get('amount_max') or 0.0)
+        offers = super().create(vals_list)
+        if not self.env.context.get('coop_no_match'):
+            offers.filtered(lambda o: o.state == 'active')._coop_match()
+        return offers
+
+    # ── Сведение (coop_matching) ────────────────────────────────────
+
+    RUB_ORDER = ('sbp', 'bank', 'cash')
+
+    def _coop_rub_methods(self):
+        return {m for m, flag in (('sbp', self.rub_sbp), ('bank', self.rub_bank),
+                                  ('cash', self.rub_cash)) if flag}
+
+    def _coop_market_domain(self):
+        return [('asset', '=', self.asset), ('network_id', '=', self.network_id.id)]
+
+    def _coop_market_key(self):
+        return 'dex:%s:%s' % (self.asset, self.network_id.code or self.network_id.id)
+
+    def _coop_can_match(self, maker):
+        # Рубли переводит одна сторона другой — нужен общий способ.
+        return bool(self._coop_rub_methods() & maker._coop_rub_methods())
+
+    def _coop_on_fill(self, maker, quantity, price):
+        common = self._coop_rub_methods() & maker._coop_rub_methods()
+        method = next(m for m in self.RUB_ORDER if m in common)
+        return self.env['coop.crypto.trade'].sudo().create({
+            'offer_id': maker.id,
+            'taker_offer_id': self.id,
+            'taker_id': self.author_id.id,
+            'amount': quantity,
+            'price': price,
+            'rub_method': method,
+        })
 
     def action_close(self):
         self.write({'state': 'closed'})
@@ -257,6 +309,9 @@ class CoopCryptoTrade(models.Model):
     number = fields.Char(string='Номер', readonly=True, copy=False)
     offer_id = fields.Many2one('coop.crypto.offer', string='Объявление', required=True,
                                index=True, ondelete='restrict')
+    taker_offer_id = fields.Many2one('coop.crypto.offer', string='Встречная заявка',
+                                     index=True, ondelete='set null',
+                                     help='Заявка, сведённая биржей с объявлением.')
     maker_id = fields.Many2one(related='offer_id.author_id', string='Автор объявления',
                                store=True, index=True)
     taker_id = fields.Many2one('res.partner', string='Откликнулся', required=True, index=True)

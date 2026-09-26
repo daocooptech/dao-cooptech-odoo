@@ -269,8 +269,19 @@
     </field>
   </record>
 
-  <menuitem id="menu_coop_crypto_root" name="DEX биржа" sequence="147"/>
-  <menuitem id="menu_coop_crypto_offers" name="Объявления"
+  <!-- Экран биржи (решение 417): пары, свечи, стакан, заявка со сведением. -->
+  <record id="action_coop_dex_terminal" model="ir.actions.client">
+    <field name="name">DEX биржа</field>
+    <field name="tag">coop_crypto_exchange.terminal</field>
+    <field name="path">dex</field>
+    <field name="context">{'coop_section': 1}</field>
+  </record>
+
+  <menuitem id="menu_coop_crypto_root" name="DEX биржа" sequence="147"
+            action="action_coop_dex_terminal"/>
+  <menuitem id="menu_coop_dex_terminal" name="Биржа"
+            parent="menu_coop_crypto_root" action="action_coop_dex_terminal" sequence="5"/>
+  <menuitem id="menu_coop_crypto_offers" name="Заявки"
             parent="menu_coop_crypto_root" action="action_coop_crypto_offer" sequence="10"/>
   <menuitem id="menu_coop_crypto_trades" name="Мои обмены"
             parent="menu_coop_crypto_root" action="action_coop_crypto_trade" sequence="20"/>

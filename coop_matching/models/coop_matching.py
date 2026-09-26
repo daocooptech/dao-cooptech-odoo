@@ -47,6 +47,12 @@ class CoopMatchingMixin(models.AbstractModel):
     _name = 'coop.matching.mixin'
     _description = 'Сводимая заявка'
     _coop_price_field = 'price'
+    # Состояния модели: в каких заявка стоит в стакане, какое ставить
+    # исполненной, какое — снятой.
+    _coop_open_states = OPEN_STATES
+    _coop_partial_state = 'partial'
+    _coop_done_state = 'done'
+    _coop_cancel_state = 'cancelled'
 
     order_type = fields.Selection([
         ('limit', 'Лимитная'),
@@ -66,6 +72,11 @@ class CoopMatchingMixin(models.AbstractModel):
     def _coop_on_fill(self, maker, quantity, price):
         raise NotImplementedError
 
+    def _coop_can_match(self, maker):
+        """Можно ли исполниться об эту встречную — например, есть ли общий
+        способ расчёта. По умолчанию можно."""
+        return True
+
     # ── Сведение ─────────────────────────────────────────────────────
 
     def _coop_price(self):
@@ -77,7 +88,7 @@ class CoopMatchingMixin(models.AbstractModel):
         opposite = 'sell' if self.side == 'buy' else 'buy'
         domain = list(self._coop_market_domain()) + [
             ('side', '=', opposite),
-            ('state', 'in', OPEN_STATES),
+            ('state', 'in', self._coop_open_states),
             ('quantity_left', '>', 0),
             ('partner_id', '!=', self.partner_id.id),
             ('id', '!=', self.id),
@@ -95,7 +106,8 @@ class CoopMatchingMixin(models.AbstractModel):
                 [candidates.ids])
             candidates.invalidate_recordset(['quantity_left', 'state'])
             candidates = candidates.filtered(
-                lambda o: o.state in OPEN_STATES and o.quantity_left > 0)
+                lambda o: o.state in self._coop_open_states and o.quantity_left > 0
+                and self._coop_can_match(o))
         return candidates
 
     def _coop_match(self):
@@ -103,7 +115,7 @@ class CoopMatchingMixin(models.AbstractModel):
         Fill = self.env['coop.match.fill'].sudo()
         results = self.env['coop.match.fill']
         for order in self:
-            if order.state not in OPEN_STATES or order.quantity_left <= 0:
+            if order.state not in order._coop_open_states or order.quantity_left <= 0:
                 continue
             filled_any = False
             for maker in order._coop_opposite():
@@ -117,14 +129,15 @@ class CoopMatchingMixin(models.AbstractModel):
                     rest = max(side.quantity_left - quantity, 0.0)
                     side.sudo().write({
                         'quantity_left': rest,
-                        'state': 'done' if rest <= 1e-9 else 'partial',
+                        'state': (side._coop_done_state if rest <= 1e-9
+                                  else side._coop_partial_state),
                     })
                 results |= Fill._coop_append(order, maker, quantity, price)
                 filled_any = True
-            if order.order_type == 'market' and order.state in OPEN_STATES:
+            if order.order_type == 'market' and order.state in order._coop_open_states:
                 # Рыночная заявка в стакане не остаётся.
                 order.sudo().write({
-                    'state': 'done' if filled_any else 'cancelled',
+                    'state': order._coop_done_state if filled_any else order._coop_cancel_state,
                     'quantity_left': 0.0,
                 })
         return results
@@ -133,7 +146,7 @@ class CoopMatchingMixin(models.AbstractModel):
     def _coop_best_prices(self, domain):
         """Лучшая цена продажи и покупки на рынке — для «по рынку» и шапки."""
         price_field = self._coop_price_field
-        base = list(domain) + [('state', 'in', OPEN_STATES), ('quantity_left', '>', 0)]
+        base = list(domain) + [('state', 'in', self._coop_open_states), ('quantity_left', '>', 0)]
         ask = self.sudo().search(base + [('side', '=', 'sell')],
                                  order='%s asc, id' % price_field, limit=1)
         bid = self.sudo().search(base + [('side', '=', 'buy')],
