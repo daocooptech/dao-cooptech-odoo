@@ -14,6 +14,7 @@ from ..data import load_trade
 from ..data import load_crypto
 from ..data import load_mining
 from ..data import load_barter
+from ..data import load_markets
 from ..data import load_resource_terms
 from ..data import load_documents_more
 from ..data import load_favorites
@@ -199,6 +200,7 @@ class CoopDemoLoader(models.AbstractModel):
         if 'coop.barter.offer' in self.env:
             load_barter.load_barter(self.env)
             load_barter.top_up_exchanges(self.env)
+        load_markets.load_market_history(self.env)
         load_resource_terms.fill_resource_terms(self.env)
         load_resource_terms.repair_resource_terms(self.env)
         # Последним — добор примеров по случаям: он смотрит, чего в
