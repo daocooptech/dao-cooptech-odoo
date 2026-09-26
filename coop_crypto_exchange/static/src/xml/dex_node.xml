@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <!-- Свой узел Komodo (решение 417, этап 5), js/dex_node.js. Классы стакана,
+       формы и списков — общие с экраном DEX биржи; своё — o_coop_kdf_*. -->
+  <t t-name="coop_crypto_exchange.KomodoNode">
+    <div class="o_coop_kdf">
+      <div class="o_coop_dext_head">
+        <div>
+          <h2>Свой узел Komodo</h2>
+          <div class="o_coop_dex_msub">
+            Обмен монетами напрямую между кошельками через сеть Komodo. Узел работает на вашем
+            компьютере; эта страница говорит с ним из вашего браузера — платформа не видит ни пароля,
+            ни ключей, ни заявок.
+          </div>
+        </div>
+        <button class="o_coop_dex_link" t-on-click="openTerminal">DEX биржа</button>
+      </div>
+
+      <div class="o_coop_kdf_warn" t-if="!secure">
+        <b>Страница открыта по http.</b> Chrome и Edge с версии 142 не пускают такие страницы к
+        узлу на 127.0.0.1 — запрос отклоняется без вопроса. Пока платформа не переехала на https,
+        подключайтесь из Firefox.
+      </div>
+
+      <!-- Подключение -->
+      <div class="o_coop_kdf_card">
+        <div class="o_coop_kdf_status">
+          <span t-attf-class="o_coop_kdf_dot o_coop_kdf_dot_{{ state.status }}"/>
+          <t t-if="state.status === 'online'">Узел на связи · <span class="o_coop_dex_msub" t-esc="state.version"/></t>
+          <t t-elif="state.status === 'connecting'">Подключаюсь…</t>
+          <t t-elif="state.status === 'error'">Нет связи с узлом</t>
+          <t t-else="">Узел не подключён</t>
+        </div>
+        <div class="o_coop_kdf_error" t-if="state.status === 'error'" t-esc="state.error"/>
+        <div class="o_coop_kdf_connect">
+          <div class="o_coop_dex_field">
+            <label>Адрес узла</label>
+            <input type="text" t-att-value="state.url" t-on-input="(ev) => this.onField('url', ev)"/>
+          </div>
+          <div class="o_coop_dex_field">
+            <label>Пароль RPC (rpc_password из MM2.json)</label>
+            <input type="password" autocomplete="off" t-att-value="state.pass"
+                   t-on-input="(ev) => this.onField('pass', ev)"/>
+          </div>
+          <div class="o_coop_kdf_actions">
+            <label class="o_coop_kdf_check">
+              <input type="checkbox" t-att-checked="state.remember"
+                     t-on-change="(ev) => this.onField('remember', ev)"/>
+              Запомнить в этом браузере
+            </label>
+            <button class="o_coop_dex_go" t-att-disabled="!state.pass or state.status === 'connecting'"
+                    t-on-click="connect">
+              <t t-esc="state.status === 'online' ? 'Переподключить' : 'Подключить'"/>
+            </button>
+            <button class="o_coop_dex_link" t-if="state.pass" t-on-click="forget">Забыть пароль</button>
+          </div>
+        </div>
+        <div class="o_coop_dex_note">
+          Пароль хранится только в этом браузере (localStorage) и уходит только на адрес узла.
+          Фразу восстановления платформа не спрашивает никогда — она лежит только в MM2.json у вас.
+        </div>
+      </div>
+
+      <!-- Узел на связи -->
+      <t t-if="state.status === 'online'">
+        <div class="o_coop_kdf_card">
+          <div class="o_coop_kdf_rowhead">
+            <b>Монеты узла</b>
+            <button class="o_coop_dex_link" t-on-click="reload">Обновить</button>
+          </div>
+          <div class="o_coop_kdf_coins" t-if="state.coins.length">
+            <div t-foreach="state.coins" t-as="c" t-key="c.ticker" class="o_coop_kdf_coin">
+              <b t-esc="c.ticker"/>
+              <span class="o_coop_dex_num" t-esc="qty(state.balances[c.ticker] and state.balances[c.ticker].balance)"/>
+              <span class="o_coop_dex_msub o_coop_kdf_addr" t-esc="c.address"/>
+            </div>
+          </div>
+          <div class="o_coop_dex_empty" t-else="">
+            На узле нет подключённых монет. Подключите хотя бы две — ниже или в Komodo Wallet.
+          </div>
+          <div class="o_coop_kdf_activate">
+            <div class="o_coop_dex_field">
+              <label>Монета (тикер из файла coins)</label>
+              <input type="text" placeholder="KMD" t-att-value="state.activate.coin"
+                     t-on-input="(ev) => this.onActivate('coin', ev)"/>
+            </div>
+            <div class="o_coop_dex_field">
+              <label>Сервер Electrum</label>
+              <input type="text" placeholder="electrum1.cipig.net:10001" t-att-value="state.activate.server"
+                     t-on-input="(ev) => this.onActivate('server', ev)"/>
+            </div>
+            <button class="o_coop_dex_link" t-att-disabled="!state.activate.coin or !state.activate.server"
+                    t-on-click="activateCoin">Подключить монету</button>
+          </div>
+        </div>
+
+        <div class="o_coop_kdf_pair" t-if="state.coins.length &gt;= 2">
+          <label>Продаю / покупаю</label>
+          <select t-on-change="(ev) => this.pickPair('base', ev)">
+            <option t-foreach="state.coins" t-as="c" t-key="c.ticker" t-att-value="c.ticker"
+                    t-att-selected="c.ticker === state.base" t-esc="c.ticker"/>
+          </select>
+          <span>за</span>
+          <select t-on-change="(ev) => this.pickPair('rel', ev)">
+            <option t-foreach="state.coins" t-as="c" t-key="c.ticker" t-att-value="c.ticker"
+                    t-att-selected="c.ticker === state.rel" t-esc="c.ticker"/>
+          </select>
+        </div>
+
+        <div class="o_coop_dex_grid" t-if="state.book">
+          <div class="o_coop_dex_book">
+            <div class="o_coop_dex_bookcol">
+              <div class="o_coop_dex_bookhead">
+                <span>Продают</span><span class="o_coop_dex_num">Цена, <t t-esc="state.rel"/></span>
+                <span class="o_coop_dex_num">Объём, <t t-esc="state.base"/></span>
+              </div>
+              <div t-foreach="state.book.asks" t-as="o" t-key="o.uuid" class="o_coop_dex_row o_coop_ask"
+                   t-on-click="() => this.pick(o, true)" t-att-title="o.address">
+                <span class="o_coop_dex_who"><t t-esc="o.address.slice(0, 10)"/>…<b t-if="o.mine"> — ваша</b></span>
+                <span class="o_coop_dex_num" t-esc="qty(o.price)"/>
+                <span class="o_coop_dex_num" t-esc="qty(o.volume)"/>
+              </div>
+              <div class="o_coop_dex_empty" t-if="!state.book.asks.length">В сети никто не продаёт.</div>
+            </div>
+            <div class="o_coop_dex_bookcol">
+              <div class="o_coop_dex_bookhead">
+                <span>Покупают</span><span class="o_coop_dex_num">Цена, <t t-esc="state.rel"/></span>
+                <span class="o_coop_dex_num">Объём, <t t-esc="state.base"/></span>
+              </div>
+              <div t-foreach="state.book.bids" t-as="o" t-key="o.uuid" class="o_coop_dex_row o_coop_bid"
+                   t-on-click="() => this.pick(o, false)" t-att-title="o.address">
+                <span class="o_coop_dex_who"><t t-esc="o.address.slice(0, 10)"/>…<b t-if="o.mine"> — ваша</b></span>
+                <span class="o_coop_dex_num" t-esc="qty(o.price)"/>
+                <span class="o_coop_dex_num" t-esc="qty(o.volume)"/>
+              </div>
+              <div class="o_coop_dex_empty" t-if="!state.book.bids.length">В сети никто не покупает.</div>
+            </div>
+          </div>
+
+          <div class="o_coop_dex_form">
+            <div class="o_coop_dex_tabs">
+              <button t-att-class="{ 'o_coop_dex_tab': true, 'o_coop_dex_tab_buy': state.side === 'buy' }"
+                      t-on-click="() => this.state.side = 'buy'">Купить <t t-esc="state.base"/></button>
+              <button t-att-class="{ 'o_coop_dex_tab': true, 'o_coop_dex_tab_sell': state.side === 'sell' }"
+                      t-on-click="() => this.state.side = 'sell'">Продать <t t-esc="state.base"/></button>
+            </div>
+            <div class="o_coop_dex_types">
+              <label><input type="radio" name="coop_kdf_mode" t-att-checked="state.mode === 'take'"
+                            t-on-change="() => this.state.mode = 'take'"/> Взять из стакана</label>
+              <label><input type="radio" name="coop_kdf_mode" t-att-checked="state.mode === 'make'"
+                            t-on-change="() => this.state.mode = 'make'"/> Выставить свою</label>
+            </div>
+            <div class="o_coop_dex_field">
+              <label>Цена за 1 <t t-esc="state.base"/>, <t t-esc="state.rel"/></label>
+              <input type="text" inputmode="decimal" t-att-value="state.price"
+                     t-on-input="(ev) => this.onField('price', ev)"/>
+            </div>
+            <div class="o_coop_dex_field">
+              <label>Сколько, <t t-esc="state.base"/></label>
+              <input type="text" inputmode="decimal" t-att-value="state.volume"
+                     t-on-input="(ev) => this.onField('volume', ev)"/>
+            </div>
+            <div class="o_coop_dex_total">
+              <span><t t-esc="state.side === 'buy' ? 'Отдадите' : 'Получите'"/></span>
+              <b><t t-esc="total"/> <t t-esc="state.rel"/></b>
+            </div>
+            <button class="o_coop_dex_go" t-att-class="{ 'o_coop_dex_go_sell': state.side === 'sell' }"
+                    t-att-disabled="!canTrade" t-on-click="placeOrder">
+              <t t-if="state.busy">Отправляю…</t>
+              <t t-elif="state.mode === 'take'"><t t-esc="state.side === 'buy' ? 'Купить' : 'Продать'"/> из стакана</t>
+              <t t-else="">Выставить заявку</t>
+            </button>
+            <div class="o_coop_dex_note">
+              Обмен атомарный: монеты уходят с вашего кошелька и приходят на него напрямую,
+              через блокчейн. Не удался — каждая сторона получает своё обратно по истечении срока.
+              Узел должен работать, пока обмен не завершится.
+            </div>
+          </div>
+        </div>
+
+        <div class="o_coop_dext_bottom">
+          <div class="o_coop_dext_list">
+            <div class="o_coop_dext_listhead">Мои заявки на узле</div>
+            <div t-foreach="state.orders" t-as="o" t-key="o.uuid" class="o_coop_kdf_line">
+              <span><t t-esc="o.kind"/> · <t t-esc="o.base"/>/<t t-esc="o.rel"/></span>
+              <span class="o_coop_dex_num"><t t-esc="qty(o.volume)"/> по <t t-esc="qty(o.price)"/></span>
+              <span class="o_coop_dex_msub" t-esc="when(o.created)"/>
+              <button class="o_coop_dex_link" t-if="o.cancellable" t-on-click="() => this.cancel(o)">снять</button>
+            </div>
+            <div class="o_coop_dex_empty" t-if="!state.orders.length">Открытых заявок нет.</div>
+          </div>
+          <div class="o_coop_dext_list">
+            <div class="o_coop_dext_listhead">Обмены</div>
+            <div t-foreach="state.swaps" t-as="s" t-key="s.uuid" class="o_coop_kdf_line">
+              <span>отдал <t t-esc="s.gave"/> · получил <t t-esc="s.got"/></span>
+              <span t-att-class="s.cls" t-esc="s.state"/>
+              <span class="o_coop_dex_msub"><t t-esc="s.role"/> · <t t-esc="when(s.started)"/></span>
+            </div>
+            <div class="o_coop_dex_empty" t-if="!state.swaps.length">Обменов на этом узле ещё не было.</div>
+          </div>
+        </div>
+      </t>
+
+      <!-- Как поставить узел -->
+      <div class="o_coop_kdf_card">
+        <div class="o_coop_kdf_rowhead">
+          <b>Как поставить узел</b>
+          <button class="o_coop_dex_link" t-on-click="toggleGuide">
+            <t t-esc="state.showGuide ? 'Свернуть' : 'Развернуть'"/>
+          </button>
+        </div>
+        <ol class="o_coop_kdf_guide" t-if="state.showGuide">
+          <li>
+            Скачайте Komodo DeFi Framework для своей системы со страницы выпусков разработчика:
+            <a href="https://github.com/KomodoPlatform/komodo-defi-framework/releases" target="_blank"
+               rel="noopener noreferrer">github.com/KomodoPlatform/komodo-defi-framework/releases</a>.
+            Распакуйте в отдельную папку. Платформа программу не раздаёт и за неё не отвечает.
+          </li>
+          <li>
+            Положите рядом файл <code>coins</code> — описания монет:
+            <a href="https://github.com/KomodoPlatform/coins/blob/master/coins" target="_blank"
+               rel="noopener noreferrer">github.com/KomodoPlatform/coins</a>.
+          </li>
+          <li>
+            Создайте рядом <code>MM2.json</code>. Строка <code>rpccors</code> — адрес этой
+            платформы: без неё узел не ответит этой странице. Пароль — 8–32 знака, без трёх
+            одинаковых подряд. Фразу восстановления впишите сами; держите файл только у себя.
+            <pre class="o_coop_kdf_pre" t-esc="mm2json"/>
+            <button class="o_coop_dex_link" t-on-click="copyConfig">Скопировать MM2.json</button>
+          </li>
+          <li>
+            Запустите: Windows — <code>kdf.exe</code> из этой папки, Linux и macOS —
+            <code>./kdf</code>. Окно не закрывайте, пока идут обмены.
+          </li>
+          <li>
+            Вернитесь сюда, введите пароль RPC и нажмите «Подключить». Подключите монеты —
+            тикер из файла <code>coins</code> и сервер Electrum из того же описания.
+          </li>
+        </ol>
+      </div>
+
+      <div class="o_coop_dex_note">
+        Здесь покупают и продают цифровую валюту как имущество. Расплачиваться цифровой валютой
+        за товары и услуги в России нельзя.
+      </div>
+    </div>
+  </t>
+</templates>

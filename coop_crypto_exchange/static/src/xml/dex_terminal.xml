@@ -32,7 +32,10 @@
               оборот за сутки <t t-esc="rub(state.current.volume)"/>
             </div>
           </div>
-          <button class="o_coop_dex_link" t-on-click="openTrades">Мои обмены</button>
+          <div class="o_coop_dext_links">
+            <button class="o_coop_dex_link" t-on-click="openTrades">Мои обмены</button>
+            <button class="o_coop_dex_link" t-on-click="openNode">Свой узел Komodo</button>
+          </div>
         </div>
 
         <div class="o_coop_dex_chart" t-if="candles.length &gt;= 2">

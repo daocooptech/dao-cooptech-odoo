@@ -277,6 +277,14 @@
     <field name="context">{'coop_section': 1}</field>
   </record>
 
+  <!-- Свой узел Komodo (решение 417, этап 5): клиент к KDF участника на 127.0.0.1. -->
+  <record id="action_coop_komodo_node" model="ir.actions.client">
+    <field name="name">Свой узел Komodo</field>
+    <field name="tag">coop_crypto_exchange.komodo_node</field>
+    <field name="path">dex-node</field>
+    <field name="context">{'coop_section': 1}</field>
+  </record>
+
   <menuitem id="menu_coop_crypto_root" name="DEX биржа" sequence="147"
             action="action_coop_dex_terminal"/>
   <menuitem id="menu_coop_dex_terminal" name="Биржа"
@@ -285,4 +293,6 @@
             parent="menu_coop_crypto_root" action="action_coop_crypto_offer" sequence="10"/>
   <menuitem id="menu_coop_crypto_trades" name="Мои обмены"
             parent="menu_coop_crypto_root" action="action_coop_crypto_trade" sequence="20"/>
+  <menuitem id="menu_coop_komodo_node" name="Свой узел Komodo"
+            parent="menu_coop_crypto_root" action="action_coop_komodo_node" sequence="30"/>
 </odoo>

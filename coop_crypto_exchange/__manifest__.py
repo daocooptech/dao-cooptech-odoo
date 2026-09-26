@@ -32,6 +32,8 @@
             'coop_crypto_exchange/static/src/scss/coop_crypto.scss',
             'coop_crypto_exchange/static/src/js/dex_terminal.js',
             'coop_crypto_exchange/static/src/xml/dex_terminal.xml',
+            'coop_crypto_exchange/static/src/js/dex_node.js',
+            'coop_crypto_exchange/static/src/xml/dex_node.xml',
         ],
     },
     'post_init_hook': '_post_init',

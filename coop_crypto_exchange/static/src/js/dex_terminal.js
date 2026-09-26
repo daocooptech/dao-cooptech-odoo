@@ -125,6 +125,10 @@ export class CoopDexTerminal extends Component {
         this.action.doAction("coop_crypto_exchange.action_coop_crypto_trade");
     }
 
+    openNode() {
+        this.action.doAction("coop_crypto_exchange.action_coop_komodo_node");
+    }
+
     // ── Числа и график ──────────────────────────────────────────────
 
     rub(v) {
