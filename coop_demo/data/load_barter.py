@@ -459,16 +459,46 @@ def load_barter(env, login='dashkevich'):
     return len(made)
 
 
-def _load_exchanges(env, rnd, offers, now):
+def top_up_exchanges(env, target=110):
+    """Довести число обменов до ста с лишним (решение 415, п. 2: «количество
+    обменов тоже догнать до 100»). Берутся объявления, которые ещё ни в
+    одном обмене не участвовали; раскладка по состояниям — та же, что у
+    первого наполнения. Уже есть сотня — ничего не делает."""
+    if 'coop.barter.exchange' not in env:
+        return 0
+    Exchange = env['coop.barter.exchange'].sudo()
+    have = Exchange.search_count([])
+    if have >= 100:
+        return 0
+    rnd = random.Random(20260926 + have)
+    now = datetime.now().replace(microsecond=0)
+    offers = env['coop.barter.offer'].sudo().search(
+        [('state', '=', 'active'), ('leg_ids', '=', False)])
+    need = target - have
+    # Доли состояний — как у первого наполнения (из 82: 24 предложено, 18
+    # исполняется, 24 завершено, 16 отклонено и отменено).
+    weights = [('proposed', 22), ('proposed_half', 7), ('agreed', 22), ('done', 29),
+               ('declined', 11), ('cancelled', 9)]
+    plan = []
+    for state, weight in weights:
+        plan += [state] * max(1, round(need * weight / 100))
+    made = _load_exchanges(env, rnd, list(offers), now, plan=plan[:need],
+                           chains=max(2, need // 7))
+    _logger.info('Бартер: обменов добавлено %s, всего %s', made, have + made)
+    return made
+
+
+def _load_exchanges(env, rnd, offers, now, plan=None, chains=15):
     Exchange = env['coop.barter.exchange'].sudo().with_context(tracking_disable=True,
                                                                mail_create_nolog=True)
     Leg = env['coop.barter.leg'].sudo()
     free = [o for o in offers]
     rnd.shuffle(free)
-    plan = (['proposed'] * 18 + ['proposed_half'] * 6 + ['agreed'] * 18 + ['done'] * 24
-            + ['declined'] * 9 + ['cancelled'] * 7)
+    if plan is None:
+        plan = (['proposed'] * 18 + ['proposed_half'] * 6 + ['agreed'] * 18 + ['done'] * 24
+                + ['declined'] * 9 + ['cancelled'] * 7)
     rnd.shuffle(plan)
-    chains_left = 15
+    chains_left = chains
     made = 0
     for state in plan:
         size = 3 if chains_left and rnd.random() < 0.18 else 2

@@ -194,6 +194,7 @@ class CoopDemoLoader(models.AbstractModel):
             load_mining.repair_mining_titles(self.env)
         if 'coop.barter.offer' in self.env:
             load_barter.load_barter(self.env)
+            load_barter.top_up_exchanges(self.env)
         load_resource_terms.fill_resource_terms(self.env)
         load_resource_terms.repair_resource_terms(self.env)
         # Последним — добор примеров по случаям: он смотрит, чего в
