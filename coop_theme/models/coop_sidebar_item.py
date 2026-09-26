@@ -113,9 +113,10 @@ EXTENSION_ITEMS = [
     # пятнадцать складов и сто шестьдесят пять объявлений.
     ('Склады', 'fa-archive', 'coop_warehouse.action_coop_warehouse_offer'),
     ('События', 'fa-calendar', 'coop_events.action_coop_event'),
-    ('Аналитика', 'fa-bar-chart', ''),
     # Решение 411 (Н3): курсы на штатном eLearning, каталог — coop_education.
+    # Выше «Аналитики» — владелец 26.09.2026.
     ('Образование', 'fa-graduation-cap', 'coop_education.action_coop_courses'),
+    ('Аналитика', 'fa-bar-chart', ''),
     ('Диск', 'fa-folder-open-o', ''),
 ]
 
