@@ -19,13 +19,17 @@
     'version': '19.0.1.0.0',
     'license': 'LGPL-3',
     'depends': ['board', 'coop_theme', 'coop_deals', 'coop_wallet', 'coop_projects',
-                'coop_crypto_exchange', 'coop_education'],
+                'coop_crypto_exchange', 'coop_education', 'coop_people', 'coop_profile',
+                'coop_wall'],
     'data': [
+        'security/ir.model.access.csv',
+        'security/coop_analytics_rules.xml',
         'views/coop_analytics_views.xml',
         'data/coop_analytics_board.xml',
     ],
     'assets': {
         'web.assets_backend': [
+            'coop_analytics/static/src/scss/coop_analytics.scss',
             'coop_analytics/static/src/js/board_tabs.js',
             'coop_analytics/static/src/xml/board_tabs.xml',
         ],

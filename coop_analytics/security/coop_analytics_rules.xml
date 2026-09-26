@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Активность видна только своя: это не рейтинг участников. -->
+  <record id="rule_account_activity_own" model="ir.rule">
+    <field name="name">Своя активность</field>
+    <field name="model_id" ref="model_coop_account_activity"/>
+    <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+  </record>
+</odoo>

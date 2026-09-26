@@ -1,0 +1,38 @@
+// «Мой аккаунт» в «Аналитике» — плитки показателей (views/coop_analytics_views.xml).
+.o_coop_an_account {
+  .o_kanban_record {
+    width: 100%;
+    max-width: none;
+    border: 0;
+    background: transparent;
+    padding: 0;
+  }
+
+  .o_coop_an_tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+    width: 100%;
+
+    > div {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 10px 12px;
+      background: var(--coop-white, #fff);
+      border: 1px solid var(--coop-line, #e6e6e1);
+      border-radius: 10px;
+    }
+
+    b {
+      font: 700 20px/1.2 'Manrope', sans-serif;
+      color: var(--coop-ink, #14171a);
+      font-variant-numeric: tabular-nums;
+    }
+
+    span {
+      font-size: 11.5px;
+      color: var(--coop-slate-light, #8f8f88);
+    }
+  }
+}

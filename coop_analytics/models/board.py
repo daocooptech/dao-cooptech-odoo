@@ -8,15 +8,19 @@
 поровну — в узкой правой графики сжимались до нечитаемого. Настроил
 панель под себя — дальше она его, по умолчанию её не перетирает.
 """
+from xml.sax.saxutils import escape
+
 from odoo import api, models
 
 # (действие, подпись, вид) — по колонкам.
 DEFAULT_COLUMNS = [
     [
+        ('coop_analytics.action_coop_an_account', 'Мой аккаунт', 'kanban'),
         ('coop_analytics.action_coop_an_money', 'Деньги по месяцам', 'graph'),
         ('coop_analytics.action_coop_an_deals', 'Сделки по месяцам', 'graph'),
     ],
     [
+        ('coop_analytics.action_coop_an_activity', 'Моя активность по месяцам', 'graph'),
         ('coop_analytics.action_coop_an_contributions', 'Мои вклады в проекты', 'graph'),
         ('coop_analytics.action_coop_an_dex', 'Обмены на бирже', 'graph'),
         ('coop_analytics.action_coop_an_courses', 'Мои курсы по темам', 'graph'),
@@ -38,8 +42,12 @@ class Board(models.AbstractModel):
             for xmlid, title, mode in column:
                 act = self.env.ref(xmlid, raise_if_not_found=False)
                 if act:
+                    # Отбор действия — в виджет: виджет панели подставляет
+                    # свой отбор вместо отбора действия.
+                    domain = (act.domain or '[]').replace('"', "'")
                     items.append('<action name="%d" string="%s" view_mode="%s" '
-                                 'context="{}" domain="[]"/>' % (act.id, title, mode))
+                                 'context="{}" domain="%s"/>' % (act.id, title, mode,
+                                                               escape(domain)))
             columns.append('<column>%s</column>' % ''.join(items))
         view.sudo().arch = ('<form string="Моя панель"><board style="1-1">%s</board></form>'
                             % ''.join(columns))

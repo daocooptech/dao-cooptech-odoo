@@ -119,7 +119,7 @@
     <field name="path">analytics-contributions</field>
     <field name="context">{'coop_section': 1}</field>
     <field name="view_mode">graph,pivot,list</field>
-    <field name="domain">[('partner_id.user_ids', 'in', [uid])]</field>
+    <field name="domain">[('partner_id.coop_is_me', '=', True)]</field>
     <field name="view_ids" eval="[(5, 0, 0),
            (0, 0, {'sequence': 10, 'view_mode': 'graph', 'view_id': ref('view_coop_an_contrib_graph')}),
            (0, 0, {'sequence': 20, 'view_mode': 'pivot', 'view_id': ref('view_coop_an_contrib_pivot')})]"/>
@@ -225,11 +225,116 @@
     <field name="view_id" ref="board.board_my_dash_view"/>
   </record>
 
+  <!-- ── Мой аккаунт и активность (владелец 26.09: «информацию по самому
+       аккаунту, количество друзей, подписчиков, активности») ──────── -->
+  <record id="view_coop_an_account_kanban" model="ir.ui.view">
+    <field name="name">coop.analytics.account.kanban</field>
+    <field name="model">res.partner</field>
+    <field name="priority">95</field>
+    <field name="arch" type="xml">
+      <kanban class="o_coop_an_account" create="false" group_create="false">
+        <field name="coop_friend_count"/>
+        <field name="coop_follower_count"/>
+        <field name="coop_deal_count"/>
+        <field name="coop_deals_done"/>
+        <field name="coop_trust"/>
+        <field name="coop_project_count"/>
+        <field name="coop_community_count"/>
+        <field name="coop_membership_count"/>
+        <field name="coop_activity_30"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_an_tiles">
+              <div><b t-esc="record.coop_friend_count.raw_value"/><span>друзей</span></div>
+              <div><b t-esc="record.coop_follower_count.raw_value"/><span>подписчиков</span></div>
+              <div><b t-esc="record.coop_activity_30.raw_value"/><span>действий за 30 дней</span></div>
+              <div><b t-esc="record.coop_deal_count.raw_value"/><span>сделок</span></div>
+              <div><b><t t-esc="record.coop_trust.raw_value || '—'"/><t t-if="record.coop_trust.raw_value">%</t></b><span>уровень доверия</span></div>
+              <div><b t-esc="record.coop_project_count.raw_value"/><span>проектов</span></div>
+              <div><b t-esc="record.coop_community_count.raw_value"/><span>сообществ</span></div>
+              <div><b t-esc="record.coop_membership_count.raw_value"/><span>кооперативов</span></div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+  <record id="action_coop_an_account" model="ir.actions.act_window">
+    <field name="name">Мой аккаунт</field>
+    <field name="res_model">res.partner</field>
+    <field name="path">analytics-account</field>
+    <field name="context">{'coop_section': 1}</field>
+    <field name="view_mode">kanban</field>
+    <field name="domain">[('coop_is_me', '=', True)]</field>
+    <field name="view_ids" eval="[(5, 0, 0),
+           (0, 0, {'sequence': 10, 'view_mode': 'kanban', 'view_id': ref('view_coop_an_account_kanban')})]"/>
+  </record>
+
+  <record id="view_coop_an_activity_graph" model="ir.ui.view">
+    <field name="name">coop.analytics.activity.graph</field>
+    <field name="model">coop.account.activity</field>
+    <field name="arch" type="xml">
+      <graph string="Активность" type="bar" stacked="1">
+        <field name="date" interval="month"/>
+        <field name="kind"/>
+        <field name="count" type="measure"/>
+      </graph>
+    </field>
+  </record>
+  <record id="view_coop_an_activity_pivot" model="ir.ui.view">
+    <field name="name">coop.analytics.activity.pivot</field>
+    <field name="model">coop.account.activity</field>
+    <field name="arch" type="xml">
+      <pivot string="Активность">
+        <field name="kind" type="row"/>
+        <field name="date" interval="month" type="col"/>
+        <field name="count" type="measure"/>
+      </pivot>
+    </field>
+  </record>
+  <record id="view_coop_an_activity_list" model="ir.ui.view">
+    <field name="name">coop.analytics.activity.list</field>
+    <field name="model">coop.account.activity</field>
+    <field name="arch" type="xml">
+      <list string="Активность" create="false">
+        <field name="date"/>
+        <field name="kind"/>
+      </list>
+    </field>
+  </record>
+  <record id="view_coop_an_activity_search" model="ir.ui.view">
+    <field name="name">coop.analytics.activity.search</field>
+    <field name="model">coop.account.activity</field>
+    <field name="arch" type="xml">
+      <search string="Активность">
+        <field name="kind"/>
+        <filter name="by_kind" string="По виду" context="{'group_by': 'kind'}"/>
+      </search>
+    </field>
+  </record>
+  <record id="action_coop_an_activity" model="ir.actions.act_window">
+    <field name="name">Активность</field>
+    <field name="res_model">coop.account.activity</field>
+    <field name="path">analytics-activity</field>
+    <field name="context">{'coop_section': 1}</field>
+    <field name="view_mode">graph,pivot,list</field>
+    <field name="search_view_id" ref="view_coop_an_activity_search"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Активности пока нет</p>
+      <p>Записи, сообщения, комментарии, сделки, новые друзья, уроки, обмены и
+         вклады — по месяцам.</p>
+    </field>
+  </record>
+
   <!-- ── Меню раздела: вкладки над видом ───────────────────────── -->
   <menuitem id="menu_coop_analytics_root" name="Аналитика" sequence="153"
             action="action_coop_my_panel"/>
   <menuitem id="menu_coop_analytics_board" name="Моя панель"
             parent="menu_coop_analytics_root" action="action_coop_my_panel" sequence="10"/>
+  <menuitem id="menu_coop_analytics_account" name="Мой аккаунт"
+            parent="menu_coop_analytics_root" action="action_coop_an_account" sequence="12"/>
+  <menuitem id="menu_coop_analytics_activity" name="Активность"
+            parent="menu_coop_analytics_root" action="action_coop_an_activity" sequence="14"/>
   <menuitem id="menu_coop_analytics_money" name="Деньги"
             parent="menu_coop_analytics_root" action="action_coop_an_money" sequence="20"/>
   <menuitem id="menu_coop_analytics_deals" name="Сделки"
