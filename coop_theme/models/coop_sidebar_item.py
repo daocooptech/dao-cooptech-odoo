@@ -114,7 +114,8 @@ EXTENSION_ITEMS = [
     ('Склады', 'fa-archive', 'coop_warehouse.action_coop_warehouse_offer'),
     ('События', 'fa-calendar', 'coop_events.action_coop_event'),
     ('Аналитика', 'fa-bar-chart', ''),
-    ('Образование', 'fa-graduation-cap', ''),
+    # Решение 411 (Н3): курсы на штатном eLearning, каталог — coop_education.
+    ('Образование', 'fa-graduation-cap', 'coop_education.action_coop_courses'),
     ('Диск', 'fa-folder-open-o', ''),
 ]
 

@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Каталог курсов (решение 411, Н3). Плитка — общего семейства каталогов
+    (o_coop_listing*), своё — строка прогресса и оценка. Курс открывается
+    на штатной странице eLearning: там уроки, прохождение и отзывы. Ссылка
+    — обычный <a>: карточка каталога не перехватывает щелчок по ссылке, и
+    вместо служебной формы курса человек попадает туда, где учатся.
+  -->
+  <record id="view_coop_course_kanban" model="ir.ui.view">
+    <field name="name">coop.course.kanban</field>
+    <field name="model">slide.channel</field>
+    <field name="priority">90</field>
+    <field name="arch" type="xml">
+      <kanban js_class="coop_catalog_kanban" class="o_coop_courses o_coop_listings"
+              create="false" default_order="sequence, id desc">
+        <field name="image_512"/>
+        <field name="website_url"/>
+        <field name="coop_topic"/>
+        <field name="coop_level"/>
+        <field name="coop_author_id"/>
+        <field name="coop_lessons_label"/>
+        <field name="coop_members_label"/>
+        <field name="coop_progress_label"/>
+        <field name="completion"/>
+        <field name="is_member"/>
+        <field name="rating_avg_stars"/>
+        <field name="rating_count"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_listing o_coop_course">
+              <a class="o_coop_media o_coop_course_cover" t-att-href="record.website_url.raw_value">
+                <field name="image_512" widget="image" t-if="record.image_512.raw_value"/>
+                <span t-else="" class="o_coop_media_sign"><i class="fa fa-graduation-cap"/></span>
+                <span class="o_coop_course_level" t-esc="record.coop_level.value"/>
+              </a>
+              <div class="o_coop_listing_body">
+                <a class="o_coop_listing_title o_coop_course_title" t-att-href="record.website_url.raw_value">
+                  <field name="name"/>
+                </a>
+                <div class="o_coop_listing_meta" t-if="record.coop_author_id.raw_value">
+                  <t t-esc="record.coop_author_id.value"/>
+                </div>
+                <div class="o_coop_course_desc"><field name="description_short"/></div>
+                <div class="o_coop_listing_meta">
+                  <t t-esc="record.coop_lessons_label.value"/>
+                </div>
+                <div class="o_coop_course_progress" t-if="record.is_member.raw_value">
+                  <div class="o_coop_course_track">
+                    <span t-attf-style="width: {{ record.completion.raw_value }}%"/>
+                  </div>
+                  <span t-esc="record.coop_progress_label.value"/>
+                </div>
+                <div class="o_coop_listing_foot">
+                  <span class="o_coop_listing_meta"><i class="fa fa-users"/> <t t-esc="record.coop_members_label.value"/></span>
+                  <span class="o_coop_course_rating" t-if="record.rating_count.raw_value">
+                    <i class="fa fa-star"/> <t t-esc="record.rating_avg_stars.value"/>
+                    <span class="o_coop_listing_meta">(<t t-esc="record.rating_count.raw_value"/>)</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="view_coop_course_list" model="ir.ui.view">
+    <field name="name">coop.course.list</field>
+    <field name="model">slide.channel</field>
+    <field name="priority">90</field>
+    <field name="arch" type="xml">
+      <list string="Курсы" create="false">
+        <field name="name"/>
+        <field name="coop_topic"/>
+        <field name="coop_level"/>
+        <field name="coop_author_id"/>
+        <field name="total_slides" string="Уроков"/>
+        <field name="members_count" string="Учеников"/>
+        <field name="rating_avg_stars" string="Оценка"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_course_search" model="ir.ui.view">
+    <field name="name">coop.course.search</field>
+    <field name="model">slide.channel</field>
+    <field name="priority">90</field>
+    <field name="arch" type="xml">
+      <search string="Курсы">
+        <field name="name" string="Курс"/>
+        <field name="coop_author_id" string="Автор"/>
+        <filter name="mine" string="Мои курсы" domain="[('is_member', '=', True)]"/>
+        <separator/>
+        <filter name="basic" string="Начальный уровень" domain="[('coop_level', '=', 'basic')]"/>
+        <filter name="middle" string="Средний уровень" domain="[('coop_level', '=', 'middle')]"/>
+        <filter name="advanced" string="Продвинутый уровень" domain="[('coop_level', '=', 'advanced')]"/>
+        <group>
+          <filter name="by_topic" string="По теме" context="{'group_by': 'coop_topic'}"/>
+          <filter name="by_level" string="По уровню" context="{'group_by': 'coop_level'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_courses" model="ir.actions.act_window">
+    <field name="name">Образование</field>
+    <field name="res_model">slide.channel</field>
+    <field name="path">education</field>
+    <field name="view_mode">kanban,list</field>
+    <field name="domain">[('is_published', '=', True)]</field>
+    <field name="search_view_id" ref="view_coop_course_search"/>
+    <field name="view_ids" eval="[(5, 0, 0),
+           (0, 0, {'sequence': 10, 'view_mode': 'kanban', 'view_id': ref('view_coop_course_kanban')}),
+           (0, 0, {'sequence': 20, 'view_mode': 'list', 'view_id': ref('view_coop_course_list')})]"/>
+    <field name="context">{'bin_size': True, 'coop_catalog': 1, 'coop_shelf_field': 'coop_topic'}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Курсов пока нет</p>
+      <p>Курсы для участников: как устроен кооператив, учёт, ремёсла,
+         разработка. Пройденное остаётся в профиле.</p>
+    </field>
+  </record>
+
+  <record id="action_coop_courses_mine" model="ir.actions.act_window">
+    <field name="name">Мои курсы</field>
+    <field name="res_model">slide.channel</field>
+    <field name="path">my-courses</field>
+    <field name="view_mode">kanban,list</field>
+    <field name="domain">[('is_member', '=', True)]</field>
+    <field name="search_view_id" ref="view_coop_course_search"/>
+    <field name="view_ids" eval="[(5, 0, 0),
+           (0, 0, {'sequence': 10, 'view_mode': 'kanban', 'view_id': ref('view_coop_course_kanban')}),
+           (0, 0, {'sequence': 20, 'view_mode': 'list', 'view_id': ref('view_coop_course_list')})]"/>
+    <field name="context">{'bin_size': True, 'coop_catalog': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Вы ещё не записались ни на один курс</p>
+      <p>Выберите курс в каталоге и нажмите «Записаться» на его странице —
+         он появится здесь вместе с прогрессом.</p>
+    </field>
+  </record>
+
+  <menuitem id="menu_coop_education_root" name="Образование" sequence="152"
+            action="action_coop_courses"/>
+  <menuitem id="menu_coop_education_catalog" name="Каталог курсов"
+            parent="menu_coop_education_root" action="action_coop_courses" sequence="10"/>
+  <menuitem id="menu_coop_education_mine" name="Мои курсы"
+            parent="menu_coop_education_root" action="action_coop_courses_mine" sequence="20"/>
+
+</odoo>

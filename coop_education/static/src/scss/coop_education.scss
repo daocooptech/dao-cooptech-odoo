@@ -1,0 +1,83 @@
+// Каталог курсов (решение 411, Н3), views/coop_education_views.xml.
+// Плитка — общего семейства o_coop_listing*; своё — уровень на обложке,
+// строка прогресса и оценка.
+
+.o_coop_courses {
+  .o_coop_course_cover {
+    position: relative;
+    display: block;
+  }
+
+  .o_coop_course_level {
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(20, 23, 26, .72);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .o_coop_course_title {
+    display: block;
+    color: var(--coop-ink, #14171a);
+    text-decoration: none;
+    &:hover { color: var(--coop-teal-dark, #0e4f4a); }
+  }
+
+  // Описание — две строки: у одного курса абзац, у другого фраза, и без
+  // обрезки ряд плиток разъезжается по высоте.
+  .o_coop_course_desc {
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--coop-slate, #4a4a44);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: calc(2 * 1.4em);
+    margin: 4px 0;
+
+    p { margin: 0; }
+  }
+
+  .o_coop_course_progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11.5px;
+    color: var(--coop-teal-dark, #0e4f4a);
+    margin: 4px 0;
+  }
+
+  .o_coop_course_progress > span {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .o_coop_course_track {
+    flex: 1;
+    min-width: 0;
+    height: 5px;
+    border-radius: 999px;
+    background: var(--coop-surface, #f2f2ee);
+    overflow: hidden;
+
+    span {
+      display: block;
+      height: 100%;
+      background: var(--coop-teal, #146b64);
+    }
+  }
+
+  .o_coop_course_rating {
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+
+    .fa-star { color: #d9a520; }
+  }
+}
