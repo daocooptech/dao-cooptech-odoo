@@ -115,9 +115,7 @@ EXTENSION_ITEMS = [
     ('События', 'fa-calendar', 'coop_events.action_coop_event'),
     ('Аналитика', 'fa-bar-chart', ''),
     ('Образование', 'fa-graduation-cap', ''),
-    ('Библиотеки', 'fa-book', ''),
     ('Диск', 'fa-folder-open-o', ''),
-    ('Здоровье', 'fa-heartbeat', ''),
 ]
 
 # Разделы, которые появляются, только когда участнику есть что в них
@@ -140,7 +138,10 @@ MAIN_BY_NAME = {name: xmlid for name, _icon, xmlid in MAIN_ITEMS}
 # Пункты, стоявшие в умолчаниях раньше и убранные из них. Перечислены
 # поимённо, а не выведены вычитанием: иначе снос затронул бы и то, что
 # участник подключил себе сам.
-RETIRED_EXTENSIONS = {'Каталог расширений', 'Помощь проекту', 'Обмен цифровой валюты'}
+# «Библиотеки» и «Здоровье» — владелец 25.09.2026 (Н2): «удались из левого
+# меню пункты — библиотеки, здоровье».
+RETIRED_EXTENSIONS = {'Каталог расширений', 'Помощь проекту', 'Обмен цифровой валюты',
+                      'Библиотеки', 'Здоровье'}
 
 
 class CoopSidebarItem(models.Model):
@@ -292,6 +293,19 @@ class CoopSidebarItem(models.Model):
                     item.sudo().write({'is_required': False})
                     item.sudo().unlink()
                     dropped += 1
+
+            # Расширения, снятые из умолчаний (RETIRED_EXTENSIONS), — сразу
+            # при обновлении, а не при следующей загрузке меню участником
+            # (`_sync_required`). Правило то же: только выданное
+            # платформой, а не подключённое участником самим.
+            offered = user._coop_sidebar_defaults()
+            stale = existing.filtered(
+                lambda i: i.section == 'ext' and i.name in RETIRED_EXTENSIONS
+                and i.name in offered and not i.is_required)
+            if stale:
+                dropped += len(stale)
+                stale.sudo().unlink()
+                user._coop_remember_sidebar_defaults(offered - RETIRED_EXTENSIONS)
             existing = existing.exists()
 
             by_key = {(item.section, item.name): item for item in existing}
