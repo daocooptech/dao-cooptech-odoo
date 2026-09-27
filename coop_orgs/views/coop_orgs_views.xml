@@ -423,6 +423,39 @@
                 </div>
               </div>
 
+              <!-- Кооперативные участки (решение 428; ст. 1, 17 Закона
+                   № 3085-1): части общества, объединяющие пайщиков для
+                   собраний, в том числе живущих за рубежом. -->
+              <div class="o_coop_band" invisible="not coop_section_ids">
+                <div class="o_coop_band_head">
+                  <span>Кооперативные участки</span>
+                </div>
+                <div class="o_coop_band_body">
+                  <field name="coop_section_ids" readonly="1" nolabel="1">
+                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                      <field name="city"/>
+                      <field name="country_id"/>
+                      <field name="member_count"/>
+                      <templates>
+                        <t t-name="card">
+                          <div class="o_coop_mini">
+                            <div class="o_coop_mini_label">
+                              <field name="name"/>
+                            </div>
+                            <div class="o_coop_mini_note">
+                              <t t-esc="record.city.value"/><t t-if="record.country_id.raw_value and record.city.value">, </t><t t-esc="record.country_id.value"/>
+                            </div>
+                            <div class="o_coop_mini_note">
+                              Пайщиков: <t t-esc="record.member_count.value"/>
+                            </div>
+                          </div>
+                        </t>
+                      </templates>
+                    </kanban>
+                  </field>
+                </div>
+              </div>
+
               <div class="o_coop_band" invisible="not coop_org_resource_ids">
                 <div class="o_coop_band_head">
                   <span>Ресурсы</span>

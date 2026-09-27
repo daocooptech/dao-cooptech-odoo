@@ -4,3 +4,4 @@ from . import res_partner
 from . import coop_join_wizard
 from . import coop_org_link
 from . import catalog_filters
+from . import coop_section

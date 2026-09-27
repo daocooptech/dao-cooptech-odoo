@@ -36,7 +36,8 @@ from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_groupbuy,
                     load_programs,
                     load_promotions,
-                    load_reference, load_residency, load_resources, load_skills,
+                    load_reference, load_residency, load_resources, load_sections,
+                    load_skills,
                     load_project_needs, load_project_tasks,
                     load_photos,
                     load_documents,
@@ -288,6 +289,10 @@ class CoopDemoLoader(models.AbstractModel):
         # личные потребности, и снимок им нужен такой же, как всем.
         load_memberships.trim_memberships(self.env)
         load_spread.spread_all(self.env)
+        # Кооперативные участки потребительских обществ (решение 428) — после
+        # резидентства и после чистки членств: участок «Шанхай» ставит своим
+        # пайщикам проживание, а чистка убрала бы его новые членства.
+        load_sections.load_sections(self.env)
         # Город — до снимков и по всем участникам разом. Город карточки
         # ресурса, права и объявления берётся у хозяина, а не у записи:
         # у нематериальных прав это прямо `related='owner_id.city'`.

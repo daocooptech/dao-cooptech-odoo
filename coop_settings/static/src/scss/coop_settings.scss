@@ -59,8 +59,8 @@
   padding: 10px 14px;
   border-radius: 8px;
   border: 1px solid var(--coop-error, #c0392b);
-  color: var(--coop-error, #c0392b);
-  font-weight: 600;
+  color: var(--coop-ink, #14171a);
+  b { color: var(--coop-error, #c0392b); }
 }
 .o_coop_settle_ok { color: var(--coop-teal, #146b64); }
 .o_coop_settle_warn { color: var(--coop-gold, #c8962c); }

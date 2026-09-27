@@ -25,7 +25,7 @@
     'data': [
         'security/ir.model.access.csv',
         'data/coop_okved_data.xml',
-        'views/coop_orgs_views.xml',
+        'views/coop_section_views.xml', 'views/coop_orgs_views.xml',
     ],
     'assets': {
         'web.assets_backend': [
