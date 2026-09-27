@@ -146,6 +146,10 @@ class CoopWalletMethod(models.Model):
     _name = 'coop.wallet.method'
     _description = 'Способ оплаты'
     _order = 'sequence, id'
+    # Имени у способа нет, и движок подписывал его «coop.wallet.method,9» —
+    # в истории кошелька, в фильтрах, в дашборде «Мои деньги» (находка 12,
+    # владелец 27.09.2026: «чини»). Подпись — то, как способ показывают.
+    _rec_name = 'label'
 
     wallet_id = fields.Many2one(
         'coop.wallet', string='Кошелёк', required=True, index=True,
