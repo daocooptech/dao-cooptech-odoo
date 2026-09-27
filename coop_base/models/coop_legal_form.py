@@ -123,6 +123,19 @@ class CoopLegalForm(models.Model):
 
     partner_ids = fields.One2many(
         'res.partner', 'coop_legal_form_id', string='Организации')
+
+    @api.model
+    def _coop_fix_snt(self):
+        """СНТ — не кооператив (ГК 123.12–123.14, 217-ФЗ), 27.09.2026.
+
+        Вызывается из данных при каждом обновлении и ничего не делает,
+        если справочник уже исправлен.
+        """
+        snt = self.env.ref('coop_base.legal_form_snt', raise_if_not_found=False)
+        group = self.env.ref('coop_base.legal_group_nonprofit', raise_if_not_found=False)
+        if snt and group and (snt.is_cooperative or snt.group_id != group):
+            snt.write({'is_cooperative': False, 'group_id': group.id})
+
     partner_count = fields.Integer(
         string='Организаций', compute='_compute_partner_count')
 

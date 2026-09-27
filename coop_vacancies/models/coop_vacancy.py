@@ -4,6 +4,8 @@ import logging
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
+from odoo.addons.coop_base.models.res_partner import PRODUCTION_KINDS
+
 _logger = logging.getLogger(__name__)
 
 # Как оформляется и чем оплачивается труд.
@@ -33,8 +35,8 @@ PAY_METHODS = [
 # первой: иначе вакансии ДАО получали кооперативный способ выплаты.
 TOKEN_FORMS = ('dao', 'platform')
 # Трудовое участие без трудового договора — только у производственного
-# кооператива (ст. 106.1 ГК, 41-ФЗ, ст. 40 193-ФЗ).
-PRODUCTION_FORMS = ('pk', 'spk', 'artel')
+# кооператива (ст. 106.1 ГК, 41-ФЗ, ст. 40 193-ФЗ): смотрим вид кооператива
+# организации, а не код формы (PRODUCTION_KINDS из coop_base).
 
 
 class ResPartner(models.Model):
@@ -46,7 +48,7 @@ class ResPartner(models.Model):
         form = self.coop_legal_form_id
         if form.code in TOKEN_FORMS:
             return 'dao'
-        if form.code in PRODUCTION_FORMS:
+        if self.coop_cooperative_kind in PRODUCTION_KINDS:
             return 'production'
         if form.is_cooperative:
             return 'coop'
@@ -251,7 +253,7 @@ class CoopVacancy(models.Model):
         self.ensure_one()
         return self.reward_kind in ('money', 'share') and self.employment != 'volunteer'
 
-    @api.depends('partner_id.coop_legal_form_id', 'employment', 'reward_kind')
+    @api.depends('partner_id.coop_legal_form_id', 'partner_id.coop_cooperative_kind', 'employment', 'reward_kind')
     def _compute_contract_kind(self):
         # Выбор работодателя не сбрасывается, пока он допустим.
         for record in self:
@@ -266,7 +268,7 @@ class CoopVacancy(models.Model):
             else:
                 record.contract_kind = 'civil'
 
-    @api.depends('contract_kind', 'partner_id.coop_legal_form_id')
+    @api.depends('contract_kind', 'partner_id.coop_legal_form_id', 'partner_id.coop_cooperative_kind')
     def _compute_pay_method(self):
         for record in self:
             if not record.contract_kind:
@@ -276,13 +278,13 @@ class CoopVacancy(models.Model):
             if record.pay_method not in allowed:
                 record.pay_method = allowed[0]
 
-    @api.depends('partner_id.coop_legal_form_id')
+    @api.depends('partner_id.coop_legal_form_id', 'partner_id.coop_cooperative_kind')
     def _compute_employer_kind(self):
         for record in self:
             record.employer_kind = (record.partner_id._coop_employer_kind()
                                     if record.partner_id else 'other')
 
-    @api.depends('contract_kind', 'pay_method', 'partner_id.coop_legal_form_id')
+    @api.depends('contract_kind', 'pay_method', 'partner_id.coop_legal_form_id', 'partner_id.coop_cooperative_kind')
     def _compute_pay_explain(self):
         # Формулировки — из заключения юриста 27.09, разд. 4.2.
         for record in self:
@@ -297,7 +299,7 @@ class CoopVacancy(models.Model):
                          'участию, заранее не гарантирован. Нужно вступить: паевой '
                          'взнос и решение собрания. С выплат удерживается НДФЛ, '
                          'кооператив платит страховые взносы.')
-                if record.partner_id.coop_legal_form_id.code == 'spk':
+                if record.partner_id.coop_cooperative_kind == 'agri_production':
                     text += ' ' + _('В сельхозартели условия не хуже Трудового кодекса.')
             elif pay == 'tokens':
                 text = _('Не трудовой договор: работа по заданию, оплата токенами '

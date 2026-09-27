@@ -425,3 +425,40 @@ def repair_empty_logos(env):
     if fixed:
         _logger.info('Организации: пустые снимки заменены монограммой у %s', fixed)
     return fixed
+
+
+def spread_cooperative_kinds(env):
+    """Вид кооператива у демо-организаций формы «ПО» — с разбросом.
+
+    Решение 425: форма «ПО» одна на потребительское общество по 3085-1 и
+    на прочие потребительские кооперативы; по умолчанию ставится
+    общество, и без разброса второй вид в каталоге не виден. Каждый
+    третий — потребительский кооператив.
+    """
+    Partner = env['res.partner'].sudo().with_context(tracking_disable=True)
+    orgs = Partner.search([('coop_legal_form_id.code', '=', 'po')], order='id')
+    changed = 0
+    for index, org in enumerate(orgs):
+        kind = 'consumer' if index % 3 == 1 else 'consumer_society'
+        if org.coop_cooperative_kind != kind:
+            org.coop_cooperative_kind = kind
+            changed += 1
+    _logger.info('Вид кооператива у ПО: %s организаций, изменено %s', len(orgs), changed)
+
+
+def drop_non_coop_shares(env):
+    """Паевые счета у организаций, которые не кооперативы, — убрать.
+
+    27.09.2026 СНТ перестало считаться кооперативом (ГК 123.12–123.14,
+    217-ФЗ: товарищество собственников без паёв). Демо-загрузка успела
+    завести у трёх СНТ полсотни паевых счетов — у товарищества их быть не
+    может, и в «Портфеле» они показывали бы пай, которого нет. Новые не
+    появятся: счета заводятся только из членства в кооперативе.
+    """
+    if 'coop.share.account' not in env:
+        return
+    accounts = env['coop.share.account'].sudo().search(
+        [('cooperative_id.coop_is_cooperative', '=', False)])
+    if accounts:
+        _logger.info('Паевые счета вне кооперативов: удалено %s', len(accounts))
+        accounts.unlink()

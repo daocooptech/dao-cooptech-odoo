@@ -195,6 +195,10 @@ class CoopDemoLoader(models.AbstractModel):
         # когда все вакансии, из каталога и из потребностей проектов, уже
         # заведены.
         load_vacancies.spread_contracts(self.env)
+        # Вид кооператива у ПО и паевые счета вне кооперативов (СНТ снято
+        # с кооперативных 27.09.2026) — после кошельков, где счета заводятся.
+        load_orgs.spread_cooperative_kinds(self.env)
+        load_orgs.drop_non_coop_shares(self.env)
         # Международные сделки (решения 392, 410) — после организаций и
         # операторов ЦФА: российская сторона — организация участника.
         if 'coop.trade.contract' in self.env:

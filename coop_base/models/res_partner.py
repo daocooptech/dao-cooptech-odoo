@@ -9,6 +9,37 @@ from odoo.tools.safe_eval import safe_eval
 _logger = logging.getLogger(__name__)
 
 
+# Вид кооператива — отдельно от правовой формы (решение 425, владелец
+# 27.09.2026: «заведи отдельное поле "вид кооператива"»). Форма «ПО» в
+# справочнике — одна на потребительское общество по 3085-1 и на прочие
+# потребительские кооперативы, а правила у них разные: у общества — союзы
+# ПО и лимит кооперативных выплат (ст. 24 3085-1), у сельхозкооперативов —
+# ревизионный союз (193-ФЗ), у кредитных — СРО и ЦБ (190-ФЗ), трудовое
+# участие — только у производственных (ГК 106.1, 41-ФЗ). ЖСК и ГСК — виды
+# потребительского кооператива (ГК ст. 50).
+COOP_KINDS = [
+    ('consumer_society', 'Потребительское общество'),
+    ('consumer', 'Потребительский кооператив'),
+    ('credit', 'Кредитный кооператив'),
+    ('agri_consumer', 'Сельскохозяйственный потребительский'),
+    ('production', 'Производственный (артель)'),
+    ('agri_production', 'Сельскохозяйственный производственный'),
+]
+# Что допустимо при данной правовой форме; первое — по умолчанию.
+COOP_KINDS_BY_FORM = {
+    'po': ('consumer_society', 'consumer'),
+    'zhsk': ('consumer',),
+    'gsk': ('consumer',),
+    'kpk': ('credit',),
+    'skpk': ('credit',),
+    'sppk': ('agri_consumer',),
+    'pk': ('production',),
+    'artel': ('production',),
+    'spk': ('agri_production',),
+}
+PRODUCTION_KINDS = ('production', 'agri_production')
+
+
 class ResPartner(models.Model):
     """Тип организации.
 
@@ -33,6 +64,42 @@ class ResPartner(models.Model):
     coop_is_cooperative = fields.Boolean(
         string='Кооперативная организация',
         related='coop_legal_form_id.is_cooperative', store=True)
+    coop_cooperative_kind = fields.Selection(
+        COOP_KINDS, string='Вид кооператива',
+        compute='_compute_coop_cooperative_kind', store=True, readonly=False,
+        index=True,
+        help='От вида зависят правила: у потребительского общества — союзы '
+             'и лимит кооперативных выплат, у сельхозкооперативов — '
+             'ревизионный союз, у кредитных — СРО и надзор ЦБ, трудовое '
+             'участие без трудового договора — только у производственных.')
+
+    def _coop_cooperative_kinds_allowed(self):
+        self.ensure_one()
+        return COOP_KINDS_BY_FORM.get(self.coop_legal_form_id.code, ())
+
+    @api.depends('coop_legal_form_id')
+    def _compute_coop_cooperative_kind(self):
+        # Выбор, сделанный вручную, не сбрасывается, пока допустим при форме.
+        for partner in self:
+            allowed = partner._coop_cooperative_kinds_allowed()
+            if partner.coop_cooperative_kind not in allowed:
+                partner.coop_cooperative_kind = allowed[0] if allowed else False
+
+    @api.constrains('coop_cooperative_kind', 'coop_legal_form_id')
+    def _check_coop_cooperative_kind(self):
+        names = dict(COOP_KINDS)
+        for partner in self:
+            kind = partner.coop_cooperative_kind
+            if not kind:
+                continue
+            allowed = partner._coop_cooperative_kinds_allowed()
+            if kind not in allowed:
+                raise UserError(_(
+                    'При форме «%(form)s» вид кооператива «%(kind)s» невозможен. %(ok)s',
+                    form=partner.coop_legal_form_id.display_name or _('не указана'),
+                    kind=names[kind],
+                    ok=(_('Допустимо: %s.') % ', '.join(names[a].lower() for a in allowed))
+                    if allowed else _('Эта форма — не кооператив.')))
 
     # Специализация одна на людей и организации: и человек, и кооператив
     # отвечают на один вопрос — чем занимаются. Разводить это на два поля

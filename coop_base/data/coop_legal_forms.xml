@@ -219,17 +219,20 @@
       <field name="sequence">80</field>
     </record>
 
-    <!-- Дачные кооперативы с 2019 года по 217-ФЗ преобразованы в СНТ, но
-         сама форма садоводческого потребительского кооператива никуда не
-         делась и в каталоге встречается. -->
+    <!-- СНТ — не кооператив: по ГК (ст. 123.12–123.14) и 217-ФЗ это
+         товарищество собственников недвижимости, без паёв и без
+         распределения дохода. Раньше стояло в кооперативных; снято по
+         заключению юриста и указанию владельца 27.09.2026 («да, снимай с
+         СНТ»). Уже работающие базы правит `_coop_fix_snt` ниже: запись
+         под noupdate, повторная загрузка её не тронет. -->
     <record id="legal_form_snt" model="coop.legal.form">
       <field name="name">Садоводческое (дачное) некоммерческое товарищество</field>
       <field name="short_name">СНТ</field>
       <field name="code">snt</field>
-      <field name="group_id" ref="legal_group_cooperative"/>
+      <field name="group_id" ref="legal_group_nonprofit"/>
       <field name="law">ФЗ от 29.07.2017 № 217-ФЗ</field>
       <field name="has_members" eval="True"/>
-      <field name="is_cooperative" eval="True"/>
+      <field name="is_cooperative" eval="False"/>
       <field name="sequence">90</field>
     </record>
 
@@ -364,5 +367,11 @@
       <field name="sequence">20</field>
     </record>
 
+  </data>
+
+  <!-- Правки справочника для баз, где он уже загружен: записи выше под
+       noupdate, и повторная загрузка их не трогает. -->
+  <data noupdate="0">
+    <function model="coop.legal.form" name="_coop_fix_snt"/>
   </data>
 </odoo>

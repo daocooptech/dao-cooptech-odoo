@@ -51,6 +51,7 @@
       <list string="Организации">
         <field name="name"/>
         <field name="coop_legal_form_id" string="Форма"/>
+        <field name="coop_cooperative_kind" optional="show"/>
         <field name="city"/>
         <field name="coop_specialization_id" string="Специализация" optional="show"/>
         <field name="coop_specialization_category_id" string="Сфера деятельности" optional="hide"/>
@@ -74,6 +75,12 @@
         <field name="coop_inn"/>
         <filter name="cooperative" string="Кооперативные"
                 domain="[('coop_is_cooperative', '=', True)]"/>
+        <filter name="coop_consumer_society" string="Потребительские общества"
+                domain="[('coop_cooperative_kind', '=', 'consumer_society')]"/>
+        <filter name="coop_production" string="Производственные и артели"
+                domain="[('coop_cooperative_kind', 'in', ('production', 'agri_production'))]"/>
+        <filter name="coop_credit" string="Кредитные"
+                domain="[('coop_cooperative_kind', '=', 'credit')]"/>
         <filter name="with_members" string="С членством"
                 domain="[('coop_member_count', '>', 0)]"/>
         <separator/>
@@ -84,6 +91,8 @@
                   context="{'group_by': 'coop_legal_form_group_id'}"/>
           <filter name="by_form" string="По правовой форме"
                   context="{'group_by': 'coop_legal_form_id'}"/>
+          <filter name="by_coop_kind" string="По виду кооператива"
+                  context="{'group_by': 'coop_cooperative_kind'}"/>
           <filter name="by_area" string="По сфере деятельности"
                   context="{'group_by': 'coop_specialization_category_id'}"/>
           <filter name="by_city" string="По городу" context="{'group_by': 'city'}"/>
@@ -339,6 +348,14 @@
               <div class="o_coop_role">
                 <field name="coop_legal_form_id" widget="coop_inline" readonly="not coop_can_edit_card"
                        placeholder="Правовая форма"/>
+                <!-- Вид кооператива (решение 425): от него правила —
+                     союзы и лимит выплат у потребительского общества,
+                     ревизионный союз у сельхозкооперативов, СРО у
+                     кредитных, трудовое участие у производственных.
+                     Выбор есть только у формы «ПО». -->
+                <field name="coop_cooperative_kind" widget="coop_inline"
+                       readonly="not coop_can_edit_card"
+                       invisible="not coop_cooperative_kind"/>
               </div>
 
               <!-- То же, что у человека: короткая заметка, а не статья
