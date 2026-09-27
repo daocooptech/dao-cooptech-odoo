@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'ДАО КООПТЕХ — аналитика',
-    'summary': '«Моя панель»: личный конструктор из графиков и сводных таблиц платформы',
+    'summary': '«Моя панель» и готовые дашборды платформы',
     'description': """
 Решение 420, слой 1. «Аналитика» — «Моя панель» штатного модуля `board`:
 каждый участник собирает свою страницу из видов платформы — графиков,
@@ -10,28 +10,38 @@
 графики и сводные таблицы: сделки, деньги, вклады в проекты, биржа,
 обучение. У кого панель ещё не настроена — панель по умолчанию из них же.
 
-Следующие слои (решение 420): готовые дашборды, портфель участника,
-прогноз и план.
+Слой 2 — готовые дашборды на штатном `spreadsheet_dashboard`: «Мои деньги»,
+«Мои сделки и доверие», «Проекты», «Биржа» — плитки к прошлому периоду,
+графики, таблицы «топ-10», глобальные фильтры по периоду, городу, разделу.
+Файлы дашбордов собирает `tools/build_dashboards.py`.
+
+Следующие слои (решение 420): портфель участника, прогноз и план.
 """,
     'author': 'ДАО КООПТЕХ',
     'website': 'https://daocooptech.ru',
     'category': 'Cooperative',
     'version': '19.0.1.0.0',
     'license': 'LGPL-3',
-    'depends': ['board', 'coop_theme', 'coop_deals', 'coop_wallet', 'coop_projects',
-                'coop_crypto_exchange', 'coop_education', 'coop_people', 'coop_profile',
-                'coop_wall'],
+    'depends': ['board', 'spreadsheet_dashboard', 'coop_theme', 'coop_deals', 'coop_wallet',
+                'coop_projects', 'coop_matching', 'coop_crypto_exchange', 'coop_tokenomics',
+                'coop_education', 'coop_people', 'coop_profile', 'coop_wall'],
     'data': [
         'security/ir.model.access.csv',
         'security/coop_analytics_rules.xml',
         'views/coop_analytics_views.xml',
         'data/coop_analytics_board.xml',
+        'data/coop_analytics_dashboards.xml',
     ],
     'assets': {
         'web.assets_backend': [
             'coop_analytics/static/src/scss/coop_analytics.scss',
             'coop_analytics/static/src/js/board_tabs.js',
             'coop_analytics/static/src/xml/board_tabs.xml',
+        ],
+        # Экран дашбордов грузится лениво, своим бандлом — вкладки над ним туда же.
+        'spreadsheet.o_spreadsheet': [
+            'coop_analytics/static/src/dashboards/dashboard_tabs.js',
+            'coop_analytics/static/src/dashboards/dashboard_tabs.xml',
         ],
     },
     'installable': True,

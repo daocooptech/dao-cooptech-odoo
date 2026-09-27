@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Готовые дашборды платформы (решение 420, слой 2) — на штатном
+    `spreadsheet_dashboard`. Файлы собирает tools/build_dashboards.py: руками
+    их не правят, при обновлении модуля они перезаливаются целиком.
+
+    «Мои деньги» и «Мои сделки и доверие» — только своё: отбор по
+    `coop_is_me` стоит в самих источниках, а не только в правилах записей —
+    администратору правила открывают всё, и его «Мои деньги» были бы
+    деньгами всей платформы. «Проекты» и «Биржа» — общая картина платформы.
+  -->
+  <record id="dashboard_group_platform" model="spreadsheet.dashboard.group">
+    <field name="name">Платформа</field>
+    <!-- Первой в списке: экран открывает первый дашборд первой группы. -->
+    <field name="sequence">1</field>
+  </record>
+
+  <record id="dashboard_money" model="spreadsheet.dashboard">
+    <field name="name">Мои деньги</field>
+    <field name="spreadsheet_binary_data" type="base64" file="coop_analytics/data/dashboards/money.json"/>
+    <field name="dashboard_group_id" ref="dashboard_group_platform"/>
+    <field name="group_ids" eval="[Command.set([ref('base.group_user')])]"/>
+    <field name="sequence">10</field>
+    <field name="is_published">True</field>
+  </record>
+
+  <record id="dashboard_deals" model="spreadsheet.dashboard">
+    <field name="name">Мои сделки и доверие</field>
+    <field name="spreadsheet_binary_data" type="base64" file="coop_analytics/data/dashboards/deals.json"/>
+    <field name="dashboard_group_id" ref="dashboard_group_platform"/>
+    <field name="group_ids" eval="[Command.set([ref('base.group_user')])]"/>
+    <field name="sequence">20</field>
+    <field name="is_published">True</field>
+  </record>
+
+  <record id="dashboard_projects" model="spreadsheet.dashboard">
+    <field name="name">Проекты</field>
+    <field name="spreadsheet_binary_data" type="base64" file="coop_analytics/data/dashboards/projects.json"/>
+    <field name="dashboard_group_id" ref="dashboard_group_platform"/>
+    <field name="group_ids" eval="[Command.set([ref('base.group_user')])]"/>
+    <field name="sequence">30</field>
+    <field name="is_published">True</field>
+  </record>
+
+  <record id="dashboard_exchange" model="spreadsheet.dashboard">
+    <field name="name">Биржа</field>
+    <field name="spreadsheet_binary_data" type="base64" file="coop_analytics/data/dashboards/exchange.json"/>
+    <field name="dashboard_group_id" ref="dashboard_group_platform"/>
+    <field name="group_ids" eval="[Command.set([ref('base.group_user')])]"/>
+    <field name="sequence">40</field>
+    <field name="is_published">True</field>
+  </record>
+
+  <!-- Вкладка «Дашборды» раздела: штатный экран дашбордов. -->
+  <record id="action_coop_an_dashboards" model="ir.actions.client">
+    <field name="name">Дашборды</field>
+    <field name="tag">action_spreadsheet_dashboard</field>
+    <field name="path">analytics-dashboards</field>
+    <field name="context">{'coop_section': 1}</field>
+  </record>
+
+  <menuitem id="menu_coop_analytics_dashboards" name="Дашборды"
+            parent="menu_coop_analytics_root" action="action_coop_an_dashboards" sequence="11"/>
+
+</odoo>

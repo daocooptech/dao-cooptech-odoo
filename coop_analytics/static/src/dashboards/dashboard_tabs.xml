@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <!-- Вкладки раздела над готовыми дашбордами (dashboard_tabs.js). -->
+  <t t-inherit="spreadsheet_dashboard.DashboardAction" t-inherit-mode="extension">
+    <xpath expr="//ControlPanel" position="before">
+      <div class="o_coop_board_tabs o_coop_dash_tabs"><CoopTabs/></div>
+    </xpath>
+  </t>
+</templates>

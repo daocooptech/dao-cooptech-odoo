@@ -1,0 +1,1183 @@
+{
+ "borders": {
+  "1": {
+   "bottom": {
+    "color": "#CCCCCC",
+    "style": "thin"
+   }
+  }
+ },
+ "chartOdooMenusReferences": {
+  "0b6cc525-4454-5f3a-9143-470772ac5744": "coop_projects.menu_coop_projects_root",
+  "0df42118-6d21-53df-9633-eb1c75cdca3f": "coop_projects.menu_coop_projects_root",
+  "1a77a8c0-ec87-5658-95a0-711528089a93": "coop_projects.menu_coop_projects_root",
+  "3abf7dc4-3b95-5e55-b724-a18340d79df1": "coop_projects.menu_coop_projects_root",
+  "5ffa353b-8c1e-5e5e-a568-53ee6a7a7890": "coop_projects.menu_coop_projects_root",
+  "8835feba-fd0f-5dda-9d7c-adb7c9a18761": "coop_projects.menu_coop_projects_root",
+  "98c64103-5386-5db1-8305-f80c74fa77a2": "coop_projects.menu_coop_projects_root",
+  "a1252d85-3bc3-51e1-803d-8b1e270fa4be": "coop_projects.menu_coop_projects_root",
+  "a580eb2c-f6b0-5577-a8e4-86691ecee759": "coop_projects.menu_coop_projects_root",
+  "d82c1382-14b6-5c80-8e4f-d9b1f365ee89": "coop_projects.menu_coop_projects_root",
+  "f6f2219e-6af0-5bc5-a60e-461ea309ba5e": "coop_projects.menu_coop_projects_root"
+ },
+ "customTableStyles": {},
+ "formats": {
+  "1": "#,##0",
+  "2": "#,##0[$ ₽]",
+  "3": "0[$ %]"
+ },
+ "globalFilters": [
+  {
+   "defaultValue": "last_12_months",
+   "id": "47451c99-b35d-5366-9fb9-c37f11f1dafa",
+   "label": "Период",
+   "type": "date"
+  },
+  {
+   "id": "b4a57661-9d98-56a4-a319-155ebe77ebaa",
+   "label": "Город",
+   "rangesOfAllowedValues": [
+    "Lists!A1:A35"
+   ],
+   "type": "text"
+  },
+  {
+   "defaultValueDisplayNames": [],
+   "id": "834c01ca-d337-5a6e-b8d8-710645331bae",
+   "label": "Тема",
+   "modelName": "coop.project.category",
+   "type": "relation"
+  },
+  {
+   "id": "1042f829-e0b4-548d-ba31-26d74ef85364",
+   "label": "Вид проекта",
+   "resModel": "coop.project",
+   "selectionField": "kind",
+   "type": "selection"
+  }
+ ],
+ "listNextId": 1,
+ "lists": {},
+ "pivotNextId": 7,
+ "pivots": {
+  "1": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    [
+     "state",
+     "not in",
+     [
+      "draft",
+      "cancelled"
+     ]
+    ]
+   ],
+   "fieldMatching": {
+    "1042f829-e0b4-548d-ba31-26d74ef85364": {
+     "chain": "kind",
+     "type": "selection"
+    },
+    "47451c99-b35d-5366-9fb9-c37f11f1dafa": {
+     "chain": "create_date",
+     "offset": 0,
+     "type": "datetime"
+    },
+    "834c01ca-d337-5a6e-b8d8-710645331bae": {
+     "chain": "category_id",
+     "type": "many2one"
+    },
+    "b4a57661-9d98-56a4-a319-155ebe77ebaa": {
+     "chain": "city",
+     "type": "char"
+    }
+   },
+   "formulaId": "1",
+   "id": "1",
+   "measures": [
+    {
+     "fieldName": "__count",
+     "id": "__count"
+    },
+    {
+     "fieldName": "required_total",
+     "id": "required_total"
+    },
+    {
+     "fieldName": "contribution_total",
+     "id": "contribution_total"
+    },
+    {
+     "aggregator": "avg",
+     "fieldName": "readiness",
+     "id": "readiness:avg"
+    }
+   ],
+   "model": "coop.project",
+   "name": "проекты",
+   "rows": [],
+   "sortedColumn": null,
+   "type": "ODOO"
+  },
+  "2": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    [
+     "state",
+     "not in",
+     [
+      "draft",
+      "cancelled"
+     ]
+    ]
+   ],
+   "fieldMatching": {
+    "1042f829-e0b4-548d-ba31-26d74ef85364": {
+     "chain": "kind",
+     "type": "selection"
+    },
+    "47451c99-b35d-5366-9fb9-c37f11f1dafa": {
+     "chain": "create_date",
+     "offset": -1,
+     "type": "datetime"
+    },
+    "834c01ca-d337-5a6e-b8d8-710645331bae": {
+     "chain": "category_id",
+     "type": "many2one"
+    },
+    "b4a57661-9d98-56a4-a319-155ebe77ebaa": {
+     "chain": "city",
+     "type": "char"
+    }
+   },
+   "formulaId": "2",
+   "id": "2",
+   "measures": [
+    {
+     "fieldName": "__count",
+     "id": "__count"
+    },
+    {
+     "fieldName": "required_total",
+     "id": "required_total"
+    },
+    {
+     "fieldName": "contribution_total",
+     "id": "contribution_total"
+    },
+    {
+     "aggregator": "avg",
+     "fieldName": "readiness",
+     "id": "readiness:avg"
+    }
+   ],
+   "model": "coop.project",
+   "name": "проекты — прошлый период",
+   "rows": [],
+   "sortedColumn": null,
+   "type": "ODOO"
+  },
+  "3": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    [
+     "state",
+     "in",
+     [
+      "accepted",
+      "released"
+     ]
+    ]
+   ],
+   "fieldMatching": {
+    "1042f829-e0b4-548d-ba31-26d74ef85364": {
+     "chain": "project_id.kind",
+     "type": "selection"
+    },
+    "47451c99-b35d-5366-9fb9-c37f11f1dafa": {
+     "chain": "offered_on",
+     "offset": 0,
+     "type": "date"
+    },
+    "834c01ca-d337-5a6e-b8d8-710645331bae": {
+     "chain": "project_id.category_id",
+     "type": "many2one"
+    },
+    "b4a57661-9d98-56a4-a319-155ebe77ebaa": {
+     "chain": "project_id.city",
+     "type": "char"
+    }
+   },
+   "formulaId": "3",
+   "id": "3",
+   "measures": [
+    {
+     "fieldName": "__count",
+     "id": "__count"
+    },
+    {
+     "fieldName": "value",
+     "id": "value"
+    },
+    {
+     "aggregator": "count_distinct",
+     "fieldName": "partner_id",
+     "id": "partner_id:count_distinct"
+    }
+   ],
+   "model": "coop.project.contribution",
+   "name": "вклады",
+   "rows": [],
+   "sortedColumn": null,
+   "type": "ODOO"
+  },
+  "4": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    [
+     "state",
+     "in",
+     [
+      "accepted",
+      "released"
+     ]
+    ]
+   ],
+   "fieldMatching": {
+    "1042f829-e0b4-548d-ba31-26d74ef85364": {
+     "chain": "project_id.kind",
+     "type": "selection"
+    },
+    "47451c99-b35d-5366-9fb9-c37f11f1dafa": {
+     "chain": "offered_on",
+     "offset": -1,
+     "type": "date"
+    },
+    "834c01ca-d337-5a6e-b8d8-710645331bae": {
+     "chain": "project_id.category_id",
+     "type": "many2one"
+    },
+    "b4a57661-9d98-56a4-a319-155ebe77ebaa": {
+     "chain": "project_id.city",
+     "type": "char"
+    }
+   },
+   "formulaId": "4",
+   "id": "4",
+   "measures": [
+    {
+     "fieldName": "__count",
+     "id": "__count"
+    },
+    {
+     "fieldName": "value",
+     "id": "value"
+    },
+    {
+     "aggregator": "count_distinct",
+     "fieldName": "partner_id",
+     "id": "partner_id:count_distinct"
+    }
+   ],
+   "model": "coop.project.contribution",
+   "name": "вклады — прошлый период",
+   "rows": [],
+   "sortedColumn": null,
+   "type": "ODOO"
+  },
+  "5": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    [
+     "state",
+     "not in",
+     [
+      "draft",
+      "cancelled"
+     ]
+    ]
+   ],
+   "fieldMatching": {
+    "1042f829-e0b4-548d-ba31-26d74ef85364": {
+     "chain": "kind",
+     "type": "selection"
+    },
+    "47451c99-b35d-5366-9fb9-c37f11f1dafa": {
+     "chain": "create_date",
+     "offset": 0,
+     "type": "datetime"
+    },
+    "834c01ca-d337-5a6e-b8d8-710645331bae": {
+     "chain": "category_id",
+     "type": "many2one"
+    },
+    "b4a57661-9d98-56a4-a319-155ebe77ebaa": {
+     "chain": "city",
+     "type": "char"
+    }
+   },
+   "formulaId": "5",
+   "id": "5",
+   "measures": [
+    {
+     "fieldName": "contribution_total",
+     "id": "contribution_total"
+    },
+    {
+     "fieldName": "required_total",
+     "id": "required_total"
+    }
+   ],
+   "model": "coop.project",
+   "name": "Проект",
+   "rows": [
+    {
+     "fieldName": "name"
+    }
+   ],
+   "sortedColumn": {
+    "domain": [],
+    "measure": "contribution_total",
+    "order": "desc"
+   },
+   "type": "ODOO"
+  },
+  "6": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    [
+     "state",
+     "=",
+     "gathering"
+    ]
+   ],
+   "fieldMatching": {
+    "1042f829-e0b4-548d-ba31-26d74ef85364": {
+     "chain": "kind",
+     "type": "selection"
+    },
+    "47451c99-b35d-5366-9fb9-c37f11f1dafa": {
+     "chain": "create_date",
+     "offset": 0,
+     "type": "datetime"
+    },
+    "834c01ca-d337-5a6e-b8d8-710645331bae": {
+     "chain": "category_id",
+     "type": "many2one"
+    },
+    "b4a57661-9d98-56a4-a319-155ebe77ebaa": {
+     "chain": "city",
+     "type": "char"
+    }
+   },
+   "formulaId": "6",
+   "id": "6",
+   "measures": [
+    {
+     "aggregator": "avg",
+     "fieldName": "readiness",
+     "id": "readiness:avg"
+    },
+    {
+     "fieldName": "contributor_count",
+     "id": "contributor_count"
+    }
+   ],
+   "model": "coop.project",
+   "name": "Проект",
+   "rows": [
+    {
+     "fieldName": "name"
+    }
+   ],
+   "sortedColumn": {
+    "domain": [],
+    "measure": "readiness:avg",
+    "order": "desc"
+   },
+   "type": "ODOO"
+  }
+ },
+ "revisionId": "START_REVISION",
+ "settings": {
+  "locale": {
+   "code": "ru_RU",
+   "dateFormat": "dd.mm.yyyy",
+   "decimalSeparator": ",",
+   "formulaArgSeparator": ";",
+   "name": "Russian",
+   "thousandsSeparator": " ",
+   "timeFormat": "hh:mm:ss",
+   "weekStart": 1
+  }
+ },
+ "sheets": [
+  {
+   "areGridLinesVisible": false,
+   "borders": {
+    "A11:G11": 1,
+    "A28:C28": 1,
+    "A45:C45": 1,
+    "A62:C62": 1,
+    "E28:G28": 1,
+    "E45:G45": 1,
+    "E62:G62": 1
+   },
+   "cells": {
+    "A11": "Вклады по неделям — чем вкладываются",
+    "A28": "Проекты по темам",
+    "A45": "Проекты по городам",
+    "A62": "Больше всего собрали",
+    "A63": "=PIVOT(5, 10, FALSE, FALSE)",
+    "E28": "Вид проекта",
+    "E45": "В каком состоянии",
+    "E62": "Ближе всего к цели — идёт сбор",
+    "E63": "=PIVOT(6, 10, FALSE, FALSE)"
+   },
+   "colNumber": 7,
+   "cols": {
+    "0": {
+     "size": 250
+    },
+    "1": {
+     "size": 110
+    },
+    "2": {
+     "size": 80
+    },
+    "3": {
+     "size": 20
+    },
+    "4": {
+     "size": 250
+    },
+    "5": {
+     "size": 110
+    },
+    "6": {
+     "size": 80
+    }
+   },
+   "comments": {},
+   "conditionalFormats": [],
+   "dataValidationRules": [],
+   "figures": [
+    {
+     "col": 0,
+     "data": {
+      "background": "#EEF6F5",
+      "baseline": "Data!C2",
+      "baselineColorDown": "#DC6965",
+      "baselineColorUp": "#00A04A",
+      "baselineDescr": {
+       "text": "к прошлому"
+      },
+      "baselineMode": "difference",
+      "humanize": false,
+      "keyValue": "Data!B2",
+      "title": {
+       "bold": true,
+       "color": "#434343",
+       "text": "Проектов"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "98c64103-5386-5db1-8305-f80c74fa77a2",
+     "offset": {
+      "x": 0,
+      "y": 12
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "background": "#EEF6F5",
+      "baseline": "Data!C3",
+      "baselineColorDown": "#DC6965",
+      "baselineColorUp": "#00A04A",
+      "baselineDescr": {
+       "text": "к прошлому"
+      },
+      "baselineMode": "percentage",
+      "humanize": false,
+      "keyValue": "Data!B3",
+      "title": {
+       "bold": true,
+       "color": "#434343",
+       "text": "Нужно собрать"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "a580eb2c-f6b0-5577-a8e4-86691ecee759",
+     "offset": {
+      "x": 303,
+      "y": 12
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "background": "#EEF6F5",
+      "baseline": "Data!C4",
+      "baselineColorDown": "#DC6965",
+      "baselineColorUp": "#00A04A",
+      "baselineDescr": {
+       "text": "к прошлому"
+      },
+      "baselineMode": "percentage",
+      "humanize": false,
+      "keyValue": "Data!B4",
+      "title": {
+       "bold": true,
+       "color": "#434343",
+       "text": "Собрано"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "8835feba-fd0f-5dda-9d7c-adb7c9a18761",
+     "offset": {
+      "x": 606,
+      "y": 12
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "background": "#EEF6F5",
+      "baseline": "Data!C5",
+      "baselineColorDown": "#DC6965",
+      "baselineColorUp": "#00A04A",
+      "baselineDescr": {
+       "text": "к прошлому"
+      },
+      "baselineMode": "difference",
+      "humanize": false,
+      "keyValue": "Data!B5",
+      "title": {
+       "bold": true,
+       "color": "#434343",
+       "text": "Готовность"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "0b6cc525-4454-5f3a-9143-470772ac5744",
+     "offset": {
+      "x": 0,
+      "y": 118
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "background": "#EEF6F5",
+      "baseline": "Data!C6",
+      "baselineColorDown": "#DC6965",
+      "baselineColorUp": "#00A04A",
+      "baselineDescr": {
+       "text": "к прошлому"
+      },
+      "baselineMode": "difference",
+      "humanize": false,
+      "keyValue": "Data!B6",
+      "title": {
+       "bold": true,
+       "color": "#434343",
+       "text": "Вкладов принято"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "a1252d85-3bc3-51e1-803d-8b1e270fa4be",
+     "offset": {
+      "x": 303,
+      "y": 118
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "background": "#EEF6F5",
+      "baseline": "Data!C7",
+      "baselineColorDown": "#DC6965",
+      "baselineColorUp": "#00A04A",
+      "baselineDescr": {
+       "text": "к прошлому"
+      },
+      "baselineMode": "difference",
+      "humanize": false,
+      "keyValue": "Data!B7",
+      "title": {
+       "bold": true,
+       "color": "#434343",
+       "text": "Вкладчиков"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "f6f2219e-6af0-5bc5-a60e-461ea309ba5e",
+     "offset": {
+      "x": 606,
+      "y": 118
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "background": "#FFFFFF",
+      "dataSets": [],
+      "fieldMatching": {
+       "1042f829-e0b4-548d-ba31-26d74ef85364": {
+        "chain": "project_id.kind",
+        "type": "selection"
+       },
+       "47451c99-b35d-5366-9fb9-c37f11f1dafa": {
+        "chain": "offered_on",
+        "offset": 0,
+        "type": "date"
+       },
+       "834c01ca-d337-5a6e-b8d8-710645331bae": {
+        "chain": "project_id.category_id",
+        "type": "many2one"
+       },
+       "b4a57661-9d98-56a4-a319-155ebe77ebaa": {
+        "chain": "project_id.city",
+        "type": "char"
+       }
+      },
+      "legendPosition": "top",
+      "metaData": {
+       "cumulatedStart": false,
+       "groupBy": [
+        "offered_on:week",
+        "kind"
+       ],
+       "measure": "value",
+       "mode": "bar",
+       "order": null,
+       "resModel": "coop.project.contribution"
+      },
+      "searchParams": {
+       "comparison": null,
+       "context": {},
+       "domain": [
+        [
+         "state",
+         "in",
+         [
+          "accepted",
+          "released"
+         ]
+        ]
+       ],
+       "groupBy": [
+        "offered_on:week",
+        "kind"
+       ],
+       "orderBy": []
+      },
+      "stacked": true,
+      "title": {
+       "text": ""
+      },
+      "type": "odoo_bar",
+      "verticalAxisPosition": "left"
+     },
+     "height": 345,
+     "id": "3abf7dc4-3b95-5e55-b724-a18340d79df1",
+     "offset": {
+      "x": 0,
+      "y": 270
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 900
+    },
+    {
+     "col": 0,
+     "data": {
+      "background": "#FFFFFF",
+      "dataSets": [],
+      "fieldMatching": {
+       "1042f829-e0b4-548d-ba31-26d74ef85364": {
+        "chain": "kind",
+        "type": "selection"
+       },
+       "47451c99-b35d-5366-9fb9-c37f11f1dafa": {
+        "chain": "create_date",
+        "offset": 0,
+        "type": "datetime"
+       },
+       "834c01ca-d337-5a6e-b8d8-710645331bae": {
+        "chain": "category_id",
+        "type": "many2one"
+       },
+       "b4a57661-9d98-56a4-a319-155ebe77ebaa": {
+        "chain": "city",
+        "type": "char"
+       }
+      },
+      "legendPosition": "none",
+      "metaData": {
+       "cumulatedStart": false,
+       "groupBy": [
+        "category_id"
+       ],
+       "measure": "__count",
+       "mode": "bar",
+       "order": "DESC",
+       "resModel": "coop.project"
+      },
+      "searchParams": {
+       "comparison": null,
+       "context": {},
+       "domain": [
+        [
+         "state",
+         "not in",
+         [
+          "draft",
+          "cancelled"
+         ]
+        ]
+       ],
+       "groupBy": [
+        "category_id"
+       ],
+       "orderBy": []
+      },
+      "stacked": true,
+      "title": {
+       "text": ""
+      },
+      "type": "odoo_bar",
+      "verticalAxisPosition": "left"
+     },
+     "height": 345,
+     "id": "d82c1382-14b6-5c80-8e4f-d9b1f365ee89",
+     "offset": {
+      "x": 0,
+      "y": 678
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 440
+    },
+    {
+     "col": 0,
+     "data": {
+      "background": "#FFFFFF",
+      "dataSets": [],
+      "fieldMatching": {
+       "1042f829-e0b4-548d-ba31-26d74ef85364": {
+        "chain": "kind",
+        "type": "selection"
+       },
+       "47451c99-b35d-5366-9fb9-c37f11f1dafa": {
+        "chain": "create_date",
+        "offset": 0,
+        "type": "datetime"
+       },
+       "834c01ca-d337-5a6e-b8d8-710645331bae": {
+        "chain": "category_id",
+        "type": "many2one"
+       },
+       "b4a57661-9d98-56a4-a319-155ebe77ebaa": {
+        "chain": "city",
+        "type": "char"
+       }
+      },
+      "legendPosition": "right",
+      "metaData": {
+       "cumulatedStart": false,
+       "groupBy": [
+        "kind"
+       ],
+       "measure": "__count",
+       "mode": "pie",
+       "order": null,
+       "resModel": "coop.project"
+      },
+      "searchParams": {
+       "comparison": null,
+       "context": {},
+       "domain": [
+        [
+         "state",
+         "not in",
+         [
+          "draft",
+          "cancelled"
+         ]
+        ]
+       ],
+       "groupBy": [
+        "kind"
+       ],
+       "orderBy": []
+      },
+      "title": {
+       "text": ""
+      },
+      "type": "odoo_pie"
+     },
+     "height": 345,
+     "id": "1a77a8c0-ec87-5658-95a0-711528089a93",
+     "offset": {
+      "x": 460,
+      "y": 678
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 440
+    },
+    {
+     "col": 0,
+     "data": {
+      "background": "#FFFFFF",
+      "dataSets": [],
+      "fieldMatching": {
+       "1042f829-e0b4-548d-ba31-26d74ef85364": {
+        "chain": "kind",
+        "type": "selection"
+       },
+       "47451c99-b35d-5366-9fb9-c37f11f1dafa": {
+        "chain": "create_date",
+        "offset": 0,
+        "type": "datetime"
+       },
+       "834c01ca-d337-5a6e-b8d8-710645331bae": {
+        "chain": "category_id",
+        "type": "many2one"
+       },
+       "b4a57661-9d98-56a4-a319-155ebe77ebaa": {
+        "chain": "city",
+        "type": "char"
+       }
+      },
+      "legendPosition": "none",
+      "metaData": {
+       "cumulatedStart": false,
+       "groupBy": [
+        "city"
+       ],
+       "measure": "contribution_total",
+       "mode": "bar",
+       "order": "DESC",
+       "resModel": "coop.project"
+      },
+      "searchParams": {
+       "comparison": null,
+       "context": {},
+       "domain": [
+        [
+         "state",
+         "not in",
+         [
+          "draft",
+          "cancelled"
+         ]
+        ]
+       ],
+       "groupBy": [
+        "city"
+       ],
+       "orderBy": []
+      },
+      "stacked": true,
+      "title": {
+       "text": ""
+      },
+      "type": "odoo_bar",
+      "verticalAxisPosition": "left"
+     },
+     "height": 345,
+     "id": "0df42118-6d21-53df-9633-eb1c75cdca3f",
+     "offset": {
+      "x": 0,
+      "y": 1086
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 440
+    },
+    {
+     "col": 0,
+     "data": {
+      "background": "#FFFFFF",
+      "dataSets": [],
+      "fieldMatching": {
+       "1042f829-e0b4-548d-ba31-26d74ef85364": {
+        "chain": "kind",
+        "type": "selection"
+       },
+       "47451c99-b35d-5366-9fb9-c37f11f1dafa": {
+        "chain": "create_date",
+        "offset": 0,
+        "type": "datetime"
+       },
+       "834c01ca-d337-5a6e-b8d8-710645331bae": {
+        "chain": "category_id",
+        "type": "many2one"
+       },
+       "b4a57661-9d98-56a4-a319-155ebe77ebaa": {
+        "chain": "city",
+        "type": "char"
+       }
+      },
+      "legendPosition": "right",
+      "metaData": {
+       "cumulatedStart": false,
+       "groupBy": [
+        "state"
+       ],
+       "measure": "__count",
+       "mode": "pie",
+       "order": null,
+       "resModel": "coop.project"
+      },
+      "searchParams": {
+       "comparison": null,
+       "context": {},
+       "domain": [
+        [
+         "state",
+         "not in",
+         [
+          "draft",
+          "cancelled"
+         ]
+        ]
+       ],
+       "groupBy": [
+        "state"
+       ],
+       "orderBy": []
+      },
+      "title": {
+       "text": ""
+      },
+      "type": "odoo_pie"
+     },
+     "height": 345,
+     "id": "5ffa353b-8c1e-5e5e-a568-53ee6a7a7890",
+     "offset": {
+      "x": 460,
+      "y": 1086
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 440
+    }
+   ],
+   "formats": {},
+   "headerGroups": {
+    "COL": [],
+    "ROW": []
+   },
+   "id": "sheet1",
+   "isVisible": true,
+   "merges": [],
+   "name": "Dashboard",
+   "rowNumber": 76,
+   "rows": {
+    "10": {
+     "size": 40
+    },
+    "27": {
+     "size": 40
+    },
+    "44": {
+     "size": 40
+    },
+    "61": {
+     "size": 40
+    }
+   },
+   "styles": {
+    "A11": 1,
+    "A28": 1,
+    "A45": 1,
+    "A62": 1,
+    "E28": 1,
+    "E45": 1,
+    "E62": 1
+   },
+   "tables": []
+  },
+  {
+   "areGridLinesVisible": true,
+   "borders": {},
+   "cells": {
+    "A2": "Проектов",
+    "A3": "Нужно собрать",
+    "A4": "Собрано",
+    "A5": "Средняя готовность",
+    "A6": "Вкладов принято",
+    "A7": "Вкладчиков",
+    "B1": "Сейчас",
+    "B2": "=PIVOT.VALUE(1,\"__count\")",
+    "B3": "=PIVOT.VALUE(1,\"required_total\")",
+    "B4": "=PIVOT.VALUE(1,\"contribution_total\")",
+    "B5": "=PIVOT.VALUE(1,\"readiness:avg\")",
+    "B6": "=PIVOT.VALUE(3,\"__count\")",
+    "B7": "=PIVOT.VALUE(3,\"partner_id:count_distinct\")",
+    "C1": "Прошлый период",
+    "C2": "=IFERROR(IF((PIVOT.VALUE(2,\"__count\"))=0,\"\",(PIVOT.VALUE(2,\"__count\"))),\"\")",
+    "C3": "=IFERROR(IF((PIVOT.VALUE(2,\"required_total\"))=0,\"\",(PIVOT.VALUE(2,\"required_total\"))),\"\")",
+    "C4": "=IFERROR(IF((PIVOT.VALUE(2,\"contribution_total\"))=0,\"\",(PIVOT.VALUE(2,\"contribution_total\"))),\"\")",
+    "C5": "=IFERROR(IF((PIVOT.VALUE(2,\"readiness:avg\"))=0,\"\",(PIVOT.VALUE(2,\"readiness:avg\"))),\"\")",
+    "C6": "=IFERROR(IF((PIVOT.VALUE(4,\"__count\"))=0,\"\",(PIVOT.VALUE(4,\"__count\"))),\"\")",
+    "C7": "=IFERROR(IF((PIVOT.VALUE(4,\"partner_id:count_distinct\"))=0,\"\",(PIVOT.VALUE(4,\"partner_id:count_distinct\"))),\"\")"
+   },
+   "colNumber": 3,
+   "cols": {
+    "0": {
+     "size": 220
+    },
+    "1": {
+     "size": 140
+    },
+    "2": {
+     "size": 140
+    }
+   },
+   "comments": {},
+   "conditionalFormats": [],
+   "dataValidationRules": [],
+   "figures": [],
+   "formats": {
+    "B2": 1,
+    "B3": 2,
+    "B4": 2,
+    "B5": 3,
+    "B6": 1,
+    "B7": 1,
+    "C2": 1,
+    "C3": 2,
+    "C4": 2,
+    "C5": 3,
+    "C6": 1,
+    "C7": 1
+   },
+   "headerGroups": {
+    "COL": [],
+    "ROW": []
+   },
+   "id": "31aa3956-ec4e-59d9-8557-6cb514adc377",
+   "isVisible": true,
+   "merges": [],
+   "name": "Data",
+   "rowNumber": 20,
+   "rows": {},
+   "styles": {
+    "A1": 2,
+    "B1": 2,
+    "C1": 2
+   },
+   "tables": []
+  },
+  {
+   "areGridLinesVisible": true,
+   "borders": {},
+   "cells": {
+    "A1": "Алтайский край",
+    "A10": "Ишим",
+    "A11": "Казань",
+    "A12": "Калининград",
+    "A13": "Кемерово",
+    "A14": "Краснодар",
+    "A15": "Красноярск",
+    "A16": "Курск",
+    "A17": "Магнитогорск",
+    "A18": "Москва",
+    "A19": "Нижний Новгород",
+    "A2": "Архангельск",
+    "A20": "Нижний Тагил",
+    "A21": "Новосибирск",
+    "A22": "Омск",
+    "A23": "Пермь",
+    "A24": "Псков",
+    "A25": "Ростов-на-Дону",
+    "A26": "Самара",
+    "A27": "Санкт-Петербург",
+    "A28": "Сочи",
+    "A29": "Тобольск",
+    "A3": "Владивосток",
+    "A30": "Тула",
+    "A31": "Тюмень",
+    "A32": "Уфа",
+    "A33": "Хабаровск",
+    "A34": "Челябинск",
+    "A35": "Ярославль",
+    "A4": "Волгоград",
+    "A5": "Вологда",
+    "A6": "Воронеж",
+    "A7": "Дербент",
+    "A8": "Екатеринбург",
+    "A9": "Иркутск"
+   },
+   "colNumber": 1,
+   "cols": {
+    "0": {
+     "size": 200
+    }
+   },
+   "comments": {},
+   "conditionalFormats": [],
+   "dataValidationRules": [],
+   "figures": [],
+   "formats": {},
+   "headerGroups": {
+    "COL": [],
+    "ROW": []
+   },
+   "id": "b56b6f6f-b2b2-58b6-a0c6-bbefa4da66b4",
+   "isVisible": true,
+   "merges": [],
+   "name": "Lists",
+   "rowNumber": 40,
+   "rows": {},
+   "styles": {},
+   "tables": []
+  }
+ ],
+ "styles": {
+  "1": {
+   "bold": true,
+   "fontSize": 16,
+   "textColor": "#146b64"
+  },
+  "2": {
+   "bold": true
+  }
+ },
+ "uniqueFigureIds": true,
+ "version": "18.4.14"
+}

@@ -1,0 +1,1046 @@
+{
+ "borders": {
+  "1": {
+   "bottom": {
+    "color": "#CCCCCC",
+    "style": "thin"
+   }
+  }
+ },
+ "chartOdooMenusReferences": {
+  "2fcc1b76-5b50-5422-9d0e-37e2d3e0e7db": "coop_analytics.menu_coop_analytics_money",
+  "354c4111-105f-51bd-96b3-a8266bb1c0c2": "coop_analytics.menu_coop_analytics_money",
+  "45eb6d2d-7f51-5a70-a652-1b692a896ee5": "coop_analytics.menu_coop_analytics_money",
+  "58326c80-5ed1-5297-a4d4-cf676f496fe0": "coop_analytics.menu_coop_analytics_money",
+  "78325e26-ac51-5be3-9b93-3a05920f0a49": "coop_analytics.menu_coop_analytics_money",
+  "7f7f4ece-c42c-5f46-a4c9-49a2cd798e46": "coop_analytics.menu_coop_analytics_money",
+  "a4a1ba1e-2d23-5a00-87b5-66a0de70bcfe": "coop_analytics.menu_coop_analytics_money",
+  "b3217f77-2449-5a20-9a30-6f5a0d5ccc03": "coop_analytics.menu_coop_analytics_money"
+ },
+ "customTableStyles": {},
+ "formats": {
+  "1": "#,##0[$ ₽]",
+  "2": "#,##0"
+ },
+ "globalFilters": [
+  {
+   "defaultValue": "last_12_months",
+   "id": "5e8cf146-1636-5917-adc6-689a356465f0",
+   "label": "Период",
+   "type": "date"
+  },
+  {
+   "id": "73b7c2ec-bf87-5c0f-87b4-e26b76c2e9b7",
+   "label": "Вид операции",
+   "resModel": "coop.wallet.movement",
+   "selectionField": "kind",
+   "type": "selection"
+  },
+  {
+   "id": "61ffd621-f066-52ea-9504-25eb47df874d",
+   "label": "Способ оплаты",
+   "resModel": "coop.wallet.method",
+   "selectionField": "kind",
+   "type": "selection"
+  }
+ ],
+ "listNextId": 1,
+ "lists": {},
+ "pivotNextId": 9,
+ "pivots": {
+  "1": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    [
+     "partner_id.coop_is_me",
+     "=",
+     true
+    ],
+    [
+     "state",
+     "=",
+     "confirmed"
+    ],
+    [
+     "amount",
+     ">",
+     0
+    ]
+   ],
+   "fieldMatching": {
+    "5e8cf146-1636-5917-adc6-689a356465f0": {
+     "chain": "date",
+     "offset": 0,
+     "type": "date"
+    },
+    "61ffd621-f066-52ea-9504-25eb47df874d": {
+     "chain": "method_id.kind",
+     "type": "selection"
+    },
+    "73b7c2ec-bf87-5c0f-87b4-e26b76c2e9b7": {
+     "chain": "kind",
+     "type": "selection"
+    }
+   },
+   "formulaId": "1",
+   "id": "1",
+   "measures": [
+    {
+     "fieldName": "amount",
+     "id": "amount"
+    }
+   ],
+   "model": "coop.wallet.movement",
+   "name": "пришло",
+   "rows": [],
+   "sortedColumn": null,
+   "type": "ODOO"
+  },
+  "2": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    [
+     "partner_id.coop_is_me",
+     "=",
+     true
+    ],
+    [
+     "state",
+     "=",
+     "confirmed"
+    ],
+    [
+     "amount",
+     ">",
+     0
+    ]
+   ],
+   "fieldMatching": {
+    "5e8cf146-1636-5917-adc6-689a356465f0": {
+     "chain": "date",
+     "offset": -1,
+     "type": "date"
+    },
+    "61ffd621-f066-52ea-9504-25eb47df874d": {
+     "chain": "method_id.kind",
+     "type": "selection"
+    },
+    "73b7c2ec-bf87-5c0f-87b4-e26b76c2e9b7": {
+     "chain": "kind",
+     "type": "selection"
+    }
+   },
+   "formulaId": "2",
+   "id": "2",
+   "measures": [
+    {
+     "fieldName": "amount",
+     "id": "amount"
+    }
+   ],
+   "model": "coop.wallet.movement",
+   "name": "пришло — прошлый период",
+   "rows": [],
+   "sortedColumn": null,
+   "type": "ODOO"
+  },
+  "3": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    [
+     "partner_id.coop_is_me",
+     "=",
+     true
+    ],
+    [
+     "state",
+     "=",
+     "confirmed"
+    ],
+    [
+     "amount",
+     "<",
+     0
+    ]
+   ],
+   "fieldMatching": {
+    "5e8cf146-1636-5917-adc6-689a356465f0": {
+     "chain": "date",
+     "offset": 0,
+     "type": "date"
+    },
+    "61ffd621-f066-52ea-9504-25eb47df874d": {
+     "chain": "method_id.kind",
+     "type": "selection"
+    },
+    "73b7c2ec-bf87-5c0f-87b4-e26b76c2e9b7": {
+     "chain": "kind",
+     "type": "selection"
+    }
+   },
+   "formulaId": "3",
+   "id": "3",
+   "measures": [
+    {
+     "fieldName": "amount",
+     "id": "amount"
+    }
+   ],
+   "model": "coop.wallet.movement",
+   "name": "ушло",
+   "rows": [],
+   "sortedColumn": null,
+   "type": "ODOO"
+  },
+  "4": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    [
+     "partner_id.coop_is_me",
+     "=",
+     true
+    ],
+    [
+     "state",
+     "=",
+     "confirmed"
+    ],
+    [
+     "amount",
+     "<",
+     0
+    ]
+   ],
+   "fieldMatching": {
+    "5e8cf146-1636-5917-adc6-689a356465f0": {
+     "chain": "date",
+     "offset": -1,
+     "type": "date"
+    },
+    "61ffd621-f066-52ea-9504-25eb47df874d": {
+     "chain": "method_id.kind",
+     "type": "selection"
+    },
+    "73b7c2ec-bf87-5c0f-87b4-e26b76c2e9b7": {
+     "chain": "kind",
+     "type": "selection"
+    }
+   },
+   "formulaId": "4",
+   "id": "4",
+   "measures": [
+    {
+     "fieldName": "amount",
+     "id": "amount"
+    }
+   ],
+   "model": "coop.wallet.movement",
+   "name": "ушло — прошлый период",
+   "rows": [],
+   "sortedColumn": null,
+   "type": "ODOO"
+  },
+  "5": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    [
+     "partner_id.coop_is_me",
+     "=",
+     true
+    ],
+    [
+     "state",
+     "=",
+     "confirmed"
+    ]
+   ],
+   "fieldMatching": {
+    "5e8cf146-1636-5917-adc6-689a356465f0": {
+     "chain": "date",
+     "offset": 0,
+     "type": "date"
+    },
+    "61ffd621-f066-52ea-9504-25eb47df874d": {
+     "chain": "method_id.kind",
+     "type": "selection"
+    },
+    "73b7c2ec-bf87-5c0f-87b4-e26b76c2e9b7": {
+     "chain": "kind",
+     "type": "selection"
+    }
+   },
+   "formulaId": "5",
+   "id": "5",
+   "measures": [
+    {
+     "fieldName": "__count",
+     "id": "__count"
+    },
+    {
+     "fieldName": "amount",
+     "id": "amount"
+    }
+   ],
+   "model": "coop.wallet.movement",
+   "name": "операции",
+   "rows": [],
+   "sortedColumn": null,
+   "type": "ODOO"
+  },
+  "6": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    [
+     "partner_id.coop_is_me",
+     "=",
+     true
+    ],
+    [
+     "state",
+     "=",
+     "confirmed"
+    ]
+   ],
+   "fieldMatching": {
+    "5e8cf146-1636-5917-adc6-689a356465f0": {
+     "chain": "date",
+     "offset": -1,
+     "type": "date"
+    },
+    "61ffd621-f066-52ea-9504-25eb47df874d": {
+     "chain": "method_id.kind",
+     "type": "selection"
+    },
+    "73b7c2ec-bf87-5c0f-87b4-e26b76c2e9b7": {
+     "chain": "kind",
+     "type": "selection"
+    }
+   },
+   "formulaId": "6",
+   "id": "6",
+   "measures": [
+    {
+     "fieldName": "__count",
+     "id": "__count"
+    },
+    {
+     "fieldName": "amount",
+     "id": "amount"
+    }
+   ],
+   "model": "coop.wallet.movement",
+   "name": "операции — прошлый период",
+   "rows": [],
+   "sortedColumn": null,
+   "type": "ODOO"
+  },
+  "7": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    [
+     "partner_id.coop_is_me",
+     "=",
+     true
+    ],
+    [
+     "state",
+     "=",
+     "confirmed"
+    ]
+   ],
+   "fieldMatching": {
+    "5e8cf146-1636-5917-adc6-689a356465f0": {
+     "chain": "date",
+     "offset": 0,
+     "type": "date"
+    },
+    "61ffd621-f066-52ea-9504-25eb47df874d": {
+     "chain": "method_id.kind",
+     "type": "selection"
+    },
+    "73b7c2ec-bf87-5c0f-87b4-e26b76c2e9b7": {
+     "chain": "kind",
+     "type": "selection"
+    }
+   },
+   "formulaId": "7",
+   "id": "7",
+   "measures": [
+    {
+     "fieldName": "amount",
+     "id": "amount"
+    },
+    {
+     "fieldName": "__count",
+     "id": "__count"
+    }
+   ],
+   "model": "coop.wallet.movement",
+   "name": "Вид операции",
+   "rows": [
+    {
+     "fieldName": "kind"
+    }
+   ],
+   "sortedColumn": {
+    "domain": [],
+    "measure": "__count",
+    "order": "desc"
+   },
+   "type": "ODOO"
+  },
+  "8": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    [
+     "partner_id.coop_is_me",
+     "=",
+     true
+    ],
+    [
+     "state",
+     "=",
+     "confirmed"
+    ]
+   ],
+   "fieldMatching": {
+    "5e8cf146-1636-5917-adc6-689a356465f0": {
+     "chain": "date",
+     "offset": 0,
+     "type": "date"
+    },
+    "61ffd621-f066-52ea-9504-25eb47df874d": {
+     "chain": "method_id.kind",
+     "type": "selection"
+    },
+    "73b7c2ec-bf87-5c0f-87b4-e26b76c2e9b7": {
+     "chain": "kind",
+     "type": "selection"
+    }
+   },
+   "formulaId": "8",
+   "id": "8",
+   "measures": [
+    {
+     "fieldName": "amount",
+     "id": "amount"
+    },
+    {
+     "fieldName": "__count",
+     "id": "__count"
+    }
+   ],
+   "model": "coop.wallet.movement",
+   "name": "Месяц",
+   "rows": [
+    {
+     "fieldName": "date",
+     "granularity": "month",
+     "order": "desc"
+    }
+   ],
+   "sortedColumn": null,
+   "type": "ODOO"
+  }
+ },
+ "revisionId": "START_REVISION",
+ "settings": {
+  "locale": {
+   "code": "ru_RU",
+   "dateFormat": "dd.mm.yyyy",
+   "decimalSeparator": ",",
+   "formulaArgSeparator": ";",
+   "name": "Russian",
+   "thousandsSeparator": " ",
+   "timeFormat": "hh:mm:ss",
+   "weekStart": 1
+  }
+ },
+ "sheets": [
+  {
+   "areGridLinesVisible": false,
+   "borders": {
+    "A11:G11": 1,
+    "A28:C28": 1,
+    "A45:C45": 1,
+    "E28:G28": 1,
+    "E45:G45": 1
+   },
+   "cells": {
+    "A11": "Приход и расход по месяцам",
+    "A28": "Остаток кошелька",
+    "A45": "Виды операций",
+    "A46": "=PIVOT(7, 12, FALSE, FALSE)",
+    "E28": "Операций по видам",
+    "E45": "Последние месяцы",
+    "E46": "=PIVOT(8, 12, FALSE, FALSE)"
+   },
+   "colNumber": 7,
+   "cols": {
+    "0": {
+     "size": 250
+    },
+    "1": {
+     "size": 110
+    },
+    "2": {
+     "size": 80
+    },
+    "3": {
+     "size": 20
+    },
+    "4": {
+     "size": 250
+    },
+    "5": {
+     "size": 110
+    },
+    "6": {
+     "size": 80
+    }
+   },
+   "comments": {},
+   "conditionalFormats": [],
+   "dataValidationRules": [],
+   "figures": [
+    {
+     "col": 0,
+     "data": {
+      "background": "#EEF6F5",
+      "baseline": "Data!C2",
+      "baselineColorDown": "#DC6965",
+      "baselineColorUp": "#00A04A",
+      "baselineDescr": {
+       "text": "к прошлому"
+      },
+      "baselineMode": "percentage",
+      "humanize": false,
+      "keyValue": "Data!B2",
+      "title": {
+       "bold": true,
+       "color": "#434343",
+       "text": "Пришло"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "78325e26-ac51-5be3-9b93-3a05920f0a49",
+     "offset": {
+      "x": 0,
+      "y": 12
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "background": "#EEF6F5",
+      "baseline": "Data!C3",
+      "baselineColorDown": "#00A04A",
+      "baselineColorUp": "#DC6965",
+      "baselineDescr": {
+       "text": "к прошлому"
+      },
+      "baselineMode": "percentage",
+      "humanize": false,
+      "keyValue": "Data!B3",
+      "title": {
+       "bold": true,
+       "color": "#434343",
+       "text": "Ушло"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "7f7f4ece-c42c-5f46-a4c9-49a2cd798e46",
+     "offset": {
+      "x": 303,
+      "y": 12
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "background": "#EEF6F5",
+      "baseline": "Data!C4",
+      "baselineColorDown": "#DC6965",
+      "baselineColorUp": "#00A04A",
+      "baselineDescr": {
+       "text": "к прошлому"
+      },
+      "baselineMode": "difference",
+      "humanize": false,
+      "keyValue": "Data!B4",
+      "title": {
+       "bold": true,
+       "color": "#434343",
+       "text": "Сальдо"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "58326c80-5ed1-5297-a4d4-cf676f496fe0",
+     "offset": {
+      "x": 606,
+      "y": 12
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "background": "#EEF6F5",
+      "baseline": "Data!C5",
+      "baselineColorDown": "#DC6965",
+      "baselineColorUp": "#00A04A",
+      "baselineDescr": {
+       "text": "к прошлому"
+      },
+      "baselineMode": "difference",
+      "humanize": false,
+      "keyValue": "Data!B5",
+      "title": {
+       "bold": true,
+       "color": "#434343",
+       "text": "Операций"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "45eb6d2d-7f51-5a70-a652-1b692a896ee5",
+     "offset": {
+      "x": 0,
+      "y": 118
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "background": "#EEF6F5",
+      "baseline": "Data!C6",
+      "baselineColorDown": "#DC6965",
+      "baselineColorUp": "#00A04A",
+      "baselineDescr": {
+       "text": "к прошлому"
+      },
+      "baselineMode": "percentage",
+      "humanize": false,
+      "keyValue": "Data!B6",
+      "title": {
+       "bold": true,
+       "color": "#434343",
+       "text": "Средняя операция"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "2fcc1b76-5b50-5422-9d0e-37e2d3e0e7db",
+     "offset": {
+      "x": 303,
+      "y": 118
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "background": "#FFFFFF",
+      "dataSets": [],
+      "fieldMatching": {
+       "5e8cf146-1636-5917-adc6-689a356465f0": {
+        "chain": "date",
+        "offset": 0,
+        "type": "date"
+       },
+       "61ffd621-f066-52ea-9504-25eb47df874d": {
+        "chain": "method_id.kind",
+        "type": "selection"
+       },
+       "73b7c2ec-bf87-5c0f-87b4-e26b76c2e9b7": {
+        "chain": "kind",
+        "type": "selection"
+       }
+      },
+      "legendPosition": "top",
+      "metaData": {
+       "cumulatedStart": false,
+       "groupBy": [
+        "date:month",
+        "kind"
+       ],
+       "measure": "amount",
+       "mode": "bar",
+       "order": null,
+       "resModel": "coop.wallet.movement"
+      },
+      "searchParams": {
+       "comparison": null,
+       "context": {},
+       "domain": [
+        [
+         "partner_id.coop_is_me",
+         "=",
+         true
+        ],
+        [
+         "state",
+         "=",
+         "confirmed"
+        ]
+       ],
+       "groupBy": [
+        "date:month",
+        "kind"
+       ],
+       "orderBy": []
+      },
+      "stacked": true,
+      "title": {
+       "text": ""
+      },
+      "type": "odoo_bar",
+      "verticalAxisPosition": "left"
+     },
+     "height": 345,
+     "id": "a4a1ba1e-2d23-5a00-87b5-66a0de70bcfe",
+     "offset": {
+      "x": 0,
+      "y": 270
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 900
+    },
+    {
+     "col": 0,
+     "data": {
+      "background": "#FFFFFF",
+      "cumulatedStart": true,
+      "cumulative": true,
+      "dataSets": [],
+      "fieldMatching": {
+       "5e8cf146-1636-5917-adc6-689a356465f0": {
+        "chain": "date",
+        "offset": 0,
+        "type": "date"
+       },
+       "61ffd621-f066-52ea-9504-25eb47df874d": {
+        "chain": "method_id.kind",
+        "type": "selection"
+       },
+       "73b7c2ec-bf87-5c0f-87b4-e26b76c2e9b7": {
+        "chain": "kind",
+        "type": "selection"
+       }
+      },
+      "fillArea": true,
+      "legendPosition": "none",
+      "metaData": {
+       "cumulatedStart": true,
+       "groupBy": [
+        "date:month"
+       ],
+       "measure": "amount",
+       "mode": "line",
+       "order": null,
+       "resModel": "coop.wallet.movement"
+      },
+      "searchParams": {
+       "comparison": null,
+       "context": {},
+       "domain": [
+        [
+         "partner_id.coop_is_me",
+         "=",
+         true
+        ],
+        [
+         "state",
+         "=",
+         "confirmed"
+        ]
+       ],
+       "groupBy": [
+        "date:month"
+       ],
+       "orderBy": []
+      },
+      "stacked": false,
+      "title": {
+       "text": ""
+      },
+      "type": "odoo_line",
+      "verticalAxisPosition": "left"
+     },
+     "height": 345,
+     "id": "354c4111-105f-51bd-96b3-a8266bb1c0c2",
+     "offset": {
+      "x": 0,
+      "y": 678
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 440
+    },
+    {
+     "col": 0,
+     "data": {
+      "background": "#FFFFFF",
+      "dataSets": [],
+      "fieldMatching": {
+       "5e8cf146-1636-5917-adc6-689a356465f0": {
+        "chain": "date",
+        "offset": 0,
+        "type": "date"
+       },
+       "61ffd621-f066-52ea-9504-25eb47df874d": {
+        "chain": "method_id.kind",
+        "type": "selection"
+       },
+       "73b7c2ec-bf87-5c0f-87b4-e26b76c2e9b7": {
+        "chain": "kind",
+        "type": "selection"
+       }
+      },
+      "legendPosition": "right",
+      "metaData": {
+       "cumulatedStart": false,
+       "groupBy": [
+        "kind"
+       ],
+       "measure": "__count",
+       "mode": "pie",
+       "order": null,
+       "resModel": "coop.wallet.movement"
+      },
+      "searchParams": {
+       "comparison": null,
+       "context": {},
+       "domain": [
+        [
+         "partner_id.coop_is_me",
+         "=",
+         true
+        ],
+        [
+         "state",
+         "=",
+         "confirmed"
+        ]
+       ],
+       "groupBy": [
+        "kind"
+       ],
+       "orderBy": []
+      },
+      "title": {
+       "text": ""
+      },
+      "type": "odoo_pie"
+     },
+     "height": 345,
+     "id": "b3217f77-2449-5a20-9a30-6f5a0d5ccc03",
+     "offset": {
+      "x": 460,
+      "y": 678
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 440
+    }
+   ],
+   "formats": {},
+   "headerGroups": {
+    "COL": [],
+    "ROW": []
+   },
+   "id": "sheet1",
+   "isVisible": true,
+   "merges": [],
+   "name": "Dashboard",
+   "rowNumber": 61,
+   "rows": {
+    "10": {
+     "size": 40
+    },
+    "27": {
+     "size": 40
+    },
+    "44": {
+     "size": 40
+    }
+   },
+   "styles": {
+    "A11": 1,
+    "A28": 1,
+    "A45": 1,
+    "E28": 1,
+    "E45": 1
+   },
+   "tables": []
+  },
+  {
+   "areGridLinesVisible": true,
+   "borders": {},
+   "cells": {
+    "A2": "Пришло",
+    "A3": "Ушло",
+    "A4": "Сальдо",
+    "A5": "Операций",
+    "A6": "Средняя операция",
+    "B1": "Сейчас",
+    "B2": "=PIVOT.VALUE(1,\"amount\")",
+    "B3": "=-PIVOT.VALUE(3,\"amount\")",
+    "B4": "=PIVOT.VALUE(5,\"amount\")",
+    "B5": "=PIVOT.VALUE(5,\"__count\")",
+    "B6": "=IFERROR((B2+B3)/B5,0)",
+    "C1": "Прошлый период",
+    "C2": "=IFERROR(IF((PIVOT.VALUE(2,\"amount\"))=0,\"\",(PIVOT.VALUE(2,\"amount\"))),\"\")",
+    "C3": "=IFERROR(IF((-PIVOT.VALUE(4,\"amount\"))=0,\"\",(-PIVOT.VALUE(4,\"amount\"))),\"\")",
+    "C4": "=IFERROR(IF((PIVOT.VALUE(6,\"amount\"))=0,\"\",(PIVOT.VALUE(6,\"amount\"))),\"\")",
+    "C5": "=IFERROR(IF((PIVOT.VALUE(6,\"__count\"))=0,\"\",(PIVOT.VALUE(6,\"__count\"))),\"\")",
+    "C6": "=IFERROR(IF((IFERROR((C2+C3)/C5,0))=0,\"\",(IFERROR((C2+C3)/C5,0))),\"\")"
+   },
+   "colNumber": 3,
+   "cols": {
+    "0": {
+     "size": 220
+    },
+    "1": {
+     "size": 140
+    },
+    "2": {
+     "size": 140
+    }
+   },
+   "comments": {},
+   "conditionalFormats": [],
+   "dataValidationRules": [],
+   "figures": [],
+   "formats": {
+    "B2": 1,
+    "B3": 1,
+    "B4": 1,
+    "B5": 2,
+    "B6": 1,
+    "C2": 1,
+    "C3": 1,
+    "C4": 1,
+    "C5": 2,
+    "C6": 1
+   },
+   "headerGroups": {
+    "COL": [],
+    "ROW": []
+   },
+   "id": "ea61dc34-e1ef-54d3-a83f-a59cc53b6e39",
+   "isVisible": true,
+   "merges": [],
+   "name": "Data",
+   "rowNumber": 20,
+   "rows": {},
+   "styles": {
+    "A1": 2,
+    "B1": 2,
+    "C1": 2
+   },
+   "tables": []
+  },
+  {
+   "areGridLinesVisible": true,
+   "borders": {},
+   "cells": {
+    "A1": "Алтайский край",
+    "A10": "Ишим",
+    "A11": "Казань",
+    "A12": "Калининград",
+    "A13": "Кемерово",
+    "A14": "Краснодар",
+    "A15": "Красноярск",
+    "A16": "Курск",
+    "A17": "Магнитогорск",
+    "A18": "Москва",
+    "A19": "Нижний Новгород",
+    "A2": "Архангельск",
+    "A20": "Нижний Тагил",
+    "A21": "Новосибирск",
+    "A22": "Омск",
+    "A23": "Пермь",
+    "A24": "Псков",
+    "A25": "Ростов-на-Дону",
+    "A26": "Самара",
+    "A27": "Санкт-Петербург",
+    "A28": "Сочи",
+    "A29": "Тобольск",
+    "A3": "Владивосток",
+    "A30": "Тула",
+    "A31": "Тюмень",
+    "A32": "Уфа",
+    "A33": "Хабаровск",
+    "A34": "Челябинск",
+    "A35": "Ярославль",
+    "A4": "Волгоград",
+    "A5": "Вологда",
+    "A6": "Воронеж",
+    "A7": "Дербент",
+    "A8": "Екатеринбург",
+    "A9": "Иркутск"
+   },
+   "colNumber": 1,
+   "cols": {
+    "0": {
+     "size": 200
+    }
+   },
+   "comments": {},
+   "conditionalFormats": [],
+   "dataValidationRules": [],
+   "figures": [],
+   "formats": {},
+   "headerGroups": {
+    "COL": [],
+    "ROW": []
+   },
+   "id": "44c8a64e-f2f5-5632-8d5f-4275b22754fb",
+   "isVisible": true,
+   "merges": [],
+   "name": "Lists",
+   "rowNumber": 40,
+   "rows": {},
+   "styles": {},
+   "tables": []
+  }
+ ],
+ "styles": {
+  "1": {
+   "bold": true,
+   "fontSize": 16,
+   "textColor": "#146b64"
+  },
+  "2": {
+   "bold": true
+  }
+ },
+ "uniqueFigureIds": true,
+ "version": "18.4.14"
+}
