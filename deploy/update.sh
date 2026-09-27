@@ -206,10 +206,15 @@ say "Обновление $before → $after"
 # `forks/`: правка README форков остановила обновление уже после
 # `git reset` — код на сервере обновился, а модули нет, и следующий
 # запуск изменений уже не видел.
+# Форки лежат уровнем ниже — `forks/<модуль>/…`: для них имя модуля —
+# вторая часть пути. Раньше их правки не видела ни одна проверка, и
+# исправленный план счетов (`forks/l10n_ru`, 28.09.2026) на боевую бы не
+# доехал: код обновился бы, модуль — нет.
 changed=$(run git diff --name-only "$before" "$after" \
-          | awk -F/ 'NF>1 {print $1}' | sort -u \
+          | awk -F/ 'NF>2 && $1=="forks" {print $2; next} NF>1 {print $1}' | sort -u \
           | while read -r d; do
-                if [ -f "$ODOO_HOME/coop-addons/$d/__manifest__.py" ]; then
+                if [ -f "$ODOO_HOME/coop-addons/$d/__manifest__.py" ] \
+                   || [ -f "$ODOO_HOME/coop-addons/forks/$d/__manifest__.py" ]; then
                     echo "$d"
                 fi
             done \
