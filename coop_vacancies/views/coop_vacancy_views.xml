@@ -106,6 +106,7 @@
         <field name="employment"/>
         <field name="experience_level" string="Опыт"/>
         <field name="reward_kind" string="Вознаграждение"/>
+        <field name="labour_pay" optional="show"/>
         <!-- Числа, а не строка: по вычисляемому виду сортировка идёт по
              алфавиту, и «120 000» встаёт выше «60 000». -->
         <field name="pay_from" string="Оплата от" optional="show"/>
@@ -180,6 +181,11 @@
               <field name="contribution_value" invisible="reward_kind != 'share'" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="share_percent" readonly="1" invisible="reward_kind != 'share'"/>
               <field name="reward_note" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/>
+              <!-- Форма вознаграждения — от того, кто ищет (решение 416):
+                   кооператив зачисляет в пай, ДАО платит токенами,
+                   остальные — рублями. Не выбирается: следует из вида
+                   организации. -->
+              <field name="labour_pay" readonly="1" invisible="reward_kind in ('barter', 'volunteer')"/>
               <field name="reward_display" readonly="1" string="В каталоге"/>
               <field name="is_mine" invisible="1"/>
               <field name="my_application_state" invisible="1"/>
@@ -237,6 +243,13 @@
         <filter name="volunteer" string="Волонтёрство"
                 domain="[('reward_kind', '=', 'volunteer')]"/>
         <separator/>
+        <filter name="pay_rub" string="Платят рублями"
+                domain="[('labour_pay', '=', 'rub')]"/>
+        <filter name="pay_share" string="Зачисляют в пай"
+                domain="[('labour_pay', '=', 'share')]"/>
+        <filter name="pay_tokens" string="Платят токенами"
+                domain="[('labour_pay', '=', 'tokens')]"/>
+        <separator/>
         <filter name="full" string="Полная занятость"
                 domain="[('employment', '=', 'full')]"/>
         <filter name="project_work" string="Проектная работа"
@@ -249,6 +262,8 @@
         <group>
           <filter name="by_reward" string="По виду вознаграждения"
                   context="{'group_by': 'reward_kind'}"/>
+          <filter name="by_labour_pay" string="Чем платят"
+                  context="{'group_by': 'labour_pay'}"/>
           <filter name="by_employment" string="По занятости"
                   context="{'group_by': 'employment'}"/>
           <filter name="by_area" string="По сфере деятельности"

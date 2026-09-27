@@ -6,6 +6,40 @@ from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
+# Чем вознаграждается труд — по виду организации (решение 416, п. 2,
+# владелец 26.09.2026): «ООО — рубли, кооператив — пай, ДАО — токены, DEX —
+# криптовалюты и токены. Самозанятые относятся к коммерческим
+# организациям». НКО владелец не называл — у них зарплата, рубли.
+LABOUR_PAY = [
+    ('rub', 'Рублями'),
+    ('share', 'Зачислением в пай'),
+    ('tokens', 'Токенами'),
+]
+LABOUR_PAY_SUFFIX = {'share': 'в пай', 'tokens': 'токенами'}
+TOKEN_FORMS = ('dao', 'platform')
+
+
+class ResPartner(models.Model):
+    _inherit = 'res.partner'
+
+    coop_labour_pay = fields.Selection(
+        LABOUR_PAY, string='Чем вознаграждает труд',
+        compute='_compute_coop_labour_pay', store=True, index=True,
+        help='По виду организации (решение 416): кооператив зачисляет в пай, '
+             'ДАО платит токенами, коммерческие организации, самозанятые и '
+             'частные лица — рублями.')
+
+    @api.depends('is_company', 'coop_legal_form_id.is_cooperative', 'coop_legal_form_id.code')
+    def _compute_coop_labour_pay(self):
+        for partner in self:
+            form = partner.coop_legal_form_id
+            if form.is_cooperative:
+                partner.coop_labour_pay = 'share'
+            elif form.code in TOKEN_FORMS:
+                partner.coop_labour_pay = 'tokens'
+            else:
+                partner.coop_labour_pay = 'rub'
+
 
 class CoopVacancy(models.Model):
     """Вакансия — предложение работы от участника платформы.
@@ -122,6 +156,12 @@ class CoopVacancy(models.Model):
         string='Уточнение к вознаграждению',
         help='Всё, что не укладывается в поля: «оплата после испытательного», '
              '«доля обсуждается», «плюс жильё».')
+    labour_pay = fields.Selection(
+        related='partner_id.coop_labour_pay', store=True, index=True,
+        string='Чем платят',
+        help='Зависит от того, кто ищет (решение 416): кооператив зачисляет '
+             'вознаграждение в пай, ДАО платит токенами, коммерческие '
+             'организации, самозанятые и частные лица — рублями.')
 
     # ── Состояние ────────────────────────────────────────────────────────
     state = fields.Selection([
@@ -163,7 +203,7 @@ class CoopVacancy(models.Model):
                 record.share_percent = 0
 
     @api.depends('reward_kind', 'pay_from', 'pay_to', 'pay_period',
-                 'share_percent', 'contribution_value', 'currency_id')
+                 'share_percent', 'contribution_value', 'currency_id', 'labour_pay')
     def _compute_reward_display(self):
         periods = {'month': 'в месяц', 'shift': 'за смену', 'hour': 'в час',
                    'job': 'за работу', 'lesson': 'за занятие'}
@@ -174,7 +214,12 @@ class CoopVacancy(models.Model):
             if record.pay_from or record.pay_to:
                 money = _format_range(record.pay_from, record.pay_to, symbol)
                 period = periods.get(record.pay_period, '')
-                parts.append(('%s %s' % (money, period)).strip())
+                # Кооператив платит зачислением в пай, ДАО — токенами
+                # (решение 416): сумма та же, форма другая, и видно её
+                # должно быть прямо в строке каталога.
+                how = LABOUR_PAY_SUFFIX.get(record.labour_pay, '')
+                line = ('%s %s' % (money, period)).strip()
+                parts.append('%s, %s' % (line, how) if how else line)
 
             if record.reward_kind == 'share':
                 if record.share_percent:
