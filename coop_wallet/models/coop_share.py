@@ -59,6 +59,15 @@ class CoopShareAccount(models.Model):
     balance = fields.Monetary(
         string='Текущий пай', currency_field='currency_id',
         compute='_compute_totals', store=True)
+    # Вступительный взнос — не пай (решение 427, владелец 28.09.2026: «да
+    # убрать вступительный из пая, он невозвратный»). В учёте это целевое
+    # поступление (счёт 86), а не паевой фонд: при выходе не возвращается.
+    # Раньше входил и в «Паевые взносы», и в «Текущий пай» — пай и сумма к
+    # возврату были завышены.
+    entry_fee = fields.Monetary(
+        string='Вступительный взнос', currency_field='currency_id',
+        compute='_compute_totals', store=True,
+        help='Невозвратный: в пай не входит и при выходе не возвращается.')
 
     state = fields.Selection([
         ('open', 'Действующий'),
@@ -92,13 +101,16 @@ class CoopShareAccount(models.Model):
     def _compute_totals(self):
         for record in self:
             confirmed = record.move_ids.filtered(lambda m: m.state == 'confirmed')
+            record.entry_fee = sum(confirmed.filtered(
+                lambda m: m.kind == 'entry').mapped('amount'))
             record.contributed = sum(confirmed.filtered(
-                lambda m: m.kind in ('entry', 'share', 'extra', 'in_kind')).mapped('amount'))
+                lambda m: m.kind in ('share', 'extra', 'in_kind')).mapped('amount'))
             record.accrued = sum(confirmed.filtered(
                 lambda m: m.kind == 'accrual').mapped('amount'))
             record.paid_out = -sum(confirmed.filtered(
                 lambda m: m.kind in ('payout', 'return')).mapped('amount'))
-            record.balance = sum(confirmed.mapped('amount'))
+            record.balance = sum(confirmed.filtered(
+                lambda m: m.kind != 'entry').mapped('amount'))
 
     def action_request_payout(self):
         """Подать заявление на выплату.
@@ -151,7 +163,7 @@ class CoopShareMove(models.Model):
     name = fields.Char(string='Операция', required=True)
 
     kind = fields.Selection([
-        ('entry', 'Вступительный взнос'),
+        ('entry', 'Вступительный взнос (не входит в пай)'),
         ('share', 'Паевой взнос'),
         ('extra', 'Дополнительный паевой взнос'),
         ('in_kind', 'Взнос имуществом'),
@@ -198,8 +210,9 @@ class CoopShareMove(models.Model):
             if not record.account_id:
                 record.balance_after = 0
                 continue
+            # Вступительный взнос в пай не входит (решение 427).
             earlier = record.account_id.move_ids.filtered(
-                lambda m: m.state == 'confirmed'
+                lambda m: m.state == 'confirmed' and m.kind != 'entry'
                 and (m.date or fields.Date.today(), m.id)
                 <= (record.date or fields.Date.today(), record.id))
             record.balance_after = sum(earlier.mapped('amount'))

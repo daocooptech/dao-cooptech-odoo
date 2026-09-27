@@ -1,6 +1,34 @@
 # -*- coding: utf-8 -*-
+import logging
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+
+_logger = logging.getLogger(__name__)
+
+# Кто платит — по ролям сторон, а не только по способу сделки (решение 427,
+# владелец 28.09.2026: «исправь график платежей»). Способ сделки не знает,
+# кем записана первая сторона: в «Юридическом сопровождении» первая сторона
+# — исполнитель, и график заставлял платить исполнителя. На копии боевой
+# так было в 72 сделках из 213.
+PAYS_FIRST = ('purchase', 'rent', 'job', 'service', 'share', 'credit')
+# График кредитной сделки — возврат долга: платит заёмщик, получает
+# кредитор (так же было и по способу: у кредита первая сторона — заёмщик).
+PAYER_ROLES = ('заказчик', 'покупатель', 'арендатор', 'заёмщик', 'заемщик',
+               'наниматель', 'работодатель', 'приобретатель', 'пайщик', 'инвестор',
+               'размещающий', 'участник')
+PAYEE_ROLES = ('исполнитель', 'продавец', 'арендодатель', 'кредитор', 'займодавец',
+               'подрядчик', 'поставщик', 'работник', 'кооператив', 'проект',
+               'владелец склада', 'инициатор')
+
+
+def _money_role(text):
+    text = (text or '').strip().lower()
+    if any(text.startswith(r) for r in PAYER_ROLES):
+        return 'pays'
+    if any(text.startswith(r) for r in PAYEE_ROLES):
+        return 'gets'
+    return None
 
 
 class CoopDeal(models.Model):
@@ -250,6 +278,19 @@ class CoopDeal(models.Model):
             return 'b'
         return False
 
+    def _coop_payer_payee(self):
+        """Кто платит и кто получает: по ролям сторон, затем по способу."""
+        self.ensure_one()
+        a, b = self.party_a_id, self.party_b_id
+        role_a, role_b = _money_role(self.role_a), _money_role(self.role_b)
+        if role_a == 'pays' or role_b == 'gets':
+            return a, b
+        if role_a == 'gets' or role_b == 'pays':
+            return b, a
+        if self.way in PAYS_FIRST:
+            return a, b
+        return b, a
+
     def _require_party(self):
         side = self._my_side()
         if not side:
@@ -498,7 +539,8 @@ class CoopDealPayment(models.Model):
     confirmed_by_id = fields.Many2one(
         'res.users', string='Подтвердил получение', readonly=True)
 
-    @api.depends('deal_id.way', 'deal_id.party_a_id', 'deal_id.party_b_id')
+    @api.depends('deal_id.way', 'deal_id.party_a_id', 'deal_id.party_b_id',
+                 'deal_id.role_a', 'deal_id.role_b')
     def _compute_parties(self):
         """Предположить стороны платежа по способу сделки.
 
@@ -507,8 +549,6 @@ class CoopDealPayment(models.Model):
         платит, при продаже получает, — но случаи бывают разные, и
         последнее слово за теми, кто сделку заключает.
         """
-        # Способы, где деньги идут от первой стороны ко второй.
-        pays_first = ('purchase', 'rent', 'job', 'service', 'share', 'credit')
         for record in self:
             deal = record.deal_id
             if not deal:
@@ -516,12 +556,30 @@ class CoopDealPayment(models.Model):
                 continue
             if record.payer_id and record.payee_id:
                 continue
-            if deal.way in pays_first:
-                record.payer_id = deal.party_a_id
-                record.payee_id = deal.party_b_id
-            else:
-                record.payer_id = deal.party_b_id
-                record.payee_id = deal.party_a_id
+            record.payer_id, record.payee_id = deal._coop_payer_payee()
+
+    @api.model
+    def _coop_fix_directions(self):
+        """Развернуть строки графика, где плательщик противоречит ролям.
+
+        Вызывается из данных при каждом обновлении модуля. Трогает только
+        строки, где стороны — ровно стороны сделки и роли говорят обратное;
+        строку, у которой роли ничего не говорят, оставляет как есть.
+        """
+        fixed = 0
+        for line in self.sudo().search([('payer_id', '!=', False), ('payee_id', '!=', False)]):
+            deal = line.deal_id
+            if not deal or {line.payer_id, line.payee_id} != {deal.party_a_id, deal.party_b_id}:
+                continue
+            if not (_money_role(deal.role_a) or _money_role(deal.role_b)):
+                continue
+            payer, payee = deal._coop_payer_payee()
+            if line.payer_id != payer:
+                line.write({'payer_id': payer.id, 'payee_id': payee.id})
+                fixed += 1
+        if fixed:
+            _logger.info('График платежей: развёрнуто строк %s', fixed)
+        return True
 
     def action_mark_paid(self):
         """Отметить получение.

@@ -176,6 +176,10 @@
               <dl>
                 <dt>Паевые взносы</dt><dd t-esc="rub(s.contributed)"/>
                 <dt>Пай</dt><dd><b t-esc="rub(s.balance)"/></dd>
+                <!-- Вступительный — не пай и не возвращается (решение 427). -->
+                <t t-if="s.entry_fee">
+                  <dt>Вступительный взнос, не входит в пай</dt><dd t-esc="rub(s.entry_fee)"/>
+                </t>
                 <dt>Кооперативные выплаты: начислено</dt><dd t-esc="rub(s.accrued)"/>
                 <dt>Выплачено на руки</dt><dd t-esc="rub(s.paid_out)"/>
                 <dt>Пайщик с</dt><dd t-esc="date(s.joined_on)"/>

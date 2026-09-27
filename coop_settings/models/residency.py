@@ -12,8 +12,14 @@
 резидентству сторон`, раздел 12): первое сработавшее запрещающее
 выигрывает, предупреждающие показываются со сноской, остальное разрешено.
 Цена — из справочника способов (`coop.settlement.method.cost_hint`,
-разбор бухгалтера). Перечень недружественных государств — данные с датой
-и основанием, а не константа в коде.
+разбор бухгалтера). Перечень стран, с резидентами которых сделки сейчас
+невозможны, — данные с датой и основанием, а не константа в коде.
+
+Слов «недружественное государство» на экранах платформы нет (решение 427,
+владелец 28.09.2026): «у нас на платформе нет недружественных государств,
+мы пишем что в данный момент сделки между резидентами этих стран не
+возможны на законодательном уровне». Внутренние имена полей остались
+прежними — их никто не читает.
 """
 from odoo import api, fields, models
 
@@ -37,28 +43,14 @@ UNFRIENDLY_BASIS = 'Распоряжение Правительства РФ о�
 REGISTRATION_THRESHOLD = 3_000_000  # постановка контракта на учёт, Инструкция ЦБ 181-И
 GIFT_LIMIT = 3000                   # п. 1 ст. 575 ГК
 
-# Способы сделки, при которых деньги идут от первой стороны ко второй —
-# то же правило, что у графика платежей (coop_deals, `_compute_parties`).
-# Только запасное: оно не знает, кем записана первая сторона, и у сделки
-# «Юридическое сопровождение», где первая сторона — исполнитель, платил
-# исполнитель. Раньше него смотрим роли сторон.
-PAYS_FIRST = ('purchase', 'rent', 'job', 'service', 'share', 'credit')
-# Роли, по которым видно, кто отдаёт деньги и кто их получает.
-PAYER_ROLES = ('заказчик', 'покупатель', 'арендатор', 'кредитор', 'займодавец',
-               'наниматель', 'работодатель', 'приобретатель', 'пайщик', 'инвестор',
-               'размещающий', 'участник')
-PAYEE_ROLES = ('исполнитель', 'продавец', 'арендодатель', 'заёмщик', 'заемщик',
-               'подрядчик', 'поставщик', 'работник', 'кооператив', 'проект',
-               'владелец склада', 'инициатор')
-
-
 class ResCountry(models.Model):
     _inherit = 'res.country'
 
     coop_unfriendly = fields.Boolean(
-        string='Недружественное государство',
-        help='Расчёты с лицами этой страны — в режиме спецсчетов и '
-             'разрешений. Перечень меняется; основание и дата — рядом.')
+        string='Сделки с резидентами сейчас невозможны',
+        help='В данный момент сделки между резидентами России и этой страны '
+             'невозможны на законодательном уровне. Перечень меняется; '
+             'основание и дата — рядом.')
     coop_unfriendly_since = fields.Date(string='В перечне с')
     coop_unfriendly_basis = fields.Char(string='Основание')
 
@@ -122,12 +114,16 @@ class CoopSettlementMethod(models.Model):
         cross = fx_a != fx_b
         kind_a, kind_b = payer._coop_kind(), payee._coop_kind()
         unfriendly = [p for p in (payer, payee) if p.country_id.coop_unfriendly]
+        blocked = _blocked_text(unfriendly)
         out = []
         for method in self.search([]):
             code = method.code
             deny, warn = [], []
             if method.status == 'planned':
                 out.append(self._coop_row(method, 'planned', [], []))
+                continue
+            if blocked:
+                out.append(self._coop_row(method, 'deny', [blocked], []))
                 continue
             # ── запрещающие, по убыванию силы ──
             if code == 'share':
@@ -166,10 +162,6 @@ class CoopSettlementMethod(models.Model):
                 warn.append('Организация, меняющаяся с частным лицом, выбивает чек (ст. 1.1 ФЗ-54).')
             if code == 'netting' and (payer.coop_tax_regime or '').startswith('usn'):
                 warn.append('На УСН доход по зачёту — в день подписания акта (п. 1 ст. 346.17 НК).')
-            if unfriendly and not deny:
-                names = ', '.join(sorted({p.country_id.name for p in unfriendly}))
-                warn.append('Сторона из недружественного государства (%s): режим спецсчетов и '
-                            'разрешений.' % names)
             if cross and code == 'cfa' and not deny:
                 warn.append('Только через оператора информационной системы — у платформы его пока нет.')
             verdict = 'deny' if deny else ('warn' if warn else 'ok')
@@ -195,30 +187,9 @@ class CoopDeal(models.Model):
              'валютному и налоговому резидентству, стране, виду и налоговому '
              'режиму (решения 118, 414).')
 
-    def _coop_payer_payee(self):
-        """Кто платит: по ролям сторон, затем по графику, затем по способу."""
-        self.ensure_one()
-        a, b = self.party_a_id, self.party_b_id
-
-        def role(text):
-            text = (text or '').strip().lower()
-            if any(text.startswith(r) for r in PAYER_ROLES):
-                return 'pays'
-            if any(text.startswith(r) for r in PAYEE_ROLES):
-                return 'gets'
-            return None
-
-        role_a, role_b = role(self.role_a), role(self.role_b)
-        if role_a == 'pays' or role_b == 'gets':
-            return a, b
-        if role_a == 'gets' or role_b == 'pays':
-            return b, a
-        line = self.payment_ids.filtered(lambda p: p.payer_id and p.payee_id)[:1]
-        if line and {line.payer_id, line.payee_id} == {a, b}:
-            return line.payer_id, line.payee_id
-        if self.way in PAYS_FIRST:
-            return a, b
-        return b, a
+    # Кто платит — `coop.deal._coop_payer_payee` в coop_deals: по ролям
+    # сторон, затем по способу сделки (решение 427). То же правило ведёт
+    # график платежей, и вкладка с графиком не расходится.
 
     @api.depends('party_a_id', 'party_b_id', 'way', 'amount', 'role_a', 'role_b',
                  'payment_ids.payer_id', 'payment_ids.payee_id')
@@ -245,6 +216,14 @@ class CoopDeal(models.Model):
 
             html = ['<div class="o_coop_settle">',
                     '<p class="o_coop_settle_who">Платит %s.<br/>Получает %s.</p>' % (who(payer), who(payee))]
+            blocked = _blocked_text([p for p in (payer, payee) if p.country_id.coop_unfriendly])
+            if blocked:
+                # Способы перечислять незачем: ни один не годится.
+                html.append('<p class="o_coop_settle_block">%s</p>' % _esc(blocked))
+                html.append('<p class="o_coop_settle_note">Основание — %s.</p></div>'
+                            % _esc(UNFRIENDLY_BASIS))
+                deal.coop_settlement_html = ''.join(html)
+                continue
             for verdict in ('ok', 'warn', 'deny', 'planned'):
                 group = [r for r in rows if r['verdict'] == verdict]
                 if not group:
@@ -258,9 +237,19 @@ class CoopDeal(models.Model):
                     html.append('</li>')
                 html.append('</ul>')
             html.append('<p class="o_coop_settle_note">Цена — сквозная: всё, что уходит в бюджет с обеих '
-                        'сторон вместе. Правила — из разбора юриста 22.09; перечень недружественных '
-                        'государств — %s.</p></div>' % _esc(UNFRIENDLY_BASIS))
+                        'сторон вместе. Правила — из разбора юриста 22.09.</p></div>')
             deal.coop_settlement_html = ''.join(html)
+
+
+def _blocked_text(parties):
+    """«Сделки невозможны» — по стране стороны (решение 427)."""
+    names = sorted({p.country_id.name for p in parties if p.country_id})
+    if not names:
+        return ''
+    country = ('страны «%s»' % names[0]) if len(names) == 1 else (
+        'стран: %s' % ', '.join('«%s»' % n for n in names))
+    return ('В данный момент сделки между резидентами России и %s '
+            'невозможны на законодательном уровне.' % country)
 
 
 def _esc(text):

@@ -370,7 +370,12 @@
               </div>
 
               <div class="o_coop_about">
+                <!-- «Описание организации», а не «О себе» (решение 427). Правит
+                     только уполномоченный от организации — `coop_can_edit_card`:
+                     организация в числе тех, от чьего имени действует
+                     пользователь. -->
                 <field name="coop_about" nolabel="1" widget="coop_about" readonly="not coop_can_edit_card"
+                       options="{'title': 'Описание организации'}"
                        placeholder="Чем занимается организация — до 280 знаков"/>
               </div>
 
@@ -379,8 +384,12 @@
                 же порядке, что в макете: сначала люди, потом то, что
                 организация предлагает, потом её замыслы и нужды.
               -->
-              <div class="o_coop_band" invisible="not coop_has_members"
-                   groups="coop_base.group_coop_member,coop_base.group_coop_board,coop_base.group_coop_audit">
+              <!-- Состав — всем, кто открыл карточку (решение 427: «куда делся
+                   блок с сотрудниками»). Раньше полоса была только группам
+                   пайщиков, правления и ревизии, и у рядового участника её
+                   не было вовсе. Кого показывать, решают правила доступа к
+                   членству, а не вид. -->
+              <div class="o_coop_band" invisible="not coop_has_members">
                 <div class="o_coop_band_head">
                   <span><field name="coop_member_label" nolabel="1" readonly="1"/></span>
                   <button name="action_coop_members" type="object"

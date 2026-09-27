@@ -28,4 +28,10 @@
     <field name="active" eval="True"/>
   </record>
 
+  <!-- График платежей: развернуть строки, где плательщик противоречит
+       ролям сторон (решение 427). При каждом обновлении, повторно ничего
+       не трогает. -->
+  <data noupdate="0">
+    <function model="coop.deal.payment" name="_coop_fix_directions"/>
+  </data>
 </odoo>

@@ -54,6 +54,14 @@
   }
 }
 .o_coop_settle_who { margin: 0 0 6px; }
+.o_coop_settle_block {
+  margin: 12px 0 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--coop-error, #c0392b);
+  color: var(--coop-error, #c0392b);
+  font-weight: 600;
+}
 .o_coop_settle_ok { color: var(--coop-teal, #146b64); }
 .o_coop_settle_warn { color: var(--coop-gold, #c8962c); }
 .o_coop_settle_deny { color: var(--coop-error, #c0392b); }

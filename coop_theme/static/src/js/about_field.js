@@ -35,6 +35,10 @@ export class CoopAboutField extends Component {
     static props = {
         ...standardFieldProps,
         placeholder: { type: String, optional: true },
+        // Заголовок полосы. У человека — «О себе», у организации —
+        // «Описание организации» (владелец 28.09.2026: «блок о себе откуда
+        // взялся? Должно быть описание организации»).
+        title: { type: String, optional: true },
     };
 
     setup() {
@@ -128,7 +132,10 @@ export const coopAboutField = {
     component: CoopAboutField,
     displayName: "О себе с правкой по карандашу",
     supportedTypes: ["char"],
-    extractProps: ({ attrs }) => ({ placeholder: attrs.placeholder }),
+    extractProps: ({ attrs, options }) => ({
+        placeholder: attrs.placeholder,
+        title: options.title,
+    }),
 };
 
 registry.category("fields").add("coop_about", coopAboutField);

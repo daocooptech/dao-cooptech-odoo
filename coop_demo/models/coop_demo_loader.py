@@ -187,6 +187,7 @@ class CoopDemoLoader(models.AbstractModel):
         load_wallets.load_wallets(self.env)
         load_wallets.repair_addresses(self.env)
         load_wallets.repair_tx_hashes(self.env)
+        load_wallets.rename_entry_moves(self.env)
         # История кошелька главного участника витрины — до двухсот
         # движений (владелец 27.09.2026); после сделок: часть движений —
         # расчёты по его настоящим сделкам.

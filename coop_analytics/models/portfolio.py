@@ -178,6 +178,7 @@ class CoopPortfolio(models.AbstractModel):
             rows.append({
                 'id': acc.id, 'cooperative': coop.name, 'state': acc.state, 'state_label': _sel(acc, 'state'),
                 'joined_on': _d(acc.joined_on), 'contributed': acc.contributed, 'balance': acc.balance,
+                'entry_fee': acc.entry_fee,
                 'accrued': acc.accrued, 'paid_out': acc.paid_out, 'charter_note': acc.charter_note or '',
                 'needs_count': len(deals), 'needs_sum': sum(deals.mapped('amount')),
                 'review_days': coop.coop_share_review_days or 30, 'waiting': waiting,

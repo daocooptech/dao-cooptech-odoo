@@ -12,7 +12,7 @@
   -->
   <t t-name="coop_theme.AboutField">
     <div class="o_coop_band_head">
-      <span>О себе</span>
+      <span t-esc="props.title or 'О себе'"/>
       <button type="button" class="o_coop_about_btn o_coop_about_start"
               t-if="canEdit and !ui.editing"
               title="Изменить" aria-label="Изменить"
