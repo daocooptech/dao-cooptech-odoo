@@ -108,7 +108,11 @@ def trim_memberships(env):
     # ничего не показывает о правах.
     def weight(membership):
         sort_order = {'active': 0, 'applied': 1, 'leaving': 2, 'ended': 3}
-        main = 0 if membership.role in ('board', 'founder', 'staff') else 1
+        # Членство в зарубежном кооперативном участке (решение 428) — такое
+        # же значимое, как в правлении: оно и есть связь человека с обществом
+        # из-за границы. Снимается другое, рядовое.
+        abroad = 'section_id' in membership._fields and membership.section_id.abroad
+        main = 0 if membership.role in ('board', 'founder', 'staff') or abroad else 1
         return (sort_order.get(membership.state, 4), main, membership.id)
 
     by_people = {}

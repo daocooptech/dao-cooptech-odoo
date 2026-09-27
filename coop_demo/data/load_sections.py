@@ -139,6 +139,24 @@ def _shanghai(env, org, china, member_role, main):
             membership.section_id = section.id
         members = Membership.search([('section_id', '=', section.id)])
         people = members.mapped('partner_id')
+    if len(people) < SHANGHAI_SIZE:
+        # Своих рядовых пайщиков не хватило — принимаем новых. Чистка членств
+        # (`load_memberships.trim_memberships`) держит членство в зарубежном
+        # участке наравне с правлением и снимает у человека другое, рядовое.
+        taken = set(Membership.search([('organization_id', '=', org.id)]).mapped('partner_id').ids)
+        pool = Partner.search([('coop_is_participant', '=', True), ('is_company', '=', False),
+                               ('id', 'not in', list(taken)), ('id', '!=', main.id)], order='id desc')
+        pool = pool.filtered(lambda p: p.country_id.code == 'RU')
+        for partner in pool[:SHANGHAI_SIZE - len(people)]:
+            Membership.create({
+                'partner_id': partner.id, 'organization_id': org.id,
+                'role_id': member_role.id, 'state': 'active',
+                'joined_on': datetime.date.today() - datetime.timedelta(days=200 + partner.id % 300),
+                'admission_basis': 'Решение правления, заявление подано онлайн',
+                'section_id': section.id,
+            })
+        members = Membership.search([('section_id', '=', section.id)])
+        people = members.mapped('partner_id')
     # Проживание — Шанхай. Граждане РФ — валютные резиденты, но налоговые
     # нерезиденты; один — иностранец (нерезидент). Раз в прогон, потому что
     # разброс резидентства идёт раньше и мог вернуть их в Россию.
