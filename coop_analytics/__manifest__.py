@@ -24,6 +24,7 @@
     'license': 'LGPL-3',
     'depends': ['board', 'spreadsheet_dashboard', 'coop_theme', 'coop_deals', 'coop_wallet',
                 'coop_projects', 'coop_matching', 'coop_crypto_exchange', 'coop_tokenomics',
+                'coop_digital_assets',
                 'coop_education', 'coop_people', 'coop_profile', 'coop_wall'],
     'data': [
         'security/ir.model.access.csv',
@@ -37,6 +38,9 @@
             'coop_analytics/static/src/scss/coop_analytics.scss',
             'coop_analytics/static/src/js/board_tabs.js',
             'coop_analytics/static/src/xml/board_tabs.xml',
+            'coop_analytics/static/src/scss/portfolio.scss',
+            'coop_analytics/static/src/js/portfolio.js',
+            'coop_analytics/static/src/xml/portfolio.xml',
         ],
         # Экран дашбордов грузится лениво, своим бандлом — вкладки над ним туда же.
         'spreadsheet.o_spreadsheet': [

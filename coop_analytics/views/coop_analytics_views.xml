@@ -331,8 +331,17 @@
             action="action_coop_my_panel"/>
   <menuitem id="menu_coop_analytics_board" name="Моя панель"
             parent="menu_coop_analytics_root" action="action_coop_my_panel" sequence="10"/>
+  <!-- «Портфель участника» — слой 3 (решения 420–422), js/portfolio.js. -->
+  <record id="action_coop_portfolio" model="ir.actions.client">
+    <field name="name">Портфель</field>
+    <field name="tag">coop_analytics.portfolio</field>
+    <field name="path">analytics-portfolio</field>
+    <field name="context">{'coop_section': 1}</field>
+  </record>
+  <menuitem id="menu_coop_analytics_portfolio" name="Портфель"
+            parent="menu_coop_analytics_root" action="action_coop_portfolio" sequence="12"/>
   <menuitem id="menu_coop_analytics_account" name="Мой аккаунт"
-            parent="menu_coop_analytics_root" action="action_coop_an_account" sequence="12"/>
+            parent="menu_coop_analytics_root" action="action_coop_an_account" sequence="13"/>
   <menuitem id="menu_coop_analytics_activity" name="Активность"
             parent="menu_coop_analytics_root" action="action_coop_an_activity" sequence="14"/>
   <menuitem id="menu_coop_analytics_money" name="Деньги"

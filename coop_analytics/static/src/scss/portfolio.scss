@@ -1,0 +1,282 @@
+// «Портфель участника» (решения 420–422), xml/portfolio.xml. Цвета — из
+// переменных темы, чтобы тёмная тема приходила сама.
+.o_coop_pf {
+  --coop-pf-c0: var(--coop-teal, #146b64);
+  --coop-pf-c1: var(--coop-gold, #c8962c);
+  --coop-pf-c2: #5b7fb3;
+  --coop-pf-c3: #9a6fb0;
+  --coop-pf-c4: var(--coop-slate, #6b6b66);
+  --coop-pf-late: var(--coop-error, #c0392b);
+  max-width: 1180px;
+  padding: 0 0 32px;
+  color: var(--coop-ink, #14171a);
+
+  .o_coop_board_tabs { margin-bottom: 12px; }
+  .o_coop_pf_loading { padding: 48px 0; color: var(--coop-slate-light, #8f8f88); }
+
+  .o_coop_pf_head {
+    h2 { font: 700 24px/1.2 Manrope, sans-serif; margin: 0 0 6px; }
+    p { margin: 0 0 16px; color: var(--coop-slate, #5f5f59); max-width: 760px; }
+  }
+
+  // ── четыре блока ──────────────────────────────────────────────────
+  .o_coop_pf_blocks {
+    display: grid;
+    // Два на два; четыре в ряд — только на широком экране (ниже). По ширине
+    // окна: рядом левое меню, и при окне 1150 на четыре колонки оставалось
+    // по 150 пикселей, а «по месту» выходило три плюс один.
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .o_coop_pf_block, .o_coop_pf_panel, .o_coop_pf_card {
+    background: var(--coop-white, #fff);
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-radius: 12px;
+  }
+  .o_coop_pf_block {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    h3 { font-size: 13px; font-weight: 600; margin: 0 0 6px; color: var(--coop-slate, #5f5f59); }
+  }
+  .o_coop_pf_big {
+    font: 700 22px/1.2 Manrope, sans-serif;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .o_coop_pf_sub { font-size: 12px; color: var(--coop-slate-light, #8f8f88); margin-bottom: 8px; }
+  dl {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px 10px;
+    margin: 0;
+    font-size: 12.5px;
+    dt { font-weight: 400; color: var(--coop-slate, #5f5f59); }
+    dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  }
+  .o_coop_pf_dl_big { font-size: 15px; margin-bottom: 8px; dd { font-weight: 700; } }
+
+  .o_coop_pf_split {
+    display: flex;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 4px 0 8px;
+    background: var(--coop-surface, #f3f3ef);
+    i { display: block; height: 100%; }
+  }
+  .o_coop_pf_legend {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+    li { display: flex; align-items: center; gap: 6px; padding: 1px 0; }
+    li span { margin-left: auto; color: var(--coop-slate, #5f5f59); white-space: nowrap; }
+    i { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+  }
+
+  // ── панели ────────────────────────────────────────────────────────
+  .o_coop_pf_panel { padding: 16px; margin-bottom: 16px; }
+  .o_coop_pf_panelhead {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px 16px;
+    margin-bottom: 12px;
+    h3 { font: 700 16px/1.3 Manrope, sans-serif; margin: 0; }
+  }
+  h4 { font-size: 13px; font-weight: 600; margin: 16px 0 6px; }
+  .o_coop_pf_note, .o_coop_pf_muted { color: var(--coop-slate-light, #8f8f88); font-size: 12px; }
+  .o_coop_pf_note { margin: 10px 0 0; }
+  .o_coop_pf_warn {
+    font-size: 12.5px;
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--coop-gold-tint, #fbf3e0);
+    color: var(--coop-gold-text, #6b4e12);
+  }
+  .o_coop_pf_late { color: var(--coop-pf-late) !important; }
+  .o_coop_pf_in { color: var(--coop-teal-dark, #0f4f4a); }
+  .o_coop_pf_out { color: var(--coop-slate, #5f5f59); }
+  .o_coop_pf_gone { opacity: .55; }
+  .o_coop_pf_link {
+    border: 0;
+    background: none;
+    padding: 8px 0 0;
+    color: var(--coop-teal-dark, #0f4f4a);
+    font-size: 13px;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  // ── график поступлений ────────────────────────────────────────────
+  .o_coop_pf_keys {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+    color: var(--coop-slate, #5f5f59);
+    li { display: flex; align-items: center; gap: 6px; }
+    i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+  }
+  .o_coop_pf_k_contract, .o_coop_pf_b_contract { background: var(--coop-pf-c0); }
+  .o_coop_pf_k_estimate, .o_coop_pf_b_estimate {
+    background: repeating-linear-gradient(135deg, var(--coop-pf-c0) 0 3px, transparent 3px 6px);
+    box-shadow: inset 0 0 0 1px var(--coop-pf-c0);
+  }
+  .o_coop_pf_k_out, .o_coop_pf_b_out { background: var(--coop-line-strong, #c9c9c2); }
+  .o_coop_pf_k_late, .o_coop_pf_b_late { background: var(--coop-pf-late); }
+
+  .o_coop_pf_chart {
+    display: grid;
+    grid-template-columns: minmax(78px, 1.2fr) repeat(12, minmax(44px, 1fr));
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .o_coop_pf_col {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    font-size: 11px;
+    span { color: var(--coop-slate, #5f5f59); margin-top: 4px; white-space: nowrap; }
+    b { font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; font-size: 10.5px; }
+  }
+  .o_coop_pf_col_late {
+    cursor: pointer;
+    border-right: 1px dashed var(--coop-line-strong, #c9c9c2);
+    padding-right: 6px;
+    b { color: var(--coop-pf-late); }
+  }
+  .o_coop_pf_up, .o_coop_pf_down {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    i { display: block; width: 70%; min-height: 0; }
+  }
+  .o_coop_pf_up {
+    height: 150px;
+    justify-content: flex-end;
+    border-bottom: 1px solid var(--coop-line-strong, #c9c9c2);
+  }
+  .o_coop_pf_down { height: 40px; justify-content: flex-start; }
+
+  .o_coop_pf_natural_row {
+    display: flex;
+    gap: 12px;
+    font-size: 12.5px;
+    padding: 4px 0;
+    border-top: 1px solid var(--coop-line, #e6e6e1);
+    b { flex: 0 0 90px; font-weight: 600; }
+  }
+
+  // ── вложения по видам ─────────────────────────────────────────────
+  .o_coop_pf_seg {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 0 10px;
+    button {
+      border: 1px solid var(--coop-line, #e6e6e1);
+      background: var(--coop-white, #fff);
+      color: var(--coop-ink, #14171a);
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 13px;
+      span { color: var(--coop-slate-light, #8f8f88); margin-left: 2px; }
+      &.active {
+        background: var(--coop-teal, #146b64);
+        border-color: var(--coop-teal, #146b64);
+        color: #fff;
+        span { color: rgba(255, 255, 255, .8); }
+      }
+    }
+  }
+  .o_coop_pf_cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px;
+  }
+  .o_coop_pf_card {
+    padding: 12px 14px;
+    header { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+    p { margin: 8px 0 0; font-size: 12px; }
+  }
+  .o_coop_pf_badge {
+    flex: none;
+    align-self: flex-start;
+    font-size: 11px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+    background: var(--coop-teal-tint, #e3f1ef);
+    color: var(--coop-teal-dark, #0f4f4a);
+  }
+  .o_coop_pf_mix {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    font-size: 12.5px;
+    margin-bottom: 10px;
+    span { display: flex; align-items: center; gap: 6px; }
+    i { width: 8px; height: 8px; border-radius: 2px; }
+  }
+  .o_coop_pf_scroll { overflow-x: auto; }
+  .o_coop_pf_table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    th {
+      text-align: left;
+      font-weight: 600;
+      font-size: 12px;
+      color: var(--coop-slate, #5f5f59);
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--coop-line-strong, #c9c9c2);
+      white-space: nowrap;
+    }
+    td { padding: 7px 8px; border-bottom: 1px solid var(--coop-line, #e6e6e1); vertical-align: top; }
+    a { color: var(--coop-teal-dark, #0f4f4a); }
+  }
+  .o_coop_pf_num { text-align: right !important; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .o_coop_pf_nowrap { white-space: nowrap; }
+
+  // ── открытая статистика ───────────────────────────────────────────
+  .o_coop_pf_stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 10px;
+    > div {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: var(--coop-surface, #f3f3ef);
+    }
+    span { font-size: 12px; color: var(--coop-slate, #5f5f59); }
+    b { font: 700 18px/1.25 Manrope, sans-serif; font-variant-numeric: tabular-nums; }
+    em { font-style: normal; font-size: 11.5px; color: var(--coop-slate-light, #8f8f88); }
+  }
+}
+
+@media (min-width: 1450px) {
+  .o_coop_pf .o_coop_pf_blocks { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@media (max-width: 575px) {
+  .o_coop_pf {
+    .o_coop_pf_blocks { grid-template-columns: 1fr; }
+    .o_coop_pf_chart { grid-template-columns: 78px repeat(12, 48px); }
+    .o_coop_pf_natural_row { flex-direction: column; gap: 2px; }
+    .o_coop_pf_natural_row b { flex: none; }
+  }
+}
