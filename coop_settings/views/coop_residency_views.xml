@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- «Как рассчитаться» в сделке (решения 118, 414): какие способы
+       расчёта законны между этими сторонами — по валютному и налоговому
+       резидентству, стране, виду стороны и налоговому режиму. Правила —
+       из матрицы юриста 22.09, цена — из справочника способов. -->
+  <record id="view_coop_deal_form_settlement" model="ir.ui.view">
+    <field name="name">coop.deal.form.settlement</field>
+    <field name="model">coop.deal</field>
+    <field name="inherit_id" ref="coop_deals.view_coop_deal_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//notebook/page[@name='payments']" position="after">
+        <page string="Как рассчитаться" name="settlement">
+          <field name="coop_settlement_html" readonly="1" nolabel="1"/>
+        </page>
+      </xpath>
+    </field>
+  </record>
+</odoo>

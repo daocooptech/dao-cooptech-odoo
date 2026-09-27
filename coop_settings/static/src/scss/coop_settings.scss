@@ -32,3 +32,35 @@
 .o_coop_settings .o_list_renderer {
   border: 0;
 }
+
+// «Как рассчитаться» в сделке (решения 118, 414): три группы — можно, с
+// оговоркой, нельзя; цвета — из переменных темы, тёмная приходит сама.
+.o_coop_settle {
+  max-width: 860px;
+  h5 {
+    font: 700 14px/1.3 Manrope, sans-serif;
+    margin: 16px 0 6px;
+  }
+  ul { margin: 0 0 4px; padding-left: 18px; }
+  li { margin: 3px 0; }
+  li > ul { margin-top: 2px; }
+  li > ul > li {
+    font-size: 12.5px;
+    color: var(--coop-slate, #5f5f59);
+  }
+}
+.o_coop_settle_who { margin: 0 0 6px; }
+.o_coop_settle_ok { color: var(--coop-teal, #146b64); }
+.o_coop_settle_warn { color: var(--coop-gold, #c8962c); }
+.o_coop_settle_deny { color: var(--coop-error, #c0392b); }
+.o_coop_settle_planned { color: var(--coop-slate-light, #8f8f88); }
+.o_coop_settle_cost {
+  margin-left: 6px;
+  font-size: 12px;
+  color: var(--coop-slate, #5f5f59);
+}
+.o_coop_settle_note {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--coop-slate-light, #8f8f88);
+}

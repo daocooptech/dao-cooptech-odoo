@@ -23,10 +23,12 @@
     'version': '19.0.1.0.0',
     'license': 'LGPL-3',
     # auth_totp — двухфакторная проверка во вкладке «Безопасность».
-    'depends': ['coop_base', 'coop_theme', 'coop_people', 'coop_profile',
+    'depends': ['coop_base', 'coop_theme', 'coop_people', 'coop_profile', 'coop_deals',
                 'coop_orgs', 'coop_wallet', 'auth_totp', 'mail'],
     'data': [
+        'data/coop_residency_data.xml',
         'views/coop_settings_views.xml',
+        'views/coop_residency_views.xml',
     ],
     'assets': {
         'web.assets_backend': [

@@ -36,7 +36,7 @@ from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_groupbuy,
                     load_programs,
                     load_promotions,
-                    load_reference, load_resources, load_skills,
+                    load_reference, load_residency, load_resources, load_skills,
                     load_project_needs, load_project_tasks,
                     load_photos,
                     load_documents,
@@ -199,6 +199,9 @@ class CoopDemoLoader(models.AbstractModel):
         # с кооперативных 27.09.2026) — после кошельков, где счета заводятся.
         load_orgs.spread_cooperative_kinds(self.env)
         load_orgs.drop_non_coop_shares(self.env)
+        # Резидентство участников — с разбросом (решения 118, 414): без
+        # него вкладка «Как рассчитаться» в каждой сделке одинакова.
+        load_residency.load_residency(self.env)
         # Международные сделки (решения 392, 410) — после организаций и
         # операторов ЦФА: российская сторона — организация участника.
         if 'coop.trade.contract' in self.env:
