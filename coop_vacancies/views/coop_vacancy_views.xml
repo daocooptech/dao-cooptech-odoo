@@ -181,11 +181,17 @@
               <field name="contribution_value" invisible="reward_kind != 'share'" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="share_percent" readonly="1" invisible="reward_kind != 'share'"/>
               <field name="reward_note" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/>
-              <!-- Форма вознаграждения — от того, кто ищет (решение 416):
-                   кооператив зачисляет в пай, ДАО платит токенами,
-                   остальные — рублями. Не выбирается: следует из вида
-                   организации. -->
-              <field name="labour_pay" readonly="1" invisible="reward_kind in ('barter', 'volunteer')"/>
+              <!-- Форма вознаграждения — от того, кто ищет (решения 416,
+                   424): кооператив выбирает — зачисление в пай или рубли
+                   по трудовому договору, ДАО платит токенами, остальные —
+                   рублями. -->
+              <field name="labour_pay_choice" invisible="1"/>
+              <field name="labour_pay" widget="coop_inline"
+                     readonly="not coop_can_edit or not labour_pay_choice"
+                     invisible="reward_kind in ('barter', 'volunteer')"/>
+              <field name="labour_pay_note" readonly="1" nolabel="1" colspan="2"
+                     class="text-muted"
+                     invisible="not labour_pay_note or reward_kind in ('barter', 'volunteer')"/>
               <field name="reward_display" readonly="1" string="В каталоге"/>
               <field name="is_mine" invisible="1"/>
               <field name="my_application_state" invisible="1"/>

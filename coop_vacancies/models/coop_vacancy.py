@@ -10,6 +10,10 @@ _logger = logging.getLogger(__name__)
 # владелец 26.09.2026): «ООО — рубли, кооператив — пай, ДАО — токены, DEX —
 # криптовалюты и токены. Самозанятые относятся к коммерческим
 # организациям». НКО владелец не называл — у них зарплата, рубли.
+# Поправка 27.09.2026 (решение 424): «кооператив — может платить как
+# зачислением в пай так и просто деньгами, но тогда у него возникает налог,
+# потому что это наемный сотрудник по трудовому договору» — у кооператива
+# выбор из двух, и рубли означают трудовой договор.
 LABOUR_PAY = [
     ('rub', 'Рублями'),
     ('share', 'Зачислением в пай'),
@@ -25,9 +29,10 @@ class ResPartner(models.Model):
     coop_labour_pay = fields.Selection(
         LABOUR_PAY, string='Чем вознаграждает труд',
         compute='_compute_coop_labour_pay', store=True, index=True,
-        help='По виду организации (решение 416): кооператив зачисляет в пай, '
-             'ДАО платит токенами, коммерческие организации, самозанятые и '
-             'частные лица — рублями.')
+        help='Что ставится в новую вакансию по умолчанию (решения 416, 424): '
+             'кооператив — зачисление в пай (может выбрать и рубли), ДАО — '
+             'токены, коммерческие организации, самозанятые и частные лица — '
+             'рубли.')
 
     @api.depends('is_company', 'coop_legal_form_id.is_cooperative', 'coop_legal_form_id.code')
     def _compute_coop_labour_pay(self):
@@ -39,6 +44,17 @@ class ResPartner(models.Model):
                 partner.coop_labour_pay = 'tokens'
             else:
                 partner.coop_labour_pay = 'rub'
+
+    def _coop_labour_pay_allowed(self):
+        """Какие формы вознаграждения открыты этому участнику.
+
+        Кооператив платит и зачислением в пай, и деньгами (решение 424),
+        ДАО — токенами, остальные — рублями.
+        """
+        self.ensure_one()
+        if self.coop_legal_form_id.is_cooperative:
+            return ('share', 'rub')
+        return (self.coop_labour_pay or 'rub',)
 
 
 class CoopVacancy(models.Model):
@@ -157,11 +173,19 @@ class CoopVacancy(models.Model):
         help='Всё, что не укладывается в поля: «оплата после испытательного», '
              '«доля обсуждается», «плюс жильё».')
     labour_pay = fields.Selection(
-        related='partner_id.coop_labour_pay', store=True, index=True,
-        string='Чем платят',
-        help='Зависит от того, кто ищет (решение 416): кооператив зачисляет '
-             'вознаграждение в пай, ДАО платит токенами, коммерческие '
-             'организации, самозанятые и частные лица — рублями.')
+        LABOUR_PAY, string='Чем платят', compute='_compute_labour_pay',
+        store=True, readonly=False, index=True, tracking=True,
+        help='Зависит от того, кто ищет (решения 416, 424): кооператив '
+             'выбирает — зачисление в пай или рубли, ДАО платит токенами, '
+             'коммерческие организации, самозанятые и частные лица — рублями.')
+    labour_pay_choice = fields.Boolean(
+        string='Форму можно выбрать', compute='_compute_labour_pay_choice',
+        help='Выбор есть только у кооператива: пай или рубли.')
+    labour_pay_note = fields.Char(
+        string='Что это значит', compute='_compute_labour_pay_choice',
+        help='Кооператив, платящий рублями, берёт человека наёмным '
+             'сотрудником по трудовому договору — и с выплаты возникает налог '
+             '(решение 424).')
 
     # ── Состояние ────────────────────────────────────────────────────────
     state = fields.Selection([
@@ -192,6 +216,41 @@ class CoopVacancy(models.Model):
 
     import_key = fields.Char(string='Ключ источника', index=True, copy=False)
 
+    @api.depends('partner_id.coop_labour_pay', 'partner_id.coop_legal_form_id.is_cooperative')
+    def _compute_labour_pay(self):
+        # Выбор, уже сделанный кооперативом, не сбрасывается, пока он
+        # допустим для того, кто ищет; иначе — форма по умолчанию.
+        for record in self:
+            partner = record.partner_id
+            if not partner:
+                record.labour_pay = 'rub'
+            elif record.labour_pay not in partner._coop_labour_pay_allowed():
+                record.labour_pay = partner.coop_labour_pay or 'rub'
+
+    @api.depends('partner_id.coop_legal_form_id.is_cooperative')
+    @api.depends('labour_pay')
+    def _compute_labour_pay_choice(self):
+        for record in self:
+            choice = bool(record.partner_id.coop_legal_form_id.is_cooperative)
+            record.labour_pay_choice = choice
+            record.labour_pay_note = (
+                _('Наёмный сотрудник по трудовому договору: с выплаты возникает налог.')
+                if choice and record.labour_pay == 'rub' else False)
+
+    @api.constrains('labour_pay', 'partner_id')
+    def _check_labour_pay(self):
+        names = dict(LABOUR_PAY)
+        for record in self:
+            if not record.partner_id or not record.labour_pay:
+                continue
+            allowed = record.partner_id._coop_labour_pay_allowed()
+            if record.labour_pay not in allowed:
+                raise UserError(_(
+                    '«%(who)s» не может платить так: %(how)s. Допустимо: %(ok)s.',
+                    who=record.partner_id.display_name,
+                    how=names[record.labour_pay].lower(),
+                    ok=', '.join(names[a].lower() for a in allowed)))
+
     @api.depends('contribution_value', 'project_id.coop_contribution_total')
     def _compute_share_percent(self):
         for record in self:
@@ -203,7 +262,8 @@ class CoopVacancy(models.Model):
                 record.share_percent = 0
 
     @api.depends('reward_kind', 'pay_from', 'pay_to', 'pay_period',
-                 'share_percent', 'contribution_value', 'currency_id', 'labour_pay')
+                 'share_percent', 'contribution_value', 'currency_id', 'labour_pay',
+                 'partner_id.coop_legal_form_id.is_cooperative')
     def _compute_reward_display(self):
         periods = {'month': 'в месяц', 'shift': 'за смену', 'hour': 'в час',
                    'job': 'за работу', 'lesson': 'за занятие'}
@@ -218,6 +278,11 @@ class CoopVacancy(models.Model):
                 # (решение 416): сумма та же, форма другая, и видно её
                 # должно быть прямо в строке каталога.
                 how = LABOUR_PAY_SUFFIX.get(record.labour_pay, '')
+                # Рубли у кооператива — это трудовой договор с налогом
+                # (решение 424), и соискатель должен видеть это сразу.
+                if (record.labour_pay == 'rub'
+                        and record.partner_id.coop_legal_form_id.is_cooperative):
+                    how = 'по трудовому договору'
                 line = ('%s %s' % (money, period)).strip()
                 parts.append('%s, %s' % (line, how) if how else line)
 

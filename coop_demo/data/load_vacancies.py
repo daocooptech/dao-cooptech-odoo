@@ -192,6 +192,12 @@ def load_vacancies(env, extra=45):
             'import_key': 'vacancies.json#%s' % index,
         }
 
+        # Кооператив платит и в пай, и рублями по трудовому договору
+        # (решение 424): каждая третья его денежная вакансия — рублями,
+        # чтобы в каталоге были видны обе формы.
+        if owner.coop_legal_form_id.is_cooperative:
+            values['labour_pay'] = 'rub' if index % 3 == 1 else 'share'
+
         if reward_kind == 'share':
             # Процент из макета — это результат, а не ввод: восстанавливаем
             # из него денежную оценку вклада, и дальше процент считается
@@ -216,7 +222,10 @@ def load_vacancies(env, extra=45):
 
         existing = Vacancy.search([('import_key', '=', values['import_key'])], limit=1)
         if existing:
-            existing.write(values)
+            # Без отслеживания: повторная загрузка — не правка владельца, и
+            # строка «Зачислением в пай → Рублями» от бота в ленте вакансии
+            # читалась бы как его решение.
+            existing.with_context(tracking_disable=True).write(values)
             updated += 1
         else:
             Vacancy.create(values)
