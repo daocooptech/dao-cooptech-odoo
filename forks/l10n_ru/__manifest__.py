@@ -1,7 +1,7 @@
 {
     "name": "Россия — план счетов (сборка ДАО КООПТЕХ)",
     "icon": "/account/static/description/l10n.png",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.1.0",
     "countries": ["ru"],
     "category": "Accounting/Localizations/Account Charts",
     "website": "https://github.com/OCA/l10n-russia",
