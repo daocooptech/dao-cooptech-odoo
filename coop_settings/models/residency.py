@@ -39,7 +39,17 @@ GIFT_LIMIT = 3000                   # п. 1 ст. 575 ГК
 
 # Способы сделки, при которых деньги идут от первой стороны ко второй —
 # то же правило, что у графика платежей (coop_deals, `_compute_parties`).
+# Только запасное: оно не знает, кем записана первая сторона, и у сделки
+# «Юридическое сопровождение», где первая сторона — исполнитель, платил
+# исполнитель. Раньше него смотрим роли сторон.
 PAYS_FIRST = ('purchase', 'rent', 'job', 'service', 'share', 'credit')
+# Роли, по которым видно, кто отдаёт деньги и кто их получает.
+PAYER_ROLES = ('заказчик', 'покупатель', 'арендатор', 'кредитор', 'займодавец',
+               'наниматель', 'работодатель', 'приобретатель', 'пайщик', 'инвестор',
+               'размещающий', 'участник')
+PAYEE_ROLES = ('исполнитель', 'продавец', 'арендодатель', 'заёмщик', 'заемщик',
+               'подрядчик', 'поставщик', 'работник', 'кооператив', 'проект',
+               'владелец склада', 'инициатор')
 
 
 class ResCountry(models.Model):
@@ -186,12 +196,32 @@ class CoopDeal(models.Model):
              'режиму (решения 118, 414).')
 
     def _coop_payer_payee(self):
+        """Кто платит: по ролям сторон, затем по графику, затем по способу."""
         self.ensure_one()
-        if self.way in PAYS_FIRST:
-            return self.party_a_id, self.party_b_id
-        return self.party_b_id, self.party_a_id
+        a, b = self.party_a_id, self.party_b_id
 
-    @api.depends('party_a_id', 'party_b_id', 'way', 'amount')
+        def role(text):
+            text = (text or '').strip().lower()
+            if any(text.startswith(r) for r in PAYER_ROLES):
+                return 'pays'
+            if any(text.startswith(r) for r in PAYEE_ROLES):
+                return 'gets'
+            return None
+
+        role_a, role_b = role(self.role_a), role(self.role_b)
+        if role_a == 'pays' or role_b == 'gets':
+            return a, b
+        if role_a == 'gets' or role_b == 'pays':
+            return b, a
+        line = self.payment_ids.filtered(lambda p: p.payer_id and p.payee_id)[:1]
+        if line and {line.payer_id, line.payee_id} == {a, b}:
+            return line.payer_id, line.payee_id
+        if self.way in PAYS_FIRST:
+            return a, b
+        return b, a
+
+    @api.depends('party_a_id', 'party_b_id', 'way', 'amount', 'role_a', 'role_b',
+                 'payment_ids.payer_id', 'payment_ids.payee_id')
     def _compute_coop_settlement_html(self):
         Method = self.env['coop.settlement.method'].sudo()
         labels = {'ok': 'Можно', 'warn': 'Можно, с оговоркой', 'deny': 'Нельзя',

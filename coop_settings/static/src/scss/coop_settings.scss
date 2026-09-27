@@ -37,6 +37,10 @@
 // оговоркой, нельзя; цвета — из переменных темы, тёмная приходит сама.
 .o_coop_settle {
   max-width: 860px;
+  // Вкладки формы наследуют `nowrap`, и длинное основание уходило за
+  // правый край карточки.
+  white-space: normal;
+  overflow-wrap: anywhere;
   h5 {
     font: 700 14px/1.3 Manrope, sans-serif;
     margin: 16px 0 6px;
