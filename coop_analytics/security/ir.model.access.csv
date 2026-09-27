@@ -1,2 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_coop_account_activity_user,Активность аккаунта — участник,model_coop_account_activity,base.group_user,1,0,0,0
+access_coop_analytics_plan_user,План на месяц — участник,model_coop_analytics_plan,base.group_user,1,0,0,0

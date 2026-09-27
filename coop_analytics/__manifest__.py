@@ -15,7 +15,8 @@
 графики, таблицы «топ-10», глобальные фильтры по периоду, городу, разделу.
 Файлы дашбордов собирает `tools/build_dashboards.py`.
 
-Следующие слои (решение 420): портфель участника, прогноз и план.
+Слой 3 — «Портфель участника» (решения 421, 422), слой 4 — «Прогноз и план»:
+свой тренд и план на месяц (решение 423).
 """,
     'author': 'ДАО КООПТЕХ',
     'website': 'https://daocooptech.ru',
@@ -41,6 +42,9 @@
             'coop_analytics/static/src/scss/portfolio.scss',
             'coop_analytics/static/src/js/portfolio.js',
             'coop_analytics/static/src/xml/portfolio.xml',
+            'coop_analytics/static/src/scss/forecast.scss',
+            'coop_analytics/static/src/js/forecast.js',
+            'coop_analytics/static/src/xml/forecast.xml',
         ],
         # Экран дашбордов грузится лениво, своим бандлом — вкладки над ним туда же.
         'spreadsheet.o_spreadsheet': [

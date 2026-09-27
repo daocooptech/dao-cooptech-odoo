@@ -4,4 +4,8 @@
        действие у модуля board помечены noupdate, а виджеты панели
        ссылаются на действия по числовому id (board_view.js, parseInt). -->
   <function model="board.board" name="_coop_default_board"/>
+
+  <!-- Планы главного участника витрины (решение 423) — один раз, если
+       планов у него ещё нет. -->
+  <function model="coop.forecast" name="_seed_main_plans"/>
 </odoo>

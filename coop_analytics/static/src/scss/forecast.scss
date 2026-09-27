@@ -1,0 +1,217 @@
+// «Прогноз и план» (решение 423), xml/forecast.xml. Цвета — из переменных
+// темы, чтобы тёмная тема приходила сама.
+.o_coop_fc {
+  --coop-fc-fact: var(--coop-slate-light, #9a9a93);
+  --coop-fc-done: var(--coop-teal, #146b64);
+  --coop-fc-miss: var(--coop-gold, #c8962c);
+  --coop-fc-bad: var(--coop-error, #c0392b);
+  --coop-fc-plan: var(--coop-ink, #14171a);
+  max-width: 1180px;
+  padding: 0 0 32px;
+  color: var(--coop-ink, #14171a);
+
+  .o_coop_board_tabs { margin-bottom: 12px; }
+  .o_coop_fc_loading { padding: 48px 0; color: var(--coop-slate-light, #8f8f88); }
+  .o_coop_fc_muted { color: var(--coop-slate-light, #8f8f88) !important; font-weight: 400 !important; }
+
+  .o_coop_fc_head {
+    margin-bottom: 14px;
+    h2 { font: 700 24px/1.2 Manrope, sans-serif; margin: 0 0 6px; }
+    p { margin: 0 0 10px; color: var(--coop-slate, #5f5f59); max-width: 760px; }
+  }
+  .o_coop_fc_who {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    > span { color: var(--coop-slate, #5f5f59); margin-right: 4px; }
+    button {
+      border: 1px solid var(--coop-line, #e6e6e1);
+      background: var(--coop-white, #fff);
+      color: var(--coop-ink, #14171a);
+      border-radius: 999px;
+      padding: 4px 12px;
+      &.active {
+        background: var(--coop-teal, #146b64);
+        border-color: var(--coop-teal, #146b64);
+        color: #fff;
+      }
+    }
+  }
+
+  .o_coop_fc_grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .o_coop_fc_card {
+    background: var(--coop-white, #fff);
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-radius: 12px;
+    padding: 14px 16px;
+    min-width: 0;
+    > header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      h3 { font: 700 16px/1.3 Manrope, sans-serif; margin: 0 0 2px; }
+      p { margin: 0; font-size: 12px; color: var(--coop-slate-light, #8f8f88); }
+    }
+    > footer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 16px;
+      font-size: 12px;
+      color: var(--coop-slate, #5f5f59);
+      margin-top: 6px;
+      b { color: var(--coop-ink, #14171a); font-variant-numeric: tabular-nums; }
+    }
+  }
+  .o_coop_fc_planbtn {
+    flex: none;
+    border: 1px solid var(--coop-line, #e6e6e1);
+    background: var(--coop-white, #fff);
+    color: var(--coop-teal-dark, #0f4f4a);
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+
+  .o_coop_fc_now {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin: 12px 0 8px;
+    > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    span { font-size: 11.5px; color: var(--coop-slate, #5f5f59); }
+    b {
+      font: 700 16px/1.25 Manrope, sans-serif;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+  .o_coop_fc_progress {
+    position: relative;
+    height: 22px;
+    border-radius: 6px;
+    background: var(--coop-surface, #f3f3ef);
+    overflow: hidden;
+    margin-bottom: 10px;
+    i { position: absolute; inset: 0 auto 0 0; background: var(--coop-fc-miss); opacity: .35; }
+    span {
+      position: relative;
+      display: block;
+      padding: 2px 8px;
+      font-size: 12px;
+      line-height: 18px;
+    }
+    &[data-status="good"] i { background: var(--coop-fc-done); }
+    &[data-status="bad"] i { background: var(--coop-fc-bad); }
+  }
+
+  .o_coop_fc_chart {
+    display: grid;
+    grid-template-columns: repeat(18, minmax(0, 1fr));
+    gap: 3px;
+    padding-top: 4px;
+  }
+  .o_coop_fc_col {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    > span {
+      font-size: 9.5px;
+      color: var(--coop-slate-light, #8f8f88);
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      margin-top: 3px;
+    }
+    &.o_coop_fc_cur > span { color: var(--coop-ink, #14171a); font-weight: 700; }
+  }
+  .o_coop_fc_bars {
+    position: relative;
+    height: 110px;
+    border-bottom: 1px solid var(--coop-line-strong, #c9c9c2);
+    i {
+      position: absolute;
+      bottom: 0;
+      left: 12%;
+      right: 12%;
+      border-radius: 2px 2px 0 0;
+    }
+  }
+  .o_coop_fc_b_fact { background: var(--coop-fc-fact); }
+  .o_coop_fc_done .o_coop_fc_b_fact { background: var(--coop-fc-done); }
+  .o_coop_fc_miss .o_coop_fc_b_fact { background: var(--coop-fc-miss); }
+  .o_coop_fc_cur .o_coop_fc_b_fact { background: var(--coop-teal-dark, #0f4f4a); left: 26%; right: 26%; }
+  .o_coop_fc_b_trend {
+    background: repeating-linear-gradient(135deg, var(--coop-fc-done) 0 3px, transparent 3px 6px);
+    box-shadow: inset 0 0 0 1px var(--coop-fc-done);
+    opacity: .75;
+  }
+  .o_coop_fc_plan {
+    position: absolute;
+    left: 2%;
+    right: 2%;
+    height: 0;
+    border-top: 2px dashed var(--coop-fc-plan);
+  }
+  .o_coop_fc_future { background: var(--coop-surface, #f3f3ef); border-radius: 4px; }
+
+  .o_coop_fc_edit {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 8px 12px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--coop-line, #e6e6e1);
+    label { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--coop-slate, #5f5f59); }
+    input, select {
+      min-width: 110px;
+      padding: 5px 8px;
+      border: 1px solid var(--coop-line-strong, #c9c9c2);
+      border-radius: 6px;
+      background: var(--coop-white, #fff);
+      color: var(--coop-ink, #14171a);
+    }
+  }
+  .o_coop_fc_editbtns { display: flex; gap: 6px; }
+
+  .o_coop_fc_legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 12px 0 0;
+    font-size: 12px;
+    color: var(--coop-slate, #5f5f59);
+    i { display: inline-block; width: 12px; height: 10px; border-radius: 2px; margin-left: 10px; }
+  }
+  .o_coop_fc_k_fact { background: var(--coop-fc-fact); }
+  .o_coop_fc_k_done { background: var(--coop-fc-done); }
+  .o_coop_fc_k_miss { background: var(--coop-fc-miss); }
+  .o_coop_fc_k_trend {
+    background: repeating-linear-gradient(135deg, var(--coop-fc-done) 0 3px, transparent 3px 6px);
+    box-shadow: inset 0 0 0 1px var(--coop-fc-done);
+  }
+  .o_coop_fc_k_plan { height: 0 !important; border-top: 2px dashed var(--coop-fc-plan); }
+}
+
+@media (max-width: 1199px) {
+  .o_coop_fc .o_coop_fc_grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 575px) {
+  .o_coop_fc {
+    .o_coop_fc_now { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .o_coop_fc_card > header { flex-direction: column; }
+    .o_coop_fc_col > span { font-size: 8px; }
+  }
+}

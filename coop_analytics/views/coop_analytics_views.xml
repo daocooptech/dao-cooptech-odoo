@@ -340,10 +340,19 @@
   </record>
   <menuitem id="menu_coop_analytics_portfolio" name="Портфель"
             parent="menu_coop_analytics_root" action="action_coop_portfolio" sequence="12"/>
+  <!-- «Прогноз и план» — слой 4 (решение 423), js/forecast.js. -->
+  <record id="action_coop_forecast" model="ir.actions.client">
+    <field name="name">Прогноз и план</field>
+    <field name="tag">coop_analytics.forecast</field>
+    <field name="path">analytics-forecast</field>
+    <field name="context">{'coop_section': 1}</field>
+  </record>
+  <menuitem id="menu_coop_analytics_forecast" name="Прогноз и план"
+            parent="menu_coop_analytics_root" action="action_coop_forecast" sequence="13"/>
   <menuitem id="menu_coop_analytics_account" name="Мой аккаунт"
-            parent="menu_coop_analytics_root" action="action_coop_an_account" sequence="13"/>
+            parent="menu_coop_analytics_root" action="action_coop_an_account" sequence="14"/>
   <menuitem id="menu_coop_analytics_activity" name="Активность"
-            parent="menu_coop_analytics_root" action="action_coop_an_activity" sequence="14"/>
+            parent="menu_coop_analytics_root" action="action_coop_an_activity" sequence="15"/>
   <menuitem id="menu_coop_analytics_money" name="Деньги"
             parent="menu_coop_analytics_root" action="action_coop_an_money" sequence="20"/>
   <menuitem id="menu_coop_analytics_deals" name="Сделки"
