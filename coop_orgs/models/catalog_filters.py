@@ -11,7 +11,7 @@ class ResPartner(models.Model):
     названию» (владелец 27.09.2026: «куда делись фильтры организаций?
     почини»). Набор — по макету `organizations.html`: отрасль с
     подкатегорией, тип (группа форм) с уточнением формы, город, уровень
-    доверия; плюс вид кооператива (решение 426) — виден всегда.
+    доверия; у кооперативных — ещё вид кооператива (решение 426).
     """
     _inherit = 'res.partner'
 
@@ -73,7 +73,8 @@ class ResPartner(models.Model):
 
         Group = self.env['coop.legal.form.group'].sudo()
         group_counts = counts('coop_legal_form_group_id',
-                              without('coop_legal_form_group_id', 'coop_legal_form_id'))
+                              without('coop_legal_form_group_id', 'coop_legal_form_id',
+                                      'coop_cooperative_kind'))
         blocks.append({
             'code': 'group', 'label': 'Тип',
             'hint': 'Коммерческие, кооперативные, некоммерческие, '
@@ -90,6 +91,24 @@ class ResPartner(models.Model):
         if group:
             group = Group.browse(int(group)).exists()
         if group:
+            # У кооперативных — сначала вид кооператива, затем форма
+            # (владелец 27.09.2026: «при выборе тип кооперативная
+            # организация появляются еще два поля вид кооператива и форма»).
+            # У остальных типов — только форма.
+            if group.code == 'cooperative':
+                kind_counts = counts('coop_cooperative_kind',
+                                     without('coop_cooperative_kind'))
+                kinds = self._fields['coop_cooperative_kind'].selection
+                blocks.append({
+                    'code': 'coop_kind', 'label': 'Вид кооператива',
+                    'hint': 'От вида зависят правила: союзы и лимит выплат, '
+                            'ревизионный союз, СРО, трудовое участие.',
+                    'widget': 'select', 'field': 'coop_cooperative_kind',
+                    'operator': '=', 'placeholder': 'Любой', 'counted': True,
+                    'options': [{'value': code, 'label': label,
+                                 'count': kind_counts.get(code, 0)}
+                                for code, label in kinds],
+                })
             form_counts = counts('coop_legal_form_id', without('coop_legal_form_id'))
             forms = self.env['coop.legal.form'].sudo().search(
                 [('group_id', '=', group.id)])
@@ -101,22 +120,6 @@ class ResPartner(models.Model):
                              'count': form_counts.get(f.id, 0)}
                             for f in forms if form_counts.get(f.id)],
             })
-
-        # Вид кооператива — всегда, а не только после выбора типа
-        # «Кооперативные» (владелец 27.09.2026): вид сам и есть отбор
-        # кооперативов, и прятать его за вторым шагом незачем.
-        kind_counts = counts('coop_cooperative_kind', without('coop_cooperative_kind'))
-        kinds = self._fields['coop_cooperative_kind'].selection
-        blocks.append({
-            'code': 'coop_kind', 'label': 'Вид кооператива',
-            'hint': 'От вида зависят правила: союзы и лимит выплат, '
-                    'ревизионный союз, СРО, трудовое участие.',
-            'widget': 'select', 'field': 'coop_cooperative_kind',
-            'operator': '=', 'placeholder': 'Любой', 'counted': True,
-            'options': [{'value': code, 'label': label,
-                         'count': kind_counts.get(code, 0)}
-                        for code, label in kinds],
-        })
 
         cities = sorted(c for c in counts('city', base) if c)
         blocks.append({
