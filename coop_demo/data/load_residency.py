@@ -14,13 +14,27 @@
 - иностранец с видом на жительство, живущий в России: резидент в обоих;
 - житель недружественного государства — режим спецсчетов и разрешений.
 
+Организации не переселяются. Первая версия (4327bfa) отправила пять
+российских компаний в Алматы, Минск, Гуанчжоу и Дубай — «КФХ „Медовый
+край“, Дубай» неправдоподобно (владелец 27.09.2026 о таком варианте:
+«выглядит неправдоподобно»). Хуже того, каталог организаций ищет запись по
+названию и городу, и с чужим городом следующий прогон завёл бы дубль.
+Теперь такие организации возвращаются в свой город. Иностранные участники-
+организации — по заключению юриста о кооперативном участке за рубежом.
+
 Кому что — по номеру записи, чтобы повторный прогон не переставлял людей
 по странам. Главного участника витрины не трогаем: его страница — образец
 «обычного» случая.
 """
+import io
+import json
 import logging
+import os
+
+from .load_org_profiles import SAMPLES
 
 _logger = logging.getLogger(__name__)
+HERE = os.path.dirname(__file__)
 
 # Страна → город. Город меняется вместе со страной: «Владивосток,
 # Армения» в карточке читалось бы как ошибка.
@@ -29,7 +43,6 @@ ABROAD = [('AM', 'Ереван'), ('GE', 'Тбилиси'), ('KZ', 'Алматы
 FOREIGN = [('CN', 'Шанхай'), ('IN', 'Бангалор'), ('BY', 'Минск'), ('UZ', 'Ташкент'),
            ('KZ', 'Астана'), ('VN', 'Хошимин')]
 UNFRIENDLY = [('DE', 'Берлин'), ('US', 'Нью-Йорк'), ('FI', 'Хельсинки'), ('LV', 'Рига')]
-FOREIGN_ORGS = [('CN', 'Гуанчжоу'), ('BY', 'Минск'), ('KZ', 'Алматы'), ('AE', 'Дубай')]
 
 MAIN_LOGIN = 'dashkevich'
 
@@ -44,7 +57,7 @@ def load_residency(env):
     main = env['res.users'].sudo().search([('login', '=', MAIN_LOGIN)], limit=1).partner_id
 
     counts = {'abroad': 0, 'foreign': 0, 'permit': 0, 'unfriendly': 0,
-              'foreign_org': 0, 'resident': 0}
+              'org_home': 0, 'resident': 0}
 
     def put(partner, fx, tax, code=None, city=None, key='resident'):
         country = countries.get(code) if code else russia
@@ -85,14 +98,14 @@ def load_residency(env):
             # тем, у кого она пуста, — в карточке «Страна» не пустует.
             put(partner, True, True)
 
-    # Иностранные организации — только коммерческие: кооператив и НКО в
-    # демо — российские юрлица.
-    orgs = Partner.search([('coop_is_participant', '=', True), ('is_company', '=', True),
-                           ('coop_legal_form_group_id.code', '=', 'commercial')], order='id')
-    for partner in orgs:
-        if partner.id % 11 == 0:
-            code, city = FOREIGN_ORGS[partner.id % len(FOREIGN_ORGS)]
-            put(partner, False, False, code, city, 'foreign_org')
+    # Организации — российские, в своём городе (см. выше).
+    home = _org_home_cities()
+    moved = Partner.search([('coop_is_participant', '=', True), ('is_company', '=', True),
+                            '|', ('coop_fx_resident', '=', False),
+                            ('country_id.code', '!=', 'RU')])
+    for partner in moved:
+        put(partner, True, True, city=home.get(partner.name), key='org_home')
+
     # Контрагенты главного участника: по номеру записи ни один из них в
     # разброс не попал, и под его входом вкладка «Как рассчитаться» во всех
     # сделках была одинаковой. Троим — по случаю: живёт за границей,
@@ -103,8 +116,8 @@ def load_residency(env):
         others = []
         for deal in deals:
             other = deal.party_b_id if deal.party_a_id == main else deal.party_a_id
-            eligible = other and (not other.is_company
-                                  or other.coop_legal_form_group_id.code == 'commercial')
+            # Только частные лица: организации не переселяем.
+            eligible = other and not other.is_company
             if eligible and other != main and other not in others:
                 others.append(other)
         cases = [(True, False, 'AM', 'Ереван', 'abroad'),
@@ -118,3 +131,16 @@ def load_residency(env):
                                    ('country_id', '=', False)]):
         put(partner, True, True)
     _logger.info('Резидентство участников: %s', counts)
+
+
+def _org_home_cities():
+    """Город организации по исходным данным: каталог и образцы профилей."""
+    cities = {}
+    with io.open(os.path.join(HERE, 'organizations.json'), encoding='utf-8') as fh:
+        for org in json.load(fh):
+            if org.get('city'):
+                cities[org['name']] = org['city']
+    for rows in SAMPLES.values():
+        for row in rows:
+            cities.setdefault(row[0], row[1])
+    return cities

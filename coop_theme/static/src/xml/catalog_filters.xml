@@ -18,19 +18,6 @@
                   t-on-click="() => this.toggleOpen()">×</button>
         </div>
 
-        <!-- Порядок — первым: он определяет, что человек увидит на
-             первой странице, ещё до всякого отбора. -->
-        <div class="o_coop_field">
-          <label for="coop_sort">Сортировка</label>
-          <select id="coop_sort" class="o_coop_input" t-on-change="onSortChange">
-            <option t-foreach="sortOptions" t-as="option" t-key="option[0]"
-                    t-att-value="option[0]"
-                    t-att-selected="option[0] === currentSort">
-              <t t-esc="option[1]"/>
-            </option>
-          </select>
-        </div>
-
         <!--
           Раздел, у которого набор полей ещё не описан, показывает не
           пустую карточку с заголовком «Фильтр», а прямую строку о том,
@@ -193,6 +180,20 @@
             </div>
           </div>
         </t>
+
+        <!-- Порядок — последним, перед «Сбросить» (владелец 27.09.2026:
+             «сортировка во всех фильтрах последним пунктом перед кнопкой
+             сбросить»): сначала отбирают, потом упорядочивают. -->
+        <div class="o_coop_field">
+          <label for="coop_sort">Сортировка</label>
+          <select id="coop_sort" class="o_coop_input" t-on-change="onSortChange">
+            <option t-foreach="sortOptions" t-as="option" t-key="option[0]"
+                    t-att-value="option[0]"
+                    t-att-selected="option[0] === currentSort">
+              <t t-esc="option[1]"/>
+            </option>
+          </select>
+        </div>
 
         <button type="button" class="o_coop_btn o_coop_btn_light"
                 t-on-click="() => this.reset()">Сбросить</button>
