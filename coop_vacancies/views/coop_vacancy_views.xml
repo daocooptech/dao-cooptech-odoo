@@ -106,7 +106,8 @@
         <field name="employment"/>
         <field name="experience_level" string="Опыт"/>
         <field name="reward_kind" string="Вознаграждение"/>
-        <field name="labour_pay" optional="show"/>
+        <field name="contract_kind" optional="show"/>
+        <field name="pay_method" optional="hide"/>
         <!-- Числа, а не строка: по вычисляемому виду сортировка идёт по
              алфавиту, и «120 000» встаёт выше «60 000». -->
         <field name="pay_from" string="Оплата от" optional="show"/>
@@ -181,17 +182,21 @@
               <field name="contribution_value" invisible="reward_kind != 'share'" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="share_percent" readonly="1" invisible="reward_kind != 'share'"/>
               <field name="reward_note" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/>
-              <!-- Форма вознаграждения — от того, кто ищет (решения 416,
-                   424): кооператив выбирает — зачисление в пай или рубли
-                   по трудовому договору, ДАО платит токенами, остальные —
-                   рублями. -->
-              <field name="labour_pay_choice" invisible="1"/>
-              <field name="labour_pay" widget="coop_inline"
-                     readonly="not coop_can_edit or not labour_pay_choice"
-                     invisible="reward_kind in ('barter', 'volunteer')"/>
-              <field name="labour_pay_note" readonly="1" nolabel="1" colspan="2"
+              <!-- Договор и способ выплаты (решение 425, по заключению
+                   юриста): выбирает работодатель, соискатель видит до
+                   отклика. Что допустимо — от того, кто ищет: трудовое
+                   участие только у артели, «в пай по желанию» только у
+                   кооператива по подряду, ДАО — токенами по подряду. -->
+              <field name="employer_kind" invisible="1"/>
+              <field name="contract_kind" widget="coop_inline" options="{'wrap': True}"
+                     readonly="not coop_can_edit or employer_kind == 'dao'"
+                     invisible="not contract_kind"/>
+              <field name="pay_method" widget="coop_inline" options="{'wrap': True}"
+                     readonly="not coop_can_edit or employer_kind in ('dao', 'other') or contract_kind != 'civil'"
+                     invisible="not contract_kind"/>
+              <field name="pay_explain" readonly="1" nolabel="1" colspan="2"
                      class="text-muted"
-                     invisible="not labour_pay_note or reward_kind in ('barter', 'volunteer')"/>
+                     invisible="not pay_explain"/>
               <field name="reward_display" readonly="1" string="В каталоге"/>
               <field name="is_mine" invisible="1"/>
               <field name="my_application_state" invisible="1"/>
@@ -249,12 +254,17 @@
         <filter name="volunteer" string="Волонтёрство"
                 domain="[('reward_kind', '=', 'volunteer')]"/>
         <separator/>
-        <filter name="pay_rub" string="Платят рублями"
-                domain="[('labour_pay', '=', 'rub')]"/>
-        <filter name="pay_share" string="Зачисляют в пай"
-                domain="[('labour_pay', '=', 'share')]"/>
+        <filter name="contract_labour" string="Трудовой договор"
+                domain="[('contract_kind', '=', 'labour')]"/>
+        <filter name="contract_civil" string="Договор подряда"
+                domain="[('contract_kind', '=', 'civil')]"/>
+        <filter name="contract_artel" string="Трудовое участие в артели"
+                domain="[('contract_kind', '=', 'artel')]"/>
+        <separator/>
+        <filter name="pay_rub_share" string="Можно внести в пай"
+                domain="[('pay_method', '=', 'rub_share')]"/>
         <filter name="pay_tokens" string="Платят токенами"
-                domain="[('labour_pay', '=', 'tokens')]"/>
+                domain="[('pay_method', '=', 'tokens')]"/>
         <separator/>
         <filter name="full" string="Полная занятость"
                 domain="[('employment', '=', 'full')]"/>
@@ -268,8 +278,10 @@
         <group>
           <filter name="by_reward" string="По виду вознаграждения"
                   context="{'group_by': 'reward_kind'}"/>
-          <filter name="by_labour_pay" string="Чем платят"
-                  context="{'group_by': 'labour_pay'}"/>
+          <filter name="by_contract" string="По договору"
+                  context="{'group_by': 'contract_kind'}"/>
+          <filter name="by_pay_method" string="Как выплачивается"
+                  context="{'group_by': 'pay_method'}"/>
           <filter name="by_employment" string="По занятости"
                   context="{'group_by': 'employment'}"/>
           <filter name="by_area" string="По сфере деятельности"

@@ -192,12 +192,6 @@ def load_vacancies(env, extra=45):
             'import_key': 'vacancies.json#%s' % index,
         }
 
-        # Кооператив платит и в пай, и рублями по трудовому договору
-        # (решение 424): каждая третья его денежная вакансия — рублями,
-        # чтобы в каталоге были видны обе формы.
-        if owner.coop_legal_form_id.is_cooperative:
-            values['labour_pay'] = 'rub' if index % 3 == 1 else 'share'
-
         if reward_kind == 'share':
             # Процент из макета — это результат, а не ввод: восстанавливаем
             # из него денежную оценку вклада, и дальше процент считается
@@ -233,6 +227,44 @@ def load_vacancies(env, extra=45):
 
     _logger.info('Каталог вакансий: %s записей, создано %s, обновлено %s',
                  len(rows), created, updated)
+
+
+def spread_contracts(env):
+    """Договор и способ выплаты у вакансий кооперативов — с разбросом.
+
+    Решение 425: в каталоге должны быть видны все сочетания. Постоянная
+    работа — трудовой договор, проектная — подряд; у артели большая часть
+    постоянных мест — трудовое участие членов, у производственного и
+    сельхозпроизводственного кооператива — каждое третье; по подряду у
+    кооператива половина — «остаток в пай по желанию пайщика». ДАО — токены
+    по подряду, это выставляет сам расчёт. Проходит по всем вакансиям, а не
+    только по каталогу-источнику: часть их заводят другие загрузчики.
+    Пишет без отслеживания — иначе у каждой вакансии в ленте осталась бы
+    смена договора от бота.
+    """
+    Vacancy = env['coop.vacancy'].sudo().with_context(tracking_disable=True)
+    counts = {}
+    for vacancy in Vacancy.search([], order='id'):
+        kind = vacancy.partner_id._coop_employer_kind() if vacancy.partner_id else 'other'
+        if kind not in ('coop', 'production') or not vacancy.contract_kind:
+            continue
+        seed = vacancy.id
+        form = vacancy.partner_id.coop_legal_form_id.code
+        steady = vacancy.employment in ('full', 'part')
+        if kind == 'production' and steady and (
+                (form == 'artel' and seed % 4) or seed % 3 == 0):
+            values = {'contract_kind': 'artel', 'pay_method': 'artel'}
+        elif not steady or seed % 7 == 3:
+            values = {'contract_kind': 'civil',
+                      'pay_method': 'rub_share' if seed % 2 else 'rub'}
+        else:
+            values = {'contract_kind': 'labour', 'pay_method': 'rub'}
+        if (vacancy.contract_kind, vacancy.pay_method) != (
+                values['contract_kind'], values['pay_method']):
+            vacancy.write(values)
+        key = values['pay_method']
+        counts[key] = counts.get(key, 0) + 1
+    _logger.info('Вакансии кооперативов по способу выплаты: %s', counts)
 
 
 def _state_for(index):
