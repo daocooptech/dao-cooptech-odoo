@@ -10,6 +10,7 @@
 """
 import logging
 import random
+from datetime import timedelta
 
 from odoo import fields
 
@@ -438,3 +439,205 @@ def _propose_clearing(env, rnd):
             'signed': offset < len(participants) - 1,
             'signed_on': fields.Date.context_today(clearing) if offset < len(participants) - 1 else False,
         })
+
+
+# ── История кошелька главного участника витрины ─────────────────────────
+#
+# Владелец 27.09.2026: «историю операций сделай 200». У главного участника
+# было 11 движений за три года, и дашборд «Мои деньги» на нём выглядел
+# пустым: три столбца за год и таблица на четыре строки. Здесь история
+# доводится до двухсот: пополнения и выводы своими способами оплаты,
+# расчёты по его настоящим сделкам, переводы участникам и от них, редкие
+# корректировки — с разбросом по месяцам, суммам и состояниям.
+
+# Кто в сделке получает деньги, а кто платит — по роли участника.
+ROLE_RECEIVES = {'продавец', 'исполнитель', 'владелец склада', 'кредитор', 'передаёт'}
+ROLE_PAYS = {'покупатель', 'арендатор', 'размещающий', 'заказчик', 'заёмщик', 'получает'}
+
+CORRECTIONS = [
+    ('Возврат комиссии банка за перевод', 1),
+    ('Корректировка: двойное списание по карте', 1),
+    ('Удержана комиссия за срочный вывод', -1),
+    ('Возврат ошибочного зачисления', -1),
+]
+
+HISTORY_KINDS = (['topup'] * 27 + ['withdraw'] * 24 + ['transfer_out'] * 22
+                 + ['transfer_in'] * 22 + ['correction'] * 3)
+
+
+def _method_from(method):
+    """«с карты МИР •• 4412», «через СБП: +7-…», «с расчётного счёта •• 7741»."""
+    short = method.label.split('(')[0].strip()
+    if method.kind == 'sbp':
+        return 'через ' + short
+    if method.kind == 'account':
+        return 'с расчётного счёта ' + short.replace('Расчётный счёт', '').strip()
+    return 'с карты ' + short.replace('Карта', '').strip()
+
+
+def _method_to(method):
+    short = method.label.split('(')[0].strip()
+    if method.kind == 'sbp':
+        return 'по ' + short
+    if method.kind == 'account':
+        return 'на расчётный счёт ' + short.replace('Расчётный счёт', '').strip()
+    return 'на карту ' + short.replace('Карта', '').strip()
+
+
+def fill_main_history(env, login='dashkevich', target=200):
+    """Довести историю кошелька главного участника до `target` движений.
+
+    Прогон один: набралось — выходит. Остаток ведётся по ходу времени и в
+    минус не уходит: расход, на который денег нет, становится меньше или
+    превращается в пополнение, а перед старым крупным списанием, которое
+    уже было в истории, ставится пополнение.
+    """
+    user = env['res.users'].sudo().search([('login', '=', login)], limit=1)
+    if not user:
+        return 0
+    partner = user.partner_id
+    # Без записей в ленте: двести движений завели бы двести сообщений.
+    Movement = env['coop.wallet.movement'].sudo().with_context(
+        tracking_disable=True, mail_create_nolog=True, mail_notrack=True)
+    wallet = env['coop.wallet'].sudo().wallet_for(partner)
+    have = Movement.search_count([('wallet_id', '=', wallet.id)])
+    if have >= target:
+        return 0
+    if not wallet.method_ids:
+        _fill_methods(env, wallet, 0)
+    methods = wallet.method_ids
+    default = methods.filtered('is_default')[:1] or methods[:1]
+
+    rnd = random.Random('main-history:%s' % partner.id)
+    today = fields.Date.context_today(wallet)
+    start = fields.Date.to_date('2024-01-08')
+    span = (today - start).days
+
+    deals = env['coop.deal'].sudo().search([
+        '|', ('party_a_id', '=', partner.id), ('party_b_id', '=', partner.id),
+        ('amount', '>', 0), ('state', 'not in', ('draft', 'cancelled'))])
+    people = env['res.partner'].sudo().search([
+        ('coop_is_participant', '=', True), ('is_company', '=', False),
+        ('id', '!=', partner.id)], order='id', limit=80)
+
+    # (дата, вид, сумма со знаком, название, способ, контрагент, сделка)
+    plan = []
+
+    # Расчёты по настоящим сделкам — частями, от даты сделки.
+    for deal in deals:
+        mine_a = deal.party_a_id == partner
+        role = ((deal.role_a if mine_a else deal.role_b) or '').strip().lower()
+        other = deal.party_b_id if mine_a else deal.party_a_id
+        if role in ROLE_RECEIVES:
+            sign = 1
+        elif role in ROLE_PAYS:
+            sign = -1
+        else:
+            sign = 1 if deal.id % 2 else -1
+        parts = 1 if deal.amount < 20000 else rnd.choice([2, 2, 3])
+        paid = deal.amount if deal.state == 'done' else deal.amount * rnd.choice([0.3, 0.5])
+        begin = deal.signed_on or today
+        for step in range(parts):
+            when = begin + timedelta(days=3 + step * rnd.randint(12, 30))
+            if when > today:
+                # Срок этой части ещё не пришёл — она не проведена.
+                break
+            title = ('Поступление по сделке %s — %s' if sign > 0
+                     else 'Оплата по сделке %s — %s') % (deal.number, other.name)
+            plan.append((when, 'deal', sign * round(paid / parts), title, False, other, deal))
+
+    # Остальное — пополнения, выводы, переводы, корректировки. Ближе к
+    # сегодняшнему дню гуще: платформой пользуются всё больше.
+    for n in range(max(0, target - have - len(plan))):
+        when = start + timedelta(days=int(span * (rnd.random() ** 0.6)))
+        kind = rnd.choice(HISTORY_KINDS)
+        method = methods[n % len(methods)]
+        if kind == 'topup':
+            amount = rnd.choice([3000, 5000, 10000, 15000, 20000, 30000, 50000]) + rnd.randint(0, 9) * 100
+            plan.append((when, 'topup', amount, 'Пополнение ' + _method_from(method), method, False, False))
+        elif kind == 'withdraw':
+            plan.append((when, 'withdraw', -rnd.randint(20, 400) * 100,
+                         'Вывод ' + _method_to(method), method, False, False))
+        elif kind in ('transfer_out', 'transfer_in'):
+            who = people[rnd.randrange(len(people))]
+            amount = rnd.choice([500, 800, 1200, 1500, 2500, 3000, 5000, 7500, 12000])
+            if kind == 'transfer_out':
+                plan.append((when, 'transfer', -amount, 'Перевод участнику — ' + who.name, False, who, False))
+            else:
+                plan.append((when, 'transfer', amount, 'Перевод от участника — ' + who.name, False, who, False))
+        else:
+            title, sign = CORRECTIONS[n % len(CORRECTIONS)]
+            plan.append((when, 'correction', sign * rnd.randint(1, 30) * 50, title, False, False, False))
+    plan.sort(key=lambda row: row[0])
+
+    old = [(m.date, m.amount) for m in Movement.search(
+        [('wallet_id', '=', wallet.id), ('state', '=', 'confirmed')], order='date, id')]
+    floor, balance, oi, created = 2000.0, 0.0, 0, 0
+
+    def topup(when, amount):
+        Movement.create({
+            'wallet_id': wallet.id, 'date': when, 'kind': 'topup', 'method_id': default.id,
+            'name': 'Пополнение ' + _method_from(default), 'amount': amount, 'state': 'confirmed'})
+
+    for when, kind, value, title, method, other, deal in plan:
+        # Сначала — то, что уже было в истории к этой дате.
+        while oi < len(old) and old[oi][0] <= when:
+            odate, oamount = old[oi]
+            if balance + oamount < floor and have + created < target:
+                need = floor - (balance + oamount) + rnd.randint(5, 40) * 1000
+                topup(odate - timedelta(days=rnd.randint(1, 4)), need)
+                balance += need
+                created += 1
+            balance += oamount
+            oi += 1
+        if have + created >= target:
+            break
+        # Деньги на кошельке не копятся без конца: при большом остатке
+        # выводят крупнее и пополняют реже (первый прогон на копии дал
+        # к концу 715 тысяч против нынешних 117).
+        if have + created == target - 1:
+            # Последняя — сегодняшний вывод, ещё в работе: состояние «деньги
+            # в пути» должно быть видно, а жребий его может и не дать.
+            when, kind, method, other, deal = today, 'withdraw', default, False, False
+            value = -max(1000, round(min(15000, balance * 0.2) / 100) * 100)
+            title = 'Вывод ' + _method_to(default)
+        elif kind == 'withdraw' and balance > 150000:
+            value = -round(balance * rnd.uniform(0.25, 0.55) / 100) * 100
+        elif kind == 'topup' and balance > 250000:
+            value = max(1000, round(value * 0.3 / 100) * 100)
+        if value < 0 and balance + value < floor:
+            if balance - floor < 1000:
+                # Денег нет — расхода не было, было пополнение.
+                if kind != 'deal':
+                    kind, method, other = 'topup', method or default, False
+                    title = 'Пополнение ' + _method_from(method)
+                value = abs(value)
+            else:
+                value = -max(500, round((balance - floor) * rnd.uniform(0.4, 0.9) / 100) * 100)
+        # Состояния: свежие выводы и пополнения ещё в работе, часть выводов
+        # банк отклонил, часть переводов участник отменил сам.
+        age = (today - when).days
+        state = 'confirmed'
+        if kind in ('withdraw', 'topup') and age < 8:
+            state = 'pending'
+        elif kind == 'withdraw' and created % 17 == 5:
+            state = 'failed'
+        elif kind == 'transfer' and value < 0 and created % 23 == 11:
+            state = 'cancelled'
+        Movement.create({
+            'wallet_id': wallet.id,
+            'date': when,
+            'name': title,
+            'kind': kind,
+            'method_id': method.id if (method and kind in ('topup', 'withdraw')) else False,
+            'counterparty_id': other.id if other else False,
+            'deal_id': deal.id if deal else False,
+            'amount': value,
+            'state': state,
+        })
+        if state == 'confirmed':
+            balance += value
+        created += 1
+    _logger.info('Кошелёк главного участника %s: добавлено движений %s, остаток %.0f',
+                 login, created, balance)
+    return created
