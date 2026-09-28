@@ -17,4 +17,18 @@
     <field name="active" eval="True"/>
   </record>
 
+  <!-- Чтение журналов соседей. Раз в две минуты: сделки и каталог
+       терпят такую задержку, а поток заданий на боевой один — частый
+       опрос отнимал бы его у просрочек, аукционов и остального. Упавший
+       сосед отодвигается с растущим интервалом (до часа). -->
+  <record id="cron_coop_fed_pull" model="ir.cron">
+    <field name="name">Федерация: чтение журналов соседей</field>
+    <field name="model_id" ref="model_coop_fed_peer"/>
+    <field name="state">code</field>
+    <field name="code">model._cron_pull()</field>
+    <field name="interval_number">2</field>
+    <field name="interval_type">minutes</field>
+    <field name="active" eval="True"/>
+  </record>
+
 </odoo>

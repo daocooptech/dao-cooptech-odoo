@@ -115,6 +115,76 @@
     </field>
   </record>
 
+  <record id="view_coop_fed_peer_list" model="ir.ui.view">
+    <field name="name">coop.fed.peer.list</field>
+    <field name="model">coop.fed.peer</field>
+    <field name="arch" type="xml">
+      <list string="Соседи">
+        <field name="name"/>
+        <field name="did"/>
+        <field name="country_id" optional="show"/>
+        <field name="cursor_seq"/>
+        <field name="last_pull_at"/>
+        <field name="state"/>
+        <field name="last_error" optional="show"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_fed_peer_form" model="ir.ui.view">
+    <field name="name">coop.fed.peer.form</field>
+    <field name="model">coop.fed.peer</field>
+    <field name="arch" type="xml">
+      <form string="Сосед по сети">
+        <header>
+          <button name="action_pull" type="object" string="Прочитать журнал сейчас"
+                  class="btn-primary" invisible="state != 'active'"/>
+          <button name="action_fetch_did" type="object" string="Обновить ключи"
+                  class="btn-secondary"/>
+          <field name="state" widget="statusbar" options="{'clickable': '1'}"/>
+        </header>
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Появится из объявления узла"/></h1>
+          </div>
+          <group>
+            <group string="Адрес">
+              <field name="did" placeholder="did:web:coop.example.ru"/>
+              <field name="base_url" placeholder="http://217.15.207.46"/>
+              <field name="country_id"/>
+            </group>
+            <group string="Чтение">
+              <field name="cursor_seq"/>
+              <field name="event_count"/>
+              <field name="last_pull_at"/>
+              <field name="did_fetched_at"/>
+              <field name="fail_count" invisible="not fail_count"/>
+              <field name="next_try_at" invisible="not next_try_at"/>
+              <field name="last_error" invisible="not last_error"/>
+            </group>
+          </group>
+          <notebook>
+            <page string="Расхождения" name="divergences" invisible="not divergence_ids">
+              <field name="divergence_ids">
+                <list create="false" delete="false">
+                  <field name="create_date"/>
+                  <field name="kind"/>
+                  <field name="seq"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_coop_fed_peer" model="ir.actions.act_window">
+    <field name="name">Соседи</field>
+    <field name="res_model">coop.fed.peer</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
   <record id="action_coop_fed_identity" model="ir.actions.act_window">
     <field name="name">Узел сети</field>
     <field name="res_model">coop.fed.identity</field>
@@ -133,5 +203,7 @@
             action="action_coop_fed_identity" sequence="10"/>
   <menuitem id="menu_coop_fed_event" name="Журнал узла" parent="menu_coop_fed_root"
             action="action_coop_fed_event" sequence="20"/>
+  <menuitem id="menu_coop_fed_peer" name="Соседи" parent="menu_coop_fed_root"
+            action="action_coop_fed_peer" sequence="15"/>
 
 </odoo>
