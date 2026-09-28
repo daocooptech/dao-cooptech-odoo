@@ -5,20 +5,23 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
 /**
- * Фарминг на DEX бирже (владелец 26.09.2026): пулы ликвидности под
- * настоящие проекты платформы. Модель — models/coop_crypto_farm.py.
+ * Пулы проектов (решения 434–436, 28.09.2026) — бывший «Фарминг». Модель —
+ * models/coop_crypto_farm.py.
  *
- * Сверху — сводка (в пулах, открытых пулов, участников, выплачено, мои
- * вложения и доход к получению); ниже — мои позиции с «забрать доход» и
- * «вывести»; дальше — пулы плитками с фильтрами по состоянию и монете и
- * сортировкой. Взнос — в раскрывающейся форме на плитке.
+ * Два вида вкладками: в монете и в рублях (ЦФА, учебный выпуск). Сводка —
+ * числа пулов и людей, без рублей. «Мои пулы как инициатора» — записать
+ * выплату из выручки; «Мои взносы» — получено, ждёт подтверждения
+ * («получил» / «спор»), потолок. Пулы плитками: доля выручки и потолок,
+ * ход сбора или выплат, просрочка. «Доходности» нет ни в плитке, ни в
+ * сортировке.
  */
 
 const SORTS = [
-    { key: "apr", label: "Доходность" },
-    { key: "tvl", label: "Объём пула" },
-    { key: "deadline", label: "Скоро закрытие" },
+    { key: "new", label: "Новые" },
+    { key: "deadline", label: "Скоро закрытие сбора" },
     { key: "progress", label: "Почти собран" },
+    { key: "paid", label: "Больше выплачено" },
+    { key: "size", label: "Размер сбора" },
 ];
 
 export class CoopDexFarm extends Component {
@@ -32,12 +35,16 @@ export class CoopDexFarm extends Component {
         this.sorts = SORTS;
         this.state = useState({
             data: null,
+            kind: "coin",
             filter: "raising",
             coin: "",
-            sort: "apr",
+            sort: "new",
             query: "",
             open: null,
             amount: 0,
+            pay: null,
+            revenue: 0,
+            tx: "",
             busy: false,
             showAll: false,
         });
@@ -50,25 +57,39 @@ export class CoopDexFarm extends Component {
 
     // ── Отбор ───────────────────────────────────────────────────────
 
+    get ofKind() {
+        return ((this.state.data && this.state.data.pools) || []).filter((p) => p.kind === this.state.kind);
+    }
+
+    get totals() {
+        return (this.state.data && this.state.data.totals[this.state.kind]) || {};
+    }
+
     get coins() {
-        const seen = new Set();
-        for (const p of (this.state.data && this.state.data.pools) || []) {
-            seen.add(p.coin);
+        return [...new Set(this.ofKind.map((p) => p.coin))].sort();
+    }
+
+    kindCount(kind) {
+        return ((this.state.data && this.state.data.pools) || []).filter((p) => p.kind === kind).length;
+    }
+
+    match(p, filter) {
+        if (filter === "all") {
+            return true;
         }
-        return [...seen].sort();
+        if (filter === "overdue") {
+            return p.overdue > 0;
+        }
+        return p.state === filter;
     }
 
     count(filter) {
-        const pools = (this.state.data && this.state.data.pools) || [];
-        return filter === "all" ? pools.length : pools.filter((p) => p.state === filter).length;
+        return this.ofKind.filter((p) => this.match(p, filter)).length;
     }
 
     get pools() {
-        let rows = (this.state.data && this.state.data.pools) || [];
-        if (this.state.filter !== "all") {
-            rows = rows.filter((p) => p.state === this.state.filter);
-        }
-        if (this.state.coin) {
+        let rows = this.ofKind.filter((p) => this.match(p, this.state.filter));
+        if (this.state.coin && this.state.kind === "coin") {
             rows = rows.filter((p) => p.coin === this.state.coin);
         }
         const q = this.state.query.trim().toLowerCase();
@@ -76,10 +97,11 @@ export class CoopDexFarm extends Component {
             rows = rows.filter((p) => `${p.project} ${p.city} ${p.purpose} ${p.initiator}`.toLowerCase().includes(q));
         }
         const by = {
-            apr: (a, b) => b.apr - a.apr,
-            tvl: (a, b) => b.tvl_rub - a.tvl_rub,
+            new: (a, b) => b.id - a.id,
             deadline: (a, b) => (a.days_left ?? 9999) - (b.days_left ?? 9999),
             progress: (a, b) => b.progress - a.progress,
+            paid: (a, b) => b.paid_pct - a.paid_pct,
+            size: (a, b) => b.target * b.price_rub - a.target * a.price_rub,
         }[this.state.sort];
         return [...rows].sort(by);
     }
@@ -88,6 +110,20 @@ export class CoopDexFarm extends Component {
         return this.state.showAll ? this.pools : this.pools.slice(0, 24);
     }
 
+    get myPools() {
+        return this.ofKind.filter(
+            (p) => p.is_initiator && ["active", "default", "raising"].includes(p.state));
+    }
+
+    get myStakes() {
+        return ((this.state.data && this.state.data.mine) || []).filter((m) => m.kind === this.state.kind);
+    }
+
+    setKind(kind) {
+        this.state.kind = kind;
+        this.state.coin = "";
+        this.state.showAll = false;
+    }
     setFilter(f) {
         this.state.filter = f;
         this.state.showAll = false;
@@ -121,8 +157,8 @@ export class CoopDexFarm extends Component {
         this.state.amount = Number(Math.max(pool.target - pool.tvl, 0).toFixed(8));
     }
 
-    yearIncome(pool) {
-        return (this.state.amount || 0) * pool.apr / 100;
+    capFor(pool) {
+        return (this.state.amount || 0) * (pool.cap_multiple || 1);
     }
 
     async stake(pool) {
@@ -130,7 +166,7 @@ export class CoopDexFarm extends Component {
         try {
             await this.orm.call("coop.farm.pool", "farm_stake", [pool.id, this.state.amount]);
             this.notification.add(
-                `Внесено ${this.qty(this.state.amount)} ${pool.coin} в пул «${pool.project}». Доход начисляется с сегодняшнего дня.`,
+                `Внесено ${this.qty(this.state.amount)} ${pool.coin} в пул «${pool.project}». Выплаты начнутся, когда пул соберётся.`,
                 { type: "success" });
             this.state.open = null;
             await this.load();
@@ -141,28 +177,74 @@ export class CoopDexFarm extends Component {
         }
     }
 
-    canHarvest(pos) {
-        // Кнопка — когда начисленное видно в знаках монеты, а не доли секунды.
-        return this.amt(pos.pending, pos.coin) !== "0";
-    }
-
-    async harvest(pos) {
+    async withdraw(pos) {
         try {
-            const got = await this.orm.call("coop.farm.stake", "farm_harvest", [pos.id]);
-            this.notification.add(`Доход ${this.amt(got, pos.coin)} ${pos.coin} — к переводу на ваш кошелёк.`, { type: "success" });
+            await this.orm.call("coop.farm.stake", "farm_withdraw", [pos.id]);
+            this.notification.add(`Возврат ${this.amt(pos.amount, pos.coin)} ${pos.coin} из несобранного пула оформлен.`, { type: "success" });
             await this.load();
         } catch (error) {
             this.notification.add(error.data?.message || String(error), { type: "danger" });
         }
     }
 
-    async withdraw(pos) {
+    // ── Подтверждение выплат ────────────────────────────────────────
+
+    async confirmLine(line) {
         try {
-            await this.orm.call("coop.farm.stake", "farm_withdraw", [pos.id]);
-            this.notification.add(`Вывод ${this.amt(pos.amount, pos.coin)} ${pos.coin} из пула оформлен.`, { type: "success" });
+            await this.orm.call("coop.farm.payout.line", "farm_confirm", [line.id]);
+            this.notification.add("Получение подтверждено.", { type: "success" });
             await this.load();
         } catch (error) {
             this.notification.add(error.data?.message || String(error), { type: "danger" });
+        }
+    }
+
+    async disputeLine(line) {
+        const note = window.prompt("Что не так с выплатой? Инициатор увидит ваш ответ.", "Перевод не пришёл");
+        if (note === null) {
+            return;
+        }
+        try {
+            await this.orm.call("coop.farm.payout.line", "farm_dispute", [line.id, note]);
+            this.notification.add("Спор открыт — выплата не засчитана, пока вы её не подтвердите.", { type: "warning" });
+            await this.load();
+        } catch (error) {
+            this.notification.add(error.data?.message || String(error), { type: "danger" });
+        }
+    }
+
+    // ── Выплата инициатора ──────────────────────────────────────────
+
+    togglePay(pool) {
+        this.state.pay = this.state.pay === pool.id ? null : pool.id;
+        this.state.revenue = 0;
+        this.state.tx = "";
+    }
+    onRevenue(ev) {
+        const v = parseFloat(String(ev.target.value).replace(",", "."));
+        this.state.revenue = isNaN(v) ? 0 : v;
+    }
+    onTx(ev) {
+        this.state.tx = ev.target.value;
+    }
+    payShare(pool) {
+        const left = Math.max(pool.cap - pool.paid, 0);
+        return Math.min((this.state.revenue || 0) * pool.revenue_share / 100, left);
+    }
+
+    async recordPayout(pool) {
+        this.state.busy = true;
+        try {
+            await this.orm.call("coop.farm.pool", "farm_record_payout", [pool.id, this.state.revenue, this.state.tx]);
+            this.notification.add(
+                `Выплата ${this.amt(this.payShare(pool), pool.coin)} ${pool.coin} записана — участники подтвердят получение.`,
+                { type: "success" });
+            this.state.pay = null;
+            await this.load();
+        } catch (error) {
+            this.notification.add(error.data?.message || String(error), { type: "danger" });
+        } finally {
+            this.state.busy = false;
         }
     }
 
@@ -186,6 +268,7 @@ export class CoopDexFarm extends Component {
     }
     async newPool() {
         await this.action.doAction("coop_crypto_exchange.action_coop_farm_pool_new", {
+            additionalContext: { default_kind: this.state.kind },
             onClose: () => this.load(),
         });
     }
@@ -196,22 +279,21 @@ export class CoopDexFarm extends Component {
         return (v || 0).toLocaleString("ru-RU", { maximumFractionDigits: 6 });
     }
     amt(v, coin) {
-        // USDT и TON — до сотых, остальные монеты — до стомиллионных долей.
+        // Рубли, USDT и TON — до сотых (рубли — целыми), прочие монеты — до миллионных.
+        if (coin === "₽") {
+            return (v || 0).toLocaleString("ru-RU", { maximumFractionDigits: 0 });
+        }
         const digits = /^(USDT|TON)/.test(coin || "") ? 2 : 6;
         return (v || 0).toLocaleString("ru-RU", { maximumFractionDigits: digits });
     }
-    rub(v) {
-        const n = v || 0;
-        if (n >= 1e9) {
-            return (n / 1e9).toLocaleString("ru-RU", { maximumFractionDigits: 2 }) + " млрд ₽";
-        }
-        if (n >= 1e6) {
-            return (n / 1e6).toLocaleString("ru-RU", { maximumFractionDigits: 2 }) + " млн ₽";
-        }
-        return n.toLocaleString("ru-RU", { maximumFractionDigits: 0 }) + " ₽";
+    pct(v) {
+        return (v || 0).toLocaleString("ru-RU", { maximumFractionDigits: 1 }) + " %";
     }
-    apr(v) {
-        return (v || 0).toLocaleString("ru-RU", { maximumFractionDigits: 1 }) + "%";
+    mult(v) {
+        return (v || 0).toLocaleString("ru-RU", { maximumFractionDigits: 2 }) + "×";
+    }
+    short(hash) {
+        return hash.length > 16 ? `${hash.slice(0, 8)}…${hash.slice(-6)}` : hash;
     }
     dmy(d) {
         return d ? `${d.slice(8, 10)}.${d.slice(5, 7)}.${d.slice(0, 4)}` : "";
@@ -223,6 +305,14 @@ export class CoopDexFarm extends Component {
             return "дней";
         }
         return b === 1 ? "день" : b >= 2 && b <= 4 ? "дня" : "дней";
+    }
+    payoutsWord(n) {
+        const a = Math.abs(n) % 100;
+        const b = a % 10;
+        if (a > 10 && a < 20) {
+            return "выплат";
+        }
+        return b === 1 ? "выплата" : b >= 2 && b <= 4 ? "выплаты" : "выплат";
     }
 }
 

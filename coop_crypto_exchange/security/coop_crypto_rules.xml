@@ -44,8 +44,10 @@
       <field name="groups" eval="[(4, ref('base.group_system'))]"/>
       <field name="domain_force">[(1, '=', 1)]</field>
     </record>
-    <!-- Пулы ликвидности (фарминг): видят все участники, открывает и
-         правит пул только инициатор проекта. Взносы — свои; сводные цифры
+    <!-- Пулы проектов: видят все участники, открывает и правит пул
+         только инициатор проекта — администратор за него не открывает
+         (решение 434, п. 7; проверка в create модели). Администратору
+         остаётся правка для разбора споров. Взносы — свои; сводные цифры
          пула считаются на сервере. -->
     <record id="rule_farm_pool_read" model="ir.rule">
       <field name="name">Пулы ликвидности — читают участники</field>
@@ -82,6 +84,35 @@
     <record id="rule_farm_stake_admin" model="ir.rule">
       <field name="name">Взносы в пулы — администратор</field>
       <field name="model_id" ref="model_coop_farm_stake"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+    <!-- Доля участника в выплате пула (решение 436, п. 6): видит сам
+         участник и инициатор проекта; подтверждают и оспаривают — методы
+         модели от имени участника. -->
+    <record id="rule_farm_payout_line_own" model="ir.rule">
+      <field name="name">Выплаты участнику пула — свои и своего пула</field>
+      <field name="model_id" ref="model_coop_farm_payout_line"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">['|', ('partner_id', '=', user.partner_id.id),
+                                  ('payout_id.pool_id.partner_id', '=', user.partner_id.id)]</field>
+    </record>
+    <record id="rule_farm_payout_line_admin" model="ir.rule">
+      <field name="name">Выплаты участнику пула — администратор</field>
+      <field name="model_id" ref="model_coop_farm_payout_line"/>
+      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+      <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+    <!-- Возврат комиссии DEX (решение 436, п. 8): свой. -->
+    <record id="rule_dex_rebate_own" model="ir.rule">
+      <field name="name">Возврат комиссии DEX — свой</field>
+      <field name="model_id" ref="model_coop_dex_rebate"/>
+      <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+      <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+    </record>
+    <record id="rule_dex_rebate_admin" model="ir.rule">
+      <field name="name">Возврат комиссии DEX — администратор</field>
+      <field name="model_id" ref="model_coop_dex_rebate"/>
       <field name="groups" eval="[(4, ref('base.group_system'))]"/>
       <field name="domain_force">[(1, '=', 1)]</field>
     </record>

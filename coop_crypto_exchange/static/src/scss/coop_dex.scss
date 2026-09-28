@@ -389,7 +389,7 @@ $dx-down: #c0392b;
 .o_coop_dx_orders,
 .o_coop_fm > .o_coop_dx_panel { overflow-x: auto; }
 
-// ── Фарминг ───────────────────────────────────────────────────────────
+// ── Пулы проектов (бывший «Фарминг», решения 434–436) ─────────────────
 .o_coop_fm_hero {
   display: flex;
   justify-content: space-between;
@@ -496,6 +496,9 @@ $dx-down: #c0392b;
 .o_coop_fm_state_raising { background: var(--coop-teal-tint, #e3efed); color: $dx-up; }
 .o_coop_fm_state_active { background: #e6f0fb; color: #1f5e9c; }
 .o_coop_fm_state_refunded { background: #fdecea; color: $dx-down; }
+.o_coop_fm_state_default { background: $dx-down; color: #fff; }
+.o_coop_fm_state_closed { background: var(--coop-surface, #f2f2ee); color: var(--coop-slate, #4a4a44); }
+.o_coop_fm_default { border-color: $dx-down; }
 .o_coop_fm_purpose { font-size: 12.5px; line-height: 1.45; color: var(--coop-slate, #4a4a44); min-height: 36px; }
 .o_coop_fm_apr {
   display: grid;
@@ -513,12 +516,15 @@ $dx-down: #c0392b;
   overflow: hidden;
   span { display: block; height: 100%; background: $dx-up; border-radius: 999px; }
 }
+// Ход выплат до потолка — другим цветом, чтобы не путать со сбором.
+.o_coop_fm_track_paid span { background: #1f5e9c; }
 .o_coop_fm_nums {
   display: flex;
   justify-content: space-between;
   gap: 8px;
   margin-top: 4px;
   font-size: 12px;
+  > span:last-child:not(:first-child) { white-space: nowrap; }
 }
 .o_coop_fm_meta {
   display: flex;
@@ -559,4 +565,29 @@ $dx-down: #c0392b;
   font: 600 13px/1.2 'Manrope', sans-serif;
   color: inherit;
   cursor: pointer;
+}
+
+// Вид пула: в монете / в рублях (учебные ЦФА).
+.o_coop_fm_kinds { align-self: flex-start; }
+.o_coop_fm_training {
+  padding: 8px 12px;
+  border: 1px dashed var(--coop-gold, #b08a2e);
+  border-radius: 10px;
+  font-size: 12.5px;
+  color: var(--coop-slate, #4a4a44);
+  .fa { color: var(--coop-gold, #b08a2e); margin-right: 4px; }
+}
+.o_coop_fm_training_tag { color: var(--coop-gold, #b08a2e); font-weight: 600; }
+.o_coop_fm_late { color: $dx-down; font-weight: 600; font-size: 11.5px; }
+.o_coop_fm_warnnum { color: var(--coop-gold, #b08a2e); }
+.o_coop_fm_badnum { color: $dx-down; }
+.o_coop_fm_hint { font-size: 11.5px; }
+.o_coop_fm_lines td { padding-top: 2px; padding-bottom: 6px; font-size: 12px; border-top: 0; }
+.o_coop_fm_payform {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  align-items: end;
+  padding: 6px 0 10px;
+  input { width: 100%; }
 }

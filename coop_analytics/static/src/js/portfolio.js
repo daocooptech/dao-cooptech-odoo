@@ -18,7 +18,7 @@ import { CoopTabs } from "@coop_theme/js/shell";
 const SECTIONS = [
     { key: "shares", label: "Паи" },
     { key: "projects", label: "Вклады в проекты" },
-    { key: "farm", label: "Пулы фарминга" },
+    { key: "farm", label: "Пулы проектов" },
     { key: "tokens", label: "Токены требования" },
     { key: "cfa", label: "ЦФА" },
     { key: "crypto", label: "Монеты" },

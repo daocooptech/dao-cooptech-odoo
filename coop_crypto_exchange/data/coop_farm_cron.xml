@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Пулы проектов, раз в сутки (решение 436, пп. 6–7): выплата без
+       ответа участника 14 дней — получена; несобранный к сроку пул —
+       возврат; выплачен потолок или вышел срок — завершён; 180 дней без
+       выплат по графику — невозврат. -->
+  <record id="cron_coop_farm_daily" model="ir.cron">
+    <field name="name">Пулы проектов: подтверждения, сроки, просрочки</field>
+    <field name="model_id" ref="model_coop_farm_pool"/>
+    <field name="state">code</field>
+    <field name="code">model._cron_daily()</field>
+    <field name="interval_number">1</field>
+    <field name="interval_type">days</field>
+    <field name="active" eval="True"/>
+  </record>
+
+  <!-- Возврат комиссии DEX за прошедший месяц (решение 436, п. 8):
+       половина собранного — торговавшим по обороту. -->
+  <record id="cron_coop_dex_rebate" model="ir.cron">
+    <field name="name">DEX: возврат комиссии по обороту за месяц</field>
+    <field name="model_id" ref="model_coop_dex_rebate"/>
+    <field name="state">code</field>
+    <field name="code">model._cron_monthly()</field>
+    <field name="interval_number">1</field>
+    <field name="interval_type">months</field>
+    <field name="active" eval="True"/>
+  </record>
+
+</odoo>

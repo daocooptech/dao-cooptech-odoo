@@ -19,13 +19,14 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '19.0.1.2.0',
+    'version': '19.0.1.3.0',
     'license': 'LGPL-3',
     'depends': ['coop_matching', 'coop_base', 'coop_theme', 'coop_wallet', 'coop_projects', 'mail'],
     'data': [
         'security/ir.model.access.csv',
         'security/coop_crypto_rules.xml',
         'views/coop_crypto_views.xml',
+        'data/coop_farm_cron.xml',
     ],
     'assets': {
         'web.assets_backend': [

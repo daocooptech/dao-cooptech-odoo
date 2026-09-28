@@ -112,8 +112,8 @@
           </div>
           <p class="o_coop_pf_note">
             «Договорено» — платежи по сделкам, погашение денежных ЦФА, возвраты вкладов по несостоявшимся
-            проектам. «Расчётно» — пулы фарминга: возврат внесённого в месяц разблокировки и доход по
-            заявленной ставке; ставку объявил инициатор, её никто не гарантирует. Монеты — по курсу на сегодня.
+            проектам и взносов из несобранных пулов. Будущих выплат по пулам проектов здесь нет: они
+            зависят от выручки проекта и никем не обещаны. Монеты — по курсу на сегодня.
           </p>
 
           <div class="o_coop_pf_overdue" t-if="state.showOverdue and d.schedule.overdue_items.length">
@@ -239,30 +239,30 @@
 
         <section class="o_coop_pf_panel" t-if="state.section === 'farm'">
           <p class="o_coop_pf_warn">
-            Ставку объявил инициатор проекта. Её никто не гарантирует. Можно потерять внесённое полностью.
-            Прошлые выплаты не обещают будущих. «Начислено» — расчёт по заявленной ставке, а не поступление.
+            Пул проекта — не вклад. Проект отдаёт участникам долю выручки, пока каждый не получит потолок;
+            выручки может не быть, и тогда выплат не будет. Можно потерять внесённое полностью.
+            «Получено» — только выплаты, которые вы подтвердили или не оспорили за 14 дней.
           </p>
           <div class="o_coop_pf_scroll">
             <table class="o_coop_pf_table">
-              <thead><tr><th>Пул</th><th class="o_coop_pf_num">Внесено</th><th>Заявленная ставка</th><th class="o_coop_pf_num">Начислено расчётно</th><th class="o_coop_pf_num">Забрано</th><th>Разблокировка</th><th>Риск</th></tr></thead>
+              <thead><tr><th>Пул</th><th class="o_coop_pf_num">Внесено</th><th>Условия</th><th class="o_coop_pf_num">Получено</th><th class="o_coop_pf_num">Ждёт подтверждения</th><th class="o_coop_pf_num">Потолок</th><th>Риск</th></tr></thead>
               <tbody>
                 <tr t-foreach="d.farm" t-as="f" t-key="f.id" t-att-class="{ o_coop_pf_gone: f.state !== 'active' }">
                   <td><b t-esc="f.project"/><div class="o_coop_pf_muted"><t t-esc="f.pool_state"/> · <t t-esc="f.state_label"/></div>
                     <div t-if="f.flag" class="o_coop_pf_late" t-esc="f.flag"/></td>
                   <td class="o_coop_pf_num"><t t-esc="coins(f.amount)"/> <t t-esc="f.coin"/>
-                    <div class="o_coop_pf_muted">≈ <t t-esc="rub(f.amount_rub)"/> справочно</div></td>
-                  <td class="o_coop_pf_nowrap">комиссии стакана <t t-esc="num(f.apr_fee)"/>%
-                    <div>выплаты проекта <t t-esc="num(f.apr_project)"/>%</div>
-                    <div class="o_coop_pf_muted">не гарантируется</div></td>
-                  <td class="o_coop_pf_num"><t t-esc="coins(f.earned)"/> <span class="o_coop_pf_muted" t-esc="f.coin"/></td>
-                  <td class="o_coop_pf_num"><t t-esc="coins(f.harvested)"/> <span class="o_coop_pf_muted" t-esc="f.coin"/></td>
-                  <td class="o_coop_pf_nowrap" t-esc="date(f.unlock)"/>
+                    <div class="o_coop_pf_muted" t-if="f.kind !== 'rub'">≈ <t t-esc="rub(f.amount_rub)"/> справочно</div></td>
+                  <td class="o_coop_pf_nowrap"><t t-esc="num(f.revenue_share)"/>% выручки
+                    <div>до <t t-esc="num(f.cap_multiple)"/>× внесённого</div></td>
+                  <td class="o_coop_pf_num"><t t-esc="coins(f.received)"/> <span class="o_coop_pf_muted" t-esc="f.coin"/></td>
+                  <td class="o_coop_pf_num"><t t-esc="coins(f.awaiting)"/> <span class="o_coop_pf_muted" t-esc="f.coin"/></td>
+                  <td class="o_coop_pf_num"><t t-esc="coins(f.cap)"/> <span class="o_coop_pf_muted" t-esc="f.coin"/></td>
                   <td t-esc="f.risk"/>
                 </tr>
               </tbody>
             </table>
           </div>
-          <p class="o_coop_pf_note" t-if="d.farm.length">Курс монеты — последняя сделка пары на DEX платформы, <t t-esc="d.farm[0].price_at"/>.</p>
+          <p class="o_coop_pf_note" t-if="d.farm.length">Курс монеты — последняя сделка пары на DEX платформы, <t t-esc="d.farm[0].price_at"/>. Рублёвые пулы — учебный выпуск ЦФА: демонстрация, прав не порождает.</p>
         </section>
 
         <section class="o_coop_pf_panel" t-if="state.section === 'tokens'">

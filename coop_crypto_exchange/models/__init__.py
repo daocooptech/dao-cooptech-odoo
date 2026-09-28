@@ -2,3 +2,4 @@
 from . import coop_crypto
 from . import coop_crypto_market
 from . import coop_crypto_farm
+from . import coop_dex_fee

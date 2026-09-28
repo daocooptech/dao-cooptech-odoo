@@ -8,7 +8,7 @@
       <button t-att-class="{ 'o_coop_dx_tab': true, 'o_coop_dx_tab_on': tab === 'trade' }"
               t-on-click="() => this.openTerminal ? this.openTerminal() : null">Биржа</button>
       <button t-att-class="{ 'o_coop_dx_tab': true, 'o_coop_dx_tab_on': tab === 'farm' }"
-              t-on-click="() => this.openFarm()">Фарминг</button>
+              t-on-click="() => this.openFarm()">Пулы проектов</button>
       <button t-att-class="{ 'o_coop_dx_tab': true, 'o_coop_dx_tab_on': tab === 'node' }"
               t-on-click="() => this.openNode()">Свой узел Komodo</button>
       <button class="o_coop_dx_tab" t-on-click="() => this.openTrades()">Мои обмены</button>
@@ -231,6 +231,8 @@
               рублями. Монета идёт с кошелька на кошелёк напрямую, рубли — переводом между
               сторонами; платформа ключей и денег не держит. Щелчок по строке стакана подставит
               цену и объём.
+              Комиссия DEX — 0,1 % от суммы обмена, её платит тот, кто забирает заявку из стакана;
+              раз в месяц половина собранной комиссии возвращается всем, кто торговал, по обороту.
             </div>
           </section>
 

@@ -94,7 +94,8 @@ class CoopPortfolio(models.AbstractModel):
         settlements = self._settlements(me, today, put, overdue)
 
         valued = [
-            ('Пулы фарминга', sum(r['amount_rub'] for r in farm['rows'] if r['state'] == 'active')),
+            ('Пулы проектов', sum(r['amount_rub'] for r in farm['rows']
+                                if r['state'] == 'active' and r['pool_state_key'] in ('raising', 'active'))),
             ('Токены требования', sum(r['value'] or 0 for r in tokens['rows'])),
             ('ЦФА', sum(r['value'] for r in cfa['rows'])),
             ('Монеты кошелька', sum(r['valuation'] for r in crypto['rows'])),
@@ -264,45 +265,44 @@ class CoopPortfolio(models.AbstractModel):
                 'mix': [{'label': k, 'value': v, 'pct': round(v / total_mix * 100, 1) if total_mix else 0}
                         for k, v in sorted(mix.items(), key=lambda kv: -kv[1])]}
 
-    # ── пулы фарминга ────────────────────────────────────────────────
+    # ── пулы проектов ────────────────────────────────────────────────
     def _farm(self, me, today, flow, put):
+        """Пулы проектов (решения 434–436): внесено, потолок, получено —
+        только подтверждённые выплаты, ждёт подтверждения. Будущих выплат
+        не рисуем: их размер зависит от выручки проекта и не обещан. В
+        поток денег — только возврат взноса из несобранного пула."""
         Stake = self.env['coop.farm.stake'].sudo()
         prices = {}
         rows = []
         now = fields.Datetime.now()
         for stake in Stake.search([('partner_id', '=', me.id)], order='date desc'):
             pool = stake.pool_id
-            key = (pool.asset, pool.network_id.id)
+            key = ('rub',) if pool.kind == 'rub' else (pool.asset, pool.network_id.id)
             if key not in prices:
                 prices[key] = pool._rub_price()
             price = prices[key]
-            earned = stake._earned()
-            unlock = stake._unlock_date()
-            late_flag = ''
-            if pool.state == 'raising' and pool.date_deadline and pool.date_deadline < today:
-                late_flag = 'Сбор не закрыт в срок: пул не запущен и не возвращён'
-            elif pool.state == 'active' and pool.project_id.state in ('frozen', 'failed'):
-                late_flag = 'Проект пула %s' % _sel(pool.project_id, 'state').lower()
-            if stake.state == 'active':
-                # Тело — в месяце разблокировки, доход — помесячно по
-                # заявленной ставке до конца пула. Всё «расчётно».
-                put(unlock, 'estimate', stake.amount * price)
-                end = pool.date_end or unlock
-                month_income = stake.amount * (pool.apr or 0) / 100 / 12 * price
-                if pool.state == 'active' and month_income:
-                    cursor = today.replace(day=1)
-                    while cursor <= end:
-                        put(cursor, 'estimate', month_income)
-                        cursor = (cursor + timedelta(days=32)).replace(day=1)
+            overdue = pool._overdue_days(today)
+            flag = ''
+            if pool.state == 'default':
+                flag = 'Невозврат: выплат нет больше 180 дней'
+            elif overdue:
+                flag = 'Просрочка выплаты %s дн.' % overdue
+            elif pool.project_id.state in ('frozen', 'failed') and pool.state == 'active':
+                flag = 'Проект пула %s' % _sel(pool.project_id, 'state').lower()
+            if stake.state == 'active' and pool.state == 'refunded':
+                put(today, 'contract', stake.amount * price)
             rows.append({
                 'id': stake.id, 'pool_id': pool.id, 'project': pool.project_id.name,
-                'coin': pool._coin_label(), 'amount': stake.amount, 'price_rub': price,
-                'amount_rub': stake.amount * price, 'price_at': fields.Datetime.to_string(now)[:16],
-                'apr_fee': pool.apr_fee, 'apr_project': pool.apr_project,
-                'earned': earned, 'harvested': stake.harvested, 'pending': max(earned - stake.harvested, 0.0),
-                'unlock': _d(unlock), 'risk': _sel(pool, 'risk'), 'risk_key': pool.risk,
-                'pool_state': _sel(pool, 'state'), 'state': stake.state, 'state_label': _sel(stake, 'state'),
-                'flag': late_flag, 'date': fields.Datetime.to_string(stake.date)[:10],
+                'kind': pool.kind, 'coin': pool._coin_label(), 'amount': stake.amount,
+                'price_rub': price, 'amount_rub': stake.amount * price,
+                'price_at': fields.Datetime.to_string(now)[:16],
+                'revenue_share': pool.revenue_share, 'cap_multiple': pool.cap_multiple,
+                'cap': stake.amount * (pool.cap_multiple or 1),
+                'received': stake._received(), 'awaiting': stake._awaiting(),
+                'risk': _sel(pool, 'risk'), 'risk_key': pool.risk,
+                'pool_state': _sel(pool, 'state'), 'pool_state_key': pool.state,
+                'state': stake.state, 'state_label': _sel(stake, 'state'),
+                'flag': flag, 'date': fields.Datetime.to_string(stake.date)[:10],
             })
         return {'rows': rows}
 
