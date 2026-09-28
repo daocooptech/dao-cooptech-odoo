@@ -8,6 +8,7 @@ import { browser } from "@web/core/browser/browser";
 import { Domain } from "@web/core/domain";
 import { user } from "@web/core/user";
 import { COOP_FAVORITE_CATALOGS } from "@coop_theme/js/favorite";
+import { pathAfterPrefix } from "@coop_theme/js/node_path";
 import { router, routerBus } from "@web/core/browser/router";
 import { WebClient } from "@web/webclient/webclient";
 import { NavBar } from "@web/webclient/navbar/navbar";
@@ -420,14 +421,15 @@ export class CoopSidebar extends Component {
     }
 
     async _currentAction() {
-        const pathname = browser.location.pathname;
-        let path = pathname.match(/\/odoo\/action-([^/?#]+)/);
+        // Адрес узла (/nn1/…) и движка (/odoo/…) разбираются одинаково.
+        const rest = pathAfterPrefix(browser.location.pathname) || "";
+        let path = rest.match(/^action-([^/?#]+)/);
         if (!path) {
             // Короткий адрес раздела: /odoo/projects вместо
             // /odoo/action-803. Их завели ради читаемых ссылок, а разбор
             // адреса остался прежним — и раздел, открытый по короткому
             // адресу, подсветки не получал.
-            const short = pathname.match(/^\/odoo\/([a-z][\w-]*)\/?$/);
+            const short = rest.match(/^([a-z][\w-]*)\/?$/);
             if (short) {
                 try {
                     // Через свой метод: читать `ir.actions.actions` из
