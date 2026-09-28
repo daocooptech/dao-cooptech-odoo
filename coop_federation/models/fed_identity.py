@@ -61,6 +61,15 @@ def configured_host():
     return host
 
 
+def base_url_for_host(host):
+    """Адрес платформы для узла: у доменного имени — https (так did:web
+    ищет документ, и сертификат есть только у имени — daocoop.tech,
+    решение 433), у голого IP и localhost — http."""
+    name = urllib.parse.urlparse('//' + host).hostname or ''
+    bare = name == 'localhost' or name.replace('.', '').isdigit() or ':' in name
+    return ('http://' if bare else 'https://') + host
+
+
 class CoopFedIdentity(models.Model):
     _name = 'coop.fed.identity'
     _description = 'Узел сети'
@@ -130,7 +139,7 @@ class CoopFedIdentity(models.Model):
             'name': company.name or 'Платформа',
             'did': did_for_url(host),
             'node_path': NODE_PATH,
-            'base_url': 'http://' + host,
+            'base_url': base_url_for_host(host),
             'country_id': company.country_id.id,
         })
         secret = crypto.generate()
