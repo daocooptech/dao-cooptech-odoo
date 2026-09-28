@@ -1,0 +1,9 @@
+<odoo>
+    <record id="seq_order_prepaid" model="ir.sequence">
+        <field name="name">Order Prepaid Нумерация</field>
+        <field name="code">order.prepaid</field>
+        <field name="prefix">OP/</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+</odoo>

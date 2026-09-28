@@ -72,6 +72,10 @@ class CoopDemoLoader(models.AbstractModel):
         marks = emblems.MarkAllocator()
         load_orgs.merge_duplicate_orgs(self.env)
         load_orgs.load_organizations(self.env, specializations, marks)
+        # Всем организациям — разные названия (владелец 28.09.2026):
+        # сразу, чтобы загрузчики ниже искали организации по уже
+        # однозначным названиям.
+        load_orgs.unique_org_names(self.env)
         load_orgs.repair_empty_logos(self.env)
         load_org_profiles.load_org_profiles(self.env, specializations, marks)
         load_org_profiles.fill_org_contacts(self.env)
@@ -322,6 +326,9 @@ class CoopDemoLoader(models.AbstractModel):
         # Избранное (решение 408) — после всех каталогов: отмечать можно
         # только то, что уже заведено.
         load_favorites.load_favorites(self.env)
+        # И ещё раз в самом конце: если какой-то загрузчик по пути завёл
+        # организацию-тёзку, она получит своё название тем же правилом.
+        load_orgs.unique_org_names(self.env)
         return True
 
     def _load_rubrics(self):

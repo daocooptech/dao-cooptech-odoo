@@ -153,8 +153,22 @@ class CoopPortfolio(models.AbstractModel):
         accounts = Account.search([('partner_id', '=', me.id)], order='joined_on')
         # Действующие — первыми, возвращённые — в конце.
         rank = {'open': 0, 'closing': 1, 'closed': 2}
+        # Одноимённые кооперативы — разные организации в разных городах
+        # (так в макете: «Кооператив «Борозда»» в Москве, Тюмени и во
+        # Владивостоке). Без города в портфеле они читались как один
+        # кооператив, записанный трижды (находка 28.09, решение 433).
+        names = {}
+        for acc in accounts:
+            names.setdefault(acc.cooperative_id.name, set()).add(acc.cooperative_id.id)
+
+        def label(coop):
+            if len(names.get(coop.name, ())) > 1 and coop.city:
+                return '%s, %s' % (coop.name, coop.city)
+            return coop.name
+
         for acc in accounts.sorted(lambda a: rank.get(a.state, 3)):
             coop = acc.cooperative_id
+            title = label(coop)
             deals = Deal.search(['|', '&', ('party_a_id', '=', me.id), ('party_b_id', '=', coop.id),
                                  '&', ('party_b_id', '=', me.id), ('party_a_id', '=', coop.id),
                                  ('state', '=', 'done')])
@@ -162,13 +176,13 @@ class CoopPortfolio(models.AbstractModel):
             for move in acc.move_ids.filtered(lambda m: m.state == 'requested'):
                 days = (today - move.date).days if move.date else 0
                 late = days > (coop.coop_share_review_days or 30)
-                item = {'account': coop.name, 'name': move.name or _sel(move, 'kind'),
+                item = {'account': title, 'name': move.name or _sel(move, 'kind'),
                         'kind': _sel(move, 'kind'), 'amount': abs(move.amount),
                         'date': _d(move.date), 'days': days, 'late': late}
                 waiting.append(item)
                 requested.append(item)
                 if late:
-                    overdue['items'].append({'date': _d(move.date), 'what': 'Заявление на выплату пая — %s' % coop.name,
+                    overdue['items'].append({'date': _d(move.date), 'what': 'Заявление на выплату пая — %s' % title,
                                              'amount': abs(move.amount), 'sign': 1, 'kind': 'share',
                                              'note': 'ждёт решения %s дн.' % days})
             if acc.state != 'closed':
@@ -176,7 +190,8 @@ class CoopPortfolio(models.AbstractModel):
             total_accrued += acc.accrued
             total_paid += acc.paid_out
             rows.append({
-                'id': acc.id, 'cooperative': coop.name, 'state': acc.state, 'state_label': _sel(acc, 'state'),
+                'id': acc.id, 'cooperative': title, 'cooperative_id': coop.id,
+                'state': acc.state, 'state_label': _sel(acc, 'state'),
                 'joined_on': _d(acc.joined_on), 'contributed': acc.contributed, 'balance': acc.balance,
                 'entry_fee': acc.entry_fee,
                 'accrued': acc.accrued, 'paid_out': acc.paid_out, 'charter_note': acc.charter_note or '',
@@ -186,7 +201,8 @@ class CoopPortfolio(models.AbstractModel):
         return {
             'rows': rows, 'requested': requested,
             'totals': {'balance': total_balance, 'accrued': total_accrued, 'paid_out': total_paid,
-                       'cooperatives': len({r['cooperative'] for r in rows if r['state'] != 'closed'}),
+                       # По номеру, а не по названию: одноимённые — разные.
+                       'cooperatives': len({r['cooperative_id'] for r in rows if r['state'] != 'closed'}),
                        'needs_count': sum(r['needs_count'] for r in rows),
                        'needs_sum': sum(r['needs_sum'] for r in rows)},
         }

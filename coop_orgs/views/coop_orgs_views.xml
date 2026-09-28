@@ -365,11 +365,17 @@
                    далее. Слово берётся у группы правовых форм, а не
                    пишется в разметке: групп четыре, и пятая появится
                    вместе с новой формой, а не с правкой шаблона. -->
-              <div class="o_coop_org_kind" invisible="not coop_card_label">
+              <!-- У кооператива то же слово уже стоит плашкой у названия —
+                   второй раз не повторяем (находка 28.09, решение 433). -->
+              <div class="o_coop_org_kind" invisible="not coop_card_label or coop_is_cooperative">
                 <field name="coop_card_label" nolabel="1" readonly="1"/>
               </div>
 
-              <div class="o_coop_about">
+              <!-- Обёртка — как у «О себе» человека: полоса во всю ширину, а не
+                   по ширине заголовка; пустая видна только тому, кто может её
+                   заполнить (находка 28.09, решение 433). -->
+              <div class="o_coop_band o_coop_about_band"
+                   invisible="not coop_about and not coop_can_edit_card">
                 <!-- «Описание организации», а не «О себе» (решение 427). Правит
                      только уполномоченный от организации — `coop_can_edit_card`:
                      организация в числе тех, от чьего имени действует
@@ -581,7 +587,7 @@
                               <field name="partner_id"/>
                             </div>
                             <div class="o_coop_mini_note">
-                              <t t-esc="record.job_title.value or record.role.value"/>
+                              <t t-esc="record.job_title.value or record.role_id.value"/>
                             </div>
                           </div>
                         </t>

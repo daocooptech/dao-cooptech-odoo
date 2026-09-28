@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_account_payment_register_prepaid_form" model="ir.ui.view">
+            <field name="name">account.payment.register.prepaid.form</field>
+            <field name="model">payment.register.prepaid</field>
+            <field name="arch" type="xml">
+                <form string="Register Payment">
+                    <group>
+                        <field name="company_id" invisible="1"/>
+                        <field name="advance_type" invisible="1"/>
+                        <field name="prepaid_id" invisible="1"/>
+                        <group name="group1">
+                            <field name="journal_id" options="{'no_open': True, 'no_create': True}"
+                                   domain="[('company_id', '=', company_id), ('type', 'in', ['bank', 'cash'])]"/>
+
+                            <field name="payment_method_line_id" options="{'no_create': True, 'no_open': True}"
+                                   domain="[('journal_id', '=', journal_id)]"/>
+
+                            <field name="partner_bank_id" context="{'display_account_trust': True}"/>
+                        </group>
+                        <group name="group2">
+                            <field name="amount_const" invisible="1"/>
+                            <label for="amount" invisible="0"/>
+                            <div name="amount_div" class="o_row">
+                                <field name="amount"/>
+                                <field name="currency_id" options="{'no_create': True, 'no_open': True}"
+                                       groups="base.group_multi_currency"/>
+                            </div>
+                            <field name="payment_date"/>
+                            <field name="communication"/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button string="Создать платеж" name="action_create_payments" type="object"
+                                class="oe_highlight"/>
+                        <button string="Отмена" class="btn btn-secondary" special="cancel" data-hotkey="x"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

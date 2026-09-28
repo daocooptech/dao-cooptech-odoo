@@ -272,3 +272,18 @@
     padding: 12px 14px 14px;
   }
 }
+
+// Строка «Оплата» в карточке вакансии: поля по ширине содержимого, а не
+// поровну — иначе сумма обрезалась до «55 000…» (находка 28.09.2026).
+// Селектор не слабее движкового `.o_form_view .o_form_editable .o_row >
+// .o_field_widget` (flex: 1 1 auto) — иначе он перебивает; проверено
+// измерением 28.09: с коротким селектором поля так и остались по 92 px.
+.o_form_view .o_row.o_coop_pay_row,
+.o_form_view .o_form_editable .o_row.o_coop_pay_row {
+    flex-wrap: wrap;
+    > .o_field_widget {
+        flex: 0 0 auto;
+        width: auto !important;
+        max-width: 100%;
+    }
+}

@@ -1,0 +1,135 @@
+<odoo>
+    <data>
+        <record id="action_order_prepaid" model="ir.actions.act_window">
+            <field name="name">Авансовые счета</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">order.prepaid</field>
+            <field name="view_mode">list,form,search</field>
+        </record>
+
+        <menuitem id="menu_order_prepaid"
+                  name="Авансовые счета"
+                  parent="account.menu_finance"
+                  action="action_order_prepaid"
+                  sequence="5"/>
+
+        <record id="tree_order_prepaid_view" model="ir.ui.view">
+            <field name="name">Авансовые счета</field>
+            <field name="model">order.prepaid</field>
+            <field name="arch" type="xml">
+                <list string="Авансовые счета">
+                    <field name="name" string="Номер"/>
+                    <field name="partner_id"/>
+                    <field name="advance_type"/>
+                    <field name="invoice_date_due" widget="remaining_days"/>
+                    <field name="invoice_date"/>
+                    <field name="company_id"/>
+                    <field name="currency_id" column_invisible="True"/>
+                    <field name="amount" column_invisible="True"/>
+                    <field name="all_total" sum="Total" decoration-bf="1" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                    <field name="payment_state" widget="badge"
+                           decoration-danger="payment_state in ['not_paid']"
+                           decoration-warning="payment_state in ['in_payment', 'partial']"
+                           decoration-success="payment_state in ['paid']"/>
+                    <field name="state" widget="badge"
+                           decoration-danger="state in ['draft']"
+                           decoration-success="state in ['posted']"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="form_order_prepaid_view" model="ir.ui.view">
+            <field name="name">Авансовые счета</field>
+            <field name="model">order.prepaid</field>
+            <field name="arch" type="xml">
+                <form string="Авансовые счета">
+                    <header>
+                        <field name="payment_state" invisible="1"/>
+                        <button name="action_post" string="Подтвердить" class="oe_highlight" type="object" invisible="state != 'draft'"/>
+                        <button name="action_register_payment" type="object" class="oe_highlight" invisible="state != 'posted' or payment_state in ['paid', 'in_payment']" context="{'dont_redirect_to_payments': True, 'display_account_trust': True}" string="Регистрация Платежа"/>
+                        <button name="button_draft" string="Переместить в черновики" type="object" invisible="state == 'draft'"/>
+                        <button name="button_cancel" string="Отмена" type="object" invisible="state != 'draft'"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,posted" optional="show"/>
+                    </header>
+                    <sheet>
+                        <widget name="web_ribbon" title="Оплачено" invisible="payment_state != 'paid'" widget_id="widget_1"/>
+                        <widget name="web_ribbon" title="В оплате" invisible="payment_state != 'in_payment'" widget_id="widget_2"/>
+                        <widget name="web_ribbon" title="Частичный" invisible="payment_state != 'partial'" widget_id="widget_3"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"
+                                   readonly="state != 'draft' or name == 'Draft'" placeholder="Draft"/>
+                            <span invisible="state != 'draft' or name != '/'">
+                                Draft
+                            </span>
+                        </h1>
+                    </div>
+                        <group>
+                            <group>
+                                <field name="partner_id" required="1" readonly="state == 'posted'"/>
+                                <field name="company_id" required="1" readonly="state == 'posted'"/>
+                                <field name="company_partner_id" invisible="1"/>
+                                <field name="partner_bank_id" domain="[('partner_id', '=', company_partner_id)]"/>
+                                <field name="advance_type" required="1" widget="radio" options="{'horizontal': True}" readonly="state == 'posted'"/>
+                                <field name="th_field_taxes" invisible="1"/>
+                              </group>
+                            <group>
+                                <field name="invoice_date" required="1" readonly="state == 'posted'"/>
+                                <field name="payment_terms" readonly="state == 'posted'"/>
+                                <field name="invoice_date_due" required="1" readonly="state == 'posted'"/>
+                                <field name="currency_id" required="1" readonly="state == 'posted'"/>
+                                <field name="sale_order_id" readonly="state == 'posted'"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page name="lines" string="Позиция счета" readonly="state == 'posted'">
+                                <field name="prepaid_line" mode="list" readonly="state == 'posted'">
+                                    <list editable="bottom">
+                                        <field name="prepaid_id" column_invisible="True"/>
+                                        <field name="product_id" optional="show" widget="many2one_barcode"/>
+                                        <field name="name" widget="section_and_note_text" optional="show" on_change="1" column_invisible="1"/>
+                                        <field name="label" optional="hide"/>
+                                        <field name="account_id" optional="hide"/>
+                                        <field name="analytic_distribution" widget="analytic_distribution" optional="hide"/>
+                                        <field name="quantity" optional="show"/>
+                                        <field name="product_uom_id" optional="show"/>
+                                        <field name="price_unit" string="Цена"/>
+                                        <field name="tax_ids" widget="many2many_tags"/>
+                                    </list>
+                                </field>
+                                <group col="12" class="oe_invoice_lines_tab">
+                                    <group colspan="8">
+                                        <field name="comment" placeholder="Комментарий" colspan="2" nolabel="1" readonly="state == 'posted'"/>
+                                    </group>
+                                    <!-- Totals (only invoices / receipts) -->
+                                    <group colspan="4">
+                                        <group class="oe_subtotal_footer" invisible="0">
+                                            <span>Всего<field name="amount" colspan="2" nolabel="1" readonly="1"/></span>
+                                        </group>
+                                    </group>
+                                </group>
+                            </page>
+                            <page name="lines" string="Доп. информация">
+                                <group>
+                                    <group>
+                                        <field name="payment_state" readonly="1"/>
+                                        <field name="payment_amount" readonly="1"/>
+                                        <field name="amount_residual" readonly="1"/>
+                                    </group>
+                                    <label for="payment_line_ids" invisible="0"/>
+                                    <field name="payment_line_ids" readonly="1"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <chatter/>
+<!--                    <div class="oe_chatter">-->
+<!--                        <field name="message_follower_ids"/>-->
+<!--                        <field name="activity_ids"/>-->
+<!--                        <field name="message_ids" options="{'post_refresh': 'always'}"/>-->
+<!--                    </div>-->
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

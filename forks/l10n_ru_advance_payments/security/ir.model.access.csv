@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_order_prepaid,order.prepaid,model_order_prepaid,base.group_user,1,1,1,1
+access_order_prepaid_line,order.prepaid.line,model_order_prepaid_line,base.group_user,1,1,1,1
+access_payment_register_prepaid,payment.register.prepaid,model_payment_register_prepaid,base.group_user,1,1,1,1

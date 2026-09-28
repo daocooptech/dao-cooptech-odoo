@@ -1,0 +1,917 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* l10n_ru_advance_payments
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0+e-20241220\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-06-06 14:28+0000\n"
+"PO-Revision-Date: 2025-06-06 14:28+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+
+#. module: l10n_ru_advance_payments
+#: model:ir.actions.report,print_report_name:l10n_ru_advance_payments.report_order_prepaid_invoice
+msgid ""
+"'Счет - %s ' % ((object.name if object.name else '')+' '+(object.partner_id.parent_id.name if\n"
+"            object.partner_id.parent_id else object.partner_id.name))"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.actions.report,print_report_name:l10n_ru_advance_payments.action_report_orderprepaid
+msgid ""
+"'Счет - %s ' % (str(object.name)+' '+(str(object.partner_id.parent_id.name) if\n"
+"            object.partner_id.parent_id else str(object.partner_id.name)))\n"
+"        "
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.report_order_prepaid
+msgid ", на сумму"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.form_order_prepaid_view
+msgid ""
+"<span invisible=\"state != 'draft' or name != '/'\">\n"
+"                                Draft\n"
+"                            </span>"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.template_order_prepaid_invoice_body
+msgid "<span style=\"font-weight:bold\">Адрес банка:</span>"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.template_order_prepaid_invoice_body
+msgid "<span style=\"font-weight:bold\">Адрес бенефициара:</span>"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.template_order_prepaid_invoice_body
+msgid "<span style=\"font-weight:bold\">БИК:</span>"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.template_order_prepaid_invoice_body
+msgid "<span style=\"font-weight:bold\">Банк:</span>"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.template_order_prepaid_invoice_body
+msgid "<span style=\"font-weight:bold\">Бенефициар:</span>"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.template_order_prepaid_invoice_body
+msgid "<span style=\"font-weight:bold\">ИНН:</span>"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.template_order_prepaid_invoice_body
+msgid "<span style=\"font-weight:bold\">Номер счета/IBAN:</span>"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.template_order_prepaid_invoice_body
+msgid "<span>Количество</span>"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.template_order_prepaid_invoice_body
+msgid "<span>Налог</span>"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.template_order_prepaid_invoice_body
+msgid "<span>Описание</span>"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.template_order_prepaid_invoice_body
+msgid "<span>Сумма</span>"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.template_order_prepaid_invoice_body
+msgid "<span>Счет</span>"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.template_order_prepaid_invoice_body
+msgid "<span>Цена за ед.изм.</span>"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.template_order_prepaid_invoice_body
+msgid "<strong class=\"mr16\">Подытог</strong>"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.template_order_prepaid_invoice_body
+msgid "<strong>Всего</strong>"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.template_order_prepaid_invoice_body
+msgid ""
+"<strong>Выдано:</strong>\n"
+"                                    <br/>"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.template_order_prepaid_invoice_body
+msgid ""
+"<strong>Дата счета:</strong>\n"
+"                                    <br/>\n"
+"                                    <strong>Срок оплаты:</strong>"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__message_needaction
+msgid "Action Needed"
+msgstr "Требуется действие"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__activity_ids
+msgid "Activities"
+msgstr "Действия"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr "Оформление исключения активности"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__activity_state
+msgid "Activity State"
+msgstr "Состояние активности"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__activity_type_icon
+msgid "Activity Type Icon"
+msgstr "Иконка типа активности"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid_line__analytic_distribution_search
+msgid "Analytic Distribution Search"
+msgstr "Поиск аналитического распределения"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid_line__analytic_precision
+msgid "Analytic Precision"
+msgstr "Точность аналитики"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__message_attachment_count
+msgid "Attachment Count"
+msgstr "Количество вложений"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_sale_order_line__bool_const_bill
+msgid "Bool Const Bill"
+msgstr "Логическая константа счета"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_sale_order_line__bool_const_bill_bill
+msgid "Bool Const Bill Bill"
+msgstr "Логическая константа счета счет"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model,name:l10n_ru_advance_payments.model_res_company
+msgid "Companies"
+msgstr "Компании"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model,name:l10n_ru_advance_payments.model_res_config_settings
+msgid "Config Settings"
+msgstr "Параметры конфигурации"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__create_uid
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid_line__create_uid
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_payment_register_prepaid__create_uid
+msgid "Created by"
+msgstr "Создано"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__create_date
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid_line__create_date
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_payment_register_prepaid__create_date
+msgid "Created on"
+msgstr "Создано"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid_line__currency_id
+msgid "Currency"
+msgstr "Валюта"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__display_name
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid_line__display_name
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_payment_register_prepaid__display_name
+msgid "Display Name"
+msgstr "Отображаемое имя"
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.form_order_prepaid_view
+msgid "Draft"
+msgstr "Черновик"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__message_follower_ids
+msgid "Followers"
+msgstr "Подписчики"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Подписчики (Партнеры)"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,help:l10n_ru_advance_payments.field_order_prepaid__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr "Иконка Font Awesome, например fa-tasks"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__has_message
+msgid "Has Message"
+msgstr "Есть сообщение"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__activity_exception_icon
+msgid "Icon"
+msgstr "Иконка"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,help:l10n_ru_advance_payments.field_order_prepaid__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr "Иконка для обозначения исключительной активности."
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,help:l10n_ru_advance_payments.field_order_prepaid__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr "Если отмечено, новые сообщения требуют вашего внимания."
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,help:l10n_ru_advance_payments.field_order_prepaid__message_has_error
+#: model:ir.model.fields,help:l10n_ru_advance_payments.field_order_prepaid__message_has_sms_error
+msgid "If checked, some messages have a delivery error."
+msgstr "Если отмечено, некоторые сообщения имеют ошибку доставки."
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__invoice_partner_display_name
+msgid "Invoice Partner Display Name"
+msgstr "Отображаемое имя партнера по счету"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__message_is_follower
+msgid "Is Follower"
+msgstr "Является подписчиком"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__write_uid
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid_line__write_uid
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_payment_register_prepaid__write_uid
+msgid "Last Updated by"
+msgstr "Последнее изменение внесено"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__write_date
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid_line__write_date
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_payment_register_prepaid__write_date
+msgid "Last Updated on"
+msgstr "Дата последнего изменения"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__message_has_error
+msgid "Message Delivery error"
+msgstr "Ошибка доставки сообщения"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__message_ids
+msgid "Messages"
+msgstr "Сообщения"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr "Срок выполнения моего действия"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__activity_calendar_event_id
+msgid "Next Activity Calendar Event"
+msgstr "Следующее событие календаря действий"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr "Срок следующего действия"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__activity_summary
+msgid "Next Activity Summary"
+msgstr "Краткое описание следующего действия"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__activity_type_id
+msgid "Next Activity Type"
+msgstr "Тип следующего действия"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__message_needaction_counter
+msgid "Number of Actions"
+msgstr "Количество действий"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__message_has_error_counter
+msgid "Number of errors"
+msgstr "Количество ошибок"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,help:l10n_ru_advance_payments.field_order_prepaid__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr "Количество сообщений, требующих действия"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,help:l10n_ru_advance_payments.field_order_prepaid__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "Количество сообщений с ошибкой доставки"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model,name:l10n_ru_advance_payments.model_order_prepaid_line
+msgid "Order Prepaid line"
+msgstr "Строка предоплаты заказа"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model,name:l10n_ru_advance_payments.model_account_payment
+msgid "Payments"
+msgstr "Платежи"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__rating_ids
+msgid "Ratings"
+msgstr "Оценки"
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.view_account_payment_register_prepaid_form
+msgid "Register Payment"
+msgstr "Зарегистрировать платеж"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__activity_user_id
+msgid "Responsible User"
+msgstr "Ответственный пользователь"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "Ошибка доставки SMS"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model,name:l10n_ru_advance_payments.model_sale_order
+msgid "Sales Order"
+msgstr "Заказ на продажу"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model,name:l10n_ru_advance_payments.model_sale_order_line
+msgid "Sales Order Line"
+msgstr "Позиция заказа на продажу"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,help:l10n_ru_advance_payments.field_order_prepaid__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+"Статус на основе действий\n"
+"Просрочено: Срок уже прошёл\n"
+"Сегодня: Дата действия — сегодня\n"
+"Запланировано: Будущие действия."
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid_line__price_subtotal
+msgid "Subtotal"
+msgstr "Промежуточный итог"
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.template_order_prepaid_invoice_body
+msgid "Tax 15%"
+msgstr "Налог 15%"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid_line__price_total
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.tree_order_prepaid_view
+msgid "Total"
+msgstr "Итого"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,help:l10n_ru_advance_payments.field_order_prepaid__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr "Тип исключительной активности в записи."
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__website_message_ids
+msgid "Website Messages"
+msgstr "Сообщения сайта"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,help:l10n_ru_advance_payments.field_order_prepaid__website_message_ids
+msgid "Website communication history"
+msgstr "История коммуникаций сайта"
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.template_order_prepaid_invoice_body
+msgid "units"
+msgstr "единицы"
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model,name:l10n_ru_advance_payments.model_order_prepaid
+msgid "Авансовые платежи"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.actions.act_window,name:l10n_ru_advance_payments.action_order_prepaid
+#: model:ir.ui.menu,name:l10n_ru_advance_payments.menu_order_prepaid
+#: model:ir.ui.menu,name:l10n_ru_advance_payments.menu_order_prepaid_bill
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.form_order_prepaid_view
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.tree_order_prepaid_view
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.view_sale_order_form_inherit_button_advance
+msgid "Авансовые счета"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.view_res_config_settings_advance
+msgid "Авансовые счета:"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_payment_register_prepaid__prepaid_id
+msgid "Авансовый платеж"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_account_payment__prepaid_id
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid_line__prepaid_id
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.view_sale_order_form_inherit_button_advance
+msgid "Авансовый счет"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid_line__analytic_distribution
+msgid "Аналитическое распределение"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.report_order_prepaid
+msgid "БИК"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.report_order_prepaid
+msgid "Банк получателя"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__partner_bank_id
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_payment_register_prepaid__partner_bank_id
+msgid "Банковский счёт получателя"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.report_order_prepaid
+msgid "Без НДС"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.report_order_prepaid
+msgid "Бухгалтер"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields.selection,name:l10n_ru_advance_payments.selection__order_prepaid__payment_state__in_payment
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.form_order_prepaid_view
+msgid "В оплате"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__currency_id
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_payment_register_prepaid__currency_id
+msgid "Валюта"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_payment_register_prepaid__currency_const
+msgid "Валюта(Const)"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.report_order_prepaid
+msgid ""
+"Внимание! Оплата данного счета означает согласие с условиями поставки "
+"товара."
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__all_total
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__amount
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.form_order_prepaid_view
+msgid "Всего"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.report_order_prepaid
+msgid "Всего наименований"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields.selection,name:l10n_ru_advance_payments.selection__order_prepaid__advance_type__inbound
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.view_res_config_settings_advance
+msgid "Входящий"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_res_company__advance_in_id
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_res_config_settings__advance_in_id
+msgid "Входящий счет"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__payment_amount
+msgid "Выплачено"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_payment_register_prepaid__payment_date
+msgid "Дата платежа"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__invoice_date
+msgid "Дата счета"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.form_order_prepaid_view
+msgid "Доп. информация"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.report_order_prepaid
+msgid "Ед."
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid_line__product_uom_id
+msgid "Ед. измерения"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_payment_register_prepaid__journal_id
+msgid "Журнал"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__sale_order_id
+msgid "Заказ продаж"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_sale_order__prepaid_advance_count
+msgid "Закупки"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_payment_register_prepaid__communication
+msgid "Заметки"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.report_order_prepaid
+msgid "ИНН"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.template_order_prepaid_invoice_body
+msgid "Информация"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields.selection,name:l10n_ru_advance_payments.selection__order_prepaid__advance_type__outbound
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.view_res_config_settings_advance
+msgid "Исходящий"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_res_company__advance_out_id
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_res_config_settings__advance_out_id
+msgid "Исходящий счет"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.report_order_prepaid
+msgid "КПП"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.report_order_prepaid
+msgid "Кол-во"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid_line__quantity
+msgid "Количество"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__comment
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.form_order_prepaid_view
+msgid "Комментарий"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__company_id
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_payment_register_prepaid__company_id
+msgid "Компания"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__company_partner_id
+msgid "Контакт компании"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__partner_id
+msgid "Контрагент"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid_line__label
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid_line__name
+msgid "Метка"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_payment_register_prepaid__method_line_type
+msgid "Метод"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_payment_register_prepaid__payment_method_line_id
+msgid "Метод оплаты"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.report_order_prepaid
+msgid "НДС:"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__name
+msgid "Название"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid_line__tax_ids
+msgid "Налоги"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields.selection,name:l10n_ru_advance_payments.selection__order_prepaid__payment_state__not_paid
+msgid "Не оплачен"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.tree_order_prepaid_view
+msgid "Номер"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.template_order_prepaid_invoice_body
+msgid "Номер:"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields.selection,name:l10n_ru_advance_payments.selection__order_prepaid__payment_state__paid
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.form_order_prepaid_view
+msgid "Оплачено"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__amount_residual
+msgid "Остаток долга"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.form_order_prepaid_view
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.view_account_payment_register_prepaid_form
+msgid "Отмена"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields.selection,name:l10n_ru_advance_payments.selection__order_prepaid__state__cancel
+msgid "Отменено"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.form_order_prepaid_view
+msgid "Переместить в черновики"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__payment_id
+msgid "Платеж"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.form_order_prepaid_view
+msgid "Подтвердить"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.form_order_prepaid_view
+msgid "Позиция счета"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.report_order_prepaid
+msgid "Покупатель:"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.report_order_prepaid
+msgid "Получатель"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.report_order_prepaid
+msgid "Поставщик:"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields.selection,name:l10n_ru_advance_payments.selection__order_prepaid__state__posted
+msgid "Проведено"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__th_field_taxes
+msgid "Проверка столбца налогов"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid_line__product_id
+msgid "Продукт"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.form_order_prepaid_view
+msgid "Регистрация Платежа"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model,name:l10n_ru_advance_payments.model_payment_register_prepaid
+msgid "Регистрация авансовых платежей"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.report_order_prepaid
+msgid "Руководитель"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__payment_line_ids
+msgid "Связанные платежи"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_sale_order_line__prepaid_ids
+msgid "Связные строки авансовых счетов"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid_line__sale_ids
+msgid "Связные строки заказа"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.view_account_payment_register_prepaid_form
+msgid "Создать платеж"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__invoice_date_due
+msgid "Срок оплаты"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__state
+msgid "Статус"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__payment_state
+msgid "Статус платежа"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__prepaid_line
+msgid "Строки счета"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__amount_sum_line
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_payment_register_prepaid__amount
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.report_order_prepaid
+msgid "Сумма"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_account_payment__amount_adv_currency
+msgid "Сумма от счета"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_payment_register_prepaid__amount_const
+msgid "Сумма(Const)"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.report_order_prepaid
+msgid "Сч. №"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.actions.report,name:l10n_ru_advance_payments.report_order_prepaid_invoice
+msgid "Счет"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.actions.report,name:l10n_ru_advance_payments.action_report_orderprepaid
+msgid "Счет по форме 1С"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid_line__account_id
+msgid "Счёт"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__advance_type
+msgid "Тип платежа"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_payment_register_prepaid__advance_type
+msgid "Тип счета на аванс"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.report_order_prepaid
+msgid "Товары (работы, услуги)"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid__payment_terms
+msgid "Условия оплаты"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.report_order_prepaid
+msgid "Условия оплаты:"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields,field_description:l10n_ru_advance_payments.field_order_prepaid_line__price_unit
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.form_order_prepaid_view
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.report_order_prepaid
+msgid "Цена"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields.selection,name:l10n_ru_advance_payments.selection__order_prepaid__payment_state__partial
+msgid "Частично оплачено"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.form_order_prepaid_view
+msgid "Частичный"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model:ir.model.fields.selection,name:l10n_ru_advance_payments.selection__order_prepaid__state__draft
+msgid "Черновик"
+msgstr ""
+
+#. module: l10n_ru_advance_payments
+#: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.report_order_prepaid
+msgid "руб."
+msgstr ""

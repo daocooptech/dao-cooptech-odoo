@@ -74,9 +74,118 @@ def _renamed(Partner, org):
     return old
 
 
+# Всем организациям — разные названия (владелец 28.09.2026: «сделай всем
+# разные имена»). Тёзки в разных городах в макете были нарочно, но на
+# платформе они читались как одна организация, записанная дважды:
+# «Кооператив «Борозда»» трижды в портфеле, два «Покоса» в поиске.
+#
+# Переименованная запись должна находиться и следующим прогоном — иначе
+# загрузчик по паре «название + город» не узнает её и заведёт тёзку
+# заново, а переименование заведёт ещё одну. Поэтому каждое
+# переименование запоминается: «прежнее название|город» → новое.
+RENAMES_PARAM = 'coop_demo.org_renames'
+
+# Новые названия — слова того же ряда, что в макете: короткие, русские,
+# про землю и ремесло. Правовая форма («Кооператив», «АО», «ТСЖ»)
+# сохраняется: меняется имя, а не вид организации.
+BRANDS = [
+    'Нива', 'Сенокос', 'Кедр', 'Берег', 'Опора', 'Слобода',
+    'Жатва', 'Лад', 'Колос', 'Вереск', 'Подворье', 'Пахарь', 'Устье',
+    'Околица', 'Житница', 'Горница', 'Пойма', 'Бор', 'Раздолье',
+    'Ключи', 'Родное', 'Сруб', 'Гумно', 'Зимовье', 'Перелесок',
+]
+
+# Названия без «кавычек» подбором не заменить — для них своё.
+SPECIAL = {
+    'ДАО КООПТЕХ — рабочая группа': 'ДАО КООПТЕХ — оператор платформы',
+}
+
+
+def _renames(env):
+    raw = env['ir.config_parameter'].sudo().get_param(RENAMES_PARAM) or '{}'
+    try:
+        return json.loads(raw)
+    except ValueError:
+        return {}
+
+
+def _renamed_by_city(Partner, renames, org):
+    """Организация, переименованная ради уникальности названия."""
+    new = renames.get('%s|%s' % (org['name'], org['city'] or ''))
+    if not new:
+        return Partner.browse()
+    domain = [('name', '=', new), ('is_company', '=', True)]
+    if org['city']:
+        domain.append(('city', '=', org['city']))
+    return Partner.search(domain, limit=1)
+
+
+def unique_org_names(env):
+    """Разные названия у всех действующих организаций. Идемпотентно."""
+    Partner = env['res.partner'].sudo().with_context(tracking_disable=True)
+    cr = env.cr
+    cr.execute("""
+        SELECT name FROM res_partner
+         WHERE is_company AND active
+         GROUP BY name HAVING count(*) > 1
+    """)
+    names = [row[0] for row in cr.fetchall()]
+    if not names:
+        return 0
+    main = env.ref('base.main_partner', raise_if_not_found=False)
+    cr.execute("SELECT res_id FROM ir_model_data WHERE model = 'res.partner'")
+    with_xmlid = {row[0] for row in cr.fetchall()}
+    taken = set(Partner.search([('is_company', '=', True)]).mapped('name'))
+    # Название в кавычках тоже не повторяется ни у кого: «АО «Нива»» рядом
+    # с «ООО «Нива»» и «ТСЖ «Нива»» формально разные, но читаются как одна
+    # сеть тёзок — то, от чего и избавляемся.
+    used = {n.partition('«')[2].rstrip('»') for n in taken if '«' in n}
+    renames = _renames(env)
+    Membership = env['coop.membership'].sudo() if 'coop.membership' in env else None
+    Deal = env['coop.deal'].sudo() if 'coop.deal' in env else None
+
+    def weight(partner):
+        # Название сохраняет та, на которой держится больше: главная
+        # компания, запись справочника, затем — члены и сделки.
+        # `is not None`, а не просто `if Membership`: пустой набор записей
+        # ложен, и тогда не считалось бы ничего — название оставалось бы
+        # у меньшего номера (так и вышло с «Покосом» на стенде 28.09).
+        members = (Membership.search_count([('organization_id', '=', partner.id)])
+                   if Membership is not None else 0)
+        deals = (Deal.search_count(['|', ('party_a_id', '=', partner.id),
+                                    ('party_b_id', '=', partner.id)])
+                 if Deal is not None else 0)
+        return (partner == main, partner.id in with_xmlid, members + deals, -partner.id)
+
+    renamed = 0
+    for name in names:
+        group = Partner.search([('name', '=', name), ('is_company', '=', True)])
+        keep = max(group, key=weight)
+        for partner in (group - keep).sorted('id'):
+            new = SPECIAL.get(name) if SPECIAL.get(name) not in taken else None
+            if not new:
+                head, sep, _tail = name.partition('«')
+                prefix = head if sep else name + ' '
+                brand = next((b for b in BRANDS if b not in used), None)
+                new = '%s«%s»' % (prefix, brand) if brand else None
+            if not new:
+                _logger.warning('Не нашлось свободного названия для «%s» (%s)', name, partner.id)
+                continue
+            renames['%s|%s' % (name, partner.city or '')] = new
+            partner.name = new
+            taken.add(new)
+            used.add(new.partition('«')[2].rstrip('»'))
+            renamed += 1
+    env['ir.config_parameter'].sudo().set_param(
+        RENAMES_PARAM, json.dumps(renames, ensure_ascii=False, sort_keys=True))
+    _logger.info('Названия организаций: переименовано %s', renamed)
+    return renamed
+
+
 def load_organizations(env, specializations, marks):
     with open(os.path.join(HERE, 'organizations.json'), encoding='utf-8') as fh:
         orgs = json.load(fh)
+    renames = _renames(env)
 
     forms = {
         form.code: form
@@ -148,6 +257,8 @@ def load_organizations(env, specializations, marks):
                 ('name', '=', org['name']), ('is_company', '=', True)],
                 order='id', limit=1)
             values.pop('city', None)
+        if not existing:
+            existing = _renamed_by_city(Partner, renames, org)
         if not existing:
             existing = _renamed(Partner, org)
         if existing:

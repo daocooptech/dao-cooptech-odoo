@@ -2,3 +2,4 @@
 from . import coop_vacancy
 from . import coop_vacancy_project
 from . import coop_vacancy_apply
+from . import catalog_filters

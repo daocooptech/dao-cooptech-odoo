@@ -1,0 +1,44 @@
+<odoo>
+    <record id="paperformat_a4" model="report.paperformat">
+        <field name="name">A4</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">7</field>
+        <field name="margin_bottom">7</field>
+        <field name="margin_left">7</field>
+        <field name="margin_right">7</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">35</field>
+        <field name="dpi">75</field>
+    </record>
+
+    <record id="action_report_orderprepaid" model="ir.actions.report">
+        <field name="name">Счет по форме 1С</field>
+        <field name="model">order.prepaid</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">l10n_ru_advance_payments.report_order_prepaid</field>
+        <field name="report_file">l10n_ru_advance_payments.report_order_prepaid</field>
+        <field name="print_report_name">'Счет - %s ' % (str(object.name)+' '+(str(object.partner_id.parent_id.name) if
+            object.partner_id.parent_id else str(object.partner_id.name)))
+        </field>
+        <field name="binding_model_id" ref="l10n_ru_advance_payments.model_order_prepaid"/>
+        <field name="paperformat_id" ref="l10n_ru_advance_payments.paperformat_a4"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="report_order_prepaid_invoice" model="ir.actions.report">
+        <field name="name">Счет</field>
+        <field name="model">order.prepaid</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">l10n_ru_advance_payments.template_order_prepaid_invoice</field>
+        <field name="report_file">l10n_ru_advance_payments.template_order_prepaid_invoice</field>
+        <field name="print_report_name">'Счет - %s ' % ((object.name if object.name else '')+' '+(object.partner_id.parent_id.name if
+            object.partner_id.parent_id else object.partner_id.name))</field>
+        <field name="attachment"/>
+        <field name="binding_model_id" ref="model_order_prepaid"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

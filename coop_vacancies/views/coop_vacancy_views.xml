@@ -169,10 +169,15 @@
               <field name="reward_kind" widget="coop_inline" readonly="not coop_can_edit"/>
               <label for="pay_from" string="Оплата"
                      invisible="reward_kind in ('barter', 'volunteer')"/>
-              <div class="o_row" invisible="reward_kind in ('barter', 'volunteer')">
+              <!-- Ширина полей — по содержимому: поровну на троих сумма
+                   «55 000,00 ₽» не влезала и обрезалась до «55 000…», а
+                   пустое «до» с прочерком занимало столько же. Пустое «до»
+                   читателю не показывается (находка 28.09, решение 433). -->
+              <div class="o_row o_coop_pay_row" invisible="reward_kind in ('barter', 'volunteer')">
                 <field name="pay_from" widget="coop_inline" readonly="not coop_can_edit"/>
-                <span>–</span>
-                <field name="pay_to" widget="coop_inline" readonly="not coop_can_edit"/>
+                <span invisible="not pay_to and not coop_can_edit">–</span>
+                <field name="pay_to" widget="coop_inline" readonly="not coop_can_edit"
+                       invisible="not pay_to and not coop_can_edit"/>
                 <field name="pay_period" widget="coop_inline" readonly="not coop_can_edit"/>
               </div>
               <field name="currency_id" invisible="1"/>

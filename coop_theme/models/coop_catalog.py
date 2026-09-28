@@ -71,8 +71,14 @@ class CoopCatalog(models.AbstractModel):
         «Спроса», и выбрать второе станет нечем.
         """
         field = block['field']
-        others = [leaf for leaf in domain
-                  if not (isinstance(leaf, (list, tuple)) and leaf and leaf[0] == field)]
+        # Считать внутри того же набора, что показывает каталог: базовое
+        # условие действия («только опубликованные») браузер передаёт в
+        # контексте. Без него у вакансий сумма счётчиков выходила 410 при
+        # 193 вакансиях в каталоге (28.09.2026).
+        base = [tuple(leaf) if isinstance(leaf, list) else leaf
+                for leaf in (self.env.context.get('coop_base_domain') or [])]
+        others = base + [leaf for leaf in domain
+                         if not (isinstance(leaf, (list, tuple)) and leaf and leaf[0] == field)]
         try:
             groups = model._read_group(others, [field], ['__count'])
         except Exception:
