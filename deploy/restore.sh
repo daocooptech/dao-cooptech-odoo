@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Перенести базу и файловое хранилище со стенда разработки.
 #
-#   bash restore.sh /path/koopeh.dump [/path/filestore.tar.gz]
+#   bash restore.sh /path/cooptech-ГГГГ-ММ-ДД-ччммсс.dump [/path/filestore.tar.gz]
 #
 # Существующая база с тем же именем удаляется — на боевом сервере это
 # делается осознанно и только пока платформа не открыта участникам.

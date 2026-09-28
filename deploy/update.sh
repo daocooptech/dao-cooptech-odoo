@@ -56,6 +56,11 @@ run() { sudo -u "$USER" "$@"; }
 BACKUP_DIR=/var/backups/coop
 KEEP=7
 LAST_DUMP=""
+# Имя снимка — по платформе, а не по базе (владелец, 28.09.2026: «пусть
+# будет cooptech»). Прежние снимки назывались по базе, `koopeh-…`; их
+# счёт сроков видит наравне с новыми, пока они не уйдут сами.
+SNAP=cooptech
+OLD_SNAP=koopeh
 
 # Снимок базы в сжатом формате. Возвращает ложь, если не вышло: вызов
 # решает сам, что с этим делать — перед обновлением это повод не
@@ -63,7 +68,7 @@ LAST_DUMP=""
 backup_db() {
     mkdir -p "$BACKUP_DIR"
     chown postgres:postgres "$BACKUP_DIR" 2>/dev/null || true
-    LAST_DUMP="$BACKUP_DIR/$DB-$(date +%F-%H%M%S).dump"
+    LAST_DUMP="$BACKUP_DIR/$SNAP-$(date +%F-%H%M%S).dump"
     say "Снимок базы → $LAST_DUMP"
     # От postgres, а не от root: у root нет роли в базе. Формат `-Fc`
     # сжатый, его понимает pg_restore в restore.sh.
@@ -76,7 +81,8 @@ backup_db() {
             # Храним последние семь. Считаем по времени изменения, а не
             # по имени: имя с датой удобно читать, но сортировать по нему
             # значит зависеть от формата даты.
-            ls -1t "$BACKUP_DIR/$DB-"*.dump 2>/dev/null                 | tail -n +$((KEEP + 1)) | xargs -r rm -f
+            { ls -1t "$BACKUP_DIR/$SNAP-"*.dump "$BACKUP_DIR/$OLD_SNAP-"*.dump 2>/dev/null || true; } \
+                | tail -n +$((KEEP + 1)) | xargs -r rm -f
             return 0
         fi
     fi

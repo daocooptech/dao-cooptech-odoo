@@ -121,7 +121,7 @@ nginx -t && systemctl reload nginx
 say "Готово"
 cat <<TEXT
 Дальше — данные:
-  · перенести базу:      bash $ODOO_HOME/coop-addons/deploy/restore.sh /path/koopeh.dump
+  · перенести базу:      bash $ODOO_HOME/coop-addons/deploy/restore.sh /path/cooptech-ГГГГ-ММ-ДД-ччммсс.dump
   · или поставить с нуля: sudo -u $ODOO_USER $ODOO_HOME/venv/bin/python $ODOO_HOME/odoo/odoo-bin \\
                               -c /etc/coop-odoo.conf -d $DB_NAME -i coop_theme --stop-after-init
 

@@ -25,8 +25,13 @@ STORE=$DATA_DIR/filestore
 # только сменить ключ резервным.
 KEYS=$DATA_DIR/federation
 
+# Имя снимка — по платформе, а не по базе (владелец, 28.09.2026: «пусть
+# будет cooptech»). Прежние `koopeh-…` счёт сроков видит наравне с новыми.
+SNAP=cooptech
+OLD_SNAP=koopeh
+
 mkdir -p "$BACKUP_DIR"
-DUMP="$BACKUP_DIR/$DB-$(date +%F-%H%M%S).dump"
+DUMP="$BACKUP_DIR/$SNAP-$(date +%F-%H%M%S).dump"
 
 sudo -u postgres pg_dump -Fc "$DB" > "$DUMP"
 if [ ! -s "$DUMP" ]; then
@@ -57,11 +62,12 @@ fi
 #
 # Считаем по времени изменения, а не по имени: имя с датой удобно
 # читать, но сортировать по нему значит зависеть от формата даты.
-ls -1t "$BACKUP_DIR/$DB-"*.dump 2>/dev/null | tail -n +$((KEEP + 1)) \
-    | xargs -r rm -f
-ls -1t "$BACKUP_DIR/$DB-"*-filestore.tar.gz 2>/dev/null \
-    | tail -n +$((KEEP_STORE + 1)) | xargs -r rm -f
-ls -1t "$BACKUP_DIR/$DB-"*-federation-keys.tar.gz 2>/dev/null \
-    | tail -n +$((KEEP + 1)) | xargs -r rm -f
+#
+# `|| true` обязателен: когда прежних `koopeh-…` не останется, ls вернёт
+# ошибку на пустом шаблоне, и при pipefail снимок оборвался бы здесь.
+newest() { ls -1t "$BACKUP_DIR/$SNAP-"$1 "$BACKUP_DIR/$OLD_SNAP-"$1 2>/dev/null || true; }
+newest '*.dump' | tail -n +$((KEEP + 1)) | xargs -r rm -f
+newest '*-filestore.tar.gz' | tail -n +$((KEEP_STORE + 1)) | xargs -r rm -f
+newest '*-federation-keys.tar.gz' | tail -n +$((KEEP + 1)) | xargs -r rm -f
 
 echo "Снимок: $DUMP ($(du -h "$DUMP" | cut -f1))"
