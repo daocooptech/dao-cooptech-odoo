@@ -268,6 +268,13 @@ done
 
 if [ -n "$new_modules" ]; then
     say "Новые модули, ставлю: $new_modules"
+    # Снимок и здесь, а не только перед обновлением: установка модуля
+    # тоже пишет в базу (таблицы, наследование чужих моделей, данные), и
+    # откатить неудачную установку без копии нечем.
+    if ! backup_db; then
+        say "ВНИМАНИЕ: снимок базы не сделан — установка отменена"
+        exit 1
+    fi
     systemctl stop coop-odoo
     if ! run "$ODOO_HOME/venv/bin/python" "$ODOO_HOME/odoo/odoo-bin"             -c "$CONF" -d "$DB" -i "$new_modules" --stop-after-init --no-http; then
         say "УСТАНОВКА УПАЛА: $new_modules"

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Экран администратора узла: кто мы в сети, чем подписываем, что
+       опубликовали. Участникам не показывается — для них федерация
+       невидима, пока нет сделок с другими узлами. -->
+
+  <record id="view_coop_fed_identity_form" model="ir.ui.view">
+    <field name="name">coop.fed.identity.form</field>
+    <field name="model">coop.fed.identity</field>
+    <field name="arch" type="xml">
+      <form string="Узел сети" create="false" delete="false">
+        <header>
+          <button name="action_seal_now" type="object" string="Подписать очередь сейчас"
+                  class="btn-secondary"/>
+          <field name="state" widget="statusbar"/>
+        </header>
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="name"/></h1>
+          </div>
+          <group>
+            <group string="Адрес в сети">
+              <field name="did"/>
+              <field name="node_path"/>
+              <field name="base_url"/>
+              <field name="country_id"/>
+            </group>
+            <group string="Журнал">
+              <field name="head_seq"/>
+              <field name="head_event"/>
+              <field name="head_ts"/>
+              <field name="last_error" invisible="not last_error"/>
+            </group>
+          </group>
+          <notebook>
+            <page string="Ключи" name="keys">
+              <field name="key_ids">
+                <list create="false" delete="false">
+                  <field name="kid"/>
+                  <field name="purpose"/>
+                  <field name="not_before"/>
+                  <field name="revoked_at"/>
+                  <field name="compromised_at"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_fed_identity_list" model="ir.ui.view">
+    <field name="name">coop.fed.identity.list</field>
+    <field name="model">coop.fed.identity</field>
+    <field name="arch" type="xml">
+      <list string="Узел сети" create="false" delete="false">
+        <field name="name"/>
+        <field name="node_path"/>
+        <field name="did"/>
+        <field name="head_seq"/>
+        <field name="state"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_fed_event_list" model="ir.ui.view">
+    <field name="name">coop.fed.event.list</field>
+    <field name="model">coop.fed.event</field>
+    <field name="arch" type="xml">
+      <list string="Журнал узла" create="false" delete="false" edit="false">
+        <field name="seq"/>
+        <field name="ts"/>
+        <field name="type"/>
+        <field name="subject"/>
+        <field name="to_json" optional="show"/>
+        <field name="origin" optional="hide"/>
+        <field name="node" optional="hide"/>
+        <field name="status"/>
+        <field name="event_id" optional="hide"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_fed_event_form" model="ir.ui.view">
+    <field name="name">coop.fed.event.form</field>
+    <field name="model">coop.fed.event</field>
+    <field name="arch" type="xml">
+      <form string="Событие журнала" create="false" delete="false" edit="false">
+        <sheet>
+          <group>
+            <group>
+              <field name="type"/>
+              <field name="subject"/>
+              <field name="node"/>
+              <field name="seq"/>
+              <field name="ts"/>
+              <field name="status"/>
+              <field name="reason" invisible="not reason"/>
+            </group>
+            <group>
+              <field name="event_id"/>
+              <field name="prev"/>
+              <field name="kid"/>
+              <field name="body_hash"/>
+              <field name="to_json"/>
+            </group>
+          </group>
+          <group string="Тело">
+            <field name="body_json" nolabel="1" colspan="2"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_coop_fed_identity" model="ir.actions.act_window">
+    <field name="name">Узел сети</field>
+    <field name="res_model">coop.fed.identity</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <record id="action_coop_fed_event" model="ir.actions.act_window">
+    <field name="name">Журнал узла</field>
+    <field name="res_model">coop.fed.event</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <menuitem id="menu_coop_fed_root" name="Федерация"
+            parent="base.menu_administration" sequence="90" groups="base.group_system"/>
+  <menuitem id="menu_coop_fed_identity" name="Узел сети" parent="menu_coop_fed_root"
+            action="action_coop_fed_identity" sequence="10"/>
+  <menuitem id="menu_coop_fed_event" name="Журнал узла" parent="menu_coop_fed_root"
+            action="action_coop_fed_event" sequence="20"/>
+
+</odoo>

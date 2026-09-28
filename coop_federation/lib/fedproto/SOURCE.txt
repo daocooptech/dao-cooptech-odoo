@@ -1,0 +1,11 @@
+# Копия federation/ref из daocooptech/dao-cooptech, коммит d9eda5b.
+# Файлы не правятся здесь: правка — в эталоне, с тестом, потом копия заново.
+# Отпечатки проверяет tests/test_federation.py.
+9e2a6765894a77a9c5139061dc3496f5b779cd6bcfa314f98aa850a1df0cdd05 *__init__.py
+22e8198061c03b4803aedafe81271dc8ca43f755b1e80efd4d0bc761907aec77 *canonical.py
+ffe86977f2af4fb7cb8aac4006c40e544c843114840b8042bd2ee8d6b342c4bd *deal.py
+e34a15562e536122eddd9de9fdec8834256771c00a4f4964a91c055f3a8a3122 *did.py
+22a5eec5750310438fd4e18a0e62275947291c700aadaf4e562d541ce3419d6d *ed25519.py
+53859f21012c4db1c0bdec58b6ab77ed22b26484e8381ce1d158882018d09237 *log.py
+3d5403e79b30e7743470b053f61db108ca9f1f4b2f7bca5636440c33f5d97739 *ownership.py
+cec9ea99af46e7033f3ad68aaae54ff742c4ca71d132e2ba556a80c82813d3be *reader.py

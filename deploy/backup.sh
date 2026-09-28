@@ -18,7 +18,12 @@ KEEP=7            # снимков базы
 KEEP_STORE=3      # копий файлового хранилища
 # Путь берётся из конфига: `data_dir` на боевой — /var/lib/coop,
 # и хранилище лежит в нём, а не рядом с кодом.
-STORE=$(awk -F'= *' '/^data_dir/ {print $2}' /etc/coop-odoo.conf 2>/dev/null)/filestore
+DATA_DIR=$(awk -F'= *' '/^data_dir/ {print $2}' /etc/coop-odoo.conf 2>/dev/null)
+STORE=$DATA_DIR/filestore
+# Ключи узла федерации (coop_federation) — вне базы и вне хранилища: в базе
+# секрету не место. Потеряв файл, узел не сможет продолжить свой журнал —
+# только сменить ключ резервным.
+KEYS=$DATA_DIR/federation
 
 mkdir -p "$BACKUP_DIR"
 DUMP="$BACKUP_DIR/$DB-$(date +%F-%H%M%S).dump"
@@ -39,6 +44,10 @@ if [ -d "$STORE" ]; then
     tar -czf "${DUMP%.dump}-filestore.tar.gz" -C "$(dirname "$STORE")" \
         "$(basename "$STORE")"
 fi
+if [ -d "$KEYS" ]; then
+    tar -czf "${DUMP%.dump}-federation-keys.tar.gz" -C "$DATA_DIR" federation
+    chmod 600 "${DUMP%.dump}-federation-keys.tar.gz"
+fi
 
 # Сколько хранить. База и хранилище разного веса: дамп тринадцать
 # мегабайт, хранилище почти двести, и семь его копий заняли бы
@@ -52,5 +61,7 @@ ls -1t "$BACKUP_DIR/$DB-"*.dump 2>/dev/null | tail -n +$((KEEP + 1)) \
     | xargs -r rm -f
 ls -1t "$BACKUP_DIR/$DB-"*-filestore.tar.gz 2>/dev/null \
     | tail -n +$((KEEP_STORE + 1)) | xargs -r rm -f
+ls -1t "$BACKUP_DIR/$DB-"*-federation-keys.tar.gz 2>/dev/null \
+    | tail -n +$((KEEP + 1)) | xargs -r rm -f
 
 echo "Снимок: $DUMP ($(du -h "$DUMP" | cut -f1))"

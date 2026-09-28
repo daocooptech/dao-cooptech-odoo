@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Печать журнала: раздать номера и подписать очередь.
+
+       Раз в минуту — страховка; обычно печать запускается сразу после
+       постановки события (`_trigger`). Отдельным заданием, а не внутри
+       действия пользователя: подпись и чтение файла ключа не должны
+       удлинять нажатие кнопки, а номер выдаётся строго по одному. -->
+  <record id="cron_coop_fed_seal" model="ir.cron">
+    <field name="name">Федерация: печать журнала узла</field>
+    <field name="model_id" ref="model_coop_fed_event"/>
+    <field name="state">code</field>
+    <field name="code">model._cron_seal()</field>
+    <field name="interval_number">1</field>
+    <field name="interval_type">minutes</field>
+    <field name="active" eval="True"/>
+  </record>
+
+</odoo>
