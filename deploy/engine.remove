@@ -22,6 +22,9 @@ base_vat
 l10n_latam_check
 
 # Rudoo-модули замены бренда: web_debranding под лицензией OPL-1 (решение 442);
-# portal_debranding от него зависит. Замена бренда — в coop_theme и coop_website.
+# portal_debranding от него зависит, website_debranding — от portal_debranding
+# (29.09 защита остановила очистку на боевой именно на нём). Замена бренда —
+# в coop_theme и coop_website («Работает на Odoo» прячет coop_no_brand_promotion).
 web_debranding
 portal_debranding
+website_debranding
