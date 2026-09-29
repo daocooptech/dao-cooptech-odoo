@@ -12,7 +12,9 @@
                 'sale',
                 'l10n_ru_contract',
                 'l10n_ru_doc',
-                'l10n_latam_check'
+                # l10n_latam_check снят (решение 442): код модуля из него
+                # ничего не использует, а зависимость держала base_vat с
+                # обращениями VIES к серверам Odoo.
                 ],
 
     'data': [

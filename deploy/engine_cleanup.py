@@ -1,0 +1,129 @@
+# -*- coding: utf-8 -*-
+"""Очистка базы от служб Odoo S.A. — решения 439 (п. 4) и 441.
+
+Запуск на старом дереве движка, пока код удаляемых модулей ещё на диске:
+
+    odoo-bin shell -c <conf> -d <db> --no-http < deploy/engine_cleanup.py
+
+Скрипт идемпотентен: повторный запуск ничего не меняет.
+
+Что делает:
+1. Удаляет задание «Publisher: Update Notification» и возвращает списку
+   запланированных действий пустой отбор (mail прятал задание отбором).
+2. Удаляет параметры iap_vies.* — ключи, выданные облаком Odoo.
+3. Отмечает мастер сайта пройденным: иначе он зовёт облачную службу.
+4. Выключает еженедельный дайджест: письма со сводкой больше не уходят.
+5. Снимает модули служб (deploy/engine.remove). Защита: если удаление
+   потянет модуль не из этого списка, скрипт останавливается до удаления.
+"""
+import logging
+import os
+
+_logger = logging.getLogger('coop.engine_cleanup')
+
+HERE = os.path.dirname(os.path.abspath(__file__)) if '__file__' in globals() else None
+
+
+def _removal_list():
+    # Под `odoo-bin shell < файл` переменной __file__ нет, поэтому путь
+    # к списку ищется от адреса модулей в конфигурации.
+    from odoo.tools import config
+    candidates = []
+    if HERE:
+        candidates.append(os.path.join(HERE, 'engine.remove'))
+    paths = config.get('addons_path') or []
+    if isinstance(paths, str):
+        paths = paths.split(',')
+    for path in paths:
+        path = str(path).strip()
+        if path.rstrip('/\\').endswith('coop-addons'):
+            candidates.append(os.path.join(path, 'deploy', 'engine.remove'))
+    for candidate in candidates:
+        if os.path.exists(candidate):
+            with open(candidate, encoding='utf-8') as fh:
+                return [line.split('#')[0].strip() for line in fh
+                        if line.split('#')[0].strip()]
+    raise SystemExit('engine.remove не найден: %s' % candidates)
+
+
+def say(msg, *args):
+    print('[engine_cleanup] ' + (msg % args if args else msg))
+
+
+def cleanup_data(env):
+    Cron = env['ir.cron'].sudo().with_context(active_test=False)
+    publisher = Cron.search([('model_name', '=', 'publisher_warranty.contract')])
+    if publisher:
+        say('задание Publisher: удаляю %s', publisher.ids)
+        publisher.unlink()
+
+    act = env.ref('base.ir_cron_act', raise_if_not_found=False)
+    if act and act.domain not in (False, '', '[]'):
+        say('отбор списка заданий: %r → []', act.domain)
+        act.sudo().domain = '[]'
+
+    params = env['ir.config_parameter'].sudo().search([('key', '=like', 'iap_vies.%')])
+    if params:
+        say('параметры облака: удаляю %s', params.mapped('key'))
+        params.unlink()
+
+    if 'website' in env:
+        todo = env['website'].sudo().search([('configurator_done', '=', False)])
+        if todo:
+            say('мастер сайта: отмечаю пройденным у %s', todo.ids)
+            todo.configurator_done = True
+
+    if 'digest.digest' in env:
+        digests = env['digest.digest'].sudo().search([('state', '=', 'activated')])
+        if digests:
+            say('дайджест: выключаю %s', digests.ids)
+            digests.write({'state': 'deactivated'})
+        ICP = env['ir.config_parameter'].sudo()
+        if ICP.get_param('digest.default_digest_emails') not in (False, 'False'):
+            ICP.set_param('digest.default_digest_emails', False)
+            say('дайджест: выключен для новых пользователей')
+        cron = env.ref('digest.ir_cron_digest_scheduler_action', raise_if_not_found=False)
+        if cron and cron.active:
+            cron.sudo().active = False
+            say('дайджест: задание рассылки выключено')
+
+    env.cr.commit()
+
+
+def removal_closure(env, names):
+    Module = env['ir.module.module'].sudo()
+    roots = Module.search([('name', 'in', names),
+                           ('state', 'in', ('installed', 'to upgrade'))])
+    if not roots:
+        return roots, roots
+    # Тот же обход, что делает button_uninstall: все установленные модули,
+    # зависящие от удаляемых.
+    closure = roots
+    while True:
+        deps = env['ir.module.module.dependency'].sudo().search([
+            ('name', 'in', closure.mapped('name'))])
+        more = deps.mapped('module_id').filtered(
+            lambda m: m.state in ('installed', 'to upgrade')) - closure
+        if not more:
+            break
+        closure |= more
+    return roots, closure
+
+
+def remove_modules(env, names):
+    roots, closure = removal_closure(env, names)
+    if not roots:
+        say('модули служб: уже сняты')
+        return False
+    extra = sorted(set(closure.mapped('name')) - set(names))
+    if extra:
+        raise SystemExit('ОСТАНОВЛЕНО: удаление потянет модули не из списка: %s' % extra)
+    say('модули служб: снимаю %s', sorted(closure.mapped('name')))
+    roots.button_immediate_uninstall()
+    return True
+
+
+removal = _removal_list()
+cleanup_data(env)  # noqa: F821 — env задаёт odoo-bin shell
+remove_modules(env, removal)  # noqa: F821
+say('готово')

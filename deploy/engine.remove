@@ -1,0 +1,22 @@
+# Модули служб Odoo S.A., которых на платформе нет — решения 439 (п. 4) и 441.
+# Снимает deploy/engine_cleanup.py; из форка движка их каталоги удалены.
+# Список полный: удаление, которое потянет модуль не отсюда, останавливается.
+iap
+iap_mail
+partner_autocomplete
+sms
+calendar_sms
+event_sms
+hr_recruitment_sms
+project_sms
+sale_sms
+stock_sms
+website_sms
+snailmail
+snailmail_account
+web_unsplash
+google_gmail
+microsoft_outlook
+base_import_module
+base_vat
+l10n_latam_check

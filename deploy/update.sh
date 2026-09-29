@@ -326,6 +326,37 @@ else
     fi
 fi
 
+# Службы Odoo S.A. — решения 439 (п. 4), 441, 442.
+#
+# Модули из engine.remove ходили на серверы Odoo S.A. или тянули за собой
+# такие модули. Пока хоть один из них стоит в базе, очистка снимает их и
+# гасит задания (publisher, VIES, дайджест) — после обновления модулей,
+# потому что список зависимостей в базе обновляет именно оно: 29.09 без
+# этого очистку остановил l10n_ru_advance_payments с лишней зависимостью.
+# Когда модулей в базе нет, блок ничего не делает.
+if [ -f "$ODOO_HOME/coop-addons/deploy/engine.remove" ]; then
+    remove_list=$(sed 's/#.*//' "$ODOO_HOME/coop-addons/deploy/engine.remove" \
+                  | awk 'NF {printf "%s'"'"'%s'"'"'", (n++ ? "," : ""), $1}')
+    left=$(run psql -d "$DB" -tAc "select string_agg(name, ',') from ir_module_module
+                                  where state in ('installed', 'to upgrade')
+                                    and name in ($remove_list)" 2>/dev/null || true)
+    if [ -n "$left" ]; then
+        say "Модули служб Odoo S.A. в базе: $left — снимаю"
+        if ! backup_db; then
+            say "ВНИМАНИЕ: снимок базы не сделан — очистка отменена"
+            exit 1
+        fi
+        systemctl stop coop-odoo
+        if ! run "$ODOO_HOME/venv/bin/python" "$ODOO_HOME/odoo/odoo-bin" shell \
+                -c "$CONF" -d "$DB" --no-http \
+                < "$ODOO_HOME/coop-addons/deploy/engine_cleanup.py"; then
+            say "ОЧИСТКА УПАЛА. Откат: bash $ODOO_HOME/coop-addons/deploy/restore.sh $LAST_DUMP"
+            start_service start || true
+            exit 1
+        fi
+    fi
+fi
+
 # Собранные пакеты сносим не всегда, а когда изменился их состав.
 #
 # Раньше здесь стояло удаление всех вложений /web/assets/% при каждой
