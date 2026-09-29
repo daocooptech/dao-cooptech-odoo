@@ -177,7 +177,7 @@ class CoopWebsiteLanding(models.AbstractModel):
                 'modified': True,
                 'label': tag,
                 'source_url': 'https://github.com/daocooptech/odoo/tree/%s' % tag,
-                'mirror_url': 'https://daocoop.tech/src/odoo.git',
+                'mirror_url': '/src/odoo-%s.tar.gz' % tag,
                 'notice_url': 'https://github.com/daocooptech/odoo/blob/%s/NOTICE.coop' % tag,
                 'sha': sha,
             }

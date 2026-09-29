@@ -409,7 +409,7 @@
       <h2>Исходный код</h2>
       <ul>
         <li>Движок, версия, которая работает сейчас: <a t-att-href="sw['source_url']" target="_blank" rel="noopener"><t t-esc="sw['label']"/></a>
-          <t t-if="sw['mirror_url']">· зеркало на этом сервере: <a t-att-href="sw['mirror_url']"><t t-esc="sw['mirror_url']"/></a></t>
+          <t t-if="sw['mirror_url']">· копия на этом сервере: <a t-att-href="sw['mirror_url']">архив исходника</a></t>
           <t t-if="sw['notice_url']">· <a t-att-href="sw['notice_url']" target="_blank" rel="noopener">NOTICE.coop</a></t></li>
         <li>Модули платформы: <a href="https://github.com/daocooptech/dao-cooptech-odoo" target="_blank" rel="noopener">github.com/daocooptech/dao-cooptech-odoo</a>, LGPL-3</li>
         <li>Модули Rudoo: <a href="https://git.ruodoo.ru/ruodoo-public/public" target="_blank" rel="noopener">git.ruodoo.ru/ruodoo-public/public</a>, лицензии указаны в манифестах модулей</li>

@@ -267,18 +267,20 @@ if [ "$engine_switch" = "1" ]; then
         exit 1
     fi
     say "Движок: $engine_tag"
-    # Зеркало исходника на этом сервере (решение 442; GPL-3 §6(d)):
-    # каждая выкаченная метка остаётся доступной, даже если GitHub закроет
-    # доступ. Раздаётся nginx по https://daocoop.tech/src/odoo.git.
-    mirror="$ODOO_HOME/src/odoo.git"
+    # Исходник на этом сервере (решение 442; GPL-3 §6(d)): архив того самого
+    # дерева, что работает, — каждая выкаченная метка остаётся доступной, даже
+    # если GitHub закроет доступ. Архивом, а не голым репозиторием: клон
+    # мелкий, и «глупый» протокол git не находит родительских коммитов
+    # (замер 29.09: «Cannot obtain needed commit»). Старые архивы не удалять.
     mkdir -p "$ODOO_HOME/src"
-    chown "$USER:$USER" "$ODOO_HOME/src"
-    [ -d "$mirror" ] || run git init --quiet --bare "$mirror"
-    if run git -C "$mirror" fetch --quiet --depth 1 "$ENGINE_DIR"             "refs/tags/$engine_tag:refs/tags/$engine_tag" 2>/dev/null        || run git -C "$mirror" fetch --quiet --depth 1 "$ENGINE_DIR"             "HEAD:refs/tags/$engine_tag"; then
-        run git -C "$mirror" update-server-info
-        say "Зеркало исходника: $engine_tag"
-    else
-        say "ВНИМАНИЕ: зеркало исходника не обновилось — метка $engine_tag только на GitHub"
+    archive="$ODOO_HOME/src/odoo-$engine_tag.tar.gz"
+    if [ ! -s "$archive" ]; then
+        if run git -C "$ENGINE_DIR" archive --format=tar.gz --prefix="odoo-$engine_tag/" HEAD                 > "$archive.part" && mv "$archive.part" "$archive"; then
+            say "Исходник: $(basename "$archive") ($(du -h "$archive" | cut -f1))"
+        else
+            rm -f "$archive.part"
+            say "ВНИМАНИЕ: архив исходника не собран — метка $engine_tag только на GitHub"
+        fi
     fi
 fi
 
