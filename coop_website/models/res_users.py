@@ -1,9 +1,17 @@
 # -*- coding: utf-8 -*-
-from odoo import api, models
+from odoo import api, fields, models
 
 
 class ResUsers(models.Model):
     _inherit = 'res.users'
+
+    # Согласие на обработку персональных данных при регистрации (решение
+    # 438, п. 8; юрист 29.09.2026: отдельная строка, не отмечена заранее).
+    # Доказывать, что согласие получено, обязан оператор (ч. 3 ст. 9
+    # 152-ФЗ) — поэтому время, адрес и версия текста хранятся при записи.
+    coop_pd_consent_at = fields.Datetime(string='Согласие на обработку ПДн', readonly=True)
+    coop_pd_consent_ip = fields.Char(string='IP при согласии', readonly=True)
+    coop_pd_consent_version = fields.Char(string='Версия текста согласия', readonly=True)
 
     @api.model
     def _signup_create_user(self, values):

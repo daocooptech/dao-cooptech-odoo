@@ -98,7 +98,9 @@ EXTENSION_ITEMS = [
     # Решение 417: экран биржи со стаканом и сведением, а не доска.
     ('DEX биржа', 'fa-exchange', 'coop_crypto_exchange.action_coop_dex_terminal'),
     # Каталог майнеров и биржа майнинговых мощностей (разбор юриста, 2.4).
-    ('Майнинг', 'fa-microchip', 'coop_mining.action_coop_mining_offer'),
+    # Название — владелец 29.09.2026: «пункт меню майнинг переименовать в
+    # Биржа мощностей»; прежнее — в RENAMED_ITEMS.
+    ('Биржа мощностей', 'fa-microchip', 'coop_mining.action_coop_mining_offer'),
     ('Нематериальные активы', 'fa-lightbulb-o', 'coop_intangibles.action_coop_intangibles'),
     ('Целевые программы ПК', 'fa-bullseye', 'coop_programs.action_coop_program'),
     ('Совместные закупки', 'fa-shopping-basket', 'coop_groupbuy.action_coop_groupbuy'),
@@ -143,6 +145,11 @@ MAIN_BY_NAME = {name: xmlid for name, _icon, xmlid in MAIN_ITEMS}
 # участник подключил себе сам.
 # «Библиотеки» и «Здоровье» — владелец 25.09.2026 (Н2): «удались из левого
 # меню пункты — библиотеки, здоровье».
+# Переименованные разделы: прежнее название → нынешнее. Меню участника
+# живёт записями, и без переименования на месте `resync_defaults` завёл бы
+# рядом со старым пунктом новый — у всех, у кого раздел уже был.
+RENAMED_ITEMS = {'Майнинг': 'Биржа мощностей'}
+
 RETIRED_EXTENSIONS = {'Каталог расширений', 'Помощь проекту', 'Обмен цифровой валюты',
                       'Библиотеки', 'Здоровье'}
 
@@ -259,10 +266,19 @@ class CoopSidebarItem(models.Model):
         чем раздел, которого у половины участников нет.
         """
         users = self.env['res.users'].sudo().search([('share', '=', False)])
-        added = renumbered = moved = dropped = rewired = 0
+        added = renumbered = moved = dropped = rewired = renamed = 0
         for user in users:
             defaults = self._defaults_for_user(user)
             existing = self.sudo().search([('user_id', '=', user.id)])
+
+            # Сначала — переименованные разделы: иначе ниже пункт с новым
+            # названием не найдётся и заведётся вторым рядом со старым.
+            for item in existing:
+                new_name = RENAMED_ITEMS.get(item.name)
+                if new_name and not existing.filtered(
+                        lambda i, n=new_name, s=item.section: i.name == n and i.section == s):
+                    item.sudo().name = new_name
+                    renamed += 1
 
             # Раздел, переехавший из основных в расширения, надо перенести,
             # а не завести заново: иначе он окажется в меню дважды.
@@ -358,10 +374,10 @@ class CoopSidebarItem(models.Model):
                 if item.action_id.id != wanted:
                     item.sudo().action_id = wanted
                     rewired += 1
-        if added or renumbered or moved or dropped or rewired:
+        if added or renumbered or moved or dropped or rewired or renamed:
             _logger.info('Меню участников: добавлено %s, перенумеровано %s, '
-                         'перенесено %s, убрано %s, подключено %s',
-                         added, renumbered, moved, dropped, rewired)
+                         'перенесено %s, убрано %s, подключено %s, переименовано %s',
+                         added, renumbered, moved, dropped, rewired, renamed)
         return True
 
     @api.model

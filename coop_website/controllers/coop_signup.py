@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+from odoo import fields
 from odoo.addons.auth_signup.controllers.main import AuthSignupHome
+from odoo.exceptions import UserError
 from odoo.http import request
 
 # Язык платформы по умолчанию. Решение владельца: если человек не выбрал
@@ -71,3 +73,26 @@ class CoopAuthSignupHome(AuthSignupHome):
         chosen = qcontext.get('lang')
         values['lang'] = chosen if chosen in installed else self._coop_default_lang()
         return values
+
+    def do_signup(self, qcontext, do_login=True):
+        """Регистрация только с согласием на обработку персональных данных.
+
+        Галочка — отдельная строка, не отмечена заранее (ч. 1 ст. 9 152-ФЗ
+        в ред. 156-ФЗ). Без неё учётная запись не заводится; с ней —
+        записываются время, адрес и версия текста согласия.
+        """
+        if not request.params.get('pd_consent'):
+            raise UserError('Чтобы зарегистрироваться, отметьте согласие на обработку персональных данных.')
+        super().do_signup(qcontext, do_login=do_login)
+        User = request.env['res.users'].sudo()
+        user = User.search(User._get_login_domain(qcontext.get('login')),
+                           order=User._get_login_order(), limit=1)
+        if user:
+            version = request.env['ir.config_parameter'].sudo().get_param(
+                'coop_website.legal_date') or '29.09.2026'
+            user.write({
+                'coop_pd_consent_at': fields.Datetime.now(),
+                'coop_pd_consent_ip': request.httprequest.remote_addr,
+                'coop_pd_consent_version': version,
+            })
+            request.env.cr.commit()

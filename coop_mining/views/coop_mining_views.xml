@@ -284,8 +284,10 @@
     <field name="context">{'bin_size': True, 'coop_catalog': 1, 'coop_create_label': 'Завести карточку майнера', 'coop_shelf_field': 'registry_state'}</field>
   </record>
 
-  <menuitem id="menu_coop_mining_root" name="Майнинг" sequence="147"/>
-  <menuitem id="menu_coop_mining_offers" name="Биржа мощностей"
+  <!-- «Биржа мощностей» — владелец 29.09.2026: «пункт меню майнинг
+       переименовать в Биржа мощностей». -->
+  <menuitem id="menu_coop_mining_root" name="Биржа мощностей" sequence="147"/>
+  <menuitem id="menu_coop_mining_offers" name="Предложения мощностей"
             parent="menu_coop_mining_root" action="action_coop_mining_offer" sequence="10"/>
   <menuitem id="menu_coop_miners" name="Майнеры"
             parent="menu_coop_mining_root" action="action_coop_miner" sequence="20"/>

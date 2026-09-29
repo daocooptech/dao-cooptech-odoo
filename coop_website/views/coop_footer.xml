@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!--
+    Подвал публичной части. Стандартный подвал Odoo («Useful Links»,
+    «info@yourcompany.example.com», «+1 555-555-5556») — заглушка
+    установщика, и на сайте платформы он выглядел как настоящие контакты.
+    Решение 438: «„ДАО КООПТЕХ“ без правовой формы» в строке копирайта.
+
+    Ссылки только туда, где уже есть страницы: мёртвая ссылка в подвале
+    хуже её отсутствия. «Политика», «Согласие» и «Правила сети» — тексты
+    юриста (решение 438, п. 8), страницы в `coop_legal.xml`.
+  -->
+  <template id="coop_footer" inherit_id="website.footer_custom" name="ДАО КООПТЕХ — подвал">
+    <xpath expr="//div[@id='footer']" position="replace">
+      <div id="footer" class="coop-footer" t-if="not no_footer">
+        <div class="container">
+          <div class="coop-footer-grid">
+            <div class="coop-footer-about">
+              <b>DAO COOPTECH</b>
+              <p>Децентрализованная социально-экономическая платформа с открытым исходным кодом:
+                люди, сообщества и организации любой формы работают, закупают и ведут общие
+                проекты вместе.</p>
+            </div>
+            <div>
+              <h5>Платформа</h5>
+              <ul class="list-unstyled">
+                <li><a href="/#features">Возможности</a></li>
+                <li><a href="/#cases">Как это работает</a></li>
+                <li><a href="/#directions">Направления</a></li>
+                <li><a href="/#architecture">Как устроено</a></li>
+                <li><a href="/#join">Как присоединиться</a></li>
+              </ul>
+            </div>
+            <div>
+              <h5>Участникам</h5>
+              <ul class="list-unstyled">
+                <li><a href="/web/signup">Зарегистрироваться</a></li>
+                <li><a href="/web/login">Войти</a></li>
+                <li><a href="/help-project">Помощь проекту</a></li>
+                <li><a href="/#contact">Написать нам</a></li>
+                <li><a href="/privacy">Политика обработки ПДн</a></li>
+                <li><a href="/consent">Согласие на обработку ПДн</a></li>
+                <li><a href="/network-rules">Правила сети</a></li>
+              </ul>
+            </div>
+            <div>
+              <h5>Открытый код</h5>
+              <ul class="list-unstyled">
+                <li><a href="https://github.com/daocooptech/dao-cooptech-odoo" target="_blank" rel="noopener">Модули платформы</a></li>
+                <li><a href="https://github.com/daocooptech/dao-cooptech" target="_blank" rel="noopener">Протокол сети и эталон</a></li>
+                <li><a href="/.well-known/did.json" target="_blank" rel="noopener">did.json этого сервера</a></li>
+                <li><a href="/federation/log" target="_blank" rel="noopener">Журнал этого сервера</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </xpath>
+  </template>
+
+  <!-- Шапка сайта: у Odoo там заглушки установщика — телефон «+1
+       555-555-5556» и кнопка «Contact Us» на несуществующий /contactus;
+       вместе они ещё и не помещались в шапку (прокрутка вбок на 1280 px).
+       Телефона у платформы нет — строка убирается; кнопка — регистрация,
+       и только для гостя: вошедшему регистрироваться незачем. -->
+  <template id="coop_header_text" inherit_id="website.header_text_element" name="ДАО КООПТЕХ — без телефона-заглушки">
+    <xpath expr="//li" position="replace"/>
+  </template>
+
+  <template id="coop_header_cta" inherit_id="website.header_call_to_action" name="ДАО КООПТЕХ — кнопка регистрации в шапке">
+    <xpath expr="//li" position="attributes">
+      <attribute name="t-if">request.env.user._is_public()</attribute>
+    </xpath>
+    <xpath expr="//a[hasclass('btn_cta')]" position="replace">
+      <a href="/web/signup" class="oe_unremovable btn btn-primary btn_cta">Зарегистрироваться</a>
+    </xpath>
+  </template>
+
+  <template id="coop_footer_copyright" inherit_id="website.footer_copyright_company_name"
+            name="ДАО КООПТЕХ — копирайт">
+    <xpath expr="//footer//span[hasclass('o_footer_copyright_name')]" position="replace">
+      <span class="o_footer_copyright_name me-2 small">© 2026 ДАО КООПТЕХ</span>
+    </xpath>
+  </template>
+</odoo>

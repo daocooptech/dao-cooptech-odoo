@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Заявки «Написать нам» с лендинга (решение 438, п. 11): видит и
+       отвечает рабочая группа — администраторы платформы. -->
+  <record id="view_coop_contact_request_list" model="ir.ui.view">
+    <field name="name">coop.contact.request.list</field>
+    <field name="model">coop.contact.request</field>
+    <field name="arch" type="xml">
+      <list string="Заявки с сайта" create="false" decoration-bf="state == 'new'"
+            decoration-muted="state == 'closed'">
+        <field name="create_date" string="Пришла"/>
+        <field name="topic"/>
+        <field name="name"/>
+        <field name="organization"/>
+        <field name="email"/>
+        <field name="state" widget="badge" decoration-info="state == 'new'"
+               decoration-success="state == 'answered'"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_contact_request_form" model="ir.ui.view">
+    <field name="name">coop.contact.request.form</field>
+    <field name="model">coop.contact.request</field>
+    <field name="arch" type="xml">
+      <form string="Заявка с сайта" create="false">
+        <header>
+          <field name="state" widget="statusbar" options="{'clickable': '1'}"/>
+        </header>
+        <sheet>
+          <group>
+            <group>
+              <field name="topic"/>
+              <field name="name"/>
+              <field name="organization"/>
+              <field name="email"/>
+            </group>
+            <group>
+              <field name="create_date" string="Пришла" readonly="1"/>
+            </group>
+          </group>
+          <field name="message" readonly="1"/>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_coop_contact_request" model="ir.actions.act_window">
+    <field name="name">Заявки с сайта</field>
+    <field name="res_model">coop.contact.request</field>
+    <field name="view_mode">list,form</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Заявок пока нет</p>
+      <p>Сюда приходят сообщения из формы «Написать нам» на главной странице сайта.</p>
+    </field>
+  </record>
+
+  <menuitem id="menu_coop_contact_request" name="Заявки с сайта"
+            parent="base.menu_administration" action="action_coop_contact_request"
+            sequence="91" groups="base.group_system"/>
+</odoo>

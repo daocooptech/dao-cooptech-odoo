@@ -82,6 +82,71 @@ class CoopWebsiteLanding(models.AbstractModel):
 
 
     @api.model
+    def _landing_facts(self):
+        """Живые цифры лендинга (решение 438, п. 3: «без оговорки») и
+        данные узла для блока «Проверьте сами».
+
+        Считается здесь, а не выражениями в шаблоне: так проверяется
+        наличие модели — у `coop_website` в зависимостях только база,
+        люди и организации, остальное может быть не установлено, — и
+        цифру с нулём шаблон просто не выводит («0 сделок» читается как
+        поломка).
+        """
+        env = self.env
+        Partner = env['res.partner'].sudo()
+
+        def count(model, domain):
+            if model not in env:
+                return 0
+            return env[model].sudo().search_count(domain)
+
+        stats = [
+            (Partner.search_count([('coop_is_participant', '=', True),
+                                   ('is_company', '=', False)]), 'участников'),
+            (Partner.search_count([('coop_is_participant', '=', True),
+                                   ('is_company', '=', True)]),
+             'организаций — кооперативы, НКО, ООО, ДАО'),
+            (count('coop.community', [('state', '=', 'published')]), 'сообществ'),
+            (count('coop.project', [('state', 'in', ('gathering', 'running', 'done'))]),
+             'проектов'),
+            (count('coop.deal', [('state', '=', 'done')]), 'завершённых сделок'),
+            (count('coop.farm.pool', [('state', 'in', ('raising', 'active'))]),
+             'пулов проектов'),
+        ]
+        facts = {
+            'stats': [{'value': v, 'label': label} for v, label in stats if v],
+            'legal_forms': count('coop.legal.form', []),
+            'node': False,
+        }
+        if 'coop.fed.identity' in env:
+            identity = env['coop.fed.identity'].sudo().search(
+                [('state', '=', 'active')], limit=1)
+            if identity and identity.head_seq >= 0:
+                facts['node'] = {
+                    'did': identity.did,
+                    'records': identity.head_seq + 1,
+                    'peers': count('coop.fed.peer', [('state', '=', 'active')]),
+                }
+        return facts
+
+    @api.model
+    def _legal_facts(self):
+        """Реквизиты для Политики, Согласия и Правил сети (решение 438,
+        п. 8). Пока владелец не заполнил параметр `coop_website.legal_<ключ>`,
+        на месте реквизита — пометка в квадратных скобках: документ честно
+        показывает, чего в нём ещё нет, а не выдумывает реквизиты."""
+        get = self.env['ir.config_parameter'].sudo().get_param
+        keys = {
+            'operator': '[ОПЕРАТОР]', 'organizer': 'ПО «ДАО КООПТЕХ» [в стадии регистрации]',
+            'inn': '[ИНН]', 'ogrn': '[ОГРН]', 'address': '[АДРЕС]',
+            'email': '[EMAIL]', 'dpo': '[ОТВЕТСТВЕННЫЙ]', 'rkn': '[НОМЕР В РЕЕСТРЕ]',
+            'date': '29.09.2026', 'rules_effective': '',
+            'dex_operator': 'оператор DEX и пулов [отдельное юрлицо, в стадии создания]',
+        }
+        return {key: get('coop_website.legal_%s' % key) or default
+                for key, default in keys.items()}
+
+    @api.model
     def setup_site(self):
         """Название, логотип и меню публичной части.
 

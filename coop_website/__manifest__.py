@@ -13,7 +13,7 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '19.0.1.0.0',
+    'version': '19.0.2.0.0',
     'license': 'LGPL-3',
     # Лендинг считает живые цифры по участникам, специализациям и
     # правовым формам и ведёт в каталоги людей и организаций.
@@ -21,7 +21,11 @@
     'depends': ['website', 'auth_signup', 'mail', 'coop_theme', 'coop_base',
                 'coop_people', 'coop_orgs'],
     'data': [
+        'security/ir.model.access.csv',
         'views/coop_landing.xml',
+        'views/coop_footer.xml',
+        'views/coop_contact_views.xml',
+        'views/coop_legal.xml',
         'views/coop_signup.xml',
         'data/coop_website_lang.xml',
     ],

@@ -39,4 +39,24 @@
     </xpath>
   </template>
 
+  <!--
+    Согласие на обработку персональных данных (решение 438, п. 8; юрист
+    29.09.2026): отдельной строкой, не отмечено заранее, со ссылками на
+    Согласие и Политику. Без отметки учётная запись не заводится —
+    проверка в `do_signup`.
+  -->
+  <template id="coop_signup_consent" inherit_id="auth_signup.fields"
+            name="ДАО КООПТЕХ: согласие на обработку ПДн при регистрации">
+    <xpath expr="//div[hasclass('field-confirm_password')]" position="after">
+      <div class="mb-3 form-check field-pd-consent">
+        <input type="checkbox" class="form-check-input" name="pd_consent" id="pd_consent" value="1" required="required"/>
+        <label class="form-check-label small" for="pd_consent">
+          Даю согласие на обработку моих персональных данных для создания и ведения учётной записи на платформе ДАО КООПТЕХ —
+          на условиях <a href="/consent" target="_blank">Согласия</a> и
+          <a href="/privacy" target="_blank">Политики обработки персональных данных</a>.
+        </label>
+      </div>
+    </xpath>
+  </template>
+
 </odoo>
