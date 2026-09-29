@@ -94,6 +94,24 @@
             name="ДАО КООПТЕХ — без preconnect к Google">
     <xpath expr="//link[@rel='preconnect'][@href='https://fonts.gstatic.com/']"
            position="replace"/>
+    <!-- Название платформы вместо «Odoo» (решение 442): метка генератора
+         страницы и подсказка кнопки перехода в кабинет. -->
+    <xpath expr="//meta[@name='generator']" position="attributes">
+      <attribute name="content">ДАО КООПТЕХ</attribute>
+    </xpath>
+    <xpath expr="//a[hasclass('o_frontend_to_backend_apps_btn')]" position="attributes">
+      <attribute name="title">Разделы платформы</attribute>
+    </xpath>
+  </template>
+
+  <!--
+    Без «Работает на Odoo» со ссылкой на odoo.com внизу сайта и портала
+    (решение 441, слой В). Раньше его прятал Rudoo-модуль portal_debranding,
+    снятый вместе с web_debranding (OPL-1, решение 442).
+  -->
+  <template id="coop_no_brand_promotion" inherit_id="web.brand_promotion"
+            name="ДАО КООПТЕХ — без «Работает на Odoo»">
+    <xpath expr="//div[hasclass('o_brand_promotion')]" position="replace"/>
   </template>
 
 </odoo>

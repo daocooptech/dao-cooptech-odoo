@@ -235,6 +235,15 @@ class CoopWebsiteLanding(models.AbstractModel):
 
         website.write(values)
 
+        # Значок вкладки сайта — логотип платформы (решение 442). У сайта
+        # значок по умолчанию — байты значка Odoo, пустым он не бывает,
+        # поэтому ставится один раз и запоминается признаком, как логотип:
+        # загруженный руками потом не трогаем.
+        if os.path.exists(LOGO) and not Config.get_param('coop_website.favicon_set'):
+            with open(LOGO, 'rb') as fh:
+                website.favicon = base64.b64encode(fh.read())
+            Config.set_param('coop_website.favicon_set', '1')
+
         Menu = self.env['website.menu'].sudo()
         root = Menu.search([('website_id', '=', website.id),
                             ('parent_id', '=', False)], limit=1)

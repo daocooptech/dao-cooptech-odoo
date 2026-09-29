@@ -20,3 +20,8 @@ microsoft_outlook
 base_import_module
 base_vat
 l10n_latam_check
+
+# Rudoo-модули замены бренда: web_debranding под лицензией OPL-1 (решение 442);
+# portal_debranding от него зависит. Замена бренда — в coop_theme и coop_website.
+web_debranding
+portal_debranding
