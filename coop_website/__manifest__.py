@@ -28,6 +28,7 @@
         'views/coop_legal.xml',
         'views/coop_signup.xml',
         'data/coop_website_lang.xml',
+        'data/coop_website_setup.xml',
     ],
     'assets': {
         'web.assets_frontend': [

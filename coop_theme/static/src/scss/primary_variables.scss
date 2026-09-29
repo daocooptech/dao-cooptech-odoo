@@ -77,6 +77,25 @@ $o-headings-font-family: 'Manrope', 'Inter', -apple-system, sans-serif;
 $o-font-family-monospace: 'JetBrains Mono', ui-monospace, SFMono-Regular,
                           Menlo, Consolas, monospace;
 
+// Шрифты сайта — без адреса Google (решение 439, п. 4). У модуля «Сайт»
+// Inter и Inter Tight заданы с `url`, и каждая страница daocoop.tech
+// тянула их с fonts.googleapis.com: IP посетителя уходил в Google без
+// уведомления о трансграничной передаче. Без `url` website.scss не
+// пишет @import, а сами начертания уже лежат локально (fonts.scss).
+// Inter Tight — заголовки сайта по умолчанию; локально его нет, и под
+// тем же именем отдаётся Inter, чтобы не менять сохранённый выбор.
+$o-theme-font-configs: (
+    'Inter': (
+        'family': ('Inter', sans-serif),
+    ),
+    'Inter Tight': (
+        'family': ('Inter', sans-serif),
+    ),
+    'Manrope': (
+        'family': ('Manrope', 'Inter', sans-serif),
+    ),
+);
+
 // 14px, как в прототипе. Стояло 13 — весь кабинет был на ступень мельче и
 // макета, и собственного значения Odoo.
 $o-font-size-base: 0.875rem;

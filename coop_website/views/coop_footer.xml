@@ -82,4 +82,17 @@
       <span class="o_footer_copyright_name me-2 small">© 2026 ДАО КООПТЕХ</span>
     </xpath>
   </template>
+  <!--
+    Без `preconnect` к fonts.gstatic.com (решение 439, п. 4). Шаблон сайта
+    ставит его на каждую страницу, даже когда шрифты Google не нужны: сам
+    Odoo оставил пометку, что убрать его руки не дошли. Браузер по нему
+    открывает соединение с Google и отдаёт ему адрес посетителя. Шрифты
+    платформы локальные (coop_theme/static/src/scss/fonts.scss).
+  -->
+  <template id="coop_no_google_preconnect" inherit_id="website.layout"
+            name="ДАО КООПТЕХ — без preconnect к Google">
+    <xpath expr="//link[@rel='preconnect'][@href='https://fonts.gstatic.com/']"
+           position="replace"/>
+  </template>
+
 </odoo>

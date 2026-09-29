@@ -29,8 +29,11 @@ LOGO = os.path.join(os.path.dirname(HERE), 'static', 'src', 'img', 'cooptech-log
 # то, чего нет, хуже, чем показать короткое меню.
 # Заглушки установщика Odoo: пункты, которых на платформе быть не должно.
 # Список закрытый — всё остальное считается добавленным осознанно.
+# `/jobs` — страница «Вакансий» модуля найма Odoo: пустая, с чужим фото,
+# «yourcompany» и телефоном +1 (650) 555-0187. Вакансии платформы живут в
+# каталоге `coop.vacancy` (решение 439, п. 8).
 INSTALLER_MENUS = {'/', '/shop', '/blog', '/aboutus', '/pricing', '/contactus',
-                   '/event', '/appointment', '/library'}
+                   '/event', '/appointment', '/library', '/jobs'}
 
 SITE_MENU = [
     # Первым пунктом — своя страница. Её не было ни в одном меню
@@ -45,7 +48,7 @@ SITE_MENU = [
     ('Моя страница', '/odoo/my-page'),
     ('Люди', '/odoo/action-coop_people.action_coop_people'),
     ('Организации', '/odoo/action-coop_orgs.action_coop_orgs'),
-    ('Вакансии', '/jobs'),
+    ('Вакансии', '/odoo/vacancies'),
     ('Обучение', '/slides'),
     ('Сообщество', '/forum'),
     # Страница живёт в модуле coop_bounty, но место в меню задаётся здесь:
@@ -139,12 +142,18 @@ class CoopWebsiteLanding(models.AbstractModel):
         keys = {
             'operator': '[ОПЕРАТОР]', 'organizer': 'ПО «ДАО КООПТЕХ» [в стадии регистрации]',
             'inn': '[ИНН]', 'ogrn': '[ОГРН]', 'address': '[АДРЕС]',
-            'email': '[EMAIL]', 'dpo': '[ОТВЕТСТВЕННЫЙ]', 'rkn': '[НОМЕР В РЕЕСТРЕ]',
+            'email': 'bizzz.ru@gmail.com',  # решение 439, п. 2
+            'dpo': '[ОТВЕТСТВЕННЫЙ]', 'rkn': '[НОМЕР В РЕЕСТРЕ]',
             'date': '29.09.2026', 'rules_effective': '',
             'dex_operator': 'оператор DEX и пулов [отдельное юрлицо, в стадии создания]',
         }
-        return {key: get('coop_website.legal_%s' % key) or default
-                for key, default in keys.items()}
+        facts = {key: get('coop_website.legal_%s' % key) or default
+                 for key, default in keys.items()}
+        # Ответственный за организацию обработки — сам оператор (решение
+        # 440, п. 6), пока параметр не задан отдельно.
+        if not get('coop_website.legal_dpo'):
+            facts['dpo'] = facts['operator']
+        return facts
 
     @api.model
     def setup_site(self):
