@@ -387,4 +387,43 @@
       <p><t t-esc="legal['organizer']"/>, ИНН <t t-esc="legal['inn']"/>, ОГРН <t t-esc="legal['ogrn']"/>, адрес <t t-esc="legal['address']"/>, <t t-esc="legal['email']"/>.</p>
     </t>
   </template>
+
+  <!--
+    «О программе» — решение 442; заключение legal-counsel «Лицензия форка
+    Odoo и товарный знак», п. 1.6. Закрывает GPL-3 §5(d) (сведения о
+    лицензии и отсутствии гарантий в интерфейсе) и §6(d) (где взять
+    исходник той версии, что работает). Версия — из deploy/engine.ref.
+  -->
+  <template id="coop_about_software" name="ДАО КООПТЕХ — О программе">
+    <t t-set="sw" t-value="request.env['coop.website.landing'].sudo()._software_facts()"/>
+    <t t-set="title">О программе — DAO COOPTECH</t>
+    <t t-call="coop_website.coop_legal_layout">
+      <h1>О программе</h1>
+      <p>Платформа работает на программе, построенной на основе Odoo 19 Community Edition,
+        © 2004–2015 Odoo S.A. и участники, лицензия GNU LGPL v3.
+        <t t-if="sw['modified']">Сборка изменена ДАО КООПТЕХ: удалены обращения к службам Odoo S.A. и модули,
+          которые от них зависят; перечень изменений — в файле NOTICE.coop.</t></p>
+      <p>Программа предоставляется без каких-либо гарантий (разделы 15–16 GNU GPL v3). Вы вправе распространять
+        и изменять её на условиях лицензии.</p>
+
+      <h2>Исходный код</h2>
+      <ul>
+        <li>Движок, версия, которая работает сейчас: <a t-att-href="sw['source_url']" target="_blank" rel="noopener"><t t-esc="sw['label']"/></a>
+          <t t-if="sw['mirror_url']">· зеркало на этом сервере: <a t-att-href="sw['mirror_url']"><t t-esc="sw['mirror_url']"/></a></t>
+          <t t-if="sw['notice_url']">· <a t-att-href="sw['notice_url']" target="_blank" rel="noopener">NOTICE.coop</a></t></li>
+        <li>Модули платформы: <a href="https://github.com/daocooptech/dao-cooptech-odoo" target="_blank" rel="noopener">github.com/daocooptech/dao-cooptech-odoo</a>, LGPL-3</li>
+        <li>Модули Rudoo: <a href="https://git.ruodoo.ru/ruodoo-public/public" target="_blank" rel="noopener">git.ruodoo.ru/ruodoo-public/public</a>, лицензии указаны в манифестах модулей</li>
+      </ul>
+
+      <h2>Тексты лицензий</h2>
+      <ul>
+        <li><a href="https://www.gnu.org/licenses/lgpl-3.0.html" target="_blank" rel="noopener">GNU LGPL v3</a></li>
+        <li><a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener">GNU GPL v3</a></li>
+        <li><a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener">GNU AGPL v3</a></li>
+      </ul>
+
+      <p class="lx-small">Odoo — товарный знак Odoo S.A. Платформа не связана с Odoo S.A. и не одобрена ею.</p>
+    </t>
+  </template>
+
 </odoo>

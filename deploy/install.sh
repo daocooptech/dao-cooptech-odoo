@@ -67,11 +67,23 @@ clone_or_pull() {
     fi
 }
 
-# Odoo клонируется мелко: полная история — полтора гигабайта, и на сервере
-# она не нужна ни для чего.
-clone_or_pull https://github.com/odoo/odoo.git        "$ODOO_HOME/odoo"         19.0 "--depth 1"
 clone_or_pull https://git.ruodoo.ru/ruodoo-public/public.git "$ODOO_HOME/rudoo-addons" master "--depth 1"
 clone_or_pull https://github.com/daocooptech/dao-cooptech-odoo.git "$ODOO_HOME/coop-addons" main
+
+# Движок — свой форк без обращений к Odoo S.A. (решения 439, 441, 442), по
+# метке из deploy/engine.ref: та же версия, что проверена на копии. Мелко:
+# полная история — полтора гигабайта, на сервере она не нужна. Уже
+# существующий клон переводится на форк: `clone_or_pull` адрес не меняет,
+# и без этого сервер продолжал бы тянуть odoo/odoo.
+ENGINE_REPO=https://github.com/daocooptech/odoo.git
+read -r engine_tag engine_want < "$ODOO_HOME/coop-addons/deploy/engine.ref"
+if [ -d "$ODOO_HOME/odoo/.git" ]; then
+    sudo -u "$ODOO_USER" git -C "$ODOO_HOME/odoo" remote set-url origin "$ENGINE_REPO"
+    sudo -u "$ODOO_USER" git -C "$ODOO_HOME/odoo" fetch --quiet --depth 1 origin "refs/tags/$engine_tag:refs/tags/$engine_tag"
+    sudo -u "$ODOO_USER" git -C "$ODOO_HOME/odoo" reset --hard --quiet "$engine_tag"
+else
+    sudo -u "$ODOO_USER" git clone --quiet --depth 1 --branch "$engine_tag" "$ENGINE_REPO" "$ODOO_HOME/odoo"
+fi
 
 # Каталоги могли быть созданы вручную до установки — от root. Тогда
 # обновление падает на «insufficient permission for adding an object»:

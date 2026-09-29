@@ -156,6 +156,41 @@ class CoopWebsiteLanding(models.AbstractModel):
         return facts
 
     @api.model
+    def _software_facts(self):
+        """Версия движка для страницы «О программе» (решение 442).
+
+        Берётся из deploy/engine.ref — того же файла, по которому выкатка
+        ставит движок, — а не пишется руками: метка, прописанная в шаблоне,
+        разошлась бы с тем, что работает. Формат файла: `<метка> <sha>`.
+        Пока файла нет, работает неизменённый Odoo 19.0, и страница честно
+        ведёт на его коммит.
+        """
+        ref = os.path.join(os.path.dirname(os.path.dirname(HERE)), 'deploy', 'engine.ref')
+        tag, sha = '', 'df0149e3'
+        if os.path.exists(ref):
+            with open(ref, encoding='utf-8') as fh:
+                parts = fh.read().split()
+            if parts:
+                tag, sha = parts[0], (parts[1] if len(parts) > 1 else '')
+        if tag:
+            return {
+                'modified': True,
+                'label': tag,
+                'source_url': 'https://github.com/daocooptech/odoo/tree/%s' % tag,
+                'mirror_url': 'https://daocoop.tech/src/odoo.git',
+                'notice_url': 'https://github.com/daocooptech/odoo/blob/%s/NOTICE.coop' % tag,
+                'sha': sha,
+            }
+        return {
+            'modified': False,
+            'label': '19.0 @ %s' % sha,
+            'source_url': 'https://github.com/odoo/odoo/tree/%s' % sha,
+            'mirror_url': '',
+            'notice_url': '',
+            'sha': sha,
+        }
+
+    @api.model
     def setup_site(self):
         """Название, логотип и меню публичной части.
 

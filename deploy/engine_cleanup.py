@@ -123,7 +123,36 @@ def remove_modules(env, names):
     return True
 
 
+def mark_stripped(env):
+    """Этап 2: движок из форка, каталоги модулей служб удалены.
+
+    `update_list()` строки удалённых с диска модулей не трогает — они так и
+    остаются `uninstalled` (замер 29.09 на копии: 153 из 154), и авто-
+    установка может попытаться поставить такой модуль, когда ставится его
+    зависимость. `uninstallable` закрывает это: авто-установка берёт только
+    `uninstalled`. Помечаются только модули из списка форка
+    (.coop/removed-modules.txt), и только если их правда нет на диске.
+    """
+    from odoo import release
+    from odoo.modules.module import get_manifest
+    listed = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(release.__file__))),
+                          '.coop', 'removed-modules.txt')
+    if not os.path.exists(listed):
+        return  # движок не из форка
+    with open(listed, encoding='utf-8') as fh:
+        names = [l.split()[0] for l in fh if l.strip() and not l.startswith('#')]
+    Module = env['ir.module.module'].sudo()
+    Module.update_list()
+    gone = Module.search([('name', 'in', names), ('state', '=', 'uninstalled')]) \
+        .filtered(lambda m: not get_manifest(m.name))
+    if gone:
+        say('удалённые из движка модули: помечаю неустанавливаемыми %s', len(gone))
+        gone.write({'state': 'uninstallable'})
+    env.cr.commit()
+
+
 removal = _removal_list()
 cleanup_data(env)  # noqa: F821 — env задаёт odoo-bin shell
 remove_modules(env, removal)  # noqa: F821
+mark_stripped(env)  # noqa: F821
 say('готово')

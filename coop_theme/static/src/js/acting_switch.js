@@ -65,6 +65,18 @@ registry.category("user_menuitems").add("coop_theme.acting", () => ({
     sequence: 1,
 }));
 
+// «О программе» — лицензия движка и ссылка на исходник той версии, что
+// работает (решение 442; LGPL-3, GPL-3 §5(d), §6(d)). Страница публичная,
+// открывается в новой вкладке, чтобы не терять место в кабинете.
+registry.category("user_menuitems").add("coop_theme.about", () => ({
+    type: "item",
+    id: "coop_about",
+    description: "О программе",
+    href: "/about/software",
+    callback: () => window.open("/about/software", "_blank"),
+    sequence: 65,
+}));
+
 // Переключатель компаний движка убран: он отвечает на тот же вопрос
 // «от чьего имени я работаю», но словами учётной системы, и рядом с
 // нашим выглядел вторым, непонятно чем отличающимся списком.

@@ -45,3 +45,7 @@ class CoopLegal(http.Controller):
     @http.route('/network-rules', type='http', auth='public', website=True, sitemap=True)
     def coop_network_rules(self, **kw):
         return request.render('coop_website.coop_network_rules')
+
+    @http.route('/about/software', type='http', auth='public', website=True, sitemap=True)
+    def coop_about_software(self, **kw):
+        return request.render('coop_website.coop_about_software')

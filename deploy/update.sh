@@ -98,6 +98,45 @@ run git fetch --quiet origin main
 run git reset --hard --quiet origin/main
 after=$(run git rev-parse HEAD)
 
+# Движок — свой форк без обращений к Odoo S.A. (решения 439, 441, 442).
+#
+# Какая версия должна работать, записано в deploy/engine.ref: `<метка> <sha>`.
+# Если в /opt/coop/odoo другой коммит, новая версия загружается рядом, в
+# odoo-next, и все ворота ниже идут по ней, пока служба работает и база не
+# тронута. Сама смена — ниже, после снимка базы. Прежний каталог остаётся
+# как odoo-prev: откат — вернуть его на место и восстановить снимок.
+#
+# Раньше движок не обновлялся вовсе: update.sh тянул только coop-addons, и
+# на 29.09.2026 боевая отставала от ветки 19.0 на 307 коммитов.
+ENGINE_REPO=https://github.com/daocooptech/odoo.git
+ENGINE_DIR="$ODOO_HOME/odoo"
+ENGINE_NEXT="$ODOO_HOME/odoo-next"
+ENGINE_CHECK="$ENGINE_DIR"
+engine_switch=0
+engine_tag=""
+engine_want=""
+if [ -f "$ODOO_HOME/coop-addons/deploy/engine.ref" ]; then
+    read -r engine_tag engine_want < "$ODOO_HOME/coop-addons/deploy/engine.ref" || true
+fi
+engine_have=$(run git -C "$ENGINE_DIR" rev-parse HEAD 2>/dev/null || echo "")
+if [ -n "$engine_want" ] && [ "$engine_have" != "$engine_want" ]; then
+    say "Движок: ${engine_have:-?} → $engine_tag"
+    rm -rf "$ENGINE_NEXT"
+    if ! run git clone --quiet --depth 1 --branch "$engine_tag" "$ENGINE_REPO" "$ENGINE_NEXT"; then
+        say "ДВИЖОК НЕ ЗАГРУЗИЛСЯ ($engine_tag) — выкатка отменена, портал не тронут"
+        rm -rf "$ENGINE_NEXT"
+        exit 1
+    fi
+    engine_got=$(run git -C "$ENGINE_NEXT" rev-parse HEAD)
+    if [ "$engine_got" != "$engine_want" ]; then
+        say "МЕТКА $engine_tag УКАЗЫВАЕТ НА $engine_got, а не на $engine_want — выкатка отменена"
+        rm -rf "$ENGINE_NEXT"
+        exit 1
+    fi
+    ENGINE_CHECK="$ENGINE_NEXT"
+    engine_switch=1
+fi
+
 # Проверка правок поверх движка — до того, как что-нибудь тронуто.
 #
 # Ловит то, чего не видит ни питон, ни сервер: два шаблона под одним
@@ -109,7 +148,7 @@ after=$(run git rev-parse HEAD)
 # Стоит здесь, а не ниже: служба ещё работает, база не тронута, и выход
 # по ошибке ничего не ломает. Ниже места нет — там уже остановка.
 if [ -f "$ODOO_HOME/coop-addons/tools/check_theme.py" ]; then
-    if ! "$ODOO_HOME/venv/bin/python"             "$ODOO_HOME/coop-addons/tools/check_theme.py"             --odoo "$ODOO_HOME/odoo"; then
+    if ! "$ODOO_HOME/venv/bin/python"             "$ODOO_HOME/coop-addons/tools/check_theme.py"             --odoo "$ENGINE_CHECK"; then
         say "ПРОВЕРКА ТЕМЫ НЕ ПРОШЛА — выкатка отменена, портал не тронут"
         exit 1
     fi
@@ -132,7 +171,7 @@ fi
 # атрибута `string` у `<group>`. Схема лежит рядом и проверяется за
 # секунду.
 if [ -f "$ODOO_HOME/coop-addons/tools/check_views.py" ]; then
-    if ! "$ODOO_HOME/venv/bin/python"             "$ODOO_HOME/coop-addons/tools/check_views.py"             --odoo "$ODOO_HOME/odoo"; then
+    if ! "$ODOO_HOME/venv/bin/python"             "$ODOO_HOME/coop-addons/tools/check_views.py"             --odoo "$ENGINE_CHECK"; then
         say "ВИДЫ НЕ ПРОШЛИ СХЕМУ ДВИЖКА — выкатка отменена"
         exit 1
     fi
@@ -197,12 +236,51 @@ fi
 
 # Принудительная пересборка пакетов работает и без новых коммитов: она
 # нужна как раз тогда, когда код уже на месте, а отдаётся старый пакет.
-if [ "$before" = "$after" ] && [ -z "${COOP_FORCE_ASSETS:-}" ]; then
+if [ "$before" = "$after" ] && [ -z "${COOP_FORCE_ASSETS:-}" ] && [ "$engine_switch" = "0" ]; then
     say "Изменений нет ($after)"
     exit 0
 fi
 
 say "Обновление $before → $after"
+
+# Смена движка. Снимок — до остановки; очистка (этап 2: update_list и
+# пометка удалённых из движка модулей) — уже на новом дереве. Упала —
+# прежний каталог возвращается на место, и служба поднимается на нём.
+if [ "$engine_switch" = "1" ]; then
+    if ! backup_db; then
+        say "ВНИМАНИЕ: снимок базы не сделан — смена движка отменена"
+        rm -rf "$ENGINE_NEXT"
+        exit 1
+    fi
+    engine_snapshot="$LAST_DUMP"
+    systemctl stop coop-odoo
+    rm -rf "$ODOO_HOME/odoo-prev"
+    mv "$ENGINE_DIR" "$ODOO_HOME/odoo-prev"
+    mv "$ENGINE_NEXT" "$ENGINE_DIR"
+    if ! run "$ODOO_HOME/venv/bin/python" "$ENGINE_DIR/odoo-bin" shell             -c "$CONF" -d "$DB" --no-http             < "$ODOO_HOME/coop-addons/deploy/engine_cleanup.py"; then
+        say "ДВИЖОК $engine_tag НЕ ВСТАЛ — возвращаю прежний"
+        rm -rf "$ODOO_HOME/odoo-failed"
+        mv "$ENGINE_DIR" "$ODOO_HOME/odoo-failed"
+        mv "$ODOO_HOME/odoo-prev" "$ENGINE_DIR"
+        say "База могла измениться. Откат базы: bash $ODOO_HOME/coop-addons/deploy/restore.sh $engine_snapshot"
+        start_service start || true
+        exit 1
+    fi
+    say "Движок: $engine_tag"
+    # Зеркало исходника на этом сервере (решение 442; GPL-3 §6(d)):
+    # каждая выкаченная метка остаётся доступной, даже если GitHub закроет
+    # доступ. Раздаётся nginx по https://daocoop.tech/src/odoo.git.
+    mirror="$ODOO_HOME/src/odoo.git"
+    mkdir -p "$ODOO_HOME/src"
+    chown "$USER:$USER" "$ODOO_HOME/src"
+    [ -d "$mirror" ] || run git init --quiet --bare "$mirror"
+    if run git -C "$mirror" fetch --quiet --depth 1 "$ENGINE_DIR"             "refs/tags/$engine_tag:refs/tags/$engine_tag" 2>/dev/null        || run git -C "$mirror" fetch --quiet --depth 1 "$ENGINE_DIR"             "HEAD:refs/tags/$engine_tag"; then
+        run git -C "$mirror" update-server-info
+        say "Зеркало исходника: $engine_tag"
+    else
+        say "ВНИМАНИЕ: зеркало исходника не обновилось — метка $engine_tag только на GitHub"
+    fi
+fi
 
 # Какие модули задеты. Первый уровень каталогов и есть имена модулей.
 #
