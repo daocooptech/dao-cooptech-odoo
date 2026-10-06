@@ -8,3 +8,4 @@ access_coop_wall_poll_option_user,coop.wall.poll.option user,coop.wall.poll.opti
 access_coop_wall_poll_option_system,coop.wall.poll.option system,coop.wall.poll.option,base.group_system,crud,
 access_coop_wall_poll_vote_user,coop.wall.poll.vote user,coop.wall.poll.vote,base.group_user,r,
 access_coop_wall_poll_vote_system,coop.wall.poll.vote system,coop.wall.poll.vote,base.group_system,crud,
+rule_coop_wall_scheduled_own,Отложенная запись на стене — только автору,mail.scheduled.message,,crud,"['|', ('model', 'not in', ['res.partner', 'coop.project', 'coop.community']), ('author_id', '=', user.partner_id.id)]"

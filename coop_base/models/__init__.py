@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from . import coop_security_unfreeze
 from . import coop_legal_form
 from . import coop_specialization
 from . import coop_verification

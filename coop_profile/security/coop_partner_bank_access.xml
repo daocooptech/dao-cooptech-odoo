@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Реквизиты видны владельцу и казначею (решение 445 п. 35).
+       В 20 чтение счетов участникам даёт строка hr (base-строку hr отключает):
+       «счета всех, кто не сотрудник». Сужаем её до своих и казначейских.
+       В 19 правило rule_partner_bank_own не работало: группа участника получала
+       то же правило hr, правила одной группы складываются через ИЛИ — проверено
+       на копии 19 06.10.2026, участник видел чужой счёт.
+       Администраторы видят всё через hr.ir_rule_res_partner_bank_internal_users_1
+       (base.group_partner_manager), кадровики — через hr.ir_rule_res_partner_bank_employees,
+       бухгалтерия — через account.ir_rule_res_partner_bank_billing_officers. -->
+  <record id="hr.ir_rule_res_partner_bank_internal_users" model="ir.access">
+    <field name="domain">['&amp;', ('partner_id.employee_ids', '=', False), '|', ('partner_id', '=', user.partner_id.id), ('partner_id', 'in', user.coop_treasury_partner_ids.ids)]</field>
+  </record>
+</odoo>

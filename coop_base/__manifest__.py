@@ -23,7 +23,6 @@
         'mail',          # лента объекта и подписчики — наш «журнал» из прототипа
     ],
     'data': [
-        'data/coop_security_unfreeze.xml',
         'security/coop_groups.xml',
         'data/coop_powers.xml',
         'data/coop_membership_powers.xml',

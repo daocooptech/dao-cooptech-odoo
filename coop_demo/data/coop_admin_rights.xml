@@ -28,26 +28,8 @@
     </record>
 
 
-    <!--
-      Сквозное правило для администратора узла. Роли выше сами по себе
-      ничего не открывают: правила доступа к членству привязаны к
-      собственному членству пользователя, а администратор ни в одном
-      кооперативе не состоит — и без этого правила видел бы пустой список.
-
-      Правило живёт в демонстрационном модуле намеренно. На узле, где
-      coop_demo не установлен, строгая модель остаётся нетронутой: состав
-      кооператива видят только его пайщики, правление и ревизия.
-    -->
-    <record id="rule_membership_system" model="ir.rule">
-      <field name="name">Администратор узла видит всё членство</field>
-      <field name="model_id" ref="coop_base.model_coop_membership"/>
-      <field name="groups" eval="[(4, ref('base.group_system'))]"/>
-      <field name="domain_force">[(1, '=', 1)]</field>
-      <field name="perm_read" eval="True"/>
-      <field name="perm_write" eval="True"/>
-      <field name="perm_create" eval="True"/>
-      <field name="perm_unlink" eval="True"/>
-    </record>
+    <!-- Сквозной доступ администратора узла к членству (только при coop_demo) —
+         строка access_coop_membership_system в security/ir.access.csv. -->
 
   </data>
 </odoo>

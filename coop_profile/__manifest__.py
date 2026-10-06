@@ -31,6 +31,7 @@
         'views/coop_profile_views.xml',
         'data/coop_home.xml',
         'security/ir.access.csv',
+        'security/coop_partner_bank_access.xml',
     ],
     'assets': {
         'web.assets_backend': [
