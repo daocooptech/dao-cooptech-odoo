@@ -46,16 +46,16 @@
           <t t-foreach="this.state.groups" t-as="group" t-key="group.label">
             <div class="o_coop_search_group">
               <div class="o_coop_search_group_head">
-                <span t-esc="group.label"/>
+                <span t-out="group.label"/>
                 <button class="o_coop_search_all" t-on-click="() => this.openCatalog(group)">
-                  все <t t-esc="group.count"/>
+                  все <t t-out="group.count"/>
                 </button>
               </div>
               <a t-foreach="group.rows" t-as="row" t-key="row.model + '-' + row.id"
                  href="#" class="o_coop_search_row"
                  t-on-click.prevent="() => this.openRecord(row)">
-                <span class="o_coop_search_name" t-esc="row.name"/>
-                <span class="o_coop_search_note" t-if="row.note" t-esc="row.note"/>
+                <span class="o_coop_search_name" t-out="row.name"/>
+                <span class="o_coop_search_note" t-if="row.note" t-out="row.note"/>
               </a>
             </div>
           </t>
@@ -67,14 +67,14 @@
             <t t-foreach="this.state.more" t-as="group" t-key="group.label">
               <button class="o_coop_search_all"
                       t-on-click="() => this.openCatalog(group)">
-                <t t-esc="group.label"/> <t t-esc="group.count"/>
+                <t t-out="group.label"/> <t t-out="group.count"/>
               </button>
             </t>
           </div>
 
           <div class="o_coop_search_hint"
                t-if="!this.state.busy and !this.state.groups.length">
-            Ничего не нашли по «<t t-esc="this.state.term"/>»
+            Ничего не нашли по «<t t-out="this.state.term"/>»
           </div>
         </t>
       </div>

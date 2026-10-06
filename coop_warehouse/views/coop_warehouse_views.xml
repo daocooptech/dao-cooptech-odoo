@@ -44,11 +44,11 @@
 
                 <div class="o_coop_wh_head">
                   <span class="o_coop_badge o_coop_wh_kind">
-                    <t t-esc="record.storage_kind.value"/>
+                    <t t-out="record.storage_kind.value"/>
                   </span>
                   <span class="o_coop_wh_meta" t-if="record.city.raw_value">
                     <i class="fa fa-map-marker" aria-hidden="true"/>
-                    <t t-esc="record.city.value"/>
+                    <t t-out="record.city.value"/>
                   </span>
                 </div>
 
@@ -58,10 +58,10 @@
 
                 <div class="o_coop_wh_head">
                   <span class="o_coop_wh_free">
-                    свободно <t t-esc="record.free_label.value"/>
+                    свободно <t t-out="record.free_label.value"/>
                   </span>
                   <span class="o_coop_wh_meta">
-                    из <t t-esc="record.capacity_label.value"/>
+                    из <t t-out="record.capacity_label.value"/>
                   </span>
                 </div>
 
@@ -80,20 +80,20 @@
 
                 <div class="o_coop_wh_legend">
                   <span><i class="o_coop_wh_dot o_coop_wh_own"/> своё
-                    <t t-esc="record.own_label.value"/></span>
+                    <t t-out="record.own_label.value"/></span>
                   <span><i class="o_coop_wh_dot o_coop_wh_rented"/> сдано
-                    <t t-esc="record.rented_label.value"/></span>
+                    <t t-out="record.rented_label.value"/></span>
                   <span><i class="o_coop_wh_dot o_coop_wh_free_seg"/> свободно
-                    <t t-esc="record.free_label.value"/></span>
+                    <t t-out="record.free_label.value"/></span>
                 </div>
 
                 <div class="o_coop_listing_foot o_coop_wh_foot">
                   <span class="o_coop_wh_meta">
-                    <t t-esc="record.owner_id.value"/>
+                    <t t-out="record.owner_id.value"/>
                   </span>
                   <span class="o_coop_wh_meta"
                         t-if="record.offer_count.raw_value">
-                    на бирже: <t t-esc="record.offer_count.value"/>
+                    на бирже: <t t-out="record.offer_count.value"/>
                   </span>
                 </div>
 

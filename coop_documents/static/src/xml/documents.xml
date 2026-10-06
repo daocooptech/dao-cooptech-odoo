@@ -15,7 +15,7 @@
         <select id="coop_upload_folder" class="form-select mb-3" t-custom-model="this.state.folderId">
           <option value="">Без папки</option>
           <option t-foreach="this.state.folders" t-as="folder" t-key="folder.id"
-                  t-att-value="folder.id" t-esc="folder.display_name"/>
+                  t-att-value="folder.id" t-out="folder.display_name"/>
         </select>
 
         <!-- Перетащить файлы или целую папку: вложенные папки заводятся
@@ -43,15 +43,15 @@
           <ul class="o_coop_doc_queue">
             <li t-foreach="this.state.queue" t-as="item" t-key="item_index">
               <i class="fa fa-file-o"/>
-              <span class="o_coop_doc_queue_path" t-esc="item.path"/>
-              <span class="text-muted" t-esc="this.sizeLabel(item.size)"/>
+              <span class="o_coop_doc_queue_path" t-out="item.path"/>
+              <span class="text-muted" t-out="this.sizeLabel(item.size)"/>
               <button type="button" class="btn btn-link btn-sm" t-att-disabled="this.state.busy"
                       t-on-click="() => this.remove(item_index)" title="Убрать">×</button>
             </li>
           </ul>
           <button type="button" class="btn btn-primary" t-att-disabled="this.state.busy" t-on-click="this.upload">
-            <t t-if="this.state.busy">Загружаю… <t t-esc="this.state.done"/> из <t t-esc="this.state.queue.length"/></t>
-            <t t-else="">Загрузить (<t t-esc="this.state.queue.length"/>)</t>
+            <t t-if="this.state.busy">Загружаю… <t t-out="this.state.done"/> из <t t-out="this.state.queue.length"/></t>
+            <t t-else="">Загрузить (<t t-out="this.state.queue.length"/>)</t>
           </button>
         </t>
 
@@ -69,14 +69,14 @@
           <div class="o_coop_doc_scans">
             <div class="o_coop_doc_scan" t-foreach="this.state.scans" t-as="scan" t-key="scan.url">
               <img t-att-src="scan.url" t-att-alt="'Страница ' + (scan_index + 1)"/>
-              <span>стр. <t t-esc="scan_index + 1"/></span>
+              <span>стр. <t t-out="scan_index + 1"/></span>
               <button type="button" class="btn btn-link btn-sm" t-on-click="() => this.removeScan(scan_index)">×</button>
             </div>
           </div>
           <input class="form-control mb-2" placeholder="Название, например «Акт № 14 от 25.09»"
                  t-custom-model="this.state.scanName"/>
           <button type="button" class="btn btn-primary" t-att-disabled="this.state.busy" t-on-click="this.saveScan">
-            Сохранить PDF (<t t-esc="this.state.scans.length"/> стр.)
+            Сохранить PDF (<t t-out="this.state.scans.length"/> стр.)
           </button>
         </t>
 

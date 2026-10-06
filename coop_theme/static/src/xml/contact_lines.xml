@@ -32,8 +32,8 @@
           </button>
         </t>
         <t t-else="">
-          <span class="o_coop_key" t-esc="line.data.name"/>
-          <span class="o_coop_inline_value" t-esc="line.data.value"/>
+          <span class="o_coop_key" t-out="line.data.name"/>
+          <span class="o_coop_inline_value" t-out="line.data.value"/>
           <t t-if="this.canEdit">
             <button type="button" class="o_coop_inline_btn o_coop_inline_start"
                     title="Изменить" aria-label="Изменить"

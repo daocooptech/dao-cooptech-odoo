@@ -245,14 +245,14 @@
         <templates>
           <t t-name="card">
             <div class="o_coop_an_tiles">
-              <div><b t-esc="record.coop_friend_count.raw_value"/><span>друзей</span></div>
-              <div><b t-esc="record.coop_follower_count.raw_value"/><span>подписчиков</span></div>
-              <div><b t-esc="record.coop_activity_30.raw_value"/><span>действий за 30 дней</span></div>
-              <div><b t-esc="record.coop_deal_count.raw_value"/><span>сделок</span></div>
-              <div><b><t t-esc="record.coop_trust.raw_value || '—'"/><t t-if="record.coop_trust.raw_value">%</t></b><span>уровень доверия</span></div>
-              <div><b t-esc="record.coop_project_count.raw_value"/><span>проектов</span></div>
-              <div><b t-esc="record.coop_community_count.raw_value"/><span>сообществ</span></div>
-              <div><b t-esc="record.coop_membership_count.raw_value"/><span>кооперативов</span></div>
+              <div><b t-out="record.coop_friend_count.raw_value"/><span>друзей</span></div>
+              <div><b t-out="record.coop_follower_count.raw_value"/><span>подписчиков</span></div>
+              <div><b t-out="record.coop_activity_30.raw_value"/><span>действий за 30 дней</span></div>
+              <div><b t-out="record.coop_deal_count.raw_value"/><span>сделок</span></div>
+              <div><b><t t-out="record.coop_trust.raw_value || '—'"/><t t-if="record.coop_trust.raw_value">%</t></b><span>уровень доверия</span></div>
+              <div><b t-out="record.coop_project_count.raw_value"/><span>проектов</span></div>
+              <div><b t-out="record.coop_community_count.raw_value"/><span>сообществ</span></div>
+              <div><b t-out="record.coop_membership_count.raw_value"/><span>кооперативов</span></div>
             </div>
           </t>
         </templates>

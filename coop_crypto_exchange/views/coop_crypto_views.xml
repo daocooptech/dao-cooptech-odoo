@@ -24,8 +24,8 @@
             <div class="o_coop_listing o_coop_crypto_card">
               <div class="o_coop_media o_coop_crypto_media"
                    t-att-class="'o_coop_crypto_' + record.asset.raw_value">
-                <span class="o_coop_crypto_sign"><t t-esc="record.asset.raw_value"/></span>
-                <span class="o_coop_locbar"><t t-esc="record.network_id.value"/></span>
+                <span class="o_coop_crypto_sign"><t t-out="record.asset.raw_value"/></span>
+                <span class="o_coop_locbar"><t t-out="record.network_id.value"/></span>
               </div>
               <div class="o_coop_listing_body">
                 <div class="o_coop_crypto_head">
@@ -34,18 +34,18 @@
                     <field name="side"/>
                   </span>
                   <span class="o_coop_crypto_meta" t-if="record.city.raw_value">
-                    <i class="fa fa-map-marker" aria-hidden="true"/> <t t-esc="record.city.value"/>
+                    <i class="fa fa-map-marker" aria-hidden="true"/> <t t-out="record.city.value"/>
                   </span>
                 </div>
-                <div class="o_coop_crypto_price"><t t-esc="record.price_label.value"/>
-                  <span class="o_coop_crypto_meta"> за 1 <t t-esc="record.asset.raw_value"/></span>
+                <div class="o_coop_crypto_price"><t t-out="record.price_label.value"/>
+                  <span class="o_coop_crypto_meta"> за 1 <t t-out="record.asset.raw_value"/></span>
                 </div>
-                <div class="o_coop_crypto_meta"><t t-esc="record.limits_label.value"/></div>
-                <div class="o_coop_crypto_meta"><t t-esc="record.methods_label.value"/></div>
+                <div class="o_coop_crypto_meta"><t t-out="record.limits_label.value"/></div>
+                <div class="o_coop_crypto_meta"><t t-out="record.methods_label.value"/></div>
                 <div class="o_coop_listing_foot o_coop_crypto_foot">
-                  <span><t t-esc="record.author_id.value"/></span>
-                  <span t-if="record.trust.raw_value">доверие <t t-esc="record.trust.value"/>%</span>
-                  <span t-if="record.done_count.raw_value">обменов: <t t-esc="record.done_count.value"/></span>
+                  <span><t t-out="record.author_id.value"/></span>
+                  <span t-if="record.trust.raw_value">доверие <t t-out="record.trust.value"/>%</span>
+                  <span t-if="record.done_count.raw_value">обменов: <t t-out="record.done_count.value"/></span>
                 </div>
               </div>
             </div>

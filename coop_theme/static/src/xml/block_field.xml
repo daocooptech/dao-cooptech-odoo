@@ -14,7 +14,7 @@
                   t-att-rows="this.props.rows or 6"
                   t-att-placeholder="this.props.placeholder"
                   t-on-input="this.onInput"
-                  t-on-keydown="this.onKeydown"><t t-esc="this.ui.draft"/></textarea>
+                  t-on-keydown="this.onKeydown"><t t-out="this.ui.draft"/></textarea>
         <div class="o_coop_block_actions">
           <button type="button" class="o_coop_block_btn o_coop_block_ok"
                   t-att-disabled="this.ui.busy"
@@ -42,14 +42,14 @@
             разделов, и все они падали.
           -->
           <p t-foreach="this.paragraphs" t-as="para" t-key="para_index"
-             t-esc="para"/>
+             t-out="para"/>
         </div>
         <!--
           Пустое описание зовёт заполнить только своего: на чужой
           странице это просто карточка без описания.
         -->
         <div class="o_coop_block_empty" t-elif="this.canEdit"
-             t-esc="this.props.placeholder or 'Описания пока нет'"/>
+             t-out="this.props.placeholder or 'Описания пока нет'"/>
         <button type="button" class="o_coop_block_btn o_coop_block_start"
                 t-if="this.canEdit"
                 title="Изменить" aria-label="Изменить"

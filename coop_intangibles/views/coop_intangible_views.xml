@@ -37,7 +37,7 @@
               <div class="o_coop_listing_body">
                 <div class="o_coop_listing_title"><field name="name"/></div>
                 <div class="o_coop_listing_meta">
-                  <t t-if="record.city.raw_value"><t t-esc="record.city.value"/> · </t>
+                  <t t-if="record.city.raw_value"><t t-out="record.city.value"/> · </t>
                   <field name="owner_id"/> · <field name="legal_basis"/>
                 </div>
                 <div class="o_coop_listing_tags">

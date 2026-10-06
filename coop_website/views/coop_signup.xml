@@ -21,7 +21,7 @@
           <t t-foreach="coop_langs" t-as="lang_row">
             <option t-att-value="lang_row[0]"
                     t-att-selected="lang_row[0] == coop_selected_lang">
-              <t t-esc="lang_row[1]"/>
+              <t t-out="lang_row[1]"/>
             </option>
           </t>
         </select>

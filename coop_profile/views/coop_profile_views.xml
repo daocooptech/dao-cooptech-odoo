@@ -566,7 +566,7 @@
                               <field name="name"/>
                             </div>
                             <div class="o_coop_mini_note">
-                              собрано <t t-esc="record.readiness.value"/>%
+                              собрано <t t-out="record.readiness.value"/>%
                             </div>
                           </div>
                         </t>

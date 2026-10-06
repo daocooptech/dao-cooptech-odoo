@@ -449,10 +449,10 @@
                               <field name="name"/>
                             </div>
                             <div class="o_coop_mini_note">
-                              <t t-esc="record.city.value"/><t t-if="record.country_id.raw_value and record.city.value">, </t><t t-esc="record.country_id.value"/>
+                              <t t-out="record.city.value"/><t t-if="record.country_id.raw_value and record.city.value">, </t><t t-out="record.country_id.value"/>
                             </div>
                             <div class="o_coop_mini_note">
-                              Пайщиков: <t t-esc="record.member_count.value"/>
+                              Пайщиков: <t t-out="record.member_count.value"/>
                             </div>
                           </div>
                         </t>
@@ -587,7 +587,7 @@
                               <field name="partner_id"/>
                             </div>
                             <div class="o_coop_mini_note">
-                              <t t-esc="record.job_title.value or record.role_id.value"/>
+                              <t t-out="record.job_title.value or record.role_id.value"/>
                             </div>
                           </div>
                         </t>

@@ -36,29 +36,29 @@
                 <!-- Обложки нет — вместо битой плитки значок на подложке.
                      Геометрия та же, ряд не разъезжается. -->
                 <div t-else="" class="o_coop_cover_icon">
-                  <t t-esc="record.icon.raw_value or '👥'"/>
+                  <t t-out="record.icon.raw_value or '👥'"/>
                 </div>
                 <span class="o_coop_badge"
                       t-att-class="'o_coop_kind_' + record.kind.raw_value">
-                  <t t-esc="record.kind.value"/>
+                  <t t-out="record.kind.value"/>
                 </span>
                 <span class="o_coop_badge o_coop_badge_right">
                   <i class="fa fa-users" aria-hidden="true"/>
-                  <t t-esc="record.member_count.value"/>
+                  <t t-out="record.member_count.value"/>
                 </span>
                 <span class="o_coop_loc" t-if="record.city.raw_value">
                   <i class="fa fa-map-marker" aria-hidden="true"/>
-                  <t t-esc="record.city.value"/>
+                  <t t-out="record.city.value"/>
                 </span>
               </div>
               <div class="o_coop_tile_body">
                 <div class="o_coop_tile_name"><field name="name"/></div>
                 <div class="o_coop_tile_desc"><field name="summary"/></div>
                 <div class="o_coop_tile_link" t-if="record.project_id.raw_value">
-                  При проекте «<t t-esc="record.project_id.value"/>»
+                  При проекте «<t t-out="record.project_id.value"/>»
                 </div>
                 <div class="o_coop_tile_link" t-elif="record.organization_id.raw_value">
-                  Сообщество организации «<t t-esc="record.organization_id.value"/>»
+                  Сообщество организации «<t t-out="record.organization_id.value"/>»
                 </div>
                 <!--
                   Участие показывается состоянием, действие — кнопкой.

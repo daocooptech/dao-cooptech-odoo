@@ -30,8 +30,8 @@
                    t-attf-src="/web/image/res.partner/{{person.id}}/avatar_128"
                    alt=""/>
               <div class="o_coop_new_dialog_text">
-                <div class="o_coop_new_dialog_name" t-esc="person.name"/>
-                <div t-if="person.city" class="o_coop_new_dialog_city" t-esc="person.city"/>
+                <div class="o_coop_new_dialog_name" t-out="person.name"/>
+                <div t-if="person.city" class="o_coop_new_dialog_city" t-out="person.city"/>
               </div>
             </div>
           </div>
@@ -50,8 +50,8 @@
               type="button" class="o_coop_chip"
               t-att-class="{ o_coop_chip_on: this.state.category === category.id }"
               t-on-click="() => (this.state.category = category.id)">
-        <t t-esc="category.label"/>
-        <span class="o_coop_chip_num" t-esc="this.countOf(category.id)"/>
+        <t t-out="category.label"/>
+        <span class="o_coop_chip_num" t-out="this.countOf(category.id)"/>
       </button>
     </div>
 
@@ -71,14 +71,14 @@
               <div class="o_coop_thread_row">
                 <span class="o_coop_thread_name">
                   <t t-if="thread.coop_pinned">📌 </t>
-                  <t t-esc="thread.displayName"/>
+                  <t t-out="thread.displayName"/>
                 </span>
-                <span class="o_coop_thread_time" t-esc="this.stampOf(thread)"/>
+                <span class="o_coop_thread_time" t-out="this.stampOf(thread)"/>
               </div>
               <div class="o_coop_thread_row">
-                <span class="o_coop_thread_last" t-esc="this.previewOf(thread)"/>
+                <span class="o_coop_thread_last" t-out="this.previewOf(thread)"/>
                 <span t-if="this.unreadOf(thread)" class="o_coop_thread_count"
-                      t-esc="this.unreadOf(thread)"/>
+                      t-out="this.unreadOf(thread)"/>
               </div>
             </div>
           </div>
@@ -119,21 +119,21 @@
             <img class="o_coop_chat_avatar" t-att-src="this.activeThread.avatarUrl" alt=""
                  t-att-class="{ o_coop_avatar_circle: this.activeThread.coop_kind === 'person' }"/>
             <div class="o_coop_chat_head_text">
-              <div class="o_coop_chat_name" t-esc="this.activeThread.displayName"/>
+              <div class="o_coop_chat_name" t-out="this.activeThread.displayName"/>
               <div class="o_coop_chat_sub">
                 <t t-if="this.activeThread.coop_kind === 'person' and this.onlineStatus(this.activeThread)">
                   <span class="o_coop_online_dot"
                         t-att-class="{ o_coop_online_off: this.onlineStatus(this.activeThread) !== 'online' }"/>
-                  <t t-esc="this.onlineStatus(this.activeThread) === 'online' ? 'в сети' : 'был(а) недавно'"/>
+                  <t t-out="this.onlineStatus(this.activeThread) === 'online' ? 'в сети' : 'был(а) недавно'"/>
                   <t t-if="this.activeThread.coop_subtitle"> · </t>
                 </t>
-                <t t-esc="this.activeThread.coop_subtitle"/>
+                <t t-out="this.activeThread.coop_subtitle"/>
               </div>
             </div>
             <button t-if="this.activeThread.coop_link_label" type="button"
                     class="o_coop_chat_link"
                     t-on-click="() => this.openRecord(this.activeThread)">
-              <t t-esc="this.activeThread.coop_link_label"/> →
+              <t t-out="this.activeThread.coop_link_label"/> →
             </button>
 
             <!--
@@ -233,7 +233,7 @@
       'community': 'Сообщество', 'org': 'Организация',
     }"/>
     <span t-if="coopKindLabels[thread.coop_kind]" class="o_coop_menu_kind"
-          t-esc="coopKindLabels[thread.coop_kind]"/>
+          t-out="coopKindLabels[thread.coop_kind]"/>
   </xpath>
 
 </t>

@@ -37,7 +37,7 @@
                 <img class="o_coop_media_logo" t-elif="record.organizer_id.raw_value" loading="lazy"
                      t-attf-src="/web/image/res.partner/#{record.organizer_id.raw_value}/image_512"
                      t-att-alt="record.organizer_id.value"/>
-                <span t-else="" class="o_coop_media_sign"><t t-esc="record.icon.value"/></span>
+                <span t-else="" class="o_coop_media_sign"><t t-out="record.icon.value"/></span>
                 <span class="o_coop_locbar" t-if="record.city.raw_value">
                   <i class="fa fa-map-marker" role="img" aria-label="Город"/>
                   <field name="city"/>
@@ -49,13 +49,13 @@
                   <field name="date_start"/>
                 </div>
                 <div class="o_coop_listing_meta">
-                  <t t-esc="record.city.value"/> ·
-                  <t t-esc="record.format.value"/> ·
-                  <t t-esc="record.organizer_id.value"/>
+                  <t t-out="record.city.value"/> ·
+                  <t t-out="record.format.value"/> ·
+                  <t t-out="record.organizer_id.value"/>
                 </div>
                 <div class="o_coop_event_desc"><field name="description"/></div>
                 <div class="o_coop_listing_tags">
-                  <span class="o_coop_chip"><t t-esc="record.category.value"/></span>
+                  <span class="o_coop_chip"><t t-out="record.category.value"/></span>
                 </div>
                 <div class="o_coop_listing_foot">
                   <span class="o_coop_listing_meta o_coop_event_signups">

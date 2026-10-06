@@ -72,11 +72,11 @@
               <div class="o_coop_gb_head">
                 <span class="o_coop_badge o_coop_gb_state"
                       t-att-class="'o_coop_gb_' + record.state.raw_value">
-                  <t t-esc="record.state.value"/>
+                  <t t-out="record.state.value"/>
                 </span>
                 <span class="o_coop_gb_meta" t-if="record.city.raw_value">
                   <i class="fa fa-map-marker" aria-hidden="true"/>
-                  <t t-esc="record.city.value"/>
+                  <t t-out="record.city.value"/>
                 </span>
               </div>
 
@@ -84,13 +84,13 @@
 
               <div class="o_coop_gb_head">
                 <span class="o_coop_gb_price">
-                  <field name="current_price"/> ₽ / <t t-esc="record.unit_label.value"/>
+                  <field name="current_price"/> ₽ / <t t-out="record.unit_label.value"/>
                 </span>
                 <span class="o_coop_gb_meta" title="Из чего сложилась цена">
                   в т. ч. оргсбор <field name="org_fee_amount"/> ₽
                 </span>
                 <span class="o_coop_gb_meta">
-                  стоп <t t-esc="record.stop_date.value"/>
+                  стоп <t t-out="record.stop_date.value"/>
                 </span>
               </div>
 
@@ -103,16 +103,16 @@
               </div>
               <div class="o_coop_gb_progress">
                 <span>
-                  <t t-esc="record.total_quantity.value"/> из
-                  <t t-esc="record.min_volume.value"/> <t t-esc="record.unit_label.value"/>
+                  <t t-out="record.total_quantity.value"/> из
+                  <t t-out="record.min_volume.value"/> <t t-out="record.unit_label.value"/>
                 </span>
-                <span><t t-esc="record.progress.value"/>%</span>
+                <span><t t-out="record.progress.value"/>%</span>
               </div>
 
               <div class="o_coop_listing_foot o_coop_gb_foot">
-                <span class="o_coop_gb_meta"><t t-esc="record.organizer_id.value"/></span>
+                <span class="o_coop_gb_meta"><t t-out="record.organizer_id.value"/></span>
                 <span class="o_coop_gb_meta">
-                  <t t-esc="record.participant_count.value"/> участников
+                  <t t-out="record.participant_count.value"/> участников
                 </span>
               </div>
               </div>

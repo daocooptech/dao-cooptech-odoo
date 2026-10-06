@@ -46,11 +46,11 @@
               <div class="o_coop_auction_head">
                 <span class="o_coop_badge o_coop_auction_state"
                       t-att-class="'o_coop_auction_' + record.state.raw_value">
-                  <t t-esc="record.state.value"/>
+                  <t t-out="record.state.value"/>
                 </span>
                 <span class="o_coop_auction_meta" t-if="record.city.raw_value">
                   <i class="fa fa-map-marker" aria-hidden="true"/>
-                  <t t-esc="record.city.value"/>
+                  <t t-out="record.city.value"/>
                 </span>
               </div>
 
@@ -63,22 +63,22 @@
                 <span class="o_coop_auction_meta"
                       t-att-class="record.minutes_left.raw_value &gt; 0 and record.minutes_left.raw_value &lt; 60 ? 'o_coop_auction_soon' : ''">
                   <t t-if="record.state.raw_value === 'running' and record.minutes_left.raw_value &gt; 0">
-                    осталось <t t-esc="record.minutes_left.value"/> мин
+                    осталось <t t-out="record.minutes_left.value"/> мин
                   </t>
                   <t t-else="">
-                    <t t-esc="record.date_end.value"/>
+                    <t t-out="record.date_end.value"/>
                   </t>
                 </span>
               </div>
 
               <div class="o_coop_auction_meta">
-                <t t-esc="record.kind.value"/> · <t t-esc="record.owner_id.value"/>
+                <t t-out="record.kind.value"/> · <t t-out="record.owner_id.value"/>
               </div>
 
               <div class="o_coop_listing_foot o_coop_auction_foot">
-                <span class="o_coop_chip"><t t-esc="record.kind.value"/></span>
+                <span class="o_coop_chip"><t t-out="record.kind.value"/></span>
                 <span class="o_coop_auction_meta">
-                  ставок: <t t-esc="record.bid_count.value"/>
+                  ставок: <t t-out="record.bid_count.value"/>
                 </span>
               </div>
 

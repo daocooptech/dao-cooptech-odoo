@@ -29,14 +29,14 @@
                 <img class="o_coop_trade_flag" t-if="record.flag_url.raw_value" loading="lazy"
                      t-att-src="record.flag_url.raw_value" t-att-alt="record.foreign_country_id.value"/>
                 <span class="o_coop_locbar">
-                  <t t-esc="record.foreign_country_id.value"/>
+                  <t t-out="record.foreign_country_id.value"/>
                 </span>
               </div>
               <div class="o_coop_listing_body">
                 <div class="o_coop_trade_head">
                   <span class="o_coop_badge o_coop_trade_dir"
                         t-att-class="'o_coop_trade_' + record.direction.raw_value">
-                    <t t-esc="record.icon.value"/> <field name="direction"/>
+                    <t t-out="record.icon.value"/> <field name="direction"/>
                   </span>
                   <span class="o_coop_badge o_coop_trade_state"
                         t-att-class="'o_coop_trade_st_' + record.state.raw_value">
@@ -44,14 +44,14 @@
                   </span>
                 </div>
                 <div class="o_coop_listing_title"><field name="name"/></div>
-                <div class="o_coop_trade_price"><t t-esc="record.amount_label.value"/></div>
+                <div class="o_coop_trade_price"><t t-out="record.amount_label.value"/></div>
                 <div class="o_coop_trade_meta">
-                  <t t-esc="record.resident_id.value"/> → <t t-esc="record.foreign_name.value"/>
+                  <t t-out="record.resident_id.value"/> → <t t-out="record.foreign_name.value"/>
                 </div>
                 <div class="o_coop_listing_foot o_coop_trade_foot">
-                  <span><t t-esc="record.settlement_short.value"/></span>
+                  <span><t t-out="record.settlement_short.value"/></span>
                   <span t-att-class="record.registration.raw_value === 'unk' ? 'o_coop_trade_unk' : ''">
-                    <t t-esc="record.registration_label.value"/>
+                    <t t-out="record.registration_label.value"/>
                   </span>
                 </div>
               </div>

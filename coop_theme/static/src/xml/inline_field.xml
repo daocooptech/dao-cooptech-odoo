@@ -23,7 +23,7 @@
           <option t-foreach="this.selectionOptions" t-as="option" t-key="option[0]"
                   t-att-value="option[0]"
                   t-att-selected="option[0] === this.value"
-                  t-esc="option[1]"/>
+                  t-out="option[1]"/>
         </select>
         <!--
           Длинный текст набирают в несколько строк: в однострочном поле
@@ -36,7 +36,7 @@
                   t-att-maxlength="this.maxlength"
                   t-att-placeholder="this.props.placeholder"
                   t-on-input="this.onInput"
-                  t-on-keydown="this.onKeydown"><t t-esc="this.ui.draft"/></textarea>
+                  t-on-keydown="this.onKeydown"><t t-out="this.ui.draft"/></textarea>
         <input t-else="" class="o_input o_coop_inline_input" t-custom-ref="input"
                t-att-type="this.inputType"
                t-att-value="this.ui.draft"
@@ -51,7 +51,7 @@
         <ul t-if="this.ui.options.length" class="o_coop_inline_hints">
           <li t-foreach="this.ui.options" t-as="option" t-key="option.id">
             <button type="button" t-on-click="() => this.pick(option)"
-                    t-esc="option.display_name"/>
+                    t-out="option.display_name"/>
           </li>
         </ul>
         <button type="button" class="o_coop_inline_btn o_coop_inline_ok"
@@ -68,9 +68,9 @@
         </button>
       </t>
       <t t-else="">
-        <span class="o_coop_inline_value" t-if="this.display" t-esc="this.display"
+        <span class="o_coop_inline_value" t-if="this.display" t-out="this.display"
               t-att-class="{ o_coop_inline_number: this.isNumeric }"/>
-        <span class="o_coop_inline_empty" t-else="" t-esc="this.props.placeholder or '—'"/>
+        <span class="o_coop_inline_empty" t-else="" t-out="this.props.placeholder or '—'"/>
         <button type="button" class="o_coop_inline_btn o_coop_inline_start"
                 t-if="this.canEdit"
                 title="Изменить" aria-label="Изменить"

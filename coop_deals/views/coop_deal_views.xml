@@ -34,7 +34,7 @@
                 <img class="o_coop_media_logo" t-elif="record.party_b_id.raw_value" loading="lazy"
                      t-attf-src="/web/image/res.partner/#{record.party_b_id.raw_value}/image_512"
                      t-att-alt="record.party_b_id.value"/>
-                <span t-else="" class="o_coop_media_sign"><t t-esc="record.icon.value"/></span>
+                <span t-else="" class="o_coop_media_sign"><t t-out="record.icon.value"/></span>
                 <span class="o_coop_locbar" t-if="record.city.raw_value">
                   <i class="fa fa-map-marker" role="img" aria-label="Город"/>
                   <field name="city"/>
@@ -42,14 +42,14 @@
               </div>
               <div class="o_coop_listing_body">
                 <div class="o_coop_deal_top">
-                  <span class="o_coop_badge_subject"><t t-esc="record.subject.value"/></span>
-                  <span class="o_coop_deal_no"><t t-esc="record.number.value"/></span>
+                  <span class="o_coop_badge_subject"><t t-out="record.subject.value"/></span>
+                  <span class="o_coop_deal_no"><t t-out="record.number.value"/></span>
                 </div>
                 <div class="o_coop_listing_title"><field name="name"/></div>
                 <!-- Город не повторяется: он стоит полосой на снимке,
                      как во всех каталогах платформы. -->
                 <div class="o_coop_listing_meta">
-                  <t t-esc="record.way.value"/>
+                  <t t-out="record.way.value"/>
                 </div>
                 <div class="o_coop_deal_parties">
                   <field name="party_a_id"/> ↔ <field name="party_b_id"/>
@@ -58,7 +58,7 @@
                   <span class="o_coop_deal_amount"><field name="amount" widget="monetary"/></span>
                   <span class="o_coop_deal_state"
                         t-att-class="'o_coop_state_' + record.state.raw_value">
-                    <t t-esc="record.state.value"/>
+                    <t t-out="record.state.value"/>
                   </span>
                 </div>
               </div>

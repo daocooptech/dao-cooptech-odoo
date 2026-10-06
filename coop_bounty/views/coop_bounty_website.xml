@@ -50,12 +50,12 @@
               <div class="coop-task-list" t-if="tasks">
                 <article class="coop-task" t-foreach="tasks" t-as="task">
                   <div class="coop-task-main">
-                    <div class="coop-task-name"><t t-esc="task.name"/></div>
+                    <div class="coop-task-name"><t t-out="task.name"/></div>
                     <div class="coop-task-meta">
                       <span t-if="task.coop_specialization_id">
-                        <t t-esc="task.coop_specialization_id.name"/> ·
+                        <t t-out="task.coop_specialization_id.name"/> ·
                       </span>
-                      <span t-if="task.deadline">до <t t-esc="task.deadline"/></span>
+                      <span t-if="task.deadline">до <t t-out="task.deadline"/></span>
                       <span t-if="not task.deadline">без срока</span>
                     </div>
                     <div class="coop-task-desc" t-if="task.description">
@@ -64,7 +64,7 @@
                   </div>
                   <div class="coop-task-side">
                     <div class="coop-task-reward">
-                      <t t-esc="task.reward_tokens"/>
+                      <t t-out="task.reward_tokens"/>
                       <span class="coop-task-unit">токенов</span>
                     </div>
                     <!-- Ссылка ведёт в кабинет: взять задачу может только

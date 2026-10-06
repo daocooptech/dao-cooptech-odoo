@@ -64,8 +64,8 @@
         <div class="lx-stats" t-if="facts['stats']">
           <div class="lx-wrap lx-stats-in">
             <div class="lx-stat" t-foreach="facts['stats']" t-as="s">
-              <b t-esc="'{:,}'.format(s['value']).replace(',', ' ')"/>
-              <span t-esc="s['label']"/>
+              <b t-out="'{:,}'.format(s['value']).replace(',', ' ')"/>
+              <span t-out="s['label']"/>
             </div>
           </div>
         </div>
@@ -328,7 +328,7 @@
                 </tbody>
               </table>
             </div>
-            <p class="lx-small" t-if="facts['legal_forms']">В справочнике платформы — <t t-esc="facts['legal_forms']"/> правовых форм.</p>
+            <p class="lx-small" t-if="facts['legal_forms']">В справочнике платформы — <t t-out="facts['legal_forms']"/> правовых форм.</p>
 
             <h3 class="lx-h3" id="links">Экономические связки: кто с кем и как рассчитывается</h3>
             <svg class="lx-diagram d-none d-md-block" viewBox="0 0 960 680" role="img" aria-labelledby="rel-t rel-d">
@@ -570,8 +570,8 @@ GET /federation/log?after=-1</pre>
 
             <div class="lx-card lx-verify" t-if="facts['node']">
               <h3><i class="fa fa-check-circle"/> Проверьте сами</h3>
-              <p>Адрес этого сервера в сети: <span class="lx-term" t-esc="facts['node']['did']"/>.
-                Записей в его журнале: <b t-esc="facts['node']['records']"/><t t-if="facts['node']['peers']">, соседей в сети: <b t-esc="facts['node']['peers']"/></t>.</p>
+              <p>Адрес этого сервера в сети: <span class="lx-term" t-out="facts['node']['did']"/>.
+                Записей в его журнале: <b t-out="facts['node']['records']"/><t t-if="facts['node']['peers']">, соседей в сети: <b t-out="facts['node']['peers']"/></t>.</p>
               <p><a href="/.well-known/did.json" target="_blank" rel="noopener">Открыть did.json</a> ·
                 <a href="/federation/log" target="_blank" rel="noopener">Открыть журнал</a> ·
                 <a href="https://github.com/daocooptech/dao-cooptech" target="_blank" rel="noopener">Эталон для проверки цепочки</a></p>

@@ -30,7 +30,7 @@
               t-att-disabled="isNewButtonDisabled"
               class="btn btn-primary o-kanban-button-new" accesskey="c"
               t-on-click="() => this.createRecord()" data-bounce-button="">
-        <t t-esc="coopCreateLabel"/>
+        <t t-out="coopCreateLabel"/>
       </button>
     </xpath>
 
@@ -250,7 +250,7 @@
       <button t-if="!editedRecord and activeActions.create and props.showButtons"
               type="button" class="btn btn-primary o_list_button_add"
               data-hotkey="c" t-on-click="onClickCreate" data-bounce-button="">
-        <t t-esc="coopCreateLabel"/>
+        <t t-out="coopCreateLabel"/>
       </button>
     </xpath>
   </t>
@@ -265,7 +265,7 @@
               t-att-disabled="isNewButtonDisabled"
               class="btn btn-primary o-kanban-button-new" accesskey="c"
               t-on-click="() => this.createRecord()" data-bounce-button="">
-        <t t-esc="coopCreateLabel"/>
+        <t t-out="coopCreateLabel"/>
       </button>
     </xpath>
   </t>
@@ -279,7 +279,7 @@
       <button t-if="canCreate" type="button"
               class="btn btn-outline-primary o_form_button_create"
               data-hotkey="c" t-on-click.stop="create">
-        <t t-esc="coopCreateLabel"/>
+        <t t-out="coopCreateLabel"/>
       </button>
     </xpath>
   </t>

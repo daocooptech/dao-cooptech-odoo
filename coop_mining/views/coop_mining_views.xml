@@ -22,9 +22,9 @@
           <t t-name="card">
             <div class="o_coop_listing o_coop_mining_card">
               <div class="o_coop_media o_coop_mining_media">
-                <span class="o_coop_mining_sign"><t t-esc="record.icon.value"/></span>
+                <span class="o_coop_mining_sign"><t t-out="record.icon.value"/></span>
                 <span class="o_coop_locbar" t-if="record.city.raw_value">
-                  <i class="fa fa-map-marker" role="img" aria-label="Город"/> <t t-esc="record.city.value"/>
+                  <i class="fa fa-map-marker" role="img" aria-label="Город"/> <t t-out="record.city.value"/>
                 </span>
               </div>
               <div class="o_coop_listing_body">
@@ -33,14 +33,14 @@
                   <span class="o_coop_badge"><field name="kind"/></span>
                 </div>
                 <div class="o_coop_listing_title"><field name="name"/></div>
-                <div class="o_coop_mining_price"><t t-esc="record.price_label.value"/></div>
+                <div class="o_coop_mining_price"><t t-out="record.price_label.value"/></div>
                 <div class="o_coop_mining_meta">
-                  <t t-esc="record.capacity_label.value"/>
+                  <t t-out="record.capacity_label.value"/>
                   <t t-if="record.energy_source.raw_value"> · <field name="energy_source"/></t>
-                  <t t-if="record.min_term.raw_value"> · от <t t-esc="record.min_term.value"/></t>
+                  <t t-if="record.min_term.raw_value"> · от <t t-out="record.min_term.value"/></t>
                 </div>
                 <div class="o_coop_listing_foot o_coop_mining_foot">
-                  <span><t t-esc="record.author_id.value"/></span>
+                  <span><t t-out="record.author_id.value"/></span>
                   <span t-if="record.infra_registered.raw_value">в реестре операторов</span>
                 </div>
               </div>
@@ -183,7 +183,7 @@
                      t-attf-src="/web/image/res.partner/#{record.partner_id.raw_value}/image_512"
                      t-att-alt="record.partner_id.value"/>
                 <span class="o_coop_locbar" t-if="record.city.raw_value">
-                  <i class="fa fa-map-marker" role="img" aria-label="Город"/> <t t-esc="record.city.value"/>
+                  <i class="fa fa-map-marker" role="img" aria-label="Город"/> <t t-out="record.city.value"/>
                 </span>
               </div>
               <div class="o_coop_listing_body">
@@ -197,9 +197,9 @@
                   <span class="o_coop_badge o_coop_mining_missing" t-if="record.over_limit.raw_value">сверх лимита</span>
                 </div>
                 <div class="o_coop_listing_title"><field name="name"/></div>
-                <div class="o_coop_mining_meta"><field name="kind"/> · <t t-esc="record.coins.value"/></div>
+                <div class="o_coop_mining_meta"><field name="kind"/> · <t t-out="record.coins.value"/></div>
                 <div class="o_coop_mining_price">
-                  <t t-esc="record.power_kw.value"/> кВт<t t-if="record.hashrate.raw_value"> · <t t-esc="record.hashrate.value"/> TH/s</t>
+                  <t t-out="record.power_kw.value"/> кВт<t t-if="record.hashrate.raw_value"> · <t t-out="record.hashrate.value"/> TH/s</t>
                 </div>
                 <div class="o_coop_listing_foot o_coop_mining_foot">
                   <span t-if="record.energy_source.raw_value"><field name="energy_source"/></span>

@@ -27,31 +27,31 @@
                 <img t-if="record.has_photo.raw_value" loading="lazy"
                      t-attf-src="/web/image/coop.resource/#{record.resource_id.raw_value}/image_512"
                      t-att-alt="record.name.value"/>
-                <span t-else="" class="o_coop_barter_sign"><t t-esc="record.icon.value"/></span>
+                <span t-else="" class="o_coop_barter_sign"><t t-out="record.icon.value"/></span>
                 <img class="o_coop_face" loading="lazy" t-if="record.partner_id.raw_value"
                      t-attf-src="/web/image/res.partner/#{record.partner_id.raw_value}/avatar_128"
                      t-att-alt="record.partner_id.value"/>
                 <span class="o_coop_locbar" t-if="record.city.raw_value">
-                  <i class="fa fa-map-marker" role="img" aria-label="Город"/> <t t-esc="record.city.value"/>
+                  <i class="fa fa-map-marker" role="img" aria-label="Город"/> <t t-out="record.city.value"/>
                 </span>
               </div>
               <div class="o_coop_listing_body">
                 <div class="o_coop_barter_head">
-                  <span class="o_coop_badge"><t t-esc="record.icon.value"/> <field name="category_id"/></span>
+                  <span class="o_coop_badge"><t t-out="record.icon.value"/> <field name="category_id"/></span>
                   <span class="o_coop_badge o_coop_barter_busy" t-if="record.state.raw_value == 'reserved'">идёт обмен</span>
                   <span class="o_coop_badge" t-if="record.state.raw_value == 'done'">обменяно</span>
                 </div>
                 <div class="o_coop_listing_title"><field name="name"/></div>
                 <div class="o_coop_barter_want">
-                  <i class="fa fa-exchange" role="img" aria-label="Взамен"/> <t t-esc="record.want_label.value"/>
+                  <i class="fa fa-exchange" role="img" aria-label="Взамен"/> <t t-out="record.want_label.value"/>
                 </div>
                 <div class="o_coop_barter_value">
-                  <t t-esc="record.value_label.value"/>
+                  <t t-out="record.value_label.value"/>
                   <span class="o_coop_barter_meta" t-if="record.surcharge_ok.raw_value"> · возможна доплата</span>
                 </div>
                 <div class="o_coop_listing_foot o_coop_barter_foot">
-                  <span><t t-esc="record.partner_id.value"/></span>
-                  <span t-if="record.handover_label.raw_value"><t t-esc="record.handover_label.value"/></span>
+                  <span><t t-out="record.partner_id.value"/></span>
+                  <span t-if="record.handover_label.raw_value"><t t-out="record.handover_label.value"/></span>
                 </div>
               </div>
             </div>

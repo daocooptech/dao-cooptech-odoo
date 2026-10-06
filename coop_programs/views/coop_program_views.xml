@@ -43,11 +43,11 @@
               <div class="o_coop_program_head">
                 <span class="o_coop_badge o_coop_program_state"
                       t-att-class="'o_coop_program_' + record.state.raw_value">
-                  <t t-esc="record.state.value"/>
+                  <t t-out="record.state.value"/>
                 </span>
                 <span class="o_coop_program_loc" t-if="record.city.raw_value">
                   <i class="fa fa-map-marker" aria-hidden="true"/>
-                  <t t-esc="record.city.value"/>
+                  <t t-out="record.city.value"/>
                 </span>
               </div>
               <div class="o_coop_listing_title o_coop_program_name"><field name="name"/></div>
@@ -55,14 +55,14 @@
                 Фонд программы: <field name="fund_amount" widget="monetary"/>
               </div>
               <div class="o_coop_program_meta">
-                <t t-esc="record.organizer_id.value"/> ·
-                срок <t t-esc="record.duration_months.value"/> мес.
+                <t t-out="record.organizer_id.value"/> ·
+                срок <t t-out="record.duration_months.value"/> мес.
               </div>
               <div class="o_coop_program_desc"><field name="description"/></div>
               <div class="o_coop_listing_foot o_coop_program_foot">
-                <span class="o_coop_chip"><t t-esc="record.industry.value"/></span>
+                <span class="o_coop_chip"><t t-out="record.industry.value"/></span>
                 <span class="o_coop_program_people">
-                  <t t-esc="record.participant_count.value"/> участников
+                  <t t-out="record.participant_count.value"/> участников
                 </span>
               </div>
               </div>

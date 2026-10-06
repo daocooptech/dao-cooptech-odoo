@@ -19,7 +19,7 @@
             <button t-foreach="d.partners" t-as="p" t-key="p.id"
                     t-att-class="{ active: p.id === d.partner.id }"
                     t-on-click="() => this.pickPartner(p.me ? null : p.id)">
-              <t t-if="p.me">Мой</t><t t-else="" t-esc="p.name"/>
+              <t t-if="p.me">Мой</t><t t-else="" t-out="p.name"/>
             </button>
           </nav>
         </header>
@@ -28,8 +28,8 @@
           <section class="o_coop_fc_card" t-foreach="d.metrics" t-as="m" t-key="m.key">
             <header>
               <div>
-                <h3 t-esc="m.label"/>
-                <p t-esc="m.hint"/>
+                <h3 t-out="m.label"/>
+                <p t-out="m.hint"/>
               </div>
               <button class="o_coop_fc_planbtn" t-on-click="() => this.openEdit(m)">
                 <i class="fa fa-flag-o"/> <t t-if="m.now.plan !== null">Изменить план</t><t t-else="">Задать план</t>
@@ -39,25 +39,25 @@
             <div class="o_coop_fc_now">
               <div>
                 <span>Этот месяц</span>
-                <b t-esc="this.fmt(m, m.now.fact)"/>
+                <b t-out="this.fmt(m, m.now.fact)"/>
               </div>
               <div>
                 <span t-if="m.better === 'down'">Лимит</span><span t-else="">План</span>
-                <b t-if="m.now.plan !== null" t-esc="this.fmt(m, m.now.plan)"/>
+                <b t-if="m.now.plan !== null" t-out="this.fmt(m, m.now.plan)"/>
                 <b t-else="" class="o_coop_fc_muted">не задан</b>
               </div>
               <div>
                 <span>К концу месяца при таком темпе</span>
-                <b t-esc="this.fmt(m, m.now.pace)"/>
+                <b t-out="this.fmt(m, m.now.pace)"/>
               </div>
               <div>
                 <span>Тренд на месяц</span>
-                <b t-esc="this.fmt(m, m.now.forecast)"/>
+                <b t-out="this.fmt(m, m.now.forecast)"/>
               </div>
             </div>
             <div class="o_coop_fc_progress" t-if="m.now.plan !== null" t-att-data-status="this.status(m)">
               <i t-att-style="this.barWidth(m)"/>
-              <span><t t-esc="this.pctLabel(m)"/><t t-if="m.now.days_left"> · осталось <t t-esc="m.now.days_left"/> дн.</t></span>
+              <span><t t-out="this.pctLabel(m)"/><t t-if="m.now.days_left"> · осталось <t t-out="m.now.days_left"/> дн.</t></span>
             </div>
 
             <div class="o_coop_fc_chart">
@@ -68,12 +68,12 @@
                   <i t-if="c.fact" class="o_coop_fc_b_fact" t-att-style="this.h(m, c.fact)"/>
                   <em t-if="c.plan !== null and c.plan !== undefined" class="o_coop_fc_plan" t-att-style="this.planTop(m, c.plan)"/>
                 </div>
-                <span t-esc="c.label"/>
+                <span t-out="c.label"/>
               </div>
             </div>
             <footer>
-              <span>средний месяц <b t-esc="this.fmt(m, m.avg)"/></span>
-              <span t-if="m.plans_total">планов выполнено <b><t t-esc="m.plans_done"/> из <t t-esc="m.plans_total"/></b></span>
+              <span>средний месяц <b t-out="this.fmt(m, m.avg)"/></span>
+              <span t-if="m.plans_total">планов выполнено <b><t t-out="m.plans_done"/> из <t t-out="m.plans_total"/></b></span>
               <span t-if="m.mode === 'average'" class="o_coop_fc_muted">данных мало — вместо тренда средний месяц</span>
             </footer>
 
@@ -81,7 +81,7 @@
                   t-on-submit.prevent="() => this.savePlan()">
               <label>С месяца
                 <select t-custom-model="this.state.edit.month">
-                  <option t-foreach="this.futureMonths(m)" t-as="f" t-key="f.key" t-att-value="f.key" t-esc="f.label"/>
+                  <option t-foreach="this.futureMonths(m)" t-as="f" t-key="f.key" t-att-value="f.key" t-out="f.label"/>
                 </select>
               </label>
               <label><t t-if="m.better === 'down'">Лимит</t><t t-else="">Цель</t><t t-if="m.unit === 'rub'">, ₽</t>

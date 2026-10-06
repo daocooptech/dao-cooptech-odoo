@@ -45,15 +45,15 @@
                 <span t-else="" class="o_coop_media_sign">🎯</span>
                 <span class="o_coop_badge o_coop_kind"
                       t-att-class="'o_coop_kind_' + record.kind.raw_value">
-                  <t t-esc="record.kind.value"/>
+                  <t t-out="record.kind.value"/>
                 </span>
                 <span class="o_coop_stop"
                       t-if="record.state.raw_value == 'frozen' or record.state.raw_value == 'cancelled' or record.state.raw_value == 'failed'">
-                  <t t-esc="record.state.value"/>
+                  <t t-out="record.state.value"/>
                 </span>
                 <span class="o_coop_loc" t-if="record.city.raw_value">
                   <i class="fa fa-map-marker" aria-hidden="true"/>
-                  <t t-esc="record.city.value"/>
+                  <t t-out="record.city.value"/>
                 </span>
               </div>
               <div class="o_coop_tile_body">
@@ -93,7 +93,7 @@
                          t-attf-title="Порог запуска — #{record.funding_threshold.value}%"/>
                   </div>
                   <div class="o_coop_readiness_pct">
-                    <t t-esc="record.readiness.value"/>%
+                    <t t-out="record.readiness.value"/>%
                   </div>
                 </div>
                 <!-- Вложиться прямо с витрины: у проекта в сборе
@@ -575,9 +575,9 @@
                         </div>
                         <div class="o_coop_mini_label"><field name="name"/></div>
                         <div class="o_coop_mini_note">
-                          <t t-esc="record.coop_specialization_id.value"/>
+                          <t t-out="record.coop_specialization_id.value"/>
                           <t t-if="record.coop_specialization_id.raw_value and record.city.raw_value"> · </t>
-                          <t t-esc="record.city.value"/>
+                          <t t-out="record.city.value"/>
                         </div>
                       </div>
                     </t>

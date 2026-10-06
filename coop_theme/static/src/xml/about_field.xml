@@ -12,7 +12,7 @@
   -->
   <t t-name="coop_theme.AboutField">
     <div class="o_coop_band_head">
-      <span t-esc="this.props.title or 'О себе'"/>
+      <span t-out="this.props.title or 'О себе'"/>
       <button type="button" class="o_coop_about_btn o_coop_about_start"
               t-if="this.canEdit and !this.ui.editing"
               title="Изменить" aria-label="Изменить"
@@ -44,14 +44,14 @@
              t-on-input="this.onInput"
              t-on-keydown="this.onKeydown"/>
       <t t-else="">
-        <span class="o_coop_about_text" t-if="this.value" t-esc="this.value"/>
+        <span class="o_coop_about_text" t-if="this.value" t-out="this.value"/>
         <!--
           Пустой блок говорит, что писать, только своему: чужая страница
           без заметки — это просто страница без заметки, а не приглашение
           её заполнить.
         -->
         <span class="o_coop_about_empty" t-elif="this.canEdit"
-              t-esc="this.props.placeholder"/>
+              t-out="this.props.placeholder"/>
       </t>
     </div>
   </t>

@@ -38,7 +38,7 @@
                  карточек с настоящими снимками. -->
             <div class="o_coop_listing o_coop_ext_card">
               <div class="o_coop_listing_ico o_coop_ext_ico">
-                <t t-esc="record.icon.value"/>
+                <t t-out="record.icon.value"/>
               </div>
               <div class="o_coop_listing_body">
               <div class="o_coop_ext_cat">
