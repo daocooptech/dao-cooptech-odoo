@@ -80,7 +80,7 @@
   <template id="coop_footer_copyright" inherit_id="website.footer_copyright_company_name"
             name="ДАО КООПТЕХ — копирайт">
     <xpath expr="//footer//span[hasclass('o_footer_copyright_name')]" position="replace">
-      <span class="o_footer_copyright_name me-2 small">© 2026 ДАО КООПТЕХ</span>
+      <span class="o_footer_copyright_name me-2 small">© 2026 ДАО КООПТЕХ · демо-версия, данные вымышленные</span>
     </xpath>
   </template>
   <!--

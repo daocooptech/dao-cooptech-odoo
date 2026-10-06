@@ -262,7 +262,7 @@
               </tbody>
             </table>
           </div>
-          <p class="o_coop_pf_note" t-if="d.farm.length">Курс монеты — последняя сделка пары на DEX платформы, <t t-esc="d.farm[0].price_at"/>. Рублёвые пулы — учебный выпуск ЦФА: демонстрация, прав не порождает.</p>
+          <p class="o_coop_pf_note" t-if="d.farm.length">Курс монеты — последняя сделка пары на DEX платформы, <t t-esc="d.farm[0].price_at"/>.</p>
         </section>
 
         <section class="o_coop_pf_panel" t-if="state.section === 'tokens'">

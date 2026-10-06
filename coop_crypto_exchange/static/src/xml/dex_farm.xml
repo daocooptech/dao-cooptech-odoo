@@ -26,10 +26,7 @@
 
         <div class="o_coop_fm_kinds o_coop_dx_seg">
           <button t-att-class="{ 'o_coop_dx_seg_on': state.kind === 'coin' }" t-on-click="() => this.setKind('coin')">В монете · <t t-esc="kindCount('coin')"/></button>
-          <button t-att-class="{ 'o_coop_dx_seg_on': state.kind === 'rub' }" t-on-click="() => this.setKind('rub')">В рублях — ЦФА, учебные · <t t-esc="kindCount('rub')"/></button>
-        </div>
-        <div class="o_coop_fm_training" t-if="state.kind === 'rub'">
-          <i class="fa fa-graduation-cap"/> <t t-esc="state.data.training_note"/>
+          <button t-att-class="{ 'o_coop_dx_seg_on': state.kind === 'rub' }" t-on-click="() => this.setKind('rub')">В рублях — ЦФА · <t t-esc="kindCount('rub')"/></button>
         </div>
 
         <div class="o_coop_fm_stats">
@@ -191,7 +188,6 @@
               <span class="o_coop_fm_late" t-if="p.overdue"><i class="fa fa-exclamation-triangle"/> просрочка <t t-esc="p.overdue"/> <t t-esc="daysWord(p.overdue)"/></span>
               <span t-elif="p.state === 'active' and p.next_due">выплата до <t t-esc="dmy(p.next_due)"/></span>
               <span class="o_coop_fm_late" t-if="p.frozen">проект заморожен</span>
-              <span class="o_coop_fm_training_tag" t-if="p.training">учебный выпуск</span>
             </div>
             <t t-if="p.open">
               <button class="o_coop_dx_go o_coop_dx_go_buy" t-if="state.open !== p.id" t-on-click="() => this.toggle(p)">Внести</button>
@@ -221,13 +217,6 @@
           Показать все · <t t-esc="pools.length"/>
         </button>
 
-        <div class="o_coop_dx_note">
-          Пул проекта — не вклад и не застрахован. Проект платит только из выручки и только до
-          потолка; выручки может не быть, и тогда внесённое можно потерять полностью. Платформа
-          ключей и средств не держит. Рублёвые пулы — учебный выпуск ЦФА: демонстрация, прав не
-          порождает. Здесь покупают и продают цифровую валюту как имущество; расплачиваться ею за
-          товары и услуги в России нельзя.
-        </div>
       </t>
     </div>
   </t>
