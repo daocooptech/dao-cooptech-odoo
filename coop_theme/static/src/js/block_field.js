@@ -1,8 +1,9 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
+import { useLayoutEffect, useRef } from "@web/owl2/utils";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
-import { Component, useEffect, useRef, useState } from "@odoo/owl";
+import { Component, proxy } from "@odoo/owl";
 
 /**
  * Описание, которое правится по карандашу.
@@ -39,9 +40,9 @@ export class CoopBlockField extends Component {
         // Черновик держится в стороне от записи: пока не нажали галочку,
         // страница не считается изменённой, а отмена — это просто выход
         // из правки.
-        this.ui = useState({ editing: false, draft: "", busy: false });
+        this.ui = proxy({ editing: false, draft: "", busy: false });
         this.input = useRef("input");
-        useEffect(
+        useLayoutEffect(
             (el) => {
                 if (el) {
                     el.focus();

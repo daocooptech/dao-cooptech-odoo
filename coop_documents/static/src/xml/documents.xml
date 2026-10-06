@@ -2,8 +2,8 @@
 <templates xml:space="preserve">
 
   <t t-name="coop_documents.PdfThumb">
-    <img t-if="state.src" class="o_coop_doc_thumb_img" t-att-src="state.src" alt="Первая страница"/>
-    <div t-elif="!state.failed" class="o_coop_doc_thumb_wait"><i class="fa fa-file-pdf-o"/></div>
+    <img t-if="this.state.src" class="o_coop_doc_thumb_img" t-att-src="this.state.src" alt="Первая страница"/>
+    <div t-elif="!this.state.failed" class="o_coop_doc_thumb_wait"><i class="fa fa-file-pdf-o"/></div>
   </t>
 
   <t t-name="coop_documents.Upload">
@@ -12,18 +12,18 @@
         <h2>Загрузить документы</h2>
 
         <label class="form-label" for="coop_upload_folder">В папку</label>
-        <select id="coop_upload_folder" class="form-select mb-3" t-model="state.folderId">
+        <select id="coop_upload_folder" class="form-select mb-3" t-custom-model="this.state.folderId">
           <option value="">Без папки</option>
-          <option t-foreach="state.folders" t-as="folder" t-key="folder.id"
+          <option t-foreach="this.state.folders" t-as="folder" t-key="folder.id"
                   t-att-value="folder.id" t-esc="folder.display_name"/>
         </select>
 
         <!-- Перетащить файлы или целую папку: вложенные папки заводятся
              сами, по пути внутри неё. -->
-        <div class="o_coop_doc_drop" t-att-class="{ 'o_coop_doc_drop_over': state.over }"
+        <div class="o_coop_doc_drop" t-att-class="{ 'o_coop_doc_drop_over': this.state.over }"
              t-on-dragover.prevent="() => this.state.over = true"
              t-on-dragleave="() => this.state.over = false"
-             t-on-drop="onDrop">
+             t-on-drop="this.onDrop">
           <i class="fa fa-cloud-upload"/>
           <div>Перетащите сюда файлы или папку целиком</div>
           <div class="o_coop_doc_drop_btns">
@@ -34,24 +34,24 @@
               <i class="fa fa-folder-o"/> Выбрать папку
             </button>
           </div>
-          <input type="file" multiple="multiple" class="d-none" t-ref="files" t-on-change="onPickFiles"/>
+          <input type="file" multiple="multiple" class="d-none" t-ref="files" t-on-change="this.onPickFiles"/>
           <input type="file" multiple="multiple" webkitdirectory="" class="d-none" t-ref="folder"
-                 t-on-change="onPickFiles"/>
+                 t-on-change="this.onPickFiles"/>
         </div>
 
-        <t t-if="state.queue.length">
+        <t t-if="this.state.queue.length">
           <ul class="o_coop_doc_queue">
-            <li t-foreach="state.queue" t-as="item" t-key="item_index">
+            <li t-foreach="this.state.queue" t-as="item" t-key="item_index">
               <i class="fa fa-file-o"/>
               <span class="o_coop_doc_queue_path" t-esc="item.path"/>
-              <span class="text-muted" t-esc="sizeLabel(item.size)"/>
-              <button type="button" class="btn btn-link btn-sm" t-att-disabled="state.busy"
+              <span class="text-muted" t-esc="this.sizeLabel(item.size)"/>
+              <button type="button" class="btn btn-link btn-sm" t-att-disabled="this.state.busy"
                       t-on-click="() => this.remove(item_index)" title="Убрать">×</button>
             </li>
           </ul>
-          <button type="button" class="btn btn-primary" t-att-disabled="state.busy" t-on-click="upload">
-            <t t-if="state.busy">Загружаю… <t t-esc="state.done"/> из <t t-esc="state.queue.length"/></t>
-            <t t-else="">Загрузить (<t t-esc="state.queue.length"/>)</t>
+          <button type="button" class="btn btn-primary" t-att-disabled="this.state.busy" t-on-click="this.upload">
+            <t t-if="this.state.busy">Загружаю… <t t-esc="this.state.done"/> из <t t-esc="this.state.queue.length"/></t>
+            <t t-else="">Загрузить (<t t-esc="this.state.queue.length"/>)</t>
           </button>
         </t>
 
@@ -64,24 +64,24 @@
           <i class="fa fa-camera"/> Снять страницу
         </button>
         <input type="file" accept="image/*" capture="environment" multiple="multiple"
-               class="d-none" t-ref="camera" t-on-change="onCamera"/>
-        <t t-if="state.scans.length">
+               class="d-none" t-ref="camera" t-on-change="this.onCamera"/>
+        <t t-if="this.state.scans.length">
           <div class="o_coop_doc_scans">
-            <div class="o_coop_doc_scan" t-foreach="state.scans" t-as="scan" t-key="scan.url">
+            <div class="o_coop_doc_scan" t-foreach="this.state.scans" t-as="scan" t-key="scan.url">
               <img t-att-src="scan.url" t-att-alt="'Страница ' + (scan_index + 1)"/>
               <span>стр. <t t-esc="scan_index + 1"/></span>
               <button type="button" class="btn btn-link btn-sm" t-on-click="() => this.removeScan(scan_index)">×</button>
             </div>
           </div>
           <input class="form-control mb-2" placeholder="Название, например «Акт № 14 от 25.09»"
-                 t-model="state.scanName"/>
-          <button type="button" class="btn btn-primary" t-att-disabled="state.busy" t-on-click="saveScan">
-            Сохранить PDF (<t t-esc="state.scans.length"/> стр.)
+                 t-custom-model="this.state.scanName"/>
+          <button type="button" class="btn btn-primary" t-att-disabled="this.state.busy" t-on-click="this.saveScan">
+            Сохранить PDF (<t t-esc="this.state.scans.length"/> стр.)
           </button>
         </t>
 
         <div class="mt-4">
-          <button type="button" class="btn btn-link px-0" t-on-click="openAll">← Все документы</button>
+          <button type="button" class="btn btn-link px-0" t-on-click="this.openAll">← Все документы</button>
         </div>
       </div>
     </div>

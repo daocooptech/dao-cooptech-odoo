@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
-import { Component, onWillStart, useState } from "@odoo/owl";
+import { Component, onWillStart, proxy, usePlugin } from "@odoo/owl";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { CoopTabs } from "@coop_theme/js/shell";
@@ -23,8 +24,8 @@ export class CoopForecast extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.notification = useService("notification");
-        this.state = useState({ data: null, partnerId: null, edit: null, busy: false });
+        this.notification = usePlugin(NotificationPlugin);
+        this.state = proxy({ data: null, partnerId: null, edit: null, busy: false });
         onWillStart(() => this.load());
     }
 

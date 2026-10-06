@@ -4,7 +4,7 @@
   <!-- Опрос в записи — сразу под её текстом, как карточка репоста. -->
   <t t-name="coop_wall.MessagePoll" t-inherit="mail.Message" t-inherit-mode="extension">
     <xpath expr="//div[hasclass('o-mail-Message-textContent')]" position="after">
-      <CoopWallPoll t-if="message.coop_poll" message="message"/>
+      <CoopWallPoll t-if="this.message.coop_poll" message="this.message"/>
     </xpath>
   </t>
 
@@ -12,32 +12,32 @@
     <div class="o_coop_poll">
       <div class="o_coop_poll_q">
         <i class="fa fa-bar-chart" aria-hidden="true"/>
-        <span t-out="poll.question"/>
+        <span t-out="this.poll.question"/>
       </div>
       <div class="o_coop_poll_kind">
-        <t t-if="poll.is_public">Открытое голосование</t>
+        <t t-if="this.poll.is_public">Открытое голосование</t>
         <t t-else="">Анонимный опрос</t>
-        <t t-if="deadline"> · <t t-out="deadline"/></t>
-        <t t-elif="poll.closed"> · Завершён</t>
+        <t t-if="this.deadline"> · <t t-out="this.deadline"/></t>
+        <t t-elif="this.poll.closed"> · Завершён</t>
       </div>
 
       <div class="o_coop_poll_options">
-        <t t-foreach="poll.options" t-as="option" t-key="option.id">
+        <t t-foreach="this.poll.options" t-as="option" t-key="option.id">
           <!-- Итог — тому, кому его уже можно видеть (сервер решает, кому
                отдать числа). Автор видит итог и до своего голоса и
                голосует щелчком по строке. -->
-          <div t-if="poll.see" class="o_coop_poll_result"
-               t-att-class="{ 'o_coop_poll_mine': poll.mine === option.id, 'o_coop_poll_votable': poll.can_vote }"
-               t-att-role="poll.can_vote ? 'button' : undefined"
-               t-att-title="poll.can_vote ? 'Проголосовать за этот вариант' : undefined"
-               t-on-click="() => poll.can_vote and this.vote(option)">
+          <div t-if="this.poll.see" class="o_coop_poll_result"
+               t-att-class="{ 'o_coop_poll_mine': this.poll.mine === option.id, 'o_coop_poll_votable': this.poll.can_vote }"
+               t-att-role="this.poll.can_vote ? 'button' : undefined"
+               t-att-title="this.poll.can_vote ? 'Проголосовать за этот вариант' : undefined"
+               t-on-click="() => this.poll.can_vote and this.vote(option)">
             <div class="o_coop_poll_fill" t-attf-style="width: {{ option.percent }}%"/>
             <span class="o_coop_poll_name">
-              <i t-if="poll.mine === option.id" class="fa fa-check-circle" aria-label="Ваш выбор"/>
+              <i t-if="this.poll.mine === option.id" class="fa fa-check-circle" aria-label="Ваш выбор"/>
               <t t-out="option.name"/>
             </span>
             <span class="o_coop_poll_pct"><t t-out="option.percent"/>%</span>
-            <button t-if="poll.is_public and option.count" type="button"
+            <button t-if="this.poll.is_public and option.count" type="button"
                     class="o_coop_poll_voters_btn"
                     t-att-title="'Кто выбрал: ' + option.count"
                     t-on-click.stop="() => this.toggleVoters(option)">
@@ -45,14 +45,14 @@
             </button>
           </div>
           <!-- До голоса — кнопки без чисел: итог не должен подсказывать. -->
-          <button t-elif="poll.can_vote" type="button" class="o_coop_poll_choice"
-                  t-att-disabled="state.busy" t-on-click="() => this.vote(option)">
+          <button t-elif="this.poll.can_vote" type="button" class="o_coop_poll_choice"
+                  t-att-disabled="this.state.busy" t-on-click="() => this.vote(option)">
             <t t-out="option.name"/>
           </button>
           <div t-else="" class="o_coop_poll_result o_coop_poll_hidden">
             <span class="o_coop_poll_name" t-out="option.name"/>
           </div>
-          <div t-if="state.voters === option.id and option.voters" class="o_coop_poll_voters">
+          <div t-if="this.state.voters === option.id and option.voters" class="o_coop_poll_voters">
             <t t-foreach="option.voters" t-as="voter" t-key="voter.id">
               <span class="o_coop_poll_voter">
                 <img t-att-src="'/web/image/res.partner/' + voter.id + '/avatar_128'" alt=""/>
@@ -67,11 +67,11 @@
       </div>
 
       <div class="o_coop_poll_foot">
-        <span t-out="totalLabel"/>
-        <span t-if="poll.mine"> · голос записан, отозвать нельзя</span>
-        <span t-elif="!poll.see and !poll.closed"> · итог — после вашего голоса</span>
-        <button t-if="poll.is_author and !poll.closed" type="button"
-                class="btn btn-link btn-sm o_coop_poll_close" t-on-click="close">
+        <span t-out="this.totalLabel"/>
+        <span t-if="this.poll.mine"> · голос записан, отозвать нельзя</span>
+        <span t-elif="!this.poll.see and !this.poll.closed"> · итог — после вашего голоса</span>
+        <button t-if="this.poll.is_author and !this.poll.closed" type="button"
+                class="btn btn-link btn-sm o_coop_poll_close" t-on-click="this.close">
           Завершить опрос
         </button>
       </div>
@@ -82,27 +82,27 @@
     <Dialog title="'Опрос'" size="'md'">
       <label class="form-label" for="coop_poll_q">Вопрос</label>
       <input id="coop_poll_q" class="form-control mb-3" maxlength="300"
-             placeholder="О чём спросить?" t-model="state.question"/>
+             placeholder="О чём спросить?" t-custom-model="this.state.question"/>
 
       <label class="form-label">Варианты ответа</label>
-      <t t-foreach="state.options" t-as="option" t-key="option_index">
+      <t t-foreach="this.state.options" t-as="option" t-key="option_index">
         <div class="input-group mb-2">
           <input class="form-control" maxlength="200"
                  t-att-placeholder="'Вариант ' + (option_index + 1)"
                  t-att-value="option"
                  t-on-input="(ev) => this.setOption(option_index, ev)"/>
-          <button t-if="state.options.length > 2" type="button" class="btn btn-outline-secondary"
+          <button t-if="this.state.options.length > 2" type="button" class="btn btn-outline-secondary"
                   title="Убрать вариант" t-on-click="() => this.removeOption(option_index)">
             <i class="fa fa-times"/>
           </button>
         </div>
       </t>
-      <button t-if="canAdd" type="button" class="btn btn-link px-0 mb-3" t-on-click="addOption">
+      <button t-if="this.canAdd" type="button" class="btn btn-link px-0 mb-3" t-on-click="this.addOption">
         <i class="fa fa-plus"/> Добавить вариант
       </button>
 
       <div class="form-check mb-3">
-        <input id="coop_poll_public" type="checkbox" class="form-check-input" t-model="state.isPublic"/>
+        <input id="coop_poll_public" type="checkbox" class="form-check-input" t-custom-model="this.state.isPublic"/>
         <label class="form-check-label" for="coop_poll_public">
           Открытое голосование — видно, кто что выбрал
         </label>
@@ -111,13 +111,13 @@
       <div class="row g-3">
         <div class="col-sm-6">
           <label class="form-label">Окончание — по желанию</label>
-          <DateTimeInput type="'datetime'" value="state.closeAt" minDate="now"
+          <DateTimeInput type="'datetime'" value="this.state.closeAt" minDate="this.now"
                          placeholder="'Без срока'"
                          onChange="(value) => this.state.closeAt = value"/>
         </div>
         <div class="col-sm-6">
           <label class="form-label">Опубликовать позже</label>
-          <DateTimeInput type="'datetime'" value="state.scheduledAt" minDate="now"
+          <DateTimeInput type="'datetime'" value="this.state.scheduledAt" minDate="this.now"
                          placeholder="'Сразу'"
                          onChange="(value) => this.state.scheduledAt = value"/>
         </div>
@@ -125,11 +125,11 @@
       <div class="form-text mt-2">Голос один, отозвать его нельзя. Итог видят проголосовавшие, автор и все — после окончания.</div>
 
       <t t-set-slot="footer">
-        <button class="btn btn-primary" t-att-disabled="state.busy" t-on-click="publish">
-          <t t-if="state.scheduledAt">Запланировать</t>
+        <button class="btn btn-primary" t-att-disabled="this.state.busy" t-on-click="this.publish">
+          <t t-if="this.state.scheduledAt">Запланировать</t>
           <t t-else="">Опубликовать</t>
         </button>
-        <button class="btn btn-secondary" t-on-click="props.close">Отмена</button>
+        <button class="btn btn-secondary" t-on-click="this.props.close">Отмена</button>
       </t>
     </Dialog>
   </t>
@@ -137,17 +137,17 @@
   <t t-name="coop_wall.ScheduleDialog">
     <Dialog title="'Отложить запись'" size="'sm'">
       <label class="form-label">Когда опубликовать</label>
-      <DateTimeInput type="'datetime'" value="state.at" minDate="now"
+      <DateTimeInput type="'datetime'" value="this.state.at" minDate="this.now"
                      onChange="(value) => this.state.at = value"/>
       <div class="form-text mt-2">
         До выхода запись видите только вы — в списке «Запланировано» над лентой:
         там её можно отправить сразу, изменить или отменить.
       </div>
       <t t-set-slot="footer">
-        <button class="btn btn-primary" t-att-disabled="state.busy or !state.at" t-on-click="schedule">
+        <button class="btn btn-primary" t-att-disabled="this.state.busy or !this.state.at" t-on-click="this.schedule">
           Запланировать
         </button>
-        <button class="btn btn-secondary" t-on-click="props.close">Отмена</button>
+        <button class="btn btn-secondary" t-on-click="this.props.close">Отмена</button>
       </t>
     </Dialog>
   </t>

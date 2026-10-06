@@ -8,12 +8,12 @@
     не долистывает.
   -->
   <t t-name="coop_theme.CatalogShelves">
-    <div class="o_coop_shelves" t-if="state.shelves.length">
-      <div class="o_coop_shelf" t-foreach="state.shelves" t-as="shelf" t-key="shelf.id">
+    <div class="o_coop_shelves" t-if="this.state.shelves.length">
+      <div class="o_coop_shelf" t-foreach="this.state.shelves" t-as="shelf" t-key="shelf.id">
         <div class="o_coop_shelf_head">
           <div class="o_coop_shelf_title">
-            <t t-esc="shelf.label"/>
-            <span class="o_coop_shelf_count"><t t-esc="shelf.count"/></span>
+            <t t-out="shelf.label"/>
+            <span class="o_coop_shelf_count"><t t-out="shelf.count"/></span>
           </div>
           <button class="o_coop_shelf_all" type="button" t-on-click="() => this.openAll(shelf)">
             Смотреть все
@@ -27,9 +27,9 @@
         -->
         <div class="o_coop_shelf_row">
           <KanbanRecord t-foreach="shelf.records" t-as="rec" t-key="rec.id"
-                        archInfo="props.archInfo"
+                        archInfo="this.props.archInfo"
                         record="rec"
-                        openRecord="props.openRecord"
+                        openRecord="this.props.openRecord"
                         forceGlobalClick="true"
                         readonly="true"/>
         </div>

@@ -1,8 +1,9 @@
 /** @odoo-module **/
 
-import { Component, onWillStart, onWillUnmount, useState } from "@odoo/owl";
+import { Component, onWillStart, onWillUnmount, proxy, usePlugin } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * Колокол в шапке: сколько событий человек ещё не видел.
@@ -22,9 +23,9 @@ export class CoopBell extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.action = useService("action");
+        this.action = usePlugin(ActionManagerPlugin);
         this.boot = useService("coopBoot");
-        this.state = useState({ count: 0 });
+        this.state = proxy({ count: 0 });
 
         // Первое число — из общего запуска: при открытии страницы
         // колокольчик спрашивал сервер отдельно, впереди раздела.

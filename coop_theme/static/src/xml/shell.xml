@@ -10,11 +10,11 @@
   <t t-name="coop_theme.WebClient" t-inherit="web.WebClient" t-inherit-mode="extension">
     <xpath expr="//ActionContainer" position="replace">
       <div class="o_coop_layout">
-        <CoopSidebar t-if="!state.fullscreen"/>
+        <CoopSidebar t-if="!this.state.fullscreen"/>
         <div class="o_coop_main">
-          <CoopLoader t-if="coopBoot.loading"/>
+          <CoopLoader t-if="this.coopBoot.loading"/>
           <ActionContainer/>
-          <CoopFooter t-if="!state.fullscreen"/>
+          <CoopFooter t-if="!this.state.fullscreen"/>
         </div>
       </div>
     </xpath>
@@ -52,15 +52,15 @@
   -->
   <t t-name="coop_theme.Sidebar">
     <div class="o_coop_sidebar_wrap">
-      <div class="o_coop_scrim" t-if="ui.open" t-on-click="() => this.toggle()"/>
-      <aside class="o_coop_sidebar" t-att-class="{ 'o_coop_sidebar_open': ui.open }">
+      <div class="o_coop_scrim" t-if="this.ui.open" t-on-click="() => this.toggle()"/>
+      <aside class="o_coop_sidebar" t-att-class="{ 'o_coop_sidebar_open': this.ui.open }">
       <nav aria-label="Разделы платформы">
-        <a t-foreach="state.main" t-as="item" t-key="item.label"
+        <a t-foreach="this.state.main" t-as="item" t-key="item.label"
            href="#" class="o_coop_nav_item"
-           t-att-class="{ 'active': isActive(item) }"
+           t-att-class="{ 'active': this.isActive(item) }"
            t-on-click.prevent="() => this.open(item)">
           <i class="fa fa-fw" t-att-class="item.icon" role="img" aria-hidden="true"/>
-          <span t-esc="item.label"/>
+          <span t-out="item.label"/>
         </a>
       </nav>
 
@@ -76,12 +76,12 @@
              оставлен намеренно, но выглядеть он должен иначе: без
              пометки меню читается как наполовину сломанное, а не как
              наполовину готовое. -->
-        <a t-foreach="state.extensions" t-as="item" t-key="item.label"
+        <a t-foreach="this.state.extensions" t-as="item" t-key="item.label"
            href="#" class="o_coop_nav_item"
-           t-att-class="{ 'active': isActive(item), 'o_coop_nav_soon': !item.actionId }"
+           t-att-class="{ 'active': this.isActive(item), 'o_coop_nav_soon': !item.actionId }"
            t-att-title="item.actionId ? undefined : 'Раздел ещё не перенесён на движок'"
            t-on-click.prevent="() => this.open(item)">
-          <span t-esc="item.label"/>
+          <span t-out="item.label"/>
           <span class="o_coop_soon_mark" t-if="!item.actionId">скоро</span>
         </a>
       </nav>
@@ -109,13 +109,13 @@
         одно правило активности.
       -->
       <nav class="o_coop_tabbar" aria-label="Быстрые разделы">
-        <a t-foreach="tabbar" t-as="item" t-key="item.label"
+        <a t-foreach="this.tabbar" t-as="item" t-key="item.label"
            href="#" class="o_coop_tabbar_item"
-           t-att-class="{ 'active': isActive(item) }"
-           t-att-aria-current="isActive(item) ? 'page' : undefined"
+           t-att-class="{ 'active': this.isActive(item) }"
+           t-att-aria-current="this.isActive(item) ? 'page' : undefined"
            t-on-click.prevent="() => this.open(item)">
           <i class="fa fa-fw" t-att-class="item.icon" role="img" aria-hidden="true"/>
-          <span t-esc="item.label"/>
+          <span t-out="item.label"/>
         </a>
       </nav>
     </div>
@@ -137,7 +137,7 @@
   <t t-name="coop_theme.NavBar" t-inherit="web.NavBar" t-inherit-mode="extension">
     <xpath expr="//div[hasclass('o_navbar_breadcrumbs')]" position="before">
       <button type="button" class="o_coop_burger" aria-label="Меню разделов"
-              t-att-aria-expanded="coopShell.open ? 'true' : 'false'"
+              t-att-aria-expanded="this.coopShell.open ? 'true' : 'false'"
               t-on-click="() => this.coopToggleSidebar()">
         <!-- Значок из дизайн-макета (`app.js`, `I.burger`). -->
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -161,21 +161,21 @@
       Имя выборки вместо вкладок: человек смотрит свой список, а не
       раздел, и подразделы раздела здесь только сбивают.
     -->
-    <div class="o_coop_tabs" t-if="state.label">
-      <span class="o_coop_tab o_coop_tab_label" t-esc="state.label"/>
+    <div class="o_coop_tabs" t-if="this.state.label">
+      <span class="o_coop_tab o_coop_tab_label" t-out="this.state.label"/>
     </div>
-    <div class="o_coop_tabs" t-elif="state.tabs.length">
-      <a t-foreach="state.tabs" t-as="tab" t-key="tab.id"
+    <div class="o_coop_tabs" t-elif="this.state.tabs.length">
+      <a t-foreach="this.state.tabs" t-as="tab" t-key="tab.id"
          href="#" class="o_coop_tab"
-         t-att-class="{ 'active': tab.id === state.current }"
+         t-att-class="{ 'active': tab.id === this.state.current }"
          t-on-click.prevent="() => this.open(tab)">
-        <t t-esc="tab.name"/>
+        <t t-out="tab.name"/>
       </a>
       <!-- «Избранное N» — как в макете, решение 408 (`js/shell.js`). -->
-      <a t-if="state.fav" href="#" class="o_coop_tab o_coop_tab_fav"
-         t-att-class="{ 'active': state.fav.on }"
+      <a t-if="this.state.fav" href="#" class="o_coop_tab o_coop_tab_fav"
+         t-att-class="{ 'active': this.state.fav.on }"
          t-on-click.prevent="() => this.openFav()">
-        Избранное <span class="o_coop_tab_count" t-esc="state.fav.count"/>
+        Избранное <span class="o_coop_tab_count" t-out="this.state.fav.count"/>
       </a>
     </div>
   </t>
@@ -190,9 +190,9 @@
   </t>
 
   <t t-name="coop_theme.Soon">
-    <div class="o_coop_soon" t-att-class="props.className">
+    <div class="o_coop_soon" t-att-class="this.props.className">
       <div class="o_coop_soon_box">
-        <h2 t-esc="label"/>
+        <h2 t-out="this.label"/>
         <p>
           Раздел ещё не перенесён на движок. Он есть в макете платформы и
           появится здесь по мере переноса — порядок разделов в меню задан

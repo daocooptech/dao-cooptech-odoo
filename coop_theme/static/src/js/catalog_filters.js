@@ -1,8 +1,9 @@
 /** @odoo-module **/
 
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { coopSort, coopSortOptionsFor, setCoopSort } from "@coop_theme/js/catalog_sort";
-import { Component, onWillStart, reactive, useState } from "@odoo/owl";
+import { Component, onWillStart, proxy, usePlugin } from "@odoo/owl";
 
 /**
  * Панель фильтров каталога — та же, что в макете.
@@ -25,7 +26,7 @@ import { Component, onWillStart, reactive, useState } from "@odoo/owl";
  * Так же, как в макете: `.filter-sheet-btn` в строке поиска открывает
  * нижнюю шторку.
  */
-export const coopFiltersUi = reactive({ open: false });
+export const coopFiltersUi = proxy({ open: false });
 
 export class CoopFilters extends Component {
     static template = "coop_theme.CatalogFilters";
@@ -39,11 +40,11 @@ export class CoopFilters extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.groupId = null;
         // Раскрытие общее с кнопкой в строке каталога — см. `coopFiltersUi`.
-        this.ui = useState(coopFiltersUi);
-        this.state = useState({
+        this.ui = proxy(coopFiltersUi);
+        this.state = proxy({
             blocks: [],
             values: {},
             quick: [],

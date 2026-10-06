@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, onWillUnmount, reactive, useState } from "@odoo/owl";
+import { Component, onWillUnmount, proxy } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { download } from "@web/core/network/download";
 import { patch } from "@web/core/utils/patch";
@@ -38,7 +38,7 @@ class CoopPhotoModeDialog extends Component {
     static template = "coop_wall.PhotoModeDialog";
 
     setup() {
-        this.batch = useState(this.props.batch);
+        this.batch = proxy(this.props.batch);
         this.urls = new Map();
         onWillUnmount(() => {
             for (const url of this.urls.values()) {
@@ -92,7 +92,7 @@ patch(AttachmentUploader.prototype, {
             batch.files.push(file);
             return batch.done;
         }
-        batch = reactive({ files: [file] });
+        batch = proxy({ files: [file] });
         batches.set(key, batch);
         let chosen = null;
         let finish;

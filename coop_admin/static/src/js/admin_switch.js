@@ -4,7 +4,7 @@ import { registry } from "@web/core/registry";
 import { CoopSidebar } from "@coop_theme/js/shell";
 import { useService } from "@web/core/utils/hooks";
 import { browser } from "@web/core/browser/browser";
-import { Component, onWillStart, useState } from "@odoo/owl";
+import { Component, onWillStart, proxy } from "@odoo/owl";
 
 /**
  * Переключатель административных полномочий в правом верхнем углу.
@@ -25,7 +25,7 @@ export class CoopAdminSwitch extends Component {
     setup() {
         this.orm = useService("orm");
         this.boot = useService("coopBoot");
-        this.state = useState({ granted: false, active: false, busy: false });
+        this.state = proxy({ granted: false, active: false, busy: false });
         onWillStart(async () => {
             // Из общего запуска оболочки, а не своим вызовом.
             const result = (await this.boot.get()).admin || {};

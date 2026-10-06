@@ -1,10 +1,12 @@
 /** @odoo-module **/
 
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
 import { Breadcrumbs } from "@web/search/breadcrumbs/breadcrumbs";
-import { useState } from "@odoo/owl";
+import { proxy, usePlugin } from "@odoo/owl";
 import { coopIsPlatformModel } from "@coop_theme/js/platform_page";
+import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * Путь и кнопка возврата.
@@ -39,9 +41,9 @@ patch(Breadcrumbs.prototype, {
     setup() {
         super.setup(...arguments);
         this.coopMenus = useService("menu");
-        this.coopNotification = useService("notification");
+        this.coopNotification = usePlugin(NotificationPlugin);
         this.coopBoot = useService("coopBoot");
-        this.coopActionService = useService("action");
+        this.coopActionService = usePlugin(ActionManagerPlugin);
         // Разделы бокового меню — чтобы найти раздел по модели записи,
         // когда действие не опознано (прямая ссылка). Список приходит
         // общим запросом запуска оболочки, второй раз он бесплатен.
@@ -58,7 +60,7 @@ patch(Breadcrumbs.prototype, {
         // Список нужен только кнопке возврата и только в одном случае из
         // трёх. Экран не должен ждать его ни секунды: придёт — кнопка
         // дорисуется сама, реактивное состояние вызовет перерисовку.
-        this.coopItems = useState({ list: [] });
+        this.coopItems = proxy({ list: [] });
         this.coopBoot
             .get()
             .then((data) => {

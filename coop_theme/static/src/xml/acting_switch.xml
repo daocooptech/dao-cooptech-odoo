@@ -8,17 +8,17 @@
     список из одной строки ему ничего не сообщает.
   -->
   <t t-name="coop_theme.ActingMenu">
-    <t t-if="state.actors.length > 1">
+    <t t-if="this.state.actors.length > 1">
       <div class="o_coop_acting_menu">
         <div class="o_coop_acting_title">Действую от имени</div>
-        <button t-foreach="state.actors" t-as="actor" t-key="actor.id"
+        <button t-foreach="this.state.actors" t-as="actor" t-key="actor.id"
                 type="button" class="o_coop_acting_item"
-                t-att-class="{ o_coop_acting_on: actor.id === state.acting }"
+                t-att-class="{ o_coop_acting_on: actor.id === this.state.acting }"
                 t-on-click="() => this.select(actor)">
-          <img class="o_coop_acting_pic" t-att-src="avatar(actor)"
+          <img class="o_coop_acting_pic" t-att-src="this.avatar(actor)"
                t-att-alt="actor.name" loading="lazy"/>
-          <span class="o_coop_acting_name" t-esc="actor.name"/>
-          <span class="o_coop_acting_mark" t-if="actor.id === state.acting">✓</span>
+          <span class="o_coop_acting_name" t-out="actor.name"/>
+          <span class="o_coop_acting_mark" t-if="actor.id === this.state.acting">✓</span>
         </button>
       </div>
       <div role="separator" class="dropdown-divider"/>

@@ -1,9 +1,10 @@
 /** @odoo-module **/
 
-import { Component, onWillStart, useState } from "@odoo/owl";
+import { Component, onWillStart, proxy, usePlugin } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { CoopTabs } from "@coop_theme/js/shell";
+import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * «Портфель участника» — слой 3 «Аналитики» (решения 420, 421, 422).
@@ -36,9 +37,9 @@ export class CoopPortfolio extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.action = useService("action");
+        this.action = usePlugin(ActionManagerPlugin);
         this.sections = SECTIONS;
-        this.state = useState({ data: null, section: "shares", showOverdue: false });
+        this.state = proxy({ data: null, section: "shares", showOverdue: false });
         onWillStart(() => this.load());
     }
 

@@ -5,9 +5,9 @@
     <div class="o_action o_coop_fc">
       <div class="o_coop_board_tabs"><CoopTabs/></div>
 
-      <div t-if="!state.data" class="o_coop_fc_loading">Считаем тренды…</div>
+      <div t-if="!this.state.data" class="o_coop_fc_loading">Считаем тренды…</div>
       <t t-else="">
-        <t t-set="d" t-value="state.data"/>
+        <t t-set="d" t-value="this.state.data"/>
         <header class="o_coop_fc_head">
           <h2>Прогноз и план</h2>
           <p>
@@ -39,56 +39,56 @@
             <div class="o_coop_fc_now">
               <div>
                 <span>Этот месяц</span>
-                <b t-esc="fmt(m, m.now.fact)"/>
+                <b t-esc="this.fmt(m, m.now.fact)"/>
               </div>
               <div>
                 <span t-if="m.better === 'down'">Лимит</span><span t-else="">План</span>
-                <b t-if="m.now.plan !== null" t-esc="fmt(m, m.now.plan)"/>
+                <b t-if="m.now.plan !== null" t-esc="this.fmt(m, m.now.plan)"/>
                 <b t-else="" class="o_coop_fc_muted">не задан</b>
               </div>
               <div>
                 <span>К концу месяца при таком темпе</span>
-                <b t-esc="fmt(m, m.now.pace)"/>
+                <b t-esc="this.fmt(m, m.now.pace)"/>
               </div>
               <div>
                 <span>Тренд на месяц</span>
-                <b t-esc="fmt(m, m.now.forecast)"/>
+                <b t-esc="this.fmt(m, m.now.forecast)"/>
               </div>
             </div>
-            <div class="o_coop_fc_progress" t-if="m.now.plan !== null" t-att-data-status="status(m)">
-              <i t-att-style="barWidth(m)"/>
-              <span><t t-esc="pctLabel(m)"/><t t-if="m.now.days_left"> · осталось <t t-esc="m.now.days_left"/> дн.</t></span>
+            <div class="o_coop_fc_progress" t-if="m.now.plan !== null" t-att-data-status="this.status(m)">
+              <i t-att-style="this.barWidth(m)"/>
+              <span><t t-esc="this.pctLabel(m)"/><t t-if="m.now.days_left"> · осталось <t t-esc="m.now.days_left"/> дн.</t></span>
             </div>
 
             <div class="o_coop_fc_chart">
               <div class="o_coop_fc_col" t-foreach="m.months" t-as="c" t-key="c.key"
-                   t-att-class="colClass(m, c)" t-att-title="colTitle(m, c)">
+                   t-att-class="this.colClass(m, c)" t-att-title="this.colTitle(m, c)">
                 <div class="o_coop_fc_bars">
-                  <i t-if="c.forecast !== null and !c.past" class="o_coop_fc_b_trend" t-att-style="h(m, c.forecast)"/>
-                  <i t-if="c.fact" class="o_coop_fc_b_fact" t-att-style="h(m, c.fact)"/>
-                  <em t-if="c.plan !== null and c.plan !== undefined" class="o_coop_fc_plan" t-att-style="planTop(m, c.plan)"/>
+                  <i t-if="c.forecast !== null and !c.past" class="o_coop_fc_b_trend" t-att-style="this.h(m, c.forecast)"/>
+                  <i t-if="c.fact" class="o_coop_fc_b_fact" t-att-style="this.h(m, c.fact)"/>
+                  <em t-if="c.plan !== null and c.plan !== undefined" class="o_coop_fc_plan" t-att-style="this.planTop(m, c.plan)"/>
                 </div>
                 <span t-esc="c.label"/>
               </div>
             </div>
             <footer>
-              <span>средний месяц <b t-esc="fmt(m, m.avg)"/></span>
+              <span>средний месяц <b t-esc="this.fmt(m, m.avg)"/></span>
               <span t-if="m.plans_total">планов выполнено <b><t t-esc="m.plans_done"/> из <t t-esc="m.plans_total"/></b></span>
               <span t-if="m.mode === 'average'" class="o_coop_fc_muted">данных мало — вместо тренда средний месяц</span>
             </footer>
 
-            <form class="o_coop_fc_edit" t-if="state.edit and state.edit.metric === m.key"
+            <form class="o_coop_fc_edit" t-if="this.state.edit and this.state.edit.metric === m.key"
                   t-on-submit.prevent="() => this.savePlan()">
               <label>С месяца
-                <select t-model="state.edit.month">
-                  <option t-foreach="futureMonths(m)" t-as="f" t-key="f.key" t-att-value="f.key" t-esc="f.label"/>
+                <select t-custom-model="this.state.edit.month">
+                  <option t-foreach="this.futureMonths(m)" t-as="f" t-key="f.key" t-att-value="f.key" t-esc="f.label"/>
                 </select>
               </label>
               <label><t t-if="m.better === 'down'">Лимит</t><t t-else="">Цель</t><t t-if="m.unit === 'rub'">, ₽</t>
-                <input type="number" min="0" step="any" t-model="state.edit.target"/>
+                <input type="number" min="0" step="any" t-custom-model="this.state.edit.target"/>
               </label>
               <label>На сколько месяцев
-                <select t-model="state.edit.repeat">
+                <select t-custom-model="this.state.edit.repeat">
                   <option value="1">1</option>
                   <option value="3">3</option>
                   <option value="6">6</option>
@@ -96,10 +96,10 @@
                 </select>
               </label>
               <div class="o_coop_fc_editbtns">
-                <button type="submit" class="btn btn-primary" t-att-disabled="state.busy">Сохранить</button>
-                <button type="button" class="btn btn-light" t-att-disabled="state.busy"
+                <button type="submit" class="btn btn-primary" t-att-disabled="this.state.busy">Сохранить</button>
+                <button type="button" class="btn btn-light" t-att-disabled="this.state.busy"
                         t-on-click="() => this.savePlan(true)">Снять план</button>
-                <button type="button" class="btn btn-link" t-on-click="() => state.edit = null">Отмена</button>
+                <button type="button" class="btn btn-link" t-on-click="() => this.state.edit = null">Отмена</button>
               </div>
             </form>
           </section>

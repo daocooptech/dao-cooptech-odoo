@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
-import { Component, onMounted, onWillStart, useExternalListener, useRef, useState, useSubEnv } from "@odoo/owl";
+import { Component, onMounted, onWillStart, proxy, usePlugin } from "@odoo/owl";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { patch } from "@web/core/utils/patch";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -15,6 +16,8 @@ import { Store } from "@mail/core/common/store_service";
 import { MessagingMenu } from "@mail/core/public_web/messaging_menu";
 import { Thread } from "@mail/core/common/thread_model";
 import { composerActionsRegistry } from "@mail/core/common/composer_actions";
+import { useExternalListener, useRef, useSubEnv } from "@web/owl2/utils";
+import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
 
 // Luxon в движке подключён библиотекой, а не модулем: импортировать его
 // нельзя — сборщик не найдёт «luxon», наш файл не определится, и вместе
@@ -275,9 +278,9 @@ export class CoopMessages extends Component {
 
     setup() {
         this.store = useService("mail.store");
-        this.action = useService("action");
+        this.action = usePlugin(ActionManagerPlugin);
         this.orm = useService("orm");
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.categories = CATEGORIES;
         // Состояние заводится до действий треда, и порядок здесь важен.
         //
@@ -291,7 +294,7 @@ export class CoopMessages extends Component {
         // заглядывая в состояние. Поэтому раздел «Сообщения» открывался
         // нормально, а «Написать» со страницы человека — нет: там
         // открытой переписки ещё нет.
-        this.state = useState({
+        this.state = proxy({
             category: "all",
             search: "",
             jump: 0,

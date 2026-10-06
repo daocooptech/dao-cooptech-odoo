@@ -2,12 +2,12 @@
 <templates xml:space="preserve">
 
   <t t-name="coop_theme.FavoriteHeart">
-    <span class="o_coop_fav" t-att-class="state.on ? 'o_coop_fav_on' : ''"
+    <span class="o_coop_fav" t-att-class="this.state.on ? 'o_coop_fav_on' : ''"
           role="button" tabindex="0"
-          t-att-title="state.on ? 'Убрать из избранного' : 'Добавить в избранное'"
-          t-att-aria-label="state.on ? 'Убрать из избранного' : 'Добавить в избранное'"
-          t-att-aria-pressed="state.on ? 'true' : 'false'"
-          t-on-click="toggle">
+          t-att-title="this.state.on ? 'Убрать из избранного' : 'Добавить в избранное'"
+          t-att-aria-label="this.state.on ? 'Убрать из избранного' : 'Добавить в избранное'"
+          t-att-aria-pressed="this.state.on ? 'true' : 'false'"
+          t-on-click="this.toggle">
       <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M12 3.6l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/>
       </svg>

@@ -3,6 +3,7 @@
 import { registry } from "@web/core/registry";
 import { browser } from "@web/core/browser/browser";
 import { patch } from "@web/core/utils/patch";
+import { useLayoutEffect } from "@web/owl2/utils";
 import { kanbanView } from "@web/views/kanban/kanban_view";
 import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
 import { CoopCatalogKanbanRecord } from "@coop_theme/js/favorite";
@@ -17,7 +18,7 @@ import { CoopFilters, coopFiltersUi } from "@coop_theme/js/catalog_filters";
 import { CoopMap } from "@coop_theme/js/catalog_map";
 import { CoopShelves } from "@coop_theme/js/catalog_shelves";
 import { coopSort, parseOrder } from "@coop_theme/js/catalog_sort";
-import { reactive, useEffect, useState } from "@odoo/owl";
+import { proxy } from "@odoo/owl";
 
 /**
  * Виды каталога в одном переключателе: плиткой, списком, на карте — три
@@ -49,7 +50,7 @@ function readSavedLayout() {
 // нужную кнопку, и представление, чтобы поставить класс на корень.
 const MODES = ["tiles", "rows", "map"];
 
-export const coopLayout = reactive({
+export const coopLayout = proxy({
     mode: MODES.includes(readSavedLayout()) ? readSavedLayout() : "tiles",
 });
 
@@ -213,7 +214,7 @@ export class CoopCatalogKanbanController extends KanbanController {
 
     setup() {
         super.setup();
-        this.coopLayout = useState(coopLayout);
+        this.coopLayout = proxy(coopLayout);
         // Состояние полок держит сам каталог, а не общая переменная, в
         // которую писали полки. Общая переменная давала круг: запись из
         // ещё не отрисованного потомка отменяла отрисовку родителя, и
@@ -223,17 +224,17 @@ export class CoopCatalogKanbanController extends KanbanController {
         //
         // «loading» с самого начала: пока полки не сказали своё число,
         // лента не показывается, иначе она мелькнёт и исчезнет.
-        this.coopShelves = useState({ status: "loading", count: 0 });
+        this.coopShelves = proxy({ status: "loading", count: 0 });
         // Отбор раздела — см. `coopSearchIsClean`. Простой объект, не
         // `useState`: он пишется во время отрисовки и перерисовку
         // вызывать не должен.
         this.coopSection = { facets: undefined };
-        this.coopSort = useState(coopSort);
+        this.coopSort = proxy(coopSort);
         // Перезагружаем список, когда сменили признак сортировки. Через
         // общее состояние, а не через событие: порядок выбирают в панели
         // управления, а перезагружает представление — прямой ссылки
         // между ними у Odoo нет.
-        useEffect(
+        useLayoutEffect(
             () => {
                 const order = this.coopSort.orders[this.props.resModel];
                 if (order) {
@@ -306,7 +307,7 @@ patch(ControlPanel.prototype, {
         // Через `useState`, а не напрямую: иначе кнопка не узнает, что
         // шторку закрыли затемнением или кнопкой «Показать результаты», —
         // и `aria-expanded` остался бы `true` при закрытой панели.
-        this.coopFilters = useState(coopFiltersUi);
+        this.coopFilters = proxy(coopFiltersUi);
     },
 
     /** Открыть или убрать шторку отбора. Методом, а не присваиванием

@@ -9,12 +9,12 @@
     главный вопрос.
   -->
   <t t-name="coop_theme.BackButton">
-    <button t-if="coopBack" type="button" class="o_coop_back"
-            t-att-title="coopBack.title" t-att-aria-label="coopBack.title"
+    <button t-if="this.coopBack" type="button" class="o_coop_back"
+            t-att-title="this.coopBack.title" t-att-aria-label="this.coopBack.title"
             data-hotkey="b"
             t-on-click="() => this.coopGoBack()">
       <i class="oi oi-arrow-left" role="img" aria-hidden="true"/>
-      <span class="o_coop_back_label" t-esc="coopBack.label"/>
+      <span class="o_coop_back_label" t-out="this.coopBack.label"/>
     </button>
   </t>
 
@@ -23,7 +23,7 @@
     <!--
       Кнопка — первой в полосе, до пути.
     -->
-    <xpath expr="//t[@t-if='env.isSmall']" position="before">
+    <xpath expr="//t[@t-if='this.env.isSmall']" position="before">
       <t t-call="coop_theme.BackButton"/>
     </xpath>
 
@@ -35,7 +35,7 @@
       Так путь рисуется на всех ширинах, а прячется на узком экране
       стилями — одно место вместо двух, расходящихся на 767 точках.
     -->
-    <xpath expr="//t[@t-if='env.isSmall']" position="attributes">
+    <xpath expr="//t[@t-if='this.env.isSmall']" position="attributes">
       <attribute name="t-if">false</attribute>
     </xpath>
 
@@ -45,7 +45,7 @@
       см. `coopIsPersonPage` в `breadcrumb.js`.
     -->
     <xpath expr="//ol[hasclass('breadcrumb')]" position="attributes">
-      <attribute name="t-if">!coopIsPersonPage</attribute>
+      <attribute name="t-if">!this.coopIsPersonPage</attribute>
     </xpath>
 
     <!--
@@ -54,7 +54,7 @@
       остаётся один значок настроек, висящий в пустоте.
     -->
     <xpath expr="//div[hasclass('o_last_breadcrumb_item')][hasclass('gap-2')]" position="attributes">
-      <attribute name="t-if">!coopIsPersonPage</attribute>
+      <attribute name="t-if">!this.coopIsPersonPage</attribute>
     </xpath>
 
     <!--
@@ -68,11 +68,11 @@
       когда есть предки, и когда карточка открыта по прямой ссылке.
     -->
     <xpath expr="(//t[@t-call='web.Breadcrumb.Actions'])[1]" position="attributes">
-      <attribute name="t-if">!coopHideActions</attribute>
+      <attribute name="t-if">!this.coopHideActions</attribute>
     </xpath>
 
     <xpath expr="(//t[@t-call='web.Breadcrumb.Actions'])[2]" position="attributes">
-      <attribute name="t-if">!coopHideActions</attribute>
+      <attribute name="t-if">!this.coopHideActions</attribute>
     </xpath>
 
     <!--

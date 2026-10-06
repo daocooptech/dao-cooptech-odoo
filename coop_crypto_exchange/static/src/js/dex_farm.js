@@ -1,8 +1,10 @@
 /** @odoo-module **/
 
-import { Component, onWillStart, useState } from "@odoo/owl";
+import { Component, onWillStart, proxy, usePlugin } from "@odoo/owl";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * Пулы проектов (решения 434–436, 28.09.2026) — бывший «Фарминг». Модель —
@@ -30,10 +32,10 @@ export class CoopDexFarm extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.action = useService("action");
-        this.notification = useService("notification");
+        this.action = usePlugin(ActionManagerPlugin);
+        this.notification = usePlugin(NotificationPlugin);
         this.sorts = SORTS;
-        this.state = useState({
+        this.state = proxy({
             data: null,
             kind: "coin",
             filter: "raising",

@@ -186,12 +186,12 @@
       же секцию на экранах без пути, и оставить её значило бы вернуть
       шестерёнку там же через полгода.
     -->
-    <xpath expr="(//section[hasclass('o_control_panel_breadcrumbs_actions')]/t[@t-slot='control-panel-additional-actions'])[1]"
+    <xpath expr="(//section[hasclass('o_control_panel_breadcrumbs_actions')]/t[@t-call-slot='control-panel-additional-actions'])[1]"
            position="attributes">
       <attribute name="t-if">!coopHideActions</attribute>
     </xpath>
 
-    <xpath expr="(//section[hasclass('o_control_panel_breadcrumbs_actions')]/t[@t-slot='control-panel-additional-actions'])[2]"
+    <xpath expr="(//section[hasclass('o_control_panel_breadcrumbs_actions')]/t[@t-call-slot='control-panel-additional-actions'])[2]"
            position="attributes">
       <attribute name="t-if">!coopHideActions</attribute>
     </xpath>

@@ -2,6 +2,6 @@
 <templates xml:space="preserve">
   <!-- Значок «Проверки» — только когда проверки есть (js/tier_review_gate.js). -->
   <t t-name="coop_theme.TierReviewGate">
-    <t t-if="store.tierReviewCounter" t-call="base_tier_validation.TierReviewMenu"/>
+    <t t-if="this.store.tierReviewCounter" t-call="base_tier_validation.TierReviewMenu"/>
   </t>
 </templates>

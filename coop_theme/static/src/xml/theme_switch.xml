@@ -9,8 +9,8 @@
   -->
   <t t-name="coop_theme.ThemeSwitch">
     <button type="button" class="o_coop_theme_switch"
-            t-att-class="{ o_coop_theme_dark: state.dark }"
-            t-att-aria-pressed="state.dark ? 'true' : 'false'"
+            t-att-class="{ o_coop_theme_dark: this.state.dark }"
+            t-att-aria-pressed="this.state.dark ? 'true' : 'false'"
             aria-label="Тёмная тема" title="Светлая или тёмная тема"
             t-on-click="() => this.toggle()">
       <span class="o_coop_tt_sun">

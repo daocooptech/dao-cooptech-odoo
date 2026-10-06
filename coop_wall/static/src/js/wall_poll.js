@@ -1,9 +1,10 @@
 /** @odoo-module **/
 
-import { Component, toRaw, useState } from "@odoo/owl";
+import { Component, proxy, toRaw, usePlugin } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { DateTimeInput } from "@web/core/datetime/datetime_input";
 import { deserializeDateTime, serializeDateTime } from "@web/core/l10n/dates";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { markEventHandled } from "@web/core/utils/misc";
 import { registerComposerAction } from "@mail/core/common/composer_actions";
@@ -32,8 +33,8 @@ export class CoopWallPoll extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.notification = useService("notification");
-        this.state = useState({ busy: false, voters: null });
+        this.notification = usePlugin(NotificationPlugin);
+        this.state = proxy({ busy: false, voters: null });
     }
 
     get poll() {
@@ -94,8 +95,8 @@ export class CoopPollDialog extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.notification = useService("notification");
-        this.state = useState({
+        this.notification = usePlugin(NotificationPlugin);
+        this.state = proxy({
             question: "",
             options: ["", ""],
             isPublic: false,
@@ -165,9 +166,9 @@ export class CoopScheduleDialog extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         // По умолчанию — завтра в девять утра: время, когда ленту читают.
-        this.state = useState({
+        this.state = proxy({
             at: luxon.DateTime.local().plus({ days: 1 }).set({ hour: 9, minute: 0, second: 0 }),
             busy: false,
         });

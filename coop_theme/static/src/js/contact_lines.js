@@ -3,7 +3,7 @@
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { useService } from "@web/core/utils/hooks";
-import { Component, useState } from "@odoo/owl";
+import { Component, proxy } from "@odoo/owl";
 
 /**
  * Свободные строки контактов: «название — значение», сколько нужно.
@@ -25,7 +25,7 @@ export class CoopContactLines extends Component {
     setup() {
         this.orm = useService("orm");
         // editing: id правимой строки, 'new' — добавляемая, null — покой.
-        this.ui = useState({ editing: null, name: "", value: "", busy: false });
+        this.ui = proxy({ editing: null, name: "", value: "", busy: false });
     }
 
     get lines() {

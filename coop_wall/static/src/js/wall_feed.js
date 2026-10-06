@@ -1,8 +1,9 @@
 /** @odoo-module **/
 
-import { Component, onWillStart, useState, useSubEnv } from "@odoo/owl";
+import { Component, onWillStart, proxy } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+import { useSubEnv } from "@web/owl2/utils";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { AttachmentList } from "@mail/core/common/attachment_list";
 import { CoopWallPostFooter, CoopRepostCard } from "@coop_wall/js/wall_post";
@@ -61,7 +62,7 @@ export class CoopWallFeedExtras extends Component {
     setup() {
         this.store = useService("mail.store");
         this.feed = useService("coop_wall_feed");
-        this.state = useState({ ready: false });
+        this.state = proxy({ ready: false });
         // Видео в записи — проигрывателем, как на стене: шаблон вложений
         // стены смотрит на признак ленты записи (`coop_theme`, chatter.xml).
         useSubEnv({ inChatter: { aside: false } });

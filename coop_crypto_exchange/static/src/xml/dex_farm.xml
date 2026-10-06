@@ -6,9 +6,9 @@
        Свои классы — o_coop_fm_*; вкладки и общие — o_coop_dx_*. -->
   <t t-name="coop_crypto_exchange.DexFarm">
     <div class="o_coop_dx o_coop_fm">
-      <t t-call="coop_crypto_exchange.DexTabs"><t t-set="tab" t-value="'farm'"/></t>
+      <t t-call="coop_crypto_exchange.DexTabs" tab="'farm'"/>
 
-      <t t-if="state.data">
+      <t t-if="this.state.data">
         <header class="o_coop_fm_hero">
           <div>
             <h2>Пулы проектов</h2>
@@ -19,62 +19,62 @@
               возвращается внесённое.
             </p>
           </div>
-          <button class="o_coop_fm_new" t-on-click="newPool">
+          <button class="o_coop_fm_new" t-on-click="this.newPool">
             <i class="fa fa-plus"/> Открыть пул под свой проект
           </button>
         </header>
 
         <div class="o_coop_fm_kinds o_coop_dx_seg">
-          <button t-att-class="{ 'o_coop_dx_seg_on': state.kind === 'coin' }" t-on-click="() => this.setKind('coin')">В монете · <t t-esc="kindCount('coin')"/></button>
-          <button t-att-class="{ 'o_coop_dx_seg_on': state.kind === 'rub' }" t-on-click="() => this.setKind('rub')">В рублях — ЦФА · <t t-esc="kindCount('rub')"/></button>
+          <button t-att-class="{ 'o_coop_dx_seg_on': this.state.kind === 'coin' }" t-on-click="() => this.setKind('coin')">В монете · <t t-out="this.kindCount('coin')"/></button>
+          <button t-att-class="{ 'o_coop_dx_seg_on': this.state.kind === 'rub' }" t-on-click="() => this.setKind('rub')">В рублях — ЦФА · <t t-out="this.kindCount('rub')"/></button>
         </div>
 
         <div class="o_coop_fm_stats">
-          <div><span>Идёт сбор</span><b t-esc="totals.raising"/></div>
-          <div><span>Идут выплаты</span><b t-esc="totals.active"/></div>
-          <div><span>С просрочкой</span><b t-att-class="{ 'o_coop_fm_warnnum': totals.overdue }" t-esc="totals.overdue"/></div>
-          <div><span>Невозврат</span><b t-att-class="{ 'o_coop_fm_badnum': totals.default }" t-esc="totals.default"/></div>
-          <div><span>Участников</span><b t-esc="totals.stakers"/></div>
-          <div class="o_coop_fm_stat_mine"><span>Ждут моего подтверждения</span><b t-esc="totals.my_awaiting"/></div>
+          <div><span>Идёт сбор</span><b t-out="this.totals.raising"/></div>
+          <div><span>Идут выплаты</span><b t-out="this.totals.active"/></div>
+          <div><span>С просрочкой</span><b t-att-class="{ 'o_coop_fm_warnnum': this.totals.overdue }" t-out="this.totals.overdue"/></div>
+          <div><span>Невозврат</span><b t-att-class="{ 'o_coop_fm_badnum': this.totals.default }" t-out="this.totals.default"/></div>
+          <div><span>Участников</span><b t-out="this.totals.stakers"/></div>
+          <div class="o_coop_fm_stat_mine"><span>Ждут моего подтверждения</span><b t-out="this.totals.my_awaiting"/></div>
         </div>
 
         <!-- Мои пулы как инициатора: записать выплату -->
-        <section class="o_coop_dx_panel" t-if="myPools.length">
-          <div class="o_coop_dx_panelhead"><b>Мои пулы как инициатора · <t t-esc="myPools.length"/></b></div>
+        <section class="o_coop_dx_panel" t-if="this.myPools.length">
+          <div class="o_coop_dx_panelhead"><b>Мои пулы как инициатора · <t t-out="this.myPools.length"/></b></div>
           <table class="o_coop_dx_table">
             <thead><tr><th>Пул</th><th>Собрано</th><th>Условия</th><th>Выплачено</th><th>Следующая выплата</th><th/></tr></thead>
             <tbody>
-              <t t-foreach="myPools" t-as="p" t-key="p.id">
+              <t t-foreach="this.myPools" t-as="p" t-key="p.id">
                 <tr>
-                  <td><b t-esc="p.project"/><div class="o_coop_dx_muted"><t t-esc="p.coin"/> · <t t-esc="p.state_label"/></div></td>
-                  <td t-esc="amt(p.tvl, p.coin)"/>
-                  <td><t t-esc="pct(p.revenue_share)"/> выручки · до <t t-esc="mult(p.cap_multiple)"/></td>
-                  <td><t t-esc="amt(p.paid, p.coin)"/> из <t t-esc="amt(p.cap, p.coin)"/></td>
+                  <td><b t-out="p.project"/><div class="o_coop_dx_muted"><t t-out="p.coin"/> · <t t-out="p.state_label"/></div></td>
+                  <td t-out="this.amt(p.tvl, p.coin)"/>
+                  <td><t t-out="this.pct(p.revenue_share)"/> выручки · до <t t-out="this.mult(p.cap_multiple)"/></td>
+                  <td><t t-out="this.amt(p.paid, p.coin)"/> из <t t-out="this.amt(p.cap, p.coin)"/></td>
                   <td>
-                    <t t-if="p.next_due"><t t-esc="dmy(p.next_due)"/></t><t t-else="">—</t>
-                    <div class="o_coop_fm_late" t-if="p.overdue">просрочка <t t-esc="p.overdue"/> <t t-esc="daysWord(p.overdue)"/></div>
+                    <t t-if="p.next_due"><t t-out="this.dmy(p.next_due)"/></t><t t-else="">—</t>
+                    <div class="o_coop_fm_late" t-if="p.overdue">просрочка <t t-out="p.overdue"/> <t t-out="this.daysWord(p.overdue)"/></div>
                   </td>
                   <td class="o_coop_fm_actions">
                     <button class="o_coop_dex_link" t-if="p.state === 'active' or p.state === 'default'" t-on-click="() => this.togglePay(p)">записать выплату</button>
                   </td>
                 </tr>
-                <tr t-if="state.pay === p.id">
+                <tr t-if="this.state.pay === p.id">
                   <td colspan="6">
                     <div class="o_coop_fm_payform">
                       <div class="o_coop_dx_field">
-                        <label>Выручка за период, <t t-esc="p.coin"/></label>
-                        <input type="number" min="0" step="0.01" t-att-value="state.revenue" t-on-input="onRevenue"/>
+                        <label>Выручка за период, <t t-out="p.coin"/></label>
+                        <input type="number" min="0" step="0.01" t-att-value="this.state.revenue" t-on-input="this.onRevenue"/>
                       </div>
                       <div class="o_coop_dx_field">
                         <label><t t-if="p.kind === 'rub'">Номер платёжного поручения</t><t t-else="">Хэш перевода</t></label>
-                        <input type="text" t-att-value="state.tx" t-on-input="onTx"/>
+                        <input type="text" t-att-value="this.state.tx" t-on-input="this.onTx"/>
                       </div>
                       <div class="o_coop_dx_total">
-                        <span>Участникам — <t t-esc="pct(p.revenue_share)"/> выручки</span>
-                        <b><t t-esc="amt(payShare(p), p.coin)"/> <t t-esc="p.coin"/></b>
+                        <span>Участникам — <t t-out="this.pct(p.revenue_share)"/> выручки</span>
+                        <b><t t-out="this.amt(this.payShare(p), p.coin)"/> <t t-out="p.coin"/></b>
                       </div>
                       <div class="o_coop_fm_stakebtns">
-                        <button class="o_coop_dx_go o_coop_dx_go_buy" t-att-disabled="state.busy or !state.revenue" t-on-click="() => this.recordPayout(p)">Записать</button>
+                        <button class="o_coop_dx_go o_coop_dx_go_buy" t-att-disabled="this.state.busy or !this.state.revenue" t-on-click="() => this.recordPayout(p)">Записать</button>
                         <button class="o_coop_dex_link" t-on-click="() => this.togglePay(p)">отмена</button>
                       </div>
                     </div>
@@ -86,32 +86,32 @@
         </section>
 
         <!-- Мои взносы -->
-        <section class="o_coop_dx_panel" t-if="myStakes.length">
-          <div class="o_coop_dx_panelhead"><b>Мои взносы · <t t-esc="myStakes.length"/></b></div>
+        <section class="o_coop_dx_panel" t-if="this.myStakes.length">
+          <div class="o_coop_dx_panelhead"><b>Мои взносы · <t t-out="this.myStakes.length"/></b></div>
           <table class="o_coop_dx_table">
             <thead><tr><th>Пул</th><th>Внесено</th><th>Получено</th><th>Ждёт подтверждения</th><th>Потолок</th><th>Состояние</th><th/></tr></thead>
             <tbody>
-              <t t-foreach="myStakes" t-as="m" t-key="m.id">
+              <t t-foreach="this.myStakes" t-as="m" t-key="m.id">
                 <tr t-att-class="{ 'o_coop_fm_gone': m.state === 'withdrawn' }">
-                  <td><b t-esc="m.project"/><div class="o_coop_dx_muted" t-esc="m.coin"/></td>
-                  <td t-esc="amt(m.amount, m.coin)"/>
-                  <td class="o_coop_dx_up" t-esc="amt(m.received, m.coin)"/>
+                  <td><b t-out="m.project"/><div class="o_coop_dx_muted" t-out="m.coin"/></td>
+                  <td t-out="this.amt(m.amount, m.coin)"/>
+                  <td class="o_coop_dx_up" t-out="this.amt(m.received, m.coin)"/>
                   <td>
-                    <t t-esc="amt(m.awaiting, m.coin)"/>
-                    <div class="o_coop_fm_late" t-if="m.disputed">в споре <t t-esc="amt(m.disputed, m.coin)"/></div>
+                    <t t-out="this.amt(m.awaiting, m.coin)"/>
+                    <div class="o_coop_fm_late" t-if="m.disputed">в споре <t t-out="this.amt(m.disputed, m.coin)"/></div>
                   </td>
-                  <td t-esc="amt(m.cap, m.coin)"/>
+                  <td t-out="this.amt(m.cap, m.coin)"/>
                   <td class="o_coop_dx_muted">
-                    <t t-esc="m.state === 'withdrawn' ? 'возвращено' : m.pool_state_label"/>
-                    <div class="o_coop_fm_late" t-if="m.overdue">просрочка <t t-esc="m.overdue"/> <t t-esc="daysWord(m.overdue)"/></div>
+                    <t t-out="m.state === 'withdrawn' ? 'возвращено' : m.pool_state_label"/>
+                    <div class="o_coop_fm_late" t-if="m.overdue">просрочка <t t-out="m.overdue"/> <t t-out="this.daysWord(m.overdue)"/></div>
                   </td>
                   <td class="o_coop_fm_actions">
                     <button class="o_coop_dex_link" t-if="m.can_withdraw" t-on-click="() => this.withdraw(m)">вернуть взнос</button>
                   </td>
                 </tr>
                 <tr t-foreach="m.pending_lines" t-as="l" t-key="l.id" class="o_coop_fm_lines">
-                  <td colspan="2" class="o_coop_dx_muted">выплата от <t t-esc="dmy(l.date)"/><t t-if="l.tx_hash"> · <t t-esc="short(l.tx_hash)"/></t></td>
-                  <td colspan="2"><b t-esc="amt(l.amount, m.coin)"/> <t t-esc="m.coin"/></td>
+                  <td colspan="2" class="o_coop_dx_muted">выплата от <t t-out="this.dmy(l.date)"/><t t-if="l.tx_hash"> · <t t-out="this.short(l.tx_hash)"/></t></td>
+                  <td colspan="2"><b t-out="this.amt(l.amount, m.coin)"/> <t t-out="m.coin"/></td>
                   <td colspan="3" class="o_coop_fm_actions">
                     <button class="o_coop_dex_link" t-on-click="() => this.confirmLine(l)">получил</button>
                     <button class="o_coop_dex_link" t-on-click="() => this.disputeLine(l)">не получил — спор</button>
@@ -126,95 +126,95 @@
         <!-- Отбор -->
         <div class="o_coop_fm_filters">
           <div class="o_coop_dx_seg">
-            <button t-att-class="{ 'o_coop_dx_seg_on': state.filter === 'raising' }" t-on-click="() => this.setFilter('raising')">Идёт сбор · <t t-esc="count('raising')"/></button>
-            <button t-att-class="{ 'o_coop_dx_seg_on': state.filter === 'active' }" t-on-click="() => this.setFilter('active')">Идут выплаты · <t t-esc="count('active')"/></button>
-            <button t-att-class="{ 'o_coop_dx_seg_on': state.filter === 'overdue' }" t-on-click="() => this.setFilter('overdue')">Просрочка · <t t-esc="count('overdue')"/></button>
-            <button t-att-class="{ 'o_coop_dx_seg_on': state.filter === 'default' }" t-on-click="() => this.setFilter('default')">Невозврат · <t t-esc="count('default')"/></button>
-            <button t-att-class="{ 'o_coop_dx_seg_on': state.filter === 'closed' }" t-on-click="() => this.setFilter('closed')">Завершены · <t t-esc="count('closed')"/></button>
-            <button t-att-class="{ 'o_coop_dx_seg_on': state.filter === 'refunded' }" t-on-click="() => this.setFilter('refunded')">Не собраны · <t t-esc="count('refunded')"/></button>
-            <button t-att-class="{ 'o_coop_dx_seg_on': state.filter === 'all' }" t-on-click="() => this.setFilter('all')">Все · <t t-esc="count('all')"/></button>
+            <button t-att-class="{ 'o_coop_dx_seg_on': this.state.filter === 'raising' }" t-on-click="() => this.setFilter('raising')">Идёт сбор · <t t-out="this.count('raising')"/></button>
+            <button t-att-class="{ 'o_coop_dx_seg_on': this.state.filter === 'active' }" t-on-click="() => this.setFilter('active')">Идут выплаты · <t t-out="this.count('active')"/></button>
+            <button t-att-class="{ 'o_coop_dx_seg_on': this.state.filter === 'overdue' }" t-on-click="() => this.setFilter('overdue')">Просрочка · <t t-out="this.count('overdue')"/></button>
+            <button t-att-class="{ 'o_coop_dx_seg_on': this.state.filter === 'default' }" t-on-click="() => this.setFilter('default')">Невозврат · <t t-out="this.count('default')"/></button>
+            <button t-att-class="{ 'o_coop_dx_seg_on': this.state.filter === 'closed' }" t-on-click="() => this.setFilter('closed')">Завершены · <t t-out="this.count('closed')"/></button>
+            <button t-att-class="{ 'o_coop_dx_seg_on': this.state.filter === 'refunded' }" t-on-click="() => this.setFilter('refunded')">Не собраны · <t t-out="this.count('refunded')"/></button>
+            <button t-att-class="{ 'o_coop_dx_seg_on': this.state.filter === 'all' }" t-on-click="() => this.setFilter('all')">Все · <t t-out="this.count('all')"/></button>
           </div>
-          <input type="search" placeholder="Проект, город, назначение" t-att-value="state.query" t-on-input="onQuery"/>
-          <select t-if="state.kind === 'coin'" t-on-change="setCoin">
+          <input type="search" placeholder="Проект, город, назначение" t-att-value="this.state.query" t-on-input="this.onQuery"/>
+          <select t-if="this.state.kind === 'coin'" t-on-change="this.setCoin">
             <option value="">Все монеты</option>
-            <option t-foreach="coins" t-as="c" t-key="c" t-att-value="c" t-att-selected="c === state.coin" t-esc="c"/>
+            <option t-foreach="this.coins" t-as="c" t-key="c" t-att-value="c" t-att-selected="c === this.state.coin" t-out="c"/>
           </select>
-          <select t-on-change="setSort">
-            <option t-foreach="sorts" t-as="s" t-key="s.key" t-att-value="s.key" t-att-selected="s.key === state.sort" t-esc="s.label"/>
+          <select t-on-change="this.setSort">
+            <option t-foreach="this.sorts" t-as="s" t-key="s.key" t-att-value="s.key" t-att-selected="s.key === this.state.sort" t-out="s.label"/>
           </select>
         </div>
 
         <!-- Пулы -->
         <div class="o_coop_fm_grid">
-          <article t-foreach="shown" t-as="p" t-key="p.id" t-attf-class="o_coop_fm_card o_coop_fm_{{ p.state }}">
+          <article t-foreach="this.shown" t-as="p" t-key="p.id" t-attf-class="o_coop_fm_card o_coop_fm_{{ p.state }}">
             <div class="o_coop_fm_head">
               <img t-attf-src="/web/image/coop.project/{{ p.project_id }}/image_512" alt="" loading="lazy"/>
               <div class="o_coop_fm_title">
-                <a href="#" t-on-click.prevent="() => this.openProject(p)" t-esc="p.project"/>
-                <div class="o_coop_dx_muted"><t t-esc="p.city"/><t t-if="p.city and p.initiator"> · </t><t t-esc="p.initiator"/></div>
+                <a href="#" t-on-click.prevent="() => this.openProject(p)" t-out="p.project"/>
+                <div class="o_coop_dx_muted"><t t-out="p.city"/><t t-if="p.city and p.initiator"> · </t><t t-out="p.initiator"/></div>
               </div>
-              <span t-attf-class="o_coop_fm_state o_coop_fm_state_{{ p.state }}" t-esc="p.state_label"/>
+              <span t-attf-class="o_coop_fm_state o_coop_fm_state_{{ p.state }}" t-out="p.state_label"/>
             </div>
-            <div class="o_coop_fm_purpose" t-esc="p.purpose"/>
+            <div class="o_coop_fm_purpose" t-out="p.purpose"/>
             <div class="o_coop_fm_apr">
               <div>
                 <span>Участникам</span>
-                <b t-esc="pct(p.revenue_share) + ' выручки'"/>
-                <small class="o_coop_dx_muted">до <t t-esc="mult(p.cap_multiple)"/> внесённого</small>
+                <b t-out="this.pct(p.revenue_share) + ' выручки'"/>
+                <small class="o_coop_dx_muted">до <t t-out="this.mult(p.cap_multiple)"/> внесённого</small>
               </div>
               <div>
                 <span t-if="p.kind === 'rub'">Сбор</span><span t-else="">Монета</span>
-                <b t-esc="p.kind === 'rub' ? 'рубли · ЦФА' : p.coin"/>
-                <small class="o_coop_dx_muted">выплаты раз в <t t-esc="p.payout_days"/> <t t-esc="daysWord(p.payout_days)"/></small>
+                <b t-out="p.kind === 'rub' ? 'рубли · ЦФА' : p.coin"/>
+                <small class="o_coop_dx_muted">выплаты раз в <t t-out="p.payout_days"/> <t t-out="this.daysWord(p.payout_days)"/></small>
               </div>
             </div>
             <div class="o_coop_fm_progress" t-if="p.state === 'raising' or p.state === 'refunded'">
               <div class="o_coop_fm_track"><span t-attf-style="width: {{ p.progress }}%"/></div>
               <div class="o_coop_fm_nums">
-                <span>собрано <b t-esc="amt(p.tvl, p.coin)"/> из <t t-esc="amt(p.target, p.coin)"/> · <t t-esc="p.progress"/>%</span>
+                <span>собрано <b t-out="this.amt(p.tvl, p.coin)"/> из <t t-out="this.amt(p.target, p.coin)"/> · <t t-out="p.progress"/>%</span>
               </div>
             </div>
             <div class="o_coop_fm_progress" t-else="">
               <div class="o_coop_fm_track o_coop_fm_track_paid"><span t-attf-style="width: {{ p.paid_pct }}%"/></div>
               <div class="o_coop_fm_nums">
-                <span>выплачено <b t-esc="amt(p.paid, p.coin)"/> из <t t-esc="amt(p.cap, p.coin)"/> · <t t-esc="p.paid_pct"/>%</span>
-                <span class="o_coop_dx_muted"><t t-esc="p.payouts"/> <t t-esc="payoutsWord(p.payouts)"/></span>
+                <span>выплачено <b t-out="this.amt(p.paid, p.coin)"/> из <t t-out="this.amt(p.cap, p.coin)"/> · <t t-out="p.paid_pct"/>%</span>
+                <span class="o_coop_dx_muted"><t t-out="p.payouts"/> <t t-out="this.payoutsWord(p.payouts)"/></span>
               </div>
             </div>
             <div class="o_coop_fm_meta">
-              <span><i class="fa fa-users"/> <t t-esc="p.stakers"/></span>
-              <span t-attf-class="o_coop_fm_risk o_coop_fm_risk_{{ p.risk }}">риск: <t t-esc="p.risk_label"/></span>
-              <span t-if="p.days_left !== null and p.days_left &gt;= 0"><i class="fa fa-clock-o"/> ещё <t t-esc="p.days_left"/> <t t-esc="daysWord(p.days_left)"/></span>
-              <span class="o_coop_fm_late" t-if="p.overdue"><i class="fa fa-exclamation-triangle"/> просрочка <t t-esc="p.overdue"/> <t t-esc="daysWord(p.overdue)"/></span>
-              <span t-elif="p.state === 'active' and p.next_due">выплата до <t t-esc="dmy(p.next_due)"/></span>
+              <span><i class="fa fa-users"/> <t t-out="p.stakers"/></span>
+              <span t-attf-class="o_coop_fm_risk o_coop_fm_risk_{{ p.risk }}">риск: <t t-out="p.risk_label"/></span>
+              <span t-if="p.days_left !== null and p.days_left &gt;= 0"><i class="fa fa-clock-o"/> ещё <t t-out="p.days_left"/> <t t-out="this.daysWord(p.days_left)"/></span>
+              <span class="o_coop_fm_late" t-if="p.overdue"><i class="fa fa-exclamation-triangle"/> просрочка <t t-out="p.overdue"/> <t t-out="this.daysWord(p.overdue)"/></span>
+              <span t-elif="p.state === 'active' and p.next_due">выплата до <t t-out="this.dmy(p.next_due)"/></span>
               <span class="o_coop_fm_late" t-if="p.frozen">проект заморожен</span>
             </div>
             <t t-if="p.open">
-              <button class="o_coop_dx_go o_coop_dx_go_buy" t-if="state.open !== p.id" t-on-click="() => this.toggle(p)">Внести</button>
+              <button class="o_coop_dx_go o_coop_dx_go_buy" t-if="this.state.open !== p.id" t-on-click="() => this.toggle(p)">Внести</button>
               <div class="o_coop_fm_stake" t-else="">
                 <div class="o_coop_dx_field">
-                  <label>Сколько, <t t-esc="p.coin"/> <span class="o_coop_dx_muted" t-if="p.min_stake">· от <t t-esc="qty(p.min_stake)"/></span></label>
+                  <label>Сколько, <t t-out="p.coin"/> <span class="o_coop_dx_muted" t-if="p.min_stake">· от <t t-out="this.qty(p.min_stake)"/></span></label>
                   <div class="o_coop_fm_amount">
-                    <input type="number" min="0" step="0.00000001" t-att-value="state.amount" t-on-input="onAmount"/>
+                    <input type="number" min="0" step="0.00000001" t-att-value="this.state.amount" t-on-input="this.onAmount"/>
                     <button class="o_coop_dex_link" t-on-click="() => this.setMax(p)">до цели</button>
                   </div>
                 </div>
                 <div class="o_coop_dx_total">
                   <span>Вернётся не больше</span>
-                  <b><t t-esc="amt(capFor(p), p.coin)"/> <t t-esc="p.coin"/></b>
+                  <b><t t-out="this.amt(this.capFor(p), p.coin)"/> <t t-out="p.coin"/></b>
                 </div>
                 <div class="o_coop_dx_muted o_coop_fm_hint">Только из выручки проекта: нет выручки — нет выплат.</div>
                 <div class="o_coop_fm_stakebtns">
-                  <button class="o_coop_dx_go o_coop_dx_go_buy" t-att-disabled="state.busy or !state.amount" t-on-click="() => this.stake(p)">Внести в пул</button>
+                  <button class="o_coop_dx_go o_coop_dx_go_buy" t-att-disabled="this.state.busy or !this.state.amount" t-on-click="() => this.stake(p)">Внести в пул</button>
                   <button class="o_coop_dex_link" t-on-click="() => this.toggle(p)">отмена</button>
                 </div>
               </div>
             </t>
           </article>
         </div>
-        <div class="o_coop_dex_empty" t-if="!pools.length">Пулов по такому отбору нет.</div>
-        <button class="o_coop_fm_more" t-if="!state.showAll and pools.length &gt; shown.length" t-on-click="showAll">
-          Показать все · <t t-esc="pools.length"/>
+        <div class="o_coop_dex_empty" t-if="!this.pools.length">Пулов по такому отбору нет.</div>
+        <button class="o_coop_fm_more" t-if="!this.state.showAll and this.pools.length &gt; this.shown.length" t-on-click="this.showAll">
+          Показать все · <t t-out="this.pools.length"/>
         </button>
 
       </t>

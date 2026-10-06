@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { reactive } from "@odoo/owl";
+import { proxy } from "@odoo/owl";
 
 /**
  * Порядок в каталоге.
@@ -88,7 +88,7 @@ export function coopSortOptionsFor(resModel) {
 
 // Выбранный порядок — по разделу: возвращаясь в каталог, человек
 // рассчитывает увидеть тот же порядок, а не сброшенный.
-export const coopSort = reactive({ orders: {} });
+export const coopSort = proxy({ orders: {} });
 
 export function setCoopSort(resModel, order) {
     coopSort.orders = { ...coopSort.orders, [resModel]: order };

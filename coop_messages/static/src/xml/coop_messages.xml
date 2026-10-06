@@ -7,7 +7,7 @@
   правой колонки — компоненты Discuss без изменений.
 -->
 <t t-name="coop_messages.Messages">
-  <div class="o_coop_messages" t-att-class="props.className">
+  <div class="o_coop_messages" t-att-class="this.props.className">
     <div class="o_coop_tabs o_coop_tabs_page">
       <span class="o_coop_tab active">Сообщения</span>
       <div class="o_coop_new_dialog" t-ref="newDialog">
@@ -15,15 +15,15 @@
                 t-on-click="() => this.toggleNewDialog()">
           <span class="o_coop_new_dialog_plus">+</span> Добавить диалог
         </button>
-        <div t-if="state.newDialogOpen" class="o_coop_new_dialog_pop">
+        <div t-if="this.state.newDialogOpen" class="o_coop_new_dialog_pop">
           <input type="text" class="o_coop_input" autofocus="autofocus"
                  placeholder="Найти человека по имени..."
                  t-on-input="(ev) => this.searchNewDialog(ev.target.value)"/>
           <div class="o_coop_new_dialog_list">
-            <t t-if="state.newDialogQuery.trim().length > 1 and !state.newDialogResults.length">
+            <t t-if="this.state.newDialogQuery.trim().length > 1 and !this.state.newDialogResults.length">
               <div class="o_coop_new_dialog_empty">Никого не нашли.</div>
             </t>
-            <div t-foreach="state.newDialogResults" t-as="person" t-key="person.id"
+            <div t-foreach="this.state.newDialogResults" t-as="person" t-key="person.id"
                  class="o_coop_new_dialog_row"
                  t-on-click="() => this.startNewDialog(person)">
               <img class="o_coop_new_dialog_avatar"
@@ -42,27 +42,27 @@
     <div class="o_coop_msg_search">
       <input type="text" class="o_coop_input"
              placeholder="Найти по диалогам и сообщениям..."
-             t-model="state.search"/>
+             t-custom-model="this.state.search"/>
     </div>
 
     <div class="o_coop_chips o_coop_msg_chips">
-      <button t-foreach="shownCategories" t-as="category" t-key="category.id"
+      <button t-foreach="this.shownCategories" t-as="category" t-key="category.id"
               type="button" class="o_coop_chip"
-              t-att-class="{ o_coop_chip_on: state.category === category.id }"
-              t-on-click="() => (state.category = category.id)">
+              t-att-class="{ o_coop_chip_on: this.state.category === category.id }"
+              t-on-click="() => (this.state.category = category.id)">
         <t t-esc="category.label"/>
-        <span class="o_coop_chip_num" t-esc="countOf(category.id)"/>
+        <span class="o_coop_chip_num" t-esc="this.countOf(category.id)"/>
       </button>
     </div>
 
     <div class="o_coop_msg_body">
       <div class="o_coop_thread_list">
-        <t t-if="visibleThreads.length">
-          <div t-foreach="visibleThreads" t-as="thread" t-key="thread.localId"
+        <t t-if="this.visibleThreads.length">
+          <div t-foreach="this.visibleThreads" t-as="thread" t-key="thread.localId"
                class="o_coop_thread_item"
                t-att-class="{
-                 o_coop_thread_on: thread.eq(activeThread),
-                 o_coop_thread_unread: unreadOf(thread),
+                 o_coop_thread_on: thread.eq(this.activeThread),
+                 o_coop_thread_unread: this.unreadOf(thread),
                }"
                t-on-click="() => this.select(thread)">
             <img class="o_coop_thread_avatar" t-att-src="thread.avatarUrl" alt=""
@@ -73,12 +73,12 @@
                   <t t-if="thread.coop_pinned">📌 </t>
                   <t t-esc="thread.displayName"/>
                 </span>
-                <span class="o_coop_thread_time" t-esc="stampOf(thread)"/>
+                <span class="o_coop_thread_time" t-esc="this.stampOf(thread)"/>
               </div>
               <div class="o_coop_thread_row">
-                <span class="o_coop_thread_last" t-esc="previewOf(thread)"/>
-                <span t-if="unreadOf(thread)" class="o_coop_thread_count"
-                      t-esc="unreadOf(thread)"/>
+                <span class="o_coop_thread_last" t-esc="this.previewOf(thread)"/>
+                <span t-if="this.unreadOf(thread)" class="o_coop_thread_count"
+                      t-esc="this.unreadOf(thread)"/>
               </div>
             </div>
           </div>
@@ -97,7 +97,7 @@
           кольцо, тот же знак, та же подпись со словом «собираем». Одна
           вещь должна выглядеть одинаково везде, где встречается.
         -->
-        <div t-elif="state.threadsLoading" class="o_coop_thread_loading">
+        <div t-elif="this.state.threadsLoading" class="o_coop_thread_loading">
           <div class="o_coop_loader_art o_coop_loader_small">
             <svg class="o_coop_loader_ring" viewBox="0 0 64 64" aria-hidden="true">
               <circle class="o_coop_loader_track" cx="32" cy="32" r="28"/>
@@ -114,26 +114,26 @@
       </div>
 
       <div class="o_coop_chat_pane" t-ref="pane">
-        <t t-if="activeThread">
+        <t t-if="this.activeThread">
           <div class="o_coop_chat_head">
-            <img class="o_coop_chat_avatar" t-att-src="activeThread.avatarUrl" alt=""
-                 t-att-class="{ o_coop_avatar_circle: activeThread.coop_kind === 'person' }"/>
+            <img class="o_coop_chat_avatar" t-att-src="this.activeThread.avatarUrl" alt=""
+                 t-att-class="{ o_coop_avatar_circle: this.activeThread.coop_kind === 'person' }"/>
             <div class="o_coop_chat_head_text">
-              <div class="o_coop_chat_name" t-esc="activeThread.displayName"/>
+              <div class="o_coop_chat_name" t-esc="this.activeThread.displayName"/>
               <div class="o_coop_chat_sub">
-                <t t-if="activeThread.coop_kind === 'person' and onlineStatus(activeThread)">
+                <t t-if="this.activeThread.coop_kind === 'person' and this.onlineStatus(this.activeThread)">
                   <span class="o_coop_online_dot"
-                        t-att-class="{ o_coop_online_off: onlineStatus(activeThread) !== 'online' }"/>
-                  <t t-esc="onlineStatus(activeThread) === 'online' ? 'в сети' : 'был(а) недавно'"/>
-                  <t t-if="activeThread.coop_subtitle"> · </t>
+                        t-att-class="{ o_coop_online_off: this.onlineStatus(this.activeThread) !== 'online' }"/>
+                  <t t-esc="this.onlineStatus(this.activeThread) === 'online' ? 'в сети' : 'был(а) недавно'"/>
+                  <t t-if="this.activeThread.coop_subtitle"> · </t>
                 </t>
-                <t t-esc="activeThread.coop_subtitle"/>
+                <t t-esc="this.activeThread.coop_subtitle"/>
               </div>
             </div>
-            <button t-if="activeThread.coop_link_label" type="button"
+            <button t-if="this.activeThread.coop_link_label" type="button"
                     class="o_coop_chat_link"
-                    t-on-click="() => this.openRecord(activeThread)">
-              <t t-esc="activeThread.coop_link_label"/> →
+                    t-on-click="() => this.openRecord(this.activeThread)">
+              <t t-esc="this.activeThread.coop_link_label"/> →
             </button>
 
             <!--
@@ -144,21 +144,21 @@
               движок сам убирает под многоточие.
             -->
             <div class="o_coop_chat_actions">
-              <ActionList actions="[quickActions]" inline="true" thread="activeThread"/>
-              <Dropdown t-if="moreActions.length" position="'bottom-end'">
+              <ActionList actions="[this.quickActions]" inline="true" thread="this.activeThread"/>
+              <Dropdown t-if="this.moreActions.length" position="'bottom-end'">
                 <button type="button" class="o_coop_chat_more"
                         aria-label="Ещё действия" title="Ещё действия">⋯</button>
                 <t t-set-slot="content">
-                  <ActionList actions="[moreActions]" dropdown="true"
-                              thread="activeThread"/>
+                  <ActionList actions="[this.moreActions]" dropdown="true"
+                              thread="this.activeThread"/>
                 </t>
               </Dropdown>
             </div>
           </div>
 
-          <Thread thread="activeThread" t-key="activeThread.localId"
-                  jumpPresent="state.jump"/>
-          <Composer composer="activeThread.composer" t-key="activeThread.localId"
+          <Thread thread="this.activeThread" t-key="this.activeThread.localId"
+                  jumpPresent="this.state.jump"/>
+          <Composer composer="this.activeThread.composer" t-key="this.activeThread.localId"
                     autofocus="true" type="'message'"
                     onPostCallback.bind="() => this.state.jump++"/>
         </t>
@@ -173,7 +173,7 @@
         колонка, а не поверх переписки: список участников читают, не
         отрываясь от разговора.
       -->
-      <div t-if="threadActions.activeAction?.actionPanelComponentCondition"
+      <div t-if="this.threadActions.activeAction?.actionPanelComponentCondition"
            class="o_coop_chat_panel">
         <!-- Возврат к переписке. Виден только там, где панель встаёт
              вместо переписки, а не рядом: на узком экране шапка диалога
@@ -182,9 +182,9 @@
                 t-on-click="() => this.threadActions.activeAction.close()">
           ← К переписке
         </button>
-        <t t-component="threadActions.activeAction.actionPanelComponent"
-           thread="activeThread"
-           t-props="threadActions.activeAction.actionPanelComponentProps"/>
+        <t t-component="this.threadActions.activeAction.actionPanelComponent"
+           thread="this.activeThread"
+           t-props="this.threadActions.activeAction.actionPanelComponentProps"/>
       </div>
     </div>
   </div>

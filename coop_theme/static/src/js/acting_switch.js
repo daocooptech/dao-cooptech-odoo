@@ -2,7 +2,7 @@
 
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { Component, onWillStart, useState } from "@odoo/owl";
+import { Component, onWillStart, proxy } from "@odoo/owl";
 
 /**
  * Выбор, от чьего имени человек действует, — в меню под аватаром.
@@ -23,7 +23,7 @@ export class CoopActingMenu extends Component {
     setup() {
         this.orm = useService("orm");
         this.boot = useService("coopBoot");
-        this.state = useState({ actors: [], acting: null });
+        this.state = proxy({ actors: [], acting: null });
         onWillStart(() => this.load());
     }
 

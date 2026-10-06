@@ -4,22 +4,22 @@
   <!-- Ряд действий и комментарии под записью стены — `js/wall_post.js`. -->
   <t t-name="coop_wall.MessageWallFooter" t-inherit="mail.Message" t-inherit-mode="extension">
     <xpath expr="//div[hasclass('o-mail-Message-textContent')]" position="after">
-      <CoopRepostCard t-if="message.coop_repost" repost="message.coop_repost"/>
+      <CoopRepostCard t-if="this.message.coop_repost" repost="this.message.coop_repost"/>
     </xpath>
     <xpath expr="//t[@name='after-reactions']" position="after">
-      <CoopWallPostFooter t-if="coopIsWallPost" message="message" thread="props.thread"/>
+      <CoopWallPostFooter t-if="this.coopIsWallPost" message="this.message" thread="this.props.thread"/>
     </xpath>
   </t>
 
   <!-- Лайк и дизлайк на стене — в ряду под записью, не в общем списке. -->
   <t t-name="coop_wall.MessageReactionsNoLikes" t-inherit="mail.MessageReactions" t-inherit-mode="extension">
-    <xpath expr="//t[@t-foreach='props.message.reactions']" position="attributes">
-      <attribute name="t-foreach">coopReactions</attribute>
+    <xpath expr="//t[@t-foreach='this.props.message.reactions']" position="attributes">
+      <attribute name="t-foreach">this.coopReactions</attribute>
     </xpath>
     <!-- Остались одни лайки — списка нет вовсе: иначе от него висел бы
          бледный значок «добавить реакцию» над рядом. -->
     <xpath expr="//div[hasclass('o-mail-MessageReactions')]" position="attributes">
-      <attribute name="t-if">coopReactions.length</attribute>
+      <attribute name="t-if">this.coopReactions.length</attribute>
     </xpath>
   </t>
 
@@ -27,49 +27,49 @@
     <div class="o_coop_post_footer">
       <div class="o_coop_post_bar">
         <button class="o_coop_post_act" title="Нравится"
-                t-att-class="{ 'o_coop_post_act_on': mine(LIKE) }"
-                t-att-disabled="!canReact" t-on-click="() => this.toggle(LIKE)">
-          <i t-att-class="mine(LIKE) ? 'fa fa-thumbs-up' : 'fa fa-thumbs-o-up'"/>
-          <span class="o_coop_post_count" t-out="count(LIKE)"/>
+                t-att-class="{ 'o_coop_post_act_on': this.mine(this.LIKE) }"
+                t-att-disabled="!this.canReact" t-on-click="() => this.toggle(this.LIKE)">
+          <i t-att-class="this.mine(this.LIKE) ? 'fa fa-thumbs-up' : 'fa fa-thumbs-o-up'"/>
+          <span class="o_coop_post_count" t-out="this.count(this.LIKE)"/>
         </button>
         <button class="o_coop_post_act" title="Не нравится"
-                t-att-class="{ 'o_coop_post_act_on': mine(DISLIKE) }"
-                t-att-disabled="!canReact" t-on-click="() => this.toggle(DISLIKE)">
-          <i t-att-class="mine(DISLIKE) ? 'fa fa-thumbs-down' : 'fa fa-thumbs-o-down'"/>
-          <span class="o_coop_post_count" t-out="count(DISLIKE)"/>
+                t-att-class="{ 'o_coop_post_act_on': this.mine(this.DISLIKE) }"
+                t-att-disabled="!this.canReact" t-on-click="() => this.toggle(this.DISLIKE)">
+          <i t-att-class="this.mine(this.DISLIKE) ? 'fa fa-thumbs-down' : 'fa fa-thumbs-o-down'"/>
+          <span class="o_coop_post_count" t-out="this.count(this.DISLIKE)"/>
         </button>
-        <button class="o_coop_post_act" title="Комментарии" t-on-click="onComment">
+        <button class="o_coop_post_act" title="Комментарии" t-on-click="this.onComment">
           <i class="fa fa-comment-o"/>
-          <span class="o_coop_post_count" t-out="list.length"/>
+          <span class="o_coop_post_count" t-out="this.list.length"/>
         </button>
-        <button class="o_coop_post_act" title="Поделиться у себя на странице" t-on-click="onRepost">
+        <button class="o_coop_post_act" title="Поделиться у себя на странице" t-on-click="this.onRepost">
           <i class="fa fa-share"/>
-          <span class="o_coop_post_count" t-out="reposts"/>
+          <span class="o_coop_post_count" t-out="this.reposts"/>
         </button>
-        <button class="o_coop_post_act" title="Поблагодарить" t-on-click="onThanks">
+        <button class="o_coop_post_act" title="Поблагодарить" t-on-click="this.onThanks">
           <i class="fa fa-gift"/>
-          <span class="o_coop_post_count" t-out="thanks"/>
+          <span class="o_coop_post_count" t-out="this.thanks"/>
         </button>
-        <button t-if="canStar" class="o_coop_post_act"
-                t-att-class="{ 'o_coop_post_act_on': props.message.starred }"
-                t-att-title="props.message.starred ? 'Убрать из избранного' : 'В избранное'"
-                t-on-click="onStar">
-          <i t-att-class="props.message.starred ? 'fa fa-star' : 'fa fa-star-o'"/>
-          <span class="o_coop_post_count" t-out="stars"/>
+        <button t-if="this.canStar" class="o_coop_post_act"
+                t-att-class="{ 'o_coop_post_act_on': this.props.message.starred }"
+                t-att-title="this.props.message.starred ? 'Убрать из избранного' : 'В избранное'"
+                t-on-click="this.onStar">
+          <i t-att-class="this.props.message.starred ? 'fa fa-star' : 'fa fa-star-o'"/>
+          <span class="o_coop_post_count" t-out="this.stars"/>
         </button>
       </div>
 
-      <div t-if="list.length or showInput" class="o_coop_comments">
-        <button t-if="hidden" class="o_coop_comments_more btn btn-link p-0"
+      <div t-if="this.list.length or this.showInput" class="o_coop_comments">
+        <button t-if="this.hidden" class="o_coop_comments_more btn btn-link p-0"
                 t-on-click="() => this.state.expanded = true">
-          Показать все комментарии — <t t-out="list.length"/>
+          Показать все комментарии — <t t-out="this.list.length"/>
         </button>
-        <div t-foreach="shown" t-as="c" t-key="c.id" class="o_coop_comment">
-          <img class="o_coop_comment_avatar" t-att-src="avatarUrl(c)" alt=""/>
+        <div t-foreach="this.shown" t-as="c" t-key="c.id" class="o_coop_comment">
+          <img class="o_coop_comment_avatar" t-att-src="this.avatarUrl(c)" alt=""/>
           <div class="o_coop_comment_main">
             <div class="o_coop_comment_head">
               <b t-out="c.author_name"/>
-              <span class="o_coop_comment_date" t-out="formatDate(c)"/>
+              <span class="o_coop_comment_date" t-out="this.formatDate(c)"/>
               <button t-if="c.can_delete" class="o_coop_comment_del" title="Удалить комментарий"
                       t-on-click="() => this.remove(c)">
                 <i class="fa fa-times"/>
@@ -78,12 +78,12 @@
             <div class="o_coop_comment_body" t-out="c.body"/>
           </div>
         </div>
-        <div t-if="showInput" class="o_coop_comment_form">
+        <div t-if="this.showInput" class="o_coop_comment_form">
           <textarea t-ref="input" class="form-control" rows="1"
                     placeholder="Комментарий…"
-                    t-model="state.draft" t-on-keydown="onKeydown"/>
+                    t-custom-model="this.state.draft" t-on-keydown="this.onKeydown"/>
           <button class="btn btn-primary btn-sm" title="Отправить"
-                  t-att-disabled="!state.draft.trim() or state.busy" t-on-click="send">
+                  t-att-disabled="!this.state.draft.trim() or this.state.busy" t-on-click="this.send">
             <i class="fa fa-paper-plane"/>
           </button>
         </div>
@@ -93,31 +93,31 @@
 
   <t t-name="coop_wall.RepostDialog">
     <Dialog title="'Поделиться у себя на странице'" size="'md'">
-      <textarea class="form-control mb-3" rows="3" t-model="state.comment"
+      <textarea class="form-control mb-3" rows="3" t-custom-model="this.state.comment"
                 placeholder="Пара слов от себя — можно без них"/>
       <div class="o_coop_repost_preview">
-        <b t-out="preview.author"/>
-        <div t-out="preview.text"/>
+        <b t-out="this.preview.author"/>
+        <div t-out="this.preview.text"/>
       </div>
       <t t-set-slot="footer">
-        <button class="btn btn-primary" t-att-disabled="state.busy" t-on-click="share">Поделиться</button>
-        <button class="btn btn-secondary" t-on-click="props.close">Отмена</button>
+        <button class="btn btn-primary" t-att-disabled="this.state.busy" t-on-click="this.share">Поделиться</button>
+        <button class="btn btn-secondary" t-on-click="this.props.close">Отмена</button>
       </t>
     </Dialog>
   </t>
 
   <t t-name="coop_wall.RepostCard">
     <div class="o_coop_repost">
-      <t t-if="props.repost.id">
+      <t t-if="this.props.repost.id">
         <div class="o_coop_repost_head">
           <i class="fa fa-retweet"/>
-          <img class="o_coop_comment_avatar" t-att-src="avatarUrl" alt=""/>
-          <b t-out="props.repost.author_name"/>
-          <span class="o_coop_comment_date" t-out="date"/>
+          <img class="o_coop_comment_avatar" t-att-src="this.avatarUrl" alt=""/>
+          <b t-out="this.props.repost.author_name"/>
+          <span class="o_coop_comment_date" t-out="this.date"/>
         </div>
-        <div class="o_coop_repost_body" t-out="body"/>
-        <div t-if="props.repost.attachment_count" class="o_coop_repost_files">
-          <i class="fa fa-paperclip"/> вложений: <t t-out="props.repost.attachment_count"/>
+        <div class="o_coop_repost_body" t-out="this.body"/>
+        <div t-if="this.props.repost.attachment_count" class="o_coop_repost_files">
+          <i class="fa fa-paperclip"/> вложений: <t t-out="this.props.repost.attachment_count"/>
         </div>
       </t>
       <div t-else="" class="o_coop_repost_gone">Исходная запись недоступна.</div>
@@ -128,42 +128,42 @@
        выбирает, автор на своей записи видит его образцом (`preview`). -->
   <t t-name="coop_wall.ThanksChoice">
     <div class="btn-group mb-3 w-100 o_coop_thanks_fork">
-      <button class="btn" t-att-class="state.channel === 'sbp' ? 'btn-primary' : 'btn-secondary'"
+      <button class="btn" t-att-class="this.state.channel === 'sbp' ? 'btn-primary' : 'btn-secondary'"
               t-on-click="() => this.state.channel = 'sbp'">
         <i class="fa fa-qrcode me-1"/>СБП по QR-коду
       </button>
-      <button class="btn" t-att-class="state.channel === 'token' ? 'btn-primary' : 'btn-secondary'"
+      <button class="btn" t-att-class="this.state.channel === 'token' ? 'btn-primary' : 'btn-secondary'"
               t-on-click="() => this.state.channel = 'token'">
         <i class="fa fa-cubes me-1"/>Токенами
       </button>
     </div>
 
-    <t t-if="state.channel === 'sbp'">
-      <div t-if="!state.info.sbp" class="o_coop_thanks_none">
+    <t t-if="this.state.channel === 'sbp'">
+      <div t-if="!this.state.info.sbp" class="o_coop_thanks_none">
         <t t-if="preview">Ссылка СБП не указана.</t>
         <t t-else="">Автор не указал СБП — подарить можно токенами.</t>
       </div>
-      <div t-elif="sbpIsLink" class="o_coop_thanks_qr">
-        <img t-att-src="sbpQrUrl" alt="QR-код СБП" width="220" height="220"/>
+      <div t-elif="this.sbpIsLink" class="o_coop_thanks_qr">
+        <img t-att-src="this.sbpQrUrl" alt="QR-код СБП" width="220" height="220"/>
         <div>
           Отсканируйте камерой телефона или в приложении своего банка — откроется
           перевод по СБП<t t-if="!preview"> автору</t>.
-          <div class="mt-2"><a t-att-href="state.info.sbp" target="_blank" rel="noopener">Открыть ссылку СБП</a></div>
+          <div class="mt-2"><a t-att-href="this.state.info.sbp" target="_blank" rel="noopener">Открыть ссылку СБП</a></div>
           <div class="text-muted mt-2">
-            От <t t-out="state.info.limits.rub_min"/> до <t t-out="state.info.limits.rub_max"/> ₽.
+            От <t t-out="this.state.info.limits.rub_min"/> до <t t-out="this.state.info.limits.rub_max"/> ₽.
           </div>
         </div>
       </div>
       <p t-else="">
-        По СБП по номеру телефона: <b class="o_coop_thanks_req" t-out="state.info.sbp"/>
+        По СБП по номеру телефона: <b class="o_coop_thanks_req" t-out="this.state.info.sbp"/>
         <br/><span class="text-muted">
-          От <t t-out="state.info.limits.rub_min"/> до <t t-out="state.info.limits.rub_max"/> ₽.
+          От <t t-out="this.state.info.limits.rub_min"/> до <t t-out="this.state.info.limits.rub_max"/> ₽.
         </span>
       </p>
     </t>
 
     <div t-else="" class="o_coop_thanks_tokens">
-      <div t-if="!state.info.networks.length" class="o_coop_thanks_none">
+      <div t-if="!this.state.info.networks.length" class="o_coop_thanks_none">
         <t t-if="preview">В кошельке нет адресов в сетях — добавьте их в кошельке.</t>
         <t t-else="">У автора нет адресов в кошельке — подарить можно по СБП.</t>
       </div>
@@ -171,26 +171,26 @@
         <div class="o_coop_thanks_pick">
           <label>
             <span class="form-label">Блокчейн</span>
-            <select class="form-select" t-on-change="onNetwork">
-              <option t-foreach="state.info.networks" t-as="n" t-key="n.id"
-                      t-att-value="n.id" t-att-selected="n.id === state.networkId" t-out="n.name"/>
+            <select class="form-select" t-on-change="this.onNetwork">
+              <option t-foreach="this.state.info.networks" t-as="n" t-key="n.id"
+                      t-att-value="n.id" t-att-selected="n.id === this.state.networkId" t-out="n.name"/>
             </select>
           </label>
-          <label t-if="network">
+          <label t-if="this.network">
             <span class="form-label">Монета</span>
-            <select class="form-select" t-model="state.token">
-              <option t-foreach="network.tokens" t-as="tk" t-key="tk.symbol"
+            <select class="form-select" t-custom-model="this.state.token">
+              <option t-foreach="this.network.tokens" t-as="tk" t-key="tk.symbol"
                       t-att-value="tk.symbol" t-out="tk.label"/>
             </select>
           </label>
         </div>
-        <p t-if="network">
-          <t t-if="preview">Ваш адрес</t><t t-else="">Адрес автора</t> в сети <t t-out="network.name"/>:
-          <code class="o_coop_thanks_req" t-out="network.address"/>
+        <p t-if="this.network">
+          <t t-if="preview">Ваш адрес</t><t t-else="">Адрес автора</t> в сети <t t-out="this.network.name"/>:
+          <code class="o_coop_thanks_req" t-out="this.network.address"/>
         </p>
-        <p t-if="network and network.fee_hint" class="o_coop_thanks_fee">
+        <p t-if="this.network and this.network.fee_hint" class="o_coop_thanks_fee">
           <i class="fa fa-bolt"/>
-          Комиссия сети — <t t-out="network.fee_hint"/>. Платит даритель; точную сумму
+          Комиссия сети — <t t-out="this.network.fee_hint"/>. Платит даритель; точную сумму
           покажет его кошелёк перед подписью.
         </p>
       </t>
@@ -200,35 +200,35 @@
   <t t-name="coop_wall.ThanksDialog">
     <!-- Заголовок — владелец 25.09.2026 (решение 412). -->
     <Dialog title="'Понравился пост? Вы можете отправить подарок!'" size="'md'">
-      <div t-if="!state.info" class="text-muted">Загрузка…</div>
-      <t t-elif="state.info.own">
+      <div t-if="!this.state.info" class="text-muted">Загрузка…</div>
+      <t t-elif="this.state.info.own">
         <!-- Как вас благодарят — образец окна дарителя. -->
         <div class="o_coop_thanks_preview">
           <div class="o_coop_thanks_preview_head">
             <b>Так вас благодарят</b>
             <span class="text-muted">— себя поблагодарить нельзя, это окно видят другие</span>
           </div>
-          <div t-if="!state.info.own_thanks_on" class="o_coop_thanks_none">
+          <div t-if="!this.state.info.own_thanks_on" class="o_coop_thanks_none">
             Приём подарков выключен, и «Поблагодарить» под вашими записями другие не видят.
-            <a href="#" t-on-click.prevent="openSettings">Включить в настройках</a>
+            <a href="#" t-on-click.prevent="this.openSettings">Включить в настройках</a>
             (Деньги и реквизиты → Подарки за записи).
           </div>
-          <t t-else="" t-call="coop_wall.ThanksChoice"><t t-set="preview" t-value="true"/></t>
+          <t t-else="" t-call="coop_wall.ThanksChoice" preview="true"/>
         </div>
 
         <div class="o_coop_thanks_received_head"><b>Подарки за эту запись</b></div>
-        <div t-if="!state.info.received.length" class="text-muted">
+        <div t-if="!this.state.info.received.length" class="text-muted">
           Подарков пока нет.
         </div>
-        <div t-if="state.info.received_notes.length" class="o_coop_thanks_tax mb-2">
+        <div t-if="this.state.info.received_notes.length" class="o_coop_thanks_tax mb-2">
           <i class="fa fa-university"/>
-          <div><div t-foreach="state.info.received_notes" t-as="line" t-key="line_index" t-out="line"/></div>
+          <div><div t-foreach="this.state.info.received_notes" t-as="line" t-key="line_index" t-out="line"/></div>
         </div>
-        <div t-foreach="state.info.received" t-as="t" t-key="t.id" class="o_coop_thanks_row">
+        <div t-foreach="this.state.info.received" t-as="t" t-key="t.id" class="o_coop_thanks_row">
           <div class="o_coop_thanks_who">
             <b t-out="t.sender_name"/>
-            <span t-out="formatAmount(t)"/>
-            <span class="text-muted" t-out="formatDate(t)"/>
+            <span t-out="this.formatAmount(t)"/>
+            <span class="text-muted" t-out="this.formatDate(t)"/>
             <span class="o_coop_thanks_state" t-att-data-state="t.state" t-out="t.state_label"/>
           </div>
           <div t-if="t.state === 'declared'" class="o_coop_thanks_marks">
@@ -244,27 +244,27 @@
           </div>
         </div>
       </t>
-      <div t-elif="!state.info.can_thank" class="text-muted" t-out="state.info.reason"/>
+      <div t-elif="!this.state.info.can_thank" class="text-muted" t-out="this.state.info.reason"/>
       <t t-else="">
-        <t t-call="coop_wall.ThanksChoice"><t t-set="preview" t-value="false"/></t>
-        <t t-if="state.channel === 'sbp' ? state.info.sbp : state.info.networks.length">
+        <t t-call="coop_wall.ThanksChoice" preview="false"/>
+        <t t-if="this.state.channel === 'sbp' ? this.state.info.sbp : this.state.info.networks.length">
           <label class="form-label">Сумма подарка</label>
-          <input class="form-control mb-3" inputmode="decimal" t-model="state.amount"
-                 t-att-placeholder="state.channel === 'sbp' ? '500 ₽' : tokenExample"/>
-          <t t-if="state.channel === 'token'">
+          <input class="form-control mb-3" inputmode="decimal" t-custom-model="this.state.amount"
+                 t-att-placeholder="this.state.channel === 'sbp' ? '500 ₽' : this.tokenExample"/>
+          <t t-if="this.state.channel === 'token'">
             <label class="form-label">Хеш транзакции — по желанию</label>
-            <input class="form-control mb-3" t-model="state.txHash"
+            <input class="form-control mb-3" t-custom-model="this.state.txHash"
                    placeholder="Из кошелька после отправки: нужен получателю для 3-НДФЛ"/>
           </t>
-          <div t-if="(state.info.taxes[state.channel] or []).length" class="o_coop_thanks_tax mb-3">
+          <div t-if="(this.state.info.taxes[this.state.channel] or []).length" class="o_coop_thanks_tax mb-3">
             <i class="fa fa-university"/>
             <div>
               <b>Налоги</b>
-              <div t-foreach="state.info.taxes[state.channel]" t-as="line" t-key="line_index" t-out="line"/>
+              <div t-foreach="this.state.info.taxes[this.state.channel]" t-as="line" t-key="line_index" t-out="line"/>
             </div>
           </div>
           <label class="o_coop_thanks_understood">
-            <input type="checkbox" t-model="state.understood"/>
+            <input type="checkbox" t-custom-model="this.state.understood"/>
             <span>Понимаю: это подарок. Автор ничего не должен мне взамен, я не
             получаю за это доступ, услугу или право. Подарок идёт напрямую
             автору — платформа его не получает и не хранит.</span>
@@ -272,9 +272,9 @@
         </t>
       </t>
       <t t-set-slot="footer">
-        <button t-if="state.info and !state.info.own and state.info.can_thank"
-                class="btn btn-primary" t-att-disabled="!canSend" t-on-click="declare">Подарок отправлен</button>
-        <button class="btn btn-secondary" t-on-click="props.close">Закрыть</button>
+        <button t-if="this.state.info and !this.state.info.own and this.state.info.can_thank"
+                class="btn btn-primary" t-att-disabled="!this.canSend" t-on-click="this.declare">Подарок отправлен</button>
+        <button class="btn btn-secondary" t-on-click="this.props.close">Закрыть</button>
       </t>
     </Dialog>
   </t>

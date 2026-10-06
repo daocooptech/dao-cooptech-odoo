@@ -18,21 +18,21 @@
     <div class="o_coop_favorites o_action">
       <div class="o_coop_favorites_head">
         <h1>Избранное</h1>
-        <span t-if="state.loaded" class="o_coop_favorites_total" t-out="total"/>
+        <span t-if="this.state.loaded" class="o_coop_favorites_total" t-out="this.total"/>
       </div>
-      <div t-if="!state.loaded" class="text-muted">Загрузка…</div>
+      <div t-if="!this.state.loaded" class="text-muted">Загрузка…</div>
       <t t-else="">
         <div class="o_coop_tabs o_coop_favorites_tabs">
-          <a t-foreach="state.tabs" t-as="t" t-key="t.key" href="#" class="o_coop_tab"
-             t-att-class="{ 'active': t.key === state.current }"
+          <a t-foreach="this.state.tabs" t-as="t" t-key="t.key" href="#" class="o_coop_tab"
+             t-att-class="{ 'active': t.key === this.state.current }"
              t-on-click.prevent="() => this.state.current = t.key">
             <t t-out="t.label"/> <span class="o_coop_favorites_count" t-out="t.items.length"/>
           </a>
         </div>
 
-        <t t-if="tab and !tab.items.length">
+        <t t-if="this.tab and !this.tab.items.length">
           <div class="o_coop_favorites_empty">
-            <t t-if="tab.key === 'posts'">
+            <t t-if="this.tab.key === 'posts'">
               Сохранённых записей нет. Нажмите ☆ под записью на стене — она появится здесь.
             </t>
             <t t-else="">
@@ -42,8 +42,8 @@
         </t>
 
         <!-- Записи со стен -->
-        <div t-elif="tab and tab.key === 'posts'" class="o_coop_favorites_posts">
-          <div t-foreach="tab.items" t-as="p" t-key="p.id" class="o_coop_favorites_post"
+        <div t-elif="this.tab and this.tab.key === 'posts'" class="o_coop_favorites_posts">
+          <div t-foreach="this.tab.items" t-as="p" t-key="p.id" class="o_coop_favorites_post"
                t-on-click="() => this.openPost(p)">
             <img class="o_coop_favorites_avatar" t-att-src="'/web/image/res.partner/' + p.author_id + '/avatar_128'" alt=""/>
             <div class="o_coop_favorites_post_main">
@@ -52,7 +52,7 @@
                 <span t-if="p.page_name and p.page_name !== p.author_name" class="text-muted">
                   на странице <t t-out="p.page_name"/>
                 </span>
-                <span class="text-muted" t-out="formatDate(p)"/>
+                <span class="text-muted" t-out="this.formatDate(p)"/>
               </div>
               <div class="o_coop_favorites_post_text" t-out="p.text"/>
               <div t-if="p.files" class="o_coop_favorites_post_files">
@@ -68,8 +68,8 @@
         </div>
 
         <!-- Карточки каталогов -->
-        <div t-elif="tab" class="o_coop_favorites_grid">
-          <div t-foreach="tab.items" t-as="c" t-key="c.model + c.id" class="o_coop_favorites_card"
+        <div t-elif="this.tab" class="o_coop_favorites_grid">
+          <div t-foreach="this.tab.items" t-as="c" t-key="c.model + c.id" class="o_coop_favorites_card"
                t-on-click="() => this.open(c)">
             <div class="o_coop_favorites_media">
               <img t-if="c.image" t-att-src="c.image" alt="" loading="lazy"/>

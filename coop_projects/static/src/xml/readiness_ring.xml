@@ -2,16 +2,16 @@
 <templates xml:space="preserve">
 
   <t t-name="coop_projects.ReadinessRing">
-    <div class="o_coop_ring" t-att-class="state">
+    <div class="o_coop_ring" t-att-class="this.state">
       <svg width="60" height="60" viewBox="0 0 60 60" aria-hidden="true">
         <circle cx="30" cy="30" r="26" class="o_coop_ring_track"/>
         <circle cx="30" cy="30" r="26" class="o_coop_ring_fill"
-                t-att-stroke-dasharray="dashArray"
-                t-att-stroke-dashoffset="dashOffset"
+                t-att-stroke-dasharray="this.dashArray"
+                t-att-stroke-dashoffset="this.dashOffset"
                 transform="rotate(-90 30 30)"/>
       </svg>
       <div class="o_coop_ring_text">
-        <div class="o_coop_ring_value"><t t-esc="percent"/>%</div>
+        <div class="o_coop_ring_value"><t t-out="this.percent"/>%</div>
         <div class="o_coop_ring_label">Готовность</div>
       </div>
     </div>

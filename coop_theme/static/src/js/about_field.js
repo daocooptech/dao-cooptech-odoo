@@ -1,8 +1,9 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
+import { useLayoutEffect, useRef } from "@web/owl2/utils";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
-import { Component, useEffect, useRef, useState } from "@odoo/owl";
+import { Component, proxy } from "@odoo/owl";
 
 /**
  * Блок «О себе» с правкой по карандашу.
@@ -49,9 +50,9 @@ export class CoopAboutField extends Component {
         // отмена обязана помнить прежнее значение и возвращать его.
         // Черновик снимает и то и другое: отмена — это просто выход из
         // правки, запись при этом не тронута.
-        this.ui = useState({ editing: false, draft: "", busy: false });
+        this.ui = proxy({ editing: false, draft: "", busy: false });
         this.input = useRef("input");
-        useEffect(
+        useLayoutEffect(
             (el) => {
                 if (el) {
                     el.focus();

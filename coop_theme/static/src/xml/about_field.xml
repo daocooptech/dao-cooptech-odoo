@@ -12,22 +12,22 @@
   -->
   <t t-name="coop_theme.AboutField">
     <div class="o_coop_band_head">
-      <span t-esc="props.title or 'О себе'"/>
+      <span t-esc="this.props.title or 'О себе'"/>
       <button type="button" class="o_coop_about_btn o_coop_about_start"
-              t-if="canEdit and !ui.editing"
+              t-if="this.canEdit and !this.ui.editing"
               title="Изменить" aria-label="Изменить"
               t-on-click="() => this.start()">
         <i class="fa fa-pencil" role="img" aria-hidden="true"/>
       </button>
-      <t t-if="ui.editing">
+      <t t-if="this.ui.editing">
         <button type="button" class="o_coop_about_btn o_coop_about_ok"
-                t-att-disabled="ui.busy"
+                t-att-disabled="this.ui.busy"
                 title="Опубликовать" aria-label="Опубликовать"
                 t-on-click="() => this.accept()">
           <i class="fa fa-check" role="img" aria-hidden="true"/>
         </button>
         <button type="button" class="o_coop_about_btn o_coop_about_cancel"
-                t-att-disabled="ui.busy"
+                t-att-disabled="this.ui.busy"
                 title="Отменить" aria-label="Отменить"
                 t-on-click="() => this.cancel()">
           <i class="fa fa-times" role="img" aria-hidden="true"/>
@@ -36,22 +36,22 @@
     </div>
 
     <div class="o_coop_band_body">
-      <input t-if="ui.editing" type="text" class="o_input o_coop_about_input"
-             t-ref="input"
-             t-att-value="ui.draft"
-             t-att-maxlength="maxlength"
-             t-att-placeholder="props.placeholder"
-             t-on-input="onInput"
-             t-on-keydown="onKeydown"/>
+      <input t-if="this.ui.editing" type="text" class="o_input o_coop_about_input"
+             t-custom-ref="input"
+             t-att-value="this.ui.draft"
+             t-att-maxlength="this.maxlength"
+             t-att-placeholder="this.props.placeholder"
+             t-on-input="this.onInput"
+             t-on-keydown="this.onKeydown"/>
       <t t-else="">
-        <span class="o_coop_about_text" t-if="value" t-esc="value"/>
+        <span class="o_coop_about_text" t-if="this.value" t-esc="this.value"/>
         <!--
           Пустой блок говорит, что писать, только своему: чужая страница
           без заметки — это просто страница без заметки, а не приглашение
           её заполнить.
         -->
-        <span class="o_coop_about_empty" t-elif="canEdit"
-              t-esc="props.placeholder"/>
+        <span class="o_coop_about_empty" t-elif="this.canEdit"
+              t-esc="this.props.placeholder"/>
       </t>
     </div>
   </t>

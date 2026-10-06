@@ -2,7 +2,9 @@
 
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { Component, useRef, useState } from "@odoo/owl";
+import { Component, proxy, usePlugin } from "@odoo/owl";
+import { useRef } from "@web/owl2/utils";
+import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * Поиск по платформе в шапке.
@@ -22,9 +24,9 @@ export class CoopSearch extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.action = useService("action");
+        this.action = usePlugin(ActionManagerPlugin);
         this.inputRef = useRef("input");
-        this.state = useState({
+        this.state = proxy({
             term: "",
             open: false,
             // Раскрыто ли поле на узком экране. В шапке телефона 390

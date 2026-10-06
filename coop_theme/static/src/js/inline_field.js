@@ -1,9 +1,11 @@
 /** @odoo-module **/
 
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { registry } from "@web/core/registry";
+import { useLayoutEffect, useRef } from "@web/owl2/utils";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { useService } from "@web/core/utils/hooks";
-import { Component, useEffect, useRef, useState } from "@odoo/owl";
+import { Component, proxy, usePlugin } from "@odoo/owl";
 
 /**
  * Поле, которое правится по месту: карандаш, галочка, крестик.
@@ -43,14 +45,14 @@ export class CoopInlineField extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         // `options` — подсказки для связи: пусто, пока не начали набирать.
         // `chosen` — что выбрали из подсказок, до галочки ещё не записано.
-        this.ui = useState({
+        this.ui = proxy({
             editing: false, draft: "", busy: false, options: [], chosen: null,
         });
         this.input = useRef("input");
-        useEffect(
+        useLayoutEffect(
             (el) => {
                 if (el) {
                     el.focus();

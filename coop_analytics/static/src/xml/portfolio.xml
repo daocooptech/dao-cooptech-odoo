@@ -6,13 +6,13 @@
     <div class="o_action o_coop_pf">
       <div class="o_coop_board_tabs"><CoopTabs/></div>
 
-      <div t-if="!state.data" class="o_coop_pf_loading">Собираем портфель…</div>
+      <div t-if="!this.state.data" class="o_coop_pf_loading">Собираем портфель…</div>
       <t t-else="">
-        <t t-set="d" t-value="state.data"/>
+        <t t-set="d" t-value="this.state.data"/>
         <header class="o_coop_pf_head">
           <h2>Портфель</h2>
           <p>
-            Всё, во что вы вложились, — на <t t-esc="date(d.today)"/>. Общей суммы нет намеренно:
+            Всё, во что вы вложились, — на <t t-out="this.date(d.today)"/>. Общей суммы нет намеренно:
             пай, оценка труда и монеты — разные вещи, и в одно число они не складываются.
           </p>
         </header>
@@ -21,54 +21,54 @@
         <div class="o_coop_pf_blocks">
           <section class="o_coop_pf_block">
             <h3>Мой пай</h3>
-            <b class="o_coop_pf_big" t-esc="rub(d.blocks.shares.balance)"/>
-            <span class="o_coop_pf_sub">в <t t-esc="d.blocks.shares.cooperatives"/> кооперативах</span>
+            <b class="o_coop_pf_big" t-out="this.rub(d.blocks.shares.balance)"/>
+            <span class="o_coop_pf_sub">в <t t-out="d.blocks.shares.cooperatives"/> кооперативах</span>
             <dl>
-              <dt>Кооперативные выплаты за всё время</dt><dd t-esc="rub(d.blocks.shares.accrued)"/>
-              <dt>Выплачено на руки</dt><dd t-esc="rub(d.blocks.shares.paid_out)"/>
+              <dt>Кооперативные выплаты за всё время</dt><dd t-out="this.rub(d.blocks.shares.accrued)"/>
+              <dt>Выплачено на руки</dt><dd t-out="this.rub(d.blocks.shares.paid_out)"/>
               <dt>Закрыто потребностей через кооперативы</dt>
-              <dd><t t-esc="d.blocks.shares.needs_count"/> сд. на <t t-esc="rub(d.blocks.shares.needs_sum)"/></dd>
+              <dd><t t-out="d.blocks.shares.needs_count"/> сд. на <t t-out="this.rub(d.blocks.shares.needs_sum)"/></dd>
             </dl>
           </section>
           <section class="o_coop_pf_block">
             <h3>Мой вклад в общие дела</h3>
-            <b class="o_coop_pf_big" t-esc="rub(d.blocks.projects.value)"/>
-            <span class="o_coop_pf_sub">по оценке, в <t t-esc="d.blocks.projects.projects"/> проектах</span>
+            <b class="o_coop_pf_big" t-out="this.rub(d.blocks.projects.value)"/>
+            <span class="o_coop_pf_sub">по оценке, в <t t-out="d.blocks.projects.projects"/> проектах</span>
             <dl>
-              <dt>Из них трудом</dt><dd t-esc="rub(d.blocks.projects.labour)"/>
-              <dt>Вернулось</dt><dd t-esc="rub(d.blocks.projects.returned)"/>
-              <dt>Признанные потери</dt><dd t-esc="rub(d.blocks.projects.losses)"/>
+              <dt>Из них трудом</dt><dd t-out="this.rub(d.blocks.projects.labour)"/>
+              <dt>Вернулось</dt><dd t-out="this.rub(d.blocks.projects.returned)"/>
+              <dt>Признанные потери</dt><dd t-out="this.rub(d.blocks.projects.losses)"/>
               <t t-if="d.blocks.projects.offered">
-                <dt>Предложено, ждёт ответа</dt><dd><t t-esc="d.blocks.projects.offered"/></dd>
+                <dt>Предложено, ждёт ответа</dt><dd><t t-out="d.blocks.projects.offered"/></dd>
               </t>
             </dl>
           </section>
           <section class="o_coop_pf_block">
             <h3>Активы с рыночной оценкой</h3>
-            <b class="o_coop_pf_big" t-esc="rub(d.blocks.valued.total)"/>
+            <b class="o_coop_pf_big" t-out="this.rub(d.blocks.valued.total)"/>
             <span class="o_coop_pf_sub">по оценке на дату, справочно — не цена сделки</span>
             <div class="o_coop_pf_split" t-if="d.blocks.valued.parts.length">
-              <i t-foreach="d.blocks.valued.parts" t-as="p" t-key="p.label" t-att-style="partStyle(p, p_index)"
+              <i t-foreach="d.blocks.valued.parts" t-as="p" t-key="p.label" t-att-style="this.partStyle(p, p_index)"
                  t-att-title="p.label"/>
             </div>
             <ul class="o_coop_pf_legend">
               <li t-foreach="d.blocks.valued.parts" t-as="p" t-key="p.label">
-                <i t-att-style="dotStyle(p_index)"/><t t-esc="p.label"/>
-                <span><t t-esc="rub(p.value)"/> · <t t-esc="num(p.pct)"/>%</span>
+                <i t-att-style="this.dotStyle(p_index)"/><t t-out="p.label"/>
+                <span><t t-out="this.rub(p.value)"/> · <t t-out="this.num(p.pct)"/>%</span>
               </li>
             </ul>
           </section>
           <section class="o_coop_pf_block">
             <h3>Взаиморасчёты</h3>
             <dl class="o_coop_pf_dl_big">
-              <dt>Мне должны</dt><dd class="o_coop_pf_in" t-esc="rub(d.blocks.settlements.owed_me)"/>
-              <dt>Я должен</dt><dd t-esc="rub(d.blocks.settlements.i_owe)"/>
+              <dt>Мне должны</dt><dd class="o_coop_pf_in" t-out="this.rub(d.blocks.settlements.owed_me)"/>
+              <dt>Я должен</dt><dd t-out="this.rub(d.blocks.settlements.i_owe)"/>
             </dl>
             <dl>
               <dt>Просрочено мне</dt>
-              <dd t-att-class="{ o_coop_pf_late: d.blocks.settlements.overdue_me }" t-esc="rub(d.blocks.settlements.overdue_me)"/>
+              <dd t-att-class="{ o_coop_pf_late: d.blocks.settlements.overdue_me }" t-out="this.rub(d.blocks.settlements.overdue_me)"/>
               <dt>Просрочено мной</dt>
-              <dd t-att-class="{ o_coop_pf_late: d.blocks.settlements.overdue_i }" t-esc="rub(d.blocks.settlements.overdue_i)"/>
+              <dd t-att-class="{ o_coop_pf_late: d.blocks.settlements.overdue_i }" t-out="this.rub(d.blocks.settlements.overdue_i)"/>
             </dl>
           </section>
         </div>
@@ -78,35 +78,35 @@
           <div class="o_coop_pf_panelhead">
             <h3>Ожидается к получению — 12 месяцев</h3>
             <ul class="o_coop_pf_keys">
-              <li><i class="o_coop_pf_k_contract"/>договорено · <t t-esc="rub(monthsTotal.contract)"/></li>
-              <li><i class="o_coop_pf_k_estimate"/>расчётно · <t t-esc="rub(monthsTotal.estimate)"/></li>
-              <li><i class="o_coop_pf_k_out"/>мои платежи · <t t-esc="rub(monthsTotal.out)"/></li>
+              <li><i class="o_coop_pf_k_contract"/>договорено · <t t-out="this.rub(this.monthsTotal.contract)"/></li>
+              <li><i class="o_coop_pf_k_estimate"/>расчётно · <t t-out="this.rub(this.monthsTotal.estimate)"/></li>
+              <li><i class="o_coop_pf_k_out"/>мои платежи · <t t-out="this.rub(this.monthsTotal.out)"/></li>
               <li><i class="o_coop_pf_k_late"/>просрочено</li>
             </ul>
           </div>
           <div class="o_coop_pf_chart">
-            <div class="o_coop_pf_col o_coop_pf_col_late" t-on-click="() => state.showOverdue = !state.showOverdue"
+            <div class="o_coop_pf_col o_coop_pf_col_late" t-on-click="() => this.state.showOverdue = !this.state.showOverdue"
                  title="Показать, что просрочено">
               <div class="o_coop_pf_up">
-                <i class="o_coop_pf_b_late" t-att-style="bar(d.schedule.overdue.in)"/>
+                <i class="o_coop_pf_b_late" t-att-style="this.bar(d.schedule.overdue.in)"/>
               </div>
               <div class="o_coop_pf_down">
-                <i class="o_coop_pf_b_out" t-att-style="bar(d.schedule.overdue.out)"/>
+                <i class="o_coop_pf_b_out" t-att-style="this.bar(d.schedule.overdue.out)"/>
               </div>
               <span>Просрочено</span>
-              <b t-esc="rub(d.schedule.overdue.in)"/>
+              <b t-out="this.rub(d.schedule.overdue.in)"/>
             </div>
             <div class="o_coop_pf_col" t-foreach="d.schedule.months" t-as="m" t-key="m.key"
-                 t-att-title="'договорено ' + rub(m.contract) + ', расчётно ' + rub(m.estimate) + ', мои платежи ' + rub(m.out)">
+                 t-att-title="'договорено ' + this.rub(m.contract) + ', расчётно ' + this.rub(m.estimate) + ', мои платежи ' + this.rub(m.out)">
               <div class="o_coop_pf_up">
-                <i class="o_coop_pf_b_estimate" t-att-style="bar(m.estimate)"/>
-                <i class="o_coop_pf_b_contract" t-att-style="bar(m.contract)"/>
+                <i class="o_coop_pf_b_estimate" t-att-style="this.bar(m.estimate)"/>
+                <i class="o_coop_pf_b_contract" t-att-style="this.bar(m.contract)"/>
               </div>
               <div class="o_coop_pf_down">
-                <i class="o_coop_pf_b_out" t-att-style="bar(m.out)"/>
+                <i class="o_coop_pf_b_out" t-att-style="this.bar(m.out)"/>
               </div>
-              <span t-esc="m.label"/>
-              <b t-if="m.contract + m.estimate" t-esc="rub(m.contract + m.estimate)"/>
+              <span t-out="m.label"/>
+              <b t-if="m.contract + m.estimate" t-out="this.rub(m.contract + m.estimate)"/>
               <b t-else="">—</b>
             </div>
           </div>
@@ -116,38 +116,38 @@
             зависят от выручки проекта и никем не обещаны. Монеты — по курсу на сегодня.
           </p>
 
-          <div class="o_coop_pf_overdue" t-if="state.showOverdue and d.schedule.overdue_items.length">
+          <div class="o_coop_pf_overdue" t-if="this.state.showOverdue and d.schedule.overdue_items.length">
             <h4>Просрочено</h4>
             <table class="o_coop_pf_table">
               <tbody>
                 <tr t-foreach="d.schedule.overdue_items" t-as="o" t-key="o_index">
-                  <td class="o_coop_pf_nowrap" t-esc="date(o.date)"/>
-                  <td t-esc="o.what"/>
-                  <td class="o_coop_pf_muted" t-esc="o.note"/>
+                  <td class="o_coop_pf_nowrap" t-out="this.date(o.date)"/>
+                  <td t-out="o.what"/>
+                  <td class="o_coop_pf_muted" t-out="o.note"/>
                   <td class="o_coop_pf_num" t-att-class="{ o_coop_pf_late: o.sign > 0, o_coop_pf_out: o.sign &lt; 0 }">
-                    <t t-if="o.amount" t-esc="rub(o.amount)"/><t t-else="">товаром</t>
+                    <t t-if="o.amount" t-out="this.rub(o.amount)"/><t t-else="">товаром</t>
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
           <button t-elif="d.schedule.overdue_items.length" class="o_coop_pf_link"
-                  t-on-click="() => state.showOverdue = true">
-            Что просрочено — <t t-esc="d.schedule.overdue_items.length"/>
+                  t-on-click="() => this.state.showOverdue = true">
+            Что просрочено — <t t-out="d.schedule.overdue_items.length"/>
           </button>
 
           <div class="o_coop_pf_natural" t-if="d.schedule.natural.length">
             <h4>Получить натурой</h4>
             <div class="o_coop_pf_natural_row" t-foreach="d.schedule.natural" t-as="n" t-key="n.key">
-              <b t-esc="n.label"/>
-              <span t-esc="n.items.join('; ')"/>
+              <b t-out="n.label"/>
+              <span t-out="n.items.join('; ')"/>
             </div>
           </div>
           <div class="o_coop_pf_natural" t-if="d.schedule.requested_shares.length">
             <h4>Без срока — заявления на выплату пая, ждут решения кооператива</h4>
             <div class="o_coop_pf_natural_row" t-foreach="d.schedule.requested_shares" t-as="r" t-key="r_index">
-              <b t-esc="rub(r.amount)"/>
-              <span><t t-esc="r.account"/> · <t t-esc="r.kind"/> · ждёт <t t-esc="r.days"/> дн.
+              <b t-out="this.rub(r.amount)"/>
+              <span><t t-out="r.account"/> · <t t-out="r.kind"/> · ждёт <t t-out="r.days"/> дн.
                 <em t-if="r.late" class="o_coop_pf_late"> — срок рассмотрения по уставу прошёл</em></span>
             </div>
           </div>
@@ -155,14 +155,14 @@
 
         <!-- ── Вложения по видам ───────────────────────────────── -->
         <nav class="o_coop_pf_seg">
-          <button t-foreach="sections" t-as="s" t-key="s.key"
-                  t-att-class="{ active: state.section === s.key }"
-                  t-on-click="() => state.section = s.key">
-            <t t-esc="s.label"/> <span t-esc="count(s.key)"/>
+          <button t-foreach="this.sections" t-as="s" t-key="s.key"
+                  t-att-class="{ active: this.state.section === s.key }"
+                  t-on-click="() => this.state.section = s.key">
+            <t t-out="s.label"/> <span t-out="this.count(s.key)"/>
           </button>
         </nav>
 
-        <section class="o_coop_pf_panel" t-if="state.section === 'shares'">
+        <section class="o_coop_pf_panel" t-if="this.state.section === 'shares'">
           <p class="o_coop_pf_warn">
             Пай — ваш вклад в имущество кооператива, а не вклад под процент. Выплаты по итогам года решает
             общее собрание, их может не быть. Пай возвращается при выходе из кооператива. Если по итогам года
@@ -172,39 +172,39 @@
           <div class="o_coop_pf_cards">
             <article class="o_coop_pf_card" t-foreach="d.shares" t-as="s" t-key="s.id"
                      t-att-class="{ o_coop_pf_gone: s.state === 'closed' }">
-              <header><b t-esc="s.cooperative"/><span class="o_coop_pf_badge" t-esc="s.state_label"/></header>
+              <header><b t-out="s.cooperative"/><span class="o_coop_pf_badge" t-out="s.state_label"/></header>
               <dl>
-                <dt>Паевые взносы</dt><dd t-esc="rub(s.contributed)"/>
-                <dt>Пай</dt><dd><b t-esc="rub(s.balance)"/></dd>
+                <dt>Паевые взносы</dt><dd t-out="this.rub(s.contributed)"/>
+                <dt>Пай</dt><dd><b t-out="this.rub(s.balance)"/></dd>
                 <!-- Вступительный — не пай и не возвращается (решение 427). -->
                 <t t-if="s.entry_fee">
-                  <dt>Вступительный взнос, не входит в пай</dt><dd t-esc="rub(s.entry_fee)"/>
+                  <dt>Вступительный взнос, не входит в пай</dt><dd t-out="this.rub(s.entry_fee)"/>
                 </t>
-                <dt>Кооперативные выплаты: начислено</dt><dd t-esc="rub(s.accrued)"/>
-                <dt>Выплачено на руки</dt><dd t-esc="rub(s.paid_out)"/>
-                <dt>Пайщик с</dt><dd t-esc="date(s.joined_on)"/>
+                <dt>Кооперативные выплаты: начислено</dt><dd t-out="this.rub(s.accrued)"/>
+                <dt>Выплачено на руки</dt><dd t-out="this.rub(s.paid_out)"/>
+                <dt>Пайщик с</dt><dd t-out="this.date(s.joined_on)"/>
                 <dt>Что дал пай</dt>
-                <dd><t t-if="s.needs_count"><t t-esc="s.needs_count"/> сд. на <t t-esc="rub(s.needs_sum)"/></t>
+                <dd><t t-if="s.needs_count"><t t-out="s.needs_count"/> сд. на <t t-out="this.rub(s.needs_sum)"/></t>
                     <t t-else="">сделок с кооперативом пока нет</t></dd>
               </dl>
-              <p class="o_coop_pf_muted" t-if="s.charter_note" t-esc="s.charter_note"/>
+              <p class="o_coop_pf_muted" t-if="s.charter_note" t-out="s.charter_note"/>
               <p t-foreach="s.waiting" t-as="w" t-key="w_index" class="o_coop_pf_wait"
                  t-att-class="{ o_coop_pf_late: w.late }">
-                Заявлено: <t t-esc="w.kind"/> <t t-esc="rub(w.amount)"/> — ждёт решения <t t-esc="w.days"/> дн.
-                (срок по уставу <t t-esc="s.review_days"/> дн.)
+                Заявлено: <t t-out="w.kind"/> <t t-out="this.rub(w.amount)"/> — ждёт решения <t t-out="w.days"/> дн.
+                (срок по уставу <t t-out="s.review_days"/> дн.)
               </p>
             </article>
           </div>
         </section>
 
-        <section class="o_coop_pf_panel" t-if="state.section === 'projects'">
+        <section class="o_coop_pf_panel" t-if="this.state.section === 'projects'">
           <p class="o_coop_pf_warn">
             Сторона договора — инициатор проекта, а не платформа. Оценки вкладов даны по данным проекта.
             Доля даёт право на результат по правилам проекта, а не на процент.
           </p>
           <div class="o_coop_pf_mix" t-if="d.project_mix.length">
             <span t-foreach="d.project_mix" t-as="k" t-key="k.label">
-              <i t-att-style="dotStyle(k_index)"/><t t-esc="k.label"/> — <t t-esc="rub(k.value)"/> (<t t-esc="num(k.pct)"/>%)
+              <i t-att-style="this.dotStyle(k_index)"/><t t-out="k.label"/> — <t t-out="this.rub(k.value)"/> (<t t-out="this.num(k.pct)"/>%)
             </span>
           </div>
           <div class="o_coop_pf_scroll">
@@ -213,23 +213,23 @@
               <tbody>
                 <tr t-foreach="d.projects" t-as="c" t-key="c.id" t-att-class="{ o_coop_pf_gone: c.state_key === 'returned' }">
                   <td>
-                    <a href="#" t-on-click.prevent="() => this.openRecord('coop.project', c.project_id)" t-esc="c.project"/>
-                    <div class="o_coop_pf_muted"><t t-esc="c.project_kind"/> · <t t-esc="c.project_state"/> · готовность <t t-esc="c.readiness"/>%</div>
-                    <div class="o_coop_pf_muted" t-esc="c.result"/>
+                    <a href="#" t-on-click.prevent="() => this.openRecord('coop.project', c.project_id)" t-out="c.project"/>
+                    <div class="o_coop_pf_muted"><t t-out="c.project_kind"/> · <t t-out="c.project_state"/> · готовность <t t-out="c.readiness"/>%</div>
+                    <div class="o_coop_pf_muted" t-out="c.result"/>
                   </td>
-                  <td><t t-esc="c.kind"/><div class="o_coop_pf_muted" t-esc="c.name"/></td>
-                  <td class="o_coop_pf_num" t-esc="rub(c.value)"/>
+                  <td><t t-out="c.kind"/><div class="o_coop_pf_muted" t-out="c.name"/></td>
+                  <td class="o_coop_pf_num" t-out="this.rub(c.value)"/>
                   <td class="o_coop_pf_nowrap">
-                    <t t-if="c.share_tokens"><t t-esc="num(c.share_tokens)"/> долей</t>
-                    <div t-if="c.share_percent"><t t-esc="num(c.share_percent)"/>% проекта</div>
+                    <t t-if="c.share_tokens"><t t-out="this.num(c.share_tokens)"/> долей</t>
+                    <div t-if="c.share_percent"><t t-out="this.num(c.share_percent)"/>% проекта</div>
                   </td>
-                  <td><t t-esc="c.state"/>
-                    <div t-if="c.withdraw_until and c.state_key === 'accepted'" class="o_coop_pf_muted">отозвать можно до <t t-esc="date(c.withdraw_until)"/></div></td>
+                  <td><t t-out="c.state"/>
+                    <div t-if="c.withdraw_until and c.state_key === 'accepted'" class="o_coop_pf_muted">отозвать можно до <t t-out="this.date(c.withdraw_until)"/></div></td>
                   <td>
-                    <t t-esc="c.return_mode"/>
+                    <t t-out="c.return_mode"/>
                     <div t-if="c.refund_due" t-att-class="c.late ? 'o_coop_pf_late' : 'o_coop_pf_in'">
-                      к возврату <t t-esc="rub(c.refund_due)"/><t t-if="c.late"> — просрочено</t></div>
-                    <div t-if="c.unrecovered" class="o_coop_pf_muted">не возмещено <t t-esc="rub(c.unrecovered)"/></div>
+                      к возврату <t t-out="this.rub(c.refund_due)"/><t t-if="c.late"> — просрочено</t></div>
+                    <div t-if="c.unrecovered" class="o_coop_pf_muted">не возмещено <t t-out="this.rub(c.unrecovered)"/></div>
                   </td>
                 </tr>
               </tbody>
@@ -237,7 +237,7 @@
           </div>
         </section>
 
-        <section class="o_coop_pf_panel" t-if="state.section === 'farm'">
+        <section class="o_coop_pf_panel" t-if="this.state.section === 'farm'">
           <p class="o_coop_pf_warn">
             Пул проекта — не вклад. Проект отдаёт участникам долю выручки, пока каждый не получит потолок;
             выручки может не быть, и тогда выплат не будет. Можно потерять внесённое полностью.
@@ -248,24 +248,24 @@
               <thead><tr><th>Пул</th><th class="o_coop_pf_num">Внесено</th><th>Условия</th><th class="o_coop_pf_num">Получено</th><th class="o_coop_pf_num">Ждёт подтверждения</th><th class="o_coop_pf_num">Потолок</th><th>Риск</th></tr></thead>
               <tbody>
                 <tr t-foreach="d.farm" t-as="f" t-key="f.id" t-att-class="{ o_coop_pf_gone: f.state !== 'active' }">
-                  <td><b t-esc="f.project"/><div class="o_coop_pf_muted"><t t-esc="f.pool_state"/> · <t t-esc="f.state_label"/></div>
-                    <div t-if="f.flag" class="o_coop_pf_late" t-esc="f.flag"/></td>
-                  <td class="o_coop_pf_num"><t t-esc="coins(f.amount)"/> <t t-esc="f.coin"/>
-                    <div class="o_coop_pf_muted" t-if="f.kind !== 'rub'">≈ <t t-esc="rub(f.amount_rub)"/> справочно</div></td>
-                  <td class="o_coop_pf_nowrap"><t t-esc="num(f.revenue_share)"/>% выручки
-                    <div>до <t t-esc="num(f.cap_multiple)"/>× внесённого</div></td>
-                  <td class="o_coop_pf_num"><t t-esc="coins(f.received)"/> <span class="o_coop_pf_muted" t-esc="f.coin"/></td>
-                  <td class="o_coop_pf_num"><t t-esc="coins(f.awaiting)"/> <span class="o_coop_pf_muted" t-esc="f.coin"/></td>
-                  <td class="o_coop_pf_num"><t t-esc="coins(f.cap)"/> <span class="o_coop_pf_muted" t-esc="f.coin"/></td>
-                  <td t-esc="f.risk"/>
+                  <td><b t-out="f.project"/><div class="o_coop_pf_muted"><t t-out="f.pool_state"/> · <t t-out="f.state_label"/></div>
+                    <div t-if="f.flag" class="o_coop_pf_late" t-out="f.flag"/></td>
+                  <td class="o_coop_pf_num"><t t-out="this.coins(f.amount)"/> <t t-out="f.coin"/>
+                    <div class="o_coop_pf_muted" t-if="f.kind !== 'rub'">≈ <t t-out="this.rub(f.amount_rub)"/> справочно</div></td>
+                  <td class="o_coop_pf_nowrap"><t t-out="this.num(f.revenue_share)"/>% выручки
+                    <div>до <t t-out="this.num(f.cap_multiple)"/>× внесённого</div></td>
+                  <td class="o_coop_pf_num"><t t-out="this.coins(f.received)"/> <span class="o_coop_pf_muted" t-out="f.coin"/></td>
+                  <td class="o_coop_pf_num"><t t-out="this.coins(f.awaiting)"/> <span class="o_coop_pf_muted" t-out="f.coin"/></td>
+                  <td class="o_coop_pf_num"><t t-out="this.coins(f.cap)"/> <span class="o_coop_pf_muted" t-out="f.coin"/></td>
+                  <td t-out="f.risk"/>
                 </tr>
               </tbody>
             </table>
           </div>
-          <p class="o_coop_pf_note" t-if="d.farm.length">Курс монеты — последняя сделка пары на DEX платформы, <t t-esc="d.farm[0].price_at"/>.</p>
+          <p class="o_coop_pf_note" t-if="d.farm.length">Курс монеты — последняя сделка пары на DEX платформы, <t t-out="d.farm[0].price_at"/>.</p>
         </section>
 
-        <section class="o_coop_pf_panel" t-if="state.section === 'tokens'">
+        <section class="o_coop_pf_panel" t-if="this.state.section === 'tokens'">
           <p class="o_coop_pf_warn">
             Это обещание поставщика поставить товар. Если он не поставит, вы требуете с него, а не с
             платформы. Рост цены на токеномике — не прибыль: это предоплаченный товар.
@@ -275,27 +275,27 @@
               <thead><tr><th>Товар</th><th class="o_coop_pf_num">Осталось получить</th><th>Поставка</th><th>Поставщик</th><th class="o_coop_pf_num">Оценка</th><th>Состояние</th></tr></thead>
               <tbody>
                 <tr t-foreach="d.tokens" t-as="t" t-key="t.id">
-                  <td><b t-esc="t.title"/></td>
-                  <td class="o_coop_pf_num"><t t-esc="num(t.left)"/> <t t-esc="t.unit"/>
-                    <div class="o_coop_pf_muted">из <t t-esc="num(t.quantity)"/>, принято <t t-esc="num(t.accepted)"/></div></td>
-                  <td t-att-class="{ o_coop_pf_late: t.late }"><t t-esc="date(t.delivery_date)"/>
-                    <div class="o_coop_pf_muted" t-esc="t.place"/>
+                  <td><b t-out="t.title"/></td>
+                  <td class="o_coop_pf_num"><t t-out="this.num(t.left)"/> <t t-out="t.unit"/>
+                    <div class="o_coop_pf_muted">из <t t-out="this.num(t.quantity)"/>, принято <t t-out="this.num(t.accepted)"/></div></td>
+                  <td t-att-class="{ o_coop_pf_late: t.late }"><t t-out="this.date(t.delivery_date)"/>
+                    <div class="o_coop_pf_muted" t-out="t.place"/>
                     <div t-if="t.late">поставка просрочена</div></td>
-                  <td><t t-esc="t.issuer"/><div class="o_coop_pf_muted">доверие <t t-esc="t.issuer_trust"/>%</div></td>
+                  <td><t t-out="t.issuer"/><div class="o_coop_pf_muted">доверие <t t-out="t.issuer_trust"/>%</div></td>
                   <td class="o_coop_pf_num">
-                    <t t-if="t.value !== null"><t t-esc="rub(t.value)"/>
-                      <div class="o_coop_pf_muted">медиана <t t-esc="t.trades"/> сделок за 30 дн.</div></t>
+                    <t t-if="t.value !== null"><t t-out="this.rub(t.value)"/>
+                      <div class="o_coop_pf_muted">медиана <t t-out="t.trades"/> сделок за 30 дн.</div></t>
                     <t t-else=""><span class="o_coop_pf_muted">нет цены</span>
-                      <div class="o_coop_pf_muted">сделок за 30 дн.: <t t-esc="t.trades"/></div></t>
+                      <div class="o_coop_pf_muted">сделок за 30 дн.: <t t-out="t.trades"/></div></t>
                   </td>
-                  <td t-esc="t.state"/>
+                  <td t-out="t.state"/>
                 </tr>
               </tbody>
             </table>
           </div>
         </section>
 
-        <section class="o_coop_pf_panel" t-if="state.section === 'cfa'">
+        <section class="o_coop_pf_panel" t-if="this.state.section === 'cfa'">
           <p class="o_coop_pf_warn">
             Данные — от операторов информационных систем, подтверждает оператор, а не платформа. Лимит для
             неквалифицированного инвестора — 600 000 ₽ в год, его проверяет оператор. Не является
@@ -306,20 +306,20 @@
               <thead><tr><th>Выпуск</th><th>Что удостоверяет</th><th class="o_coop_pf_num">Количество</th><th class="o_coop_pf_num">Оценка</th><th>Погашение</th><th>Обеспечение</th></tr></thead>
               <tbody>
                 <tr t-foreach="d.cfa" t-as="c" t-key="c_index">
-                  <td><b t-esc="c.name"/><div class="o_coop_pf_muted"><t t-esc="c.operator"/> · <t t-esc="c.state"/><t t-if="c.count > 1"> · записей <t t-esc="c.count"/></t></div></td>
-                  <td><t t-if="c.rights" t-esc="c.rights"/><span t-else="" class="o_coop_pf_muted">по данным оператора</span></td>
-                  <td class="o_coop_pf_num" t-esc="num(c.quantity)"/>
-                  <td class="o_coop_pf_num" t-esc="rub(c.value)"/>
-                  <td class="o_coop_pf_nowrap" t-att-class="{ o_coop_pf_late: c.late }"><t t-esc="date(c.maturity)"/>
+                  <td><b t-out="c.name"/><div class="o_coop_pf_muted"><t t-out="c.operator"/> · <t t-out="c.state"/><t t-if="c.count > 1"> · записей <t t-out="c.count"/></t></div></td>
+                  <td><t t-if="c.rights" t-out="c.rights"/><span t-else="" class="o_coop_pf_muted">по данным оператора</span></td>
+                  <td class="o_coop_pf_num" t-out="this.num(c.quantity)"/>
+                  <td class="o_coop_pf_num" t-out="this.rub(c.value)"/>
+                  <td class="o_coop_pf_nowrap" t-att-class="{ o_coop_pf_late: c.late }"><t t-out="this.date(c.maturity)"/>
                     <div t-if="c.late">срок прошёл</div></td>
-                  <td><t t-if="c.collateral" t-esc="c.collateral"/><span t-else="" class="o_coop_pf_muted">—</span></td>
+                  <td><t t-if="c.collateral" t-out="c.collateral"/><span t-else="" class="o_coop_pf_muted">—</span></td>
                 </tr>
               </tbody>
             </table>
           </div>
         </section>
 
-        <section class="o_coop_pf_panel" t-if="state.section === 'crypto'">
+        <section class="o_coop_pf_panel" t-if="this.state.section === 'crypto'">
           <p class="o_coop_pf_warn">
             Цифровая валюта — имущество. Платить ею за товары и услуги в России нельзя. Курс может упасть до
             нуля. Оценка в рублях — справочно, не цена сделки.
@@ -329,18 +329,18 @@
               <thead><tr><th>Монета</th><th>Сеть</th><th class="o_coop_pf_num">Количество</th><th class="o_coop_pf_num">Оценка, справочно</th><th>Курс</th></tr></thead>
               <tbody>
                 <tr t-foreach="d.crypto" t-as="a" t-key="a.id">
-                  <td><b t-esc="a.symbol"/> <span class="o_coop_pf_muted" t-esc="a.name"/></td>
-                  <td t-esc="a.network"/>
-                  <td class="o_coop_pf_num" t-esc="coins(a.quantity)"/>
-                  <td class="o_coop_pf_num" t-esc="rub(a.valuation)"/>
-                  <td class="o_coop_pf_muted"><t t-esc="a.source"/><div t-esc="a.valued_at"/></td>
+                  <td><b t-out="a.symbol"/> <span class="o_coop_pf_muted" t-out="a.name"/></td>
+                  <td t-out="a.network"/>
+                  <td class="o_coop_pf_num" t-out="this.coins(a.quantity)"/>
+                  <td class="o_coop_pf_num" t-out="this.rub(a.valuation)"/>
+                  <td class="o_coop_pf_muted"><t t-out="a.source"/><div t-out="a.valued_at"/></td>
                 </tr>
               </tbody>
             </table>
           </div>
         </section>
 
-        <section class="o_coop_pf_panel" t-if="state.section === 'payments'">
+        <section class="o_coop_pf_panel" t-if="this.state.section === 'payments'">
           <p class="o_coop_pf_warn">
             График — по договору между сторонами сделки. Платформа не сторона сделки и платежей не гарантирует.
           </p>
@@ -349,13 +349,13 @@
               <thead><tr><th>Срок</th><th>Сделка</th><th>С кем</th><th class="o_coop_pf_num">Мне</th><th class="o_coop_pf_num">Я</th></tr></thead>
               <tbody>
                 <tr t-foreach="d.payments" t-as="p" t-key="p.id">
-                  <td class="o_coop_pf_nowrap" t-att-class="{ o_coop_pf_late: p.late }"><t t-esc="date(p.due_on)"/>
-                    <div t-if="p.late">просрочено <t t-esc="p.days_late"/> дн.</div></td>
-                  <td><a href="#" t-on-click.prevent="() => this.openRecord('coop.deal', p.deal_id)" t-esc="p.deal"/>
-                    <div class="o_coop_pf_muted" t-esc="p.subject"/></td>
-                  <td t-esc="p.other"/>
-                  <td class="o_coop_pf_num o_coop_pf_in"><t t-if="p.to_me" t-esc="rub(p.amount)"/></td>
-                  <td class="o_coop_pf_num"><t t-if="!p.to_me" t-esc="rub(p.amount)"/></td>
+                  <td class="o_coop_pf_nowrap" t-att-class="{ o_coop_pf_late: p.late }"><t t-out="this.date(p.due_on)"/>
+                    <div t-if="p.late">просрочено <t t-out="p.days_late"/> дн.</div></td>
+                  <td><a href="#" t-on-click.prevent="() => this.openRecord('coop.deal', p.deal_id)" t-out="p.deal"/>
+                    <div class="o_coop_pf_muted" t-out="p.subject"/></td>
+                  <td t-out="p.other"/>
+                  <td class="o_coop_pf_num o_coop_pf_in"><t t-if="p.to_me" t-out="this.rub(p.amount)"/></td>
+                  <td class="o_coop_pf_num"><t t-if="!p.to_me" t-out="this.rub(p.amount)"/></td>
                 </tr>
               </tbody>
             </table>
@@ -366,13 +366,13 @@
         <section class="o_coop_pf_panel">
           <div class="o_coop_pf_panelhead">
             <h3>Платформа в целом</h3>
-            <span class="o_coop_pf_muted">сводно, без имён · срез на <t t-esc="date(d.platform.as_of)"/></span>
+            <span class="o_coop_pf_muted">сводно, без имён · срез на <t t-out="this.date(d.platform.as_of)"/></span>
           </div>
           <div class="o_coop_pf_stats">
             <div t-foreach="d.platform.items" t-as="s" t-key="s_index">
-              <span t-esc="s.label"/>
-              <b><t t-if="s.unit === 'rub'" t-esc="rub(s.value)"/><t t-elif="s.unit === 'pct'"><t t-esc="s.value"/>%</t><t t-else="" t-esc="s.value"/></b>
-              <em t-esc="s.note"/>
+              <span t-out="s.label"/>
+              <b><t t-if="s.unit === 'rub'" t-out="this.rub(s.value)"/><t t-elif="s.unit === 'pct'"><t t-out="s.value"/>%</t><t t-else="" t-out="s.value"/></b>
+              <em t-out="s.note"/>
             </div>
           </div>
         </section>

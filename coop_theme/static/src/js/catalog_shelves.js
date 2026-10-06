@@ -1,10 +1,12 @@
 /** @odoo-module **/
 
-import { Component, onMounted, onWillStart, useState } from "@odoo/owl";
+import { Component, onMounted, onWillStart, proxy, usePlugin } from "@odoo/owl";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { RelationalModel } from "@web/model/relational_model/relational_model";
 import { addFieldDependencies, extractFieldsFromArchInfo } from "@web/model/relational_model/utils";
 import { CoopCatalogKanbanRecord as KanbanRecord } from "@coop_theme/js/favorite";
+import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * Полки каталога: ряды по рубрикам над общим списком.
@@ -88,8 +90,8 @@ export class CoopShelves extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.action = useService("action");
-        this.state = useState({ shelves: [], loading: true });
+        this.action = usePlugin(ActionManagerPlugin);
+        this.state = proxy({ shelves: [], loading: true });
 
         // Вторая модель — на все полки одна.
         //
@@ -104,9 +106,9 @@ export class CoopShelves extends Component {
         // запросом с отбором по списку рубрик.
         this.shelvesModel = new RelationalModel(
             this.env, this.modelParams, {
-                action: useService("action"),
+                action: usePlugin(ActionManagerPlugin),
                 dialog: useService("dialog"),
-                notification: useService("notification"),
+                notification: usePlugin(NotificationPlugin),
                 orm: this.orm,
             });
 

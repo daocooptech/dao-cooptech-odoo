@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { toRaw, useState } from "@odoo/owl";
+import { toRaw, proxy } from "@odoo/owl";
 import { checkFileSize } from "@web/core/utils/files";
 import { isHtmlEmpty } from "@web/core/utils/html";
 import { patch } from "@web/core/utils/patch";
@@ -165,7 +165,7 @@ patch(Composer.prototype, {
         // поле ставится мимо реактивности (`toRaw`) — нарочно, чтобы не
         // перерисовывать поле на каждый фокус, — и кнопки по нему не
         // появлялись, пока не набран первый знак.
-        this.coopFocus = useState({ on: false });
+        this.coopFocus = proxy({ on: false });
     },
 
     onFocusin(ev) {

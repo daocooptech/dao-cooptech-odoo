@@ -36,7 +36,7 @@
   -->
   <t t-name="coop_theme.AttachmentListVideo" t-inherit="mail.AttachmentList" t-inherit-mode="extension">
     <xpath expr="//Gif" position="after">
-      <video t-elif="env.inChatter and attachment.mimetype and attachment.mimetype.startsWith('video/')"
+      <video t-elif="this.env.inChatter and attachment.mimetype and attachment.mimetype.startsWith('video/')"
              class="o_coop_wall_video"
              controls="controls" preload="metadata"
              t-att-src="'/web/content/' + attachment.id"
@@ -54,7 +54,7 @@
   -->
   <t t-name="coop_theme.ThreadWallEmpty" t-inherit="mail.Thread" t-inherit-mode="extension">
     <xpath expr="//t[@name='empty-message']/div" position="attributes">
-      <attribute name="t-elif">!['res.partner', 'coop.project', 'coop.community'].includes(props.thread.model)</attribute>
+      <attribute name="t-elif">!['res.partner', 'coop.project', 'coop.community'].includes(this.props.thread.model)</attribute>
       <attribute name="t-else"></attribute>
     </xpath>
     <xpath expr="//t[@name='empty-message']" position="inside">
@@ -63,7 +63,7 @@
     <!-- В ленте есть только скрытый на стене журнал — движок считает её
          непустой (js/wall.js, coopWallEmpty). -->
     <xpath expr="//t[@name='content']/div" position="inside">
-      <div t-if="coopWallEmpty" class="o_coop_wall_empty text-muted">Записей пока нет.</div>
+      <div t-if="this.coopWallEmpty" class="o_coop_wall_empty text-muted">Записей пока нет.</div>
     </xpath>
   </t>
 

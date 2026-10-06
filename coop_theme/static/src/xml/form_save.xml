@@ -32,14 +32,14 @@
   -->
   <t t-name="coop_theme.FormViewSaveBar" t-inherit="web.FormView" t-inherit-mode="extension">
 
-    <xpath expr="//t[@t-set-slot='control-panel-status-indicator']/t[@t-if='canEdit']"
+    <xpath expr="//t[@t-set-slot='control-panel-status-indicator']/t[@t-if='this.canEdit']"
            position="attributes">
-      <attribute name="t-if">canEdit and !coopIsPlatformPage</attribute>
+      <attribute name="t-if">this.canEdit and !this.coopIsPlatformPage</attribute>
     </xpath>
 
-    <xpath expr="//t[@t-component='props.Renderer'][@archInfo='archInfo']"
+    <xpath expr="//t[@t-component='this.props.Renderer'][@archInfo='archInfo']"
            position="after">
-      <div t-if="coopIsPlatformPage and coopHasChanges" class="o_coop_save_bar">
+      <div t-if="this.coopIsPlatformPage and this.coopHasChanges" class="o_coop_save_bar">
         <span class="o_coop_save_note">Есть несохранённые правки</span>
         <button type="button" class="btn btn-secondary o_coop_save_discard"
                 data-hotkey="j"

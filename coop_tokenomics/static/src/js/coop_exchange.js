@@ -1,9 +1,11 @@
 /** @odoo-module **/
 
-import { Component, onWillStart, useState } from "@odoo/owl";
+import { Component, onWillStart, proxy, usePlugin } from "@odoo/owl";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { connectTonWallet } from "@coop_tokenomics/js/coop_ton_connect";
+import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * Торговый экран биржи.
@@ -48,10 +50,10 @@ export class CoopExchange extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.action = useService("action");
-        this.notification = useService("notification");
+        this.action = usePlugin(ActionManagerPlugin);
+        this.notification = usePlugin(NotificationPlugin);
 
-        this.state = useState({
+        this.state = proxy({
             data: null,
             book: null,
             wallet: null,

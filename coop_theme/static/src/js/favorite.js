@@ -14,7 +14,7 @@
  * Служба общая на все каталоги: разделов полтора десятка, и отметка
  * «нравится» у них одна и та же.
  */
-import { Component, useState } from "@odoo/owl";
+import { Component, proxy } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
@@ -92,7 +92,7 @@ export class CoopFavoriteHeart extends Component {
 
     setup() {
         this.favorite = useService("coopFavorite");
-        this.state = useState({ on: false, busy: false });
+        this.state = proxy({ on: false, busy: false });
         this.model = this.props.record.resModel;
         this.recordId = this.props.record.resId;
         this.favorite.ready(this.model).then(() => {

@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { useService } from "@web/core/utils/hooks";
-import { Component, onWillStart, onWillUpdateProps, useState } from "@odoo/owl";
+import { Component, onWillStart, onWillUpdateProps, proxy } from "@odoo/owl";
 
 /**
  * Каталог на карте: схематичная карта России с метками по городам.
@@ -42,7 +42,7 @@ export class CoopMap extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.state = useState({ pins: [], other: 0, loading: true, failed: false });
+        this.state = proxy({ pins: [], other: 0, loading: true, failed: false });
         onWillStart(() => this.load(this.props.domain));
         // Отбор меняется, пока карта на экране: сняли город, поставили
         // цену. Без этого метки остались бы от первого захода, а подпись

@@ -2,12 +2,12 @@
 <templates xml:space="preserve">
 
   <t t-name="coop_search.TopbarSearch">
-    <div class="o_coop_search" t-att-class="{ 'o_coop_search_expanded': state.expanded }">
+    <div class="o_coop_search" t-att-class="{ 'o_coop_search_expanded': this.state.expanded }">
       <!-- Кнопка вместо поля на узком экране: само поле там прячется и
            возвращается строкой под шапкой, как в макете. -->
       <button type="button" class="o_coop_search_btn"
               aria-label="Поиск по платформе"
-              t-att-aria-expanded="state.expanded ? 'true' : 'false'"
+              t-att-aria-expanded="this.state.expanded ? 'true' : 'false'"
               t-on-click="() => this.toggleExpanded()">
         <!-- Значок из дизайн-макета (`app.js`, `I.search`): ряд в шапке
              набран одним почерком — линия в 1.9 на 18 точках. -->
@@ -21,29 +21,29 @@
 
       <div class="o_coop_search_field">
         <i class="fa fa-search" aria-hidden="true"/>
-        <input type="search" t-ref="input" class="o_coop_search_input"
+        <input type="search" t-custom-ref="input" class="o_coop_search_input"
                placeholder="Поиск по платформе..."
                aria-label="Поиск по платформе"
-               t-att-value="state.term"
-               t-on-input="onInput"
+               t-att-value="this.state.term"
+               t-on-input="this.onInput"
                t-on-focus="() => this.state.open = true"
-               t-on-blur="onBlur"
-               t-on-keydown="onKeydown"/>
+               t-on-blur="this.onBlur"
+               t-on-keydown="this.onKeydown"/>
       </div>
 
-      <div class="o_coop_search_panel" t-if="state.open and state.term">
+      <div class="o_coop_search_panel" t-if="this.state.open and this.state.term">
         <!-- По одной-двум буквам совпадает половина базы: показывать
              такую выдачу незачем, выбрать из неё нечего. -->
-        <div class="o_coop_search_hint" t-if="state.tooShort">
+        <div class="o_coop_search_hint" t-if="this.state.tooShort">
           Введите ещё пару букв
         </div>
 
         <t t-else="">
-          <div class="o_coop_search_hint" t-if="state.busy and !state.groups.length">
+          <div class="o_coop_search_hint" t-if="this.state.busy and !this.state.groups.length">
             Ищем…
           </div>
 
-          <t t-foreach="state.groups" t-as="group" t-key="group.label">
+          <t t-foreach="this.state.groups" t-as="group" t-key="group.label">
             <div class="o_coop_search_group">
               <div class="o_coop_search_group_head">
                 <span t-esc="group.label"/>
@@ -62,9 +62,9 @@
 
           <!-- Остальные разделы одной строкой со счётчиками: восемь
                групп подряд перестают читаться. -->
-          <div class="o_coop_search_more" t-if="state.more.length">
+          <div class="o_coop_search_more" t-if="this.state.more.length">
             Ещё:
-            <t t-foreach="state.more" t-as="group" t-key="group.label">
+            <t t-foreach="this.state.more" t-as="group" t-key="group.label">
               <button class="o_coop_search_all"
                       t-on-click="() => this.openCatalog(group)">
                 <t t-esc="group.label"/> <t t-esc="group.count"/>
@@ -73,8 +73,8 @@
           </div>
 
           <div class="o_coop_search_hint"
-               t-if="!state.busy and !state.groups.length">
-            Ничего не нашли по «<t t-esc="state.term"/>»
+               t-if="!this.state.busy and !this.state.groups.length">
+            Ничего не нашли по «<t t-esc="this.state.term"/>»
           </div>
         </t>
       </div>

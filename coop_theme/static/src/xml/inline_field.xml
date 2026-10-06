@@ -8,21 +8,21 @@
   -->
   <t t-name="coop_theme.InlineField">
     <span class="o_coop_inline"
-          t-att-class="{ 'o_coop_inline_editing': ui.editing,
-                         'o_coop_inline_wrap': props.wrap or isMultiline }">
-      <t t-if="ui.editing">
+          t-att-class="{ 'o_coop_inline_editing': this.ui.editing,
+                         'o_coop_inline_wrap': this.props.wrap or this.isMultiline }">
+      <t t-if="this.ui.editing">
         <!--
           Выбор из списка — не набор: варианты известны заранее,
           и выбранное записывается сразу: выбрали — значит ответили.
         -->
-        <select t-if="isSelection" class="o_input o_coop_inline_input"
-                t-ref="input"
-                t-att-disabled="ui.busy"
-                t-on-change="onSelect">
+        <select t-if="this.isSelection" class="o_input o_coop_inline_input"
+                t-custom-ref="input"
+                t-att-disabled="this.ui.busy"
+                t-on-change="this.onSelect">
           <option value=""/>
-          <option t-foreach="selectionOptions" t-as="option" t-key="option[0]"
+          <option t-foreach="this.selectionOptions" t-as="option" t-key="option[0]"
                   t-att-value="option[0]"
-                  t-att-selected="option[0] === value"
+                  t-att-selected="option[0] === this.value"
                   t-esc="option[1]"/>
         </select>
         <!--
@@ -30,49 +30,49 @@
           видно только хвост, а начало уезжает за край. Именно это
           владелец и увидел на названии проекта.
         -->
-        <textarea t-elif="isMultiline" class="o_input o_coop_inline_input o_coop_inline_area"
-                  t-ref="input"
-                  t-att-rows="props.rows or 2"
-                  t-att-maxlength="maxlength"
-                  t-att-placeholder="props.placeholder"
-                  t-on-input="onInput"
-                  t-on-keydown="onKeydown"><t t-esc="ui.draft"/></textarea>
-        <input t-else="" class="o_input o_coop_inline_input" t-ref="input"
-               t-att-type="inputType"
-               t-att-value="ui.draft"
-               t-att-maxlength="maxlength"
-               t-att-placeholder="props.placeholder"
-               t-on-input="onInput"
-               t-on-keydown="onKeydown"/>
+        <textarea t-elif="this.isMultiline" class="o_input o_coop_inline_input o_coop_inline_area"
+                  t-custom-ref="input"
+                  t-att-rows="this.props.rows or 2"
+                  t-att-maxlength="this.maxlength"
+                  t-att-placeholder="this.props.placeholder"
+                  t-on-input="this.onInput"
+                  t-on-keydown="this.onKeydown"><t t-esc="this.ui.draft"/></textarea>
+        <input t-else="" class="o_input o_coop_inline_input" t-custom-ref="input"
+               t-att-type="this.inputType"
+               t-att-value="this.ui.draft"
+               t-att-maxlength="this.maxlength"
+               t-att-placeholder="this.props.placeholder"
+               t-on-input="this.onInput"
+               t-on-keydown="this.onKeydown"/>
         <!--
           Подсказки для связи. Справочник бывает на тысячи
           строк — выпадающий список со всеми не пролистать.
         -->
-        <ul t-if="ui.options.length" class="o_coop_inline_hints">
-          <li t-foreach="ui.options" t-as="option" t-key="option.id">
+        <ul t-if="this.ui.options.length" class="o_coop_inline_hints">
+          <li t-foreach="this.ui.options" t-as="option" t-key="option.id">
             <button type="button" t-on-click="() => this.pick(option)"
                     t-esc="option.display_name"/>
           </li>
         </ul>
         <button type="button" class="o_coop_inline_btn o_coop_inline_ok"
-                t-att-disabled="ui.busy"
+                t-att-disabled="this.ui.busy"
                 title="Опубликовать" aria-label="Опубликовать"
                 t-on-click="() => this.accept()">
           <i class="fa fa-check" role="img" aria-hidden="true"/>
         </button>
         <button type="button" class="o_coop_inline_btn o_coop_inline_cancel"
-                t-att-disabled="ui.busy"
+                t-att-disabled="this.ui.busy"
                 title="Отменить" aria-label="Отменить"
                 t-on-click="() => this.cancel()">
           <i class="fa fa-times" role="img" aria-hidden="true"/>
         </button>
       </t>
       <t t-else="">
-        <span class="o_coop_inline_value" t-if="display" t-esc="display"
-              t-att-class="{ o_coop_inline_number: isNumeric }"/>
-        <span class="o_coop_inline_empty" t-else="" t-esc="props.placeholder or '—'"/>
+        <span class="o_coop_inline_value" t-if="this.display" t-esc="this.display"
+              t-att-class="{ o_coop_inline_number: this.isNumeric }"/>
+        <span class="o_coop_inline_empty" t-else="" t-esc="this.props.placeholder or '—'"/>
         <button type="button" class="o_coop_inline_btn o_coop_inline_start"
-                t-if="canEdit"
+                t-if="this.canEdit"
                 title="Изменить" aria-label="Изменить"
                 t-on-click="() => this.start()">
           <i class="fa fa-pencil" role="img" aria-hidden="true"/>

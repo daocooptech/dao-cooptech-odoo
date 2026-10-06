@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, reactive, useState, onMounted, onWillStart, onWillUnmount } from "@odoo/owl";
+import { Component, onMounted, onWillStart, onWillUnmount, proxy, usePlugin } from "@odoo/owl";
 import { patch } from "@web/core/utils/patch";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
@@ -10,6 +10,7 @@ import { user } from "@web/core/user";
 import { COOP_FAVORITE_CATALOGS } from "@coop_theme/js/favorite";
 import { pathAfterPrefix } from "@coop_theme/js/node_path";
 import { router, routerBus } from "@web/core/browser/router";
+import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
 import { WebClient } from "@web/webclient/webclient";
 import { NavBar } from "@web/webclient/navbar/navbar";
 
@@ -39,9 +40,9 @@ export class CoopTabs extends Component {
 
     setup() {
         this.menus = useService("menu");
-        this.action = useService("action");
+        this.action = usePlugin(ActionManagerPlugin);
         this.orm = useService("orm");
-        this.state = useState({ tabs: [], current: null, label: null, fav: null });
+        this.state = proxy({ tabs: [], current: null, label: null, fav: null });
         useBus(this.env.bus, "COOP_FAVORITE_CHANGED", () => this.refreshFav());
         // Строка вкладок рисуется раньше, чем открывается сам каталог, и
         // первый расчёт вкладки «Избранное» не находил действия — вкладка
@@ -225,7 +226,7 @@ export class CoopTabs extends Component {
  * обе стороны видят одно и то же: нажатие открывает панель, а панель
  * возвращает кнопке правильный `aria-expanded`.
  */
-export const coopShellUi = reactive({ open: false });
+export const coopShellUi = proxy({ open: false });
 
 /**
  * Разделы нижней панели на телефоне — те же пять, что в макете
@@ -242,12 +243,12 @@ export class CoopSidebar extends Component {
     static props = {};
 
     setup() {
-        this.action = useService("action");
+        this.action = usePlugin(ActionManagerPlugin);
         this.orm = useService("orm");
         this.boot = useService("coopBoot");
         // Открытие панели общее с кнопкой в шапке — см. `coopShellUi`.
-        this.ui = useState(coopShellUi);
-        this.state = useState({
+        this.ui = proxy(coopShellUi);
+        this.state = proxy({
             main: [], extensions: [], admin: [], current: null, model: null,
             acting: null, actors: [],
             route: router.current?.action ?? null,
@@ -716,7 +717,7 @@ patch(WebClient, {
  * при первой загрузке — пустоту и подвал, подпирающий шапку. Разницы
  * между «грузится впервые» и «грузится раздел» для смотрящего нет.
  */
-export const coopBootUi = reactive({ loading: true });
+export const coopBootUi = proxy({ loading: true });
 
 /**
  * Кнопка меню разделов стоит в шапке слева, как в макете.
@@ -729,7 +730,7 @@ export const coopBootUi = reactive({ loading: true });
 patch(NavBar.prototype, {
     setup() {
         super.setup();
-        this.coopShell = useState(coopShellUi);
+        this.coopShell = proxy(coopShellUi);
     },
 
     /** Методом, а не присваиванием прямо в шаблоне: присваивание в
@@ -757,7 +758,7 @@ patch(NavBar.prototype, {
 patch(WebClient.prototype, {
     setup() {
         super.setup();
-        this.coopBoot = useState(coopBootUi);
+        this.coopBoot = proxy(coopBootUi);
 
         // Заставка показывается только на первой загрузке.
         //

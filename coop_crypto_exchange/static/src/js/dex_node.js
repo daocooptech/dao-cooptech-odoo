@@ -1,9 +1,10 @@
 /** @odoo-module **/
 
-import { Component, onWillStart, useState } from "@odoo/owl";
+import { Component, onWillStart, proxy, usePlugin } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
+import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * Свой узел Komodo (решение 417, этап 5 плана биржи): страница-клиент к
@@ -52,9 +53,9 @@ export class CoopKomodoNode extends Component {
     static props = ["*"];
 
     setup() {
-        this.action = useService("action");
-        this.notification = useService("notification");
-        this.state = useState({
+        this.action = usePlugin(ActionManagerPlugin);
+        this.notification = usePlugin(NotificationPlugin);
+        this.state = proxy({
             url: load(KEY_URL, DEFAULT_URL),
             pass: load(KEY_PASS, ""),
             remember: !!load(KEY_PASS, ""),

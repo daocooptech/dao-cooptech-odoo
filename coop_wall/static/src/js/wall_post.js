@@ -1,8 +1,9 @@
 /** @odoo-module **/
 
-import { Component, markup, reactive, useRef, useState } from "@odoo/owl";
+import { Component, markup, proxy, usePlugin } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { deserializeDateTime } from "@web/core/l10n/dates";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
@@ -12,6 +13,7 @@ import { fields } from "@mail/core/common/record";
 import { MessageReactions } from "@mail/core/common/message_reactions";
 import { WALL_MODELS } from "@coop_theme/js/wall";
 import { CoopWallPoll } from "@coop_wall/js/wall_poll";
+import { useRef } from "@web/owl2/utils";
 
 // Под записью на стене — ряд действий и комментарии.
 //
@@ -44,7 +46,7 @@ export const DISLIKE = "👎";
 export const coopWallCommentsService = {
     dependencies: ["orm"],
     start(env, { orm }) {
-        const byPost = reactive({});
+        const byPost = proxy({});
         let pending = new Set();
         let scheduled = null;
 
@@ -102,8 +104,8 @@ export class CoopWallPostFooter extends Component {
 
     setup() {
         this.comments = useService("coop_wall_comments");
-        this.byPost = useState(this.comments.byPost);
-        this.state = useState({ expanded: false, writing: false, draft: "", busy: false });
+        this.byPost = proxy(this.comments.byPost);
+        this.state = proxy({ expanded: false, writing: false, draft: "", busy: false });
         this.inputRef = useRef("input");
         this.comments.load(this.props.message.id);
     }
@@ -249,8 +251,8 @@ export class CoopRepostDialog extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.notification = useService("notification");
-        this.state = useState({ comment: "", busy: false });
+        this.notification = usePlugin(NotificationPlugin);
+        this.state = proxy({ comment: "", busy: false });
     }
 
     get preview() {
@@ -301,8 +303,8 @@ export class CoopThanksDialog extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.notification = useService("notification");
-        this.state = useState({
+        this.notification = usePlugin(NotificationPlugin);
+        this.state = proxy({
             info: null, channel: "sbp", amount: "", understood: false, busy: false,
             networkId: null, token: null, txHash: "",
         });
