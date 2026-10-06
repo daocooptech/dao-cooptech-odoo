@@ -1,0 +1,31 @@
+id,name,model_id,group_id/id,operation,domain
+rule_wallet_own,Свой кошелёк,coop.wallet,base.group_user,cru,"[('partner_id', 'in', user.coop_treasury_partner_ids.ids)]"
+rule_wallet_admin,Кошельки — администратор,coop.wallet,base.group_system,cru,
+rule_wallet_movement_own,Движения своего кошелька,coop.wallet.movement,base.group_user,crud,"[('partner_id', 'in', user.coop_treasury_partner_ids.ids)]"
+rule_wallet_movement_admin,Движения — администратор,coop.wallet.movement,base.group_system,crud,
+rule_settlement_own,Своё сальдо,coop.settlement,base.group_user,r,"[('partner_id', 'in', user.coop_treasury_partner_ids.ids)]"
+rule_settlement_admin,Сальдо — администратор,coop.settlement,base.group_system,r,
+access_coop_network_user,Сети — чтение,coop.wallet.network,base.group_user,r,
+access_coop_network_admin,Сети — ведение,coop.wallet.network,coop_base.group_coop_platform,crud,
+access_coop_address_user,Адреса — участник,coop.wallet.address,base.group_user,crud,
+access_coop_asset_user,Активы — участник,coop.wallet.asset,base.group_user,crud,
+access_coop_method_user,Способы оплаты — участник,coop.wallet.method,base.group_user,crud,
+rule_credit_line_own,Свои линии взаимного кредита,coop.credit.line,base.group_user,cru,"['|',
+        ('partner_id', 'in', user.coop_actor_partner_ids.ids),
+        ('counterparty_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_credit_line_admin,Линии — администратор,coop.credit.line,base.group_system,cru,
+rule_credit_movement_own,Операции своих линий,coop.credit.movement,base.group_user,cru,"['|',
+        ('line_id.partner_id', 'in', user.coop_actor_partner_ids.ids),
+        ('line_id.counterparty_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_credit_movement_admin,Операции кредита — администратор,coop.credit.movement,base.group_system,cru,
+rule_clearing_own,"Круги, где я участник",coop.credit.clearing,base.group_user,cru,"[('participant_ids', 'in', user.coop_actor_partner_ids.ids)]"
+rule_clearing_admin,Взаимозачёты — администратор,coop.credit.clearing,base.group_system,cru,
+access_coop_signature_user,Подписи — участник,coop.credit.signature,base.group_user,cru,
+rule_share_account_own,Свой паевой счёт,coop.share.account,base.group_user,cru,"[('partner_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_share_account_admin,Паевые счета — администратор,coop.share.account,base.group_system,cru,
+rule_share_move_own,Движения своего паевого счёта,coop.share.move,base.group_user,cru,"[('account_id.partner_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_share_move_admin,Движения по паю — администратор,coop.share.move,base.group_system,cru,
+rule_wallet_tx_own,Свои операции в сетях,coop.wallet.tx,base.group_user,cru,"[('partner_id', 'in', user.coop_treasury_partner_ids.ids)]"
+rule_wallet_tx_admin,Операции в сетях — администратор,coop.wallet.tx,base.group_system,cru,
+access_coop_settlement_method_user,Способы расчёта — чтение,coop.settlement.method,base.group_user,r,
+access_coop_settlement_method_admin,Способы расчёта — ведение,coop.settlement.method,coop_base.group_coop_platform,crud,

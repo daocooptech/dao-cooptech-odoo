@@ -21,9 +21,8 @@ COOP — предоплаченная единица услуг самой пл�
     'license': 'LGPL-3',
     'depends': ['coop_base'],
     'data': [
-        'security/ir.model.access.csv',
-        'security/coop_token_rules.xml',
         'views/coop_token_views.xml',
+        'security/ir.access.csv',
     ],
     'installable': True,
 }

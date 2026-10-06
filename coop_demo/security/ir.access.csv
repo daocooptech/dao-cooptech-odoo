@@ -1,0 +1,15 @@
+id,name,model_id,group_id/id,operation,domain
+access_coop_membership_system,Членство — администратор узла,coop.membership,base.group_system,cud,
+rule_membership_public,Действующий состав организаций виден участникам,coop.membership,base.group_system,r,"
+        ['|',
+          ('partner_id', '=', user.partner_id.id),
+          ('state', '=', 'active')]
+      "
+rule_membership_roster,"Заявления видит тот, кто ведёт состав",coop.membership,base.group_system,r,"
+        [('organization_id', 'in',
+            [m.organization_id.id for m in
+             user.env['coop.membership'].sudo().search(
+                 [('partner_id', '=', user.partner_id.id),
+                  ('state', '=', 'active'),
+                  ('power_ids.code', '=', 'roster')])])]
+      "

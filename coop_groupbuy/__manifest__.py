@@ -17,9 +17,8 @@
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_orgs', 'coop_communities', 'mail'],
     'data': [
-        'security/ir.model.access.csv',
-        'security/coop_groupbuy_rules.xml',
         'views/coop_groupbuy_views.xml',
+        'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_backend': [

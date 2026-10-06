@@ -28,11 +28,10 @@
                 'coop_digital_assets',
                 'coop_education', 'coop_people', 'coop_profile', 'coop_wall'],
     'data': [
-        'security/ir.model.access.csv',
-        'security/coop_analytics_rules.xml',
         'views/coop_analytics_views.xml',
         'data/coop_analytics_board.xml',
         'data/coop_analytics_dashboards.xml',
+        'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_backend': [

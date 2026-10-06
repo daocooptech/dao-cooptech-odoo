@@ -1,0 +1,12 @@
+id,name,model_id,group_id/id,operation,domain
+rule_groupbuy_read,"Складчина: черновик виден организатору, остальное всем",coop.groupbuy,base.group_user,r,"['|', ('state', '!=', 'draft'),
+          ('organizer_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_groupbuy_write,Складчину правит организатор,coop.groupbuy,base.group_user,cu,"[('organizer_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_groupbuy_write_1,Складчину правит организатор,coop.groupbuy,base.group_system,cud,"[('organizer_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_groupbuy_tier_read,Ступени цены видны вместе со складчиной,coop.groupbuy.tier,base.group_user,r,"['|', ('groupbuy_id.state', '!=', 'draft'),
+          ('groupbuy_id.organizer_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_groupbuy_tier_write,Ступени правит организатор,coop.groupbuy.tier,base.group_user,cu,"[('groupbuy_id.organizer_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_groupbuy_tier_write_1,Ступени правит организатор,coop.groupbuy.tier,base.group_system,cud,"[('groupbuy_id.organizer_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_groupbuy_order_own,Свой заказ в складчине,coop.groupbuy.order,base.group_user,crud,"[('partner_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_groupbuy_order_organizer,Организатор видит заказы,coop.groupbuy.order,base.group_user,ru,"[('groupbuy_id.organizer_id', 'in', user.coop_actor_partner_ids.ids)]"
+access_coop_groupbuy_join,Окно участия — участник,coop.groupbuy.join,base.group_user,crud,

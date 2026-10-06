@@ -1,0 +1,18 @@
+id,name,model_id,group_id/id,operation,domain
+coop_cession_published,Витрина уступок — размещённые предложения,coop.cession,base.group_user,cru,"['|', ('state', 'in', ['published', 'negotiating', 'done']), ('creditor_id', 'in', user.coop_treasury_partner_ids.ids)]"
+coop_cession_write_own,"Уступки — правит тот, кто разместил",coop.cession,base.group_user,cu,"[('creditor_id', 'in', user.coop_treasury_partner_ids.ids)]"
+coop_cession_admin,Уступки — администратор,coop.cession,base.group_system,crud,
+coop_cession_response_own,Отклики — свои и на свои предложения,coop.cession.response,base.group_user,cru,"['|', ('partner_id', 'in', user.coop_treasury_partner_ids.ids), ('cession_id.creditor_id', 'in', user.coop_treasury_partner_ids.ids)]"
+coop_cession_response_admin,Отклики на уступку — администратор,coop.cession.response,base.group_system,crud,
+access_coop_token_claim_user,Выпуски токенов — участник,coop.token.claim,base.group_user,cru,
+access_coop_token_claim_admin,Выпуски токенов — администратор,coop.token.claim,base.group_system,crud,
+access_coop_token_holding_user,Токены на руках — участник,coop.token.holding,base.group_user,cru,
+access_coop_token_holding_admin,Токены на руках — администратор,coop.token.holding,base.group_system,crud,
+access_coop_token_order_user,Заявки биржи — участник,coop.token.order,base.group_user,cru,
+access_coop_token_order_admin,Заявки биржи — администратор,coop.token.order,base.group_system,crud,
+access_coop_token_trade_user,Сделки по токенам — участник,coop.token.trade,base.group_user,cru,
+access_coop_token_trade_admin,Сделки по токенам — администратор,coop.token.trade,base.group_system,crud,
+access_coop_share_rate_user,Ставки долей — участник,coop.project.share.rate,base.group_user,cru,
+access_coop_share_rate_admin,Ставки долей — администратор,coop.project.share.rate,base.group_system,crud,
+access_coop_token_escrow_user,Эскроу — участник,coop.token.escrow,base.group_user,ru,
+access_coop_token_escrow_admin,Эскроу — администратор,coop.token.escrow,base.group_system,crud,

@@ -1,0 +1,7 @@
+id,name,model_id,group_id/id,operation,domain
+access_coop_attribute_user,Характеристики — чтение,coop.attribute,base.group_user,r,
+access_coop_attribute_system,Характеристики — администратор,coop.attribute,base.group_system,crud,
+access_coop_attribute_option_user,Варианты — чтение,coop.attribute.option,base.group_user,r,
+access_coop_attribute_option_system,Варианты — администратор,coop.attribute.option,base.group_system,crud,
+access_coop_attribute_assignment_user,Характеристики рубрики — чтение,coop.attribute.assignment,base.group_user,r,
+access_coop_attribute_assignment_system,Характеристики рубрики — администратор,coop.attribute.assignment,base.group_system,crud,

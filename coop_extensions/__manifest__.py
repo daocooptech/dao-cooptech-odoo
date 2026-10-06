@@ -23,10 +23,10 @@
     # поведение и компонент, а не только css-класс.
     'depends': ['base', 'mail', 'coop_base', 'coop_theme'],
     'data': [
-        'security/ir.model.access.csv',
         'views/coop_extension_views.xml',
         'views/coop_extension_menus.xml',
         'data/coop_extension_data.xml',
+        'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_backend': [

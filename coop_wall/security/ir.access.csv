@@ -1,0 +1,10 @@
+id,name,model_id,group_id/id,operation,domain
+access_coop_wall_comment_user,coop.wall.comment user,coop.wall.comment,base.group_user,r,
+access_coop_wall_comment_system,coop.wall.comment system,coop.wall.comment,base.group_system,crud,
+access_coop_wall_thanks_system,coop.wall.thanks system,coop.wall.thanks,base.group_system,crud,
+access_coop_wall_poll_user,coop.wall.poll user,coop.wall.poll,base.group_user,r,
+access_coop_wall_poll_system,coop.wall.poll system,coop.wall.poll,base.group_system,crud,
+access_coop_wall_poll_option_user,coop.wall.poll.option user,coop.wall.poll.option,base.group_user,r,
+access_coop_wall_poll_option_system,coop.wall.poll.option system,coop.wall.poll.option,base.group_system,crud,
+access_coop_wall_poll_vote_user,coop.wall.poll.vote user,coop.wall.poll.vote,base.group_user,r,
+access_coop_wall_poll_vote_system,coop.wall.poll.vote system,coop.wall.poll.vote,base.group_system,crud,

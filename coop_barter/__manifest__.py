@@ -23,10 +23,9 @@
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_theme', 'coop_resources', 'coop_deals', 'mail'],
     'data': [
-        'security/ir.model.access.csv',
-        'security/coop_barter_rules.xml',
         'data/coop_barter_data.xml',
         'views/coop_barter_views.xml',
+        'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_backend': [

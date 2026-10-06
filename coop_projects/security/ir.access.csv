@@ -1,0 +1,19 @@
+id,name,model_id,group_id/id,operation,domain
+access_coop_project_category_user,Темы проектов — чтение,coop.project.category,base.group_user,r,
+access_coop_project_category_admin,Темы проектов — ведение,coop.project.category,coop_base.group_coop_platform,crud,
+rule_project_read,Участник видит проекты в сборе и свои,coop.project,base.group_user,r,"
+        ['|', ('state', 'in', ('gathering', 'running', 'frozen', 'failed', 'done')),
+         ('partner_id', 'in', user.coop_actor_partner_ids.ids)]
+      "
+rule_project_own,Править можно только свой проект,coop.project,base.group_user,cud,"[('partner_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_project_admin,Администратор узла ведёт все проекты,coop.project,base.group_system,crud,
+access_coop_contribution_user,Вклады — участник,coop.project.contribution,base.group_user,d,
+rule_contribution_own,"Свои вклады, вклады в свой проект и по своей потребности",coop.project.contribution,base.group_user,cu,"
+        ['|', ('partner_id', 'in', user.coop_actor_partner_ids.ids),
+         '|', ('project_id.partner_id', 'in', user.coop_actor_partner_ids.ids),
+         ('need_id.need_manager_id', 'in', user.coop_actor_partner_ids.ids)]
+      "
+rule_contribution_read_all,Вклады в проект видны всем,coop.project.contribution,base.group_user,r,
+rule_contribution_admin,Вклады — администратор,coop.project.contribution,base.group_system,crud,
+access_coop_project_contribute,Окно вклада — участник,coop.project.contribute,base.group_user,crud,
+rule_coop_task_own,Задачи: свои и своего проекта,project.task,,crud,

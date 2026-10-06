@@ -1,0 +1,64 @@
+id,name,model_id,group_id/id,operation,domain
+rule_membership_public,Действующий состав организаций виден участникам,coop.membership,base.group_user,r,"
+        ['|',
+          ('partner_id', '=', user.partner_id.id),
+          ('state', '=', 'active')]
+      "
+rule_membership_roster,"Заявления видит тот, кто ведёт состав",coop.membership,base.group_user,r,"
+        [('organization_id', 'in',
+            [m.organization_id.id for m in
+             user.env['coop.membership'].sudo().search(
+                 [('partner_id', '=', user.partner_id.id),
+                  ('state', '=', 'active'),
+                  ('power_ids.code', '=', 'roster')])])]
+      "
+rule_membership_member,Пайщик видит состав своих организаций,coop.membership,coop_base.group_coop_member,r,"
+        ['|',
+          ('partner_id', '=', user.partner_id.id),
+          ('organization_id', 'in',
+             [m.organization_id.id for m in
+              user.env['coop.membership'].sudo().search(
+                  [('partner_id', '=', user.partner_id.id),
+                   ('state', '=', 'active')])])]
+      "
+rule_membership_audit,Ревизия видит состав проверяемой организации,coop.membership,coop_base.group_coop_audit,r,"
+        [('organization_id', 'in',
+            [m.organization_id.id for m in
+             user.env['coop.membership'].sudo().search(
+                 [('partner_id', '=', user.partner_id.id),
+                  ('role', '=', 'audit'),
+                  ('state', '=', 'active')])])]
+      "
+rule_membership_board,Правление ведёт членство только своей организации,coop.membership,coop_base.group_coop_board,cru,"
+        [('organization_id', 'in',
+            [m.organization_id.id for m in
+             user.env['coop.membership'].sudo().search(
+                 [('partner_id', '=', user.partner_id.id),
+                  ('role', '=', 'board'),
+                  ('state', '=', 'active')])])]
+      "
+access_coop_legal_form_group_user,Группы правовых форм — чтение,coop.legal.form.group,base.group_user,r,
+access_coop_legal_form_group_admin,Группы правовых форм — ведение,coop.legal.form.group,coop_base.group_coop_platform,crud,
+access_coop_legal_form_user,Правовые формы — чтение,coop.legal.form,base.group_user,r,
+access_coop_legal_form_admin,Правовые формы — ведение,coop.legal.form,coop_base.group_coop_platform,crud,
+access_coop_specialization_category_user,Сферы деятельности — чтение,coop.specialization.category,base.group_user,r,
+access_coop_specialization_category_admin,Сферы деятельности — ведение,coop.specialization.category,coop_base.group_coop_platform,crud,
+access_coop_specialization_user,Специализации — чтение,coop.specialization,base.group_user,r,
+access_coop_specialization_admin,Специализации — ведение,coop.specialization,coop_base.group_coop_platform,crud,
+coop_verification_own,Свои подтверждения,coop.verification,base.group_user,cr,"[('partner_id', '=', user.partner_id.id)]"
+coop_verification_admin,Подтверждения — администратор,coop.verification,base.group_system,cr,
+coop_verification_board,Подтверждения — правление,coop.verification,coop_base.group_coop_board,cru,
+access_coop_power_user,Полномочия — чтение,coop.power,base.group_user,r,
+access_coop_power_admin,Полномочия — ведение,coop.power,coop_base.group_coop_platform,crud,
+rule_notification_own,Извещение видит только адресат,coop.notification,base.group_user,ru,"
+        [('partner_id', 'in', user.coop_actor_partner_ids.ids)]
+      "
+rule_notification_system,Администратор узла видит все извещения,coop.notification,base.group_system,crud,
+access_coop_membership_admit,Окно приёма — участник,coop.membership.admit,base.group_user,crud,
+rule_favorite_own,Избранное видно только своему хозяину,coop.favorite,base.group_user,r,"[('partner_id', '=', user.partner_id.id)]"
+rule_contact_line_read,Строки контактов видны всем,coop.contact.line,base.group_user,r,
+rule_contact_line_own,Свои строки контактов правит хозяин,coop.contact.line,base.group_user,cud,"[('partner_id', '=', user.partner_id.id)]"
+rule_notification_pref_own,Настройки извещений видит и правит их хозяин,coop.notification.pref,base.group_user,crud,"[('partner_id', '=', user.partner_id.id)]"
+rule_block_own,Чёрный список видит и правит его хозяин,coop.block,base.group_user,crud,"[('partner_id', '=', user.partner_id.id)]"
+access_coop_membership_role_user,Основания участия — чтение,coop.membership.role,base.group_user,r,
+access_coop_membership_role_admin,Основания участия — ведение,coop.membership.role,coop_base.group_coop_platform,crud,

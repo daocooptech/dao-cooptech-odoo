@@ -1,0 +1,7 @@
+id,name,model_id,group_id/id,operation,domain
+rule_miner_read,Майнеры — читают участники,coop.miner,base.group_user,r,
+rule_miner_own,Майнеры — правит свою карточку,coop.miner,base.group_user,cu,"[('partner_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_miner_admin,Майнеры — администратор,coop.miner,base.group_system,crud,
+rule_mining_offer_read,Мощности — читают участники,coop.mining.offer,base.group_user,r,
+rule_mining_offer_own,Мощности — правит автор,coop.mining.offer,base.group_user,cud,"[('author_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_mining_offer_admin,Мощности — администратор,coop.mining.offer,base.group_system,crud,

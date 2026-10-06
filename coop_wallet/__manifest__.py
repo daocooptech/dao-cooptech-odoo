@@ -23,11 +23,10 @@
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_tokens', 'coop_deals', 'mail'],
     'data': [
-        'security/ir.model.access.csv',
-        'security/coop_wallet_rules.xml',
         'data/coop_networks.xml',
         'data/coop_settlement_methods.xml',
         'views/coop_wallet_views.xml',
+        'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_backend': [

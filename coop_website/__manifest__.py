@@ -21,7 +21,6 @@
     'depends': ['website', 'auth_signup', 'mail', 'coop_theme', 'coop_base',
                 'coop_people', 'coop_orgs'],
     'data': [
-        'security/ir.model.access.csv',
         'views/coop_landing.xml',
         'views/coop_footer.xml',
         'views/coop_contact_views.xml',
@@ -29,6 +28,7 @@
         'views/coop_signup.xml',
         'data/coop_website_lang.xml',
         'data/coop_website_setup.xml',
+        'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_frontend': [

@@ -1,0 +1,13 @@
+id,name,model_id,group_id/id,operation,domain
+access_res_partner_coop_self,Участник правит свой профиль,res.partner,base.group_user,r,
+rule_partner_write_own,Править можно свой профиль и профиль своей организации,res.partner,base.group_user,u,"
+        ['|',
+          ('id', '=', user.partner_id.id),
+          ('id', 'in', user.coop_site_partner_ids.ids)]
+      "
+rule_coop_education_read,Образование видно всем,coop.education,base.group_user,r,
+rule_coop_education_own,Своё образование правит сам участник,coop.education,base.group_user,cud,"[('partner_id', '=', user.partner_id.id)]"
+rule_coop_achievement_read,Достижения видны всем,coop.achievement,base.group_user,r,
+rule_coop_achievement_own,Свои достижения правит сам участник,coop.achievement,base.group_user,cud,"[('partner_id', '=', user.partner_id.id)]"
+access_coop_institution_user,Учебные заведения — читают все,coop.institution,base.group_user,r,
+access_coop_institution_admin,Учебные заведения — ведёт платформа,coop.institution,coop_base.group_coop_platform,crud,

@@ -1,0 +1,6 @@
+id,name,model_id,group_id/id,operation,domain
+access_coop_fed_identity_system,coop.fed.identity system,coop.fed.identity,base.group_system,ru,
+access_coop_fed_key_system,coop.fed.key system,coop.fed.key,base.group_system,r,
+access_coop_fed_event_system,coop.fed.event system,coop.fed.event,base.group_system,r,
+access_coop_fed_peer_system,coop.fed.peer system,coop.fed.peer,base.group_system,crud,
+access_coop_fed_divergence_system,coop.fed.divergence system,coop.fed.divergence,base.group_system,r,

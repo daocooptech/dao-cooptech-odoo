@@ -26,8 +26,8 @@
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_resources'],
     'data': [
-        'security/ir.model.access.csv',
         'views/coop_attribute_views.xml',
+        'security/ir.access.csv',
     ],
     'installable': True,
     'auto_install': False,

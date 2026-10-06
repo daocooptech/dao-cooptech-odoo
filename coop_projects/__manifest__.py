@@ -23,16 +23,14 @@
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_resources', 'project', 'mail'],
     'data': [
-        'security/ir.model.access.csv',
-        'security/coop_project_rules.xml',
         'security/coop_project_groups.xml',
-        'security/coop_task_rules.xml',
         'views/coop_project_views.xml',
         'views/coop_project_need_views.xml',
         'data/coop_project_backfill.xml',
         'data/coop_project_readiness.xml',
         'data/coop_project_cron.xml',
         'data/project_stage_data.xml',
+        'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_backend': [

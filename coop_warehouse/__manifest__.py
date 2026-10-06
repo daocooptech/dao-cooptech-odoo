@@ -19,10 +19,9 @@
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_orgs', 'coop_deals', 'mail'],
     'data': [
-        'security/ir.model.access.csv',
-        'security/coop_warehouse_rules.xml',
         'views/coop_warehouse_views.xml',
         'views/coop_warehouse_offer_views.xml',
+        'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_backend': [

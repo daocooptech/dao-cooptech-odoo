@@ -1,0 +1,17 @@
+id,name,model_id,group_id/id,operation,domain
+rule_trade_contract_parties,Свои внешнеторговые контракты,coop.trade.contract,base.group_user,cru,"
+        ['|', ('resident_id', 'in', user.coop_actor_partner_ids.ids),
+         ('foreign_partner_id', 'in', user.coop_actor_partner_ids.ids)]
+      "
+rule_trade_contract_admin,Внешнеторговые контракты — администратор,coop.trade.contract,base.group_system,crud,
+rule_trade_document_parties,Документы своих контрактов,coop.trade.document,base.group_user,crud,"
+        ['|', ('contract_id.resident_id', 'in', user.coop_actor_partner_ids.ids),
+         ('contract_id.foreign_partner_id', 'in', user.coop_actor_partner_ids.ids)]
+      "
+rule_trade_document_admin,Документы контрактов — администратор,coop.trade.document,base.group_system,crud,
+rule_trade_payment_parties,Платежи своих контрактов,coop.trade.payment,base.group_user,crud,"
+        ['|', ('contract_id.resident_id', 'in', user.coop_actor_partner_ids.ids),
+         ('contract_id.foreign_partner_id', 'in', user.coop_actor_partner_ids.ids)]
+      "
+rule_trade_payment_admin,Платежи контрактов — администратор,coop.trade.payment,base.group_system,crud,
+access_coop_trade_calculator_user,Калькулятор порога — участник,coop.trade.calculator,base.group_user,crud,

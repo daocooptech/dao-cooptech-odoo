@@ -20,7 +20,7 @@
     'license': 'LGPL-3',
     'depends': ['coop_base'],
     'data': [
-        'security/ir.model.access.csv',
+        'security/ir.access.csv',
     ],
     'installable': True,
 }

@@ -1,0 +1,10 @@
+id,name,model_id,group_id/id,operation,domain
+access_coop_cfa_operator_user,Операторы ЦФА — участник,coop.cfa.operator,base.group_user,r,
+access_coop_cfa_operator_admin,Операторы ЦФА — администратор,coop.cfa.operator,base.group_system,crud,
+rule_cfa_issue_read,"Выпуск: черновик виден эмитенту, остальное всем",coop.cfa.issue,base.group_user,r,"['|', ('state', '!=', 'draft'),
+          ('issuer_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_cfa_issue_write,Выпуск ведёт эмитент,coop.cfa.issue,base.group_user,cu,"[('issuer_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_cfa_issue_write_1,Выпуск ведёт эмитент,coop.cfa.issue,base.group_system,cud,"[('issuer_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_cfa_holding_own,Своё владение цифровым активом,coop.cfa.holding,base.group_user,crud,"[('partner_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_cfa_holding_issuer,Эмитент видит держателей своего выпуска,coop.cfa.holding,base.group_user,r,"[('issue_id.issuer_id', 'in', user.coop_actor_partner_ids.ids)]"
+access_coop_cfa_buy,Окно приобретения — участник,coop.cfa.buy,base.group_user,crud,

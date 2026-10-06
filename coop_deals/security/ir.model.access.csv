@@ -1,8 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_coop_deal_user,Сделки — участник,model_coop_deal,base.group_user,1,1,1,0
-access_coop_deal_line_user,Спецификация — участник,model_coop_deal_line,base.group_user,1,1,1,1
-access_coop_deal_payment_user,Платежи — участник,model_coop_deal_payment,base.group_user,1,1,1,1
-access_coop_deal_review_user,Отзывы — участник,model_coop_deal_review,base.group_user,1,1,1,0
-access_coop_deal_review_wizard,Окно отзыва — участник,model_coop_deal_review_wizard,base.group_user,1,1,1,1
-access_coop_resource_transfer_user,История прав — участник,model_coop_resource_transfer,base.group_user,1,0,0,0
-access_coop_resource_transfer_system,История прав — администратор,model_coop_resource_transfer,base.group_system,1,1,1,1

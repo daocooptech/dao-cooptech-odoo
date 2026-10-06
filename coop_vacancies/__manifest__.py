@@ -23,9 +23,8 @@
     'depends': ['coop_base', 'coop_people', 'coop_projects', 'coop_theme',
                 'hr_recruitment', 'hr_skills', 'project', 'mail'],
     'data': [
-        'security/ir.model.access.csv',
-        'security/coop_vacancy_rules.xml',
         'views/coop_vacancy_views.xml',
+        'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_backend': [

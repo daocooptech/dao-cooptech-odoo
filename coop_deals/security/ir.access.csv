@@ -1,0 +1,22 @@
+id,name,model_id,group_id/id,operation,domain
+rule_deal_parties,Свои сделки,coop.deal,base.group_user,cru,"
+        ['|', ('party_a_id', 'in', user.coop_actor_partner_ids.ids),
+         ('party_b_id', 'in', user.coop_actor_partner_ids.ids)]
+      "
+rule_deal_admin,Сделки — администратор,coop.deal,base.group_system,cru,
+rule_deal_line_parties,Спецификация своих сделок,coop.deal.line,base.group_user,crud,"
+        ['|', ('deal_id.party_a_id', 'in', user.coop_actor_partner_ids.ids),
+         ('deal_id.party_b_id', 'in', user.coop_actor_partner_ids.ids)]
+      "
+rule_deal_payment_parties,Платежи своих сделок,coop.deal.payment,base.group_user,crud,"
+        ['|', ('deal_id.party_a_id', 'in', user.coop_actor_partner_ids.ids),
+         ('deal_id.party_b_id', 'in', user.coop_actor_partner_ids.ids)]
+      "
+rule_review_visible,Раскрытые отзывы и свои,coop.deal.review,base.group_user,cru,"
+        ['|', ('visible', '=', True),
+         ('author_id', 'in', user.coop_actor_partner_ids.ids)]
+      "
+rule_review_admin,Отзывы — администратор,coop.deal.review,base.group_system,cru,
+access_coop_deal_review_wizard,Окно отзыва — участник,coop.deal.review.wizard,base.group_user,crud,
+access_coop_resource_transfer_user,История прав — участник,coop.resource.transfer,base.group_user,r,
+access_coop_resource_transfer_system,История прав — администратор,coop.resource.transfer,base.group_system,crud,

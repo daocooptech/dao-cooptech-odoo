@@ -1,6 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_coop_fed_identity_system,coop.fed.identity system,model_coop_fed_identity,base.group_system,1,1,0,0
-access_coop_fed_key_system,coop.fed.key system,model_coop_fed_key,base.group_system,1,0,0,0
-access_coop_fed_event_system,coop.fed.event system,model_coop_fed_event,base.group_system,1,0,0,0
-access_coop_fed_peer_system,coop.fed.peer system,model_coop_fed_peer,base.group_system,1,1,1,1
-access_coop_fed_divergence_system,coop.fed.divergence system,model_coop_fed_divergence,base.group_system,1,0,0,0

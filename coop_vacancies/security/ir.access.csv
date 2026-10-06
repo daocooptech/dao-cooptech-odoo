@@ -1,0 +1,15 @@
+id,name,model_id,group_id/id,operation,domain
+rule_vacancy_read,"Участник видит опубликованные вакансии, свои и те, на которые откликался",coop.vacancy,base.group_user,r,"
+        ['|', '|', ('state', '=', 'published'),
+         ('partner_id', 'in', user.coop_actor_partner_ids.ids),
+         ('application_ids.partner_id', 'in', user.coop_actor_partner_ids.ids)]
+      "
+rule_vacancy_own,Править можно только свою вакансию,coop.vacancy,base.group_user,cud,"[('partner_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_vacancy_system,Администратор узла ведёт все вакансии,coop.vacancy,base.group_system,crud,
+rule_vacancy_application,"Отклик виден откликнувшемуся, автору вакансии и ответственному",coop.vacancy.application,base.group_user,crud,"
+        ['|', ('partner_id', '=', user.partner_id.id),
+         '|', ('vacancy_id.partner_id', 'in', user.coop_actor_partner_ids.ids),
+              ('vacancy_id.need_manager_id', 'in', user.coop_actor_partner_ids.ids)]
+      "
+rule_vacancy_application_system,Администратор узла видит все отклики,coop.vacancy.application,base.group_system,crud,
+access_vacancy_apply_user,Окно отклика — участник,coop.vacancy.apply,base.group_user,crud,

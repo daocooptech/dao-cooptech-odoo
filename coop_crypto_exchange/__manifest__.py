@@ -23,10 +23,9 @@
     'license': 'LGPL-3',
     'depends': ['coop_matching', 'coop_base', 'coop_theme', 'coop_wallet', 'coop_projects', 'mail'],
     'data': [
-        'security/ir.model.access.csv',
-        'security/coop_crypto_rules.xml',
         'views/coop_crypto_views.xml',
         'data/coop_farm_cron.xml',
+        'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_backend': [

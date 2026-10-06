@@ -1,0 +1,5 @@
+id,name,model_id,group_id/id,operation,domain
+coop_friendship_own,Своя дружба,coop.friendship,base.group_user,crud,"['|',
+      ('requester_id', '=', user.partner_id.id),
+      ('addressee_id', '=', user.partner_id.id)]"
+coop_friendship_admin,Дружба — администратор,coop.friendship,base.group_system,crud,

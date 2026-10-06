@@ -1,0 +1,11 @@
+id,name,model_id,group_id/id,operation,domain
+rule_coop_document_parties,Документы: только свои стороны,coop.document,base.group_user,cru,"['|', ('party_a_id', 'in', user.coop_actor_partner_ids.ids), ('party_b_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_coop_document_platform,Документы: рабочая группа видит всё,coop.document,coop_base.group_coop_platform,crud,
+access_coop_document_check_user,Сверка документа,coop.document.check,base.group_user,crud,
+rule_coop_document_folder_own,Папки документов: только свои,coop.document.folder,base.group_user,crud,"[('partner_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_coop_document_version_parties,Редакции: стороны документа,coop.document.version,base.group_user,r,"['|', ('document_id.party_a_id', 'in', user.coop_actor_partner_ids.ids), ('document_id.party_b_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_coop_document_version_platform,Редакции: рабочая группа видит всё,coop.document.version,coop_base.group_coop_platform,crud,
+rule_coop_document_log_parties,Журнал: стороны документа,coop.document.log,base.group_user,r,"['|', ('document_id.party_a_id', 'in', user.coop_actor_partner_ids.ids), ('document_id.party_b_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_coop_document_share_parties,Ссылки: стороны документа,coop.document.share,base.group_user,ru,"['|', ('document_id.party_a_id', 'in', user.coop_actor_partner_ids.ids), ('document_id.party_b_id', 'in', user.coop_actor_partner_ids.ids)]"
+access_coop_document_share_wizard_user,Выдать ссылку — участник,coop.document.share.wizard,base.group_user,crud,
+access_coop_document_move_wizard_user,Переложить в папку — участник,coop.document.move.wizard,base.group_user,crud,

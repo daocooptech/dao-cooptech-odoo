@@ -27,11 +27,10 @@
         'coop_communities', 'coop_deals', 'coop_wallet', 'mail',
     ],
     'data': [
-        'security/ir.model.access.csv',
         'data/coop_institutions.xml',
-        'security/coop_profile_rules.xml',
         'views/coop_profile_views.xml',
         'data/coop_home.xml',
+        'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_backend': [

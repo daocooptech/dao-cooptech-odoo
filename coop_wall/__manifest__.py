@@ -31,10 +31,9 @@
     'depends': ['mail', 'coop_base', 'coop_theme', 'coop_wallet', 'coop_settings',
                 'coop_messages'],
     'data': [
-        'security/ir.model.access.csv',
-        'security/coop_wall_rules.xml',
         'views/coop_wall_settings_views.xml',
         'views/coop_wall_feed_views.xml',
+        'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_backend': [

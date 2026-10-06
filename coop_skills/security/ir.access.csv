@@ -1,0 +1,7 @@
+id,name,model_id,group_id/id,operation,domain
+rule_skill_offer_read,Участник видит опубликованные предложения и свои,coop.skill.offer,base.group_user,r,"
+        ['|', ('state', '=', 'published'),
+         ('partner_id', 'in', user.coop_actor_partner_ids.ids)]
+      "
+rule_skill_offer_own,Править можно только своё предложение,coop.skill.offer,base.group_user,cud,"[('partner_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_skill_offer_system,Администратор узла ведёт все предложения,coop.skill.offer,base.group_system,crud,

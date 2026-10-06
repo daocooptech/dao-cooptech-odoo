@@ -1,0 +1,19 @@
+id,name,model_id,group_id/id,operation,domain
+rule_crypto_offer_read,Объявления обмена — читают участники,coop.crypto.offer,base.group_user,r,
+rule_crypto_offer_own,Объявления обмена — правит автор,coop.crypto.offer,base.group_user,cu,"[('author_id', '=', user.partner_id.id)]"
+rule_crypto_offer_admin,Объявления обмена — администратор,coop.crypto.offer,base.group_system,crud,
+rule_crypto_trade_parties,Свои обмены,coop.crypto.trade,base.group_user,ru,"['|', ('maker_id', '=', user.partner_id.id), ('taker_id', '=', user.partner_id.id)]"
+rule_crypto_trade_admin,Обмены — администратор,coop.crypto.trade,base.group_system,crud,
+access_coop_crypto_respond_user,Отклик на обмен — участник,coop.crypto.respond,base.group_user,crud,
+rule_farm_pool_read,Пулы ликвидности — читают участники,coop.farm.pool,base.group_user,r,
+rule_farm_pool_own,Пулы ликвидности — открывает инициатор проекта,coop.farm.pool,base.group_user,cu,"[('project_id.partner_id', '=', user.partner_id.id)]"
+rule_farm_pool_admin,Пулы ликвидности — администратор,coop.farm.pool,base.group_system,crud,
+rule_farm_stake_own,Свои взносы в пулы,coop.farm.stake,base.group_user,r,"[('partner_id', '=', user.partner_id.id)]"
+rule_farm_stake_admin,Взносы в пулы — администратор,coop.farm.stake,base.group_system,crud,
+access_coop_farm_payout_user,Выплата по пулу — участник,coop.farm.payout,base.group_user,r,
+access_coop_farm_payout_system,Выплата по пулу — администратор,coop.farm.payout,base.group_system,crud,
+rule_farm_payout_line_own,Выплаты участнику пула — свои и своего пула,coop.farm.payout.line,base.group_user,r,"['|', ('partner_id', '=', user.partner_id.id),
+                                  ('payout_id.pool_id.partner_id', '=', user.partner_id.id)]"
+rule_farm_payout_line_admin,Выплаты участнику пула — администратор,coop.farm.payout.line,base.group_system,crud,
+rule_dex_rebate_own,Возврат комиссии DEX — свой,coop.dex.rebate,base.group_user,r,"[('partner_id', '=', user.partner_id.id)]"
+rule_dex_rebate_admin,Возврат комиссии DEX — администратор,coop.dex.rebate,base.group_system,crud,

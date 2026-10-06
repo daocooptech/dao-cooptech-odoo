@@ -1,0 +1,4 @@
+id,name,model_id,group_id/id,operation,domain
+rule_channel_read_member_only,Переписка видна только своим участникам,discuss.channel,,r,
+rule_channel_write_owner,Переименовать переписку может хозяин записи или её создатель,discuss.channel,,u,
+rule_channel_unlink,Переписку платформы не удаляют,discuss.channel,,d,

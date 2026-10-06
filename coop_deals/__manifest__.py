@@ -25,11 +25,10 @@
     'depends': ['coop_base', 'coop_resources', 'coop_skills', 'coop_vacancies',
                 'coop_projects', 'mail'],
     'data': [
-        'security/ir.model.access.csv',
-        'security/coop_deal_rules.xml',
         'data/coop_deal_data.xml',
         'report/coop_deal_reports.xml',
         'views/coop_deal_views.xml',
+        'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_backend': [

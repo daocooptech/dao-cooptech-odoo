@@ -1,0 +1,21 @@
+id,name,model_id,group_id/id,operation,domain
+access_resource_category_user,Категории ресурсов — чтение,coop.resource.category,base.group_user,r,
+access_resource_category_admin,Категории ресурсов — ведение,coop.resource.category,coop_base.group_coop_platform,crud,
+access_resource_method_user,Способы передачи — чтение,coop.resource.method,base.group_user,r,
+access_resource_method_admin,Способы передачи — ведение,coop.resource.method,coop_base.group_coop_platform,crud,
+rule_resource_read,Участник видит опубликованные объявления и свои,coop.resource,base.group_user,r,"
+        ['|', ('state', '=', 'published'),
+         ('owner_id', 'in', user.coop_actor_partner_ids.ids)]
+      "
+rule_resource_own,Править можно только своё объявление,coop.resource,base.group_user,cud,"[('owner_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_resource_system,Администратор узла ведёт все объявления,coop.resource,base.group_system,crud,
+rule_promotion_own,Своё продвижение,coop.promotion,base.group_user,r,"[('partner_id', '=', user.partner_id.id)]"
+rule_promotion_system,Администратор узла видит всё продвижение,coop.promotion,base.group_system,r,
+access_promotion_admin,Продвижение — платформа,coop.promotion,coop_base.group_coop_platform,crud,
+access_resource_promote_user,Окно продвижения,coop.resource.promote,base.group_user,crud,
+access_promotion_slot_user,Места в выдаче — чтение,coop.promotion.slot,base.group_user,r,
+access_promotion_slot_admin,Места в выдаче — ведение,coop.promotion.slot,coop_base.group_coop_platform,crud,
+access_coop_resource_respond,Окно отклика — участник,coop.resource.respond,base.group_user,crud,
+rule_resource_term_read,Условия объявления читают участники,coop.resource.term,base.group_user,r,
+rule_resource_term_own,Условия правит хозяин объявления,coop.resource.term,base.group_user,cud,"[('resource_id.owner_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_resource_term_system,Условия объявлений — администратор узла,coop.resource.term,base.group_system,crud,

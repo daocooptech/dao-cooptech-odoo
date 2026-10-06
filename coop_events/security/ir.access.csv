@@ -1,0 +1,7 @@
+id,name,model_id,group_id/id,operation,domain
+rule_event_read,"Событие: черновик виден организатору, остальное всем",coop.event,base.group_user,r,"['|', ('state', '!=', 'draft'),
+          ('organizer_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_event_write,Событие правит организатор,coop.event,base.group_user,cu,"[('organizer_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_event_write_1,Событие правит организатор,coop.event,base.group_system,cud,"[('organizer_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_event_signup_own,Своя запись на событие,coop.event.signup,base.group_user,crud,"[('partner_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_event_signup_organizer,Организатор видит записавшихся,coop.event.signup,base.group_user,ru,"[('event_id.organizer_id', 'in', user.coop_actor_partner_ids.ids)]"

@@ -1,0 +1,3 @@
+id,name,model_id,group_id/id,operation,domain
+rule_account_activity_own,Своя активность,coop.account.activity,base.group_user,r,"[('partner_id', '=', user.partner_id.id)]"
+rule_analytics_plan_own,Свои планы,coop.analytics.plan,base.group_user,r,"[('partner_id', 'in', user.coop_actor_partner_ids.ids)]"

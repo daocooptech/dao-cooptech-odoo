@@ -1,0 +1,9 @@
+id,name,model_id,group_id/id,operation,domain
+rule_intangible_read,"Актив: черновик виден правообладателю, остальное всем",coop.intangible,base.group_user,r,"['|', ('state', '!=', 'draft'),
+          ('owner_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_intangible_write,Актив правит правообладатель,coop.intangible,base.group_user,cu,"[('owner_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_intangible_write_1,Актив правит правообладатель,coop.intangible,base.group_system,cud,"[('owner_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_intangible_license_side,Лицензию видят её стороны,coop.intangible.license,base.group_user,r,"['|', ('licensee_id', 'in', user.coop_actor_partner_ids.ids),
+          ('intangible_id.owner_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_intangible_license_owner,Лицензию выдаёт правообладатель,coop.intangible.license,base.group_user,cu,"[('intangible_id.owner_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_intangible_license_owner_1,Лицензию выдаёт правообладатель,coop.intangible.license,base.group_system,cud,"[('intangible_id.owner_id', 'in', user.coop_publisher_partner_ids.ids)]"

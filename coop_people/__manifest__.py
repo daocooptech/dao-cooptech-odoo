@@ -20,10 +20,9 @@
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_theme', 'contacts', 'hr_skills', 'mail'],
     'data': [
-        'security/ir.model.access.csv',
-        'security/coop_people_rules.xml',
         'views/coop_people_views.xml',
         'data/coop_home.xml',
+        'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_backend': [

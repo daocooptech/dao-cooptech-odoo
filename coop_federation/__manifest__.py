@@ -25,9 +25,9 @@ GET /.well-known/did.json и GET /federation/log. Тела адресных со
     'depends': ['coop_theme'],
     'external_dependencies': {'python': ['cryptography']},
     'data': [
-        'security/ir.model.access.csv',
         'data/coop_fed_cron.xml',
         'views/coop_fed_views.xml',
+        'security/ir.access.csv',
     ],
     'post_init_hook': '_post_init',
     'installable': True,

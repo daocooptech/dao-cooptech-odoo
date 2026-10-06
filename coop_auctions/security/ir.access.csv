@@ -1,0 +1,9 @@
+id,name,model_id,group_id/id,operation,domain
+rule_auction_read,"Торг: черновик виден владельцу, остальное всем",coop.auction,base.group_user,r,"['|', ('state', '!=', 'draft'),
+          ('owner_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_auction_write,Торг правит владелец лота,coop.auction,base.group_user,cu,"[('owner_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_auction_write_1,Торг правит владелец лота,coop.auction,base.group_system,cud,"[('owner_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_auction_bid_own,Своя ставка,coop.auction.bid,base.group_user,cr,"[('partner_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_auction_bid_owner,Владелец лота видит ставки,coop.auction.bid,base.group_user,r,"[('auction_id.owner_id', 'in', user.coop_actor_partner_ids.ids)]"
+access_coop_auction_bid_admin,Ставки — администратор,coop.auction.bid,base.group_system,ud,
+access_coop_auction_bid_wizard,Окно ставки — участник,coop.auction.bid.wizard,base.group_user,crud,

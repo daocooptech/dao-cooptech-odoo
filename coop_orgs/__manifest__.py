@@ -23,9 +23,9 @@
     'depends': ['coop_base', 'coop_theme', 'coop_resources',
                 'coop_projects', 'coop_vacancies', 'contacts', 'mail'],
     'data': [
-        'security/ir.model.access.csv',
         'data/coop_okved_data.xml',
         'views/coop_section_views.xml', 'views/coop_orgs_views.xml',
+        'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_backend': [

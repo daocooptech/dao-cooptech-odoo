@@ -25,10 +25,10 @@
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_projects'],
     'data': [
-        'security/ir.model.access.csv',
         'views/coop_economic_model_views.xml',
         'views/coop_project_views.xml',
         'data/coop_economic_load.xml',
+        'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_backend': [

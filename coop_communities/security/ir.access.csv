@@ -1,0 +1,31 @@
+id,name,model_id,group_id/id,operation,domain
+rule_community_read,Каталог сообществ,coop.community,base.group_user,r,"
+        ['|', '|',
+          ('state', 'in', ('published', 'frozen', 'archived')),
+          ('partner_id', 'in', user.coop_actor_partner_ids.ids),
+          ('member_ids', 'any', [('partner_id', '=', user.partner_id.id),
+                                 ('state', '=', 'active')])]
+      "
+rule_community_manage,Править сообщество может ведущий или модератор,coop.community,base.group_user,cu,"
+        ['|',
+          ('partner_id', 'in', user.coop_publisher_partner_ids.ids),
+          ('member_ids', 'any', [('partner_id', '=', user.partner_id.id),
+                                 ('state', '=', 'active'),
+                                 ('role', 'in', ('owner', 'moderator'))])]
+      "
+rule_community_admin,Администратор узла ведёт все сообщества,coop.community,base.group_system,crud,
+rule_community_member_read,Состав сообщества,coop.community.member,base.group_user,r,"
+        ['|', '|',
+          ('partner_id', '=', user.partner_id.id),
+          '&', ('community_id.access', 'in', ('public', 'request')),
+                   ('state', '=', 'active'),
+          ('community_id.member_ids', 'any', [('partner_id', '=', user.partner_id.id),
+                                              ('state', '=', 'active')])]
+      "
+rule_community_member_own,Своё участие,coop.community.member,base.group_user,cud,"[('partner_id', '=', user.partner_id.id)]"
+rule_community_member_moderate,Модератор ведёт состав своего сообщества,coop.community.member,base.group_user,cru,"
+        [('community_id.member_ids', 'any', [('partner_id', '=', user.partner_id.id),
+                                             ('state', '=', 'active'),
+                                             ('role', 'in', ('owner', 'moderator'))])]
+      "
+rule_community_member_admin,Администратор узла ведёт весь состав,coop.community.member,base.group_system,crud,

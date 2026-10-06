@@ -1,0 +1,11 @@
+id,name,model_id,group_id/id,operation,domain
+access_coop_barter_category_user,Категория обмена — участник,coop.barter.category,base.group_user,r,
+access_coop_barter_category_system,Категория обмена — администратор,coop.barter.category,base.group_system,crud,
+rule_barter_offer_read,Бартер — объявления читают участники,coop.barter.offer,base.group_user,r,
+rule_barter_offer_own,Бартер — объявление правит автор,coop.barter.offer,base.group_user,cud,"[('partner_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_barter_offer_admin,"Бартер — объявления, администратор",coop.barter.offer,base.group_system,crud,
+rule_barter_match_own,"Бартер — подбор видит тот, кто подбирал",coop.barter.match,base.group_user,crud,"[('create_uid', '=', user.id)]"
+rule_barter_exchange_party,Бартер — обмен видят участники,coop.barter.exchange,base.group_user,cru,"[('participant_ids', 'in', user.coop_actor_partner_ids.ids)]"
+rule_barter_exchange_admin,"Бартер — обмены, администратор",coop.barter.exchange,base.group_system,crud,
+rule_barter_leg_party,Бартер — передачи видят участники обмена,coop.barter.leg,base.group_user,r,"[('exchange_id.participant_ids', 'in', user.coop_actor_partner_ids.ids)]"
+rule_barter_leg_admin,"Бартер — передачи, администратор",coop.barter.leg,base.group_system,crud,

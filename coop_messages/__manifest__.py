@@ -25,9 +25,9 @@
     'depends': ['mail', 'coop_base', 'coop_theme', 'coop_deals', 'coop_projects',
                 'coop_people', 'coop_orgs'],
     'data': [
-        'security/coop_channel_rules.xml',
         'views/coop_messages_views.xml',
         'data/coop_channel_resync.xml',
+        'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_backend': [

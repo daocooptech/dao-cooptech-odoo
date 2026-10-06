@@ -42,14 +42,13 @@
     'depends': ['coop_base', 'coop_wallet', 'coop_deals', 'coop_resources', 'coop_people', 'coop_projects',
                 'coop_matching'],
     'data': [
-        'security/ir.model.access.csv',
-        'security/coop_cession_rules.xml',
         'data/coop_escrow_cron.xml',
         'views/coop_cession_views.xml',
         'views/coop_token_views.xml',
         'views/coop_resource_issue_views.xml',
         'views/coop_escrow_views.xml',
         'views/coop_project_share_views.xml',
+        'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_backend': [

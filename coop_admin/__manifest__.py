@@ -29,8 +29,8 @@
     # и остальные операции узла.
     'depends': ['coop_base', 'coop_theme', 'coop_wallet', 'mail'],
     'data': [
-        'security/ir.model.access.csv',
         'views/coop_admin_views.xml',
+        'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_backend': [

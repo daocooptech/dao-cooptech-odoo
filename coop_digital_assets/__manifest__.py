@@ -32,10 +32,9 @@
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_people', 'coop_intangibles'],
     'data': [
-        'security/ir.model.access.csv',
-        'security/coop_cfa_rules.xml',
         'data/coop_cfa_operators.xml',
         'views/coop_cfa_views.xml',
+        'security/ir.access.csv',
     ],
     'installable': True,
 }

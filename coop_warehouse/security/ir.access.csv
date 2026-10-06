@@ -1,0 +1,15 @@
+id,name,model_id,group_id/id,operation,domain
+rule_warehouse_read,"Участник видит свои склады и те, что на бирже",coop.warehouse,base.group_user,r,"
+        ['|', ('owner_id', 'in', user.coop_actor_partner_ids.ids),
+         ('offer_ids.state', '=', 'published')]
+      "
+rule_warehouse_own,Править можно только свой склад,coop.warehouse,base.group_user,cud,"[('owner_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_warehouse_system,Администратор узла ведёт все склады,coop.warehouse,base.group_system,crud,
+access_coop_warehouse_zone_user,Зоны склада — участник,coop.warehouse.zone,base.group_user,crud,
+rule_warehouse_offer_read,Участник видит опубликованные объявления и свои,coop.warehouse.offer,base.group_user,r,"
+        ['|', ('state', 'in', ('published', 'matched')),
+         ('owner_id', 'in', user.coop_actor_partner_ids.ids)]
+      "
+rule_warehouse_offer_own,Править можно только своё объявление,coop.warehouse.offer,base.group_user,cud,"[('owner_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_warehouse_offer_system,Администратор узла ведёт все объявления биржи,coop.warehouse.offer,base.group_system,crud,
+access_coop_warehouse_offer_term_user,Условия объявления — участник,coop.warehouse.offer.term,base.group_user,crud,

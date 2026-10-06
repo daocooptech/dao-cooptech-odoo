@@ -37,9 +37,8 @@
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_projects', 'coop_people'],
     'data': [
-        'security/ir.model.access.csv',
-        'security/coop_intangible_rules.xml',
         'views/coop_intangible_views.xml',
+        'security/ir.access.csv',
     ],
     'installable': True,
 }

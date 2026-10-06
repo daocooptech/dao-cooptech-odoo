@@ -24,10 +24,9 @@
     'depends': ['coop_base', 'coop_tokens', 'coop_theme', 'website', 'mail'],
     'data': [
         'security/coop_bounty_groups.xml',
-        'security/ir.model.access.csv',
-        'security/coop_bounty_rules.xml',
         'views/coop_bounty_views.xml',
         'views/coop_bounty_website.xml',
+        'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_frontend': [

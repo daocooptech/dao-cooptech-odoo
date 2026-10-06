@@ -21,9 +21,8 @@
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_people', 'coop_theme', 'hr_skills', 'mail'],
     'data': [
-        'security/ir.model.access.csv',
-        'security/coop_skills_rules.xml',
         'views/coop_skill_views.xml',
+        'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_backend': [

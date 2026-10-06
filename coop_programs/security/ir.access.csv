@@ -1,0 +1,13 @@
+id,name,model_id,group_id/id,operation,domain
+rule_program_read,"Программа: черновик виден организатору, остальное всем",coop.program,base.group_user,r,"['|', ('state', '!=', 'draft'),
+          ('organizer_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_program_write,Программу правит организатор,coop.program,base.group_user,cu,"[('organizer_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_program_write_1,Программу правит организатор,coop.program,base.group_system,cud,"[('organizer_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_program_step_read,Этапы программы видны вместе с ней,coop.program.step,base.group_user,r,"['|', ('program_id.state', '!=', 'draft'),
+          ('program_id.organizer_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_program_step_write,Этапы правит организатор программы,coop.program.step,base.group_user,cu,"[('program_id.organizer_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_program_step_write_1,Этапы правит организатор программы,coop.program.step,base.group_system,cud,"[('program_id.organizer_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_program_need_read,Потребности программы видны вместе с ней,coop.program.need,base.group_user,r,"['|', ('program_id.state', '!=', 'draft'),
+          ('program_id.organizer_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_program_need_write,Потребности правит организатор программы,coop.program.need,base.group_user,cu,"[('program_id.organizer_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_program_need_write_1,Потребности правит организатор программы,coop.program.need,base.group_system,cud,"[('program_id.organizer_id', 'in', user.coop_publisher_partner_ids.ids)]"

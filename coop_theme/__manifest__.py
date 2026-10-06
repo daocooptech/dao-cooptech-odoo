@@ -26,13 +26,12 @@
     # молча затирается.
     'depends': ['web', 'mail', 'coop_base'],
     'data': [
-        'security/ir.model.access.csv',
-        'security/coop_sidebar_rules.xml',
         'views/coop_theme_boot.xml',
         'views/coop_sidebar_views.xml',
         'views/coop_contacts_views.xml',
         'views/coop_favorites_views.xml',
         'data/coop_sidebar_resync.xml',
+        'security/ir.access.csv',
     ],
     'assets': {
         'web._assets_primary_variables': [
