@@ -139,7 +139,7 @@ class CoopWebsiteLanding(models.AbstractModel):
         реквизиты, которых владелец не задал параметром
         `coop_website.legal_<ключ>`, в документах не показываются — их не
         выдумываем и не заменяем пометкой в скобках."""
-        get = self.env['ir.config_parameter'].sudo().get_param
+        get = self.env['ir.config_parameter'].sudo().get_str
         keys = {
             'operator': 'ДАО КООПТЕХ', 'organizer': 'ДАО КООПТЕХ',
             # Реквизиты не выдумываются: пока параметр не задан, строка
