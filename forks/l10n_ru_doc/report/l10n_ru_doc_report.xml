@@ -37,7 +37,6 @@
            <field name="model">sale.order</field>
            <field name="report_type">qweb-pdf</field>
            <field name="report_name">l10n_ru_doc.report_order</field>
-           <field name="report_file">l10n_ru_doc.report_order</field>
            <field name="print_report_name">'Счет - %s ' % ((object.name or '')+' '+(object.partner_id.parent_id.name if object.partner_id.parent_id else object.partner_id.name))</field>
            <field name="binding_model_id" ref="sale.model_sale_order" />
            <field name="paperformat_id" ref="l10n_ru_doc.paperformat_a4" />
@@ -133,7 +132,6 @@
            <field name="model">account.move</field>
            <field name="report_type">qweb-pdf</field>
            <field name="report_name">l10n_ru_doc.report_upd</field>
-           <field name="report_file">l10n_ru_doc.report_upd</field>
            <field name="print_report_name">'УПД'</field>
            <field name="binding_model_id" ref="account.model_account_move" />
            <field name="paperformat_id" ref="l10n_ru_doc.paperformat_a4l" />
@@ -157,7 +155,6 @@
            <field name="model">account.move</field>
            <field name="report_type">qweb-pdf</field>
            <field name="report_name">l10n_ru_doc.report_updn</field>
-           <field name="report_file">l10n_ru_doc.report_updn</field>
            <field name="print_report_name">'УПД без печатей'</field>
            <field name="binding_model_id" ref="account.model_account_move" />
            <field name="paperformat_id" ref="l10n_ru_doc.paperformat_a4l" />

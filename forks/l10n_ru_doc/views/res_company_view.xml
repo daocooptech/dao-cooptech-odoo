@@ -7,19 +7,17 @@
         <field name="model">res.company</field>
         <field name="inherit_id" ref="base.view_company_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='vat']" position="after">
+            <xpath expr="//div[@name='identifiers']" position="after">
                 <field name="inn" invisible="True"/><!-- reason: need-->
                 <field name="kpp"/>
                 <field name="okpo"/>
+                <field name="company_registry" string="ОГРН"/>
             </xpath>
 
-            <xpath expr="//field[@name='vat']" position="attributes">
+            <xpath expr="//label[@for='vat']" position="attributes">
                 <attribute name="string">ИНН</attribute>
             </xpath>
-            <xpath expr="//field[@name='company_registry']" position="attributes">
-                <attribute name="string">ОГРН</attribute>
-            </xpath>
-                
+
             <xpath expr="//notebook" position="inside">
                 <page string="Подписи и печати">
                     <group string="Ответственные">
