@@ -224,7 +224,7 @@ class CoopWebsiteLanding(models.AbstractModel):
         Config = self.env['ir.config_parameter'].sudo()
         if os.path.exists(LOGO) and not Config.get_str('coop_website.logo_set'):
             with open(LOGO, 'rb') as fh:
-                values['logo'] = base64.b64encode(fh.read())
+                values['logo'] = base64.b64encode(fh.read()).decode()
             Config.set_str('coop_website.logo_set', '1')
 
         # Телефон и почта из установщика — «+1 555-555-5556» и адрес
@@ -244,7 +244,7 @@ class CoopWebsiteLanding(models.AbstractModel):
         # загруженный руками потом не трогаем.
         if os.path.exists(LOGO) and not Config.get_str('coop_website.favicon_set'):
             with open(LOGO, 'rb') as fh:
-                website.favicon = base64.b64encode(fh.read())
+                website.favicon = base64.b64encode(fh.read()).decode()
             Config.set_str('coop_website.favicon_set', '1')
 
         Menu = self.env['website.menu'].sudo()

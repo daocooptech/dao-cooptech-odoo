@@ -25,6 +25,7 @@ import hashlib
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+from odoo.tools.binary import BinaryValue
 
 
 class CoopDocument(models.Model):
@@ -119,6 +120,9 @@ class CoopDocument(models.Model):
         """
         if not value:
             return False
+        if isinstance(value, BinaryValue):
+            # значение поля в 20: SHA-256 содержимого уже посчитано движком
+            return value.checksum
         raw = value
         if isinstance(raw, str):
             raw = raw.encode('ascii', errors='ignore')

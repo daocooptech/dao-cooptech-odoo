@@ -201,7 +201,7 @@ def emblem(name, activity=None):
     glyph = ('<g transform="translate(72 72) scale(%.3f)" fill="none" '
              'stroke="%s" stroke-width="1.7" stroke-linecap="round" '
              'stroke-linejoin="round">%s</g>') % (112 / 24.0, fg, body)
-    return base64.b64encode(_svg(bg, glyph).encode('utf-8'))
+    return base64.b64encode(_svg(bg, glyph).encode('utf-8')).decode()
 
 
 def monogram(name, activity=None):
@@ -219,7 +219,7 @@ def monogram(name, activity=None):
     text = ('<text x="128" y="182" fill="%s" font-family="Manrope, sans-serif" '
             'font-size="86" font-weight="700" text-anchor="middle">%s</text>'
             ) % (fg, _letter(name))
-    return base64.b64encode(_svg(bg, glyph + text).encode('utf-8'))
+    return base64.b64encode(_svg(bg, glyph + text).encode('utf-8')).decode()
 
 
 def dao_mark(name, icon):
@@ -260,7 +260,7 @@ def dao_mark(name, icon):
            'viewBox="0 0 %d %d"><rect width="%d" height="%d" fill="%s"/>'
            '%s%s</svg>') % (width, height, width, height,
                             width, height, fg, dots, glyph)
-    return base64.b64encode(svg.encode('utf-8'))
+    return base64.b64encode(svg.encode('utf-8')).decode()
 
 
 def _marks():

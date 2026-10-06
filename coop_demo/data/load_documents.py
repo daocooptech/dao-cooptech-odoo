@@ -225,7 +225,7 @@ def load_documents(env, target=TARGET):
             line['state'] = 'draft'
         else:
             line['state'] = 'signed'
-        line['file'] = base64.b64encode(text.encode('utf-8'))
+        line['file'] = base64.b64encode(text.encode('utf-8')).decode()
         line['file_name'] = '%s.txt' % line['number'].replace('/', '-')
         values.append(line)
 

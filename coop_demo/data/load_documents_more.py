@@ -82,7 +82,7 @@ def _pdf(doc, text, draft=False):
 
 def _text_of(doc):
     try:
-        raw = base64.b64decode(doc.file or b'')
+        raw = doc.file.content
         return raw.decode('utf-8')
     except Exception:
         return doc.name or ''
@@ -100,7 +100,7 @@ def pdf_documents(env):
         text = _text_of(doc)
         if not text:
             continue
-        data = base64.b64encode(_pdf(doc, text))
+        data = base64.b64encode(_pdf(doc, text)).decode()
         old_print = doc.fingerprint
         doc.write({'file': data, 'file_name': doc.file_name[:-4] + '.pdf'})
         for version in doc.version_ids.filtered(lambda v: v.fingerprint == old_print):
@@ -142,7 +142,7 @@ def enrich_documents(env, login='dashkevich'):
         draft = _pdf(doc, _draft_text(doc), draft=True)
         Version.create({
             'document_id': doc.id, 'number': 1,
-            'file': base64.b64encode(draft),
+            'file': base64.b64encode(draft).decode(),
             'file_name': (doc.file_name or 'документ.pdf').replace('.pdf', ' (проект).pdf'),
             'fingerprint': hashlib.sha256(draft).hexdigest(),
             'author_id': doc.party_a_id.id, 'date': earlier, 'note': 'проект для согласования',

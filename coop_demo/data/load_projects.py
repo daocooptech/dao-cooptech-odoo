@@ -228,7 +228,7 @@ def _it_photo(name):
         return None
     path = files[zlib.crc32((name or '').encode('utf-8')) % len(files)]
     with open(path, 'rb') as fh:
-        return base64.b64encode(fh.read())
+        return base64.b64encode(fh.read()).decode()
 
 
 def load_projects(env, extra=100):
@@ -306,7 +306,7 @@ def load_projects(env, extra=100):
             photo = os.path.join(PHOTO_DIR, photo_file) if photo_file else ''
             if photo and os.path.exists(photo):
                 with open(photo, 'rb') as fh:
-                    values['image_1920'] = base64.b64encode(fh.read())
+                    values['image_1920'] = base64.b64encode(fh.read()).decode()
 
         project = Project.search([('import_key', '=', key)], limit=1)
         if project:

@@ -4,7 +4,6 @@
 Свои адреса, а не `/web/content`: открытие и скачивание должны попасть
 в журнал документа (разбор дисков, п. 4) — движок этого не знает.
 """
-import base64
 import io
 import mimetypes
 import zipfile
@@ -20,7 +19,9 @@ KINDS = {'contract': 'Договор', 'act': 'Акт приёма-переда�
 
 
 def _content(doc):
-    data = base64.b64decode(doc.file or b'')
+    # В 20 значение Binary-поля — BinaryValue: байты берутся из .content,
+    # раскодировать base64 уже не нужно.
+    data = doc.file.content if doc.file else b''
     name = doc.file_name or ('%s.pdf' % doc.name)
     mime = mimetypes.guess_type(name)[0] or 'application/octet-stream'
     return data, name, mime

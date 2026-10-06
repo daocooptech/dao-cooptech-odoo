@@ -234,7 +234,7 @@ def load_org_profiles(env, specializations, marks):
                 mark = marks.next()
                 if mark:
                     with open(mark, 'rb') as fh:
-                        values['image_1920'] = base64.b64encode(fh.read())
+                        values['image_1920'] = base64.b64encode(fh.read()).decode()
                 else:
                     values['image_1920'] = emblems.emblem(name, specialization_name)
                 Partner.create(dict(values, name=name))

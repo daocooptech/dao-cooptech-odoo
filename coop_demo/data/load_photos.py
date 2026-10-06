@@ -124,7 +124,7 @@ def _pick(name, specialization):
             number = zlib.crc32((name or '').encode('utf-8')) % len(fit)
             path = os.path.join(IMG_DIR, fit[number])
             with open(path, 'rb') as fh:
-                return path, base64.b64encode(fh.read())
+                return path, base64.b64encode(fh.read()).decode()
     rule = load_resources._photo_by_name(name or '')
     if rule:
         options = photos._variants(rule)
@@ -132,7 +132,7 @@ def _pick(name, specialization):
             number = zlib.crc32((name or '').encode('utf-8')) % len(options)
             path = os.path.join(photos.PHOTO_DIR, options[number])
             with open(path, 'rb') as fh:
-                return path, base64.b64encode(fh.read())
+                return path, base64.b64encode(fh.read()).decode()
     return None, None
 
 
@@ -269,7 +269,7 @@ def ensure_marks(env):
             env.invalidate_all()
         path = os.path.join(emblems.MARK_DIR, name)
         with open(path, 'rb') as fh:
-            org.image_1920 = base64.b64encode(fh.read())
+            org.image_1920 = base64.b64encode(fh.read()).decode()
         org.flush_recordset()
         attachment = env['ir.attachment'].sudo().search([
             ('res_model', '=', 'res.partner'), ('res_field', '=', 'image_1920'),

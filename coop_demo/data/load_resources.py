@@ -688,7 +688,7 @@ def load_resources(env, extra=45):
         photo = os.path.join(PHOTO_DIR, file) if file else ''
         if photo and os.path.exists(photo):
             with open(photo, 'rb') as fh:
-                values['image_1920'] = base64.b64encode(fh.read())
+                values['image_1920'] = base64.b64encode(fh.read()).decode()
 
         # Ключ — название вместе с городом и владельцем: в макете
         # одинаковые названия встречаются у разных участников («Сварочный

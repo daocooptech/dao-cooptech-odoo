@@ -23,6 +23,7 @@ from markupsafe import Markup
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+from odoo.tools.binary import BinaryValue
 
 TRASH_DAYS = 30
 
@@ -30,6 +31,8 @@ TRASH_DAYS = 30
 def _sha256_b64(value):
     if not value:
         return False
+    if isinstance(value, BinaryValue):
+        return value.checksum
     raw = value.encode('ascii', errors='ignore') if isinstance(value, str) else value
     try:
         content = base64.b64decode(raw)
@@ -411,7 +414,7 @@ class CoopDocument(models.Model):
         doc = self.create({
             'name': title,
             'kind': 'act',
-            'file': base64.b64encode(out.getvalue()),
+            'file': base64.b64encode(out.getvalue()).decode(),
             'file_name': '%s.pdf' % title,
             'folder_id': folder_id or False,
         })

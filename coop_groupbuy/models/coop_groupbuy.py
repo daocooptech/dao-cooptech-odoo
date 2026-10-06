@@ -307,7 +307,7 @@ class CoopGroupBuy(models.Model):
             try:
                 image = reports.barcode(
                     'QR', record.my_pickup_code, width=180, height=180)
-                record.my_pickup_qr = base64.b64encode(image)
+                record.my_pickup_qr = base64.b64encode(image).decode()
             except Exception as error:
                 # Картинка — удобство, а код и так виден рядом числом.
                 # Уронить из-за неё весь экран было бы несоразмерно.

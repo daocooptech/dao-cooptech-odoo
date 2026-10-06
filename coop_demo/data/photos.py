@@ -79,7 +79,7 @@ def photo_for(name):
     number = zlib.crc32((name or '').encode('utf-8')) % len(options)
     path = os.path.join(PHOTO_DIR, options[number])
     with open(path, 'rb') as fh:
-        return base64.b64encode(fh.read())
+        return base64.b64encode(fh.read()).decode()
 
 
 def fill(records, field='image_1920', name_field='name'):

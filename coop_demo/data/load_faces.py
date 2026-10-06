@@ -83,7 +83,7 @@ def _pick(directory, files, partner_id):
 
 def _read(path):
     with open(path, 'rb') as handle:
-        return base64.b64encode(handle.read())
+        return base64.b64encode(handle.read()).decode()
 
 
 def _stub(data):
@@ -158,7 +158,7 @@ def ensure_faces(env):
 
         raw_one = partner.image_1920
         if raw_one:
-            data = base64.b64decode(raw_one)
+            data = raw_one.content
             from_where = ours.get(hashlib.sha256(data).hexdigest())
             if from_where is None and not _stub(data):
                 # Не из наших наборов — фотография самого участника.

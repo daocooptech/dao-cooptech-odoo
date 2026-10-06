@@ -23,7 +23,6 @@
 Повторный запуск ничего не удваивает: запись с тем же вложением на
 стене уже есть — пропускается.
 """
-import base64
 import logging
 import os
 from datetime import datetime, timedelta
@@ -86,7 +85,7 @@ def load_wall_media(env, login='dashkevich'):
                 data = handle.read()
             attachments |= Attachment.create({
                 'name': name,
-                'datas': base64.b64encode(data),
+                'raw': data,
                 'mimetype': mime,
                 'res_model': 'res.partner',
                 'res_id': page.id,

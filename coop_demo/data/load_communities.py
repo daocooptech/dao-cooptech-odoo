@@ -173,7 +173,7 @@ def load_communities(env):
         photo = os.path.join(PHOTO_DIR, row['photo'])
         if os.path.exists(photo):
             with open(photo, 'rb') as handle:
-                values['image_1920'] = base64.b64encode(handle.read())
+                values['image_1920'] = base64.b64encode(handle.read()).decode()
 
         community = Community.search([('import_key', '=', key)], limit=1)
         if community:

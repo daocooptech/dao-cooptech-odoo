@@ -190,7 +190,7 @@ def photo_for(name, specialization):
         return None
     number = zlib.crc32((name or '').encode('utf-8')) % len(fit)
     with open(os.path.join(IMG_DIR, fit[number]), 'rb') as fh:
-        return base64.b64encode(fh.read())
+        return base64.b64encode(fh.read()).decode()
 
 
 def all_files():

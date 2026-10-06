@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import base64
 import json
 
 from odoo import _, api, fields, models
@@ -57,7 +56,7 @@ class ResPartner(models.Model):
             'name': 'cooptech-%s-%s.json' % (
                 self.id, fields.Date.today().isoformat()),
             'type': 'binary',
-            'datas': base64.b64encode(content.encode('utf-8')),
+            'raw': content.encode('utf-8'),
             'res_model': 'res.partner',
             'res_id': self.id,
             'public': False,

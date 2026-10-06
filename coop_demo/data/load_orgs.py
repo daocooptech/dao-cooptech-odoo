@@ -226,7 +226,7 @@ def load_organizations(env, specializations, marks):
         mark = marks.next()
         if mark:
             with open(mark, 'rb') as fh:
-                values['image_1920'] = base64.b64encode(fh.read())
+                values['image_1920'] = base64.b64encode(fh.read()).decode()
             values['coop_symbol_mark'] = True
         else:
             values['image_1920'] = emblems.monogram(org['name'], org['specialization'])

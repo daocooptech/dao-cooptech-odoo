@@ -206,7 +206,7 @@ def load_vacancies(env, extra=45):
         photo = os.path.join(PHOTO_DIR, os.path.basename(row['photo'])) if row['photo'] else ''
         if photo and os.path.exists(photo):
             with open(photo, 'rb') as fh:
-                values['image_1920'] = base64.b64encode(fh.read())
+                values['image_1920'] = base64.b64encode(fh.read()).decode()
         else:
             # Снимка нет — ставим знак по роду занятий. Пустое место в
             # плитке читается как незагрузившаяся картинка, а знак — как

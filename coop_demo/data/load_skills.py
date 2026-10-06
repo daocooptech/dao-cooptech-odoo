@@ -116,7 +116,7 @@ def load_skills(env):
         photo = os.path.join(PHOTO_DIR, os.path.basename(row['photo'])) if row['photo'] else ''
         if photo and os.path.exists(photo):
             with open(photo, 'rb') as fh:
-                values['image_1920'] = base64.b64encode(fh.read())
+                values['image_1920'] = base64.b64encode(fh.read()).decode()
 
         # Опознаём по ключу источника, а не по названию: название
         # правится, и тогда загрузчик заводит запись заново вместо того,
@@ -252,7 +252,7 @@ def _generate_missing(env, Offer, Partner, photo_by_spec, texts_by_spec,
         photo = os.path.join(PHOTO_DIR, photo_name) if photo_name else ''
         if photo and os.path.exists(photo):
             with open(photo, 'rb') as fh:
-                values['image_1920'] = base64.b64encode(fh.read())
+                values['image_1920'] = base64.b64encode(fh.read()).decode()
         else:
             # Снимка нет ни у специализации, ни у сферы — ставим знак по
             # роду занятий. Пустое место в строке каталога читается как
