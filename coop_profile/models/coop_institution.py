@@ -44,13 +44,12 @@ class CoopInstitution(models.Model):
     city = fields.Char('Город', index=True)
     active = fields.Boolean(default=True)
 
-    _sql_constraints = [
-        # Два одинаковых сокращения в одном городе — верный признак того,
-        # что справочник заполнили дважды.
-        ('coop_institution_short_city_uniq',
-         'unique(short_name, city)',
-         'Такое сокращённое название в этом городе уже есть.'),
-    ]
+    # Два одинаковых сокращения в одном городе — верный признак того,
+    # что справочник заполнили дважды.
+    _coop_institution_short_city_uniq = models.Constraint(
+        'unique(short_name, city)',
+        "Такое сокращённое название в этом городе уже есть.",
+    )
 
     @api.depends('name', 'short_name', 'city')
     def _compute_display_name(self):

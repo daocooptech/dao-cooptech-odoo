@@ -68,10 +68,10 @@ class CoopOrgLink(models.Model):
         string='Подтверждена', default=False,
         help='Вторая сторона согласилась, что связь есть.')
 
-    _sql_constraints = [
-        ('coop_org_link_uniq', 'unique(org_id, other_id, kind)',
-         'Такая связь между этими организациями уже заведена.'),
-    ]
+    _coop_org_link_uniq = models.Constraint(
+        'unique(org_id, other_id, kind)',
+        "Такая связь между этими организациями уже заведена.",
+    )
 
     @api.constrains('org_id', 'other_id')
     def _check_not_self(self):

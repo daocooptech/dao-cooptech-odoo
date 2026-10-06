@@ -44,7 +44,7 @@ class CoopTonConnect(http.Controller):
                      ('Access-Control-Allow-Origin', '*'),
                      ('Cache-Control', 'public, max-age=600')])
 
-    @http.route('/coop/ton/connected', type='json', auth='user',
+    @http.route('/coop/ton/connected', type='jsonrpc', auth='user',
                 methods=['POST'])
     def connected(self, address=None, network=None, **kwargs):
         """Запомнить адрес подключённого кошелька.

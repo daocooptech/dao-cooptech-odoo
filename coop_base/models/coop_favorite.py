@@ -30,12 +30,11 @@ class CoopFavorite(models.Model):
     res_model = fields.Char(string='Модель', required=True, index=True)
     res_id = fields.Integer(string='Номер записи', required=True, index=True)
 
-    _sql_constraints = [
-        # Второй раз отметить то же самое нельзя: сердечко — не счётчик.
-        ('coop_favorite_uniq',
-         'unique(partner_id, res_model, res_id)',
-         'Эта запись уже в избранном.'),
-    ]
+    # Второй раз отметить то же самое нельзя: сердечко — не счётчик.
+    _coop_favorite_uniq = models.Constraint(
+        'unique(partner_id, res_model, res_id)',
+        "Эта запись уже в избранном.",
+    )
 
     @api.model
     def coop_toggle(self, res_model, res_id):
