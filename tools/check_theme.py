@@ -271,7 +271,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--odoo', default=DEFAULT_ODOO,
                         help='где лежит движок Odoo')
+    parser.add_argument('--quiet', action='store_true',
+                        help='по одной строке на беду — без пояснений')
     args = parser.parse_args()
+    # В конвейере Git Bash вывод иначе уходит в cp1251 и читается кракозябрами.
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8')
 
     if etree is None:
         print('Нужен lxml: pip install lxml')
@@ -287,6 +292,9 @@ def main():
         return 0
     print('Проверка темы: бед %d\n' % len(problems))
     for item in problems:
+        if args.quiet:
+            print('— ' + item.splitlines()[0])
+            continue
         print('— ' + item)
         print()
     return 1
