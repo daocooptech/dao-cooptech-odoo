@@ -17,9 +17,9 @@
     "license": "LGPL-3",
     "depends": ["base", "web", "report_monetary_helpers"],
     "data": [
-        "security/ir.model.access.csv",
         "views/ir_actions_report_views.xml",
         "wizard/custom_report_field_values_wizard_views.xml",
+        'security/ir.access.csv',
     ],
     "assets": {
         "web.assets_backend": [

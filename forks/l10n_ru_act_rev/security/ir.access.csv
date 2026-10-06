@@ -1,0 +1,2 @@
+id,name,model_id,group_id/id,operation,domain
+access_general_ledger_act_revise_wizard,general.ledger.act_revise.wizard,general.ledger.act_revise.wizard,base.group_user,crud,

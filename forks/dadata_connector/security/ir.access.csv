@@ -1,0 +1,2 @@
+id,name,model_id,group_id/id,operation,domain
+access_res_partner_auto_data_wizard,res_partner_auto_data_wizard user,res.partner.auto_data.wizard,base.group_everyone,crud,

@@ -8,10 +8,10 @@
     "depends": ["base", "web", "contacts", "account", "l10n_ru_doc"],
     "external_dependencies": {"python": ["dadata==21.10.1"]},
     "data": [
-        "security/ir.model.access.csv",
         "views/res_partner_views.xml",
         "wizard/res_partner_auto_data_wizard_views.xml",
         "views/res_config_settings_view.xml",
+        'security/ir.access.csv',
     ],
     "assets": {
         "web.assets_backend": [

@@ -18,7 +18,6 @@
                 ],
 
     'data': [
-        'security/ir.model.access.csv',
         'data/data.xml',
         'views/order_prepaid.xml',
         'views/sale_order.xml',
@@ -27,6 +26,8 @@
         'report/report_invoice.xml',
         'wizard/account_payment_register_prepaid.xml',
         'views/res_config_settings.xml',
+
+        'security/ir.access.csv',
     ],
 
     "external_dependencies": {

@@ -27,13 +27,13 @@
     # any module necessary for this one to work correctly
     "depends": ["account", "portal", "website", 'contacts', "l10n_ru_doc", 'l10n_ru_contract', 'l10n_ru_base'],
     "data": [
-        "security/ir.model.access.csv",
         "wizard/general_ledger_wizard_view.xml",
         "report/layouts.xml",
         "report/general_ledger.xml",
         "views/account_account_views.xml",
         "views/report_general_ledger.xml",
         "views/portal_templates.xml",
+        'security/ir.access.csv',
     ],
     "installable": True,
     "application": True,

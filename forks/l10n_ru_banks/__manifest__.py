@@ -12,6 +12,6 @@
     "installable": True,
     "depends": ["account"],
     "auto_install": ["account"],
-    "data": ["security/ir.model.access.csv", "views/res_bank.xml"],
+    "data": [ "views/res_bank.xml", 'security/ir.access.csv'],
     "demo": ["data/res_bank_demo.xml"],
 }

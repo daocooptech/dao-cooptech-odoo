@@ -1,0 +1,4 @@
+id,name,model_id,group_id/id,operation,domain
+access_custom_report_field,custom_report_field user,custom.report.field,base.group_user,crud,
+access_custom_report_field_values_wizard,custom_report_field_values_wizard user,custom.report.field.values.wizard,base.group_everyone,crud,
+access_custom_report_field_values_wizard_line,custom_report_field_values_wizard_line user,custom.report.field.values.wizard.line,base.group_everyone,crud,

@@ -46,8 +46,8 @@
         'views/res_company_views.xml',
         'views/res_partner_views.xml',
         'views/contract_profile_views.xml',
-        'security/ir.model.access.csv',
         'report/report_contract.xml',
+        'security/ir.access.csv',
     ],
     'demo': [
         'demo/demo.xml',
