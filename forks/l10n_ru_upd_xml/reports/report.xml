@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record id="upd_xml_report" model="ir.actions.report">
+        <field name="name">УПД xml</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-xml</field>
+        <field name="report_name">l10n_ru_upd_xml.demo_report_xml_view</field>
+        <field name="report_file">l10n_ru_upd_xml.demo_report_xml_view</field>
+        <field name="print_report_name">'%s' % (object.edi)</field>
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

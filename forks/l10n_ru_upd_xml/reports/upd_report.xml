@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+   <template id="demo_report_xml_view">
+        <t t-foreach="docs" t-as="o">
+            <!-- Multicompany -->
+            <t t-if="o and o.company_id">
+                <t t-set="company" t-value="o.company_id"/>
+            </t>
+            <t t-elif="not o or not o.company_id">
+                <t t-set="company" t-value="res_company"/>
+            </t>
+
+            <t t-set="pid" t-value="o and o.partner_id and (o.partner_id.parent_id or o.partner_id) or False"/>
+
+            <Файл t-att="{
+                'ИдФайл': o and o.edi and (o.edi + '_0_0_0_0_0_00') or '',
+                'ВерсФорм': '5.03',
+                'ВерсПрог': 'Odoo19'
+            }">
+                <Документ t-att="{
+                    'КНД': '1115131',
+                    'Функция': 'СЧФДОП',
+                    'ПоФактХЖ': 'Документ об отгрузке товаров (выполнении работ), передаче имущественных прав (документ об оказании услуг)',
+                    'НаимДокОпр': 'Счет-фактура и документ об отгрузке товаров (выполнении работ), передаче имущественных прав (документ об оказании услуг)',
+                    'ДатаИнфПр': time.strftime('%d.%m.%Y'),
+                    'ВремИнфПр': time.strftime('%H.%M.%S'),
+                    'НаимЭконСубСост': company and company.name or ''
+                }">
+                    <СвСчФакт t-att="{
+                        'НомерДок': o and (o.invoice_origin or o.name) or '',
+                        'ДатаДок': o and o.invoice_date and o.invoice_date.strftime('%d.%m.%Y') or ''
+                    }">
+                        <СвПрод t-att="{'ОКПО': company and company.okpo or ''}">
+                            <ИдСв>
+                                <t t-if="company and company.inn and len(company.inn) == 10">
+                                    <СвЮЛУч t-att="{
+                                        'НаимОрг': company.name or '',
+                                        'ИННЮЛ': company.inn or '',
+                                        'КПП': company.kpp or ''
+                                    }"/>
+                                </t>
+                                <t t-elif="company and company.inn and len(company.inn) == 12">
+                                    <СвИП t-att="{
+                                        'ИННФЛ': company.inn or '',
+                                        'ИныеСвед': company.name or ''
+                                    }">
+                                        <ФИО t-att="{
+                                            'Фамилия': company.partner_id and company.partner_id.last_name_IP or '',
+                                            'Имя': company.partner_id and company.partner_id.first_name_IP or '',
+                                            'Отчество': company.partner_id and company.partner_id.middle_name_IP or ''
+                                        }"/>
+                                    </СвИП>
+                                </t>
+                            </ИдСв>
+                            <Адрес>
+                                <АдрИнф t-att="{
+                                    'КодСтр': '643',
+                                    'НаимСтран': 'Российская Федерация',
+                                    'АдрТекст': (company.city or '') + ', ' + (company.street or '')
+                                }"/>
+                            </Адрес>
+                        </СвПрод>
+
+                        <t t-if="o and o.only_service == False">
+                            <ГрузОт>
+                                <ГрузОтпр>
+                                    <t t-set="gruzootpr" t-value="o.gruzootpr or company.partner_id"/>
+                                    <t t-set="gruzootpr" t-value="gruzootpr and (gruzootpr.parent_id or gruzootpr)"/>
+                                    <ИдСв>
+                                        <t t-if="gruzootpr and gruzootpr.inn and len(gruzootpr.inn) == 10">
+                                            <СвЮЛУч t-att="{
+                                                'НаимОрг': gruzootpr.name or '',
+                                                'ИННЮЛ': gruzootpr.inn or '',
+                                                'КПП': gruzootpr.kpp or ''
+                                            }"/>
+                                        </t>
+                                        <t t-elif="gruzootpr and gruzootpr.inn and len(gruzootpr.inn) == 12">
+                                            <СвИП t-att="{
+                                                'ИННФЛ': gruzootpr.inn or '',
+                                                'ИныеСвед': gruzootpr.name or ''
+                                            }">
+                                                <ФИО t-att="{
+                                                    'Фамилия': gruzootpr.last_name_IP or '',
+                                                    'Имя': gruzootpr.first_name_IP or '',
+                                                    'Отчество': gruzootpr.middle_name_IP or ''
+                                                }"/>
+                                            </СвИП>
+                                        </t>
+                                    </ИдСв>
+                                    <Адрес>
+                                        <АдрИнф t-att="{
+                                            'КодСтр': '643',
+                                            'НаимСтран': 'Российская Федерация',
+                                            'АдрТекст': (gruzootpr.city or '') + ', ' + (gruzootpr.street or '')
+                                        }"/>
+                                    </Адрес>
+                                </ГрузОтпр>
+                            </ГрузОт>
+
+                            <t t-set="gruzopol" t-value="o.gruzopol or pid"/>
+                            <t t-set="gruzopol" t-value="gruzopol and (gruzopol.parent_id or gruzopol)"/>
+
+                            <ГрузПолуч t-att="{'ОКПО': gruzopol and gruzopol.okpo or ''}">
+                                <ИдСв>
+                                    <t t-if="gruzopol and gruzopol.inn and len(gruzopol.inn) == 10">
+                                        <СвЮЛУч t-att="{
+                                            'НаимОрг': gruzopol.name or '',
+                                            'ИННЮЛ': gruzopol.inn or '',
+                                            'КПП': gruzopol.kpp or ''
+                                        }"/>
+                                    </t>
+                                    <t t-elif="gruzopol and gruzopol.inn and len(gruzopol.inn) == 12">
+                                        <СвИП t-att="{
+                                            'ИННФЛ': gruzopol.inn or '',
+                                            'ИныеСвед': gruzopol.name or ''
+                                        }">
+                                            <ФИО t-att="{
+                                                'Фамилия': gruzopol.last_name_IP or '',
+                                                'Имя': gruzopol.first_name_IP or '',
+                                                'Отчество': gruzopol.middle_name_IP or ''
+                                            }"/>
+                                        </СвИП>
+                                    </t>
+                                </ИдСв>
+                                <Адрес>
+                                    <АдрИнф t-att="{
+                                        'КодСтр': '643',
+                                        'НаимСтран': 'Российская Федерация',
+                                        'АдрТекст': (gruzopol.city or '') + ', ' + (gruzopol.street or '')
+                                    }"/>
+                                </Адрес>
+                            </ГрузПолуч>
+                        </t>
+
+                        <t t-if="o and o.payment_num and o.payment_num != ''">
+                            <СвПРД t-att="{
+                                'НомерПРД': o.payment_num,
+                                'ДатаПРД': o.payment_date or ''
+                            }"/>
+                        </t>
+
+                        <t t-if="o and o.only_service == False">
+                            <ДокПодтвОтгрНом
+                                РеквНаимДок="Счет-фактура и документ об отгрузке товаров (выполнении работ), передаче имущественных прав (документ об оказании услуг)"
+                                t-att="{
+                                    'РеквНомерДок': o.invoice_origin or o.name or '',
+                                    'РеквДатаДок': o.invoice_date and o.invoice_date.strftime('%d.%m.%Y') or ''
+                                }"/>
+                        </t>
+
+                        <СвПокуп t-att="{'ОКПО': pid and pid.okpo or ''}">
+                            <ИдСв>
+                                <t t-if="pid and pid.inn and len(pid.inn) == 10">
+                                    <СвЮЛУч t-att="{
+                                        'НаимОрг': pid.name or '',
+                                        'ИННЮЛ': pid.inn or '',
+                                        'КПП': pid.kpp or ''
+                                    }"/>
+                                </t>
+                                <t t-elif="pid and pid.inn and len(pid.inn) == 12">
+                                    <СвИП t-att="{
+                                        'ИННФЛ': pid.inn or '',
+                                        'ИныеСвед': pid.name or ''
+                                    }">
+                                        <ФИО t-att="{
+                                            'Фамилия': pid.last_name_IP or '',
+                                            'Имя': pid.first_name_IP or '',
+                                            'Отчество': pid.middle_name_IP or ''
+                                        }"/>
+                                    </СвИП>
+                                </t>
+                            </ИдСв>
+                            <Адрес>
+                                <АдрИнф t-att="{
+                                    'КодСтр': '643',
+                                    'НаимСтран': 'Российская Федерация',
+                                    'АдрТекст': (pid.city or '') + ', ' + (pid.street or '')
+                                }"/>
+                            </Адрес>
+                        </СвПокуп>
+
+                        <ДенИзм КодОКВ="643" НаимОКВ="Российский рубль" />
+                    </СвСчФакт>
+
+                    <ТаблСчФакт>
+                        <t t-set="total_price_subtotal" t-value="sum(line.price_subtotal for line in o.invoice_line_ids)"/>
+                        <t t-set="total_price_total" t-value="sum(line.price_total for line in o.invoice_line_ids)"/>
+                        <t t-set="total_tax_amount" t-value="total_price_total - total_price_subtotal"/>
+
+                        <t t-foreach="o.invoice_line_ids" t-as="line">
+                            <t t-set="tax_rate_raw">
+                            <t t-if="line.tax_ids">
+                                <t t-set="first_tax" t-value="line.tax_ids[0]"/>
+                                <t t-if="first_tax.amount != 0">
+                                    <t t-esc="str(int(first_tax.amount)) + '%'"/>
+                                </t>
+                                <t t-else="">
+                                    <t t-esc="'без НДС'"/>
+                                </t>
+                            </t>
+                            <t t-else="">
+                                <t t-esc="'без НДС'"/>
+                            </t>
+                        </t>
+                        <t t-set="tax_rate" t-value="tax_rate_raw.replace(' ', '').replace('\n', '').replace('\t', '')"/>
+
+                            <t t-set="line_tax_amount" t-value="line.price_total - line.price_subtotal"/>
+
+                            <СведТов t-att="{
+                                'НомСтр': line_index+1,
+                                'НаимТов': line.name or '',
+                                'НаимЕдИзм': line.product_uom_id.name or '',
+                                'КолТов': line.quantity or '',
+                                'ЦенаТов': ('%.2f' % (line.price_subtotal / line.quantity if line.quantity else 0)) if line.quantity else '0.00',
+                                'СтТовБезНДС': ('%.2f' % (line.price_subtotal or 0)),
+                                'НалСт': tax_rate,
+                                'СтТовУчНал': ('%.2f' % (line.price_total or 0))
+                            }">
+                                <ДопСведТов t-att="{
+                                    'КодТов': line.product_id and line.product_id.default_code or '',
+                                    'ГТИН': '0' + (line.product_id and line.product_id.barcode or '') if line.product_id and line.product_id.barcode else '',
+                                    'КодВидТов': line.product_id and line.product_id.hs_code or ''
+                                }">
+                                    <t t-if="line.product_id and line.product_id.tracking == 'serial'">
+                                        <КрНаимСтрПр>Китай</КрНаимСтрПр>
+                                        <НомСредИдентТов>
+                                            <t t-foreach="line.sale_line_ids" t-as="line_order">
+                                                <t t-foreach="line_order.move_ids" t-as="line_move">
+                                                    <t t-foreach="line_move.move_line_ids.filtered(lambda km: km.state=='done')" t-as="lot">
+                                                        <t t-if="lot.lot_id and lot.lot_id.cz_code_id">
+                                                            <КИЗ><t t-esc="lot.lot_id.cz_code_id.code_without_characters"/></КИЗ>
+                                                        </t>
+                                                    </t>
+                                                </t>
+                                            </t>
+                                        </НомСредИдентТов>
+                                    </t>
+                                </ДопСведТов>
+
+                                <Акциз>
+                                    <БезАкциз>без акциза</БезАкциз>
+                                </Акциз>
+
+                                <СумНал>
+                                    <t t-if="line_tax_amount != 0">
+                                        <СумНал><t t-esc="('%.2f' % line_tax_amount)"/></СумНал>
+                                    </t>
+                                    <t t-else="">
+                                        <БезНДС>без НДС</БезНДС>
+                                    </t>
+                                </СумНал>
+                            </СведТов>
+                        </t>
+
+                        <ВсегоОпл t-att="{
+                            'СтТовБезНДСВсего': ('%.2f' % total_price_subtotal),
+                            'СтТовУчНалВсего': ('%.2f' % total_price_total)
+                        }">
+                            <СумНалВсего>
+                                <t t-if="total_tax_amount != 0">
+                                    <СумНал><t t-esc="('%.2f' % total_tax_amount)"/></СумНал>
+                                </t>
+                                <t t-else="">
+                                    <БезНДС>без НДС</БезНДС>
+                                </t>
+                            </СумНалВсего>
+                        </ВсегоОпл>
+                    </ТаблСчФакт>
+
+                    <СвПродПер>
+                        <СвПер t-att="{
+                            'СодОпер': 'Товары или услуги по документу',
+                            'ДатаПер': o.invoice_date and o.invoice_date.strftime('%d.%m.%Y') or ''
+                        }">
+                            <ОснПер t-att="{
+                                'РеквНаимДок': 'Счет-фактура',
+                                'РеквНомерДок': o.invoice_origin or o.name or '',
+                                'РеквДатаДок': o.invoice_date and o.invoice_date.strftime('%d.%m.%Y') or ''
+                            }"/>
+
+                            <СвЛицПер>
+                                <РабОргПрод t-att="{'Должность': o.kladov and o.kladov.partner_id and o.kladov.partner_id.function or ''}">
+                                    <t t-if="o.kladov and o.kladov.partner_id and o.kladov.partner_id.name">
+                                        <t t-set="name_parts" t-value="o.kladov.partner_id.name.split()"/>
+                                        <t t-if="len(name_parts) == 3">
+                                            <ФИО t-att="{
+                                                'Фамилия': name_parts[0],
+                                                'Имя': name_parts[1],
+                                                'Отчество': name_parts[2]
+                                            }"/>
+                                        </t>
+                                        <t t-else="">
+                                            <ФИО t-att="{
+                                                'Фамилия': name_parts[0] if name_parts else '',
+                                                'Имя': name_parts[1] if len(name_parts) > 1 else ''
+                                            }"/>
+                                        </t>
+                                    </t>
+                                </РабОргПрод>
+                            </СвЛицПер>
+                            <Тран t-att="{'СвТран': o.transport or 'Без квитанции'}"/>
+                        </СвПер>
+                    </СвПродПер>
+
+                    <Подписант t-att="{
+                        'СпосПодтПолном': '1',
+                        'Должн': company.chief_id and company.chief_id.function or ''
+                    }">
+                        <t t-if="company.inn and len(company.inn) == 10">
+                            <t t-if="company.chief_id and company.chief_id.second_name">
+                                <ФИО t-att="{
+                                    'Фамилия': company.chief_id.last_name or '',
+                                    'Имя': company.chief_id.first_name or '',
+                                    'Отчество': company.chief_id.second_name or ''
+                                }"/>
+                            </t>
+                            <t t-else="">
+                                <ФИО t-att="{
+                                    'Фамилия': company.chief_id and company.chief_id.last_name or '',
+                                    'Имя': company.chief_id and company.chief_id.first_name or ''
+                                }"/>
+                            </t>
+                        </t>
+                        <t t-elif="company.inn and len(company.inn) == 12">
+                            <t t-if="company.partner_id and company.partner_id.middle_name_IP">
+                                <ФИО t-att="{
+                                    'Фамилия': company.partner_id.last_name_IP or '',
+                                    'Имя': company.partner_id.first_name_IP or '',
+                                    'Отчество': company.partner_id.middle_name_IP or ''
+                                }"/>
+                            </t>
+                            <t t-else="">
+                                <ФИО t-att="{
+                                    'Фамилия': company.partner_id and company.partner_id.last_name_IP or '',
+                                    'Имя': company.partner_id and company.partner_id.first_name_IP or ''
+                                }"/>
+                            </t>
+                        </t>
+                    </Подписант>
+                </Документ>
+            </Файл>
+        </t>
+    </template>
+</odoo>

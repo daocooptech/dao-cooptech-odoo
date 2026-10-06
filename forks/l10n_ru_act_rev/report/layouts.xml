@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template id="l10n_ru_act_rev.html_container">
+        <t t-set="body_classname" t-value="'container'" />
+        <t t-call="web.report_layout">
+            <t t-out="0" />
+        </t>
+    </template>
+    <template id="l10n_ru_act_rev.internal_layout">
+        <div class="article o_account_financial_reports_page">
+            <t t-out="0" />
+        </div>
+        <div class="footer">
+            <div class="row">
+                <div class="col-6 custom_footer">
+                    <span
+                        t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"
+                    />
+                </div>
+                <div class="col-6 text-right custom_footer">
+                    <ul class="list-inline">
+                        <li class="list-inline-item">
+                            <span class="page" />
+                        </li>
+                        <li class="list-inline-item">/</li>
+                        <li class="list-inline-item">
+                            <span class="topage" />
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </template>
+</odoo>

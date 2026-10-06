@@ -1,0 +1,116 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* l10n_ru_doc
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 13.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-08-19 09:27+0000\n"
+"PO-Revision-Date: 2020-08-19 09:27+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: l10n_ru_doc
+#: model:ir.actions.report,name:l10n_ru_doc.report_account_invoice_act
+msgid "Act"
+msgstr "Акт об оказании услуг"
+
+#. module: l10n_ru_doc
+#: model:ir.actions.report,name:l10n_ru_doc.report_account_invoice_bill
+msgid "Bill"
+msgstr "Товарная накладная (ТОРГ-12)"
+
+#. module: l10n_ru_doc
+#: model:ir.model.fields,help:l10n_ru_doc.field_res_company__print_facsimile
+#: model:ir.model.fields,help:l10n_ru_doc.field_res_users__print_facsimile
+msgid "Check this for adding Facsimiles of responsible persons to documents."
+msgstr "Отметьте, для вставки подписей ответственных лиц в документы."
+
+#. module: l10n_ru_doc
+#: model:ir.model.fields,help:l10n_ru_doc.field_res_company__print_stamp
+msgid "Check this for adding Stamp of company to documents."
+msgstr "Отметьте, для вставки печати организации в документы."
+
+#. module: l10n_ru_doc
+#: model:ir.model.fields,field_description:l10n_ru_doc.field_res_company__chief_id
+msgid "Chief"
+msgstr "Руководитель организации"
+
+#. module: l10n_ru_doc
+#: model:ir.model.fields,field_description:l10n_ru_doc.field_account_setup_bank_manual_config__bank_corr_acc
+#: model:ir.model.fields,field_description:l10n_ru_doc.field_res_bank__corr_acc
+#: model:ir.model.fields,field_description:l10n_ru_doc.field_res_partner_bank__bank_corr_acc
+msgid "Corresponding account"
+msgstr "Корр. счет"
+
+#. module: l10n_ru_doc
+#: model_terms:ir.ui.view,arch_db:l10n_ru_doc.view_company_ru_form
+msgid "Documents"
+msgstr "Документы"
+
+#. module: l10n_ru_doc
+#: model:ir.model.fields,field_description:l10n_ru_doc.field_res_users__facsimile
+msgid "Facsimile"
+msgstr "Подпись"
+
+#. module: l10n_ru_doc
+#: model:ir.model.fields,field_description:l10n_ru_doc.field_res_company__inn
+#: model:ir.model.fields,field_description:l10n_ru_doc.field_res_partner__inn
+#: model:ir.model.fields,field_description:l10n_ru_doc.field_res_users__inn
+msgid "INN"
+msgstr "ИНН"
+
+#. module: l10n_ru_doc
+#: model:ir.model.fields,field_description:l10n_ru_doc.field_res_company__kpp
+#: model:ir.model.fields,field_description:l10n_ru_doc.field_res_partner__kpp
+#: model:ir.model.fields,field_description:l10n_ru_doc.field_res_users__kpp
+msgid "KPP"
+msgstr "КПП"
+
+#. module: l10n_ru_doc
+#: model:ir.model.fields,field_description:l10n_ru_doc.field_res_company__okpo
+#: model:ir.model.fields,field_description:l10n_ru_doc.field_res_partner__okpo
+#: model:ir.model.fields,field_description:l10n_ru_doc.field_res_users__okpo
+msgid "OKPO"
+msgstr "ОКПО"
+
+#. module: l10n_ru_doc
+#: model:ir.model.fields,field_description:l10n_ru_doc.field_res_company__print_anywhere
+msgid "Print Anywhere"
+msgstr "Документы"
+
+#. module: l10n_ru_doc
+#: model:ir.model.fields,field_description:l10n_ru_doc.field_res_company__print_facsimile
+#: model:ir.model.fields,field_description:l10n_ru_doc.field_res_users__print_facsimile
+msgid "Print Facsimile"
+msgstr "Выводить подписи"
+
+#. module: l10n_ru_doc
+#: model:ir.model.fields,field_description:l10n_ru_doc.field_res_company__print_stamp
+msgid "Print Stamp"
+msgstr "Выводить печать"
+
+#. module: l10n_ru_doc
+#: model_terms:ir.ui.view,arch_db:l10n_ru_doc.view_company_ru_form
+msgid "Responsible Persons"
+msgstr "Ответственные лица"
+
+#. module: l10n_ru_doc
+#: model:ir.model.fields,field_description:l10n_ru_doc.field_res_company__stamp
+msgid "Stamp"
+msgstr "Печать"
+
+#. module: l10n_ru_doc
+#: model:ir.model.fields,help:l10n_ru_doc.field_res_company__print_anywhere
+msgid "Uncheck this, if you want add Facsimile and Stamp only in email."
+msgstr "Снимите отметку, если хотите добавлять подписи и печать только в email."
+
+#. module: l10n_ru_doc
+#: model:ir.actions.report,name:l10n_ru_doc.report_account_invoice_upd
+msgid "Upd"
+msgstr "Универсальный платежный документ (УПД)"

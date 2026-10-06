@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+     <record id="view_taxiher_form" model="ir.ui.view">
+        <field name="name">view_taxiher_form</field>
+        <field name="model">account.tax</field>
+        <field name="inherit_id" ref="account.view_tax_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='active']" position="after">
+                <field name="invisiblePF" widget="boolean_toggle"/>
+            </xpath>
+        </field>
+     </record>
+
+    </data>
+</odoo>
+

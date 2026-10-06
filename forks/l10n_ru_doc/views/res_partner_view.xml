@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+    <record id="view_partner_ru_form" model="ir.ui.view">
+        <field name="name">res.partner.ru.form</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='website']" position="before">
+                <field name="inn" string="ИНН" invisible="True"/> <!-- reason: need-->
+                <field name="kpp" string="КПП" invisible="is_company==False"/>
+                <field name="okpo" string="ОКПО" invisible="is_company==False"/>
+                <field name="ogrn" string="ОГРН" invisible="is_company==False"/>
+            </xpath>
+            <xpath expr="//field[@name='vat']" position="attributes">
+                <attribute name="string">ИНН</attribute>
+            </xpath>
+            <xpath expr="//page[@name='internal_notes']" position="inside">
+                <group>
+                    <field name="facsimile" invisible="is_company==True" widget="image" class="oe_avatar codup_sign"/>
+                </group>
+            </xpath>
+            <xpath expr="//page[@name='contact_addresses']/field[@name='child_ids']/form/sheet/group" position="after">
+                <group>
+                    <field name="facsimile" invisible="type not in ['director','accountant','contact']" widget="image" class="oe_avatar codup_sign"/>
+                </group>
+            </xpath>
+            <xpath expr="//page[@name='contact_addresses']/field[@name='child_ids']/form/sheet//field[@name='function']" position="replace">
+                <field name="function" placeholder="e.g. Sales Director" invisible="type not in ['director','accountant','contact']"/>
+            </xpath>
+        </field>
+    </record>
+
+    </data>
+</openerp>

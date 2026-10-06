@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="paperformat_a4" model="report.paperformat">
+            <field name="name">A4</field>
+            <field name="default" eval="True"/>
+            <field name="format">A4</field>
+            <field name="page_height">0</field>
+            <field name="page_width">0</field>
+            <field name="orientation">Portrait</field>
+            <field name="margin_top">7</field>
+            <field name="margin_bottom">7</field>
+            <field name="margin_left">7</field>
+            <field name="margin_right">7</field>
+            <field name="header_line" eval="False"/>
+            <field name="header_spacing">35</field>
+            <field name="dpi">75</field>
+        </record>
+        <record id="paperformat_a4l" model="report.paperformat">
+            <field name="name">A4 Landscape</field>
+            <field name="default" eval="True"/>
+            <field name="format">A4</field>
+            <field name="page_height">0</field>
+            <field name="page_width">0</field>
+            <field name="orientation">Landscape</field>
+            <field name="margin_top">7</field>
+            <field name="margin_bottom">7</field>
+            <field name="margin_left">7</field>
+            <field name="margin_right">7</field>
+            <field name="header_line" eval="False"/>
+            <field name="header_spacing">75</field>
+            <field name="dpi">60</field>
+        </record>
+
+        <record id="l10n_ru_doc.action_report_saleorder_new" model="ir.actions.report">
+           <field name="name">Счет по форме 1С</field>
+           <field name="model">sale.order</field>
+           <field name="report_type">qweb-pdf</field>
+           <field name="report_name">l10n_ru_doc.report_order</field>
+           <field name="report_file">l10n_ru_doc.report_order</field>
+           <field name="print_report_name">'Счет - %s ' % ((object.name or '')+' '+(object.partner_id.parent_id.name if object.partner_id.parent_id else object.partner_id.name))</field>
+           <field name="binding_model_id" ref="sale.model_sale_order" />
+           <field name="paperformat_id" ref="l10n_ru_doc.paperformat_a4" />
+           <field name="binding_type">report</field>
+        </record>
+
+<!--        <record id="l10n_ru_doc.action_report_saleorder_new_templates" model="ir.actions.report">-->
+<!--           <field name="name">Счет по форме 1С DOCX</field>-->
+<!--           <field name="model">sale.order</field>-->
+<!--           <field name="report_type">docx-docx</field>-->
+<!--           <field name="report_file">l10n_ru_doc.report_order</field>-->
+<!--           <field name="print_report_name">'Счет - %s DOCX' % ((object.name or '')+' '+(object.partner_id.parent_id.name if object.partner_id.parent_id else object.partner_id.name))</field>-->
+<!--           <field name="binding_model_id" ref="sale.model_sale_order"/>-->
+<!--           <field name="paperformat_id" ref="l10n_ru_doc.paperformat_a4"/>-->
+<!--           <field name="binding_type">report</field>-->
+<!--           <field name="report_docx_template" type="base64" file="docx_report/static/src/docx/report_saleorder_new_template.docx"/>-->
+<!--        </record>-->
+
+<!--        <record id="l10n_ru_doc.account_invoices_new" model="ir.actions.report">-->
+<!--           <field name="name">Счет-фактура</field>-->
+<!--           <field name="model">account.move</field>-->
+<!--           <field name="report_type">qweb-pdf</field>-->
+<!--           <field name="report_name">l10n_ru_doc.report_invoice</field>-->
+<!--           <field name="report_file">l10n_ru_doc.report_invoice</field>-->
+<!--           <field name="print_report_name">'Счет-фактура - %s ' % ((object.name or '')+' '+(object.partner_id.parent_id.name if object.partner_id.parent_id else object.partner_id.name))</field>-->
+<!--           <field name="binding_model_id" ref="account.model_account_move" />-->
+<!--           <field name="paperformat_id" ref="l10n_ru_doc.paperformat_a4l" />-->
+<!--           <field name="binding_type">report</field>-->
+<!--        </record>-->
+
+<!--        <record id="l10n_ru_doc.account_invoices_new_templates" model="ir.actions.report">-->
+<!--           <field name="name">Счет-фактура DOCX</field>-->
+<!--           <field name="model">account.move</field>-->
+<!--           <field name="report_type">docx-docx</field>-->
+<!--           <field name="report_file">l10n_ru_doc.report_invoice</field>-->
+<!--           <field name="print_report_name">'Счет-фактура - %s DOCX' % ((object.name or '')+' '+(object.partner_id.parent_id.name if object.partner_id.parent_id else object.partner_id.name))</field>-->
+<!--           <field name="binding_model_id" ref="account.model_account_move" />-->
+<!--           <field name="paperformat_id" ref="l10n_ru_doc.paperformat_a4l" />-->
+<!--           <field name="binding_type">report</field>-->
+<!--           <field name="report_docx_template" type="base64" file="l10n_ru_doc/static/src/docx/report_account_invoices_new_templates.docx"/>-->
+<!--        </record>-->
+
+<!--        <record id="l10n_ru_doc.report_account_invoice_bill_new" model="ir.actions.report">-->
+<!--           <field name="name">Товарная накладная (ТОРГ-12)</field>-->
+<!--           <field name="model">account.move</field>-->
+<!--           <field name="report_type">qweb-pdf</field>-->
+<!--           <field name="report_name">l10n_ru_doc.report_bill</field>-->
+<!--           <field name="report_file">l10n_ru_doc.report_bill</field>-->
+<!--           <field name="print_report_name">'Товарная накладная - %s ' % ((object.name or '')+' '+(object.partner_id.parent_id.name if object.partner_id.parent_id else object.partner_id.name))</field>-->
+<!--           <field name="binding_model_id" ref="account.model_account_move" />-->
+<!--           <field name="paperformat_id" ref="l10n_ru_doc.paperformat_a4l" />-->
+<!--           <field name="binding_type">report</field>-->
+<!--        </record>-->
+
+<!--        <record id="l10n_ru_doc.report_account_invoice_bill_new_templates" model="ir.actions.report">-->
+<!--           <field name="name">Товарная накладная (ТОРГ-12) DOCX</field>-->
+<!--           <field name="model">account.move</field>-->
+<!--           <field name="report_type">docx-docx</field>-->
+<!--           <field name="report_file">l10n_ru_doc.report_bill</field>-->
+<!--           <field name="print_report_name">'Товарная накладная - %s DOCX' % ((object.name or '')+' '+(object.partner_id.parent_id.name if object.partner_id.parent_id else object.partner_id.name))</field>-->
+<!--           <field name="binding_model_id" ref="account.model_account_move" />-->
+<!--           <field name="paperformat_id" ref="l10n_ru_doc.paperformat_a4l" />-->
+<!--           <field name="binding_type">report</field>-->
+<!--           <field name="report_docx_template" type="base64" file="l10n_ru_doc/static/src/docx/report_account_invoice_bill_new_templates.docx"/>-->
+<!--        </record>-->
+
+<!--        <record id="l10n_ru_doc.report_account_invoice_act_new" model="ir.actions.report">-->
+<!--           <field name="name">Акт выполненных работ</field>-->
+<!--           <field name="model">account.move</field>-->
+<!--           <field name="report_type">qweb-pdf</field>-->
+<!--           <field name="report_name">l10n_ru_doc.report_act</field>-->
+<!--           <field name="report_file">l10n_ru_doc.report_act</field>-->
+<!--           <field name="print_report_name">'Акт - %s ' % ((object.name or '')+' '+(object.partner_id.parent_id.name if object.partner_id.parent_id else object.partner_id.name))</field>-->
+<!--           <field name="binding_model_id" ref="account.model_account_move" />-->
+<!--           <field name="paperformat_id" ref="l10n_ru_doc.paperformat_a4" />-->
+<!--           <field name="binding_type">report</field>-->
+<!--        </record>-->
+
+<!--        <record id="l10n_ru_doc.report_account_invoice_act_new_templates" model="ir.actions.report">-->
+<!--           <field name="name">Акт выполненных работ DOCX</field>-->
+<!--           <field name="model">account.move</field>-->
+<!--           <field name="report_type">docx-docx</field>-->
+<!--           <field name="report_file">l10n_ru_doc.report_act</field>-->
+<!--           <field name="print_report_name">'Акт - %s ' % ((object.name or '')+'  DOCX '+(object.partner_id.parent_id.name if object.partner_id.parent_id else object.partner_id.name))</field>-->
+<!--           <field name="binding_model_id" ref="account.model_account_move" />-->
+<!--           <field name="paperformat_id" ref="l10n_ru_doc.paperformat_a4" />-->
+<!--           <field name="binding_type">report</field>-->
+<!--           <field name="report_docx_template" type="base64" file="l10n_ru_doc/static/src/docx/report_account_invoice_act_new_templates.docx"/>-->
+<!--        </record>-->
+
+        <record id="report_account_invoice_upd_new" model="ir.actions.report">
+           <field name="name">Универсальный передаточный документ(УПД)</field>
+           <field name="model">account.move</field>
+           <field name="report_type">qweb-pdf</field>
+           <field name="report_name">l10n_ru_doc.report_upd</field>
+           <field name="report_file">l10n_ru_doc.report_upd</field>
+           <field name="print_report_name">'УПД'</field>
+           <field name="binding_model_id" ref="account.model_account_move" />
+           <field name="paperformat_id" ref="l10n_ru_doc.paperformat_a4l" />
+           <field name="binding_type">report</field>
+        </record>
+
+<!--        <record id="report_account_invoice_upd_new_templates" model="ir.actions.report">-->
+<!--           <field name="name">Универсальный передаточный документ(УПД) DOCX</field>-->
+<!--           <field name="model">account.move</field>-->
+<!--           <field name="report_type">docx-docx</field>-->
+<!--           <field name="report_file">l10n_ru_doc.report_upd</field>-->
+<!--           <field name="print_report_name">'УПД DOCX'</field>-->
+<!--           <field name="binding_model_id" ref="account.model_account_move" />-->
+<!--           <field name="paperformat_id" ref="l10n_ru_doc.paperformat_a4l" />-->
+<!--           <field name="binding_type">report</field>-->
+<!--           <field name="report_docx_template" type="base64" file="docx_report/static/src/docx/report_account_invoice_upd_new_templates.docx"/>-->
+<!--        </record>-->
+
+        <record id="report_account_invoice_updn" model="ir.actions.report">
+           <field name="name">УПД без печатей</field>
+           <field name="model">account.move</field>
+           <field name="report_type">qweb-pdf</field>
+           <field name="report_name">l10n_ru_doc.report_updn</field>
+           <field name="report_file">l10n_ru_doc.report_updn</field>
+           <field name="print_report_name">'УПД без печатей'</field>
+           <field name="binding_model_id" ref="account.model_account_move" />
+           <field name="paperformat_id" ref="l10n_ru_doc.paperformat_a4l" />
+           <field name="binding_type">report</field>
+        </record>
+
+<!--        <record id="report_account_invoice_updn_templates" model="ir.actions.report">-->
+<!--           <field name="name">УПД без печатей DOCX</field>-->
+<!--           <field name="model">account.move</field>-->
+<!--           <field name="report_type">docx-docx</field>-->
+<!--           <field name="report_file">l10n_ru_doc.report_updn</field>-->
+<!--           <field name="print_report_name">'УПД без печатей DOCX'</field>-->
+<!--           <field name="binding_model_id" ref="account.model_account_move" />-->
+<!--           <field name="paperformat_id" ref="l10n_ru_doc.paperformat_a4l" />-->
+<!--           <field name="binding_type">report</field>-->
+<!--           <field name="report_docx_template" type="base64" file="docx_report/static/src/docx/report_account_invoice_updn_templates.docx"/>-->
+<!--        </record>-->
+    </data>
+</openerp>

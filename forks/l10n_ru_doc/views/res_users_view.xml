@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+    <record id="view_users_facsimile_form" model="ir.ui.view">
+        <field name="name">res.users.signature.form</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+         <xpath expr="//field[@name='signature']" position="after">
+           
+                <field name="facsimile" widget="image" colspan="2" class="oe_avatar codup_sign"/>
+                <field name="print_facsimile"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_users_simple_form" model="ir.ui.view">
+        <field name="name">res.users.simple.form</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_simple_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form/sheet" position="inside">
+                <group name="facsimile_group">
+                    <field name="facsimile" widget="image" colspan="2" class="oe_avatar codup_sign"/>
+                    <field name="print_facsimile"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    </data>
+</openerp>

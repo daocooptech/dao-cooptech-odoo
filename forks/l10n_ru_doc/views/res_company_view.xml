@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+    <record id="view_companyruform" model="ir.ui.view">
+        <field name="name">res.companyruform</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='vat']" position="after">
+                <field name="inn" invisible="True"/><!-- reason: need-->
+                <field name="kpp"/>
+                <field name="okpo"/>
+            </xpath>
+
+            <xpath expr="//field[@name='vat']" position="attributes">
+                <attribute name="string">ИНН</attribute>
+            </xpath>
+            <xpath expr="//field[@name='company_registry']" position="attributes">
+                <attribute name="string">ОГРН</attribute>
+            </xpath>
+                
+            <xpath expr="//notebook" position="inside">
+                <page string="Подписи и печати">
+                    <group string="Ответственные">
+                        <field name="chief_id"/>
+                        <field name="accountant_id"/>
+                    </group>
+                    <group string="Настройки печати">
+                        <field name="print_facsimile"/>
+                        <field name="print_stamp"/>
+                        <field name="print_anywhere"/>
+                        <field name="stamp" widget="image" class="oe_avatar codup_stamp" invisible="print_stamp==False"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    </data>
+</odoo>
+

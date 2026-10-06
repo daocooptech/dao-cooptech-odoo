@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_partner_contract_customer,access_partner_contract_customer,model_partner_contract_customer,,1,1,1,1
+access_contract_day,access_contract_day,model_contract_day,,1,1,1,1
+access_contract_allowed_profiles,access_contract_allowed_profiles,model_contract_allowed_profiles,,1,1,1,1
+access_partner_contract_customerline,access_partner_contract_customerline,model_contract_line,,1,1,1,1
+access_contract_profile,access_contract_profile,model_contract_profile,base.group_user,1,1,1,1

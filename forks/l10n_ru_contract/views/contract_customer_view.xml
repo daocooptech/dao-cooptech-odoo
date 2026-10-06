@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="contract_customer_form" model="ir.ui.view">
+            <field name="name">Договор</field>
+            <field name="model">partner.contract.customer</field>
+            <field name="arch" type="xml">
+                <form string="Договор">
+                    <header>
+                        <field name="state" widget="statusbar" nolabel="1" clickable="True"/>
+                        <button name="action_set_on_approval"
+                                string="На согласовании"
+                                type="object"
+                                invisible="state!='draft'"/>
+
+                        <button name="action_confirm"
+                                class="btn-primary"
+                                string="Подтвердить"
+                                type="object"
+                                invisible="state!='progress'"/>
+
+                        <button name="action_reset_to_draft"
+                                string="В черновик"
+                                type="object"
+                                invisible="state not in ('signed','progress')"/>
+
+                    </header>
+                    <sheet>
+                        <h1 class="o_row"
+                            style="align-items:center; gap:8px; font-weight:400;">
+                            <field name="name"
+                                   nolabel="1"
+                                   placeholder="Номер договора"
+                                   readonly="state!='draft'"
+                                   style="max-width:220px; font-weight:400;"/>
+
+                            <span style="font-weight:400; position:relative; top:-3px;"> от </span>
+
+                            <field name="date_start"
+                                   nolabel="1"
+                                   readonly="state!='draft'"
+                                   style="max-width:150px; font-weight:400;"/>
+                        </h1>
+                        <group string="Сведения о контрагенте">
+                                <group>
+                                    <field name="partner_type" readonly="state!='draft'"/>
+                                </group>
+                                <group>
+                                    <field name="partner_id" readonly="state!='draft'"/>
+                                </group>
+                            </group>
+
+                            <group string="Сведения о договоре">
+                                <group>
+                                    <field name="type" readonly="state!='draft'"/>
+                                    <field name="date_end" readonly="state!='draft'"/>
+                                </group>
+                                <group>
+                                    <field name="profile_id" readonly="state!='draft'"/>
+                                    <field name="company_id" readonly="state!='draft'"/>
+                                </group>
+                            </group>
+                        <notebook>
+                        </notebook>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <record id="contract_customer_tree" model="ir.ui.view">
+            <field name="name">Договор</field>
+            <field name="model">partner.contract.customer</field>
+            <field name="arch" type="xml">
+                <list string="Договоры">
+                    <field name="name"/>
+                    <field name="partner_id"/>
+                    <field name="date_start"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="contract_customer_search" model="ir.ui.view">
+            <field name="name">Поиск в договорах</field>
+            <field name="model">partner.contract.customer</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="partner_id" string="Номер или клиент"
+                           filter_domain="['|',('partner_id','ilike',self),('name','ilike',self)]"/>
+                    <field name="name"/>
+                    <field name="partner_id"/>
+                    <field name="company_id"/>
+                    <field name="date_start"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="contract_customer_action" model="ir.actions.act_window">
+            <field name="name">Договоры</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">partner.contract.customer</field>
+            <field name="view_mode">kanban,list,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Нет созданных контрактов
+                </p>
+                <p>
+                </p>
+            </field>
+        </record>
+
+        <record id="contract_customer_kanban" model="ir.ui.view">
+            <field name="name">Договор</field>
+            <field name="model">partner.contract.customer</field>
+            <field name="arch" type="xml">
+
+               <kanban default_group_by="state">
+            <field name="name"/>
+            <field name="partner_id"/>
+            <field name="profile_id"/>
+            <field name="company_id"/>
+            <field name="type"/>
+            <templates>
+                <!-- Odoo 19 OWL требует шаблон card -->
+                <t t-name="card">
+                    <div t-attf-class="oe_kanban_global_click">
+                        <div class="oe_kanban_content">
+                            <div>
+                                <strong class="o_kanban_record_title">Номер: <b><field name="name"/></b></strong>
+                            </div>
+                            <div>
+                                Контрагент: <b><field name="partner_id"/></b> <br/>
+                                Тип: <b><field name="type"/></b> <br/>
+                                Вид договора: <b><field name="profile_id"/></b>
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                Наша компания: <b><field name="company_id"/></b>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </templates>
+        </kanban>
+
+
+            </field>
+        </record>
+    </data>
+</odoo>

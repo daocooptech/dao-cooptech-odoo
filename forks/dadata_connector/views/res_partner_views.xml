@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+
+    <record id="partner_with_auto_data_view_form" model="ir.ui.view">
+        <field name="name">Partner with auto data view form</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="l10n_ru_doc.view_partner_ru_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='ogrn']" position="attributes">
+                <attribute name="widget">dadata_search</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="partner_with_auto_data_view_form2" model="ir.ui.view">
+        <field name="name">Partner with auto data view form 2</field>
+        <field name="model">res.partner</field>
+        <field name="priority">2</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <!-- vat widget is set programmatically via _get_view to override partner_autocomplete -->
+            <xpath expr="//field[@name='vat']" position="attributes">
+                <attribute name="widget">dadata_search</attribute>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

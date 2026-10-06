@@ -1,0 +1,46 @@
+<odoo>
+    <menuitem id="menu_report_templates" name="Шаблоны отчетов" parent="l10n_ru_contract.separator" sequence="10"/>
+
+    <record id="view_report_template_tree" model="ir.ui.view">
+        <field name="name">contract.report.template.tree</field>
+        <field name="model">contract.report.template</field>
+        <field name="arch" type="xml">
+            <tree string="Шаблоны отчетов">
+                <field name="name"/>
+                <field name="typeformat"/>
+                <field name="attachment_filename"/>
+                <field name="create_date"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_report_template_form" model="ir.ui.view">
+        <field name="name">contract.report.template.form</field>
+        <field name="model">contract.report.template</field>
+        <field name="arch" type="xml">
+            <form string="Шаблон отчета">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="attachment" filename="attachment_filename"/>
+                        <field name="typeformat" readonly="1"/>
+                        <field name="create_date" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_report_templates" model="ir.actions.act_window">
+        <field name="name">Шаблоны отчетов</field>
+        <field name="res_model">contract.report.template</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Создайте новый шаблон отчета.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_report_templates_action" parent="menu_report_templates" action="action_report_templates"/>
+</odoo>

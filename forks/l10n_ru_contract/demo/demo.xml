@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- ===== СПРАВОЧНИКИ ===== -->
+
+        <!-- Виды договоров -->
+        <record id="demo_contract_profile_supply" model="contract.profile">
+            <field name="name">Договор поставки</field>
+        </record>
+        <record id="demo_contract_profile_service" model="contract.profile">
+            <field name="name">Договор оказания услуг</field>
+        </record>
+        <record id="demo_contract_profile_agency" model="contract.profile">
+            <field name="name">Агентский договор</field>
+        </record>
+
+        <!-- Дни доставки/отгрузки -->
+        <record id="demo_day_monday" model="contract.day">
+            <field name="name">Понедельник</field>
+        </record>
+        <record id="demo_day_wednesday" model="contract.day">
+            <field name="name">Среда</field>
+        </record>
+        <record id="demo_day_friday" model="contract.day">
+            <field name="name">Пятница</field>
+        </record>
+
+        <!-- ===== ПАРТНЁРЫ ===== -->
+
+        <!-- Покупатель -->
+        <record id="demo_partner_buyer" model="res.partner">
+            <field name="name">ООО "Торговый Дом Альфа"</field>
+            <field name="is_company" eval="True"/>
+            <field name="street">ул. Ленина, д. 10</field>
+            <field name="city">Москва</field>
+            <field name="zip">101000</field>
+            <field name="inn">7701234567</field>
+            <field name="kpp">770101001</field>
+            <field name="ogrn">1027700000001</field>
+            <field name="okpo">12345678</field>
+        </record>
+
+        <!-- Поставщик -->
+        <record id="demo_partner_supplier" model="res.partner">
+            <field name="name">ООО "Производственная Компания Бета"</field>
+            <field name="is_company" eval="True"/>
+            <field name="street">пр. Мира, д. 25</field>
+            <field name="city">Санкт-Петербург</field>
+            <field name="zip">190000</field>
+            <field name="inn">7802345678</field>
+            <field name="kpp">780201001</field>
+            <field name="ogrn">1027800000002</field>
+            <field name="okpo">87654321</field>
+        </record>
+
+        <!-- ===== ДОГОВОРЫ ===== -->
+
+        <!-- Договор с покупателем -->
+        <record id="demo_contract_customer_001" model="partner.contract.customer">
+            <field name="date_start">2026-01-01</field>
+            <field name="date_end">2026-12-31</field>
+            <field name="partner_id" ref="demo_partner_buyer"/>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="profile_id" ref="demo_contract_profile_supply"/>
+            <field name="type">customer</field>
+            <field name="state">signed</field>
+            <field name="partner_type">company</field>
+        </record>
+
+        <!-- Договор с поставщиком -->
+        <record id="demo_contract_supplier_001" model="partner.contract.customer">
+            <field name="date_start">2026-01-01</field>
+            <field name="date_end">2026-12-31</field>
+            <field name="partner_id" ref="demo_partner_supplier"/>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="profile_id" ref="demo_contract_profile_service"/>
+            <field name="type">supplier</field>
+            <field name="state">signed</field>
+            <field name="partner_type">company</field>
+        </record>
+
+        <!-- Строки договора -->
+        <record id="demo_contract_line_001" model="contract.line">
+            <field name="contract_id" ref="demo_contract_customer_001"/>
+            <field name="sequence">10</field>
+            <field name="name">1.1</field>
+            <field name="punct">&lt;p&gt;Поставщик обязуется поставить товар в соответствии с условиями настоящего договора.&lt;/p&gt;</field>
+        </record>
+        <record id="demo_contract_line_002" model="contract.line">
+            <field name="contract_id" ref="demo_contract_customer_001"/>
+            <field name="sequence">20</field>
+            <field name="name">1.2</field>
+            <field name="punct">&lt;p&gt;Покупатель обязуется принять и оплатить товар в установленные сроки.&lt;/p&gt;</field>
+        </record>
+
+        <!-- account.move убран: модуль account не является зависимостью l10n_ru_contract,
+             поэтому account.move недоступна при загрузке демо этого модуля -->
+
+    </data>
+</odoo>

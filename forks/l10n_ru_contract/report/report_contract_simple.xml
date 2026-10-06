@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_contract_simple" model="ir.actions.report">
+        <field name="name">Договор (WeasyPrint)</field>
+        <field name="model">partner.contract.customer</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">l10n_ru_contract.report_contract_customer_modern</field>
+        <field name="report_file">l10n_ru_contract.report_contract_customer_modern</field>
+        <field name="print_report_name">'Договор - %s' % (object.name or '')</field>
+        <field name="binding_model_id" ref="l10n_ru_contract.model_partner_contract_customer" />
+        <field name="use_weasyprint">True</field>
+    </record>
+
+<template id="report_contract_customer_modern">
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="o">
+
+            <t t-if="o and 'company_id' in o">
+                <t t-set="company" t-value="o.company_id"/>
+            </t>
+            <t t-if="not o or not 'company_id' in o">
+                <t t-set="company" t-value="res_company"/>
+            </t>
+
+            <t t-call="web.external_layout">
+
+                <!-- Корневой блок, передаём номер договора в string-set -->
+                <div class="page contract-root" t-att-data-contract-number="o.name or ''">
+                    <style type="text/css">
+                        @page {
+                            size: A4;
+                            margin: 18mm 20mm 22mm 20mm;
+
+                            @bottom-right {
+                                content: "Страница " counter(page) " из " counter(pages);
+                                font-size: 9pt;
+                                font-family: "DejaVu Serif", "Times New Roman", serif;
+                            }
+                        }
+
+                        body {
+                            font-family: "DejaVu Serif", "Times New Roman", serif;
+                            font-size: 11pt;
+                            line-height: 1.45;
+                            color: #000;
+                            background: #ffffff;
+                            margin: 0;
+                        }
+
+                        .contract-root {
+                            string-set: contract_number attr(data-contract-number);
+                        }
+
+                        .contract-main-title {
+                            text-align: center;
+                            font-size: 15pt;
+                            font-weight: bold;
+                            margin-bottom: 4mm;
+                        }
+
+                        .contract-subtitle {
+                            text-align: center;
+                            font-size: 11pt;
+                            color: #444;
+                            margin-bottom: 6mm;
+                        }
+
+                        .meta-table {
+                            width: 100%;
+                            margin-bottom: 6mm;
+                            font-size: 10.5pt;
+                        }
+                        .meta-city { text-align: left; }
+                        .meta-date { text-align: right; }
+
+                        .parties-block {
+                            margin-bottom: 10mm;
+                            text-align: justify;
+                        }
+
+                        .clauses-root {
+                            counter-reset: clause;
+                        }
+
+                        .clauses-columns {
+                            column-count: 2;
+                            column-gap: 12mm;
+                            column-rule: 0.2mm solid #999;
+                        }
+
+                        .clause {
+                            counter-increment: clause;
+                            margin-bottom: 4mm;
+                            break-inside: avoid-column;
+                        }
+
+                        .clause-title::before {
+                            content: counter(clause) ". ";
+                            font-weight: bold;
+                        }
+
+                        .clause-title {
+                            font-weight: bold;
+                            margin-bottom: 1mm;
+                        }
+
+                        .clause-body {
+                            text-align: justify;
+                        }
+
+                        .requisites-title {
+                            margin-top: 12mm;
+                            margin-bottom: 4mm;
+                            text-align: center;
+                            font-weight: bold;
+                            font-size: 12pt;
+                        }
+
+                        .requisites-grid {
+                            display: grid;
+                            grid-template-columns: 48% 48%;
+                            column-gap: 4%;
+                            row-gap: 6mm;
+                            font-size: 10pt;
+                        }
+
+                        .requisites-card {
+                            border: 1px solid #000;
+                            padding: 4mm;
+                            break-inside: avoid;
+                        }
+
+                        .requisites-card-title {
+                            font-weight: bold;
+                            text-transform: uppercase;
+                            margin-bottom: 3mm;
+                            text-align: center;
+                        }
+
+                        .requisites-line {
+                            margin-bottom: 2mm;
+                        }
+
+                        .signature-block {
+                            margin-top: 12mm;
+                            display: grid;
+                            grid-template-columns: 1fr 1fr;
+                            column-gap: 12mm;
+                        }
+
+                        .signature-side-title {
+                            font-size: 10pt;
+                            font-weight: bold;
+                            margin-bottom: 3mm;
+                        }
+
+                        .signature-line {
+                            border-bottom: 1px solid #000;
+                            height: 6mm;
+                            margin-bottom: 2mm;
+                            width: 60mm;
+                        }
+
+                        .signature-name {
+                            font-size: 10pt;
+                            margin-bottom: 4mm;
+                        }
+
+                        .signature-stamp {
+                            margin-top: 4mm;
+                            height: 30mm;
+                            position: relative;
+                        }
+
+                        .signature-stamp img {
+                            position: absolute;
+                            max-width: 120px;
+                            max-height: 120px;
+                            left: 0;
+                            top: -5mm;
+                        }
+
+                        .debug-test {
+                            background: yellow;
+                            border: 3px solid red;
+                            font-size: 20pt;
+                        }
+                    </style>
+
+                    <div class="debug-test">
+                        ТЕСТ CSS
+                    </div>
+
+                    <!-- Шапка договора -->
+                    <div class="header-block">
+                        <div class="contract-main-title">
+                            ДОГОВОР ПОСТАВКИ ПРОДУКЦИИ № <t t-esc="o.name or ''"/>
+                        </div>
+                        <div class="contract-subtitle">
+                            (пример шаблона, оптимизированного под WeasyPrint)
+                        </div>
+                        <table class="meta-table" border="0" cellpadding="0" cellspacing="0">
+                            <tbody>
+                                <tr>
+                                    <td class="meta-city">
+                                        <t t-esc="company.partner_id.city or ''"/>
+                                    </td>
+                                    <td class="meta-date">
+                                        <t t-esc="o.get_date_text(o.date_start) if o.date_start else ''"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="parties-block">
+                            <t t-if="o.partner_type in ['company', 'company_ip']">
+                                <t t-esc="company.name or ''"/>,
+                                именуемое в дальнейшем «Поставщик», с одной стороны, и
+                                <t t-esc="o.partner_id.name or ''"/>,
+                                именуемое в дальнейшем «Покупатель», совместно именуемые «Стороны»,
+                                заключили настоящий договор о нижеследующем:
+                            </t>
+                            <t t-else="">
+                                <t t-esc="company.name or ''"/> (далее — «Поставщик») и
+                                гражданин(ка) <t t-esc="o.partner_id.name or ''"/> (далее — «Покупатель»),
+                                совместно именуемые «Стороны», заключили настоящий договор о нижеследующем:
+                            </t>
+                        </div>
+                    </div>
+
+                    <!-- Основная часть: пункты в две колонки -->
+                    <div class="clauses-root clauses-columns">
+                        <t t-foreach="o.lines_ids.sorted(key=lambda r: r.sequence, reverse=False)" t-as="line">
+                            <div class="clause">
+                                <div class="clause-title">
+                                    <t t-esc="line.name or ''"/>
+                                </div>
+                                <div class="clause-body">
+                                    <span>
+                                        <t t-raw="line.punct or ''"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+
+                    <!-- Реквизиты и подписи с использованием CSS Grid -->
+                    <div class="requisites-title">
+                        Реквизиты и подписи сторон
+                    </div>
+
+                    <div class="requisites-grid">
+                        <!-- Поставщик -->
+                        <div class="requisites-card">
+                            <div class="requisites-card-title">Поставщик</div>
+                            <div class="requisites-line">
+                                <strong>Наименование:</strong>
+                                <t t-esc="company.name or ''"/>
+                            </div>
+                            <div class="requisites-line">
+                                <strong>ИНН:</strong>
+                                <t t-esc="company.inn or ''"/>
+                            </div>
+                            <div class="requisites-line">
+                                <strong>ОГРН:</strong>
+                                <t t-esc="company.company_registry or ''"/>
+                            </div>
+                            <div class="requisites-line">
+                                <strong>КПП:</strong>
+                                <t t-esc="company.kpp or ''"/>
+                            </div>
+                            <div class="requisites-line">
+                                <strong>Юр. адрес:</strong><br/>
+                                <t t-esc="o.address(o.company_id) or ''"/>
+                            </div>
+                        </div>
+
+                        <!-- Покупатель -->
+                        <div class="requisites-card">
+                            <div class="requisites-card-title">Покупатель</div>
+                            <div class="requisites-line">
+                                <strong>Наименование / ФИО:</strong>
+                                <t t-esc="o.partner_id.name or ''"/>
+                            </div>
+                            <div class="requisites-line">
+                                <strong>ИНН:</strong>
+                                <t t-esc="o.partner_id.inn or ''"/>
+                            </div>
+                            <t t-if="o.partner_type in ['company', 'company_ip']">
+                                <div class="requisites-line">
+                                    <strong>ОГРН:</strong>
+                                    <t t-esc="o.partner_id.ogrn or ''"/>
+                                </div>
+                                <t t-if="o.partner_type == 'company'">
+                                    <div class="requisites-line">
+                                        <strong>КПП:</strong>
+                                        <t t-esc="o.partner_id.kpp or ''"/>
+                                    </div>
+                                </t>
+                            </t>
+                            <t t-else="">
+                                <div class="requisites-line">
+                                    <strong>Паспорт:</strong>
+                                    <t t-esc="o.partner_id.passport or ''"/>
+                                </div>
+                            </t>
+                            <div class="requisites-line">
+                                <strong>Юр. адрес / адрес регистрации:</strong><br/>
+                                <t t-esc="o.address(o.partner_id) or ''"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="signature-block">
+                        <div>
+                            <div class="signature-side-title">Поставщик</div>
+                            <div class="signature-line"></div>
+                            <div class="signature-name">
+                                <t t-esc="o.director_name_company or ''"/>
+                            </div>
+                            <div class="signature-stamp">
+                                <t t-if="o.stamp">
+                                    <t t-raw="o.img(o.company_id.stamp) or ''"/>
+                                </t>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="signature-side-title">Покупатель</div>
+                            <div class="signature-line"></div>
+                            <div class="signature-name">
+                                <!-- тут можно вывести ФИО либо оставить пустым -->
+                                <t t-esc="''"/>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </t>
+        </t>
+    </t>
+</template>
+
+</odoo>
