@@ -391,7 +391,7 @@ class CoopMembership(models.Model):
     # второе хуже первого. Поэтому любое изменение членства сбрасывает кэш.
 
     def _invalidate_rule_cache(self):
-        self.env.registry.clear_cache()
+        self.env.transaction.invalidate_ormcache()
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -428,7 +428,7 @@ class CoopMembership(models.Model):
         for membership in empty:
             membership.power_ids = [
                 (6, 0, membership._default_power_ids(membership.role).ids)]
-        self.env.registry.clear_cache()
+        self.env.transaction.invalidate_ormcache()
         return True
 
     # ── Кто решает и что видит вступающий ────────────────────────────
