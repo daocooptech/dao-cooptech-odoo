@@ -9,3 +9,5 @@ rule_coop_document_log_parties,Журнал: стороны документа,c
 rule_coop_document_share_parties,Ссылки: стороны документа,coop.document.share,base.group_user,ru,"['|', ('document_id.party_a_id', 'in', user.coop_actor_partner_ids.ids), ('document_id.party_b_id', 'in', user.coop_actor_partner_ids.ids)]"
 access_coop_document_share_wizard_user,Выдать ссылку — участник,coop.document.share.wizard,base.group_user,crud,
 access_coop_document_move_wizard_user,Переложить в папку — участник,coop.document.move.wizard,base.group_user,crud,
+rule_coop_document_log_platform,Журнал: рабочая группа видит всё,coop.document.log,coop_base.group_coop_platform,r,
+rule_coop_document_share_platform,Ссылки: рабочая группа видит всё,coop.document.share,coop_base.group_coop_platform,ru,

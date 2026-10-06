@@ -29,3 +29,5 @@ rule_wallet_tx_own,Свои операции в сетях,coop.wallet.tx,base.g
 rule_wallet_tx_admin,Операции в сетях — администратор,coop.wallet.tx,base.group_system,cru,
 access_coop_settlement_method_user,Способы расчёта — чтение,coop.settlement.method,base.group_user,r,
 access_coop_settlement_method_admin,Способы расчёта — ведение,coop.settlement.method,coop_base.group_coop_platform,crud,
+rule_share_account_board,Паевые счета своего кооператива — правление,coop.share.account,coop_base.group_coop_board,r,"[('cooperative_id.coop_member_ids', 'any', [('partner_id', '=', user.partner_id.id), ('state', '=', 'active'), ('role', 'in', ('board', 'audit'))])]"
+rule_share_account_audit,Паевые счета своего кооператива — ревизия,coop.share.account,coop_base.group_coop_audit,r,"[('cooperative_id.coop_member_ids', 'any', [('partner_id', '=', user.partner_id.id), ('state', '=', 'active'), ('role', 'in', ('board', 'audit'))])]"

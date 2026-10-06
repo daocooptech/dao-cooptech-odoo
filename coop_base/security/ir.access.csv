@@ -62,3 +62,4 @@ rule_notification_pref_own,Настройки извещений видит и �
 rule_block_own,Чёрный список видит и правит его хозяин,coop.block,base.group_user,crud,"[('partner_id', '=', user.partner_id.id)]"
 access_coop_membership_role_user,Основания участия — чтение,coop.membership.role,base.group_user,r,
 access_coop_membership_role_admin,Основания участия — ведение,coop.membership.role,coop_base.group_coop_platform,crud,
+rule_contact_line_admin,Администратор узла ведёт все строки контактов,coop.contact.line,coop_base.group_coop_platform,crud,
