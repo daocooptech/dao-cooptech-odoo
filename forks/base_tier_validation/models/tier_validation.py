@@ -436,7 +436,7 @@ class TierValidation(models.AbstractModel):
                 rec.review_ids
                 and rec._check_tier_state_transition(vals)
                 and not rec._check_allow_write_under_validation(vals)
-                and not rec._context.get("skip_validation_check")
+                and not rec.env.context.get("skip_validation_check")
             ):
                 (
                     allowed_fields,
@@ -463,7 +463,7 @@ class TierValidation(models.AbstractModel):
                 and rec._tier_validation_get_current_state_value()
                 in (self._state_to + [self._cancel_state])
                 and not rec._check_allow_write_after_validation(vals)
-                and not rec._context.get("skip_validation_check")
+                and not rec.env.context.get("skip_validation_check")
             ):
                 (
                     allowed_fields,

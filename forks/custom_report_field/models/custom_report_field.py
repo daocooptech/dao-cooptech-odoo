@@ -71,14 +71,14 @@ class CustomReportField(models.Model):
         model = self.env[model_name]
         record = None
         records = None
-        if self._context.get("active_model") == model_name and self._context.get(
+        if self.env.context.get("active_model") == model_name and self.env.context.get(
             "active_id"
         ):
-            record = model.browse(self._context["active_id"])
-        if self._context.get("active_model") == model_name and self._context.get(
+            record = model.browse(self.env.context["active_id"])
+        if self.env.context.get("active_model") == model_name and self.env.context.get(
             "active_ids"
         ):
-            records = model.browse(self._context["active_ids"])
+            records = model.browse(self.env.context["active_ids"])
         eval_context.update(
             {
                 # orm

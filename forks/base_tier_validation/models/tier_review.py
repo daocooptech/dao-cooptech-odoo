@@ -82,7 +82,7 @@ class TierReview(models.Model):
 
     @api.depends_context("tz")
     def _compute_reviewed_formated_date(self):
-        timezone = self._context.get("tz") or self.env.user.partner_id.tz or "UTC"
+        timezone = self.env.context.get("tz") or self.env.user.partner_id.tz or "UTC"
         for review in self:
             if not review.reviewed_date:
                 review.reviewed_formated_date = False

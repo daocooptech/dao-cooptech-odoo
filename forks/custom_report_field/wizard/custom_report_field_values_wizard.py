@@ -21,10 +21,10 @@ class CustomReportFieldValuesWizard(models.TransientModel):
         """
         Checks source records for report generation. If more than one - raise error.
         """
-        active_model = self._context.get("active_model")
+        active_model = self.env.context.get("active_model")
         if active_model:
-            record_id = self.env[active_model].browse(self._context.get("active_id"))
-            record_ids = self.env[active_model].browse(self._context.get("active_ids"))
+            record_id = self.env[active_model].browse(self.env.context.get("active_id"))
+            record_ids = self.env[active_model].browse(self.env.context.get("active_ids"))
             records_for_report = record_id | record_ids
             if len(records_for_report) > 1:
                 raise ValidationError(
@@ -64,7 +64,7 @@ class CustomReportFieldValuesWizard(models.TransientModel):
         self.ensure_one()
         cleaned_report = False
         action_id = self.ir_actions_report_id.id
-        ctx = dict(self._context)
+        ctx = dict(self.env.context)
         ctx.update({"report_values_validated": True})
         report = self.env["ir.actions.report"].sudo().browse([action_id]).read()
         if report:

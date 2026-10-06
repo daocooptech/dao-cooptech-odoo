@@ -250,7 +250,7 @@ class PartnerContractCustomer(models.Model):
     @api.onchange('name')
     def set_comp_and_partn(self):
         for s in self:
-            context = s._context
+            context = s.env.context
             order_id = context.get('sale_order_id')
             if order_id:
                 sale_order = self.env['sale.order'].browse(order_id)
