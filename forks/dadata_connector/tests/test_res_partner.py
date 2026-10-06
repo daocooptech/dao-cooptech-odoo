@@ -25,7 +25,7 @@ class TestResPartnerDadata(DadataConnectorCommon):
 
     def test_get_dadata_token_raises_when_missing(self):
         """ValidationError is raised when token is not configured."""
-        self.env["ir.config_parameter"].sudo().set_param(
+        self.env["ir.config_parameter"].sudo().set_str(
             "dadata_connector.dadata_token", ""
         )
         with self.assertRaises(ValidationError):

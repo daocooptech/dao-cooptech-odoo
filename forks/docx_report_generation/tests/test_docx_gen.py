@@ -53,7 +53,7 @@ def _make_docx_with_template(body_text="Hello World"):
             "</Relationships>",
         )
     buf.seek(0)
-    return base64.b64encode(buf.read())
+    return base64.b64encode(buf.read()).decode()
 
 
 @tagged("post_install", "-at_install")

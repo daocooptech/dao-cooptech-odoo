@@ -4,7 +4,7 @@
     "author": "MK.lab",
     "website": "#",
     "category": "Marketing",
-    "version": "19.0.2025.12.03",
+    "version": "20.0.2025.12.03",
     "depends": ["base", "web", "contacts", "account", "l10n_ru_doc"],
     "external_dependencies": {"python": ["dadata==21.10.1"]},
     "data": [

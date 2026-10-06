@@ -94,6 +94,6 @@ class DadataConnectorCommon(TransactionCase):
             "name": "Test Partner",
             "is_company": True,
         })
-        cls.env["ir.config_parameter"].sudo().set_param(
+        cls.env["ir.config_parameter"].sudo().set_str(
             "dadata_connector.dadata_token", "test_token_123"
         )

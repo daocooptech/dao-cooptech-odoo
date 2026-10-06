@@ -17,7 +17,7 @@
     'website': "https://www.inf-centre.ru/",
 
     'category': 'Uncategorized',
-    'version': '19.0.2025.12.11',
+    'version': '20.0.2025.12.11',
     "depends": ["web", "base", "account", "account_payment", "l10n_ru_doc", "l10n_ru_base", "uom"],
     "data": [
         "views/ir_actions_report_view.xml",

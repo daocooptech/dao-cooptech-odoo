@@ -64,8 +64,8 @@ class IrActionsReport(models.Model):
         html = "".join(bodies)
 
         base_url = (
-            self.env["ir.config_parameter"].sudo().get_param("report.url")
-            or self.env["ir.config_parameter"].sudo().get_param("web.base.url")
+            self.env["ir.config_parameter"].sudo().get_str("report.url")
+            or self.env["ir.config_parameter"].sudo().get_str("web.base.url")
             or ""
         )
 

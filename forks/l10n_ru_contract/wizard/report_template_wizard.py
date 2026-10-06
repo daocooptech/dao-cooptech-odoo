@@ -24,7 +24,7 @@ class ReportTemplateWizard(models.TransientModel):
         contract = self.contract_id
 
         if template.format == 'docx':
-            template_data = base64.b64decode(template.attachment)
+            template_data = template.attachment.content
             docx_io = BytesIO(template_data)
             doc = DocxTemplate(docx_io)
 
@@ -39,7 +39,7 @@ class ReportTemplateWizard(models.TransientModel):
             doc.save(output_io)
             output_io.seek(0)
 
-            self.generated_report = base64.b64encode(output_io.read())
+            self.generated_report = base64.b64encode(output_io.read()).decode()
             self.report_filename = f'{contract.name or "report"}.docx'
 
             return {
@@ -50,7 +50,7 @@ class ReportTemplateWizard(models.TransientModel):
 
         elif template.format == 'md':
             md_content = f"# Отчет по договору\n\nНазвание договора: {contract.name or ''}\n"
-            self.generated_report = base64.b64encode(md_content.encode('utf-8'))
+            self.generated_report = base64.b64encode(md_content.encode('utf-8')).decode()
             self.report_filename = f'{contract.name or "report"}.md'
 
             return {

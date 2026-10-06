@@ -1,7 +1,7 @@
 {
     "name": "Report WeasyPrint",
     "summary": "Рендер пдф документов через WeasyPrint вместо wkhtmltopdf",
-    "version": "19.0.1.0.0",
+    "version": "20.0.1.0.0",
     "category": "Reporting",
     "author": "Mk.lab",
     "license": "LGPL-3",

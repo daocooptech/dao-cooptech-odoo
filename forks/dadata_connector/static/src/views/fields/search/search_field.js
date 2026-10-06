@@ -6,14 +6,14 @@ import { useInputField } from "@web/views/fields/input_field_hook";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { CharField } from "@web/views/fields/char/char_field";
 
-import { Component } from "@odoo/owl";
+import { Component, t, useProps } from "@odoo/owl";
 
 export class SearchField extends Component {
     static template = "dadata_connector.SearchField";
-    static props = {
+    props = useProps({
         ...standardFieldProps,
-        placeholder: { type: String, optional: true },
-    };
+        placeholder: t.string().optional(),
+    });
 
     setup() {
         useInputField({ getValue: () => this.props.record.data[this.props.name] || "" });

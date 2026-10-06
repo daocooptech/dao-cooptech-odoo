@@ -1,8 +1,8 @@
 from odoo import models
 from datetime import datetime
 import re
-import pymorphy2
-from odoo.tools import pycompat
+import pymorphy3
+from markupsafe import Markup
 
 FRACTIONS = (
     (u"десятая", u"десятых", u"десятых"),
@@ -93,20 +93,18 @@ class Report_contract_customer(models.Model):
     _inherit = 'partner.contract.customer'
 
     def img(self, img, type='png', width=0, height=0):
-        if width:
-            width = "width='%spx'" % (width)
-        else:
-            width = " "
-        if height:
-            height = "height='%spx'" % (height)
-        else:
-            height = " "
-        toreturn = "<img %s %s src='data:image/%s;base64,%s' />" % (
-            width,
-            height,
-            type,
-            str(pycompat.to_text(img)))
-        return toreturn
+        # Odoo 20: Binary-поле отдаёт BinaryValue, а не base64-текст; вывод через t-out
+        # экранируется, поэтому готовый <img> возвращаем как Markup.
+        if not img:
+            return Markup('')
+        if hasattr(img, 'to_base64'):
+            img = img.to_base64()
+        elif isinstance(img, bytes):
+            img = img.decode()
+        width = "width='%spx'" % width if width else ' '
+        height = "height='%spx'" % height if height else ' '
+        return Markup("<img %s %s src='data:image/%s;base64,%s' />") % (
+            Markup(width), Markup(height), type, img)
 
     def numer(self, name):
         if name:
@@ -263,7 +261,7 @@ class Report_contract_customer(models.Model):
                 return ', '.join(repr)
 
     def get_function_print(self, function):
-        morph = pymorphy2.MorphAnalyzer()
+        morph = pymorphy3.MorphAnalyzer()
         if function:
             f = morph.parse(function)[0]
             f = f.inflect({'gent'}).word
@@ -277,7 +275,7 @@ class Report_contract_customer(models.Model):
 
     def get_function_partner(self, partner):
         res = []
-        morph = pymorphy2.MorphAnalyzer()
+        morph = pymorphy3.MorphAnalyzer()
         if partner:
             director = self.env['res.partner'].search([('parent_id', '=', partner), ('type', '=', 'director')], limit=1)
             if director:

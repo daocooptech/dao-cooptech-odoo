@@ -2,7 +2,8 @@ import logging
 import time
 from ast import literal_eval
 from odoo import _, api, fields, models
-from odoo.tools import date_utils,pycompat
+from markupsafe import Markup
+from odoo.tools import date_utils
 from pytils import dt,numeral
 from datetime import datetime, date
 import re
@@ -373,20 +374,18 @@ class GeneralLedgerReportWizard(models.TransientModel):
         return ("%s %02d %s") % (text_rubles, copeck, text_copeck)
 
     def img(self, img, type='png', width=0, height=0):
-        if width:
-            width = "width='%spx'" % (width)
-        else:
-            width = " "
-        if height:
-            height = "height='%spx'" % (height)
-        else:
-            height = " "
-        toreturn = "<img %s %s src='data:image/%s;base64,%s' />" % (
-            width,
-            height,
-            type,
-            str(pycompat.to_text(img)))
-        return toreturn
+        # Odoo 20: Binary-поле отдаёт BinaryValue, а не base64-текст; вывод через t-out
+        # экранируется, поэтому готовый <img> возвращаем как Markup.
+        if not img:
+            return Markup('')
+        if hasattr(img, 'to_base64'):
+            img = img.to_base64()
+        elif isinstance(img, bytes):
+            img = img.decode()
+        width = "width='%spx'" % width if width else ' '
+        height = "height='%spx'" % height if height else ' '
+        return Markup("<img %s %s src='data:image/%s;base64,%s' />") % (
+            Markup(width), Markup(height), type, img)
 
     def get_contract(self):
         partner = int(self.partner_ids[0].id)

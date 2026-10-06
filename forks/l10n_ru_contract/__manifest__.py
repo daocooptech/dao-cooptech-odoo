@@ -25,7 +25,7 @@
        1. Открываем созданную запись договора - Действие - "Договор".         
     """,
 
-    'version': '19.0.1.0.0',
+    'version': '20.0.1.0.0',
     'sequence': 0,
     'author': 'MK.Lab',
     'website': 'https://www.inf-centre.ru/',

@@ -12,7 +12,6 @@ from requests.exceptions import RequestException
 
 from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, UserError
-from odoo.http import request
 from odoo.tools.safe_eval import safe_eval, time
 
 try:
@@ -396,14 +395,15 @@ class IrActionsReport(models.Model):
         # Browse the user instead of using the sudo self.env.user
         user = self.env["res.users"].browse(self.env.uid)
         website = None
-        if request and hasattr(request, "website"):
-            if request.website is not None:
-                website = request.website
-                context = dict(
-                    context,
-                    translatable=context.get("lang")
-                    != request.env["ir.http"]._get_default_lang().code,
-                )
+        # Odoo 19.4+: request.website убран, текущий сайт - env.website
+        # (модель website есть в реестре только при установленном модуле website).
+        if "website" in self.env and self.env.website:
+            website = self.env.website
+            context = dict(
+                context,
+                translatable=context.get("lang")
+                != self.env["ir.http"]._get_default_lang().code,
+            )
         values.update(
             record=values["docs"],
             time=time,
@@ -415,7 +415,7 @@ class IrActionsReport(models.Model):
             website=website,
             web_base_url=self.env["ir.config_parameter"]
             .sudo()
-            .get_param("web.base.url", default=""),
+            .get_str("web.base.url", default=""),
         )
 
         record_to_render = values["docs"]
@@ -434,7 +434,11 @@ class IrActionsReport(models.Model):
         values["docs"] = docs
 
         docx_content = BytesIO()
-        with BytesIO(b64decode(template)) as template_file:
+        # Odoo 19.3+: Binary-поле отдаёт BinaryValue (сырые байты), а не base64.
+        template_bytes = (
+            template.content if hasattr(template, "content") else b64decode(template)
+        )
+        with BytesIO(template_bytes) as template_file:
             doc = DocxTemplate(template_file)
             doc.render(values)
             doc.save(docx_content)

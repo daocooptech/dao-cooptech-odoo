@@ -71,7 +71,7 @@ class ResPartner(models.Model):
         token = (
             self.env["ir.config_parameter"]
             .sudo()
-            .get_param("dadata_connector.dadata_token")
+            .get_str("dadata_connector.dadata_token")
         )
         if token:
             return token

@@ -1,7 +1,7 @@
 {
     "name": "Russian - Banks",
     "summary": "Russian banks and their addresses",
-    "version": "19.0.1.0.0",
+    "version": "20.0.1.0.0",
     "countries": ["ru"],
     "category": "Accounting/Localizations",
     "website": "https://github.com/OCA/l10n-russia",

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, exceptions, tools, _
-import pymorphy2
+import pymorphy3
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from .crutch_fields_header import IP_CONTACT_HEADER, ENTITY_CONTRACT_HEADER, INDIVIDUAL_CONTRACT_HEADER
@@ -113,7 +113,7 @@ class PartnerContractCustomer(models.Model):
                     line.copy({'contract_id': s.id})
 
     def _get_name_print(self):
-        morph = pymorphy2.MorphAnalyzer()
+        morph = pymorphy3.MorphAnalyzer()
         for s in self:
             s.name_print = False
             director = self.env['res.partner'].search([('parent_id', '=', s.partner_id.id), ('type', '=', 'director')],
@@ -148,7 +148,7 @@ class PartnerContractCustomer(models.Model):
                     s.name_print = name_print.title()
 
     def _get_name_print1(self):
-        morph = pymorphy2.MorphAnalyzer()
+        morph = pymorphy3.MorphAnalyzer()
         for s in self:
             director = s.company_id.chief_id.partner_id if s.company_id.chief_id else False
             # raise exceptions.UserError(str(director))
@@ -297,7 +297,7 @@ class PartnerContractCustomer(models.Model):
 
         attachment = self.env['ir.attachment'].create({
             'name': filename,
-            'datas': base64.b64encode(file_data),
+            'raw': file_data,
             'res_model': self._name,
             'res_id': self.id,
             'mimetype': mimetype or 'application/octet-stream',

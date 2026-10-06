@@ -7,7 +7,6 @@ import {useService} from "@web/core/utils/hooks";
 
 export class TierReviewMenu extends Component {
     static components = {Dropdown};
-    static props = [];
     static template = "base_tier_validation.TierReviewMenu";
 
     setup() {

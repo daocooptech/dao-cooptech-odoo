@@ -16,7 +16,7 @@
     'author': "MK.Lab",
     'website': "https://www.inf-centre.ru/",
 
-    'version': '19.0.2025.11.11',
+    'version': '20.0.2025.11.11',
     'license': 'LGPL-3',
     'category': 'Uncategorized',
 
