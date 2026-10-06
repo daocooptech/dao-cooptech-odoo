@@ -46,7 +46,7 @@
     'category': 'Localization',
     'version': '20.0.2025.11.11',
 
-    'depends': ['base', 'sale', 'account', 'sale_stock', 'uom', 'l10n_ru_base', 'docx_report_generation'],
+    'depends': ['base', 'sale', 'account', 'sale_stock', 'uom', 'l10n_ru_base', 'l10n_ru_banks', 'docx_report_generation'],
 
     'external_dependencies': {'python': ['pytils']},
 

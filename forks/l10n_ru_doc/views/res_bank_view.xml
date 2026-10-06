@@ -6,7 +6,7 @@
         <field name="name">res.bank.ru.form</field>
         <field name="model">res.bank</field>
         <field name="type">form</field>
-        <field name="inherit_id" ref="base.view_res_bank_form"/>
+        <field name="inherit_id" ref="l10n_ru_banks.view_res_bank_ru_form"/>
         <field name="arch" type="xml">
             <field name="bic" position="after">
                 <field name="corr_acc"/>

@@ -3,15 +3,70 @@
     <record id="view_res_bank_ru_form" model="ir.ui.view">
         <field name="name">res.bank.ru.form</field>
         <field name="model">res.bank</field>
-        <field name="type">form</field>
-        <field name="inherit_id" ref="base.view_res_bank_form" />
         <field name="arch" type="xml">
-            <field name="bic" position="after">
-                <field name="country_code" invisible="1" />
-                <field name="corr_acc_ids" invisible="country_code !='RU'" />
-            </field>
+            <form string="Bank">
+                <group>
+                    <group>
+                        <field name="name" />
+                        <field name="bic" />
+                        <field name="country_code" invisible="1" />
+                        <field name="corr_acc_ids" invisible="country_code !='RU'" />
+                    </group>
+                    <group>
+                        <field name="street" />
+                        <field name="street2" />
+                        <field name="zip" />
+                        <field name="city" />
+                        <field name="state" />
+                        <field name="country" />
+                        <field name="email" />
+                        <field name="phone" />
+                        <field name="active" />
+                    </group>
+                </group>
+            </form>
         </field>
     </record>
+
+    <record id="view_res_bank_ru_list" model="ir.ui.view">
+        <field name="name">res.bank.ru.list</field>
+        <field name="model">res.bank</field>
+        <field name="arch" type="xml">
+            <list string="Banks">
+                <field name="name" />
+                <field name="bic" />
+                <field name="city" />
+                <field name="country" />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_res_bank_ru_search" model="ir.ui.view">
+        <field name="name">res.bank.ru.search</field>
+        <field name="model">res.bank</field>
+        <field name="arch" type="xml">
+            <search string="Banks">
+                <field name="name" filter_domain="['|', ('name', 'ilike', self), ('bic', 'ilike', self)]" string="Bank" />
+                <field name="bic" />
+                <field name="city" />
+            </search>
+        </field>
+    </record>
+
+    <record id="action_res_bank_ru" model="ir.actions.act_window">
+        <field name="name">Banks</field>
+        <field name="res_model">res.bank</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem
+        id="menu_res_bank_ru"
+        name="Banks"
+        parent="account.menu_finance_configuration"
+        action="action_res_bank_ru"
+        groups="account.group_account_manager"
+        sequence="3"
+    />
 
     <record id="update_ru_banks_wizard_form" model="ir.ui.view">
         <field name="name">update.ru.banks.wizard.form</field>

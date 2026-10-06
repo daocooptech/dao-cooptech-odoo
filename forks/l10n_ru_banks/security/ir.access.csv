@@ -1,3 +1,5 @@
 id,name,model_id,group_id/id,operation,domain
 access_update_ru_banks_wizard,access.update.ru.banks.wizard,update.ru.banks.wizard,account.group_account_manager,cru,
 access_res_bank_corracc,access.res.bank.corracc,res.bank.corracc,account.group_account_manager,cru,
+access_res_bank_user,access.res.bank.user,res.bank,base.group_user,r,
+access_res_bank_manager,access.res.bank.manager,res.bank,account.group_account_manager,crud,
