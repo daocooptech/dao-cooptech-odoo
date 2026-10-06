@@ -163,7 +163,7 @@ class TestFundingDeadline(CoopProjectCase):
             project.action_open_gathering()
 
     def test_so_statusom_operatora_investitsii_otkryvayutsya(self):
-        self.env['ir.config_parameter'].sudo().set_param(
+        self.env['ir.config_parameter'].sudo().set_str(
             'coop.investment_operator', 'True')
         project = self._make_project()
         project.contribution_basis = 'investment'

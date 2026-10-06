@@ -289,7 +289,7 @@ def _reset_first_fill(env):
     сторон пересчитываются. Отметка версии в параметрах — второй раз не
     сработает."""
     Param = env['ir.config_parameter'].sudo()
-    if Param.get_param('coop_barter.demo_version') == DEMO_VERSION:
+    if Param.get_str('coop_barter.demo_version') == DEMO_VERSION:
         return False
     cr = env.cr
     cr.execute('SELECT count(*) FROM coop_barter_offer WHERE create_uid <> 1')
@@ -298,7 +298,7 @@ def _reset_first_fill(env):
     live += cr.fetchone()[0]
     if live:
         _logger.warning('Бартер: есть записи участников (%s) — наполнение не пересобираю', live)
-        Param.set_param('coop_barter.demo_version', DEMO_VERSION)
+        Param.set_str('coop_barter.demo_version', DEMO_VERSION)
         return False
     cr.execute('SELECT id, party_a_id, party_b_id FROM coop_deal '
                'WHERE coop_barter_exchange_id IS NOT NULL')
@@ -454,7 +454,7 @@ def load_barter(env, login='dashkevich'):
     closed = rnd.sample([o for o in made if o.state == 'active'], k=10)
     for offer in closed:
         offer.state = 'closed'
-    env['ir.config_parameter'].sudo().set_param('coop_barter.demo_version', DEMO_VERSION)
+    env['ir.config_parameter'].sudo().set_str('coop_barter.demo_version', DEMO_VERSION)
     _logger.info('Бартер: объявлений %s, обменов %s', len(made), exchanges)
     return len(made)
 

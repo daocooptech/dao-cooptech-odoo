@@ -222,10 +222,10 @@ class CoopWebsiteLanding(models.AbstractModel):
         # заглушку «Your Logo», и она никогда не пуста. А писать логотип
         # при каждом обновлении нельзя — затрём тот, что загрузили руками.
         Config = self.env['ir.config_parameter'].sudo()
-        if os.path.exists(LOGO) and not Config.get_param('coop_website.logo_set'):
+        if os.path.exists(LOGO) and not Config.get_str('coop_website.logo_set'):
             with open(LOGO, 'rb') as fh:
                 values['logo'] = base64.b64encode(fh.read())
-            Config.set_param('coop_website.logo_set', '1')
+            Config.set_str('coop_website.logo_set', '1')
 
         # Телефон и почта из установщика — «+1 555-555-5556» и адрес
         # yourcompany.example. В шапке сайта они выглядят как настоящие
@@ -242,10 +242,10 @@ class CoopWebsiteLanding(models.AbstractModel):
         # значок по умолчанию — байты значка Odoo, пустым он не бывает,
         # поэтому ставится один раз и запоминается признаком, как логотип:
         # загруженный руками потом не трогаем.
-        if os.path.exists(LOGO) and not Config.get_param('coop_website.favicon_set'):
+        if os.path.exists(LOGO) and not Config.get_str('coop_website.favicon_set'):
             with open(LOGO, 'rb') as fh:
                 website.favicon = base64.b64encode(fh.read())
-            Config.set_param('coop_website.favicon_set', '1')
+            Config.set_str('coop_website.favicon_set', '1')
 
         Menu = self.env['website.menu'].sudo()
         root = Menu.search([('website_id', '=', website.id),

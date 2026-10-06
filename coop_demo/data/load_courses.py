@@ -363,7 +363,7 @@ def _lesson_html(course, lesson, topic_word, rnd):
 
 def load_courses(env, login='dashkevich'):
     Param = env['ir.config_parameter'].sudo()
-    if Param.get_param(PARAM) == VERSION:
+    if Param.get_str(PARAM) == VERSION:
         return 0
     if 'slide.channel' not in env or 'coop_topic' not in env['slide.channel']._fields:
         return 0
@@ -472,6 +472,6 @@ def load_courses(env, login='dashkevich'):
         'completed_template_id': completed_template.id if completed_template else False,
         'publish_template_id': publish_template.id if publish_template else False,
     })
-    Param.set_param(PARAM, VERSION)
+    Param.set_str(PARAM, VERSION)
     _logger.info('Образование: курсы, уроки, ученики и отзывы — %s записей', made)
     return made

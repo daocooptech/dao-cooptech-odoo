@@ -48,8 +48,8 @@ class CoopSetup(models.AbstractModel):
         }
         changed = []
         for key, value in branding.items():
-            if params.get_param(key) != value:
-                params.set_param(key, value)
+            if params.get_str(key) != value:
+                params.set_str(key, value)
                 changed.append(key)
         if changed:
             _logger.info('Имя платформы в интерфейсе: %s', ', '.join(changed))
@@ -82,8 +82,8 @@ class CoopSetup(models.AbstractModel):
         # него молча ничего не делала. Язык новой записи ставится при
         # создании — см. `res.users.create` в этом же модуле.
         params = self.env['ir.config_parameter'].sudo()
-        if not params.get_param('coop.default_lang'):
-            params.set_param('coop.default_lang', 'ru_RU')
+        if not params.get_str('coop.default_lang'):
+            params.set_str('coop.default_lang', 'ru_RU')
 
     def _setup_home(self):
         """Один адрес, который всегда открывает платформу.
@@ -138,8 +138,8 @@ class CoopSetup(models.AbstractModel):
         # последнего входа — и в письме оказывается адрес, по которому
         # никто больше не зайдёт.
         params = self.env['ir.config_parameter'].sudo()
-        if not params.get_param('web.base.url.freeze'):
-            params.set_param('web.base.url.freeze', 'True')
+        if not params.get_str('web.base.url.freeze'):
+            params.set_str('web.base.url.freeze', 'True')
 
     def _setup_currency(self):
         """Знак рубля вместо «руб».

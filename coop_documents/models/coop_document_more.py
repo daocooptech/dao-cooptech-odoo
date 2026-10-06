@@ -123,7 +123,7 @@ class CoopDocumentShare(models.Model):
             share.has_password = bool(share.password_hash)
 
     def _compute_url(self):
-        base = self.env['ir.config_parameter'].sudo().get_param('web.base.url', '')
+        base = self.env['ir.config_parameter'].sudo().get_str('web.base.url') or ''
         for share in self:
             share.url = '%s/coop/doc/%s' % (base, share.token)
 

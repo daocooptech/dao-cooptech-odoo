@@ -102,7 +102,7 @@ SPECIAL = {
 
 
 def _renames(env):
-    raw = env['ir.config_parameter'].sudo().get_param(RENAMES_PARAM) or '{}'
+    raw = env['ir.config_parameter'].sudo().get_str(RENAMES_PARAM) or '{}'
     try:
         return json.loads(raw)
     except ValueError:
@@ -176,7 +176,7 @@ def unique_org_names(env):
             taken.add(new)
             used.add(new.partition('«')[2].rstrip('»'))
             renamed += 1
-    env['ir.config_parameter'].sudo().set_param(
+    env['ir.config_parameter'].sudo().set_str(
         RENAMES_PARAM, json.dumps(renames, ensure_ascii=False, sort_keys=True))
     _logger.info('Названия организаций: переименовано %s', renamed)
     return renamed

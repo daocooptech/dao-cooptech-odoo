@@ -62,6 +62,5 @@ class ResUsers(models.Model):
 
     @api.model
     def _coop_signup_makes_participant(self):
-        value = self.env['ir.config_parameter'].sudo().get_param(
-            'coop.signup_creates_participant', 'True')
+        value = self.env['ir.config_parameter'].sudo().get_str('coop.signup_creates_participant') or 'True'
         return str(value).strip().lower() not in ('0', 'false', 'нет')

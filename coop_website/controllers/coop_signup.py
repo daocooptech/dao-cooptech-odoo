@@ -42,8 +42,7 @@ class CoopAuthSignupHome(AuthSignupHome):
         return super().web_auth_signup(*args, **kw)
 
     def _coop_signup_mail_enabled(self):
-        value = request.env['ir.config_parameter'].sudo().get_param(
-            'coop.signup_send_email', 'False')
+        value = request.env['ir.config_parameter'].sudo().get_str('coop.signup_send_email') or 'False'
         return str(value).strip().lower() in ('1', 'true', 'да')
 
     def get_auth_signup_qcontext(self):
@@ -88,7 +87,7 @@ class CoopAuthSignupHome(AuthSignupHome):
         user = User.search(User._get_login_domain(qcontext.get('login')),
                            order=User._get_login_order(), limit=1)
         if user:
-            version = request.env['ir.config_parameter'].sudo().get_param(
+            version = request.env['ir.config_parameter'].sudo().get_str(
                 'coop_website.legal_date') or '29.09.2026'
             user.write({
                 'coop_pd_consent_at': fields.Datetime.now(),

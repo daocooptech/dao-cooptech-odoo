@@ -35,7 +35,7 @@ def _walk(rnd, start, days, vol):
 
 def load_market_history(env):
     Param = env['ir.config_parameter'].sudo()
-    if Param.get_param(PARAM) == VERSION:
+    if Param.get_str(PARAM) == VERSION:
         return 0
     if 'coop.match.fill' not in env:
         # Движок ещё не поставлен (загрузчик идёт раньше модулей бирж) —
@@ -46,7 +46,7 @@ def load_market_history(env):
         made += _dex_history(env)
     if 'coop.token.order' in env and 'coop.match.fill' in env:
         made += _token_history(env)
-    Param.set_param(PARAM, VERSION)
+    Param.set_str(PARAM, VERSION)
     _logger.info('Биржи: история торгов — %s сделок', made)
     return made
 

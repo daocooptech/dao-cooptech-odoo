@@ -24,14 +24,14 @@ class CoopTonConnect(http.Controller):
     def manifest(self, **kwargs):
         """Манифест приложения для кошельков TON."""
         params = request.env['ir.config_parameter'].sudo()
-        base = params.get_param('web.base.url', '')
+        base = params.get_str('web.base.url') or ''
         # Название берётся отдельным параметром, а не из карточки
         # компании: там стоит юридическое имя со всеми уточнениями
         # («рабочая группа»), а кошелёк показывает эту строку человеку —
         # он должен узнать платформу, а не гадать, кому даёт доступ.
         data = {
             'url': base,
-            'name': params.get_param('coop.platform_name', 'ДАО КООПТЕХ'),
+            'name': params.get_str('coop.platform_name') or 'ДАО КООПТЕХ',
             'iconUrl': '%s/coop_website/static/src/img/cooptech-logo.png' % base,
             'termsOfUseUrl': '%s/rules' % base,
             'privacyPolicyUrl': '%s/rules' % base,

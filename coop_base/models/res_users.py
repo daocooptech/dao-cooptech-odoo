@@ -207,7 +207,7 @@ class ResUsers(models.Model):
             if need_home:
                 need_home.sudo().action_id = home.id
 
-        lang = self.env['ir.config_parameter'].sudo().get_param(
+        lang = self.env['ir.config_parameter'].sudo().get_str(
             'coop.default_lang')
         if lang and self.env['res.lang'].sudo().with_context(
                 active_test=False).search_count([('code', '=', lang)]):

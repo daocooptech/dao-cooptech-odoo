@@ -451,8 +451,7 @@ class CoopResource(models.Model):
             ('promoted_until', '>', now),
         ])
 
-        page_size = int(self.env['ir.config_parameter'].sudo().get_param(
-            'coop_resources.page_size', PAGE_SIZE))
+        page_size = int(self.env['ir.config_parameter'].sudo().get_str('coop_resources.page_size') or PAGE_SIZE)
 
         taken = {}
         for record in promoted:

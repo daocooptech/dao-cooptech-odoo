@@ -230,8 +230,7 @@ class CoopTokenClaim(models.Model):
         десятая доля TON на развёртывание контракта и первые операции,
         пересчитанная в рубли с запасом.
         """
-        value = self.env['ir.config_parameter'].sudo().get_param(
-            'coop_tokenomics.mint_cost', '200.0')
+        value = self.env['ir.config_parameter'].sudo().get_str('coop_tokenomics.mint_cost') or '200.0'
         try:
             return float(value)
         except (TypeError, ValueError):

@@ -571,7 +571,7 @@ class CoopProject(models.Model):
         self.ensure_one()
         if self.contribution_basis != 'investment':
             return
-        allowed = self.env['ir.config_parameter'].sudo().get_param(
+        allowed = self.env['ir.config_parameter'].sudo().get_str(
             'coop.investment_operator')
         if allowed not in ('True', 'true', '1'):
             raise UserError(_(

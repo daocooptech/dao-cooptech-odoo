@@ -62,8 +62,7 @@ class CoopBinary(Binary):
     def _coop_image_max_age(self, kwargs):
         """Сколько браузеру можно не переспрашивать про эту картинку."""
         env = http.request.env
-        param = env['ir.config_parameter'].sudo().get_param(
-            'coop.image_cache_seconds', DEFAULT_DEADLINE)
+        param = env['ir.config_parameter'].sudo().get_str('coop.image_cache_seconds') or DEFAULT_DEADLINE
         try:
             deadline = int(param)
         except (TypeError, ValueError):

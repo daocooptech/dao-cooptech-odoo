@@ -80,7 +80,7 @@ def _round(value, asset):
 
 def load_dex_farm(env, login='dashkevich'):
     Param = env['ir.config_parameter'].sudo()
-    current = Param.get_param(PARAM)
+    current = Param.get_str(PARAM)
     if current == VERSION:
         return 0
     if 'coop.farm.pool' not in env or 'coop.crypto.offer' not in env:
@@ -98,7 +98,7 @@ def load_dex_farm(env, login='dashkevich'):
         made += _showcase_orders(env, crowd, showcase)
     made += _farm(env, crowd, showcase)
     made += _rebates(env)
-    Param.set_param(PARAM, VERSION)
+    Param.set_str(PARAM, VERSION)
     _logger.info('DEX биржа: стакан, история, пулы проектов и возвраты — %s записей', made)
     return made
 
