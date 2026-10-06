@@ -124,9 +124,9 @@ class ReportXmlAbstract(models.AbstractModel):
             else:
                 for line in s.invoice_line_ids:
                     if not line.price_unit:
-                        mes += f"Нет цены: {line.name}\n"
+                        mes += f"Нет цены: {line.label}\n"
                     if not line.quantity:
-                        mes += f"Нет количества: {line.name}\n"
+                        mes += f"Нет количества: {line.label}\n"
                     if not line.product_uom_id.okei:
                         mes += f"Нет ОКЕИ: {line.product_uom_id.name}\n"
 

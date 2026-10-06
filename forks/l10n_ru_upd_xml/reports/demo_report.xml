@@ -48,7 +48,7 @@
                         <t t-set="total_price_tax_subtotal" t-value="sum([line.price_unit*line.quantity for line in o.invoice_line_ids])"/>
                         <t t-set="total_tax_subtotal" t-value="sum([line.price_unit*line.quantity*(line.tax_ids.amount/100) for line in o.invoice_line_ids])"/>
                         <t t-foreach="o.invoice_line_ids" t-as="line">
-			<СведТов t-att="{'НомСтр':line_index+1,'НаимТов':line.name or '','ОКЕИ_Тов':line.product_uom_id.okei or '','КолТов':line.quantity or '','ЦенаТов':(('%.2f')%(line.price_subtotal/line.quantity)).replace('.',',') or '','СтТовБезНДС':(('%.2f')%(line.price_subtotal)).replace('.',',') or '','НалСт':(('%.0f')%(line.tax_ids.amount)).replace('.',',')+'%' or 'без НДС','СтТовУчНал':(('%.2f')%(line.price_subtotal*(1+(line.tax_ids.amount/100)))).replace('.',',') or ''}">
+			<СведТов t-att="{'НомСтр':line_index+1,'НаимТов':line.label or '','ОКЕИ_Тов':line.product_uom_id.okei or '','КолТов':line.quantity or '','ЦенаТов':(('%.2f')%(line.price_subtotal/line.quantity)).replace('.',',') or '','СтТовБезНДС':(('%.2f')%(line.price_subtotal)).replace('.',',') or '','НалСт':(('%.0f')%(line.tax_ids.amount)).replace('.',',')+'%' or 'без НДС','СтТовУчНал':(('%.2f')%(line.price_subtotal*(1+(line.tax_ids.amount/100)))).replace('.',',') or ''}">
 				<Акциз>
 					<БезАкциз>без акциза</БезАкциз>
 				</Акциз>

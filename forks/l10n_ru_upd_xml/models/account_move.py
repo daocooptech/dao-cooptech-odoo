@@ -187,9 +187,9 @@ class AccountMove(models.Model):
             else:
                 for line in s.invoice_line_ids:
                     if not line.price_unit:
-                        mes += u"Не указана цена за единицу для товара {}.\n".format(line.name)
+                        mes += u"Не указана цена за единицу для товара {}.\n".format(line.label)
                     if not line.quantity:
-                        mes += u"Не указано количество для товара {}.\n".format(line.name)
+                        mes += u"Не указано количество для товара {}.\n".format(line.label)
                     if not line.product_uom_id.okei:
                         mes += u"Не указан код ОКЕИ для единицы измерения {}.\n".format(line.product_uom_id.name)
             if not s.mt_contract_id:

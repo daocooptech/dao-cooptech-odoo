@@ -209,7 +209,7 @@ tbody, table, tr, td, th{border: none;}
 <t t-set="total_price_tax_subtotal"
    t-value="sum([line.price_total_pf for line in invoice_line_ids])"/>
 <tr  CLASS="R3" t-foreach="o.invoice_line_ids" t-as="line">
-    <TD CLASS="R22C1"><t t-out="line.name or ''"/></TD>
+    <TD CLASS="R22C1"><t t-out="line.label or ''"/></TD>
     <TD CLASS="R22C2"><SPAN class="cu_wspace"><!-- TO DO: ЕдиницаИзмеренияКод --></SPAN></TD>
     <TD CLASS="R22C2"><SPAN class="cu_wspace"><t t-out="line.product_uom_id.name or ''"/></SPAN></TD>
     <TD CLASS="R22C4"><SPAN class="cu_wspace"><t t-out="line.quantity or ''"/></SPAN></TD>

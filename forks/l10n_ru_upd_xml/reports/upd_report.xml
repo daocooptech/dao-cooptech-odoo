@@ -15,7 +15,7 @@
             <Файл t-att="{
                 'ИдФайл': o and o.edi and (o.edi + '_0_0_0_0_0_00') or '',
                 'ВерсФорм': '5.03',
-                'ВерсПрог': 'Odoo19'
+                'ВерсПрог': 'Odoo20'
             }">
                 <Документ t-att="{
                     'КНД': '1115131',
@@ -208,7 +208,7 @@
 
                             <СведТов t-att="{
                                 'НомСтр': line_index+1,
-                                'НаимТов': line.name or '',
+                                'НаимТов': line.label or '',
                                 'НаимЕдИзм': line.product_uom_id.name or '',
                                 'КолТов': line.quantity or '',
                                 'ЦенаТов': ('%.2f' % (line.price_subtotal / line.quantity if line.quantity else 0)) if line.quantity else '0.00',
@@ -219,7 +219,7 @@
                                 <ДопСведТов t-att="{
                                     'КодТов': line.product_id and line.product_id.default_code or '',
                                     'ГТИН': '0' + (line.product_id and line.product_id.barcode or '') if line.product_id and line.product_id.barcode else '',
-                                    'КодВидТов': line.product_id and line.product_id.hs_code or ''
+                                    'КодВидТов': line.product_id and line.product_id.get_hs_code() or ''
                                 }">
                                     <t t-if="line.product_id and line.product_id.tracking == 'serial'">
                                         <КрНаимСтрПр>Китай</КрНаимСтрПр>

@@ -23,6 +23,29 @@ class GeneralLedgerReport(models.AbstractModel):
         "name",
     ]
 
+    NUMERIC_ML_FIELDS = ("debit", "credit", "balance", "amount_currency")
+
+    @api.model
+    def _read_group_dicts(self, domain, fields, groupby):
+        """Замена read_group(fields=..., groupby=...) из Odoo 19: в 20 он возвращает
+        кортежи, а словари с ключами вида ``debit`` отдаёт formatted_read_group
+        (ключи агрегатов ``debit:sum``). Здесь они приводятся к старым именам."""
+        aggregates = []
+        for spec in fields:
+            name = spec.partition(":")[0]
+            if name in self.NUMERIC_ML_FIELDS and name not in groupby:
+                aggregates.append("%s:sum" % name)
+        groups = self.env["account.move.line"].formatted_read_group(
+            domain, groupby, aggregates
+        )
+        result = []
+        for group in groups:
+            item = dict(group)
+            for agg in aggregates:
+                item[agg.partition(":")[0]] = group[agg]
+            result.append(item)
+        return result
+
     @api.model
     def _get_move_lines_domain_not_reconciled(
             self, company_id, account_ids, partner_ids, only_posted_moves, date_from
@@ -139,7 +162,6 @@ class GeneralLedgerReport(models.AbstractModel):
                         "code": account.code,
                         "name": account.name,
                         "hide_account": False,
-                        "group_id": account.group_id.id,
                         "currency_id": account.currency_id.id,
                         "currency_name": account.currency_id.name,
                         "centralized": account.centralized,
@@ -240,12 +262,12 @@ class GeneralLedgerReport(models.AbstractModel):
         return domain
 
     def _get_accounts_initial_balance(self, initial_domain_bs, initial_domain_pl):
-        gl_initial_acc_bs = self.env["account.move.line"].read_group(
+        gl_initial_acc_bs = self._read_group_dicts(
             domain=initial_domain_bs,
             fields=["account_id", "debit", "credit", "balance", "amount_currency:sum"],
             groupby=["account_id"],
         )
-        gl_initial_acc_pl = self.env["account.move.line"].read_group(
+        gl_initial_acc_pl = self._read_group_dicts(
             domain=initial_domain_pl,
             fields=["account_id", "debit", "credit", "balance", "amount_currency:sum"],
             groupby=["account_id"],
@@ -275,7 +297,7 @@ class GeneralLedgerReport(models.AbstractModel):
         domain = self._get_initial_balance_fy_pl_ml_domain(
             account_ids, company_id, fy_start_date, base_domain
         )
-        initial_balances = self.env["account.move.line"].read_group(
+        initial_balances = self._read_group_dicts(
             domain=domain,
             fields=["account_id", "debit", "credit", "balance", "amount_currency:sum"],
             groupby=["account_id"],
@@ -327,7 +349,7 @@ class GeneralLedgerReport(models.AbstractModel):
         return getattr(self, method)(data, domain, grouped_by)
 
     def _prepare_gen_ld_data_group_partners(self, data, domain, grouped_by):
-        gl_initial_acc_prt = self.env["account.move.line"].read_group(
+        gl_initial_acc_prt = self._read_group_dicts(
             domain=domain,
             fields=[
                 "account_id",
@@ -338,7 +360,6 @@ class GeneralLedgerReport(models.AbstractModel):
                 "amount_currency:sum",
             ],
             groupby=["account_id", "partner_id"],
-            lazy=False,
         )
         if gl_initial_acc_prt:
             for gl in gl_initial_acc_prt:
@@ -348,7 +369,7 @@ class GeneralLedgerReport(models.AbstractModel):
                 else:
                     prt_id = gl["partner_id"][0]
                     prt_name = gl["partner_id"][1]
-                    prt_name = prt_name._value
+                    prt_name = getattr(prt_name, "_value", prt_name)
                 acc_id = gl["account_id"][0]
                 data[acc_id][prt_id] = self._prepare_gen_ld_data_item(gl)
                 data[acc_id][prt_id]["id"] = prt_id
@@ -357,7 +378,7 @@ class GeneralLedgerReport(models.AbstractModel):
         return data
 
     def _prepare_gen_ld_data_group_taxes(self, data, domain, grouped_by):
-        gl_initial_acc_prt = self.env["account.move.line"].read_group(
+        gl_initial_acc_prt = self._read_group_dicts(
             domain=domain,
             fields=[
                 "account_id",
@@ -368,14 +389,13 @@ class GeneralLedgerReport(models.AbstractModel):
                 "tax_line_id",
             ],
             groupby=["account_id"],
-            lazy=False,
         )
         if gl_initial_acc_prt:
             for gl in gl_initial_acc_prt:
                 if "tax_line_id" in gl and gl["tax_line_id"]:
                     tax_id = gl["tax_line_id"][0]
                     tax_name = gl["tax_line_id"][1]
-                    tax_name = tax_name._value
+                    tax_name = getattr(tax_name, "_value", tax_name)
                 else:
                     tax_id = 0
                     tax_name = "Missing Tax"
