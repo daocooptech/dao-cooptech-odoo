@@ -28,5 +28,6 @@ class IrAttachment(models.Model):
         if kwargs.get("coop_as_file"):
             self.coop_as_file = True
 
-    def _to_store_defaults(self, target):
-        return super()._to_store_defaults(target) + ["coop_as_file"]
+    def _store_attachment_fields(self, res, **kwargs):
+        super()._store_attachment_fields(res, **kwargs)
+        res.attr("coop_as_file")

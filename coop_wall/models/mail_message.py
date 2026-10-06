@@ -26,14 +26,13 @@ class MailMessage(models.Model):
 
     # ── В браузер ───────────────────────────────────────────────────
 
-    def _to_store_defaults(self, target):
-        return super()._to_store_defaults(target) + [
-            Store.Attr('coop_repost', lambda m: m._coop_repost_data()),
-            Store.Attr('coop_repost_count', lambda m: m._coop_repost_count()),
-            Store.Attr('coop_thanks_count', lambda m: m._coop_thanks_count()),
-            Store.Attr('coop_star_count', lambda m: m._coop_star_count()),
-            Store.Attr('coop_poll', lambda m: m._coop_poll_data()),
-        ]
+    def _store_message_fields(self, res, **kwargs):
+        super()._store_message_fields(res, **kwargs)
+        res.attr('coop_repost', lambda m: m._coop_repost_data())
+        res.attr('coop_repost_count', lambda m: m._coop_repost_count())
+        res.attr('coop_thanks_count', lambda m: m._coop_thanks_count())
+        res.attr('coop_star_count', lambda m: m._coop_star_count())
+        res.attr('coop_poll', lambda m: m._coop_poll_data())
 
     def _coop_poll_data(self):
         """Опрос записи глазами смотрящего — или False (`coop_wall_poll.py`)."""
@@ -130,5 +129,7 @@ class MailMessage(models.Model):
         """
         messages = self.browse(message_ids).exists()._filtered_access('read')
         messages = messages.filtered(lambda m: m.model in WALL_MODELS)
-        return Store().add(messages).get_result()
+        # В 20 `get_result()` нет, поля задаются явно; объект Store сериализуется
+        # сам (как в `message_get_followers` движка).
+        return Store().add(messages, '_store_message_fields')
 

@@ -217,7 +217,7 @@ class DiscussChannel(models.Model):
     # «ведёт платформа» все сорок шесть личных.
     MANAGED_KINDS = ('deal', 'project', 'org', 'shareholders')
 
-    def _action_unfollow(self, partner=None, guest=None, post_leave_message=True):
+    def action_unfollow(self):
         """Из переписки платформы не выходят.
 
         Решение владельца 16 сентября 2026: запретить явно. Состав такой
@@ -235,8 +235,7 @@ class DiscussChannel(models.Model):
                     'записью. «%(what)s» — разговор тех, кто в деле; выйти '
                     'из него можно, только перестав в нём участвовать.',
                     what=channel.display_name))
-        return super()._action_unfollow(
-            partner=partner, guest=guest, post_leave_message=post_leave_message)
+        return super().action_unfollow()
 
     @api.model
     def coop_resync_managed(self):
@@ -296,14 +295,15 @@ class DiscussChannel(models.Model):
             'добавлено %(added)s, убрано %(removed)s', merged)
         return True
 
-    def _to_store_defaults(self, target: Store.Target):
+    def _store_channel_fields(self, res: Store.FieldList):
         """Наши поля уезжают на клиент вместе с каналом.
 
         Отдельным запросом их было бы не собрать: список переписок рисуется
         из того, что движок уже прислал, и дозагрузка вида и подписи дала
         бы кадр со списком без фильтров.
         """
-        return super()._to_store_defaults(target) + [
+        super()._store_channel_fields(res)
+        res.extend([
             'coop_kind',
             'coop_subtitle',
             'coop_res_model',
@@ -311,4 +311,4 @@ class DiscussChannel(models.Model):
             'coop_link_label',
             'coop_pinned',
             'coop_managed',
-        ]
+        ])

@@ -523,7 +523,11 @@ class CoopCommunityMember(models.Model):
             if record.state == 'active' and not inside:
                 channel._add_members(partners=partner, post_joined_message=False)
             elif record.state != 'active' and inside:
-                channel._action_unfollow(partner=partner, post_leave_message=False)
+                # В 20 `_action_unfollow` удалён: убрать участника из канала
+                # — значит удалить его членство; без контекста
+                # `post_leave_message` сообщение «вышел» не пишется.
+                channel.channel_member_ids.filtered(
+                    lambda member: member.partner_id == partner).unlink()
 
     @api.model_create_multi
     def create(self, vals_list):
