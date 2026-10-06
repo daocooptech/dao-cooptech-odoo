@@ -53,7 +53,7 @@
 <!--           <field name="binding_model_id" ref="sale.model_sale_order"/>-->
 <!--           <field name="paperformat_id" ref="l10n_ru_doc.paperformat_a4"/>-->
 <!--           <field name="binding_type">report</field>-->
-<!--           <field name="report_docx_template" type="base64" file="docx_report/static/src/docx/report_saleorder_new_template.docx"/>-->
+<!--           <field name="report_docx_template" type="bytes" file="docx_report/static/src/docx/report_saleorder_new_template.docx"/>-->
 <!--        </record>-->
 
 <!--        <record id="l10n_ru_doc.account_invoices_new" model="ir.actions.report">-->
@@ -77,7 +77,7 @@
 <!--           <field name="binding_model_id" ref="account.model_account_move" />-->
 <!--           <field name="paperformat_id" ref="l10n_ru_doc.paperformat_a4l" />-->
 <!--           <field name="binding_type">report</field>-->
-<!--           <field name="report_docx_template" type="base64" file="l10n_ru_doc/static/src/docx/report_account_invoices_new_templates.docx"/>-->
+<!--           <field name="report_docx_template" type="bytes" file="l10n_ru_doc/static/src/docx/report_account_invoices_new_templates.docx"/>-->
 <!--        </record>-->
 
 <!--        <record id="l10n_ru_doc.report_account_invoice_bill_new" model="ir.actions.report">-->
@@ -101,7 +101,7 @@
 <!--           <field name="binding_model_id" ref="account.model_account_move" />-->
 <!--           <field name="paperformat_id" ref="l10n_ru_doc.paperformat_a4l" />-->
 <!--           <field name="binding_type">report</field>-->
-<!--           <field name="report_docx_template" type="base64" file="l10n_ru_doc/static/src/docx/report_account_invoice_bill_new_templates.docx"/>-->
+<!--           <field name="report_docx_template" type="bytes" file="l10n_ru_doc/static/src/docx/report_account_invoice_bill_new_templates.docx"/>-->
 <!--        </record>-->
 
 <!--        <record id="l10n_ru_doc.report_account_invoice_act_new" model="ir.actions.report">-->
@@ -125,7 +125,7 @@
 <!--           <field name="binding_model_id" ref="account.model_account_move" />-->
 <!--           <field name="paperformat_id" ref="l10n_ru_doc.paperformat_a4" />-->
 <!--           <field name="binding_type">report</field>-->
-<!--           <field name="report_docx_template" type="base64" file="l10n_ru_doc/static/src/docx/report_account_invoice_act_new_templates.docx"/>-->
+<!--           <field name="report_docx_template" type="bytes" file="l10n_ru_doc/static/src/docx/report_account_invoice_act_new_templates.docx"/>-->
 <!--        </record>-->
 
         <record id="report_account_invoice_upd_new" model="ir.actions.report">
@@ -149,7 +149,7 @@
 <!--           <field name="binding_model_id" ref="account.model_account_move" />-->
 <!--           <field name="paperformat_id" ref="l10n_ru_doc.paperformat_a4l" />-->
 <!--           <field name="binding_type">report</field>-->
-<!--           <field name="report_docx_template" type="base64" file="docx_report/static/src/docx/report_account_invoice_upd_new_templates.docx"/>-->
+<!--           <field name="report_docx_template" type="bytes" file="docx_report/static/src/docx/report_account_invoice_upd_new_templates.docx"/>-->
 <!--        </record>-->
 
         <record id="report_account_invoice_updn" model="ir.actions.report">
@@ -173,7 +173,7 @@
 <!--           <field name="binding_model_id" ref="account.model_account_move" />-->
 <!--           <field name="paperformat_id" ref="l10n_ru_doc.paperformat_a4l" />-->
 <!--           <field name="binding_type">report</field>-->
-<!--           <field name="report_docx_template" type="base64" file="docx_report/static/src/docx/report_account_invoice_updn_templates.docx"/>-->
+<!--           <field name="report_docx_template" type="bytes" file="docx_report/static/src/docx/report_account_invoice_updn_templates.docx"/>-->
 <!--        </record>-->
     </data>
 </openerp>
