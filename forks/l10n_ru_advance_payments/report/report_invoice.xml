@@ -1,7 +1,6 @@
 <odoo>
     <template id="template_order_prepaid_invoice">
-        <t t-call="web.basic_layout">
-            <t t-set="print_with_payments" t-value="True"/>
+        <t t-call="web.basic_layout" print_with_payments="True">
             <t t-foreach="docs" t-as="o">
                 <t t-call="l10n_ru_advance_payments.template_order_prepaid_invoice_body"/>
             </t>
