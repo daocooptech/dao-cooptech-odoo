@@ -529,7 +529,7 @@
                                     N</SPAN></TD>
                                 <TD CLASS="RE16CE2p"><SPAN class="cu_wspace">
                                     <t
-                                            t-esc="o.name[len(o.name)-4:]"/>
+                                            t-out="o.name[len(o.name)-4:]"/>
                                 </SPAN></TD>
                                 <TD CLASS="RE16CE2"><SPAN class="cu_wspace">от</SPAN></TD>
                                 <TD CLASS="RE16CE2p" COLSPAN="2"><DIV class="cu_space16"><span class="cu_wspace"
@@ -588,11 +588,11 @@
                                 <TD CLASS="RE15CE1l" COLSPAN="3"><SPAN></SPAN></TD>
                                 <TD CLASS="RE15CE2b" COLSPAN="3"><SPAN class="cu_wspace">Продавец</SPAN></TD>
                                 <TD CLASS="RE15CE2p" COLSPAN="6"><SPAN class="cu_wspace"><t
-                                        t-esc="company.name or ''"/></SPAN></TD>
+                                        t-out="company.name or ''"/></SPAN></TD>
                                 <TD CLASS="RE15CE3"><SPAN>(2)</SPAN></TD>
                                 <TD CLASS="RE15CE2b" COLSPAN="3"><SPAN class="cu_wspace">Покупатель</SPAN></TD>
                                 <TD CLASS="RE15CE2p" COLSPAN="6"><SPAN class="cu_wspace"><t
-                                        t-esc="o.partner_id.parent_id.name if o.partner_id.parent_id else  o.partner_id.name"/></SPAN></TD>
+                                        t-out="o.partner_id.parent_id.name if o.partner_id.parent_id else  o.partner_id.name"/></SPAN></TD>
                                 <TD CLASS="RE15CE3"><SPAN>(6)</SPAN></TD>
                             </TR>
                             <TR CLASS="RE15">
@@ -601,11 +601,11 @@
                                 <TD CLASS="RE15CE1l"><SPAN></SPAN></TD>
                                 <TD CLASS="RE15CE2" COLSPAN="3"><SPAN class="cu_wspace">Адрес</SPAN></TD>
                                 <TD CLASS="RE15CE2p" COLSPAN="6"><t
-                                        t-raw="helper.address(company)"/></TD>
+                                        t-out="helper.address(company)"/></TD>
                                 <TD CLASS="RE15CE3"><SPAN>(2а)</SPAN></TD>
                                 <TD CLASS="RE15CE2" COLSPAN="3"><SPAN class="cu_wspace">Адрес</SPAN></TD>
                                 <TD CLASS="RE15CE2p" COLSPAN="6"><t
-                                        t-raw="helper.address(o.partner_id)"/></TD>
+                                        t-out="helper.address(o.partner_id)"/></TD>
                                 <TD CLASS="RE15CE3"><SPAN>(6а)</SPAN></TD>
                             </TR>
                             <TR CLASS="RE15">
@@ -616,14 +616,14 @@
                                 <TD CLASS="RE15CE2" COLSPAN="3"><SPAN class="cu_wspace">ИНН/КПП<![CDATA[&nbsp;]]>
                                     продавца</SPAN></TD>
                                 <TD CLASS="RE15CE2p" COLSPAN="6"><SPAN class="cu_wspace"><t
-                                        t-esc="company.inn or ''"/><t
-                                        t-esc="company.kpp and '/'+company.kpp or ''"/></SPAN></TD>
+                                        t-out="company.inn or ''"/><t
+                                        t-out="company.kpp and '/'+company.kpp or ''"/></SPAN></TD>
                                 <TD CLASS="RE15CE3"><SPAN>(2б)</SPAN></TD>
                                 <TD CLASS="RE15CE2" COLSPAN="3"><SPAN class="cu_wspace">ИНН/КПП<![CDATA[&nbsp;]]>
                                     покупателя</SPAN></TD>
                                 <TD CLASS="RE15CE2p" COLSPAN="6"><SPAN class="cu_wspace">
-                                    <t t-esc="o.partner_id.parent_id.inn if o.partner_id.parent_id else o.partner_id.inn  "/>
-                                    /<t t-esc="o.partner_id.parent_id.kpp if o.partner_id.parent_id else o.partner_id.kpp "/>
+                                    <t t-out="o.partner_id.parent_id.inn if o.partner_id.parent_id else o.partner_id.inn  "/>
+                                    /<t t-out="o.partner_id.parent_id.kpp if o.partner_id.parent_id else o.partner_id.kpp "/>
                                 </SPAN></TD>
                                 <TD CLASS="RE15CE3"><SPAN>(6б)</SPAN></TD>
                             </TR>
@@ -631,7 +631,7 @@
                                 <TD CLASS="RE15CE2" COLSPAN="3">Грузоотправитель
                                     <![CDATA[&nbsp;]]>и<![CDATA[&nbsp;]]>его<![CDATA[&nbsp;]]>адрес</TD>
                                 <TD CLASS="RE15CE2p" COLSPAN="6"><t t-if='o.only_service==False'><t
-                                        t-esc="helper.representation_small(o.gruzootpr) or company.name"/></t></TD>
+                                        t-out="helper.representation_small(o.gruzootpr) or company.name"/></t></TD>
                                 <TD CLASS="RE15CE3"><SPAN>(3)</SPAN></TD>
                                 <TD CLASS="RE15CE2" COLSPAN="3"><SPAN class="cu_wspace">Валюта:<![CDATA[&nbsp;]]>
                                     наименование,<![CDATA[&nbsp;]]>код</SPAN></TD>
@@ -643,7 +643,7 @@
                                 <TD CLASS="RE15CE2" COLSPAN="3">Грузополучатель
                                     <![CDATA[&nbsp;]]>и<![CDATA[&nbsp;]]>его<![CDATA[&nbsp;]]>адрес</TD>
                                 <TD CLASS="RE15CE2p" COLSPAN="6"><t t-if='o.only_service==False'><t
-                                        t-esc="helper.representation_small(o.gruzopol) or ''"/></t></TD>
+                                        t-out="helper.representation_small(o.gruzopol) or ''"/></t></TD>
                                 <TD CLASS="RE15CE3"><SPAN>(4)</SPAN></TD>
                                 <TD CLASS="RE15CE3" COLSPAN="10"><SPAN></SPAN></TD>
                             </TR>
@@ -651,7 +651,7 @@
                                 <TD CLASS="RE15CE2" COLSPAN="3" style="vertical-align: bottom;">К<![CDATA[&nbsp;]]>
                                     платежно-расчетному<![CDATA[&nbsp;]]>документу №</TD>
                                 <TD CLASS="RE15CE2p" COLSPAN="6" style="vertical-align: bottom;"><SPAN class="cu_wspace"><t
-                                        t-esc="o.payment_text"/></SPAN></TD>
+                                        t-out="o.payment_text"/></SPAN></TD>
 
                                 <TD CLASS="RE15CE3"><SPAN>(5)</SPAN></TD>
                                 <TD CLASS="RE15CE2" COLSPAN="3">Идентификатор<![CDATA[&nbsp;]]>
@@ -667,19 +667,19 @@
                                         <tr>
                                             <td style="width: 70%;" CLASS="RE15CE2p"><SPAN class="cu_wspace">1
                                                 <![CDATA[&nbsp;]]><t t-if="len(o.invoice_line_ids)>1">-
-                                                    <![CDATA[&nbsp;]]><t t-esc="len(o.invoice_line_ids)"/></t></SPAN></td>
+                                                    <![CDATA[&nbsp;]]><t t-out="len(o.invoice_line_ids)"/></t></SPAN></td>
                                             <td style="width: 30%;" CLASS="RE15CE3"><SPAN class="cu_wspace">
                                                 №</SPAN></td>
                                         </tr>
                                     </table>
                                 </TD>
                                 <TD CLASS="RE15CE2p" COLSPAN="3"><SPAN class="cu_wspace"><t
-                                        t-esc="o.get_delivery_doc_name()"/></SPAN></TD>
+                                        t-out="o.get_delivery_doc_name()"/></SPAN></TD>
                                 <TD><table border="1" style="width: 100%;">
                                     <tr>
                                         <td style="width: 15%;" CLASS="RE15CE3"><SPAN class="cu_wspace">от</SPAN></td>
                                         <td style="width: 85%;" CLASS="RE15CE2p"><SPAN class="cu_wspace"><t
-                                                t-esc="o.get_delivery_doc_date()"/></SPAN></td>
+                                                t-out="o.get_delivery_doc_date()"/></SPAN></td>
                                     </tr>
                                 </table></TD>
                                 <TD CLASS="RE15CE3"><SPAN>(5a)</SPAN></TD>
@@ -787,33 +787,33 @@
                                t-value="sum([line.price_total_pf for line in invoice_line_ids])"/>
                             <tr CLASS="RE0" t-foreach="invoice_line_ids" t-as="line">
                                 <TD CLASS="RE0CE1"><SPAN class="cu_wspace"><t
-                                        t-esc="line.product_id.default_code or ''"/></SPAN></TD>
-                                <TD CLASS="RE0CE1l"><SPAN class="cu_wspace"><t t-esc="line_index+1"/></SPAN></TD>
-                                <TD CLASS="RE0CE1" style="text-align: left;"><t t-esc="line.name or ''"/></TD>
+                                        t-out="line.product_id.default_code or ''"/></SPAN></TD>
+                                <TD CLASS="RE0CE1l"><SPAN class="cu_wspace"><t t-out="line_index+1"/></SPAN></TD>
+                                <TD CLASS="RE0CE1" style="text-align: left;"><t t-out="line.name or ''"/></TD>
                                 <TD CLASS="RE0CE1"><!-- TO DO: Код Вида товара -->
                                     <SPAN><t
-                                            t-esc="line.product_id.kod_tnved or ''"/></SPAN>
+                                            t-out="line.product_id.kod_tnved or ''"/></SPAN>
                                 </TD>
                                 <TD CLASS="RE0CE1"><!-- TO DO: Код ЕдИзм -->
                                     <t
-                                            t-esc="line.product_uom_id.kod or ''"/>
+                                            t-out="line.product_uom_id.kod or ''"/>
                                 </TD>
                                 <TD CLASS="RE0CE1"><SPAN class="cu_wspace"><t
-                                        t-esc="line.product_uom_id.name or ''"/></SPAN></TD>
-                                <TD CLASS="RE0CE1"><SPAN class="cu_wspace"><t t-esc="line.quantity or ''"/></SPAN></TD>
+                                        t-out="line.product_uom_id.name or ''"/></SPAN></TD>
+                                <TD CLASS="RE0CE1"><SPAN class="cu_wspace"><t t-out="line.quantity or ''"/></SPAN></TD>
                                 <TD CLASS="RE0CE1"><SPAN class="cu_wspace"><t
-                                        t-esc="(('%.2f')%(line.price_subtotal/line.quantity)).replace('.',',') or ''"/></SPAN></TD>
+                                        t-out="(('%.2f')%(line.price_subtotal/line.quantity)).replace('.',',') or ''"/></SPAN></TD>
                                 <TD CLASS="RE0CE1"><SPAN class="cu_wspace"><t
-                                        t-esc="(('%.2f')%line.price_subtotal) or ''"/></SPAN></TD>
+                                        t-out="(('%.2f')%line.price_subtotal) or ''"/></SPAN></TD>
                                 <TD CLASS="RE0CE1"><SPAN class="cu_wspace">Без
                                     акциза<!-- TO DO: Сумма акциза --></SPAN></TD>
                                 <TD CLASS="RE0CE1"><SPAN class="cu_wspace"><t
-                                        t-esc="line.tax_ids.filtered(lambda tax: tax.invisiblePF == False)[0].amount if line.tax_ids.filtered(lambda tax: tax.invisiblePF == False) else  ''"/>
+                                        t-out="line.tax_ids.filtered(lambda tax: tax.invisiblePF == False)[0].amount if line.tax_ids.filtered(lambda tax: tax.invisiblePF == False) else  ''"/>
                                     % <!-- TO DO: СтавкаНДС --></SPAN></TD>
                                 <TD CLASS="RE0CE1"><SPAN class="cu_wspace"><t
-                                        t-esc="(('%.2f')%(line.price_total_pf-line.price_subtotal)).replace('.',',') or ''"/></SPAN></TD>
+                                        t-out="(('%.2f')%(line.price_total_pf-line.price_subtotal)).replace('.',',') or ''"/></SPAN></TD>
                                 <TD CLASS="RE0CE1"><SPAN class="cu_wspace"><t
-                                        t-esc="(('%.2f')%(line.price_total_pf)).replace('.',',') or ''"/></SPAN></TD>
+                                        t-out="(('%.2f')%(line.price_total_pf)).replace('.',',') or ''"/></SPAN></TD>
 
                                 <TD CLASS="RE0CE1"><SPAN class="cu_wspace">643<!-- TO DO: Страна код --></SPAN></TD>
                                 <TD CLASS="RE0CE1"><SPAN class="cu_wspace">РФ<!-- TO DO: Страна --></SPAN></TD>
@@ -825,12 +825,12 @@
                                 <TD CLASS="RE0CE1lb" COLSPAN="7"><SPAN class="cu_wspace">Всего<![CDATA[&nbsp;]]>к
                                     <![CDATA[&nbsp;]]>оплате (9)</SPAN></TD>
                                 <TD CLASS="RE0CE1"><SPAN class="cu_wspace"><t
-                                        t-esc="(('%.2f')%(page_price_subtotal)).replace('.',',') or ''"/></SPAN></TD>
+                                        t-out="(('%.2f')%(page_price_subtotal)).replace('.',',') or ''"/></SPAN></TD>
                                 <TD CLASS="RE0CE1" COLSPAN="2"><SPAN class="cu_wspace">Х</SPAN></TD>
                                 <TD CLASS="RE0CE1"><SPAN class="cu_wspace"><t
-                                        t-esc="(('%.2f')%(page_tax)).replace('.',',') or ''"/></SPAN></TD>
+                                        t-out="(('%.2f')%(page_tax)).replace('.',',') or ''"/></SPAN></TD>
                                 <TD CLASS="RE0CE1"><SPAN class="cu_wspace"><t
-                                        t-esc="(('%.2f')%(page_price_tax_subtotal)).replace('.',',') or ''"/></SPAN></TD>
+                                        t-out="(('%.2f')%(page_price_tax_subtotal)).replace('.',',') or ''"/></SPAN></TD>
                                 <TD CLASS="RE0CE1" COLSPAN="3"><SPAN class="cu_wspace"></SPAN></TD>
                             </TR>
                         </TABLE>
@@ -860,14 +860,14 @@
                                 <TD CLASS="RE32CE8I2"><SPAN class="cu_wspace"></SPAN></TD>
                                 <TD CLASS="RE30CE1"><SPAN class="cu_wspace"></SPAN></TD>
                                 <TD CLASS="RE30CE2"><SPAN class="cu_wspace"><t
-                                        t-esc="helper.initials(company.chief_id.name)"/></SPAN></TD>
+                                        t-out="helper.initials(company.chief_id.name)"/></SPAN></TD>
                                 <TD CLASS="RE30CE1" COLSPAN="2"><SPAN class="cu_wspace">Главный<![CDATA[&nbsp;]]>
                                     бухгалтер<BR/>или<![CDATA[&nbsp;]]>иное<![CDATA[&nbsp;]]>уполномоченное
                                     <![CDATA[&nbsp;]]>лицо</SPAN></TD>
                                 <TD CLASS="RE32CE8I2"><SPAN class="cu_wspace"></SPAN></TD>
                                 <TD CLASS="RE30CE1"><SPAN class="cu_wspace"></SPAN></TD>
                                 <TD CLASS="RE30CE2"><SPAN class="cu_wspace"><t
-                                        t-esc="helper.initials(company.accountant_id.name)"/></SPAN></TD>
+                                        t-out="helper.initials(company.accountant_id.name)"/></SPAN></TD>
                             </TR>
                             <TR CLASS="REB15">
                                 <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
@@ -921,7 +921,7 @@
                                 <TD CLASS="REB15CE1" COLSPAN="2"><SPAN class="cu_wspace">Основание<![CDATA[&nbsp;]]>
                                     передачи<![CDATA[&nbsp;]]>(сдачи)<![CDATA[&nbsp;]]>/<![CDATA[&nbsp;]]>получения
                                     <![CDATA[&nbsp;]]>(приемки)</SPAN></TD>
-                                <TD CLASS="REB15CE2"><SPAN class="cu_wspace"><t t-esc="o.osnovanie"/></SPAN></TD>
+                                <TD CLASS="REB15CE2"><SPAN class="cu_wspace"><t t-out="o.osnovanie"/></SPAN></TD>
                                 <TD CLASS="REB15CE4"><SPAN class="cu_wspace"></SPAN>[8]</TD>
                             </TR>
                             <TR CLASS="REB15">
@@ -934,7 +934,7 @@
                                 <TD CLASS="REB15CE1"><SPAN class="cu_wspace">Данные<![CDATA[&nbsp;]]>о<![CDATA[&nbsp;]]>
                                     транспортировке<![CDATA[&nbsp;]]>и<![CDATA[&nbsp;]]>грузе</SPAN></TD>
                                 <TD CLASS="REB15CE2" COLSPAN="2"><SPAN class="cu_wspace"><t
-                                        t-esc="o.transport"/></SPAN></TD>
+                                        t-out="o.transport"/></SPAN></TD>
                                 <TD CLASS="REB15CE4"><SPAN class="cu_wspace">[9]</SPAN></TD>
                             </TR>
                             <TR CLASS="REB15">
@@ -991,7 +991,7 @@
                             <TR CLASS="RE30"> <!-- REB15-->
                                 <TD CLASS="REB15CE2"
                                     style="text-align:center; vertical-align:bottom; border-bottom: #000000 1px solid;"><SPAN
-                                        class="cu_wspace"><t t-esc='o.kladov.partner_id.function or ""'/></SPAN></TD>
+                                        class="cu_wspace"><t t-out='o.kladov.partner_id.function or ""'/></SPAN></TD>
                                 <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
                                 <TD CLASS="RE32CE8I2" COLSPAN="5" style="border-bottom: #000000 1px solid;"><SPAN
                                         class="cu_wspace"></SPAN></TD>
@@ -999,15 +999,15 @@
                                 <TD CLASS="REB15CE2" COLSPAN="3"
                                     style="text-align:center; vertical-align:bottom; border-bottom: #000000 1px solid;"><SPAN
                                         class="cu_wspace"><t
-                                        t-esc="helper.initials(o.kladov.partner_id.name)"/></SPAN></TD>
+                                        t-out="helper.initials(o.kladov.partner_id.name)"/></SPAN></TD>
                                 <TD CLASS="REB15CE4" style="text-align:center; border-right: #000000 2px solid;"><SPAN
                                         class="cu_wspace">[10]</SPAN></TD>
                                 <TD CLASS="REB15CE1r"><SPAN class="cu_wspace"></SPAN></TD>
-                                <TD CLASS="REB15CE2" style="text-align:center; vertical-align:bottom; border-bottom: #000000 1px solid;"><SPAN class="cu_wspace"><t t-esc='o.get_function_partner(o.partner_id,"director") or ""'/></SPAN></TD>
+                                <TD CLASS="REB15CE2" style="text-align:center; vertical-align:bottom; border-bottom: #000000 1px solid;"><SPAN class="cu_wspace"><t t-out='o.get_function_partner(o.partner_id,"director") or ""'/></SPAN></TD>
                                 <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
                                 <TD CLASS="RE32CE8I2" COLSPAN="5" style="border-bottom: #000000 1px solid;"><SPAN class="cu_wspace"></SPAN></TD>
                                 <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
-                                <TD CLASS="REB15CE2" COLSPAN="3" style="text-align:center; vertical-align:bottom; border-bottom: #000000 1px solid;"><SPAN class="cu_wspace"></SPAN><t t-esc="helper.initials(o.get_name_partner(o.partner_id,'director') or False)"/></TD>
+                                <TD CLASS="REB15CE2" COLSPAN="3" style="text-align:center; vertical-align:bottom; border-bottom: #000000 1px solid;"><SPAN class="cu_wspace"></SPAN><t t-out="helper.initials(o.get_name_partner(o.partner_id,'director') or False)"/></TD>
                                 <TD CLASS="REB15CE4" style="text-align:center;"><SPAN class="cu_wspace">[15]</SPAN></TD>
                             </TR>
                             <TR CLASS="REB15">
@@ -1029,7 +1029,7 @@
                                 <TD CLASS="REB15CE1" COLSPAN="3"><SPAN class="cu_wspace">Дата<![CDATA[&nbsp;]]>отгрузки,
                                     <![CDATA[&nbsp;]]>передачи<![CDATA[&nbsp;]]>(сдачи)</SPAN></TD>
                                 <TD CLASS="REB15CE2" COLSPAN="8"><SPAN class="cu_wspace"><t
-                                        t-esc="helper.ru_date(o.invoice_date)"/></SPAN></TD>
+                                        t-out="helper.ru_date(o.invoice_date)"/></SPAN></TD>
                                 <TD CLASS="REB15CE4"><SPAN class="cu_wspace">[11]</SPAN></TD>
                                 <TD CLASS="REB15CE1r"><SPAN class="cu_wspace"></SPAN></TD>
                                 <TD CLASS="REB15CE1" COLSPAN="3"><SPAN class="cu_wspace">Дата<![CDATA[&nbsp;]]>получения
@@ -1087,7 +1087,7 @@
                                 <TD CLASS="REB15CE2"
                                     style="text-align:center; vertical-align:bottom; border-bottom: #000000 1px solid;"><SPAN
                                         class="cu_wspace"><t
-                                        t-esc='company.accountant_id.partner_id.function or ""'/></SPAN></TD>
+                                        t-out='company.accountant_id.partner_id.function or ""'/></SPAN></TD>
                                 <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
                                 <TD CLASS="RE32CE8I2" COLSPAN="5" style="border-bottom: #000000 1px solid;"><SPAN
                                         class="cu_wspace"></SPAN></TD>
@@ -1095,15 +1095,15 @@
                                 <TD CLASS="REB15CE2" COLSPAN="3"
                                     style="text-align:center; vertical-align:bottom; border-bottom: #000000 1px solid;"><SPAN
                                         class="cu_wspace"><t
-                                        t-esc="helper.initials(company.accountant_id.name)"/></SPAN></TD>
+                                        t-out="helper.initials(company.accountant_id.name)"/></SPAN></TD>
                                 <TD CLASS="REB15CE4" style="text-align:center; border-right: #000000 2px solid;"><SPAN
                                         class="cu_wspace">[13]</SPAN></TD>
                                 <TD CLASS="REB15CE1r"><SPAN class="cu_wspace"></SPAN></TD>
-                                <TD CLASS="REB15CE2" style="text-align:center; vertical-align:bottom; border-bottom: #000000 1px solid;"><SPAN class="cu_wspace"><t t-esc='o.get_function_partner(o.partner_id,"accountant") or ""'/></SPAN></TD>
+                                <TD CLASS="REB15CE2" style="text-align:center; vertical-align:bottom; border-bottom: #000000 1px solid;"><SPAN class="cu_wspace"><t t-out='o.get_function_partner(o.partner_id,"accountant") or ""'/></SPAN></TD>
                                 <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
                                 <TD CLASS="RE32CE8I2" COLSPAN="5" style="border-bottom: #000000 1px solid;"><SPAN class="cu_wspace"></SPAN></TD>
                                 <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
-                                <TD CLASS="REB15CE2" COLSPAN="3" style="text-align:center; vertical-align:bottom; border-bottom: #000000 1px solid;"><SPAN class="cu_wspace"></SPAN><t t-esc="helper.initials(o.get_name_partner(o.partner_id,'accountant') or False)"/></TD>
+                                <TD CLASS="REB15CE2" COLSPAN="3" style="text-align:center; vertical-align:bottom; border-bottom: #000000 1px solid;"><SPAN class="cu_wspace"></SPAN><t t-out="helper.initials(o.get_name_partner(o.partner_id,'accountant') or False)"/></TD>
                                 <TD CLASS="REB15CE4" style="text-align:center"><SPAN class="cu_wspace">[18]</SPAN></TD>
                             </TR>
                             <TR CLASS="REB15">
@@ -1134,16 +1134,16 @@
                             </TR>
                             <TR CLASS="REB15">
                                 <TD CLASS="REB15CE2" COLSPAN="11"><SPAN class="cu_wspace"><t
-                                        t-esc="company.name or ''"/>,<![CDATA[&nbsp;]]>ИНН/КПП<![CDATA[&nbsp;]]><t
-                                        t-esc="company.inn or ''"/><t
-                                        t-esc="company.kpp and '/'+company.kpp or ''"/></SPAN></TD>
+                                        t-out="company.name or ''"/>,<![CDATA[&nbsp;]]>ИНН/КПП<![CDATA[&nbsp;]]><t
+                                        t-out="company.inn or ''"/><t
+                                        t-out="company.kpp and '/'+company.kpp or ''"/></SPAN></TD>
                                 <TD CLASS="REB15CE4"><SPAN class="cu_wspace">[14]</SPAN></TD>
                                 <TD CLASS="REB15CE1r"><SPAN class="cu_wspace"></SPAN></TD>
                                 <TD CLASS="REB15CE2" COLSPAN="11"><SPAN class="cu_wspace"><t
-                                        t-esc="o.partner_id.parent_id.name if o.partner_id.parent_id else o.partner_id.name"/>
+                                        t-out="o.partner_id.parent_id.name if o.partner_id.parent_id else o.partner_id.name"/>
                                     ,<![CDATA[&nbsp;]]>ИНН/КПП<![CDATA[&nbsp;]]>
-                                    <t t-esc="o.partner_id.parent_id.inn if o.partner_id.parent_id else o.partner_id.inn  "/>
-                                    /<t t-esc="o.partner_id.parent_id.kpp if o.partner_id.parent_id else o.partner_id.kpp "/></SPAN></TD>
+                                    <t t-out="o.partner_id.parent_id.inn if o.partner_id.parent_id else o.partner_id.inn  "/>
+                                    /<t t-out="o.partner_id.parent_id.kpp if o.partner_id.parent_id else o.partner_id.kpp "/></SPAN></TD>
                                 <TD CLASS="REB15CE4"><SPAN class="cu_wspace">[19]</SPAN></TD>
                             </TR>
                             <TR CLASS="REB15">

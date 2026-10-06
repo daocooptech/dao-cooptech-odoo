@@ -52,13 +52,13 @@
                         <tbody>
                             <tr class="R0">
                                 <td class="R0C0">
-                                    <t t-esc="o.company_id.name or ''"/>
+                                    <t t-out="o.company_id.name or ''"/>
                                 </td>
                                 <td class="R0C1">Договор
-                                    <t t-esc="o.name or ''"/>
+                                    <t t-out="o.name or ''"/>
                                     от
                                     <t
-                                            t-esc="o.date_start or ''"/>
+                                            t-out="o.date_start or ''"/>
                                 </td>
                             </tr>
                         </tbody>
@@ -123,7 +123,7 @@
                         <tbody>
                             <tr class="R0">
                                 <td class="R0C0" colspan="2">Договор №
-                                    <t t-esc="o.name"/>
+                                    <t t-out="o.name"/>
                                 </td>
                             </tr>
                             <tr class="R0">
@@ -135,10 +135,10 @@
                             </tr>
                             <tr class="R0">
                                 <td class="R0C1">
-                                    <t t-esc="company.partner_id.city"/>
+                                    <t t-out="company.partner_id.city"/>
                                 </td>
                                 <td class="R0C2">
-                                    <t t-esc="o.get_date_text(o.date_start)"/>
+                                    <t t-out="o.get_date_text(o.date_start)"/>
                                 </td>
                             </tr>
                             <tr class="R0">
@@ -148,7 +148,7 @@
                             <tr class="R0">
                                 <td class="R0C3" colspan="2">
                                     <span>
-                                        <t t-raw="o.contract_header or ''"/>
+                                        <t t-out="o.contract_header or ''"/>
                                     </span>
                                 </td>
                                 <tr class="R0">
@@ -158,10 +158,10 @@
                             </tr>
                             <!--t t-foreach="o.lines.sorted(key=lambda r: r.sequence, reverse=False)" t-as="line">
                               <tr class="R0">
-                                <td  class="R0C4" colspan="2"><t t-esc="line.name"/></td>
+                                <td  class="R0C4" colspan="2"><t t-out="line.name"/></td>
                               </tr>
                               <tr class="R0">
-                                <td  class="R0C5" colspan="2"><span><t t-raw="line.punct"/></span></td>
+                                <td  class="R0C5" colspan="2"><span><t t-out="line.punct"/></span></td>
                               </tr>
                               <tr class="R0">
                                 <td  class="R0C5" colspan="2"></td>
@@ -171,11 +171,11 @@
                     </table>
                     <t t-foreach="o.lines_ids.sorted(key=lambda r: r.sequence, reverse=False)" t-as="line">
                         <p class="R0C4">
-                            <t t-esc="line.name or ''"/>
+                            <t t-out="line.name or ''"/>
                         </p>
                         <div class="R0C5">
                             <span>
-                                <t t-raw="line.punct or ''"/>
+                                <t t-out="line.punct or ''"/>
                             </span>
                         </div>
                     </t>
@@ -199,45 +199,45 @@
                             </tr>
                             <tr class="R0">
                                 <td class="R0C6rl" colspan="3">
-                                    <t t-esc="o.company_id.name or ''"/>
+                                    <t t-out="o.company_id.name or ''"/>
                                 </td>
                                 <td class="R0C6rl" colspan="3">
-                                    <t t-esc="o.partner_id.name or ''"/>
+                                    <t t-out="o.partner_id.name or ''"/>
                                 </td>
                             </tr>
                             <tr class="R0">
                                 <td class="R0C6l" colspan="3">ИНН
-                                    <t t-esc="o.company_id.inn or ''"/>
+                                    <t t-out="o.company_id.inn or ''"/>
                                 </td>
                                 <td class="R0C7rl" colspan="3">ИНН
-                                    <t t-esc="o.partner_id.inn or ''"/>
+                                    <t t-out="o.partner_id.inn or ''"/>
                                 </td>
                             </tr>
                             <tr class="R0">
                                 <td class="R0C6l" colspan="2">ОГРН
-                                    <t t-esc="o.company_id.company_registry or ''"/>
+                                    <t t-out="o.company_id.company_registry or ''"/>
                                 </td>
                                 <td class="R0C6r" rowspan="2">
-                                    <t t-esc="o.director_name_company or ''"/>
+                                    <t t-out="o.director_name_company or ''"/>
                                 </td>
                                 <t t-if="o.partner_type in ['company', 'company_ip']">
                                     <td class="R0C7rl" colspan="3">ОГРН
-                                        <t t-esc="o.partner_id.ogrn or ''"/>
+                                        <t t-out="o.partner_id.ogrn or ''"/>
                                     </td>
                                 </t>
                                 <t t-else="">
                                     <td class="R0C7rl" colspan="3">Паспорт
-                                        <t t-esc="o.partner_id.passport or ''"/>
+                                        <t t-out="o.partner_id.passport or ''"/>
                                     </td>
                                 </t>
                             </tr>
                             <tr class="R0">
                                 <td class="R0C6l" colspan="3">КПП
-                                    <t t-esc="o.company_id.kpp or ''"/>
+                                    <t t-out="o.company_id.kpp or ''"/>
                                 </td>
                                 <t t-if="o.partner_type == 'company'">
                                     <td class="R0C7rl" colspan="3">КПП
-                                        <t t-esc="o.partner_id.kpp or ''"/>
+                                        <t t-out="o.partner_id.kpp or ''"/>
                                     </td>
                                 </t>
                                 <t t-else="">
@@ -250,16 +250,16 @@
                             <!--                            </tr>-->
                             <!--                            <tr class="R0">-->
                             <!--                                <td class="R0C6l" colspan="3">-->
-                            <!--                                    <t t-raw="o.get_bank(o.company_id.partner_id) or ''"/>-->
+                            <!--                                    <t t-out="o.get_bank(o.company_id.partner_id) or ''"/>-->
                             <!--                                </td>-->
                             <!--                                <td class="R0C7rl" colspan="3">-->
-                            <!--                                    <t t-raw="o.get_bank(o.partner_id) or ''"/>-->
+                            <!--                                    <t t-out="o.get_bank(o.partner_id) or ''"/>-->
                             <!--                                </td>-->
                             <!--                            </tr>-->
                             <!--                                                        <td class="R0C6tI">-->
                             <!--                                                            <SPAN>-->
                             <!--                                                                <t-->
-                            <!--                                                                        t-raw="o.stamp and o.img(company.chief_id.facsimile) or ''"/>-->
+                            <!--                                                                        t-out="o.stamp and o.img(company.chief_id.facsimile) or ''"/>-->
                             <!--                                                            </SPAN>-->
                             <!--                                                        </td>-->
                             <tr class="R0">
@@ -270,10 +270,10 @@
                             </tr>
                             <tr class="R0">
                                 <td class="R0C6l" colspan="3">
-                                    <t t-esc="o.address(o.company_id) or ''"/>
+                                    <t t-out="o.address(o.company_id) or ''"/>
                                 </td>
                                 <td class="R0C7rl" colspan="3">
-                                    <t t-esc="o.address(o.partner_id) or ''"/>
+                                    <t t-out="o.address(o.partner_id) or ''"/>
                                 </td>
                             </tr>
                             <tr class="R0">
@@ -300,12 +300,12 @@
                                 <td class="R0C6l"></td>
                                 <td class="R0C6tI">
                                     <SPAN>
-                                        <t t-raw="o.stamp and o.img(o.company_id.chief_id.facsimile) or ''"/>
+                                        <t t-out="o.stamp and o.img(o.company_id.chief_id.facsimile) or ''"/>
                                     </SPAN>
                                 </td>
                                 <td class="R0C6tS">
                                     <SPAN>
-                                        <t t-raw="o.stamp and o.img(o.company_id.stamp) or ''"/>
+                                        <t t-out="o.stamp and o.img(o.company_id.stamp) or ''"/>
                                     </SPAN>
                                 </td>
                                 <td class="R0C6rl" colspan="3"></td>
@@ -315,7 +315,7 @@
                                 <td class="R0C6l"></td>
                                 <td class="R0C6b"></td>
                                 <td class="R0C6r">
-                                    <t t-esc="''"/>
+                                    <t t-out="''"/>
                                 </td>
                             </tr>
                             <tr class="R0">
@@ -372,7 +372,7 @@
                                 <td class="R0C6tI">
                                     <SPAN>
                                         <t
-                                                t-raw="o.stamp and o.img(company.chief_id.facsimile) or ''"/>
+                                                t-out="o.stamp and o.img(company.chief_id.facsimile) or ''"/>
                                     </SPAN>
                                 </td>
                                 <td class="R0C0"></td>

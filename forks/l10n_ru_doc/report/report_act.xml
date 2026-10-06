@@ -79,14 +79,14 @@ tbody, table, tr, td, th{border: none;}
     <COL WIDTH="10%"/>
     <COL WIDTH="10%"/>
     <TR CLASS="R3">
-        <TD CLASS="R3C1" COLSPAN="7"><DIV class="cu_space28"><SPAN class="cu_wspace">Акт № <t t-esc="helper.numer(o.name)"/> от <span t-field="o.invoice_date"/></SPAN></DIV></TD>
+        <TD CLASS="R3C1" COLSPAN="7"><DIV class="cu_space28"><SPAN class="cu_wspace">Акт № <t t-out="helper.numer(o.name)"/> от <span t-field="o.invoice_date"/></SPAN></DIV></TD>
     </TR>
     <TR>
         <TD COLSPAN="7"><![CDATA[&nbsp;]]></TD>
     </TR>
     <TR CLASS="R5">
         <TD CLASS="R5C1" COLSPAN="2"><SPAN class="cu_wspace">Исполнитель:</SPAN></TD>
-        <TD CLASS="R5C5" COLSPAN="5"><t t-esc="helper.full_representation(company.partner_id)"/></TD>
+        <TD CLASS="R5C5" COLSPAN="5"><t t-out="helper.full_representation(company.partner_id)"/></TD>
     </TR>
     <TR>
         <TD COLSPAN="7"><![CDATA[&nbsp;]]></TD>
@@ -96,7 +96,7 @@ tbody, table, tr, td, th{border: none;}
     </TR>
     <TR CLASS="R5">
         <TD CLASS="R5C1" COLSPAN="2"><SPAN class="cu_wspace">Заказчик:</SPAN></TD>
-        <TD CLASS="R5C5" COLSPAN="5"><t t-esc="helper.full_representation(o.partner_id.parent_id or o.partner_id)"/></TD>
+        <TD CLASS="R5C5" COLSPAN="5"><t t-out="helper.full_representation(o.partner_id.parent_id or o.partner_id)"/></TD>
         <TD><SPAN></SPAN></TD>
         <TD></TD>
     </TR>
@@ -115,12 +115,12 @@ tbody, table, tr, td, th{border: none;}
         <TD CLASS="R11C29"><DIV class="cu_space29"><SPAN class="cu_wspace">Сумма</SPAN></DIV></TD>
     </TR>
     <TR  CLASS="R0" t-foreach="o.invoice_line_ids" t-as="line">
-        <TD CLASS="R14C1"><SPAN class="cu_wspace"><t t-esc="line_index+1"/></SPAN></TD>
-        <TD CLASS="R14C3" COLSPAN="2"><t t-esc="line.product_id.name or ''"/></TD>
-        <TD CLASS="R14C20"><SPAN class="cu_wspace"><t t-esc="line.quantity or ''"/></SPAN></TD>
-        <TD CLASS="R14C23"><SPAN class="cu_wspace"><t t-esc="line.product_uom_id.name or ''"/></SPAN></TD>
-        <TD CLASS="R14C20"><SPAN class="cu_wspace"><t t-esc="(('%.2f')%(line.price_subtotal/line.quantity)).replace('.',',') or ''"/></SPAN></TD>
-        <TD CLASS="R14C29"><SPAN class="cu_wspace"><t t-esc="line.price_subtotal or ''"/></SPAN></TD>
+        <TD CLASS="R14C1"><SPAN class="cu_wspace"><t t-out="line_index+1"/></SPAN></TD>
+        <TD CLASS="R14C3" COLSPAN="2"><t t-out="line.product_id.name or ''"/></TD>
+        <TD CLASS="R14C20"><SPAN class="cu_wspace"><t t-out="line.quantity or ''"/></SPAN></TD>
+        <TD CLASS="R14C23"><SPAN class="cu_wspace"><t t-out="line.product_uom_id.name or ''"/></SPAN></TD>
+        <TD CLASS="R14C20"><SPAN class="cu_wspace"><t t-out="(('%.2f')%(line.price_subtotal/line.quantity)).replace('.',',') or ''"/></SPAN></TD>
+        <TD CLASS="R14C29"><SPAN class="cu_wspace"><t t-out="line.price_subtotal or ''"/></SPAN></TD>
         <TD><SPAN></SPAN></TD>
         <TD></TD>
     </TR>
@@ -129,14 +129,14 @@ tbody, table, tr, td, th{border: none;}
     </TR>
     <TR CLASS="R5">
         <TD CLASS="R22C28" COLSPAN="6"><SPAN class="cu_wspace">Итого:</SPAN></TD>
-        <TD CLASS="R22C28"><SPAN class="cu_wspace"><t t-esc="o.amount_untaxed or '0,00'"/></SPAN></TD>
+        <TD CLASS="R22C28"><SPAN class="cu_wspace"><t t-out="o.amount_untaxed or '0,00'"/></SPAN></TD>
     </TR>
     <TR>
         <TD COLSPAN="7"><DIV class="cu_space9"><![CDATA[&nbsp;]]></DIV></TD>
     </TR>
     <TR CLASS="R5">
         <TD CLASS="R22C28" COLSPAN="6"><SPAN class="cu_wspace">Сумма НДС: <!-- TO DO: [НДС]: --></SPAN></TD>
-        <TD CLASS="R22C28"><SPAN class="cu_wspace"><t t-esc="o.amount_tax or '0,00'"/></SPAN></TD>
+        <TD CLASS="R22C28"><SPAN class="cu_wspace"><t t-out="o.amount_tax or '0,00'"/></SPAN></TD>
     </TR>
     <TR>
         <TD COLSPAN="7"><![CDATA[&nbsp;]]></TD>
@@ -145,10 +145,10 @@ tbody, table, tr, td, th{border: none;}
         <TD COLSPAN="7"><![CDATA[&nbsp;]]></TD>
     </TR>
     <TR CLASS="R0">
-        <TD COLSPAN="7"><SPAN class="cu_wspace">Всего оказано услуг <t t-esc="o.invoice_line_ids and len(o.invoice_line_ids) or 0"/>, на сумму <t t-esc="o.amount_total or '0,00'"/> руб.</SPAN></TD>
+        <TD COLSPAN="7"><SPAN class="cu_wspace">Всего оказано услуг <t t-out="o.invoice_line_ids and len(o.invoice_line_ids) or 0"/>, на сумму <t t-out="o.amount_total or '0,00'"/> руб.</SPAN></TD>
     </TR>
     <TR CLASS="R5">
-        <TD CLASS="R5C5" COLSPAN="7"><t t-esc="helper.rubles(o.amount_total).capitalize()"/></TD>
+        <TD CLASS="R5C5" COLSPAN="7"><t t-out="helper.rubles(o.amount_total).capitalize()"/></TD>
     </TR>
     <TR>
         <TD COLSPAN="7"><![CDATA[&nbsp;]]></TD>
@@ -177,19 +177,19 @@ tbody, table, tr, td, th{border: none;}
         <TD><SPAN></SPAN></TD>
     </TR>
     <TR CLASS="R5">
-        <TD CLASS="R36C1" COLSPAN="3">Директор <t t-esc="company.name or ''"/><!-- TO DO: ДолжностьИНазваниеОрганизации --></TD>
+        <TD CLASS="R36C1" COLSPAN="3">Директор <t t-out="company.name or ''"/><!-- TO DO: ДолжностьИНазваниеОрганизации --></TD>
         <TD CLASS="R35C17" COLSPAN="3"><SPAN></SPAN></TD>
     </TR>
     <TR>
         <TD COLSPAN="7"><![CDATA[&nbsp;]]></TD>
     </TR>
     <TR CLASS="R37">
-        <TD CLASS="R37C5S"><SPAN><t t-raw="company.print_stamp and (company.print_anywhere or context.get('mark_invoice_as_sent', False)) and helper.img(company.stamp) or ''"/></SPAN></TD>
-        <TD CLASS="R37C5I"><SPAN><t t-raw="company.print_facsimile and (company.print_anywhere or context.get('mark_invoice_as_sent', False)) and helper.img(company.chief_id.facsimile) or ''"/></SPAN></TD>
+        <TD CLASS="R37C5S"><SPAN><t t-out="company.print_stamp and (company.print_anywhere or context.get('mark_invoice_as_sent', False)) and helper.img(company.stamp) or ''"/></SPAN></TD>
+        <TD CLASS="R37C5I"><SPAN><t t-out="company.print_facsimile and (company.print_anywhere or context.get('mark_invoice_as_sent', False)) and helper.img(company.chief_id.facsimile) or ''"/></SPAN></TD>
         <TD><DIV class="cu_space25" COLSPAN="5"><SPAN></SPAN></DIV></TD>
     </TR>
     <TR CLASS="R5">
-        <TD CLASS="R38C1" COLSPAN="2"><t t-esc="helper.initials(company.chief_id.name)"/></TD>
+        <TD CLASS="R38C1" COLSPAN="2"><t t-out="helper.initials(company.chief_id.name)"/></TD>
         <TD><SPAN></SPAN></TD>
         <TD CLASS="R38C1" COLSPAN="2"><SPAN></SPAN></TD>
     </TR>

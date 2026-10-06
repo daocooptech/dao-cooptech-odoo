@@ -53,13 +53,13 @@
 					<БезАкциз>без акциза</БезАкциз>
 				</Акциз>
 				<СумНал>
-					<СумНал><t t-esc="(('%.2f')%(line.price_subtotal*(line.tax_ids.amount/100))).replace('.',',') or ''"/></СумНал>
+					<СумНал><t t-out="(('%.2f')%(line.price_subtotal*(line.tax_ids.amount/100))).replace('.',',') or ''"/></СумНал>
 				</СумНал>
 			</СведТов>
                         </t>
 			<ВсегоОпл t-att="{'СтТовБезНДСВсего':(('%.2f')%(total_price_tax_subtotal)).replace('.',',') or '','СтТовУчНалВсего':(('%.2f')%(total_price_tax_subtotal+total_tax_subtotal)).replace('.',',') or ''}">
 				<СумНалВсего>
-					<СумНал><t t-esc="(('%.2f')%(total_tax_subtotal)).replace('.',',') or ''"/></СумНал>
+					<СумНал><t t-out="(('%.2f')%(total_tax_subtotal)).replace('.',',') or ''"/></СумНал>
 				</СумНалВсего>
 			</ВсегоОпл>
 		</ТаблСчФакт>

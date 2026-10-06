@@ -9,7 +9,7 @@
 
     <template id="template_order_prepaid_invoice_body">
             <span>
-                <t t-esc="address"/>
+                <t t-out="address"/>
             </span>
 
             <div class="mt-5 clearfix">
@@ -18,7 +18,7 @@
                         <span>Счет</span>
                         <span t-if="o.name != '/'" t-field="o.name">INV/2023/0001</span>
                         <span>
-                            <t t-esc="address"/>
+                            <t t-out="address"/>
                         </span>
                     </h2>
                     <div class="oe_structure"/>
@@ -40,11 +40,11 @@
                                 </td>
                                 <td style="width: 15%;">
                                     <span>
-                                        <t t-esc="o.invoice_date.strftime('%d.%m.%Y') or ''"/>
+                                        <t t-out="o.invoice_date.strftime('%d.%m.%Y') or ''"/>
                                     </span>
                                     <br/>
                                     <span>
-                                        <t t-esc="o.invoice_date_due.strftime('%d.%m.%Y') or ''"/>
+                                        <t t-out="o.invoice_date_due.strftime('%d.%m.%Y') or ''"/>
                                     </span>
                                 </td>
                             </tr>
@@ -110,7 +110,7 @@
                                     <td name="td_price_unit"
                                         t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
                                         <span>
-                                            <t t-esc="line.price_unit"/>
+                                            <t t-out="line.price_unit"/>
                                         </span>
                                     </td>
                                     <t t-if="o.th_field_taxes">
@@ -167,7 +167,7 @@
                                 <p style="font-weight:bold">Информация</p>
                                 <div>Номер:
                                     <span style="font-weight:bold">
-                                        <t t-esc="o.name"/>
+                                        <t t-out="o.name"/>
                                     </span>
                                 </div>
 
@@ -193,7 +193,7 @@
                                         </td>
                                         <td>
                                             <span>
-                                                <t t-esc="o.company_id.name"/>
+                                                <t t-out="o.company_id.name"/>
                                             </span>
                                         </td>
                                     </tr>
@@ -217,7 +217,7 @@
                                         </td>
                                         <td>
                                             <span>
-                                                <t t-esc="o.company_id.partner_id.vat"/>
+                                                <t t-out="o.company_id.partner_id.vat"/>
                                             </span>
                                             <span t-field="o.company_id.partner_id.vat"/>
                                         </td>
@@ -231,7 +231,7 @@
                                         </td>
                                         <td>
                                             <span>
-                                                <t t-esc="o.partner_bank_id.bank_id.name"/>
+                                                <t t-out="o.partner_bank_id.bank_id.name"/>
                                             </span>
                                         </td>
                                     </tr>
@@ -244,7 +244,7 @@
                                         </td>
                                         <td>
                                             <span>
-                                                <t t-esc="o.partner_bank_id.bank_id.street"/>
+                                                <t t-out="o.partner_bank_id.bank_id.street"/>
                                             </span>
                                         </td>
                                     </tr>
@@ -257,7 +257,7 @@
                                         </td>
                                         <td>
                                             <span>
-                                                <t t-esc="o.partner_bank_id.bank_id.bic"/>
+                                                <t t-out="o.partner_bank_id.bank_id.bic"/>
                                             </span>
                                         </td>
                                     </tr>
@@ -270,7 +270,7 @@
                                         </td>
                                         <td>
                                             <span>
-                                                <t t-esc="o.partner_bank_id.acc_number"/>
+                                                <t t-out="o.partner_bank_id.acc_number"/>
                                             </span>
                                         </td>
                                     </tr>

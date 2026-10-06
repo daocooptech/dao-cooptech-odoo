@@ -192,14 +192,14 @@
                             <t t-if="line.tax_ids">
                                 <t t-set="first_tax" t-value="line.tax_ids[0]"/>
                                 <t t-if="first_tax.amount != 0">
-                                    <t t-esc="str(int(first_tax.amount)) + '%'"/>
+                                    <t t-out="str(int(first_tax.amount)) + '%'"/>
                                 </t>
                                 <t t-else="">
-                                    <t t-esc="'без НДС'"/>
+                                    <t t-out="'без НДС'"/>
                                 </t>
                             </t>
                             <t t-else="">
-                                <t t-esc="'без НДС'"/>
+                                <t t-out="'без НДС'"/>
                             </t>
                         </t>
                         <t t-set="tax_rate" t-value="tax_rate_raw.replace(' ', '').replace('\n', '').replace('\t', '')"/>
@@ -228,7 +228,7 @@
                                                 <t t-foreach="line_order.move_ids" t-as="line_move">
                                                     <t t-foreach="line_move.move_line_ids.filtered(lambda km: km.state=='done')" t-as="lot">
                                                         <t t-if="lot.lot_id and lot.lot_id.cz_code_id">
-                                                            <КИЗ><t t-esc="lot.lot_id.cz_code_id.code_without_characters"/></КИЗ>
+                                                            <КИЗ><t t-out="lot.lot_id.cz_code_id.code_without_characters"/></КИЗ>
                                                         </t>
                                                     </t>
                                                 </t>
@@ -243,7 +243,7 @@
 
                                 <СумНал>
                                     <t t-if="line_tax_amount != 0">
-                                        <СумНал><t t-esc="('%.2f' % line_tax_amount)"/></СумНал>
+                                        <СумНал><t t-out="('%.2f' % line_tax_amount)"/></СумНал>
                                     </t>
                                     <t t-else="">
                                         <БезНДС>без НДС</БезНДС>
@@ -258,7 +258,7 @@
                         }">
                             <СумНалВсего>
                                 <t t-if="total_tax_amount != 0">
-                                    <СумНал><t t-esc="('%.2f' % total_tax_amount)"/></СумНал>
+                                    <СумНал><t t-out="('%.2f' % total_tax_amount)"/></СумНал>
                                 </t>
                                 <t t-else="">
                                     <БезНДС>без НДС</БезНДС>

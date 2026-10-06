@@ -23,9 +23,9 @@
                     <table border="0" cellpadding="0" cellspacing="0" style="width:100%">
                         <tbody>
                             <tr class="R0">
-                                <td class="R0C0"><t t-esc="o.mt_contract_id.company_id.name or ''"/></td>
-                                <td class="R0C1">Договор <t t-esc="o.mt_contract_id.name or ''"/> от <t
-                                        t-esc="o.mt_contract_id.date_start or ''"/></td>
+                                <td class="R0C0"><t t-out="o.mt_contract_id.company_id.name or ''"/></td>
+                                <td class="R0C1">Договор <t t-out="o.mt_contract_id.name or ''"/> от <t
+                                        t-out="o.mt_contract_id.date_start or ''"/></td>
                             </tr>
                         </tbody>
                     </table>
@@ -93,7 +93,7 @@
                     <table border="0" cellpadding="0" cellspacing="0" style="width:100%;">
                         <tbody>
                             <tr class="R0">
-                                <td class="R0C0" colspan="2">Договор № <t t-esc="o.mt_contract_id.name or ''"/></td>
+                                <td class="R0C0" colspan="2">Договор № <t t-out="o.mt_contract_id.name or ''"/></td>
                             </tr>
                             <tr class="R0">
                                 <td class="R0C0" colspan="2">на поставку продукции</td>
@@ -103,9 +103,9 @@
                                 <td class="R0C2"></td>
                             </tr>
                             <tr class="R0">
-                                <td class="R0C1"><t t-esc="o.mt_contract_id.company_id.partner_id.city or ''"/></td>
+                                <td class="R0C1"><t t-out="o.mt_contract_id.company_id.partner_id.city or ''"/></td>
                                 <td class="R0C2"><t
-                                        t-esc="o.mt_contract_id.get_date_text(o.mt_contract_id.date_start) or ''"/></td>
+                                        t-out="o.mt_contract_id.get_date_text(o.mt_contract_id.date_start) or ''"/></td>
                             </tr>
                             <tr class="R0">
                                 <td class="R0C1"></td>
@@ -114,7 +114,7 @@
                             <tr class="R0">
                                 <td class="R0C3" colspan="2">
                                     <span>
-                                        <t t-raw="o.mt_contract_id.contract_header or ''"/>
+                                        <t t-out="o.mt_contract_id.contract_header or ''"/>
                                     </span>
                                 </td>
                                 <tr class="R0">
@@ -124,10 +124,10 @@
                             </tr>
                             <!--t t-foreach="o.mt_contract_id.lines.sorted(key=lambda r: r.sequence, reverse=False)" t-as="line">
                               <tr class="R0">
-                                <td  class="R0C4" colspan="2"><t t-esc="line.name"/></td>
+                                <td  class="R0C4" colspan="2"><t t-out="line.name"/></td>
                               </tr>
                               <tr class="R0">
-                                <td  class="R0C5" colspan="2"><t t-raw="line.punct"/></td>
+                                <td  class="R0C5" colspan="2"><t t-out="line.punct"/></td>
                               </tr>
                               <tr class="R0">
                                 <td  class="R0C5" colspan="2"></td>
@@ -143,8 +143,8 @@
                         </tbody>
                     </table>
                     <t t-foreach="o.mt_contract_id.lines.sorted(key=lambda r: r.sequence, reverse=False)" t-as="line">
-                        <p class="R0C4"><t t-esc="line.name or ''"/></p>
-                        <div class="R0C5"><span><t t-raw="line.punct or ''"/></span></div>
+                        <p class="R0C4"><t t-out="line.name or ''"/></p>
+                        <div class="R0C5"><span><t t-out="line.punct or ''"/></span></div>
                     </t>
                     <table border="0" cellpadding="0" cellspacing="0" style="width:100%; page-break-inside: avoid;">
                         <COL WIDTH="5%"/>
@@ -165,41 +165,41 @@
                                 <td class="R0C6rtl" colspan="3">Покупатель:</td>
                             </tr>
                             <tr class="R0">
-                                <td class="R0C6rl" colspan="3"><t t-esc="o.mt_contract_id.company_id.name or ''"/></td>
-                                <td class="R0C6rl" colspan="3"><t t-esc="o.mt_contract_id.partner_id.name or ''"/></td>
+                                <td class="R0C6rl" colspan="3"><t t-out="o.mt_contract_id.company_id.name or ''"/></td>
+                                <td class="R0C6rl" colspan="3"><t t-out="o.mt_contract_id.partner_id.name or ''"/></td>
                             </tr>
                             <tr class="R0">
                                 <td class="R0C6l" colspan="3">ИНН
-                                    <t t-esc="o.mt_contract_id.company_id.inn or ''"/>
+                                    <t t-out="o.mt_contract_id.company_id.inn or ''"/>
                                 </td>
                                 <td class="R0C7rl" colspan="3">ИНН <t
-                                        t-esc="o.mt_contract_id.partner_id.inn or ''"/></td>
+                                        t-out="o.mt_contract_id.partner_id.inn or ''"/></td>
                             </tr>
                             <tr class="R0">
                                 <td class="R0C6l" colspan="2">ОГРН
-                                    <t t-esc="o.company_id.company_registry or ''"/>
+                                    <t t-out="o.company_id.company_registry or ''"/>
                                 </td>
                                 <td class="R0C6r" rowspan="2">
-                                    <t t-esc="o.mt_contract_id.name_dirprint1 or ''"/>
+                                    <t t-out="o.mt_contract_id.name_dirprint1 or ''"/>
                                 </td>
                                 <t t-if="o.mt_contract_id.partner_type in ['company', 'company_ip']">
                                     <td class="R0C7rl" colspan="3">ОГРН
-                                        <t t-esc="o.partner_id.ogrn or ''"/>
+                                        <t t-out="o.partner_id.ogrn or ''"/>
                                     </td>
                                 </t>
                                 <t t-else="">
                                     <td class="R0C7rl" colspan="3">Паспорт
-                                        <t t-esc="o.partner_id.passport or ''"/>
+                                        <t t-out="o.partner_id.passport or ''"/>
                                     </td>
                                 </t>
                             </tr>
                             <tr class="R0">
                                 <td class="R0C6l" colspan="3">КПП
-                                    <t t-esc="o.mt_contract_id.company_id.kpp or ''"/>
+                                    <t t-out="o.mt_contract_id.company_id.kpp or ''"/>
                                 </td>
                                 <t t-if="o.mt_contract_id.partner_type == 'company'">
                                     <td class="R0C7rl" colspan="3">КПП
-                                        <t t-esc="o.partner_id.kpp or ''"/>
+                                        <t t-out="o.partner_id.kpp or ''"/>
                                     </td>
                                 </t>
                                 <t t-else="">
@@ -214,10 +214,10 @@
                             </tr>
                             <tr class="R0">
                                 <td class="R0C6l" colspan="3">
-                                    <t t-esc="o.mt_contract_id.address(o.company_id) or ''"/>
+                                    <t t-out="o.mt_contract_id.address(o.company_id) or ''"/>
                                 </td>
                                 <td class="R0C7rl" colspan="3">
-                                    <t t-esc="o.mt_contract_id.address(o.partner_id) or ''"/>
+                                    <t t-out="o.mt_contract_id.address(o.partner_id) or ''"/>
                                 </td>
                             </tr>
                             <tr class="R0">
@@ -236,12 +236,12 @@
                                 <td class="R0C6l"></td>
                                 <td class="R0C6tI">
                                     <SPAN>
-                                        <t t-raw="o.stamp and o.mt_contract_id.img(o.company_id.chief_id.facsimile) or ''"/>
+                                        <t t-out="o.stamp and o.mt_contract_id.img(o.company_id.chief_id.facsimile) or ''"/>
                                     </SPAN>
                                 </td>
                                 <td class="R0C6tS">
                                     <SPAN>
-                                        <t t-raw="o.stamp and o.mt_contract_id.img(o.company_id.stamp) or ''"/>
+                                        <t t-out="o.stamp and o.mt_contract_id.img(o.company_id.stamp) or ''"/>
                                     </SPAN>
                                 </td>
                                 <td class="R0C6rl" colspan="3"></td>
@@ -251,7 +251,7 @@
                                 <td class="R0C6l"></td>
                                 <td class="R0C6b"></td>
                                 <td class="R0C6r">
-                                    <t t-esc="''"/>
+                                    <t t-out="''"/>
                                 </td>
                             </tr>
                             <tr class="R0">
@@ -281,8 +281,8 @@
                         <tbody>
                             <tr class="R0">
                                 <td class="R0C8" colspan="8">Приложение<br/>к договору № <t
-                                        t-esc="o.mt_contract_id.name"/><br/>на поставку продукции<br/>от <t
-                                        t-esc="o.mt_contract_id.get_date_text(o.mt_contract_id.date_start) or ''"/></td>
+                                        t-out="o.mt_contract_id.name"/><br/>на поставку продукции<br/>от <t
+                                        t-out="o.mt_contract_id.get_date_text(o.mt_contract_id.date_start) or ''"/></td>
                             </tr>
                             <tr class="R0">
                                 <td class="R0C0" colspan="8"></td>
@@ -295,9 +295,9 @@
                             </tr>
                             <tr class="R0">
                                 <td class="R0C1" colspan="4"><t
-                                        t-esc="o.mt_contract_id.company_id.partner_id.city or ''"/></td>
+                                        t-out="o.mt_contract_id.company_id.partner_id.city or ''"/></td>
                                 <td class="R0C2" colspan="4"><t
-                                        t-esc="o.mt_contract_id.get_date_text(o.mt_contract_id.date_start) or ''"/></td>
+                                        t-out="o.mt_contract_id.get_date_text(o.mt_contract_id.date_start) or ''"/></td>
                             </tr>
                             <tr class="R0">
                                 <td class="R0C0" colspan="8"></td>
@@ -305,7 +305,7 @@
                             <tr class="R0">
                                 <td class="R0C3" colspan="8">
                                     <span>
-                                        <t t-raw="o.mt_contract_id.contract_header or ''"/>
+                                        <t t-out="o.mt_contract_id.contract_header or ''"/>
                                     </span>
                                 </td>
                             </tr>
@@ -314,8 +314,8 @@
                             </tr>
                             <tr class="R0">
                                 <td class="R0C5" colspan="8">1. По договору на поставку продукции <t
-                                        t-esc="o.mt_contract_id.name or ''"/> от <t
-                                        t-esc="o.mt_contract_id.get_date_text(o.mt_contract_id.date_start) or ''"/>.
+                                        t-out="o.mt_contract_id.name or ''"/> от <t
+                                        t-out="o.mt_contract_id.get_date_text(o.mt_contract_id.date_start) or ''"/>.
                                     Поставщик обязуется поставить, а Покупатель оплатить в полном объеме следующее:</td>
                             </tr>
                             <tr class="R0">
@@ -338,44 +338,44 @@
                             <t t-set="sum_nds"
                                t-value="sum([line.product_uom_qty*line.price_unit*1.2 for line in order_line])"/>
                             <tr class="R0" t-foreach="order_line" t-as="line">
-                                <td class="R0C9box"><t t-esc="line.product_id.name or ''"/></td>
+                                <td class="R0C9box"><t t-out="line.product_id.name or ''"/></td>
                                 <!--                                <td class="R0C9box">&lt;!&ndash;ГОСТ&ndash;&gt;</td>-->
-                                <td class="R0C9box"><t t-esc="line.product_id.uom_id.name or ''"/></td>
-                                <td class="R0C9box"><t t-esc="line.product_uom_qty or ''"/></td>
-                                <td class="R0C9box"><t t-esc="line.price_unit or ''"/></td>
-                                <td class="R0C9box"><t t-esc="line.price_unit*line.product_uom_qty or ''"/></td>
+                                <td class="R0C9box"><t t-out="line.product_id.uom_id.name or ''"/></td>
+                                <td class="R0C9box"><t t-out="line.product_uom_qty or ''"/></td>
+                                <td class="R0C9box"><t t-out="line.price_unit or ''"/></td>
+                                <td class="R0C9box"><t t-out="line.price_unit*line.product_uom_qty or ''"/></td>
                                 <!--                                <td class="R0C9box">20%</td>-->
-                                <!--                                <td class="R0C9box"><t t-esc="line.price_unit*line.product_uom_qty*1.2 or ''"/></td>-->
+                                <!--                                <td class="R0C9box"><t t-out="line.price_unit*line.product_uom_qty*1.2 or ''"/></td>-->
                             </tr>
                             <tr class="R0">
                                 <td></td>
                                 <!--                                <td></td>-->
                                 <td>ИТОГО</td>
-                                <td class="R0C9box"><t t-esc="quantity or ''"/></td>
+                                <td class="R0C9box"><t t-out="quantity or ''"/></td>
                                 <td class="R0C9box">x</td>
-                                <td class="R0C9box"><t t-esc="sum_full or ''"/></td>
+                                <td class="R0C9box"><t t-out="sum_full or ''"/></td>
                                 <!--                                <td class="R0C9box">x</td>-->
-                                <!--                                <td class="R0C9box"><t t-esc="sum_nds or ''"/></td>-->
+                                <!--                                <td class="R0C9box"><t t-out="sum_nds or ''"/></td>-->
                             </tr>
                             <tr class="R0">
                                 <td class="R0C0" colspan="8"></td>
                             </tr>
                             <tr class="R0">
-                                <td class="R0C5" colspan="9">Итого: <t t-esc="sum_full or ''"/> рублей (<t
-                                        t-esc="o.mt_contract_id.rubles(sum_full) or ''"/>). В стоимость продукции входит
+                                <td class="R0C5" colspan="9">Итого: <t t-out="sum_full or ''"/> рублей (<t
+                                        t-out="o.mt_contract_id.rubles(sum_full) or ''"/>). В стоимость продукции входит
                                     стоимость
                                     тары и стоимость транспортных расходов, связанных с доставкой продукции до станции
                                     назначения.<br/>
                                     2. Базис поставки (пункт назначения) по отгрузочным реквизитам:<br/>
-                                    <t t-esc="o.mt_contract_id.address_delivery(o.mt_contract_id.partner_id.id) or ''"/><br/>
-                                    Грузополучатель: <t t-esc="o.mt_contract_id.partner_id.name or ''"/>, код <t
-                                            t-esc="o.mt_contract_id.partner_id.id or ''"/>, ОКПО <t
-                                            t-esc="o.mt_contract_id.partner_id.okpo or ''"/>.<br/>
-                                    3. Условия оплаты: <t t-esc="o.payment_term_id.name or ''"/> согласно выставленному
+                                    <t t-out="o.mt_contract_id.address_delivery(o.mt_contract_id.partner_id.id) or ''"/><br/>
+                                    Грузополучатель: <t t-out="o.mt_contract_id.partner_id.name or ''"/>, код <t
+                                            t-out="o.mt_contract_id.partner_id.id or ''"/>, ОКПО <t
+                                            t-out="o.mt_contract_id.partner_id.okpo or ''"/>.<br/>
+                                    3. Условия оплаты: <t t-out="o.payment_term_id.name or ''"/> согласно выставленному
                                     счету
                                     Поставщика.<br/>
                                     4. Срок отгрузки: <t
-                                            t-esc="o.mt_contract_id.get_date_text(o.mt_contract_id.date_end) or ''"/>
+                                            t-out="o.mt_contract_id.get_date_text(o.mt_contract_id.date_end) or ''"/>
                                     <br/>
                                     5. Срок действия настоящей спецификации ограничен и равен сроку отгрузки по
                                     условиям данной спецификации.
@@ -405,41 +405,41 @@
                                 <td class="R0C6rtl" colspan="3">Покупатель:</td>
                             </tr>
                             <tr class="R0">
-                                <td class="R0C6rl" colspan="3"><t t-esc="o.mt_contract_id.company_id.name or ''"/></td>
-                                <td class="R0C6rl" colspan="3"><t t-esc="o.mt_contract_id.partner_id.name or ''"/></td>
+                                <td class="R0C6rl" colspan="3"><t t-out="o.mt_contract_id.company_id.name or ''"/></td>
+                                <td class="R0C6rl" colspan="3"><t t-out="o.mt_contract_id.partner_id.name or ''"/></td>
                             </tr>
                             <tr class="R0">
                                 <td class="R0C6l" colspan="3">ИНН
-                                    <t t-esc="o.mt_contract_id.company_id.inn or ''"/>
+                                    <t t-out="o.mt_contract_id.company_id.inn or ''"/>
                                 </td>
                                 <td class="R0C7rl" colspan="3">ИНН <t
-                                        t-esc="o.mt_contract_id.partner_id.inn or ''"/></td>
+                                        t-out="o.mt_contract_id.partner_id.inn or ''"/></td>
                             </tr>
                             <tr class="R0">
                                 <td class="R0C6l" colspan="2">ОГРН
-                                    <t t-esc="o.company_id.company_registry or ''"/>
+                                    <t t-out="o.company_id.company_registry or ''"/>
                                 </td>
                                 <td class="R0C6r" rowspan="2">
-                                    <t t-esc="o.mt_contract_id.name_dirprint1 or ''"/>
+                                    <t t-out="o.mt_contract_id.name_dirprint1 or ''"/>
                                 </td>
                                 <t t-if="o.mt_contract_id.partner_type in ['company', 'company_ip']">
                                     <td class="R0C7rl" colspan="3">ОГРН
-                                        <t t-esc="o.partner_id.ogrn or ''"/>
+                                        <t t-out="o.partner_id.ogrn or ''"/>
                                     </td>
                                 </t>
                                 <t t-else="">
                                     <td class="R0C7rl" colspan="3">Паспорт
-                                        <t t-esc="o.partner_id.passport or ''"/>
+                                        <t t-out="o.partner_id.passport or ''"/>
                                     </td>
                                 </t>
                             </tr>
                             <tr class="R0">
                                 <td class="R0C6l" colspan="3">КПП
-                                    <t t-esc="o.mt_contract_id.company_id.kpp or ''"/>
+                                    <t t-out="o.mt_contract_id.company_id.kpp or ''"/>
                                 </td>
                                 <t t-if="o.mt_contract_id.partner_type == 'company'">
                                     <td class="R0C7rl" colspan="3">КПП
-                                        <t t-esc="o.partner_id.kpp or ''"/>
+                                        <t t-out="o.partner_id.kpp or ''"/>
                                     </td>
                                 </t>
                                 <t t-else="">
@@ -454,10 +454,10 @@
                             </tr>
                             <tr class="R0">
                                 <td class="R0C6l" colspan="3">
-                                    <t t-esc="o.mt_contract_id.address(o.company_id) or ''"/>
+                                    <t t-out="o.mt_contract_id.address(o.company_id) or ''"/>
                                 </td>
                                 <td class="R0C7rl" colspan="3">
-                                    <t t-esc="o.mt_contract_id.address(o.partner_id) or ''"/>
+                                    <t t-out="o.mt_contract_id.address(o.partner_id) or ''"/>
                                 </td>
                             </tr>
                             <tr class="R0">
@@ -476,12 +476,12 @@
                                 <td class="R0C6l"></td>
                                 <td class="R0C6tI">
                                     <SPAN>
-                                        <t t-raw="o.stamp and o.mt_contract_id.img(o.company_id.chief_id.facsimile) or ''"/>
+                                        <t t-out="o.stamp and o.mt_contract_id.img(o.company_id.chief_id.facsimile) or ''"/>
                                     </SPAN>
                                 </td>
                                 <td class="R0C6tS">
                                     <SPAN>
-                                        <t t-raw="o.stamp and o.mt_contract_id.img(o.company_id.stamp) or ''"/>
+                                        <t t-out="o.stamp and o.mt_contract_id.img(o.company_id.stamp) or ''"/>
                                     </SPAN>
                                 </td>
                                 <td class="R0C6rl" colspan="3"></td>
@@ -491,7 +491,7 @@
                                 <td class="R0C6l"></td>
                                 <td class="R0C6b"></td>
                                 <td class="R0C6r">
-                                    <t t-esc="''"/>
+                                    <t t-out="''"/>
                                 </td>
                             </tr>
                             <tr class="R0">
@@ -540,7 +540,7 @@
                                 <td class="R0C6tI">
                                     <SPAN>
                                         <t
-                                                t-raw="o.stamp and o.mt_contract_id.img(company.chief_id.facsimile) or ''"/>
+                                                t-out="o.stamp and o.mt_contract_id.img(company.chief_id.facsimile) or ''"/>
                                     </SPAN>
                                 </td>
                                 <td class="R0C0"></td>
