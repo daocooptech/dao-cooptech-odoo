@@ -28,3 +28,11 @@ class AccountMoveLine(models.Model):
                 line.price_total_pf = taxes_res['total_included']
             else:
                 line.price_total_pf = line.price_total
+
+    def _ru_print_name(self):
+        """Text of the "Name" column of the print forms: no product code."""
+        self.ensure_one()
+        if not self.product_id or self.display_type in ('line_section', 'line_subsection', 'line_note'):
+            return self.name or ''
+        product = self.product_id.with_context(lang=self.move_id._get_lang())
+        return product._ru_print_name(self.name)

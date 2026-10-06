@@ -331,7 +331,7 @@
                                 <!--                                <td class="R0C9box">НДС</td>-->
                                 <!--                                <td class="R0C9box">Стоимость/руб.<br/>c НДС</td>-->
                             </tr>
-                            <t t-set="order_line" t-value="o.order_line.filtered(lambda s: 'аванс' not in s.name.lower() and 'депозит' not in s.name.lower())"/>
+                            <t t-set="order_line" t-value="o.order_line.filtered(lambda s: 'аванс' not in (s.label or '').lower() and 'депозит' not in (s.label or '').lower())"/>
                             <t t-set="quantity" t-value="sum([line.product_uom_qty for line in order_line])"/>
                             <t t-set="sum_full"
                                t-value="sum([line.product_uom_qty*line.price_unit for line in order_line])"/>

@@ -208,7 +208,7 @@
 
                             <СведТов t-att="{
                                 'НомСтр': line_index+1,
-                                'НаимТов': line.label or '',
+                                'НаимТов': line._ru_print_name(),
                                 'НаимЕдИзм': line.product_uom_id.name or '',
                                 'КолТов': line.quantity or '',
                                 'ЦенаТов': ('%.2f' % (line.price_subtotal / line.quantity if line.quantity else 0)) if line.quantity else '0.00',

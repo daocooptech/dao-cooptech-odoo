@@ -715,7 +715,7 @@
                                 <TD CLASS="RE15CE1box">11</TD>
                             </TR>
                             <!--Тело таблицы-->
-                            <t t-set="invoice_line_ids" t-value="o.invoice_line_ids.filtered(lambda s: 'аванс' not in s.name.lower() and 'депозит' not in s.name.lower())"/>
+                            <t t-set="invoice_line_ids" t-value="o.invoice_line_ids.filtered(lambda s: 'аванс' not in (s.label or '').lower() and 'депозит' not in (s.label or '').lower())"/>
 
                             <t t-set="page_quantity" t-value="sum([line.quantity for line in invoice_line_ids])"/>
                             <t t-set="total_quantity" t-value="sum([line.quantity for line in invoice_line_ids])"/>
@@ -735,7 +735,7 @@
                             <tr CLASS="RE0" t-foreach="invoice_line_ids" t-as="line">
                                 <TD CLASS="RE0CE1"><SPAN class="cu_wspace"><t t-out="line.product_id.default_code or ''"/></SPAN></TD>
                                 <TD CLASS="RE0CE1l"><SPAN class="cu_wspace"><t t-out="line_index+1"/></SPAN></TD>
-                                <TD CLASS="RE0CE1" style="text-align: left;"><t t-out="line.label or ''"/></TD>
+                                <TD CLASS="RE0CE1" style="text-align: left;"><t t-out="line._ru_print_name()"/></TD>
                                 <TD CLASS="RE0CE1"><!-- TO DO: Код Вида товара --><SPAN><t
                                         t-out="line.product_id.kod_tnved or ''"/></SPAN></TD>
                                 <TD CLASS="RE0CE1"><!-- TO DO: Код ЕдИзм --><t

@@ -8,6 +8,7 @@ from . import res_partner_bank
 from . import account_invoice
 from . import account_move_line
 from . import sale
+from . import sale_order_line
 from . import uom
 from . import tax
 from . import product

@@ -234,10 +234,10 @@
                             </TR>
 
                             <tr CLASS="R0"
-                                t-foreach="o.order_line.filtered(lambda s: 'аванс' not in s.name.lower() and 'депозит' not in s.name.lower())"
+                                t-foreach="o.order_line.filtered(lambda s: 'аванс' not in (s.label or '').lower() and 'депозит' not in (s.label or '').lower())"
                                 t-as="line">
                                 <TD CLASS="R37C1"><SPAN class="cu_wspace"><t t-out="line_index+1"/></SPAN></TD>
-                                <TD CLASS="R37C2" COLSPAN="3"><t t-out="line.label or ''"/></TD>
+                                <TD CLASS="R37C2" COLSPAN="3"><t t-out="line._ru_print_name()"/></TD>
                                 <TD CLASS="R37C4"><SPAN class="cu_wspace"><t t-out="line.product_uom_qty or ''"/></SPAN></TD>
                                 <TD CLASS="R37C5"><SPAN class="cu_wspace"><t t-out="line.product_uom_id.name or ''"/></SPAN></TD>
                                 <TD CLASS="R37C4"><SPAN class="cu_wspace"><t t-out="line.price_unit or ''"/></SPAN></TD>

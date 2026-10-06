@@ -361,7 +361,7 @@ tbody, table, tr, td, th{border: none;}
     <t t-set="total_price_tax_subtotal" t-value="sum([line.price_unit*line.quantity for line in o.invoice_line_ids])"/>
     <tr  CLASS="R0" t-foreach="o.invoice_line_ids" t-as="line">
         <TD CLASS="R25C1"><SPAN class="cu_wspace"><t t-out="line_index+1"/></SPAN></TD>
-        <TD CLASS="R25C2"><t t-out="line.label or ''"/></TD>
+        <TD CLASS="R25C2"><t t-out="line._ru_print_name()"/></TD>
         <TD CLASS="R25C3"><!-- TO DO: ТоварКод --></TD>
         <TD CLASS="R25C4"><SPAN class="cu_wspace"><t t-out="line.product_uom_id.name or ''"/></SPAN></TD>
         <TD CLASS="R25C5">796<!-- TO DO: БазоваяЕдиницаКодПоОКЕИ --></TD>
