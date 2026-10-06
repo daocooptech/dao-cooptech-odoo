@@ -55,7 +55,7 @@
         'views/res_partner_view.xml',
         'views/res_company_view.xml',
         'views/res_users_view.xml',
-        'views/res_bank_view.xml',
+        'views/res_partner_bank_view.xml',
         'views/uom.xml',
         'views/tax.xml',
         'views/product.xml',

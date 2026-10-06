@@ -231,7 +231,7 @@
                                         </td>
                                         <td>
                                             <span>
-                                                <t t-out="o.partner_bank_id.bank_id.name"/>
+                                                <t t-out="o.partner_bank_id.bank_name"/>
                                             </span>
                                         </td>
                                     </tr>
@@ -244,7 +244,7 @@
                                         </td>
                                         <td>
                                             <span>
-                                                <t t-out="o.partner_bank_id.bank_id.street"/>
+                                                <t t-out="o.partner_bank_id.street"/>
                                             </span>
                                         </td>
                                     </tr>
@@ -257,7 +257,7 @@
                                         </td>
                                         <td>
                                             <span>
-                                                <t t-out="o.partner_bank_id.bank_id.bic"/>
+                                                <t t-out="o.partner_bank_id.bank_bic"/>
                                             </span>
                                         </td>
                                     </tr>

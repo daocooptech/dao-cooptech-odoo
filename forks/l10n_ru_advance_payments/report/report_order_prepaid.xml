@@ -123,7 +123,7 @@
                             </TR>
                             <TR CLASS="R15">
                                 <TD CLASS="R15C1" COLSPAN="4" ROWSPAN="2">
-                                    <DIV class="cu_space31" t-out="(company.partner_id.bank_ids and company.partner_id.bank_ids[0].bank_name or '')+' '+(company.partner_id.bank_ids and company.partner_id.bank_ids[0].bank_id.city or '')"/>
+                                    <DIV class="cu_space31" t-out="(company.partner_id.bank_ids and company.partner_id.bank_ids[0].bank_name or '')+' '+(company.partner_id.bank_ids and company.partner_id.bank_ids[0].city or '')"/>
                                 </TD>
                                 <TD CLASS="R15C19">
                                     <SPAN class="cu_wspace">БИК</SPAN>
@@ -139,7 +139,7 @@
                                 </TD>
                                 <TD CLASS="R16C22" COLSPAN="3" ROWSPAN="2">
                                     <DIV class="cu_space29">
-                                        <SPAN class="cu_wspace" t-out="company.partner_id.bank_ids and company.partner_id.bank_ids[0].bank_id.corr_acc or ''"/>
+                                        <SPAN class="cu_wspace" t-out="company.partner_id.bank_ids and company.partner_id.bank_ids[0].bank_corr_acc or ''"/>
                                     </DIV>
                                 </TD>
                             </TR>

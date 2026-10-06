@@ -2,16 +2,25 @@
 <openerp>
     <data noupdate="1">
 
-        <record id="main_bank" model="res.bank">
+        <record id="main_bank" model="ru.bank">
             <field name="name">ОАО "СБЕРБАНК РОССИИ"</field>
             <field name="city">г.Москва</field>
             <field name="bic">044525225</field>
+        </record>
+
+        <record id="main_bank_corracc" model="ru.bank.corracc">
+            <field name="bank_id" ref="main_bank"/>
             <field name="corr_acc">30101810400000000225</field>
         </record>
 
+        <!-- Details are written out: the directory is a tip, documents read the account. -->
         <record id="main_company_bank" model="res.partner.bank">
             <field name="account_number">40707810600025341231</field>
-            <field name="bank_id" ref="main_bank"/>
+            <field name="ru_bank_id" ref="main_bank"/>
+            <field name="bank_name">ОАО "СБЕРБАНК РОССИИ"</field>
+            <field name="bank_bic">044525225</field>
+            <field name="bank_corr_acc">30101810400000000225</field>
+            <field name="city">г.Москва</field>
             <field name="company_id" ref="base.main_company"/>
             <field name="partner_id" ref="base.main_partner"/>
         </record>
