@@ -17,9 +17,12 @@ class AccountMove(models.Model):
 
     @api.depends('name')
     def _compute_sh1_edi(self):
-        hash_object = hashlib.sha1((self.name).encode('utf-8'))
-        pid = self.partner_id.parent_id or self.partner_id
-        self.edi = 'ON_NSCHFDOPPR_2BM-' + str(pid.edi) + '_' + str(self.company_id.edi) + '_' + hash_object.hexdigest()
+        # В Odoo 20 у черновика name == False (раньше '/'), а compute вызывается
+        # и на наборе записей, поэтому считаем по одной и берём имя или пустую строку.
+        for s in self:
+            hash_object = hashlib.sha1((s.name or '').encode('utf-8'))
+            pid = s.partner_id.parent_id or s.partner_id
+            s.edi = 'ON_NSCHFDOPPR_2BM-' + str(pid.edi) + '_' + str(s.company_id.edi) + '_' + hash_object.hexdigest()
 
     def print_upd(self):
         for s in self:
@@ -192,7 +195,11 @@ class AccountMove(models.Model):
                         mes += u"Не указано количество для товара {}.\n".format(line.label)
                     if not line.product_uom_id.okei:
                         mes += u"Не указан код ОКЕИ для единицы измерения {}.\n".format(line.product_uom_id.name)
-            if not s.mt_contract_id:
+            # mt_contract_id заводит l10n_ru_contract (и то в неподключённом файле), от
+            # него этот модуль не зависит - проверяем договор, только если поле есть.
+            if 'mt_contract_id' not in s._fields:
+                pass
+            elif not s.mt_contract_id:
                 mes += u"Не указан договор.\n"
             else:
                 if not s.mt_contract_id.name:
