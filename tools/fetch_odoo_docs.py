@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Загрузить документацию Odoo 19 в базу знаний.
+"""Загрузить документацию Odoo в базу знаний (версия — ключ --version, по умолчанию 20).
 
 Что берём: задаётся при запуске. Прикладные разделы, справочник
 разработчика, администрирование — три отдельных прогона, потому что
@@ -9,8 +9,11 @@
     python fetch_odoo_docs.py developer.html developer
     python fetch_odoo_docs.py administration.html administration
 
+Версия: `--version 19` или `--version 20` (по умолчанию 20) — от неё зависят
+адрес на сайте, папка `Матчасть/Odoo <версия>/` и метка `source`.
+
 Как храним: одна страница — одна заметка, путь сайта повторяется папками
-внутри `Матчасть/Odoo 19/`. Так по ссылке из документации всегда понятно,
+внутри `Матчасть/Odoo <версия>/`. Так по ссылке из документации всегда понятно,
 где заметка лежит, и наоборот.
 
 Что выкидываем: навигацию, оглавление сайдбара, футер, кнопки правки —
@@ -27,9 +30,14 @@ import requests
 from bs4 import BeautifulSoup
 import html2text
 
-BASE = 'https://www.odoo.com/documentation/19.0/'
+VERSION = '20'
+if '--version' in sys.argv:
+    _i = sys.argv.index('--version')
+    VERSION = sys.argv[_i + 1]
+    del sys.argv[_i:_i + 2]
+BASE = 'https://www.odoo.com/documentation/%s.0/' % VERSION
 VAULT = os.path.join(os.environ['USERPROFILE'], 'Documents', 'Obsidian',
-                     'Vault', 'Матчасть', 'Odoo 19')
+                     'Vault', 'Матчасть', 'Odoo ' + VERSION)
 
 # Прикладные разделы. Остальное (разработка, установка) — отдельной
 # задачей, если понадобится.
@@ -113,7 +121,7 @@ def save(path, title, text):
     header = (
         '---\n'
         'type: reference\n'
-        'source: odoo-docs-19\n'
+        'source: odoo-docs-' + VERSION + '\n'
         'url: ' + BASE + path + '\n'
         'tags:\n  - матчасть\n  - odoo\n'
         '---\n'
