@@ -39,7 +39,7 @@ class CoopDocumentFolder(models.Model):
     parent_id = fields.Many2one(
         'coop.document.folder', string='Внутри папки',
         index=True, ondelete='cascade')
-    parent_path = fields.Char(index=True, unaccent=False)
+    parent_path = fields.Char(index=True)
     child_ids = fields.One2many(
         'coop.document.folder', 'parent_id', string='Вложенные')
 

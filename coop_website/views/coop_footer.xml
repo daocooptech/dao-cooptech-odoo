@@ -92,8 +92,9 @@
   -->
   <template id="coop_no_google_preconnect" inherit_id="website.layout"
             name="ДАО КООПТЕХ — без preconnect к Google">
-    <xpath expr="//link[@rel='preconnect'][@href='https://fonts.gstatic.com/']"
-           position="replace"/>
+    <!-- В 20 `preconnect` к Google выводится шаблоном `website.font_links` только
+         когда на сайте есть шрифт Google; у нас шрифты локальные, так что
+         прежний xpath на него больше не нужен. -->
     <!-- Название платформы вместо «Odoo» (решение 442): метка генератора
          страницы и подсказка кнопки перехода в кабинет. -->
     <xpath expr="//meta[@name='generator']" position="attributes">

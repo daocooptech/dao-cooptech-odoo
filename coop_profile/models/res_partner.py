@@ -20,6 +20,7 @@ class ResPartner(models.Model):
     счётчик, а их восемь.
     """
 
+    _name = 'res.partner'
     _inherit = ['res.partner', 'coop.page.mixin']
 
     def _coop_page_view_ref(self):

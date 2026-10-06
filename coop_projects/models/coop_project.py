@@ -36,7 +36,7 @@ class CoopProjectCategory(models.Model):
     name = fields.Char(string='Название', required=True, translate=True)
     parent_id = fields.Many2one(
         'coop.project.category', string='Входит в', ondelete='cascade', index=True)
-    parent_path = fields.Char(index=True, unaccent=False)
+    parent_path = fields.Char(index=True)
     child_ids = fields.One2many('coop.project.category', 'parent_id', string='Разделы')
     complete_name = fields.Char(
         string='Полное название', compute='_compute_complete_name',

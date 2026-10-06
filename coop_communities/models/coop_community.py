@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models, tools, _
+from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools import sql
 
 
 class CoopCommunity(models.Model):
@@ -398,7 +399,7 @@ class CoopCommunityMember(models.Model):
         остаться.
         """
         result = super()._auto_init()
-        tools.create_index(
+        sql.create_index(
             self.env.cr, 'coop_community_member_open_uniq', self._table,
             ['community_id', 'partner_id'], unique=True,
             where="state IN ('pending', 'active')")

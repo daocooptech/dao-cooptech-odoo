@@ -167,14 +167,17 @@ class CoopFedIdentity(models.Model):
         self.env['coop.fed.event']._enqueue('node.announced', self.did, {
             'name': self.name,
             'regions': [company.city] if company.city else [],
-            'software': 'odoo/rudoo-19',
+            'software': 'odoo/rudoo-20',
             'protocols': ['https-pull'],
             'jurisdiction': {
                 'country': (self.country_id.code or '').upper(),
                 'legal_form': company.coop_legal_form_id.name
                 if 'coop_legal_form_id' in company._fields and company.coop_legal_form_id else '',
                 'registry': 'ЕГРЮЛ' if self.country_id.code == 'RU' else '',
-                'reg_number': company.company_registry or '',
+                # В 20 поля `res.company.company_registry` нет: берём ОГРН из
+                # карточки компании (`coop_orgs`), если модуль стоит.
+                'reg_number': company.partner_id.coop_ogrn
+                if 'coop_ogrn' in company.partner_id._fields else '',
             },
         })
 

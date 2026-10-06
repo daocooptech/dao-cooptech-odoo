@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from odoo import _, api, fields, models, tools
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import sql
 
@@ -225,7 +225,7 @@ class CoopMembership(models.Model):
         модуль просто не установится.
         """
         res = super()._auto_init()
-        tools.create_index(
+        sql.create_index(
             self.env.cr, 'coop_membership_open_uniq', self._table,
             ['partner_id', 'organization_id'], unique=True,
             where="state IN ('applied', 'active', 'leaving')")

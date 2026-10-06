@@ -31,7 +31,7 @@ class CoopResourceCategory(models.Model):
     parent_id = fields.Many2one(
         'coop.resource.category', string='Родительская категория',
         ondelete='restrict', index=True)
-    parent_path = fields.Char(index=True, unaccent=False)
+    parent_path = fields.Char(index=True)
     child_ids = fields.One2many(
         'coop.resource.category', 'parent_id', string='Подкатегории')
     complete_name = fields.Char(

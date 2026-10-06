@@ -16,7 +16,6 @@
     <field name="model">coop.deal</field>
     <field name="report_type">qweb-pdf</field>
     <field name="report_name">coop_deals.report_deal_act</field>
-    <field name="report_file">coop_deals.report_deal_act</field>
     <field name="print_report_name">'Акт %s' % object.number</field>
     <field name="binding_model_id" ref="model_coop_deal"/>
     <field name="binding_type">report</field>
@@ -27,7 +26,6 @@
     <field name="model">coop.deal</field>
     <field name="report_type">qweb-pdf</field>
     <field name="report_name">coop_deals.report_deal_agreement</field>
-    <field name="report_file">coop_deals.report_deal_agreement</field>
     <field name="print_report_name">'Договор %s' % object.number</field>
     <field name="binding_model_id" ref="model_coop_deal"/>
     <field name="binding_type">report</field>

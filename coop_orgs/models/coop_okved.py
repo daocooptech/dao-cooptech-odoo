@@ -37,7 +37,7 @@ class CoopOkved(models.Model):
     parent_id = fields.Many2one(
         'coop.okved', string='Раздел', index=True, ondelete='cascade',
         help='У класса — раздел, в который он входит. У раздела пусто.')
-    parent_path = fields.Char(index=True, unaccent=False)
+    parent_path = fields.Char(index=True)
     child_ids = fields.One2many('coop.okved', 'parent_id', string='Классы')
     active = fields.Boolean(default=True)
 

@@ -20,10 +20,12 @@
             name="ДАО КООПТЕХ: тема до отрисовки">
     <!-- Значок вкладки кабинета — логотип платформы, а не значок Odoo
          (решение 442): без x_icon web.layout берёт /web/static/img/favicon.ico. -->
-    <xpath expr="//t[@t-set='head_web']" position="before">
-      <t t-set="x_icon" t-value="'/coop_theme/static/src/img/cooptech-logo.png'"/>
+    <!-- В 20 `web.layout` зовётся с аргументами-атрибутами, а блок головы
+         называется `head`, а не `head_web`. -->
+    <xpath expr="//t[@t-call='web.layout']" position="attributes">
+      <attribute name="x_icon.f">/coop_theme/static/src/img/cooptech-logo.png</attribute>
     </xpath>
-    <xpath expr="//t[@t-set='head_web']" position="inside">
+    <xpath expr="//t[@t-set='head']" position="inside">
       <script type="text/javascript">
         {
             var coopChoice = null;
