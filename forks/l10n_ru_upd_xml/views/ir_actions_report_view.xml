@@ -8,7 +8,7 @@
             <button name="associated_view" position="attributes">
                 <attribute name="invisible">report_type not in ('qweb-pdf', 'qweb-html', 'qweb-text', 'qweb-xml')</attribute>
             </button>
-            <xpath expr="//page[@name='advanced']/group" position="after">
+            <xpath expr="//page[@name='advanced']" position="inside">
                 <group
                     name="xml_reports"
                     string="XML Report Settings"

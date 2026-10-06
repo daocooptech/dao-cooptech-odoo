@@ -2,6 +2,7 @@ from odoo import api, fields, models, exceptions, tools, _
 
 class ContractLine(models.Model):
     _name = 'contract.line'
+    _description = 'contract.line'
     _order = "sequence desc"
 
 

@@ -5,6 +5,7 @@ _logger = logging.getLogger(__name__)
 
 class PartnerContractCustomer(models.Model):
     _name = 'partner.contract.customer'
+    _description = 'partner.contract.customer'
     _inherit = ['mail.thread', 'mail.activity.mixin', 'mail.render.mixin']
 
     name = fields.Char(string='Номер')

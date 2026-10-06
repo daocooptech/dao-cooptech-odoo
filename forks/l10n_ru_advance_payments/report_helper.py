@@ -91,8 +91,8 @@ class QWebHelper(object):
             bank = partner.bank_ids[0]
         elif partner.parent_id.bank_ids:
             bank = partner.parent_id.bank_ids[0]
-        if bank and bank.acc_number:
-            repr.append("р/сч " + bank.acc_number)
+        if bank and bank.account_number:
+            repr.append("р/сч " + bank.account_number)
         if bank and bank.bank_name:
             repr.append("в банке " + bank.bank_name)
         if bank and bank.banvk_bic:

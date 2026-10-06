@@ -17,7 +17,7 @@ class AccountPaymentRegisterPrepaid(models.TransientModel):
     journal_id = fields.Many2one(comodel_name='account.journal', string='Журнал', required=True)
     communication = fields.Char(string="Заметки")
     prepaid_id = fields.Many2one(comodel_name='order.prepaid', string="Авансовый платеж")
-    advance_type = fields.Selection(selection=[('outbound', 'Входящий'), ('inbound', 'Исходящий')],
+    advance_type = fields.Selection(
                                     string='Тип счета на аванс', related='prepaid_id.advance_type')
     method_line_type = fields.Many2one(comodel_name='account.payment.method.line', string="Метод")
     amount_const = fields.Float(string='Сумма(Const)')

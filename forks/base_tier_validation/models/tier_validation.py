@@ -37,7 +37,6 @@ class TierValidation(models.AbstractModel):
         inverse_name="res_id",
         string="Validations",
         domain=lambda self: [("model", "=", self._name)],
-        auto_join=True,
     )
     # TODO: Delete in v19 in favor of validation_status field
     validated = fields.Boolean(

@@ -4,6 +4,7 @@ from odoo.addons.l10n_ru_doc.report_helper import QWebHelper
 
 class RuUpdReport(models.AbstractModel):
     _name = 'report.l10n_ru_doc.report_upd'
+    _description = 'Печатная форма l10n_ru_doc.report_upd'
     def _get_report_values(self, docids, data=None):
         docs = self.env['account.move'].browse(docids)
         return {
@@ -14,6 +15,7 @@ class RuUpdReport(models.AbstractModel):
         }
 class RuUpdReportn(models.AbstractModel):
     _name = 'report.l10n_ru_doc.report_updn'
+    _description = 'Печатная форма l10n_ru_doc.report_updn'
     def _get_report_values(self, docids, data=None):
         docs = self.env['account.move'].browse(docids)
         return {

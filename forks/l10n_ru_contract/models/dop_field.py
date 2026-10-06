@@ -108,7 +108,7 @@ class Report_contract_customer(models.Model):
 
     def numer(self, name):
         if name:
-            numeration = re.findall('\d+$', name)
+            numeration = re.findall(r'\d+$', name)
             if numeration: return numeration[0]
         return ''
 
@@ -305,7 +305,7 @@ class Report_contract_customer(models.Model):
         elif partner.parent_id.bank_ids:
             bank = partner.parent_id.bank_ids[0]
         if bank and bank.bank_name: repr.append(bank.bank_name)
-        if bank and bank.acc_number: repr.append(u"Р/счет " + bank.acc_number)
+        if bank and bank.account_number: repr.append(u"Р/счет " + bank.account_number)
         if bank and bank.bank_bic: repr.append(u"БИК " + bank.bank_bic)
         if bank and bank.bank_corr_acc: repr.append(u"к/с " + bank.bank_corr_acc)
         return '<br/>'.join(repr)

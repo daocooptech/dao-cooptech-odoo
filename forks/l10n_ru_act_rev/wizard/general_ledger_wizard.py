@@ -352,7 +352,7 @@ class GeneralLedgerReportWizard(models.TransientModel):
 
     def numer(self, name):
         if name:
-            numeration = re.findall('\d+$', name)
+            numeration = re.findall(r'\d+$', name)
             if numeration: return numeration[0]
         return name
 
@@ -826,7 +826,7 @@ class GeneralLedgerReportWizard(models.TransientModel):
 #
 #     def numer(self, name):
 #         if name:
-#             numeration = re.findall('\d+$', name)
+#             numeration = re.findall(r'\d+$', name)
 #             if numeration: return numeration[0]
 #         return name
 #

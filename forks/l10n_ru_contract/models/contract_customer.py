@@ -15,6 +15,7 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 class PartnerContractCustomer(models.Model):
     _name = 'partner.contract.customer'
+    _description = 'partner.contract.customer'
     _inherit = ['mail.thread', 'mail.activity.mixin', 'mail.render.mixin']
 
     def get_dateend(self):
@@ -450,6 +451,7 @@ class Partner(models.Model):
 
 class ContractLine(models.Model):
     _name = 'contract.line'
+    _description = 'contract.line'
     contract_id = fields.Many2one('partner.contract.customer', string='Order Reference', required=True,
                                   ondelete='cascade', index=True, copy=False)
     _order = "sequence desc"
@@ -469,6 +471,7 @@ class ContractLine(models.Model):
 
 class AllowedProfiles(models.Model):
     _name = 'contract.allowed.profiles'
+    _description = 'contract.allowed.profiles'
     name = fields.Char(string='Одновременно включены следующие виды договоров:')
     allowed_profiles = fields.Many2many('contract.profile', string='Виды договоров', required=True)
 
@@ -485,6 +488,7 @@ class AllowedProfiles(models.Model):
 
 class ContractProfile(models.Model):
     _name = 'contract.profile'
+    _description = 'contract.profile'
     name = fields.Char(string='Вид договора', required=True)
     payable_account_id = fields.Many2one('account.account', string='Счет кредиторской задолженности', required=True)
     receivable_account_id = fields.Many2one('account.account', string='Счет дебиторской задолженности', required=True)
@@ -495,4 +499,5 @@ class ContractProfile(models.Model):
 
 class ContractDay(models.Model):
     _name = 'contract.day'
+    _description = 'contract.day'
     name = fields.Char('День')

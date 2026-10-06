@@ -158,7 +158,7 @@
                                 </TD>
                                 <TD CLASS="R18C19" COLSPAN="3" ROWSPAN="4">
                                     <DIV class="cu_space61">
-                                        <SPAN class="cu_wspace" t-out="company.partner_id.bank_ids and company.partner_id.bank_ids[0].acc_number or ''"/>
+                                        <SPAN class="cu_wspace" t-out="company.partner_id.bank_ids and company.partner_id.bank_ids[0].account_number or ''"/>
                                     </DIV>
                                 </TD>
                             </TR>

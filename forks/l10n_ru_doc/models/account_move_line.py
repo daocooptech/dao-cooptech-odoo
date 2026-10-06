@@ -6,13 +6,14 @@ class AccountMoveLine(models.Model):
 
     price_total_pf = fields.Monetary(
         string='TotalPF',
-        compute='_compute_totals',
+        compute='_compute_price_total_pf',
         currency_field='currency_id',
     )
 
-    @api.depends('quantity', 'discount', 'price_unit', 'tax_ids', 'currency_id')
-    def _compute_totals(self):
-        super(AccountMoveLine,self)._compute_totals()
+    # Отдельный compute: в Odoo 20 поле, посчитанное тем же методом, что и
+    # хранимые price_subtotal/price_total, даёт предупреждение реестра.
+    @api.depends('quantity', 'discount', 'price_unit', 'tax_ids', 'currency_id', 'price_total')
+    def _compute_price_total_pf(self):
         for line in self:
             line_discount_price_unit = line.price_unit * (1 - (line.discount / 100.0))
             if line.tax_ids.filtered(lambda tax: tax.invisiblePF == False):

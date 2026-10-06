@@ -270,7 +270,7 @@
                                         </td>
                                         <td>
                                             <span>
-                                                <t t-out="o.partner_bank_id.acc_number"/>
+                                                <t t-out="o.partner_bank_id.account_number"/>
                                             </span>
                                         </td>
                                     </tr>

@@ -2,6 +2,7 @@ from odoo import api, fields, models
 
 class AllowedProfiles(models.Model):
     _name = 'contract.allowed.profiles'
+    _description = 'contract.allowed.profiles'
     name = fields.Char(string='Одновременно включены следующие виды договоров:')
     allowed_profiles = fields.Many2many('contract.profile', string='Виды договоров', required=True)
 

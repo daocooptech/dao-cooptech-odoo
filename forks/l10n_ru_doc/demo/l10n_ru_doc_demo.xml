@@ -10,7 +10,7 @@
         </record>
 
         <record id="main_company_bank" model="res.partner.bank">
-            <field name="acc_number">40707810600025341231</field>
+            <field name="account_number">40707810600025341231</field>
             <field name="bank_id" ref="main_bank"/>
             <field name="company_id" ref="base.main_company"/>
             <field name="partner_id" ref="base.main_partner"/>
