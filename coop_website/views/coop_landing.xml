@@ -20,8 +20,8 @@
     не трогает, и они не застывают.
   -->
   <template id="coop_landing" name="ДАО КООПТЕХ — главная">
-    <t t-call="website.layout">
-      <t t-set="title">Децентрализованная социально-экономическая платформа с открытым исходным кодом - DAO COOPTECH</t>
+    <t t-call="website.layout"
+        title.translate="Децентрализованная социально-экономическая платформа с открытым исходным кодом - DAO COOPTECH">
       <t t-set="facts" t-value="request.env['coop.website.landing'].sudo()._landing_facts()"/>
       <div id="wrap" class="coop-landing lx">
 
