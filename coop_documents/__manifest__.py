@@ -16,7 +16,7 @@
     'author': 'ДАО КООПТЕХ',
     'website': 'https://daocooptech.ru',
     'category': 'Cooperative',
-    'version': '19.0.1.1.0',
+    'version': '20.0.1.1.0',
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_theme', 'mail'],
     'data': [

@@ -37,7 +37,7 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '19.0.1.0.0',
+    'version': '20.0.1.0.0',
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_wallet', 'coop_deals', 'coop_resources', 'coop_people', 'coop_projects',
                 'coop_matching'],

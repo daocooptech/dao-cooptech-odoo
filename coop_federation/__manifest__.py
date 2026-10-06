@@ -20,7 +20,7 @@ GET /.well-known/did.json и GET /federation/log. Тела адресных со
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '19.0.1.0.0',
+    'version': '20.0.1.0.0',
     'license': 'LGPL-3',
     'depends': ['coop_theme'],
     'external_dependencies': {'python': ['cryptography']},
