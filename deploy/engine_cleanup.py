@@ -151,8 +151,75 @@ def mark_stripped(env):
     env.cr.commit()
 
 
+def refresh_engine_changes(env):
+    """Виды и шаблоны писем, изменённые в форке (слой В решения 441).
+
+    Они лежат в базе, и `-u` их не обновит: шаблоны писем — noupdate, а
+    `-u web`/`-u mail` тянет почти все модули. Форк сам перечисляет, что
+    изменил (.coop/refresh-views.txt, refresh-templates.txt); здесь виды
+    перечитываются из файла (reset_arch hard), шаблоны — штатным сбросом
+    с переводами. Один раз на каждый коммит движка: сброс затирает правки
+    шаблонов, сделанные в интерфейсе, и повторять его без нужды нельзя.
+    """
+    from odoo import release
+    root = os.path.dirname(os.path.dirname(os.path.abspath(release.__file__)))
+    head = os.path.join(root, '.git', 'HEAD')
+    if not os.path.exists(os.path.join(root, '.coop')) or not os.path.exists(head):
+        return
+    with open(head, encoding='utf-8') as fh:
+        sha = fh.read().strip()
+    if sha.startswith('ref:'):
+        # Рабочая копия на ветке (стенд): коммит — в файле ветки или в
+        # packed-refs. На сервере клон по метке, и там в HEAD сам коммит.
+        ref = sha.split(':', 1)[1].strip()
+        loose = os.path.join(root, '.git', *ref.split('/'))
+        if os.path.exists(loose):
+            with open(loose, encoding='utf-8') as fh:
+                sha = fh.read().strip()
+        else:
+            packed = os.path.join(root, '.git', 'packed-refs')
+            if os.path.exists(packed):
+                with open(packed, encoding='utf-8') as fh:
+                    for line in fh:
+                        if line.strip().endswith(' ' + ref):
+                            sha = line.split()[0]
+    ICP = env['ir.config_parameter'].sudo()
+    if ICP.get_param('coop_engine.refreshed_for') == sha:
+        return
+
+    def listed(name):
+        path = os.path.join(root, '.coop', name)
+        if not os.path.exists(path):
+            return []
+        with open(path, encoding='utf-8') as fh:
+            return [l.split()[0] for l in fh if l.strip() and not l.startswith('#')]
+
+    views = env['ir.ui.view'].sudo()
+    for xmlid in listed('refresh-views.txt'):
+        view = env.ref(xmlid, raise_if_not_found=False)
+        if view and view._name == 'ir.ui.view':
+            views |= view
+    if views:
+        say('виды из форка: перечитываю %s', len(views))
+        views.reset_arch(mode='hard')
+
+    templates = env['mail.template'].sudo() if 'mail.template' in env else None
+    if templates is not None:
+        for xmlid in listed('refresh-templates.txt'):
+            tpl = env.ref(xmlid, raise_if_not_found=False)
+            if tpl and tpl._name == 'mail.template':
+                templates |= tpl
+        if templates:
+            say('шаблоны писем из форка: перезаливаю %s', len(templates))
+            templates.reset_template()
+
+    ICP.set_param('coop_engine.refreshed_for', sha)
+    env.cr.commit()
+
+
 removal = _removal_list()
 cleanup_data(env)  # noqa: F821 — env задаёт odoo-bin shell
 remove_modules(env, removal)  # noqa: F821
 mark_stripped(env)  # noqa: F821
+refresh_engine_changes(env)  # noqa: F821
 say('готово')
