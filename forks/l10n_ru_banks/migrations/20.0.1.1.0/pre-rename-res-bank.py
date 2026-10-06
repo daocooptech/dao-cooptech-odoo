@@ -84,7 +84,12 @@ def migrate(cr, version):
         for (name,) in cr.fetchall():
             cr.execute('ALTER TABLE res_partner_bank DROP CONSTRAINT "%s"' % name)
         cr.execute('DROP INDEX IF EXISTS res_partner_bank__bank_id_index')
-        cr.execute("ALTER TABLE res_partner_bank RENAME COLUMN bank_id TO ru_bank_id")
+        if _column_exists(cr, "res_partner_bank", "ru_bank_id"):
+            # an earlier partial update already created the new column
+            cr.execute("UPDATE res_partner_bank SET ru_bank_id = bank_id WHERE ru_bank_id IS NULL")
+            cr.execute("ALTER TABLE res_partner_bank DROP COLUMN bank_id")
+        else:
+            cr.execute("ALTER TABLE res_partner_bank RENAME COLUMN bank_id TO ru_bank_id")
 
     # model and field metadata
     cr.execute("UPDATE ir_model SET model = 'ru.bank' WHERE model = 'res.bank'")

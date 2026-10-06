@@ -81,13 +81,18 @@ Odoo 19, репозиторий Rudoo `ruodoo-public`; OCA-модули в нё�
 | `docx_report_generation` | Rudoo, RYDLAB | LGPL-3 | `get_param` → `get_str`, `request.website` → `env.website`, `BinaryValue.content` вместо `b64decode`, импорты контроллера |
 | `custom_report_field` | Rudoo, RYDLAB | LGPL-3 | `ir.access` |
 | `report_monetary_helpers` | Rudoo, RYDLAB | LGPL-3 | только версия |
-| `report_weasyprint` | Rudoo, MK.Lab | LGPL-3 | `get_param` → `get_str`. **Не портирован по существу**: подмена `_run_wkhtmltopdf` в 20 мертва, см. ниже |
 | `l10n_ru` | OCA, наш форк 19 | AGPL-3 | пустой `account.group-ru.csv` убран, данные компании в шаблоне плана счетов (`receivable/payable/expense/income_account_id`, storno, сумма прописью) |
 | `l10n_ru_banks` | OCA, наш форк 19 | AGPL-3 | `ir.access`; **провизорно** воссоздана модель `res.bank` (см. ниже) |
 | `l10n_ru_advance_payments` | Rudoo, MK.Lab, наш форк 19 | ключа нет | `t-out`, `pycompat`, `acc_number` → `account_number`, `selection` у related-поля |
 | `base_tier_validation` | OCA `server-ux` 19.0 | AGPL-3 | `ir.access` (правила записей внутри), `static props` убран, `auto_join` убран |
 | `base_user_role` | OCA `server-backend` 19.0 | LGPL-3 | `ir.rule` и `ir.model.access` слиты в `ir.access`: у роли один список доступов; `_sql_constraints` → `models.Constraint` |
 | `dadata_connector` | Rudoo, MK.lab | ключа нет | `get_param` → `get_str`, `static props` → `useProps` |
+
+**`report_weasyprint` снят** (решение 446, НВ9, «снять, печатать штатно»):
+форма договора (`report_contract_simple.xml`) печатается штатным движком
+Odoo, зависимость и каталог `forks/report_weasyprint` убраны. На базе, где
+модуль стоял, его надо удалить кнопкой «Удалить» (поле `use_weasyprint`
+уйдёт вместе с ним).
 
 Версии в манифестах подняты с 19.0.* до 20.0.*; серия 19 для Odoo 20 даёт
 `installable = False`. Не переносились: `translation_helper`, `dms` и прочие
@@ -118,21 +123,16 @@ Odoo 19, репозиторий Rudoo `ruodoo-public`; OCA-модули в нё�
 
 ## Зависимости Python (venv `rudoo20`, Python 3.12, PyPI)
 
-`weasyprint==70.0` (тянет `pydyf 0.12.1`, `pyphen 0.18.1`, `tinycss2 1.5.1`,
-`tinyhtml5 2.1.0`, `cssselect2 0.10.1`, `fonttools 4.66.1`, `brotli 1.2.0`,
-`zopfli 0.4.3`, `webencodings 0.6.1`), `docxtpl==0.20.2`, `docxcompose==2.2.0`,
+`docxtpl==0.20.2`, `docxcompose==2.2.0`,
 `python-docx==1.2.0`, `beautifulsoup4==4.15.0` (в манифесте имя PyPI, а не `bs4`),
 `pytils==0.4.4`, `num2words==0.5.13`, `dadata==21.10.1` (тянет `httpx 0.28.1`,
 `httpcore 1.0.9`, `anyio 4.15.1`), `pymorphy3==2.0.6` и
 `pymorphy3-dicts-ru==2.4.417150.4580142` вместо `pymorphy2` (тот не работает на
-Python ≥ 3.11), для тестов OCA — `odoo-test-helper`. WeasyPrint на Windows
-требует библиотеки Pango/GTK: на стенде их нет, `import weasyprint` падает, модуль
-`report_weasyprint` это переживает (предупреждение), PDF через него не проверен.
-На Linux-сервере нужны системные пакеты `libpango-1.0-0`, `libpangoft2-1.0-0`.
+Python ≥ 3.11), для тестов OCA — `odoo-test-helper`. `weasyprint` и его
+библиотеки (Pango/GTK) больше не нужны: `report_weasyprint` снят.
 
 ## Открытое (решает основная сессия)
 
-См. отчёт этапа Э5: `report_weasyprint` (движок печати), справочник банков
-(коммит «ПРОВИЗОРНО — res.bank воссоздан»), схема XML УПД (5.03), `company_registry`,
+См. отчёт этапа Э5: схема XML УПД (5.03), `company_registry`,
 `fa-*` значки в OCA-модулях, семантика `base_user_role` (тесты), поломка
 `payment` в форке движка (данные ссылаются на снятые модули).

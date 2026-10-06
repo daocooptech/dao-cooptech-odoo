@@ -25,7 +25,7 @@
        1. Открываем созданную запись договора - Действие - "Договор".         
     """,
 
-    'version': '20.0.1.0.0',
+    'version': '20.0.1.1.0',
     'sequence': 0,
     'author': 'MK.Lab',
     'website': 'https://www.inf-centre.ru/',
@@ -33,10 +33,9 @@
         'base',
         'mail',
         'l10n_ru_base',
-        'report_weasyprint',
     ],
     "external_dependencies": {
-        "python": ["weasyprint", "pymorphy3", "python-docx", "docxtpl"],
+        "python": ["pymorphy3", "python-docx", "docxtpl"],
     },
     'data': [
         'data/data.xml',
