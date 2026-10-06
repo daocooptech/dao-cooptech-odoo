@@ -3,9 +3,9 @@ from odoo import api, fields, models, _
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
-    last_name = fields.Char(string=_('Фамилия'), compute='_compute_update_name')
-    first_name = fields.Char(string=_('Имя'), compute='_compute_update_name')
-    second_name = fields.Char(string=_('Отчество'), compute='_compute_update_name')
+    last_name = fields.Char(string='Фамилия', compute='_compute_update_name')
+    first_name = fields.Char(string='Имя', compute='_compute_update_name')
+    second_name = fields.Char(string='Отчество', compute='_compute_update_name')
 
     @api.depends('name')
     def _compute_update_name(self):

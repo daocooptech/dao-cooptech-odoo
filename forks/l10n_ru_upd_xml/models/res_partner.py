@@ -3,16 +3,16 @@ from odoo import api, fields, models, _
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
-    inn = fields.Char(_('ИНН'), size=12)
-    kpp = fields.Char(_('КПП'), size=9)
-    okpo = fields.Char(_('ОКПО'), size=14)
-    edi = fields.Char(_('ID EDI'))
-    house = fields.Char(_('Дом'))
-    office = fields.Char(_('Квартира, офис'))
-    fias_id = fields.Char(_('Код ФИАС'))
-    last_name_IP = fields.Char(_('Фамилия ИП'), compute='_compute_get_fio', readonly=False)
-    first_name_IP = fields.Char(_('Имя ИП'), compute='_compute_get_fio', readonly=False)
-    middle_name_IP = fields.Char(_('Отчество ИП'), compute='_compute_get_fio', readonly=False)
+    inn = fields.Char('ИНН', size=12)
+    kpp = fields.Char('КПП', size=9)
+    okpo = fields.Char('ОКПО', size=14)
+    edi = fields.Char('ID EDI')
+    house = fields.Char('Дом')
+    office = fields.Char('Квартира, офис')
+    fias_id = fields.Char('Код ФИАС')
+    last_name_IP = fields.Char('Фамилия ИП', compute='_compute_get_fio', readonly=False)
+    first_name_IP = fields.Char('Имя ИП', compute='_compute_get_fio', readonly=False)
+    middle_name_IP = fields.Char('Отчество ИП', compute='_compute_get_fio', readonly=False)
 
     @api.depends('name')
     def _compute_get_fio(self):

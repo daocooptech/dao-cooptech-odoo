@@ -5,9 +5,9 @@ from datetime import datetime
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
     
-    mt_contract_id = fields.Many2one('partner.contract.customer', string=_('Номер договора'))
-    sec_partner_id = fields.Many2one('res.partner', string=_('Контрагент'), store=True, compute='_compute_get_pid')
-    stamp = fields.Boolean(string=_('Печать и подпись'), related='mt_contract_id.stamp')
+    mt_contract_id = fields.Many2one('partner.contract.customer', string='Номер договора')
+    sec_partner_id = fields.Many2one('res.partner', string='Контрагент', store=True, compute='_compute_get_pid')
+    stamp = fields.Boolean(string='Печать и подпись', related='mt_contract_id.stamp')
 
     @api.depends('partner_id')
     def _compute_get_pid(self):

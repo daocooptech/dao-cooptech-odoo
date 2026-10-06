@@ -27,61 +27,61 @@ class PartnerContractCustomer(models.Model):
 
     name = fields.Char(string='Номер')
     date_start = fields.Date(string='Дата договора', required=True, default=fields.Datetime.now())
-    partner_id = fields.Many2one('res.partner', string=_('Контрагент'), required=True)
-    sec_partner_id = fields.Many2one('res.partner', string=_('Контрагент как в заказе'))
-    company_id = fields.Many2one('res.company', string=_('Компания'), required=True)
-    name_print = fields.Char(string=_('Имя для печати'), compute='_get_name_print')
-    name_print1 = fields.Char(string=_('Имя для печати, И.П.'), compute='_get_name_printip')
-    date_end = fields.Date(string=_('Дата окончания'), required=True, default=get_dateend)
-    name_dirprint = fields.Char(string=_('Имя нашего директора для печати'))
-    name_dirprint1 = fields.Char(string=_('Имя нашего директора для печати И.П.'))
-    lines = fields.One2many('contract.line', 'contract_id', string=_('Договорные цены'))
+    partner_id = fields.Many2one('res.partner', string='Контрагент', required=True)
+    sec_partner_id = fields.Many2one('res.partner', string='Контрагент как в заказе')
+    company_id = fields.Many2one('res.company', string='Компания', required=True)
+    name_print = fields.Char(string='Имя для печати', compute='_get_name_print')
+    name_print1 = fields.Char(string='Имя для печати, И.П.', compute='_get_name_printip')
+    date_end = fields.Date(string='Дата окончания', required=True, default=get_dateend)
+    name_dirprint = fields.Char(string='Имя нашего директора для печати')
+    name_dirprint1 = fields.Char(string='Имя нашего директора для печати И.П.')
+    lines = fields.One2many('contract.line', 'contract_id', string='Договорные цены')
     type = fields.Selection(
         [('customer', 'С покупателем'),
          ('supplier', 'С поставщиком'),
          ('other', 'Прочие расчеты'),
 
          ],
-        string=_('Тип договора'), default='customer', required=True)
-    saleorder_id = fields.Many2one('sale.order', string=_('Заказ/Сделка'))
-    stamp = fields.Boolean(string=_('Печать и подпись'))
-    signed = fields.Boolean(string=_('Договор подписан'))
+        string='Тип договора', default='customer', required=True)
+    saleorder_id = fields.Many2one('sale.order', string='Заказ/Сделка')
+    stamp = fields.Boolean(string='Печать и подпись')
+    signed = fields.Boolean(string='Договор подписан')
     state = fields.Selection(
         [('draft', 'Черновик'),
          ('progress', 'На согласовании'),
          ('signed', 'Подписан, действует'),
          ('closed', 'Истёк'),
          ],
-        string=_('Статус'), default='draft', group_expand='_expand_states', index=True
+        string='Статус', default='draft', group_expand='_expand_states', index=True
     )
-    is_template = fields.Boolean(_('Это шаблон'))
-    copy_from = fields.Many2one('partner.contract.customer', string=_('Копировать из этого шаблона'))
-    profile_id = fields.Many2one('contract.profile', string=_('Вид договора'), required=True)
-    credit_limit = fields.Float(string=_('Лимит кредита'))
-    guid_1s = fields.Char(_('Код договора из 1С'))
-    buh_code = fields.Char(_('Код договора из бухгалтерии'))
-    payment_term_id = fields.Many2one('account.payment.term', string=_('Условие оплаты'))
-    manager_id = fields.Many2one('res.users', string=_('Менеджер по продажам'))
-    accountant_id = fields.Many2one('res.users', string=_('Бухгалтер по взаиморасчетам'))
-    time_to_delivery_from = fields.Datetime(_('Время доставки от'))
-    time_to_delivery_to = fields.Datetime(_('Время доставки до'))
-    day_of_delivery = fields.Float(_('Дни доставки'))
-    day_of_otgruzki = fields.Float(_('Дни отгрузки'))
+    is_template = fields.Boolean('Это шаблон')
+    copy_from = fields.Many2one('partner.contract.customer', string='Копировать из этого шаблона')
+    profile_id = fields.Many2one('contract.profile', string='Вид договора', required=True)
+    credit_limit = fields.Float(string='Лимит кредита')
+    guid_1s = fields.Char('Код договора из 1С')
+    buh_code = fields.Char('Код договора из бухгалтерии')
+    payment_term_id = fields.Many2one('account.payment.term', string='Условие оплаты')
+    manager_id = fields.Many2one('res.users', string='Менеджер по продажам')
+    accountant_id = fields.Many2one('res.users', string='Бухгалтер по взаиморасчетам')
+    time_to_delivery_from = fields.Datetime('Время доставки от')
+    time_to_delivery_to = fields.Datetime('Время доставки до')
+    day_of_delivery = fields.Float('Дни доставки')
+    day_of_otgruzki = fields.Float('Дни отгрузки')
 
-    channel_id = fields.Many2one('saleorder.channel', string=_('Канал продаж'))
-    team_id = fields.Many2one('crm.team', string=_('Команда продаж'))
-    order_days_ids = fields.Many2many(comodel_name='contract.day', relation='orderdays', string=_('Дни доставки'),
+    channel_id = fields.Many2one('saleorder.channel', string='Канал продаж')
+    team_id = fields.Many2one('crm.team', string='Команда продаж')
+    order_days_ids = fields.Many2many(comodel_name='contract.day', relation='orderdays', string='Дни доставки',
                                       column1='contract_id', column2='day_id')
-    shipment_days_ids = fields.Many2many(comodel_name='contract.day', relation='shipmentdays', string=_('Дни отгрузки'),
+    shipment_days_ids = fields.Many2many(comodel_name='contract.day', relation='shipmentdays', string='Дни отгрузки',
                                          column1='contract_id',
                                          column2='day_id')
     # Доработка хедера договора
-    partner_type = fields.Selection(string=_('Тип контрагента'), selection=[
+    partner_type = fields.Selection(string='Тип контрагента', selection=[
         ('person', 'Физ. лицо'),
         ('company_ip', 'ИП'),
         ('company', 'Юр. лицо')
     ], required=True)
-    contract_header = fields.Html(_('Шапка договора'))
+    contract_header = fields.Html('Шапка договора')
 
     @api.onchange('partner_type')
     def generate_contract_header(self):

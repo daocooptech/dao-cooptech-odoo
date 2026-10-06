@@ -6,8 +6,8 @@ from odoo.exceptions import UserError
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    edi = fields.Char(string=_('ID EDI'), compute='_compute_sh1_edi')
-    kpp = fields.Char(string=_('КПП'), compute='_compute_get_kpp')
+    edi = fields.Char(string='ID EDI', compute='_compute_sh1_edi')
+    kpp = fields.Char(string='КПП', compute='_compute_get_kpp')
 
     def _compute_get_kpp(self):
         for s in self:

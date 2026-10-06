@@ -1,13 +1,10 @@
 from json import dumps as json_dumps, loads as json_loads
 from werkzeug.urls import url_decode
 
-from odoo.http import (
-    content_disposition,
-    request,
-    route,
-    serialize_exception as _serialize_exception,
-)
-from odoo.tools import html_escape
+from odoo.http import request, route
+from odoo.http.dispatcher import serialize_exception as _serialize_exception
+from odoo.http.stream import content_disposition
+from odoo.tools.misc import html_escape
 from odoo.tools.safe_eval import safe_eval, time
 
 from odoo.addons.web.controllers.report import ReportController

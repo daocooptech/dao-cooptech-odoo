@@ -28,36 +28,36 @@ class GeneralLedgerReportWizard(models.TransientModel):
         default="posted",
     )
     account_ids = fields.Many2many(
-        comodel_name="account.account", string=_("Filter accounts")
+        comodel_name="account.account", string="Filter accounts"
     )
-    centralize = fields.Boolean(string=_("Activate centralization"), default=True)
+    centralize = fields.Boolean(string="Activate centralization", default=True)
     hide_account_at_0 = fields.Boolean(
-        string=_("Hide account ending balance at 0"),
-        help=_("Use this filter to hide an account or a partner "
+        string="Hide account ending balance at 0",
+        help="Use this filter to hide an account or a partner "
         "with an ending balance at 0. "
         "If partners are filtered, "
-        "debits and credits totals will not match the trial balance."),
+        "debits and credits totals will not match the trial balance.",
     )
     receivable_accounts_only = fields.Boolean()
     payable_accounts_only = fields.Boolean()
     partner_ids = fields.Many2many(
         comodel_name="res.partner",
-        string=_("Filter partners"),
+        string="Filter partners",
         default=lambda self: self._default_partners(),
     )
     account_journal_ids = fields.Many2many(
-        comodel_name="account.journal", string=_("Filter journals")
+        comodel_name="account.journal", string="Filter journals"
     )
     cost_center_ids = fields.Many2many(
-        comodel_name="account.analytic.account", string=_("Filter cost centers")
+        comodel_name="account.analytic.account", string="Filter cost centers"
     )
 
     not_only_one_unaffected_earnings_account = fields.Boolean(readonly=True)
     foreign_currency = fields.Boolean(
-        string=_("Show foreign currency"),
-        help=_("Display foreign currency for move lines, unless "
+        string="Show foreign currency",
+        help="Display foreign currency for move lines, unless "
         "account currency is not setup through chart of accounts "
-        "will display initial and final balance in that currency."),
+        "will display initial and final balance in that currency.",
         default=lambda self: self._default_foreign_currency(),
     )
     account_code_from = fields.Many2one(

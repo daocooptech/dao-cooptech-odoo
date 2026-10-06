@@ -9,8 +9,8 @@ class Partner(models.Model):
     kpp = fields.Char('KPP')
     passport = fields.Char('Паспорт')
 
-    contract_count = fields.Integer(string=_('Договоры'), compute='get_count_contract')
-    pol = fields.Selection(string=_("Пол"), selection=[('m', 'Муж.'), ('j', 'Жен'), ], required=False)
+    contract_count = fields.Integer(string='Договоры', compute='get_count_contract')
+    pol = fields.Selection(string="Пол", selection=[('m', 'Муж.'), ('j', 'Жен'), ], required=False)
     type = fields.Selection(selection_add=[('director', 'Директор')])
 
     def get_count_contract(self):

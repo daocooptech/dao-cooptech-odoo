@@ -16,12 +16,12 @@ _FIELDS_MODUL = [
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
-    module_l10n_ru_act_rev = fields.Boolean(_("Act revise"))
-    module_l10n_ru_contract = fields.Boolean(_("Contract"))
-    module_l10n_ru_upd_xml = fields.Boolean(_("Report_xml"))
-    module_l10n_ru_doc = fields.Boolean(_("Print forms"))
-    module_l10n_ru_attorney = fields.Boolean(_("Consent"))
-    module_l10n_ru_advance_payments = fields.Boolean(_("Advance payments"))
+    module_l10n_ru_act_rev = fields.Boolean("Act revise")
+    module_l10n_ru_contract = fields.Boolean("Contract")
+    module_l10n_ru_upd_xml = fields.Boolean("Report_xml")
+    module_l10n_ru_doc = fields.Boolean("Print forms")
+    module_l10n_ru_attorney = fields.Boolean("Consent")
+    module_l10n_ru_advance_payments = fields.Boolean("Advance payments")
 
     @api.model
     def write(self, values):

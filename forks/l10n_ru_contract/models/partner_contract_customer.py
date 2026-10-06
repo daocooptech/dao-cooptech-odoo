@@ -7,17 +7,17 @@ class PartnerContractCustomer(models.Model):
     _name = 'partner.contract.customer'
     _inherit = ['mail.thread', 'mail.activity.mixin', 'mail.render.mixin']
 
-    name = fields.Char(string=_('Номер'))
-    date_start = fields.Date(string=_('Дата договора'), required=True, default=fields.Datetime.now())
-    date_end = fields.Date(string=_('Дата окончания'), required=True)
+    name = fields.Char(string='Номер')
+    date_start = fields.Date(string='Дата договора', required=True, default=fields.Datetime.now())
+    date_end = fields.Date(string='Дата окончания', required=True)
     type = fields.Selection(
         [('customer', 'С покупателем'),
          ('supplier', 'С поставщиком'),
          ('other', 'Прочие расчеты'),
 
          ],
-        string=_('Тип договора'), default='customer', required=True)
-    profile_id = fields.Many2one('contract.profile', string=_('Вид договора'), required=True)
+        string='Тип договора', default='customer', required=True)
+    profile_id = fields.Many2one('contract.profile', string='Вид договора', required=True)
     partner_id = fields.Many2one(
         'res.partner',
         string='Контрагент',
@@ -25,12 +25,12 @@ class PartnerContractCustomer(models.Model):
         domain="[('id', 'in', possible_partner_ids)]",
     )
 
-    partner_type = fields.Selection(string=_('Тип контрагента'), selection=[
+    partner_type = fields.Selection(string='Тип контрагента', selection=[
         ('person', 'Физ. лицо'),
         ('company_ip', 'ИП'),
         ('company', 'Юр. лицо')
     ], required=True)
-    company_id = fields.Many2one('res.company', string=_('Компания'), required=True)
+    company_id = fields.Many2one('res.company', string='Компания', required=True)
     state = fields.Selection(
         [
             ('draft', 'Черновик'),
@@ -38,55 +38,55 @@ class PartnerContractCustomer(models.Model):
             ('signed', 'Подписан, действует'),
             ('closed', 'Истёк'),
         ],
-        string=_('Статус'),
+        string='Статус',
         default='draft',
         group_expand=lambda self, states, domain: [
             key for key, _ in self._fields['state'].selection
         ],
     )
-    stamp = fields.Boolean(string=_('Печать и подпись'))
-    signed = fields.Boolean(string=_('Договор подписан'))
-    lines_ids = fields.One2many('contract.line', 'contract_id', string=_('Пункты договора'))
+    stamp = fields.Boolean(string='Печать и подпись')
+    signed = fields.Boolean(string='Договор подписан')
+    lines_ids = fields.One2many('contract.line', 'contract_id', string='Пункты договора')
 
-    is_template = fields.Boolean(_('Это шаблон'))
-    copy_from = fields.Many2one('partner.contract.customer', string=_('Копировать из этого шаблона'))
+    is_template = fields.Boolean('Это шаблон')
+    copy_from = fields.Many2one('partner.contract.customer', string='Копировать из этого шаблона')
 
     director_name_partner = fields.Char(
-        string=_('ФИО директора (от партнёра)'),
+        string='ФИО директора (от партнёра)',
         related='partner_id.parent_id.name',
         readonly=True,
     )
 
     director_name_company = fields.Char(
-        string=_('ФИО руководителя (от компании)'),
+        string='ФИО руководителя (от компании)',
         related='company_id.chief_id.partner_id.name',
         readonly=True,
     )
 
     contract_header = fields.Html(
-        string=_("Шапка договора"),
+        string="Шапка договора",
         compute="_compute_contract_header",
     )
 
     contract_header_template_id = fields.Many2one(
         "ir.ui.view",
-        string=_("Шаблон шапки договора"),
+        string="Шаблон шапки договора",
         domain='['
                '("type", "=", "qweb"), '
                '"|", '
                '"&", ("model", "!=", False), ("model", "=", "partner.contract.customer"), '
                '"&", ("model", "=", False), ("key", "ilike", "l10n_ru_contract.contract_header_")'
                ']',
-        help=_("QWeb-шаблон, по которому генерируется поле «Шапка договора»."),
+        help="QWeb-шаблон, по которому генерируется поле «Шапка договора».",
     )
 
     use_custom_contract_header = fields.Boolean(
-        string=_("Использовать кастомный шаблон"),
+        string="Использовать кастомный шаблон",
         default=False,
-        help=_(
+        help=
             "Если включено, шапка договора редактируется вручную и "
             "не перегенерируется автоматически при изменении реквизитов."
-        ),
+        ,
     )
 
     possible_partner_ids = fields.Many2many(

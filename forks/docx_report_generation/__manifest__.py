@@ -17,7 +17,7 @@
     "version": "20.0.2025.11.11",
     "license": "LGPL-3",
     "depends": ["base", "web", "custom_report_field"],
-    "external_dependencies": {"python": ["docxcompose", "docxtpl", "bs4"]},
+    "external_dependencies": {"python": ["docxcompose", "docxtpl", "beautifulsoup4", "python-docx"]},
     "data": [
         "views/ir_actions_report_views.xml",
     ],

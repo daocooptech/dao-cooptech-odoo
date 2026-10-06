@@ -36,7 +36,7 @@
         'report_weasyprint',
     ],
     "external_dependencies": {
-        "python": ["weasyprint"],
+        "python": ["weasyprint", "pymorphy3", "python-docx", "docxtpl"],
     },
     'data': [
         'data/data.xml',

@@ -4,11 +4,11 @@ from odoo import api, fields, models, exceptions, _
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    mt_contract_id = fields.Many2one('partner.contract.customer', string=_('Номер договора'))
-    sf_number = fields.Char(string=_('Номер с/ф'))
-    osnovanie = fields.Char(string=_('Основание'))
-    sec_partner_id = fields.Many2one('res.partner', string=_('Контрагент'), store=True, compute='_compute_get_pid')
-    stamp = fields.Boolean(string=_('Печать и подпись'), related='mt_contract_id.stamp')
+    mt_contract_id = fields.Many2one('partner.contract.customer', string='Номер договора')
+    sf_number = fields.Char(string='Номер с/ф')
+    osnovanie = fields.Char(string='Основание')
+    sec_partner_id = fields.Many2one('res.partner', string='Контрагент', store=True, compute='_compute_get_pid')
+    stamp = fields.Boolean(string='Печать и подпись', related='mt_contract_id.stamp')
 
     @api.depends('partner_id')
     def _compute_get_pid(self):
