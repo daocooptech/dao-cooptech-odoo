@@ -80,15 +80,15 @@
             <form class="o_coop_fc_edit" t-if="this.state.edit and this.state.edit.metric === m.key"
                   t-on-submit.prevent="() => this.savePlan()">
               <label>С месяца
-                <select t-custom-model="this.state.edit.month">
+                <select t-model.proxy="this.state.edit.month">
                   <option t-foreach="this.futureMonths(m)" t-as="f" t-key="f.key" t-att-value="f.key" t-out="f.label"/>
                 </select>
               </label>
               <label><t t-if="m.better === 'down'">Лимит</t><t t-else="">Цель</t><t t-if="m.unit === 'rub'">, ₽</t>
-                <input type="number" min="0" step="any" t-custom-model="this.state.edit.target"/>
+                <input type="number" min="0" step="any" t-model.proxy="this.state.edit.target"/>
               </label>
               <label>На сколько месяцев
-                <select t-custom-model="this.state.edit.repeat">
+                <select t-model.proxy="this.state.edit.repeat">
                   <option value="1">1</option>
                   <option value="3">3</option>
                   <option value="6">6</option>

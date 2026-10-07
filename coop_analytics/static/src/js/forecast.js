@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, onWillStart, proxy, usePlugin } from "@odoo/owl";
+import { Component, onWillStart, proxy, usePlugin, useProps } from "@odoo/owl";
 import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -20,7 +20,7 @@ const nf = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 });
 export class CoopForecast extends Component {
     static template = "coop_analytics.Forecast";
     static components = { CoopTabs };
-    static props = ["*"];
+    props = useProps();
 
     setup() {
         this.orm = useService("orm");
