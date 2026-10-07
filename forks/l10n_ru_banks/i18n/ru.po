@@ -189,3 +189,7 @@ msgstr "Обновление банков России"
 #: model_terms:ir.ui.view,arch_db:l10n_ru_banks.update_ru_banks_wizard_form
 msgid "Update the directory of Russian banks"
 msgstr "Обновить справочник Российских банков"
+#. module: l10n_ru_banks
+#: model:ir.ui.menu,name:l10n_ru_banks.menu_ru_bank
+msgid "Banks"
+msgstr "Банки"

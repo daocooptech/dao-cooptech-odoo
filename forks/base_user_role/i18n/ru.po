@@ -379,7 +379,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base_user_role.res_groups_view_form
 #: model_terms:ir.ui.view,arch_db:base_user_role.view_res_users_form_inherit
 msgid "User Roles"
-msgstr ""
+msgstr "Роли пользователей"
 
 #. module: base_user_role
 #: model:ir.module.category,name:base_user_role.ir_module_category_role
