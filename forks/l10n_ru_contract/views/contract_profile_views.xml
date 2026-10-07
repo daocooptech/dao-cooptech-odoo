@@ -7,6 +7,11 @@
                 <sheet>
                     <group>
                         <field name="name"/>
+                        <field name="journal_id"/>
+                        <field name="payment_term_id"/>
+                        <field name="receivable_account_id"/>
+                        <field name="payable_account_id"/>
+                        <field name="max_receivable_id"/>
                     </group>
                 </sheet>
             </form>

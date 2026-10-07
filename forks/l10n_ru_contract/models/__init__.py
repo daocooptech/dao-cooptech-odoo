@@ -7,3 +7,7 @@ from . import contract_day
 from . import contract_allowed_profiles
 from . import contract_line
 from . import contract_profile
+from . import contract_customer
+from . import account_move
+from . import invoice_saleorder
+from . import sale_make_invoice_advance

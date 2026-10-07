@@ -32,6 +32,8 @@
     'depends': [
         'base',
         'mail',
+        'account',
+        'sale',
         'l10n_ru_base',
     ],
     "external_dependencies": {
@@ -45,6 +47,7 @@
         'views/res_company_views.xml',
         'views/res_partner_views.xml',
         'views/contract_profile_views.xml',
+        'views/contract_documents_views.xml',
         'report/report_contract.xml',
         'security/ir.access.csv',
     ],
