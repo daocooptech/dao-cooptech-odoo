@@ -34,7 +34,7 @@
                     <field name="side"/>
                   </span>
                   <span class="o_coop_crypto_meta" t-if="record.city.raw_value">
-                    <i class="fa fa-map-marker" aria-hidden="true"/> <t t-out="record.city.value"/>
+                    <i class="oi" data-icon="location_on" aria-hidden="true"/> <t t-out="record.city.value"/>
                   </span>
                 </div>
                 <div class="o_coop_crypto_price"><t t-out="record.price_label.value"/>

@@ -76,7 +76,7 @@
 }
 
 .o_coop_poll_mine .o_coop_poll_fill { background: var(--coop-teal-tint, #e3efed); }
-.o_coop_poll_mine .fa-check-circle { color: var(--coop-teal, #146b64); }
+.o_coop_poll_mine [data-icon="check_circle"] { color: var(--coop-teal, #146b64); }
 
 .o_coop_poll_name { flex: 1 1 auto; min-width: 0; }
 

@@ -59,7 +59,7 @@
            href="#" class="o_coop_nav_item"
            t-att-class="{ 'active': this.isActive(item) }"
            t-on-click.prevent="() => this.open(item)">
-          <i class="fa fa-fw" t-att-class="item.icon" role="img" aria-hidden="true"/>
+          <i class="oi oi-fw" t-att-data-icon="item.icon" role="img" aria-hidden="true"/>
           <span t-out="item.label"/>
         </a>
       </nav>
@@ -95,7 +95,7 @@
              меню учётной записи в шапке. -->
         <button type="button" class="o_coop_nav_settings o_coop_nav_logout"
                 t-on-click="() => this.logout()">
-          <i class="fa fa-sign-out fa-fw" role="img" aria-hidden="true"/> Выйти
+          <i class="oi oi-fw" data-icon="logout" role="img" aria-hidden="true"/> Выйти
         </button>
       </aside>
 
@@ -114,7 +114,7 @@
            t-att-class="{ 'active': this.isActive(item) }"
            t-att-aria-current="this.isActive(item) ? 'page' : undefined"
            t-on-click.prevent="() => this.open(item)">
-          <i class="fa fa-fw" t-att-class="item.icon" role="img" aria-hidden="true"/>
+          <i class="oi oi-fw" t-att-data-icon="item.icon" role="img" aria-hidden="true"/>
           <span t-out="item.label"/>
         </a>
       </nav>

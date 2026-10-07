@@ -32,7 +32,7 @@
                 <p t-out="m.hint"/>
               </div>
               <button class="o_coop_fc_planbtn" t-on-click="() => this.openEdit(m)">
-                <i class="fa fa-flag-o"/> <t t-if="m.now.plan !== null">Изменить план</t><t t-else="">Задать план</t>
+                <i class="oi" data-icon="flag"/> <t t-if="m.now.plan !== null">Изменить план</t><t t-else="">Задать план</t>
               </button>
             </header>
 

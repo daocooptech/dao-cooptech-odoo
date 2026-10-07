@@ -51,7 +51,7 @@
                 <span class="o_coop_res_promo" t-if="record.is_promoted.raw_value"
                       title="Объявление продвигается владельцем за токены платформы, а не показано выше по качеству">Продвигается</span>
                 <span class="o_coop_locbar" t-if="record.city.raw_value">
-                  <i class="fa fa-map-marker" role="img" aria-label="Город"/>
+                  <i class="oi" data-icon="location_on" role="img" aria-label="Город"/>
                   <field name="city"/>
                 </span>
               </div>

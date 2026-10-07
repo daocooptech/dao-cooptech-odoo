@@ -18,7 +18,7 @@
       <attribute name="t-if">this.thread and !this.thread.channel and !this.coopWallSmall</attribute>
     </xpath>
     <xpath expr="//t[@t-out='this.SEND_TEXT']" position="after">
-      <i t-elif="this.coopWallSmall" class="fa fa-fw fa-check"/>
+      <i t-elif="this.coopWallSmall" class="oi oi-fw" data-icon="check"/>
     </xpath>
     <xpath expr="//button" position="attributes">
       <attribute name="t-att-title">this.SEND_TEXT</attribute>
@@ -32,7 +32,7 @@
               title="Очистить" aria-label="Очистить"
               t-att-disabled="this.coopDraftEmpty"
               t-on-click="this.coopDiscard">
-        <i class="fa fa-fw fa-times"/>
+        <i class="oi oi-fw" data-icon="close"/>
       </button>
     </xpath>
   </t>

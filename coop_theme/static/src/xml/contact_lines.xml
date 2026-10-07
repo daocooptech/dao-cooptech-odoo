@@ -22,13 +22,13 @@
                   t-att-disabled="this.ui.busy or !this.filled"
                   title="Опубликовать" aria-label="Опубликовать"
                   t-on-click="() => this.accept()">
-            <i class="fa fa-check" role="img" aria-hidden="true"/>
+            <i class="oi" data-icon="check" role="img" aria-hidden="true"/>
           </button>
           <button type="button" class="o_coop_inline_btn o_coop_inline_cancel"
                   t-att-disabled="this.ui.busy"
                   title="Отменить" aria-label="Отменить"
                   t-on-click="() => this.cancel()">
-            <i class="fa fa-times" role="img" aria-hidden="true"/>
+            <i class="oi" data-icon="close" role="img" aria-hidden="true"/>
           </button>
         </t>
         <t t-else="">
@@ -38,13 +38,13 @@
             <button type="button" class="o_coop_inline_btn o_coop_inline_start"
                     title="Изменить" aria-label="Изменить"
                     t-on-click="() => this.start(line)">
-              <i class="fa fa-pencil" role="img" aria-hidden="true"/>
+              <i class="oi oi-filled" data-icon="edit" role="img" aria-hidden="true"/>
             </button>
             <button type="button" class="o_coop_inline_btn o_coop_inline_drop"
                     t-att-disabled="this.ui.busy"
                     title="Убрать" aria-label="Убрать"
                     t-on-click="() => this.remove(line)">
-              <i class="fa fa-trash-o" role="img" aria-hidden="true"/>
+              <i class="oi" data-icon="delete" role="img" aria-hidden="true"/>
             </button>
           </t>
         </t>
@@ -61,20 +61,20 @@
                 t-att-disabled="this.ui.busy or !this.filled"
                 title="Опубликовать" aria-label="Опубликовать"
                 t-on-click="() => this.accept()">
-          <i class="fa fa-check" role="img" aria-hidden="true"/>
+          <i class="oi" data-icon="check" role="img" aria-hidden="true"/>
         </button>
         <button type="button" class="o_coop_inline_btn o_coop_inline_cancel"
                 t-att-disabled="this.ui.busy"
                 title="Отменить" aria-label="Отменить"
                 t-on-click="() => this.cancel()">
-          <i class="fa fa-times" role="img" aria-hidden="true"/>
+          <i class="oi" data-icon="close" role="img" aria-hidden="true"/>
         </button>
       </div>
 
       <button type="button" class="o_coop_contact_add btn btn-link"
               t-if="this.canEdit and this.ui.editing !== 'new'"
               t-on-click="() => this.startNew()">
-        <i class="fa fa-plus" role="img" aria-hidden="true"/> добавить поле
+        <i class="oi" data-icon="add" role="img" aria-hidden="true"/> добавить поле
       </button>
 
     </div>

@@ -17,20 +17,20 @@
               t-if="this.canEdit and !this.ui.editing"
               title="Изменить" aria-label="Изменить"
               t-on-click="() => this.start()">
-        <i class="fa fa-pencil" role="img" aria-hidden="true"/>
+        <i class="oi oi-filled" data-icon="edit" role="img" aria-hidden="true"/>
       </button>
       <t t-if="this.ui.editing">
         <button type="button" class="o_coop_about_btn o_coop_about_ok"
                 t-att-disabled="this.ui.busy"
                 title="Опубликовать" aria-label="Опубликовать"
                 t-on-click="() => this.accept()">
-          <i class="fa fa-check" role="img" aria-hidden="true"/>
+          <i class="oi" data-icon="check" role="img" aria-hidden="true"/>
         </button>
         <button type="button" class="o_coop_about_btn o_coop_about_cancel"
                 t-att-disabled="this.ui.busy"
                 title="Отменить" aria-label="Отменить"
                 t-on-click="() => this.cancel()">
-          <i class="fa fa-times" role="img" aria-hidden="true"/>
+          <i class="oi" data-icon="close" role="img" aria-hidden="true"/>
         </button>
       </t>
     </div>

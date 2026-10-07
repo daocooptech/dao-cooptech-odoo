@@ -207,7 +207,7 @@ export class CoopScheduleDialog extends Component {
 
 registerComposerAction("coop-wall-poll", {
     condition: (p) => onWall(p) && !p.composer.message,
-    icon: "fa fa-bar-chart",
+    icon: "bar_chart",
     name: "Опрос",
     onSelected: ({ composer, owner }, ev) => {
         markEventHandled(ev, "composer.clickOnAddAttachment");
@@ -219,7 +219,7 @@ registerComposerAction("coop-wall-poll", {
 // Часы у «Опубликовать» (решение 410): отложить то, что набрано в поле.
 registerComposerAction("coop-wall-schedule", {
     condition: (p) => onWall(p) && !p.composer.message,
-    icon: "fa fa-clock-o",
+    icon: "schedule",
     name: "Отложить",
     onSelected: ({ composer, owner }, ev) => {
         markEventHandled(ev, "composer.clickOnAddAttachment");

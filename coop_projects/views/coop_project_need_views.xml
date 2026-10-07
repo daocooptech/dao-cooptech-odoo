@@ -27,7 +27,7 @@
               <field name="state" widget="badge"/>
               <field name="listing_type" column_invisible="1"/>
               <button name="action_view_offers" type="object"
-                      string="Предложения" icon="fa-inbox"
+                      string="Предложения" icon="inbox"
                       invisible="need_offer_count == 0"/>
             </list>
           </field>

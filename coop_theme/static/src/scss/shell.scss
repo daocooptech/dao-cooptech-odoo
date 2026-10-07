@@ -525,8 +525,8 @@
 // столом. В макете на телефоне остаётся и вовсе один колокол.
 @media (max-width: 900px) {
   .o_menu_systray > .o-mail-DiscussSystray-class,
-  .o_menu_systray > button:has(> .fa-clock-o),
-  .o_menu_systray > button:has(> .fa-pencil-square-o),
+  .o_menu_systray > button:has(> [data-icon="schedule"]),
+  .o_menu_systray > button:has(> [data-icon="edit_square"]),
   .o_menu_systray > .o_coop_admin_switch {
     display: none !important;
   }
@@ -749,10 +749,10 @@ body.o_dark_mode .o_coop_logo img {
 }
 
 // Значок внутри клетки — один размер на весь ряд. Движок помечает свои
-// значки классом `fa-lg`, а это треть сверху: рядом с колоколом в 18
+// значки классом `oi-lg`, а это треть сверху: рядом с колоколом в 18
 // точек шестерёнка выходила 23 и читалась как более важная, хотя важнее
 // не была.
-.o_main_navbar .o_menu_systray .fa-lg {
+.o_main_navbar .o_menu_systray .oi-lg {
   font-size: 1em;
 }
 

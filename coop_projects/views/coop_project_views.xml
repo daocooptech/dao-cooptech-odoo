@@ -52,7 +52,7 @@
                   <t t-out="record.state.value"/>
                 </span>
                 <span class="o_coop_loc" t-if="record.city.raw_value">
-                  <i class="fa fa-map-marker" aria-hidden="true"/>
+                  <i class="oi" data-icon="location_on" aria-hidden="true"/>
                   <t t-out="record.city.value"/>
                 </span>
               </div>
@@ -241,7 +241,7 @@
           </div>
           <div class="oe_button_box" name="button_box">
             <button name="action_open_project" type="object" class="oe_stat_button"
-                    icon="fa-tasks" invisible="not project_id">
+                    icon="checklist" invisible="not project_id">
               <div class="o_stat_info">
                 <!-- Этап ведения прямо на кнопке: человек видит, где
                      идут работы, не открывая управление. Пока этапа нет
@@ -260,7 +260,7 @@
               подписчикам и показом в управлении.
             -->
             <button name="action_open_updates" type="object" class="oe_stat_button"
-                    icon="fa-line-chart" invisible="not project_id">
+                    icon="show_chart" invisible="not project_id">
               <div class="o_stat_info">
                 <span class="o_stat_value">
                   <field name="update_count" nolabel="1"/>
@@ -621,26 +621,26 @@
                                                      'withdrawn', 'released',
                                                      'consumed')"/>
                   <button name="action_accept" type="object" string="Принять"
-                          icon="fa-check" invisible="state != 'offered'"/>
+                          icon="check" invisible="state != 'offered'"/>
                   <button name="action_decline" type="object" string="Отклонить"
-                          icon="fa-times" invisible="state != 'offered'"/>
+                          icon="close" invisible="state != 'offered'"/>
                   <button name="action_mark_delivered" type="object"
-                          string="Передано" icon="fa-truck"
+                          string="Передано" icon="local_shipping"
                           invisible="state != 'accepted' or delivered_on
                                      or parent.state != 'running'"/>
                   <button name="action_consume" type="object"
-                          string="Израсходован" icon="fa-fire"
+                          string="Израсходован" icon="whatshot"
                           invisible="state != 'accepted'
                                      or kind not in ('material', 'knowledge')"/>
                   <button name="action_return" type="object" string="Вернуть"
-                          icon="fa-undo"
+                          icon="undo"
                           invisible="state not in ('accepted', 'consumed')
                                      or kind != 'money'"/>
                   <button name="action_release" type="object"
-                          string="Снять обязательство" icon="fa-unlink"
+                          string="Снять обязательство" icon="link_off"
                           invisible="state != 'accepted' or kind == 'money'"/>
                   <button name="action_compensate" type="object"
-                          string="Возместить" icon="fa-money"
+                          string="Возместить" icon="payments"
                           invisible="state != 'consumed'"/>
                 </list>
               </field>

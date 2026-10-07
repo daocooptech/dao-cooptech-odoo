@@ -20,7 +20,7 @@
             </p>
           </div>
           <button class="o_coop_fm_new" t-on-click="this.newPool">
-            <i class="fa fa-plus"/> Открыть пул под свой проект
+            <i class="oi" data-icon="add"/> Открыть пул под свой проект
           </button>
         </header>
 
@@ -182,10 +182,10 @@
               </div>
             </div>
             <div class="o_coop_fm_meta">
-              <span><i class="fa fa-users"/> <t t-out="p.stakers"/></span>
+              <span><i class="oi oi-filled" data-icon="group"/> <t t-out="p.stakers"/></span>
               <span t-attf-class="o_coop_fm_risk o_coop_fm_risk_{{ p.risk }}">риск: <t t-out="p.risk_label"/></span>
-              <span t-if="p.days_left !== null and p.days_left &gt;= 0"><i class="fa fa-clock-o"/> ещё <t t-out="p.days_left"/> <t t-out="this.daysWord(p.days_left)"/></span>
-              <span class="o_coop_fm_late" t-if="p.overdue"><i class="fa fa-exclamation-triangle"/> просрочка <t t-out="p.overdue"/> <t t-out="this.daysWord(p.overdue)"/></span>
+              <span t-if="p.days_left !== null and p.days_left &gt;= 0"><i class="oi" data-icon="schedule"/> ещё <t t-out="p.days_left"/> <t t-out="this.daysWord(p.days_left)"/></span>
+              <span class="o_coop_fm_late" t-if="p.overdue"><i class="oi" data-icon="warning"/> просрочка <t t-out="p.overdue"/> <t t-out="this.daysWord(p.overdue)"/></span>
               <span t-elif="p.state === 'active' and p.next_due">выплата до <t t-out="this.dmy(p.next_due)"/></span>
               <span class="o_coop_fm_late" t-if="p.frozen">проект заморожен</span>
             </div>

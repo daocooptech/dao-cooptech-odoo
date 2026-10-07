@@ -29,32 +29,32 @@
         <button class="o_coop_post_act" title="Нравится"
                 t-att-class="{ 'o_coop_post_act_on': this.mine(this.LIKE) }"
                 t-att-disabled="!this.canReact" t-on-click="() => this.toggle(this.LIKE)">
-          <i t-att-class="this.mine(this.LIKE) ? 'fa fa-thumbs-up' : 'fa fa-thumbs-o-up'"/>
+          <i class="oi" data-icon="thumb_up" t-att-class="{'oi-filled': this.mine(this.LIKE)}"/>
           <span class="o_coop_post_count" t-out="this.count(this.LIKE)"/>
         </button>
         <button class="o_coop_post_act" title="Не нравится"
                 t-att-class="{ 'o_coop_post_act_on': this.mine(this.DISLIKE) }"
                 t-att-disabled="!this.canReact" t-on-click="() => this.toggle(this.DISLIKE)">
-          <i t-att-class="this.mine(this.DISLIKE) ? 'fa fa-thumbs-down' : 'fa fa-thumbs-o-down'"/>
+          <i class="oi" data-icon="thumb_down" t-att-class="{'oi-filled': this.mine(this.DISLIKE)}"/>
           <span class="o_coop_post_count" t-out="this.count(this.DISLIKE)"/>
         </button>
         <button class="o_coop_post_act" title="Комментарии" t-on-click="this.onComment">
-          <i class="fa fa-comment-o"/>
+          <i class="oi" data-icon="chat_bubble"/>
           <span class="o_coop_post_count" t-out="this.list.length"/>
         </button>
         <button class="o_coop_post_act" title="Поделиться у себя на странице" t-on-click="this.onRepost">
-          <i class="fa fa-share"/>
+          <i class="oi" data-icon="share"/>
           <span class="o_coop_post_count" t-out="this.reposts"/>
         </button>
         <button class="o_coop_post_act" title="Поблагодарить" t-on-click="this.onThanks">
-          <i class="fa fa-gift"/>
+          <i class="oi" data-icon="card_giftcard"/>
           <span class="o_coop_post_count" t-out="this.thanks"/>
         </button>
         <button t-if="this.canStar" class="o_coop_post_act"
                 t-att-class="{ 'o_coop_post_act_on': this.props.message.starred }"
                 t-att-title="this.props.message.starred ? 'Убрать из избранного' : 'В избранное'"
                 t-on-click="this.onStar">
-          <i t-att-class="this.props.message.starred ? 'fa fa-star' : 'fa fa-star-o'"/>
+          <i class="oi" data-icon="star" t-att-class="{'oi-filled': this.props.message.starred}"/>
           <span class="o_coop_post_count" t-out="this.stars"/>
         </button>
       </div>
@@ -72,7 +72,7 @@
               <span class="o_coop_comment_date" t-out="this.formatDate(c)"/>
               <button t-if="c.can_delete" class="o_coop_comment_del" title="Удалить комментарий"
                       t-on-click="() => this.remove(c)">
-                <i class="fa fa-times"/>
+                <i class="oi" data-icon="close"/>
               </button>
             </div>
             <div class="o_coop_comment_body" t-out="c.body"/>
@@ -84,7 +84,7 @@
                     t-model.proxy="this.state.draft" t-on-keydown="this.onKeydown"/>
           <button class="btn btn-primary btn-sm" title="Отправить"
                   t-att-disabled="!this.state.draft.trim() or this.state.busy" t-on-click="this.send">
-            <i class="fa fa-paper-plane"/>
+            <i class="oi oi-filled" data-icon="send"/>
           </button>
         </div>
       </div>
@@ -110,14 +110,14 @@
     <div class="o_coop_repost">
       <t t-if="this.props.repost.id">
         <div class="o_coop_repost_head">
-          <i class="fa fa-retweet"/>
+          <i class="oi" data-icon="repeat"/>
           <img class="o_coop_comment_avatar" t-att-src="this.avatarUrl" alt=""/>
           <b t-out="this.props.repost.author_name"/>
           <span class="o_coop_comment_date" t-out="this.date"/>
         </div>
         <div class="o_coop_repost_body" t-out="this.body"/>
         <div t-if="this.props.repost.attachment_count" class="o_coop_repost_files">
-          <i class="fa fa-paperclip"/> вложений: <t t-out="this.props.repost.attachment_count"/>
+          <i class="oi" data-icon="attach_file"/> вложений: <t t-out="this.props.repost.attachment_count"/>
         </div>
       </t>
       <div t-else="" class="o_coop_repost_gone">Исходная запись недоступна.</div>
@@ -130,11 +130,11 @@
     <div class="btn-group mb-3 w-100 o_coop_thanks_fork">
       <button class="btn" t-att-class="this.state.channel === 'sbp' ? 'btn-primary' : 'btn-secondary'"
               t-on-click="() => this.state.channel = 'sbp'">
-        <i class="fa fa-qrcode me-1"/>СБП по QR-коду
+        <i class="oi me-1" data-icon="qr_code"/>СБП по QR-коду
       </button>
       <button class="btn" t-att-class="this.state.channel === 'token' ? 'btn-primary' : 'btn-secondary'"
               t-on-click="() => this.state.channel = 'token'">
-        <i class="fa fa-cubes me-1"/>Токенами
+        <i class="oi me-1" data-icon="inventory_2"/>Токенами
       </button>
     </div>
 
@@ -189,7 +189,7 @@
           <code class="o_coop_thanks_req" t-out="this.network.address"/>
         </p>
         <p t-if="this.network and this.network.fee_hint" class="o_coop_thanks_fee">
-          <i class="fa fa-bolt"/>
+          <i class="oi" data-icon="flash_on"/>
           Комиссия сети — <t t-out="this.network.fee_hint"/>. Платит даритель; точную сумму
           покажет его кошелёк перед подписью.
         </p>
@@ -221,7 +221,7 @@
           Подарков пока нет.
         </div>
         <div t-if="this.state.info.received_notes.length" class="o_coop_thanks_tax mb-2">
-          <i class="fa fa-university"/>
+          <i class="oi" data-icon="account_balance"/>
           <div><div t-foreach="this.state.info.received_notes" t-as="line" t-key="line_index" t-out="line"/></div>
         </div>
         <div t-foreach="this.state.info.received" t-as="t" t-key="t.id" class="o_coop_thanks_row">
@@ -238,7 +238,7 @@
           <div t-elif="t.state === 'confirmed'" class="o_coop_thanks_marks">
             <!-- Справка к 3-НДФЛ — по подаркам токенами (решение 410, п. 1). -->
             <a t-if="t.ndfl_url" class="btn btn-sm btn-secondary" t-att-href="t.ndfl_url" target="_blank">
-              <i class="fa fa-file-text-o"/> Справка для 3-НДФЛ
+              <i class="oi" data-icon="article"/> Справка для 3-НДФЛ
             </a>
             <button class="btn btn-sm btn-link p-0" t-on-click="() => this.mark(t, 'returned')">Вернуть</button>
           </div>
@@ -257,7 +257,7 @@
                    placeholder="Из кошелька после отправки: нужен получателю для 3-НДФЛ"/>
           </t>
           <div t-if="(this.state.info.taxes[this.state.channel] or []).length" class="o_coop_thanks_tax mb-3">
-            <i class="fa fa-university"/>
+            <i class="oi" data-icon="account_balance"/>
             <div>
               <b>Налоги</b>
               <div t-foreach="this.state.info.taxes[this.state.channel]" t-as="line" t-key="line_index" t-out="line"/>

@@ -11,7 +11,7 @@
                         class="oe_stat_button"
                         name="action_view_roles"
                         type="object"
-                        icon="fa-gears"
+                        icon="settings_applications"
                         invisible="not role_count"
                     >
                         <field string="Roles" name="role_count" widget="statinfo" />

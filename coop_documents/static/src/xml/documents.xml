@@ -3,7 +3,7 @@
 
   <t t-name="coop_documents.PdfThumb">
     <img t-if="this.state.src" class="o_coop_doc_thumb_img" t-att-src="this.state.src" alt="Первая страница"/>
-    <div t-elif="!this.state.failed" class="o_coop_doc_thumb_wait"><i class="fa fa-file-pdf-o"/></div>
+    <div t-elif="!this.state.failed" class="o_coop_doc_thumb_wait"><i class="oi" data-icon="picture_as_pdf"/></div>
   </t>
 
   <t t-name="coop_documents.Upload">
@@ -24,14 +24,14 @@
              t-on-dragover.prevent="() => this.state.over = true"
              t-on-dragleave="() => this.state.over = false"
              t-on-drop="this.onDrop">
-          <i class="fa fa-cloud-upload"/>
+          <i class="oi" data-icon="cloud_upload"/>
           <div>Перетащите сюда файлы или папку целиком</div>
           <div class="o_coop_doc_drop_btns">
             <button type="button" class="btn btn-secondary" t-on-click="() => this.filesRef().click()">
-              <i class="fa fa-file-o"/> Выбрать файлы
+              <i class="oi" data-icon="description"/> Выбрать файлы
             </button>
             <button type="button" class="btn btn-secondary" t-on-click="() => this.folderRef().click()">
-              <i class="fa fa-folder-o"/> Выбрать папку
+              <i class="oi" data-icon="folder"/> Выбрать папку
             </button>
           </div>
           <input type="file" multiple="multiple" class="d-none" t-ref="this.filesRef" t-on-change="this.onPickFiles"/>
@@ -42,7 +42,7 @@
         <t t-if="this.state.queue.length">
           <ul class="o_coop_doc_queue">
             <li t-foreach="this.state.queue" t-as="item" t-key="item_index">
-              <i class="fa fa-file-o"/>
+              <i class="oi" data-icon="description"/>
               <span class="o_coop_doc_queue_path" t-out="item.path"/>
               <span class="text-muted" t-out="this.sizeLabel(item.size)"/>
               <button type="button" class="btn btn-link btn-sm" t-att-disabled="this.state.busy"
@@ -61,7 +61,7 @@
           один PDF. На телефоне откроется камера.
         </p>
         <button type="button" class="btn btn-secondary mb-2" t-on-click="() => this.cameraRef().click()">
-          <i class="fa fa-camera"/> Снять страницу
+          <i class="oi" data-icon="photo_camera"/> Снять страницу
         </button>
         <input type="file" accept="image/*" capture="environment" multiple="multiple"
                class="d-none" t-ref="this.cameraRef" t-on-change="this.onCamera"/>

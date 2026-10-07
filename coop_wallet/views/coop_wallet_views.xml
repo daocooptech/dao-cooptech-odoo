@@ -113,7 +113,7 @@
                 <field name="currency_id" column_invisible="True"/>
                 <field name="state"/>
                 <button name="action_open_explorer" type="object"
-                        string="Проверить в сети" icon="fa-external-link"/>
+                        string="Проверить в сети" icon="open_in_new"/>
               </list>
             </field>
 
@@ -392,9 +392,9 @@
               <field name="currency_id" column_invisible="True"/>
               <field name="state"/>
               <button name="action_confirm" type="object" string="Провести"
-                      icon="fa-check" invisible="state != 'requested'"/>
+                      icon="check" invisible="state != 'requested'"/>
               <button name="action_decline" type="object" string="Отклонить"
-                      icon="fa-times" invisible="state != 'requested'"/>
+                      icon="close" invisible="state != 'requested'"/>
             </list>
           </field>
 
@@ -475,9 +475,9 @@
               <field name="deal_id" optional="hide"/>
               <field name="state"/>
               <button name="action_confirm" type="object" string="Подтвердить"
-                      icon="fa-check" invisible="state != 'proposed'"/>
+                      icon="check" invisible="state != 'proposed'"/>
               <button name="action_decline" type="object" string="Отклонить"
-                      icon="fa-times" invisible="state != 'proposed'"/>
+                      icon="close" invisible="state != 'proposed'"/>
             </list>
           </field>
           <div class="o_coop_note">

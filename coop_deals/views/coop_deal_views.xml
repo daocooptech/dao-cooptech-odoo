@@ -36,7 +36,7 @@
                      t-att-alt="record.party_b_id.value"/>
                 <span t-else="" class="o_coop_media_sign"><t t-out="record.icon.value"/></span>
                 <span class="o_coop_locbar" t-if="record.city.raw_value">
-                  <i class="fa fa-map-marker" role="img" aria-label="Город"/>
+                  <i class="oi" data-icon="location_on" role="img" aria-label="Город"/>
                   <field name="city"/>
                 </span>
               </div>
@@ -237,7 +237,7 @@
                   <field name="paid_on" readonly="1"/>
                   <field name="confirmed_by_id" readonly="1" optional="hide"/>
                   <button name="action_mark_paid" type="object"
-                          string="Отметить получение" icon="fa-check"
+                          string="Отметить получение" icon="check"
                           invisible="state == 'paid'"/>
                 </list>
               </field>

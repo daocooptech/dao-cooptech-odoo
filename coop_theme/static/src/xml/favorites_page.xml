@@ -56,13 +56,13 @@
               </div>
               <div class="o_coop_favorites_post_text" t-out="p.text"/>
               <div t-if="p.files" class="o_coop_favorites_post_files">
-                <i class="fa fa-paperclip"/> вложений: <t t-out="p.files"/>
+                <i class="oi" data-icon="attach_file"/> вложений: <t t-out="p.files"/>
               </div>
             </div>
             <img t-if="p.image" class="o_coop_favorites_post_img" t-att-src="p.image" alt="" loading="lazy"/>
             <button class="o_coop_favorites_unstar" title="Убрать из избранного"
                     t-on-click.stop="() => this.unstar(p)">
-              <i class="fa fa-star"/>
+              <i class="oi oi-filled" data-icon="star"/>
             </button>
           </div>
         </div>

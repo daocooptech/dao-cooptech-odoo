@@ -47,7 +47,7 @@
                      t-attf-src="/web/image/res.partner/#{record.partner_id.raw_value}/avatar_128"
                      t-att-title="record.partner_id.value" t-att-alt="record.partner_id.value"/>
                 <span class="o_coop_locbar" t-if="record.city.raw_value">
-                  <i class="fa fa-map-marker" role="img" aria-label="Город"/>
+                  <i class="oi" data-icon="location_on" role="img" aria-label="Город"/>
                   <field name="city"/>
                 </span>
               </div>

@@ -43,11 +43,11 @@
                   <t t-out="record.kind.value"/>
                 </span>
                 <span class="o_coop_badge o_coop_badge_right">
-                  <i class="fa fa-users" aria-hidden="true"/>
+                  <i class="oi oi-filled" data-icon="group" aria-hidden="true"/>
                   <t t-out="record.member_count.value"/>
                 </span>
                 <span class="o_coop_loc" t-if="record.city.raw_value">
-                  <i class="fa fa-map-marker" aria-hidden="true"/>
+                  <i class="oi" data-icon="location_on" aria-hidden="true"/>
                   <t t-out="record.city.value"/>
                 </span>
               </div>
@@ -93,8 +93,8 @@
                           t-att-class="record.coop_is_subscribed.raw_value ? 'o_coop_bell_on' : ''"
                           aria-label="Показывать новости в ленте"
                           title="Показывать новости в ленте">
-                    <i class="fa" aria-hidden="true"
-                       t-att-class="record.coop_is_subscribed.raw_value ? 'fa-bell' : 'fa-bell-o'"/>
+                    <i class="oi" data-icon="notifications" aria-hidden="true"
+                       t-att-class="{'oi-filled': record.coop_is_subscribed.raw_value}"/>
                   </button>
                 </div>
               </div>
@@ -161,7 +161,7 @@
           <field name="image_1920" widget="image" class="oe_avatar"/>
           <div class="oe_button_box" name="button_box">
             <button name="action_open_applications" type="object"
-                    class="oe_stat_button" icon="fa-user-plus"
+                    class="oe_stat_button" icon="person_add"
                     invisible="coop_member_state != 'moderator'">
               <span class="o_stat_text">Заявки</span>
             </button>

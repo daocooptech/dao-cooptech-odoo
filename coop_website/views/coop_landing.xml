@@ -76,17 +76,17 @@
             <h2>Кому это</h2>
             <div class="lx-grid lx-grid-3">
               <div class="lx-card">
-                <h3><i class="fa fa-user"/> Человеку</h3>
+                <h3><i class="oi oi-filled" data-icon="person"/> Человеку</h3>
                 <p>Мастер, фермер, специалист, владелец техники или помещения. Расскажите, что умеете и что у вас есть.
                   Берите работу за деньги или долю, сдавайте технику посменно, вкладывайтесь в проекты соседей.</p>
               </div>
               <div class="lx-card">
-                <h3><i class="fa fa-users"/> Сообществу</h3>
+                <h3><i class="oi oi-filled" data-icon="group"/> Сообществу</h3>
                 <p>Соседи по дому, мастера одного ремесла, пасечники одного района. Юрлицо не нужно. Общая лента,
                   закупки вскладчину, обмен без денег, свои встречи.</p>
               </div>
               <div class="lx-card">
-                <h3><i class="fa fa-university"/> Организации любой формы</h3>
+                <h3><i class="oi" data-icon="account_balance"/> Организации любой формы</h3>
                 <p>Потребительский или производственный кооператив, артель, фонд, АНО, ООО, АО, ДАО. Члены и паи,
                   вакансии, сделки, документы, склад. Партнёры других форм — рядом и на тех же правилах.</p>
               </div>
@@ -101,7 +101,7 @@
             <p class="section-sub">Основные разделы и расширения платформы, сгруппированные по тому, зачем вы пришли.</p>
             <div class="lx-grid lx-grid-3">
               <div class="lx-card lx-feat">
-                <div class="lx-ico"><i class="fa fa-users"/></div>
+                <div class="lx-ico"><i class="oi oi-filled" data-icon="group"/></div>
                 <h3>Найти людей и работу</h3>
                 <ul>
                   <li><b>Люди и Навыки.</b> Кто что умеет, в каком городе, сколько сделок довёл до конца. Доверие — доля
@@ -113,7 +113,7 @@
                 </ul>
               </div>
               <div class="lx-card lx-feat">
-                <div class="lx-ico"><i class="fa fa-rocket"/></div>
+                <div class="lx-ico"><i class="oi" data-icon="rocket_launch"/></div>
                 <h3>Вести проекты и организации</h3>
                 <ul>
                   <li><b>Проекты.</b> Сбор денег, труда, техники, материалов, помещения и знаний. Каждый вклад оценивается
@@ -126,7 +126,7 @@
                 </ul>
               </div>
               <div class="lx-card lx-feat">
-                <div class="lx-ico"><i class="fa fa-exchange"/></div>
+                <div class="lx-ico"><i class="oi" data-icon="swap_horiz"/></div>
                 <h3>Деньги, паи и расчёты</h3>
                 <ul>
                   <li><b>Кошелёк.</b> Рубли, цифровая валюта в вашем собственном кошельке и паевой счёт — отдельный в
@@ -140,7 +140,7 @@
                 </ul>
               </div>
               <div class="lx-card lx-feat">
-                <div class="lx-ico"><i class="fa fa-cubes"/></div>
+                <div class="lx-ico"><i class="oi" data-icon="inventory_2"/></div>
                 <h3>Обмен, закупки, склады</h3>
                 <ul>
                   <li><b>Совместные закупки.</b> Оптовая цена вскладчину, цена падает по мере набора. В цене видно, сколько
@@ -153,7 +153,7 @@
                 </ul>
               </div>
               <div class="lx-card lx-feat">
-                <div class="lx-ico"><i class="fa fa-line-chart"/></div>
+                <div class="lx-ico"><i class="oi" data-icon="show_chart"/></div>
                 <h3>Цифровые активы и биржа</h3>
                 <ul>
                   <li><b>Токеномика.</b> Токен требования на свой будущий товар: фермер весной продаёт осеннюю морковь,
@@ -167,7 +167,7 @@
                 </ul>
               </div>
               <div class="lx-card lx-feat">
-                <div class="lx-ico"><i class="fa fa-graduation-cap"/></div>
+                <div class="lx-ico"><i class="oi" data-icon="school"/></div>
                 <h3>Учиться и считать</h3>
                 <ul>
                   <li><b>Образование.</b> Курсы по кооперации, учёту, ремёслам и технике: уроки, прохождение, отзывы.</li>
@@ -193,7 +193,7 @@
             <p class="section-sub">Восемь сценариев: от одного мастера до кооператива за границей.</p>
             <div class="lx-cases">
               <article class="lx-case">
-                <h3><i class="fa fa-user"/> Станок работает во вторую смену</h3>
+                <h3><i class="oi oi-filled" data-icon="person"/> Станок работает во вторую смену</h3>
                 <p class="lx-who">Мастер-столяр со станком ЧПУ</p>
                 <dl>
                   <dt>Было</dt><dd>Станок занят полдня, клиенты — по сарафанному радио.</dd>
@@ -204,7 +204,7 @@
                 </dl>
               </article>
               <article class="lx-case">
-                <h3><i class="fa fa-users"/> Оптовая партия без таблицы в общем чате</h3>
+                <h3><i class="oi oi-filled" data-icon="group"/> Оптовая партия без таблицы в общем чате</h3>
                 <p class="lx-who">Соседское сообщество без юрлица</p>
                 <dl>
                   <dt>Было</dt><dd>Закупка в чате, деньги — организатору, долги — в таблице одного человека.</dd>
@@ -215,7 +215,7 @@
                 </dl>
               </article>
               <article class="lx-case">
-                <h3><i class="fa fa-shopping-basket"/> Пайщики, собрание и общее дело</h3>
+                <h3><i class="oi" data-icon="shopping_basket"/> Пайщики, собрание и общее дело</h3>
                 <p class="lx-who">Потребительский кооператив в Дагестане</p>
                 <dl>
                   <dt>Было</dt><dd>Реестр пайщиков в тетради, собрания — по телефону.</dd>
@@ -226,7 +226,7 @@
                 </dl>
               </article>
               <article class="lx-case">
-                <h3><i class="fa fa-briefcase"/> Поставщик, работодатель и сосед по складу</h3>
+                <h3><i class="oi" data-icon="work"/> Поставщик, работодатель и сосед по складу</h3>
                 <p class="lx-who">Обычное ООО</p>
                 <dl>
                   <dt>Было</dt><dd>Продажи через маркетплейс, склад наполовину пуст.</dd>
@@ -236,7 +236,7 @@
                 </dl>
               </article>
               <article class="lx-case">
-                <h3><i class="fa fa-heart-o"/> Гранты, волонтёры и отчёт</h3>
+                <h3><i class="oi" data-icon="favorite"/> Гранты, волонтёры и отчёт</h3>
                 <p class="lx-who">Благотворительный фонд</p>
                 <dl>
                   <dt>Было</dt><dd>Жертвователь не видит, куда ушли деньги.</dd>
@@ -246,7 +246,7 @@
                 </dl>
               </article>
               <article class="lx-case">
-                <h3><i class="fa fa-rocket"/> Проект из того, что есть у людей вокруг</h3>
+                <h3><i class="oi" data-icon="rocket_launch"/> Проект из того, что есть у людей вокруг</h3>
                 <p class="lx-who">Инициатор проекта теплицы</p>
                 <dl>
                   <dt>Было</dt><dd>Идея и расчёт; денег на всё нет, людей и техники вокруг много.</dd>
@@ -257,7 +257,7 @@
                 </dl>
               </article>
               <article class="lx-case">
-                <h3><i class="fa fa-pie-chart"/> Всё, чем владею, на одной странице</h3>
+                <h3><i class="oi" data-icon="pie_chart"/> Всё, чем владею, на одной странице</h3>
                 <p class="lx-who">Пайщик кооператива, живёт за границей</p>
                 <dl>
                   <dt>Было</dt><dd>Пай, доля в проекте, взнос в пул — три места, ни одной сводки.</dd>
@@ -267,7 +267,7 @@
                 </dl>
               </article>
               <article class="lx-case">
-                <h3><i class="fa fa-globe"/> Первый шаг за границу</h3>
+                <h3><i class="oi" data-icon="public"/> Первый шаг за границу</h3>
                 <p class="lx-who">Кооператив из Казахстана · готовится</p>
                 <dl>
                   <dt>Было</dt><dd>Партнёры в России есть, но договор и расчёты — вслепую.</dd>
@@ -288,11 +288,11 @@
               <p class="section-sub">Три направления — акселерация проектов, управление проектами, управление организациями —
                 и экономические связки между всеми участниками.</p>
               <div class="lx-grid lx-grid-3">
-                <a class="lx-card lx-link-card" href="#accel"><h3><i class="fa fa-rocket"/> Акселерация проектов</h3>
+                <a class="lx-card lx-link-card" href="#accel"><h3><i class="oi" data-icon="rocket_launch"/> Акселерация проектов</h3>
                   <p>Платформа не выбирает за проект модель — даёт собрать любую законную и показывает её вкладчику до вклада.</p></a>
-                <a class="lx-card lx-link-card" href="#accel"><h3><i class="fa fa-tasks"/> Управление проектами</h3>
+                <a class="lx-card lx-link-card" href="#accel"><h3><i class="oi" data-icon="checklist"/> Управление проектами</h3>
                   <p>Задачи, этапы, команда, отчёты о ходе. Отчёты видят участники, подписчику — только этап.</p></a>
-                <a class="lx-card lx-link-card" href="#forms"><h3><i class="fa fa-university"/> Управление организациями</h3>
+                <a class="lx-card lx-link-card" href="#forms"><h3><i class="oi" data-icon="account_balance"/> Управление организациями</h3>
                   <p>Кооперативы, НКО, ООО, ДАО и сообщества без юрлица — каждая форма по своим правилам.</p></a>
               </div>
             </div>
@@ -569,7 +569,7 @@ GET /federation/log?after=-1</pre>
             </div>
 
             <div class="lx-card lx-verify" t-if="facts['node']">
-              <h3><i class="fa fa-check-circle"/> Проверьте сами</h3>
+              <h3><i class="oi oi-filled" data-icon="check_circle"/> Проверьте сами</h3>
               <p>Адрес этого сервера в сети: <span class="lx-term" t-out="facts['node']['did']"/>.
                 Записей в его журнале: <b t-out="facts['node']['records']"/><t t-if="facts['node']['peers']">, соседей в сети: <b t-out="facts['node']['peers']"/></t>.</p>
               <p><a href="/.well-known/did.json" target="_blank" rel="noopener">Открыть did.json</a> ·
@@ -585,14 +585,14 @@ GET /federation/log?after=-1</pre>
           <div class="lx-wrap oe_structure" id="oe_structure_coop_join">
             <h2>Как присоединиться</h2>
             <div class="lx-grid lx-grid-4">
-              <div class="lx-card lx-join"><h3><i class="fa fa-user"/> Человеком</h3><p>Зарегистрируйтесь, укажите специализации, выложите первое объявление в «Ресурсах» или «Навыках».</p><a href="/web/signup">Зарегистрироваться →</a></div>
-              <div class="lx-card lx-join"><h3><i class="fa fa-users"/> Сообществом</h3><p>Создайте сообщество, позовите соседей, откройте первую закупку или обмен.</p><a href="/web/signup">Создать сообщество →</a></div>
-              <div class="lx-card lx-join"><h3><i class="fa fa-university"/> Организацией</h3><p>Заведите карточку — форма, состав, реквизиты; разместите вакансию или объявление; кооперативу — внесите пайщиков.</p><a href="/web/signup">Завести организацию →</a></div>
-              <div class="lx-card lx-join"><h3><i class="fa fa-server"/> Своим сервером в сети</h3><p>Серверы других организаций подключаются по очереди; за рубежом — через местного партнёра.</p><a href="#contact">Написать нам →</a></div>
-              <div class="lx-card lx-join"><h3><i class="fa fa-code"/> Разработчиком</h3><p>Прочитайте спецификацию и запустите эталон: <span class="lx-term">python federation/ref/run_tests.py</span>. Задачи с вознаграждением — в «Помощи проекту».</p><a href="https://github.com/daocooptech/dao-cooptech" target="_blank" rel="noopener">Открытый код →</a></div>
-              <div class="lx-card lx-join"><h3><i class="fa fa-pie-chart"/> Вкладчиком проекта или пайщиком</h3><p>Выберите проект, прочитайте условия — порог, что при недоборе, как считается доля — и внесите вклад. Это не вклад в банке.</p><a href="/web/signup">Выбрать проект →</a></div>
-              <div class="lx-card lx-join"><h3><i class="fa fa-handshake-o"/> Партнёром-оператором</h3><p>Региональный сервер без особых прав; за рубежом — местное юрлицо-партнёр.</p><a href="#contact">Написать нам →</a></div>
-              <div class="lx-card lx-join"><h3><i class="fa fa-heart"/> Помочь проекту</h3><p>Задачи рабочей группы с вознаграждением в токенах и пожертвования.</p><a href="/help-project">Помощь проекту →</a></div>
+              <div class="lx-card lx-join"><h3><i class="oi oi-filled" data-icon="person"/> Человеком</h3><p>Зарегистрируйтесь, укажите специализации, выложите первое объявление в «Ресурсах» или «Навыках».</p><a href="/web/signup">Зарегистрироваться →</a></div>
+              <div class="lx-card lx-join"><h3><i class="oi oi-filled" data-icon="group"/> Сообществом</h3><p>Создайте сообщество, позовите соседей, откройте первую закупку или обмен.</p><a href="/web/signup">Создать сообщество →</a></div>
+              <div class="lx-card lx-join"><h3><i class="oi" data-icon="account_balance"/> Организацией</h3><p>Заведите карточку — форма, состав, реквизиты; разместите вакансию или объявление; кооперативу — внесите пайщиков.</p><a href="/web/signup">Завести организацию →</a></div>
+              <div class="lx-card lx-join"><h3><i class="oi" data-icon="dns"/> Своим сервером в сети</h3><p>Серверы других организаций подключаются по очереди; за рубежом — через местного партнёра.</p><a href="#contact">Написать нам →</a></div>
+              <div class="lx-card lx-join"><h3><i class="oi" data-icon="code"/> Разработчиком</h3><p>Прочитайте спецификацию и запустите эталон: <span class="lx-term">python federation/ref/run_tests.py</span>. Задачи с вознаграждением — в «Помощи проекту».</p><a href="https://github.com/daocooptech/dao-cooptech" target="_blank" rel="noopener">Открытый код →</a></div>
+              <div class="lx-card lx-join"><h3><i class="oi" data-icon="pie_chart"/> Вкладчиком проекта или пайщиком</h3><p>Выберите проект, прочитайте условия — порог, что при недоборе, как считается доля — и внесите вклад. Это не вклад в банке.</p><a href="/web/signup">Выбрать проект →</a></div>
+              <div class="lx-card lx-join"><h3><i class="oi" data-icon="handshake"/> Партнёром-оператором</h3><p>Региональный сервер без особых прав; за рубежом — местное юрлицо-партнёр.</p><a href="#contact">Написать нам →</a></div>
+              <div class="lx-card lx-join"><h3><i class="oi oi-filled" data-icon="favorite"/> Помочь проекту</h3><p>Задачи рабочей группы с вознаграждением в токенах и пожертвования.</p><a href="/help-project">Помощь проекту →</a></div>
             </div>
           </div>
         </section>
@@ -607,7 +607,7 @@ GET /federation/log?after=-1</pre>
               <p class="section-sub">Свой сервер в сети, партнёрство, подключение организации — заявка придёт рабочей группе
                 платформы, ответим на указанный адрес.</p>
             </div>
-            <div class="lx-sent" t-if="request.params.get('sent') == '1'"><i class="fa fa-check"/> Спасибо, заявка отправлена рабочей группе.</div>
+            <div class="lx-sent" t-if="request.params.get('sent') == '1'"><i class="oi" data-icon="check"/> Спасибо, заявка отправлена рабочей группе.</div>
             <div class="lx-sent lx-sent-err" t-if="request.params.get('sent') == '0'">Заполните имя, контакт и сообщение.</div>
             <form class="lx-form" action="/coop/contact" method="post">
               <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>

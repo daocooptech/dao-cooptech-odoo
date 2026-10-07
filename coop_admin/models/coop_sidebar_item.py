@@ -5,23 +5,23 @@ from odoo import api, models
 # меню участника: полномочия — состояние, а не подписка, и меню не должно
 # помнить их между включениями. Выключил переключатель — пунктов нет.
 ADMIN_ITEMS = [
-    ('Полномочия', 'fa-shield', 'coop_admin.action_coop_admin_grant'),
-    ('Участники узла', 'fa-users', 'base.action_res_users'),
+    ('Полномочия', 'security', 'coop_admin.action_coop_admin_grant'),
+    ('Участники узла', 'group', 'base.action_res_users'),
     # Сводный реестр членств по всей платформе: кто, где, на каком
     # основании, с какими полномочиями. Состав каждой организации виден
     # на её странице, а этот экран — взгляд узла целиком, и место ему
     # здесь. Решение владельца 16 сентября 2026.
-    ('Членство', 'fa-id-card-o', 'coop_base.action_coop_membership'),
-    ('Настройки', 'fa-cog', 'base_setup.action_general_configuration'),
-    ('Модели и поля', 'fa-database', 'base.action_model_model'),
-    ('Журнал действий', 'fa-history', 'base.action_ir_logging'),
+    ('Членство', 'badge', 'coop_base.action_coop_membership'),
+    ('Настройки', 'settings', 'base_setup.action_general_configuration'),
+    ('Модели и поля', 'database', 'base.action_model_model'),
+    ('Журнал действий', 'history', 'base.action_ir_logging'),
     # Справочники узла — правовые формы, специализации, сферы
     # деятельности, рубрики ресурсов, способы передачи. Пункт ведёт на
     # первый из них, остальные стоят вкладками того же раздела
     # (`coop_base.menu_coop_reference_root`). Ссылка мягкая: `env.ref`
     # ниже с `raise_if_not_found=False`, и без `coop_orgs` пункт просто
     # не появится.
-    ('Справочники', 'fa-book', 'coop_orgs.action_coop_legal_form'),
+    ('Справочники', 'book', 'coop_orgs.action_coop_legal_form'),
 ]
 
 

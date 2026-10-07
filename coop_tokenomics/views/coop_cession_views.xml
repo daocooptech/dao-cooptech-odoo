@@ -147,9 +147,9 @@
                          decoration-success="state == 'accepted'"
                          decoration-muted="state == 'declined'"/>
                   <button name="action_accept" type="object" string="Принять"
-                          icon="fa-check" invisible="state == 'accepted'"/>
+                          icon="check" invisible="state == 'accepted'"/>
                   <button name="action_decline" type="object" string="Отклонить"
-                          icon="fa-times" invisible="state == 'declined'"/>
+                          icon="close" invisible="state == 'declined'"/>
                 </list>
               </field>
             </page>

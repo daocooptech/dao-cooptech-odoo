@@ -20,7 +20,7 @@
       </button>
 
       <div class="o_coop_search_field">
-        <i class="fa fa-search" aria-hidden="true"/>
+        <i class="oi" data-icon="search" aria-hidden="true"/>
         <input type="search" t-ref="this.inputRef" class="o_coop_search_input"
                placeholder="Поиск по платформе..."
                aria-label="Поиск по платформе"

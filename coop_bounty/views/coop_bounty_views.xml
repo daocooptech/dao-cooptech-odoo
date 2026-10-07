@@ -70,10 +70,10 @@
                   <field name="message"/>
                   <field name="state"/>
                   <button name="action_approve" type="object" string="Утвердить"
-                          icon="fa-check" invisible="state != 'applied'"
+                          icon="check" invisible="state != 'applied'"
                           groups="coop_bounty.group_coop_community_manager"/>
                   <button name="action_reject" type="object" string="Отклонить"
-                          icon="fa-times" invisible="state == 'rejected'"
+                          icon="close" invisible="state == 'rejected'"
                           groups="coop_bounty.group_coop_community_manager"/>
                 </list>
               </field>

@@ -29,7 +29,7 @@
           <div class="o_coop_dx_picker">
             <button class="o_coop_dx_pair" t-on-click="this.togglePicker">
               <b t-out="this.state.current.label"/><span> / RUB</span>
-              <i t-attf-class="fa fa-chevron-{{ this.state.pickerOpen ? 'up' : 'down' }}"/>
+              <i class="oi" t-att-data-icon="this.state.pickerOpen ? 'expand_less' : 'expand_more'"/>
             </button>
             <div class="o_coop_dx_pairs" t-if="this.state.pickerOpen">
               <input type="search" placeholder="Найти монету" t-att-value="this.state.pairQuery"
@@ -150,7 +150,7 @@
             <div class="o_coop_dx_mid">
               <b t-att-class="this.lastUp ? 'o_coop_dx_up' : 'o_coop_dx_down'">
                 <t t-out="this.num(this.state.current.last)"/>
-                <i t-attf-class="fa fa-arrow-{{ this.lastUp ? 'up' : 'down' }}"/>
+                <i class="oi" t-att-data-icon="this.lastUp ? 'arrow_upward' : 'arrow_downward'"/>
               </b>
               <span t-if="this.spread">спред <t t-out="this.num(this.spread.abs)"/> ₽ · <t t-out="this.spread.pct.toFixed(2)"/>%</span>
             </div>

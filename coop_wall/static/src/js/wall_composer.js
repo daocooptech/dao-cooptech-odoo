@@ -69,7 +69,7 @@ const isImage = (file) => Boolean(file.type?.startsWith("image/"));
 
 registerComposerAction("coop-wall-photo", {
     condition: (p) => onWall(p) && p.owner.allowUpload,
-    icon: "fa fa-picture-o",
+    icon: "image",
     name: "Фото",
     onSelected: ({ composer, owner }, ev) => {
         markEventHandled(ev, "composer.clickOnAddAttachment");
@@ -80,7 +80,8 @@ registerComposerAction("coop-wall-photo", {
 
 registerComposerAction("coop-wall-video", {
     condition: (p) => onWall(p) && p.owner.allowUpload,
-    icon: "fa fa-video-camera",
+    icon: "videocam",
+    iconClass: "oi-filled",
     name: "Видео",
     onSelected: ({ composer, owner }, ev) => {
         markEventHandled(ev, "composer.clickOnAddAttachment");
@@ -91,7 +92,7 @@ registerComposerAction("coop-wall-video", {
 
 registerComposerAction("coop-wall-audio", {
     condition: (p) => onWall(p) && p.owner.allowUpload,
-    icon: "fa fa-music",
+    icon: "music_note",
     name: "Аудио",
     onSelected: ({ composer, owner }, ev) => {
         markEventHandled(ev, "composer.clickOnAddAttachment");

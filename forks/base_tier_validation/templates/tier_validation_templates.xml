@@ -25,7 +25,7 @@
                 t-attf-invisible="validation_status == 'validated' or hide_reviews or validation_status == 'rejected' or not review_ids"
             >
                 <p class="mb-1">
-                <i class="fa fa-lg fa-info-circle" />
+                <i class="oi oi-filled oi-lg" data-icon="info" />
                 This Record needs to be
                 validated.
                 <button
@@ -34,7 +34,7 @@
                     invisible="not can_review"
                     type="object"
                     class="btn-icon me-1 btn-success"
-                    icon="fa-thumbs-up"
+                    icon="thumb_up"
                 />
                 <button
                     name="reject_tier"
@@ -42,7 +42,7 @@
                     invisible="not can_review"
                     type="object"
                     class="btn-icon btn-danger"
-                    icon="fa-thumbs-down"
+                    icon="thumb_down"
                 />
                 <br /><field name="next_review" readonly="1" />
             </p>
@@ -53,7 +53,7 @@
                 t-attf-invisible="validation_status != 'validated' or hide_reviews or not review_ids"
             >
                 <p class="mb-1">
-                <i class="fa fa-lg fa-thumbs-up" />
+                <i class="oi oi-filled oi-lg" data-icon="thumb_up" />
                 Operation has been
                 <b>validated</b>
                 !
@@ -65,7 +65,7 @@
                 t-attf-invisible="validation_status != 'rejected' or hide_reviews or not review_ids"
             >
                 <p class="mb-1">
-                <i class="fa fa-lg fa-thumbs-down" />
+                <i class="oi oi-filled oi-lg" data-icon="thumb_down" />
                 Operation has been
                 <b>rejected</b>
                 .

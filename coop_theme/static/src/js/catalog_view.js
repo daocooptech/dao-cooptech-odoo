@@ -411,7 +411,7 @@ patch(ControlPanel.prototype, {
                 // ширину, а не таблица движка. Оставить у таблицы то же
                 // слово значит поставить в один ряд две кнопки с одной
                 // подписью.
-                return [{ ...entry, name: "Таблицей", icon: "fa fa-table" }];
+                return [{ ...entry, name: "Таблицей", icon: "table_chart" }];
             }
             if (entry.type !== "kanban") {
                 return [entry];
@@ -421,20 +421,20 @@ patch(ControlPanel.prototype, {
                     ...entry,
                     type: "coop_tiles",
                     name: "Плиткой",
-                    icon: "oi oi-view-kanban",
+                    icon: "oi_view-kanban",
                     active: entry.active && coopLayout.mode === "tiles",
                 },
                 {
                     ...entry,
                     name: "Списком",
-                    icon: "fa fa-align-justify",
+                    icon: "format_align_justify",
                     active: entry.active && coopLayout.mode === "rows",
                 },
                 {
                     ...entry,
                     type: "coop_map",
                     name: "На карте",
-                    icon: "fa fa-map-marker",
+                    icon: "location_on",
                     active: entry.active && coopLayout.mode === "map",
                 },
             ];

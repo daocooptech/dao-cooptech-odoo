@@ -51,7 +51,7 @@
                   <field name="reward_kind"/>
                 </span>
                 <span class="o_coop_locbar" t-if="record.city.raw_value">
-                  <i class="fa fa-map-marker" role="img" aria-label="Город"/>
+                  <i class="oi" data-icon="location_on" role="img" aria-label="Город"/>
                   <field name="city"/>
                 </span>
               </div>
@@ -144,7 +144,7 @@
           <field name="coop_can_edit" invisible="1"/>
           <div class="oe_button_box" name="button_box">
             <button name="action_open_applications" type="object"
-                    class="oe_stat_button" icon="fa-users">
+                    class="oe_stat_button" icon="group">
               <field name="application_count" widget="statinfo" string="Откликов"/>
             </button>
           </div>
@@ -227,9 +227,9 @@
                   <field name="message"/>
                   <field name="state"/>
                   <button name="action_invite" type="object" string="Пригласить"
-                          icon="fa-check" invisible="state == 'invited'"/>
+                          icon="check" invisible="state == 'invited'"/>
                   <button name="action_decline" type="object" string="Отклонить"
-                          icon="fa-times" invisible="state == 'declined'"/>
+                          icon="close" invisible="state == 'declined'"/>
                 </list>
               </field>
             </page>
@@ -384,9 +384,9 @@
              значит потерять из виду остальные. -->
         <field name="can_decide" column_invisible="1"/>
         <button name="action_invite" type="object" string="Пригласить"
-                icon="fa-check" invisible="not can_decide or state == 'invited'"/>
+                icon="check" invisible="not can_decide or state == 'invited'"/>
         <button name="action_decline" type="object" string="Отклонить"
-                icon="fa-times" invisible="not can_decide or state == 'declined'"/>
+                icon="close" invisible="not can_decide or state == 'declined'"/>
       </list>
     </field>
   </record>

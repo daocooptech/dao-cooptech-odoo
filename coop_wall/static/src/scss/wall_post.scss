@@ -141,7 +141,7 @@
   margin-bottom: 4px;
   font-size: 13px;
 
-  .fa-retweet { opacity: .6; }
+  [data-icon="repeat"] { opacity: .6; }
 }
 
 .o_coop_repost_body {
@@ -224,7 +224,7 @@
 .o_coop_thanks_fee {
   font-size: 13px;
 
-  .fa-bolt { opacity: .6; margin-right: 4px; }
+  [data-icon="flash_on"] { opacity: .6; margin-right: 4px; }
 }
 
 // Налоги в окне подарка — справкой, тише основного текста.
@@ -236,7 +236,7 @@
   background: rgba(0, 0, 0, .035);
   font-size: 13px;
 
-  .fa-university { opacity: .55; margin-top: 3px; }
+  [data-icon="account_balance"] { opacity: .55; margin-top: 3px; }
   b { display: block; margin-bottom: 2px; }
 }
 

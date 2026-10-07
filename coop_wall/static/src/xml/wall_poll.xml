@@ -11,7 +11,7 @@
   <t t-name="coop_wall.Poll">
     <div class="o_coop_poll">
       <div class="o_coop_poll_q">
-        <i class="fa fa-bar-chart" aria-hidden="true"/>
+        <i class="oi" data-icon="bar_chart" aria-hidden="true"/>
         <span t-out="this.poll.question"/>
       </div>
       <div class="o_coop_poll_kind">
@@ -33,7 +33,7 @@
                t-on-click="() => this.poll.can_vote and this.vote(option)">
             <div class="o_coop_poll_fill" t-attf-style="width: {{ option.percent }}%"/>
             <span class="o_coop_poll_name">
-              <i t-if="this.poll.mine === option.id" class="fa fa-check-circle" aria-label="Ваш выбор"/>
+              <i t-if="this.poll.mine === option.id" class="oi oi-filled" data-icon="check_circle" aria-label="Ваш выбор"/>
               <t t-out="option.name"/>
             </span>
             <span class="o_coop_poll_pct"><t t-out="option.percent"/>%</span>
@@ -41,7 +41,7 @@
                     class="o_coop_poll_voters_btn"
                     t-att-title="'Кто выбрал: ' + option.count"
                     t-on-click.stop="() => this.toggleVoters(option)">
-              <i class="fa fa-users"/> <t t-out="option.count"/>
+              <i class="oi oi-filled" data-icon="group"/> <t t-out="option.count"/>
             </button>
           </div>
           <!-- До голоса — кнопки без чисел: итог не должен подсказывать. -->
@@ -93,12 +93,12 @@
                  t-on-input="(ev) => this.setOption(option_index, ev)"/>
           <button t-if="this.state.options.length > 2" type="button" class="btn btn-outline-secondary"
                   title="Убрать вариант" t-on-click="() => this.removeOption(option_index)">
-            <i class="fa fa-times"/>
+            <i class="oi" data-icon="close"/>
           </button>
         </div>
       </t>
       <button t-if="this.canAdd" type="button" class="btn btn-link px-0 mb-3" t-on-click="this.addOption">
-        <i class="fa fa-plus"/> Добавить вариант
+        <i class="oi" data-icon="add"/> Добавить вариант
       </button>
 
       <div class="form-check mb-3">

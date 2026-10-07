@@ -40,7 +40,7 @@
              href="#" class="o_coop_nav_item"
              t-att-class="{ 'active': this.isActive(item) }"
              t-on-click.prevent="() => this.open(item)">
-            <i class="fa fa-fw" t-att-class="item.icon" role="img" aria-hidden="true"/>
+            <i class="oi oi-fw" t-att-data-icon="item.icon" role="img" aria-hidden="true"/>
             <span t-out="item.label"/>
           </a>
         </nav>

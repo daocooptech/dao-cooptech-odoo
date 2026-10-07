@@ -9,7 +9,7 @@
             </xpath>
             <div name="button_box" position="inside">
                 <button class="oe_stat_button" type="object" name="action_prepaid_advance"
-                        icon="fa-suitcase" invisible="prepaid_advance_count == 0">
+                        icon="luggage" invisible="prepaid_advance_count == 0">
                     <field string="Авансовые счета" name="prepaid_advance_count" widget="statinfo"/>
                 </button>
             </div>

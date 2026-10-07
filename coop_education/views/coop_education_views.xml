@@ -32,7 +32,7 @@
             <div class="o_coop_listing o_coop_course">
               <a class="o_coop_media o_coop_course_cover" t-att-href="record.website_url.raw_value">
                 <field name="image_512" widget="image" t-if="record.image_512.raw_value"/>
-                <span t-else="" class="o_coop_media_sign"><i class="fa fa-graduation-cap"/></span>
+                <span t-else="" class="o_coop_media_sign"><i class="oi" data-icon="school" title="Курс"/></span>
                 <span class="o_coop_course_level" t-out="record.coop_level.value"/>
               </a>
               <div class="o_coop_listing_body">
@@ -53,9 +53,9 @@
                   <span t-out="record.coop_progress_label.value"/>
                 </div>
                 <div class="o_coop_listing_foot">
-                  <span class="o_coop_listing_meta"><i class="fa fa-users"/> <t t-out="record.coop_members_label.value"/></span>
+                  <span class="o_coop_listing_meta"><i class="oi oi-filled" data-icon="group"/> <t t-out="record.coop_members_label.value"/></span>
                   <span class="o_coop_course_rating" t-if="record.rating_count.raw_value">
-                    <i class="fa fa-star"/> <t t-out="record.rating_avg_stars.value"/>
+                    <i class="oi oi-filled" data-icon="star"/> <t t-out="record.rating_avg_stars.value"/>
                     <span class="o_coop_listing_meta">(<t t-out="record.rating_count.raw_value"/>)</span>
                   </span>
                 </div>

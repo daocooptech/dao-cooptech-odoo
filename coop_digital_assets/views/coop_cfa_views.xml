@@ -66,7 +66,7 @@
                      t-att-alt="record.issuer_id.value"/>
                 <span t-else="" class="o_coop_media_sign">📜</span>
                 <span class="o_coop_locbar" t-if="record.city.raw_value">
-                  <i class="fa fa-map-marker" role="img" aria-label="Город"/>
+                  <i class="oi" data-icon="location_on" role="img" aria-label="Город"/>
                   <field name="city"/>
                 </span>
               </div>

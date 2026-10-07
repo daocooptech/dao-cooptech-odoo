@@ -39,7 +39,7 @@
                      t-att-alt="record.organizer_id.value"/>
                 <span t-else="" class="o_coop_media_sign"><t t-out="record.icon.value"/></span>
                 <span class="o_coop_locbar" t-if="record.city.raw_value">
-                  <i class="fa fa-map-marker" role="img" aria-label="Город"/>
+                  <i class="oi" data-icon="location_on" role="img" aria-label="Город"/>
                   <field name="city"/>
                 </span>
               </div>
@@ -169,9 +169,9 @@
                   <field name="state"/>
                   <field name="note" optional="show"/>
                   <button name="action_attended" type="object" string="Был"
-                          icon="fa-check" invisible="state != 'going'"/>
+                          icon="check" invisible="state != 'going'"/>
                   <button name="action_missed" type="object" string="Не пришёл"
-                          icon="fa-times" invisible="state != 'going'"/>
+                          icon="close" invisible="state != 'going'"/>
                 </list>
               </field>
             </page>

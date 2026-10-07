@@ -10,7 +10,7 @@
         >
             <button>
                 <i
-                    class="fa fa-lg fa-pencil-square-o"
+                    class="oi oi-lg" data-icon="edit_square"
                     role="img"
                     aria-label="Reviews"
                 />

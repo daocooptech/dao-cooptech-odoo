@@ -36,7 +36,7 @@
                      t-att-alt="record.owner_id.value"/>
                 <span t-else="" class="o_coop_media_sign">🏬</span>
                 <span class="o_coop_locbar" t-if="record.city.raw_value">
-                  <i class="fa fa-map-marker" role="img" aria-label="Город"/>
+                  <i class="oi" data-icon="location_on" role="img" aria-label="Город"/>
                   <field name="city"/>
                 </span>
               </div>
@@ -47,7 +47,7 @@
                     <t t-out="record.storage_kind.value"/>
                   </span>
                   <span class="o_coop_wh_meta" t-if="record.city.raw_value">
-                    <i class="fa fa-map-marker" aria-hidden="true"/>
+                    <i class="oi" data-icon="location_on" aria-hidden="true"/>
                     <t t-out="record.city.value"/>
                   </span>
                 </div>

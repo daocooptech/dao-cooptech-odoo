@@ -32,23 +32,23 @@ MODEL_HINTS = {
 }
 
 MAIN_ITEMS = [
-    ('Моя страница', 'fa-user-circle-o', 'coop_profile.action_coop_my_page'),
+    ('Моя страница', 'account_circle', 'coop_profile.action_coop_my_page'),
     # Экран платформы, а не штатная переписка движка. Пункт меню движка
     # перевешен на него же (`coop_messages/views/coop_messages_views.xml`),
     # и до 16 сентября 2026 эти два пути расходились: из меню приложений
     # человек попадал на экран из макета, а из бокового меню и с телефона —
     # в переписку Odoo. На платформе меню приложений убрано, так что
     # экран платформы был достижим только там, где его не ищут.
-    ('Сообщения', 'fa-comments-o', 'coop_messages.action_coop_messages'),
-    ('Люди', 'fa-users', 'coop_people.action_coop_people'),
-    ('Навыки', 'fa-wrench', 'coop_skills.action_coop_skills'),
-    ('Вакансии', 'fa-briefcase', 'coop_vacancies.action_coop_vacancies'),
-    ('Ресурсы', 'fa-cube', 'coop_resources.action_coop_resources'),
-    ('Проекты', 'fa-rocket', 'coop_projects.action_coop_projects'),
-    ('Организации', 'fa-university', 'coop_orgs.action_coop_orgs'),
-    ('Сообщества', 'fa-comments', 'coop_communities.action_coop_communities'),
-    ('Кошелёк', 'fa-credit-card', 'coop_wallet.action_coop_my_wallet'),
-    ('Сделки', 'fa-handshake-o', 'coop_deals.action_coop_deals'),
+    ('Сообщения', 'chat_bubble', 'coop_messages.action_coop_messages'),
+    ('Люди', 'group', 'coop_people.action_coop_people'),
+    ('Навыки', 'build', 'coop_skills.action_coop_skills'),
+    ('Вакансии', 'work', 'coop_vacancies.action_coop_vacancies'),
+    ('Ресурсы', 'deployed_code', 'coop_resources.action_coop_resources'),
+    ('Проекты', 'rocket_launch', 'coop_projects.action_coop_projects'),
+    ('Организации', 'account_balance', 'coop_orgs.action_coop_orgs'),
+    ('Сообщества', 'forum', 'coop_communities.action_coop_communities'),
+    ('Кошелёк', 'credit_card', 'coop_wallet.action_coop_my_wallet'),
+    ('Сделки', 'handshake', 'coop_deals.action_coop_deals'),
 ]
 
 # Расширения — те же тринадцать, что в макете, и в том же порядке.
@@ -72,7 +72,7 @@ EXTENSION_ITEMS = [
     # Плоский список не показывает ни столбцов ведения, ни перетаскивания
     # между ними — а ради них этапы и заводились (пункт 13 разбора
     # архитектора).
-    ('Управление проектами', 'fa-tasks',
+    ('Управление проектами', 'checklist',
      'project.open_view_project_all_group_stage'),
     # Владелец 22 сентября 2026: «добавить пункт в меню после управление
     # проектами» (решение 382).
@@ -82,45 +82,45 @@ EXTENSION_ITEMS = [
     # способом, в неё не попадает вовсе. 23 сентября 2026 я завёл его
     # меню движка, отчитался «готово» — и владелец пункта не увидел.
     # Проверять надо то, что видно с экрана, а не то, что легло в базу.
-    ('Документы', 'fa-file-text-o', 'coop_documents.action_coop_documents'),
+    ('Документы', 'article', 'coop_documents.action_coop_documents'),
     # Ведёт на биржу, а не на движения COOP: COOP — предоплата услуг
     # платформы, она не торгуется и к бирже отношения не имеет. Пока пункт
     # вёл туда, участник открывал «Токеномику» и видел пустой список
     # служебных начислений.
-    ('Токеномика', 'fa-diamond', 'coop_tokenomics.action_coop_exchange_screen'),
-    ('Цифровые активы', 'fa-certificate', 'coop_digital_assets.action_coop_cfa_issue'),
+    ('Токеномика', 'diamond', 'coop_tokenomics.action_coop_exchange_screen'),
+    ('Цифровые активы', 'verified', 'coop_digital_assets.action_coop_cfa_issue'),
     # Решения 392, 410: расчёты резидента с нерезидентом — внешнеторговый
     # контракт, порог учёта в банке, аккредитив, ЦФА по договору.
-    ('Международные сделки', 'fa-globe', 'coop_trade.action_coop_trade_contract'),
+    ('Международные сделки', 'public', 'coop_trade.action_coop_trade_contract'),
     # Решение 392: обмен цифровой валюты — доской объявлений, платформа
     # не сторона (разбор юриста, 2.6). Название — владелец 25.09.2026;
     # прежнее «Обмен цифровой валюты» — в RETIRED_EXTENSIONS.
     # Решение 417: экран биржи со стаканом и сведением, а не доска.
-    ('DEX биржа', 'fa-exchange', 'coop_crypto_exchange.action_coop_dex_terminal'),
+    ('DEX биржа', 'swap_horiz', 'coop_crypto_exchange.action_coop_dex_terminal'),
     # Каталог майнеров и биржа майнинговых мощностей (разбор юриста, 2.4).
     # Название — владелец 29.09.2026: «пункт меню майнинг переименовать в
     # Биржа мощностей»; прежнее — в RENAMED_ITEMS.
-    ('Биржа мощностей', 'fa-microchip', 'coop_mining.action_coop_mining_offer'),
-    ('Нематериальные активы', 'fa-lightbulb-o', 'coop_intangibles.action_coop_intangibles'),
-    ('Целевые программы ПК', 'fa-bullseye', 'coop_programs.action_coop_program'),
-    ('Совместные закупки', 'fa-shopping-basket', 'coop_groupbuy.action_coop_groupbuy'),
+    ('Биржа мощностей', 'memory', 'coop_mining.action_coop_mining_offer'),
+    ('Нематериальные активы', 'lightbulb', 'coop_intangibles.action_coop_intangibles'),
+    ('Целевые программы ПК', 'crisis_alert', 'coop_programs.action_coop_program'),
+    ('Совместные закупки', 'shopping_basket', 'coop_groupbuy.action_coop_groupbuy'),
     # Решение 412 (Н7): «в расширения перед аукционом добавь вкладку
     # бартер». Объявления «отдаю — хочу взамен», подбор встречных и
     # цепочек на троих (разбор «Бартерона» и других площадок).
-    ('Бартер', 'fa-retweet', 'coop_barter.action_coop_barter_offer'),
-    ('Аукционы', 'fa-gavel', 'coop_auctions.action_coop_auction'),
+    ('Бартер', 'repeat', 'coop_barter.action_coop_barter_offer'),
+    ('Аукционы', 'gavel', 'coop_auctions.action_coop_auction'),
     # Раздел перенесён на движок 14 сентября 2026 — биржа складских
     # мощностей. Пока здесь стояла пустая строка, участник открывал
     # «Склад» и видел «раздел ещё не перенесён», хотя в нём сто
     # пятнадцать складов и сто шестьдесят пять объявлений.
-    ('Склады', 'fa-archive', 'coop_warehouse.action_coop_warehouse_offer'),
-    ('События', 'fa-calendar', 'coop_events.action_coop_event'),
+    ('Склады', 'archive', 'coop_warehouse.action_coop_warehouse_offer'),
+    ('События', 'calendar_today', 'coop_events.action_coop_event'),
     # Решение 411 (Н3): курсы на штатном eLearning, каталог — coop_education.
     # Выше «Аналитики» — владелец 26.09.2026.
-    ('Образование', 'fa-graduation-cap', 'coop_education.action_coop_courses'),
+    ('Образование', 'school', 'coop_education.action_coop_courses'),
     # Решение 420, слой 1: «Моя панель» — личный конструктор (coop_analytics).
-    ('Аналитика', 'fa-bar-chart', 'coop_analytics.action_coop_my_panel'),
-    ('Диск', 'fa-folder-open-o', ''),
+    ('Аналитика', 'bar_chart', 'coop_analytics.action_coop_my_panel'),
+    ('Диск', 'folder_open', ''),
 ]
 
 # Разделы, которые появляются, только когда участнику есть что в них
@@ -176,7 +176,7 @@ class CoopSidebarItem(models.Model):
         'res.users', string='Участник', required=True, ondelete='cascade',
         index=True, default=lambda self: self.env.user)
     name = fields.Char('Название', required=True)
-    icon = fields.Char('Значок', help='Класс значка Font Awesome, например fa-users.')
+    icon = fields.Char('Значок', help='Имя значка Material Symbols, например group.')
     action_id = fields.Many2one(
         'ir.actions.actions', string='Открывает', ondelete='cascade',
         help='Пусто — раздел из макета, который ещё не перенесён на движок; '
