@@ -14,10 +14,10 @@
   "8d50600b-c2c5-5d25-b7fe-09ad8f2406b3": "coop_analytics.menu_coop_analytics_dex",
   "8fe91ab4-e73d-594c-880e-821866d6e2c2": "coop_analytics.menu_coop_analytics_dex",
   "9bf06b09-6319-548e-9d9a-bd2750ab7223": "coop_analytics.menu_coop_analytics_dex",
+  "9e0205b2-2301-553f-b240-5784a9d1a828": "coop_analytics.menu_coop_analytics_dex",
   "a212c564-5084-5356-93ae-1519a5938d01": "coop_analytics.menu_coop_analytics_dex",
   "c485d5c2-5f3e-5e98-ac48-a81928999fe0": "coop_analytics.menu_coop_analytics_dex",
   "d58f08b9-4413-5bfe-92b3-c3984fc708c4": "coop_analytics.menu_coop_analytics_dex",
-  "f4a6fd46-afa4-5a6d-a50e-6b8642c87f38": "coop_analytics.menu_coop_analytics_dex",
   "f899599f-d8d5-55e6-a62b-38fd1ddc80c8": "coop_analytics.menu_coop_analytics_dex"
  },
  "customTableStyles": {},
@@ -163,8 +163,8 @@
     },
     {
      "aggregator": "avg",
-     "fieldName": "apr",
-     "id": "apr:avg"
+     "fieldName": "revenue_share",
+     "id": "revenue_share:avg"
     }
    ],
    "model": "coop.farm.pool",
@@ -530,12 +530,12 @@
       "title": {
        "bold": true,
        "color": "#434343",
-       "text": "Доходность пулов, средняя"
+       "text": "Доля выручки пулам, средняя"
       },
       "type": "scorecard"
      },
      "height": 96,
-     "id": "f4a6fd46-afa4-5a6d-a50e-6b8642c87f38",
+     "id": "9e0205b2-2301-553f-b240-5784a9d1a828",
      "offset": {
       "x": 0,
       "y": 118
@@ -944,14 +944,14 @@
     "A2": "Сделок на бирже",
     "A3": "Оборот",
     "A4": "Пулов открыто",
-    "A5": "Доходность пулов",
+    "A5": "Доля выручки пулам",
     "A6": "Мои обмены",
     "A7": "Мой оборот",
     "B1": "Сейчас",
     "B2": "=PIVOT.VALUE(1,\"__count\")",
     "B3": "=PIVOT.VALUE(1,\"coop_turnover\")",
     "B4": "=PIVOT.VALUE(3,\"__count\")",
-    "B5": "=PIVOT.VALUE(3,\"apr:avg\")",
+    "B5": "=PIVOT.VALUE(3,\"revenue_share:avg\")",
     "B6": "=PIVOT.VALUE(4,\"__count\")",
     "B7": "=PIVOT.VALUE(4,\"total\")",
     "C1": "Прошлый период",

@@ -511,7 +511,7 @@ def exchange():
     live_trades = mine + [['state', '!=', 'cancelled']]
 
     ff, ff0 = both(d, 'сведения', f, [], ['__count', 'coop_turnover'], fpairs)
-    pools = d.pivot('пулы', 'coop.farm.pool', open_pools, ['__count', 'apr:avg'],
+    pools = d.pivot('пулы', 'coop.farm.pool', open_pools, ['__count', 'revenue_share:avg'],
                     match(ppairs, 0))
     tt, tt0 = both(d, 'мои обмены', 'coop.crypto.trade', live_trades, ['__count', 'total'], tpairs)
     k_cnt, b_cnt = d.value('Сделок на бирже', '=PIVOT.VALUE(%s,"__count")' % ff, INT,
@@ -519,7 +519,11 @@ def exchange():
     k_vol, b_vol = d.value('Оборот', '=PIVOT.VALUE(%s,"coop_turnover")' % ff, MONEY,
                            '=PIVOT.VALUE(%s,"coop_turnover")' % ff0)
     k_pool, _ = d.value('Пулов открыто', '=PIVOT.VALUE(%s,"__count")' % pools, INT)
-    k_apr, _ = d.value('Доходность пулов', '=PIVOT.VALUE(%s,"apr:avg")' % pools, '0.0[$ %]')
+    # В пуле нет «доходности» (apr): условие пула — доля выручки, которую
+    # проект отдаёт участникам. 20 проверяет поля сводной при загрузке, и
+    # несуществующее `apr` роняло -u coop_analytics (07.10).
+    k_apr, _ = d.value('Доля выручки пулам', '=PIVOT.VALUE(%s,"revenue_share:avg")' % pools,
+                       '0.0[$ %]')
     k_my, b_my = d.value('Мои обмены', '=PIVOT.VALUE(%s,"__count")' % tt, INT,
                          '=PIVOT.VALUE(%s,"__count")' % tt0)
     k_myv, b_myv = d.value('Мой оборот', '=PIVOT.VALUE(%s,"total")' % tt, MONEY,
@@ -528,7 +532,7 @@ def exchange():
         ('Сделок на бирже', k_cnt, b_cnt, 'percentage'),
         ('Оборот биржи', k_vol, b_vol, 'percentage'),
         ('Пулов открыто', k_pool, None, None),
-        ('Доходность пулов, средняя', k_apr, None, None),
+        ('Доля выручки пулам, средняя', k_apr, None, None),
         ('Мои обмены', k_my, b_my, 'difference'),
         ('Мой оборот', k_myv, b_myv, 'percentage'),
     ])
