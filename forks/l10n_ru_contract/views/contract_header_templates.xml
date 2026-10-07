@@ -1,0 +1,51 @@
+<odoo>
+    <template id="contract_header_entity">
+        <span>
+            <b><t t-out="object.company_id.partner_id.name"/></b>,
+            именуемое в дальнейшем <b>«Поставщик»</b>, в лице
+            <t t-out="(object.company_id.chief_id.partner_id.function or '').lower()"/>
+            <t t-out="(object.director_name_company or '').title()"/>,
+            действующего на основании ОГРНИП №
+            <t t-out="object.company_id.company_registry or ''"/>,
+            с одной стороны, и <b><t t-out="object.partner_id.name or ''"/></b>,
+            именуемое в дальнейшем <b>«Покупатель»</b>, в лице
+            <t t-out="(object.director_name_partner or '').title()"/>,
+            действующего на основании устава общества,
+            с другой стороны, вместе именуемые в дальнейшем <b>«Стороны»</b>
+            заключили настоящий Договор о нижеследующем:
+        </span>
+    </template>
+
+    <template id="contract_header_ip">
+        <span>
+            <b><t t-out="object.company_id.partner_id.name"/></b>,
+            именуемое в дальнейшем <b>«Поставщик»</b>, в лице
+            <t t-out="(object.company_id.chief_id.partner_id.function or '').lower()"/>
+            <t t-out="(object.director_name_company or '').title()"/>,
+            действующего на основании ОГРНИП №
+            <t t-out="object.company_id.company_registry or ''"/>,
+            с одной стороны, и <b><t t-out="object.partner_id.name or ''"/></b>,
+            именуемое в дальнейшем <b>«Покупатель»</b>, в лице
+            <t t-out="(object.director_name_partner or '').title()"/>,
+            действующего на основании ОГРНИП №
+            <t t-out="object.partner_id.ogrn or ''"/>,
+            с другой стороны, вместе именуемые в дальнейшем <b>«Стороны»</b>
+            заключили настоящий Договор о нижеследующем:
+        </span>
+    </template>
+
+    <template id="contract_header_individual">
+        <span>
+            <b><t t-out="object.company_id.partner_id.name"/></b>,
+            именуемое в дальнейшем <b>«Поставщик»</b>, в лице
+            <t t-out="(object.company_id.chief_id.partner_id.function or '').lower()"/>
+            <t t-out="(object.director_name_company or '').title()"/>,
+            действующего на основании ОГРНИП №
+            <t t-out="object.company_id.company_registry or ''"/>,
+            с одной стороны, и <b><t t-out="object.partner_id.name or ''"/></b>,
+            именуемое в дальнейшем <b>«Покупатель»</b>,
+            вместе именуемые в дальнейшем <b>«Стороны»</b>
+            заключили настоящий Договор о нижеследующем:
+        </span>
+    </template>
+</odoo>

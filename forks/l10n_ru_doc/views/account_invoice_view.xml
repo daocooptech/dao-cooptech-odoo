@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="invoice_ru_form" model="ir.ui.view">
+            <field name="name">account.invoice.ru.form</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+<!--                <data>-->
+<!--                    <button name="action_invoice_sent" position="attributes">-->
+<!--                        <attribute name="name">action_bill_sent</attribute>-->
+<!--                    </button>-->
+<!--                </data>-->
+               <xpath expr="//group[@id='header_left_group']" position="inside">
+               
+                   <field name="kladov"/>
+                   <field name="gruzopol"/>
+                   <field name="gruzootpr"/>
+
+                   <field name="transport"/>
+                   <field name="osnovanie"/>
+                   <field name="only_service" invisible="1"/> <!-- reason: need-->
+               </xpath>
+
+                <xpath expr="//page[@name='invoice_tab']/field[@name='invoice_line_ids']/list/field[@name='tax_ids']" position="after">
+                    <field name="price_total_pf" column_invisible="True"/><!-- reason: need-->
+               </xpath>
+               
+            </field>
+        </record>
+
+    </data>
+</odoo>
+
+

@@ -15,12 +15,6 @@ class AccountChartTemplate(models.AbstractModel):
         return {
             "name": _("Chart of Accounts"),
             "code_digits": "1",
-            "use_storno_accounting": True,
-            "display_invoice_amount_total_words": True,
-            "property_account_receivable_id": "ru_acc_62_01",
-            "property_account_payable_id": "ru_acc_60_01",
-            "property_account_expense_categ_id": "ru_acc_41_01",
-            "property_account_income_categ_id": "ru_acc_90_01_1",
         }
 
     @template("ru", "res.company")
@@ -28,6 +22,15 @@ class AccountChartTemplate(models.AbstractModel):
         return {
             self.env.company.id: {
                 "account_fiscal_country_id": "base.ru",
+                # Odoo 20: ключи шаблона, которых нет в TEMPLATE_DATA_KEYS (storno, сумма
+                # прописью, счета по умолчанию), живут в данных компании; property_account_*
+                # заменены полями компании receivable/payable/expense/income_account_id.
+                "use_storno_accounting": True,
+                "display_invoice_amount_total_words": True,
+                "receivable_account_id": "ru_acc_62_01",
+                "payable_account_id": "ru_acc_60_01",
+                "expense_account_id": "ru_acc_41_01",
+                "income_account_id": "ru_acc_90_01_1",
                 "bank_account_code_prefix": "999",
                 "cash_account_code_prefix": "999",
                 "transfer_account_code_prefix": "000",

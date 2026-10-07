@@ -1,0 +1,19 @@
+<odoo>
+    <record id="view_print_report_wizard_form" model="ir.ui.view">
+        <field name="name">report.template.wizard.form</field>
+        <field name="model">report.template.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Печать по шаблону">
+                <group>
+                    <field name="contract_id" invisible="1"/>
+                    <field name="typeformat"/>
+                    <field name="template_id" required="1" options="{'no_create': True}" domain="[('typeformat','=',typeformat)]"/>
+                </group>
+                <footer>
+                    <button string="Печать" type="object" name="print_report" class="btn-primary"/>
+                    <button string="Отмена" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

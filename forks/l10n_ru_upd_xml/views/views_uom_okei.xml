@@ -1,0 +1,29 @@
+<odoo>
+    <record id="uom_rep" model="ir.ui.view">
+        <field name="name">OKEI code for uom</field>
+        <field name="model">uom.uom</field>
+        <field name="inherit_id" ref="uom.uom_uom_view_form"/>
+        <field name="arch" type="xml">
+            <data>
+                <xpath expr="//field[@name='name']" position="after">
+                    <field name="okei" string="Код единицы товара по ОКЕИ"/>
+                </xpath>
+            </data>
+        </field>
+    </record>
+
+<!--    <record id="uom_categories_rep" model="ir.ui.view">-->
+<!--        <field name="name">OKEI code for uom categories</field>-->
+<!--        <field name="model">uom.category</field>-->
+<!--        <field name="inherit_id" ref="l10n_ru_doc.view_uomiher_tree"/>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <list>-->
+<!--                <xpath expr="//field[@name='kod']" position="after">-->
+<!--                    <field name="okei" string="Код по ОКЕИ"/>-->
+<!--                </xpath>-->
+<!--            </list>-->
+<!--        </field>-->
+<!--    </record>-->
+
+</odoo>
+

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.russian.localization</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="5"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app string="Российская локализация" name="l10n_ru_base" img="/l10n_ru_base/static/description/icon.png">
+
+                    <block title="Акт сверки" name="act_revise_setting_container">
+                        <setting id="act_revise"
+                                 string="Акт сверки"
+                                 help="Отчет «Акт сверки»">
+                            <field name="module_l10n_ru_act_rev"/>
+                        </setting>
+                    </block>
+
+                    <block title="Договоры" name="contract_setting_container">
+                        <setting id="contract"
+                                 string="Договоры"
+                                 help="Отчеты по договорам">
+                            <field name="module_l10n_ru_contract"/>
+                        </setting>
+                    </block>
+
+                    <block title="УПД (XML)" name="upd_xml_setting_container">
+                        <setting id="report_xml"
+                                 string="УПД в формате XML"
+                                 help="Формирование УПД для ЭДО">
+                            <field name="module_l10n_ru_upd_xml"/>
+                        </setting>
+                    </block>
+
+                    <block title="Печатные формы" name="print_forms_setting_container">
+                        <setting id="print_forms"
+                                 string="Печатные формы"
+                                 help="Печатные формы документов">
+                            <field name="module_l10n_ru_doc"/>
+                        </setting>
+                    </block>
+
+                    <block title="Доверенности" name="powers_attorney_setting_container">
+                        <setting id="powers_attorney"
+                                 string="Доверенности"
+                                 help="Доверенности на получение ТМЦ">
+                            <field name="module_l10n_ru_attorney"/>
+                        </setting>
+                    </block>
+
+                    <block title="Авансовые платежи" name="advance_payments_setting_container">
+                        <setting id="advance_payments"
+                                 string="Авансовые платежи"
+                                 help="Учет авансовых платежей">
+                            <field name="module_l10n_ru_advance_payments"/>
+                        </setting>
+                    </block>
+
+                </app>
+            </xpath>
+        </field>
+    </record>
+</data>
+</odoo>

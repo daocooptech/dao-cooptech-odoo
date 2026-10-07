@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="portal_my_home_act_revise" name="Portal My Home : act revise" inherit_id="portal.portal_my_home" priority="40">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <a t-attf-href="/my/act_revise/a">
+               <button type="button" class="btn btn-primary btn-md o_website_form_send">Печатать акт сверки</button>
+            </a>
+        </xpath>
+    </template>
+
+</odoo>

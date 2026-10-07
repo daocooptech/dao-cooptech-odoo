@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- ===== ПАРТНЁРЫ — добавляем страну и zip ===== -->
+        <record id="l10n_ru_contract.demo_partner_buyer" model="res.partner">
+            <field name="country_id" ref="base.ru"/>
+            <field name="zip">101000</field>
+        </record>
+
+        <record id="l10n_ru_contract.demo_partner_supplier" model="res.partner">
+            <field name="country_id" ref="base.ru"/>
+            <field name="zip">190000</field>
+        </record>
+
+        <!-- ===== КОНТАКТ-PERSON от компании покупателя ===== -->
+        <record id="demo_contact_person_buyer" model="res.partner">
+            <field name="name">Иванов Иван Иванович</field>
+            <field name="parent_id" ref="l10n_ru_contract.demo_partner_buyer"/>
+            <field name="type">contact</field>
+            <field name="is_company" eval="False"/>
+            <field name="country_id" ref="base.ru"/>
+            <field name="zip">101000</field>
+            <field name="passport">4510 123456</field>
+        </record>
+
+        <!-- ===== ПРОДУКТ ===== -->
+        <record id="demo_product_tovar" model="product.product">
+            <field name="name">Товар</field>
+            <field name="default_code">TOV-001</field>
+            <field name="barcode">4607001234567</field>
+            <field name="kod_tnved">8471300000</field>
+            <field name="list_price">15000.0</field>
+            <field name="standard_price">9000.0</field>
+            <field name="categ_id" ref="product.product_category_goods"/>
+            <field name="type">consu</field>
+        </record>
+
+        <!-- ===== ИНВОЙС ===== -->
+        <record id="demo_invoice_doc_001" model="account.move">
+            <field name="move_type">out_invoice</field>
+            <field name="partner_id" ref="l10n_ru_contract.demo_partner_buyer"/>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="invoice_date">2026-02-10</field>
+            <field name="gruzopol" ref="l10n_ru_contract.demo_partner_buyer"/>
+            <field name="gruzootpr" ref="l10n_ru_contract.demo_partner_buyer"/>
+            <field name="sf_number">547</field>
+            <field name="osnovanie">Договор поставки</field>
+        </record>
+
+        <record id="demo_invoice_doc_line_001" model="account.move.line">
+            <field name="move_id" ref="demo_invoice_doc_001"/>
+            <field name="product_id" ref="demo_product_tovar"/>
+            <field name="quantity">3.0</field>
+            <field name="price_unit">15000.0</field>
+            <field name="name">Товар</field>
+        </record>
+
+    </data>
+</odoo>

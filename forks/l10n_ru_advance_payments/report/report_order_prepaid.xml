@@ -10,7 +10,7 @@
                     <t t-if="not o or not 'company_id' in o">
                         <t t-set="company" t-value="res_company"/>
                     </t>
-                    <t t-set="context" t-value="o._context"/>
+                    <t t-set="context" t-value="o.env.context"/>
 
                     <div class="page">
 
@@ -123,13 +123,13 @@
                             </TR>
                             <TR CLASS="R15">
                                 <TD CLASS="R15C1" COLSPAN="4" ROWSPAN="2">
-                                    <DIV class="cu_space31" t-esc="(company.partner_id.bank_ids and company.partner_id.bank_ids[0].bank_name or '')+' '+(company.partner_id.bank_ids and company.partner_id.bank_ids[0].bank_id.city or '')"/>
+                                    <DIV class="cu_space31" t-out="(company.partner_id.bank_ids and company.partner_id.bank_ids[0].bank_name or '')+' '+(company.partner_id.bank_ids and company.partner_id.bank_ids[0].city or '')"/>
                                 </TD>
                                 <TD CLASS="R15C19">
                                     <SPAN class="cu_wspace">БИК</SPAN>
                                 </TD>
                                 <TD CLASS="R15C22" COLSPAN="3">
-                                    <SPAN class="cu_wspace" t-esc="company.partner_id.bank_ids and company.partner_id.bank_ids[0].bank_bic or ''"/>
+                                    <SPAN class="cu_wspace" t-out="company.partner_id.bank_ids and company.partner_id.bank_ids[0].bank_bic or ''"/>
                                 </TD>
                                 <TD/>
                             </TR>
@@ -139,7 +139,7 @@
                                 </TD>
                                 <TD CLASS="R16C22" COLSPAN="3" ROWSPAN="2">
                                     <DIV class="cu_space29">
-                                        <SPAN class="cu_wspace" t-esc="company.partner_id.bank_ids and company.partner_id.bank_ids[0].bank_id.corr_acc or ''"/>
+                                        <SPAN class="cu_wspace" t-out="company.partner_id.bank_ids and company.partner_id.bank_ids[0].bank_corr_acc or ''"/>
                                     </DIV>
                                 </TD>
                             </TR>
@@ -150,20 +150,20 @@
                             </TR>
                             <TR CLASS="R15">
                                 <TD CLASS="R18C1" COLSPAN="1"><SPAN class="cu_wspace">ИНН</SPAN></TD>
-                                <TD CLASS="R18C3" COLSPAN="1"><SPAN class="cu_wspace" t-esc="company.inn or ''"/></TD>
+                                <TD CLASS="R18C3" COLSPAN="1"><SPAN class="cu_wspace" t-out="company.inn or ''"/></TD>
                                 <TD CLASS="R18C1" COLSPAN="1"><SPAN class="cu_wspace">КПП</SPAN></TD>
-                                <TD CLASS="R18C3" COLSPAN="1"><SPAN class="cu_wspace" t-esc="company.kpp or ''"/></TD>
+                                <TD CLASS="R18C3" COLSPAN="1"><SPAN class="cu_wspace" t-out="company.kpp or ''"/></TD>
                                 <TD CLASS="R18C19" ROWSPAN="4">
                                     <DIV class="cu_space61"><SPAN class="cu_wspace">Сч. №</SPAN></DIV>
                                 </TD>
                                 <TD CLASS="R18C19" COLSPAN="3" ROWSPAN="4">
                                     <DIV class="cu_space61">
-                                        <SPAN class="cu_wspace" t-esc="company.partner_id.bank_ids and company.partner_id.bank_ids[0].acc_number or ''"/>
+                                        <SPAN class="cu_wspace" t-out="company.partner_id.bank_ids and company.partner_id.bank_ids[0].account_number or ''"/>
                                     </DIV>
                                 </TD>
                             </TR>
                             <TR CLASS="R0">
-                                <TD CLASS="R19C1" COLSPAN="4" ROWSPAN="2"><DIV class="cu_space29" t-esc="company.name or ''"/></TD>
+                                <TD CLASS="R19C1" COLSPAN="4" ROWSPAN="2"><DIV class="cu_space29" t-out="company.name or ''"/></TD>
                             </TR>
                             <TR CLASS="R0">
                                 <TD>&amp;nbsp;</TD>
@@ -181,9 +181,9 @@
                                 <TD CLASS="R24C1" COLSPAN="8" ROWSPAN="2">
                                     <DIV class="cu_space29">
                                         <SPAN class="cu_wspace">
-                                            <t t-esc="'Комм. предложение' if o.state in ['draft','sent'] else 'Счет на оплату'"/>
-                                            <t t-esc="' № '"/>
-                                            <t t-esc="helper.numer(o.name)"/>
+                                            <t t-out="'Комм. предложение' if o.state in ['draft','sent'] else 'Счет на оплату'"/>
+                                            <t t-out="' № '"/>
+                                            <t t-out="helper.numer(o.name)"/>
                                         </SPAN>
                                     </DIV>
                                 </TD>
@@ -202,7 +202,7 @@
                                     <SPAN class="cu_wspace">Поставщик:</SPAN>
                                 </TD>
                                 <TD CLASS="R29C5" COLSPAN="7">
-                                    <t t-esc="helper.representation(company)"/>
+                                    <t t-out="helper.representation(company)"/>
                                 </TD>
                             </TR>
                             <TR CLASS="R0">
@@ -213,7 +213,7 @@
                                     <SPAN class="cu_wspace">Покупатель:</SPAN>
                                 </TD>
                                 <TD CLASS="R29C5" COLSPAN="7">
-                                    <t t-esc="helper.representation(o.partner_id.parent_id) if o.partner_id.parent_id else helper.representation(o.partner_id) "/>
+                                    <t t-out="helper.representation(o.partner_id.parent_id) if o.partner_id.parent_id else helper.representation(o.partner_id) "/>
                                 </TD>
                                 <TD/>
                             </TR>
@@ -231,12 +231,12 @@
                             </TR>
 
                             <tr CLASS="R0" t-foreach="o.prepaid_line.filtered(lambda s: 'аванс' not in s.name.lower() and 'депозит' not in s.name.lower())" t-as="line">
-                                <TD CLASS="R37C1"><SPAN class="cu_wspace"><t t-esc="line_index+1"/></SPAN></TD>
-                                <TD CLASS="R37C2" COLSPAN="3"><t t-esc="line.name or ''"/></TD>
-                                <TD CLASS="R37C4"><SPAN class="cu_wspace"><t t-esc="line.quantity or ''"/></SPAN></TD>
-                                <TD CLASS="R37C5"><SPAN class="cu_wspace"><t t-esc="line.product_uom_id.name or ''"/></SPAN></TD>
-                                <TD CLASS="R37C4"><SPAN class="cu_wspace"><t t-esc="line.price_unit or ''"/></SPAN></TD>
-                                <TD CLASS="R37C7"><SPAN class="cu_wspace"><t t-esc="(('%.2f')%(line.price_unit*line.quantity)).replace('.',',') or ''"/></SPAN></TD>
+                                <TD CLASS="R37C1"><SPAN class="cu_wspace"><t t-out="line_index+1"/></SPAN></TD>
+                                <TD CLASS="R37C2" COLSPAN="3"><t t-out="line.name or ''"/></TD>
+                                <TD CLASS="R37C4"><SPAN class="cu_wspace"><t t-out="line.quantity or ''"/></SPAN></TD>
+                                <TD CLASS="R37C5"><SPAN class="cu_wspace"><t t-out="line.product_uom_id.name or ''"/></SPAN></TD>
+                                <TD CLASS="R37C4"><SPAN class="cu_wspace"><t t-out="line.price_unit or ''"/></SPAN></TD>
+                                <TD CLASS="R37C7"><SPAN class="cu_wspace"><t t-out="(('%.2f')%(line.price_unit*line.quantity)).replace('.',',') or ''"/></SPAN></TD>
                             </tr>
                             <TR CLASS="R26">
                                 <TD COLSPAN="8" CLASS="R39C1">&amp;nbsp;</TD>
@@ -250,20 +250,20 @@
                             </TR>
                             <TR CLASS="R15">
                                 <TD CLASS="R46C1" COLSPAN="8">
-                                    <SPAN class="cu_wspace">Всего наименований <t t-esc="o.prepaid_line and len(o.prepaid_line) or '0' "/>, на сумму
-                                        <t t-esc="o.amount_sum_line or '0,00'"/>
+                                    <SPAN class="cu_wspace">Всего наименований <t t-out="o.prepaid_line and len(o.prepaid_line) or '0' "/>, на сумму
+                                        <t t-out="o.amount_sum_line or '0,00'"/>
                                         руб.
                                     </SPAN>
                                 </TD>
                             </TR>
                             <TR CLASS="R15">
                                 <TD CLASS="R29C5" COLSPAN="8">
-                                    <t t-esc="helper.rubles(o.amount_sum_line).capitalize()"/>
+                                    <t t-out="helper.rubles(o.amount_sum_line).capitalize()"/>
                                 </TD>
                             </TR>
                             <TR CLASS="R15">
                                 <TD CLASS="R29C5" COLSPAN="8">Условия оплаты:
-                                    <t t-esc="o.payment_terms"/>
+                                    <t t-out="o.payment_terms"/>
                                 </TD>
                             </TR>
                             <TR CLASS="R0">
@@ -283,16 +283,16 @@
                                     <SPAN class="cu_wspace">Руководитель</SPAN>
                                 </TD>
                                 <TD CLASS="R51C10" COLSPAN="1">
-                                    <t t-esc="helper.initials(company.chief_id.name)"/>
+                                    <t t-out="helper.initials(company.chief_id.name)"/>
                                 </TD>
                                 <TD CLASS="R51C6I">
                                     <SPAN>
-                                        <t t-raw="company.print_facsimile and (company.print_anywhere or context.get('mark_so_as_sent', False)) and helper.img(company.chief_id.facsimile) or ''"/>
+                                        <t t-out="company.print_facsimile and (company.print_anywhere or context.get('mark_so_as_sent', False)) and helper.img(company.chief_id.facsimile) or ''"/>
                                     </SPAN>
                                 </TD>
                                 <TD CLASS="R51C6S">
                                     <SPAN>
-                                        <t t-raw="company.print_stamp and (company.print_anywhere or context.get('mark_so_as_sent', False)) and helper.img(company.stamp) or ''"/>
+                                        <t t-out="company.print_stamp and (company.print_anywhere or context.get('mark_so_as_sent', False)) and helper.img(company.stamp) or ''"/>
                                     </SPAN>
                                 </TD>
 
@@ -300,11 +300,11 @@
                                     <SPAN class="cu_wspace">Бухгалтер</SPAN>
                                 </TD>
                                 <TD CLASS="R51C10" COLSPAN="1">
-                                    <t t-esc="helper.initials(company.accountant_id.name)"/>
+                                    <t t-out="helper.initials(company.accountant_id.name)"/>
                                 </TD>
                                 <TD CLASS="R51C6I">
                                     <SPAN>
-                                        <t t-raw="company.print_facsimile and (company.print_anywhere or context.get('mark_so_as_sent', False)) and helper.img(company.accountant_id.facsimile) or ''"/>
+                                        <t t-out="company.print_facsimile and (company.print_anywhere or context.get('mark_so_as_sent', False)) and helper.img(company.accountant_id.facsimile) or ''"/>
                                     </SPAN>
                                 </TD>
 

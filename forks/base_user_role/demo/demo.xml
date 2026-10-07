@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Демо роль: Менеджер по продажам -->
+        <!-- implied_ids убраны: зависимые модули (sales_team, account) могут быть
+             не загружены на момент установки base_user_role -->
+        <record id="demo_role_sales_manager" model="res.users.role">
+            <field name="name">Менеджер по продажам (демо)</field>
+        </record>
+
+        <!-- Демо роль: Бухгалтер -->
+        <record id="demo_role_accountant" model="res.users.role">
+            <field name="name">Бухгалтер (демо)</field>
+        </record>
+
+    </data>
+</odoo>

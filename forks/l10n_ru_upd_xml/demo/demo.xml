@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Добавляем код ОКЕИ 796 (штука) к стандартной единице измерения -->
+        <record id="uom.product_uom_unit" model="uom.uom">
+            <field name="okei">796</field>
+        </record>
+
+    </data>
+</odoo>

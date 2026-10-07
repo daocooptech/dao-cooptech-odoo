@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template id="demo_report_xml_view">
+        <t t-foreach="docs" t-as="o">
+            <!-- Multicompany -->
+            <t t-if="o and 'company_id' in o">
+                <t t-set="company" t-value="o.company_id"></t>
+            </t>
+            <t t-if="not o or not 'company_id' in o">
+                <t t-set="company" t-value="res_company"></t>
+            </t>
+            <t t-set="context" t-value="o.env.context"></t>
+<Файл t-att="{'ИдФайл':o.edi or '','ВерсПрог':'[bi-cons.ru] v.1.6','ВерсФорм':'5.01'}">
+	<СвУчДокОбор t-att="{'ИдОтпр':company.edi,'ИдПол':o.partner_id.edi}">
+	</СвУчДокОбор>
+	<Документ t-att="{'КНД':'1115125','Функция':'СЧФДОП','ПоФактХЖ':'Документ об отгрузке товаров (выполнении работ), передаче имущественных прав (документ об оказании услуг)','НаимДокОпр':'Счет-фактура и документ об отгрузке товаров (выполнении работ), передаче имущественных прав (документ об оказании услуг)','ДатаИнфПр':datetime.datetime.now().strftime('%d.%m.%Y'),'ВремИнфПр':datetime.datetime.now().strftime('%H.%M.%S'),'НаимЭконСубСост':company.name or ''}">
+		<СвСчФакт t-att="{'НомерСчФ':o.name or '','ДатаСчФ':o.invoice_date.strftime('%d.%m.%Y'),'КодОКВ':'643'}">
+			<СвПрод t-att="{'ОКПО':company.okpo or '','КраткНазв':company.name or ''}">
+				<ИдСв>
+					<СвЮЛУч t-att="{'НаимОрг':company.name or '','ИННЮЛ':company.inn or '','КПП':company.kpp or ''}"/>
+				</ИдСв>
+				<Адрес>
+					<АдрРФ t-att="{'КодРегион':company.state_id.code or '','Город':company.city or ''}"/>
+				</Адрес>
+			</СвПрод>
+			<ГрузОт>
+				<ОнЖе>он же</ОнЖе>
+			</ГрузОт>
+			<ГрузПолуч t-att="{'ОКПО':o.partner_id.okpo or '','КраткНазв':o.partner_id.name or ''}">
+				<ИдСв>
+					<СвЮЛУч t-att="{'НаимОрг':o.partner_id.name or '','ИННЮЛ':o.partner_id.inn or '','КПП':o.partner_id.kpp or ''}"/>
+				</ИдСв>
+				<Адрес>
+					<АдрРФ t-att="{'КодРегион':o.partner_id.state_id.code or '','Город':o.partner_id.city or ''}"/>
+				</Адрес>
+			</ГрузПолуч>
+			
+			<СвПокуп t-att="{'ОКПО':o.partner_id.okpo or '','КраткНазв':o.partner_id.name or ''}">
+				<ИдСв>
+					<СвЮЛУч t-att="{'НаимОрг':o.partner_id.name or '','ИННЮЛ':o.partner_id.inn or '','КПП':o.partner_id.kpp or ''}"/>
+				</ИдСв>
+				<Адрес>
+					<АдрРФ t-att="{'КодРегион':o.partner_id.state_id.code or '','Город':o.partner_id.city or ''}"/>
+				</Адрес>
+			</СвПокуп>
+		</СвСчФакт>
+		<ТаблСчФакт>
+                        <t t-set="total_price_tax_subtotal" t-value="sum([line.price_unit*line.quantity for line in o.invoice_line_ids])"/>
+                        <t t-set="total_tax_subtotal" t-value="sum([line.price_unit*line.quantity*(line.tax_ids.amount/100) for line in o.invoice_line_ids])"/>
+                        <t t-foreach="o.invoice_line_ids" t-as="line">
+			<СведТов t-att="{'НомСтр':line_index+1,'НаимТов':line._ru_print_name(),'ОКЕИ_Тов':line.product_uom_id.okei or '','КолТов':line.quantity or '','ЦенаТов':(('%.2f')%(line.price_subtotal/line.quantity)).replace('.',',') or '','СтТовБезНДС':(('%.2f')%(line.price_subtotal)).replace('.',',') or '','НалСт':(('%.0f')%(line.tax_ids.amount)).replace('.',',')+'%' or 'без НДС','СтТовУчНал':(('%.2f')%(line.price_subtotal*(1+(line.tax_ids.amount/100)))).replace('.',',') or ''}">
+				<Акциз>
+					<БезАкциз>без акциза</БезАкциз>
+				</Акциз>
+				<СумНал>
+					<СумНал><t t-out="(('%.2f')%(line.price_subtotal*(line.tax_ids.amount/100))).replace('.',',') or ''"/></СумНал>
+				</СумНал>
+			</СведТов>
+                        </t>
+			<ВсегоОпл t-att="{'СтТовБезНДСВсего':(('%.2f')%(total_price_tax_subtotal)).replace('.',',') or '','СтТовУчНалВсего':(('%.2f')%(total_price_tax_subtotal+total_tax_subtotal)).replace('.',',') or ''}">
+				<СумНалВсего>
+					<СумНал><t t-out="(('%.2f')%(total_tax_subtotal)).replace('.',',') or ''"/></СумНал>
+				</СумНалВсего>
+			</ВсегоОпл>
+		</ТаблСчФакт>
+		<Подписант t-att="{'ОблПолн':'0','Статус':'1','ОснПолн':'Должностные обязанности'}">
+			<ЮЛ t-att="{'ИННЮЛ':company.inn or '','НаимОрг':company.name or '','Должн':company.chief_id.function or ''}">
+				<ФИО t-att="{'Фамилия':company.chief_id.last_name or '','Имя':company.chief_id.first_name or '','Отчество':company.chief_id.second_name or ''}"/>
+			</ЮЛ>
+		</Подписант>
+	</Документ>
+</Файл>
+
+        </t>
+    </template>
+</odoo>

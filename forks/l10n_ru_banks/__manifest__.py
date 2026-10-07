@@ -1,7 +1,7 @@
 {
     "name": "Russian - Banks",
     "summary": "Russian banks and their addresses",
-    "version": "19.0.1.0.0",
+    "version": "20.0.1.1.0",
     "countries": ["ru"],
     "category": "Accounting/Localizations",
     "website": "https://github.com/OCA/l10n-russia",
@@ -12,6 +12,6 @@
     "installable": True,
     "depends": ["account"],
     "auto_install": ["account"],
-    "data": ["security/ir.model.access.csv", "views/res_bank.xml"],
-    "demo": ["data/res_bank_demo.xml"],
+    "data": [ "views/ru_bank_views.xml", 'security/ir.access.csv'],
+    "demo": ["data/ru_bank_demo.xml"],
 }

@@ -59,8 +59,8 @@ class UpdateBanksWizard(models.TransientModel):
         except etree.XMLSyntaxError as e:
             raise UserError(_("Invalid XML format in downloaded file: %s") % e) from e
 
-        bank_model = self.env["res.bank"]
-        corracc_model = self.env["res.bank.corracc"]
+        bank_model = self.env["ru.bank"]
+        corracc_model = self.env["ru.bank.corracc"]
         country_ru = self.env.ref("base.ru", raise_if_not_found=False)
 
         count_created = 0
@@ -91,7 +91,7 @@ class UpdateBanksWizard(models.TransientModel):
                 "zip": zip_code,
             }
             if country_ru:
-                bank_vals["country"] = country_ru.id
+                bank_vals["country_id"] = country_ru.id
 
             if bank:
                 bank.write(bank_vals)
@@ -100,10 +100,13 @@ class UpdateBanksWizard(models.TransientModel):
                 bank = bank_model.create(bank_vals)
                 self.env["ir.model.data"].create(
                     {
-                        "name": f"res_bank_{bank.id}",
+                        "name": f"ru_bank_{bank.id}",
                         "module": "l10n_ru_banks",
-                        "model": "res.bank",
+                        "model": "ru.bank",
                         "res_id": bank.id,
+                        # without noupdate the end of every module update
+                        # deletes records whose xmlid is not in the module data
+                        "noupdate": True,
                     }
                 )
                 count_created += 1
@@ -139,10 +142,11 @@ class UpdateBanksWizard(models.TransientModel):
                 )
                 self.env["ir.model.data"].create(
                     {
-                        "name": f"res_bank_corracc_{corr.id}",
+                        "name": f"ru_bank_corracc_{corr.id}",
                         "module": "l10n_ru_banks",
-                        "model": "res.bank.corracc",
+                        "model": "ru.bank.corracc",
                         "res_id": corr.id,
+                        "noupdate": True,
                     }
                 )
 

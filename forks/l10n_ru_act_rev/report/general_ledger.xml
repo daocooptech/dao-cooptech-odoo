@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template id="l10n_ru_act_rev.general_ledger">
+        <t t-call="l10n_ru_act_rev.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="l10n_ru_act_rev.internal_layout">
+                    <t t-call="l10n_ru_act_rev.report_general_ledger_base" />
+                </t>
+            </t>
+        </t>
+    </template>
+    <template id="l10n_ru_act_rev.report_general_ledger_base">
+        <t t-set="foreign_currency" t-value="foreign_currency" />
+        <t t-set="filter_partner_ids" t-value="filter_partner_ids" />
+        <div class="page">
+            <style type="text/css">
+               body { background: #ffffff; margin: 0; font-family: Arial; font-size: 10pt; font-style: normal; text-align: center;}
+                tbody, table, tr, td, th { border: none;}
+                tr.R0{ height: 15px;  border: border: none; }
+               tr.R0 td.R0t{text-align: center; font-family: Tahoma; font-size: 14pt; font-weight: bold;}
+               tr.R0 td.R0j{text-align: justify }
+               tr.R0 td.R0l{text-align: left}
+               tr.R0 td.R0lb{font-weight: bold; text-align: left}
+               tr.R0 td.R0lbt{font-weight: bold; text-align: left; border-top: #000000 1px solid;}
+                tr.R0 td.R0lbox{text-align: left; border-left: #000000 1px solid; border-top: #000000 1px solid;
+                border-right: #000000 1px solid; border-bottom: #000000 1px solid; vertical-align: middle;}
+                tr.R0 td.R0cbox{text-align: center; border-left: #000000 1px solid; border-top: #000000 1px solid;
+                border-right: #000000 1px solid; border-bottom: #000000 1px solid; vertical-align: middle;}
+                tr.R0 td.R0lbbox{font-weight: bold; text-align: left; border-left: #000000 1px solid; border-top:
+                #000000 1px solid; border-right: #000000 1px solid; border-bottom: #000000 1px solid; vertical-align: middle;}
+                tr.R0 td.R0rbox{text-align: right; border-left: #000000 1px solid; border-top: #000000 1px solid;
+                border-right: #000000 1px solid; border-bottom: #000000 1px solid;}
+                tr.R0 td.R0rbbox{font-weight: bold; text-align: right; border-left: #000000 1px solid; border-top:
+                #000000 1px solid; border-right: #000000 1px solid; border-bottom: #000000 1px solid;}
+                tr.R0 td.Rcbox{text-align: center; border-left: #000000 1px solid; border-top: #000000 1px solid;
+                border-right: #000000 1px solid; border-bottom: #000000 1px solid;}
+                tr.R0 td.R0cbbox{font-weight: bold; text-align: center; border-left: #000000 1px solid; border-top:
+                #000000 1px solid; border-right: #000000 1px solid; border-bottom: #000000 1px solid;}
+                tr.R0 td.R0lboxf{background: #FFFFCC;text-align: left; border-left: #000000 1px solid; border-top:
+                #000000 1px solid; border-right: #000000 1px solid; border-bottom: #000000 1px solid;}
+                tr.R0 td.R0lbboxf{background: #FFFFCC;font-weight: bold; text-align: left; border-left: #000000 1px
+                solid; border-top: #000000 1px solid; border-right: #000000 1px solid; border-bottom: #000000 1px
+                solid;}
+                tr.R0 td.R0rboxf{background: #FFFFCC;text-align: right; border-left: #000000 1px solid; border-top:
+                #000000 1px solid; border-right: #000000 1px solid; border-bottom: #000000 1px solid;}
+                tr.R0 td.R0rbboxf{background: #FFFFCC;font-weight: bold; text-align: right; border-left: #000000 1px
+                solid; border-top: #000000 1px solid; border-right: #000000 1px solid; border-bottom: #000000 1px
+                solid;}
+                tr.R0 td.Rcboxf{background: #FFFFCC;text-align: center; border-left: #000000 1px solid; border-top:
+                #000000 1px solid; border-right: #000000 1px solid; border-bottom: #000000 1px solid;}
+                tr.R0 td.R0cbboxf{background: #FFFFCC;font-weight: bold; text-align: center; border-left: #000000 1px
+                solid; border-top: #000000 1px solid; border-right: #000000 1px solid; border-bottom: #000000 1px
+                solid; vertical-align: middle;}
+               tr.R0 td.R0print span img { position: absolute; width: 140px; top: -80px; left: -350px; }
+               tr.R0 td.R0print { overflow: visible; }
+               tr.R0 td.R0print span { position: relative; }
+               tr.R0 td.R0print{ text-align: left; }
+               tr.R0 td.R0fas { font-family: Arial; font-size: 7pt; font-style: normal; text-align: right; border-bottom: #000000 1px solid; }
+               tr.R0 td.R0fas { overflow: visible; }
+               tr.R0 td.R0fas span { position: relative; }
+               tr.R0 td.R0fas span img { position: absolute; width: 100px; top: -25px; left: 200px;}
+             </style>
+            <t t-set="lines" t-value='[]' />
+            <t t-set="total_debit_init_all" t-value='0.0'/>
+            <t t-set="total_credit_init_all" t-value='0.0'/>
+
+            <t t-foreach="general_ledger" t-as="account">
+                <t t-if="'list_grouped' in account">
+                    <t t-foreach="account['list_grouped']" t-as="group_item">
+
+                        <t
+                            t-set="misc_domain"
+                            t-value="[('account_id', '=', account['id']),('date', '&lt;', date_from)]"
+                        />
+                        <t
+                            t-set="misc_grouped_domain"
+                            t-value="[('partner_id', '=', group_item['id'])]"
+                            t-if="'partners' in account"
+                        />
+                        <t t-set="misc_grouped_domain" t-value="[]" t-else="" />
+                            <t t-set="debit_domain" t-value="[('debit', '&lt;&gt;', 0)]" />
+                            <span
+                                t-att-domain="misc_domain+debit_domain+misc_grouped_domain"
+                                res-model="account.move.line"
+                            >
+                                <t t-set="total_debit_init" t-value="group_item['init_bal']['debit']" />
+                                <t t-set="total_debit_init_all" t-value='total_debit_init_all+total_debit_init'/>
+                            </span>
+                            <t t-set="credit_domain" t-value="[('credit', '&lt;&gt;', 0)]" />
+                            <span
+                                t-att-domain="misc_domain+credit_domain+misc_grouped_domain"
+                                res-model="account.move.line"
+                            >
+                                <t t-set="total_credit_init" t-value="group_item['init_bal']['credit']"  />
+                                <t t-set="total_credit_init_all" t-value='total_credit_init_all+total_credit_init'/>
+                            </span>
+                            <t t-set="lines" t-value='lines+group_item["move_lines"]' />
+
+                    </t>
+                </t>
+            </t>
+            <t t-set="lines" t-value='o.sorted_lines(lines)'/>
+            <t t-set="total_debit" t-value='0.0' />
+            <t t-set="total_credit" t-value='0.0' />
+            <TABLE CELLSPACING="0">
+              <COL WIDTH="12%"/>
+              <COL WIDTH="14%"/>
+              <COL WIDTH="12%"/>
+              <COL WIDTH="12%"/>
+              <COL WIDTH="12%"/>
+              <COL WIDTH="12%"/>
+              <COL WIDTH="14%"/>
+              <COL WIDTH="12%"/>
+              <tr CLASS="R0">
+                <td colspan="8" CLASS="R0t">Акт сверки</td>
+              </tr>
+              <tr CLASS="R0">
+                <td colspan="8">взаимных расчетов за период: <t t-out="o.get_data_format(date_from) or ''"/> - <t t-out="o.get_data_format(date_to) or ''"/></td>
+              </tr>
+              <t t-set="pid" t-value="o.partner_ids[0].parent_id or o.partner_ids[0]"/>
+              <tr CLASS="R0">
+                <td colspan="8">между: <t t-out="company_name"/> и <t t-out="pid.name"/></td>
+              </tr>
+              <tr CLASS="R0">
+                <td colspan="8"><t t-if="o.get_contract()">по договору №<t t-out="o.get_contract().name"/> от <t t-out="o.get_contract().date_start"/></t></td>
+              </tr>
+              <tr CLASS="R0">
+                <td colspan="8" CLASS="R0lb"></td>
+              </tr>
+              <tr CLASS="R0">
+                <td colspan="8" CLASS="R0lb"></td>
+              </tr>
+              <tr CLASS="R0">
+                <td colspan="8" CLASS="R0j">Мы, нижеподписавшиеся, <t t-out="company_name"/> с одной стороны, и <t t-out="pid.name"/>, с другой стороны, составили данный акт сверки в том, что, состояние взаимных расчетов по данным учета следующее:</td>
+              </tr>
+              <tr CLASS="R0">
+                <td colspan="8" CLASS="R0lb"></td>
+              </tr>
+              <tr CLASS="R0">
+                <td colspan="4" CLASS="R0lbox">По данным <t t-out="company_name"/>, руб</td>
+                <td colspan="4" CLASS="R0lbox">По данным <t t-out="pid.name"/>, руб</td>
+              </tr>
+              <tr CLASS="R0">
+                <td CLASS="R0cbbox">Дата</td>
+                <td CLASS="R0cbbox">Документ</td>
+                <td CLASS="R0cbbox">Дебет</td>
+                <td CLASS="R0cbbox">Кредит</td>
+                <td CLASS="R0cbbox">Дата</td>
+                <td CLASS="R0cbbox">Документ</td>
+                <td CLASS="R0cbbox">Дебет</td>
+                <td CLASS="R0cbbox">Кредит</td>
+              </tr>
+              <tr CLASS="R0">
+                  <t
+                    t-set="misc_domain"
+                    t-value="[('account_id', '=', account['id']),('date', '&lt;', date_from)]"
+                />
+                <t
+                    t-set="misc_grouped_domain"
+                    t-value="[('partner_id', '=', group_item['id'])]"
+                    t-if="'partners' in account"
+                />
+                <t t-set="misc_grouped_domain" t-value="[]" t-else="" />
+                <td colspan="2" CLASS="R0lbox">Сальдо начальное</td>
+                <td CLASS="R0cbox"><span t-out="'%0.2f'%(total_debit_init_all)"/></td>
+                <td CLASS="R0cbox"><span t-out="'%0.2f'%(total_credit_init_all)"/></td>
+                <td colspan="2" CLASS="R0lbox">Сальдо начальное</td>
+                <td CLASS="R0cbox"></td>
+                <td CLASS="R0cbox"></td>
+              </tr>
+              <tr CLASS="R0" t-foreach="lines" t-as="line">
+                  <t t-set="total_debit" t-value="total_debit+line['debit']" />
+                  <t t-set="total_credit" t-value="total_credit+line['credit']" />
+                <td CLASS="R0cbox"><t t-out="o.get_data_format(line['date']) or ''"/></td>
+                <td CLASS="R0lbox"><t t-out="line['entry']"/></td>
+                <td CLASS="R0cbox"><t t-out="'%0.2f'%(line['debit'])"/></td>
+                <td CLASS="R0cbox"><t t-out="'%0.2f'%(line['credit'])"/></td>
+                <td CLASS="R0cbox"></td>
+                <td CLASS="R0lbox"></td>
+                <td CLASS="R0cbox"></td>
+                <td CLASS="R0cbox"></td>
+              </tr>
+              <tr CLASS="R0">
+                <td colspan="2" CLASS="R0lbbox">Обороты за период</td>
+                <td CLASS="R0cbbox"><t t-out="'%0.2f'%(total_debit)"/>
+                </td>
+                <td CLASS="R0cbbox"><t t-out="'%0.2f'%(total_credit)"/>
+                </td>
+                <td colspan="2" CLASS="R0lbbox">Обороты за период</td>
+                <td CLASS="R0cbbox"></td>
+                <td CLASS="R0cbbox"></td>
+              </tr>
+              <tr CLASS="R0">
+                <td colspan="2" CLASS="R0lbbox">Сальдо конечное</td>
+                <td CLASS="R0cbbox"><t t-out="'%0.2f'%(total_debit_init_all+total_debit)"/></td>
+                <td CLASS="R0cbbox"><t t-out="'%0.2f'%(total_credit_init_all+total_credit)"/></td>
+                <td colspan="2" CLASS="R0lbbox">Сальдо конечное</td>
+                <td CLASS="R0cbbox"></td>
+                <td CLASS="R0cbbox"></td>
+              </tr>
+                <t t-set="total_balance_fin" t-value='(total_debit_init_all+total_debit)-(total_credit_init_all+total_credit)'/>
+              <tr CLASS="R0">
+                <td colspan="8" CLASS="R0lb"></td>
+              </tr>
+              <tr CLASS="R0">
+                <td colspan="4" CLASS="R0l">По данным <t t-out="company_name"/></td>
+                <td colspan="4" CLASS="R0l">По данным <t t-out="pid.name"/></td>
+              </tr>
+              <tr CLASS="R0">
+                <td colspan="4" CLASS="R0lb">на <t t-out="o.get_data_format(date_to) or ''"/> задолженность в пользу <t t-if="total_balance_fin>=0"><t t-out="company_name"/></t><t t-else=""><t t-out="pid.name"/></t> <t t-out="'%0.2f'%(abs(total_balance_fin))"/> руб. (<t t-out="o.rubles(abs(total_balance_fin)) or ''"/>)"
+</td>
+                <td colspan="4" CLASS="R0lb">на <t t-out="o.get_data_format(date_to) or ''"/> задолженность в пользу <t t-if="total_balance_fin>=0"><t t-out="company_name"/></t><t t-else=""><t t-out="pid.name"/></t> <t t-out="'%0.2f'%(abs(total_balance_fin))"/> руб. (<t t-out="o.rubles(abs(total_balance_fin)) or ''"/>)"
+</td>
+              </tr>
+              <tr CLASS="R0">
+                <td colspan="8" CLASS="R0lb"></td>
+              </tr>
+              <tr CLASS="R0">
+                <td colspan="4" CLASS="R0l">От <t t-out="company_name"/></td>
+                <td colspan="4" CLASS="R0l">От <t t-out="pid.name"/></td>
+              </tr>
+              <tr CLASS="R0">
+                <td colspan="8" CLASS="R0lb"></td>
+              </tr>
+              <tr CLASS="R0">
+                <td colspan="4" CLASS="R0lb"><t t-out="o.company_id.chief_id.function or ''"/></td>
+                <td colspan="4" CLASS="R0lb">Директор</td>
+              </tr>
+              <tr CLASS="R0">
+                <td colspan="8" CLASS="R0lb"></td>
+              </tr>
+              <tr CLASS="R0">
+                <td colspan="2" CLASS="R0fas"><SPAN><t t-out="o.company_id.print_facsimile and o.img(o.company_id.chief_id.facsimile) or ''"/></SPAN></td>
+                <td colspan="2" CLASS="R0lb"><t t-out="o.initials(o.company_id.chief_id.name) or ''"/></td>
+                <td colspan="2" CLASS="R0lb"></td>
+                <td colspan="2" CLASS="R0lb"></td>
+              </tr>
+              <tr CLASS="R0">
+                <td colspan="2" CLASS="R0lbt">М.П.</td>
+                <td colspan="2" CLASS="R0print"><SPAN><t t-out="o.company_id.print_stamp and (o.company_id.print_anywhere or context.get('mark_invoice_as_sent', False)) and o.img(o.company_id.stamp) or ''"/></SPAN></td>
+                <td colspan="2" CLASS="R0lbt">М.П.</td>
+                <td colspan="2" CLASS="R0lb"></td>
+              </tr>
+            </TABLE>
+        </div>
+    </template>
+
+<!--    <report-->
+<!--        id="action_print_report_general_ledger_qweb"-->
+<!--        model="general.ledger.report.wizard"-->
+<!--        string="Акт сверки"-->
+<!--        report_type="qweb-pdf"-->
+<!--        menu="False"-->
+<!--        name="act_revise.general_ledger"-->
+<!--        file="act_revise.general_ledger"-->
+<!--        print_report_name=" 'Акт сверки - %s' %s (object.get_report_filename()) or ''"-->
+<!--    />-->
+    <record id="action_print_report_general_ledger_qweb" model="ir.actions.report">
+        <field name="name">Акт сверки</field>
+        <field name="model">general.ledger.act_revise.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">l10n_ru_act_rev.general_ledger</field>
+        <field name="print_report_name">'Акт сверки - %s' % (object.get_report_filename() or '')</field>
+        <field name="binding_model_id" ref="model_general_ledger_act_revise_wizard"/>
+    </record>
+
+    <record id="report_qweb_paperformat" model="report.paperformat">
+        <field name="name">Account financial report qweb paperformat</field>
+        <field name="default" eval="True" />
+        <field name="format">custom</field>
+        <field name="page_height">297</field>
+        <field name="page_width">210</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">12</field>
+        <field name="margin_bottom">8</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False" />
+        <field name="header_spacing">10</field>
+        <field name="dpi">110</field>
+    </record>
+    <record id="action_print_report_general_ledger_qweb" model="ir.actions.report">
+        <field name="paperformat_id" ref="report_qweb_paperformat" />
+    </record>
+</odoo>

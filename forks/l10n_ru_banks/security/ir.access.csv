@@ -1,0 +1,6 @@
+id,name,model_id,group_id/id,operation,domain
+access_update_ru_banks_wizard,access.update.ru.banks.wizard,update.ru.banks.wizard,account.group_account_manager,cru,
+access_ru_bank_corracc,access.ru.bank.corracc,ru.bank.corracc,account.group_account_manager,cru,
+access_ru_bank_user,access.ru.bank.user,ru.bank,base.group_user,r,
+access_ru_bank_manager,access.ru.bank.manager,ru.bank,account.group_account_manager,crud,
+access_ru_bank_corracc_user,access.ru.bank.corracc.user,ru.bank.corracc,base.group_user,r,

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="contract_customer_sequence" model="ir.sequence">
+            <field name="name">Договор последовательность клиент</field>
+            <field name="code">partner.contract.customer.sequence</field>
+            <field eval="1" name="number_next"/>
+            <field eval="1" name="number_increment"/>
+            <field eval="True" name="use_date_range"/>
+            <field name="padding">5</field>
+        </record>
+        <record id="contract_supplier_sequence" model="ir.sequence">
+            <field name="name">Договор последовательность поставщик</field>
+            <field name="code">partner.contract.supplier.sequence</field>
+            <field eval="1" name="number_next"/>
+            <field eval="1" name="number_increment"/>
+            <field eval="True" name="use_date_range"/>
+            <field name="padding">5</field>
+        </record>
+    </data>
+</odoo>

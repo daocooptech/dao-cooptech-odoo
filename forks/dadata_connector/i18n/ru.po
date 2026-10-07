@@ -1,0 +1,225 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* dadata_connector
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-07-18 05:07+0000\n"
+"PO-Revision-Date: 2024-07-18 05:07+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: dadata_connector
+#: model:ir.model.fields.selection,name:dadata_connector.selection__res_partner_auto_data_wizard__status__active
+msgid "Active"
+msgstr "Действующая"
+
+#. module: dadata_connector
+#: model:ir.model.fields.selection,name:dadata_connector.selection__res_partner_auto_data_wizard__status__bankrupt
+msgid "Bankrupt"
+msgstr "Банкротство"
+
+#. module: dadata_connector
+#: model:ir.model,name:dadata_connector.model_res_config_settings
+msgid "Config Settings"
+msgstr "Конфигурационные настройки"
+
+#. module: dadata_connector
+#: model:ir.model,name:dadata_connector.model_res_partner
+msgid "Contact"
+msgstr "Контакт"
+
+#. module: dadata_connector
+#: model:ir.model.fields,field_description:dadata_connector.field_res_partner_auto_data_wizard__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: dadata_connector
+#: model:ir.model.fields,field_description:dadata_connector.field_res_partner_auto_data_wizard__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: dadata_connector
+#: model:ir.model.fields,field_description:dadata_connector.field_res_config_settings__dadata_token
+msgid "DaData token"
+msgstr ""
+
+#. module: dadata_connector
+#. odoo-javascript
+#: code:addons/dadata_connector/static/src/views/fields/search/search_field.js:0
+#: code:addons/local_addons/dadata_connector/static/src/views/fields/search/search_field.js:0
+#, python-format
+msgid "Data updated."
+msgstr "Данные обновлены."
+
+#. module: dadata_connector
+#: model:ir.model.fields,field_description:dadata_connector.field_res_partner_auto_data_wizard__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: dadata_connector
+#. odoo-python
+#: code:addons/dadata_connector/models/res_partner.py:0
+#: code:addons/local_addons/dadata_connector/models/res_partner.py:0
+#, python-format
+msgid ""
+"Failed to connect to DaData server. The token in the settings may be "
+"incorrect."
+msgstr ""
+"Не удалось подключиться к серверу DaData. Возможно, токен в настройках "
+"указан не верно."
+
+#. module: dadata_connector
+#: model:ir.model.fields,field_description:dadata_connector.field_res_partner_auto_data_wizard__full_address
+msgid "Full legal address"
+msgstr "Юридический адрес"
+
+#. module: dadata_connector
+#: model:ir.model.fields,field_description:dadata_connector.field_res_partner_auto_data_wizard__name
+msgid "Full name"
+msgstr "Наименование"
+
+#. module: dadata_connector
+#: model:ir.model.fields,field_description:dadata_connector.field_res_partner_auto_data_wizard__id
+msgid "ID"
+msgstr ""
+
+#. module: dadata_connector
+#: model:ir.model.fields,field_description:dadata_connector.field_res_partner_auto_data_wizard__vat
+msgid "Identification Number"
+msgstr "ИНН"
+
+#. module: dadata_connector
+#: model:ir.model.fields,help:dadata_connector.field_res_partner_auto_data_wizard__vat
+msgid "Identification Number for selected type"
+msgstr ""
+
+#. module: dadata_connector
+#: model:ir.model.fields.selection,name:dadata_connector.selection__res_partner_auto_data_wizard__organization_type__individual
+msgid "Individual entrepreneur"
+msgstr "Индивидуальный предприниматель"
+
+#. module: dadata_connector
+#: model:ir.model.fields,field_description:dadata_connector.field_res_partner_auto_data_wizard____last_update
+msgid "Last Modified on"
+msgstr ""
+
+#. module: dadata_connector
+#: model:ir.model.fields,field_description:dadata_connector.field_res_partner_auto_data_wizard__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: dadata_connector
+#: model:ir.model.fields,field_description:dadata_connector.field_res_partner_auto_data_wizard__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: dadata_connector
+#: model:ir.model.fields.selection,name:dadata_connector.selection__res_partner_auto_data_wizard__organization_type__legal
+msgid "Legal entity"
+msgstr "Юридическое лицо"
+
+#. module: dadata_connector
+#: model:ir.model.fields,help:dadata_connector.field_res_partner_auto_data_wizard__organization_type
+msgid "Legal entity or individual entrepreneur"
+msgstr "Юридическое лицо или индивидуальный предприниматель"
+
+#. module: dadata_connector
+#: model:ir.model.fields.selection,name:dadata_connector.selection__res_partner_auto_data_wizard__status__liquidated
+msgid "Liquidated"
+msgstr "Ликвидирована"
+
+#. module: dadata_connector
+#: model:ir.model.fields.selection,name:dadata_connector.selection__res_partner_auto_data_wizard__status__liquidating
+msgid "Liquidating"
+msgstr "Ликвидируется"
+
+#. module: dadata_connector
+#: model_terms:ir.ui.view,arch_db:dadata_connector.res_partner_auto_data_wizard_view_form
+msgid "No"
+msgstr "Нет"
+
+#. module: dadata_connector
+#. odoo-python
+#: code:addons/dadata_connector/models/res_partner.py:0
+#: code:addons/local_addons/dadata_connector/models/res_partner.py:0
+#, python-format
+msgid "No data found for the organization"
+msgstr "Не найдены данные для организации"
+
+#. module: dadata_connector
+#: model:ir.model.fields,field_description:dadata_connector.field_res_partner_auto_data_wizard__partner_id
+msgid "Partner"
+msgstr "Контакт"
+
+#. module: dadata_connector
+#: model:ir.model.fields.selection,name:dadata_connector.selection__res_partner_auto_data_wizard__status__reorganizing
+msgid "Reorganizing"
+msgstr ""
+"В процессе присоединения к другому юр. лицу, с последующей ликвидацией"
+
+#. module: dadata_connector
+#. odoo-javascript
+#: code:addons/dadata_connector/static/src/views/fields/search/search_field.js:0
+#: code:addons/dadata_connector/static/src/views/fields/search/search_field.xml:0
+#: code:addons/dadata_connector/static/src/views/fields/search/search_field.xml:0
+#: code:addons/local_addons/dadata_connector/static/src/views/fields/search/search_field.js:0
+#: code:addons/local_addons/dadata_connector/static/src/views/fields/search/search_field.xml:0
+#: code:addons/local_addons/dadata_connector/static/src/views/fields/search/search_field.xml:0
+#, python-format
+msgid "Search"
+msgstr "Поиск"
+
+#. module: dadata_connector
+#. odoo-python
+#: code:addons/dadata_connector/models/res_partner.py:0
+#: code:addons/local_addons/dadata_connector/models/res_partner.py:0
+#, python-format
+msgid "Set these details for the current contact?"
+msgstr "Установить данные реквизиты для текущего контакта?"
+
+#. module: dadata_connector
+#: model:ir.model.fields,field_description:dadata_connector.field_res_partner_auto_data_wizard__status
+msgid "Status"
+msgstr "Статус"
+
+#. module: dadata_connector
+#. odoo-python
+#: code:addons/dadata_connector/models/res_partner.py:0
+#: code:addons/local_addons/dadata_connector/models/res_partner.py:0
+#, python-format
+msgid ""
+"The token for DaData is not specified in the settings. (Settings - General "
+"settings - Integrations - DaData token)"
+msgstr ""
+"В настройках не указан токен для DaData. (Настройки - Общие настройки - "
+"Интеграции - DaData token)"
+
+#. module: dadata_connector
+#: model:ir.model.fields,field_description:dadata_connector.field_res_partner_auto_data_wizard__organization_type
+msgid "Type of organization"
+msgstr "Тип организации"
+
+#. module: dadata_connector
+#. odoo-python
+#: code:addons/dadata_connector/models/res_partner.py:0
+#: code:addons/local_addons/dadata_connector/models/res_partner.py:0
+#, python-format
+msgid "Unknown organization type"
+msgstr "Неизвестный тип организации"
+
+#. module: dadata_connector
+#: model:ir.model,name:dadata_connector.model_res_partner_auto_data_wizard
+msgid "Wizard for autofilling partner"
+msgstr "Визард для автозаполнения контактов"
+
+#. module: dadata_connector
+#: model_terms:ir.ui.view,arch_db:dadata_connector.res_partner_auto_data_wizard_view_form
+msgid "Yes"
+msgstr "Да"

@@ -1,0 +1,34 @@
+<odoo>
+    <record id="contract_profile_view" model="ir.ui.view">
+        <field name="name">contract.profile.form</field>
+        <field name="model">contract.profile</field>
+        <field name="arch" type="xml">
+            <form string="Профиль договора">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="journal_id"/>
+                        <field name="payment_term_id"/>
+                        <field name="receivable_account_id"/>
+                        <field name="payable_account_id"/>
+                        <field name="max_receivable_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="contract_profile_action" model="ir.actions.act_window">
+        <field name="name">Виды договоров</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">contract.profile</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="contract_allowed_profiles_action" model="ir.actions.act_window">
+        <field name="name">Настройка одновременно включенных договоров</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">contract.allowed.profiles</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

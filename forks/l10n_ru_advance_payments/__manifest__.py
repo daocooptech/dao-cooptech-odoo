@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Российская локализация - Авансовые счета',
-    'version': '19.0.2025.06.06',
+    'version': '20.0.2025.06.06',
     'description': """Модуль создания новой модели - Авансовые счета. Он добавляет функционал построенный на базовых 
     функциях бухгалтерии.""",
 
@@ -18,7 +18,6 @@
                 ],
 
     'data': [
-        'security/ir.model.access.csv',
         'data/data.xml',
         'views/order_prepaid.xml',
         'views/sale_order.xml',
@@ -27,6 +26,8 @@
         'report/report_invoice.xml',
         'wizard/account_payment_register_prepaid.xml',
         'views/res_config_settings.xml',
+
+        'security/ir.access.csv',
     ],
 
     "external_dependencies": {

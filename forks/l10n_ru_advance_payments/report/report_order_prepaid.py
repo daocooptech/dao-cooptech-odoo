@@ -5,6 +5,7 @@ from odoo.addons.l10n_ru_advance_payments.report_helper import QWebHelper
 
 class RuOrderPrepaidReport(models.AbstractModel):
     _name = 'report.l10n_ru_advance_payments.report_order_prepaid'
+    _description = 'Печатная форма l10n_ru_advance_payments.report_order_prepaid'
 
     def _get_report_values(self, docids, data=None):
         docs = self.env['order.prepaid'].browse(docids)

@@ -1,0 +1,1177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <template id="report_updn">
+            <t t-call="web.basic_layout">
+                <t t-foreach="docs" t-as="o">
+                    <!-- Multicompany -->
+                    <t t-if="o and 'company_id' in o">
+                        <t t-set="company" t-value="o.company_id"/>
+                    </t>
+                    <t t-if="not o or not 'company_id' in o">
+                        <t t-set="company" t-value="res_company"/>
+                    </t>
+                    <t t-set="context" t-value="o.env.context"/>
+
+                    <div class="page">
+
+                        <STYLE TYPE="text/css">
+                            body { background: #ffffff; margin: 0; font-family: Times new roman; font-size: 8pt;
+                            font-style:
+                            normal; }
+
+                            tr.RE15{ height: 15px; }
+                            tr.RE15 td.RE15CE1l{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: left; border-right: #000000 2px solid;}
+                            tr.RE15 td.RE15CE1{ font-family: Times new roman; font-size: 7pt; font-style: normal;
+                            text-align:
+                            right; }
+                            tr.RE15 td.RE15CE2box{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center; border-bottom: #000000 2px solid;border-top: #000000 2px
+                            solid;border-left: #000000 2px solid;border-right: #000000 2px solid;}
+                            tr.RE15 td.RE15CE2b{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            font-weight: bold; text-align: left; }
+                            tr.RE15 td.RE15CE2p{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: left; border-bottom: #000000 1px solid;}
+                            tr.RE15 td.RE15CE3{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center; }
+                            tr.RE15 td.RE15CE1box{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center; border-bottom: #000000 1px solid;border-top: #000000 1px
+                            solid;border-left: #000000 1px solid;border-right: #000000 1px solid;vertical-align: middle
+                            ;}
+                            tr.RE15 td.RE15CE1boxr{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center; border-bottom: #000000 1px solid;border-top: #000000 1px
+                            solid;border-left: #000000 1px solid;border-right: #000000 2px solid;vertical-align: middle
+                            ;}
+                            tr.RE15 td.RE15CE1boxl{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center; border-bottom: #000000 1px solid;border-top: #000000 1px
+                            solid;border-left: #000000 2px solid;border-right: #000000 1px solid;vertical-align: middle
+                            ;}
+                            tr.RE16{ height: 16px; }
+                            tr.RE16 td.RE16CE1l{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align:
+                            left; border-right: #000000 2px solid;}
+                            tr.RE16 td.RE16CE1{ font-family: Times new roman; font-size: 9pt; font-style: normal;
+                            text-align: left;}
+                            tr.RE16 td.RE16CE2{ font-family: Times new roman; font-size: 9pt; font-style: normal;
+                            text-align: center;}
+                            tr.RE16 td.RE16CE2p{ font-family: Times new roman; font-size: 9pt; font-style: normal;
+                            text-align: center; border-bottom: #000000 1px solid;}
+                            tr.RE16 td.RE16CE3{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center; }
+                            tr.RE16 td.RE16CE4{ font-family: Times new roman; font-size: 7pt; font-style: normal;
+                            text-align: right; }
+                            tr.RE7{ height: 7px; }
+                            tr.RE7 td.RE7CE1l{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: left; border-right: #000000 2px solid;}
+                            tr.RE7 td.RE7CE1{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: left;}
+                            tr.RE29{ height: 29px; }
+                            tr.RE29 td.RE29CE1box{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center; border-bottom: #000000 1px solid;border-top: #000000 1px
+                            solid;border-left: #000000 1px solid;border-right: #000000 1px solid;vertical-align: middle
+                            ;}
+                            tr.RE29 td.RE29CE1boxr{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center; border-bottom: #000000 1px solid;border-top: #000000 1px
+                            solid;border-left: #000000 1px solid;border-right: #000000 2px solid;vertical-align: middle
+                            ;}
+                            tr.RE29 td.RE29CE1boxl{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center; border-bottom: #000000 1px solid;border-top: #000000 1px
+                            solid;border-left: #000000 2px solid;border-right: #000000 1px solid;vertical-align: middle
+                            ;}
+                            tr.RE62{ height: 62px; }
+                            tr.RE62 td.RE62CE1box{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center; border-bottom: #000000 1px solid;border-top: #000000 1px
+                            solid;border-left: #000000 1px solid;border-right: #000000 1px solid;vertical-align: middle
+                            ;}
+                            tr.RE62 td.RE62CE1boxr{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center; border-bottom: #000000 1px solid;border-top: #000000 1px
+                            solid;border-left: #000000 1px solid;border-right: #000000 2px solid;vertical-align: middle
+                            ;}
+                            tr.RE62 td.RE62CE1boxl{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center; border-bottom: #000000 1px solid;border-top: #000000 1px
+                            solid;border-left: #000000 2px solid;border-right: #000000 1px solid;vertical-align: middle
+                            ;}
+                            tr.RE0{ height: 16px; }
+                            tr.RE0 td.RE0CE1{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center; vertical-align: top; border-left: #000000 1px solid; border-top: #000000
+                            1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px solid; }
+                            tr.RE0 td.RE0CE1r{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center; vertical-align: top; border-left: #000000 1px solid; border-top: #000000
+                            1px solid; border-bottom: #000000 1px solid; border-right: #000000 2px solid; }
+                            tr.RE0 td.RE0CE1l{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: left; vertical-align: top; border-left: #000000 2px solid; border-top: #000000
+                            1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px solid; }
+                            tr.RE0 td.RE0CE1lb{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: left; font-weight: bold; vertical-align: top; border-left: #000000 2px solid;
+                            border-top: #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px
+                            solid; }
+                            tr.RE6{ height: 6px;}
+                            tr.RE6 td.RE6CE1 {font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: left;}
+                            tr.RE6 td.RE6CE1r {font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: left; border-left: #000000 2px solid;}
+                            tr.RE6 td.RE6CE1t {font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: left; border-top: #000000 2px solid;}
+                            tr.RE30{ height: 30px; }
+                            tr.RE30 td.RE30CE1 {font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: left; vertical-align: bottom;}
+                            tr.RE30 td.RE30CE1r {font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center; vertical-align: bottom; border-left: #000000 2px solid;}
+                            tr.RE30 td.RE30CE2 {font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center; vertical-align: bottom; border-bottom: #000000 1px solid;}
+                            tr.RE30 td.RE30CE3 {font-family: Times new roman; font-size: 7pt; font-style: normal;
+                            text-align: center; vertical-align: top;}
+
+                            tr.RE30 td.RE29CE7S2 span img { position: absolute; width: 140px; top: -110px; left: -10px;
+                            }
+                            tr.RE30 td.RE32CE82, tr.RE30 td.RE32CE8I2{ border-bottom: #000000 1px solid; }
+                            tr.RE30 td.RE32CE8I2,tr.RE30 td.RE29CE7S2 { overflow: visible; }
+                            tr.RE30 td.RE32CE8I2 span,tr.RE30 td.RE29CE7S2 span { position: relative; }
+                            tr.RE30 td.RE32CE8I2 span img { position: absolute; width: 100px; top: -5px; }
+                            tr.RE30 td.RE29CE72, tr.RE30 td.RE29CE7S2{ text-align: right; }
+
+                            tr.REB15{ height: 15px; }
+                            tr.REB15 td.REB15CE1 {font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: left; vertical-align: bottom;}
+                            tr.REB15 td.REB15CE1r {font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center; vertical-align: bottom; border-left: #000000 2px solid;}
+                            tr.REB15 td.REB15CE2 {font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center; vertical-align: bottom; border-bottom: #000000 1px solid;}
+                            tr.REB15 td.REB15CE3 {font-family: Times new roman; font-size: 7pt; font-style: normal;
+                            text-align: center; vertical-align: top;}
+                            tr.REB15 td.REB15CE4 {font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center; vertical-align: bottom;}
+
+                            tr.REB15 td.RE29CE7S span img { position: absolute; width: 140px; top: -110px; left: -140px;
+                            }
+                            tr.REB15 td.RE32CE8, tr.REB15 td.RE32CE8I{ border-bottom: #000000 1px solid; }
+                            tr.REB15 td.RE32CE8I,tr.REB15 td.RE29CE7S { overflow: visible; }
+                            tr.REB15 td.RE32CE8I span,tr.REB15 td.RE29CE7S span { position: relative; }
+                            tr.REB15 td.RE32CE8I span img { position: absolute; width: 100px; top: -30px; }
+                            tr.REB15 td.RE29CE7, tr.REB15 td.RE29CE7S{ text-align: left; }
+
+                            tr.RE2{ height: 21px; }
+                            tr.RE2 td.RE2CE1{ font-family: Times new roman; font-size: 6pt; font-style: normal;
+                            text-align: right;
+                            }
+
+                            tr.R0{ height: 15px; }
+                            tr.R0 td.R0C0{ color: #413003; }
+                            tr.R0 td.R0C5{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            vertical-align: top; }
+                            tr.R0 td.R0C8{ font-family: Times new roman; font-size: 8pt; font-style: normal; text-align:
+                            right; }
+                            tr.R0 td.R19C15{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: right; vertical-align: medium; }
+                            tr.R0 td.R20C0{ vertical-align: top; }
+                            tr.R0 td.R20C15{ font-family: Times new roman; font-size: 8pt; font-style: italic;
+                            text-align: right; vertical-align: top; }
+                            tr.R0 td.R20C3{ text-align: center; vertical-align: top; }
+                            tr.R0 td.R20C7{ text-align: right; vertical-align: top; }
+                            tr.R0 td.R21C0{ vertical-align: top; border-left: #000000 1px solid; border-top: #000000 1px
+                            solid; border-bottom: #000000 1px solid; border-right: #000000 1px solid; }
+                            tr.R0 td.R21C1{ text-align: center; vertical-align: medium; border-left: #000000 1px solid;
+                            border-top: #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px
+                            solid; }
+                            tr.R0 td.R21C2{ text-align: center; vertical-align: medium; border-left: #000000 1px solid;
+                            border-top: #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px
+                            solid; }
+                            tr.R0 td.R23C0{ vertical-align: medium; border-left: #000000 1px solid; border-top: #000000
+                            1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px solid; }
+                            tr.R0 td.R23C1{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center; vertical-align: medium; border-left: #000000 1px solid; border-top:
+                            #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px solid; }
+                            tr.R0 td.R23C3{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center; vertical-align: medium; border-left: #000000 1px solid; border-top:
+                            #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px solid; }
+                            tr.R0 td.R25C1{ vertical-align: top; border-left: #000000 1px solid; border-top: #000000 1px
+                            solid; border-bottom: #000000 1px solid; border-right: #000000 1px solid; }
+                            tr.R0 td.R25C10{ text-align: right; vertical-align: top; border-left: #000000 1px solid;
+                            border-top: #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px
+                            solid; }
+                            tr.R0 td.R25C12{ text-align: right; vertical-align: top; border-left: #000000 1px solid;
+                            border-top: #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px
+                            solid; }
+                            tr.R0 td.R25C13{ text-align: center; vertical-align: top; border-left: #000000 1px solid;
+                            border-top: #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px
+                            solid; }
+                            tr.R0 td.R25C14{ text-align: right; vertical-align: top; border-left: #000000 1px solid;
+                            border-top: #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px
+                            solid; }
+                            tr.R0 td.R25C15{ text-align: right; vertical-align: top; border-left: #000000 1px solid;
+                            border-top: #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px
+                            solid; }
+                            tr.R0 td.R25C2{ vertical-align: top; border-left: #000000 1px solid; border-top: #000000 1px
+                            solid; border-bottom: #000000 1px solid; }
+                            tr.R0 td.R25C3{ text-align: left; vertical-align: top; border-left: #000000 1px solid;
+                            border-top: #000000 1px solid; border-bottom: #000000 1px solid; }
+                            tr.R0 td.R25C4{ text-align: center; vertical-align: top; border-left: #000000 1px solid;
+                            border-top: #000000 1px solid; border-bottom: #000000 1px solid; }
+                            tr.R0 td.R25C5{ text-align: center; vertical-align: top; border-left: #000000 1px solid;
+                            border-top: #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px
+                            solid; }
+                            tr.R0 td.R25C6{ text-align: center; vertical-align: top; border-left: #000000 1px solid;
+                            border-top: #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px
+                            solid; }
+                            tr.R0 td.R25C7{ text-align: right; vertical-align: top; border-left: #000000 1px solid;
+                            border-top: #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px
+                            solid; }
+                            tr.R0 td.R25C8{ vertical-align: top; border-left: #000000 1px solid; border-top: #000000 1px
+                            solid; border-bottom: #000000 1px solid; border-right: #000000 1px solid; }
+                            tr.R0 td.R27C0{ border-left: #000000 1px solid; border-top: #000000 1px solid;
+                            border-bottom: #000000 1px solid; border-right: #000000 1px solid; }
+                            tr.R0 td.R27C1{ border-left: #000000 1px solid; border-top: #000000 1px solid;
+                            border-bottom: #000000 1px solid; }
+                            tr.R0 td.R27C11{ text-align: center; vertical-align: top; border-left: #000000 1px solid;
+                            border-top: #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px
+                            solid; }
+                            tr.R0 td.R27C12{ text-align: right; vertical-align: top; border-left: #000000 1px solid;
+                            border-top: #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px
+                            solid; }
+                            tr.R0 td.R27C13{ text-align: center; vertical-align: top; border-left: #000000 1px solid;
+                            border-top: #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px
+                            solid; }
+                            tr.R0 td.R27C14{ text-align: right; vertical-align: top; border-left: #000000 1px solid;
+                            border-top: #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px
+                            solid; }
+                            tr.R0 td.R27C15{ text-align: right; vertical-align: top; border-left: #000000 1px solid;
+                            border-top: #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px
+                            solid; }
+                            tr.R0 td.R27C2{ border-top: #000000 1px solid; border-bottom: #000000 1px solid;
+                            border-right: #000000 1px solid; }
+                            tr.R0 td.R27C3{ border-top: #000000 1px solid; }
+                            tr.R0 td.R27C7{ text-align: right; border-top: #000000 1px solid; }
+                            tr.R0 td.R27C8{ text-align: right; border-left: #000000 1px solid; border-top: #000000 1px
+                            solid; border-bottom: #000000 1px solid; border-right: #000000 1px solid; }
+                            tr.R0 td.R29C11{ text-align: center; vertical-align: top; border-left: #000000 1px solid;
+                            border-top: #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px
+                            solid; }
+                            tr.R0 td.R29C7, tr.R0 td.R29C7S{ text-align: right; }
+                            tr.R0 td.R29C8{ text-align: right; border-left: #000000 1px solid; border-top: #000000 1px
+                            solid; border-bottom: #000000 1px solid; border-right: #000000 1px solid; }
+                            tr.R0 td.R32C3{ border-top: #000000 1px solid; border-bottom: #000000 1px solid; }
+                            tr.R0 td.R32C7{ border-top: #000000 1px solid; border-bottom: #000000 1px solid; }
+                            tr.R0 td.R32C8, tr.R0 td.R32C8I{ border-bottom: #000000 1px solid; }
+
+                            tr.R0 td.R32C8I,tr.R0 td.R29C7S { overflow: visible; }
+                            tr.R0 td.R32C8I span,tr.R0 td.R29C7S span { position: relative; }
+                            tr.R0 td.R32C8I span img { position: absolute; width: 100px; top: -30px; }
+                            tr.R0 td.R29C7S span img { position: absolute; width: 140px; top: -110px; left: 50px; }
+
+                            tr.R0 td.R34C8{ border-left: #000000 1px solid; border-top: #000000 1px solid;
+                            border-bottom: #000000 1px solid; border-right: #000000 1px solid; }
+                            tr.R0 td.R36C16{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center; vertical-align: top; border-top: #000000 1px solid; }
+                            tr.R0 td.R36C9{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center; vertical-align: top; border-top: #000000 1px solid; border-bottom:
+                            #000000 1px solid; }
+                            tr.R0 td.R42C0{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            font-weight: bold; vertical-align: bottom; }
+                            tr.R0 td.R42C1{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            font-weight: bold; vertical-align: bottom; border-bottom: #000000 1px solid; }
+                            tr.R0 td.R42C2{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            font-weight: bold; vertical-align: top; border-bottom: #000000 1px solid; }
+                            tr.R0 td.R42C7{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            font-weight: bold; vertical-align: top; border-right: #000000 1px solid; }
+                            tr.R0 td.R44C2{ border-bottom: #000000 1px solid; }
+                            tr.R0 td.R44C3{ border-bottom: #000000 1px solid; }
+                            tr.R0 td.R44C6{ border-bottom: #000000 1px solid; border-right: #000000 1px solid; }
+                            tr.R0 td.R46C0{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            font-weight: bold; }
+                            tr.R0 td.R47C17{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center; vertical-align: top; overflow: hidden;border-top: #000000 1px solid; }
+                            tr.R0 td.R47C2{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: left; vertical-align: bottom; border-top: #000000 1px solid; }
+                            tr.R0 td.R47C6{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center; vertical-align: top; border-top: #000000 1px solid; border-right:
+                            #000000 1px solid; }
+                            tr.R0 td.R48C2{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: left; vertical-align: bottom; border-bottom: #000000 1px solid; }
+                            tr.R0 td.R48C3{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: left; vertical-align: bottom; border-bottom: #000000 1px solid; }
+                            tr.R0 td.R51C10{ text-align: center; }
+                            tr.R0 td.R51C7{ border-right: #000000 1px solid; }
+                            tr.R1{ height: 21px; }
+                            tr.R1 td.R1C5{ font-family: Times new roman; font-size: 6pt; font-style: normal;
+                            vertical-align: top;
+                            }
+                            tr.R1 td.R1C9{ font-family: Times new roman; font-size: 6pt; font-style: normal; text-align:
+                            right; }
+                            tr.R2{ height: 17px; }
+                            tr.R2 td.R2C0{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            vertical-align: top;
+                            }
+                            tr.R2 td.R2C7{ font-family: Times new roman; font-size: 9pt; font-style: normal; text-align:
+                            right;
+                            vertical-align: medium; }
+                            tr.R2 td.R2C9{ text-align: center; vertical-align: medium; border-left: #000000 1px solid;
+                            border-top: #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px
+                            solid; }
+                            tr.R22{ height: 56px; }
+                            tr.R22 td.R22C0{ vertical-align: top; border-left: #ffffff 1px none; border-top: #ffffff 1px
+                            none; border-bottom: #ffffff 1px none; border-right: #ffffff 1px none; }
+                            tr.R22 td.R22C2{ text-align: center; vertical-align: medium; border-left: #000000 1px solid;
+                            border-top: #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px
+                            solid; }
+                            tr.R22 td.R22C3{ text-align: center; vertical-align: medium; border-left: #000000 1px solid;
+                            border-top: #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px
+                            solid; }
+                            tr.R3{ height: 16px; }
+                            tr.R3 td.R14C2{ vertical-align: bottom; border-left: #ffffff 1px none; border-top: #ffffff
+                            1px none; border-bottom: #000000 1px solid; }
+                            tr.R3 td.R15C1{ font-family: Times new roman; font-size: 8pt; font-style: normal; }
+                            tr.R3 td.R15C2{ font-family: Times new roman; font-size: 6pt; font-style: normal;
+                            text-align: center;
+                            vertical-align: top; border-left: #ffffff 1px none; border-top: #ffffff 1px none;
+                            border-bottom: #ffffff 1px none; }
+                            tr.R3 td.R15C8{ font-family: Times new roman; font-size: 9pt; font-style: normal;
+                            text-align: right;
+                            vertical-align: bottom; border-left: #000000 1px solid; border-top: #000000 1px solid;
+                            border-bottom: #000000 1px solid; border-right: #000000 1px solid; }
+                            tr.R3 td.R16C3{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            text-align: center;
+                            vertical-align: medium; border-left: #000000 1px solid; border-top: #000000 1px solid;
+                            border-bottom: #000000 1px solid; border-right: #000000 1px solid; }
+                            tr.R3 td.R17C2{ font-family: Times new roman; font-size: 9pt; font-style: normal;
+                            font-weight: bold;
+                            text-align: right; vertical-align: medium; border-right: #000000 1px solid; }
+                            tr.R3 td.R17C3{ font-family: Times new roman; font-size: 9pt; font-style: normal;
+                            text-align: center;
+                            vertical-align: medium; border-left: #000000 2px solid; border-top: #000000 2px solid;
+                            border-bottom: #000000 2px solid; border-right: #000000 1px solid; }
+                            tr.R3 td.R17C4{ font-family: Times new roman; font-size: 9pt; font-style: normal;
+                            text-align: center;
+                            vertical-align: medium; border-left: #000000 1px solid; border-top: #000000 2px solid;
+                            border-bottom: #000000 2px solid; border-right: #000000 2px solid; }
+                            tr.R3 td.R18C3{ font-family: Times new roman; font-size: 9pt; font-style: normal;
+                            text-align: center;
+                            border-left: #ffffff 1px none; border-top: #ffffff 1px none; border-bottom: #ffffff 1px
+                            none; border-right: #ffffff 1px none; }
+                            tr.R3 td.R18C7{ font-family: Times new roman; font-size: 9pt; font-style: normal;
+                            text-align: right;
+                            vertical-align: bottom; }
+                            tr.R3 td.R18C9{ font-family: Times new roman; font-size: 9pt; font-style: normal;
+                            font-weight: bold;
+                            text-align: center; vertical-align: bottom; overflow: hidden;border-left: #000000 2px solid;
+                            border-top: #000000 1px solid; border-bottom: #000000 2px solid; border-right: #000000 2px
+                            solid; }
+                            tr.R3 td.R31C5{ border-bottom: #ffffff 1px none; }
+                            tr.R3 td.R31C6{ border-left: #ffffff 1px none; border-top: #ffffff 1px none; border-bottom:
+                            #000000 1px solid; }
+                            tr.R3 td.R3C0{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            vertical-align: top;
+                            }
+                            tr.R3 td.R3C1{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            vertical-align:
+                            bottom; border-left: #ffffff 1px none; border-top: #ffffff 1px none; border-bottom: #000000
+                            1px solid; }
+                            tr.R3 td.R3C7{ font-family: Times new roman; font-size: 9pt; font-style: normal; text-align:
+                            right;
+                            vertical-align: medium; }
+                            tr.R3 td.R3C9{ font-family: Times new roman; font-size: 9pt; font-style: normal;
+                            font-weight: bold;
+                            text-align: center; vertical-align: medium; border-left: #000000 2px solid; border-top:
+                            #000000 2px solid; border-right: #000000 2px solid; }
+                            tr.R3 td.R4C0{ text-align: right; }
+                            tr.R3 td.R4C6{ border-bottom: #000000 1px solid; }
+                            tr.R3 td.R4C7{ font-family: Times new roman; font-size: 9pt; font-style: normal; text-align:
+                            right; }
+                            tr.R3 td.R4C9{ font-family: Times new roman; font-size: 9pt; font-style: normal;
+                            font-weight: bold;
+                            text-align: center; vertical-align: bottom; overflow: hidden;border-left: #000000 2px solid;
+                            border-top: #000000 1px solid; border-right: #000000 2px solid; }
+                            tr.R3 td.R6C1{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            vertical-align:
+                            bottom; border-left: #ffffff 1px none; border-top: #ffffff 1px none; border-bottom: #000000
+                            1px solid; }
+                            tr.R3 td.R6C7{ font-family: Times new roman; font-size: 9pt; font-style: normal; text-align:
+                            right; }
+                            tr.R3 td.R8C1{ font-family: Times new roman; font-size: 9pt; font-style: normal; text-align:
+                            right; }
+                            tr.R3 td.R8C9{ font-family: Times new roman; font-size: 9pt; font-style: normal;
+                            font-weight: bold;
+                            text-align: center; vertical-align: bottom; overflow: hidden;border-left: #000000 2px solid;
+                            border-right: #000000 2px solid; }
+                            tr.R38{ height: 7px; }
+                            tr.R38 td.R50C7{ border-right: #000000 1px solid; }
+                            tr.R39{ height: 13px; }
+                            tr.R39 td.R39C10{ text-align: right; }
+                            tr.R39 td.R39C14{ text-align: center; }
+                            tr.R39 td.R39C4{ border-bottom: #000000 1px solid; }
+                            tr.R39 td.R39C7{ border-right: #000000 1px solid; }
+                            tr.R39 td.R41C0{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            font-weight: bold;
+                            }
+                            tr.R39 td.R41C11{ border-top: #ffffff 1px none; border-bottom: #000000 1px solid; }
+                            tr.R39 td.R41C2{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            font-weight: bold;
+                            }
+                            tr.R40{ height: 14px; }
+                            tr.R40 td.R40C4{ font-family: Times new roman; font-size: 6pt; font-style: normal;
+                            text-align: center;
+                            vertical-align: top; border-top: #ffffff 1px none; }
+                            tr.R40 td.R40C7{ border-right: #000000 1px solid; }
+                            tr.R45{ height: 12px; }
+                            tr.R45 td.R45C10{ border-left: #ffffff 0px none; border-top: #ffffff 1px none; }
+                            tr.R45 td.R45C11{ border-top: #ffffff 1px none; }
+                            tr.R45 td.R45C2{ font-family: Times new roman; font-size: 6pt; font-style: normal;
+                            text-align: center;
+                            vertical-align: top; border-top: #ffffff 1px none; }
+                            tr.R45 td.R45C6{ font-family: Times new roman; font-size: 6pt; font-style: normal;
+                            text-align: center;
+                            vertical-align: top; border-top: #ffffff 1px none; border-right: #000000 1px solid; }
+                            tr.R5{ height: 11px; }
+                            tr.R5 td.R11C3{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            vertical-align:
+                            bottom; border-left: #ffffff 1px none; border-top: #ffffff 1px none; border-bottom: #ffffff
+                            1px none; }
+                            tr.R5 td.R13C8{ font-family: Times new roman; font-size: 9pt; font-style: normal;
+                            text-align: right;
+                            vertical-align: bottom; border-left: #000000 1px solid; border-top: #000000 1px solid;
+                            border-bottom: #000000 1px solid; border-right: #000000 1px solid; }
+                            tr.R5 td.R33C17{ border-left: #000000 2px solid; border-top: #000000 2px solid;
+                            border-bottom: #000000 2px solid; border-right: #000000 2px solid; }
+                            tr.R5 td.R35C10{ border-top: #ffffff 1px none; }
+                            tr.R5 td.R35C9{ font-family: Times new roman; font-size: 6pt; font-style: normal;
+                            border-top: #ffffff
+                            1px none; }
+                            tr.R5 td.R43C1{ font-family: Times new roman; font-size: 6pt; font-style: normal;
+                            text-align: center;
+                            vertical-align: top; border-top: #ffffff 1px none; border-bottom: #ffffff 1px none; }
+                            tr.R5 td.R43C11{ border-bottom: #000000 1px solid; }
+                            tr.R5 td.R43C7{ border-right: #000000 1px solid; }
+                            tr.R5 td.R5C0{ font-family: Times new roman; font-size: 6pt; font-style: normal; text-align:
+                            center;
+                            vertical-align: top; border-top: #ffffff 1px none; }
+                            tr.R5 td.R5C2{ font-family: Times new roman; font-size: 6pt; font-style: normal; text-align:
+                            center;
+                            vertical-align: top; border-left: #ffffff 1px none; border-top: #ffffff 1px none;
+                            border-bottom: #ffffff 1px none; }
+                            tr.R5 td.R5C7{ font-family: Times new roman; font-size: 8pt; font-style: normal; }
+                            tr.R5 td.R5C9{ font-family: Times new roman; font-size: 9pt; font-style: normal;
+                            vertical-align:
+                            bottom; overflow: hidden;border-left: #000000 2px solid; border-top: #000000 1px solid;
+                            border-bottom: #000000 1px solid; border-right: #000000 2px solid; }
+                            tr.R5 td.R9C0{ text-align: right; }
+                            tr.R5 td.R9C1{ font-family: Times new roman; font-size: 8pt; font-style: normal; text-align:
+                            right; }
+                            tr.R5 td.R9C3{ font-family: Times new roman; font-size: 8pt; font-style: normal;
+                            border-left: #ffffff
+                            1px none; border-top: #ffffff 1px none; border-bottom: #ffffff 1px none; }
+                            tr.R5 td.R9C7{ font-family: Times new roman; font-size: 9pt; font-style: normal; text-align:
+                            right; }
+                            tr.R5 td.R9C9{ font-family: Times new roman; font-size: 9pt; font-style: normal;
+                            font-weight: bold;
+                            text-align: center; vertical-align: bottom; overflow: hidden;border-left: #000000 2px solid;
+                            border-top: #000000 1px solid; border-right: #000000 2px solid; }
+                            tr.R7{ height: 19px; }
+                            tr.R7 td.R7C0{ font-family: Times new roman; font-size: 6pt; font-style: normal; text-align:
+                            center;
+                            vertical-align: top; border-left: #ffffff 0px none; border-top: #ffffff 1px none; }
+                            tr.R7 td.R7C2{ font-family: Times new roman; font-size: 6pt; font-style: normal; text-align:
+                            center;
+                            vertical-align: top; border-left: #ffffff 1px none; border-top: #ffffff 1px none;
+                            border-bottom: #ffffff 1px none; }
+                            tr.R7 td.R7C7{ font-family: Times new roman; font-size: 9pt; font-style: normal; text-align:
+                            right; }
+                            tr.R7 td.R7C9{ font-family: Times new roman; font-size: 9pt; font-style: normal;
+                            font-weight: bold;
+                            text-align: center; vertical-align: bottom; overflow: hidden;border-left: #000000 2px solid;
+                            border-top: #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 2px
+                            solid; }
+                            table {table-layout: fixed; padding: 0px; padding-left: 2px; vertical-align:bottom;
+                            border-collapse:collapse;width: 100%; font-family: Times new roman; font-size: 8pt;
+                            font-style:
+                            normal; }
+                            td { padding: 0px; padding-left: 2px; overflow:hidden; }
+
+                            .cu_wspace { white-space:nowrap; }
+                            .cu_space21 { width:100%;height:21px;overflow:hidden; }
+                            .cu_space31 { width:100%;height:31px;overflow:hidden; }
+                            .cu_space11 { width:100%;height:11px;overflow:hidden; }
+                            .cu_space16 { width:100%;height:16px;overflow:hidden; }
+                            .cu_space19 { width:100%;height:19px;overflow:hidden; }
+                            .cu_space26 { width:100%;height:26px;overflow:hidden; }
+                            .cu_left { border-left: #ffffff 0px none; }
+                            .cu_space15 { width:100%;height:15px;overflow:hidden; }
+                            .cu_space70 { width:100%;height:70px;overflow:hidden; }
+                            .cu_space40 { width:100%;height:40px;overflow:hidden; }
+                            .cu_space7 { width:100%;height:7px;overflow:hidden; }
+                            .cu_space13 { width:100%;height:13px;overflow:hidden; }
+                            .cu_right { border-right: #000000 1px solid; }
+                            .cu_space14 { width:100%;height:14px;overflow:hidden; }
+                            .cu_space12 { width:100%;height:12px;overflow:hidden; }
+                            tbody, table, tr, td, th{border: none;}
+                        </STYLE>
+                        <!-- шапка -->
+                        <TABLE CELLSPACING="0">
+                            <COL WIDTH="44"/>
+                            <COL WIDTH="22"/>
+                            <COL WIDTH="13"/>
+                            <COL WIDTH="11"/>
+                            <COL WIDTH="88"/>
+                            <COL WIDTH="111"/>
+                            <COL WIDTH="22"/>
+                            <COL WIDTH="88"/>
+                            <COL WIDTH="22"/>
+                            <COL WIDTH="11"/>
+                            <COL WIDTH="33"/>
+                            <COL WIDTH="462"/>
+                            <COL WIDTH="33"/>
+                            <TR CLASS="RE15">
+                                <TD CLASS="RE15CE1" COLSPAN="13"><SPAN class="cu_wspace"></SPAN></TD>
+                            </TR>
+                            <TR CLASS="RE16">
+                                <TD CLASS="RE16CE1l" COLSPAN="3" ROWSPAN="3"><SPAN class="cu_wspace">Универсальный<BR/>
+                                    передаточный<BR/>документ</SPAN></TD>
+                                <TD CLASS="RE16CE1" COLSPAN="2"><SPAN class="cu_wspace">Счет-фактура<![CDATA[&nbsp;]]>
+                                    N</SPAN></TD>
+                                <TD CLASS="RE16CE2p"><SPAN class="cu_wspace">
+                                    <t
+                                            t-out="o.name[len(o.name)-4:]"/>
+                                </SPAN></TD>
+                                <TD CLASS="RE16CE2"><SPAN class="cu_wspace">от</SPAN></TD>
+                                <TD CLASS="RE16CE2p" COLSPAN="2"><DIV class="cu_space16"><span class="cu_wspace"
+                                                                                               t-field="o.invoice_date"/></DIV></TD>
+                                <TD CLASS="RE16CE3" COLSPAN="2"><SPAN class="cu_wspace">(1)</SPAN></TD>
+                                <TD CLASS="RE16CE4" COLSPAN="2" ROWSPAN="2"><SPAN class="cu_wspace">Приложение
+                                    <![CDATA[&nbsp;]]>N<![CDATA[&nbsp;]]>1<![CDATA[&nbsp;]]>к<![CDATA[&nbsp;]]>
+                                    постановлению<![CDATA[&nbsp;]]>Правительства<![CDATA[&nbsp;]]>Российской
+                                    <![CDATA[&nbsp;]]>Федерации<![CDATA[&nbsp;]]>от<![CDATA[&nbsp;]]>26
+                                    <![CDATA[&nbsp;]]>декабря<![CDATA[&nbsp;]]>2011<![CDATA[&nbsp;]]>года
+                                    <![CDATA[&nbsp;]]>№<![CDATA[&nbsp;]]>1137<BR/>(в<![CDATA[&nbsp;]]>редакции
+                                    <![CDATA[&nbsp;]]>постановления<![CDATA[&nbsp;]]>Правительства<![CDATA[&nbsp;]]>
+                                    Российской<![CDATA[&nbsp;]]>Федерации<![CDATA[&nbsp;]]>от<![CDATA[&nbsp;]]>
+                                    2<![CDATA[&nbsp;]]>апреля<![CDATA[&nbsp;]]>2021г.<![CDATA[&nbsp;]]>№
+                                    <![CDATA[&nbsp;]]>534)</SPAN></TD>
+                            </TR>
+                            <TR CLASS="RE16">
+                                <TD CLASS="RE16CE1" COLSPAN="2"><SPAN class="cu_wspace">Исправление<![CDATA[&nbsp;]]>
+                                    N</SPAN></TD>
+                                <TD CLASS="RE16CE2p"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="RE16CE2"><SPAN class="cu_wspace">от</SPAN></TD>
+                                <TD CLASS="RE16CE2p" COLSPAN="2"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="RE16CE3" COLSPAN="2"><SPAN class="cu_wspace">(1a)</SPAN></TD>
+                            </TR>
+                            <TR CLASS="RE7">
+                                <TD CLASS="RE7" COLSPAN="10"><SPAN></SPAN></TD>
+                            </TR>
+                        </TABLE>
+                        <TABLE CELLSPACING="0">
+                            <COL WIDTH="44"/>
+                            <COL WIDTH="20"/>
+                            <COL WIDTH="13"/>
+                            <!---->
+                            <COL WIDTH="40"/>
+                            <COL WIDTH="40"/>
+                            <COL WIDTH="40"/>
+                            <COL WIDTH="40"/>
+                            <COL WIDTH="40"/>
+                            <COL WIDTH="40"/>
+                            <COL WIDTH="40"/>
+                            <COL WIDTH="40"/>
+                            <COL WIDTH="80"/>
+                            <COL WIDTH="30"/>
+                            <!---->
+                            <COL WIDTH="40"/>
+                            <COL WIDTH="40"/>
+                            <COL WIDTH="40"/>
+                            <COL WIDTH="40"/>
+                            <COL WIDTH="40"/>
+                            <COL WIDTH="40"/>
+                            <COL WIDTH="40"/>
+                            <COL WIDTH="40"/>
+                            <COL WIDTH="80"/>
+                            <COL WIDTH="30"/>
+                            <TR CLASS="RE15">
+                                <TD CLASS="RE15CE1l" COLSPAN="3"><SPAN></SPAN></TD>
+                                <TD CLASS="RE15CE2b" COLSPAN="3"><SPAN class="cu_wspace">Продавец</SPAN></TD>
+                                <TD CLASS="RE15CE2p" COLSPAN="6"><SPAN class="cu_wspace"><t
+                                        t-out="company.name or ''"/></SPAN></TD>
+                                <TD CLASS="RE15CE3"><SPAN>(2)</SPAN></TD>
+                                <TD CLASS="RE15CE2b" COLSPAN="3"><SPAN class="cu_wspace">Покупатель</SPAN></TD>
+                                <TD CLASS="RE15CE2p" COLSPAN="6"><SPAN class="cu_wspace"><t
+                                        t-out="o.partner_id.parent_id.name if o.partner_id.parent_id else  o.partner_id.name"/></SPAN></TD>
+                                <TD CLASS="RE15CE3"><SPAN>(6)</SPAN></TD>
+                            </TR>
+                            <TR CLASS="RE15">
+                                <TD CLASS="RE15CE2" style="vertical-align: middle;"><SPAN>Статус:</SPAN></TD>
+                                <TD CLASS="RE15CE2box" style="vertical-align: middle;"><SPAN>1</SPAN></TD>
+                                <TD CLASS="RE15CE1l"><SPAN></SPAN></TD>
+                                <TD CLASS="RE15CE2" COLSPAN="3"><SPAN class="cu_wspace">Адрес</SPAN></TD>
+                                <TD CLASS="RE15CE2p" COLSPAN="6"><t
+                                        t-out="helper.address(company)"/></TD>
+                                <TD CLASS="RE15CE3"><SPAN>(2а)</SPAN></TD>
+                                <TD CLASS="RE15CE2" COLSPAN="3"><SPAN class="cu_wspace">Адрес</SPAN></TD>
+                                <TD CLASS="RE15CE2p" COLSPAN="6"><t
+                                        t-out="helper.address(o.partner_id)"/></TD>
+                                <TD CLASS="RE15CE3"><SPAN>(6а)</SPAN></TD>
+                            </TR>
+                            <TR CLASS="RE15">
+                                <TD CLASS="RE15CE1l" COLSPAN="3" ROWSPAN="9"><SPAN><BR/>1<![CDATA[&nbsp;]]>-
+                                    <![CDATA[&nbsp;]]>счет-фактура<![CDATA[&nbsp;]]>и<BR/>передаточный<BR/>документ
+                                    <![CDATA[&nbsp;]]>(акт)<BR/>2<![CDATA[&nbsp;]]>-<![CDATA[&nbsp;]]>передаточный<BR/>
+                                    документ<![CDATA[&nbsp;]]>(акт)</SPAN></TD>
+                                <TD CLASS="RE15CE2" COLSPAN="3"><SPAN class="cu_wspace">ИНН/КПП<![CDATA[&nbsp;]]>
+                                    продавца</SPAN></TD>
+                                <TD CLASS="RE15CE2p" COLSPAN="6"><SPAN class="cu_wspace"><t
+                                        t-out="company.inn or ''"/><t
+                                        t-out="company.kpp and '/'+company.kpp or ''"/></SPAN></TD>
+                                <TD CLASS="RE15CE3"><SPAN>(2б)</SPAN></TD>
+                                <TD CLASS="RE15CE2" COLSPAN="3"><SPAN class="cu_wspace">ИНН/КПП<![CDATA[&nbsp;]]>
+                                    покупателя</SPAN></TD>
+                                <TD CLASS="RE15CE2p" COLSPAN="6"><SPAN class="cu_wspace">
+                                    <t t-out="o.partner_id.parent_id.inn if o.partner_id.parent_id else o.partner_id.inn  "/>
+                                    /<t t-out="o.partner_id.parent_id.kpp if o.partner_id.parent_id else o.partner_id.kpp "/>
+                                </SPAN></TD>
+                                <TD CLASS="RE15CE3"><SPAN>(6б)</SPAN></TD>
+                            </TR>
+                            <TR CLASS="RE15">
+                                <TD CLASS="RE15CE2" COLSPAN="3">Грузоотправитель
+                                    <![CDATA[&nbsp;]]>и<![CDATA[&nbsp;]]>его<![CDATA[&nbsp;]]>адрес</TD>
+                                <TD CLASS="RE15CE2p" COLSPAN="6"><t t-if='o.only_service==False'><t
+                                        t-out="helper.representation_small(o.gruzootpr) or company.name"/></t></TD>
+                                <TD CLASS="RE15CE3"><SPAN>(3)</SPAN></TD>
+                                <TD CLASS="RE15CE2" COLSPAN="3"><SPAN class="cu_wspace">Валюта:<![CDATA[&nbsp;]]>
+                                    наименование,<![CDATA[&nbsp;]]>код</SPAN></TD>
+                                <TD CLASS="RE15CE2p" COLSPAN="6"><SPAN class="cu_wspace">Российский рубль,
+                                    <![CDATA[&nbsp;]]>643</SPAN></TD>
+                                <TD CLASS="RE15CE3"><SPAN>(7)</SPAN></TD>
+                            </TR>
+                            <TR CLASS="RE15">
+                                <TD CLASS="RE15CE2" COLSPAN="3">Грузополучатель
+                                    <![CDATA[&nbsp;]]>и<![CDATA[&nbsp;]]>его<![CDATA[&nbsp;]]>адрес</TD>
+                                <TD CLASS="RE15CE2p" COLSPAN="6"><t t-if='o.only_service==False'><t
+                                        t-out="helper.representation_small(o.gruzopol) or ''"/></t></TD>
+                                <TD CLASS="RE15CE3"><SPAN>(4)</SPAN></TD>
+                                <TD CLASS="RE15CE3" COLSPAN="10"><SPAN></SPAN></TD>
+                            </TR>
+                            <TR CLASS="RE15">
+                                <TD CLASS="RE15CE2" COLSPAN="3" style="vertical-align: bottom;">К<![CDATA[&nbsp;]]>
+                                    платежно-расчетному<![CDATA[&nbsp;]]>документу №</TD>
+                                <TD CLASS="RE15CE2p" COLSPAN="6" style="vertical-align: bottom;"><SPAN class="cu_wspace"><t
+                                        t-out="o.payment_text"/></SPAN></TD>
+
+                                <TD CLASS="RE15CE3"><SPAN>(5)</SPAN></TD>
+                                <TD CLASS="RE15CE2" COLSPAN="3">Идентификатор<![CDATA[&nbsp;]]>
+                                    государственного<![CDATA[&nbsp;]]>контракта,<![CDATA[&nbsp;]]>договора<![CDATA[&nbsp;]]>(соглашения)</TD>
+                                <TD CLASS="RE15CE2p" COLSPAN="6"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="RE15CE3"><SPAN>(8)</SPAN></TD>
+                            </TR>
+                            <TR CLASS="RE15">
+                                <TD CLASS="RE15CE2" COLSPAN="3"><SPAN class="cu_wspace">Документ<![CDATA[&nbsp;]]>об<![CDATA[&nbsp;]]>отгрузке</SPAN></TD>
+                                <TD CLASS="RE15CE3"><SPAN class="cu_wspace">№<![CDATA[&nbsp;]]>п/п</SPAN></TD>
+                                <TD>
+                                    <table border="1" style="width: 100%;">
+                                        <tr>
+                                            <td style="width: 70%;" CLASS="RE15CE2p"><SPAN class="cu_wspace">1
+                                                <![CDATA[&nbsp;]]><t t-if="len(o.invoice_line_ids)>1">-
+                                                    <![CDATA[&nbsp;]]><t t-out="len(o.invoice_line_ids)"/></t></SPAN></td>
+                                            <td style="width: 30%;" CLASS="RE15CE3"><SPAN class="cu_wspace">
+                                                №</SPAN></td>
+                                        </tr>
+                                    </table>
+                                </TD>
+                                <TD CLASS="RE15CE2p" COLSPAN="3"><SPAN class="cu_wspace"><t
+                                        t-out="o.get_delivery_doc_name()"/></SPAN></TD>
+                                <TD><table border="1" style="width: 100%;">
+                                    <tr>
+                                        <td style="width: 15%;" CLASS="RE15CE3"><SPAN class="cu_wspace">от</SPAN></td>
+                                        <td style="width: 85%;" CLASS="RE15CE2p"><SPAN class="cu_wspace"><t
+                                                t-out="o.get_delivery_doc_date()"/></SPAN></td>
+                                    </tr>
+                                </table></TD>
+                                <TD CLASS="RE15CE3"><SPAN>(5a)</SPAN></TD>
+                            </TR>
+                            <TR CLASS="RE7">
+                                <TD CLASS="RE7CE1" COLSPAN="3"><SPAN></SPAN></TD>
+                                <TD CLASS="RE7CE1" COLSPAN="17"><SPAN></SPAN></TD>
+                            </TR>
+                            <TR CLASS="RE7">
+                                <TD CLASS="RE7CE1" COLSPAN="3"><SPAN></SPAN></TD>
+                                <TD CLASS="RE7CE1" COLSPAN="17"><SPAN></SPAN></TD>
+                            </TR>
+                        </TABLE>
+                        <!-- Шапка таблицы-->
+                        <TABLE CELLSPACING="0">
+                            <COL WIDTH="112"/>
+                            <COL WIDTH="40"/>
+                            <COL WIDTH="190"/>
+                            <COL WIDTH="55"/>
+                            <COL WIDTH="44"/>
+                            <COL WIDTH="60"/>
+                            <COL WIDTH="66"/>
+                            <COL WIDTH="77"/>
+                            <COL WIDTH="99"/>
+                            <COL WIDTH="66"/>
+                            <COL WIDTH="66"/>
+                            <COL WIDTH="88"/>
+                            <COL WIDTH="99"/>
+                            <COL WIDTH="66"/>
+                            <COL WIDTH="70"/>
+                            <COL WIDTH="158"/>
+                            <TR CLASS="RE29">
+                                <TD CLASS="RE29CE1box" ROWSPAN="2">Код<![CDATA[&nbsp;]]>товара/<BR/>работ,
+                                    <![CDATA[&nbsp;]]>услуг</TD>
+                                <TD CLASS="RE29CE1boxl" ROWSPAN="2">N<BR/>п/п</TD>
+                                <TD CLASS="RE29CE1box" ROWSPAN="2">Наименование<![CDATA[&nbsp;]]>товара
+                                    <![CDATA[&nbsp;]]>(описание<BR/>выполненных<![CDATA[&nbsp;]]>работ,
+                                    <![CDATA[&nbsp;]]>оказанных<BR/>услуг),<![CDATA[&nbsp;]]>имущественного
+                                    <![CDATA[&nbsp;]]>права
+                                </TD>
+                                <TD CLASS="RE29CE1box" ROWSPAN="2">Код<BR/>вида<BR/>товара</TD>
+                                <TD CLASS="RE29CE1box" COLSPAN="2">Единица<![CDATA[&nbsp;]]>измерения</TD>
+                                <TD CLASS="RE29CE1box" ROWSPAN="2">Коли-<BR/>чество<BR/>(объем)</TD>
+                                <TD CLASS="RE29CE1box" ROWSPAN="2">Цена<BR/>(тариф)<![CDATA[&nbsp;]]>за<BR/>единицу<BR/>
+                                    измерения</TD>
+                                <TD CLASS="RE29CE1box" ROWSPAN="2">Стоимость<BR/>товаров<BR/>(работ,<![CDATA[&nbsp;]]>
+                                    услуг),<BR/>имущественных<BR/>прав<![CDATA[&nbsp;]]>без<![CDATA[&nbsp;]]>налога
+                                    <![CDATA[&nbsp;]]>-<BR/>всего</TD>
+                                <TD CLASS="RE29CE1box" ROWSPAN="2">В<![CDATA[&nbsp;]]>том<BR/>числе<BR/>сумма<BR/>
+                                    акциза</TD>
+                                <TD CLASS="RE29CE1box" ROWSPAN="2">Нало-<BR/>говая<BR/>ставка</TD>
+                                <TD CLASS="RE29CE1box" ROWSPAN="2">Сумма<![CDATA[&nbsp;]]>налога,<BR/>предъявляемая<BR/>
+                                    покупателю</TD>
+                                <TD CLASS="RE29CE1box" ROWSPAN="2">Стоимость<BR/>товаров<BR/>(работ,<![CDATA[&nbsp;]]>
+                                    услуг),<BR/>имущественных<BR/>прав<![CDATA[&nbsp;]]>с<![CDATA[&nbsp;]]>налогом
+                                    <![CDATA[&nbsp;]]>-<BR/>всего</TD>
+                                <TD CLASS="RE29CE1box" COLSPAN="2">Страна<![CDATA[&nbsp;]]>происхождения<BR/>товара</TD>
+                                <TD CLASS="RE29CE1box" ROWSPAN="2">Регистрационный<![CDATA[&nbsp;]]>номер
+                                    <BR/>декларации<![CDATA[&nbsp;]]>на<![CDATA[&nbsp;]]>товары<BR/>
+                                    или<![CDATA[&nbsp;]]>регистрационный<BR/>
+                                    номер<![CDATA[&nbsp;]]>партии<![CDATA[&nbsp;]]>товара,<![CDATA[&nbsp;]]>
+                                    подлежащего<![CDATA[&nbsp;]]>прослежи-<BR/> ваемости</TD>
+                            </TR>
+                            <TR CLASS="RE62">
+                                <TD CLASS="RE62CE1box">код</TD>
+                                <TD CLASS="RE62CE1box">условное<BR/>обозначение<BR/>(национальное)</TD>
+                                <TD CLASS="RE62CE1box">Цифро-<BR/>вой<![CDATA[&nbsp;]]>код</TD>
+                                <TD CLASS="RE62CE1box">Краткое<BR/>наименование</TD>
+                            </TR>
+                            <TR CLASS="RE15">
+                                <TD CLASS="RE15CE1box">A</TD>
+                                <TD CLASS="RE15CE1boxl">1</TD>
+                                <TD CLASS="RE15CE1box">1а</TD>
+                                <TD CLASS="RE15CE1box">1б</TD>
+                                <TD CLASS="RE15CE1box">2</TD>
+                                <TD CLASS="RE15CE1box">2а</TD>
+                                <TD CLASS="RE15CE1box">3</TD>
+                                <TD CLASS="RE15CE1box">4</TD>
+                                <TD CLASS="RE15CE1box">5</TD>
+                                <TD CLASS="RE15CE1box">6</TD>
+                                <TD CLASS="RE15CE1box">7</TD>
+                                <TD CLASS="RE15CE1box">8</TD>
+                                <TD CLASS="RE15CE1box">9</TD>
+                                <TD CLASS="RE15CE1box">10</TD>
+                                <TD CLASS="RE15CE1box">10а</TD>
+                                <TD CLASS="RE15CE1box">11</TD>
+                            </TR>
+                            <!--Тело таблицы-->
+                            <t t-set="invoice_line_ids"
+                               t-value="o.invoice_line_ids.filtered(lambda s: 'аванс' not in (s.label or '').lower() and 'депозит' not in (s.label or '').lower())"/>
+                            <t t-set="page_quantity" t-value="sum([line.quantity for line in invoice_line_ids])"/>
+                            <t t-set="total_quantity" t-value="sum([line.quantity for line in invoice_line_ids])"/>
+                            <t t-set="page_price_subtotal"
+                               t-value="sum([line.price_subtotal for line in invoice_line_ids])"/>
+                            <t t-set="total_price_subtotal"
+                               t-value="sum([line.price_subtotal for line in invoice_line_ids])"/>
+                            <t t-set="page_tax"
+                               t-value="sum([line.price_total_pf - line.price_subtotal for line in invoice_line_ids])"/>
+                            <t t-set="total_tax"
+                               t-value="sum([line.price_total_pf - line.price_subtotal for line in invoice_line_ids])"/>
+
+                            <t t-set="page_price_tax_subtotal"
+                               t-value="sum([line.price_total_pf for line in invoice_line_ids])"/>
+                            <t t-set="total_price_tax_subtotal"
+                               t-value="sum([line.price_total_pf for line in invoice_line_ids])"/>
+                            <tr CLASS="RE0" t-foreach="invoice_line_ids" t-as="line">
+                                <TD CLASS="RE0CE1"><SPAN class="cu_wspace"><t
+                                        t-out="line.product_id.default_code or ''"/></SPAN></TD>
+                                <TD CLASS="RE0CE1l"><SPAN class="cu_wspace"><t t-out="line_index+1"/></SPAN></TD>
+                                <TD CLASS="RE0CE1" style="text-align: left;"><t t-out="line._ru_print_name()"/></TD>
+                                <TD CLASS="RE0CE1"><!-- TO DO: Код Вида товара -->
+                                    <SPAN><t
+                                            t-out="line.product_id.kod_tnved or ''"/></SPAN>
+                                </TD>
+                                <TD CLASS="RE0CE1"><!-- TO DO: Код ЕдИзм -->
+                                    <t
+                                            t-out="line.product_uom_id.kod or ''"/>
+                                </TD>
+                                <TD CLASS="RE0CE1"><SPAN class="cu_wspace"><t
+                                        t-out="line.product_uom_id.name or ''"/></SPAN></TD>
+                                <TD CLASS="RE0CE1"><SPAN class="cu_wspace"><t t-out="line.quantity or ''"/></SPAN></TD>
+                                <TD CLASS="RE0CE1"><SPAN class="cu_wspace"><t
+                                        t-out="(('%.2f')%(line.price_subtotal/line.quantity)).replace('.',',') or ''"/></SPAN></TD>
+                                <TD CLASS="RE0CE1"><SPAN class="cu_wspace"><t
+                                        t-out="(('%.2f')%line.price_subtotal) or ''"/></SPAN></TD>
+                                <TD CLASS="RE0CE1"><SPAN class="cu_wspace">Без
+                                    акциза<!-- TO DO: Сумма акциза --></SPAN></TD>
+                                <TD CLASS="RE0CE1"><SPAN class="cu_wspace"><t
+                                        t-out="line.tax_ids.filtered(lambda tax: tax.invisiblePF == False)[0].amount if line.tax_ids.filtered(lambda tax: tax.invisiblePF == False) else  ''"/>
+                                    % <!-- TO DO: СтавкаНДС --></SPAN></TD>
+                                <TD CLASS="RE0CE1"><SPAN class="cu_wspace"><t
+                                        t-out="(('%.2f')%(line.price_total_pf-line.price_subtotal)).replace('.',',') or ''"/></SPAN></TD>
+                                <TD CLASS="RE0CE1"><SPAN class="cu_wspace"><t
+                                        t-out="(('%.2f')%(line.price_total_pf)).replace('.',',') or ''"/></SPAN></TD>
+
+                                <TD CLASS="RE0CE1"><SPAN class="cu_wspace">643<!-- TO DO: Страна код --></SPAN></TD>
+                                <TD CLASS="RE0CE1"><SPAN class="cu_wspace">РФ<!-- TO DO: Страна --></SPAN></TD>
+                                <TD CLASS="RE0CE1"><SPAN class="cu_wspace"><!-- TO DO: Декларация --></SPAN></TD>
+                            </tr>
+                            <!-- Итоги таблицы -->
+                            <TR CLASS="RE0">
+                                <TD CLASS="RE0CE1r" COLSPAN="1"><SPAN></SPAN></TD>
+                                <TD CLASS="RE0CE1lb" COLSPAN="7"><SPAN class="cu_wspace">Всего<![CDATA[&nbsp;]]>к
+                                    <![CDATA[&nbsp;]]>оплате (9)</SPAN></TD>
+                                <TD CLASS="RE0CE1"><SPAN class="cu_wspace"><t
+                                        t-out="(('%.2f')%(page_price_subtotal)).replace('.',',') or ''"/></SPAN></TD>
+                                <TD CLASS="RE0CE1" COLSPAN="2"><SPAN class="cu_wspace">Х</SPAN></TD>
+                                <TD CLASS="RE0CE1"><SPAN class="cu_wspace"><t
+                                        t-out="(('%.2f')%(page_tax)).replace('.',',') or ''"/></SPAN></TD>
+                                <TD CLASS="RE0CE1"><SPAN class="cu_wspace"><t
+                                        t-out="(('%.2f')%(page_price_tax_subtotal)).replace('.',',') or ''"/></SPAN></TD>
+                                <TD CLASS="RE0CE1" COLSPAN="3"><SPAN class="cu_wspace"></SPAN></TD>
+                            </TR>
+                        </TABLE>
+                        <TABLE CELLSPACING="0">
+                            <COL WIDTH="40"/>
+                            <COL WIDTH="40"/>
+                            <COL WIDTH="11"/>
+                            <COL WIDTH="229"/>
+                            <COL WIDTH="62"/>
+                            <COL WIDTH="11"/>
+                            <COL WIDTH="165"/>
+                            <COL WIDTH="33"/>
+                            <COL WIDTH="143"/>
+                            <COL WIDTH="66"/>
+                            <COL WIDTH="11"/>
+                            <COL WIDTH="165"/>
+                            <TR CLASS="RE6">
+                                <TD CLASS="RE6CE1" COLSPAN="2"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="RE6CE1r" COLSPAN="10"><SPAN class="cu_wspace"></SPAN></TD>
+                            </TR>
+                            <TR CLASS="RE30">
+                                <TD CLASS="RE30CE1" COLSPAN="2"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="RE30CE1r"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="RE30CE1"><SPAN class="cu_wspace">Руководитель<![CDATA[&nbsp;]]>
+                                    организации<BR/>или<![CDATA[&nbsp;]]>иное<![CDATA[&nbsp;]]>уполномоченное
+                                    <![CDATA[&nbsp;]]>лицо</SPAN></TD>
+                                <TD CLASS="RE32CE8I2"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="RE30CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="RE30CE2"><SPAN class="cu_wspace"><t
+                                        t-out="helper.initials(company.chief_id.name)"/></SPAN></TD>
+                                <TD CLASS="RE30CE1" COLSPAN="2"><SPAN class="cu_wspace">Главный<![CDATA[&nbsp;]]>
+                                    бухгалтер<BR/>или<![CDATA[&nbsp;]]>иное<![CDATA[&nbsp;]]>уполномоченное
+                                    <![CDATA[&nbsp;]]>лицо</SPAN></TD>
+                                <TD CLASS="RE32CE8I2"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="RE30CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="RE30CE2"><SPAN class="cu_wspace"><t
+                                        t-out="helper.initials(company.accountant_id.name)"/></SPAN></TD>
+                            </TR>
+                            <TR CLASS="REB15">
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1r"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE3"><SPAN class="cu_wspace">(подпись)</SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE3"><SPAN class="cu_wspace">(ф.и.о.)</SPAN></TD>
+                                <TD CLASS="REB15CE1" COLSPAN="2"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE3"><SPAN class="cu_wspace">(подпись)</SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE3"><SPAN class="cu_wspace">(ф.и.о.)</SPAN></TD>
+                            </TR>
+                            <TR CLASS="REB15">
+                                <TD CLASS="REB15CE1" COLSPAN="2"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1r"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace">Индивидуальный<![CDATA[&nbsp;]]>
+                                    предприниматель</SPAN></TD>
+                                <TD CLASS="REB15CE2"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE2"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE2" COLSPAN="3"><SPAN class="cu_wspace"></SPAN></TD>
+                            </TR>
+                            <TR CLASS="REB15">
+                                <TD CLASS="REB15CE1" COLSPAN="2"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1r"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace">или<![CDATA[&nbsp;]]>иное<![CDATA[&nbsp;]]>
+                                    уполномоченное<![CDATA[&nbsp;]]>лицо</SPAN></TD>
+                                <TD CLASS="REB15CE3"><SPAN class="cu_wspace">(подпись)</SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE3"><SPAN class="cu_wspace">(ф.и.о.)</SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE3" COLSPAN="3"><SPAN class="cu_wspace">(реквизиты<![CDATA[&nbsp;]]>
+                                    свидетельства<![CDATA[&nbsp;]]>о<![CDATA[&nbsp;]]>государственной<![CDATA[&nbsp;]]>
+                                    регистрации<![CDATA[&nbsp;]]>индивидуального<![CDATA[&nbsp;]]>
+                                    предпринимателя)</SPAN></TD>
+                            </TR>
+                            <TR CLASS="RE6">
+                                <TD CLASS="RE6CE1" COLSPAN="2"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="RE6CE1t" COLSPAN="10"><SPAN class="cu_wspace"></SPAN></TD>
+                            </TR>
+                        </TABLE>
+                        <TABLE CELLSPACING="0">
+                            <COL WIDTH="176"/>
+                            <COL WIDTH="99"/>
+                            <COL WIDTH="668"/>
+                            <COL WIDTH="33"/>
+                            <TR CLASS="REB15">
+                                <TD CLASS="REB15CE1" COLSPAN="2"><SPAN class="cu_wspace">Основание<![CDATA[&nbsp;]]>
+                                    передачи<![CDATA[&nbsp;]]>(сдачи)<![CDATA[&nbsp;]]>/<![CDATA[&nbsp;]]>получения
+                                    <![CDATA[&nbsp;]]>(приемки)</SPAN></TD>
+                                <TD CLASS="REB15CE2"><SPAN class="cu_wspace"><t t-out="o.osnovanie"/></SPAN></TD>
+                                <TD CLASS="REB15CE4"><SPAN class="cu_wspace"></SPAN>[8]</TD>
+                            </TR>
+                            <TR CLASS="REB15">
+                                <TD CLASS="REB15CE1" COLSPAN="2"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE3"><SPAN class="cu_wspace">(договор;<![CDATA[&nbsp;]]>доверенность
+                                    <![CDATA[&nbsp;]]>и<![CDATA[&nbsp;]]>др.)</SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                            </TR>
+                            <TR CLASS="REB15">
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace">Данные<![CDATA[&nbsp;]]>о<![CDATA[&nbsp;]]>
+                                    транспортировке<![CDATA[&nbsp;]]>и<![CDATA[&nbsp;]]>грузе</SPAN></TD>
+                                <TD CLASS="REB15CE2" COLSPAN="2"><SPAN class="cu_wspace"><t
+                                        t-out="o.transport"/></SPAN></TD>
+                                <TD CLASS="REB15CE4"><SPAN class="cu_wspace">[9]</SPAN></TD>
+                            </TR>
+                            <TR CLASS="REB15">
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE3" COLSPAN="2"><SPAN class="cu_wspace">(транспортная<![CDATA[&nbsp;]]>
+                                    накладная,<![CDATA[&nbsp;]]>поручение<![CDATA[&nbsp;]]>экспедитору,
+                                    <![CDATA[&nbsp;]]>экспедиторская<![CDATA[&nbsp;]]>/<![CDATA[&nbsp;]]>складская
+                                    <![CDATA[&nbsp;]]>расписка<![CDATA[&nbsp;]]>и<![CDATA[&nbsp;]]>др.<![CDATA[&nbsp;]]>
+                                    /<![CDATA[&nbsp;]]>масса<![CDATA[&nbsp;]]>нетто<![CDATA[&nbsp;]]>/<![CDATA[&nbsp;]]>
+                                    брутто<![CDATA[&nbsp;]]>груза,<![CDATA[&nbsp;]]>если<![CDATA[&nbsp;]]>не
+                                    <![CDATA[&nbsp;]]>приведены<![CDATA[&nbsp;]]>ссылки<![CDATA[&nbsp;]]>на
+                                    <![CDATA[&nbsp;]]>транспортные<![CDATA[&nbsp;]]>документы,<![CDATA[&nbsp;]]>
+                                    содержащие<![CDATA[&nbsp;]]>эти<![CDATA[&nbsp;]]>сведения)</SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                            </TR>
+                        </TABLE>
+                        <TABLE CELLSPACING="0">
+                            <COL WIDTH="143"/>
+                            <COL WIDTH="11"/>
+                            <COL WIDTH="11"/>
+                            <COL WIDTH="11"/>
+                            <COL WIDTH="22"/>
+                            <COL WIDTH="11"/>
+                            <COL WIDTH="88"/>
+                            <COL WIDTH="11"/>
+                            <COL WIDTH="22"/>
+                            <COL WIDTH="22"/>
+                            <COL WIDTH="110"/>
+                            <COL WIDTH="33"/>
+                            <COL WIDTH="11"/>
+                            <COL WIDTH="143"/>
+                            <COL WIDTH="11"/>
+                            <COL WIDTH="11"/>
+                            <COL WIDTH="11"/>
+                            <COL WIDTH="22"/>
+                            <COL WIDTH="11"/>
+                            <COL WIDTH="88"/>
+                            <COL WIDTH="11"/>
+                            <COL WIDTH="22"/>
+                            <COL WIDTH="22"/>
+                            <COL WIDTH="110"/>
+                            <COL WIDTH="33"/>
+                            <TR CLASS="REB15">
+                                <TD CLASS="REB15CE1" COLSPAN="12"><SPAN class="cu_wspace">Товар<![CDATA[&nbsp;]]>(груз)
+                                    <![CDATA[&nbsp;]]>передал<![CDATA[&nbsp;]]>/<![CDATA[&nbsp;]]>услуги,
+                                    <![CDATA[&nbsp;]]>результаты<![CDATA[&nbsp;]]>работ,<![CDATA[&nbsp;]]>права
+                                    <![CDATA[&nbsp;]]>сдал</SPAN></TD>
+                                <TD CLASS="REB15CE1r"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1" COLSPAN="12"><SPAN class="cu_wspace">Товар<![CDATA[&nbsp;]]>(груз)
+                                    <![CDATA[&nbsp;]]>получил<![CDATA[&nbsp;]]>/<![CDATA[&nbsp;]]>услуги,
+                                    <![CDATA[&nbsp;]]>результаты<![CDATA[&nbsp;]]>работ,<![CDATA[&nbsp;]]>права
+                                    <![CDATA[&nbsp;]]>принял</SPAN></TD>
+                            </TR>
+                            <TR CLASS="RE30"> <!-- REB15-->
+                                <TD CLASS="REB15CE2"
+                                    style="text-align:center; vertical-align:bottom; border-bottom: #000000 1px solid;"><SPAN
+                                        class="cu_wspace"><t t-out='o.kladov.partner_id.function or ""'/></SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="RE32CE8I2" COLSPAN="5" style="border-bottom: #000000 1px solid;"><SPAN
+                                        class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE2" COLSPAN="3"
+                                    style="text-align:center; vertical-align:bottom; border-bottom: #000000 1px solid;"><SPAN
+                                        class="cu_wspace"><t
+                                        t-out="helper.initials(o.kladov.partner_id.name)"/></SPAN></TD>
+                                <TD CLASS="REB15CE4" style="text-align:center; border-right: #000000 2px solid;"><SPAN
+                                        class="cu_wspace">[10]</SPAN></TD>
+                                <TD CLASS="REB15CE1r"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE2" style="text-align:center; vertical-align:bottom; border-bottom: #000000 1px solid;"><SPAN class="cu_wspace"><t t-out='o.get_function_partner(o.partner_id,"director") or ""'/></SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="RE32CE8I2" COLSPAN="5" style="border-bottom: #000000 1px solid;"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE2" COLSPAN="3" style="text-align:center; vertical-align:bottom; border-bottom: #000000 1px solid;"><SPAN class="cu_wspace"></SPAN><t t-out="helper.initials(o.get_name_partner(o.partner_id,'director') or False)"/></TD>
+                                <TD CLASS="REB15CE4" style="text-align:center;"><SPAN class="cu_wspace">[15]</SPAN></TD>
+                            </TR>
+                            <TR CLASS="REB15">
+                                <TD CLASS="REB15CE3"><SPAN class="cu_wspace">(должность)</SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE3" COLSPAN="5"><SPAN class="cu_wspace">(подпись)</SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE3" COLSPAN="3"><SPAN class="cu_wspace">(ф.и.о.)</SPAN></TD>
+                                <TD CLASS="REB15CE4"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1r"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE3"><SPAN class="cu_wspace">(должность)</SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE3" COLSPAN="5"><SPAN class="cu_wspace">(подпись)</SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE3" COLSPAN="3"><SPAN class="cu_wspace">(ф.и.о.)</SPAN></TD>
+                                <TD CLASS="REB15CE4"><SPAN class="cu_wspace"></SPAN></TD>
+                            </TR>
+                            <TR CLASS="REB15">
+                                <TD CLASS="REB15CE1" COLSPAN="3"><SPAN class="cu_wspace">Дата<![CDATA[&nbsp;]]>отгрузки,
+                                    <![CDATA[&nbsp;]]>передачи<![CDATA[&nbsp;]]>(сдачи)</SPAN></TD>
+                                <TD CLASS="REB15CE2" COLSPAN="8"><SPAN class="cu_wspace"><t
+                                        t-out="helper.ru_date(o.invoice_date)"/></SPAN></TD>
+                                <TD CLASS="REB15CE4"><SPAN class="cu_wspace">[11]</SPAN></TD>
+                                <TD CLASS="REB15CE1r"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1" COLSPAN="3"><SPAN class="cu_wspace">Дата<![CDATA[&nbsp;]]>получения
+                                    <![CDATA[&nbsp;]]>(приемки)</SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace">"</SPAN></TD>
+                                <TD CLASS="REB15CE2"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace">"</SPAN></TD>
+                                <TD CLASS="REB15CE2" COLSPAN="2"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace">20</SPAN></TD>
+                                <TD CLASS="REB15CE2"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace">г.</SPAN></TD>
+                                <TD CLASS="REB15CE4"><SPAN class="cu_wspace">[16]</SPAN></TD>
+                            </TR>
+                            <TR CLASS="REB15">
+                                <TD CLASS="REB15CE1" COLSPAN="12"><SPAN class="cu_wspace">Иные<![CDATA[&nbsp;]]>сведения
+                                    <![CDATA[&nbsp;]]>об<![CDATA[&nbsp;]]>отгрузке,<![CDATA[&nbsp;]]>
+                                    передаче</SPAN></TD>
+                                <TD CLASS="REB15CE1r"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1" COLSPAN="12"><SPAN class="cu_wspace">Иные<![CDATA[&nbsp;]]>сведения
+                                    <![CDATA[&nbsp;]]>о<![CDATA[&nbsp;]]>получении,<![CDATA[&nbsp;]]>приемке</SPAN></TD>
+                            </TR>
+                            <TR CLASS="REB15">
+                                <TD CLASS="REB15CE2" COLSPAN="11"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE4"><SPAN class="cu_wspace">[12]</SPAN></TD>
+                                <TD CLASS="REB15CE1r"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE2" COLSPAN="11"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE4"><SPAN class="cu_wspace">[17]</SPAN></TD>
+                            </TR>
+                            <TR CLASS="REB15">
+                                <TD CLASS="REB15CE3" COLSPAN="11"><SPAN class="cu_wspace">(ссылки<![CDATA[&nbsp;]]>на
+                                    <![CDATA[&nbsp;]]>неотъемлемые<![CDATA[&nbsp;]]>приложения,<![CDATA[&nbsp;]]>
+                                    сопутствующие<![CDATA[&nbsp;]]>документы,<![CDATA[&nbsp;]]>иные<![CDATA[&nbsp;]]>
+                                    документы<![CDATA[&nbsp;]]>и<![CDATA[&nbsp;]]>т.п.)</SPAN></TD>
+                                <TD CLASS="REB15CE4"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1r"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE3" COLSPAN="11"><SPAN class="cu_wspace">(информация<![CDATA[&nbsp;]]>о
+                                    <![CDATA[&nbsp;]]>наличии/отсутствии<![CDATA[&nbsp;]]>претензии;<![CDATA[&nbsp;]]>
+                                    ссылки<![CDATA[&nbsp;]]>на<![CDATA[&nbsp;]]>неотъемлемые<![CDATA[&nbsp;]]>
+                                    приложения,<![CDATA[&nbsp;]]>и<![CDATA[&nbsp;]]>другие<![CDATA[&nbsp;]]>документы
+                                    <![CDATA[&nbsp;]]>и<![CDATA[&nbsp;]]>т.п.)</SPAN></TD>
+                                <TD CLASS="REB15CE4"><SPAN class="cu_wspace"></SPAN></TD>
+                            </TR>
+                            <TR CLASS="REB15">
+                                <TD CLASS="REB15CE1" COLSPAN="12"><SPAN class="cu_wspace">Ответственный
+                                    <![CDATA[&nbsp;]]>за<![CDATA[&nbsp;]]>правильность<![CDATA[&nbsp;]]>оформления
+                                    <![CDATA[&nbsp;]]>факта<![CDATA[&nbsp;]]>хозяйственной<![CDATA[&nbsp;]]>
+                                    жизни</SPAN></TD>
+                                <TD CLASS="REB15CE1r"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1" COLSPAN="12"><SPAN class="cu_wspace">Ответственный
+                                    <![CDATA[&nbsp;]]>за<![CDATA[&nbsp;]]>правильность<![CDATA[&nbsp;]]>оформления
+                                    <![CDATA[&nbsp;]]>факта<![CDATA[&nbsp;]]>хозяйственной<![CDATA[&nbsp;]]>
+                                    жизни</SPAN></TD>
+                            </TR>
+                            <TR CLASS="RE30">
+                                <TD CLASS="REB15CE2"
+                                    style="text-align:center; vertical-align:bottom; border-bottom: #000000 1px solid;"><SPAN
+                                        class="cu_wspace"><t
+                                        t-out='company.accountant_id.partner_id.function or ""'/></SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="RE32CE8I2" COLSPAN="5" style="border-bottom: #000000 1px solid;"><SPAN
+                                        class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE2" COLSPAN="3"
+                                    style="text-align:center; vertical-align:bottom; border-bottom: #000000 1px solid;"><SPAN
+                                        class="cu_wspace"><t
+                                        t-out="helper.initials(company.accountant_id.name)"/></SPAN></TD>
+                                <TD CLASS="REB15CE4" style="text-align:center; border-right: #000000 2px solid;"><SPAN
+                                        class="cu_wspace">[13]</SPAN></TD>
+                                <TD CLASS="REB15CE1r"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE2" style="text-align:center; vertical-align:bottom; border-bottom: #000000 1px solid;"><SPAN class="cu_wspace"><t t-out='o.get_function_partner(o.partner_id,"accountant") or ""'/></SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="RE32CE8I2" COLSPAN="5" style="border-bottom: #000000 1px solid;"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE2" COLSPAN="3" style="text-align:center; vertical-align:bottom; border-bottom: #000000 1px solid;"><SPAN class="cu_wspace"></SPAN><t t-out="helper.initials(o.get_name_partner(o.partner_id,'accountant') or False)"/></TD>
+                                <TD CLASS="REB15CE4" style="text-align:center"><SPAN class="cu_wspace">[18]</SPAN></TD>
+                            </TR>
+                            <TR CLASS="REB15">
+                                <TD CLASS="REB15CE3"><SPAN class="cu_wspace">(должность)</SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE3" COLSPAN="5"><SPAN class="cu_wspace">(подпись)</SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE3" COLSPAN="3"><SPAN class="cu_wspace">(ф.и.о.)</SPAN></TD>
+                                <TD CLASS="REB15CE4"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1r"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE3"><SPAN class="cu_wspace">(должность)</SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE3" COLSPAN="5"><SPAN class="cu_wspace">(подпись)</SPAN></TD>
+                                <TD CLASS="REB15CE1"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE3" COLSPAN="3"><SPAN class="cu_wspace">(ф.и.о.)</SPAN></TD>
+                                <TD CLASS="REB15CE4"><SPAN class="cu_wspace"></SPAN></TD>
+                            </TR>
+                            <TR CLASS="REB15">
+                                <TD CLASS="REB15CE1" COLSPAN="12"><SPAN class="cu_wspace">Наименование<![CDATA[&nbsp;]]>
+                                    экономического<![CDATA[&nbsp;]]>субъекта<![CDATA[&nbsp;]]>–<![CDATA[&nbsp;]]>
+                                    составителя<![CDATA[&nbsp;]]>документа<![CDATA[&nbsp;]]>(в<![CDATA[&nbsp;]]>т.ч.
+                                    <![CDATA[&nbsp;]]>комиссионера<![CDATA[&nbsp;]]>/<![CDATA[&nbsp;]]>
+                                    агента)</SPAN></TD>
+                                <TD CLASS="REB15CE1r"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1" COLSPAN="12"><SPAN class="cu_wspace">Наименование<![CDATA[&nbsp;]]>
+                                    экономического<![CDATA[&nbsp;]]>субъекта<![CDATA[&nbsp;]]>-<![CDATA[&nbsp;]]>
+                                    составителя документа</SPAN></TD>
+                            </TR>
+                            <TR CLASS="REB15">
+                                <TD CLASS="REB15CE2" COLSPAN="11"><SPAN class="cu_wspace"><t
+                                        t-out="company.name or ''"/>,<![CDATA[&nbsp;]]>ИНН/КПП<![CDATA[&nbsp;]]><t
+                                        t-out="company.inn or ''"/><t
+                                        t-out="company.kpp and '/'+company.kpp or ''"/></SPAN></TD>
+                                <TD CLASS="REB15CE4"><SPAN class="cu_wspace">[14]</SPAN></TD>
+                                <TD CLASS="REB15CE1r"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE2" COLSPAN="11"><SPAN class="cu_wspace"><t
+                                        t-out="o.partner_id.parent_id.name if o.partner_id.parent_id else o.partner_id.name"/>
+                                    ,<![CDATA[&nbsp;]]>ИНН/КПП<![CDATA[&nbsp;]]>
+                                    <t t-out="o.partner_id.parent_id.inn if o.partner_id.parent_id else o.partner_id.inn  "/>
+                                    /<t t-out="o.partner_id.parent_id.kpp if o.partner_id.parent_id else o.partner_id.kpp "/></SPAN></TD>
+                                <TD CLASS="REB15CE4"><SPAN class="cu_wspace">[19]</SPAN></TD>
+                            </TR>
+                            <TR CLASS="REB15">
+                                <TD CLASS="REB15CE3" COLSPAN="11"><SPAN class="cu_wspace">(может<![CDATA[&nbsp;]]>не
+                                    <![CDATA[&nbsp;]]>заполняться<![CDATA[&nbsp;]]>при<![CDATA[&nbsp;]]>проставлении
+                                    <![CDATA[&nbsp;]]>печати<![CDATA[&nbsp;]]>в<![CDATA[&nbsp;]]>М.П.,<![CDATA[&nbsp;]]>
+                                    может<![CDATA[&nbsp;]]>быть<![CDATA[&nbsp;]]>указан<![CDATA[&nbsp;]]>ИНН
+                                    <![CDATA[&nbsp;]]>/<![CDATA[&nbsp;]]>КПП)</SPAN></TD>
+                                <TD CLASS="REB15CE4"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1r"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE3" COLSPAN="11"><SPAN class="cu_wspace">(может<![CDATA[&nbsp;]]>не
+                                    <![CDATA[&nbsp;]]>заполняться<![CDATA[&nbsp;]]>при<![CDATA[&nbsp;]]>проставлении
+                                    <![CDATA[&nbsp;]]>печати<![CDATA[&nbsp;]]>в<![CDATA[&nbsp;]]>М.П.,<![CDATA[&nbsp;]]>
+                                    может<![CDATA[&nbsp;]]>быть<![CDATA[&nbsp;]]>указан<![CDATA[&nbsp;]]>ИНН
+                                    <![CDATA[&nbsp;]]>/<![CDATA[&nbsp;]]>КПП)</SPAN></TD>
+                                <TD CLASS="REB15CE4"><SPAN class="cu_wspace"></SPAN></TD>
+                            </TR>
+                            <TR CLASS="REB15">
+                                <TD CLASS="REB15CE4"><SPAN class="cu_wspace">М.П.</SPAN></TD>
+                                <TD CLASS="RE29CE7S" COLSPAN="11"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE1r"><SPAN class="cu_wspace"></SPAN></TD>
+                                <TD CLASS="REB15CE4"><SPAN class="cu_wspace">М.П.</SPAN></TD>
+                                <TD CLASS="REB15CE1" COLSPAN="11"><SPAN class="cu_wspace"></SPAN></TD>
+                            </TR>
+                        </TABLE>
+                    </div>
+                </t>
+            </t>
+        </template>
+    </data>
+</openerp>

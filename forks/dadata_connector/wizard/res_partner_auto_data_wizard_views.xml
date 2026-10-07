@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_partner_auto_data_wizard_view_form" model="ir.ui.view">
+        <field name="name">Partner with auto data wizard view form</field>
+        <field name="model">res.partner.auto_data.wizard</field>
+        <field name="arch" type="xml">
+            <form create="0" delete="0" edit="0">
+                <group>
+                    <field name="status"
+                           decoration-success="status == 'active'"
+                           decoration-danger="status != 'active'"/>
+                    <field name="organization_type"/>
+                    <field name="name"/>
+                    <field name="full_address"/>
+                </group>
+                <footer>
+                    <button string="Yes" class="oe_highlight" name="button_yes" type="object"/>
+                    <button string="No" class="btn btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

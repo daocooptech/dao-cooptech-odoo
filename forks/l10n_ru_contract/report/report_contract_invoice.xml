@@ -1,0 +1,591 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_contract_customer_invoice">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="o">
+                <t t-if="o and 'company_id' in o">
+                    <t t-set="company" t-value="o.company_id"/>
+                </t>
+                <t t-if="not o or not 'company_id' in o">
+                    <t t-set="company" t-value="res_company"/>
+                </t>
+                <t t-set="context" t-value="o.env.context"/>
+                <div class="header">
+                    <STYLE TYPE="text/css">
+                        body {background: #ffffff; margin: 0; font-family: Times new roman; font-size: 12pt; font-style:
+                        normal;}
+                        tr.R0{height: 15px;}
+                        tr.R0 td.R0C0{ font-family: Times new roman; font-size: 11pt; font-style: normal; text-align:
+                        left; vertical-align: medium; font-weight: bold;}
+                        tr.R0 td.R0C1{ font-family: Times new roman; font-size: 11pt; font-style: normal; text-align:
+                        right; vertical-align: medium; font-weight: bold;}
+                    </STYLE>
+                    <table border="0" cellpadding="0" cellspacing="0" style="width:100%">
+                        <tbody>
+                            <tr class="R0">
+                                <td class="R0C0"><t t-out="o.mt_contract_id.company_id.name or ''"/></td>
+                                <td class="R0C1">Договор <t t-out="o.mt_contract_id.name or ''"/> от <t
+                                        t-out="o.mt_contract_id.date_start or ''"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="page">
+                    <STYLE TYPE="text/css">
+                        body {background: #ffffff; margin: 0; font-family: Times new roman; font-size: 12pt; font-style:
+                        normal;}
+                        tr.R0{height: 15px;}
+                        tr.R0 td.R0C0{ font-family: Times new roman; font-size: 11pt; font-style: normal; font-weight:
+                        bold; text-align: center; vertical-align: medium;}
+                        tr.R0 td.R0C1{ font-family: Times new roman; font-size: 11pt; font-style: normal; text-align:
+                        left; vertical-align: medium;}
+                        tr.R0 td.R0C2{ font-family: Times new roman; font-size: 11pt; font-style: normal; text-align:
+                        right; vertical-align: medium;}
+                        tr.R0 td.R0C3{ font-family: Times new roman; font-size: 12pt; font-style: normal; text-align:
+                        justify; vertical-align: medium; margin: 40px;}
+                        tr.R0 td.R0C4{ font-family: Times new roman; font-size: 12pt; font-style: normal; text-align:
+                        center; vertical-align: medium; font-weight: bold;}
+                        tr.R0 td.R0C5{ font-family: Times new roman; font-size: 12pt; font-style: normal; text-align:
+                        start; vertical-align: medium;}
+                        p.R0C4{ font-family: Times new roman; font-size: 12pt; font-style: normal; text-align: center;
+                        vertical-align: medium; font-weight: bold;}
+                        div.R0C5{ font-family: Times new roman; font-size: 12pt; font-style: normal; text-align:
+                        justify; vertical-align: medium;}
+                        tr.R0 td.R0C6rtl{ font-family: Times new roman; font-size: 11pt; font-style: normal;
+                        font-weight: bold; text-align: left; vertical-align: medium; border-left: #000000 1px solid;
+                        border-top: #000000 1px solid; border-right: #000000 1px solid;}
+                        tr.R0 td.R0C6rl{ font-family: Times new roman; font-size: 11pt; font-style: normal; font-weight:
+                        bold; text-align: left; vertical-align: medium; border-left: #000000 1px solid; border-right:
+                        #000000 1px solid}
+                        tr.R0 td.R0C6r{ font-family: Times new roman; font-size: 11pt; font-style: normal; font-weight:
+                        bold; text-align: left; vertical-align: medium; border-right: #000000 1px solid}
+                        tr.R0 td.R0C6l{ font-family: Times new roman; font-size: 11pt; font-style: normal;
+                        text-align: left; vertical-align: medium; border-left: #000000 1px solid;}
+                        tr.R0 td.R0C6b{ font-family: Times new roman; font-size: 11pt; font-style: normal; font-weight:
+                        bold; text-align: left; vertical-align: medium; border-bottom: #000000 1px solid;}
+                        tr.R0 td.R0C6t{ font-family: Times new roman; font-size: 11pt; font-style: normal; font-weight:
+                        bold; text-align: left; vertical-align: medium; border-top: #000000 1px solid;}
+                        tr.R0 td.R0C6rbl{ font-family: Times new roman; font-size: 11pt; font-style: normal;
+                        font-weight: bold; text-align: left; vertical-align: medium; border-left: #000000 1px solid;
+                        border-right: #000000 1px solid; border-bottom: #000000 1px solid;}
+                        tr.R0 td.R0C7rtl{ font-family: Times new roman; font-size: 11pt; font-style: normal; text-align:
+                        left; vertical-align: medium; border-left: #000000 1px solid; border-top: #000000 1px solid;
+                        border-right: #000000 1px solid;}
+                        tr.R0 td.R0C7rl{ font-family: Times new roman; font-size: 11pt; font-style: normal; text-align:
+                        left; vertical-align: medium; border-left: #000000 1px solid; border-right: #000000 1px solid;}
+                        tr.R0 td.R0C7rbl{ font-family: Times new roman; font-size: 11pt; font-style: normal; text-align:
+                        left; vertical-align: medium; border-left: #000000 1px solid; border-right: #000000 1px solid;
+                        border-bottom: #000000 1px solid;}
+                        tr.R0 td.R0C6tI{ font-family: Times new roman; font-size: 11pt; font-style: normal; font-weight:
+                        bold; text-align: left; vertical-align: medium; border-bottom: #000000 1px solid;}
+                        tr.R0 td.R0C6tI { overflow: visible; }
+                        tr.R0 td.R0C6tI span { position: relative; }
+                        tr.R0 td.R0C6tI span img { position: absolute; width: 100px; top: -30px; left: 80px; }
+                        tr.R0 td.R0C6tS { overflow: visible; }
+                        tr.R0 td.R0C6tS span { position: relative; }
+                        tr.R0 td.R0C6tS span img { position: absolute; width: 140px; top: -40px; left: -200px; }
+                        tr.R0 td.R0C8{ font-family: Times new roman; font-size: 11pt; font-style: normal; text-align:
+                        right; vertical-align: medium; font-weight: bold;}
+                        tr.R0 td.R0C9box{ font-family: Times new roman; font-size: 12pt; font-style: normal; text-align:
+                        center; vertical-align: medium; border-left: #000000 1px solid; border-right: #000000 1px solid;
+                        border-bottom: #000000 1px solid; border-top: #000000 1px solid;}
+                    </STYLE>
+                    <table border="0" cellpadding="0" cellspacing="0" style="width:100%; page-break-inside: auto;">
+                        <tbody>
+                            <tr class="R0">
+                                <td class="R0C0" colspan="2">Договор № <t t-out="o.mt_contractid.name or ''"/></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C0" colspan="2">на поставку продукции</td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C1"></td>
+                                <td class="R0C2"></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C1"><t t-out="o.mt_contractid.company_id.partner_id.city or ''"/></td>
+                                <td class="R0C2"><t
+                                        t-out="o.mt_contractid.get_date_text(o.mt_contractid.date_start) or ''"/></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C1"></td>
+                                <td class="R0C2"></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C3" colspan="2">
+                                    <span>
+                                        <t t-out="o.mt_contractid.contract_header or ''"/>
+                                    </span>
+                                </td>
+                                <tr class="R0">
+                                    <td class="R0C1"></td>
+                                    <td class="R0C2"></td>
+                                </tr>
+                            </tr>
+                            <!--t t-foreach="o.mt_contractid.lines.sorted(key=lambda r: r.sequence, reverse=False)" t-as="line">
+                              <tr class="R0">
+                                <td  class="R0C4" colspan="2"><t t-out="line.name"/></td>
+                              </tr>
+                              <tr class="R0">
+                                <td  class="R0C5" colspan="2"><t t-out="line.punct"/></td>
+                              </tr>
+                              <tr class="R0">
+                                <td  class="R0C5" colspan="2"></td>
+                              </tr>
+                            </t-->
+                            <!--tr class="R0">
+                              <td  class="R0C4" colspan="2">Реквизиты и подписи сторон.</td>
+                            </tr>
+                            <tr class="R0">
+                              <td class="R0C1"></td>
+                              <td class="R0C2"></td>
+                            </tr-->
+                        </tbody>
+                    </table>
+                    <t t-foreach="o.mt_contractid.lines.sorted(key=lambda r: r.sequence, reverse=False)" t-as="line">
+                        <p class="R0C4"><t t-out="line.name or ''"/></p>
+                        <div class="R0C5"><span><t t-out="line.punct or ''"/></span></div>
+                    </t>
+                    <table border="0" cellpadding="0" cellspacing="0" style="width:100%; page-break-inside: avoid;">
+                        <COL WIDTH="5%"/>
+                        <COL WIDTH="30%"/>
+                        <COL WIDTH="15%"/>
+                        <COL WIDTH="5%"/>
+                        <COL WIDTH="30%"/>
+                        <COL WIDTH="15%"/>
+                        <tbody>
+                            <tr class="R0">
+                                <td class="R0C4" colspan="6">Реквизиты и подписи сторон.</td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C1" colspan="6"></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6rtl" colspan="3">Поставщик:</td>
+                                <td class="R0C6rtl" colspan="3">Покупатель:</td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6rl" colspan="3"><t t-out="o.mt_contractid.company_id.name or ''"/></td>
+                                <td class="R0C6rl" colspan="3"><t t-out="o.mt_contractid.partner_id.name or ''"/></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6l" colspan="3">ИНН
+                                    <t t-out="o.mt_contractid.company_id.inn or ''"/>
+                                </td>
+                                <td class="R0C7rl" colspan="3">ИНН <t
+                                        t-out="o.mt_contractid.partner_id.inn or ''"/></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6l" colspan="2">ОГРН
+                                    <t t-out="o.company_id.company_registry or ''"/>
+                                </td>
+                                <td class="R0C6r" rowspan="2">
+                                    <t t-out="o.mt_contractid.name_dirprint1 or ''"/>
+                                </td>
+                                <t t-if="o.mt_contractid.partner_type in ['company', 'company_ip']">
+                                    <td class="R0C7rl" colspan="3">ОГРН
+                                        <t t-out="o.partner_id.ogrn or ''"/>
+                                    </td>
+                                </t>
+                                <t t-else="">
+                                    <td class="R0C7rl" colspan="3">Паспорт
+                                        <t t-out="o.partner_id.passport or ''"/>
+                                    </td>
+                                </t>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6l" colspan="3">КПП
+                                    <t t-out="o.mt_contractid.company_id.kpp or ''"/>
+                                </td>
+                                <t t-if="o.mt_contractid.partner_type == 'company'">
+                                    <td class="R0C7rl" colspan="3">КПП
+                                        <t t-out="o.partner_id.kpp or ''"/>
+                                    </td>
+                                </t>
+                                <t t-else="">
+                                    <td class="R0C7rl" colspan="3"></td>
+                                </t>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6rl" colspan="3">Юридический адрес:
+                                </td>
+                                <td class="R0C6rl" colspan="3">Юридический адрес:
+                                </td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6l" colspan="3">
+                                    <t t-out="o.mt_contractid.address(o.company_id) or ''"/>
+                                </td>
+                                <td class="R0C7rl" colspan="3">
+                                    <t t-out="o.mt_contractid.address(o.partner_id) or ''"/>
+                                </td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6rl" colspan="3"></td>
+                                <td class="R0C6rl" colspan="3"></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6rl" colspan="3"></td>
+                                <td class="R0C6rl" colspan="3"></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6rl" colspan="3"></td>
+                                <td class="R0C6rl" colspan="3"></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6l"></td>
+                                <td class="R0C6tI">
+                                    <SPAN>
+                                        <t t-out="o.stamp and o.mt_contractid.img(o.company_id.chief_id.facsimile) or ''"/>
+                                    </SPAN>
+                                </td>
+                                <td class="R0C6tS">
+                                    <SPAN>
+                                        <t t-out="o.stamp and o.mt_contractid.img(o.company_id.stamp) or ''"/>
+                                    </SPAN>
+                                </td>
+                                <td class="R0C6rl" colspan="3"></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6rl" colspan="3"></td>
+                                <td class="R0C6l"></td>
+                                <td class="R0C6b"></td>
+                                <td class="R0C6r">
+                                    <t t-out="''"/>
+                                </td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6rl" colspan="3"></td>
+                                <td class="R0C6rl" colspan="3"></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6rl" colspan="3"></td>
+                                <td class="R0C6rl" colspan="3"></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6rl" colspan="3"></td>
+                                <td class="R0C6rl" colspan="3"></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6rbl" colspan="3"></td>
+                                <td class="R0C6rbl" colspan="3"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p style="page-break-before:always;"></p>
+                    <!--p style="page-break-after:always"></p>
+                    <div style="page-break-after: auto;"><span style="display: none;"> </span></div>
+                    <p style="page-break-inside: avoid">
+                    <div style="page-break-inside: auto"></div-->
+                    <table border="0" cellpadding="0" cellspacing="0" style="width:100%">
+                        <tbody>
+                            <tr class="R0">
+                                <td class="R0C8" colspan="8">Приложение<br/>к договору № <t
+                                        t-out="o.mt_contractid.name"/><br/>на поставку продукции<br/>от <t
+                                        t-out="o.mt_contractid.get_date_text(o.mt_contractid.date_start) or ''"/></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C0" colspan="8"></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C0" colspan="8">Спецификация № 1</td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C0" colspan="8"></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C1" colspan="4"><t
+                                        t-out="o.mt_contractid.company_id.partner_id.city or ''"/></td>
+                                <td class="R0C2" colspan="4"><t
+                                        t-out="o.mt_contractid.get_date_text(o.mt_contractid.date_start) or ''"/></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C0" colspan="8"></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C3" colspan="8">
+                                    <span>
+                                        <t t-out="o.mt_contractid.contract_header or ''"/>
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C0" colspan="8"></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C5" colspan="8">1. По договору на поставку продукции <t
+                                        t-out="o.mt_contractid.name or ''"/> от <t
+                                        t-out="o.mt_contractid.get_date_text(o.mt_contractid.date_start) or ''"/>.
+                                    Поставщик обязуется поставить, а Покупатель оплатить в полном объеме следующее:</td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C0" colspan="8"></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C9box">Номенклатура</td>
+<!--                                <td class="R0C9box">*ГОСТ</td>-->
+                                <td class="R0C9box">Ед.изм.</td>
+                                <td class="R0C9box">Кол-во</td>
+                                <td class="R0C9box">Цена/руб.<br/>без НДС</td>
+                                <td class="R0C9box">Стоимость/руб.<br/>без НДС</td>
+<!--                                <td class="R0C9box">НДС</td>-->
+<!--                                <td class="R0C9box">Стоимость/руб.<br/>c НДС</td>-->
+                            </tr>
+                            <t t-set="invoice_line_ids" t-value="o.invoice_line_ids.filtered(lambda s: 'аванс' not in (s.label or '').lower() and 'депозит' not in (s.label or '').lower())"/>
+
+                            <t t-set="quantity" t-value="sum([line.quantity for line in invoice_line_ids])"/>
+                            <t t-set="sum_full"
+                               t-value="sum([line.quantity*line.price_unit for line in invoice_line_ids])"/>
+                            <t t-set="sum_nds"
+                               t-value="sum([line.quantity*line.price_unit*1.2 for line in invoice_line_ids])"/>
+                            <tr class="R0" t-foreach="invoice_line_ids" t-as="line">
+                                <td class="R0C9box"><t t-out="line.product_id.name or ''"/></td>
+<!--                                <td class="R0C9box">&lt;!&ndash;ГОСТ&ndash;&gt;</td>-->
+                                <td class="R0C9box"><t t-out="line.product_id.uom_id.name or ''"/></td>
+                                <td class="R0C9box"><t t-out="line.quantity or ''"/></td>
+                                <td class="R0C9box"><t t-out="line.price_unit or ''"/></td>
+                                <td class="R0C9box"><t t-out="line.price_unit*line.quantity or ''"/></td>
+<!--                                <td class="R0C9box">20%</td>-->
+<!--                                <td class="R0C9box"><t t-out="line.price_unit*line.quantity*1.2 or ''"/></td>-->
+                            </tr>
+                            <tr class="R0">
+                                <td></td>
+<!--                                <td></td>-->
+                                <td>ИТОГО</td>
+                                <td class="R0C9box"><t t-out="quantity or ''"/></td>
+                                <td class="R0C9box">x</td>
+                                <td class="R0C9box"><t t-out="sum_full or ''"/></td>
+<!--                                <td class="R0C9box">x</td>-->
+<!--                                <td class="R0C9box"><t t-out="sum_nds or ''"/></td>-->
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C0" colspan="8"></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C5" colspan="8">Итого: <t t-out="sum_full or ''"/> рублей (<t
+                                        t-out="o.mt_contractid.rubles(sum_full) or ''"/>). В стоимость продукции входит стоимость
+                                    тары и стоимость транспортных расходов, связанных с доставкой продукции до станции
+                                    назначения.<br/>
+                                    2. Базис поставки (пункт назначения) по отгрузочным реквизитам:<br/>
+                                    <t t-out="o.mt_contractid.address_delivery(o.mt_contractid.partner_id.id) or ''"/><br/>
+                                    Грузополучатель: <t t-out="o.mt_contractid.partner_id.name or ''"/>, код <t
+                                            t-out="o.mt_contractid.partner_id.id or ''"/>, ОКПО <t
+                                            t-out="o.mt_contractid.partner_id.okpo or ''"/>.<br/>
+                                    3. Условия оплаты: <t t-out="o.invoice_payment_term_id.name or ''"/> согласно
+                                    выставленному счету Поставщика.<br/>
+                                    4. Срок отгрузки: <t
+                                            t-out="o.mt_contractid.get_date_text(o.mt_contractid.date_end) or ''"/><br/>
+                                    5. Срок действия настоящей спецификации ограничен и равен сроку отгрузки по условиям
+                                    данной спецификации.
+                                </td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C0" colspan="8"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table border="0" cellpadding="0" cellspacing="0" style="width:100%; page-break-inside: avoid;">
+                        <COL WIDTH="5%"/>
+                        <COL WIDTH="30%"/>
+                        <COL WIDTH="15%"/>
+                        <COL WIDTH="5%"/>
+                        <COL WIDTH="30%"/>
+                        <COL WIDTH="15%"/>
+                        <tbody>
+                            <tr class="R0">
+                                <td class="R0C4" colspan="6">Реквизиты и подписи сторон.</td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C1" colspan="6"></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6rtl" colspan="3">Поставщик:</td>
+                                <td class="R0C6rtl" colspan="3">Покупатель:</td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6rl" colspan="3"><t t-out="o.mt_contractid.company_id.name or ''"/></td>
+                                <td class="R0C6rl" colspan="3"><t t-out="o.mt_contractid.partner_id.name or ''"/></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6l" colspan="3">ИНН
+                                    <t t-out="o.mt_contractid.company_id.inn or ''"/>
+                                </td>
+                                <td class="R0C7rl" colspan="3">ИНН <t
+                                        t-out="o.mt_contractid.partner_id.inn or ''"/></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6l" colspan="2">ОГРН
+                                    <t t-out="o.company_id.company_registry or ''"/>
+                                </td>
+                                <td class="R0C6r" rowspan="2">
+                                    <t t-out="o.mt_contractid.name_dirprint1 or ''"/>
+                                </td>
+                                <t t-if="o.mt_contractid.partner_type in ['company', 'company_ip']">
+                                    <td class="R0C7rl" colspan="3">ОГРН
+                                        <t t-out="o.partner_id.ogrn or ''"/>
+                                    </td>
+                                </t>
+                                <t t-else="">
+                                    <td class="R0C7rl" colspan="3">Паспорт
+                                        <t t-out="o.partner_id.passport or ''"/>
+                                    </td>
+                                </t>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6l" colspan="3">КПП
+                                    <t t-out="o.mt_contractid.company_id.kpp or ''"/>
+                                </td>
+                                <t t-if="o.mt_contractid.partner_type == 'company'">
+                                    <td class="R0C7rl" colspan="3">КПП
+                                        <t t-out="o.partner_id.kpp or ''"/>
+                                    </td>
+                                </t>
+                                <t t-else="">
+                                    <td class="R0C7rl" colspan="3"></td>
+                                </t>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6rl" colspan="3">Юридический адрес:
+                                </td>
+                                <td class="R0C6rl" colspan="3">Юридический адрес:
+                                </td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6l" colspan="3">
+                                    <t t-out="o.mt_contractid.address(o.company_id) or ''"/>
+                                </td>
+                                <td class="R0C7rl" colspan="3">
+                                    <t t-out="o.mt_contractid.address(o.partner_id) or ''"/>
+                                </td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6rl" colspan="3"></td>
+                                <td class="R0C6rl" colspan="3"></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6rl" colspan="3"></td>
+                                <td class="R0C6rl" colspan="3"></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6rl" colspan="3"></td>
+                                <td class="R0C6rl" colspan="3"></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6l"></td>
+                                <td class="R0C6tI">
+                                    <SPAN>
+                                        <t t-out="o.stamp and o.mt_contractid.img(o.company_id.chief_id.facsimile) or ''"/>
+                                    </SPAN>
+                                </td>
+                                <td class="R0C6tS">
+                                    <SPAN>
+                                        <t t-out="o.stamp and o.mt_contractid.img(o.company_id.stamp) or ''"/>
+                                    </SPAN>
+                                </td>
+                                <td class="R0C6rl" colspan="3"></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6rl" colspan="3"></td>
+                                <td class="R0C6l"></td>
+                                <td class="R0C6b"></td>
+                                <td class="R0C6r">
+                                    <t t-out="''"/>
+                                </td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6rl" colspan="3"></td>
+                                <td class="R0C6rl" colspan="3"></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6rl" colspan="3"></td>
+                                <td class="R0C6rl" colspan="3"></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6rl" colspan="3"></td>
+                                <td class="R0C6rl" colspan="3"></td>
+                            </tr>
+                            <tr class="R0">
+                                <td class="R0C6rbl" colspan="3"></td>
+                                <td class="R0C6rbl" colspan="3"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="footer">
+                    <STYLE TYPE="text/css">
+                        body {background: #ffffff; margin: 0; font-family: Times new roman; font-size: 12pt; font-style:
+                        normal;}
+                        tr.R0{height: 30px;}
+                        tr.R0 td.R0C0{ font-family: Times new roman; font-size: 11pt; font-style: normal; font-weight:
+                        bold; text-align: left; vertical-align: bottom;}
+                        tr.R0 td.R0C1{ font-family: Times new roman; font-size: 11pt; font-style: normal; font-weight:
+                        bold; text-align: right; vertical-align: bottom;}
+                        tr.R0 td.R0C6tI{ font-family: Times new roman; font-size: 11pt; font-style: normal; font-weight:
+                        bold; text-align: left; vertical-align: top; border-bottom: #000000 1px solid;}
+                        tr.R0 td.R0C6tI { overflow: visible; }
+                        tr.R0 td.R0C6tI span { position: relative; }
+                        tr.R0 td.R0C6tI span img { position: absolute; width: 100px; top: -5px; left: 5px;}
+                    </STYLE>
+                    <table border="0" cellpadding="0" cellspacing="0" style="width:100%">
+                        <COL WIDTH="20%"/>
+                        <COL WIDTH="20%"/>
+                        <COL WIDTH="20%"/>
+                        <COL WIDTH="20%"/>
+                        <COL WIDTH="20%"/>
+                        <tbody>
+                            <tr class="R0">
+                                <td class="R0C0">Подпись Исполнителя</td>
+                                <td class="R0C6tI">
+                                    <SPAN>
+                                        <t
+                                                t-out="o.stamp and o.mt_contractid.img(company.chief_id.facsimile) or ''"/>
+                                    </SPAN>
+                                </td>
+                                <td class="R0C0"></td>
+                                <td class="R0C1">Подпись Заказчика</td>
+                                <td class="R0C6tI"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="row">
+                        <div class="col-xs-3 pull-right">
+                            <small style="font-size:18px;">
+                                <span>Страница</span>
+                                <span class="page"/>
+                                из
+                                <span class="topage"/>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <record id="paperformat_a4" model="report.paperformat">
+        <field name="name">A4</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">15</field>
+        <field name="margin_bottom">30</field>
+        <field name="margin_left">7</field>
+        <field name="margin_right">7</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">10</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="action_report_contract_customer_invoce" model="ir.actions.report">
+       <field name="name">Договор со спецификацией</field>
+       <field name="model">account.move</field>
+       <field name="report_type">qweb-pdf</field>
+       <field name="report_name">l10n_ru_contract.report_contract_customer_invoice</field>
+       <field name="print_report_name">'Договор со спецификацией - %s' % (object.name)</field>
+       <field name="binding_model_id" ref="account.model_account_move" />
+       <field name="paperformat_id" ref="paperformat_a4" />
+       <field name="binding_type">report</field>
+   </record>
+</odoo>

@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- GENERAL LEDGER -->
+    <record id="general_ledger_wizard" model="ir.ui.view">
+        <field name="name">Акт сверки</field>
+        <field name="model">general.ledger.act_revise.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group name="main_info">
+                    <field
+                        name="company_id"
+                        options="{'no_create': True}"
+                        groups="base.group_multi_company"
+                    />
+                </group>
+                <div invisible= "not_only_one_unaffected_earnings_account==True"                >
+                    <group name="filters">
+                        <group name="date_range">
+<!--                            <field name="date_range_id" />-->
+                            <field name="date_from" />
+                            <field name="date_to" />
+                            <field name="fy_start_date" invisible="1" />
+                            <field name="target_move" widget="radio" />
+                        </group>
+                        <group name="other_filters" invisible="1">
+                            <field name="grouped_by" />
+                            <field name="centralize" />
+                            <field name="hide_account_at_0" />
+                            <field name="foreign_currency" />
+                            <field name="show_cost_center" />
+                        </group>
+                    </group>
+                    <notebook invisible="1">
+                        <page string="Filter accounts">
+                            <group name="account_filter" col="4">
+                                <label for="account_ids" colspan="4" />
+                                <field name="receivable_accounts_only" />
+                                <field name="payable_accounts_only" />
+                                <label for="account_code_from" string="From Code" />
+                                <div>
+                                    <div class="o_row">
+                                        <field
+                                            name="account_code_from"
+                                            class="oe_inline"
+                                            options="{'no_create': True}"
+                                        />
+                                        <span class="oe_inline">To</span>
+                                        <field
+                                            name="account_code_to"
+                                            class="oe_inline"
+                                            options="{'no_create': True}"
+                                        />
+                                    </div>
+                                </div>
+                                <field
+                                    name="account_ids"
+                                    nolabel="1"
+                                    widget="many2many_tags"
+                                    options="{'no_create': True}"
+                                    colspan="4"
+                                />
+                            </group>
+                        </page>
+                        <page string="Filter partners">
+                            <field
+                                name="partner_ids"
+                                nolabel="1"
+                                widget="many2many_tags"
+                                options="{'no_create': True}"
+                            />
+                        </page>
+                        <page
+                            string="Filter analytic accounts"
+                            groups="analytic.group_analytic_accounting"
+                        >
+                            <field
+                                name="cost_center_ids"
+                                nolabel="1"
+                                widget="many2many_tags"
+                                options="{'no_create': True}"
+                            />
+                        </page>
+                        <page string="Additional Filtering">
+                            <style>
+                                .o_domain_show_selection_button {display: none}
+                            </style>
+                            <field
+                                name="domain"
+                                widget="domain"
+                                options="{'model': 'account.move.line', 'in_dialog': True}"
+                                context="{'skip_search_count': 1}"
+                            />
+                        </page>
+                    </notebook>
+                </div>
+                <div invisible= "not_only_one_unaffected_earnings_account==False"                >
+                    <field
+                        name="not_only_one_unaffected_earnings_account"
+                        invisible="1"
+                    />
+                    <group />
+                    <h4>
+                        General Ledger can be computed only if selected company have
+                        only one unaffected earnings account.
+                    </h4>
+                    <group />
+                </div>
+                <footer>
+                    <div invisible= "not_only_one_unaffected_earnings_account==True">
+                        <button
+                            name="button_export_pdf"
+                            string="Печать"
+                            type="object"
+                        />
+                        <button string="Отмена" class="oe_link" special="cancel" />
+                    </div>
+                    <div invisible= "not_only_one_unaffected_earnings_account==False" >
+                        <button string="Отмена" class="oe_link" special="cancel" />
+                    </div>
+                </footer>
+            </form>
+        </field>
+    </record>
+<!--    <act_window-->
+<!--        id="action_general_ledger_wizard"-->
+<!--        name="Акт сверки"-->
+<!--        res_model="general.ledger.act_revise.wizard"-->
+<!--        view_mode="form"-->
+<!--        view_id="general_ledger_wizard"-->
+<!--        target="new"-->
+<!--    />-->
+<!--    &lt;!&ndash;Add to res.partner action&ndash;&gt;-->
+<!--    <act_window-->
+<!--        id="act_action_general_ledger_wizard_partner_relation"-->
+<!--        name="Печатать акт сверки"-->
+<!--        res_model="general.ledger.act_revise.wizard"-->
+<!--        binding_model="res.partner"-->
+<!--        view_mode="form"-->
+<!--        context="{-->
+<!--                    'default_receivable_accounts_only':1,-->
+<!--                    'default_payable_accounts_only':1,-->
+<!--                    }"-->
+<!--        groups="account.group_account_manager"-->
+<!--        target="new"-->
+<!--    />-->
+
+    <record id="action_general_ledger_wizard" model="ir.actions.act_window">
+        <field name="name">Акт сверки</field>
+        <field name="res_model">general.ledger.act_revise.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="general_ledger_wizard"/>
+        <field name="target">new</field>
+    </record>
+
+    <record id="act_action_general_ledger_wizard_partner_relation" model="ir.actions.act_window">
+        <field name="name">Печатать акт сверки</field>
+        <field name="res_model">general.ledger.act_revise.wizard</field>
+        <field name="binding_model_id" ref="base.model_res_partner"/>
+        <field name="view_mode">form</field>
+        <field name="context">{'default_receivable_accounts_only': 1, 'default_payable_accounts_only': 1}</field>
+        <field name="group_ids" eval="[(6, 0, [ref('account.group_account_manager')])]"/>
+        <field name="target">new</field>
+    </record>
+
+
+    
+</odoo>

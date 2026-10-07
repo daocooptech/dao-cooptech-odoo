@@ -1,26 +1,24 @@
 from datetime import datetime
 import re
 from pytils import numeral, dt
-from odoo.tools import pycompat
+from markupsafe import Markup
 
 
 class QWebHelper(object):
 
-    def img(self, img, type='png', width=0, height=0) :
-        if width :
-            width = "width='%spx'"%(width)
-        else :
-            width = " "
-        if height :
-            height = "height='%spx'"%(height)
-        else :
-            height = " "
-        toreturn = "<img %s %s src='data:image/%s;base64,%s' />"%(
-            width,
-            height,
-            type,
-            str(pycompat.to_text(img)))
-        return toreturn
+    def img(self, img, type='png', width=0, height=0):
+        # Odoo 20: Binary-поле отдаёт BinaryValue, а не base64-текст; вывод через t-out
+        # экранируется, поэтому готовый <img> возвращаем как Markup.
+        if not img:
+            return Markup('')
+        if hasattr(img, 'to_base64'):
+            img = img.to_base64()
+        elif isinstance(img, bytes):
+            img = img.decode()
+        width = "width='%spx'" % width if width else ' '
+        height = "height='%spx'" % height if height else ' '
+        return Markup("<img %s %s src='data:image/%s;base64,%s' />") % (
+            Markup(width), Markup(height), type, img)
 
     def numer(self, name):
         if name:
@@ -93,8 +91,8 @@ class QWebHelper(object):
             bank = partner.bank_ids[0]
         elif partner.parent_id.bank_ids:
             bank = partner.parent_id.bank_ids[0]
-        if bank and bank.acc_number:
-            repr.append("р/сч " + bank.acc_number)
+        if bank and bank.account_number:
+            repr.append("р/сч " + bank.account_number)
         if bank and bank.bank_name:
             repr.append("в банке " + bank.bank_name)
         if bank and bank.banvk_bic:

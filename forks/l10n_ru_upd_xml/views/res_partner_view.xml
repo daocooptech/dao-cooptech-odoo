@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_ru_form" model="ir.ui.view">
+        <field name="name">res.partner.ru.form</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[2]" position="inside">
+                <field name="edi" invisible="is_company==False"/>
+                <field name="last_name_IP"/>
+                <field name="first_name_IP"/>
+                <field name="middle_name_IP"/>
+            </xpath>
+            <xpath expr="//field[@name='street']" position="after">
+                <field name="house" placeholder="Дом..."/>
+                <field name="office" placeholder="Офис\кв..."/>
+                <field name="fias_id" placeholder="Код ФИАС..."/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
