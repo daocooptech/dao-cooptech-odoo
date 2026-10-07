@@ -50,10 +50,17 @@ win() {
   if command -v cygpath >/dev/null 2>&1; then cygpath -w "$1"; else printf '%s' "$1"; fi
 }
 
+# Свой HTTP-сервер на свободном порту и фильтр ровно на тестовую базу.
+# С --no-http HTTP-тесты (федерация: did.json, журнал) стучались в тот
+# сервер, что уже слушает порт из конфига, — к чужой базе, и падали 500
+# (07.10.2026: dbfilter стенда ^cooptech$, тесты шли на cooptech20).
+PORT="${COOP_TEST_PORT:-8079}"
+
 MSYS_NO_PATHCONV=1 PYTHONUTF8=1 PYTHONIOENCODING=utf-8 \
   "$PY" "$(win "$ROOT/odoo/odoo-bin")" -c "$(win "$CONF")" -d "$DB" \
+  --db-filter="^${DB}\$" --http-port "$PORT" \
   -u "$LIST" --test-enable --test-tags "$TAGS" \
-  --stop-after-init --no-http --logfile= > "$LOG" 2>&1
+  --stop-after-init --logfile= > "$LOG" 2>&1
 
 grep -E "odoo\.tests\.(stats|result)" "$LOG" | sed -E 's/^[0-9-]+ [0-9:,]+ [0-9]+ [A-Z]+ [^ ]+ //'
 
