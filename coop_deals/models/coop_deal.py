@@ -693,7 +693,17 @@ class CoopDealReview(models.Model):
         for vals in vals_list:
             if not vals.get('side') and vals.get('deal_id'):
                 deal = self.env['coop.deal'].browse(vals['deal_id'])
-                vals['side'] = deal._my_side() or 'a'
+                # Сторона — по автору, если он назван: от текущего
+                # пользователя её можно взять, только когда пишет он сам.
+                # Под суперпользователем (загрузчик, перенос) оба отзыва
+                # получали сторону «a» и упирались в one_per_side.
+                author = vals.get('author_id')
+                if author and author == deal.party_a_id.id:
+                    vals['side'] = 'a'
+                elif author and author == deal.party_b_id.id:
+                    vals['side'] = 'b'
+                else:
+                    vals['side'] = deal._my_side() or 'a'
         records = super().create(vals_list)
         for record in records:
             if record.deal_id.state != 'done':

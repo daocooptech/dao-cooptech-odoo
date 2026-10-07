@@ -395,7 +395,17 @@ class CoopMembership(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        Role = self.env['coop.membership.role']
         for values in vals_list:
+            # Код основания строкой — сразу в запись справочника. Иначе
+            # `role_id` получает значение по умолчанию («Пайщик»), и в
+            # Odoo 20 проверка правовой формы срабатывает раньше, чем
+            # обратная запись кода: установка с нуля падала на членстве
+            # администратора в рабочей группе (`role='platform'`).
+            if values.get('role') and not values.get('role_id'):
+                found = Role.search([('code', '=', values['role'])], limit=1)
+                if found:
+                    values['role_id'] = found.id
             if not values.get('power_ids'):
                 powers = self._default_power_ids(values.get('role') or 'member')
                 values['power_ids'] = [(6, 0, powers.ids)]
