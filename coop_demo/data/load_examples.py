@@ -1328,10 +1328,23 @@ def _project_state_cases(env):
                 # нельзя, и обходить собственное правило в данных тоже.
                 missing = project.required_total - project.contribution_total
                 if missing > 0:
+                    # Пай вносит только пайщик кооператива-инициатора
+                    # (решение 294): замыкающий взнос в паевой проект —
+                    # от действующего пайщика, а нет такого — трудом.
+                    contributor, kind = people[created % len(people)], 'money'
+                    if project.contribution_basis == 'share':
+                        member = env['coop.membership'].sudo().search([
+                            ('organization_id', '=', project.partner_id.id),
+                            ('state', '=', 'active'),
+                            ('partner_id.is_company', '=', False)], limit=1)
+                        if member:
+                            contributor = member.partner_id
+                        else:
+                            kind = 'labour'
                     Contribution.create({
                         'project_id': project.id,
-                        'partner_id': people[created % len(people)].id,
-                        'kind': 'money',
+                        'partner_id': contributor.id,
+                        'kind': kind,
                         'name': 'Замыкающий взнос',
                         'value': missing,
                         'state': 'accepted',

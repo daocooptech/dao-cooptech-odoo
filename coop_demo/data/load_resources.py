@@ -578,7 +578,9 @@ def _fill_making(env):
             values = {}
             fit_materials = (materials - item)
             fit_equipment = (equipment - item)
-            if fit_materials:
+            # Состав — от двух материалов; на базе с нуля подходящих
+            # бывает меньше, и randint(2, 1) ронял всю установку.
+            if len(fit_materials) >= 2:
                 take = rnd.randint(2, min(5, len(fit_materials)))
                 values['material_ids'] = [
                     (6, 0, rnd.sample(fit_materials.ids, take))]

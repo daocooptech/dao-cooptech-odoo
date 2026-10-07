@@ -274,7 +274,7 @@ def load_projects(env, extra=100):
             'funding_rule': _rule_for(index),
             'funding_threshold': 70,
             'fallback_plan': _fallback_for(row),
-            'contribution_basis': _basis_for(row),
+            'contribution_basis': _basis_for(row, initiator),
             'summary': row['description'],
             'description': '<p>%s</p>' % row['description'] if row['description'] else False,
             'city': row['city'],
@@ -505,12 +505,27 @@ def _make_contributions(Contribution, project, required, readiness, people, rnd,
     weights = [3.0] + [rnd.uniform(0.6, 1.6) for _ in range(parts - 1)]
     total_weight = sum(weights)
 
+    # Деньги в паевой проект вносят только пайщики кооператива-инициатора
+    # (решение 294, проверка `_check_share_member`). На базе с нуля
+    # деньги раздавались кому попало, и установка падала.
+    members = Contribution.env['res.partner']
+    if project.contribution_basis == 'share':
+        members = Contribution.env['coop.membership'].sudo().search([
+            ('organization_id', '=', project.partner_id.id),
+            ('state', '=', 'active'),
+            ('partner_id.is_company', '=', False)]).partner_id
+
     for offset, weight in enumerate(weights):
         kind, title = CONTRIBUTION_KINDS[(index + offset) % len(CONTRIBUTION_KINDS)]
         value = round(collected * weight / total_weight)
         if value <= 0:
             continue
         contributor = people[(index * 3 + offset * 11) % len(people)]
+        if kind == 'money' and project.contribution_basis == 'share':
+            if members:
+                contributor = members[(index + offset) % len(members)]
+            else:
+                kind, title = next(k for k in CONTRIBUTION_KINDS if k[0] == 'labour')
         Contribution.create({
             'project_id': project.id,
             'partner_id': contributor.id,
@@ -629,18 +644,26 @@ def _rule_for(index):
     return 'threshold'
 
 
-def _basis_for(row):
+def _basis_for(row, initiator=None):
     """Правовое основание денежного вклада.
 
     Кооперативный проект собирает паевые взносы, некоммерческий —
     пожертвования, остальные — предоплату за вознаграждение.
     Инвестирование в наполнении не ставим: на узле оно закрыто, пока нет
     статуса оператора инвестиционной платформы.
+
+    Пай — только у организации: паевого фонда у человека нет, и
+    проверка вклада такой проект отвергает. ДАО-проект с инициатором-
+    человеком собирает предоплату (установка с нуля на 20 падала на
+    «Строительном 3д принтере»).
     """
-    return {
+    basis = {
         'Кооперативный': 'share',
         'Некоммерческий': 'donation',
     }.get(row['project_type'], 'prepay')
+    if basis == 'share' and initiator is not None and not initiator.is_company:
+        return 'prepay'
+    return basis
 
 
 def _fallback_for(row):

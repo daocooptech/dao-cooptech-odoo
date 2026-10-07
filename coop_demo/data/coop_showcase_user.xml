@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Витринный участник — учётная запись Дашкевича. На неё опираются
+       наполнение избранного, событий, закупок, программ, токенов и стены
+       (`login='dashkevich'` в загрузчиках). На боевой 19 её заводили
+       руками, и в базе с нуля её не было: избранное оставалось пустым,
+       а витринные страницы — без своего участника (07.10.2026).
+       Пароль здесь не задаётся: на боевой переносится прежний. -->
+  <record id="user_dashkevich" model="res.users">
+    <field name="login">dashkevich</field>
+    <field name="partner_id" ref="person_dashkevich"/>
+    <field name="group_ids" eval="[(6, 0, [ref('base.group_user')])]"/>
+  </record>
+
+</odoo>
