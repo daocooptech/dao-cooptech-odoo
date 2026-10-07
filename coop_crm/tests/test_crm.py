@@ -14,6 +14,10 @@ class TestCoopCrm(TransactionCase):
         cls.client = Partner.create({'name': 'ООО «Клиент»', 'is_company': True})
         cls.env['coop.vat.regime'].create(
             {'organization_id': cls.org.id, 'date_from': '2026-01-01', 'regime': 'exempt_145'})
+        # Без правовой формы по умолчанию только «Проекты»; CRM включает
+        # руководитель (решение 450, приложения организации).
+        cls.org.coop_app_crm = True
+        cls.head = cls._member('Руководитель Пробы CRM', ['sign', 'represent'])
         cls.seller = cls._member('Продавец Пробы', ['deal', 'represent'])
         cls.keeper = cls._member('Казначей Пробы', ['treasury'])
         cls.org._coop_ensure_company()
@@ -89,3 +93,30 @@ class TestCoopCrm(TransactionCase):
         membership = page.coop_staff_ids.filtered(
             lambda m: m.partner_id == self.seller.partner_id)
         self.assertEqual(membership.coop_open_deal_count, 1 if deal.responsible_a_id == self.seller else 0)
+
+    def test_apps_by_head(self):
+        company = self.org.coop_company_id
+        with self.assertRaises(UserError):
+            self.org.with_user(self.seller).write({'coop_app_crm': False})
+        self.org.with_user(self.head).write({'coop_app_crm': False})
+        self.assertFalse(self.seller.has_group('sales_team.group_sale_salesman_all_leads'))
+        team = self.env['crm.team'].search([('company_id', '=', company.id)])
+        self.assertFalse(team.member_ids)
+        # Компания остаётся, пока открыты «Проекты»; выключены и они —
+        # учёта организации у продавца больше нет.
+        self.assertIn(company, self.seller.company_ids)
+        self.org.with_user(self.head).write({'coop_app_project': False})
+        self.assertNotIn(company, self.seller.company_ids)
+        self.org.with_user(self.head).write({'coop_app_project': True})
+        self.org.with_user(self.head).write({'coop_app_crm': True})
+        self.assertTrue(self.seller.has_group('sales_team.group_sale_salesman_all_leads'))
+        self.assertIn(company, self.seller.company_ids)
+
+    def test_default_apps_by_form(self):
+        group = self.env.ref('coop_base.legal_group_cooperative')
+        form = self.env['coop.legal.form'].search([('group_id', '=', group.id)], limit=1)
+        coop = self.env['res.partner'].create({
+            'name': 'ПК «Набор по форме»', 'is_company': True,
+            'coop_legal_form_id': form.id})
+        self.assertTrue(coop.coop_app_crm and coop.coop_app_stock and coop.coop_app_project)
+        self.assertFalse(coop.coop_app_hr)

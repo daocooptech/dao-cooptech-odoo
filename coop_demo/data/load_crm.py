@@ -49,7 +49,10 @@ def load_crm(env, target=TARGET):
     if 'crm.lead' not in env or 'coop.vat.regime' not in env:
         return 0
     Lead = env['crm.lead'].sudo()
-    have = Lead.search_count([('coop_import_key', '!=', False)])
+    # Проигранные лиды в архиве — считаем и их, иначе загрузчик решал, что
+    # лидов мало, и заводил новые при каждом обновлении.
+    have = Lead.with_context(active_test=False).search_count(
+        [('coop_import_key', '!=', False)])
     if have >= target:
         _logger.info('CRM: лидов уже %s, пропускаю', have)
         return 0
@@ -57,9 +60,13 @@ def load_crm(env, target=TARGET):
     stages = env['crm.stage'].sudo().search([('is_won', '=', False)], order='sequence')
     clients = env['res.partner'].sudo().search([
         ('coop_is_participant', '=', True)], order='id')
-    orgs = env['res.partner'].sudo().search([
-        ('is_company', '=', True), ('coop_is_participant', '=', True),
-        ('coop_company_id', '!=', False)], order='id')
+    # Только где CRM включён (приложения организации, решение 450): у
+    # остальных держателю «Сделок» лиды не открыты.
+    domain = [('is_company', '=', True), ('coop_is_participant', '=', True),
+              ('coop_company_id', '!=', False)]
+    if 'coop_app_crm' in env['res.partner']._fields:
+        domain.append(('coop_app_crm', '=', True))
+    orgs = env['res.partner'].sudo().search(domain, order='id')
     made = deals = 0
     today = date.today()
     for org in orgs:
@@ -69,13 +76,15 @@ def load_crm(env, target=TARGET):
         sellers = env['coop.membership'].sudo().search([
             ('organization_id', '=', org.id), ('state', '=', 'active'),
             ('power_ids.code', '=', 'deal')]).partner_id.user_ids.filtered(
-            lambda u: not u.share and org.coop_company_id in u.company_ids)
+            lambda u: not u.share and org.coop_company_id in u.company_ids
+            and u.has_group('sales_team.group_sale_salesman'))
         if not sellers:
             continue
         company = org.coop_company_id
         for number in range(rnd.choice((0, 1, 1, 2, 2, 3))):
             key = 'crm#%s.%s' % (org.id, number)
-            if Lead.search_count([('coop_import_key', '=', key)]):
+            if Lead.with_context(active_test=False).search_count(
+                    [('coop_import_key', '=', key)]):
                 continue
             seller = sellers[rnd.randrange(len(sellers))]
             client = clients[rnd.randrange(len(clients))]

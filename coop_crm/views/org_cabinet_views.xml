@@ -55,14 +55,13 @@
                     class="o_coop_band_all">открыть воронку</button>
           </div>
           <div class="o_coop_funnel_steps">
+            <!-- Лиды CRM и сделки в «Обращении» — одна ступень (владелец
+                 08.10.2026). Переход — в CRM, где обращения ведут. -->
             <div class="o_coop_funnel_step">
-              <b><field name="coop_funnel_crm" nolabel="1"/></b>
-              <button name="action_coop_org_leads" type="object"
-                      class="o_coop_band_all" invisible="not coop_company_id">лиды CRM</button>
-              <span invisible="coop_company_id">лиды CRM</span>
-            </div>
-            <div class="o_coop_funnel_step">
-              <b><field name="coop_funnel_lead" nolabel="1"/></b><span>обращения</span>
+              <b><field name="coop_funnel_inquiry" nolabel="1"/></b>
+              <button name="action_coop_org_leads" type="object" class="o_coop_band_all"
+                      invisible="not coop_company_id or not coop_app_crm">обращения</button>
+              <span invisible="coop_company_id and coop_app_crm">обращения</span>
             </div>
             <div class="o_coop_funnel_step">
               <b><field name="coop_funnel_draft" nolabel="1"/></b><span>переговоры</span>
@@ -114,6 +113,54 @@
               </templates>
             </kanban>
           </field>
+        </div>
+      </xpath>
+      <!--
+        Приложения организации (ответ владельца 08.10.2026, «С доступом»):
+        переключает руководитель, включённое открывает людям с подходящим
+        полномочием её учёт в этом приложении. Карточкой-справкой в левой
+        колонке, как «Реквизиты» и «На платформе» (владелец 08.10.2026:
+        «перенести блок приложения в левый столбец и оформи в
+        соответствующем стиле»).
+      -->
+      <xpath expr="//div[hasclass('o_coop_profile_side')]" position="inside">
+        <field name="coop_can_manage_apps" invisible="1"/>
+        <field name="coop_company_id" invisible="1"/>
+        <div class="o_coop_infobox o_coop_apps" invisible="not coop_is_org_staff">
+          <div class="o_coop_infobox_head">Приложения</div>
+          <div class="o_coop_infobox_body">
+              <div class="o_coop_app_row">
+                <span class="o_coop_key">CRM</span>
+                <field name="coop_app_crm" widget="coop_autosave_toggle" nolabel="1"
+                       readonly="not coop_can_manage_apps"/>
+                <button name="action_coop_org_leads" type="object" class="o_coop_band_all"
+                        invisible="not coop_app_crm or not coop_company_id">открыть</button>
+              </div>
+              <div class="o_coop_app_row">
+                <span class="o_coop_key">Склад</span>
+                <field name="coop_app_stock" widget="coop_autosave_toggle" nolabel="1"
+                       readonly="not coop_can_manage_apps"/>
+                <button name="action_coop_app_stock" type="object" class="o_coop_band_all"
+                        invisible="not coop_app_stock or not coop_company_id">открыть</button>
+              </div>
+              <div class="o_coop_app_row">
+                <span class="o_coop_key">Проекты</span>
+                <field name="coop_app_project" widget="coop_autosave_toggle" nolabel="1"
+                       readonly="not coop_can_manage_apps"/>
+                <button name="action_coop_app_project" type="object" class="o_coop_band_all"
+                        invisible="not coop_app_project or not coop_company_id">открыть</button>
+              </div>
+              <div class="o_coop_app_row">
+                <span class="o_coop_key">Сотрудники</span>
+                <field name="coop_app_hr" widget="coop_autosave_toggle" nolabel="1"
+                       readonly="not coop_can_manage_apps"/>
+                <button name="action_coop_app_hr" type="object" class="o_coop_band_all"
+                        invisible="not coop_app_hr or not coop_company_id">открыть</button>
+              </div>
+            <div class="o_coop_app_note" invisible="coop_can_manage_apps">
+              Включает и выключает руководитель.
+            </div>
+          </div>
         </div>
       </xpath>
     </field>

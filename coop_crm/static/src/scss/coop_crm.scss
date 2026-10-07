@@ -44,3 +44,22 @@
     color: var(--coop-slate, #4a4a44);
   }
 }
+
+// Приложения организации — карточка-справка левой колонки: название,
+// переключатель, переход.
+.o_coop_profile .o_coop_apps {
+  .o_coop_app_row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .o_coop_key { flex: 1 1 auto; }
+    .o_field_widget { width: auto; flex: 0 0 auto; }
+    .o_coop_band_all { flex: 0 0 auto; }
+  }
+
+  .o_coop_app_note {
+    font-size: 12px;
+    color: var(--coop-slate, #4a4a44);
+  }
+}

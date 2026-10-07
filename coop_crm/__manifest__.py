@@ -11,9 +11,10 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.1.0',
+    'version': '20.0.1.2.0',
     'license': 'LGPL-3',
-    'depends': ['crm', 'coop_invoicing', 'coop_deals', 'coop_profile'],
+    'depends': ['crm', 'stock', 'project', 'hr', 'coop_invoicing', 'coop_deals',
+                'coop_profile'],
     'data': [
         'views/crm_lead_views.xml',
         'views/coop_deal_views.xml',
@@ -22,6 +23,7 @@
     'assets': {
         'web.assets_backend': [
             'coop_crm/static/src/scss/coop_crm.scss',
+            'coop_crm/static/src/js/autosave_toggle.js',
         ],
     },
     'post_init_hook': 'post_init_hook',

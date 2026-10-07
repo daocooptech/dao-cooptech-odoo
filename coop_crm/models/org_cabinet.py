@@ -22,6 +22,10 @@ class ResPartner(models.Model):
     # (решение 450): сделки организации открыты им, а не всему составу.
     coop_can_see_funnel = fields.Boolean(compute='_compute_coop_cabinet')
     coop_funnel_crm = fields.Integer(compute='_compute_coop_cabinet')
+    # Лиды CRM и сделки в «Обращении» — одно и то же (владелец 08.10.2026:
+    # «Лиды CRM и Обращение у организации это одно и то же, назови это
+    # Обращение»), поэтому в воронке одна ступень.
+    coop_funnel_inquiry = fields.Integer(compute='_compute_coop_cabinet')
     coop_funnel_lead = fields.Integer(compute='_compute_coop_cabinet')
     coop_funnel_draft = fields.Integer(compute='_compute_coop_cabinet')
     coop_funnel_agreed = fields.Integer(compute='_compute_coop_cabinet')
@@ -72,6 +76,7 @@ class ResPartner(models.Model):
             for state in FUNNEL:
                 org['coop_funnel_%s' % state] = counts[state]
             org.coop_funnel_crm = crm
+            org.coop_funnel_inquiry = crm + counts['lead']
             org.coop_funnel_unassigned = unassigned
 
     def action_coop_org_funnel(self):

@@ -14,21 +14,9 @@ class ResUsers(models.Model):
         ])
         return memberships.organization_id.filtered('is_company')
 
-    @api.model
-    def _coop_company_grants(self, user):
-        """CRM — по полномочию «Сделки» (решение 450).
-
-        Держатель «Сделок» получает компанию учёта своей организации и
-        группу «все лиды отдела»: видит и ведёт лиды всей организации, а не
-        только свои. Группы бухгалтерии отсюда не приходят.
-        """
-        grants = super()._coop_company_grants(user)
-        group = self.env.ref('sales_team.group_sale_salesman_all_leads')
-        for org in self._coop_deal_orgs(user):
-            if org.coop_company_id:
-                grants[org.coop_company_id] = grants.get(
-                    org.coop_company_id, self.env['res.groups']) | group
-        return grants
+    # Компанию учёта и группу CRM держателям «Сделок» теперь выдаёт
+    # набор приложений организации (`org_apps.py`): только там, где CRM
+    # у неё включён (решение 450, ответ владельца 08.10.2026).
 
     @api.model
     def _coop_sync_accounting_access(self, organizations=None, users=None):
