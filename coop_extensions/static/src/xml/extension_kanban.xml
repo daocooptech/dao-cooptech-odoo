@@ -10,7 +10,7 @@
   <t t-name="coop_extensions.ExtensionKanbanView" t-inherit="web.KanbanView"
      t-inherit-mode="primary">
 
-    <xpath expr="//div[@t-custom-ref='root']" position="attributes">
+    <xpath expr="//div[@t-ref='this.rootRef']" position="attributes">
       <attribute name="t-attf-class">{{ this.className }} {{ this.hasSelectedRecords ? 'o_kanban_selection_active' : 'o_kanban_selection_available' }} o_coop_ext_catalog</attribute>
     </xpath>
 
@@ -20,7 +20,7 @@
       его отбирают. На экране она стоит справа, за это отвечает
       `order: 2` в теме.
     -->
-    <xpath expr="//t[@t-component='this.props.Renderer']" position="after">
+    <xpath expr="//t[@t-elif='this.model.couldNotLoadRootOffline']" position="after">
       <CoopFilters t-key="'coop_filters'"
                    resModel="this.props.resModel" baseDomain="this.coopBaseDomain"/>
     </xpath>
