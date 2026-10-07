@@ -27,6 +27,7 @@ from ..data import load_vat
 from ..data import load_staff
 from ..data import load_crm
 from ..data import load_deal_leads
+from ..data import load_deal_activities
 from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_cessions,
                     load_tokens,
@@ -360,6 +361,9 @@ class CoopDemoLoader(models.AbstractModel):
         # Обращения людей (решение 451) — откликами на объявления, когда
         # у организаций уже есть держатели «Сделок», чтобы отвечать.
         load_deal_leads.load_deal_leads(self.env)
+        # Ответственные сторон и дела по сделкам (решение 450) — после
+        # обращений: дела ставятся и по ним.
+        load_deal_activities.load_deal_activities(self.env)
         return True
 
     def _load_rubrics(self):

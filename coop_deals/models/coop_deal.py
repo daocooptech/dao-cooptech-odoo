@@ -2,7 +2,7 @@
 import logging
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -116,6 +116,22 @@ class CoopDeal(models.Model):
     author_id = fields.Many2one(
         'res.partner', string='Оформил', readonly=True, index=True,
         default=lambda self: self.env.user.partner_id)
+
+    # Ответственный — на каждую сторону (решение 450, «максимальная
+    # схожесть с битрикс24»). У человека это он сам. У организации — тот,
+    # кому она поручила «Сделки»: он ведёт сделку, ему приходят дела и
+    # извещения. Две стороны — два ответственных: у каждой свои люди, и
+    # чужого ответственного сторона назначить не может.
+    responsible_a_id = fields.Many2one(
+        'res.users', string='Ответственный стороны', index=True,
+        tracking=True, copy=False)
+    responsible_b_id = fields.Many2one(
+        'res.users', string='Ответственный второй стороны', index=True,
+        tracking=True, copy=False)
+    responsible_a_allowed_ids = fields.Many2many(
+        'res.users', compute='_compute_responsible_allowed')
+    responsible_b_allowed_ids = fields.Many2many(
+        'res.users', compute='_compute_responsible_allowed')
 
     city = fields.Char(string='Город', index=True)
 
@@ -277,7 +293,161 @@ class CoopDeal(models.Model):
                     [('code', '=', 'coop.deal')], order='company_id', limit=1)
                 values['number'] = (sequence._next() if sequence else False) \
                     or _('Черновик')
-        return super().create(vals_list)
+        records = super().create(vals_list)
+        records._coop_fill_responsibles()
+        return records
+
+    def write(self, vals):
+        # Ответственного стороны назначает сама сторона: человек — себя,
+        # организация — тот, у кого её «Сделки». Вторая сторона и автор
+        # сделки здесь не решают.
+        if not self.env.su and not self.env.user.has_group('base.group_system'):
+            for side in ('a', 'b'):
+                if 'responsible_%s_id' % side not in vals:
+                    continue
+                for record in self:
+                    party = record['party_%s_id' % side]
+                    if not self.env.user.coop_has_power('deal', party):
+                        raise UserError(_(
+                            'Ответственного стороны «%s» назначает она сама: '
+                            'человек или тот, кому организация поручила '
+                            'сделки.') % party.display_name)
+        # Сменилась сторона — прежний ответственный ей чужой: снимаем и
+        # подбираем заново из её людей.
+        for side in 'ab':
+            if 'party_%s_id' % side in vals and 'responsible_%s_id' % side not in vals:
+                vals = dict(vals, **{'responsible_%s_id' % side: False})
+        before = {(r.id, s): r['responsible_%s_id' % s] for r in self for s in 'ab'}
+        result = super().write(vals)
+        if {'party_a_id', 'party_b_id'} & set(vals):
+            self._coop_fill_responsibles()
+        for record in self:
+            for side in 'ab':
+                user = record['responsible_%s_id' % side]
+                if user and user != before[(record.id, side)] \
+                        and user != self.env.user:
+                    self.env['coop.notification'].sudo()._notify(
+                        user.partner_id, _(
+                            'Вы назначены ответственным по сделке %s.')
+                        % record.display_name, record=record, kind='deal')
+        return result
+
+    # ── Ответственные ────────────────────────────────────────────────────
+
+    @api.model
+    def _coop_side_staff(self, partner):
+        """Кто может отвечать за сделку от имени стороны."""
+        if not partner:
+            return self.env['res.users']
+        if not partner.is_company:
+            return partner.sudo().user_ids.filtered('active')
+        return self.env['coop.membership'].sudo().search([
+            ('organization_id', '=', partner.id), ('state', '=', 'active'),
+            ('power_ids.code', '=', 'deal'),
+        ], order='joined_on, id').partner_id.user_ids.filtered('active')
+
+    @api.depends('party_a_id', 'party_b_id')
+    def _compute_responsible_allowed(self):
+        for record in self:
+            record.responsible_a_allowed_ids = self._coop_side_staff(record.party_a_id)
+            record.responsible_b_allowed_ids = self._coop_side_staff(record.party_b_id)
+
+    def _coop_fill_responsibles(self):
+        """Проставить ответственных там, где их нет.
+
+        Тот, кто завёл сделку, отвечает за свою сторону, если может; иначе
+        — первый по стажу держатель «Сделок». Нет такого — поле пустое, и
+        сделка видна в фильтре «Нет ответственного».
+        """
+        me = self.env.user
+        for record in self:
+            values = {}
+            for side in 'ab':
+                if record['responsible_%s_id' % side]:
+                    continue
+                staff = self._coop_side_staff(record['party_%s_id' % side])
+                if staff:
+                    values['responsible_%s_id' % side] = (
+                        me if me in staff else staff[0]).id
+            if values:
+                # Без строки в ленте: подбор — не событие сделки, а её
+                # исходное состояние, и «None → Иванов» от OdooBot в каждой
+                # из сотен сделок только засоряет ленту.
+                super(CoopDeal, record.sudo().with_context(
+                    mail_notrack=True)).write(values)
+        return True
+
+    @api.constrains('responsible_a_id', 'responsible_b_id', 'party_a_id', 'party_b_id')
+    def _check_responsibles(self):
+        for record in self:
+            for side in 'ab':
+                user = record['responsible_%s_id' % side]
+                if user and user not in self._coop_side_staff(
+                        record['party_%s_id' % side]):
+                    raise ValidationError(_(
+                        '%(user)s не может отвечать за сторону «%(party)s»: '
+                        'отвечает сам человек или тот, кому организация '
+                        'поручила сделки.',
+                        user=user.name,
+                        party=record['party_%s_id' % side].display_name))
+
+    def _coop_my_responsible(self):
+        """Ответственный моей стороны — ему по умолчанию и пишется дело."""
+        self.ensure_one()
+        side = self._my_side()
+        return self['responsible_%s_id' % side] if side else self.env['res.users']
+
+    def action_coop_plan_activity(self):
+        """«Запланировать дело» в блоке «Что дальше»."""
+        self.ensure_one()
+        user = self._coop_my_responsible() or self.env.user
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Что дальше по сделке %s') % self.number,
+            'res_model': 'mail.activity.schedule',
+            'view_mode': 'form',
+            'views': [[False, 'form']],
+            'target': 'new',
+            'context': {
+                'active_model': self._name,
+                'active_ids': self.ids,
+                'active_id': self.id,
+                'default_activity_user_id': user.id,
+            },
+        }
+
+    @api.model
+    def _coop_release_responsible(self, user, organization):
+        """Человек больше не ведёт сделки организации.
+
+        Сделки, где он отвечал за неё, остаются без ответственного, а
+        руководителю (полномочие «Подпись», иначе «Представительство»)
+        ставится дело — назначить нового.
+        """
+        Deal = self.sudo()
+        open_states = ('lead', 'draft', 'agreed', 'active', 'acceptance', 'disputed')
+        heads = self.env['coop.membership'].sudo().search([
+            ('organization_id', '=', organization.id), ('state', '=', 'active'),
+            ('partner_id.user_ids', '!=', False)])
+        head = (heads.filtered(lambda m: 'sign' in m.power_ids.mapped('code'))
+                or heads.filtered(lambda m: 'represent' in m.power_ids.mapped('code'))
+                )[:1].partner_id.user_ids.filtered('active')[:1]
+        released = Deal
+        for side in 'ab':
+            deals = Deal.search([
+                ('party_%s_id' % side, '=', organization.id),
+                ('responsible_%s_id' % side, '=', user.id),
+                ('state', 'in', open_states)])
+            if deals:
+                super(CoopDeal, deals).write({'responsible_%s_id' % side: False})
+                released |= deals
+        if head:
+            for deal in released:
+                deal.activity_schedule(
+                    'mail.mail_activity_data_todo', user_id=head.id,
+                    summary=_('Назначить ответственного'),
+                    note=_('%s больше не ведёт сделки организации.') % user.name)
+        return released
 
     # ── Кто есть кто ─────────────────────────────────────────────────────
 

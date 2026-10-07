@@ -89,6 +89,8 @@
         <field name="outcome" optional="show" widget="badge"
                decoration-success="outcome == 'positive'"
                decoration-danger="outcome == 'negative'"/>
+        <field name="responsible_a_id" string="Ответственный стороны" widget="many2one_avatar_user" optional="show"/>
+        <field name="responsible_b_id" string="Ответственный второй стороны" widget="many2one_avatar_user" optional="hide"/>
         <field name="state" widget="badge"
                decoration-success="state == 'done'"
                decoration-warning="state == 'lead'"
@@ -182,15 +184,64 @@
             <h1><field name="number" readonly="1"/></h1>
             <field name="name" placeholder="Что передаётся" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/>
           </div>
-          <group>
-            <group string="Стороны">
+          <!--
+            Две плашки сторон, как карточка сделки в Битрикс24 (решение
+            450): у каждой стороны свой ответственный. Назначает его сама
+            сторона — проверка в write модели, здесь только подбор из её
+            людей.
+          -->
+          <field name="responsible_a_allowed_ids" invisible="1"/>
+          <field name="responsible_b_allowed_ids" invisible="1"/>
+          <group class="o_coop_deal_sides">
+            <group string="Сторона" class="o_coop_deal_side">
               <field name="party_a_id" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="role_a" placeholder="продавец, арендатор, исполнитель" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/>
+              <field name="responsible_a_id" string="Ответственный" widget="many2one_avatar_user"
+                     domain="[('id', 'in', responsible_a_allowed_ids)]"
+                     options="{'no_create': True, 'no_open': True}"
+                     placeholder="Нет ответственного"/>
+            </group>
+            <group string="Вторая сторона" class="o_coop_deal_side">
               <field name="party_b_id" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="role_b" placeholder="покупатель, арендодатель, заказчик" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/>
-              <field name="author_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="responsible_b_id" string="Ответственный" widget="many2one_avatar_user"
+                     domain="[('id', 'in', responsible_b_allowed_ids)]"
+                     options="{'no_create': True, 'no_open': True}"
+                     placeholder="Нет ответственного"/>
             </group>
+          </group>
+          <!--
+            «Что дальше» — дела по сделке на виду, а не в шестерёнке ленты:
+            в Битрикс24 карточка начинается со следующего шага. Дело
+            ставится ответственному своей стороны.
+          -->
+          <div class="o_coop_deal_next">
+            <div class="o_coop_deal_next_head">
+              <span class="o_coop_deal_next_title">Что дальше</span>
+              <button name="action_coop_plan_activity" type="object"
+                      string="Запланировать дело" class="btn btn-secondary btn-sm"
+                      invisible="state in ('done', 'cancelled')"/>
+            </div>
+            <p class="o_coop_deal_next_empty" invisible="activity_ids">
+              Дел нет. Запланируйте следующий шаг: звонок, встречу, отправку документов.
+            </p>
+            <field name="activity_ids" nolabel="1" readonly="1" invisible="not activity_ids">
+              <list create="0" delete="0" no_open="1"
+                    decoration-danger="state == 'overdue'"
+                    decoration-warning="state == 'today'">
+                <field name="date_deadline" string="Срок"/>
+                <field name="activity_type_id" string="Дело"/>
+                <field name="summary" string="Что сделать"/>
+                <field name="user_id" string="Кто" widget="many2one_avatar_user"/>
+                <field name="state" column_invisible="True"/>
+                <button name="action_done" type="object" string="Выполнено"
+                        icon="fa-check" class="btn-link"/>
+              </list>
+            </field>
+          </div>
+          <group>
             <group string="Условия">
+              <field name="author_id" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="subject" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/>
               <field name="way" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="city" widget="coop_inline" readonly="not coop_can_edit"/>
@@ -319,12 +370,20 @@
         <filter name="done" string="Завершённые" domain="[('state', '=', 'done')]"/>
         <filter name="disputed" string="Спорные" domain="[('state', '=', 'disputed')]"/>
         <separator/>
+        <filter name="my_responsible" string="Я ответственный"
+                domain="['|', ('responsible_a_id', '=', uid), ('responsible_b_id', '=', uid)]"/>
+        <filter name="no_responsible" string="Нет ответственного"
+                domain="[('state', 'not in', ('done', 'cancelled')), '|', ('responsible_a_id', '=', False), ('responsible_b_id', '=', False)]"/>
+        <filter name="my_overdue_activities" string="Мои просроченные дела"
+                domain="[('activity_ids.user_id', '=', uid), ('activity_ids.date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
+        <separator/>
         <filter name="awaiting_reviews" string="Ждут отзывов"
                 domain="[('outcome', '=', 'pending')]"/>
         <filter name="overdue" string="С просроченным платежом"
                 domain="[('payment_ids.state', '=', 'overdue')]"/>
         <group>
           <filter name="by_state" string="По состоянию" context="{'group_by': 'state'}"/>
+          <filter name="by_responsible" string="По ответственному стороны" context="{'group_by': 'responsible_a_id'}"/>
           <filter name="by_subject" string="По предмету" context="{'group_by': 'subject'}"/>
           <filter name="by_way" string="По способу" context="{'group_by': 'way'}"/>
           <filter name="by_city" string="По городу" context="{'group_by': 'city'}"/>

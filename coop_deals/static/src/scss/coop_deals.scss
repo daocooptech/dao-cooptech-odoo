@@ -99,8 +99,8 @@
   // Обращение ждёт ответа второй стороны (решение 451): тёплым, чтобы
   // его не пропустили среди идущих сделок.
   .o_coop_state_lead {
-    background: #fbf0dc;
-    color: #8a5a10;
+    background: var(--coop-gold-tint, #fbf0dc);
+    color: var(--coop-gold-text, #8a5a10);
   }
 
   // Спор виден издалека намеренно: это единственное состояние, которое
@@ -108,5 +108,43 @@
   .o_coop_state_disputed {
     background: #f6e3e2;
     color: var(--coop-error, #b3413a);
+  }
+}
+
+// Карточка сделки по образцу Битрикс24 (решение 450): две плашки сторон
+// с ответственными и блок «Что дальше» над вкладками.
+.o_form_view {
+  .o_coop_deal_sides > .o_inner_group.o_coop_deal_side {
+    background: var(--coop-surface, #f6f6f2);
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-radius: 10px;
+    padding: 10px 14px 6px;
+    margin: 0 6px 12px;
+  }
+
+  .o_coop_deal_next {
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-left: 3px solid var(--coop-teal, #146b64);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin: 0 6px 16px;
+  }
+
+  .o_coop_deal_next_head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+
+  .o_coop_deal_next_title {
+    font: 700 14px/1.4 'Manrope', sans-serif;
+    color: var(--coop-ink, #14171a);
+  }
+
+  .o_coop_deal_next_empty {
+    margin: 0;
+    color: var(--coop-slate, #4a4a44);
   }
 }
