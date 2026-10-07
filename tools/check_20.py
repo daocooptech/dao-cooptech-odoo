@@ -41,6 +41,9 @@ RULES = {
                   'bytes в поле Binary — TypeError: .decode() при записи'),
     'static-props': (('.js',), re.compile(r'\bstatic\s+(?:props|defaultProps)\s*='),
                      'Owl 3: static props/defaultProps роняют веб-клиент — useProps'),
+    'owl2-state': (('.js',), re.compile(
+        r'''import\s*\{[^}]*\b(?:useState|reactive)\b[^}]*\}\s*from\s*['"]@odoo/owl['"]'''),
+        'Owl 3: useState/reactive нет — proxy (служба с reactive роняет весь веб-клиент)'),
     'mail-paths': (('.js',), re.compile(
         r'''@mail/(?:core/common/record|chatter/web_portal/chatter|utils/common/pdf_thumbnail|core/public_web/messaging_menu)['"]'''),
         'путь модуля mail в 20 переехал или удалён'),
