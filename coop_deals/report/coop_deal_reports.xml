@@ -152,7 +152,14 @@
               </tbody>
             </table>
 
-            <h4 t-if="deal.payment_ids">2. Порядок расчётов</h4>
+            <!-- Пункт 2 есть всегда: без графика платежей договор шёл
+                 «1. Предмет», а за ним сразу «3. Приёмка». -->
+            <h4>2. Цена и порядок расчётов</h4>
+            <p t-if="not deal.payment_ids">
+              <t t-if="deal.amount">Цена — <span t-field="deal.amount"/>.
+                Расчёт единовременно, напрямую между сторонами.</t>
+              <t t-else="">Сделка совершается без встречной оплаты.</t>
+            </p>
             <table class="table table-sm" t-if="deal.payment_ids">
               <thead>
                 <tr>
