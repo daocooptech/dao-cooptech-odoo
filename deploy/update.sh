@@ -10,7 +10,7 @@ set -euo pipefail
 
 ODOO_HOME=/opt/coop
 CONF=/etc/coop-odoo.conf
-DB=koopeh
+DB=cooptech
 USER=odoo
 
 # Запуск службы — только когда память освободилась.

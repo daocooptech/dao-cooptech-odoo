@@ -12,7 +12,7 @@
 #   systemctl start coop-backup.service
 set -euo pipefail
 
-DB=koopeh
+DB=cooptech
 BACKUP_DIR=/var/backups/coop
 KEEP=7            # снимков базы
 KEEP_STORE=3      # копий файлового хранилища

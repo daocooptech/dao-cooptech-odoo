@@ -1,0 +1,10 @@
+# Зависимости наших модулей и российской цепочки (forks/) сверх
+# requirements.txt движка. Версии — те, на которых проверен стенд 20.
+cryptography
+pytils==0.4.4
+dadata==21.10.1
+docxtpl==0.20.2
+docxcompose==2.2.0
+python-docx==1.2.0
+pymorphy3==2.0.6
+pymorphy3-dicts-ru==2.4.417150.4580142

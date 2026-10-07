@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Первичная установка ДАО КООПТЕХ на чистый сервер (Debian/Ubuntu).
 #
-# Ставит PostgreSQL, Python и Odoo 19 с двумя наборами дополнений —
-# rudoo-addons (российская сборка) и coop-addons (наши разделы), — и
-# поднимает платформу как службу systemd за nginx.
+# Ставит PostgreSQL, Python и Odoo 20 (свой форк) с нашими разделами —
+# coop-addons, российская цепочка в нём же, в forks/, — и поднимает
+# платформу как службу systemd за nginx.
 #
 # Запускать один раз от root:
 #
@@ -14,7 +14,7 @@ set -euo pipefail
 
 ODOO_USER=odoo
 ODOO_HOME=/opt/coop
-DB_NAME=koopeh
+DB_NAME=cooptech
 DB_USER=odoo
 DB_PASS="${COOP_DB_PASS:-odoo}"
 
@@ -41,7 +41,7 @@ say "Пользователь $ODOO_USER и каталоги"
 # Исходники принадлежат пользователю платформы, а обслуживающие команды
 # идут от root: без этой пометки git отказывается работать в чужом
 # каталоге («dubious ownership»), и обновление молча не доезжает.
-for d in "$ODOO_HOME/odoo" "$ODOO_HOME/rudoo-addons" "$ODOO_HOME/coop-addons"; do
+for d in "$ODOO_HOME/odoo" "$ODOO_HOME/coop-addons"; do
     git config --global --get-all safe.directory | grep -qxF "$d"         || git config --global --add safe.directory "$d"
 done
 id -u "$ODOO_USER" >/dev/null 2>&1 || useradd -m -d "$ODOO_HOME" -s /bin/bash "$ODOO_USER"
@@ -67,7 +67,6 @@ clone_or_pull() {
     fi
 }
 
-clone_or_pull https://git.ruodoo.ru/ruodoo-public/public.git "$ODOO_HOME/rudoo-addons" master "--depth 1"
 clone_or_pull https://github.com/daocooptech/dao-cooptech-odoo.git "$ODOO_HOME/coop-addons" main
 
 # Движок — свой форк без обращений к Odoo S.A. (решения 439, 441, 442), по
@@ -88,7 +87,7 @@ fi
 # Каталоги могли быть созданы вручную до установки — от root. Тогда
 # обновление падает на «insufficient permission for adding an object»:
 # git пишет от пользователя платформы, а объекты репозитория чужие.
-chown -R "$ODOO_USER:$ODOO_USER" "$ODOO_HOME/odoo" "$ODOO_HOME/rudoo-addons"     "$ODOO_HOME/coop-addons"
+chown -R "$ODOO_USER:$ODOO_USER" "$ODOO_HOME/odoo" "$ODOO_HOME/coop-addons"
 
 # ── Окружение Python ─────────────────────────────────────────────────────
 say "Виртуальное окружение"
@@ -99,13 +98,12 @@ sudo -u "$ODOO_USER" "$ODOO_HOME/venv/bin/pip" install -q --upgrade pip wheel se
 sudo -u "$ODOO_USER" "$ODOO_HOME/venv/bin/pip" install -q psycopg2-binary
 sudo -u "$ODOO_USER" "$ODOO_HOME/venv/bin/pip" install -q -r "$ODOO_HOME/odoo/requirements.txt"
 
-# У российской сборки свой список зависимостей, и без него платформа не
-# поднимается вовсе: модуль перевода падает на импорте, а вместе с ним
-# не собирается весь реестр — снаружи это выглядит как 500 на любой
-# странице, без единой подсказки о причине.
-if [ -f "$ODOO_HOME/rudoo-addons/requirements.txt" ]; then
-    sudo -u "$ODOO_USER" "$ODOO_HOME/venv/bin/pip" install -q         -r "$ODOO_HOME/rudoo-addons/requirements.txt"
-fi
+# У российской цепочки и наших разделов свои зависимости (pytils,
+# docxtpl, dadata…). Без них платформа не поднимается вовсе: модуль
+# падает на импорте, а с ним не собирается весь реестр — снаружи это
+# 500 на любой странице без единой подсказки о причине.
+sudo -u "$ODOO_USER" "$ODOO_HOME/venv/bin/pip" install -q \
+    -r "$ODOO_HOME/coop-addons/deploy/requirements-coop.txt"
 
 # ── Конфигурация ─────────────────────────────────────────────────────────
 say "Конфигурация"

@@ -9,7 +9,7 @@ set -euo pipefail
 
 DUMP="$1"
 STORE="${2:-}"
-DB=koopeh
+DB=cooptech
 USER=odoo
 
 systemctl stop coop-odoo || true
