@@ -91,6 +91,7 @@
                decoration-danger="outcome == 'negative'"/>
         <field name="state" widget="badge"
                decoration-success="state == 'done'"
+               decoration-warning="state == 'lead'"
                decoration-info="state in ('agreed', 'active', 'acceptance')"
                decoration-danger="state == 'disputed'"/>
       </list>
@@ -131,6 +132,8 @@
     <field name="arch" type="xml">
       <form string="Сделка">
         <header>
+          <button name="action_negotiate" type="object" string="Начать переговоры"
+                  class="btn-primary" invisible="state != 'lead'"/>
           <button name="action_agree" type="object" string="Согласовать"
                   class="btn-primary" invisible="state != 'draft'"/>
           <button name="action_start" type="object" string="Начать исполнение"
@@ -141,7 +144,7 @@
           <button name="action_review" type="object" string="Оставить отзыв"
                   class="btn-primary" invisible="not can_review"/>
           <button name="action_open_dispute" type="object" string="Открыть спор"
-                  invisible="state in ('draft', 'done', 'cancelled', 'disputed')"/>
+                  invisible="state in ('lead', 'draft', 'done', 'cancelled', 'disputed')"/>
           <button name="action_resolve_dispute" type="object"
                   string="Закрыть спор" class="btn-primary"
                   invisible="state != 'disputed'"
@@ -165,12 +168,12 @@
           -->
           <button name="%(coop_deals.action_report_deal_agreement)d"
                   type="action" string="Договор"
-                  invisible="state == 'draft'"/>
+                  invisible="state in ('lead', 'draft')"/>
           <button name="%(coop_deals.action_report_deal_act)d"
                   type="action" string="Акт"
                   invisible="not act_confirmed_on"/>
           <field name="state" widget="statusbar"
-                 statusbar_visible="draft,agreed,active,acceptance,done"/>
+                 statusbar_visible="lead,draft,agreed,active,acceptance,done"/>
         </header>
         <sheet>
           <field name="coop_can_edit" invisible="1"/>
@@ -309,6 +312,8 @@
         <field name="party_a_id"/>
         <field name="party_b_id"/>
         <field name="city"/>
+        <filter name="leads" string="Обращения" domain="[('state', '=', 'lead')]"/>
+        <filter name="negotiations" string="Переговоры" domain="[('state', '=', 'draft')]"/>
         <filter name="active_deals" string="В работе"
                 domain="[('state', 'in', ('agreed', 'active', 'acceptance'))]"/>
         <filter name="done" string="Завершённые" domain="[('state', '=', 'done')]"/>

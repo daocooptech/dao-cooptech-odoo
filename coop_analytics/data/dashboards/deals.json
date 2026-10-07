@@ -69,8 +69,11 @@
     ],
     [
      "state",
-     "!=",
-     "draft"
+     "not in",
+     [
+      "lead",
+      "draft"
+     ]
     ]
    ],
    "fieldMatching": {
@@ -127,8 +130,11 @@
     ],
     [
      "state",
-     "!=",
-     "draft"
+     "not in",
+     [
+      "lead",
+      "draft"
+     ]
     ]
    ],
    "fieldMatching": {
@@ -185,8 +191,11 @@
     ],
     [
      "state",
-     "!=",
-     "draft"
+     "not in",
+     [
+      "lead",
+      "draft"
+     ]
     ],
     [
      "state",
@@ -240,8 +249,11 @@
     ],
     [
      "state",
-     "!=",
-     "draft"
+     "not in",
+     [
+      "lead",
+      "draft"
+     ]
     ],
     [
      "state",
@@ -406,8 +418,11 @@
     ],
     [
      "state",
-     "!=",
-     "draft"
+     "not in",
+     [
+      "lead",
+      "draft"
+     ]
     ]
    ],
    "fieldMatching": {
@@ -811,8 +826,11 @@
         ],
         [
          "state",
-         "!=",
-         "draft"
+         "not in",
+         [
+          "lead",
+          "draft"
+         ]
         ]
        ],
        "groupBy": [
@@ -886,8 +904,11 @@
         ],
         [
          "state",
-         "!=",
-         "draft"
+         "not in",
+         [
+          "lead",
+          "draft"
+         ]
         ]
        ],
        "groupBy": [
@@ -1021,8 +1042,11 @@
         ],
         [
          "state",
-         "!=",
-         "draft"
+         "not in",
+         [
+          "lead",
+          "draft"
+         ]
         ]
        ],
        "groupBy": [
@@ -1095,8 +1119,11 @@
         ],
         [
          "state",
-         "!=",
-         "draft"
+         "not in",
+         [
+          "lead",
+          "draft"
+         ]
         ],
         [
          "outcome",

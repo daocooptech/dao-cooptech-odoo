@@ -476,7 +476,7 @@ class CoopSettlement(models.Model):
                       FROM coop_deal_payment p
                       JOIN coop_deal d ON d.id = p.deal_id
                      WHERE p.state IN ('planned', 'overdue')
-                       AND d.state NOT IN ('cancelled', 'draft')
+                       AND d.state NOT IN ('cancelled', 'draft', 'lead')
                        AND p.payer_id IS NOT NULL AND p.payee_id IS NOT NULL
                     UNION ALL
                     -- Плательщик должен: та же сумма в минус.
@@ -489,7 +489,7 @@ class CoopSettlement(models.Model):
                       FROM coop_deal_payment p
                       JOIN coop_deal d ON d.id = p.deal_id
                      WHERE p.state IN ('planned', 'overdue')
-                       AND d.state NOT IN ('cancelled', 'draft')
+                       AND d.state NOT IN ('cancelled', 'draft', 'lead')
                        AND p.payer_id IS NOT NULL AND p.payee_id IS NOT NULL
                 ) t
                 GROUP BY t.partner_id, t.counterparty_id

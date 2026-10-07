@@ -140,7 +140,7 @@ class CoopForecast(models.AbstractModel):
         elif metric in ('deals_amount', 'deals_count'):
             rows = env['coop.deal'].sudo()._read_group(
                 ['|', ('party_a_id', '=', partner.id), ('party_b_id', '=', partner.id),
-                 ('state', 'not in', ('draft', 'cancelled')),
+                 ('state', 'not in', ('lead', 'draft', 'cancelled')),
                  ('signed_on', '>=', start), ('signed_on', '<', end)],
                 ['signed_on:month'], ['amount:sum', '__count'])
             for month, amount, count in rows:

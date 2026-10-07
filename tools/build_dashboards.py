@@ -382,7 +382,7 @@ def deals():
     rpairs = {period: ('deal_id.signed_on', 'date'), city: ('deal_id.city', 'char'),
               subject: ('deal_id.subject', 'selection')}
     mine = ['|', ['party_a_id.coop_is_me', '=', True], ['party_b_id.coop_is_me', '=', True]]
-    live = mine + [['state', '!=', 'draft']]
+    live = mine + [['state', 'not in', ['lead', 'draft']]]
 
     allp, all0 = both(d, 'сделки', m, live, ['__count', 'amount', 'amount_paid'], pairs)
     done, done0 = both(d, 'завершённые', m, live + [['state', '=', 'done']], ['__count'], pairs)
