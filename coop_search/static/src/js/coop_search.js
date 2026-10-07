@@ -2,9 +2,8 @@
 
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { Component, proxy, usePlugin } from "@odoo/owl";
-import { useRef } from "@web/owl2/utils";
-import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
+import { Component, proxy, signal, usePlugin, useProps } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * Поиск по платформе в шапке.
@@ -20,12 +19,12 @@ const DEBOUNCE = 250;
 
 export class CoopSearch extends Component {
     static template = "coop_search.TopbarSearch";
-    static props = {};
+    props = useProps();
 
     setup() {
         this.orm = useService("orm");
-        this.action = usePlugin(ActionManagerPlugin);
-        this.inputRef = useRef("input");
+        this.action = usePlugin(ActionPlugin);
+        this.inputRef = signal.ref();
         this.state = proxy({
             term: "",
             open: false,
@@ -50,7 +49,7 @@ export class CoopSearch extends Component {
         if (this.state.expanded) {
             // Фокус — следующим кадром: в момент нажатия поле ещё
             // скрыто, а скрытому элементу фокус не ставится.
-            requestAnimationFrame(() => this.inputRef.el?.focus());
+            requestAnimationFrame(() => this.inputRef()?.focus());
         } else {
             this.state.open = false;
         }

@@ -21,7 +21,7 @@
 
       <div class="o_coop_search_field">
         <i class="fa fa-search" aria-hidden="true"/>
-        <input type="search" t-custom-ref="input" class="o_coop_search_input"
+        <input type="search" t-ref="this.inputRef" class="o_coop_search_input"
                placeholder="Поиск по платформе..."
                aria-label="Поиск по платформе"
                t-att-value="this.state.term"
