@@ -12,11 +12,12 @@
   <!--
     Над содержимым страницы, под шапкой: на всю ширину области раздела.
     Наследуется от web.WebClient, а не от расширения оболочки: у
-    расширения своего имени нет. Блок o_coop_main к этому шагу уже есть —
-    расширения применяются по порядку модулей, coop_theme раньше.
+    расширения своего имени нет. Прицел — ActionContainer: он есть и в
+    исходном шаблоне (по нему сверяет check_theme), и после оболочки,
+    где стоит внутри o_coop_main.
   -->
   <t t-name="coop_admin.WebClient" t-inherit="web.WebClient" t-inherit-mode="extension">
-    <xpath expr="//div[hasclass('o_coop_main')]/CoopLoader" position="before">
+    <xpath expr="//ActionContainer" position="before">
       <CoopLoginAsBar/>
     </xpath>
   </t>
