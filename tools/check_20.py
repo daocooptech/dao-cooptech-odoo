@@ -19,7 +19,7 @@ import sys
 from collections import Counter, defaultdict
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SKIP_DIRS = {'.git', '__pycache__', 'node_modules', 'tools', 'deploy'}
+SKIP_DIRS = {'.git', '__pycache__', 'node_modules', 'tools'}
 # Миграция переводит записанные в базу имена Font Awesome — старые имена
 # в ней и есть то, что она ищет.
 FA_EXEMPT_DIR = os.sep + 'migrations' + os.sep

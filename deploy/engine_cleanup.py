@@ -79,8 +79,8 @@ def cleanup_data(env):
             say('дайджест: выключаю %s', digests.ids)
             digests.write({'state': 'deactivated'})
         ICP = env['ir.config_parameter'].sudo()
-        if ICP.get_param('digest.default_digest_emails') not in (False, 'False'):
-            ICP.set_param('digest.default_digest_emails', False)
+        if ICP.get_bool('digest.default_digest_emails'):
+            ICP.set_bool('digest.default_digest_emails', False)
             say('дайджест: выключен для новых пользователей')
         cron = env.ref('digest.ir_cron_digest_scheduler_action', raise_if_not_found=False)
         if cron and cron.active:
@@ -184,7 +184,7 @@ def refresh_engine_changes(env):
                         if line.strip().endswith(' ' + ref):
                             sha = line.split()[0]
     ICP = env['ir.config_parameter'].sudo()
-    if ICP.get_param('coop_engine.refreshed_for') == sha:
+    if ICP.get_str('coop_engine.refreshed_for') == sha:
         return
 
     def listed(name):
@@ -213,7 +213,7 @@ def refresh_engine_changes(env):
             say('шаблоны писем из форка: перезаливаю %s', len(templates))
             templates.reset_template()
 
-    ICP.set_param('coop_engine.refreshed_for', sha)
+    ICP.set_str('coop_engine.refreshed_for', sha)
     env.cr.commit()
 
 
