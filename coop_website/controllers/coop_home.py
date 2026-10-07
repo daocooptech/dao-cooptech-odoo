@@ -13,6 +13,11 @@
 Лендинг при этом никуда не девается: он нужен и владельцу — смотреть, как
 платформа выглядит со стороны. Поэтому у перехода есть отмена: `/?site=1`
 показывает лендинг как есть.
+
+Внутри фрейма перехода нет: сайтостроитель открывает корень сайта во
+фрейме, а веб-клиент во фрейм не пускается — браузер подставлял страницу
+ошибки, и конструктор падал на `onIframeLoad … reading 'body'` (обход
+меню 07.10.2026, «Сайт», «Редактор меню», «SEO»).
 """
 
 from odoo import http
@@ -26,7 +31,8 @@ class CoopHome(Website):
     def index(self, **kw):
         # `site=1` — осознанный просмотр лендинга вошедшим: владельцу
         # нужно видеть, что показывают постороннему.
-        if not kw.get('site'):
+        in_frame = request.httprequest.headers.get('Sec-Fetch-Dest') == 'iframe'
+        if not kw.get('site') and not in_frame:
             user = request.env.user
             if user and not user._is_public() \
                     and user._is_internal():
