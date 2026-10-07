@@ -317,6 +317,10 @@ def _load_cfa(env, companies, people, rnd, today, target):
             issued |= issue
 
     # Купленное участниками: часть из наших выпусков, часть со стороны.
+    # Один раз: без этой проверки каждая выкатка (-u coop_demo) добавляла
+    # ещё ~27 владений (на 20 за 07.10 — восемь прогонов, 217 записей).
+    if Holding.search_count([], limit=1):
+        return
     holders = list(people[:40]) + list(companies[:20])
     for position, holder in enumerate(holders):
         if rnd.random() > 0.5:

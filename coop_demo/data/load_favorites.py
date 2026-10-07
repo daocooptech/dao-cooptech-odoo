@@ -42,7 +42,12 @@ def load_favorites(env, login='dashkevich'):
     showcase = env['res.users'].sudo().search([('login', '=', login)], limit=1).partner_id
     if not showcase:
         return 0
-    if Favorite.search_count([('partner_id', '=', showcase.id)], limit=1):
+    # Только по каталогам плана: десяток документов в избранное кладёт
+    # `load_documents_more`, и проверка по любым отметкам пропускала
+    # весь прогон (на 20 так и вышло: 10 отметок вместо ~180).
+    if Favorite.search_count([('partner_id', '=', showcase.id),
+                              ('res_model', 'in', [m for m, _d, _c in PLAN])],
+                             limit=1):
         _logger.info("Избранное: уже наполнено, пропускаю")
         return 0
     rnd = random.Random(20260924 + 410)
