@@ -18,7 +18,7 @@
 
     'category': 'Uncategorized',
     'version': '20.0.2025.12.11',
-    "depends": ["web", "base", "account", "account_payment", "l10n_ru_doc", "l10n_ru_base", "uom"],
+    "depends": ["web", "base", "account", "account_payment", "stock_delivery", "l10n_ru_doc", "l10n_ru_base", "uom"],
     "data": [
         "views/ir_actions_report_view.xml",
         "views/res_partner_view.xml",
