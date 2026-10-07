@@ -1,10 +1,10 @@
 /** @odoo-module **/
 
-import { Component, onWillStart, proxy, usePlugin } from "@odoo/owl";
+import { Component, onWillStart, proxy, usePlugin, useProps } from "@odoo/owl";
 import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * Экран DEX биржи (решение 417; владелец 26.09 — «сделай современную
@@ -30,11 +30,11 @@ const BOOK_ROWS = 14;
 
 export class CoopDexTerminal extends Component {
     static template = "coop_crypto_exchange.DexTerminal";
-    static props = ["*"];
+    props = useProps();
 
     setup() {
         this.orm = useService("orm");
-        this.action = usePlugin(ActionManagerPlugin);
+        this.action = usePlugin(ActionPlugin);
         this.notification = usePlugin(NotificationPlugin);
         this.ranges = RANGES;
         this.state = proxy({

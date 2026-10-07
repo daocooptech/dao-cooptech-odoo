@@ -1,10 +1,10 @@
 /** @odoo-module **/
 
-import { Component, onWillStart, proxy, usePlugin } from "@odoo/owl";
+import { Component, onWillStart, proxy, usePlugin, useProps } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
 import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { registry } from "@web/core/registry";
-import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * Свой узел Komodo (решение 417, этап 5 плана биржи): страница-клиент к
@@ -50,10 +50,10 @@ function save(key, value) {
 
 export class CoopKomodoNode extends Component {
     static template = "coop_crypto_exchange.KomodoNode";
-    static props = ["*"];
+    props = useProps();
 
     setup() {
-        this.action = usePlugin(ActionManagerPlugin);
+        this.action = usePlugin(ActionPlugin);
         this.notification = usePlugin(NotificationPlugin);
         this.state = proxy({
             url: load(KEY_URL, DEFAULT_URL),
