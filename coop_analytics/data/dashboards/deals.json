@@ -17,6 +17,7 @@
   "c7fd0e6b-50bc-5ac1-a1b3-3babd2da897c": "coop_analytics.menu_coop_analytics_deals",
   "cc99b973-d4de-5303-951e-1da5248fde0c": "coop_analytics.menu_coop_analytics_deals",
   "d064e9c3-634e-5a94-83d6-114407280e2a": "coop_analytics.menu_coop_analytics_deals",
+  "d5236733-d57b-5390-bcba-34791104f4da": "coop_analytics.menu_coop_analytics_deals",
   "d5e82af0-9403-5c26-9336-840945aaf759": "coop_analytics.menu_coop_analytics_deals",
   "dc815f56-cd31-52a0-a2f5-bd6427c404cf": "coop_analytics.menu_coop_analytics_deals"
  },
@@ -542,23 +543,25 @@
    "areGridLinesVisible": false,
    "borders": {
     "A11:G11": 1,
-    "A28:C28": 1,
+    "A28:G28": 1,
     "A45:C45": 1,
     "A62:C62": 1,
-    "E28:G28": 1,
+    "A79:C79": 1,
     "E45:G45": 1,
-    "E62:G62": 1
+    "E62:G62": 1,
+    "E79:G79": 1
    },
    "cells": {
-    "A11": "Сделки по месяцам",
-    "A28": "Что передаётся",
-    "A45": "Сделки по городам",
-    "A62": "Каким образом",
-    "A63": "=PIVOT(8, 10, FALSE, FALSE)",
-    "E28": "Оценки, которые мне поставили",
-    "E45": "Чем закончились",
-    "E62": "Состояния сделок",
-    "E63": "=PIVOT(9, 10, FALSE, FALSE)"
+    "A11": "Воронка: от обращения до завершения",
+    "A28": "Сделки по месяцам",
+    "A45": "Что передаётся",
+    "A62": "Сделки по городам",
+    "A79": "Каким образом",
+    "A80": "=PIVOT(8, 10, FALSE, FALSE)",
+    "E45": "Оценки, которые мне поставили",
+    "E62": "Чем закончились",
+    "E79": "Состояния сделок",
+    "E80": "=PIVOT(9, 10, FALSE, FALSE)"
    },
    "colNumber": 7,
    "cols": {
@@ -784,6 +787,80 @@
       "dataSets": [],
       "fieldMatching": {
        "b62e49ba-61d1-54c5-a6da-68fa83b3477b": {
+        "chain": "funnel_date",
+        "offset": 0,
+        "type": "date"
+       },
+       "e311161d-7073-5b3a-acc4-235ec896a436": {
+        "chain": "subject",
+        "type": "selection"
+       },
+       "ff409c15-6b86-59b7-b6e7-018fdce3a667": {
+        "chain": "city",
+        "type": "char"
+       }
+      },
+      "legendPosition": "none",
+      "metaData": {
+       "cumulatedStart": false,
+       "groupBy": [
+        "state"
+       ],
+       "measure": "__count",
+       "mode": "bar",
+       "order": null,
+       "resModel": "coop.deal"
+      },
+      "searchParams": {
+       "comparison": null,
+       "context": {},
+       "domain": [
+        "|",
+        [
+         "party_a_id.coop_is_me",
+         "=",
+         true
+        ],
+        [
+         "party_b_id.coop_is_me",
+         "=",
+         true
+        ],
+        [
+         "state",
+         "!=",
+         "cancelled"
+        ]
+       ],
+       "groupBy": [
+        "state"
+       ],
+       "orderBy": []
+      },
+      "stacked": true,
+      "title": {
+       "text": ""
+      },
+      "type": "odoo_bar",
+      "verticalAxisPosition": "left"
+     },
+     "height": 345,
+     "id": "d5236733-d57b-5390-bcba-34791104f4da",
+     "offset": {
+      "x": 0,
+      "y": 270
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 900
+    },
+    {
+     "col": 0,
+     "data": {
+      "background": "#FFFFFF",
+      "dataSets": [],
+      "fieldMatching": {
+       "b62e49ba-61d1-54c5-a6da-68fa83b3477b": {
         "chain": "signed_on",
         "offset": 0,
         "type": "date"
@@ -850,7 +927,7 @@
      "id": "d064e9c3-634e-5a94-83d6-114407280e2a",
      "offset": {
       "x": 0,
-      "y": 270
+      "y": 678
      },
      "row": 0,
      "tag": "chart",
@@ -925,7 +1002,7 @@
      "id": "c7fd0e6b-50bc-5ac1-a1b3-3babd2da897c",
      "offset": {
       "x": 0,
-      "y": 678
+      "y": 1086
      },
      "row": 0,
      "tag": "chart",
@@ -988,7 +1065,7 @@
      "id": "b5e69ac0-8e17-50d9-a6bd-cfa67b36cd2e",
      "offset": {
       "x": 460,
-      "y": 678
+      "y": 1086
      },
      "row": 0,
      "tag": "chart",
@@ -1065,7 +1142,7 @@
      "id": "a0118262-d860-507b-9881-344fd3f81a8e",
      "offset": {
       "x": 0,
-      "y": 1086
+      "y": 1494
      },
      "row": 0,
      "tag": "chart",
@@ -1145,7 +1222,7 @@
      "id": "cc99b973-d4de-5303-951e-1da5248fde0c",
      "offset": {
       "x": 460,
-      "y": 1086
+      "y": 1494
      },
      "row": 0,
      "tag": "chart",
@@ -1161,7 +1238,7 @@
    "isVisible": true,
    "merges": [],
    "name": "Dashboard",
-   "rowNumber": 76,
+   "rowNumber": 93,
    "rows": {
     "10": {
      "size": 40
@@ -1174,6 +1251,9 @@
     },
     "61": {
      "size": 40
+    },
+    "78": {
+     "size": 40
     }
    },
    "styles": {
@@ -1181,9 +1261,10 @@
     "A28": 1,
     "A45": 1,
     "A62": 1,
-    "E28": 1,
+    "A79": 1,
     "E45": 1,
-    "E62": 1
+    "E62": 1,
+    "E79": 1
    },
    "tables": []
   },

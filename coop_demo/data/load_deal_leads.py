@@ -100,10 +100,10 @@ def load_deal_leads(env, target=TARGET):
             continue
         # Разброс дат: обращения шли последние два с половиной месяца.
         when = now - timedelta(days=rnd.randint(0, 75), hours=rnd.randint(0, 23))
-        env.cr.execute('UPDATE coop_deal SET create_date = %s WHERE id = %s',
-                       (when, deal.id))
+        env.cr.execute('UPDATE coop_deal SET create_date = %s, funnel_date = %s '
+                       'WHERE id = %s AND signed_on IS NULL', (when, when.date(), deal.id))
         made += 1
-    Deal.invalidate_model(['create_date'])
+    Deal.invalidate_model(['create_date', 'funnel_date'])
     _logger.info('Обращения: заведено %s (в переговоры %s, отклонено %s, '
                  'отменено самими %s), пропущено %s',
                  made, stats_neg, stats_lost, stats_own, skipped)

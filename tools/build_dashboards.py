@@ -415,6 +415,16 @@ def deals():
         ('Доверие, %', k_trust, None, 'gauge'),
     ])
     mt, rmt = match(pairs, 0), match(rpairs, 0)
+    # Воронка — первым этапом обращения (владелец 08.10.2026: «обращения
+    # попадают в аналитику как этап, самый первый этап, так же как и у
+    # организаций лид»). Период — по «дате в воронке»: у обращения и
+    # переговоров даты заключения ещё нет, и отбор по ней их выкидывал, а
+    # дата создания у загруженных разом сделок одна на всех.
+    fpairs = {period: ('funnel_date', 'date'), city: ('city', 'char'),
+              subject: ('subject', 'selection')}
+    d.section(('Воронка: от обращения до завершения',
+               chart('odoo_bar', m, mine + [['state', '!=', 'cancelled']], ['state'],
+                     '__count', match(fpairs, 0))))
     d.section(('Сделки по месяцам',
                chart('odoo_bar', m, live, ['signed_on:month', 'state'], '__count', mt,
                      legend='top')))

@@ -188,6 +188,18 @@ class CoopDeal(models.Model):
 
     signed_on = fields.Date(string='Заключена', tracking=True)
     closed_on = fields.Date(string='Закрыта', tracking=True)
+    # Дата сделки в воронке аналитики: заключённая — по дате заключения,
+    # обращение и переговоры — по дню появления (у них даты заключения
+    # ещё нет, и отбор по ней выкидывал их из воронки).
+    funnel_date = fields.Date(
+        string='Дата в воронке', compute='_compute_funnel_date', store=True,
+        index=True)
+
+    @api.depends('signed_on', 'create_date')
+    def _compute_funnel_date(self):
+        for record in self:
+            record.funnel_date = record.signed_on or (
+                record.create_date and record.create_date.date())
 
     # ── Акт приёма-передачи ──────────────────────────────────────────────
     #
