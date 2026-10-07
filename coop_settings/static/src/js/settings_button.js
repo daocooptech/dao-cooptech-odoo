@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { Component, usePlugin } from "@odoo/owl";
-import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
+import { Component, usePlugin, useProps } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * Шестерёнка настроек в шапке.
@@ -17,10 +17,10 @@ import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
  */
 export class CoopSettingsButton extends Component {
     static template = "coop_settings.Button";
-    static props = {};
+    props = useProps();
 
     setup() {
-        this.action = usePlugin(ActionManagerPlugin);
+        this.action = usePlugin(ActionPlugin);
     }
 
     open() {
