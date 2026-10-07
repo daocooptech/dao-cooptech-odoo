@@ -27,14 +27,17 @@
     # Кошелёк — ради справочника сетей: решение о полномочиях переедет
     # в блокчейн, и запись о транзакции ссылается на ту же сеть, что
     # и остальные операции узла.
-    'depends': ['coop_base', 'coop_theme', 'coop_wallet', 'mail'],
+    'depends': ['coop_base', 'coop_theme', 'coop_wallet', 'coop_profile', 'mail'],
     'data': [
         'views/coop_admin_views.xml',
+        'views/login_as_views.xml',
         'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_backend': [
             'coop_admin/static/src/js/admin_switch.js',
+            'coop_admin/static/src/js/login_as.js',
+            'coop_admin/static/src/xml/login_as.xml',
             'coop_admin/static/src/xml/admin_switch.xml',
             'coop_admin/static/src/scss/coop_admin.scss',
         ],

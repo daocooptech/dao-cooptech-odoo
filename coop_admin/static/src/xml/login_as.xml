@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <t t-name="coop_admin.LoginAsBadge">
+    <div class="o_coop_login_as" t-if="this.state.info">
+      <span class="o_coop_login_as_text" t-att-title="'Вы вошли как ' + this.state.info.name">
+        <span class="o_coop_login_as_prefix">Вы — </span><b t-out="this.state.info.short"/>
+      </span>
+      <a class="o_coop_login_as_back" href="/coop/login_back"
+         t-att-title="'Вернуться к учётной записи ' + this.state.info.back">вернуться</a>
+    </div>
+  </t>
+
+</templates>

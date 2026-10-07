@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    «Войти как» — в карточке человека, последней кнопкой и без выделения:
+    это действие администратора, а не участника, и стоять наравне с
+    «Написать» оно не должно. Видна только администратору с включёнными
+    полномочиями (группа системы появляется у него по переключателю).
+  -->
+  <record id="view_coop_profile_form_login_as" model="ir.ui.view">
+    <field name="name">coop.profile.form.login_as</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="coop_profile.view_coop_profile_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//header" position="inside">
+        <field name="user_ids" invisible="1" groups="base.group_system"/>
+        <button name="action_coop_login_as" type="object" string="Войти как"
+                groups="base.group_system"
+                invisible="coop_is_self or not user_ids"/>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>
