@@ -129,12 +129,13 @@ def load_contact_requests(env, rnd=None):
     return made
 
 
-def load_admin_grants(env, rnd=None):
+def load_admin_grants(env, rnd=None, login='dashkevich'):
     """Решения о полномочиях: голосования, отказы, отзывы.
 
-    Выданными («granted») отмечаются только те, у кого администратор уже
-    есть, и без `_coop_sync_admin_grant`: иначе демо-участники получили бы
-    настоящие права на действующем узле.
+    Права администратора на платформе — у одного человека, `dashkevich`, и
+    включаются его переключателем в шапке (решение владельца; так было и в
+    19). Поэтому «выданы» — только его решение; у остальных — голосования,
+    отказы и отзывы. Технический `admin` решения не получает.
     """
     if 'coop.admin.grant' not in env:   # модуль раздела не установлен на этом узле
         return 0
@@ -143,17 +144,18 @@ def load_admin_grants(env, rnd=None):
     if Grant.search_count([]) >= 30:
         return 0
     people = _people(env)
-    admins = env['res.users'].sudo().search(
-        [('group_ids', 'in', env.ref('base.group_system').id), ('share', '=', False)])
+    owner = env['res.users'].sudo().search([('login', '=', login)], limit=1)
     today = fields.Date.context_today(Grant)
     made = 0
-    granted_left = list(admins.partner_id)
+    granted_left = list(owner.partner_id)
     for index in range(GRANT_TOTAL):
         if granted_left and index % 25 == 0:
             partner = granted_left.pop(0)
             state = 'granted'
         else:
             partner = people[rnd.randrange(len(people))]
+            if owner and partner == owner.partner_id:
+                continue
             state = rnd.choice(['rejected'] * 4 + ['revoked'] * 3 + ['proposed'] * 2)
         team = rnd.randint(5, 11)
         voters = people.browse(rnd.sample(people.ids, min(team, len(people))))
@@ -179,6 +181,8 @@ def load_admin_grants(env, rnd=None):
             vals['revoked_on'] = today
         Grant.create(vals)
         made += 1
+    if owner:
+        owner._coop_sync_admin_grant()   # признак «выданы» — для переключателя
     _logger.info('Полномочия: %s', made)
     return made
 
