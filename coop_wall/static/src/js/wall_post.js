@@ -207,8 +207,14 @@ export class CoopWallPostFooter extends Component {
     // и её исход известен заранее.
     async onStar() {
         const m = this.props.message;
-        const was = m.starred;
-        await m.toggleStar();
+        // В Odoo 20 «звёздочка» стала закладкой: is_bookmarked,
+        // addBookmark / removeBookmark вместо starred / toggleStar.
+        const was = m.is_bookmarked;
+        if (was) {
+            await m.removeBookmark(this.env);
+        } else {
+            await m.addBookmark();
+        }
         m.coop_star_count = Math.max(0, (m.coop_star_count || 0) + (was ? -1 : 1));
     }
 

@@ -443,7 +443,7 @@ def load_wall_stars(env, login='dashkevich'):
         ('model', '=', 'res.partner'), ('message_type', '=', 'comment'),
         ('subtype_id.internal', '=', False),
     ])
-    if posts.filtered('starred_partner_ids')[:1]:
+    if posts.filtered('bookmarked_partner_ids')[:1]:
         _logger.info("Звёздочки на стенах: уже наполнено, пропускаю")
         return 0
     rnd = random.Random(20260924 + 409)
@@ -465,7 +465,7 @@ def load_wall_stars(env, login='dashkevich'):
         if showcase and post.id in mine_saved:
             fans.add(showcase.id)
         if fans:
-            post.write({'starred_partner_ids': [(4, pid) for pid in fans]})
+            post.write({'bookmarked_partner_ids': [(4, pid) for pid in fans]})
             total += len(fans)
     _logger.info("Звёздочки на стенах: поставлено %s", total)
     return total

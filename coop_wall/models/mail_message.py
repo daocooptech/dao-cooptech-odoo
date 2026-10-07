@@ -77,7 +77,7 @@ class MailMessage(models.Model):
         self.ensure_one()
         if self.model not in WALL_MODELS or self.message_type != 'comment':
             return 0
-        return len(self.sudo().starred_partner_ids)
+        return len(self.sudo().bookmarked_partner_ids)
 
     def _coop_thanks_count(self):
         """Сколько разных людей поблагодарили, и автор это подтвердил.

@@ -4,7 +4,7 @@
 Решение 408 (24 сентября 2026): сердечки и вкладка «Избранное» в каждом
 каталоге — как в макете, — и сверх макета общая страница со вкладками по
 типу содержимого и значок в шапке. Хранилище одно — `coop.favorite`;
-записи со стен — звёздочка движка под записью (`starred_partner_ids`).
+записи со стен — звёздочка движка под записью (`bookmarked_partner_ids`).
 
 Здесь только чтение и открытие: схему хранилища (`coop_base`) не трогаем.
 """
@@ -73,7 +73,7 @@ class CoopFavorite(models.Model):
     def _coop_posts(self):
         me = self.env.user.partner_id
         posts = self.env['mail.message'].search([
-            ('starred_partner_ids', 'in', me.ids),
+            ('bookmarked_partner_ids', 'in', me.ids),
             ('model', 'in', WALL_MODELS),
             ('message_type', '=', 'comment'),
         ], order='date desc, id desc', limit=200)
@@ -148,6 +148,9 @@ class CoopFavorite(models.Model):
     def coop_unstar(self, message_id):
         """Убрать запись стены из избранного (звёздочку движка)."""
         message = self.env['mail.message'].browse(int(message_id)).exists()
-        if message and self.env.user.partner_id in message.sudo().starred_partner_ids:
-            message.toggle_message_starred()
+        me = self.env.user.partner_id
+        if message and me in message.sudo().bookmarked_partner_ids:
+            # sudo: закладку снимает себе тот, кто её поставил (как
+            # mailbox.store_remove_bookmark в ядре 20).
+            message.sudo().bookmarked_partner_ids = [(3, me.id)]
         return True

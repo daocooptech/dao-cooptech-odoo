@@ -51,10 +51,10 @@
           <span class="o_coop_post_count" t-out="this.thanks"/>
         </button>
         <button t-if="this.canStar" class="o_coop_post_act"
-                t-att-class="{ 'o_coop_post_act_on': this.props.message.starred }"
-                t-att-title="this.props.message.starred ? 'Убрать из избранного' : 'В избранное'"
+                t-att-class="{ 'o_coop_post_act_on': this.props.message.is_bookmarked }"
+                t-att-title="this.props.message.is_bookmarked ? 'Убрать из избранного' : 'В избранное'"
                 t-on-click="this.onStar">
-          <i class="oi" data-icon="star" t-att-class="{'oi-filled': this.props.message.starred}"/>
+          <i class="oi" data-icon="star" t-att-class="{'oi-filled': this.props.message.is_bookmarked}"/>
           <span class="o_coop_post_count" t-out="this.stars"/>
         </button>
       </div>
