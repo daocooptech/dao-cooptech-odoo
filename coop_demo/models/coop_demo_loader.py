@@ -23,6 +23,7 @@ from ..data import load_documents_more
 from ..data import load_favorites
 from ..data import load_okved
 from ..data import load_accounts
+from ..data import load_vat
 from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_cessions,
                     load_tokens,
@@ -340,6 +341,12 @@ class CoopDemoLoader(models.AbstractModel):
         # И ещё раз в самом конце: если какой-то загрузчик по пути завёл
         # организацию-тёзку, она получит своё название тем же правилом.
         load_orgs.unique_org_names(self.env)
+        # Режимы НДС и счета по сделкам (решение 449) — последними: счёт
+        # заводит организации компанию учёта, и её название должно быть
+        # уже окончательным.
+        if 'coop.vat.regime' in self.env:
+            load_vat.load_vat_regimes(self.env)
+            load_vat.load_invoices(self.env)
         return True
 
     def _load_rubrics(self):

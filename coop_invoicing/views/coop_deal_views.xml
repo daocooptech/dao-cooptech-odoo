@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Счёт — рядом с договором и актом: те же три бумаги одной сделки.
+    Кнопку видит только тот, кто вправе выставить счёт от имени продавца;
+    после выставления она сменяется ссылкой на сам счёт, где печатаются
+    УПД и его XML.
+  -->
+  <record id="view_coop_deal_form_invoice" model="ir.ui.view">
+    <field name="name">coop.deal.form.invoice</field>
+    <field name="model">coop.deal</field>
+    <field name="inherit_id" ref="coop_deals.view_coop_deal_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//button[@name='%(coop_deals.action_report_deal_act)d']" position="after">
+        <field name="coop_can_invoice" invisible="1"/>
+        <field name="coop_invoice_count" invisible="1"/>
+        <button name="action_coop_create_invoice" type="object"
+                string="Выставить счёт" invisible="not coop_can_invoice"/>
+        <button name="action_coop_open_invoices" type="object"
+                string="Счёт и УПД" invisible="not coop_invoice_count"/>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

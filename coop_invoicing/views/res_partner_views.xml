@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Режим НДС — отдельной справкой рядом с реквизитами: это не выписка из
+    реестра и не то, что организация о себе рассказала, а её налоговое
+    положение, от которого зависят счета и УПД по её сделкам. История
+    видна всем (контрагенту важно, выставят ли ему счёт-фактуру), правит
+    её тот, у кого полномочие «Бухгалтерия и счета».
+  -->
+  <record id="view_coop_orgs_form_vat" model="ir.ui.view">
+    <field name="name">coop.orgs.form.vat</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="coop_orgs.view_coop_orgs_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//div[hasclass('o_coop_infobox')][.//field[@name='coop_okved_code']]" position="after">
+        <div class="o_coop_infobox">
+          <div class="o_coop_infobox_head">Налоги</div>
+          <div class="o_coop_infobox_body">
+            <field name="coop_can_edit_vat" invisible="1"/>
+            <div><span class="o_coop_key">НДС сейчас</span>
+              <field name="coop_vat_regime" readonly="1" placeholder="не указан"/></div>
+            <field name="coop_vat_regime_ids" nolabel="1" readonly="not coop_can_edit_vat">
+              <list editable="bottom" create="coop_can_edit_vat" delete="coop_can_edit_vat">
+                <field name="date_from"/>
+                <field name="regime"/>
+                <field name="note" optional="show"/>
+              </list>
+            </field>
+          </div>
+        </div>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

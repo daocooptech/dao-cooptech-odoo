@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Функция УПД — по режиму НДС продавца на дату счёта, а не всегда
+    СЧФДОП, как в форке: освобождённая организация выставляет только
+    первичный документ (ДОП), и счёт-фактура от неё — ошибка (п. 5 ст. 173
+    НК). Правила — в account_move._coop_upd_function.
+  -->
+  <template id="upd_xml_function" inherit_id="l10n_ru_upd_xml.demo_report_xml_view">
+    <xpath expr="//Документ" position="attributes">
+      <attribute name="t-att">{
+                    'КНД': '1115131',
+                    'Функция': o and o._coop_upd_function() or 'СЧФДОП',
+                    'ПоФактХЖ': 'Документ об отгрузке товаров (выполнении работ), передаче имущественных прав (документ об оказании услуг)',
+                    'НаимДокОпр': o and o._coop_upd_title() or 'Счет-фактура и документ об отгрузке товаров (выполнении работ), передаче имущественных прав (документ об оказании услуг)',
+                    'ДатаИнфПр': time.strftime('%d.%m.%Y'),
+                    'ВремИнфПр': time.strftime('%H.%M.%S'),
+                    'НаимЭконСубСост': company and company.name or ''
+                }</attribute>
+    </xpath>
+  </template>
+
+  <!--
+    Ставка «без НДС» — с пробелом, как в формате 5.03. Форк вычищает из
+    тела t-set переводы строк и пробелы разом и получает «безНДС»: такое
+    значение схема не принимает, и УПД освобождённой организации ЭДО
+    вернул бы как ошибочный.
+  -->
+  <template id="upd_xml_no_vat_rate" inherit_id="l10n_ru_upd_xml.demo_report_xml_view">
+    <xpath expr="//t[@t-set='tax_rate']" position="attributes">
+      <attribute name="t-value">tax_rate_raw.replace(' ', '').replace('\n', '').replace('\t', '').replace('безНДС', 'без НДС')</attribute>
+    </xpath>
+  </template>
+
+  <!-- Печатный УПД: статус 1 — счёт-фактура и первичный, 2 — только первичный. -->
+  <template id="report_upd_status" inherit_id="l10n_ru_doc.report_upd">
+    <xpath expr="//TD[@CLASS='RE15CE2box']/SPAN" position="replace">
+      <SPAN t-out="o._coop_upd_status()"/>
+    </xpath>
+  </template>
+
+</odoo>
