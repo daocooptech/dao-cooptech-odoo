@@ -7,6 +7,8 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
 import { fields } from "@mail/model/export";
+import { MessagingMenu } from "@mail/core/public_web/messaging_menu/messaging_menu_model";
+import { openChannelInvitationDialog } from "@mail/discuss/core/common/channel_invitation";
 import { Thread as ThreadComponent } from "@mail/core/common/thread";
 import { Composer } from "@mail/core/common/composer";
 import { ActionList } from "@mail/core/common/action_list";
@@ -207,11 +209,95 @@ const HIDDEN_ACTIONS = new Set([
 // всё остальное. Деление делается там, где движок сопоставляет вкладку
 // видам переписки: тогда и список, и счётчик, и поиск считают по нему
 // сами.
-// В 20 переложить нечего: вкладки меню — записи `MessagingMenuTab`, состав
-// вкладки задают сервер (`_get_menu_tab_domain` контроллера меню) и
-// `includesChannel` на клиенте, а `tabToThreadType` и `threads` у меню
-// больше нет. Вкладки «Личные» / «Групповые» и «Служебные» вернутся
-// правкой контроллера на питоне — открытый вопрос этапа Э3б.
+// В 20 вкладки меню — записи `MessagingMenuTab`: состав задаёт сервер
+// (`controllers/messaging_menu.py`, домен по `id` вкладки), а здесь тот же
+// признак повторён в `includesChannel` — для живых обновлений без похода
+// на сервер. Оба места должны говорить одно (НВ19, 07.10.2026).
+//
+// Вкладки переопределяются целиком, а не обёрткой: в 20 определение поля,
+// присвоенное в `setup`, перехватывает прокси записи, и прочитать
+// `this.chatTab` обратно нельзя — там `undefined`. Обёртка 07.10 на этом
+// уронила весь веб-клиент на 12 минут. Повторное присваивание того же
+// имени после `super.setup()` заменяет определение движка.
+const SERVICE_TAB = "coop_service";
+const isService = (c) => c.coop_kind === "service";
+
+patch(MessagingMenu.prototype, {
+    setup() {
+        super.setup(...arguments);
+        this.chatTab = fields.One("MessagingMenuTab", {
+            compute() {
+                return {
+                    id: "chat",
+                    recordType: "discuss.channel",
+                    includesChannel: (c) =>
+                        c.self_member_id?.is_pinned &&
+                        c.channel_type === "chat" &&
+                        !c.isMeetingOrMeetingChild &&
+                        !isService(c),
+                    icon: "person",
+                    iconClass: "oi-filled",
+                    sequence: 15,
+                    label: "Личные",
+                    emptyState: { title: "Личных разговоров пока нет" },
+                    filters: [
+                        { id: "chat_unread", text: "Непрочитанные", includesChannel: (c) => c.isUnread },
+                    ],
+                    actions:
+                        this.store.self_user?.share === false
+                            ? [{
+                                  id: "new_chat",
+                                  icon: "add",
+                                  text: "Написать",
+                                  onClick: () => openChannelInvitationDialog(this.store.env),
+                              }]
+                            : [],
+                };
+            },
+            eager: true,
+        });
+        this.channelTab = fields.One("MessagingMenuTab", {
+            compute() {
+                return {
+                    id: "channel",
+                    recordType: "discuss.channel",
+                    includesChannel: (c) =>
+                        ["channel", "group"].includes(c.channel_type) &&
+                        !c.isMeetingOrMeetingChild &&
+                        !isService(c) &&
+                        Boolean(c.isLocallyPinned || c.self_member_id?.is_pinned || c.needactionCounter),
+                    icon: "group",
+                    iconClass: "oi-filled",
+                    sequence: 30,
+                    label: "Групповые",
+                    emptyState: { title: "Групповых разговоров пока нет" },
+                    filters: [
+                        { id: "channel_unread", text: "Непрочитанные", includesChannel: (c) => c.isUnread },
+                    ],
+                    actions: [],
+                };
+            },
+            eager: true,
+        });
+        this.coopServiceTab = fields.One("MessagingMenuTab", {
+            compute() {
+                return {
+                    id: SERVICE_TAB,
+                    recordType: "discuss.channel",
+                    includesChannel: (c) => isService(c) && Boolean(c.self_member_id),
+                    icon: "notifications",
+                    sequence: 40,
+                    label: "Служебные",
+                    emptyState: { title: "Служебных сообщений нет" },
+                    filters: [
+                        { id: "coop_service_unread", text: "Непрочитанные", includesChannel: (c) => c.isUnread },
+                    ],
+                };
+            },
+            eager: true,
+        });
+    },
+});
 
 // Слова движка на экран не пускаем.
 //
