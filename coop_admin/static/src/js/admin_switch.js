@@ -4,7 +4,7 @@ import { registry } from "@web/core/registry";
 import { CoopSidebar } from "@coop_theme/js/shell";
 import { useService } from "@web/core/utils/hooks";
 import { browser } from "@web/core/browser/browser";
-import { Component, onWillStart, proxy } from "@odoo/owl";
+import { Component, onWillStart, proxy, useProps } from "@odoo/owl";
 
 /**
  * Переключатель административных полномочий в правом верхнем углу.
@@ -20,7 +20,7 @@ import { Component, onWillStart, proxy } from "@odoo/owl";
  */
 export class CoopAdminSwitch extends Component {
     static template = "coop_admin.AdminSwitch";
-    static props = {};
+    props = useProps();
 
     setup() {
         this.orm = useService("orm");
