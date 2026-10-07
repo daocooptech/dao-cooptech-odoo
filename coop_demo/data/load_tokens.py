@@ -95,6 +95,7 @@ def load_tokens(env, target=TARGET_CLAIMS):
 
     created = skipped = 0
     claims = Claim.browse()
+    fresh = Claim.browse()
     # По одному объявлению бывает несколько выпусков: партия к осени и
     # партия к весне — это разные требования с разными сроками, и на
     # бирже они живут порознь. Проходим каталог дважды, второй раз — с
@@ -102,7 +103,11 @@ def load_tokens(env, target=TARGET_CLAIMS):
     # объявлений, которых у участников нет.
     plan = [(resource, wave) for wave in (0, 1) for resource in resources]
     for index, (resource, wave) in enumerate(plan):
-        if created >= target:
+        # Предел — на весь каталог, а не на прогон: при `created` уже
+        # заведённые не считались, и каждый -u coop_demo шёл по каталогу
+        # дальше и добавлял ещё 120 выпусков (а за ними заявки, держателей
+        # и сделки) — замерено на стенде 07.10.2026.
+        if len(claims) >= target:
             break
         key = 'tokens#%s.%s' % (resource.id, wave)
         existing = Claim.search([('import_key', '=', key)], limit=1)
@@ -163,9 +168,12 @@ def load_tokens(env, target=TARGET_CLAIMS):
                 'default_reason': 'Срок поставки прошёл, товар не передан',
             })
         claims |= claim
+        fresh |= claim
         created += 1
 
-    _spread_created(env, claims, rnd)
+    # Только новые: иначе каждая выкатка заново перетасовывала даты
+    # размещения всего каталога, и «Новые выпуски» менялись сами собой.
+    _spread_created(env, fresh, rnd)
     _ensure_defaults(Claim, claims, today)
     _make_orders_and_holdings(Order, Holding, claims, buyers, rnd, today)
     _make_trades(env, claims, rnd)

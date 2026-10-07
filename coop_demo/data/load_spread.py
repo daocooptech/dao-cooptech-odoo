@@ -510,11 +510,15 @@ def ensure_extra_specializations(env):
         return 0
     categories = sorted(by_category)
 
-    rnd = random.Random(20260923)
     given = 0
     for person in people:
         if person.coop_specialization_ids:
             continue
+        # Свой жребий у каждого: «умеет одно» ничего не записывает, и с
+        # общим генератором такой человек на следующем -u coop_demo
+        # получал новый бросок — вторые специальности прибывали с каждой
+        # выкаткой (стенд 07.10.2026).
+        rnd = random.Random(20260923 + person.id)
         main = person.coop_specialization_id
         chance = rnd.random()
         if chance < 0.55:

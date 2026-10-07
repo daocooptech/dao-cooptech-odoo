@@ -569,6 +569,10 @@ def _fill_making(env):
         for item in goods:
             if item.material_ids or item.equipment_ids:
                 continue
+            # Жребий — свой у каждого изделия: с общим генератором его ход
+            # сдвигался от уже заполненного, и каждый -u coop_demo
+            # дозаполнял «нарочно пустые» составы (стенд 07.10.2026).
+            rnd = random.Random(20260922 + item.id)
             # У каждого седьмого состава нет вовсе — не потому что
             # забыли, а потому что учёт ведут не все. Раздел, где состав
             # есть у всех до единого, врёт ровно так же, как раздел, где
@@ -608,14 +612,18 @@ def _fill_making(env):
     ])
 
     named = 0
-    for index, item in enumerate(goods):
+    for item in goods:
+        # Свой жребий и свой «второй» по номеру изделия, а не по месту в
+        # выборке: выборка — только те, у кого производителя ещё нет, и с
+        # каждым прогоном она другая.
+        rnd = random.Random(20260923 + item.id)
         makers = []
         if item.owner_id and item.owner_id.is_company:
             makers.append(item.owner_id.id)
         # Второй производитель у каждого третьего — и только если есть
         # кому им быть.
         if companies and rnd.random() < 0.33:
-            other = companies[index % len(companies)]
+            other = companies[item.id % len(companies)]
             if other.id not in makers:
                 makers.append(other.id)
         if makers:
