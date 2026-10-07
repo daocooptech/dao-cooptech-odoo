@@ -7,6 +7,7 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
 import { fields } from "@mail/model/export";
+import { MessagingMenu } from "@mail/core/public_web/messaging_menu/messaging_menu_model";
 import { Thread as ThreadComponent } from "@mail/core/common/thread";
 import { Composer } from "@mail/core/common/composer";
 import { ActionList } from "@mail/core/common/action_list";
@@ -207,11 +208,71 @@ const HIDDEN_ACTIONS = new Set([
 // всё остальное. Деление делается там, где движок сопоставляет вкладку
 // видам переписки: тогда и список, и счётчик, и поиск считают по нему
 // сами.
-// В 20 переложить нечего: вкладки меню — записи `MessagingMenuTab`, состав
-// вкладки задают сервер (`_get_menu_tab_domain` контроллера меню) и
-// `includesChannel` на клиенте, а `tabToThreadType` и `threads` у меню
-// больше нет. Вкладки «Личные» / «Групповые» и «Служебные» вернутся
-// правкой контроллера на питоне — открытый вопрос этапа Э3б.
+// В 20 вкладки меню — записи `MessagingMenuTab`: состав задаёт сервер
+// (`controllers/messaging_menu.py`, домен по `id` вкладки), а здесь тот же
+// признак повторён в `includesChannel` — для живых обновлений без похода
+// на сервер. Оба места должны говорить одно (НВ19, 07.10.2026).
+//
+// Определения вкладок движка — простые объекты с `compute`; обёртываем их
+// после `super.setup()`, ничего не копируя из движка, кроме того, что
+// меняем: признак, подпись и фильтры.
+const SERVICE_TAB = "coop_service";
+const isService = (c) => c.coop_kind === "service";
+
+patch(MessagingMenu.prototype, {
+    setup() {
+        super.setup(...arguments);
+        const wrap = (definition, change) => {
+            const compute = definition.compute;
+            definition.compute = function () {
+                const tab = compute.call(this);
+                return tab && change(tab);
+            };
+        };
+        wrap(this.chatTab, (tab) => ({
+            ...tab,
+            label: "Личные",
+            includesChannel: (c) =>
+                c.self_member_id?.is_pinned &&
+                c.channel_type === "chat" &&
+                !c.isMeetingOrMeetingChild &&
+                !isService(c),
+            // «Группа» здесь больше не живёт — она во «Групповых».
+            filters: tab.filters.filter((f) => f.id !== "chat_group"),
+        }));
+        wrap(this.channelTab, (tab) => ({
+            ...tab,
+            label: "Групповые",
+            icon: "group",
+            includesChannel: (c) =>
+                ["channel", "group"].includes(c.channel_type) &&
+                !c.isMeetingOrMeetingChild &&
+                !isService(c) &&
+                Boolean(c.isLocallyPinned || c.self_member_id?.is_pinned || c.needactionCounter),
+        }));
+        this.coopServiceTab = fields.One("MessagingMenuTab", {
+            compute() {
+                return {
+                    id: SERVICE_TAB,
+                    recordType: "discuss.channel",
+                    includesChannel: (c) => isService(c) && Boolean(c.self_member_id),
+                    icon: "notifications",
+                    sequence: 40,
+                    label: "Служебные",
+                    emptyState: { title: "Служебных сообщений нет" },
+                    filters: [
+                        {
+                            id: "coop_service_unread",
+                            text: "Непрочитанные",
+                            includesChannel: (c) => c.isUnread,
+                        },
+                    ],
+                };
+            },
+            eager: true,
+        });
+    },
+});
 
 // Слова движка на экран не пускаем.
 //
