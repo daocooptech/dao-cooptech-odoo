@@ -20,6 +20,9 @@ from collections import Counter, defaultdict
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SKIP_DIRS = {'.git', '__pycache__', 'node_modules', 'tools', 'deploy'}
+# Миграция переводит записанные в базу имена Font Awesome — старые имена
+# в ней и есть то, что она ищет.
+FA_EXEMPT_DIR = os.sep + 'migrations' + os.sep
 # Свой протокол федерации кодирует base64 не для полей Binary.
 B64_EXEMPT = ('coop_federation' + os.sep,)
 
@@ -75,6 +78,8 @@ def scan(only=None):
             rel = os.path.relpath(path, ROOT)
             for rule in rules:
                 if rule == 'b64-bytes' and rel.startswith(B64_EXEMPT):
+                    continue
+                if rule == 'fa-icon' and FA_EXEMPT_DIR in os.sep + rel:
                     continue
                 rx = RULES[rule][1]
                 for i, line in enumerate(lines, 1):
