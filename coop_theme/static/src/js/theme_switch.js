@@ -2,6 +2,7 @@
 
 import { registry } from "@web/core/registry";
 import { browser } from "@web/core/browser/browser";
+import { cookie } from "@web/core/browser/cookie";
 import { Component, proxy, useProps } from "@odoo/owl";
 
 /**
@@ -62,6 +63,11 @@ export function applyCoopTheme(dark) {
     const root = document.documentElement;
     root.setAttribute("data-bs-theme", dark ? "dark" : "light");
     document.body?.classList.toggle("o_dark_mode", dark);
+    // Часть штатных компонентов (дашборды «Таблиц», графики журналов,
+    // история правок) читает тему не с документа, а из куки `color_scheme`.
+    // Без неё дашборд 7 октября рисовался тёмным в светлой теме: кука
+    // осталась `dark` с прошлого раза, а признак на документе был светлым.
+    cookie.set("color_scheme", dark ? "dark" : "light");
 }
 
 /**
