@@ -6,7 +6,7 @@ import { useInputField } from "@web/views/fields/input_field_hook";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { CharField } from "@web/views/fields/char/char_field";
 
-import { Component, t, useProps } from "@odoo/owl";
+import { Component, signal, t, useProps } from "@odoo/owl";
 
 export class SearchField extends Component {
     static template = "dadata_connector.SearchField";
@@ -14,9 +14,14 @@ export class SearchField extends Component {
         ...standardFieldProps,
         placeholder: t.string().optional(),
     });
+    // Owl 3: ссылка — сигнал, а не имя в t-ref (как у CharField в 20).
+    input = signal.ref();
 
     setup() {
-        useInputField({ getValue: () => this.props.record.data[this.props.name] || "" });
+        useInputField({
+            getValue: () => this.props.record.data[this.props.name] || "",
+            ref: this.input,
+        });
         this.action = null;
     }
 
@@ -48,7 +53,7 @@ export class SearchField extends Component {
                     }
                     await record.update({
                         ...newRecordData,
-                        company_type: "company",
+                        is_company: true,
                     });
                     await record.save();
 
