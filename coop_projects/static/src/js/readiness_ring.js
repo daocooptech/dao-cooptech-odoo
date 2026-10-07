@@ -10,7 +10,7 @@
  * нужного, показывает своё число. Ограничена только дуга — рисовать
  * больше полного круга нечем.
  */
-import { Component } from "@odoo/owl";
+import { Component, useProps } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 
@@ -19,7 +19,7 @@ const LENGTH = 2 * Math.PI * RADIUS;
 
 export class CoopReadinessRing extends Component {
     static template = "coop_projects.ReadinessRing";
-    static props = { ...standardFieldProps };
+    props = useProps(standardFieldProps);
 
     get percent() {
         return this.props.record.data[this.props.name] || 0;
