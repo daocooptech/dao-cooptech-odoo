@@ -4,6 +4,7 @@ import logging
 from odoo import api, models
 
 from ..data import rubrics
+from ..data import load_registries
 from ..data import load_project_updates
 from ..data import load_project_follows
 from ..data import load_wall_posts
@@ -145,6 +146,8 @@ class CoopDemoLoader(models.AbstractModel):
         # вкладам в проекты — и то и другое к этому моменту уже есть.
         if 'coop.token.claim' in self.env:
             load_tokens.load_tokens(self.env)
+        # «Поставки» — эскроу по первичным сделкам; загрузчик был, а вызова не было.
+        load_tokens.load_escrow(self.env)
         # Реестр НМА и заявки ЦФА — после проектов и токенов: активы
         # вносятся вкладом в проекты и получают доли по той же формуле,
         # что труд и техника, а значит механика долей должна уже работать.
@@ -239,6 +242,9 @@ class CoopDemoLoader(models.AbstractModel):
         # проектов, сообществ и организаций, и до их появления
         # разговаривать не о чем.
         load_messages.load_messages(self.env)
+        # Реестры, пустые на 20: заявки, полномочия, сотрудники, звонки.
+        # После переписок — звонки идут по их каналам.
+        load_registries.load_registries(self.env)
         # Снимки последними и по всем каталогам разом.
         #
         # Отдельным проходом, а не внутри каждого загрузчика: каталоги

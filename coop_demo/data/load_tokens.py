@@ -14,7 +14,7 @@
 import logging
 import random
 
-from datetime import timedelta
+from datetime import datetime, time, timedelta
 
 from odoo import fields
 
@@ -438,6 +438,9 @@ def _fake_hash(rnd):
     return ''.join(rnd.choice('0123456789abcdef') for _ in range(64))
 
 
+LIMIT_ESCROW = 160
+
+
 def load_escrow(env, rnd=None):
     """Открыть эскроу по первичным сделкам.
 
@@ -460,9 +463,14 @@ def load_escrow(env, rnd=None):
         return
 
     today = fields.Date.context_today(Escrow)
-    trades = Trade.search([('state', '=', 'done')])
+    # Подходящих сделок на демо-базе больше тысячи — каталог по норме 100–200,
+    # поэтому берём случайную выборку, чтобы сроки и состояния разошлись.
+    trades = list(Trade.search([('state', '=', 'done')], order='id'))
+    rnd.shuffle(trades)
     made = 0
     for trade in trades:
+        if made >= LIMIT_ESCROW:
+            break
         if trade.order_id.kind != 'primary':
             continue
         if Escrow.search_count([('trade_id', '=', trade.id)]):
@@ -470,6 +478,11 @@ def load_escrow(env, rnd=None):
         due = trade.claim_id.delivery_date
         if not due:
             continue
+        # Сроки выпусков на демо-базе все впереди, и каталог выходил в одном
+        # состоянии «держим». Части поставок срок уже прошёл — так видны и
+        # завершённые, и возвраты, и споры.
+        if due >= today and rnd.random() < 0.6:
+            due = today - timedelta(days=rnd.randint(1, 200))
         escrow = Escrow.create({
             'trade_id': trade.id,
             'buyer_id': trade.buyer_id.id,
@@ -478,6 +491,9 @@ def load_escrow(env, rnd=None):
             'quantity': trade.quantity,
             'due_date': due,
         })
+        # Время событий — от срока поставки, а не секунда загрузки: иначе
+        # у всех ста шестидесяти записей одна и та же дата.
+        at = datetime.combine(due, time(rnd.randint(8, 19), rnd.randint(0, 59)))
         if due < today:
             # Срок прошёл: чаще всего поставка состоялась, реже сорвалась,
             # изредка стороны спорят.
@@ -485,13 +501,13 @@ def load_escrow(env, rnd=None):
             if outcome == 'released':
                 escrow.write({
                     'state': 'released',
-                    'delivered_on': fields.Datetime.now(),
-                    'accepted_on': fields.Datetime.now(),
-                    'settled_on': fields.Datetime.now(),
+                    'delivered_on': at - timedelta(days=rnd.randint(0, 3)),
+                    'accepted_on': at + timedelta(days=rnd.randint(0, 2)),
+                    'settled_on': at + timedelta(days=rnd.randint(2, 5)),
                 })
             elif outcome == 'refunded':
                 escrow.write({'state': 'refunded',
-                              'settled_on': fields.Datetime.now()})
+                              'settled_on': at + timedelta(days=rnd.randint(1, 4))})
             else:
                 escrow.write({
                     'disputed': True,
@@ -504,7 +520,7 @@ def load_escrow(env, rnd=None):
         elif rnd.random() < 0.25:
             # Часть поставщиков уже отметила отгрузку, покупатель ещё нет:
             # это самое частое промежуточное состояние.
-            escrow.write({'delivered_on': fields.Datetime.now()})
+            escrow.write({'delivered_on': min(fields.Datetime.now(), at)})
         made += 1
 
     _logger.info('Эскроу: открыто %s записей', made)
