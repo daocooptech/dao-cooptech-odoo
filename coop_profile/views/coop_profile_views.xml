@@ -399,6 +399,73 @@
 
 
               <!--
+                Рабочий стол на своей странице (решение 450, «как в
+                Битрикс24»): дела на сегодня и сделки, где ход за мной.
+                Только себе: это не владения, а работа, и чужим она не
+                видна. Пусто — полосы нет.
+              -->
+              <field name="coop_my_activity_count" invisible="1"/>
+              <field name="coop_waiting_deal_count" invisible="1"/>
+              <div class="o_coop_band o_coop_my_day"
+                   invisible="not coop_is_self or not coop_my_activity_count">
+                <div class="o_coop_band_head">
+                  <span>Мои дела на сегодня</span>
+                  <button name="action_coop_my_activities" type="object"
+                          class="o_coop_band_all">смотреть все</button>
+                </div>
+                <!-- Строки, а не таблица: колонка узкая, и таблица в ней
+                     уезжала вбок с прокруткой. -->
+                <field name="coop_my_activity_ids" readonly="1" nolabel="1">
+                  <kanban class="o_coop_day_kanban" records_draggable="false"
+                          action="action_open_document" type="object">
+                    <field name="state"/>
+                    <templates>
+                      <t t-name="card">
+                        <div t-att-class="'o_coop_day_row' + (record.state.raw_value == 'overdue' ? ' o_coop_day_overdue' : '')">
+                          <div class="o_coop_day_when">
+                            <field name="date_deadline"/> · <field name="activity_type_id"/>
+                          </div>
+                          <div class="o_coop_day_what"><field name="summary"/></div>
+                          <div class="o_coop_day_where"><field name="res_name"/></div>
+                          <button name="action_done" type="object"
+                                  class="btn btn-link o_coop_day_done">Выполнено</button>
+                        </div>
+                      </t>
+                    </templates>
+                  </kanban>
+                </field>
+              </div>
+              <div class="o_coop_band o_coop_my_day"
+                   invisible="not coop_is_self or not coop_waiting_deal_count">
+                <div class="o_coop_band_head">
+                  <span>Сделки ждут меня</span>
+                  <button name="action_coop_waiting_deals" type="object"
+                          class="o_coop_band_all">смотреть все</button>
+                </div>
+                <field name="coop_waiting_deal_ids" readonly="1" nolabel="1">
+                  <kanban class="o_coop_day_kanban" records_draggable="false"
+                          action="action_coop_open_page" type="object">
+                    <field name="state"/>
+                    <field name="currency_id"/>
+                    <templates>
+                      <t t-name="card">
+                        <div class="o_coop_day_row">
+                          <div class="o_coop_day_when">
+                            <field name="number"/>
+                            <span t-att-class="'o_coop_day_state o_coop_state_' + record.state.raw_value">
+                              <t t-out="record.state.value"/>
+                            </span>
+                          </div>
+                          <div class="o_coop_day_what"><field name="name"/></div>
+                          <div class="o_coop_day_where"><field name="amount"/></div>
+                        </div>
+                      </t>
+                    </templates>
+                  </kanban>
+                </field>
+              </div>
+
+              <!--
                 Строка статуса, а не статья. Стояло штатное `comment` —
                 поле Html, а с ним весь редактор движка: вставка
                 картинок и видео, загрузка файлов, кнопки, оглавление,
