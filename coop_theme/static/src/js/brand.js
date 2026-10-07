@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { t } from "@odoo/owl";
 import { patch } from "@web/core/utils/patch";
 import { Dialog } from "@web/core/dialog/dialog";
 import { WebClient } from "@web/webclient/webclient";
@@ -26,6 +27,10 @@ patch(WebClient.prototype, {
 });
 
 // Окно без собственного заголовка называлось «Odoo».
+//
+// В 20 умолчаний props у окна больше нет (Owl 3): схема с умолчаниями
+// лежит в статическом `propsSchema`, и окно читает её при создании
+// (`props = useProps(this.constructor.propsSchema)`, web/core/dialog).
 patch(Dialog, {
-    defaultProps: { ...Dialog.defaultProps, title: PLATFORM_NAME },
+    propsSchema: { ...Dialog.propsSchema, title: t.string().optional(PLATFORM_NAME) },
 });

@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { useService } from "@web/core/utils/hooks";
-import { Component, onWillStart, onWillUpdateProps, proxy } from "@odoo/owl";
+import { Component, onWillStart, onWillUpdateProps, proxy, t, useProps } from "@odoo/owl";
 
 /**
  * Каталог на карте: схематичная карта России с метками по городам.
@@ -30,15 +30,15 @@ const CITY_POS = {
 
 export class CoopMap extends Component {
     static template = "coop_theme.CatalogMap";
-    static props = {
-        resModel: String,
-        domain: { type: Array, optional: true },
+    props = useProps({
+        resModel: t.string(),
+        domain: t.array().optional(),
         // Куда вернуться после выбора города. Передаётся представлением, а
         // не берётся из состояния вида: карта и переключатель вида тогда
         // ссылались бы друг на друга, и модуль загружался бы наполовину
         // собранным.
-        showTiles: { type: Function, optional: true },
-    };
+        showTiles: t.function().optional(),
+    });
 
     setup() {
         this.orm = useService("orm");

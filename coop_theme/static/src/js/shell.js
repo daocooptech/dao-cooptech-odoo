@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, onMounted, onWillStart, onWillUnmount, proxy, usePlugin } from "@odoo/owl";
+import { Component, onMounted, onWillStart, onWillUnmount, proxy, usePlugin, useProps } from "@odoo/owl";
 import { patch } from "@web/core/utils/patch";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
@@ -10,7 +10,7 @@ import { user } from "@web/core/user";
 import { COOP_FAVORITE_CATALOGS } from "@coop_theme/js/favorite";
 import { pathAfterPrefix } from "@coop_theme/js/node_path";
 import { router, routerBus } from "@web/core/browser/router";
-import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 import { WebClient } from "@web/webclient/webclient";
 import { NavBar } from "@web/webclient/navbar/navbar";
 
@@ -36,11 +36,11 @@ import { NavBar } from "@web/webclient/navbar/navbar";
  */
 export class CoopTabs extends Component {
     static template = "coop_theme.Tabs";
-    static props = {};
+    props = useProps();
 
     setup() {
         this.menus = useService("menu");
-        this.action = usePlugin(ActionManagerPlugin);
+        this.action = usePlugin(ActionPlugin);
         this.orm = useService("orm");
         this.state = proxy({ tabs: [], current: null, label: null, fav: null });
         useBus(this.env.bus, "COOP_FAVORITE_CHANGED", () => this.refreshFav());
@@ -240,10 +240,10 @@ const TABBAR_LABELS = ["Моя страница", "Сообщения", "Рес�
 
 export class CoopSidebar extends Component {
     static template = "coop_theme.Sidebar";
-    static props = {};
+    props = useProps();
 
     setup() {
-        this.action = usePlugin(ActionManagerPlugin);
+        this.action = usePlugin(ActionPlugin);
         this.orm = useService("orm");
         this.boot = useService("coopBoot");
         // Открытие панели общее с кнопкой в шапке — см. `coopShellUi`.
@@ -655,7 +655,7 @@ export class CoopSidebar extends Component {
 
 export class CoopFooter extends Component {
     static template = "coop_theme.Footer";
-    static props = {};
+    props = useProps();
 }
 
 /**
@@ -686,12 +686,12 @@ export class CoopFooter extends Component {
  */
 export class CoopLoader extends Component {
     static template = "coop_theme.Loader";
-    static props = {};
+    props = useProps();
 }
 
 export class CoopSoon extends Component {
     static template = "coop_theme.Soon";
-    static props = ["*"];
+    props = useProps();
 
     setup() {
         this.label = this.props.action?.params?.label || this.props.action?.name || "Раздел";

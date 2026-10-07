@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { useLayoutEffect, useRef } from "@web/owl2/utils";
+import { useLayoutEffect } from "@web/owl2/utils";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
-import { Component, proxy } from "@odoo/owl";
+import { Component, proxy, signal, t, useProps } from "@odoo/owl";
 
 /**
  * Блок «О себе» с правкой по карандашу.
@@ -33,14 +33,14 @@ export class CoopAboutField extends Component {
     // полем ввода — ссылку на него, слежение за значением, разбор на
     // лету, — а ввода в чтении нет вовсе. Ссылка оказывалась пустой, и
     // обработчики кнопок молча не навешивались: ни ошибки, ни правки.
-    static props = {
+    props = useProps({
         ...standardFieldProps,
-        placeholder: { type: String, optional: true },
+        placeholder: t.string().optional(),
         // Заголовок полосы. У человека — «О себе», у организации —
         // «Описание организации» (владелец 28.09.2026: «блок о себе откуда
         // взялся? Должно быть описание организации»).
-        title: { type: String, optional: true },
-    };
+        title: t.string().optional(),
+    });
 
     setup() {
         // Черновик держится в стороне от записи, и это главное здесь.
@@ -51,7 +51,7 @@ export class CoopAboutField extends Component {
         // Черновик снимает и то и другое: отмена — это просто выход из
         // правки, запись при этом не тронута.
         this.ui = proxy({ editing: false, draft: "", busy: false });
-        this.input = useRef("input");
+        this.input = signal.ref();
         useLayoutEffect(
             (el) => {
                 if (el) {
@@ -62,7 +62,7 @@ export class CoopAboutField extends Component {
                     el.setSelectionRange(el.value.length, el.value.length);
                 }
             },
-            () => [this.input.el]
+            () => [this.input()]
         );
     }
 

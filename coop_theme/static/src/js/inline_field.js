@@ -2,10 +2,10 @@
 
 import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { registry } from "@web/core/registry";
-import { useLayoutEffect, useRef } from "@web/owl2/utils";
+import { useLayoutEffect } from "@web/owl2/utils";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { useService } from "@web/core/utils/hooks";
-import { Component, proxy, usePlugin } from "@odoo/owl";
+import { Component, proxy, signal, t, usePlugin, useProps } from "@odoo/owl";
 
 /**
  * Поле, которое правится по месту: карандаш, галочка, крестик.
@@ -32,16 +32,16 @@ function valueOfPair(link) {
 
 export class CoopInlineField extends Component {
     static template = "coop_theme.InlineField";
-    static props = {
+    props = useProps({
         ...standardFieldProps,
-        placeholder: { type: String, optional: true },
+        placeholder: t.string().optional(),
         // Длинное значение переносится, а не обрезается многоточием.
         // Название проекта в одну строку не помещается: владелец
         // 21 сентября 2026 — «в проектах название включает очень мало
         // символов, из-за этого не видно название полностью».
-        wrap: { type: Boolean, optional: true },
-        rows: { type: Number, optional: true },
-    };
+        wrap: t.boolean().optional(),
+        rows: t.number().optional(),
+    });
 
     setup() {
         this.orm = useService("orm");
@@ -51,7 +51,7 @@ export class CoopInlineField extends Component {
         this.ui = proxy({
             editing: false, draft: "", busy: false, options: [], chosen: null,
         });
-        this.input = useRef("input");
+        this.input = signal.ref();
         useLayoutEffect(
             (el) => {
                 if (el) {
@@ -61,7 +61,7 @@ export class CoopInlineField extends Component {
                     }
                 }
             },
-            () => [this.input.el]
+            () => [this.input()]
         );
     }
 

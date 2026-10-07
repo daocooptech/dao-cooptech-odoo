@@ -37,7 +37,7 @@
 
     <div class="o_coop_band_body">
       <input t-if="this.ui.editing" type="text" class="o_input o_coop_about_input"
-             t-custom-ref="input"
+             t-ref="this.input"
              t-att-value="this.ui.draft"
              t-att-maxlength="this.maxlength"
              t-att-placeholder="this.props.placeholder"

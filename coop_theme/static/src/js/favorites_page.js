@@ -1,10 +1,10 @@
 /** @odoo-module **/
 
-import { Component, onWillStart, proxy, usePlugin } from "@odoo/owl";
+import { Component, onWillStart, proxy, usePlugin, useProps } from "@odoo/owl";
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * Страница «Избранное» — решение 408.
@@ -16,11 +16,11 @@ import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
  */
 export class CoopFavoritesPage extends Component {
     static template = "coop_theme.FavoritesPage";
-    static props = ["*"];
+    props = useProps();
 
     setup() {
         this.orm = useService("orm");
-        this.action = usePlugin(ActionManagerPlugin);
+        this.action = usePlugin(ActionPlugin);
         this.favorite = useService("coopFavorite");
         this.state = proxy({ tabs: [], current: null, loaded: false });
         onWillStart(() => this.load());
@@ -84,10 +84,10 @@ registry.category("actions").add("coop_theme.favorites", CoopFavoritesPage);
  */
 export class CoopFavoritesButton extends Component {
     static template = "coop_theme.FavoritesButton";
-    static props = {};
+    props = useProps();
 
     setup() {
-        this.action = usePlugin(ActionManagerPlugin);
+        this.action = usePlugin(ActionPlugin);
     }
 
     open() {

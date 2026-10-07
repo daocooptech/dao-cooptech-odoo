@@ -3,7 +3,7 @@
 import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { coopSort, coopSortOptionsFor, setCoopSort } from "@coop_theme/js/catalog_sort";
-import { Component, onWillStart, proxy, usePlugin } from "@odoo/owl";
+import { Component, onWillStart, proxy, t, usePlugin, useProps } from "@odoo/owl";
 
 /**
  * Панель фильтров каталога — та же, что в макете.
@@ -30,13 +30,13 @@ export const coopFiltersUi = proxy({ open: false });
 
 export class CoopFilters extends Component {
     static template = "coop_theme.CatalogFilters";
-    static props = {
-        resModel: String,
+    props = useProps({
+        resModel: t.string(),
         // Домен самого раздела: «Организую», «Мои закупки», «Опубликованные».
         // Без него число на кнопке считалось по всей модели — во вкладке
         // «Организую» с одной записью стояло «Показать результаты · 120».
-        baseDomain: { type: Array, optional: true },
-    };
+        baseDomain: t.array().optional(),
+    });
 
     setup() {
         this.orm = useService("orm");

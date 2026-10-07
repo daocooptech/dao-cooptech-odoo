@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { useLayoutEffect, useRef } from "@web/owl2/utils";
+import { useLayoutEffect } from "@web/owl2/utils";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
-import { Component, proxy } from "@odoo/owl";
+import { Component, proxy, signal, t, useProps } from "@odoo/owl";
 
 /**
  * Описание, которое правится по карандашу.
@@ -30,18 +30,18 @@ const SIMPLE_TAGS = new Set(["p", "br", "div", "span"]);
 
 export class CoopBlockField extends Component {
     static template = "coop_theme.BlockField";
-    static props = {
+    props = useProps({
         ...standardFieldProps,
-        placeholder: { type: String, optional: true },
-        rows: { type: Number, optional: true },
-    };
+        placeholder: t.string().optional(),
+        rows: t.number().optional(),
+    });
 
     setup() {
         // Черновик держится в стороне от записи: пока не нажали галочку,
         // страница не считается изменённой, а отмена — это просто выход
         // из правки.
         this.ui = proxy({ editing: false, draft: "", busy: false });
-        this.input = useRef("input");
+        this.input = signal.ref();
         useLayoutEffect(
             (el) => {
                 if (el) {
@@ -49,7 +49,7 @@ export class CoopBlockField extends Component {
                     el.setSelectionRange(el.value.length, el.value.length);
                 }
             },
-            () => [this.input.el]
+            () => [this.input()]
         );
     }
 

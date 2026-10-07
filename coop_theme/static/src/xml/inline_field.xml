@@ -16,7 +16,7 @@
           и выбранное записывается сразу: выбрали — значит ответили.
         -->
         <select t-if="this.isSelection" class="o_input o_coop_inline_input"
-                t-custom-ref="input"
+                t-ref="this.input"
                 t-att-disabled="this.ui.busy"
                 t-on-change="this.onSelect">
           <option value=""/>
@@ -31,13 +31,13 @@
           владелец и увидел на названии проекта.
         -->
         <textarea t-elif="this.isMultiline" class="o_input o_coop_inline_input o_coop_inline_area"
-                  t-custom-ref="input"
+                  t-ref="this.input"
                   t-att-rows="this.props.rows or 2"
                   t-att-maxlength="this.maxlength"
                   t-att-placeholder="this.props.placeholder"
                   t-on-input="this.onInput"
                   t-on-keydown="this.onKeydown"><t t-out="this.ui.draft"/></textarea>
-        <input t-else="" class="o_input o_coop_inline_input" t-custom-ref="input"
+        <input t-else="" class="o_input o_coop_inline_input" t-ref="this.input"
                t-att-type="this.inputType"
                t-att-value="this.ui.draft"
                t-att-maxlength="this.maxlength"

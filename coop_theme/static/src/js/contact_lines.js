@@ -3,7 +3,7 @@
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { useService } from "@web/core/utils/hooks";
-import { Component, proxy } from "@odoo/owl";
+import { Component, proxy, useProps } from "@odoo/owl";
 
 /**
  * Свободные строки контактов: «название — значение», сколько нужно.
@@ -20,7 +20,7 @@ import { Component, proxy } from "@odoo/owl";
  */
 export class CoopContactLines extends Component {
     static template = "coop_theme.ContactLines";
-    static props = { ...standardFieldProps };
+    props = useProps(standardFieldProps);
 
     setup() {
         this.orm = useService("orm");

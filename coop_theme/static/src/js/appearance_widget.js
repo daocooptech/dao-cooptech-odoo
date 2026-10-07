@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { Component, proxy } from "@odoo/owl";
+import { Component, proxy, useProps } from "@odoo/owl";
 import { readCoopThemeChoice, setCoopThemeChoice } from "@coop_theme/js/theme_switch";
 import { coopLayout, setCoopLayout } from "@coop_theme/js/catalog_view";
 
@@ -18,7 +18,7 @@ import { coopLayout, setCoopLayout } from "@coop_theme/js/catalog_view";
  */
 export class CoopAppearance extends Component {
     static template = "coop_theme.Appearance";
-    static props = { "*": true };
+    props = useProps();
 
     setup() {
         this.ui = proxy({

@@ -1,12 +1,12 @@
 /** @odoo-module **/
 
-import { Component, onMounted, onWillStart, proxy, usePlugin } from "@odoo/owl";
+import { Component, onMounted, onWillStart, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { RelationalModel } from "@web/model/relational_model/relational_model";
 import { addFieldDependencies, extractFieldsFromArchInfo } from "@web/model/relational_model/utils";
 import { CoopCatalogKanbanRecord as KanbanRecord } from "@coop_theme/js/favorite";
-import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * Полки каталога: ряды по рубрикам над общим списком.
@@ -59,22 +59,22 @@ import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
 export class CoopShelves extends Component {
     static template = "coop_theme.CatalogShelves";
     static components = { KanbanRecord };
-    static props = {
-        resModel: { type: String },
-        field: { type: String },
-        domain: { type: Array, optional: true },
+    props = useProps({
+        resModel: t.string(),
+        field: t.string(),
+        domain: t.array().optional(),
         // Порядок передаётся снаружи: своей модели полки грузят записи
         // сами, и без него брали их в порядке базы. На торгах это было
         // видно сразу — витрина показывала завершённые лоты при
         // выбранном порядке «сначала идущие».
-        orderBy: { type: Array, optional: true },
+        orderBy: t.array().optional(),
         // Разбор представления и список полей — те же, по которым
         // каталог рисует свои карточки. Полка рисует ими же: два вида
         // карточек на одном экране владелец назвал разнобоем, и был
         // прав — витрина показывает тот же каталог, а не другой раздел.
-        archInfo: { type: Object },
-        fields: { type: Object },
-        openRecord: { type: Function, optional: true },
+        archInfo: t.object(),
+        fields: t.object(),
+        openRecord: t.function().optional(),
         // Какие рубрики раскладывать глубже — по своим подрубрикам
         // (`coop_shelf_split` в контексте действия каталога). Владелец
         // 24 сентября 2026: «в каталоге людей есть рабочий персонал, не
@@ -82,15 +82,15 @@ export class CoopShelves extends Component {
         // специализациям». Вид: `{names: [рубрики], field: поле подрубрик
         // у записи, parent: поле рубрики у подрубрики, other: имя полки
         // для мелких подрубрик}`.
-        split: { type: [Object, Boolean], optional: true },
+        split: t.or([t.object(), t.boolean()]).optional(),
         // Сколько полок собралось. Зовётся один раз, после появления на
         // экране: по этому числу каталог решает, показывать ли ленту.
-        onLoaded: { type: Function, optional: true },
-    };
+        onLoaded: t.function().optional(),
+    });
 
     setup() {
         this.orm = useService("orm");
-        this.action = usePlugin(ActionManagerPlugin);
+        this.action = usePlugin(ActionPlugin);
         this.state = proxy({ shelves: [], loading: true });
 
         // Вторая модель — на все полки одна.
@@ -106,7 +106,7 @@ export class CoopShelves extends Component {
         // запросом с отбором по списку рубрик.
         this.shelvesModel = new RelationalModel(
             this.env, this.modelParams, {
-                action: usePlugin(ActionManagerPlugin),
+                action: usePlugin(ActionPlugin),
                 dialog: useService("dialog"),
                 notification: usePlugin(NotificationPlugin),
                 orm: this.orm,

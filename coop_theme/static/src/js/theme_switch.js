@@ -2,7 +2,7 @@
 
 import { registry } from "@web/core/registry";
 import { browser } from "@web/core/browser/browser";
-import { Component, proxy } from "@odoo/owl";
+import { Component, proxy, useProps } from "@odoo/owl";
 
 /**
  * Переключатель светлой и тёмной темы — тот же, что в прототипе.
@@ -113,7 +113,7 @@ initCoopTheme();
 
 export class CoopThemeSwitch extends Component {
     static template = "coop_theme.ThemeSwitch";
-    static props = {};
+    props = useProps();
 
     setup() {
         this.state = proxy({

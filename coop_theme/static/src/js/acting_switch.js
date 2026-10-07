@@ -2,7 +2,7 @@
 
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { Component, onWillStart, proxy } from "@odoo/owl";
+import { Component, onWillStart, proxy, useProps } from "@odoo/owl";
 
 /**
  * Выбор, от чьего имени человек действует, — в меню под аватаром.
@@ -18,7 +18,7 @@ import { Component, onWillStart, proxy } from "@odoo/owl";
  */
 export class CoopActingMenu extends Component {
     static template = "coop_theme.ActingMenu";
-    static props = {};
+    props = useProps();
 
     setup() {
         this.orm = useService("orm");

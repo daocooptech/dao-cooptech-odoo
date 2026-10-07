@@ -23,7 +23,7 @@
     <!--
       Кнопка — первой в полосе, до пути.
     -->
-    <xpath expr="//t[@t-if='this.env.isSmall']" position="before">
+    <xpath expr="//t[@t-if='this.uiService.isSmall']" position="before">
       <t t-call="coop_theme.BackButton"/>
     </xpath>
 
@@ -35,7 +35,7 @@
       Так путь рисуется на всех ширинах, а прячется на узком экране
       стилями — одно место вместо двух, расходящихся на 767 точках.
     -->
-    <xpath expr="//t[@t-if='this.env.isSmall']" position="attributes">
+    <xpath expr="//t[@t-if='this.uiService.isSmall']" position="attributes">
       <attribute name="t-if">false</attribute>
     </xpath>
 

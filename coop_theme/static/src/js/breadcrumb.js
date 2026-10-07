@@ -6,7 +6,7 @@ import { useService } from "@web/core/utils/hooks";
 import { Breadcrumbs } from "@web/search/breadcrumbs/breadcrumbs";
 import { proxy, usePlugin } from "@odoo/owl";
 import { coopIsPlatformModel } from "@coop_theme/js/platform_page";
-import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * Путь и кнопка возврата.
@@ -43,7 +43,7 @@ patch(Breadcrumbs.prototype, {
         this.coopMenus = useService("menu");
         this.coopNotification = usePlugin(NotificationPlugin);
         this.coopBoot = useService("coopBoot");
-        this.coopActionService = usePlugin(ActionManagerPlugin);
+        this.coopActionService = usePlugin(ActionPlugin);
         // Разделы бокового меню — чтобы найти раздел по модели записи,
         // когда действие не опознано (прямая ссылка). Список приходит
         // общим запросом запуска оболочки, второй раз он бесплатен.

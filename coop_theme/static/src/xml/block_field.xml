@@ -10,7 +10,7 @@
   <t t-name="coop_theme.BlockField">
     <div class="o_coop_block" t-att-class="{ 'o_coop_block_editing': this.ui.editing }">
       <t t-if="this.ui.editing">
-        <textarea class="o_input o_coop_block_input" t-custom-ref="input"
+        <textarea class="o_input o_coop_block_input" t-ref="this.input"
                   t-att-rows="this.props.rows or 6"
                   t-att-placeholder="this.props.placeholder"
                   t-on-input="this.onInput"

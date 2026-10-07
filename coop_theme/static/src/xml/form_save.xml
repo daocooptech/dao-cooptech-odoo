@@ -18,8 +18,8 @@
 
     Отрисовщик формы в шаблоне встречается дважды: второй раз — внутри
     слота кнопок, для формы в окне. Отличаем не порядковым номером, а
-    признаком: у главного `archInfo="archInfo"`, у оконного
-    `archInfo="footerArchInfo"`. Номер сместился бы при первой же правке
+    признаком: у главного `archInfo="this.archInfo"`, у оконного
+    `archInfo="this.footerArchInfo"`. Номер сместился бы при первой же правке
     движка, и полоса уехала бы в подвал диалога.
   -->
   <!--
@@ -37,7 +37,7 @@
       <attribute name="t-if">this.canEdit and !this.coopIsPlatformPage</attribute>
     </xpath>
 
-    <xpath expr="//t[@t-component='this.props.Renderer'][@archInfo='archInfo']"
+    <xpath expr="//t[@t-component='this.props.Renderer'][@archInfo='this.archInfo']"
            position="after">
       <div t-if="this.coopIsPlatformPage and this.coopHasChanges" class="o_coop_save_bar">
         <span class="o_coop_save_note">Есть несохранённые правки</span>

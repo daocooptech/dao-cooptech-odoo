@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
-import { Component, onWillStart, onWillUnmount, proxy, usePlugin } from "@odoo/owl";
+import { Component, onWillStart, onWillUnmount, proxy, usePlugin, useProps } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * Колокол в шапке: сколько событий человек ещё не видел.
@@ -19,11 +19,11 @@ import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
  */
 export class CoopBell extends Component {
     static template = "coop_theme.Bell";
-    static props = {};
+    props = useProps();
 
     setup() {
         this.orm = useService("orm");
-        this.action = usePlugin(ActionManagerPlugin);
+        this.action = usePlugin(ActionPlugin);
         this.boot = useService("coopBoot");
         this.state = proxy({ count: 0 });
 

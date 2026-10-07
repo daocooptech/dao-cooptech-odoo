@@ -13,10 +13,10 @@
            class="o_coop_contact_line">
         <t t-if="this.ui.editing === line.resId">
           <input class="o_input o_coop_inline_input o_coop_contact_name"
-                 t-custom-model="this.ui.name" placeholder="название"
+                 t-model.proxy="this.ui.name" placeholder="название"
                  t-on-keydown="this.onKeydown"/>
           <input class="o_input o_coop_inline_input"
-                 t-custom-model="this.ui.value" placeholder="значение"
+                 t-model.proxy="this.ui.value" placeholder="значение"
                  t-on-keydown="this.onKeydown"/>
           <button type="button" class="o_coop_inline_btn o_coop_inline_ok"
                   t-att-disabled="this.ui.busy or !this.filled"
@@ -52,10 +52,10 @@
 
       <div t-if="this.ui.editing === 'new'" class="o_coop_contact_line">
         <input class="o_input o_coop_inline_input o_coop_contact_name"
-               t-custom-model="this.ui.name" placeholder="название" autofocus="autofocus"
+               t-model.proxy="this.ui.name" placeholder="название" autofocus="autofocus"
                t-on-keydown="this.onKeydown"/>
         <input class="o_input o_coop_inline_input"
-               t-custom-model="this.ui.value" placeholder="значение"
+               t-model.proxy="this.ui.value" placeholder="значение"
                t-on-keydown="this.onKeydown"/>
         <button type="button" class="o_coop_inline_btn o_coop_inline_ok"
                 t-att-disabled="this.ui.busy or !this.filled"

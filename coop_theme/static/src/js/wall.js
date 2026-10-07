@@ -2,7 +2,7 @@
 
 import { patch } from "@web/core/utils/patch";
 import { FormRenderer } from "@web/views/form/form_renderer";
-import { Chatter } from "@mail/chatter/web_portal/chatter";
+import { Chatter } from "@mail/chatter/web_portal_project/chatter";
 import { Composer } from "@mail/core/common/composer";
 import { Thread } from "@mail/core/common/thread";
 import { coopIsPlatformModel } from "@coop_theme/js/platform_page";
@@ -74,7 +74,7 @@ patch(FormRenderer.prototype, {
 patch(Chatter.prototype, {
     setup() {
         super.setup();
-        if (WALL_MODELS.includes(this.props.threadModel)) {
+        if (WALL_MODELS.includes(this.threadModel())) {
             // Не через `toggleComposer`: тот на неспасённой записи ждёт
             // сохранения и открывает поле уже после него. Здесь запись
             // всегда сохранена — это чужая или своя страница, а не форма
@@ -96,7 +96,7 @@ patch(Chatter.prototype, {
      */
     onPostCallback() {
         super.onPostCallback();
-        if (WALL_MODELS.includes(this.props.threadModel)) {
+        if (WALL_MODELS.includes(this.threadModel())) {
             this.state.composerType = "message";
         }
     },
