@@ -62,6 +62,22 @@ def load_vat_regimes(env):
     return len(orgs)
 
 
+def load_companies(env):
+    """Компания учёта у каждой организации с режимом НДС (решение 450).
+
+    Своя бухгалтерия нужна организации не только для счетов по сделкам:
+    паевые взносы, оплаты, движения по кошельку тоже проводки. Около трёх
+    секунд на организацию — один раз; дальше пропускается.
+    """
+    orgs = env['res.partner'].sudo().search([
+        ('is_company', '=', True), ('coop_is_participant', '=', True),
+        ('coop_vat_regime_ids', '!=', False), ('coop_company_id', '=', False)], order='id')
+    for org in orgs:
+        org._coop_ensure_company()
+    _logger.info('Компании учёта: заведено %s', len(orgs))
+    return len(orgs)
+
+
 def load_invoices(env):
     """Счета по сделкам: у продавца — УПД, у покупателя — входящий документ.
 

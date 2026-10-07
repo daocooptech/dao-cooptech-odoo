@@ -24,6 +24,7 @@ from ..data import load_favorites
 from ..data import load_okved
 from ..data import load_accounts
 from ..data import load_vat
+from ..data import load_staff
 from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_cessions,
                     load_tokens,
@@ -344,8 +345,12 @@ class CoopDemoLoader(models.AbstractModel):
         # Режимы НДС и счета по сделкам (решение 449) — последними: счёт
         # заводит организации компанию учёта, и её название должно быть
         # уже окончательным.
+        # Ответственные (решение 450) — до счетов: выставляет счёт и видит
+        # бухгалтерию тот, у кого полномочие, а не загрузчик сверху.
+        load_staff.load_staff(self.env)
         if 'coop.vat.regime' in self.env:
             load_vat.load_vat_regimes(self.env)
+            load_vat.load_companies(self.env)
             load_vat.load_invoices(self.env)
         return True
 
