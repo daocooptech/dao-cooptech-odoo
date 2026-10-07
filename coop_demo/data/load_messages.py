@@ -155,7 +155,10 @@ def _channel(env, name, kind, partners, self_partner, as_user,
     members = self_partner | partners
     return env['discuss.channel'].with_user(as_user).sudo().create({
         'name': name,
-        'channel_type': 'group' if len(members) > 2 else 'chat',
+        # Служебные — всегда группой: в 20 чат на двоих у пары один
+        # (`member_indices`), а служебных переписок у человека с роботом
+        # шесть, и с ботом у него уже есть свой чат.
+        'channel_type': 'group' if len(members) > 2 or kind == 'service' else 'chat',
         'channel_partner_ids': [(4, pid) for pid in members.ids],
         'coop_kind': kind,
         'coop_subtitle': subtitle,
@@ -175,7 +178,16 @@ def load_messages(env, login='dashkevich'):
     me = user.partner_id
 
     Channel = env['discuss.channel'].sudo()
-    if Channel.search_count([('coop_kind', '!=', False)]):
+
+    # Проверка по видам, а не «есть ли хоть одна переписка с видом»: на 20
+    # переписки сделок, проектов и организаций заранее заводит синхронизация
+    # (`coop_channel_sync`), и прежняя общая проверка молча пропускала весь
+    # загрузчик — 07.10.2026 в базе не было ни одной служебной переписки и
+    # всего две личные. Раздел наполняется, только если его вида ещё нет.
+    def have(kind, enough=1):
+        return Channel.search_count([('coop_kind', '=', kind)]) >= enough
+
+    if have('service'):
         _logger.info('Переписки уже загружены')
         return 0
 
@@ -216,7 +228,11 @@ def load_messages(env, login='dashkevich'):
         return now - timedelta(hours=rnd.randint(1, 240))
 
     # ── Личные беседы ─────────────────────────────────────────────────
-    for person in people[:45]:
+    # С кем чат уже есть — второго на ту же пару движок 20 не даст.
+    chatted = Channel.search([('channel_type', '=', 'chat'),
+                              ('channel_partner_ids', 'in', me.ids)]).channel_partner_ids
+    personal = (people - chatted)[:45] if not have('person', 10) else Partner.browse()
+    for person in personal:
         last = spread()
         parts = [p for p in (person.city, person.coop_specialization_id.name)
                  if p]
@@ -231,6 +247,8 @@ def load_messages(env, login='dashkevich'):
     orgs = Partner.search(
         [('is_company', '=', True), ('coop_is_participant', '=', True)],
         order='id', limit=40)
+    if have('org'):
+        orgs = Partner.browse()
     for index, org in enumerate(orgs):
         members = people[index * 3:index * 3 + 3] or people[:3]
         last = spread()
@@ -245,6 +263,8 @@ def load_messages(env, login='dashkevich'):
 
     # ── Сделки ────────────────────────────────────────────────────────
     deals = env['coop.deal'].sudo().search([], order='id desc', limit=30)
+    if have('deal'):
+        deals = deals.browse()
     states = dict(env['coop.deal']._fields['state'].selection)
     for deal in deals:
         other = deal.party_b_id if deal.party_a_id == me else deal.party_a_id
@@ -260,6 +280,8 @@ def load_messages(env, login='dashkevich'):
 
     # ── Проекты ───────────────────────────────────────────────────────
     projects = env['coop.project'].sudo().search([], order='id', limit=30)
+    if have('project'):
+        projects = projects.browse()
     for index, project in enumerate(projects):
         members = people[index * 2:index * 2 + 4] or people[:4]
         last = spread()
@@ -272,6 +294,8 @@ def load_messages(env, login='dashkevich'):
 
     # ── Сообщества ────────────────────────────────────────────────────
     communities = env['coop.community'].sudo().search([], order='id', limit=25)
+    if have('community'):
+        communities = communities.browse()
     for index, community in enumerate(communities):
         members = people[index * 4:index * 4 + 5] or people[:5]
         last = spread()
@@ -297,8 +321,10 @@ def load_messages(env, login='dashkevich'):
     #
     # Заведена и брошена: так проверяется, что показывает лента без
     # сообщений и что пишется в колонке времени, когда писать нечего.
-    _channel(env, rnd.choice(people).name, 'person', rnd.choice(people), me,
-             user, subtitle='Переписка ещё не начата')
+    silent = rnd.choice(people - chatted - personal) if people - chatted - personal else False
+    if silent:
+        _channel(env, silent.name, 'person', silent, me,
+                 user, subtitle='Переписка ещё не начата')
     made['channels'] += 1
 
     _mark_unread(env, me)
