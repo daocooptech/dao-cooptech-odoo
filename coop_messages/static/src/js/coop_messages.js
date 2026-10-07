@@ -1,23 +1,21 @@
 /** @odoo-module **/
 
-import { Component, onMounted, onWillStart, proxy, usePlugin } from "@odoo/owl";
+import { Component, computed, onMounted, onWillStart, proxy, signal, useListener, usePlugin, useProps } from "@odoo/owl";
 import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { patch } from "@web/core/utils/patch";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
-import { fields } from "@mail/core/common/record";
+import { fields } from "@mail/model/export";
 import { Thread as ThreadComponent } from "@mail/core/common/thread";
 import { Composer } from "@mail/core/common/composer";
 import { ActionList } from "@mail/core/common/action_list";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { threadActionsRegistry, useThreadActions } from "@mail/core/common/thread_actions";
-import { Store } from "@mail/core/common/store_service";
-import { MessagingMenu } from "@mail/core/public_web/messaging_menu";
-import { Thread } from "@mail/core/common/thread_model";
+import { DiscussChannel } from "@mail/discuss/core/common/discuss_channel_model";
 import { composerActionsRegistry } from "@mail/core/common/composer_actions";
-import { useExternalListener, useRef, useSubEnv } from "@web/owl2/utils";
-import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
+import { useSubEnv } from "@web/owl2/utils";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 // Luxon в движке подключён библиотекой, а не модулем: импортировать его
 // нельзя — сборщик не найдёт «luxon», наш файл не определится, и вместе
@@ -90,9 +88,12 @@ if (cannedResponseDef) {
 // Наши поля канала приезжают вместе с ним, но модели переписки о них не
 // сказано, и без объявления они не попадают под наблюдение — список
 // перестаёт перерисовываться при смене вида.
-patch(Thread.prototype, {
+// В 20 канал — своя модель `discuss.channel` (наследует `mail.thread`
+// через `_inherits`), и поля канала с сервера приезжают в неё, а не в
+// переписку. Отсюда и заплатка — на модели канала.
+patch(DiscussChannel.prototype, {
     setup() {
-        super.setup();
+        super.setup(...arguments);
         this.coop_kind = fields.Attr(false);
         this.coop_subtitle = fields.Attr("");
         this.coop_res_model = fields.Attr("");
@@ -112,11 +113,11 @@ patch(Thread.prototype, {
      * них в базе осмысленные: «Проверка объявлений», «Кошелёк и
      * платежи», «Споры по сделкам».
      */
-    get displayName() {
+    get computedDisplayName() {
         if (this.coop_kind === "service" && this.name) {
             return this.name;
         }
-        return super.displayName;
+        return super.computedDisplayName;
     },
 
     /**
@@ -133,12 +134,13 @@ patch(Thread.prototype, {
      * открыт — просто меняем выбранную переписку, без перехода: переход
      * поверх самого себя сбрасывает прокрутку ленты.
      */
-    open(options) {
-        if (this.model !== "discuss.channel") {
-            return super.open(...arguments);
-        }
+    // В 20 `Thread.open` у канала зовёт `channel.openChannel()`, а тот —
+    // `_openChannel()`: правда — «открыто, окно не нужно». Выбор переписки
+    // ставим напрямую, а не через `setAsDiscussThread`: тот на телефоне
+    // сам зовёт `open` и замкнулся бы на нас.
+    _openChannel() {
         const actionService = this.store.env.services.action;
-        this.setAsDiscussThread(false);
+        this.store.discuss.thread = this.thread;
         const openedNow = actionService.currentController?.action?.tag;
         if (openedNow === "coop_messages.messages") {
             return true;
@@ -205,43 +207,11 @@ const HIDDEN_ACTIONS = new Set([
 // всё остальное. Деление делается там, где движок сопоставляет вкладку
 // видам переписки: тогда и список, и счётчик, и поиск считают по нему
 // сами.
-patch(Store.prototype, {
-    tabToThreadType(tab) {
-        if (tab === "chat") {
-            return ["chat"];
-        }
-        if (tab === "channel") {
-            return ["channel", "group"];
-        }
-        return super.tabToThreadType(...arguments);
-    },
-});
-
-// Служебные переписки — своей вкладкой.
-//
-// Решение владельца 16 сентября 2026: «служебные можно вынести в
-// отдельную вкладку». Это переписки с самой платформой — помощник,
-// извещения системы; человеческого разговора в них нет, а в общем
-// списке они стоят наравне с живыми людьми и занимают верх, потому что
-// пишут чаще всех.
-//
-// Вид переписки у нас свой (`coop_kind`), а движок отбирает вкладки по
-// своему виду канала — сопоставлением их не связать. Поэтому список
-// для этой вкладки собирается здесь, а из остальных вкладок служебные
-// убираются.
-const SERVICE_TAB = "coop_service";
-
-patch(MessagingMenu.prototype, {
-    get threads() {
-        if (this.store.discuss.activeTab !== SERVICE_TAB) {
-            return super.threads.filter((thread) => thread.coop_kind !== "service");
-        }
-        const freshness = (thread) => thread.newestPersistentOfAllMessage?.datetime || 0;
-        return Object.values(this.store.Thread.records)
-            .filter((thread) => thread.coop_kind === "service" && thread.displayToSelf)
-            .sort((a, b) => (freshness(b) > freshness(a) ? 1 : -1));
-    },
-});
+// В 20 переложить нечего: вкладки меню — записи `MessagingMenuTab`, состав
+// вкладки задают сервер (`_get_menu_tab_domain` контроллера меню) и
+// `includesChannel` на клиенте, а `tabToThreadType` и `threads` у меню
+// больше нет. Вкладки «Личные» / «Групповые» и «Служебные» вернутся
+// правкой контроллера на питоне — открытый вопрос этапа Э3б.
 
 // Слова движка на экран не пускаем.
 //
@@ -274,11 +244,11 @@ for (const [id, label] of Object.entries(ACTION_LABELS)) {
 export class CoopMessages extends Component {
     static template = "coop_messages.Messages";
     static components = { Thread: ThreadComponent, Composer, ActionList, Dropdown };
-    static props = ["*"];
+    props = useProps();
 
     setup() {
         this.store = useService("mail.store");
-        this.action = usePlugin(ActionManagerPlugin);
+        this.action = usePlugin(ActionPlugin);
         this.orm = useService("orm");
         this.ui = usePlugin(UIPlugin);
         this.categories = CATEGORIES;
@@ -318,7 +288,11 @@ export class CoopMessages extends Component {
         // открыт — личный диалог, канал или почтовый ящик. Свои кнопки
         // означали бы, что после обновления половина возможностей
         // пропала, и никто бы этого не заметил.
-        this.threadActions = useThreadActions({ thread: () => this.activeThread });
+        this.threadActions = useThreadActions({ thread: () => this.activeThread?.thread });
+        // В 20 список действий принимает реактивное значение, а не массив:
+        // `ActionList` подписывается на него сам (mail/core/common/action_list).
+        this.quickActionsList = computed(() => [this.quickActions]);
+        this.moreActionsList = computed(() => [this.moreActions]);
         // У ленты уже есть готовый вид переписки — цветные пузыри,
         // хвостик, свои сообщения справа. Он не самодельный, а встроен в
         // движок, только включается признаком `inChatWindow` — тем же,
@@ -329,12 +303,12 @@ export class CoopMessages extends Component {
         // выше) стали прямыми кнопками именно здесь, не трогая обычный
         // Discuss.
         useSubEnv({ inChatWindow: true, inCoopMessages: true });
-        this.newDialogRef = useRef("newDialog");
+        this.newDialogRef = signal.ref();
         // Клик мимо панели закрывает её — тот же приём, что у popover'ов
         // в макете (вложение, эмодзи): открытая панель поверх списка
         // переписок не должна требовать отдельной кнопки «закрыть».
-        useExternalListener(window, "click", (ev) => {
-            if (this.state.newDialogOpen && !this.newDialogRef.el?.contains(ev.target)) {
+        useListener(window, "click", (ev) => {
+            if (this.state.newDialogOpen && !this.newDialogRef()?.contains(ev.target)) {
                 this.state.newDialogOpen = false;
             }
         });
@@ -365,8 +339,7 @@ export class CoopMessages extends Component {
         // пустой список при полной базе выглядит как «переписок нет», и
         // человек поверит. Поэтому в журнал браузера.
         onMounted(() => {
-            this.store.channels
-                .fetch()
+            this.loadChannels()
                 .then(() => this.openRequestedDialog())
                 .catch((ошибка) => {
                     console.warn("[сообщения] переписки не загрузились:", ошибка);
@@ -391,7 +364,38 @@ export class CoopMessages extends Component {
      * работает.
      */
     get threads() {
-        return this.store.allChannels.filter((thread) => thread.displayToSelf);
+        // В 20 набора всех переписок у хранилища нет: каналы живут во
+        // вкладках меню чатов (`MessagingMenuTab.channels`), и состав
+        // вкладки движок ведёт сам — на него подписка работает так же.
+        const menu = this.store.messagingMenu;
+        const seen = new Set();
+        const out = [];
+        for (const tab of [menu?.chatTab, menu?.channelTab]) {
+            for (const channel of tab?.channels || []) {
+                if (!seen.has(channel.id)) {
+                    seen.add(channel.id);
+                    out.push(channel);
+                }
+            }
+        }
+        return out;
+    }
+
+    /**
+     * Догрузить переписки целиком: вкладка меню отдаёт их страницами по
+     * двадцать (`/mail/messaging_menu/discuss.channel/load_more`), а здесь
+     * нужен весь список — по нему считаются чипы и идёт поиск.
+     */
+    async loadChannels() {
+        const menu = this.store.messagingMenu;
+        for (const tab of [menu?.chatTab, menu?.channelTab]) {
+            for (let page = 0; tab && page < 50; page++) {
+                if (!["new", "idle"].includes(tab.getLoadStatus())) {
+                    break;
+                }
+                await tab.loadMore();
+            }
+        }
     }
 
     /**
@@ -512,8 +516,8 @@ export class CoopMessages extends Component {
     }
 
     get activeThread() {
-        const current = this.store.discuss.thread;
-        if (current?.model === "discuss.channel" && current.displayToSelf) {
+        const current = this.store.discuss.thread?.channel;
+        if (current?.self_member_id) {
             return current;
         }
         return this.visibleThreads[0];
@@ -521,7 +525,7 @@ export class CoopMessages extends Component {
 
     /** «В сети» / «был(а) недавно» под именем в личной переписке. */
     onlineStatus(thread) {
-        return thread.correspondent?.im_status;
+        return thread.correspondent?.persona?.im_status;
     }
 
     /**
@@ -534,7 +538,7 @@ export class CoopMessages extends Component {
      * переписку как открытую в хранилище, как это делает сам Discuss.
      */
     select(thread) {
-        this.store.discuss.thread = thread;
+        this.store.discuss.thread = thread.thread;
         this.state.jump++;
     }
 

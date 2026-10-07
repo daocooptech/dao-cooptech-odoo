@@ -10,7 +10,7 @@
   <div class="o_coop_messages" t-att-class="this.props.className">
     <div class="o_coop_tabs o_coop_tabs_page">
       <span class="o_coop_tab active">Сообщения</span>
-      <div class="o_coop_new_dialog" t-ref="newDialog">
+      <div class="o_coop_new_dialog" t-ref="this.newDialogRef">
         <button type="button" class="o_coop_new_dialog_btn"
                 t-on-click="() => this.toggleNewDialog()">
           <span class="o_coop_new_dialog_plus">+</span> Добавить диалог
@@ -42,7 +42,7 @@
     <div class="o_coop_msg_search">
       <input type="text" class="o_coop_input"
              placeholder="Найти по диалогам и сообщениям..."
-             t-custom-model="this.state.search"/>
+             t-model.proxy="this.state.search"/>
     </div>
 
     <div class="o_coop_chips o_coop_msg_chips">
@@ -113,7 +113,7 @@
         </div>
       </div>
 
-      <div class="o_coop_chat_pane" t-ref="pane">
+      <div class="o_coop_chat_pane">
         <t t-if="this.activeThread">
           <div class="o_coop_chat_head">
             <img class="o_coop_chat_avatar" t-att-src="this.activeThread.avatarUrl" alt=""
@@ -127,7 +127,7 @@
                   <t t-out="this.onlineStatus(this.activeThread) === 'online' ? 'в сети' : 'был(а) недавно'"/>
                   <t t-if="this.activeThread.coop_subtitle"> · </t>
                 </t>
-                <t t-out="this.activeThread.coop_subtitle"/>
+                <t t-out="this.activeThread.coop_subtitle or ''"/>
               </div>
             </div>
             <button t-if="this.activeThread.coop_link_label" type="button"
@@ -144,21 +144,23 @@
               движок сам убирает под многоточие.
             -->
             <div class="o_coop_chat_actions">
-              <ActionList actions="[this.quickActions]" inline="true" thread="this.activeThread"/>
+              <ActionList actions="this.quickActionsList" inline="true"/>
               <Dropdown t-if="this.moreActions.length" position="'bottom-end'">
                 <button type="button" class="o_coop_chat_more"
                         aria-label="Ещё действия" title="Ещё действия">⋯</button>
                 <t t-set-slot="content">
-                  <ActionList actions="[this.moreActions]" dropdown="true"
-                              thread="this.activeThread"/>
+                  <ActionList actions="this.moreActionsList" dropdown="true"/>
                 </t>
               </Dropdown>
             </div>
           </div>
 
-          <Thread thread="this.activeThread" t-key="this.activeThread.localId"
+          <!-- В 20 лента и поле ввода берут переписку (`mail.thread`), а
+               список здесь — каналы (`discuss.channel`): у канала она в
+               `thread`. -->
+          <Thread thread="this.activeThread.thread" t-key="this.activeThread.thread.localId"
                   jumpPresent="this.state.jump"/>
-          <Composer composer="this.activeThread.composer" t-key="this.activeThread.localId"
+          <Composer composer="this.activeThread.thread.composer" t-key="this.activeThread.thread.localId"
                     autofocus="true" type="'message'"
                     onPostCallback.bind="() => this.state.jump++"/>
         </t>
@@ -183,7 +185,6 @@
           ← К переписке
         </button>
         <t t-component="this.threadActions.activeAction.actionPanelComponent"
-           thread="this.activeThread"
            t-props="this.threadActions.activeAction.actionPanelComponentProps"/>
       </div>
     </div>
@@ -204,7 +205,7 @@
   группы, и каналы. Какого вида чат на самом деле, видно по строке
   списка, а не по вкладке.
 -->
-<t t-name="coop_messages.MessagingMenuHeader" t-inherit="mail.MessagingMenu.content" t-inherit-mode="extension">
+<t t-name="coop_messages.MessagingMenuHeader" t-inherit="mail.MessagingMenuItem" t-inherit-mode="extension">
   <!--
     Здесь были два правила, переименовывавшие вкладки всплывающего меню
     сообщений: «Личные», «Групповые», «Служебные». Они целились в
@@ -223,7 +224,9 @@
     одну кучу, и по строке было не понять, чат это сделки или общий
     разговор — а в самом разделе «Сообщения» они разложены чипами.
   -->
-  <xpath expr="//t[@name='threads']//t[@t-set-slot='name']" position="inside">
+  <!-- В 20 строка меню — отдельный компонент `MessagingMenuItem`, и
+       переписка у неё берётся из сообщения: `this.message.thread`. -->
+  <xpath expr="//t[@name='itemName']" position="after">
     <!-- Имя переменной латиницей: разбор выражений в шаблонах движка
          русских имён не принимает и отказывает словами «could not
          tokenize», не называя причины. В коде на русском можно, в
@@ -232,8 +235,8 @@
       'deal': 'Сделка', 'project': 'Проект',
       'community': 'Сообщество', 'org': 'Организация',
     }"/>
-    <span t-if="coopKindLabels[thread.coop_kind]" class="o_coop_menu_kind"
-          t-out="coopKindLabels[thread.coop_kind]"/>
+    <span t-if="coopKindLabels[this.message?.thread?.channel?.coop_kind]" class="o_coop_menu_kind"
+          t-out="coopKindLabels[this.message?.thread?.channel?.coop_kind]"/>
   </xpath>
 
 </t>
