@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Оператор платформы — демо-реквизиты (решение 445 п. 15): «всё
+       должно выглядеть как действующая платформа», но реквизиты
+       вымышленные. ИНН и ОГРН в правильном формате (Москва, 2026), а
+       контрольные цифры у обоих заведомо неверны: с реальной
+       организацией такие номера совпасть не могут.
+
+       На боевой 19 карточку компании правили руками, и в базе с нуля она
+       оставалась «My Company» без правовой формы и номера — объявление
+       узла федерации уходило с пустыми legal_form и reg_number
+       (находка 432 п. 2). -->
+
+  <record id="base.main_company" model="res.company">
+    <field name="name">ДАО КООПТЕХ — рабочая группа</field>
+    <field name="country_id" ref="base.ru"/>
+    <field name="city">Москва</field>
+  </record>
+
+  <record id="base.main_partner" model="res.partner">
+    <field name="name">ДАО КООПТЕХ — рабочая группа</field>
+    <field name="is_company" eval="True"/>
+    <field name="coop_legal_form_id" ref="coop_base.legal_form_platform"/>
+    <field name="country_id" ref="base.ru"/>
+    <field name="city">Москва</field>
+    <!-- ИНН в карточку (`vat`) не пишется: движок проверяет его по
+         контрольной сумме и вымышленный отвергает. Он есть в реквизитах
+         документов ниже; ОГРН такой проверки не проходит. -->
+    <field name="coop_ogrn">1267700493812</field>
+  </record>
+
+  <record id="param_legal_inn" model="ir.config_parameter">
+    <field name="key">coop_website.legal_inn</field>
+    <field name="value">7714592630</field>
+  </record>
+  <record id="param_legal_ogrn" model="ir.config_parameter">
+    <field name="key">coop_website.legal_ogrn</field>
+    <field name="value">1267700493812</field>
+  </record>
+  <record id="param_legal_address" model="ir.config_parameter">
+    <field name="key">coop_website.legal_address</field>
+    <field name="value">125009, г. Москва, Сетевой пер., д. 3, офис 12</field>
+  </record>
+
+</odoo>

@@ -369,24 +369,24 @@
             </svg>
             <div class="lx-table-wrap">
               <table class="lx-table lx-links">
-                <thead><tr><th scope="col">Кто ↔ кто</th><th scope="col">Что связывает</th><th scope="col">Как рассчитываются</th><th scope="col">Где</th><th scope="col">На схеме</th><th scope="col">Статус</th></tr></thead>
+                <thead><tr><th scope="col">Кто ↔ кто</th><th scope="col">Что связывает</th><th scope="col">Как рассчитываются</th><th scope="col">Где</th><th scope="col">На схеме</th></tr></thead>
                 <tbody>
-                  <tr><th scope="row">Человек ↔ кооператив</th><td data-label="Связь">членство</td><td data-label="Расчёт">паевой взнос; кооперативные выплаты деньгами или в пай решением собрания</td><td data-label="Где">Организации, Кошелёк</td><td data-label="На схеме">3</td><td data-label="Статус"><span class="lx-st lx-st-live">работает</span></td></tr>
-                  <tr><th scope="row">Работник ↔ организация</th><td data-label="Связь">вакансия</td><td data-label="Расчёт">трудовой договор, подряд, трудовое участие в артели, токены в ДАО; в кооперативе остаток — в пай по желанию</td><td data-label="Где">Вакансии</td><td data-label="На схеме">4, 6, 7</td><td data-label="Статус"><span class="lx-st lx-st-live">работает</span></td></tr>
-                  <tr><th scope="row">Люди и организации ↔ проект</th><td data-label="Связь">вклад</td><td data-label="Расчёт">деньги, труд, техника, материалы, помещение, знания → доля; при провале — возврат</td><td data-label="Где">Проекты</td><td data-label="На схеме">11, 12, 13</td><td data-label="Статус"><span class="lx-st lx-st-live">работает</span></td></tr>
-                  <tr><th scope="row">Человек и организации ↔ НКО</th><td data-label="Связь">пожертвование, волонтёрство, грант</td><td data-label="Расчёт">без доли и пая</td><td data-label="Где">Проекты, Организации</td><td data-label="На схеме">5, 10</td><td data-label="Статус"><span class="lx-st lx-st-live">работает</span></td></tr>
-                  <tr><th scope="row">Участник ↔ участник</th><td data-label="Связь">сделка</td><td data-label="Расчёт">продажа, аренда, обмен, дар; график платежей, акт, отзывы</td><td data-label="Где">Сделки, Ресурсы</td><td data-label="На схеме">1</td><td data-label="Статус"><span class="lx-st lx-st-live">работает</span></td></tr>
-                  <tr><th scope="row">Соседи ↔ поставщик</th><td data-label="Связь">совместная закупка</td><td data-label="Расчёт">оптовая цена; оргсбор отдельной строкой — делится между организатором и платформой</td><td data-label="Где">Совместные закупки</td><td data-label="На схеме">2</td><td data-label="Статус"><span class="lx-st lx-st-live">работает</span></td></tr>
-                  <tr><th scope="row">Участник ↔ участник</th><td data-label="Связь">бартер</td><td data-label="Расчёт">вещь за вещь, цепочки на троих; для налога мена — две продажи</td><td data-label="Где">Бартер</td><td data-label="На схеме">1</td><td data-label="Статус"><span class="lx-st lx-st-live">работает</span></td></tr>
-                  <tr><th scope="row">Постоянные партнёры</th><td data-label="Связь">взаимный кредит</td><td data-label="Расчёт">долг по линии, изменения подтверждают обе стороны; гасится деньгами или зачётом</td><td data-label="Где">Кошелёк</td><td data-label="На схеме">9</td><td data-label="Статус"><span class="lx-st lx-st-live">работает</span></td></tr>
-                  <tr><th scope="row">Трое и больше</th><td data-label="Связь">взаимозачёт по кругу</td><td data-label="Расчёт">долги гасятся по кольцу, когда подписали все; только внутри одной страны</td><td data-label="Где">Кошелёк</td><td data-label="На схеме">9</td><td data-label="Статус"><span class="lx-st lx-st-live">работает</span></td></tr>
-                  <tr><th scope="row">Несколько хозяйств</th><td data-label="Связь">целевая программа</td><td data-label="Расчёт">общий фонд, техника, склад; каждый самостоятелен</td><td data-label="Где">Целевые программы ПК</td><td data-label="На схеме">8</td><td data-label="Статус"><span class="lx-st lx-st-live">работает</span></td></tr>
-                  <tr><th scope="row">Держатель требования ↔ участник</th><td data-label="Связь">токен требования, уступка</td><td data-label="Расчёт">право на товар к сроку переходит; должник уведомляется</td><td data-label="Где">Токеномика</td><td data-label="На схеме">—</td><td data-label="Статус"><span class="lx-st lx-st-live">работает</span></td></tr>
-                  <tr><th scope="row">Инициатор ↔ вкладчики пула</th><td data-label="Связь">пул проекта</td><td data-label="Расчёт">доля выручки с потолком; в монете или в рублях</td><td data-label="Где">DEX биржа → Пулы проектов</td><td data-label="На схеме">13</td><td data-label="Статус"><span class="lx-st lx-st-live">работает</span></td></tr>
-                  <tr><th scope="row">Организация ↔ кооператив</th><td data-label="Связь">членство юрлица</td><td data-label="Расчёт">пай организации в потребительском обществе</td><td data-label="Где">Организации</td><td data-label="На схеме">8</td><td data-label="Статус"><span class="lx-st lx-st-work">готовится</span></td></tr>
-                  <tr><th scope="row">Организации на разных серверах</th><td data-label="Связь">сделка и кредит между серверами</td><td data-label="Расчёт">в рублях; лимит открывает кредитор</td><td data-label="Где">—</td><td data-label="На схеме">14</td><td data-label="Статус"><span class="lx-st lx-st-work">готовится</span></td></tr>
-                  <tr><th scope="row">Резидент РФ ↔ нерезидент</th><td data-label="Связь">внешнеторговый контракт</td><td data-label="Расчёт">перевод через банк, аккредитив; криптовалютой — нельзя</td><td data-label="Где">Международные сделки</td><td data-label="На схеме">—</td><td data-label="Статус"><span class="lx-st lx-st-work">работает частично</span></td></tr>
-                  <tr><th scope="row">Участник из страны перечня 430-р</th><td data-label="Связь">—</td><td data-label="Расчёт">сделки временно недоступны</td><td data-label="Где">—</td><td data-label="На схеме">—</td><td data-label="Статус"><span class="lx-st lx-st-info">ограничение</span></td></tr>
+                  <tr><th scope="row">Человек ↔ кооператив</th><td data-label="Связь">членство</td><td data-label="Расчёт">паевой взнос; кооперативные выплаты деньгами или в пай решением собрания</td><td data-label="Где">Организации, Кошелёк</td><td data-label="На схеме">3</td></tr>
+                  <tr><th scope="row">Работник ↔ организация</th><td data-label="Связь">вакансия</td><td data-label="Расчёт">трудовой договор, подряд, трудовое участие в артели, токены в ДАО; в кооперативе остаток — в пай по желанию</td><td data-label="Где">Вакансии</td><td data-label="На схеме">4, 6, 7</td></tr>
+                  <tr><th scope="row">Люди и организации ↔ проект</th><td data-label="Связь">вклад</td><td data-label="Расчёт">деньги, труд, техника, материалы, помещение, знания → доля; при провале — возврат</td><td data-label="Где">Проекты</td><td data-label="На схеме">11, 12, 13</td></tr>
+                  <tr><th scope="row">Человек и организации ↔ НКО</th><td data-label="Связь">пожертвование, волонтёрство, грант</td><td data-label="Расчёт">без доли и пая</td><td data-label="Где">Проекты, Организации</td><td data-label="На схеме">5, 10</td></tr>
+                  <tr><th scope="row">Участник ↔ участник</th><td data-label="Связь">сделка</td><td data-label="Расчёт">продажа, аренда, обмен, дар; график платежей, акт, отзывы</td><td data-label="Где">Сделки, Ресурсы</td><td data-label="На схеме">1</td></tr>
+                  <tr><th scope="row">Соседи ↔ поставщик</th><td data-label="Связь">совместная закупка</td><td data-label="Расчёт">оптовая цена; оргсбор отдельной строкой — делится между организатором и платформой</td><td data-label="Где">Совместные закупки</td><td data-label="На схеме">2</td></tr>
+                  <tr><th scope="row">Участник ↔ участник</th><td data-label="Связь">бартер</td><td data-label="Расчёт">вещь за вещь, цепочки на троих; для налога мена — две продажи</td><td data-label="Где">Бартер</td><td data-label="На схеме">1</td></tr>
+                  <tr><th scope="row">Постоянные партнёры</th><td data-label="Связь">взаимный кредит</td><td data-label="Расчёт">долг по линии, изменения подтверждают обе стороны; гасится деньгами или зачётом</td><td data-label="Где">Кошелёк</td><td data-label="На схеме">9</td></tr>
+                  <tr><th scope="row">Трое и больше</th><td data-label="Связь">взаимозачёт по кругу</td><td data-label="Расчёт">долги гасятся по кольцу, когда подписали все; только внутри одной страны</td><td data-label="Где">Кошелёк</td><td data-label="На схеме">9</td></tr>
+                  <tr><th scope="row">Несколько хозяйств</th><td data-label="Связь">целевая программа</td><td data-label="Расчёт">общий фонд, техника, склад; каждый самостоятелен</td><td data-label="Где">Целевые программы ПК</td><td data-label="На схеме">8</td></tr>
+                  <tr><th scope="row">Держатель требования ↔ участник</th><td data-label="Связь">токен требования, уступка</td><td data-label="Расчёт">право на товар к сроку переходит; должник уведомляется</td><td data-label="Где">Токеномика</td><td data-label="На схеме">—</td></tr>
+                  <tr><th scope="row">Инициатор ↔ вкладчики пула</th><td data-label="Связь">пул проекта</td><td data-label="Расчёт">доля выручки с потолком; в монете или в рублях</td><td data-label="Где">DEX биржа → Пулы проектов</td><td data-label="На схеме">13</td></tr>
+                  <tr><th scope="row">Организация ↔ кооператив</th><td data-label="Связь">членство юрлица</td><td data-label="Расчёт">пай организации в потребительском обществе</td><td data-label="Где">Организации</td><td data-label="На схеме">8</td></tr>
+                  <tr><th scope="row">Организации на разных серверах</th><td data-label="Связь">сделка и кредит между серверами</td><td data-label="Расчёт">в рублях; лимит открывает кредитор</td><td data-label="Где">—</td><td data-label="На схеме">14</td></tr>
+                  <tr><th scope="row">Резидент РФ ↔ нерезидент</th><td data-label="Связь">внешнеторговый контракт</td><td data-label="Расчёт">перевод через банк, аккредитив; криптовалютой — нельзя</td><td data-label="Где">Международные сделки</td><td data-label="На схеме">—</td></tr>
+                  <tr><th scope="row">Участник из страны перечня 430-р</th><td data-label="Связь">—</td><td data-label="Расчёт">сделки временно недоступны</td><td data-label="Где">—</td><td data-label="На схеме">—</td></tr>
                 </tbody>
               </table>
             </div>
@@ -411,7 +411,6 @@
               </defs>
               <g class="is-work" transform="translate(20 40)">
                 <rect class="lx-box" width="240" height="270" rx="14"/>
-                <rect class="lx-pill" x="16" y="14" width="92" height="22" rx="11"/><text class="lx-pill-t" x="62" y="29" text-anchor="middle">в работе</text>
                 <text class="lx-title" x="16" y="62">Кооператив</text><text class="lx-sub" x="16" y="80">со своим сервером</text>
                 <text class="lx-mono" x="16" y="100">did:web:coop.example</text>
                 <rect class="lx-layer" x="16" y="116" width="208" height="30" rx="8"/><text class="lx-layer-t" x="28" y="136">Учёт: Odoo / Rudoo</text>
@@ -421,7 +420,6 @@
               </g>
               <g class="is-live" transform="translate(360 40)">
                 <rect class="lx-box" width="240" height="270" rx="14"/>
-                <rect class="lx-pill" x="16" y="14" width="92" height="22" rx="11"/><text class="lx-pill-t" x="62" y="29" text-anchor="middle">работает</text>
                 <text class="lx-title" x="16" y="62">daocoop.tech</text><text class="lx-sub" x="16" y="80">общий сервер сети</text>
                 <text class="lx-mono" x="16" y="100">did:web:daocoop.tech</text>
                 <rect class="lx-layer" x="16" y="116" width="208" height="30" rx="8"/><text class="lx-layer-t" x="28" y="136">Учёт: Odoo 19 / Rudoo</text>
@@ -431,7 +429,6 @@
               </g>
               <g class="is-plan" transform="translate(700 40)">
                 <rect class="lx-box" width="240" height="270" rx="14"/>
-                <rect class="lx-pill" x="16" y="14" width="92" height="22" rx="11"/><text class="lx-pill-t" x="62" y="29" text-anchor="middle">в планах</text>
                 <text class="lx-title" x="16" y="62">Организация</text><text class="lx-sub" x="16" y="80">на 1С или Битрикс24</text>
                 <text class="lx-mono" x="16" y="100">did:web:org.example</text>
                 <rect class="lx-layer" x="16" y="116" width="208" height="30" rx="8"/><text class="lx-layer-t" x="28" y="136">Учёт: 1С / Битрикс24</text>
@@ -446,18 +443,16 @@
                 <rect class="lx-box" x="20" y="340" width="580" height="60" rx="14"/>
                 <text class="lx-title-s" x="40" y="365">Сделка между организациями разных серверов</text>
                 <text class="lx-sub" x="40" y="386">У неё нет хозяина: она действует, когда подписали обе стороны</text>
-                <rect class="lx-pill" x="492" y="352" width="92" height="22" rx="11"/><text class="lx-pill-t" x="538" y="367" text-anchor="middle">в работе</text>
               </g>
               <g class="is-plan">
                 <rect class="lx-box" x="620" y="340" width="320" height="60" rx="14"/>
-                <text class="lx-title-s" x="640" y="365">Человек</text><text class="lx-sub" x="640" y="386">Входит логином; личный ключ did:key — в планах</text>
+                <text class="lx-title-s" x="640" y="365">Человек</text><text class="lx-sub" x="640" y="386">Входит логином</text>
               </g>
               <text class="lx-band-label" x="20" y="436">ЧТО ХОДИТ МЕЖДУ СЕРВЕРАМИ</text>
               <g transform="translate(20 448)"><rect class="lx-box" width="280" height="112" rx="14"/><text class="lx-title-s" x="18" y="34">Всем соседям</text><text class="lx-sub" x="18" y="62">Объявления, каталог, отзывы —</text><text class="lx-sub" x="18" y="80">без личных данных</text></g>
               <g transform="translate(340 448)"><rect class="lx-box" width="280" height="112" rx="14"/><text class="lx-title-s" x="18" y="34">Только сторонам сделки</text><text class="lx-sub" x="18" y="62">Условия, акты, переписка — по</text><text class="lx-sub" x="18" y="80">запросу с подписью читателя</text></g>
               <g transform="translate(660 448)"><rect class="lx-box" width="280" height="112" rx="14"/><text class="lx-title-s" x="18" y="34">Не покидает сервер</text><text class="lx-sub" x="18" y="62">Паспорт, адреса, документы.</text><text class="lx-sub" x="18" y="80">Вложения шифром — в планах</text></g>
             </svg>
-            <p class="lx-legend d-none d-md-block"><span class="lx-st lx-st-live">работает</span> <span class="lx-st lx-st-work">в работе</span> <span class="lx-st lx-st-plan">в планах</span></p>
 
             <div class="lx-grid lx-grid-2 lx-arch oe_structure" id="oe_structure_coop_arch_parts">
               <details class="lx-card" open="open">
@@ -554,16 +549,16 @@ GET /federation/log?after=-1</pre>
             <h3 class="lx-h3">Где мы сейчас</h3>
             <div class="lx-table-wrap">
               <table class="lx-table">
-                <thead><tr><th scope="col">Шаг</th><th scope="col">Что</th><th scope="col">Состояние</th></tr></thead>
+                <thead><tr><th scope="col">Шаг</th><th scope="col">Что</th></tr></thead>
                 <tbody>
-                  <tr><th scope="row">0</th><td data-label="Что">эталон протокола</td><td data-label="Состояние"><span class="lx-st lx-st-live">готово</span></td></tr>
-                  <tr><th scope="row">1</th><td data-label="Что">узел отвечает</td><td data-label="Состояние"><span class="lx-st lx-st-live">работает на daocoop.tech с 28.09.2026</span></td></tr>
-                  <tr><th scope="row">2</th><td data-label="Что">узлы читают друг друга</td><td data-label="Состояние"><span class="lx-st lx-st-live">работает: стенд читает боевую</span></td></tr>
-                  <tr><th scope="row">3</th><td data-label="Что">сделка через два узла</td><td data-label="Состояние"><span class="lx-st lx-st-work">в работе</span></td></tr>
-                  <tr><th scope="row">4</th><td data-label="Что">взаимный кредит и зачёт между узлами (в рублях)</td><td data-label="Состояние"><span class="lx-st lx-st-work">следующий</span></td></tr>
-                  <tr><th scope="row">5</th><td data-label="Что">каталог по сети</td><td data-label="Состояние"><span class="lx-st lx-st-plan">в планах</span></td></tr>
-                  <tr><th scope="row">6</th><td data-label="Что">членство и совместная собственность</td><td data-label="Состояние"><span class="lx-st lx-st-plan">в планах</span></td></tr>
-                  <tr><th scope="row">7</th><td data-label="Что">внешние узлы: ЕАЭС первыми, Китай вторым; ЕС и США — только каталог</td><td data-label="Состояние"><span class="lx-st lx-st-plan">в планах</span></td></tr>
+                  <tr><th scope="row">0</th><td data-label="Что">эталон протокола</td></tr>
+                  <tr><th scope="row">1</th><td data-label="Что">узел отвечает</td></tr>
+                  <tr><th scope="row">2</th><td data-label="Что">узлы читают друг друга</td></tr>
+                  <tr><th scope="row">3</th><td data-label="Что">сделка через два узла</td></tr>
+                  <tr><th scope="row">4</th><td data-label="Что">взаимный кредит и зачёт между узлами (в рублях)</td></tr>
+                  <tr><th scope="row">5</th><td data-label="Что">каталог по сети</td></tr>
+                  <tr><th scope="row">6</th><td data-label="Что">членство и совместная собственность</td></tr>
+                  <tr><th scope="row">7</th><td data-label="Что">внешние узлы: ЕАЭС первыми, Китай вторым; ЕС и США — только каталог</td></tr>
                 </tbody>
               </table>
             </div>

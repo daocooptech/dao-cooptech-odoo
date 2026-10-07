@@ -301,24 +301,31 @@ class CoopWallet(models.Model):
         self.ensure_one()
         self.partner_id.coop_require_level('identity', action)
 
+    def _open_operation(self, mode, title):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': title,
+            'res_model': 'coop.wallet.operation',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_wallet_id': self.id, 'default_mode': mode},
+        }
+
     def action_crypto_send(self):
         self._require_identity(_('отправить перевод'))
-        raise UserError(_(
-            'Отправка в сеть пока не подключена: платформа не хранит ключей, '
-            'и транзакцию подписывает сам участник. Сети подключаются в '
-            'справочнике сетей.'))
+        return self._open_operation('send', _('Отправить'))
+
+    def action_crypto_receive(self):
+        self.ensure_one()
+        return self._open_operation('receive', _('Получить'))
 
     def action_fiat_topup(self):
         self._require_identity(_('пополнить кошелёк'))
-        raise UserError(_(
-            'Пополнение пойдёт через платёжного агрегатора — платформа денег '
-            'не принимает. Агрегатор ещё не подключён.'))
+        return self._open_operation('topup', _('Пополнить'))
 
     def action_fiat_withdraw(self):
         self._require_identity(_('вывести средства'))
-        raise UserError(_(
-            'Вывод пойдёт через платёжного агрегатора на привязанный способ '
-            'оплаты. Агрегатор ещё не подключён.'))
+        return self._open_operation('withdraw', _('Вывести'))
 
 
 class CoopWalletMovement(models.Model):

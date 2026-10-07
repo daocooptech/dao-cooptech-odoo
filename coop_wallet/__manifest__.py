@@ -26,6 +26,7 @@
         'data/coop_networks.xml',
         'data/coop_settlement_methods.xml',
         'views/coop_wallet_views.xml',
+        'views/coop_wallet_operation_views.xml',
         'security/ir.access.csv',
     ],
     'assets': {

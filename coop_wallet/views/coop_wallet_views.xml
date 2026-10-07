@@ -21,7 +21,7 @@
           <field name="tab" widget="statusbar" options="{'clickable': '1'}"/>
           <button name="action_crypto_send" type="object" string="Отправить"
                   class="btn-primary" invisible="tab != 'crypto'"/>
-          <button name="action_crypto_send" type="object" string="Получить"
+          <button name="action_crypto_receive" type="object" string="Получить"
                   invisible="tab != 'crypto'"/>
           <button name="action_fiat_topup" type="object" string="Пополнить"
                   class="btn-primary" invisible="tab != 'fiat'"/>

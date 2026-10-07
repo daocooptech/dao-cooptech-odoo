@@ -31,3 +31,4 @@ access_coop_settlement_method_user,Способы расчёта — чтени�
 access_coop_settlement_method_admin,Способы расчёта — ведение,coop.settlement.method,coop_base.group_coop_platform,crud,
 rule_share_account_board,Паевые счета своего кооператива — правление,coop.share.account,coop_base.group_coop_board,r,"[('cooperative_id.coop_member_ids', 'any', [('partner_id', '=', user.partner_id.id), ('state', '=', 'active'), ('role', 'in', ('board', 'audit'))])]"
 rule_share_account_audit,Паевые счета своего кооператива — ревизия,coop.share.account,coop_base.group_coop_audit,r,"[('cooperative_id.coop_member_ids', 'any', [('partner_id', '=', user.partner_id.id), ('state', '=', 'active'), ('role', 'in', ('board', 'audit'))])]"
+access_coop_wallet_operation,Окно операции по кошельку — участник,coop.wallet.operation,base.group_user,crud,

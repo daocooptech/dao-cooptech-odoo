@@ -18,6 +18,8 @@
     'data': [
         'data/coop_admin_rights.xml',
         'data/coop_reference_data.xml',
+        'data/coop_operator_data.xml',
+        'data/coop_showcase_user.xml',
         'data/coop_demo_data.xml',
         'data/coop_people_data.xml',
         'data/coop_load.xml',

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Отправка, получение, пополнение, вывод — одно окно на четыре кнопки
+       кошелька (решение 445 п. 14). -->
+  <record id="view_coop_wallet_operation_form" model="ir.ui.view">
+    <field name="name">coop.wallet.operation.form</field>
+    <field name="model">coop.wallet.operation</field>
+    <field name="arch" type="xml">
+      <form string="Операция по кошельку">
+        <field name="wallet_id" invisible="1"/>
+        <field name="mode" invisible="1"/>
+        <field name="currency_id" invisible="1"/>
+
+        <group invisible="mode != 'send'">
+          <field name="asset_id" required="mode == 'send'"
+                 options="{'no_create': True, 'no_open': True}"/>
+          <field name="available_quantity" invisible="not asset_id"/>
+          <field name="quantity" required="mode == 'send'"/>
+          <field name="peer_partner_id" options="{'no_create': True}"/>
+          <field name="peer_address" required="mode == 'send'"/>
+        </group>
+
+        <div invisible="mode != 'receive'">
+          <p>Переводите на эти адреса — каждый в своей сети. Монета,
+            отправленная в чужую сеть, не дойдёт.</p>
+          <field name="address_ids" readonly="1" nolabel="1">
+            <list>
+              <field name="network_id"/>
+              <field name="address"/>
+            </list>
+          </field>
+        </div>
+
+        <group invisible="mode not in ('topup', 'withdraw')">
+          <field name="method_id" required="mode in ('topup', 'withdraw')"
+                 options="{'no_create': True, 'no_open': True}"/>
+          <field name="fiat_available" invisible="mode != 'withdraw'"/>
+          <field name="amount" required="mode in ('topup', 'withdraw')"/>
+        </group>
+
+        <footer>
+          <button name="action_confirm" type="object" string="Отправить"
+                  class="btn-primary" invisible="mode != 'send'"/>
+          <button name="action_confirm" type="object" string="Пополнить"
+                  class="btn-primary" invisible="mode != 'topup'"/>
+          <button name="action_confirm" type="object" string="Вывести"
+                  class="btn-primary" invisible="mode != 'withdraw'"/>
+          <button string="Закрыть" special="cancel" invisible="mode != 'receive'"/>
+          <button string="Отмена" special="cancel" invisible="mode == 'receive'"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+</odoo>

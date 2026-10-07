@@ -171,8 +171,11 @@ class CoopFedIdentity(models.Model):
             'protocols': ['https-pull'],
             'jurisdiction': {
                 'country': (self.country_id.code or '').upper(),
-                'legal_form': company.coop_legal_form_id.name
-                if 'coop_legal_form_id' in company._fields and company.coop_legal_form_id else '',
+                # Правовая форма — на карточке партнёра компании (`coop_orgs`),
+                # у `res.company` такого поля нет: на боевой 19 поле в
+                # объявлении поэтому всегда уходило пустым (находка 432 п. 2).
+                'legal_form': company.partner_id.coop_legal_form_id.name or ''
+                if 'coop_legal_form_id' in company.partner_id._fields else '',
                 'registry': 'ЕГРЮЛ' if self.country_id.code == 'RU' else '',
                 # В 20 поля `res.company.company_registry` нет: берём ОГРН из
                 # карточки компании (`coop_orgs`), если модуль стоит.
