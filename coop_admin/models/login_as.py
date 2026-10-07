@@ -73,14 +73,8 @@ class CoopShell(models.AbstractModel):
         data = super().boot()
         impersonator = request and request.session.get('coop_impersonator_uid')
         if impersonator:
-            name = self.env.user.name or ''
-            parts = name.split()
-            # «Васильева Т. М.»: полное имя не помещается в шапку рядом со
-            # значками и выдавливает страницу вбок.
-            short = ' '.join(parts[:1] + ['%s.' % p[0] for p in parts[1:3]]) if len(parts) > 1 else name
             data['login_as'] = {
-                'name': name,
-                'short': short,
+                'name': self.env.user.name,
                 'back': self.env['res.users'].sudo().browse(impersonator).name,
             }
         return data

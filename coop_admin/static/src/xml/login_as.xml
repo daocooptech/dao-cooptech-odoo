@@ -1,14 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-  <t t-name="coop_admin.LoginAsBadge">
-    <div class="o_coop_login_as" t-if="this.state.info">
-      <span class="o_coop_login_as_text" t-att-title="'Вы вошли как ' + this.state.info.name">
-        <span class="o_coop_login_as_prefix">Вы — </span><b t-out="this.state.info.short"/>
-      </span>
+  <t t-name="coop_admin.LoginAsBar">
+    <div class="o_coop_login_as" t-if="this.state.info" role="status">
+      Вы вошли как <b t-out="this.state.info.name"/>.
       <a class="o_coop_login_as_back" href="/coop/login_back"
-         t-att-title="'Вернуться к учётной записи ' + this.state.info.back">вернуться</a>
+         t-att-title="'Вернуться к учётной записи ' + this.state.info.back">Вернуться</a>
     </div>
+  </t>
+
+  <!--
+    Над содержимым страницы, под шапкой: на всю ширину области раздела.
+    Наследуется от web.WebClient, а не от расширения оболочки: у
+    расширения своего имени нет. Блок o_coop_main к этому шагу уже есть —
+    расширения применяются по порядку модулей, coop_theme раньше.
+  -->
+  <t t-name="coop_admin.WebClient" t-inherit="web.WebClient" t-inherit-mode="extension">
+    <xpath expr="//div[hasclass('o_coop_main')]/CoopLoader" position="before">
+      <CoopLoginAsBar/>
+    </xpath>
   </t>
 
 </templates>

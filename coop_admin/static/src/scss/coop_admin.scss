@@ -121,40 +121,19 @@
   }
 }
 
-// Плашка «Вы вошли как …» — жёлтая, как предупреждение: пока она видна,
-// все действия идут от имени другого человека.
+// Полоса «Вы вошли как …» под шапкой — жёлтая, как предупреждение: пока
+// она видна, все действия идут от имени другого человека.
 .o_coop_login_as {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-right: 8px;
-  padding: 2px 10px;
-  border-radius: 12px;
+  margin: 8px 16px 0;
+  padding: 6px 12px;
+  border-radius: 8px;
   background: var(--warning-bg, #fff3cd);
   color: var(--warning-text, #664d03);
-  font-size: 0.85rem;
-  white-space: nowrap;
-  max-width: 260px;
-  min-width: 0;
-
-  .o_coop_login_as_text {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-width: 0;
-  }
-
-  // Шапка не сжимается (в ней поиск и значки), и на обычном ноутбуке
-  // плашка в полную ширину выдавливала страницу вбок на 44 точки:
-  // остаются фамилия с инициалами и «вернуться».
-  @media (max-width: 1279.98px) {
-    max-width: 170px;
-
-    .o_coop_login_as_prefix {
-      display: none;
-    }
-  }
+  text-align: center;
+  font-size: 0.95rem;
 
   .o_coop_login_as_back {
+    margin-left: 6px;
     font-weight: 600;
     text-decoration: underline;
     color: inherit;
