@@ -122,7 +122,7 @@ export class CoopWallPostFooter extends Component {
     }
 
     get canReact() {
-        return this.props.message.canAddReaction(this.props.thread);
+        return this.props.message.canAddReaction;
     }
 
     reaction(content) {
