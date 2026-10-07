@@ -122,7 +122,7 @@
                                     <td class="R0C2"></td>
                                 </tr>
                             </tr>
-                            <!--t t-foreach="o.mt_contract_id.lines.sorted(key=lambda r: r.sequence, reverse=False)" t-as="line">
+                            <!--t t-foreach="o.mt_contract_id.lines_ids.sorted(key=lambda r: r.sequence, reverse=False)" t-as="line">
                               <tr class="R0">
                                 <td  class="R0C4" colspan="2"><t t-out="line.name"/></td>
                               </tr>
@@ -142,7 +142,7 @@
                             </tr-->
                         </tbody>
                     </table>
-                    <t t-foreach="o.mt_contract_id.lines.sorted(key=lambda r: r.sequence, reverse=False)" t-as="line">
+                    <t t-foreach="o.mt_contract_id.lines_ids.sorted(key=lambda r: r.sequence, reverse=False)" t-as="line">
                         <p class="R0C4"><t t-out="line.name or ''"/></p>
                         <div class="R0C5"><span><t t-out="line.punct or ''"/></span></div>
                     </t>
@@ -564,21 +564,6 @@
         </t>
     </template>
 
-    <record id="paperformat_a4" model="report.paperformat">
-        <field name="name">A4</field>
-        <field name="default" eval="True"/>
-        <field name="format">A4</field>
-        <field name="page_height">0</field>
-        <field name="page_width">0</field>
-        <field name="orientation">Portrait</field>
-        <field name="margin_top">15</field>
-        <field name="margin_bottom">30</field>
-        <field name="margin_left">7</field>
-        <field name="margin_right">7</field>
-        <field name="header_line" eval="False"/>
-        <field name="header_spacing">10</field>
-        <field name="dpi">90</field>
-    </record>
 
     <record id="action_report_contract_customer_order" model="ir.actions.report">
        <field name="name">Договор со спецификацией</field>

@@ -49,6 +49,9 @@
         'views/contract_profile_views.xml',
         'views/contract_documents_views.xml',
         'report/report_contract.xml',
+        'report/report_contract_invoice.xml',
+        'report/report_contract_order.xml',
+        'report/report_contract_order1.xml',
         'security/ir.access.csv',
     ],
     'demo': [
