@@ -7,6 +7,7 @@
         <field name="arch" type="xml">
              <xpath expr="//field[@name='vat']" position="after">
                 <field name="edi"/>
+                <field name="edi_operator"/>
                 <field name="chief_id"/>
             </xpath>
         </field>

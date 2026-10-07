@@ -1,5 +1,6 @@
 from odoo import api, fields, models, _
 import hashlib
+import re
 from odoo.exceptions import UserError
 
 
@@ -22,7 +23,24 @@ class AccountMove(models.Model):
         for s in self:
             hash_object = hashlib.sha1((s.name or '').encode('utf-8'))
             pid = s.partner_id.parent_id or s.partner_id
-            s.edi = 'ON_NSCHFDOPPR_2BM-' + str(pid.edi) + '_' + str(s.company_id.edi) + '_' + hash_object.hexdigest()
+            operator = s.company_id.edi_operator or '2BM'
+            s.edi = 'ON_NSCHFDOPPR_%s_%s_%s' % (
+                self._edi_participant(pid.edi, operator),
+                self._edi_participant(s.company_id.edi, operator),
+                hash_object.hexdigest())
+
+    @staticmethod
+    def _edi_participant(value, operator):
+        """ID участника ЭДО с кодом оператора впереди.
+
+        Полный ID (`2AL-…`) оставляем как есть; голый — дополняем кодом
+        оператора из настроек компании. Прежде код `2BM-` был вшит и ставился
+        только получателю, а у отправителя его не было вовсе.
+        """
+        value = (value or '').strip()
+        if not value or re.match(r'^[0-9A-Z]{3}-', value):
+            return value
+        return '%s-%s' % (operator, value)
 
     def print_upd(self):
         for s in self:
