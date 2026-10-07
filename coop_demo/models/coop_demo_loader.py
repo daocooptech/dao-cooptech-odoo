@@ -25,6 +25,7 @@ from ..data import load_okved
 from ..data import load_accounts
 from ..data import load_vat
 from ..data import load_staff
+from ..data import load_crm
 from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_cessions,
                     load_tokens,
@@ -352,6 +353,9 @@ class CoopDemoLoader(models.AbstractModel):
             load_vat.load_vat_regimes(self.env)
             load_vat.load_companies(self.env)
             load_vat.load_invoices(self.env)
+        # Лиды CRM (решение 450) — последними: их ведут держатели «Сделок»,
+        # которым компании учёта и отделы продаж выданы шагами выше.
+        load_crm.load_crm(self.env)
         return True
 
     def _load_rubrics(self):

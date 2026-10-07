@@ -257,8 +257,15 @@ class CoopDeal(models.Model):
     def create(self, vals_list):
         for values in vals_list:
             if not values.get('number') or values['number'] == _('Черновик'):
-                values['number'] = self.env['ir.sequence'].next_by_code(
-                    'coop.deal') or _('Черновик')
+                # Нумератор — общий на площадку, без отбора по текущей
+                # компании: next_by_code ищет только в ней, и у того, кто
+                # действует из компании учёта своей организации (решение
+                # 449), нумератор не находился — сделка получала
+                # «Черновик», а вторая такая же падала на уникальности.
+                sequence = self.env['ir.sequence'].sudo().search(
+                    [('code', '=', 'coop.deal')], order='company_id', limit=1)
+                values['number'] = (sequence._next() if sequence else False) \
+                    or _('Черновик')
         return super().create(vals_list)
 
     # ── Кто есть кто ─────────────────────────────────────────────────────

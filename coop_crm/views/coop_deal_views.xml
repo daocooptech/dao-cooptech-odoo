@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Откуда сделка: лид CRM — рядом с договором, актом и счётом. -->
+  <record id="view_coop_deal_form_lead" model="ir.ui.view">
+    <field name="name">coop.deal.form.lead</field>
+    <field name="model">coop.deal</field>
+    <field name="inherit_id" ref="coop_deals.view_coop_deal_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//button[@name='%(coop_deals.action_report_deal_act)d']" position="after">
+        <field name="coop_lead_id" invisible="1" groups="sales_team.group_sale_salesman"/>
+        <button name="action_coop_open_lead" type="object" string="Лид"
+                groups="sales_team.group_sale_salesman" invisible="not coop_lead_id"/>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

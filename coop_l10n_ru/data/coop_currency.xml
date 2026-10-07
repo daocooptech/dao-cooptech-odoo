@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Валюта площадки — рубль: см. res.company._coop_platform_rub. -->
+  <function model="res.company" name="_coop_platform_rub"/>
+</odoo>

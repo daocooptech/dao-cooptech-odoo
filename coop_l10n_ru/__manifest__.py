@@ -17,6 +17,7 @@
     'version': '20.0.1.0.0',
     'license': 'LGPL-3',
     'depends': ['coop_orgs', 'l10n_ru_contract', 'l10n_ru_doc'],
+    'data': ['data/coop_currency.xml'],
     'auto_install': True,
     'post_init_hook': 'post_init_hook',
     'installable': True,

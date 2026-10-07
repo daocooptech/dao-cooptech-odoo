@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    «Создать сделку» — первой в шапке лида: это и есть следующий шаг лида
+    на площадке (решение 450, «Лид -> сделка площадки»). Когда сделка уже
+    есть, на её месте ссылка на неё.
+  -->
+  <record id="crm_lead_view_form_coop" model="ir.ui.view">
+    <field name="name">crm.lead.form.coop</field>
+    <field name="model">crm.lead</field>
+    <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//button[@name='action_set_won_rainbowman']" position="before">
+        <field name="coop_deal_id" invisible="1"/>
+        <button name="action_coop_create_deal" type="object" string="Создать сделку"
+                class="btn-primary" invisible="coop_deal_id or not active"/>
+        <button name="action_coop_open_deal" type="object" string="Сделка площадки"
+                invisible="not coop_deal_id"/>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

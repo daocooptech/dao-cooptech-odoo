@@ -74,6 +74,11 @@ EXTENSION_ITEMS = [
     # архитектора).
     ('Управление проектами', 'checklist',
      'project.open_view_project_all_group_stage'),
+    # CRM организаций (решение 450): лиды по стадиям, «Лид -> сделка
+    # площадки». Виден только держателям «Сделок» — у остальных нет прав
+    # на лиды, и пункт отсеивается по модели действия. Модуля crm может не
+    # быть на узле — тогда действие не находится и пункта нет.
+    ('CRM', 'contact_phone', 'crm.crm_lead_action_pipeline'),
     # Владелец 22 сентября 2026: «добавить пункт в меню после управление
     # проектами» (решение 382).
     #
@@ -135,6 +140,12 @@ EXTENSION_ITEMS = [
 # Раздел не прячется на экране, а не создаётся вовсе: пункт меню, который
 # видно и по которому не пускает, раздражает сильнее, чем его отсутствие.
 REQUIRES_PROJECT = {'Управление проектами'}
+
+# Расширения, которые появляются по участию, и чем это участие проверяется.
+# CRM (решение 450) — у держателей «Сделок»: только у них есть права на
+# лиды, а пункт, по которому не пускает, хуже, чем его отсутствие.
+REQUIRES = {name: '_has_project' for name in REQUIRES_PROJECT}
+REQUIRES['CRM'] = '_has_crm'
 
 EXT_BY_NAME = {name: xmlid for name, _icon, xmlid in EXTENSION_ITEMS}
 
@@ -204,6 +215,21 @@ class CoopSidebarItem(models.Model):
         return super().unlink()
 
     @api.model
+    def _requirement(self, name, user):
+        """Положен ли участнику пункт, который появляется по участию.
+
+        True — положен, False — нет, None — проверить нельзя (модуля нет).
+        """
+        return getattr(self, REQUIRES[name])(user)
+
+    def _has_crm(self, user):
+        """Ведёт ли участник лиды: группа отдела продаж у него по
+        полномочию «Сделки» (coop_crm). Модуля нет — None, как у проектов.
+        """
+        if 'crm.lead' not in self.env:
+            return None
+        return user.has_group('sales_team.group_sale_salesman')
+
     def _has_project(self, user):
         """Есть ли участнику что вести: утверждён ли он хоть в одном проекте.
 
@@ -301,9 +327,9 @@ class CoopSidebarItem(models.Model):
             # Раздел, который участнику больше не положен, убирается. Иначе
             # он остаётся у того, кто его однажды увидел, навсегда.
             for item in existing:
-                if (item.name in REQUIRES_PROJECT
+                if (item.name in REQUIRES
                         and item.name not in wanted_section
-                        and self._has_project(user) is False):
+                        and self._requirement(item.name, user) is False):
                     # Пометку обязательности снимаем перед удалением:
                     # обязательный раздел удалить нельзя, и на узле, где
                     # пункт заводился ещё основным разделом, обновление
@@ -336,7 +362,7 @@ class CoopSidebarItem(models.Model):
                         self.sudo().create(values)
                         added += 1
                     continue
-                if values['name'] in REQUIRES_PROJECT and not self._has_project(user):
+                if values['name'] in REQUIRES and not self._requirement(values['name'], user):
                     # Участие кончилось — раздел уходит вместе с ним.
                     #
                     # Пометку обязательности снимаем и здесь, тем же
@@ -368,7 +394,7 @@ class CoopSidebarItem(models.Model):
                 # вело в плоский список Odoo, а нужно в тот, что
                 # сгруппирован по этапам ведения.
                 obligatory = (values['section'] == 'main'
-                              or values['name'] in REQUIRES_PROJECT)
+                              or values['name'] in REQUIRES)
                 if item.action_id and not obligatory:
                     continue
                 if item.action_id.id != wanted:
@@ -399,7 +425,7 @@ class CoopSidebarItem(models.Model):
         """
         obligatory = dict(MAIN_BY_NAME)
         obligatory.update({name: EXT_BY_NAME[name]
-                           for name in REQUIRES_PROJECT
+                           for name in REQUIRES
                            if name in EXT_BY_NAME})
         moved = 0
         for name, xmlid in obligatory.items():
@@ -437,9 +463,8 @@ class CoopSidebarItem(models.Model):
                 'section': 'main',
                 'is_required': True,
             })
-        allowed = self._has_project(user)
         for index, (name, icon, xmlid) in enumerate(EXTENSION_ITEMS):
-            if name in REQUIRES_PROJECT and allowed is not True:
+            if name in REQUIRES and self._requirement(name, user) is not True:
                 continue
             action = self.env.ref(xmlid, raise_if_not_found=False) if xmlid else None
             values.append({
@@ -582,7 +607,7 @@ class CoopSidebarItem(models.Model):
         # как человек его уберёт.
         have = set(items.mapped('name'))
         missing += [v for v in defaults
-                    if v['name'] in REQUIRES_PROJECT and v['name'] not in have]
+                    if v['name'] in REQUIRES and v['name'] not in have]
         if missing:
             items |= self._create_menu_items(missing, user)
         # Раздел мог быть перенесён после того, как меню уже собрано, —

@@ -29,5 +29,10 @@
         'views/coop_deal_views.xml',
         'report/upd_templates.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'coop_invoicing/static/src/js/all_companies.js',
+        ],
+    },
     'installable': True,
 }

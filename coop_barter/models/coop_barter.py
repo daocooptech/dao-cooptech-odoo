@@ -431,7 +431,12 @@ class CoopBarterExchange(models.Model):
     def create(self, vals_list):
         for vals in vals_list:
             if not vals.get('name') or vals['name'] == _('Новый обмен'):
-                vals['name'] = self.env['ir.sequence'].next_by_code('coop.barter.exchange') \
+                # Нумератор общий на площадку — без отбора по текущей
+                # компании (как у сделок): из компании учёта организации
+                # next_by_code его не находил.
+                sequence = self.env['ir.sequence'].sudo().search(
+                    [('code', '=', 'coop.barter.exchange')], order='company_id', limit=1)
+                vals['name'] = (sequence._next() if sequence else False) \
                     or _('Новый обмен')
         return super().create(vals_list)
 
