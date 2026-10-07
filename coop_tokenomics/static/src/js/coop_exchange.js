@@ -1,11 +1,11 @@
 /** @odoo-module **/
 
-import { Component, onWillStart, proxy, usePlugin } from "@odoo/owl";
+import { Component, onWillStart, proxy, usePlugin, useProps } from "@odoo/owl";
 import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { connectTonWallet } from "@coop_tokenomics/js/coop_ton_connect";
-import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * Торговый экран биржи.
@@ -30,7 +30,7 @@ import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
  */
 export class CoopExchange extends Component {
     static template = "coop_tokenomics.Exchange";
-    static props = ["*"];
+    props = useProps();
 
     static CATEGORIES = [
         { key: "all", label: "Все рынки" },
@@ -50,7 +50,7 @@ export class CoopExchange extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.action = usePlugin(ActionManagerPlugin);
+        this.action = usePlugin(ActionPlugin);
         this.notification = usePlugin(NotificationPlugin);
 
         this.state = proxy({
