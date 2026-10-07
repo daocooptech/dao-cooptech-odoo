@@ -123,11 +123,11 @@ override("voice-start", (d) => ({
     name: (p) => (onWall(p) ? "Голосовое" : d.name),
     sequence: 14,
 }));
-for (const id of ["voice-stop", "voice-recording"]) {
-    override(id, (d) => ({
-        condition: (p) => d.condition(p) || (onWall(p) && recording(p)),
-    }));
-}
+// В 20 отдельной кнопки «стоп» нет: её рисует сам `VoiceRecorder` внутри
+// «voice-recording» (mail/discuss/voice_message/common).
+override("voice-recording", (d) => ({
+    condition: (p) => d.condition(p) || (onWall(p) && recording(p)),
+}));
 
 // Скрепка на стене — «Файл»: всё, что выбрано ею, идёт файлом, снимки
 // тоже.

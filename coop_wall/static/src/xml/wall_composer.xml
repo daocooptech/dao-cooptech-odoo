@@ -15,7 +15,7 @@
   -->
   <t t-name="coop_wall.ComposerSendButton" t-inherit="mail.Composer.sendButton" t-inherit-mode="extension">
     <xpath expr="//t[@t-out='this.SEND_TEXT']" position="attributes">
-      <attribute name="t-if">this.thread and this.thread.model !== 'discuss.channel' and !this.coopWallSmall</attribute>
+      <attribute name="t-if">this.thread and !this.thread.channel and !this.coopWallSmall</attribute>
     </xpath>
     <xpath expr="//t[@t-out='this.SEND_TEXT']" position="after">
       <i t-elif="this.coopWallSmall" class="fa fa-fw fa-check"/>

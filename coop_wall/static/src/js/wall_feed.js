@@ -1,11 +1,12 @@
 /** @odoo-module **/
 
-import { Component, onWillStart, proxy } from "@odoo/owl";
+import { Component, onWillStart, proxy, useProps } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { useSubEnv } from "@web/owl2/utils";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { AttachmentList } from "@mail/core/common/attachment_list";
+import { groupAttachments } from "@mail/utils/common/attachments";
 import { CoopWallPostFooter, CoopRepostCard } from "@coop_wall/js/wall_post";
 import { CoopWallPoll } from "@coop_wall/js/wall_poll";
 
@@ -56,7 +57,7 @@ registry.category("services").add("coop_wall_feed", coopWallFeedService);
 
 export class CoopWallFeedExtras extends Component {
     static template = "coop_wall.FeedExtras";
-    static props = { ...standardFieldProps };
+    props = useProps(standardFieldProps);
     static components = { AttachmentList, CoopWallPostFooter, CoopRepostCard, CoopWallPoll };
 
     setup() {
@@ -78,6 +79,12 @@ export class CoopWallFeedExtras extends Component {
 
     get attachments() {
         return this.message?.extra_body_attachment_ids || [];
+    }
+
+    // В 20 список вложений берёт их группами (повторы одного файла —
+    // вместе), как у сообщения: `Message.attachmentGroups`.
+    get attachmentGroups() {
+        return groupAttachments(this.attachments);
     }
 
     // Удалять вложение из ленты подписок нельзя — это чужая запись.

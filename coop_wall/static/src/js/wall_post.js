@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, markup, proxy, usePlugin } from "@odoo/owl";
+import { Component, markup, proxy, signal, usePlugin, useProps } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
@@ -9,11 +9,10 @@ import { useService } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
 import { Message } from "@mail/core/common/message";
 import { Message as MessageModel } from "@mail/core/common/message_model";
-import { fields } from "@mail/core/common/record";
+import { fields } from "@mail/model/export";
 import { MessageReactions } from "@mail/core/common/message_reactions";
 import { WALL_MODELS } from "@coop_theme/js/wall";
 import { CoopWallPoll } from "@coop_wall/js/wall_poll";
-import { useRef } from "@web/owl2/utils";
 
 // Под записью на стене — ряд действий и комментарии.
 //
@@ -96,7 +95,7 @@ registry.category("services").add("coop_wall_comments", coopWallCommentsService)
 const SHOWN = 2;
 
 export class CoopWallPostFooter extends Component {
-    static props = ["message", "thread"];
+    props = useProps(["message", "thread"]);
     static template = "coop_wall.WallPostFooter";
 
     LIKE = LIKE;
@@ -106,7 +105,7 @@ export class CoopWallPostFooter extends Component {
         this.comments = useService("coop_wall_comments");
         this.byPost = proxy(this.comments.byPost);
         this.state = proxy({ expanded: false, writing: false, draft: "", busy: false });
-        this.inputRef = useRef("input");
+        this.inputRef = signal.ref();
         this.comments.load(this.props.message.id);
     }
 
@@ -178,7 +177,7 @@ export class CoopWallPostFooter extends Component {
     onComment() {
         this.state.writing = true;
         // Поле рисуется в этом же такте; фокус — после отрисовки.
-        setTimeout(() => this.inputRef.el?.focus());
+        setTimeout(() => this.inputRef()?.focus());
     }
 
     get reposts() {
@@ -246,7 +245,7 @@ export class CoopWallPostFooter extends Component {
  */
 export class CoopRepostDialog extends Component {
     static components = { Dialog };
-    static props = ["message", "thread", "close"];
+    props = useProps(["message", "thread", "close"]);
     static template = "coop_wall.RepostDialog";
 
     setup() {
@@ -298,7 +297,7 @@ export class CoopRepostDialog extends Component {
  */
 export class CoopThanksDialog extends Component {
     static components = { Dialog };
-    static props = ["message", "close"];
+    props = useProps(["message", "close"]);
     static template = "coop_wall.ThanksDialog";
 
     setup() {
@@ -405,7 +404,7 @@ export class CoopThanksDialog extends Component {
 
 
 export class CoopRepostCard extends Component {
-    static props = ["repost"];
+    props = useProps(["repost"]);
     static template = "coop_wall.RepostCard";
 
     get body() {
@@ -444,8 +443,11 @@ patch(Message.prototype, {
 // в общем списке реакций движка они были бы вторым разом.
 patch(MessageReactions.prototype, {
     get coopReactions() {
-        const reactions = this.props.message.reactions;
-        const thread = this.props.message.thread;
+        // В 20 сообщение у ряда реакций — вычисление от props, а не сам
+        // props (`propComputed` в mail/core/common/message_reactions), и
+        // порядок реакций движок держит в `sortedReactions`.
+        const reactions = this.message().sortedReactions;
+        const thread = this.message().thread;
         if (!this.env.inChatter || !WALL_MODELS.includes(thread?.model)) {
             return reactions;
         }

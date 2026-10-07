@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, onWillUnmount, proxy } from "@odoo/owl";
+import { Component, onWillUnmount, proxy, useProps } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { download } from "@web/core/network/download";
 import { patch } from "@web/core/utils/patch";
@@ -8,7 +8,7 @@ import { Attachment } from "@mail/core/common/attachment_model";
 import { AttachmentList } from "@mail/core/common/attachment_list";
 import { AttachmentUploadService } from "@mail/core/common/attachment_upload_service";
 import { AttachmentUploader } from "@mail/core/common/attachment_uploader_hook";
-import { fields } from "@mail/core/common/record";
+import { fields } from "@mail/model/export";
 import { WALL_MODELS } from "@coop_theme/js/wall";
 
 // Фото на стене — картинкой или файлом.
@@ -34,7 +34,7 @@ import { WALL_MODELS } from "@coop_theme/js/wall";
  */
 class CoopPhotoModeDialog extends Component {
     static components = { Dialog };
-    static props = ["batch", "choose", "close"];
+    props = useProps(["batch", "choose", "close"]);
     static template = "coop_wall.PhotoModeDialog";
 
     setup() {

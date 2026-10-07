@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, proxy, toRaw, usePlugin } from "@odoo/owl";
+import { Component, proxy, toRaw, usePlugin, useProps } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { DateTimeInput } from "@web/core/datetime/datetime_input";
 import { deserializeDateTime, serializeDateTime } from "@web/core/l10n/dates";
@@ -28,7 +28,7 @@ const onWall = ({ composer }) => WALL_MODELS.includes(composer?.targetThread?.mo
 
 /** Карточка опроса в записи. */
 export class CoopWallPoll extends Component {
-    static props = ["message"];
+    props = useProps(["message"]);
     static template = "coop_wall.Poll";
 
     setup() {
@@ -90,7 +90,7 @@ export class CoopWallPoll extends Component {
 /** Окно «Опрос». */
 export class CoopPollDialog extends Component {
     static components = { Dialog, DateTimeInput };
-    static props = ["thread", "close"];
+    props = useProps(["thread", "close"]);
     static template = "coop_wall.PollDialog";
 
     setup() {
@@ -161,7 +161,7 @@ export class CoopPollDialog extends Component {
 /** Окно «Отложить»: когда выйдет запись, набранная в поле. */
 export class CoopScheduleDialog extends Component {
     static components = { Dialog, DateTimeInput };
-    static props = ["composer", "owner", "close"];
+    props = useProps(["composer", "owner", "close"]);
     static template = "coop_wall.ScheduleDialog";
 
     setup() {

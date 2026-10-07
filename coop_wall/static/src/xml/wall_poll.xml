@@ -82,7 +82,7 @@
     <Dialog title="'Опрос'" size="'md'">
       <label class="form-label" for="coop_poll_q">Вопрос</label>
       <input id="coop_poll_q" class="form-control mb-3" maxlength="300"
-             placeholder="О чём спросить?" t-custom-model="this.state.question"/>
+             placeholder="О чём спросить?" t-model.proxy="this.state.question"/>
 
       <label class="form-label">Варианты ответа</label>
       <t t-foreach="this.state.options" t-as="option" t-key="option_index">
@@ -102,7 +102,7 @@
       </button>
 
       <div class="form-check mb-3">
-        <input id="coop_poll_public" type="checkbox" class="form-check-input" t-custom-model="this.state.isPublic"/>
+        <input id="coop_poll_public" type="checkbox" class="form-check-input" t-model.proxy="this.state.isPublic"/>
         <label class="form-check-label" for="coop_poll_public">
           Открытое голосование — видно, кто что выбрал
         </label>

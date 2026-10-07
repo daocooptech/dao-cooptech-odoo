@@ -6,8 +6,8 @@
     <div class="o_coop_feed_extras" t-if="this.state.ready and this.message" t-on-click.stop="">
       <CoopRepostCard t-if="this.message.coop_repost" repost="this.message.coop_repost"/>
       <CoopWallPoll t-if="this.message.coop_poll" message="this.message"/>
-      <AttachmentList t-if="this.attachments.length" attachments="this.attachments"
-                      unlinkAttachment.bind="this.noUnlink"/>
+      <AttachmentList t-if="this.attachments.length" attachmentGroups="this.attachmentGroups"
+                      unlinkAttachments.bind="this.noUnlink"/>
       <CoopWallPostFooter message="this.message" thread="this.message.thread"/>
     </div>
   </t>

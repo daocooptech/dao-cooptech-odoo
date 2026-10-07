@@ -13,7 +13,7 @@
 
   <!-- Лайк и дизлайк на стене — в ряду под записью, не в общем списке. -->
   <t t-name="coop_wall.MessageReactionsNoLikes" t-inherit="mail.MessageReactions" t-inherit-mode="extension">
-    <xpath expr="//t[@t-foreach='this.props.message.reactions']" position="attributes">
+    <xpath expr="//t[@t-foreach='this.message().sortedReactions']" position="attributes">
       <attribute name="t-foreach">this.coopReactions</attribute>
     </xpath>
     <!-- Остались одни лайки — списка нет вовсе: иначе от него висел бы
@@ -79,9 +79,9 @@
           </div>
         </div>
         <div t-if="this.showInput" class="o_coop_comment_form">
-          <textarea t-ref="input" class="form-control" rows="1"
+          <textarea t-ref="this.inputRef" class="form-control" rows="1"
                     placeholder="Комментарий…"
-                    t-custom-model="this.state.draft" t-on-keydown="this.onKeydown"/>
+                    t-model.proxy="this.state.draft" t-on-keydown="this.onKeydown"/>
           <button class="btn btn-primary btn-sm" title="Отправить"
                   t-att-disabled="!this.state.draft.trim() or this.state.busy" t-on-click="this.send">
             <i class="fa fa-paper-plane"/>
@@ -93,7 +93,7 @@
 
   <t t-name="coop_wall.RepostDialog">
     <Dialog title="'Поделиться у себя на странице'" size="'md'">
-      <textarea class="form-control mb-3" rows="3" t-custom-model="this.state.comment"
+      <textarea class="form-control mb-3" rows="3" t-model.proxy="this.state.comment"
                 placeholder="Пара слов от себя — можно без них"/>
       <div class="o_coop_repost_preview">
         <b t-out="this.preview.author"/>
@@ -178,7 +178,7 @@
           </label>
           <label t-if="this.network">
             <span class="form-label">Монета</span>
-            <select class="form-select" t-custom-model="this.state.token">
+            <select class="form-select" t-model.proxy="this.state.token">
               <option t-foreach="this.network.tokens" t-as="tk" t-key="tk.symbol"
                       t-att-value="tk.symbol" t-out="tk.label"/>
             </select>
@@ -249,11 +249,11 @@
         <t t-call="coop_wall.ThanksChoice" preview="false"/>
         <t t-if="this.state.channel === 'sbp' ? this.state.info.sbp : this.state.info.networks.length">
           <label class="form-label">Сумма подарка</label>
-          <input class="form-control mb-3" inputmode="decimal" t-custom-model="this.state.amount"
+          <input class="form-control mb-3" inputmode="decimal" t-model.proxy="this.state.amount"
                  t-att-placeholder="this.state.channel === 'sbp' ? '500 ₽' : this.tokenExample"/>
           <t t-if="this.state.channel === 'token'">
             <label class="form-label">Хеш транзакции — по желанию</label>
-            <input class="form-control mb-3" t-custom-model="this.state.txHash"
+            <input class="form-control mb-3" t-model.proxy="this.state.txHash"
                    placeholder="Из кошелька после отправки: нужен получателю для 3-НДФЛ"/>
           </t>
           <div t-if="(this.state.info.taxes[this.state.channel] or []).length" class="o_coop_thanks_tax mb-3">
@@ -264,7 +264,7 @@
             </div>
           </div>
           <label class="o_coop_thanks_understood">
-            <input type="checkbox" t-custom-model="this.state.understood"/>
+            <input type="checkbox" t-model.proxy="this.state.understood"/>
             <span>Понимаю: это подарок. Автор ничего не должен мне взамен, я не
             получаю за это доступ, услугу или право. Подарок идёт напрямую
             автору — платформа его не получает и не хранит.</span>
