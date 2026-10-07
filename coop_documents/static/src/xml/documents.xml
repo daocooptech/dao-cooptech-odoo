@@ -12,7 +12,7 @@
         <h2>Загрузить документы</h2>
 
         <label class="form-label" for="coop_upload_folder">В папку</label>
-        <select id="coop_upload_folder" class="form-select mb-3" t-custom-model="this.state.folderId">
+        <select id="coop_upload_folder" class="form-select mb-3" t-model.proxy="this.state.folderId">
           <option value="">Без папки</option>
           <option t-foreach="this.state.folders" t-as="folder" t-key="folder.id"
                   t-att-value="folder.id" t-out="folder.display_name"/>
@@ -27,15 +27,15 @@
           <i class="fa fa-cloud-upload"/>
           <div>Перетащите сюда файлы или папку целиком</div>
           <div class="o_coop_doc_drop_btns">
-            <button type="button" class="btn btn-secondary" t-on-click="() => this.filesRef.el.click()">
+            <button type="button" class="btn btn-secondary" t-on-click="() => this.filesRef().click()">
               <i class="fa fa-file-o"/> Выбрать файлы
             </button>
-            <button type="button" class="btn btn-secondary" t-on-click="() => this.folderRef.el.click()">
+            <button type="button" class="btn btn-secondary" t-on-click="() => this.folderRef().click()">
               <i class="fa fa-folder-o"/> Выбрать папку
             </button>
           </div>
-          <input type="file" multiple="multiple" class="d-none" t-ref="files" t-on-change="this.onPickFiles"/>
-          <input type="file" multiple="multiple" webkitdirectory="" class="d-none" t-ref="folder"
+          <input type="file" multiple="multiple" class="d-none" t-ref="this.filesRef" t-on-change="this.onPickFiles"/>
+          <input type="file" multiple="multiple" webkitdirectory="" class="d-none" t-ref="this.folderRef"
                  t-on-change="this.onPickFiles"/>
         </div>
 
@@ -60,11 +60,11 @@
           Сфотографируйте страницы бумажного документа по одной — они сложатся в
           один PDF. На телефоне откроется камера.
         </p>
-        <button type="button" class="btn btn-secondary mb-2" t-on-click="() => this.cameraRef.el.click()">
+        <button type="button" class="btn btn-secondary mb-2" t-on-click="() => this.cameraRef().click()">
           <i class="fa fa-camera"/> Снять страницу
         </button>
         <input type="file" accept="image/*" capture="environment" multiple="multiple"
-               class="d-none" t-ref="camera" t-on-change="this.onCamera"/>
+               class="d-none" t-ref="this.cameraRef" t-on-change="this.onCamera"/>
         <t t-if="this.state.scans.length">
           <div class="o_coop_doc_scans">
             <div class="o_coop_doc_scan" t-foreach="this.state.scans" t-as="scan" t-key="scan.url">
@@ -74,7 +74,7 @@
             </div>
           </div>
           <input class="form-control mb-2" placeholder="Название, например «Акт № 14 от 25.09»"
-                 t-custom-model="this.state.scanName"/>
+                 t-model.proxy="this.state.scanName"/>
           <button type="button" class="btn btn-primary" t-att-disabled="this.state.busy" t-on-click="this.saveScan">
             Сохранить PDF (<t t-out="this.state.scans.length"/> стр.)
           </button>

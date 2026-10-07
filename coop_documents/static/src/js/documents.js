@@ -1,13 +1,12 @@
 /** @odoo-module **/
 
-import { Component, onWillStart, proxy, usePlugin } from "@odoo/owl";
+import { Component, onWillStart, proxy, signal, usePlugin, useProps } from "@odoo/owl";
 import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { useRef } from "@web/owl2/utils";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
-import { generatePdfThumbnail } from "@mail/utils/common/pdf_thumbnail";
-import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
+import { generatePdfThumbnail } from "@web/core/utils/pdfjs";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 // Раздел «Документы» как у облачных дисков (разбор 25.09.2026):
 // первая страница PDF на плитке (п. 2), загрузка файлами и папкой (п. 7),
@@ -22,7 +21,7 @@ const thumbs = new Map();
 
 export class CoopPdfThumb extends Component {
     static template = "coop_documents.PdfThumb";
-    static props = { ...standardFieldProps };
+    props = useProps(standardFieldProps);
 
     setup() {
         this.state = proxy({ src: thumbs.get(this.props.record.resId) || null, failed: false });
@@ -90,15 +89,15 @@ async function walkEntry(entry, prefix, out) {
 
 export class CoopDocumentsUpload extends Component {
     static template = "coop_documents.Upload";
-    static props = ["*"];
+    props = useProps();
 
     setup() {
         this.orm = useService("orm");
-        this.action = usePlugin(ActionManagerPlugin);
+        this.action = usePlugin(ActionPlugin);
         this.notification = usePlugin(NotificationPlugin);
-        this.filesRef = useRef("files");
-        this.folderRef = useRef("folder");
-        this.cameraRef = useRef("camera");
+        this.filesRef = signal.ref();
+        this.folderRef = signal.ref();
+        this.cameraRef = signal.ref();
         this.state = proxy({
             folders: [], folderId: "", queue: [], scans: [], scanName: "",
             over: false, busy: false, done: 0,
