@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Воронка сделок организации (решение 450): канбан по стадиям, карточка
+    — глазами организации: с кем сделка и кто ведёт её у нас. Перетаскивать
+    между стадиями нельзя: стадию двигают кнопки сделки, у каждой свои
+    проверки (личность сторон, акт с двух сторон).
+  -->
+  <record id="view_coop_deal_funnel_kanban" model="ir.ui.view">
+    <field name="name">coop.deal.funnel.kanban</field>
+    <field name="model">coop.deal</field>
+    <field name="priority">40</field>
+    <field name="arch" type="xml">
+      <kanban default_group_by="state" records_draggable="false"
+              group_create="false" group_delete="false" group_edit="false"
+              quick_create="false" class="o_coop_funnel_kanban">
+        <field name="currency_id"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_funnel_number"><field name="number"/></div>
+            <field name="name" class="fw-bold"/>
+            <field name="coop_org_counterparty_id" class="text-muted"/>
+            <footer>
+              <field name="amount" widget="monetary"/>
+              <div class="d-flex ms-auto align-items-center gap-1">
+                <field name="activity_ids" widget="kanban_activity"/>
+                <field name="coop_org_responsible_id" widget="many2one_avatar_user"/>
+              </div>
+            </footer>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <!--
+    Кабинет на странице организации — только её людям с полномочиями.
+    Сразу под видом организации: это первое, за чем сотрудник приходит.
+  -->
+  <record id="view_coop_orgs_form_cabinet" model="ir.ui.view">
+    <field name="name">coop.orgs.form.cabinet</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="coop_orgs.view_coop_orgs_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//div[hasclass('o_coop_org_kind')]" position="after">
+        <field name="coop_is_org_staff" invisible="1"/>
+        <field name="coop_funnel_unassigned" invisible="1"/>
+        <field name="coop_can_see_funnel" invisible="1"/>
+        <div class="o_coop_band o_coop_my_day o_coop_cabinet"
+             invisible="not coop_can_see_funnel">
+          <div class="o_coop_band_head">
+            <span>Воронка сделок</span>
+            <button name="action_coop_org_funnel" type="object"
+                    class="o_coop_band_all">открыть воронку</button>
+          </div>
+          <div class="o_coop_funnel_steps">
+            <div class="o_coop_funnel_step">
+              <b><field name="coop_funnel_crm" nolabel="1"/></b>
+              <button name="action_coop_org_leads" type="object"
+                      class="o_coop_band_all" invisible="not coop_company_id">лиды CRM</button>
+              <span invisible="coop_company_id">лиды CRM</span>
+            </div>
+            <div class="o_coop_funnel_step">
+              <b><field name="coop_funnel_lead" nolabel="1"/></b><span>обращения</span>
+            </div>
+            <div class="o_coop_funnel_step">
+              <b><field name="coop_funnel_draft" nolabel="1"/></b><span>переговоры</span>
+            </div>
+            <div class="o_coop_funnel_step">
+              <b><field name="coop_funnel_agreed" nolabel="1"/></b><span>согласованы</span>
+            </div>
+            <div class="o_coop_funnel_step">
+              <b><field name="coop_funnel_active" nolabel="1"/></b><span>исполняются</span>
+            </div>
+            <div class="o_coop_funnel_step">
+              <b><field name="coop_funnel_acceptance" nolabel="1"/></b><span>на приёмке</span>
+            </div>
+            <div class="o_coop_funnel_step">
+              <b><field name="coop_funnel_disputed" nolabel="1"/></b><span>спор</span>
+            </div>
+            <div class="o_coop_funnel_step">
+              <b><field name="coop_funnel_done" nolabel="1"/></b><span>завершены</span>
+            </div>
+          </div>
+          <div class="o_coop_funnel_alert" invisible="not coop_funnel_unassigned">
+            Без ответственного: <b><field name="coop_funnel_unassigned" nolabel="1"/></b>
+            — назначьте в карточке сделки.
+          </div>
+        </div>
+        <div class="o_coop_band o_coop_my_day o_coop_cabinet"
+             invisible="not coop_is_org_staff">
+          <div class="o_coop_band_head">
+            <span>Сотрудники и ответственные</span>
+            <button name="action_coop_members" type="object"
+                    class="o_coop_band_all">весь состав</button>
+          </div>
+          <field name="coop_staff_ids" readonly="1" nolabel="1">
+            <kanban class="o_coop_day_kanban" records_draggable="false">
+              <templates>
+                <t t-name="card">
+                  <div class="o_coop_day_row">
+                    <div class="o_coop_day_what"><field name="partner_id"/></div>
+                    <div class="o_coop_day_when">
+                      <field name="job_title"/>
+                    </div>
+                    <field name="power_ids" widget="many2many_tags"/>
+                    <div class="o_coop_day_where">
+                      ведёт сделок: <field name="coop_open_deal_count"/>
+                      · просрочено дел: <field name="coop_overdue_count"/>
+                    </div>
+                  </div>
+                </t>
+              </templates>
+            </kanban>
+          </field>
+        </div>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

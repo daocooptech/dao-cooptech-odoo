@@ -11,13 +11,19 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.0.0',
+    'version': '20.0.1.1.0',
     'license': 'LGPL-3',
-    'depends': ['crm', 'coop_invoicing', 'coop_deals'],
+    'depends': ['crm', 'coop_invoicing', 'coop_deals', 'coop_profile'],
     'data': [
         'views/crm_lead_views.xml',
         'views/coop_deal_views.xml',
+        'views/org_cabinet_views.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'coop_crm/static/src/scss/coop_crm.scss',
+        ],
+    },
     'post_init_hook': 'post_init_hook',
     'installable': True,
 }

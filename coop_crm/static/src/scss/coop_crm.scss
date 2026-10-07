@@ -1,0 +1,46 @@
+// Кабинет организации (решение 450): ступени воронки и канбан воронки.
+
+.o_coop_profile .o_coop_cabinet {
+  .o_coop_funnel_steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+    gap: 1px;
+    background: var(--coop-line, #e6e6e1);
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-top: 0;
+  }
+
+  .o_coop_funnel_step {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 10px;
+    background: var(--coop-white, #fff);
+    font-size: 11.5px;
+    color: var(--coop-slate, #4a4a44);
+
+    b {
+      font: 700 16px/1.2 'Manrope', sans-serif;
+      color: var(--coop-ink, #14171a);
+    }
+
+    .o_coop_band_all { text-align: left; }
+  }
+
+  .o_coop_funnel_alert {
+    padding: 8px 14px;
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-top: 0;
+    border-radius: 0 0 10px 10px;
+    background: var(--coop-gold-tint, #fbf0dc);
+    color: var(--coop-gold-text, #8a5a10);
+    font-size: 12.5px;
+  }
+}
+
+.o_coop_funnel_kanban {
+  .o_coop_funnel_number {
+    font: 600 11px/1.4 'JetBrains Mono', monospace;
+    color: var(--coop-slate, #4a4a44);
+  }
+}

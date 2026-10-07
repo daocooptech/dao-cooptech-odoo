@@ -69,3 +69,23 @@ class TestCoopCrm(TransactionCase):
         lead.partner_id = self.client
         with self.assertRaises(Exception):
             lead.with_user(self.keeper).action_coop_create_deal()
+
+    def test_cabinet(self):
+        deal = self.env['coop.deal'].sudo().create({
+            'name': 'Поставка зерна', 'party_a_id': self.org.id,
+            'party_b_id': self.client.id, 'state': 'lead'})
+        page = self.org.with_user(self.seller)
+        self.assertTrue(page.coop_is_org_staff)
+        self.assertTrue(page.coop_can_see_funnel)
+        self.assertEqual(page.coop_funnel_lead, 1)
+        self.assertIn(self.seller.partner_id, page.coop_staff_ids.partner_id)
+        # Казначей в составе, но воронка — держателям «Сделок».
+        keeper_page = self.org.with_user(self.keeper)
+        self.assertTrue(keeper_page.coop_is_org_staff)
+        self.assertFalse(keeper_page.coop_can_see_funnel)
+        action = page.action_coop_org_funnel()
+        self.assertFalse(action['context']['coop_catalog'])
+        self.assertEqual(action['context']['default_party_a_id'], self.org.id)
+        membership = page.coop_staff_ids.filtered(
+            lambda m: m.partner_id == self.seller.partner_id)
+        self.assertEqual(membership.coop_open_deal_count, 1 if deal.responsible_a_id == self.seller else 0)
