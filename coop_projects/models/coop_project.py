@@ -716,6 +716,7 @@ class CoopProject(models.Model):
         project = Project.create(values)
         project.message_subscribe(partner_ids=self._project_followers().ids)
         self._create_milestones(project)
+        project._coop_add_team(self._project_team_users())
         return project
 
     @api.model
@@ -784,17 +785,29 @@ class CoopProject(models.Model):
             })
 
     def _project_followers(self):
-        """Кого проект должен видеть своими: инициатор и принятые вкладчики.
+        """Кто получает ленту проекта: инициатор и принятые вкладчики.
 
-        Подписка — не украшение ленты, а доступ: при видимости «по
-        приглашению» подписчик и есть тот, кто видит проект. Тот, чьё
-        предложение приняли, становится подписчиком в тот же момент.
+        Подписка даёт ленту, но не доступ: в Odoo 20 видимость «followers»
+        означает команду проекта (`allowed_internal_user_ids`), а не
+        подписчиков. Решение 286 исходило из обратного, и проект видел
+        один инициатор (разбор ux 08.10.2026). Доступ — `_project_team_users`.
         """
         self.ensure_one()
         partners = self.partner_id
         partners |= self.contribution_ids.filtered(
             lambda c: c.state == 'accepted').mapped('partner_id')
         return partners
+
+    def _project_team_users(self):
+        """Кто видит проект в управлении: те же, кто получает ленту.
+
+        Вкладчик видит проект, даже если задач у него нет (решение 452).
+        За организацию — её действующие члены с полномочием действовать от
+        её имени: тот же круг, что `coop_actor_partner_ids`.
+        """
+        self.ensure_one()
+        return self.env['project.project']._coop_partner_users(
+            self._project_followers())
 
     @api.model
     def grant_project_access(self):
@@ -884,6 +897,11 @@ class CoopProject(models.Model):
             if missing:
                 record.project_id.sudo().message_subscribe(
                     partner_ids=missing.ids)
+        # Команда: проекты заводились, когда доступ считали подпиской, и
+        # в команде у них один инициатор. Исполнители задач — туда же.
+        Project.with_context(active_test=False).search([
+            ('privacy_visibility', '=', 'followers'),
+        ])._coop_sync_team()
         if opened:
             _logger.info('Видимость «по приглашению» проставлена у %s проектов',
                          len(opened))
@@ -1387,6 +1405,11 @@ class CoopProjectContribution(models.Model):
                 'accepted_on': fields.Date.context_today(record),
             })
             record._close_need()
+            # Вклад приняли после запуска — вкладчик входит в команду
+            # сразу. До запуска команды нет: её заводит запуск.
+            if record.project_id.project_id:
+                record.project_id.project_id._coop_add_team(
+                    record.project_id._project_team_users())
             # Вкладчику: он предложил и ждёт ответа. Без извещения
             # узнать о принятии можно было только вернувшись на
             # страницу проекта по своей воле.

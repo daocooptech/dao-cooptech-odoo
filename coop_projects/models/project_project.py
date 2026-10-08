@@ -15,7 +15,11 @@
 полем со значением по умолчанию — то есть гасила расчёт ядра ради того
 же самого результата.
 """
-from odoo import fields, models
+from odoo import api, fields, models
+
+# Полномочия, с которыми член организации действует от её имени, — те же,
+# что у `res.users.ACTING_POWERS` в coop_base.
+_ACTING_POWERS = ('publish', 'deal', 'treasury', 'site')
 
 
 class ProjectProject(models.Model):
@@ -29,3 +33,71 @@ class ProjectProject(models.Model):
         'coop.project', 'project_id', string='Сбор вкладов',
         help='Обратная сторона связи: из какого сбора вырос этот проект. '
              'Пусто у проектов, заведённых напрямую в управлении.')
+
+    @api.model
+    def _coop_partner_users(self, partners):
+        """Пользователи, стоящие за участниками: сам человек, а за
+        организацию — её действующие члены с полномочием действовать от
+        её имени. Только внутренние: портальному команда не откроет
+        ничего, а поле команды его и не принимает.
+        """
+        users = partners.sudo().user_ids
+        memberships = self.env['coop.membership'].sudo().search([
+            ('organization_id', 'in', partners.ids),
+            ('state', '=', 'active'),
+            ('power_ids.code', 'in', _ACTING_POWERS),
+        ])
+        users |= memberships.partner_id.user_ids
+        return users.filtered(lambda u: not u.share and u.active)
+
+    def _coop_add_team(self, users):
+        """Добавить в команду проекта — только добавить, не заменяя.
+
+        Команда в Odoo 20 и есть доступ к проекту с видимостью
+        «followers». Убирать никого не убираем: участника мог добавить
+        руками руководитель проекта.
+        """
+        users = users.filtered(lambda u: not u.share)
+        for project in self.sudo():
+            missing = users - project.allowed_internal_user_ids
+            if missing:
+                project.allowed_internal_user_ids = [
+                    fields.Command.link(user.id) for user in missing]
+
+    def _coop_sync_team(self):
+        """Собрать команду заново: сбор (инициатор и принятые вкладчики),
+        исполнители задач, руководитель проекта."""
+        Task = self.env['project.task'].sudo().with_context(active_test=False)
+        for project in self.sudo():
+            users = project.user_id
+            for fee in project.coop_project_id:
+                users |= fee._project_team_users()
+            users |= Task.search([('project_id', '=', project.id)]).user_ids
+            project._coop_add_team(users)
+
+
+class ProjectTask(models.Model):
+    _inherit = 'project.task'
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        tasks = super().create(vals_list)
+        tasks._coop_assignees_to_team()
+        return tasks
+
+    def write(self, vals):
+        result = super().write(vals)
+        if 'user_ids' in vals or 'project_id' in vals:
+            self._coop_assignees_to_team()
+        return result
+
+    def _coop_assignees_to_team(self):
+        """Исполнитель задачи входит в команду её проекта.
+
+        Иначе он видит задачу, но не проект: у 101 исполнителя настоящих
+        проектов не открывался ни один (разбор ux 08.10.2026).
+        """
+        for task in self.sudo():
+            project = task.project_id
+            if task.user_ids and project.privacy_visibility == 'followers':
+                project._coop_add_team(task.user_ids)
