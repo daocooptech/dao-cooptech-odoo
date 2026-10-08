@@ -41,15 +41,15 @@
     wkhtmltopdf не работает, поэтому отдельный файл).
   -->
   <template id="report_platform_header">
-    <div class="d-flex align-items-center pb-2 mb-3"
+    <div class="d-flex align-items-center justify-content-end pb-2 mb-3"
          style="border-bottom: 1px solid #999;">
-      <img src="/coop_deals/static/img/cooptech-logo-light.png"
-           alt="ДАО КООПТЕХ" style="height: 40px; width: auto;"/>
-      <div class="ms-3" style="font-size: 12px; line-height: 1.25; color: #444;">
+      <div class="me-3 text-end" style="font-size: 12px; line-height: 1.25; color: #444;">
         <div>Децентрализованная</div>
-        <div><strong>Социально-экономическая платформа</strong></div>
+        <div style="font-size: 14px;"><strong>Социально-экономическая платформа</strong></div>
         <div>с открытым исходным кодом</div>
       </div>
+      <img src="/coop_deals/static/img/cooptech-logo-light.png"
+           alt="ДАО КООПТЕХ" style="height: 40px; width: auto;"/>
     </div>
   </template>
 
