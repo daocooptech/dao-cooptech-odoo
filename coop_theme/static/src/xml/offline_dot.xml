@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!--
+    Значок «нет связи с сервером» — точкой, а не плашкой «Working
+    offline». Владелец 08.10.2026: «что это за желтое пятно с текстом на
+    логотипе? убери или сделай логично и красиво», затем «сделай тогда не
+    тонкую полоску, а точку». Плашка не помещалась в клетку шапки 36×36
+    и вылезала оранжевым пятном. Подсказка — по-русски.
+  -->
+  <t t-name="coop_theme.OfflineSystray" t-inherit="web.OfflineSystray" t-inherit-mode="extension">
+    <xpath expr="//button[@data-tooltip='Click to check connection and Sync']" position="attributes">
+      <attribute name="data-tooltip">Нет связи с сервером. Нажмите, чтобы проверить</attribute>
+      <attribute name="aria-label">Нет связи с сервером</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('o_offline_systray')]/i" position="attributes">
+      <attribute name="t-att-data-tooltip">'Нет связи с сервером'</attribute>
+      <attribute name="t-att-aria-label">'Нет связи с сервером'</attribute>
+    </xpath>
+  </t>
+
+</templates>

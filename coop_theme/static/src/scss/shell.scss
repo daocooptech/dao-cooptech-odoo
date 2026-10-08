@@ -1116,3 +1116,37 @@ body.o_dark_mode .o_coop_loader_mark {
     animation: none;
   }
 }
+
+// Нет связи с сервером — янтарная точка в ряду шапки вместо плашки
+// «Working offline» (владелец 08.10.2026: «не тонкую полоску, а
+// точку»). Текст и значки внутри скрыты, клетка та же 36×36, что у
+// соседей, — точка в её центре и мягко пульсирует, пока связи нет.
+.o_web_client .o_main_navbar .o_menu_systray .o_offline_systray {
+  position: relative;
+  font-size: 0 !important;
+  color: transparent !important;
+  background: none !important;
+  overflow: hidden;
+
+  > i {
+    display: none;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    margin: -5px 0 0 -5px;
+    border-radius: 50%;
+    background: var(--coop-gold, #d99a1e);
+    animation: o_coop_offline_pulse 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes o_coop_offline_pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(217, 154, 30, .55); }
+  50% { box-shadow: 0 0 0 6px rgba(217, 154, 30, 0); }
+}

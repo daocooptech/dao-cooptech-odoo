@@ -51,6 +51,7 @@
             'coop_theme/static/src/js/platform_page.js',
             'coop_theme/static/src/js/favorite.js',
             'coop_theme/static/src/xml/favorite.xml',
+            'coop_theme/static/src/xml/offline_dot.xml',
             'coop_theme/static/src/js/favorites_page.js',
             'coop_theme/static/src/xml/favorites_page.xml',
             'coop_theme/static/src/scss/favorites_page.scss',
