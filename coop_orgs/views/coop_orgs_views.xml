@@ -238,7 +238,7 @@
             -->
             <div class="o_coop_org_head">
                 <div class="o_coop_name_row">
-                  <h1><field name="name" widget="coop_inline" readonly="not coop_can_edit_card"
+                  <h1><field name="name" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit_card"
                              placeholder="Название организации"/></h1>
                   <span class="o_coop_verified" invisible="not coop_is_cooperative">
                     Кооперативная организация
