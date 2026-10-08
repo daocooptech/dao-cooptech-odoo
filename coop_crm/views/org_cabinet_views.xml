@@ -36,14 +36,14 @@
 
   <!--
     Кабинет на странице организации — только её людям с полномочиями.
-    Сразу под видом организации: это первое, за чем сотрудник приходит.
+    Первым в правой колонке: это первое, за чем сотрудник приходит.
   -->
   <record id="view_coop_orgs_form_cabinet" model="ir.ui.view">
     <field name="name">coop.orgs.form.cabinet</field>
     <field name="model">res.partner</field>
     <field name="inherit_id" ref="coop_orgs.view_coop_orgs_form"/>
     <field name="arch" type="xml">
-      <xpath expr="//div[hasclass('o_coop_org_kind')]" position="after">
+      <xpath expr="//div[hasclass('o_coop_about_band')]" position="before">
         <field name="coop_is_org_staff" invisible="1"/>
         <field name="coop_funnel_unassigned" invisible="1"/>
         <field name="coop_can_see_funnel" invisible="1"/>
