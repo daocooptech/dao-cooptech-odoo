@@ -125,18 +125,25 @@
     <field name="arch" type="xml">
       <form string="Предложение навыка">
         <header>
+          <!-- Публикация, пауза и стадии — только разместившему
+               (владелец 08.10.2026); остальным — «Написать» и контакты. -->
+          <field name="coop_is_mine" invisible="1"/>
           <button name="action_publish" type="object" string="Опубликовать"
-                  class="btn-primary" invisible="state == 'published'"/>
+                  class="btn-primary" invisible="not coop_is_mine or state != 'draft'"/>
+          <button name="action_publish" type="object" string="Возобновить"
+                  class="btn-primary" invisible="not coop_is_mine or state != 'paused'"/>
           <button name="action_pause" type="object" string="Приостановить"
-                  invisible="state != 'published'"/>
-          <button name="action_message_owner" type="object" string="Написать"/>
+                  invisible="not coop_is_mine or state != 'published'"/>
+          <button name="action_message_owner" type="object" string="Написать"
+                  invisible="coop_is_mine"/>
           <!-- «Показать контакты» — как в макете (`skill.html`):
                телефон и почта не выставлены сразу, а открываются
                по нажатию. -->
           <button name="action_show_contacts" type="object"
-                  string="Показать контакты"/>
+                  string="Показать контакты" invisible="coop_is_mine"/>
           <field name="state" widget="statusbar"
-                 statusbar_visible="draft,published,paused"/>
+                 statusbar_visible="draft,published,paused"
+                 invisible="not coop_is_mine"/>
         </header>
         <sheet>
           <field name="coop_can_edit" invisible="1"/>

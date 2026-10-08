@@ -2,6 +2,7 @@
 import logging
 
 from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -129,6 +130,30 @@ class CoopSkillOffer(models.Model):
         help='Приостановленное предложение остаётся у владельца, но из '
              'каталога уходит: мастер занят, а не ушёл с платформы.')
 
+    # Чьё это предложение для того, кто смотрит. Публикует и
+    # приостанавливает только разместивший (владелец 08.10.2026: «кнопку
+    # приостановить … сделать доступной только тому кто разместил
+    # объявление, стадии тоже»). Не по праву записи: администратор
+    # платформы правит всё, но чужое объявление его не делает.
+    coop_is_mine = fields.Boolean(
+        string='Моё предложение', compute='_compute_coop_is_mine')
+
+    @api.depends_context('uid')
+    @api.depends('partner_id')
+    def _compute_coop_is_mine(self):
+        mine = self.env.user.coop_publisher_partner_ids
+        for record in self:
+            record.coop_is_mine = record.partner_id in mine
+
+    def _coop_require_mine(self):
+        if self.env.su:
+            return
+        for record in self:
+            if not record.coop_is_mine:
+                raise UserError(_(
+                    'Публикует и приостанавливает предложение тот, кто его '
+                    'разместил.'))
+
     updated_display = fields.Char(
         string='Обновлено', compute='_compute_updated_display',
         help='Свежесть предложения. Мастер, обновлявший карточку на этой '
@@ -230,6 +255,7 @@ class CoopSkillOffer(models.Model):
         ноль минут, и каталог, в который можно писать с такой, наполняется
         не навыками.
         """
+        self._coop_require_mine()
         for record in self:
             record.partner_id.coop_require_level(
                 'contact', _('опубликовать предложение навыка'))
@@ -237,6 +263,7 @@ class CoopSkillOffer(models.Model):
         return True
 
     def action_pause(self):
+        self._coop_require_mine()
         self.write({'state': 'paused'})
         return True
 
