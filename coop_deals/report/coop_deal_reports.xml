@@ -31,10 +31,31 @@
     <field name="binding_type">report</field>
   </record>
 
+  <!--
+    Шапка печатных форм — платформы, а не компании сеанса. Стандартная
+    обёртка движка подставляла в шапку компанию, под которой открыт сеанс
+    (рабочая группа платформы со своим логотипом), хотя договор и акт —
+    между сторонами сделки. Логотип — светлой темы: в тёмной теме он
+    нарисован белым по чёрному, на бумаге нужен чёрный по белому (файл
+    получен инверсией, цветов ровно два, полутонов нет; фильтр CSS в
+    wkhtmltopdf не работает, поэтому отдельный файл).
+  -->
+  <template id="report_platform_header">
+    <div class="d-flex align-items-center pb-2 mb-3"
+         style="border-bottom: 1px solid #999;">
+      <img src="/coop_deals/static/img/cooptech-logo-light.png"
+           alt="ДАО КООПТЕХ" style="height: 40px; width: auto;"/>
+      <span class="ms-3" style="font-size: 12px; color: #444;">
+        Децентрализованная социально-экономическая платформа с открытым исходным кодом
+      </span>
+    </div>
+  </template>
+
   <template id="report_deal_act">
     <t t-call="web.html_container">
       <t t-foreach="docs" t-as="deal">
-        <t t-call="web.external_layout">
+        <div class="article">
+          <t t-call="coop_deals.report_platform_header"/>
           <div class="page">
             <h2 class="mt-4">Акт приёма-передачи к сделке <span t-field="deal.number"/></h2>
             <p class="text-muted">
@@ -105,7 +126,7 @@
               </div>
             </div>
           </div>
-        </t>
+        </div>
       </t>
     </t>
   </template>
@@ -113,7 +134,8 @@
   <template id="report_deal_agreement">
     <t t-call="web.html_container">
       <t t-foreach="docs" t-as="deal">
-        <t t-call="web.external_layout">
+        <div class="article">
+          <t t-call="coop_deals.report_platform_header"/>
           <div class="page">
             <h2 class="mt-4">Договор <span t-field="deal.number"/></h2>
             <p class="text-muted">
@@ -189,7 +211,7 @@
               платформы.
             </p>
           </div>
-        </t>
+        </div>
       </t>
     </t>
   </template>
