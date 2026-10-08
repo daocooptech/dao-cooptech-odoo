@@ -267,6 +267,27 @@ if [ "$engine_switch" = "1" ]; then
         exit 1
     fi
     say "Движок: $engine_tag"
+    # Русский перевод модулей, у которых он сменился в движке, — в базу.
+    # Подписи полей, меню и фильтров хранятся в базе, обычное обновление
+    # их не перезаписывает (deploy/engine_i18n.py). Сравнение по файлам:
+    # клон мелкий, истории для git diff в нём нет.
+    i18n_mods=$(cd "$ENGINE_DIR" && for po in addons/*/i18n/ru.po odoo/addons/*/i18n/ru.po; do
+                    [ -f "$po" ] || continue
+                    if ! cmp -s "$po" "$ODOO_HOME/odoo-prev/$po"; then
+                        basename "$(dirname "$(dirname "$po")")"
+                    fi
+                done | sort -u | tr '
+' ' ')
+    if [ -n "${i18n_mods// /}" ]; then
+        printf '%s
+' "$i18n_mods" > /tmp/coop_engine_i18n.txt
+        chmod 644 /tmp/coop_engine_i18n.txt
+        if ! run "$ODOO_HOME/venv/bin/python" "$ENGINE_DIR/odoo-bin" shell                 -c "$CONF" -d "$DB" --no-http                 < "$ODOO_HOME/coop-addons/deploy/engine_i18n.py"; then
+            say "ВНИМАНИЕ: перевод не перезалит ($i18n_mods) — движок встал, продолжаю"
+        else
+            say "Перевод из движка: $i18n_mods"
+        fi
+    fi
     # Исходник на этом сервере (решение 442; GPL-3 §6(d)): архив того самого
     # дерева, что работает, — каждая выкаченная метка остаётся доступной, даже
     # если GitHub закроет доступ. Архивом, а не голым репозиторием: клон
