@@ -20,6 +20,7 @@
 """
 
 from odoo import _, api, fields, models
+from odoo.tools import html2plaintext
 
 
 class CoopNotification(models.Model):
@@ -159,6 +160,27 @@ class CoopNotification(models.Model):
             self.env.user, '_coop_acting_partner') else self.env.user.partner_id
         return self.search_count([
             ('partner_id', '=', partner.id), ('is_read', '=', False)])
+
+    @api.model
+    def coop_latest(self, limit=8):
+        """Последние извещения для выпадающего списка у колокольчика.
+
+        Задача владельца 08.10.2026: «при нажатии на иконку уведомлений …
+        должна быть еще всплывашка с последними уведомлениями как в
+        сообщениях и внизу ссылка посмотреть все уведомления». Текст —
+        без разметки: в узком списке ссылки внутри строки не нужны, вся
+        строка и есть переход.
+        """
+        partner = self.env.user._coop_acting_partner() if hasattr(
+            self.env.user, '_coop_acting_partner') else self.env.user.partner_id
+        kinds = dict(self._fields['kind']._description_selection(self.env))
+        return [{
+            'id': record.id,
+            'text': html2plaintext(record.body or '').strip(),
+            'kind': kinds.get(record.kind, ''),
+            'date': fields.Datetime.to_string(record.create_date),
+            'is_read': record.is_read,
+        } for record in self.search([('partner_id', '=', partner.id)], limit=limit)]
 
     def action_open(self):
         """Открыть запись, о которой извещение, и погасить точку."""

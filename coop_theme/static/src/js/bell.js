@@ -1,6 +1,9 @@
 /** @odoo-module **/
 
 import { Component, onWillStart, onWillUnmount, proxy, usePlugin, useProps } from "@odoo/owl";
+import { Dropdown } from "@web/core/dropdown/dropdown";
+import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
+import { deserializeDateTime } from "@web/core/l10n/dates";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { ActionPlugin } from "@web/webclient/actions/action_plugin";
@@ -19,13 +22,17 @@ import { ActionPlugin } from "@web/webclient/actions/action_plugin";
  */
 export class CoopBell extends Component {
     static template = "coop_theme.Bell";
+    static components = { Dropdown };
     props = useProps();
 
     setup() {
         this.orm = useService("orm");
         this.action = usePlugin(ActionPlugin);
         this.boot = useService("coopBoot");
-        this.state = proxy({ count: 0 });
+        this.state = proxy({ count: 0, items: [], loading: false });
+        // Выпадающий список последних извещений — как у сообщений
+        // (задача владельца 08.10.2026); весь раздел — ссылкой внизу.
+        this.dropdown = useDropdownState();
 
         // Первое число — из общего запуска: при открытии страницы
         // колокольчик спрашивал сервер отдельно, впереди раздела.
@@ -52,6 +59,45 @@ export class CoopBell extends Component {
             // значит, числа не будет, а платформа работает дальше.
             this.state.count = 0;
         }
+    }
+
+    async load() {
+        this.state.loading = true;
+        try {
+            this.state.items = await this.orm.call("coop.notification", "coop_latest", []);
+        } catch {
+            this.state.items = [];
+        } finally {
+            this.state.loading = false;
+        }
+    }
+
+    when(value) {
+        return value ? deserializeDateTime(value).toRelative() : "";
+    }
+
+    async openItem(item) {
+        this.dropdown.close();
+        const action = await this.orm.call("coop.notification", "action_open", [[item.id]]);
+        if (action) {
+            await this.action.doAction(action);
+        } else {
+            this.open();
+        }
+        this.refresh();
+    }
+
+    async markAll() {
+        await this.orm.call("coop.notification", "action_mark_all_read", []);
+        for (const item of this.state.items) {
+            item.is_read = true;
+        }
+        this.state.count = 0;
+    }
+
+    openAll() {
+        this.dropdown.close();
+        this.open();
     }
 
     // Имя латиницей намеренно: шаблонизатор OWL разбирает выражения

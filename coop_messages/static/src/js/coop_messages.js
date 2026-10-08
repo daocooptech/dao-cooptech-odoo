@@ -8,6 +8,8 @@ import { useService } from "@web/core/utils/hooks";
 
 import { fields } from "@mail/model/export";
 import { MessagingMenu } from "@mail/core/public_web/messaging_menu/messaging_menu_model";
+import { MessagingMenuTab } from "@mail/core/public_web/messaging_menu/messaging_menu_tab_model";
+import { MessagingMenu as MessagingMenuComponent } from "@mail/core/public_web/messaging_menu/messaging_menu";
 import { openChannelInvitationDialog } from "@mail/discuss/core/common/channel_invitation";
 import { Thread as ThreadComponent } from "@mail/core/common/thread";
 import { Composer } from "@mail/core/common/composer";
@@ -296,6 +298,42 @@ patch(MessagingMenu.prototype, {
             },
             eager: true,
         });
+    },
+});
+
+// Неудачная подгрузка вкладки — повторить при следующем открытии.
+//
+// Движок грузит список вкладки при открытии меню, только пока она в
+// состоянии «new»; после неудачи (сервер перезапускается, сессия истекла)
+// он ставит «idle», и дальше грузит только прокруткой вниз. В меню
+// оставался один OdooBot, а на ярлыке «Личные» — 9 непрочитанных, и так
+// до перезагрузки страницы. Владелец 08.10.2026: «написано 9
+// непрочитанные сообщений, а там во вкладке 1 сообщение от бота, как так
+// получилось? исправь». Воспроизведено: одна сорванная подгрузка — и
+// повторное открытие меню ничего не грузит. Заплатка — на метод, а не на
+// поле (см. выше про 07.10).
+patch(MessagingMenuTab.prototype, {
+    async loadMore({ filter, pluginFilters = [], searchTerm } = {}) {
+        const key = this._filterKey(filter, pluginFilters);
+        try {
+            return await super.loadMore(...arguments);
+        } catch (error) {
+            if (!searchTerm && this.loadStatusByFilterId[key] === "idle") {
+                this.loadStatusByFilterId[key] = "new";
+            }
+            throw error;
+        }
+    },
+});
+
+// И сама повторная попытка: первичную подгрузку движок запускает только
+// при смене вкладки или фильтра, а состояние меню живёт между открытиями.
+// Поэтому при каждом показе меню — проверка: вкладка ещё «new» (не
+// грузилась или сорвалась) — грузим.
+patch(MessagingMenuComponent.prototype, {
+    setup() {
+        super.setup(...arguments);
+        onMounted(() => this.state()?._ensureTabOrFilterInitialLoad?.());
     },
 });
 
