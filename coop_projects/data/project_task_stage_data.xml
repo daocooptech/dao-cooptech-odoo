@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!--
+    Этапы задач — общие для всех проектов платформы (решение 452, этап 3).
+
+    Их заводил загрузчик наполнения по названию, а движок 20 к каждому
+    новому проекту добавлял свои четыре «New / In Progress / Done /
+    Cancelled»: на канбане восемь столбцов вперемешку, половина английские.
+    Теперь этапы — данные модуля; уже заведённые по названию узнаются до
+    загрузки записей, чтобы не появилось вторых «Готово».
+  -->
+  <function model="project.project" name="coop_adopt_task_stages"/>
+
+  <record id="task_stage_idea" model="project.task.type">
+    <field name="name">Идея</field>
+    <field name="sequence">10</field>
+    <field name="fold" eval="False"/>
+  </record>
+  <record id="task_stage_doing" model="project.task.type">
+    <field name="name">В работе</field>
+    <field name="sequence">20</field>
+    <field name="fold" eval="False"/>
+  </record>
+  <record id="task_stage_review" model="project.task.type">
+    <field name="name">На проверке</field>
+    <field name="sequence">30</field>
+    <field name="fold" eval="False"/>
+  </record>
+  <record id="task_stage_done" model="project.task.type">
+    <field name="name">Готово</field>
+    <field name="sequence">40</field>
+    <field name="fold" eval="True"/>
+  </record>
+
+  <function model="project.project" name="coop_merge_task_stages"/>
+</odoo>

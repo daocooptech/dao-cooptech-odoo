@@ -14,4 +14,5 @@
   -->
   <function model="coop.project" name="backfill_managed_projects"/>
   <function model="res.company" name="coop_archive_internal_projects"/>
+  <function model="project.project" name="coop_drop_engine_stages"/>
 </odoo>

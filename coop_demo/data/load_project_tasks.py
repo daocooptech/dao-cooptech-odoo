@@ -221,7 +221,13 @@ def _ensure_stages(Stage, projects):
     """Этапы заводятся один раз и привязываются ко всем проектам сразу."""
     found = {}
     for code, name, sequence in STAGES:
-        stage = Stage.search([('name', '=', name)], limit=1)
+        # Этапы — данные модуля проектов (решение 452, этап 3). По
+        # названию искать нельзя: на боевой нашлось два общих «Готово».
+        stage = Stage.env.ref('coop_projects.task_stage_%s' % code,
+                              raise_if_not_found=False)
+        if not stage:
+            stage = Stage.search([('name', '=', name), ('user_id', '=', False)],
+                                 limit=1)
         if not stage:
             stage = Stage.create({'name': name, 'sequence': sequence})
         # Этап виден в проекте, только если проект указан в его списке.

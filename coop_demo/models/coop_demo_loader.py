@@ -6,6 +6,7 @@ from odoo import api, models
 from ..data import rubrics
 from ..data import load_registries
 from ..data import load_project_updates
+from ..data import load_project_work
 from ..data import load_project_follows
 from ..data import load_wall_posts
 from ..data import load_wall_media
@@ -192,6 +193,10 @@ class CoopDemoLoader(models.AbstractModel):
         # а исполнители берутся из вкладчиков сбора.
         if 'project.task' in self.env:
             load_project_tasks.load_project_tasks(self.env)
+            # Управление проектами как в работающей организации (решение
+            # 452, этап 3): закрытые задачи, сроки 2026, подзадачи,
+            # зависимости, часы, вложения и проекты без сбора.
+            load_project_work.load_project_work(self.env)
         # Склады и биржа мощностей — после сделок: сданное другим место
         # склад считает по действующим договорённостям, а не по
         # введённому числу, и договорённости для этого должны уже быть.

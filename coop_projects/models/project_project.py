@@ -15,7 +15,11 @@
 полем со значением по умолчанию — то есть гасила расчёт ядра ради того
 же самого результата.
 """
+import logging
+
 from odoo import api, fields, models
+
+_logger = logging.getLogger(__name__)
 
 # Полномочия, с которыми член организации действует от её имени, — те же,
 # что у `res.users.ACTING_POWERS` в coop_base.
@@ -33,6 +37,102 @@ class ProjectProject(models.Model):
         'coop.project', 'project_id', string='Сбор вкладов',
         help='Обратная сторона связи: из какого сбора вырос этот проект. '
              'Пусто у проектов, заведённых напрямую в управлении.')
+
+    # Общие этапы задач: xml-id в coop_projects -> название.
+    _COOP_TASK_STAGES = [
+        ('task_stage_idea', 'Идея'),
+        ('task_stage_doing', 'В работе'),
+        ('task_stage_review', 'На проверке'),
+        ('task_stage_done', 'Готово'),
+    ]
+
+    @api.model
+    def coop_adopt_task_stages(self):
+        """Признать своими этапы, которые загрузчик завёл по названию.
+
+        Из нескольких одноимённых берётся тот, к которому привязано
+        больше проектов, — им и пользуются. Личные этапы (`user_id`) не
+        трогаем: это «Входящие / Сегодня» каждого человека.
+        """
+        Data = self.env['ir.model.data'].sudo()
+        Stage = self.env['project.task.type'].sudo().with_context(active_test=False)
+        for xmlid, name in self._COOP_TASK_STAGES:
+            if self.env.ref('coop_projects.%s' % xmlid, raise_if_not_found=False):
+                continue
+            found = Stage.search([('name', '=', name), ('user_id', '=', False)])
+            if not found:
+                continue
+            stage = max(found, key=lambda s: (len(s.project_ids), -s.id))
+            Data.create({'module': 'coop_projects', 'name': xmlid,
+                         'model': 'project.task.type', 'res_id': stage.id})
+
+    @api.model
+    def coop_merge_task_stages(self):
+        """Слить одноимённые общие этапы в свои.
+
+        На боевой два общих «Готово» (замер копии 08.10.2026: 55 и 119
+        проектов, задачи в обоих) — загрузчики заводили этап по названию в
+        разное время. Задачи и проекты переезжают в свой этап, дубль — в
+        архив. Личные этапы людей не трогаем.
+        """
+        Stage = self.env['project.task.type'].sudo().with_context(active_test=False)
+        Task = self.env['project.task'].sudo().with_context(
+            active_test=False, mail_notrack=True, tracking_disable=True)
+        merged = 0
+        for stage in self._coop_task_stages():
+            twins = Stage.search([('id', '!=', stage.id), ('user_id', '=', False)]
+                                 ).filtered(lambda s: s.name == stage.name)
+            for twin in twins:
+                Task.search([('stage_id', '=', twin.id)]).write({'stage_id': stage.id})
+                for project in twin.project_ids:
+                    project.type_ids = [fields.Command.unlink(twin.id),
+                                        fields.Command.link(stage.id)]
+                twin.active = False
+                merged += 1
+        if merged:
+            _logger.info('Одноимённые этапы задач слиты в общие: %s', merged)
+        return merged
+
+    @api.model
+    def _coop_task_stages(self):
+        stages = self.env['project.task.type']
+        for xmlid, _name in self._COOP_TASK_STAGES:
+            stages |= self.env.ref('coop_projects.%s' % xmlid,
+                                   raise_if_not_found=False) or stages.browse()
+        return stages
+
+    @api.model
+    def coop_drop_engine_stages(self):
+        """Снять с проектов пустые этапы, которые движок завёл сам.
+
+        Движок 20 каждому новому проекту без этапов заводит свои четыре
+        «New / In Progress / Done / Cancelled». У проектов с общими этапами
+        они лишние: на канбане восемь столбцов. Снимаем только пустые,
+        только принадлежащие одному проекту и без xml-id; сами этапы — в
+        архив, а не удаляются.
+        """
+        shared = self._coop_task_stages()
+        if len(shared) < 4:
+            return 0
+        Stage = self.env['project.task.type'].sudo().with_context(active_test=False)
+        Task = self.env['project.task'].sudo().with_context(active_test=False)
+        named = set(self.env['ir.model.data'].sudo().search(
+            [('model', '=', 'project.task.type')]).mapped('res_id'))
+        dropped = Stage
+        for project in self.sudo().with_context(active_test=False).search(
+                [('type_ids', 'in', shared.ids)]):
+            extra = project.type_ids - shared
+            extra = extra.filtered(lambda s: (
+                not s.user_id and s.id not in named
+                and s.project_ids == project
+                and not Task.search_count([('stage_id', '=', s.id)])))
+            if extra:
+                project.type_ids = [fields.Command.unlink(s.id) for s in extra]
+                dropped |= extra
+        if dropped:
+            dropped.write({'active': False})
+            _logger.info('Пустые этапы движка сняты с проектов: %s', len(dropped))
+        return len(dropped)
 
     @api.model
     def _coop_partner_users(self, partners):

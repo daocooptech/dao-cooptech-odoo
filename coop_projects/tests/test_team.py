@@ -65,6 +65,16 @@ class TestProjectTeam(CoopProjectCase):
         self.assertTrue(self._sees(agent, managed))
         self.assertFalse(self._sees(reader, managed))
 
+    def test_rukovoditel_proekta_organizacii_eyo_predstavitel(self):
+        """У организации нет своего входа — руководитель её представитель,
+        а не тот, от чьего имени шёл запуск (система)."""
+        org = self._make_org('ПК Свой Проект')
+        agent = self._make_person('Представитель Инициатора')
+        self._join(agent, org, powers=('deal',))
+        fee = self._make_project(partner=org)
+        managed = fee._create_managed_project()
+        self.assertEqual(managed.user_id, agent)
+
     def test_dobor_komandy_u_staryh_proektov(self):
         giver = self._make_person('Вкладчик Старого Проекта')
         project = self._launched(giver)

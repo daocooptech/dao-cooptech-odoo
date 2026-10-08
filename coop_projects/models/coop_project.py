@@ -677,9 +677,12 @@ class CoopProject(models.Model):
             # надо (решение владельца от 2026-09-14).
             'privacy_visibility': 'followers',
         }
-        lead = self.partner_id.user_ids[:1]
-        if lead:
-            values['user_id'] = lead.id
+        # Руководитель — сам инициатор, а за организацию — её
+        # представитель. Пустым поле оставлять нельзя: движок подставит
+        # того, кто запускает, а запуск идёт от системы.
+        lead = (self.partner_id.user_ids
+                or Project._coop_partner_users(self.partner_id))[:1]
+        values['user_id'] = lead.id or False
         # Первый этап ведения ставим сами. Odoo подставила бы свой
         # первый по порядку, а наш набор кооперативный: проект начинается
         # с подготовки, а не с «К выполнению».
@@ -697,6 +700,12 @@ class CoopProject(models.Model):
         # достиг. Пункт 16 разбора архитектора.
         if 'allow_milestones' in Project._fields:
             values['allow_milestones'] = True
+        # Этапы задач — общие для платформы. Без них движок заведёт
+        # проекту свои четыре английских «New / In Progress / Done /
+        # Cancelled».
+        task_stages = Project._coop_task_stages()
+        if task_stages:
+            values['type_ids'] = [(6, 0, task_stages.ids)]
         for name, field in Project._fields.items():
             if name in values or not field.store or field.type != 'selection':
                 continue
@@ -838,6 +847,13 @@ class CoopProject(models.Model):
         wanted = project_group
         if stages_group:
             wanted |= stages_group
+        # Зависимости задач — тоже всем (решение 452, этап 3): без группы
+        # поле «Ждёт» и состояние «Ожидание» скрыты, и шаг, который нельзя
+        # начать до предыдущего, выглядит просто незапущенным.
+        dependencies_group = self.env.ref('project.group_project_task_dependencies',
+                                          raise_if_not_found=False)
+        if dependencies_group:
+            wanted |= dependencies_group
         missing = wanted - base_group.implied_ids
         if not missing:
             return True
