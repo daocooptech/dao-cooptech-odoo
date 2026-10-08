@@ -45,9 +45,11 @@
          style="border-bottom: 1px solid #999;">
       <img src="/coop_deals/static/img/cooptech-logo-light.png"
            alt="ДАО КООПТЕХ" style="height: 40px; width: auto;"/>
-      <span class="ms-3" style="font-size: 12px; color: #444;">
-        Децентрализованная социально-экономическая платформа с открытым исходным кодом
-      </span>
+      <div class="ms-3" style="font-size: 12px; line-height: 1.25; color: #444;">
+        <div>Децентрализованная</div>
+        <div><strong>Социально-экономическая платформа</strong></div>
+        <div>с открытым исходным кодом</div>
+      </div>
     </div>
   </template>
 
