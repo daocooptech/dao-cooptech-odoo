@@ -45,8 +45,8 @@
          style="border-bottom: 1px solid #999;">
       <div class="me-3 text-end" style="font-size: 12px; line-height: 1.25; color: #444;">
         <div>Децентрализованная</div>
-        <div style="font-size: 14px;"><strong>Социально-экономическая</strong></div>
-        <div style="font-size: 14px;"><strong>платформа</strong></div>
+        <div>Социально-экономическая</div>
+        <div>платформа</div>
       </div>
       <img src="/coop_deals/static/img/cooptech-logo-light.png"
            alt="ДАО КООПТЕХ" style="height: 40px; width: auto;"/>
