@@ -96,6 +96,9 @@ class TestCoopCrm(TransactionCase):
 
     def test_apps_by_head(self):
         company = self.org.coop_company_id
+        # «Проекты» по умолчанию выключены (решение 452) — включаем, чтобы
+        # проверить, что компания держится на последнем открытом приложении.
+        self.org.with_user(self.head).write({'coop_app_project': True})
         with self.assertRaises(UserError):
             self.org.with_user(self.seller).write({'coop_app_crm': False})
         self.org.with_user(self.head).write({'coop_app_crm': False})
@@ -118,5 +121,6 @@ class TestCoopCrm(TransactionCase):
         coop = self.env['res.partner'].create({
             'name': 'ПК «Набор по форме»', 'is_company': True,
             'coop_legal_form_id': form.id})
-        self.assertTrue(coop.coop_app_crm and coop.coop_app_stock and coop.coop_app_project)
-        self.assertFalse(coop.coop_app_hr)
+        self.assertTrue(coop.coop_app_crm and coop.coop_app_stock)
+        # «Проекты» выключены у всех форм (решение 452).
+        self.assertFalse(coop.coop_app_hr or coop.coop_app_project)

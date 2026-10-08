@@ -74,3 +74,10 @@ class TestProjectTeam(CoopProjectCase):
         self.assertFalse(self._sees(giver, managed))
         self.Project.backfill_managed_projects()
         self.assertTrue(self._sees(giver, managed))
+
+    def test_vnutrenniy_proekt_novoy_kompanii_v_arhive(self):
+        """Заглушка учёта времени не попадает в «Управление проектами»."""
+        company = self.env['res.company'].create({'name': 'ООО Новая Компания Учёта'})
+        internal = company.internal_project_id
+        self.assertTrue(internal)
+        self.assertFalse(internal.active)

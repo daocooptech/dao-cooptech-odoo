@@ -148,7 +148,7 @@
                 <field name="coop_app_project" widget="coop_autosave_toggle" nolabel="1"
                        readonly="not coop_can_manage_apps"/>
                 <button name="action_coop_app_project" type="object" class="o_coop_band_all"
-                        invisible="not coop_app_project or not coop_company_id">открыть</button>
+                        invisible="not coop_app_project">открыть</button>
               </div>
               <div class="o_coop_app_row">
                 <span class="o_coop_key">Сотрудники</span>

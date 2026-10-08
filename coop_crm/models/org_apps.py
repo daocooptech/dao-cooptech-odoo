@@ -20,11 +20,14 @@ APPS = {
     'project': (('sign', 'deal'), 'project.group_project_user'),
     'hr': (('roster', 'powers'), 'hr.group_hr_user'),
 }
+# «Проекты» по умолчанию выключены у всех (решение 452): организация не
+# ведёт своих проектов, пока руководитель не включит, но участвует в
+# чужих — команда проекта открывает их её людям и без переключателя.
 DEFAULTS = {
-    'commercial': ('crm', 'stock', 'project', 'hr'),
-    'cooperative': ('crm', 'stock', 'project'),
-    'nonprofit': ('project', 'hr'),
-    'decentralized': ('project',),
+    'commercial': ('crm', 'stock', 'hr'),
+    'cooperative': ('crm', 'stock'),
+    'nonprofit': ('hr',),
+    'decentralized': (),
 }
 FIELDS = ['coop_app_%s' % code for code in APPS]
 
@@ -46,10 +49,10 @@ class ResPartner(models.Model):
                 org.is_company and org.id and user.coop_has_power('sign', org))
 
     def _coop_default_apps(self):
-        """Набор по группе правовых форм; без формы — только «Проекты»."""
+        """Набор по группе правовых форм; без формы — ничего."""
         for org in self:
             code = org.coop_legal_form_group_id.code
-            wanted = DEFAULTS.get(code, ('project',))
+            wanted = DEFAULTS.get(code, ())
             super(ResPartner, org).write(
                 {'coop_app_%s' % app: app in wanted for app in APPS})
         return True
@@ -105,7 +108,19 @@ class ResPartner(models.Model):
         return self._coop_app_action('stock.action_picking_tree_all', _('Склад'))
 
     def action_coop_app_project(self):
-        return self._coop_app_action('project.open_view_project_all', _('Проекты'))
+        """Проекты, которые организация ведёт или где она вкладчик.
+
+        Не по компании учёта, как остальные приложения: проект сбора
+        общий для вкладчиков из разных организаций, и привязка к одной
+        компании выкинула бы остальных из команды. Организация-инициатор
+        и принятые вкладчики — подписчики проекта (`_project_followers`).
+        """
+        action = self._coop_app_action('project.open_view_project_all', _('Проекты'))
+        action['domain'] = ['|', ('partner_id', '=', self.id),
+                            ('message_partner_ids', 'in', [self.id])]
+        action['context'] = {'default_partner_id': self.id,
+                             'coop_catalog': False, 'coop_section': False}
+        return action
 
     def action_coop_app_hr(self):
         return self._coop_app_action('hr.open_view_employee_list_my', _('Сотрудники'))

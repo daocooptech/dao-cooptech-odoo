@@ -13,4 +13,5 @@
     Повторение безопасно — тем, у кого связь есть, ничего не делается.
   -->
   <function model="coop.project" name="backfill_managed_projects"/>
+  <function model="res.company" name="coop_archive_internal_projects"/>
 </odoo>
