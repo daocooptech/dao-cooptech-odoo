@@ -217,6 +217,7 @@ class CoopDemoLoader(models.AbstractModel):
         # мимо кнопки (замечание 11.10), — когда все, кто заводит сделки,
         # уже отработали, и до кошельков: сальдо считается из платежей.
         load_deal_specs.load_deal_specs(self.env)
+        load_deal_specs.tidy_payment_schedules(self.env)
         # Кошельки последними: состав вкладок зависит от членства, а
         # сальдо по контрагентам считается из платежей по сделкам.
         load_wallets.load_wallets(self.env)

@@ -3,7 +3,7 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 CHANNELS = [
-    ('direct', 'Напрямую продавцу'),
+    ('direct', 'Напрямую получателю'),
     ('nominal', 'Безопасная сделка: через номинальный счёт'),
 ]
 

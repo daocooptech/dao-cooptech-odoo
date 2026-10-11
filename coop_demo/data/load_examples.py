@@ -842,25 +842,36 @@ def _subject(way, index, rnd):
 
 
 def _payment_cases(env):
+    """Просроченные и отменённые платежи — там, где они бывают.
+
+    Просрочка — у сделки, которая исполняется или ждёт приёмки; отмена
+    при пересмотре условий — у отменённой после согласования. Сумма — доля
+    суммы сделки: платёж в девять раз больше договора (было до 11.10)
+    выдаёт машинное происхождение с первого взгляда.
+    """
     Payment = env['coop.deal.payment'].sudo()
     Deal = env['coop.deal'].sudo()
-    deals = Deal.search([('amount', '>', 0)], limit=80)
-    if not deals:
-        return {}
+    money = ('sale', 'purchase', 'batch', 'rent', 'service', 'job')
     rnd = _rnd()
     made = {}
-    for state, title in (
-        ('overdue', 'Просроченный платёж'),
-        ('cancelled', 'Платёж отменён при пересмотре условий'),
+    for state, title, deal_states in (
+        ('overdue', 'Просроченный платёж', ('active', 'acceptance', 'disputed')),
+        ('cancelled', 'Платёж отменён при пересмотре условий', ('cancelled',)),
     ):
-        need = _need(env, 'coop.deal.payment', [('state', '=', state)])
+        deals = Deal.search([('amount', '>', 0), ('way', 'in', money),
+                             ('state', 'in', deal_states),
+                             ('signed_on', '!=', False)], limit=80)
+        need = _need(env, 'coop.deal.payment', [('state', '=', state)]) if deals else 0
         for index in range(need):
             deal = deals[index % len(deals)]
+            payer, payee = deal._coop_payer_payee()
             Payment.create({
                 'deal_id': deal.id,
                 'name': title,
                 'due_on': '2026-%02d-%02d' % (1 + index % 8, 1 + index % 27),
-                'amount': rnd.randint(4000, 60000),
+                'amount': round(deal.amount * rnd.choice((0.2, 0.25, 0.3, 0.5)), 2),
+                'payer_id': payer.id,
+                'payee_id': payee.id,
                 'state': state,
             })
         made['платёж %s' % state] = need

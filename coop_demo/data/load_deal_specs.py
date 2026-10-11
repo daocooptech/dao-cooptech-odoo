@@ -165,3 +165,110 @@ def load_deal_specs(env):
             _logger.exception('Сделка %s: спецификация не дописана', deal.number)
     _logger.info('Спецификация дописана сделкам: %s, график платежей: %s',
                  lines, payments)
+
+
+DOPLATA = 'Доплата за разницу в стоимости'
+
+
+def _paid_on(deal, due, salt, today):
+    return min(due + timedelta(days=int(_bucket(deal.id, salt) * 4) - 1),
+               deal.closed_on or today, today)
+
+
+def tidy_payment_schedules(env):
+    """Графики платежей — как у действующей площадки.
+
+    Замечание владельца 11.10.2026 (сделка 327: обмен на 3 200 ₽ с
+    просроченным платежом 5 096 ₽ и отменённым 28 649 ₽). Замер в тот же
+    день: 170 из 213 завершённых сделок с неоплаченными платежами, у 39
+    сделок платежи не сходятся с суммой, у 66 обменов денежные платежи.
+
+    - Обмен и дар деньгами не платятся: платежи снимаются, у каждой
+      пятой сделки обмена остаётся доплата за разницу в стоимости.
+    - Платежи, кроме отменённых, сходятся с суммой сделки; отменённый не
+      больше суммы сделки.
+    - Завершённая сделка оплачена; долг после акта — у каждой восьмой.
+    - У отменённой сделки неоплаченное отменено.
+    """
+    Deal = env['coop.deal'].sudo().with_context(
+        tracking_disable=True, mail_create_nolog=True, mail_notrack=True)
+    Payment = env['coop.deal.payment'].sudo().with_context(
+        tracking_disable=True, mail_create_nolog=True, mail_notrack=True)
+    today = fields.Date.context_today(Deal)
+    nominal = 'nominal_hold_ids' in Payment._fields
+    fixed = 0
+    for deal in Deal.search([('payment_ids', '!=', False)], order='id'):
+        payments = deal.payment_ids.sorted(lambda p: (p.due_on, p.id))
+        if nominal and payments.nominal_hold_ids:
+            continue  # деньги на номинальном счёте — их график не трогаем
+        before = [(p.amount, p.state) for p in payments]
+        try:
+            with env.cr.savepoint():
+                if deal.way in ('exchange', 'gift'):
+                    _tidy_barter(deal, payments, Payment, today)
+                else:
+                    _tidy_money(deal, payments, Payment, today)
+                after = [(p.amount, p.state) for p in deal.payment_ids.sorted(
+                    lambda p: (p.due_on, p.id))]
+                fixed += before != after
+        except Exception:
+            _logger.exception('Сделка %s: график не приведён', deal.number)
+    _logger.info('Графики платежей приведены в порядок: %s сделок', fixed)
+
+
+def _tidy_barter(deal, payments, Payment, today):
+    payments.filtered(lambda p: p.name != DOPLATA).unlink()
+    keep = deal.way == 'exchange' and deal.amount > 0 and _bucket(deal.id, 'dop') < 0.2
+    if not keep or deal.payment_ids or deal.state in ('lead', 'draft'):
+        return
+    payer, payee = deal._coop_payer_payee()
+    due = (deal.signed_on or deal.create_date.date()) + timedelta(days=7)
+    if deal.state == 'cancelled':
+        state = 'cancelled'
+    elif deal.state == 'done':
+        state = 'paid'
+    else:
+        state = 'overdue' if due < today else 'planned'
+    Payment.create({
+        'deal_id': deal.id,
+        'name': DOPLATA,
+        'due_on': due,
+        'amount': round(deal.amount * (0.1 + 0.15 * _bucket(deal.id, 'dsum')), -1) or 100.0,
+        'payer_id': payer.id,
+        'payee_id': payee.id,
+        'state': state,
+        'paid_on': _paid_on(deal, due, 'dop', today) if state == 'paid' else False,
+    })
+
+
+def _tidy_money(deal, payments, Payment, today):
+    currency = deal.currency_id
+    live = payments.filtered(lambda p: p.state != 'cancelled')
+    if (not live and deal.amount > 0 and deal.way in MONEY_WAYS
+            and deal.state not in ('lead', 'draft', 'cancelled')):
+        # Остались одни отменённые — договорённость об оплате всё же была.
+        Payment.create(_schedule(deal, today))
+        return
+    total = sum(live.mapped('amount'))
+    if live and deal.amount > 0 and currency.compare_amounts(total, deal.amount):
+        # Пропорционально, остаток округления — последнему платежу.
+        rest = deal.amount
+        for payment in live[:-1]:
+            value = currency.round(payment.amount * deal.amount / total)
+            payment.amount = value
+            rest -= value
+        live[-1].amount = currency.round(rest)
+    for payment in payments.filtered(lambda p: p.state == 'cancelled'):
+        if deal.amount > 0 and payment.amount > deal.amount:
+            payment.amount = currency.round(deal.amount * 0.3)
+
+    open_ = live.filtered(lambda p: p.state in ('planned', 'overdue'))
+    if deal.state == 'cancelled':
+        open_.write({'state': 'cancelled'})
+    elif deal.state == 'done' and open_:
+        debt = open_[-1:] if _bucket(deal.id, 'debt') < 0.125 else open_.browse()
+        for payment in open_ - debt:
+            payment.write({'state': 'paid',
+                           'paid_on': _paid_on(deal, payment.due_on, payment.id, today)})
+        for payment in debt:
+            payment.state = 'overdue' if payment.due_on < today else 'planned'
