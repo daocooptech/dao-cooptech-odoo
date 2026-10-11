@@ -31,7 +31,7 @@
             <div class="o_coop_kpi_num">
               <field name="nominal_to_pay" widget="monetary" nolabel="1"/>
             </div>
-            <div class="o_coop_kpi_label">Внести на хранение</div>
+            <div class="o_coop_kpi_label">К оплате</div>
           </div>
           <div class="o_coop_kpi_cell">
             <div class="o_coop_kpi_num">
