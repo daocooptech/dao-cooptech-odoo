@@ -94,7 +94,7 @@ class CoopNominalPayout(models.Model):
                     'получателя: %(available)s.',
                     amount=record.amount, code=hold.code, available=available))
 
-    def _mark_executed(self, date):
+    def _mark_executed(self, date, statement_line=None):
         """Списание найдено в выписке — выплата исполнена."""
         for record in self:
             if record.state not in LIVE:
@@ -104,7 +104,7 @@ class CoopNominalPayout(models.Model):
             hold._post(record.kind, date, [
                 {'leg': 'holder', 'amount': record.amount, 'partner': record.partner_id},
                 {'leg': 'bank', 'amount': -record.amount},
-            ])
+            ], statement_line=statement_line)
             record.write({'state': 'executed', 'executed_on': date})
             hold.write({
                 'state': 'paid_out' if record.kind == 'payout' else 'refunded',

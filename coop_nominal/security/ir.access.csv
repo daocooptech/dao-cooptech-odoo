@@ -18,3 +18,6 @@ rule_nominal_payout_party,Выплаты своих удержаний,coop.nomi
          ('hold_id.payee_id', 'in', user.coop_treasury_partner_ids.ids)]
       "
 rule_nominal_payout_admin,Выплаты — администратор,coop.nominal.payout,base.group_system,r,
+access_nominal_statement_admin,Выписки — администратор,coop.nominal.statement,base.group_system,r,
+access_nominal_statement_line_admin,Строки выписок — администратор,coop.nominal.statement.line,base.group_system,r,
+access_nominal_statement_import_admin,Загрузка выписки,coop.nominal.statement.import,base.group_system,crud,

@@ -172,13 +172,14 @@ class CoopNominalHold(models.Model):
                     code=record.code,
                     state=dict(record._fields['state'].selection)[record.state]))
 
-    def _post(self, kind, date, lines):
+    def _post(self, kind, date, lines, statement_line=None):
         self.ensure_one()
         for line in lines:
             line.setdefault('hold', self)
-        return self.env['coop.nominal.entry']._post(self.account_id, kind, date, lines)
+        return self.env['coop.nominal.entry']._post(
+            self.account_id, kind, date, lines, statement_line=statement_line)
 
-    def _credit(self, date):
+    def _credit(self, date, statement_line=None):
         """Деньги плательщика пришли на счёт — по выписке.
 
         Совпавшая строка выписки ставит позицию графика оплаченной: это
@@ -190,7 +191,7 @@ class CoopNominalHold(models.Model):
             record._post('credit', date, [
                 {'leg': 'bank', 'amount': record.amount},
                 {'leg': 'holder', 'amount': -record.amount, 'partner': first},
-            ])
+            ], statement_line=statement_line)
             record.write({
                 'state': 'held_buyer' if record.beneficiary_mode == 'both' else 'held_seller',
                 'beneficiary_id': first.id,

@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Строка выписки -->
+  <record id="view_coop_nominal_statement_line_list" model="ir.ui.view">
+    <field name="name">coop.nominal.statement.line.list</field>
+    <field name="model">coop.nominal.statement.line</field>
+    <field name="arch" type="xml">
+      <list string="Строки выписок" decoration-warning="state == 'unrecognized'">
+        <field name="date"/>
+        <field name="number"/>
+        <field name="direction"/>
+        <field name="amount" sum="Итого"/>
+        <field name="partner_name"/>
+        <field name="partner_inn" optional="show"/>
+        <field name="purpose"/>
+        <field name="state" widget="badge"
+               decoration-success="state == 'matched'"
+               decoration-warning="state == 'unrecognized'"/>
+        <field name="match_rule" optional="show"/>
+        <field name="hold_ids" widget="many2many_tags" optional="show"/>
+        <field name="note" optional="show"/>
+        <field name="statement_id" optional="hide"/>
+        <field name="currency_id" column_invisible="True"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_nominal_statement_line_search" model="ir.ui.view">
+    <field name="name">coop.nominal.statement.line.search</field>
+    <field name="model">coop.nominal.statement.line</field>
+    <field name="arch" type="xml">
+      <search string="Строки выписок">
+        <field name="purpose"/>
+        <field name="partner_name"/>
+        <field name="partner_inn"/>
+        <field name="number"/>
+        <filter name="unrecognized" string="Нераспознанное"
+                domain="[('state', '=', 'unrecognized')]"/>
+        <filter name="matched" string="Сопоставлено"
+                domain="[('state', '=', 'matched')]"/>
+        <separator/>
+        <filter name="incoming" string="Поступления" domain="[('direction', '=', 'in')]"/>
+        <filter name="outgoing" string="Списания" domain="[('direction', '=', 'out')]"/>
+        <group>
+          <filter name="by_statement" string="Выписка" context="{'group_by': 'statement_id'}"/>
+          <filter name="by_rule" string="Как сопоставлено" context="{'group_by': 'match_rule'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <!-- Выписка -->
+  <record id="view_coop_nominal_statement_list" model="ir.ui.view">
+    <field name="name">coop.nominal.statement.list</field>
+    <field name="model">coop.nominal.statement</field>
+    <field name="arch" type="xml">
+      <list string="Выписки" create="false" decoration-warning="unrecognized_count">
+        <field name="name"/>
+        <field name="account_id"/>
+        <field name="date_from"/>
+        <field name="date_to"/>
+        <field name="balance_start"/>
+        <field name="total_in"/>
+        <field name="total_out"/>
+        <field name="balance_end"/>
+        <field name="unrecognized_count"/>
+        <field name="uploaded_by_id" optional="show"/>
+        <field name="create_date" string="Загружена" optional="hide"/>
+        <field name="currency_id" column_invisible="True"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_nominal_statement_form" model="ir.ui.view">
+    <field name="name">coop.nominal.statement.form</field>
+    <field name="model">coop.nominal.statement</field>
+    <field name="arch" type="xml">
+      <form string="Выписка" create="false" edit="false" delete="false">
+        <sheet>
+          <div class="alert alert-warning" role="alert" invisible="not opening_discrepancy">
+            Начальный остаток выписки не сходится с книгой накануне: между выписками
+            пропущен день или строка.
+          </div>
+          <div class="oe_title">
+            <h1><field name="name"/></h1>
+          </div>
+          <group>
+            <group string="Файл">
+              <field name="account_id"/>
+              <field name="file_name"/>
+              <field name="uploaded_by_id"/>
+              <field name="create_date" string="Загружена"/>
+              <field name="skipped_count"/>
+              <field name="file_hash" groups="base.group_no_one"/>
+            </group>
+            <group string="Остатки">
+              <field name="date_from"/>
+              <field name="date_to"/>
+              <field name="balance_start"/>
+              <field name="total_in"/>
+              <field name="total_out"/>
+              <field name="balance_end"/>
+              <field name="opening_discrepancy"/>
+              <field name="unrecognized_count"/>
+              <field name="currency_id" invisible="1"/>
+            </group>
+          </group>
+          <field name="line_ids"/>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- Загрузка выписки -->
+  <record id="view_coop_nominal_statement_import_form" model="ir.ui.view">
+    <field name="name">coop.nominal.statement.import.form</field>
+    <field name="model">coop.nominal.statement.import</field>
+    <field name="arch" type="xml">
+      <form string="Загрузить выписку">
+        <p class="text-muted">
+          Файл обмена с клиент-банком (1CClientBankExchange). Поступления с кодом
+          удержания в назначении платежа зачтутся сами; что не опознано — ляжет
+          в «Нераспознанное» до разбора.
+        </p>
+        <group>
+          <field name="account_id"/>
+          <field name="file" filename="file_name"/>
+          <field name="file_name" invisible="1"/>
+        </group>
+        <footer>
+          <button name="action_import" type="object" string="Загрузить" class="btn-primary"/>
+          <button special="cancel" string="Отмена"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <!-- Кнопка и вкладка на счёте -->
+  <record id="view_coop_nominal_account_form_statement" model="ir.ui.view">
+    <field name="name">coop.nominal.account.form.statement</field>
+    <field name="model">coop.nominal.account</field>
+    <field name="inherit_id" ref="view_coop_nominal_account_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//sheet" position="before">
+        <header groups="base.group_system">
+          <button name="action_import_statement" type="object"
+                  string="Загрузить выписку" class="btn-primary"
+                  groups="base.group_system"/>
+        </header>
+      </xpath>
+      <xpath expr="//page[@name='holds']" position="after">
+        <page string="Выписки" name="statements" groups="base.group_system">
+          <field name="statement_ids" readonly="1"/>
+        </page>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="action_coop_nominal_statement" model="ir.actions.act_window">
+    <field name="name">Выписки</field>
+    <field name="res_model">coop.nominal.statement</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <record id="action_coop_nominal_statement_line" model="ir.actions.act_window">
+    <field name="name">Строки выписок</field>
+    <field name="res_model">coop.nominal.statement.line</field>
+    <field name="view_mode">list</field>
+    <field name="context">{'search_default_unrecognized': 1}</field>
+  </record>
+
+  <menuitem id="menu_coop_nominal_statement" name="Выписки"
+            parent="menu_coop_nominal_root" action="action_coop_nominal_statement" sequence="25"/>
+  <menuitem id="menu_coop_nominal_statement_line" name="Строки выписок"
+            parent="menu_coop_nominal_root" action="action_coop_nominal_statement_line" sequence="26"/>
+
+</odoo>

@@ -57,6 +57,10 @@ class CoopNominalEntry(models.Model):
     currency_id = fields.Many2one(related='account_id.currency_id')
     date = fields.Date(string='Дата', required=True, index=True, readonly=True)
     posted_by_id = fields.Many2one('res.users', string='Провёл', readonly=True)
+    statement_line_id = fields.Many2one(
+        'coop.nominal.statement.line', string='Строка выписки',
+        ondelete='restrict', index=True, readonly=True,
+        help='Строка банка, по которой проведено событие.')
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -75,12 +79,13 @@ class CoopNominalEntry(models.Model):
             'Записи книги номинального счёта не удаляются.'))
 
     @api.model
-    def _post(self, account, kind, date, lines):
+    def _post(self, account, kind, date, lines, statement_line=None):
         """Провести событие: набор записей с нулевой суммой.
 
         `lines` — словари с ключами `leg`, `amount` и, где нужно,
         `hold` и `partner`. Нога бенефициара без бенефициара и любая
-        запись с нулевой суммой — ошибка вызывающего кода.
+        запись с нулевой суммой — ошибка вызывающего кода. Событие по
+        выписке помнит свою строку.
         """
         account.ensure_one()
         currency = account.currency_id
@@ -108,6 +113,7 @@ class CoopNominalEntry(models.Model):
                 'amount': currency.round(line['amount']),
                 'date': date,
                 'posted_by_id': self.env.user.id,
+                'statement_line_id': statement_line.id if statement_line else False,
             })
         return self.sudo().with_context(coop_nominal_post=True).create(vals_list)
 
