@@ -1,0 +1,20 @@
+id,name,model_id,group_id/id,operation,domain
+access_nominal_account_user,Номинальные счета — чтение,coop.nominal.account,base.group_user,r,
+access_nominal_account_admin,Номинальные счета — ведение,coop.nominal.account,base.group_system,cru,
+access_nominal_setting_user,Настройки счёта — чтение,coop.nominal.setting,base.group_user,r,
+access_nominal_setting_admin,Настройки счёта — ведение,coop.nominal.setting,base.group_system,crud,
+rule_nominal_share_party,Свои доли,coop.nominal.share,base.group_user,r,"
+        ['|', ('payer_id', 'in', user.coop_treasury_partner_ids.ids),
+         ('payee_id', 'in', user.coop_treasury_partner_ids.ids)]
+      "
+rule_nominal_share_admin,Доли — администратор,coop.nominal.share,base.group_system,r,
+rule_nominal_entry_party,Книга своих долей,coop.nominal.entry,base.group_user,r,"
+        ['|', ('share_id.payer_id', 'in', user.coop_treasury_partner_ids.ids),
+         ('share_id.payee_id', 'in', user.coop_treasury_partner_ids.ids)]
+      "
+rule_nominal_entry_admin,Книга — администратор,coop.nominal.entry,base.group_system,r,
+rule_nominal_payout_party,Выплаты своих долей,coop.nominal.payout,base.group_user,r,"
+        ['|', ('share_id.payer_id', 'in', user.coop_treasury_partner_ids.ids),
+         ('share_id.payee_id', 'in', user.coop_treasury_partner_ids.ids)]
+      "
+rule_nominal_payout_admin,Выплаты — администратор,coop.nominal.payout,base.group_system,r,
