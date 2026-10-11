@@ -38,6 +38,9 @@ class CoopNominalReconciliation(models.Model):
         string='Выплат застряло в банке', readonly=True,
         help='Выгружены в банк больше %s дней назад, а списания в выписке нет.'
              % STALE_DAYS)
+    failed_payout_count = fields.Integer(
+        string='Отказов ждут решения', readonly=True,
+        help='Банк отказал, а удержание всё ещё ждёт выплаты: повторить или снять.')
     state = fields.Selection([
         ('ok', 'Сходится'),
         ('problem', 'Есть что разобрать'),
@@ -76,6 +79,9 @@ class CoopNominalAccountReconciliation(models.Model):
                 ('state', 'in', ('sent', 'bank_review', 'unknown')),
                 ('sent_on', '<', date - timedelta(days=STALE_DAYS)),
             ])
+            failed = Payout.search([
+                ('account_id', '=', account.id), ('state', '=', 'failed')]).filtered(
+                lambda p: p._source_waits())
             problems = []
             expected = date - timedelta(days=1)
             if not account.statement_date:
@@ -100,7 +106,12 @@ class CoopNominalAccountReconciliation(models.Model):
                     'Выплат выгружено в банк больше %(days)s дней назад и не '
                     'видно в выписке: %(count)s.') % {
                     'days': STALE_DAYS, 'count': stale})
+            if failed:
+                problems.append(_(
+                    'Банк отказал в выплатах, а удержания ждут: %s. Повторите '
+                    'или снимите.') % len(failed))
             vals = {
+                'failed_payout_count': len(failed),
                 'statement_date': account.statement_date,
                 'statement_balance': account.statement_balance,
                 'ledger_balance': account.ledger_balance,

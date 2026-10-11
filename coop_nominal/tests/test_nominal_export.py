@@ -11,9 +11,8 @@ from .test_nominal_statement import NominalStatementCase, _doc, _file
 SELLER_ACCOUNT = '40702810000000000002'
 
 
-@tagged('post_install', '-at_install')
-class TestNominalExport(NominalStatementCase):
-    """Реестр платёжек 1С и ежедневная сверка (этап 2в)."""
+class NominalExportCase(NominalStatementCase):
+    """Счёт с банком и продавец с реквизитами: выплаты можно выгружать."""
 
     @classmethod
     def setUpClass(cls):
@@ -35,6 +34,11 @@ class TestNominalExport(NominalStatementCase):
     def _documents(self, batch):
         _header, _accounts, documents = parse_1c(batch.file.content)
         return documents
+
+
+@tagged('post_install', '-at_install')
+class TestNominalExport(NominalExportCase):
+    """Реестр платёжек 1С и ежедневная сверка (этап 2в)."""
 
     def test_export_file_and_statement_closes_payout(self):
         hold, payout = self._queued_payout()

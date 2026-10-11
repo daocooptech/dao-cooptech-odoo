@@ -139,6 +139,10 @@ class CoopNominalAccountExport(models.Model):
         """
         self.ensure_one()
         account = self.sudo()
+        if account.adapter != 'manual':
+            raise UserError(_(
+                'Счёт %s подключён к банку: выплаты уходят без файла, второй '
+                'файл заплатил бы дважды.') % account.display_name)
         account._check_payouts_allowed()
         payouts = account._exportable_payouts()
         if not payouts:

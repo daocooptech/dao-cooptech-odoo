@@ -101,6 +101,9 @@ class CoopNominalPayout(models.Model):
         Hold = self.env['coop.nominal.hold']
         Line = self.env['coop.nominal.statement.line']
         today = fields.Date.context_today(self)
+        # Индекс «одна живая выплата» смотрит на состояние в базе: снятая
+        # минуту назад выплата ещё может висеть в кэше живой.
+        self.flush_model(['state'])
         for vals in vals_list:
             hold = Hold.browse(vals.get('hold_id'))
             line = Line.browse(vals.get('source_line_id'))

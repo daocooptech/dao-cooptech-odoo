@@ -85,6 +85,7 @@
         <field name="unrecognized_count"/>
         <field name="unrecognized_balance" optional="hide"/>
         <field name="stale_payout_count"/>
+        <field name="failed_payout_count"/>
         <field name="state" widget="badge"
                decoration-danger="state == 'problem'" decoration-success="state == 'ok'"/>
         <field name="note"/>
@@ -116,6 +117,72 @@
         <field name="sent_on" optional="show"/>
         <field name="batch_id" optional="hide"/>
       </field>
+    </field>
+  </record>
+
+  <!-- Выплата: ответы банка и действия сотрудника -->
+  <record id="view_coop_nominal_payout_form" model="ir.ui.view">
+    <field name="name">coop.nominal.payout.form</field>
+    <field name="model">coop.nominal.payout</field>
+    <field name="arch" type="xml">
+      <form string="Выплата" create="0" edit="0" delete="0">
+        <header>
+          <button name="action_retry" type="object" string="Повторить"
+                  class="btn-primary" invisible="state != 'failed'"
+                  groups="base.group_system"/>
+          <button name="action_mark_accepted" type="object" string="Банк принял"
+                  invisible="state != 'bank_review'" groups="base.group_system"/>
+          <button name="action_mark_rejected" type="object" string="Банк отказал"
+                  invisible="state not in ('sent', 'bank_review', 'unknown')"
+                  groups="base.group_system"
+                  confirm="Отметить, что банк отказал в этой выплате?"/>
+          <button name="action_cancel" type="object" string="Снять"
+                  invisible="state not in ('queued', 'bank_review', 'failed')"
+                  groups="base.group_system"
+                  confirm="Снять выплату? Деньги останутся на удержании за бенефициаром."/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="queued,sent,executed"/>
+        </header>
+        <sheet>
+          <div class="alert alert-danger" role="alert" invisible="state != 'failed'">
+            <field name="failure_reason" readonly="1"/>
+          </div>
+          <group>
+            <group string="Откуда и кому">
+              <field name="hold_id"/>
+              <field name="source_line_id" invisible="not source_line_id"/>
+              <field name="kind"/>
+              <field name="partner_id"/>
+              <field name="amount"/>
+              <field name="currency_id" invisible="1"/>
+            </group>
+            <group string="Реквизиты получателя">
+              <field name="recipient_name"/>
+              <field name="recipient_inn"/>
+              <field name="recipient_kpp"/>
+              <field name="recipient_account"/>
+              <field name="recipient_bic"/>
+              <field name="recipient_bank_name"/>
+              <field name="recipient_corr_account"/>
+            </group>
+            <group string="Банк">
+              <field name="version"/>
+              <field name="idempotency_key"/>
+              <field name="submit_count"/>
+              <field name="submitted_at"/>
+              <field name="bank_ref"/>
+              <field name="batch_id"/>
+              <field name="order_number"/>
+              <field name="sent_on"/>
+              <field name="executed_on"/>
+            </group>
+            <group string="Платёжка">
+              <field name="purpose"/>
+            </group>
+          </group>
+        </sheet>
+        <chatter/>
+      </form>
     </field>
   </record>
 
