@@ -38,8 +38,8 @@ class CoopNominalAccount(models.Model):
 
     setting_ids = fields.One2many(
         'coop.nominal.setting', 'account_id', string='Настройки')
-    share_ids = fields.One2many(
-        'coop.nominal.share', 'account_id', string='Доли')
+    hold_ids = fields.One2many(
+        'coop.nominal.hold', 'account_id', string='Платежи на удержании')
     entry_ids = fields.One2many(
         'coop.nominal.entry', 'account_id', string='Книга')
 
@@ -57,7 +57,7 @@ class CoopNominalAccount(models.Model):
     unrecognized_balance = fields.Monetary(
         string='Нераспознанное', currency_field='currency_id',
         compute='_compute_balances',
-        help='Поступления, которые не сопоставились с долей. Должно '
+        help='Поступления, которые не сопоставились с платежом. Должно '
              'уходить в ноль.')
     discrepancy = fields.Monetary(
         string='Расхождение с выпиской', currency_field='currency_id',
@@ -110,7 +110,7 @@ class CoopNominalAccount(models.Model):
 class CoopNominalSetting(models.Model):
     """Версия настроек номинального счёта с датой действия.
 
-    Развилки владельца меняются не задним числом: доля, созданная при
+    Развилки владельца меняются не задним числом: платёж на удержании, заведённый при
     одной версии, живёт по ней до конца. Поэтому вступившую в силу версию
     нельзя ни править, ни удалять — только добавить следующую.
     """
@@ -127,7 +127,7 @@ class CoopNominalSetting(models.Model):
         ('seller', 'Только продавец'),
     ], string='Бенефициары', default='both', required=True)
     fee_mode = fields.Selection([
-        ('withhold', 'Удержать из доли'),
+        ('withhold', 'Удержать из платежа'),
         ('invoice', 'Выставить счёт'),
     ], string='Комиссия', default='withhold', required=True)
     books_mode = fields.Selection([
@@ -139,7 +139,7 @@ class CoopNominalSetting(models.Model):
         help='Банк проверяет основание каждой выплаты до списания.')
     fee_percent = fields.Float(
         string='Комиссия, %', digits=(5, 2),
-        help='Доля от суммы платежа, которую берёт оператор.')
+        help='Процент от суммы платежа, который берёт оператор.')
     fee_vat_percent = fields.Float(
         string='НДС в комиссии, %', digits=(5, 2),
         help='Ставка НДС, входящего в сумму комиссии. Ноль — без НДС.')
@@ -162,11 +162,11 @@ class CoopNominalSetting(models.Model):
         for vals in vals_list:
             account = self.env['coop.nominal.account'].browse(vals.get('account_id'))
             date_from = fields.Date.to_date(vals.get('date_from'))
-            # Задним числом — только пока по счёту нет ни одной доли:
-            # иначе прошлые доли разошлись бы с тем, что «действовало».
-            if date_from and date_from < today and account.sudo().share_ids:
+            # Задним числом — только пока по счёту нет ни одного удержания:
+            # иначе прошлые удержания разошлись бы с тем, что «действовало».
+            if date_from and date_from < today and account.sudo().hold_ids:
                 raise UserError(_(
-                    'По счёту уже есть доли: новая версия настроек действует '
+                    'По счёту уже есть удержания: новая версия настроек действует '
                     'не раньше сегодняшнего дня.'))
         return super().create(vals_list)
 

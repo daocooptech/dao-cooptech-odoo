@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="view_coop_deal_form_nominal" model="ir.ui.view">
+    <field name="name">coop.deal.form.nominal</field>
+    <field name="model">coop.deal</field>
+    <field name="inherit_id" ref="coop_deals.view_coop_deal_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='way']" position="after">
+        <field name="payment_channel" widget="coop_inline"
+               readonly="not coop_can_edit or state not in ('lead', 'draft')"/>
+      </xpath>
+      <xpath expr="//field[@name='payment_ids']" position="before">
+        <div class="alert alert-warning" role="status"
+             invisible="payment_channel != 'nominal'">
+          Безопасная сделка: покупатель платит на номинальный счёт
+          оператора, указав в назначении код позиции. Деньги лежат там до
+          акта, потом уходят продавцу; при отмене до акта — возвращаются
+          покупателю. Оплату отмечает выписка банка.
+        </div>
+      </xpath>
+      <xpath expr="//field[@name='payment_ids']/list/field[@name='due_on']" position="after">
+        <field name="channel" readonly="nominal_hold_id" optional="show"/>
+        <field name="nominal_hold_id" column_invisible="True"/>
+        <field name="nominal_code" optional="show"/>
+      </xpath>
+      <xpath expr="//field[@name='payment_ids']/list/button[@name='action_mark_paid']" position="attributes">
+        <attribute name="invisible">state == 'paid' or channel == 'nominal'</attribute>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

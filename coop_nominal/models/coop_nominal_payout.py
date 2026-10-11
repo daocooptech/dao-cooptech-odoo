@@ -9,10 +9,10 @@ LIVE = ('queued', 'bank_review', 'sent', 'unknown')
 
 
 class CoopNominalPayout(models.Model):
-    """Распоряжение выплатить долю получателю или вернуть плательщику.
+    """Распоряжение выплатить удержанное получателю или вернуть плательщику.
 
     Выплата исполнена, только когда списание видно в выписке: ответ банка
-    «принято» — ещё не деньги у получателя. На долю — одна живая выплата,
+    «принято» — ещё не деньги у получателя. На удержание — одна живая выплата,
     иначе повтор после сбоя заплатил бы дважды.
     """
     _name = 'coop.nominal.payout'
@@ -20,11 +20,11 @@ class CoopNominalPayout(models.Model):
     _inherit = ['mail.thread']
     _order = 'id desc'
 
-    share_id = fields.Many2one(
-        'coop.nominal.share', string='Доля', required=True,
+    hold_id = fields.Many2one(
+        'coop.nominal.hold', string='Удержание', required=True,
         ondelete='restrict', index=True)
     account_id = fields.Many2one(
-        related='share_id.account_id', store=True, index=True, string='Счёт')
+        related='hold_id.account_id', store=True, index=True, string='Счёт')
     kind = fields.Selection([
         ('payout', 'Выплата получателю'),
         ('refund', 'Возврат плательщику'),
@@ -33,7 +33,7 @@ class CoopNominalPayout(models.Model):
         'res.partner', string='Кому', required=True, index=True)
     amount = fields.Monetary(
         string='Сумма', currency_field='currency_id', required=True)
-    currency_id = fields.Many2one(related='share_id.currency_id')
+    currency_id = fields.Many2one(related='hold_id.currency_id')
     state = fields.Selection([
         ('queued', 'В очереди'),
         ('bank_review', 'На проверке банка'),
@@ -52,8 +52,8 @@ class CoopNominalPayout(models.Model):
     executed_on = fields.Date(string='Списано', readonly=True)
 
     _one_live = models.UniqueIndex(
-        "(share_id) WHERE state IN ('queued', 'bank_review', 'sent', 'unknown')",
-        'По доле уже есть выплата в работе.',
+        "(hold_id) WHERE state IN ('queued', 'bank_review', 'sent', 'unknown')",
+        'По удержанию уже есть выплата в работе.',
     )
     _key_unique = models.UniqueIndex(
         '(idempotency_key)',
@@ -66,47 +66,47 @@ class CoopNominalPayout(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        Share = self.env['coop.nominal.share']
+        Share = self.env['coop.nominal.hold']
         for vals in vals_list:
-            share = Share.browse(vals['share_id'])
+            hold = Share.browse(vals['hold_id'])
             version = self.sudo().search_count([
-                ('share_id', '=', share.id), ('kind', '=', vals['kind'])]) + 1
-            raw = '%s:%s:%s' % (share.id, vals['kind'], version)
+                ('hold_id', '=', hold.id), ('kind', '=', vals['kind'])]) + 1
+            raw = '%s:%s:%s' % (hold.id, vals['kind'], version)
             vals.update({
                 'version': version,
                 'idempotency_key': hashlib.sha256(raw.encode()).hexdigest(),
-                'state': 'bank_review' if share.bank_control else 'queued',
+                'state': 'bank_review' if hold.bank_control else 'queued',
             })
         payouts = super().create(vals_list)
-        payouts._check_within_share()
+        payouts._check_within_hold()
         return payouts
 
-    def _check_within_share(self):
+    def _check_within_hold(self):
         """Инвариант 3: выплата не больше того, что лежит у её адресата."""
         Entry = self.env['coop.nominal.entry']
         for record in self:
-            share = record.share_id
+            hold = record.hold_id
             available = -Entry._leg_sum(
-                share.account_id, 'holder', share=share, partner=record.partner_id)
-            if share.currency_id.compare_amounts(record.amount, available) > 0:
+                hold.account_id, 'holder', hold=hold, partner=record.partner_id)
+            if hold.currency_id.compare_amounts(record.amount, available) > 0:
                 raise ValidationError(_(
-                    'Выплата %(amount)s больше остатка доли %(code)s у '
+                    'Выплата %(amount)s больше остатка удержания %(code)s у '
                     'получателя: %(available)s.',
-                    amount=record.amount, code=share.code, available=available))
+                    amount=record.amount, code=hold.code, available=available))
 
     def _mark_executed(self, date):
         """Списание найдено в выписке — выплата исполнена."""
         for record in self:
             if record.state not in LIVE:
                 raise UserError(_('Выплата уже закрыта.'))
-            record._check_within_share()
-            share = record.share_id
-            share._post(record.kind, date, [
+            record._check_within_hold()
+            hold = record.hold_id
+            hold._post(record.kind, date, [
                 {'leg': 'holder', 'amount': record.amount, 'partner': record.partner_id},
                 {'leg': 'bank', 'amount': -record.amount},
             ])
             record.write({'state': 'executed', 'executed_on': date})
-            share.write({
+            hold.write({
                 'state': 'paid_out' if record.kind == 'payout' else 'refunded',
                 'paid_out_on': date,
             })

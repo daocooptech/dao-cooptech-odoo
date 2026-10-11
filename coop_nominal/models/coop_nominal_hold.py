@@ -2,30 +2,33 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
-# Состояния, в которых деньги доли лежат на счёте и их можно заморозить.
+# Состояния, в которых деньги удержания лежат на счёте и их можно заморозить.
 HELD = ('held_buyer', 'held_seller', 'payout_queued', 'refund_queued')
 
 
-class CoopNominalShare(models.Model):
-    """Доля на номинальном счёте — одна на позицию графика оплат.
+class CoopNominalHold(models.Model):
+    """Платёж на удержании — позиция графика оплат на номинальном счёте.
 
-    Путь доли: ждёт оплаты → пришла, бенефициар покупатель → (акт)
+    Не путать с долями в проектах и на биржах: здесь только деньги
+    одного платежа, которые лежат до акта.
+
+    Путь удержания: ждёт оплаты → пришла, бенефициар покупатель → (акт)
     бенефициар продавец → выплата в очереди → выплачена. Возврат —
     от покупателя-бенефициара в очередь возврата и обратно покупателю.
-    При споре доля замораживается и помнит, откуда.
+    При споре удержание замораживается и помнит, откуда.
 
     Если по настройкам бенефициар один продавец, шага «бенефициар
     покупатель» нет, а вернуть деньги покупателю можно только с согласия
     продавца: деньги уже его.
     """
-    _name = 'coop.nominal.share'
-    _description = 'Доля на номинальном счёте'
+    _name = 'coop.nominal.hold'
+    _description = 'Платёж на удержании'
     _inherit = ['mail.thread']
     _order = 'id desc'
 
     code = fields.Char(
         string='Код', compute='_compute_code',
-        help='Код для назначения платежа: по нему выписка находит долю.')
+        help='Код для назначения платежа: по нему выписка находит удержание.')
     account_id = fields.Many2one(
         'coop.nominal.account', string='Счёт', required=True,
         ondelete='restrict', index=True)
@@ -50,7 +53,7 @@ class CoopNominalShare(models.Model):
     currency_id = fields.Many2one(related='account_id.currency_id')
 
     # Снимок настроек на момент создания: следующая версия настроек
-    # долю не трогает.
+    # удержание не трогает.
     setting_id = fields.Many2one(
         'coop.nominal.setting', string='Версия настроек', readonly=True,
         ondelete='restrict')
@@ -58,7 +61,7 @@ class CoopNominalShare(models.Model):
         [('both', 'Обе стороны'), ('seller', 'Только продавец')],
         string='Бенефициары', readonly=True)
     fee_mode = fields.Selection(
-        [('withhold', 'Удержать из доли'), ('invoice', 'Выставить счёт')],
+        [('withhold', 'Удержать из платежа'), ('invoice', 'Выставить счёт')],
         string='Порядок комиссии', readonly=True)
     books_mode = fields.Selection(
         [('off_balance', 'За балансом'), ('on_balance', 'На балансе')],
@@ -89,20 +92,20 @@ class CoopNominalShare(models.Model):
         'res.users', string='Согласие дал', readonly=True)
 
     entry_ids = fields.One2many(
-        'coop.nominal.entry', 'share_id', string='Книга')
+        'coop.nominal.entry', 'hold_id', string='Книга')
     payout_ids = fields.One2many(
-        'coop.nominal.payout', 'share_id', string='Выплаты')
+        'coop.nominal.payout', 'hold_id', string='Выплаты')
     held_amount = fields.Monetary(
         string='Лежит на счёте', currency_field='currency_id',
         compute='_compute_held_amount')
 
     _payment_unique = models.Constraint(
         'unique(payment_id)',
-        'На позицию графика — одна доля.',
+        'На позицию графика — одно удержание.',
     )
     _amount_positive = models.Constraint(
         'CHECK(amount > 0)',
-        'Сумма доли — больше нуля.',
+        'Сумма удержания — больше нуля.',
     )
 
     def _compute_code(self):
@@ -114,13 +117,13 @@ class CoopNominalShare(models.Model):
         Entry = self.env['coop.nominal.entry']
         for record in self:
             record.held_amount = -Entry._leg_sum(
-                record.account_id, 'holder', share=record) if record.id else 0.0
+                record.account_id, 'holder', hold=record) if record.id else 0.0
 
     @api.constrains('payer_id', 'payee_id', 'payment_id', 'account_id')
     def _check_parties(self):
         for record in self:
             if record.payer_id == record.payee_id:
-                raise ValidationError(_('Плательщик и получатель доли — разные стороны.'))
+                raise ValidationError(_('Плательщик и получатель удержания — разные стороны.'))
             if record.payment_id.currency_id != record.account_id.currency_id:
                 raise ValidationError(_(
                     'Валюта платежа и номинального счёта должна совпадать.'))
@@ -148,8 +151,8 @@ class CoopNominalShare(models.Model):
             })
         return super().create(vals_list)
 
-    # Сумма, условия и стороны доли — часть договорённости. После создания
-    # их меняют новой долей, а не правкой.
+    # Сумма, условия и стороны удержания — часть договорённости. После создания
+    # их меняют новым удержанием, а не правкой.
     _FROZEN_FIELDS = {'account_id', 'payment_id', 'payer_id', 'payee_id', 'amount',
                       'setting_id', 'beneficiary_mode', 'fee_mode', 'books_mode',
                       'bank_control', 'fee_amount', 'vat_amount'}
@@ -157,14 +160,14 @@ class CoopNominalShare(models.Model):
     def write(self, vals):
         if self._FROZEN_FIELDS & set(vals):
             raise UserError(_(
-                'Сумма, стороны и условия доли не меняются после создания.'))
+                'Сумма, стороны и условия удержания не меняются после создания.'))
         return super().write(vals)
 
     def _expect(self, *states):
         for record in self:
             if record.state not in states:
                 raise UserError(_(
-                    'Доля %(code)s в состоянии «%(state)s» — это действие '
+                    'Удержание %(code)s в состоянии «%(state)s» — это действие '
                     'для неё недоступно.',
                     code=record.code,
                     state=dict(record._fields['state'].selection)[record.state]))
@@ -172,7 +175,7 @@ class CoopNominalShare(models.Model):
     def _post(self, kind, date, lines):
         self.ensure_one()
         for line in lines:
-            line.setdefault('share', self)
+            line.setdefault('hold', self)
         return self.env['coop.nominal.entry']._post(self.account_id, kind, date, lines)
 
     def _credit(self, date):
@@ -221,7 +224,7 @@ class CoopNominalShare(models.Model):
         """Спор: деньги остаются на месте, пока его не разберут.
 
         Выплату, ещё не отправленную в банк, снимаем с очереди;
-        отправленную остановить нельзя — её долю не трогаем.
+        отправленную остановить нельзя — её удержание не трогаем.
         """
         for record in self.filtered(lambda r: r.state in HELD):
             live = record.payout_ids.filtered(lambda p: p.state in ('queued', 'bank_review'))
@@ -236,7 +239,7 @@ class CoopNominalShare(models.Model):
         return True
 
     def _unfreeze(self):
-        """Спор закрыт: доля возвращается туда, где была.
+        """Спор закрыт: удержание возвращается туда, где была.
 
         Деление суммы по решению спора — отдельное действие, оно ещё не
         решено владельцем.
@@ -251,9 +254,9 @@ class CoopNominalShare(models.Model):
         for record in self:
             record.account_id._check_payouts_allowed()
             amount = -self.env['coop.nominal.entry']._leg_sum(
-                record.account_id, 'holder', share=record, partner=record.payee_id)
+                record.account_id, 'holder', hold=record, partner=record.payee_id)
             self.env['coop.nominal.payout'].create({
-                'share_id': record.id,
+                'hold_id': record.id,
                 'kind': 'payout',
                 'partner_id': record.payee_id.id,
                 'amount': amount,
@@ -267,11 +270,11 @@ class CoopNominalShare(models.Model):
             if record.state == 'held_seller':
                 if record.beneficiary_mode != 'seller' or record.act_on:
                     raise UserError(_(
-                        'Деньги доли %s уже принадлежат продавцу по акту: '
+                        'Деньги удержания %s уже принадлежат продавцу по акту: '
                         'вернуть их можно только новой сделкой.') % record.code)
                 if not record.refund_consent:
                     raise UserError(_(
-                        'Деньги доли %s принадлежат продавцу: возврат — только '
+                        'Деньги удержания %s принадлежат продавцу: возврат — только '
                         'с его согласия.') % record.code)
             record.account_id._check_payouts_allowed()
             if record.state == 'held_seller':
@@ -282,7 +285,7 @@ class CoopNominalShare(models.Model):
                 ])
                 record.beneficiary_id = record.payer_id
             self.env['coop.nominal.payout'].create({
-                'share_id': record.id,
+                'hold_id': record.id,
                 'kind': 'refund',
                 'partner_id': record.payer_id.id,
                 'amount': record.held_amount,
@@ -291,7 +294,7 @@ class CoopNominalShare(models.Model):
         return True
 
     def _cancel(self):
-        """Сделку отменили до оплаты — доле нечего держать."""
+        """Сделку отменили до оплаты — держать нечего."""
         self._expect('awaiting')
         self.write({'state': 'cancelled'})
         return True
@@ -299,12 +302,12 @@ class CoopNominalShare(models.Model):
     def action_consent_refund(self):
         """Согласие продавца вернуть деньги покупателю.
 
-        Даёт только получатель доли: деньги его, и решать ему.
+        Даёт только получатель платежа: деньги его, и решать ему.
         """
         for record in self:
             if record.payee_id not in self.env.user.coop_treasury_partner_ids:
                 raise UserError(_(
-                    'Согласие на возврат даёт получатель доли.'))
+                    'Согласие на возврат даёт получатель платежа.'))
             record.sudo().write({
                 'refund_consent': True,
                 'refund_consent_by_id': self.env.user.id,

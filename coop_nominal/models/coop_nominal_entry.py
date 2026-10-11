@@ -46,8 +46,8 @@ class CoopNominalEntry(models.Model):
         help='Общий ключ записей одного события.')
     kind = fields.Selection(KINDS, string='Событие', required=True, readonly=True)
     leg = fields.Selection(LEGS, string='Нога', required=True, readonly=True)
-    share_id = fields.Many2one(
-        'coop.nominal.share', string='Доля', ondelete='restrict',
+    hold_id = fields.Many2one(
+        'coop.nominal.hold', string='Удержание', ondelete='restrict',
         index=True, readonly=True)
     partner_id = fields.Many2one(
         'res.partner', string='Бенефициар', index=True, readonly=True)
@@ -79,7 +79,7 @@ class CoopNominalEntry(models.Model):
         """Провести событие: набор записей с нулевой суммой.
 
         `lines` — словари с ключами `leg`, `amount` и, где нужно,
-        `share` и `partner`. Нога бенефициара без бенефициара и любая
+        `hold` и `partner`. Нога бенефициара без бенефициара и любая
         запись с нулевой суммой — ошибка вызывающего кода.
         """
         account.ensure_one()
@@ -97,13 +97,13 @@ class CoopNominalEntry(models.Model):
             partner = line.get('partner')
             if line['leg'] == 'holder' and not partner:
                 raise UserError(_('У записи бенефициара нет бенефициара.'))
-            share = line.get('share')
+            hold = line.get('hold')
             vals_list.append({
                 'account_id': account.id,
                 'event_key': key,
                 'kind': kind,
                 'leg': line['leg'],
-                'share_id': share.id if share else False,
+                'hold_id': hold.id if hold else False,
                 'partner_id': partner.id if partner else False,
                 'amount': currency.round(line['amount']),
                 'date': date,
@@ -112,10 +112,10 @@ class CoopNominalEntry(models.Model):
         return self.sudo().with_context(coop_nominal_post=True).create(vals_list)
 
     @api.model
-    def _leg_sum(self, account, leg, share=None, partner=None, until=None):
+    def _leg_sum(self, account, leg, hold=None, partner=None, until=None):
         domain = [('account_id', '=', account.id), ('leg', '=', leg)]
-        if share is not None:
-            domain.append(('share_id', '=', share.id))
+        if hold is not None:
+            domain.append(('hold_id', '=', hold.id))
         if partner is not None:
             domain.append(('partner_id', '=', partner.id))
         if until:

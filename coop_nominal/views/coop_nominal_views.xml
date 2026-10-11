@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Номинальный счёт -->
+  <record id="view_coop_nominal_account_list" model="ir.ui.view">
+    <field name="name">coop.nominal.account.list</field>
+    <field name="model">coop.nominal.account</field>
+    <field name="arch" type="xml">
+      <list string="Номинальные счета" decoration-danger="payouts_blocked">
+        <field name="name"/>
+        <field name="bank_name"/>
+        <field name="account_number"/>
+        <field name="ledger_balance"/>
+        <field name="statement_balance"/>
+        <field name="statement_date"/>
+        <field name="payouts_blocked"/>
+        <field name="currency_id" column_invisible="True"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_nominal_account_form" model="ir.ui.view">
+    <field name="name">coop.nominal.account.form</field>
+    <field name="model">coop.nominal.account</field>
+    <field name="arch" type="xml">
+      <form string="Номинальный счёт">
+        <sheet>
+          <div class="alert alert-danger" role="alert" invisible="not payouts_blocked">
+            Выплаты остановлены: нет выписки или реестр расходится с ней.
+          </div>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Название счёта"/></h1>
+          </div>
+          <group>
+            <group string="Счёт">
+              <field name="owner_id"/>
+              <field name="bank_name"/>
+              <field name="bank_bic"/>
+              <field name="account_number"/>
+              <field name="adapter"/>
+              <field name="currency_id"/>
+              <field name="auto_payout_limit"/>
+            </group>
+            <group string="Сверка">
+              <field name="ledger_balance"/>
+              <field name="statement_balance"/>
+              <field name="statement_date"/>
+              <field name="discrepancy"/>
+              <field name="unrecognized_balance"/>
+              <field name="payouts_blocked"/>
+            </group>
+          </group>
+          <notebook>
+            <page string="Настройки" name="settings">
+              <field name="setting_ids">
+                <list editable="bottom">
+                  <field name="date_from"/>
+                  <field name="beneficiary_mode"/>
+                  <field name="fee_mode"/>
+                  <field name="books_mode"/>
+                  <field name="bank_control"/>
+                  <field name="fee_percent"/>
+                  <field name="fee_vat_percent"/>
+                  <field name="note"/>
+                </list>
+              </field>
+            </page>
+            <page string="Платежи на удержании" name="holds">
+              <field name="hold_ids" readonly="1"/>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <!-- Платёж на удержании -->
+  <record id="view_coop_nominal_hold_list" model="ir.ui.view">
+    <field name="name">coop.nominal.hold.list</field>
+    <field name="model">coop.nominal.hold</field>
+    <field name="arch" type="xml">
+      <list string="Платежи на удержании" create="0"
+            decoration-muted="state in ('cancelled', 'paid_out', 'refunded')"
+            decoration-danger="state == 'frozen'">
+        <field name="code"/>
+        <field name="deal_id"/>
+        <field name="payer_id"/>
+        <field name="payee_id"/>
+        <field name="amount" sum="Всего"/>
+        <field name="held_amount"/>
+        <field name="fee_amount" optional="hide"/>
+        <field name="credited_on"/>
+        <field name="act_on"/>
+        <field name="paid_out_on"/>
+        <field name="state" widget="badge"/>
+        <field name="currency_id" column_invisible="True"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_nominal_hold_form" model="ir.ui.view">
+    <field name="name">coop.nominal.hold.form</field>
+    <field name="model">coop.nominal.hold</field>
+    <field name="arch" type="xml">
+      <form string="Платёж на удержании" create="0" edit="0">
+        <header>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="awaiting,held_buyer,held_seller,payout_queued,paid_out"/>
+        </header>
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="code"/></h1>
+          </div>
+          <group>
+            <group string="Платёж">
+              <field name="deal_id"/>
+              <field name="payment_id"/>
+              <field name="payer_id"/>
+              <field name="payee_id"/>
+              <field name="beneficiary_id"/>
+              <field name="amount"/>
+              <field name="held_amount"/>
+              <field name="fee_amount"/>
+              <field name="vat_amount"/>
+              <field name="currency_id" invisible="1"/>
+            </group>
+            <group string="Даты по выписке">
+              <field name="credited_on"/>
+              <field name="act_on"/>
+              <field name="paid_out_on"/>
+              <field name="frozen_from" invisible="state != 'frozen'"/>
+              <field name="refund_consent"/>
+            </group>
+            <group string="Условия на момент заведения">
+              <field name="account_id"/>
+              <field name="setting_id"/>
+              <field name="beneficiary_mode"/>
+              <field name="fee_mode"/>
+              <field name="books_mode"/>
+              <field name="bank_control"/>
+            </group>
+          </group>
+          <notebook>
+            <page string="Книга" name="entries">
+              <field name="entry_ids">
+                <list>
+                  <field name="date"/>
+                  <field name="kind"/>
+                  <field name="leg"/>
+                  <field name="partner_id"/>
+                  <field name="amount"/>
+                  <field name="currency_id" column_invisible="True"/>
+                </list>
+              </field>
+            </page>
+            <page string="Выплаты" name="payouts">
+              <field name="payout_ids"/>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <!-- Книга и выплаты -->
+  <record id="view_coop_nominal_entry_list" model="ir.ui.view">
+    <field name="name">coop.nominal.entry.list</field>
+    <field name="model">coop.nominal.entry</field>
+    <field name="arch" type="xml">
+      <list string="Книга номинального счёта" create="0" edit="0" delete="0">
+        <field name="date"/>
+        <field name="account_id"/>
+        <field name="hold_id"/>
+        <field name="kind"/>
+        <field name="leg"/>
+        <field name="partner_id"/>
+        <field name="amount" sum="Итого"/>
+        <field name="posted_by_id" optional="hide"/>
+        <field name="event_key" optional="hide"/>
+        <field name="currency_id" column_invisible="True"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_nominal_payout_list" model="ir.ui.view">
+    <field name="name">coop.nominal.payout.list</field>
+    <field name="model">coop.nominal.payout</field>
+    <field name="arch" type="xml">
+      <list string="Выплаты" create="0" edit="0" delete="0"
+            decoration-muted="state == 'cancelled'"
+            decoration-danger="state in ('failed', 'unknown')">
+        <field name="hold_id"/>
+        <field name="kind"/>
+        <field name="partner_id"/>
+        <field name="amount" sum="Всего"/>
+        <field name="version"/>
+        <field name="executed_on"/>
+        <field name="state" widget="badge"/>
+        <field name="idempotency_key" optional="hide"/>
+        <field name="currency_id" column_invisible="True"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="action_coop_nominal_account" model="ir.actions.act_window">
+    <field name="name">Номинальные счета</field>
+    <field name="res_model">coop.nominal.account</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <record id="action_coop_nominal_hold" model="ir.actions.act_window">
+    <field name="name">Платежи на удержании</field>
+    <field name="res_model">coop.nominal.hold</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <record id="action_coop_nominal_entry" model="ir.actions.act_window">
+    <field name="name">Книга номинального счёта</field>
+    <field name="res_model">coop.nominal.entry</field>
+    <field name="view_mode">list</field>
+  </record>
+
+  <record id="action_coop_nominal_payout" model="ir.actions.act_window">
+    <field name="name">Выплаты с номинального счёта</field>
+    <field name="res_model">coop.nominal.payout</field>
+    <field name="view_mode">list</field>
+  </record>
+
+  <menuitem id="menu_coop_nominal_root" name="Номинальный счёт"
+            parent="coop_wallet.menu_coop_wallet_root" sequence="60"
+            groups="base.group_system"/>
+  <menuitem id="menu_coop_nominal_account" name="Счета"
+            parent="menu_coop_nominal_root" action="action_coop_nominal_account" sequence="10"/>
+  <menuitem id="menu_coop_nominal_hold" name="Платежи на удержании"
+            parent="menu_coop_nominal_root" action="action_coop_nominal_hold" sequence="20"/>
+  <menuitem id="menu_coop_nominal_entry" name="Книга"
+            parent="menu_coop_nominal_root" action="action_coop_nominal_entry" sequence="30"/>
+  <menuitem id="menu_coop_nominal_payout" name="Выплаты"
+            parent="menu_coop_nominal_root" action="action_coop_nominal_payout" sequence="40"/>
+
+</odoo>
