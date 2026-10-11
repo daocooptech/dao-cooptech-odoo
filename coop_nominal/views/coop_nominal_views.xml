@@ -189,6 +189,7 @@
     <field name="model">coop.nominal.payout</field>
     <field name="arch" type="xml">
       <list string="Выплаты" create="0" edit="0" delete="0"
+            decoration-warning="needs_signature"
             decoration-muted="state == 'cancelled'"
             decoration-danger="state in ('failed', 'unknown')">
         <field name="hold_id"/>
@@ -202,6 +203,7 @@
         <field name="version"/>
         <field name="executed_on"/>
         <field name="state" widget="badge"/>
+        <field name="needs_signature" optional="show"/>
         <field name="idempotency_key" optional="hide"/>
         <field name="currency_id" column_invisible="True"/>
       </list>

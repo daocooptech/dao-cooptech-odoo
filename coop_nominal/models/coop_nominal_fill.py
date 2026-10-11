@@ -19,6 +19,9 @@ from odoo import api, fields, models
 _logger = logging.getLogger(__name__)
 
 ACCOUNT_NAME = 'Номинальный счёт ДАО КООПТЕХ'
+# Выше — выплату подписывает уполномоченный оператора: около десятой части
+# платежей по графикам крупнее.
+AUTO_PAYOUT_LIMIT = 100000.0
 WEEKS = 26
 INN10 = (2, 4, 10, 3, 5, 9, 4, 6, 8)
 INN11 = (7, 2, 4, 10, 3, 5, 9, 4, 6, 8)
@@ -84,6 +87,7 @@ class CoopNominalAccountFill(models.Model):
     def _fill_run(self):
         rnd = random.Random(20261011)
         today = fields.Date.context_today(self)
+        signer = self.env.ref('base.user_admin')
         start = today - timedelta(weeks=WEEKS)
         start -= timedelta(days=start.weekday())  # с понедельника
         Payment = self.env['coop.deal.payment'].sudo()
@@ -118,6 +122,7 @@ class CoopNominalAccountFill(models.Model):
             'bank_bic': '044525225',
             'account_number': _bank_account(rnd, '40702810', '044525225'),
             'adapter': 'demo',
+            'auto_payout_limit': AUTO_PAYOUT_LIMIT,
             'setting_ids': [(0, 0, {
                 'date_from': start - timedelta(days=7), 'fee_percent': 2.0,
                 'fee_vat_percent': 20.0, 'note': 'Договор номинального счёта',
@@ -219,6 +224,11 @@ class CoopNominalAccountFill(models.Model):
                     hold._freeze()
             live = self.env['coop.nominal.payout'].sudo().search([
                 ('account_id', '=', account.id), ('state', 'in', ('queued', 'unknown'))])
+            # Крупные выплаты подписывает уполномоченный оператора — в тот же
+            # день, кроме последней недели: там они ещё ждут подписи.
+            if end < today - timedelta(days=7):
+                live.filtered('needs_signature').write({
+                    'signed_by_id': signer.id, 'signed_at': fields.Datetime.now()})
             live._submit_to_bank()
             live._poll_bank()
             if end < today - timedelta(days=14):

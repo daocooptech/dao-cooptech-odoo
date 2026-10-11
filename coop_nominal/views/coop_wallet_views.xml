@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Фиатная вкладка кошелька: безопасные сделки участника.
+
+       Три цифры из книги номинального счёта — сколько ещё заплатить,
+       сколько моих денег лежит до акта и сколько ждёт выплаты мне, — и
+       список удержаний с тремя датами по выписке. -->
+  <record id="view_coop_wallet_form_nominal" model="ir.ui.view">
+    <field name="name">coop.wallet.form.nominal</field>
+    <field name="model">coop.wallet</field>
+    <field name="inherit_id" ref="coop_wallet.view_coop_wallet_form"/>
+    <field name="arch" type="xml">
+      <button name="action_fiat_withdraw" position="after">
+        <button name="action_nominal_statement" type="object"
+                string="Выписка за период" invisible="tab != 'fiat'"/>
+      </button>
+      <xpath expr="//div[hasclass('o_coop_wallet_intro')][following-sibling::div//field[@name='fiat_balance']]"
+             position="replace">
+        <div class="o_coop_wallet_intro">
+          Обычные рубли — без блокчейна и курсов обмена. По безопасной сделке
+          деньги лежат на номинальном счёте оператора в банке: до акта они
+          ваши, после акта — продавца, и банк переводит их получателю.
+          Платформа ведёт их учёт и сама ими не распоряжается.
+        </div>
+      </xpath>
+      <xpath expr="//div[hasclass('o_coop_kpi')][.//field[@name='fiat_balance']]" position="after">
+        <separator string="Безопасные сделки"/>
+        <div class="o_coop_kpi">
+          <div class="o_coop_kpi_cell">
+            <div class="o_coop_kpi_num">
+              <field name="nominal_to_pay" widget="monetary" nolabel="1"/>
+            </div>
+            <div class="o_coop_kpi_label">К оплате на номинальный счёт</div>
+          </div>
+          <div class="o_coop_kpi_cell">
+            <div class="o_coop_kpi_num">
+              <field name="nominal_mine_before_act" widget="monetary" nolabel="1"/>
+            </div>
+            <div class="o_coop_kpi_label">Мои деньги до акта</div>
+          </div>
+          <div class="o_coop_kpi_cell o_coop_kpi_free">
+            <div class="o_coop_kpi_num">
+              <field name="nominal_mine_to_receive" widget="monetary" nolabel="1"/>
+            </div>
+            <div class="o_coop_kpi_label">Ждёт выплаты мне</div>
+          </div>
+        </div>
+        <div class="o_coop_note" invisible="nominal_hold_count">
+          Безопасных сделок пока нет. Выберите в сделке способ оплаты
+          «Безопасная сделка: через номинальный счёт» — деньги пролежат
+          в банке до акта.
+        </div>
+        <field name="nominal_hold_ids" nolabel="1" readonly="1"
+               invisible="not nominal_hold_count">
+          <list decoration-muted="state in ('cancelled', 'refunded', 'paid_out')"
+                decoration-warning="state == 'awaiting'"
+                decoration-danger="state == 'frozen'">
+            <field name="code"/>
+            <field name="deal_id"/>
+            <field name="payer_id" optional="show"/>
+            <field name="payee_id" optional="show"/>
+            <field name="amount" sum="Всего"/>
+            <field name="fee_amount" optional="hide"/>
+            <field name="credited_on"/>
+            <field name="act_on"/>
+            <field name="paid_out_on"/>
+            <field name="state" widget="badge"/>
+            <field name="currency_id" column_invisible="True"/>
+          </list>
+        </field>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_coop_nominal_partner_statement_form" model="ir.ui.view">
+    <field name="name">coop.nominal.partner.statement.form</field>
+    <field name="model">coop.nominal.partner.statement</field>
+    <field name="arch" type="xml">
+      <form string="Выписка по безопасным сделкам">
+        <p class="text-muted">
+          Все движения ваших денег на номинальном счёте за период: поступления,
+          переход к продавцу по акту, комиссия оператора, выплаты и возвраты.
+          Остатки на начало и конец — по книге счёта. Файл CSV открывается в
+          Excel и загружается в учётные программы.
+        </p>
+        <group>
+          <field name="wallet_id" invisible="1"/>
+          <field name="partner_id"/>
+          <field name="date_from"/>
+          <field name="date_to"/>
+        </group>
+        <footer>
+          <button name="action_download" type="object" string="Скачать CSV"
+                  class="btn-primary"/>
+          <button special="cancel" string="Закрыть"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+</odoo>

@@ -12,7 +12,7 @@ class TestNominalDemoBank(NominalExportCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.account.adapter = 'demo'
+        cls.account.write({'adapter': 'demo', 'auto_payout_limit': 1000000.0})
         cls.Order = cls.env['coop.nominal.demo.order']
 
     def _orders(self, payout):
@@ -86,3 +86,32 @@ class TestNominalDemoBank(NominalExportCase):
         count = len(self.account.statement_ids)
         self.account._fetch_statement()
         self.assertEqual(len(self.account.statement_ids), count, 'за день — одна пустая')
+
+    def test_over_limit_waits_for_signature(self):
+        self.account.auto_payout_limit = 5000.0
+        hold, payout = self._queued_payout()
+        self.assertTrue(payout.needs_signature)
+        self.assertIn(payout, payout.search([('needs_signature', '=', True)]))
+        self.account.with_context(coop_demo_fault='none')._cron_bank_accounts()
+        self.assertEqual(payout.state, 'queued')
+        self.assertFalse(payout.submit_count)
+        user = self.env['res.users'].create({
+            'name': 'Сотрудник без права подписи', 'login': 'nominal_no_sign',
+            'group_ids': [(6, 0, [self.env.ref('base.group_user').id])]})
+        with self.assertRaises(UserError):
+            payout.with_user(user).action_sign()
+        payout.action_sign()
+        self.assertEqual(payout.signed_by_id, self.env.user)
+        self.assertFalse(payout.needs_signature)
+        with self.assertRaises(UserError):
+            payout.action_sign()
+        self.account.with_context(coop_demo_fault='none')._cron_bank_accounts()
+        self.assertEqual(payout.state, 'executed')
+        self.assertEqual(hold.state, 'paid_out')
+
+    def test_zero_limit_means_everyone_signs_manual_never(self):
+        self.account.auto_payout_limit = 0.0
+        _hold, payout = self._queued_payout()
+        self.assertTrue(payout.needs_signature)
+        self.account.adapter = 'manual'
+        self.assertFalse(payout.needs_signature)

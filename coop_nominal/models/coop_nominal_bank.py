@@ -86,6 +86,17 @@ class CoopNominalPayoutBank(models.Model):
         help='Сколько раз распоряжение с этим ключом уходило в банк. '
              'Больше одного — были обрывы связи; банк исполнит его один раз.')
     submitted_at = fields.Datetime(string='Отправлено', readonly=True)
+    # Порог автовыплаты: распоряжение банку подписывает владелец счёта.
+    # До порога за него подписывает подключение, выше — уполномоченный
+    # человек оператора: взлом сервера не должен открывать весь счёт.
+    signed_by_id = fields.Many2one(
+        'res.users', string='Подписал', readonly=True, tracking=True)
+    signed_at = fields.Datetime(string='Подписано', readonly=True)
+    needs_signature = fields.Boolean(
+        string='Ждёт подписи', compute='_compute_needs_signature',
+        search='_search_needs_signature',
+        help='Сумма выше порога автовыплаты: в банк выплата уйдёт после '
+             'подписи уполномоченного.')
 
     @api.depends('hold_id', 'source_line_id', 'kind', 'version')
     def _compute_display_name(self):
@@ -95,6 +106,45 @@ class CoopNominalPayoutBank(models.Model):
             record.display_name = _('%(kind)s %(source)s, попытка %(version)s') % {
                 'kind': kinds.get(record.kind, ''), 'source': source,
                 'version': record.version or 1}
+
+    def _over_limit(self):
+        """Выше порога автовыплаты счёта. Ручной режим порога не знает:
+        платёжки и так подписывает сотрудник в клиент-банке."""
+        self.ensure_one()
+        account = self.account_id
+        return account.adapter != 'manual' and self.currency_id.compare_amounts(
+            self.amount, account.auto_payout_limit or 0.0) > 0
+
+    @api.depends('amount', 'state', 'signed_by_id', 'submit_count', 'batch_id',
+                 'account_id.adapter', 'account_id.auto_payout_limit')
+    def _compute_needs_signature(self):
+        for record in self:
+            record.needs_signature = bool(
+                record.id and not record.signed_by_id
+                and record.state in ('queued', 'bank_review') and not record._in_bank()
+                and record._over_limit())
+
+    def _search_needs_signature(self, operator, value):
+        if operator not in ('=', '!=') or not isinstance(value, bool):
+            return NotImplemented
+        waiting = self.sudo().search([
+            ('signed_by_id', '=', False), ('state', 'in', ('queued', 'bank_review')),
+        ]).filtered('needs_signature')
+        positive = (operator == '=') == value
+        return [('id', 'in' if positive else 'not in', waiting.ids)]
+
+    def action_sign(self):
+        """Подпись уполномоченного: выплата выше порога уйдёт в банк
+        следующим обменом."""
+        if not (self.env.is_superuser() or self.env.user.has_group('base.group_system')):
+            raise UserError(_('Подписывает выплату уполномоченный оператора счёта.'))
+        for record in self.sudo():
+            if not record.needs_signature:
+                raise UserError(_(
+                    'Выплата %s подписи не ждёт.') % record.display_name)
+            record.write({'signed_by_id': self.env.user.id,
+                          'signed_at': fields.Datetime.now()})
+        return True
 
     def _in_bank(self):
         """Распоряжение уже у банка: отдано подключением или файлом."""
@@ -131,6 +181,10 @@ class CoopNominalPayoutBank(models.Model):
             if not payouts:
                 continue
             account._check_payouts_allowed()
+            # Выше порога без подписи — ждут в очереди, остальные идут.
+            payouts -= payouts.filtered('needs_signature')
+            if not payouts:
+                continue
             # Без реквизитов банк поручение не примет — сразу отказ, чтобы
             # одна такая выплата не держала остальные.
             incomplete = payouts.filtered(lambda p: not (

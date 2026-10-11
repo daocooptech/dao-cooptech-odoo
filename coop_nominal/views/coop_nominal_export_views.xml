@@ -116,7 +116,28 @@
         <field name="order_number" optional="show"/>
         <field name="sent_on" optional="show"/>
         <field name="batch_id" optional="hide"/>
+        <field name="signed_by_id" optional="hide"/>
       </field>
+    </field>
+  </record>
+
+  <record id="view_coop_nominal_payout_search" model="ir.ui.view">
+    <field name="name">coop.nominal.payout.search</field>
+    <field name="model">coop.nominal.payout</field>
+    <field name="arch" type="xml">
+      <search string="Выплаты">
+        <field name="hold_id"/>
+        <field name="partner_id"/>
+        <field name="recipient_name"/>
+        <filter name="needs_signature" string="Ждут подписи"
+                domain="[('needs_signature', '=', True)]"/>
+        <filter name="live" string="В работе"
+                domain="[('state', 'in', ('queued', 'bank_review', 'sent', 'unknown'))]"/>
+        <filter name="failed" string="Отклонены" domain="[('state', '=', 'failed')]"/>
+        <separator/>
+        <filter name="group_state" string="Состояние" context="{'group_by': 'state'}"/>
+        <filter name="group_kind" string="Вид" context="{'group_by': 'kind'}"/>
+      </search>
     </field>
   </record>
 
@@ -127,6 +148,10 @@
     <field name="arch" type="xml">
       <form string="Выплата" create="0" edit="0" delete="0">
         <header>
+          <button name="action_sign" type="object" string="Подписать"
+                  class="btn-primary" invisible="not needs_signature"
+                  groups="base.group_system"
+                  confirm="Подписать выплату? Она уйдёт в банк следующим обменом."/>
           <button name="action_retry" type="object" string="Повторить"
                   class="btn-primary" invisible="state != 'failed'"
                   groups="base.group_system"/>
@@ -144,6 +169,10 @@
                  statusbar_visible="queued,sent,executed"/>
         </header>
         <sheet>
+          <div class="alert alert-warning" role="alert" invisible="not needs_signature">
+            Сумма выше порога автовыплаты счёта: в банк выплата уйдёт после
+            подписи уполномоченного.
+          </div>
           <div class="alert alert-danger" role="alert" invisible="state != 'failed'">
             <field name="failure_reason" readonly="1"/>
           </div>
@@ -167,6 +196,9 @@
             </group>
             <group string="Банк">
               <field name="version"/>
+              <field name="needs_signature" invisible="1"/>
+              <field name="signed_by_id" invisible="not signed_by_id"/>
+              <field name="signed_at" invisible="not signed_by_id"/>
               <field name="idempotency_key" groups="base.group_no_one"/>
               <field name="submit_count"/>
               <field name="submitted_at"/>

@@ -10,3 +10,4 @@ from . import coop_nominal_reconciliation
 from . import coop_nominal_bank
 from . import coop_nominal_demo_bank
 from . import coop_nominal_fill
+from . import coop_wallet

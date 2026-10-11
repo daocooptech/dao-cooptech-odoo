@@ -21,7 +21,7 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.3.0',
+    'version': '20.0.1.4.0',
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_deals', 'coop_wallet', 'mail'],
     'data': [
@@ -30,6 +30,7 @@
         'views/coop_deal_views.xml',
         'views/coop_nominal_statement_views.xml',
         'views/coop_nominal_export_views.xml',
+        'views/coop_wallet_views.xml',
         'data/coop_nominal_cron.xml',
         'data/coop_nominal_fill.xml',
     ],
