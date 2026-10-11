@@ -22,7 +22,7 @@ if   [ -f "$ROOT/odoo.conf" ];        then CONF="$ROOT/odoo.conf"
 elif [ -f "/etc/coop-odoo.conf" ];    then CONF="/etc/coop-odoo.conf"
 else echo "не нашёл odoo.conf"; exit 1; fi
 
-DB="${COOP_TEST_DB:-koopeh}"
+DB="${COOP_TEST_DB:-cooptech}"
 
 # Без аргументов — всё, где есть папка tests. Список не держим отдельно:
 # он разошёлся бы с действительностью на первом же новом модуле.
