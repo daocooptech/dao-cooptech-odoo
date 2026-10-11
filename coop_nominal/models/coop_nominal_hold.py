@@ -255,7 +255,9 @@ class CoopNominalHold(models.Model):
         отправленную остановить нельзя — её удержание не трогаем.
         """
         for record in self.filtered(lambda r: r.state in HELD):
-            live = record.payout_ids.filtered(lambda p: p.state in ('queued', 'bank_review'))
+            # Выгруженная файлом уже в банке, даже если ещё на его проверке.
+            live = record.payout_ids.filtered(
+                lambda p: p.state in ('queued', 'bank_review') and not p.batch_id)
             if record.state in ('payout_queued', 'refund_queued') and not live:
                 continue
             live.write({'state': 'cancelled'})

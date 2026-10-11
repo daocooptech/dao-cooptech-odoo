@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import base64
-
 from odoo import fields, models
 
 
@@ -16,7 +14,7 @@ class CoopNominalStatementImport(models.TransientModel):
     def action_import(self):
         self.ensure_one()
         statement = self.account_id._import_statement(
-            base64.b64decode(self.file), self.file_name)
+            self.file.content, self.file_name)
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'coop.nominal.statement',

@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Реестр платёжек -->
+  <record id="view_coop_nominal_payment_batch_list" model="ir.ui.view">
+    <field name="name">coop.nominal.payment.batch.list</field>
+    <field name="model">coop.nominal.payment.batch</field>
+    <field name="arch" type="xml">
+      <list string="Реестры платёжек" create="0" edit="0" delete="0">
+        <field name="date"/>
+        <field name="name"/>
+        <field name="account_id"/>
+        <field name="payout_count" sum="Всего"/>
+        <field name="amount_total" sum="Всего"/>
+        <field name="created_by_id"/>
+        <field name="currency_id" column_invisible="True"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_nominal_payment_batch_form" model="ir.ui.view">
+    <field name="name">coop.nominal.payment.batch.form</field>
+    <field name="model">coop.nominal.payment.batch</field>
+    <field name="arch" type="xml">
+      <form string="Реестр платёжек" create="0" edit="0" delete="0">
+        <header>
+          <button name="action_download" type="object" string="Скачать файл"
+                  class="btn-primary"/>
+        </header>
+        <sheet>
+          <div class="alert alert-info" role="alert">
+            Загрузите файл в клиент-банк номинального счёта и подпишите платёжки.
+            Исполненными выплаты станут, когда списание придёт в выписке.
+          </div>
+          <div class="oe_title">
+            <h1><field name="name"/></h1>
+          </div>
+          <group>
+            <group>
+              <field name="account_id"/>
+              <field name="date"/>
+              <field name="created_by_id"/>
+            </group>
+            <group>
+              <field name="payout_count"/>
+              <field name="amount_total"/>
+              <field name="file_name"/>
+            </group>
+          </group>
+          <field name="payout_ids" readonly="1">
+            <list>
+              <field name="order_number"/>
+              <field name="hold_id"/>
+              <field name="source_line_id" optional="hide"/>
+              <field name="kind"/>
+              <field name="recipient_name"/>
+              <field name="recipient_inn" optional="show"/>
+              <field name="recipient_account" optional="hide"/>
+              <field name="purpose" optional="show"/>
+              <field name="amount" sum="Всего"/>
+              <field name="state" widget="badge"/>
+              <field name="currency_id" column_invisible="True"/>
+            </list>
+          </field>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- Сверка -->
+  <record id="view_coop_nominal_reconciliation_list" model="ir.ui.view">
+    <field name="name">coop.nominal.reconciliation.list</field>
+    <field name="model">coop.nominal.reconciliation</field>
+    <field name="arch" type="xml">
+      <list string="Сверки" create="0" edit="0" delete="0"
+            decoration-danger="state == 'problem'" decoration-success="state == 'ok'">
+        <field name="date"/>
+        <field name="account_id"/>
+        <field name="statement_date"/>
+        <field name="statement_balance"/>
+        <field name="ledger_balance"/>
+        <field name="discrepancy"/>
+        <field name="unrecognized_count"/>
+        <field name="unrecognized_balance" optional="hide"/>
+        <field name="stale_payout_count"/>
+        <field name="state" widget="badge"
+               decoration-danger="state == 'problem'" decoration-success="state == 'ok'"/>
+        <field name="note"/>
+        <field name="currency_id" column_invisible="True"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_nominal_reconciliation_search" model="ir.ui.view">
+    <field name="name">coop.nominal.reconciliation.search</field>
+    <field name="model">coop.nominal.reconciliation</field>
+    <field name="arch" type="xml">
+      <search>
+        <field name="account_id"/>
+        <filter name="problem" string="Есть что разобрать"
+                domain="[('state', '=', 'problem')]"/>
+      </search>
+    </field>
+  </record>
+
+  <!-- Выплаты: номер платёжки и реестр -->
+  <record id="view_coop_nominal_payout_list_export" model="ir.ui.view">
+    <field name="name">coop.nominal.payout.list.export</field>
+    <field name="model">coop.nominal.payout</field>
+    <field name="inherit_id" ref="view_coop_nominal_payout_list"/>
+    <field name="arch" type="xml">
+      <field name="version" position="after">
+        <field name="order_number" optional="show"/>
+        <field name="sent_on" optional="show"/>
+        <field name="batch_id" optional="hide"/>
+      </field>
+    </field>
+  </record>
+
+  <!-- Кнопки и вкладки на счёте -->
+  <record id="view_coop_nominal_account_form_export" model="ir.ui.view">
+    <field name="name">coop.nominal.account.form.export</field>
+    <field name="model">coop.nominal.account</field>
+    <field name="inherit_id" ref="view_coop_nominal_account_form_statement"/>
+    <field name="arch" type="xml">
+      <button name="action_import_statement" position="after">
+        <button name="action_export_payouts" type="object"
+                string="Выгрузить платёжки" groups="base.group_system"
+                invisible="payouts_blocked"/>
+        <button name="action_reconcile" type="object"
+                string="Сверить" groups="base.group_system"/>
+      </button>
+      <field name="bank_bic" position="after">
+        <field name="bank_corr_account"/>
+      </field>
+      <page name="statements" position="after">
+        <page string="Реестры платёжек" name="batches" groups="base.group_system">
+          <field name="batch_ids" readonly="1"/>
+        </page>
+        <page string="Сверки" name="reconciliations" groups="base.group_system">
+          <field name="reconciliation_ids" readonly="1"/>
+        </page>
+      </page>
+    </field>
+  </record>
+
+  <record id="action_coop_nominal_payment_batch" model="ir.actions.act_window">
+    <field name="name">Реестры платёжек</field>
+    <field name="res_model">coop.nominal.payment.batch</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <record id="action_coop_nominal_reconciliation" model="ir.actions.act_window">
+    <field name="name">Сверки</field>
+    <field name="res_model">coop.nominal.reconciliation</field>
+    <field name="view_mode">list</field>
+  </record>
+
+  <menuitem id="menu_coop_nominal_payment_batch" name="Реестры платёжек"
+            parent="menu_coop_nominal_root" action="action_coop_nominal_payment_batch" sequence="45"/>
+  <menuitem id="menu_coop_nominal_reconciliation" name="Сверки"
+            parent="menu_coop_nominal_root" action="action_coop_nominal_reconciliation" sequence="27"/>
+
+</odoo>

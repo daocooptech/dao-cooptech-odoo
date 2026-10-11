@@ -326,6 +326,9 @@ class CoopNominalStatementLine(models.Model):
         ]).filtered(lambda p: not currency.compare_amounts(p.amount, self.amount))
         codes = self._codes()
         payout = live.filtered(lambda p: p.hold_id.id in codes) if codes else Payout
+        if not payout and self.number:
+            # Своя платёжка из реестра: номер в выписке — наш номер.
+            payout = live.filtered(lambda p: p.order_number == self.number)
         if not payout and self.partner_inn:
             payout = live.filtered(
                 lambda p: (p.recipient_inn or p.partner_id.vat) == self.partner_inn)

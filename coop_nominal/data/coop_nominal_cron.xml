@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Ежедневная сверка номинальных счетов.
+
+       Утром, когда выписка за вчера уже должна быть загружена: нет её,
+       расходится книга или висит нераспознанное — об этом пишем в ленту
+       счёта, а не ждём, пока кто-то откроет его сам. -->
+  <record id="cron_coop_nominal_reconcile" model="ir.cron">
+    <field name="name">Номинальный счёт: ежедневная сверка</field>
+    <field name="model_id" ref="model_coop_nominal_account"/>
+    <field name="state">code</field>
+    <field name="code">model._cron_reconcile()</field>
+    <field name="interval_number">1</field>
+    <field name="interval_type">days</field>
+    <field name="nextcall" eval="(DateTime.now() + relativedelta(days=1)).strftime('%Y-%m-%d 07:00:00')"/>
+    <field name="active" eval="True"/>
+  </record>
+
+</odoo>
