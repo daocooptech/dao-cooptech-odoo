@@ -76,7 +76,7 @@ class CoopNominalPartnerStatement(models.TransientModel):
         out = io.StringIO()
         writer = csv.writer(out, delimiter=';', lineterminator='\r\n')
         fmt = lambda d: d.strftime('%d.%m.%Y')
-        writer.writerow([_('Выписка по безопасным сделкам на номинальном счёте')])
+        writer.writerow([_('Выписка по безопасным сделкам')])
         writer.writerow([_('Участник'), self.partner_id.name])
         writer.writerow([_('Период'), '%s — %s' % (fmt(self.date_from), fmt(self.date_to))])
         writer.writerow([])

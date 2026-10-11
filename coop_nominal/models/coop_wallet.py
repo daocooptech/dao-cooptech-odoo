@@ -16,14 +16,14 @@ class CoopWalletNominal(models.Model):
     nominal_hold_count = fields.Integer(
         string='Платежей на удержании', compute='_compute_nominal')
     nominal_to_pay = fields.Monetary(
-        string='К оплате на номинальный счёт', currency_field='currency_id',
+        string='Внести на хранение', currency_field='currency_id',
         compute='_compute_nominal',
         help='Платежи по графикам, которых счёт ещё не получил. В назначении '
              'платежа — код удержания (CT-…), по нему банк найдёт сделку.')
     nominal_mine_before_act = fields.Monetary(
         string='Мои деньги до акта', currency_field='currency_id',
         compute='_compute_nominal',
-        help='Вы заплатили, акта ещё нет: деньги лежат на номинальном счёте и '
+        help='Вы заплатили, акта ещё нет: деньги на хранении в банке и '
              'принадлежат вам. Подпишете акт — перейдут продавцу.')
     nominal_mine_to_receive = fields.Monetary(
         string='Ждёт выплаты мне', currency_field='currency_id',

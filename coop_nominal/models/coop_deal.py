@@ -4,7 +4,7 @@ from odoo.exceptions import UserError
 
 CHANNELS = [
     ('direct', 'Напрямую получателю'),
-    ('nominal', 'Безопасная сделка: через номинальный счёт'),
+    ('nominal', 'Безопасная сделка: деньги на хранении до акта'),
 ]
 
 # Стадии, на которых условия уже согласованы и деньги можно ждать.
@@ -128,7 +128,7 @@ class CoopDealPayment(models.Model):
     def write(self, vals):
         if 'channel' in vals and self.sudo().filtered('nominal_hold_id'):
             raise UserError(_(
-                'По позиции уже заведено удержание на номинальном счёте: '
+                'По позиции деньги уже на хранении: '
                 'способ оплаты не меняется.'))
         result = super().write(vals)
         if 'channel' in vals:
@@ -139,6 +139,6 @@ class CoopDealPayment(models.Model):
         """Оплату через номинальный счёт отмечает выписка, а не сторона."""
         if self.filtered(lambda p: p.channel == 'nominal'):
             raise UserError(_(
-                'Оплата через номинальный счёт отмечается по выписке банка, '
+                'Оплата безопасной сделки отмечается по выписке банка, '
                 'вручную её не ставят.'))
         return super().action_mark_paid()

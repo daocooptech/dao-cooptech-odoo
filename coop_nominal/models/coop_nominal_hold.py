@@ -145,7 +145,7 @@ class CoopNominalHold(models.Model):
                 raise ValidationError(_('Плательщик и получатель удержания — разные стороны.'))
             if record.payment_id.currency_id != record.account_id.currency_id:
                 raise ValidationError(_(
-                    'Валюта платежа и номинального счёта должна совпадать.'))
+                    'Безопасная сделка принимает платёж только в валюте счёта хранения.'))
 
     @api.model_create_multi
     def create(self, vals_list):
