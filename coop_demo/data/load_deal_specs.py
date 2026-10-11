@@ -195,11 +195,12 @@ def tidy_payment_schedules(env):
     Payment = env['coop.deal.payment'].sudo().with_context(
         tracking_disable=True, mail_create_nolog=True, mail_notrack=True)
     today = fields.Date.context_today(Deal)
-    nominal = 'nominal_hold_ids' in Payment._fields
+    # Удержания объявлены у сделки (coop_nominal), а не у позиции графика.
+    nominal = 'nominal_hold_ids' in Deal._fields
     fixed = 0
     for deal in Deal.search([('payment_ids', '!=', False)], order='id'):
         payments = deal.payment_ids.sorted(lambda p: (p.due_on, p.id))
-        if nominal and payments.nominal_hold_ids:
+        if nominal and deal.nominal_hold_ids:
             continue  # деньги на номинальном счёте — их график не трогаем
         before = [(p.amount, p.state) for p in payments]
         try:
