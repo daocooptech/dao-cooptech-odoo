@@ -37,7 +37,7 @@
             <div class="o_coop_kpi_num">
               <field name="nominal_mine_before_act" widget="monetary" nolabel="1"/>
             </div>
-            <div class="o_coop_kpi_label">Мои деньги до акта</div>
+            <div class="o_coop_kpi_label">Ожидает подтверждения</div>
           </div>
           <div class="o_coop_kpi_cell o_coop_kpi_free">
             <div class="o_coop_kpi_num">

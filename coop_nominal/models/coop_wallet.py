@@ -21,7 +21,7 @@ class CoopWalletNominal(models.Model):
         help='Платежи по графикам, которых счёт ещё не получил. В назначении '
              'платежа — код удержания (CT-…), по нему банк найдёт сделку.')
     nominal_mine_before_act = fields.Monetary(
-        string='Мои деньги до акта', currency_field='currency_id',
+        string='Ожидает подтверждения', currency_field='currency_id',
         compute='_compute_nominal',
         help='Вы заплатили, акта ещё нет: деньги на хранении в банке и '
              'принадлежат вам. Подпишете акт — перейдут продавцу.')
