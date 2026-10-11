@@ -16,7 +16,7 @@ NEW=0
 [ "${1:-}" = "--new" ] && { NEW=1; shift; }
 DB="${1:?база}"; shift
 LOG="${TMPDIR:-/tmp}/odoo_run_${DB}.log"
-PSQL="$ROOT/../rudoo/pgsql/bin/psql.exe"
+PSQL="$ROOT/pgsql17/bin/psql.exe"
 
 exists=$(PGPASSWORD=odoo "$PSQL" -h 127.0.0.1 -p 5433 -U odoo -d postgres -tAc \
     "select 1 from pg_database where datname='$DB'" 2>/dev/null)
