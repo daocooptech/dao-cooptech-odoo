@@ -506,6 +506,13 @@ class CoopBarterExchange(models.Model):
                     'city': offer.city,
                     'resource_id': offer.resource_id.id,
                     'amount': offer.value,
+                    # Сделка рождается согласованной, мимо «Согласовать», —
+                    # спецификацию пишем сразу: что передаётся и почём.
+                    'line_ids': [(0, 0, {
+                        'name': offer.name,
+                        'quantity': 1.0,
+                        'price_unit': offer.value,
+                    })],
                     'state': 'agreed',
                     'signed_on': today,
                     'coop_barter_exchange_id': exchange.id,

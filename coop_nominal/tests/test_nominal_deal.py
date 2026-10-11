@@ -17,6 +17,9 @@ class TestNominalDeal(TransactionCase):
         cls.today = fields.Date.context_today(cls.env['coop.nominal.hold'])
         cls.seller = cls._user('Продавец безопасной сделки')
         cls.buyer = cls._user('Покупатель безопасной сделки')
+        # Счёт для сделок ищется среди действующих: счета стенда не должны
+        # перехватить тестовую сделку.
+        cls.env['coop.nominal.account'].search([]).write({'active': False})
         cls.account = cls.env['coop.nominal.account'].create({
             'name': 'Номинальный счёт сделок',
             'owner_id': cls.env['res.partner'].create(
@@ -41,6 +44,8 @@ class TestNominalDeal(TransactionCase):
             'party_a_id': self.seller.partner_id.id,
             'party_b_id': self.buyer.partner_id.id,
             'payment_channel': channel,
+            'line_ids': [(0, 0, {'name': 'Зерно, т', 'quantity': 10.0,
+                                 'price_unit': 5000.0})],
             'payment_ids': [(0, 0, {
                 'due_on': self.today,
                 'amount': 50000.0,

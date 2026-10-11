@@ -581,9 +581,17 @@ class CoopDeal(models.Model):
 
         Обе стороны должны быть с подтверждённой личностью: сделка — это
         обязательство, и знать, с кем имеешь дело, вправе каждая сторона.
+
+        Без спецификации не согласовать (владелец 11.10.2026): сделка,
+        где не записано, что передаётся, ничего не обязывает, а акт по
+        ней нечем сверить.
         """
         for record in self:
             record._require_party()
+            if not record.line_ids:
+                raise UserError(_(
+                    'Сделку %s нельзя согласовать без спецификации: сначала '
+                    'запишите, что именно передаётся.') % record.display_name)
             for party in (record.party_a_id, record.party_b_id):
                 party.coop_require_level('identity', _('заключить сделку'))
             record.write({

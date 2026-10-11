@@ -8,6 +8,7 @@ from ..data import load_registries
 from ..data import load_project_updates
 from ..data import load_project_work
 from ..data import load_market_mix
+from ..data import load_deal_specs
 from ..data import load_token_history
 from ..data import load_project_follows
 from ..data import load_wall_posts
@@ -212,6 +213,10 @@ class CoopDemoLoader(models.AbstractModel):
         # Аукционы — после ресурсов: лот часто ссылается на объявление.
         if 'coop.auction' in self.env:
             load_auctions.load_auctions(self.env)
+        # Спецификация и график платежей у сделок, прошедших согласование
+        # мимо кнопки (замечание 11.10), — когда все, кто заводит сделки,
+        # уже отработали, и до кошельков: сальдо считается из платежей.
+        load_deal_specs.load_deal_specs(self.env)
         # Кошельки последними: состав вкладок зависит от членства, а
         # сальдо по контрагентам считается из платежей по сделкам.
         load_wallets.load_wallets(self.env)
