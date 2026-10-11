@@ -33,9 +33,12 @@ class CoopSkillOffer(models.Model):
             'options': [{'value': c.id, 'label': c.name} for c in categories],
         })
         category = chosen('coop_specialization_category_id')
-        if category:
-            specs = self.env['coop.specialization'].sudo().search(
-                [('category_id', '=', int(category))])
+        specs = self.env['coop.specialization'].sudo().search(
+            [('category_id', '=', int(category))]) if category else []
+        # Сфера из одной специализации — бывший «Рабочий персонал»
+        # (владелец 24.09.2026): «Сварщик» → «Сварщик». Выбирать там
+        # нечего, и второй список читается как повтор.
+        if len(specs) > 1:
             blocks.append({
                 'code': 'spec', 'label': 'Подкатегория',
                 'widget': 'select', 'field': 'coop_specialization_id',
