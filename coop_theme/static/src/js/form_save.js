@@ -39,6 +39,11 @@ import { coopIsPlatformModel } from "@coop_theme/js/platform_page";
 patch(FormController.prototype, {
     /** Платформенная ли это страница записи. */
     get coopIsPlatformPage() {
+        // Форма в окне — мастер или запись из списка: у окна свой подвал
+        // с кнопками, вторая пара «сохранить/отменить» там лишняя.
+        if (this.env.inDialog) {
+            return false;
+        }
         try {
             return coopIsPlatformModel(
                 this.props?.resModel || this.model?.root?.resModel
