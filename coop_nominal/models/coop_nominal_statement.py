@@ -196,7 +196,21 @@ class CoopNominalStatementLine(models.Model):
     state = fields.Selection([
         ('matched', 'Сопоставлено'),
         ('unrecognized', 'Нераспознано'),
+        ('resolved', 'Разобрано вручную'),
     ], string='Разбор', readonly=True, index=True)
+    resolution = fields.Selection([
+        ('holds', 'Зачтено платежам на удержании'),
+        ('refund', 'Возвращено отправителю'),
+        ('payout', 'Признано выплатой'),
+        ('offset', 'Зачтено встречной строкой'),
+    ], string='Как разобрано', readonly=True)
+    resolved_by_id = fields.Many2one('res.users', string='Разобрал', readonly=True)
+    resolved_on = fields.Date(string='Разобрано', readonly=True)
+    counterpart_line_id = fields.Many2one(
+        'coop.nominal.statement.line', string='Встречная строка', readonly=True,
+        ondelete='restrict')
+    refund_payout_ids = fields.One2many(
+        'coop.nominal.payout', 'source_line_id', string='Возврат')
     match_rule = fields.Selection([
         ('code', 'По коду удержания'),
         ('inn_amount', 'По ИНН и сумме'),
@@ -238,6 +252,16 @@ class CoopNominalStatementLine(models.Model):
 
     def unlink(self):
         raise UserError(_('Строки выписки не удаляются.'))
+
+    @api.depends('number', 'date', 'amount', 'direction')
+    def _compute_display_name(self):
+        for line in self:
+            line.display_name = _('№%(number)s от %(date)s, %(sign)s%(amount)s') % {
+                'number': line.number or '?',
+                'date': line.date and line.date.strftime('%d.%m.%Y'),
+                'sign': '−' if line.direction == 'out' else '',
+                'amount': '%.2f' % line.amount,
+            }
 
     def _codes(self):
         return {int(code) for code in HOLD_CODE.findall(self.purpose or '')}
@@ -303,7 +327,8 @@ class CoopNominalStatementLine(models.Model):
         codes = self._codes()
         payout = live.filtered(lambda p: p.hold_id.id in codes) if codes else Payout
         if not payout and self.partner_inn:
-            payout = live.filtered(lambda p: p.partner_id.vat == self.partner_inn)
+            payout = live.filtered(
+                lambda p: (p.recipient_inn or p.partner_id.vat) == self.partner_inn)
         if len(payout) == 1:
             payout._mark_executed(self.date, statement_line=self)
             self.write({'state': 'matched', 'match_rule': 'payout',
@@ -339,6 +364,105 @@ class CoopNominalStatementLine(models.Model):
             {'leg': 'unrecognized', 'amount': -sign * self.amount},
         ], statement_line=self)
         self.write({'state': 'unrecognized', 'note': note})
+
+    # Ручной разбор нераспознанного. Каждое действие закрывает строку
+    # целиком: поделить одно поступление между разными исходами нельзя,
+    # иначе остаток нераспознанного потом не сведёшь со строками.
+
+    def _expect_unrecognized(self, direction=None):
+        for line in self:
+            if line.state != 'unrecognized':
+                raise UserError(_('Строка №%s уже разобрана.') % line.number)
+            if direction and line.direction != direction:
+                raise UserError(_(
+                    'Строка №%s — не то движение для этого разбора.') % line.number)
+            if line.refund_payout_ids.filtered(lambda p: p.state in LIVE):
+                raise UserError(_(
+                    'По строке №%s уже поставлен возврат: дождитесь его в выписке '
+                    'или снимите.') % line.number)
+
+    def _mark_resolved(self, resolution, **vals):
+        vals.update({
+            'state': 'resolved',
+            'resolution': resolution,
+            'resolved_by_id': self.env.user.id,
+            'resolved_on': fields.Date.context_today(self),
+        })
+        return self.sudo().write(vals)
+
+    def _resolve_holds(self, holds):
+        """Нераспознанное поступление — это оплата этих удержаний."""
+        self.ensure_one()
+        self._expect_unrecognized('in')
+        holds = holds.sudo()
+        if not holds or holds.account_id != self.account_id:
+            raise UserError(_('Выберите удержания этого же счёта.'))
+        if self.currency_id.compare_amounts(sum(holds.mapped('amount')), self.amount):
+            raise UserError(_(
+                'Сумма удержаний %(holds)s не равна поступлению %(amount)s.',
+                holds=sum(holds.mapped('amount')), amount=self.amount))
+        holds._credit(self.date, statement_line=self, from_unrecognized=True)
+        return self._mark_resolved('holds', hold_ids=[(6, 0, holds.ids)])
+
+    def _resolve_refund(self):
+        """Чужие или ошибочные деньги — вернуть тому, кто прислал.
+
+        Строка остаётся нераспознанной, пока возврат не увидим в выписке.
+        """
+        self.ensure_one()
+        self._expect_unrecognized('in')
+        if not (self.partner_account and self.partner_bic):
+            raise UserError(_(
+                'В строке №%s нет счёта или БИК отправителя: вернуть некуда.')
+                % self.number)
+        self.account_id._check_payouts_allowed()
+        return self.env['coop.nominal.payout'].sudo().create({
+            'source_line_id': self.id,
+            'kind': 'refund',
+            'amount': self.amount,
+        })
+
+    def _resolve_payout(self, payout):
+        """Нераспознанное списание — это исполненная выплата из реестра."""
+        self.ensure_one()
+        self._expect_unrecognized('out')
+        payout = payout.sudo()
+        if payout.account_id != self.account_id or payout.state not in LIVE:
+            raise UserError(_('Выберите выплату этого счёта, которая ещё в работе.'))
+        if self.currency_id.compare_amounts(payout.amount, self.amount):
+            raise UserError(_(
+                'Сумма выплаты %(payout)s не равна списанию %(amount)s.',
+                payout=payout.amount, amount=self.amount))
+        payout._mark_executed(self.date, statement_line=self, from_unrecognized=True)
+        return self._mark_resolved(
+            'payout', payout_id=payout.id, hold_ids=[(6, 0, payout.hold_id.ids)])
+
+    def _resolve_offset(self, other):
+        """Встречные строки гасят друг друга: ошибочное списание и его
+        возврат, деньги, ушедшие и вернувшиеся. В книге проводить нечего —
+        в нераспознанном они уже дают ноль."""
+        self.ensure_one()
+        other = other.sudo()
+        (self | other)._expect_unrecognized()
+        if (len(other) != 1 or other == self or other.account_id != self.account_id
+                or other.direction == self.direction
+                or self.currency_id.compare_amounts(other.amount, self.amount)):
+            raise UserError(_(
+                'Встречная строка — того же счёта, обратного движения и на ту же сумму.'))
+        self._mark_resolved('offset', counterpart_line_id=other.id)
+        other._mark_resolved('offset', counterpart_line_id=self.id)
+        return True
+
+    def action_resolve(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Разобрать строку выписки'),
+            'res_model': 'coop.nominal.statement.resolve',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_line_id': self.id},
+        }
 
 
 class CoopNominalAccountStatement(models.Model):

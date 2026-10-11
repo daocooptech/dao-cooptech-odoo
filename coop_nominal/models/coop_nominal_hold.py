@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import re
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
@@ -108,9 +110,26 @@ class CoopNominalHold(models.Model):
         'Сумма удержания — больше нуля.',
     )
 
+    _rec_names_search = ['deal_id.name', 'payer_id.name', 'payee_id.name']
+
     def _compute_code(self):
         for record in self:
             record.code = 'CT-%s' % record.id if record.id else False
+
+    @api.depends('deal_id.name')
+    def _compute_display_name(self):
+        for record in self:
+            record.display_name = ' · '.join(filter(None, [record.code, record.deal_id.name]))
+
+    @api.model
+    def _search_display_name(self, operator, value):
+        # Администратор ищет удержание так, как оно написано в назначении
+        # платежа: «CT-15».
+        match = isinstance(value, str) and re.fullmatch(
+            r'\s*[CС][TТ]\s*-?\s*(\d+)\s*', value, re.IGNORECASE)
+        if match and operator in ('ilike', '='):
+            return [('id', '=', int(match.group(1)))]
+        return super()._search_display_name(operator, value)
 
     @api.depends('entry_ids.amount')
     def _compute_held_amount(self):
@@ -179,17 +198,25 @@ class CoopNominalHold(models.Model):
         return self.env['coop.nominal.entry']._post(
             self.account_id, kind, date, lines, statement_line=statement_line)
 
-    def _credit(self, date, statement_line=None):
+    def _credit(self, date, statement_line=None, from_unrecognized=False):
         """Деньги плательщика пришли на счёт — по выписке.
 
         Совпавшая строка выписки ставит позицию графика оплаченной: это
         сильнее, чем «я получил» от стороны.
+
+        `from_unrecognized` — деньги уже лежат в нераспознанном, их опознали
+        руками: переносим их бенефициару сегодняшней проводкой (книга о
+        прошлом не переписывается), а зачисленными считаем с даты выписки.
         """
         self._expect('awaiting')
         for record in self:
             first = record.payer_id if record.beneficiary_mode == 'both' else record.payee_id
-            record._post('credit', date, [
-                {'leg': 'bank', 'amount': record.amount},
+            if from_unrecognized:
+                kind, leg, post_on = 'recognize', 'unrecognized', fields.Date.context_today(record)
+            else:
+                kind, leg, post_on = 'credit', 'bank', date
+            record._post(kind, post_on, [
+                {'leg': leg, 'amount': record.amount},
                 {'leg': 'holder', 'amount': -record.amount, 'partner': first},
             ], statement_line=statement_line)
             record.write({

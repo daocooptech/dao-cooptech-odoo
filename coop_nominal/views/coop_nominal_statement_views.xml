@@ -20,9 +20,111 @@
         <field name="match_rule" optional="show"/>
         <field name="hold_ids" widget="many2many_tags" optional="show"/>
         <field name="note" optional="show"/>
+        <field name="resolution" optional="hide"/>
         <field name="statement_id" optional="hide"/>
         <field name="currency_id" column_invisible="True"/>
+        <button name="action_resolve" type="object" string="Разобрать"
+                class="btn-link" invisible="state != 'unrecognized'"/>
       </list>
+    </field>
+  </record>
+
+  <record id="view_coop_nominal_statement_line_form" model="ir.ui.view">
+    <field name="name">coop.nominal.statement.line.form</field>
+    <field name="model">coop.nominal.statement.line</field>
+    <field name="arch" type="xml">
+      <form string="Строка выписки" create="false" edit="false" delete="false">
+        <header>
+          <button name="action_resolve" type="object" string="Разобрать"
+                  class="btn-primary" invisible="state != 'unrecognized'"/>
+          <field name="state" widget="statusbar"/>
+        </header>
+        <sheet>
+          <div class="alert alert-warning" role="alert" invisible="state != 'unrecognized'">
+            <field name="note" nolabel="1"/>
+          </div>
+          <group>
+            <group string="Банк">
+              <field name="statement_id"/>
+              <field name="direction"/>
+              <field name="date"/>
+              <field name="number"/>
+              <field name="amount"/>
+              <field name="purpose"/>
+              <field name="currency_id" invisible="1"/>
+            </group>
+            <group string="Контрагент">
+              <field name="partner_name"/>
+              <field name="partner_inn"/>
+              <field name="partner_kpp"/>
+              <field name="partner_account"/>
+              <field name="partner_bic"/>
+            </group>
+            <group string="Разбор">
+              <field name="match_rule" invisible="not match_rule"/>
+              <field name="resolution" invisible="not resolution"/>
+              <field name="resolved_by_id" invisible="not resolution"/>
+              <field name="resolved_on" invisible="not resolution"/>
+              <field name="hold_ids" widget="many2many_tags" invisible="not hold_ids"/>
+              <field name="payout_id" invisible="not payout_id"/>
+              <field name="counterpart_line_id" invisible="not counterpart_line_id"/>
+            </group>
+          </group>
+          <notebook>
+            <page string="Книга" name="entries">
+              <field name="entry_ids" readonly="1"/>
+            </page>
+            <page string="Возврат" name="refund" invisible="not refund_payout_ids">
+              <field name="refund_payout_ids" readonly="1"/>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- Разбор нераспознанного -->
+  <record id="view_coop_nominal_statement_resolve_form" model="ir.ui.view">
+    <field name="name">coop.nominal.statement.resolve.form</field>
+    <field name="model">coop.nominal.statement.resolve</field>
+    <field name="arch" type="xml">
+      <form string="Разобрать строку выписки">
+        <group>
+          <group>
+            <field name="line_id"/>
+            <field name="direction"/>
+            <field name="amount"/>
+          </group>
+          <group>
+            <field name="partner_name"/>
+            <field name="purpose"/>
+            <field name="account_id" invisible="1"/>
+            <field name="currency_id" invisible="1"/>
+          </group>
+        </group>
+        <group>
+          <field name="mode" widget="radio"/>
+          <field name="hold_ids" widget="many2many_tags"
+                 invisible="mode != 'holds'" required="mode == 'holds'"
+                 domain="[('account_id', '=', account_id), ('state', '=', 'awaiting')]"/>
+          <field name="payout_id"
+                 invisible="mode != 'payout'" required="mode == 'payout'"
+                 domain="[('account_id', '=', account_id), ('amount', '=', amount),
+                          ('state', 'in', ['queued', 'bank_review', 'sent', 'unknown'])]"/>
+          <field name="counterpart_line_id"
+                 invisible="mode != 'offset'" required="mode == 'offset'"
+                 domain="[('account_id', '=', account_id), ('state', '=', 'unrecognized'),
+                          ('direction', '!=', direction), ('amount', '=', amount)]"/>
+        </group>
+        <p class="text-muted" invisible="mode != 'refund'">
+          Возврат встанет в очередь выплат по реквизитам отправителя из строки. Строка
+          закроется, когда списание появится в выписке.
+        </p>
+        <footer>
+          <button name="action_apply" type="object" string="Разобрать" class="btn-primary"/>
+          <button special="cancel" string="Отмена"/>
+        </footer>
+      </form>
     </field>
   </record>
 
@@ -166,7 +268,7 @@
   <record id="action_coop_nominal_statement_line" model="ir.actions.act_window">
     <field name="name">Строки выписок</field>
     <field name="res_model">coop.nominal.statement.line</field>
-    <field name="view_mode">list</field>
+    <field name="view_mode">list,form</field>
     <field name="context">{'search_default_unrecognized': 1}</field>
   </record>
 

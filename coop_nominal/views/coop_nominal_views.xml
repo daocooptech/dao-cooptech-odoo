@@ -192,8 +192,12 @@
             decoration-muted="state == 'cancelled'"
             decoration-danger="state in ('failed', 'unknown')">
         <field name="hold_id"/>
+        <field name="source_line_id" optional="show"/>
         <field name="kind"/>
         <field name="partner_id"/>
+        <field name="recipient_name" optional="show"/>
+        <field name="recipient_inn" optional="hide"/>
+        <field name="recipient_account" optional="hide"/>
         <field name="amount" sum="Всего"/>
         <field name="version"/>
         <field name="executed_on"/>

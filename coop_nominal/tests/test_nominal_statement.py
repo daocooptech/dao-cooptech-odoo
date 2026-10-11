@@ -18,7 +18,7 @@ def _doc(number, date, amount, purpose, inn, account, incoming=True):
     lines.append(('ДатаПоступило=%s' if incoming else 'ДатаСписано=%s') % date)
     for prefix, side in (('Плательщик', payer), ('Получатель', payee)):
         lines += ['%sСчет=%s' % (prefix, side['Счет']), '%sИНН=%s' % (prefix, side['ИНН']),
-                  '%s1=%s' % (prefix, side['1'])]
+                  '%s1=%s' % (prefix, side['1']), '%sБИК=044525225' % prefix]
     lines += ['НазначениеПлатежа=%s' % purpose, 'КонецДокумента']
     return lines
 
@@ -33,9 +33,8 @@ def _file(date_from, date_to, start, end, docs, encoding='cp1251'):
     return '\r\n'.join(head + body + ['КонецФайла', '']).encode(encoding)
 
 
-@tagged('post_install', '-at_install')
-class TestNominalStatement(TransactionCase):
-    """Выписка 1С: зачисление по коду, нераспознанное, выплаты (этап 2а)."""
+class NominalStatementCase(TransactionCase):
+    """Счёт, стороны и сделка для проб выписки."""
 
     @classmethod
     def setUpClass(cls):
@@ -74,6 +73,11 @@ class TestNominalStatement(TransactionCase):
 
     def _import(self, docs, start='0.00', end='0.00', **kw):
         return self.account._import_statement(_file(self.day, self.day, start, end, docs, **kw))
+
+
+@tagged('post_install', '-at_install')
+class TestNominalStatement(NominalStatementCase):
+    """Выписка 1С: зачисление по коду, нераспознанное, выплаты (этап 2а)."""
 
     def test_code_credits_hold_and_ledger_matches_bank(self):
         hold = self._hold()
@@ -176,3 +180,102 @@ class TestNominalStatement(TransactionCase):
             statement.line_ids.write({'amount': 5.0})
         with self.assertRaises(UserError):
             statement.line_ids.unlink()
+
+
+@tagged('post_install', '-at_install')
+class TestNominalResolve(NominalStatementCase):
+    """Ручной разбор нераспознанного (этап 2б)."""
+
+    def _unknown_in(self, amount='5000.00', number=20, end=None):
+        statement = self._import([_doc(
+            number, self.day, amount, 'Оплата', '123456789012', '40817810000000000009')],
+            end=end or amount)
+        return statement.line_ids
+
+    def test_unrecognized_paid_hold_by_hand(self):
+        hold = self._hold(5000.0)
+        line = self._unknown_in()
+        self.assertEqual(line.state, 'unrecognized')
+        found = self.env['coop.nominal.hold'].name_search('ct-%s' % hold.id)
+        self.assertEqual([hold.id], [row[0] for row in found])
+        self.assertTrue(hold.display_name.startswith('CT-%s' % hold.id))
+        wizard = self.env['coop.nominal.statement.resolve'].create({
+            'line_id': line.id, 'hold_ids': [(6, 0, hold.ids)]})
+        self.assertEqual(wizard.mode, 'holds')
+        wizard.action_apply()
+        self.assertEqual(line.state, 'resolved')
+        self.assertEqual(line.resolution, 'holds')
+        self.assertEqual(hold.state, 'held_buyer')
+        self.assertEqual(hold.credited_on, line.date)
+        self.assertIn('recognize', hold.entry_ids.mapped('kind'))
+        self.assertFalse(self.account.unrecognized_balance)
+        self.assertFalse(self.account.discrepancy)
+        with self.assertRaises(UserError):
+            line._resolve_refund()
+
+    def test_wrong_sum_is_refused(self):
+        hold = self._hold(4000.0)
+        line = self._unknown_in()
+        with self.assertRaises(UserError):
+            line._resolve_holds(hold)
+        self.assertEqual(hold.state, 'awaiting')
+
+    def test_refund_to_sender_closes_by_statement(self):
+        line = self._unknown_in('777.00')
+        refund = line._resolve_refund()
+        self.assertEqual(refund.state, 'queued')
+        self.assertEqual(refund.recipient_inn, '123456789012')
+        self.assertEqual(refund.recipient_account, '40817810000000000009')
+        self.assertEqual(refund.recipient_bic, '044525225')
+        self.assertEqual(line.state, 'unrecognized')
+        with self.assertRaises(UserError):
+            line._resolve_refund()
+        statement = self._import([_doc(
+            21, self.day, '777.00', 'Возврат ошибочно перечисленных', '123456789012',
+            '40817810000000000009', incoming=False)], start='777.00', end='0.00')
+        self.assertEqual(statement.line_ids.match_rule, 'payout')
+        self.assertEqual(refund.state, 'executed')
+        self.assertEqual(line.state, 'resolved')
+        self.assertEqual(line.resolution, 'refund')
+        self.assertFalse(self.account.unrecognized_balance)
+        self.assertFalse(self.account.ledger_balance)
+        self.assertFalse(self.account.discrepancy)
+
+    def test_unrecognized_debit_is_payout(self):
+        hold = self._hold()
+        self._import([_doc(
+            22, self.day, '10000.00', 'CT-%s' % hold.id, '500100732259', '40817810000000000001')],
+            end='10000.00')
+        hold._act(self.today)
+        hold._queue_payout()
+        payout = hold.payout_ids
+        # Банк списал без кода и на ИНН, которого у продавца в карточке нет.
+        statement = self._import([_doc(
+            23, self.day, '9800.00', 'Оплата по договору', '9909090909',
+            '40702810000000000002', incoming=False)], start='10000.00', end='200.00')
+        line = statement.line_ids
+        self.assertEqual(line.state, 'unrecognized')
+        self.assertEqual(payout.state, 'queued')
+        self.assertEqual(self.account.unrecognized_balance, -9800.0)
+        line._resolve_payout(payout)
+        self.assertEqual(payout.state, 'executed')
+        self.assertEqual(hold.state, 'paid_out')
+        self.assertEqual(line.resolution, 'payout')
+        self.assertFalse(self.account.unrecognized_balance)
+        self.assertFalse(self.account.discrepancy)
+
+    def test_offset_of_counter_lines(self):
+        statement = self._import([
+            _doc(24, self.day, '500.00', 'Ошибочное списание', '123456789012',
+                 '40817810000000000009', incoming=False),
+            _doc(25, self.day, '500.00', 'Возврат ошибочного списания', '123456789012',
+                 '40817810000000000009'),
+            _doc(26, self.day, '300.00', 'Прочее', '123456789012', '40817810000000000009'),
+        ], end='300.00')
+        out, back, other = statement.line_ids.sorted('number')
+        with self.assertRaises(UserError):
+            out._resolve_offset(other)
+        out._resolve_offset(back)
+        self.assertEqual((out | back).mapped('state'), ['resolved', 'resolved'])
+        self.assertEqual(out.counterpart_line_id, back)
+        self.assertEqual(self.account.unrecognized_balance, 300.0)
