@@ -43,7 +43,7 @@
             <div class="o_coop_kpi_num">
               <field name="nominal_mine_to_receive" widget="monetary" nolabel="1"/>
             </div>
-            <div class="o_coop_kpi_label">Ждёт выплаты мне</div>
+            <div class="o_coop_kpi_label">К получению</div>
           </div>
         </div>
         <div class="o_coop_note" invisible="nominal_hold_count">

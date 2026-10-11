@@ -26,7 +26,7 @@ class CoopWalletNominal(models.Model):
         help='Вы заплатили, акта ещё нет: деньги на хранении в банке и '
              'принадлежат вам. Подпишете акт — перейдут продавцу.')
     nominal_mine_to_receive = fields.Monetary(
-        string='Ждёт выплаты мне', currency_field='currency_id',
+        string='К получению', currency_field='currency_id',
         compute='_compute_nominal',
         help='Акт подписан, деньги ваши за вычетом комиссии оператора: банк '
              'переводит их на ваш счёт.')
