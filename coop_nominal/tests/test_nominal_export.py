@@ -52,6 +52,11 @@ class TestNominalExport(NominalStatementCase):
         self.assertEqual(doc['ПолучательСчет'], SELLER_ACCOUNT)
         self.assertEqual(doc['ПолучательИНН'], '7707083893')
         self.assertEqual(doc['ПолучательБИК'], '044525593')
+        if 'ru.bank' in self.env:
+            bank = self.env['ru.bank'].search([('bic', '=', '044525593')], limit=1)
+            if bank.corr_acc_ids:
+                self.assertEqual(doc['ПолучательКорсчет'], bank.corr_acc_ids[0].corr_acc)
+                self.assertEqual(doc['ПолучательБанк1'], bank.name)
         self.assertTrue(doc['НазначениеПлатежа'].startswith('CT-%s.' % hold.id))
         # Списание по этой платёжке в выписке закрывает выплату.
         self._import([_doc(

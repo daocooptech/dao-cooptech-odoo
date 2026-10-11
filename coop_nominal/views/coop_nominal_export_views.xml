@@ -56,6 +56,8 @@
               <field name="recipient_name"/>
               <field name="recipient_inn" optional="show"/>
               <field name="recipient_account" optional="hide"/>
+              <field name="recipient_bank_name" optional="hide"/>
+              <field name="recipient_corr_account" optional="hide"/>
               <field name="purpose" optional="show"/>
               <field name="amount" sum="Всего"/>
               <field name="state" widget="badge"/>

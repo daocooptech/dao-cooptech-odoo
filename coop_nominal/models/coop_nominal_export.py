@@ -71,6 +71,8 @@ class CoopNominalPayoutExport(models.Model):
         help='Номер платёжного поручения в реестре: по нему списание в '
              'выписке находит свою выплату, даже если в назначении нет кода.')
     sent_on = fields.Date(string='Выгружено', readonly=True)
+    recipient_bank_name = fields.Char(string='Банк получателя', readonly=True)
+    recipient_corr_account = fields.Char(string='Корр. счёт банка получателя', readonly=True)
     purpose = fields.Char(string='Назначение платежа', readonly=True)
 
     def _payment_purpose(self):
@@ -91,6 +93,18 @@ class CoopNominalPayoutExport(models.Model):
                       'Без налога (НДС)')) % {
                 'code': hold.code, 'deal': hold.deal_id.name or ''}
         return text[:PURPOSE_MAX]
+
+
+def _ru_bank(env, bic):
+    """Название банка и корр. счёт по БИК из справочника банков России.
+
+    Справочник ставит модуль l10n_ru_banks; без него — пусто, и клиент-банк
+    подставит корр. счёт по БИК сам.
+    """
+    if not bic or 'ru.bank' not in env:
+        return '', ''
+    bank = env['ru.bank'].sudo().search([('bic', '=', bic)], limit=1)
+    return bank.name or '', bank.corr_acc_ids[:1].corr_acc or ''
 
 
 class CoopNominalAccountExport(models.Model):
@@ -148,9 +162,12 @@ class CoopNominalAccountExport(models.Model):
         number = account.last_order_number
         for payout in payouts:
             number += 1
+            bank_name, corr_account = _ru_bank(self.env, payout.recipient_bic)
             payout.write({
                 'order_number': str(number),
                 'purpose': payout._payment_purpose(),
+                'recipient_bank_name': bank_name,
+                'recipient_corr_account': corr_account,
             })
         account.last_order_number = number
 
@@ -180,6 +197,9 @@ class CoopNominalAccountExport(models.Model):
         self.ensure_one()
         owner = self.owner_id
         payer_kpp = owner.kpp if 'kpp' in owner._fields else ''
+        bank_name, corr_account = _ru_bank(self.env, self.bank_bic)
+        bank_name = self.bank_name or bank_name
+        corr_account = self.bank_corr_account or corr_account
         now = fields.Datetime.context_timestamp(self, datetime.now())
         day = date.strftime('%d.%m.%Y')
         lines = [
@@ -207,9 +227,9 @@ class CoopNominalAccountExport(models.Model):
                 'ПлательщикКПП=%s' % (payer_kpp or ''),
                 'Плательщик1=%s' % owner.name,
                 'ПлательщикРасчСчет=%s' % self.account_number,
-                'ПлательщикБанк1=%s' % (self.bank_name or ''),
+                'ПлательщикБанк1=%s' % bank_name,
                 'ПлательщикБИК=%s' % self.bank_bic,
-                'ПлательщикКорсчет=%s' % (self.bank_corr_account or ''),
+                'ПлательщикКорсчет=%s' % corr_account,
                 'ПолучательСчет=%s' % payout.recipient_account,
                 'Получатель=%s' % (
                     'ИНН %s %s' % (payout.recipient_inn, payout.recipient_name)
@@ -218,7 +238,9 @@ class CoopNominalAccountExport(models.Model):
                 'ПолучательКПП=%s' % (payout.recipient_kpp or ''),
                 'Получатель1=%s' % payout.recipient_name,
                 'ПолучательРасчСчет=%s' % payout.recipient_account,
+                'ПолучательБанк1=%s' % (payout.recipient_bank_name or ''),
                 'ПолучательБИК=%s' % payout.recipient_bic,
+                'ПолучательКорсчет=%s' % (payout.recipient_corr_account or ''),
                 'ВидОплаты=01',
                 'Очередность=5',
                 'Код=0',
