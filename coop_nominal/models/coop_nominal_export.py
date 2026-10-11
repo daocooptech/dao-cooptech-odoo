@@ -147,34 +147,8 @@ class CoopNominalAccountExport(models.Model):
         payouts = account._exportable_payouts()
         if not payouts:
             raise UserError(_('Выгружать нечего: в очереди нет выплат.'))
-        owner = account.owner_id
-        if not (owner.vat and account.account_number and account.bank_bic):
-            raise UserError(_(
-                'У счёта %s не хватает реквизитов плательщика: ИНН владельца, '
-                'расчётного счёта или БИК банка.') % account.display_name)
-        incomplete = payouts.filtered(lambda p: not (
-            p.recipient_name and p.recipient_account and p.recipient_bic))
-        if incomplete:
-            raise UserError(_(
-                'Нет реквизитов получателя (название, счёт, БИК) у выплат: '
-                '%s. Снимите их с очереди или поставьте заново после того, '
-                'как получатель заполнит реквизиты.') % ', '.join(
-                    p.recipient_name or p.partner_id.display_name or str(p.id)
-                    for p in incomplete))
-
+        account._prepare_orders(payouts)
         today = fields.Date.context_today(self)
-        number = account.last_order_number
-        for payout in payouts:
-            number += 1
-            bank_name, corr_account = _ru_bank(self.env, payout.recipient_bic)
-            payout.write({
-                'order_number': str(number),
-                'purpose': payout._payment_purpose(),
-                'recipient_bank_name': bank_name,
-                'recipient_corr_account': corr_account,
-            })
-        account.last_order_number = number
-
         file_name = 'payouts_%s_%s.txt' % (today.strftime('%Y%m%d'), payouts[0].order_number)
         content = account._payment_file(payouts, today)
         batch = self.env['coop.nominal.payment.batch'].sudo().with_context(
@@ -195,6 +169,39 @@ class CoopNominalAccountExport(models.Model):
         # На проверке банка выплата и остаётся: банк ещё смотрит основание.
         payouts.filtered(lambda p: p.state == 'queued').write({'state': 'sent'})
         return batch.with_env(self.env)
+
+    def _prepare_orders(self, payouts):
+        """Проверить реквизиты и пронумеровать поручения. Номер и
+        назначение даются один раз: повтор того же поручения идёт под
+        прежним номером."""
+        self.ensure_one()
+        account = self.sudo()
+        owner = account.owner_id
+        if not (owner.vat and account.account_number and account.bank_bic):
+            raise UserError(_(
+                'У счёта %s не хватает реквизитов плательщика: ИНН владельца, '
+                'расчётного счёта или БИК банка.') % account.display_name)
+        incomplete = payouts.filtered(lambda p: not (
+            p.recipient_name and p.recipient_account and p.recipient_bic))
+        if incomplete:
+            raise UserError(_(
+                'Нет реквизитов получателя (название, счёт, БИК) у выплат: '
+                '%s. Снимите их с очереди или поставьте заново после того, '
+                'как получатель заполнит реквизиты.') % ', '.join(
+                    p.recipient_name or p.partner_id.display_name or str(p.id)
+                    for p in incomplete))
+        number = account.last_order_number
+        for payout in payouts.filtered(lambda p: not p.order_number):
+            number += 1
+            bank_name, corr_account = _ru_bank(self.env, payout.recipient_bic)
+            payout.write({
+                'order_number': str(number),
+                'purpose': payout._payment_purpose(),
+                'recipient_bank_name': bank_name,
+                'recipient_corr_account': corr_account,
+            })
+        account.last_order_number = number
+        return True
 
     def _payment_file(self, payouts, date):
         """Файл 1CClientBankExchange с платёжными поручениями, в Windows-1251."""

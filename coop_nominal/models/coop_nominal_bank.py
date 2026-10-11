@@ -87,6 +87,15 @@ class CoopNominalPayoutBank(models.Model):
              'Больше одного — были обрывы связи; банк исполнит его один раз.')
     submitted_at = fields.Datetime(string='Отправлено', readonly=True)
 
+    @api.depends('hold_id', 'source_line_id', 'kind', 'version')
+    def _compute_display_name(self):
+        kinds = dict(self._fields['kind']._description_selection(self.env))
+        for record in self:
+            source = record.hold_id.code or record.source_line_id.display_name or ''
+            record.display_name = _('%(kind)s %(source)s, попытка %(version)s') % {
+                'kind': kinds.get(record.kind, ''), 'source': source,
+                'version': record.version or 1}
+
     def _in_bank(self):
         """Распоряжение уже у банка: отдано подключением или файлом."""
         self.ensure_one()
@@ -122,6 +131,17 @@ class CoopNominalPayoutBank(models.Model):
             if not payouts:
                 continue
             account._check_payouts_allowed()
+            # Без реквизитов банк поручение не примет — сразу отказ, чтобы
+            # одна такая выплата не держала остальные.
+            incomplete = payouts.filtered(lambda p: not (
+                p.recipient_name and p.recipient_account and p.recipient_bic))
+            for payout in incomplete:
+                payout._apply_bank_answer({'status': 'rejected', 'reason': _(
+                    'Нет реквизитов получателя: название, счёт или БИК.')})
+            payouts -= incomplete
+            if not payouts:
+                continue
+            account._prepare_orders(payouts)
             answers = account._bank_adapter()._submit(payouts)
             now = fields.Datetime.now()
             for payout in payouts:
@@ -220,14 +240,4 @@ class CoopNominalPayoutBank(models.Model):
             if record.state != 'bank_review':
                 raise UserError(_('Отметка нужна только выплате на проверке банка.'))
             record._apply_bank_answer({'status': 'accepted'})
-        return True
-
-    @api.model
-    def _cron_bank(self):
-        """Отдать очередь и опросить банк по счетам с подключением."""
-        accounts = self.env['coop.nominal.account'].search([('adapter', '!=', 'manual')])
-        for account in accounts.filtered(lambda a: not a.payouts_blocked):
-            payouts = self.search([('account_id', '=', account.id), ('state', 'in', LIVE)])
-            payouts._submit_to_bank()
-            payouts._poll_bank()
         return True

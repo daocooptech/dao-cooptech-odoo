@@ -25,7 +25,7 @@ class CoopNominalAccount(models.Model):
     account_number = fields.Char(string='Расчётный счёт')
     adapter = fields.Selection([
         ('manual', 'Вручную: выписка и реестр платёжек'),
-        ('demo', 'Демо'),
+        ('demo', 'Банк по API'),
     ], string='Подключение банка', default='manual', required=True)
     currency_id = fields.Many2one(
         'res.currency', string='Валюта', required=True,

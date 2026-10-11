@@ -195,7 +195,10 @@
       <button name="action_import_statement" position="after">
         <button name="action_export_payouts" type="object"
                 string="Выгрузить платёжки" groups="base.group_system"
-                invisible="payouts_blocked"/>
+                invisible="payouts_blocked or adapter != 'manual'"/>
+        <button name="action_bank_exchange" type="object"
+                string="Обмен с банком" groups="base.group_system"
+                invisible="adapter == 'manual'"/>
         <button name="action_reconcile" type="object"
                 string="Сверить" groups="base.group_system"/>
       </button>
@@ -225,6 +228,35 @@
     <field name="view_mode">list</field>
   </record>
 
+  <record id="view_coop_nominal_demo_order_list" model="ir.ui.view">
+    <field name="name">coop.nominal.demo.order.list</field>
+    <field name="model">coop.nominal.demo.order</field>
+    <field name="arch" type="xml">
+      <list string="Поручения в банке" create="0" edit="0" delete="0"
+            decoration-danger="state == 'rejected'" decoration-muted="in_statement">
+        <field name="id" string="№ в банке"/>
+        <field name="account_id"/>
+        <field name="payout_id"/>
+        <field name="number"/>
+        <field name="recipient_name"/>
+        <field name="amount" sum="Всего"/>
+        <field name="state" widget="badge"/>
+        <field name="reason"/>
+        <field name="in_statement"/>
+        <field name="idempotency_key" optional="hide"/>
+        <field name="currency_id" column_invisible="True"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="action_coop_nominal_demo_order" model="ir.actions.act_window">
+    <field name="name">Поручения в банке</field>
+    <field name="res_model">coop.nominal.demo.order</field>
+    <field name="view_mode">list</field>
+  </record>
+
+  <menuitem id="menu_coop_nominal_demo_order" name="Поручения в банке"
+            parent="menu_coop_nominal_root" action="action_coop_nominal_demo_order" sequence="90"/>
   <menuitem id="menu_coop_nominal_payment_batch" name="Реестры платёжек"
             parent="menu_coop_nominal_root" action="action_coop_nominal_payment_batch" sequence="45"/>
   <menuitem id="menu_coop_nominal_reconciliation" name="Сверки"
