@@ -167,7 +167,7 @@
             </group>
             <group string="Банк">
               <field name="version"/>
-              <field name="idempotency_key"/>
+              <field name="idempotency_key" groups="base.group_no_one"/>
               <field name="submit_count"/>
               <field name="submitted_at"/>
               <field name="bank_ref"/>

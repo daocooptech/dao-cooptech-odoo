@@ -51,7 +51,7 @@ class CoopFedPeer(models.Model):
     did = fields.Char('Идентификатор (did:web)', required=True, index=True)
     base_url = fields.Char(
         'Адрес вместо стандартного',
-        help='Для узла без https или на стенде: http://217.15.207.46. Пусто — адрес по did:web.')
+        help='Для узла без https: http://адрес. Пусто — адрес по did:web.')
     state = fields.Selection([('active', 'Читаем'), ('paused', 'Пауза'), ('blocked', 'Заблокирован')],
                              string='Состояние', default='active', required=True)
     did_doc = fields.Text('DID-документ', readonly=True)
