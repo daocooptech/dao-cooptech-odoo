@@ -170,44 +170,129 @@
             </div>
           </div>
 
-          <!-- Дневные свечи по сделкам (решение 417) — когда торгов хватает
-               хотя бы на три дня; иначе — линия по сделкам ниже. -->
-          <div class="o_coop_dex_chart" t-if="this.candles.length &gt;= 3">
-            <div class="o_coop_dex_chartlabels">
-              <span>Цена по дням</span>
-              <span class="o_coop_dex_msub">
-                <t t-out="this.candles.length"/> дн. торгов ·
-                от <t t-out="this.money(this.candleRange.min, this.current.currency)"/>
-                до <t t-out="this.money(this.candleRange.max, this.current.currency)"/>
-              </span>
+          <!-- График как на бирже: свечи с объёмом и средней, линия, глубина
+               стакана; сводка по периоду и подсказка по свече под курсором. -->
+          <div class="o_coop_tx_chart">
+            <div class="o_coop_tx_head">
+              <div class="o_coop_tx_price" t-if="this.chartStats">
+                <b t-out="this.money(this.chartStats.last, this.current.currency)"/>
+                <span t-att-class="this.chartStats.day &gt;= 0 ? 'o_coop_tx_up' : 'o_coop_tx_down'"
+                      t-out="this.percent(this.chartStats.day)"/>
+                <span class="o_coop_tx_sub">за день</span>
+              </div>
+              <div class="o_coop_tx_price" t-else="">
+                <b>График</b>
+              </div>
+              <div class="o_coop_tx_stats" t-if="this.chartStats">
+                <span>Макс. <b t-out="this.money(this.chartStats.high, this.current.currency)"/></span>
+                <span>Мин. <b t-out="this.money(this.chartStats.low, this.current.currency)"/></span>
+                <span>Объём <b t-out="this.qty(this.chartStats.volume)"/> <t t-out="this.current.unit"/></span>
+                <span>Сделок <b t-out="this.chartStats.trades"/></span>
+                <span>За период
+                  <b t-att-class="this.chartStats.period &gt;= 0 ? 'o_coop_tx_up' : 'o_coop_tx_down'"
+                     t-out="this.percent(this.chartStats.period)"/></span>
+              </div>
             </div>
-            <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="o_coop_dex_svg">
-              <t t-foreach="this.candleBars" t-as="b" t-key="b.day">
-                <line t-att-x1="b.x" t-att-x2="b.x" t-att-y1="b.yh" t-att-y2="b.yl"
-                      t-att-class="b.up ? 'o_coop_candle_up' : 'o_coop_candle_down'"
-                      stroke-width="1" vector-effect="non-scaling-stroke"/>
-                <rect t-att-x="b.x - b.w / 2" t-att-width="b.w" t-att-y="b.yt" t-att-height="b.hh"
-                      t-att-class="b.up ? 'o_coop_candle_up' : 'o_coop_candle_down'"/>
-              </t>
-            </svg>
-          </div>
+            <div class="o_coop_tx_controls">
+              <div class="o_coop_tx_seg">
+                <button t-att-class="{ 'o_coop_tx_seg_on': this.state.chart === 'candles' }"
+                        t-on-click="() => this.setChart('candles')">Свечи</button>
+                <button t-att-class="{ 'o_coop_tx_seg_on': this.state.chart === 'line' }"
+                        t-on-click="() => this.setChart('line')">Линия</button>
+                <button t-att-class="{ 'o_coop_tx_seg_on': this.state.chart === 'depth' }"
+                        t-on-click="() => this.setChart('depth')">Глубина</button>
+              </div>
+              <div class="o_coop_tx_seg" t-if="this.state.chart !== 'depth'">
+                <button t-foreach="this.ranges" t-as="r" t-key="r.key"
+                        t-att-class="{ 'o_coop_tx_seg_on': this.state.range === r.key }"
+                        t-on-click="() => this.setRange(r.key)" t-out="r.label"/>
+              </div>
+            </div>
 
-          <!-- Линия цены по сделкам. Свечей нет: по большинству выпусков
-               сделок единицы, и свечной график рисовал бы движение,
-               которого не было. -->
-          <div class="o_coop_dex_chart" t-if="this.candles.length &lt; 3 and this.chartRange and this.chartRange.count &gt; 1">
-            <div class="o_coop_dex_chartlabels">
-              <span>Цена по сделкам</span>
-              <span class="o_coop_dex_msub">
-                от <t t-out="this.money(this.chartRange.min, this.current.currency)"/>
-                до <t t-out="this.money(this.chartRange.max, this.current.currency)"/>
-                · сделок <t t-out="this.chartRange.count"/>
-              </span>
-            </div>
-            <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="o_coop_dex_svg">
-              <path t-att-d="this.chartPath" fill="none" stroke="currentColor"
-                    stroke-width="1.4" vector-effect="non-scaling-stroke"/>
-            </svg>
+            <t t-if="this.state.chart !== 'depth'">
+              <div class="o_coop_tx_plot" t-if="this.candles.length &gt;= 2">
+                <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="o_coop_tx_svg">
+                  <line t-foreach="this.priceTicks" t-as="tk" t-key="tk_index"
+                        x1="0" x2="100" t-att-y1="tk.top" t-att-y2="tk.top"
+                        class="o_coop_tx_gridline" vector-effect="non-scaling-stroke"/>
+                  <t t-foreach="this.candleBars" t-as="b" t-key="b.day">
+                    <rect t-att-x="b.x - b.w / 2" t-att-width="b.w" t-att-y="b.vy" t-att-height="b.vh"
+                          t-att-class="b.up ? 'o_coop_tx_vol_up' : 'o_coop_tx_vol_down'"/>
+                  </t>
+                  <t t-if="this.state.chart === 'candles'">
+                    <t t-foreach="this.candleBars" t-as="b" t-key="b.day">
+                      <line t-att-x1="b.x" t-att-x2="b.x" t-att-y1="b.yh" t-att-y2="b.yl"
+                            t-att-class="b.up ? 'o_coop_candle_up' : 'o_coop_candle_down'"
+                            stroke-width="1" vector-effect="non-scaling-stroke"/>
+                      <rect t-att-x="b.x - b.w / 2" t-att-width="b.w" t-att-y="b.yt" t-att-height="b.hh"
+                            t-att-class="b.up ? 'o_coop_candle_up' : 'o_coop_candle_down'"/>
+                    </t>
+                    <path t-if="this.movingAverage" t-att-d="this.movingAverage" class="o_coop_tx_ma"
+                          fill="none" vector-effect="non-scaling-stroke"/>
+                  </t>
+                  <t t-else="">
+                    <path t-att-d="this.closeLine.area" class="o_coop_tx_area"/>
+                    <path t-att-d="this.closeLine.line" class="o_coop_tx_line" fill="none"
+                          vector-effect="non-scaling-stroke"/>
+                  </t>
+                  <line t-if="this.lastPriceLine" x1="0" x2="100"
+                        t-att-y1="this.lastPriceLine.y" t-att-y2="this.lastPriceLine.y"
+                        t-att-class="'o_coop_tx_lastline ' + (this.lastPriceLine.up ? 'o_coop_tx_lastup' : 'o_coop_tx_lastdown')"
+                        vector-effect="non-scaling-stroke"/>
+                  <t t-if="this.hoverInfo">
+                    <line t-att-x1="this.hoverInfo.left" t-att-x2="this.hoverInfo.left" y1="0" y2="100"
+                          class="o_coop_tx_cross" vector-effect="non-scaling-stroke"/>
+                    <line x1="0" x2="100" t-att-y1="this.hoverInfo.cy" t-att-y2="this.hoverInfo.cy"
+                          class="o_coop_tx_cross" vector-effect="non-scaling-stroke"/>
+                  </t>
+                </svg>
+                <div class="o_coop_tx_ticks">
+                  <span t-foreach="this.priceTicks" t-as="tk" t-key="tk_index"
+                        t-attf-style="top: {{ tk.top }}%" t-out="this.money(tk.v)"/>
+                  <span t-if="this.lastPriceLine" class="o_coop_tx_lasttag"
+                        t-att-class="this.lastPriceLine.up ? 'o_coop_tx_tagup' : 'o_coop_tx_tagdown'"
+                        t-attf-style="top: {{ this.lastPriceLine.y }}%" t-out="this.money(this.lastPriceLine.v)"/>
+                </div>
+                <div class="o_coop_tx_days">
+                  <span t-foreach="this.dayLabels" t-as="d" t-key="d_index"
+                        t-attf-style="left: {{ d.left }}" t-out="d.label"/>
+                </div>
+                <div class="o_coop_tx_hit" t-on-mousemove="this.onPlotMove" t-on-mouseleave="this.onPlotLeave"/>
+                <div t-if="this.hoverInfo" class="o_coop_tx_tip"
+                     t-att-class="this.hoverInfo.flip ? 'o_coop_tx_tip_left' : 'o_coop_tx_tip_right'"
+                     t-attf-style="left: calc((100% - 72px) * {{ this.hoverInfo.left / 100 }})">
+                  <b t-out="this.hoverInfo.date"/>
+                  <span>Откр. <t t-out="this.money(this.hoverInfo.o)"/></span>
+                  <span>Макс. <t t-out="this.money(this.hoverInfo.h)"/></span>
+                  <span>Мин. <t t-out="this.money(this.hoverInfo.l)"/></span>
+                  <span>Закр. <t t-out="this.money(this.hoverInfo.c)"/>
+                    <i t-att-class="this.hoverInfo.change &gt;= 0 ? 'o_coop_tx_up' : 'o_coop_tx_down'"
+                       t-out="this.percent(this.hoverInfo.change)"/></span>
+                  <span>Объём <t t-out="this.qty(this.hoverInfo.v)"/> · сделок <t t-out="this.hoverInfo.n"/></span>
+                </div>
+              </div>
+              <div class="o_coop_dex_empty" t-else="">
+                Торгов по этому рынку пока мало для графика: нужны сделки хотя бы за два дня.
+              </div>
+            </t>
+            <t t-else="">
+              <div class="o_coop_tx_plot" t-if="this.depthChart">
+                <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="o_coop_tx_svg">
+                  <path t-att-d="this.depthChart.bids" class="o_coop_tx_depth_bid" vector-effect="non-scaling-stroke"/>
+                  <path t-att-d="this.depthChart.asks" class="o_coop_tx_depth_ask" vector-effect="non-scaling-stroke"/>
+                </svg>
+                <div class="o_coop_tx_depthlegend">
+                  <span class="o_coop_tx_up">Покупают всего <t t-out="this.qty(this.depthChart.bidTotal)"/></span>
+                  <span t-if="this.depthChart.mid">середина <b t-out="this.money(this.depthChart.mid, this.current.currency)"/></span>
+                  <span class="o_coop_tx_down">Продают всего <t t-out="this.qty(this.depthChart.askTotal)"/></span>
+                </div>
+                <div class="o_coop_tx_days">
+                  <span style="left: 3%" t-out="this.money(this.depthChart.lo)"/>
+                  <span style="left: 97%" t-out="this.money(this.depthChart.hi)"/>
+                </div>
+              </div>
+              <div class="o_coop_dex_empty" t-else="">Стакан пуст.</div>
+            </t>
           </div>
 
           <div class="o_coop_dex_grid">

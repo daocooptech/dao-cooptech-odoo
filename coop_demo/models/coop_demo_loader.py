@@ -8,6 +8,7 @@ from ..data import load_registries
 from ..data import load_project_updates
 from ..data import load_project_work
 from ..data import load_market_mix
+from ..data import load_token_history
 from ..data import load_project_follows
 from ..data import load_wall_posts
 from ..data import load_wall_media
@@ -200,6 +201,8 @@ class CoopDemoLoader(models.AbstractModel):
             load_project_work.load_project_work(self.env)
             # Состояния однобокого наполнения (замечание 11.10): задачи
             # проектов, биржа токенов, DEX, бартер.
+            # История торгов токенов — свечам нужны месяцы сделок.
+            load_token_history.load_token_history(self.env)
             load_market_mix.load_market_mix(self.env)
         # Склады и биржа мощностей — после сделок: сданное другим место
         # склад считает по действующим договорённостям, а не по

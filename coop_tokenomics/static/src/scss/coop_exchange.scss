@@ -734,33 +734,182 @@
 
 // ── График цены ─────────────────────────────────────────────────────────
 //
-// Линия по сделкам, без свечей и сетки. На трёх сделках за месяц свечной
-// график рисовал бы движение, которого не было, — а выглядел бы
-// убедительно, и это худший вид неправды на торговом экране.
+// Как на бирже: свечи с объёмом и средней, линия, глубина стакана, сводка
+// за период, перекрестие с подсказкой (владелец 11.10.2026). Зелёный —
+// рост, красный — падение; SVG без библиотек, см. coop_exchange.js.
 
-.o_coop_dex_chart {
+$tx-up: var(--coop-teal, #146b64);
+$tx-down: #c0392b;
+
+.o_coop_tx_chart {
   background: var(--coop-white, #fff);
   border: 1px solid var(--coop-line, #e6e6e1);
   border-radius: 10px;
-  padding: 12px 16px;
+  padding: 12px 16px 10px;
+  min-width: 0;
 }
 
-.o_coop_dex_chartlabels {
+.o_coop_tx_head {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  font: 600 12.5px/1.3 'Manrope', sans-serif;
-  color: var(--coop-ink, #14171a);
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  margin-bottom: 8px;
 }
 
-.o_coop_dex_svg {
-  display: block;
-  width: 100%;
-  height: 96px;
-  margin-top: 8px;
-  color: var(--coop-teal, #146b64);
-  overflow: visible;
+.o_coop_tx_price {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  b { font: 700 20px/1.2 'Manrope', sans-serif; color: var(--coop-ink, #14171a); }
+}
+
+.o_coop_tx_sub { font-size: 11.5px; color: var(--coop-slate-light, #8f8f88); }
+
+.o_coop_tx_stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 16px;
+  font-size: 11.5px;
+  color: var(--coop-slate-light, #8f8f88);
+  b { color: var(--coop-ink, #14171a); font-weight: 600; }
+}
+
+.o_coop_tx_up { color: $tx-up; font-style: normal; font-weight: 600; }
+.o_coop_tx_down { color: $tx-down; font-style: normal; font-weight: 600; }
+
+.o_coop_tx_controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.o_coop_tx_seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 2px;
+  background: var(--coop-surface, #f2f2ee);
+  border-radius: 8px;
+
+  button {
+    border: 0;
+    background: none;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font: 600 12px/1.3 'Manrope', sans-serif;
+    color: var(--coop-slate-light, #8f8f88);
+    cursor: pointer;
+  }
+  .o_coop_tx_seg_on {
+    background: var(--coop-white, #fff);
+    color: var(--coop-ink, #14171a);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .08);
+  }
+}
+
+.o_coop_tx_plot {
+  position: relative;
+  height: 320px;
+  padding: 0 72px 22px 0;
+}
+
+.o_coop_tx_svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.o_coop_tx_gridline { stroke: var(--coop-line, #e6e6e1); stroke-width: 1; }
+.o_coop_tx_vol_up { fill: $tx-up; opacity: .25; }
+.o_coop_tx_vol_down { fill: $tx-down; opacity: .25; }
+.o_coop_tx_ma { stroke: #d99a1c; stroke-width: 1.2; }
+.o_coop_tx_line { stroke: $tx-up; stroke-width: 1.6; }
+.o_coop_tx_area { fill: rgba(20, 107, 100, .12); stroke: none; }
+.o_coop_tx_lastline { stroke-width: 1; stroke-dasharray: 3 3; }
+.o_coop_tx_lastup { stroke: $tx-up; }
+.o_coop_tx_lastdown { stroke: $tx-down; }
+.o_coop_tx_cross { stroke: var(--coop-slate-light, #8f8f88); stroke-width: 1; stroke-dasharray: 2 3; }
+
+.o_coop_tx_ticks {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 22px;
+  width: 68px;
+  span {
+    position: absolute;
+    right: 0;
+    transform: translateY(-50%);
+    font-size: 10.5px;
+    color: var(--coop-slate-light, #8f8f88);
+    white-space: nowrap;
+  }
+  .o_coop_tx_lasttag {
+    padding: 1px 4px;
+    border-radius: 3px;
+    color: #fff;
+    font-weight: 600;
+  }
+  .o_coop_tx_tagup { background: $tx-up; }
+  .o_coop_tx_tagdown { background: $tx-down; }
+}
+
+.o_coop_tx_days {
+  position: absolute;
+  left: 0;
+  right: 72px;
+  bottom: 0;
+  height: 18px;
+  span {
+    position: absolute;
+    transform: translateX(-50%);
+    font-size: 10.5px;
+    color: var(--coop-slate-light, #8f8f88);
+    white-space: nowrap;
+  }
+}
+
+// Невидимый слой над графиком: ловит мышь для перекрестия.
+.o_coop_tx_hit {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 72px;
+  bottom: 22px;
+  cursor: crosshair;
+}
+
+.o_coop_tx_tip {
+  position: absolute;
+  top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 150px;
+  padding: 7px 10px;
+  background: var(--coop-white, #fff);
+  border: 1px solid var(--coop-line, #e6e6e1);
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .12);
+  font-size: 11.5px;
+  line-height: 1.45;
+  pointer-events: none;
+  b { font-weight: 700; color: var(--coop-ink, #14171a); }
+  i { margin-left: 4px; }
+}
+.o_coop_tx_tip_right { transform: translateX(14px); }
+.o_coop_tx_tip_left { transform: translateX(calc(-100% - 14px)); }
+
+.o_coop_tx_depth_bid { fill: rgba(20, 107, 100, .18); stroke: $tx-up; stroke-width: 1.5; }
+.o_coop_tx_depth_ask { fill: rgba(192, 57, 43, .15); stroke: $tx-down; stroke-width: 1.5; }
+.o_coop_tx_depthlegend {
+  position: absolute;
+  top: 4px;
+  left: 8px;
+  right: 80px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 11.5px;
 }
 
 // ── Карточка обязательства и заявки ───────────────────────────────────

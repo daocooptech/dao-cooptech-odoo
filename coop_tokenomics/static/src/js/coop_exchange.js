@@ -40,6 +40,13 @@ export class CoopExchange extends Component {
         { key: "down", label: "Дешевеют" },
     ];
 
+    static RANGES = [
+        { key: "7", label: "7д", days: 7 },
+        { key: "30", label: "1м", days: 30 },
+        { key: "90", label: "3м", days: 90 },
+        { key: "all", label: "Всё", days: 0 },
+    ];
+
     static GROUPINGS = [
         { key: "none", label: "Без группировки" },
         { key: "type", label: "По типу товара" },
@@ -70,6 +77,9 @@ export class CoopExchange extends Component {
             orderType: "limit",
             selectedOrder: null,
             showScore: false,
+            chart: "candles",
+            range: "90",
+            hover: null,
             loading: true,
         });
 
@@ -370,33 +380,31 @@ export class CoopExchange extends Component {
         return `${Math.max((order.quantity / max) * 100, 4)}%`;
     }
 
-    /** Линия цены по сделкам — координаты для SVG.
-     *
-     * Своей библиотеки графиков не подключаем: линия из десятка точек
-     * рисуется двумя строками, а зависимость тянула бы за собой вес,
-     * который на этом экране нечем оправдать.
-     */
-    get chartPath() {
-        const points = (this.state.book && this.state.book.chart) || [];
-        if (points.length < 2) {
-            return "";
-        }
-        const prices = points.map((p) => p.price);
-        const min = Math.min(...prices);
-        const max = Math.max(...prices);
-        const span = max - min || 1;
-        const step = 100 / (points.length - 1);
-        return points
-            .map((p, i) => {
-                const x = (i * step).toFixed(2);
-                const y = (100 - ((p.price - min) / span) * 90 - 5).toFixed(2);
-                return `${i === 0 ? "M" : "L"}${x},${y}`;
-            })
-            .join(" ");
+    // ── График ──────────────────────────────────────────────────────────
+    //
+    // Свечи с объёмом, линия, глубина стакана — как на любой бирже. Своей
+    // библиотеки графиков не подключаем: всё это SVG из пары сотен точек.
+    // Координаты в SVG 100×100: цена занимает верхние 74% высоты, объём —
+    // нижние 20%.
+
+    get ranges() {
+        return CoopExchange.RANGES;
+    }
+
+    setChart(kind) {
+        this.state.chart = kind;
+        this.state.hover = null;
+    }
+
+    setRange(key) {
+        this.state.range = key;
+        this.state.hover = null;
     }
 
     get candles() {
-        return (this.state.book && this.state.book.candles) || [];
+        const all = (this.state.book && this.state.book.candles) || [];
+        const range = CoopExchange.RANGES.find((r) => r.key === this.state.range);
+        return range && range.days ? all.slice(-range.days) : all;
     }
 
     get candleRange() {
@@ -404,40 +412,190 @@ export class CoopExchange extends Component {
         if (!c.length) {
             return { min: 0, max: 0 };
         }
-        return { min: Math.min(...c.map((x) => x.l)), max: Math.max(...c.map((x) => x.h)) };
+        const min = Math.min(...c.map((x) => x.l));
+        const max = Math.max(...c.map((x) => x.h));
+        const pad = (max - min) * 0.06 || max * 0.01;
+        return { min: min - pad, max: max + pad };
     }
 
-    /** Свечи в координатах SVG 100×100: тело — открытие/закрытие, тень —
-     *  максимум/минимум. Своей библиотеки графиков не подключаем. */
+    /** Сводка по выбранному периоду: последняя цена, изменение за период
+     *  и день, крайние цены, объём и число сделок. */
+    get chartStats() {
+        const c = this.candles;
+        if (!c.length) {
+            return null;
+        }
+        const last = c[c.length - 1];
+        const first = c[0];
+        const prev = c.length > 1 ? c[c.length - 2] : first;
+        return {
+            last: last.c,
+            day: prev.c ? ((last.c - prev.c) / prev.c) * 100 : 0,
+            period: first.o ? ((last.c - first.o) / first.o) * 100 : 0,
+            high: Math.max(...c.map((x) => x.h)),
+            low: Math.min(...c.map((x) => x.l)),
+            volume: c.reduce((s, x) => s + x.v, 0),
+            trades: c.reduce((s, x) => s + (x.n || 1), 0),
+            days: c.length,
+        };
+    }
+
+    get priceTicks() {
+        const { min, max } = this.candleRange;
+        const ticks = [];
+        for (let i = 0; i <= 4; i++) {
+            ticks.push({ v: max - ((max - min) * i) / 4, top: 4 + i * 17.5 });
+        }
+        return ticks;
+    }
+
+    _y(v) {
+        const { min, max } = this.candleRange;
+        return 4 + (1 - (v - min) / (max - min || 1)) * 70;
+    }
+
     get candleBars() {
         const c = this.candles;
-        const { min, max } = this.candleRange;
-        const span = max - min || 1;
         const step = 100 / Math.max(c.length, 1);
-        const y = (v) => 95 - ((v - min) / span) * 90;
+        const vmax = Math.max(...c.map((x) => x.v), 0.00000001);
         return c.map((x, i) => {
-            const top = y(Math.max(x.o, x.c));
-            const bottom = y(Math.min(x.o, x.c));
+            const top = this._y(Math.max(x.o, x.c));
+            const bottom = this._y(Math.min(x.o, x.c));
+            const vh = (x.v / vmax) * 20;
             return {
                 day: x.day,
                 x: step * i + step / 2,
-                w: Math.max(step * 0.6, 0.4),
-                yh: y(x.h),
-                yl: y(x.l),
+                w: Math.max(step * 0.62, 0.35),
+                yh: this._y(x.h),
+                yl: this._y(x.l),
                 yt: top,
-                hh: Math.max(bottom - top, 0.6),
+                hh: Math.max(bottom - top, 0.5),
                 up: x.c >= x.o,
+                vy: 100 - vh,
+                vh,
             };
         });
     }
 
-    get chartRange() {
-        const points = (this.state.book && this.state.book.chart) || [];
-        if (!points.length) {
+    /** Линия закрытия и заливка под ней. */
+    get closeLine() {
+        const c = this.candles;
+        if (c.length < 2) {
+            return { line: "", area: "" };
+        }
+        const step = 100 / c.length;
+        const pts = c.map((x, i) => [step * i + step / 2, this._y(x.c)]);
+        const line = pts.map((p, i) => `${i ? "L" : "M"} ${p[0].toFixed(2)} ${p[1].toFixed(2)}`).join(" ");
+        const area = `${line} L ${pts[pts.length - 1][0].toFixed(2)} 74 L ${pts[0][0].toFixed(2)} 74 Z`;
+        return { line, area };
+    }
+
+    /** Скользящая средняя по семи дням — линия тренда поверх свечей. */
+    get movingAverage() {
+        const c = this.candles;
+        if (c.length < 8) {
+            return "";
+        }
+        const step = 100 / c.length;
+        const pts = [];
+        for (let i = 6; i < c.length; i++) {
+            const avg = c.slice(i - 6, i + 1).reduce((s, x) => s + x.c, 0) / 7;
+            pts.push(`${pts.length ? "L" : "M"} ${(step * i + step / 2).toFixed(2)} ${this._y(avg).toFixed(2)}`);
+        }
+        return pts.join(" ");
+    }
+
+    get lastPriceLine() {
+        const s = this.chartStats;
+        return s ? { y: this._y(s.last), v: s.last, up: s.day >= 0 } : null;
+    }
+
+    get dayLabels() {
+        const c = this.candles;
+        if (c.length < 2) {
+            return [];
+        }
+        const out = [];
+        for (let i = 0; i < 5; i++) {
+            const idx = Math.round(((c.length - 1) * i) / 4);
+            const d = c[idx].day;
+            out.push({ left: `${((idx + 0.5) / c.length) * 100}%`, label: `${d.slice(8, 10)}.${d.slice(5, 7)}` });
+        }
+        return out;
+    }
+
+    onPlotMove(ev) {
+        const rect = ev.currentTarget.getBoundingClientRect();
+        const n = this.candles.length;
+        if (!n || !rect.width) {
+            return;
+        }
+        const idx = Math.floor(((ev.clientX - rect.left) / rect.width) * n);
+        this.state.hover = Math.min(Math.max(idx, 0), n - 1);
+    }
+
+    onPlotLeave() {
+        this.state.hover = null;
+    }
+
+    /** Свеча под курсором и положение перекрестия. */
+    get hoverInfo() {
+        const i = this.state.hover;
+        const c = this.candles;
+        if (i === null || i === undefined || !c[i]) {
             return null;
         }
-        const prices = points.map((p) => p.price);
-        return { min: Math.min(...prices), max: Math.max(...prices), count: points.length };
+        const x = c[i];
+        const left = ((i + 0.5) / c.length) * 100;
+        return {
+            ...x,
+            left,
+            flip: left > 60,
+            cy: this._y(x.c),
+            change: x.o ? ((x.c - x.o) / x.o) * 100 : 0,
+            date: `${x.day.slice(8, 10)}.${x.day.slice(5, 7)}.${x.day.slice(0, 4)}`,
+        };
+    }
+
+    /** Глубина: накопленный объём заявок вправо и влево от лучшей цены. */
+    get depthChart() {
+        const b = this.state.book || {};
+        const bids = b.bids || [];
+        const asks = b.asks || [];
+        if (!bids.length && !asks.length) {
+            return null;
+        }
+        const cum = (rows) => {
+            let s = 0;
+            return rows.map((r) => ({ p: r.price, c: (s += r.quantity) }));
+        };
+        const cb = cum(bids);
+        const ca = cum(asks);
+        const lo = bids.length ? bids[bids.length - 1].price : asks[0].price;
+        const hi = asks.length ? asks[asks.length - 1].price : bids[0].price;
+        const span = hi - lo || 1;
+        const cmax = Math.max(cb.length ? cb[cb.length - 1].c : 0, ca.length ? ca[ca.length - 1].c : 0) || 1;
+        const x = (p) => ((p - lo) / span) * 100;
+        const y = (c) => 96 - (c / cmax) * 88;
+        const path = (points, close) => {
+            if (!points.length) {
+                return "";
+            }
+            let d = `M ${x(points[0].p)} 96`;
+            for (const pt of points) {
+                d += ` L ${x(pt.p)} ${y(pt.c)}`;
+            }
+            return d + ` L ${close} ${y(points[points.length - 1].c)} L ${close} 96 Z`;
+        };
+        return {
+            bids: path(cb, 0),
+            asks: path(ca, 100),
+            lo,
+            hi,
+            mid: b.best_ask && b.best_bid ? (b.best_ask + b.best_bid) / 2 : 0,
+            bidTotal: cb.length ? cb[cb.length - 1].c : 0,
+            askTotal: ca.length ? ca[ca.length - 1].c : 0,
+        };
     }
 }
 

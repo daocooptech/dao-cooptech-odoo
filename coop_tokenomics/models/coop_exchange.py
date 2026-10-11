@@ -374,27 +374,29 @@ class CoopExchange(models.AbstractModel):
         }
 
     @api.model
-    def _candles(self, claim_id, days=120):
+    def _candles(self, claim_id, days=180):
         """Дневные свечи по сделкам: открытие, максимум, минимум, закрытие,
-        объём. Сделки, не прошедшие в сети, не считаются."""
+        объём в штуках и оборот. Считаются только исполненные сделки:
+        «ждёт подписи», «в сети» и «не прошла» цены рынку не задают."""
         Trade = self.env['coop.token.trade'].sudo()
         since = fields.Datetime.now() - timedelta(days=days)
-        trades = Trade.search([('claim_id', '=', claim_id), ('state', '!=', 'failed'),
-                               ('create_date', '>=', since)], order='create_date, id')
+        trades = Trade.search([
+            ('claim_id', '=', claim_id), ('state', '=', 'done'),
+            ('confirmed_on', '>=', since)], order='confirmed_on, id')
         by_day = {}
         for t in trades:
-            when = t.confirmed_on or t.create_date
-            day = fields.Date.to_string(when.date())
+            day = fields.Date.to_string(t.confirmed_on.date())
             c = by_day.get(day)
             if not c:
                 by_day[day] = {'day': day, 'o': t.price_per_unit, 'h': t.price_per_unit,
                                'l': t.price_per_unit, 'c': t.price_per_unit,
-                               'v': t.quantity}
+                               'v': t.quantity, 'n': 1}
             else:
                 c['h'] = max(c['h'], t.price_per_unit)
                 c['l'] = min(c['l'], t.price_per_unit)
                 c['c'] = t.price_per_unit
                 c['v'] += t.quantity
+                c['n'] += 1
         return [by_day[d] for d in sorted(by_day)]
 
     @api.model
