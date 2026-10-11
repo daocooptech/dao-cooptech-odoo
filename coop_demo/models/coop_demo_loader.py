@@ -7,6 +7,7 @@ from ..data import rubrics
 from ..data import load_registries
 from ..data import load_project_updates
 from ..data import load_project_work
+from ..data import load_market_mix
 from ..data import load_project_follows
 from ..data import load_wall_posts
 from ..data import load_wall_media
@@ -197,6 +198,9 @@ class CoopDemoLoader(models.AbstractModel):
             # 452, этап 3): закрытые задачи, сроки 2026, подзадачи,
             # зависимости, часы, вложения и проекты без сбора.
             load_project_work.load_project_work(self.env)
+            # Состояния однобокого наполнения (замечание 11.10): задачи
+            # проектов, биржа токенов, DEX, бартер.
+            load_market_mix.load_market_mix(self.env)
         # Склады и биржа мощностей — после сделок: сданное другим место
         # склад считает по действующим договорённостям, а не по
         # введённому числу, и договорённости для этого должны уже быть.
