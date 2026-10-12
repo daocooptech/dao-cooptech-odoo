@@ -69,8 +69,14 @@
             </div>
 
             <separator string="Активы"/>
-            <field name="asset_ids" nolabel="1">
-              <list editable="bottom">
+            <!-- Активы, движения фиата и паевые счета заводит платформа: остаток
+                 приходит из сети, движение — из «Пополнить»/«Вывести», паевой
+                 счёт — из членства в кооперативе. «Добавить строку» здесь
+                 только плодила бы записи мимо источника (владелец 12.10.2026:
+                 «добавить строку только там где это не возможно подставить
+                 автоматически»). -->
+            <field name="asset_ids" nolabel="1" readonly="1">
+              <list>
                 <field name="name"/>
                 <field name="symbol"/>
                 <field name="standard" optional="show"/>
@@ -169,9 +175,8 @@
             </field>
 
             <separator string="История операций"/>
-            <field name="movement_ids" nolabel="1" context="{'default_wallet_id': id}">
-              <list editable="bottom"
-                    decoration-muted="state == 'cancelled'"
+            <field name="movement_ids" nolabel="1" readonly="1">
+              <list decoration-muted="state == 'cancelled'"
                     decoration-danger="state == 'failed'"
                     decoration-info="state == 'pending'">
                 <field name="date"/>
@@ -302,7 +307,7 @@
               кооператива и решением его собрания — поэтому счета разделены.
             </div>
             <separator string="Паевые счета"/>
-            <field name="share_account_ids" nolabel="1"/>
+            <field name="share_account_ids" nolabel="1" readonly="1"/>
           </div>
 
         </sheet>
