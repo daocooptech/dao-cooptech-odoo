@@ -77,11 +77,13 @@
     }
   }
 
+  // Подпись — `coop-slate`, как в эталоне (`StatCard`): светлее она на
+  // белом не читалась.
   .o_coop_kpi_label {
     margin-top: 3px;
     font-size: 11.5px;
     line-height: 1.4;
-    color: var(--coop-slate-light, #8f8f88);
+    color: var(--coop-slate, #4a4a44);
   }
 
   // «Должны вам» — фирменным, «должны вы» — приглушённо-кирпичным. Это не
@@ -92,7 +94,7 @@
   }
 
   .o_coop_kpi_due .o_coop_kpi_num {
-    color: var(--coop-error, #b3413a);
+    color: var(--coop-error-text, #b3413a);
   }
 
   .o_coop_note {

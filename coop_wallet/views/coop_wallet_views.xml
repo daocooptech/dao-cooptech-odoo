@@ -2,11 +2,12 @@
 <odoo>
 
   <!--
-    Экран кошелька. Полоса вкладок — штатный кликабельный statusbar, а не
-    свой компонент: он даёт то, чего не даёт notebook, — кнопки в шапке
-    меняются вместе с вкладкой. У каждой вкладки свой набор действий, и
-    показывать их все сразу значит предлагать «вывести средства» на
-    вкладке пая.
+    Экран кошелька. Вкладки — поле выбора `tab`, а не notebook: от поля
+    зависят кнопки в шапке, они меняются вместе с вкладкой. У каждой
+    вкладки свой набор действий, и показывать их все сразу значит
+    предлагать «вывести средства» на вкладке пая. Нарисовано поле
+    вкладками страницы (`coop_tabs`, эталон `WalletPage`), а не
+    плашками-стрелками строки состояний, как было.
 
     Списки внутри — штатные: им нужны поиск, сортировка, страницы и
     правила доступа, и всё это в Odoo уже есть. Писать своё представление
@@ -18,7 +19,6 @@
     <field name="arch" type="xml">
       <form string="Кошелёк" class="o_coop_wallet" create="false">
         <header>
-          <field name="tab" widget="statusbar" options="{'clickable': '1'}"/>
           <button name="action_crypto_send" type="object" string="Отправить"
                   class="btn-primary" invisible="tab != 'crypto'"/>
           <button name="action_crypto_receive" type="object" string="Получить"
@@ -32,6 +32,7 @@
           <div class="oe_title">
             <h1><field name="display_name" readonly="1"/></h1>
           </div>
+          <field name="tab" widget="coop_tabs" nolabel="1"/>
 
           <!-- ═══ Крипто ═══════════════════════════════════════════════ -->
           <div invisible="tab != 'crypto'">
