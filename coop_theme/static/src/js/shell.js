@@ -88,7 +88,8 @@ export class CoopTabs extends Component {
     }
 
     get actionId() {
-        return this.env.config?.actionId || this.lastActionId || null;
+        return (this.env.config?.actionId || this.lastActionId
+                || this.action?.currentController?.action?.id || null);
     }
 
     /**
@@ -216,6 +217,136 @@ export class CoopTabs extends Component {
 
     open(tab) {
         this.menus.selectMenu(tab);
+    }
+}
+
+/**
+ * Значок подраздела — по названию пункта меню (дизайн-система, `Sidebar`).
+ * В коде у пунктов меню значков нет; один смысл — один значок во всех
+ * разделах, поэтому опознаём по началу названия, а не по разделу.
+ */
+const SUBNAV_ICONS = [
+    ["Мои отклики", "send"],
+    ["Мой кошелёк", "wallet"],
+    ["Мои сделки", "contract"],
+    ["Каталог", "layout-grid"],
+    ["Общий каталог", "layout-grid"],
+    ["Мои", "user"],
+    ["Мой", "user"],
+    ["Лента", "news"],
+    ["Избранное", "bookmark"],
+    ["Продвижение", "speakerphone"],
+    ["Взаиморасчёты", "arrows-exchange"],
+    ["Линии взаимного кредита", "credit-card"],
+    ["Взаимозачёты", "repeat"],
+    ["Паевые счета", "coins"],
+    ["Номинальный счёт", "building-bank"],
+    ["Отзывы", "star"],
+    ["Уступки требований", "transfer"],
+    ["Установленные", "puzzle"],
+];
+
+export function subnavIcon(name) {
+    const found = SUBNAV_ICONS.find(([prefix]) => (name || "").startsWith(prefix));
+    return found ? found[1] : "layout-list";
+}
+
+/**
+ * Меню подразделов — дизайн-система, решение 459 (`Sidebar`): подразделы
+ * открытого раздела слева от листа, а не вкладками над поиском. Состав и
+ * правила те же, что у вкладок (`CoopTabs`): пункты меню модуля,
+ * «Избранное N» последним, имя выборки вместо подразделов не ставится —
+ * подразделы видны, но ни один не выделен.
+ *
+ * Только на большом экране; на узком остаются вкладки (этап 7 переноса).
+ */
+const NO_SUBNAV_APPS = ["mail.menu_root_discuss"];
+
+export class CoopSubnav extends CoopTabs {
+    static template = "coop_theme.Subnav";
+    static components = { CoopIcon };
+
+    setup() {
+        super.setup();
+        this.ui = proxy(coopShellUi);
+        this.orm2 = useService("orm");
+        useBus(this.env.bus, "COOP_SHELL_UI", () => render(this));
+        // Событие о смене экрана приходит раньше, чем служба действий
+        // узнаёт новое действие, — меню отставало на шаг (стенд,
+        // 12.10.2026). Вкладкам это не мешало: они рождаются заново с
+        // каждым экраном, а меню живёт в оболочке. Пересчитываем, когда
+        // экран уже дорисован.
+        useBus(this.env.bus, "ACTION_MANAGER:UI-UPDATED", () => this.refresh());
+    }
+
+    /** Открытое действие — у службы действий, а не из события. */
+    get actionId() {
+        return this.action?.currentController?.action?.id || null;
+    }
+
+    /**
+     * Пункт меню открытого экрана.
+     *
+     * Сначала по действию, потом по адресу у роутера: кошелёк открывается
+     * карточкой (`/wallet/1`), и действия карточки среди пунктов меню нет,
+     * а первый кусок адреса — `wallet` — у пункта «Мой кошелёк» есть.
+     * «Последнее выбранное приложение» движка не годится: по разделам
+     * ходят планкой, минуя его, и на «Моей странице» висели подразделы
+     * «Ресурсов» (стенд, 12.10.2026). Не опознали — меню не показываем.
+     */
+    ownMenu() {
+        const all = this.menus.getAll();
+        const actionId = this.actionId;
+        let own = actionId ? all.find((menu) => menu.actionID === actionId) : null;
+        if (!own) {
+            const route = router.current?.action;
+            if (route !== undefined && route !== null) {
+                own = all.find((menu) => menu.actionPath && menu.actionPath === String(route))
+                    || all.find((menu) => menu.actionID && menu.actionID === Number(route));
+            }
+        }
+        return own || null;
+    }
+
+    refresh() {
+        const own = this.ownMenu();
+        const app = own ? this.menus.getMenu(own.appID) : null;
+        // У «Сообщений» подразделов нет (дизайн-система): пункты меню
+        // переписки движка — каналы, звонки, настройка — участнику не
+        // разделы платформы.
+        if (!app || NO_SUBNAV_APPS.includes(app.xmlid)) {
+            this.state.tabs = [];
+            this.state.current = null;
+            this.state.fav = null;
+            this.state.title = "";
+            return;
+        }
+        const children = this.menus.getMenuAsTree(app.id).childrenTree || [];
+        this.state.tabs = children;
+        this.state.title = app.name;
+        // Выборка («Мои друзья») — подразделы видны, ни один не выделен.
+        const active = this.screenLabel ? null : children.find((tab) => tab.actionID === own.actionID);
+        this.state.current = active ? active.id : null;
+        this.state.label = null;
+        this.refreshFav();
+    }
+
+    /** Раздел без подразделов («Моя страница», «Сообщения») меню не
+     *  получает: лист начинается сразу за планкой. */
+    get visible() {
+        // Один подраздел — это сам раздел; «Избранное» к нему меню не
+        // делает: у «Моей страницы» выходило «Моя страница · Избранное».
+        return this.state.tabs.length > 1;
+    }
+
+    icon(name) {
+        return subnavIcon(name);
+    }
+
+    toggleCollapsed() {
+        this.ui.subCollapsed = !this.ui.subCollapsed;
+        coopSaveMenuState(this.orm2, { sub_collapsed: this.ui.subCollapsed });
+        coopShellChanged(this.env);
     }
 }
 
@@ -736,7 +867,7 @@ export class CoopSoon extends Component {
 registry.category("actions").add("coop_soon", CoopSoon);
 
 patch(WebClient, {
-    components: { ...WebClient.components, CoopSidebar, CoopFooter, CoopLoader },
+    components: { ...WebClient.components, CoopSidebar, CoopSubnav, CoopFooter, CoopLoader },
 });
 
 /**

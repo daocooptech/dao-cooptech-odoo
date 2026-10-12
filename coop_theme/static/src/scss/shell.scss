@@ -1454,3 +1454,165 @@ body.o_dark_mode .o_coop_loader_mark {
     }
   }
 }
+
+// ── Меню подразделов (решение 459, `Sidebar`) ───────────────────────────
+//
+// Между планкой и листом, на фоне оболочки; текущий пункт — приподнятая
+// плашка `nav-active` с зелёным значком. Развёрнуто 228, свёрнуто 52 —
+// одни значки с подсказкой.
+.o_coop_subnav {
+  display: none;
+}
+
+@media (min-width: 901px) {
+  .o_coop_subnav {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+    width: var(--coop-sidebar-width);
+    min-height: 0;
+    padding: 6px 0 6px;
+    overflow-y: auto;
+  }
+
+  .o_coop_subnav_head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 4px 4px 10px 10px;
+  }
+
+  .o_coop_subnav_title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font: 700 13px/1.3 'Manrope', sans-serif;
+    color: var(--coop-ink);
+  }
+
+  .o_coop_subnav_toggle {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--coop-radius-item);
+    background: none;
+    color: var(--coop-slate);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--coop-line);
+      color: var(--coop-ink);
+    }
+  }
+
+  .o_coop_subnav nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .o_web_client a.o_coop_subnav_item,
+  .o_coop_subnav_item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 36px;
+    padding: 0 10px;
+    border: 1px solid transparent;
+    border-radius: var(--coop-radius-item);
+    font: 500 13px/1.3 'Manrope', sans-serif;
+    color: var(--coop-slate);
+    text-decoration: none;
+
+    .o_coop_icon {
+      flex: none;
+    }
+
+    &:hover,
+    &:hover:not(.btn) {
+      background: var(--coop-line);
+      color: var(--coop-ink);
+      text-decoration: none;
+    }
+
+    &.active,
+    &.active:not(.btn) {
+      background: var(--coop-nav-active);
+      border-color: var(--coop-line);
+      box-shadow: var(--coop-shadow-card);
+      color: var(--coop-ink);
+      font-weight: 600;
+
+      .o_coop_icon {
+        color: var(--coop-teal);
+      }
+    }
+  }
+
+  .o_coop_subnav_label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .o_coop_subnav_count {
+    flex: none;
+    min-width: 20px;
+    padding: 1px 6px;
+    border: 1px solid var(--coop-line-strong);
+    border-radius: var(--coop-radius-pill);
+    font: 600 11px/1.4 'JetBrains Mono', ui-monospace, monospace;
+    text-align: center;
+    color: var(--coop-slate);
+  }
+
+  // Свёрнутое — одни значки; счётчик — точкой с числом в углу значка.
+  .o_coop_subnav.o_coop_subnav_collapsed {
+    width: var(--coop-rail-width);
+    align-items: center;
+
+    .o_coop_subnav_head {
+      padding: 4px 0 10px;
+    }
+
+    .o_coop_subnav_title,
+    .o_coop_subnav_label {
+      display: none;
+    }
+
+    .o_coop_subnav_item {
+      position: relative;
+      justify-content: center;
+      width: 36px;
+      padding: 0;
+    }
+
+    .o_coop_subnav_count {
+      position: absolute;
+      top: -2px;
+      right: -4px;
+      min-width: 16px;
+      padding: 0 4px;
+      border: 0;
+      background: var(--coop-teal);
+      color: var(--coop-btn-fg);
+      font-size: 9.5px;
+    }
+  }
+
+  // Подразделы теперь в меню слева — вкладки над поиском на большом
+  // экране не нужны. Имя выборки («Мои друзья») остаётся: оно называет
+  // то, на что человек смотрит.
+  .o_coop_tabs:not(:has(.o_coop_tab_label)) {
+    display: none;
+  }
+}

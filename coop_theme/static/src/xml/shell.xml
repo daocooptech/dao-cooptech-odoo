@@ -11,6 +11,7 @@
     <xpath expr="//ActionContainer" position="replace">
       <div class="o_coop_layout">
         <CoopSidebar t-if="!this.state.fullscreen"/>
+        <CoopSubnav t-if="!this.state.fullscreen"/>
         <div class="o_coop_main">
           <CoopLoader t-if="this.coopBoot.loading"/>
           <ActionContainer/>
@@ -204,6 +205,43 @@
         Избранное <span class="o_coop_tab_count" t-out="this.state.fav.count"/>
       </a>
     </div>
+  </t>
+
+  <!-- Меню подразделов (дизайн-система, `Sidebar`, решение 459). -->
+  <t t-name="coop_theme.Subnav">
+    <aside class="o_coop_subnav" t-if="this.visible"
+           t-att-class="{ 'o_coop_subnav_collapsed': this.ui.subCollapsed }"
+           aria-label="Подразделы">
+      <div class="o_coop_subnav_head">
+        <span class="o_coop_subnav_title" t-out="this.state.title"/>
+        <button type="button" class="o_coop_subnav_toggle"
+                t-att-title="this.ui.subCollapsed ? 'Развернуть подразделы' : 'Свернуть подразделы'"
+                t-att-aria-label="this.ui.subCollapsed ? 'Развернуть подразделы' : 'Свернуть подразделы'"
+                t-att-aria-expanded="this.ui.subCollapsed ? 'false' : 'true'"
+                t-on-click="() => this.toggleCollapsed()">
+          <CoopIcon name="this.ui.subCollapsed ? 'chevrons-right' : 'chevrons-left'" size="16"/>
+        </button>
+      </div>
+      <nav>
+        <a t-foreach="this.state.tabs" t-as="tab" t-key="tab.id"
+           href="#" class="o_coop_subnav_item"
+           t-att-class="{ 'active': tab.id === this.state.current }"
+           t-att-title="this.ui.subCollapsed ? tab.name : undefined"
+           t-att-aria-current="tab.id === this.state.current ? 'page' : undefined"
+           t-on-click.prevent="() => this.open(tab)">
+          <CoopIcon name="this.icon(tab.name)" size="18"/>
+          <span class="o_coop_subnav_label" t-out="tab.name"/>
+        </a>
+        <a t-if="this.state.fav" href="#" class="o_coop_subnav_item"
+           t-att-class="{ 'active': this.state.fav.on }"
+           t-att-title="this.ui.subCollapsed ? 'Избранное' : undefined"
+           t-on-click.prevent="() => this.openFav()">
+          <CoopIcon name="'bookmark'" size="18"/>
+          <span class="o_coop_subnav_label">Избранное</span>
+          <span class="o_coop_subnav_count" t-out="this.state.fav.count"/>
+        </a>
+      </nav>
+    </aside>
   </t>
 
   <t t-name="coop_theme.Footer">
