@@ -60,6 +60,11 @@ CATALOGS = (
     ('coop.deal', 'image_512', None, False),
     ('coop.auction', 'image_512', None, False),
     ('coop.warehouse.offer', 'image_1920', None, True),
+    # Решение 341 дотянуто до каталогов, появившихся после него
+    # (12.10.2026): майнинг, задания «Помощи проекту», бартер без ресурса.
+    ('coop.mining.offer', 'image_1920', None, True),
+    ('coop.bounty.task', 'image_1920', None, True),
+    ('coop.barter.offer', 'image_1920', None, True),
 )
 
 
@@ -159,6 +164,12 @@ def ensure_photos(env):
             # первой ошибке, и одна негодная запись тихо отменила бы все
             # снимки этого прогона.
             with env.cr.savepoint():
+                # Объявление бартера с ресурсом показывает снимок ресурса:
+                # свой ему не нужен, а знак вместо неопознанного предмета
+                # встал бы поверх настоящей фотографии.
+                if 'has_photo' in record._fields and model == 'coop.barter.offer' \
+                        and record.has_photo:
+                    continue
                 specialization = ''
                 if spec_field and spec_field in record._fields:
                     value = record[spec_field]

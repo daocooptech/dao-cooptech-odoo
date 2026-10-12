@@ -112,6 +112,7 @@
       <kanban default_group_by="state" quick_create="false">
         <field name="state"/>
         <field name="reward_tokens"/>
+        <field name="image_512"/>
         <templates>
           <t t-name="card">
             <!-- Общая карточка каталога. В квадрате — исполнитель, если
@@ -123,7 +124,11 @@
                    Своего снимка у записи может не быть; тогда лицом
                    становится тот, с кем придётся иметь дело. -->
               <div class="o_coop_media">
-                <img class="o_coop_media_logo" t-if="record.assignee_id.raw_value" loading="lazy"
+                <!-- Снимок задания по смыслу (решение 341) — первым. -->
+                <img t-if="record.image_512.raw_value" loading="lazy"
+                     t-attf-src="/web/image/coop.bounty.task/#{record.id.raw_value}/image_512"
+                     t-att-alt="record.name.value"/>
+                <img class="o_coop_media_logo" t-elif="record.assignee_id.raw_value" loading="lazy"
                      t-attf-src="/web/image/res.users/#{record.assignee_id.raw_value}/image_512"
                      t-att-alt="record.assignee_id.value"/>
                 <span t-else="" class="o_coop_media_sign"><field name="id" widget="coop_sign" options="{'icon': 'tools'}"/></span>

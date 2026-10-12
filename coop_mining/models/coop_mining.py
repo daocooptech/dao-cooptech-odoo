@@ -133,7 +133,9 @@ class CoopMiningOffer(models.Model):
     """
     _name = 'coop.mining.offer'
     _description = 'Предложение майнинговых мощностей'
-    _inherit = ['mail.thread']
+    # Снимок — как у всех каталогов (решение 341): карточка без него
+    # стояла тёмным квадратом со значком.
+    _inherit = ['mail.thread', 'image.mixin']
     _order = 'published_on desc, id desc'
 
     name = fields.Char(string='Заголовок', required=True)

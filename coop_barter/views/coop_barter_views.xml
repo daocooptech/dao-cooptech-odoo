@@ -9,6 +9,7 @@
     <field name="arch" type="xml">
       <kanban js_class="coop_catalog_kanban" class="o_coop_barter_offers" quick_create="false">
         <field name="icon"/>
+        <field name="image_512"/>
         <field name="city"/>
         <field name="partner_id"/>
         <field name="category_id"/>
@@ -23,8 +24,12 @@
         <templates>
           <t t-name="card">
             <div class="o_coop_listing o_coop_barter_card">
-              <div class="o_coop_media" t-att-class="{'o_coop_barter_media': !record.has_photo.raw_value}">
-                <img t-if="record.has_photo.raw_value" loading="lazy"
+              <div class="o_coop_media" t-att-class="{'o_coop_barter_media': !record.has_photo.raw_value and !record.image_512.raw_value}">
+                <!-- Свой снимок объявления — первым: у услуги ресурса нет. -->
+                <img t-if="record.image_512.raw_value" loading="lazy"
+                     t-attf-src="/web/image/coop.barter.offer/#{record.id.raw_value}/image_512"
+                     t-att-alt="record.name.value"/>
+                <img t-elif="record.has_photo.raw_value" loading="lazy"
                      t-attf-src="/web/image/coop.resource/#{record.resource_id.raw_value}/image_512"
                      t-att-alt="record.name.value"/>
                 <span t-else="" class="o_coop_barter_sign"><field name="id" widget="coop_sign" options="{'icon': 'arrows-exchange'}"/></span>

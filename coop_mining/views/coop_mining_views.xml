@@ -18,11 +18,15 @@
         <field name="min_term"/>
         <field name="energy_source"/>
         <field name="infra_registered"/>
+        <field name="image_512"/>
         <templates>
           <t t-name="card">
             <div class="o_coop_listing o_coop_mining_card">
-              <div class="o_coop_media o_coop_mining_media">
-                <span class="o_coop_mining_sign"><field name="kind" widget="coop_sign" options="{'icon': 'cpu', 'map': {'hosting': 'building', 'equipment': 'server', 'hashrate': 'bolt', 'service': 'tools'}}"/></span>
+              <div class="o_coop_media" t-att-class="{'o_coop_mining_media': !record.image_512.raw_value}">
+                <img t-if="record.image_512.raw_value" loading="lazy"
+                     t-attf-src="/web/image/coop.mining.offer/#{record.id.raw_value}/image_512"
+                     t-att-alt="record.name.value"/>
+                <span t-else="" class="o_coop_mining_sign"><field name="kind" widget="coop_sign" options="{'icon': 'cpu', 'map': {'hosting': 'building', 'equipment': 'server', 'hashrate': 'bolt', 'service': 'tools'}}"/></span>
                 <span class="o_coop_locbar" t-if="record.city.raw_value">
                   <i class="oi" data-icon="location_on" role="img" aria-label="Город"/> <t t-out="record.city.value"/>
                 </span>
