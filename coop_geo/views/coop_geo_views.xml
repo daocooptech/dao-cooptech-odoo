@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    «Адрес» — сразу под «Городом» и с теми же правилами правки: где город
+    правится строкой справки, там и адрес. Координаты в форме не видны —
+    их находит сервер по адресу при сохранении.
+  -->
+
+  <record id="view_geo_view_coop_auction_form" model="ir.ui.view">
+    <field name="name">coop.auction.form.coop_geo</field>
+    <field name="model">coop.auction</field>
+    <field name="inherit_id" ref="coop_auctions.view_coop_auction_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//group/field[@name='city']" position="after">
+        <field name="coop_address" widget="coop_inline" readonly="not coop_can_edit" placeholder="Улица, дом"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_geo_view_coop_barter_offer_form" model="ir.ui.view">
+    <field name="name">coop.barter.offer.form.coop_geo</field>
+    <field name="model">coop.barter.offer</field>
+    <field name="inherit_id" ref="coop_barter.view_coop_barter_offer_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//group/field[@name='city']" position="after">
+        <field name="coop_address" placeholder="Улица, дом"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_geo_view_coop_community_form" model="ir.ui.view">
+    <field name="name">coop.community.form.coop_geo</field>
+    <field name="model">coop.community</field>
+    <field name="inherit_id" ref="coop_communities.view_coop_community_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//group/field[@name='city']" position="after">
+        <field name="coop_address" widget="coop_inline" readonly="not coop_can_edit" placeholder="Улица, дом"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_geo_view_coop_crypto_offer_form" model="ir.ui.view">
+    <field name="name">coop.crypto.offer.form.coop_geo</field>
+    <field name="model">coop.crypto.offer</field>
+    <field name="inherit_id" ref="coop_crypto_exchange.view_coop_crypto_offer_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//group/field[@name='city']" position="after">
+        <field name="coop_address" invisible="not rub_cash" placeholder="Улица, дом — где встретиться"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_geo_view_coop_event_form" model="ir.ui.view">
+    <field name="name">coop.event.form.coop_geo</field>
+    <field name="model">coop.event</field>
+    <field name="inherit_id" ref="coop_events.view_coop_event_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//group/field[@name='city']" position="after">
+        <field name="coop_address" widget="coop_inline" readonly="not coop_can_edit" placeholder="Улица, дом"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_geo_view_coop_groupbuy_form" model="ir.ui.view">
+    <field name="name">coop.groupbuy.form.coop_geo</field>
+    <field name="model">coop.groupbuy</field>
+    <field name="inherit_id" ref="coop_groupbuy.view_coop_groupbuy_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//group/field[@name='city']" position="after">
+        <field name="coop_address" widget="coop_inline" readonly="not coop_can_edit" placeholder="Улица, дом"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_geo_view_coop_mining_offer_form" model="ir.ui.view">
+    <field name="name">coop.mining.offer.form.coop_geo</field>
+    <field name="model">coop.mining.offer</field>
+    <field name="inherit_id" ref="coop_mining.view_coop_mining_offer_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//group/field[@name='city']" position="after">
+        <field name="coop_address" placeholder="Улица, дом"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_geo_view_coop_miner_form" model="ir.ui.view">
+    <field name="name">coop.miner.form.coop_geo</field>
+    <field name="model">coop.miner</field>
+    <field name="inherit_id" ref="coop_mining.view_coop_miner_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//group/field[@name='city']" position="after">
+        <field name="coop_address" placeholder="Улица, дом"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_geo_view_coop_program_form" model="ir.ui.view">
+    <field name="name">coop.program.form.coop_geo</field>
+    <field name="model">coop.program</field>
+    <field name="inherit_id" ref="coop_programs.view_coop_program_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//group/field[@name='city']" position="after">
+        <field name="coop_address" widget="coop_inline" readonly="not coop_can_edit" placeholder="Улица, дом"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_geo_view_coop_project_form" model="ir.ui.view">
+    <field name="name">coop.project.form.coop_geo</field>
+    <field name="model">coop.project</field>
+    <field name="inherit_id" ref="coop_projects.view_coop_project_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//group/field[@name='city']" position="after">
+        <field name="coop_address" widget="coop_inline" readonly="not coop_can_edit" placeholder="Улица, дом"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_geo_view_coop_resource_form" model="ir.ui.view">
+    <field name="name">coop.resource.form.coop_geo</field>
+    <field name="model">coop.resource</field>
+    <field name="inherit_id" ref="coop_resources.view_coop_resource_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//group/field[@name='city']" position="after">
+        <field name="coop_address" widget="coop_inline" readonly="not coop_can_edit" placeholder="Улица, дом"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_geo_view_coop_resource_add" model="ir.ui.view">
+    <field name="name">coop.resource.form.coop_geo</field>
+    <field name="model">coop.resource</field>
+    <field name="inherit_id" ref="coop_resources.view_coop_resource_add"/>
+    <field name="arch" type="xml">
+      <xpath expr="//group/field[@name='city']" position="after">
+        <field name="coop_address" widget="coop_inline" readonly="not coop_can_edit" placeholder="Улица, дом"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_geo_view_coop_skill_form" model="ir.ui.view">
+    <field name="name">coop.skill.offer.form.coop_geo</field>
+    <field name="model">coop.skill.offer</field>
+    <field name="inherit_id" ref="coop_skills.view_coop_skill_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//group/field[@name='city']" position="after">
+        <field name="coop_address" widget="coop_inline" readonly="not coop_can_edit" placeholder="Улица, дом"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_geo_view_coop_vacancy_form" model="ir.ui.view">
+    <field name="name">coop.vacancy.form.coop_geo</field>
+    <field name="model">coop.vacancy</field>
+    <field name="inherit_id" ref="coop_vacancies.view_coop_vacancy_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//group/field[@name='city']" position="after">
+        <field name="coop_address" widget="coop_inline" readonly="not coop_can_edit" placeholder="Улица, дом"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_geo_view_coop_warehouse_offer_form" model="ir.ui.view">
+    <field name="name">coop.warehouse.offer.form.coop_geo</field>
+    <field name="model">coop.warehouse.offer</field>
+    <field name="inherit_id" ref="coop_warehouse.view_coop_warehouse_offer_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//group/field[@name='city']" position="after">
+        <field name="coop_address" widget="coop_inline" readonly="not coop_can_edit" placeholder="Улица, дом"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_geo_view_coop_warehouse_form" model="ir.ui.view">
+    <field name="name">coop.warehouse.form.coop_geo</field>
+    <field name="model">coop.warehouse</field>
+    <field name="inherit_id" ref="coop_warehouse.view_coop_warehouse_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//group/field[@name='city']" position="after">
+        <field name="coop_address" widget="coop_inline" readonly="not coop_can_edit" placeholder="Улица, дом"/>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

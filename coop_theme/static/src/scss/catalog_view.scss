@@ -636,6 +636,58 @@
   display: block;
 }
 
+// Одиночная точка объявления — маленькая, без числа.
+.o_coop_lpoint .o_coop_lpin_dot {
+  border-width: 2px;
+}
+
+// Карточка у точки: фото, название, цена, адрес, переход.
+.o_coop_map_canvas .leaflet-popup-content {
+  margin: 10px 12px;
+}
+
+.o_coop_lpop {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font: 400 12px/1.4 'Inter', sans-serif;
+  color: var(--coop-ink, #14171a);
+}
+
+.o_coop_lpop_img {
+  width: 100%;
+  height: 120px;
+  margin-bottom: 4px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: var(--coop-surface, #f3f3ef);
+}
+
+.o_coop_lpop_name {
+  font: 600 13px/1.35 'Manrope', sans-serif;
+}
+
+.o_coop_lpop_price {
+  font: 700 14px/1.3 'Manrope', sans-serif;
+}
+
+.o_coop_lpop_addr {
+  color: var(--coop-slate, #4a4a44);
+}
+
+.o_coop_lpop_open {
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+[data-bs-theme="dark"] .o_coop_map_canvas {
+  .leaflet-popup-content-wrapper,
+  .leaflet-popup-tip {
+    background: var(--coop-white);
+    color: var(--coop-ink);
+  }
+}
+
 .o_coop_lpin:hover .o_coop_lpin_dot {
   background: var(--coop-teal-dark, #0e4f4a);
 }

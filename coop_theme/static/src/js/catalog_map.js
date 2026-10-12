@@ -2,8 +2,10 @@
 
 import { useService } from "@web/core/utils/hooks";
 import { loadCSS, loadJS } from "@web/core/assets";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 import {
-    Component, onMounted, onWillStart, onWillUnmount, onWillUpdateProps, proxy, signal, t, useProps,
+    Component, onMounted, onWillStart, onWillUnmount, onWillUpdateProps, proxy, signal, t, usePlugin,
+    useProps,
 } from "@odoo/owl";
 
 /**
@@ -67,6 +69,20 @@ function nearHome([lat, lon]) {
     return lat > 38 && lon > 19;
 }
 
+// Объявления с адресом стоят каждое своей точкой (`coop_geo`, владелец
+// 12.10.2026: «почему не показывает точный адрес каждого объявления? …
+// смотри как сделано на авито»). Близкие точки при отдалении собираются
+// в кружок с числом, нажатие приближает; у точки — карточка с фото,
+// ценой и адресом. Каталоги без адресов (люди, организации) остаются
+// с метками по городам.
+const POINT_LIMIT = 5000;
+const PRICE_FIELDS = ["price", "current_price", "main_price", "rate"];
+const IMAGE_FIELDS = ["image_512", "image_1920"];
+
+function formatPrice(value) {
+    return `${Math.round(value).toLocaleString("ru-RU")} ₽`;
+}
+
 // Названия городов — с этого приближения; дальше метки слишком тесны, и
 // подписи легли бы друг на друга. Число в кружке видно всегда.
 const NAMES_FROM_ZOOM = 5;
@@ -85,15 +101,21 @@ export class CoopMap extends Component {
         // ссылались бы друг на друга, и модуль загружался бы наполовину
         // собранным.
         showTiles: t.function().optional(),
+        // Поля модели: есть ли у объявлений адрес, цена и фото.
+        fields: t.object().optional(),
     });
 
     setup() {
         this.orm = useService("orm");
-        this.state = proxy({ pins: [], other: 0, loading: true, failed: false });
+        this.action = usePlugin(ActionPlugin);
+        this.state = proxy({ pins: [], shown: 0, other: 0, loading: true, failed: false });
+        this.points = [];
         this.canvas = signal.ref();
         onWillStart(() => Promise.all([
-            loadJS(`${LEAFLET}.js`),
+            // Объединение точек — дополнение к Leaflet и грузится после него.
+            loadJS(`${LEAFLET}.js`).then(() => loadJS(`${LEAFLET}.markercluster.js`)),
             loadCSS(`${LEAFLET}.css`),
+            loadCSS("/coop_theme/static/lib/leaflet/markercluster.css"),
             this.load(this.props.domain),
         ]));
         onMounted(() => this.mountMap());
@@ -111,7 +133,55 @@ export class CoopMap extends Component {
         });
     }
 
-    async load(domain) {
+    /** Есть ли у объявлений этого каталога адрес и точка. */
+    get byPoint() {
+        return Boolean(this.props.fields?.coop_lat);
+    }
+
+    load(domain) {
+        return this.byPoint ? this.loadPoints(domain) : this.loadCities(domain);
+    }
+
+    async loadPoints(domain) {
+        const fields = this.props.fields;
+        this.priceField = PRICE_FIELDS.find((name) => fields[name]) || null;
+        this.imageField = IMAGE_FIELDS.find((name) => fields[name]) || null;
+        this.state.loading = true;
+        this.state.failed = false;
+        let rows = [];
+        let total = 0;
+        try {
+            [rows, total] = await Promise.all([
+                this.orm.searchRead(
+                    this.props.resModel, [...(domain || []), ["coop_lat", "!=", 0]],
+                    ["display_name", "coop_address", "city", "coop_lat", "coop_lon",
+                     ...(this.priceField ? [this.priceField] : [])],
+                    { limit: POINT_LIMIT }),
+                this.orm.searchCount(this.props.resModel, domain || []),
+            ]);
+        } catch {
+            this.points = [];
+            this.state.shown = 0;
+            this.state.other = 0;
+            this.state.failed = true;
+            this.state.loading = false;
+            return;
+        }
+        this.points = rows.map((row) => ({
+            id: row.id,
+            name: row.display_name,
+            address: row.coop_address || "",
+            city: row.city || "",
+            pos: [row.coop_lat, row.coop_lon],
+            price: this.priceField ? row[this.priceField] : null,
+        }));
+        this.state.shown = this.points.length;
+        this.state.other = Math.max(0, total - this.points.length);
+        this.state.loading = false;
+        this.drawPins();
+    }
+
+    async loadCities(domain) {
         // Считаем на сервере группировкой, а не по загруженной странице:
         // на карте нужен весь отбор целиком, а страница — это два десятка
         // записей, и метки по ней врали бы в разы.
@@ -174,6 +244,7 @@ export class CoopMap extends Component {
                 : 22;
         }
         this.state.pins = pins;
+        this.state.shown = pins.length;
         this.state.other = other;
         this.state.loading = false;
         this.drawPins();
@@ -194,6 +265,12 @@ export class CoopMap extends Component {
         this.map.attributionControl.setPrefix(false);
         L.tileLayer(TILES, { maxZoom: 19, attribution: TILES_CREDIT }).addTo(this.map);
         this.layer = L.layerGroup().addTo(this.map);
+        // Кнопка в карточке точки — разметкой Leaflet, а не шаблоном,
+        // поэтому нажатие ловим при каждом открытии карточки.
+        this.map.on("popupopen", ({ popup }) => {
+            const button = popup.getElement()?.querySelector(".o_coop_lpop_open");
+            button?.addEventListener("click", () => this.openRecord(Number(button.dataset.id)));
+        });
         this.map.on("zoomend", () => this.showNames());
         // Планку развернули, окно сузили — карта пересчитывает свой размер,
         // иначе справа остаётся серая полоса без тайлов.
@@ -208,6 +285,10 @@ export class CoopMap extends Component {
             return;
         }
         this.layer.clearLayers();
+        if (this.byPoint) {
+            this.drawPoints();
+            return;
+        }
         for (const pin of this.state.pins) {
             const city = escapeHtml(pin.city);
             const icon = L.divIcon({
@@ -232,7 +313,79 @@ export class CoopMap extends Component {
         this.showNames();
     }
 
+    drawPoints() {
+        const L = window.L;
+        const dot = L.divIcon({
+            className: "o_coop_lpin o_coop_lpoint",
+            iconSize: [16, 16],
+            iconAnchor: [8, 8],
+            html: '<span class="o_coop_lpin_dot"></span>',
+        });
+        const group = L.markerClusterGroup({
+            showCoverageOnHover: false,
+            maxClusterRadius: 48,
+            chunkedLoading: true,
+            iconCreateFunction: (cluster) => {
+                const count = cluster.getChildCount();
+                const size = count < 10 ? 30 : count < 100 ? 36 : count < 1000 ? 44 : 52;
+                return L.divIcon({
+                    className: "o_coop_lpin",
+                    iconSize: [size, size],
+                    html: `<span class="o_coop_lpin_dot">${count}</span>`,
+                });
+            },
+        });
+        for (const point of this.points) {
+            group.addLayer(L.marker(point.pos, { icon: dot, title: point.name })
+                .bindPopup(() => this.popupHtml(point), { minWidth: 220, maxWidth: 260 }));
+        }
+        this.layer.addLayer(group);
+        const spots = this.points.map((point) => point.pos);
+        const home = spots.filter(nearHome);
+        const view = home.length ? home : spots;
+        if (view.length) {
+            this.map.fitBounds(view, { padding: [36, 36], maxZoom: 14 });
+        }
+    }
+
+    /** Карточка у точки — как на доске объявлений: фото, название,
+     *  цена, адрес и переход к самому объявлению. */
+    popupHtml(point) {
+        const image = this.imageField
+            ? `<img class="o_coop_lpop_img" loading="lazy" alt=""
+                    src="/web/image/${this.props.resModel}/${point.id}/${this.imageField}"/>`
+            : "";
+        const price = point.price
+            ? `<div class="o_coop_lpop_price">${formatPrice(point.price)}</div>` : "";
+        const place = [point.city, point.address].filter(Boolean).map(escapeHtml).join(", ");
+        return `<div class="o_coop_lpop">${image}`
+            + `<div class="o_coop_lpop_name">${escapeHtml(point.name)}</div>${price}`
+            + `<div class="o_coop_lpop_addr">${place}</div>`
+            + `<button type="button" class="btn btn-primary btn-sm o_coop_lpop_open"`
+            + ` data-id="${point.id}">Открыть объявление</button></div>`;
+    }
+
+    /** Открыть объявление его страницей, как из плитки. */
+    async openRecord(id) {
+        let action = null;
+        try {
+            action = await this.orm.call(this.props.resModel, "action_coop_open_page", [[id]]);
+        } catch {
+            action = null;
+        }
+        this.action.doAction(action || {
+            type: "ir.actions.act_window",
+            res_model: this.props.resModel,
+            res_id: id,
+            views: [[false, "form"]],
+            target: "current",
+        });
+    }
+
     showNames() {
+        if (!this.map) {
+            return;
+        }
         this.canvas()?.classList.toggle(
             "o_coop_map_names", this.map.getZoom() >= NAMES_FROM_ZOOM);
     }

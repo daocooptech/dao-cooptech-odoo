@@ -21,11 +21,19 @@
         <div class="o_coop_map_empty" t-elif="this.state.loading">
           Считаем метки…
         </div>
-        <div class="o_coop_map_empty" t-elif="!this.state.pins.length">
-          Нет городов, подходящих под текущий отбор
+        <div class="o_coop_map_empty" t-elif="!this.state.shown">
+          Нет объявлений с местом, подходящих под текущий отбор
         </div>
       </div>
-      <p class="o_coop_map_note">
+      <p class="o_coop_map_note" t-if="this.byPoint">
+        Каждое объявление стоит по своему адресу; число в кружке — сколько
+        объявлений рядом, нажатие приближает. Нажмите на точку — откроется
+        карточка объявления.
+        <t t-if="this.state.other">
+          Ещё <t t-out="this.state.other"/> без адреса — они видны плиткой и списком.
+        </t>
+      </p>
+      <p class="o_coop_map_note" t-else="">
         Число в метке — сколько записей в городе с учётом текущего отбора;
         названия городов видны при приближении. Нажмите на метку: отберём
         этот город и покажем записи плиткой.

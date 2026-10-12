@@ -425,14 +425,22 @@
       margin: 0;
     }
 
-    // Быстрые фильтры — чипы, им две колонки.
-    > .o_coop_field:has(> .o_coop_chips) {
-      grid-column: span 2;
-    }
-
     // Кнопки — своим рядом с первой колонки, все четыре вместе.
     > .o_coop_field + .o_coop_btn {
       grid-column-start: 1;
+    }
+  }
+
+  // Быстрые фильтры — чипы, им две колонки, но только если колонок
+  // хотя бы две: в узкой панели «две колонки» одного поля заставляли
+  // сетку достроить вторую сама, и заголовок с полями съезжали вбок.
+  .o_coop_map .o_coop_filters {
+    container: coop-filters / inline-size;
+  }
+
+  @container coop-filters (min-width: 430px) {
+    .o_coop_filters_body > .o_coop_field:has(> .o_coop_chips) {
+      grid-column: span 2;
     }
   }
 

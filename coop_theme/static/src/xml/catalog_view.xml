@@ -101,6 +101,7 @@
     <xpath expr="//t[@t-elif='this.model.couldNotLoadRootOffline']" position="after">
       <CoopMap t-if="this.coopLayout.mode === 'map'" t-key="'coop_map'"
                resModel="this.props.resModel" domain="this.model.root.domain"
+               fields="this.props.fields"
                showTiles.bind="this.coopShowTiles"/>
       <CoopFilters t-key="'coop_filters'"
                    resModel="this.props.resModel" baseDomain="this.coopBaseDomain"/>
