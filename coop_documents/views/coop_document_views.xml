@@ -15,7 +15,8 @@
     <field name="name">coop.document.kanban</field>
     <field name="model">coop.document</field>
     <field name="arch" type="xml">
-      <kanban class="o_coop_documents" quick_create="false">
+      <kanban class="o_coop_documents" quick_create="false"
+              js_class="coop_catalog_kanban">
         <field name="id"/>
         <field name="is_pdf"/>
         <field name="file_name"/>
@@ -265,14 +266,14 @@
           `hierarchize` строит дерево по `parent_id`, `enable_counters`
           ставит число рядом с папкой: пустая полка видна до того, как в
           неё зайдёшь.
+
+          «Вид» и «Состояние» — в панели «Фильтр» справа, как во всех
+          разделах (эталон DocumentsPage, `models/catalog_filters.py`);
+          папки остались деревом слева — владелец 13.10.2026.
         -->
         <searchpanel view_types="list,kanban">
           <field name="folder_id" string="Папки" icon="folder"
                  enable_counters="1" hierarchize="1" expand="1"/>
-          <field name="kind" string="Вид" icon="article"
-                 select="multi" enable_counters="1"/>
-          <field name="state" string="Состояние" icon="check_circle"
-                 select="multi" enable_counters="1"/>
         </searchpanel>
 
         <filter name="signed" string="Подписанные"
@@ -379,7 +380,7 @@
     -->
     <!-- `coop_section` — вкладки раздела над списком (`coop_theme`,
          `coopHasTabs`): «Недавние», «Жду подписи», «Корзина» и остальные. -->
-    <field name="context">{'coop_section': 1, 'coop_create_label': 'Загрузить', 'coop_create_method': 'action_open_upload'}</field>
+    <field name="context">{'coop_section': 1, 'coop_filters': 1, 'coop_create_label': 'Загрузить', 'coop_create_method': 'action_open_upload'}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiley_face">Документов пока нет</p>
       <p>Акты, договоры и закрывающие. У каждого считается отпечаток, и
