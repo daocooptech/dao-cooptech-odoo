@@ -551,8 +551,26 @@
 }
 
 // Тёмная тема: тайлы тускнеют, чтобы не слепили посреди тёмного листа.
-[data-bs-theme="dark"] .o_coop_map_canvas .leaflet-tile-pane {
-  filter: brightness(.72) contrast(1.1) saturate(.8);
+[data-bs-theme="dark"] .o_coop_map_canvas {
+  .leaflet-tile-pane {
+    filter: brightness(.72) contrast(1.1) saturate(.8);
+  }
+
+  // Кнопки «+ −» и подпись о данных библиотека красит белым литералом.
+  .leaflet-bar a,
+  .leaflet-control-attribution {
+    background: var(--coop-white);
+    color: var(--coop-ink);
+    border-color: var(--coop-line-strong);
+  }
+
+  .leaflet-bar a:hover {
+    background: var(--coop-surface);
+  }
+
+  .leaflet-control-attribution a {
+    color: var(--coop-teal);
+  }
 }
 
 .o_coop_map_empty {
