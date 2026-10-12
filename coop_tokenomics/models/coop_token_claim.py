@@ -430,6 +430,10 @@ class CoopTokenHolding(models.Model):
         'res.partner', string='Держатель', required=True, index=True)
     quantity = fields.Float(string='Токенов', digits=(16, 3), required=True)
     acquired_on = fields.Datetime(string='Куплено', default=fields.Datetime.now)
+    # Срок из выпуска — в списке кошелька: пустой раздел обещает «к какому
+    # сроку», а без столбца срок видно только в карточке выпуска.
+    delivery_date = fields.Date(
+        related='claim_id.delivery_date', string='Срок поставки')
     accepted_quantity = fields.Float(
         string='Принято', digits=(16, 3),
         help='Сколько единиц держатель принял по приёмке. Остаток либо '

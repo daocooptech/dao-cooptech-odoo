@@ -452,6 +452,9 @@
     <field name="name">Мои токены</field>
     <field name="res_model">coop.token.claim</field>
     <field name="view_mode">kanban,list,form</field>
+    <!-- Только свои: выпуски, где поставщик — я или организация, где я
+         состою (владелец 12.10.2026). Название обещает «мои». -->
+    <field name="domain">['|', ('issuer_id.user_ids', 'in', [uid]), ('issuer_id.coop_member_ids', 'any', [('partner_id.user_ids', 'in', [uid]), ('state', '=', 'active')])]</field>
     <field name="search_view_id" ref="view_coop_token_claim_search"/>
     <field name="context">{'coop_section': 1, 'coop_catalog': 1, 'coop_shelf_field': 'resource_category_id'}</field>
     <field name="help" type="html">
@@ -531,6 +534,7 @@
       <list string="Кошелёк TON">
         <field name="partner_id" string="Держатель"/>
         <field name="claim_id" string="Требование"/>
+        <field name="delivery_date" string="Срок поставки"/>
         <field name="quantity" string="Токенов" sum="Всего"/>
         <field name="accepted_quantity" string="Принято"/>
         <field name="acquired_on" string="Куплено"/>
@@ -542,6 +546,8 @@
     <field name="name">Кошелёк TON</field>
     <field name="res_model">coop.token.holding</field>
     <field name="view_mode">list</field>
+    <!-- Только свои: держатель — я или моя организация (владелец 12.10.2026). -->
+    <field name="domain">['|', ('partner_id.user_ids', 'in', [uid]), ('partner_id.coop_member_ids', 'any', [('partner_id.user_ids', 'in', [uid]), ('state', '=', 'active')])]</field>
     <field name="context">{'coop_section': 1}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Токенов на руках нет</p>

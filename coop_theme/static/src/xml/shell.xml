@@ -339,4 +339,34 @@
     </div>
   </t>
 
+  <!--
+    Значки «Сообщения» и «Дела» в шапке — контуры Tabler, как соседние
+    «Уведомления» и «Избранное» (эталон `TopMenu`), а не шрифт движка.
+    «Дела» вместо «Активностей» (владелец 12.10.2026): слово движка
+    служебное, человеку оно ничего не говорит.
+  -->
+  <t t-name="coop_theme.MessagingMenuInDropdown" t-inherit="mail.MessagingMenuInDropdown" t-inherit-mode="extension">
+    <xpath expr="//i[@data-icon='forum']" position="replace">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+           role="img" aria-label="Сообщения">
+        <path d="M3 20l1.3 -3.9c-2.324 -3.437 -1.426 -7.872 2.1 -10.374c3.526 -2.501 8.59 -2.296 11.845 .48c3.255 2.777 3.695 7.266 1.029 10.501c-2.666 3.235 -7.615 4.215 -11.574 2.293l-4.7 1"/>
+      </svg>
+    </xpath>
+  </t>
+
+  <t t-name="coop_theme.ActivityMenu" t-inherit="mail.ActivityMenu" t-inherit-mode="extension">
+    <xpath expr="//i[@data-icon='schedule']" position="replace">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+           role="img" aria-label="Дела">
+        <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/>
+        <path d="M12 7v5l3 3"/>
+      </svg>
+    </xpath>
+    <xpath expr="//div[hasclass('o-mail-ActivityMenu-empty')]/span" position="replace">
+      <span>Поздравляем, вы завершили все свои дела.</span>
+    </xpath>
+  </t>
+
 </templates>
