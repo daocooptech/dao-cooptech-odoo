@@ -10,6 +10,7 @@ import { patch } from "@web/core/utils/patch";
 import { Message } from "@mail/core/common/message";
 import { Message as MessageModel } from "@mail/core/common/message_model";
 import { fields } from "@mail/model/export";
+import { CoopIcon } from "@coop_theme/js/icons";
 import { MessageReactions } from "@mail/core/common/message_reactions";
 import { WALL_MODELS } from "@coop_theme/js/wall";
 import { CoopWallPoll } from "@coop_wall/js/wall_poll";
@@ -97,6 +98,10 @@ const SHOWN = 2;
 export class CoopWallPostFooter extends Component {
     props = useProps(["message", "thread"]);
     static template = "coop_wall.WallPostFooter";
+    // Значки ряда — контуры Tabler, как в эталоне (`PostBar`): шрифтовые
+    // значки движка рядом с остальными контурами платформы читались
+    // другим почерком (решение 459, шаг 3б).
+    static components = { CoopIcon };
 
     LIKE = LIKE;
     DISLIKE = DISLIKE;

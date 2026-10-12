@@ -356,12 +356,15 @@
   padding: 2px 0;
 }
 
-.o_coop_multi_item {
+// Через поле: общее правило подписей поля (`.o_coop_field label`,
+// блоком и шрифтом заголовка) сильнее одиночного класса, и длинное имя
+// переносилось под флажок, а не под текст (владелец 12.10.2026).
+.o_coop_field .o_coop_multi_item {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  font-size: 12.5px;
-  line-height: 1.35;
+  margin: 0;
+  font: 400 12.5px/1.35 'Inter', sans-serif;
   cursor: pointer;
 
   input {

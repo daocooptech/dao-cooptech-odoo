@@ -16,6 +16,8 @@
   gap: 4px 18px;
 }
 
+// Цвета и отметка «моё» — по эталону (`PostBar`): отмеченное —
+// тёмно-бирюзовым, контур залит оттенком; не жёлтым движка.
 .o_coop_post_act {
   display: inline-flex;
   align-items: center;
@@ -23,16 +25,29 @@
   padding: 4px 2px;
   border: 0;
   background: none;
-  color: var(--text-muted, #6c757d);
-  font-size: 13px;
+  color: var(--coop-slate, #4a4a44);
+  font: 500 13px/1.3 'Inter', sans-serif;
+  cursor: pointer;
 
-  &:hover { color: var(--o-main-text-color, inherit); }
+  &:hover { color: var(--coop-ink, #14171a); }
 
-  .fa { font-size: 15px; }
+  &:focus-visible {
+    outline: 2px solid var(--coop-teal, #146b64);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 }
 
 .o_coop_post_act_on {
-  color: var(--o-color-1, #e4a11b);
+  color: var(--coop-teal-dark, #0e4f4a);
+
+  svg { fill: var(--coop-teal-tint, #e3efed); }
+}
+
+[data-bs-theme="dark"] .o_coop_post_act_on {
+  color: var(--coop-teal, #146b64);
+
+  svg { fill: transparent; }
 }
 
 .o_coop_post_count {

@@ -29,32 +29,32 @@
         <button class="o_coop_post_act" title="Нравится"
                 t-att-class="{ 'o_coop_post_act_on': this.mine(this.LIKE) }"
                 t-att-disabled="!this.canReact" t-on-click="() => this.toggle(this.LIKE)">
-          <i class="oi" data-icon="thumb_up" t-att-class="{'oi-filled': this.mine(this.LIKE)}"/>
+          <CoopIcon name="'thumb-up'" size="16"/>
           <span class="o_coop_post_count" t-out="this.count(this.LIKE)"/>
         </button>
         <button class="o_coop_post_act" title="Не нравится"
                 t-att-class="{ 'o_coop_post_act_on': this.mine(this.DISLIKE) }"
                 t-att-disabled="!this.canReact" t-on-click="() => this.toggle(this.DISLIKE)">
-          <i class="oi" data-icon="thumb_down" t-att-class="{'oi-filled': this.mine(this.DISLIKE)}"/>
+          <CoopIcon name="'thumb-down'" size="16"/>
           <span class="o_coop_post_count" t-out="this.count(this.DISLIKE)"/>
         </button>
         <button class="o_coop_post_act" title="Комментарии" t-on-click="this.onComment">
-          <i class="oi" data-icon="chat_bubble"/>
+          <CoopIcon name="'message-circle'" size="16"/>
           <span class="o_coop_post_count" t-out="this.list.length"/>
         </button>
         <button class="o_coop_post_act" title="Поделиться у себя на странице" t-on-click="this.onRepost">
-          <i class="oi" data-icon="share"/>
+          <CoopIcon name="'share'" size="16"/>
           <span class="o_coop_post_count" t-out="this.reposts"/>
         </button>
         <button class="o_coop_post_act" title="Поблагодарить" t-on-click="this.onThanks">
-          <i class="oi" data-icon="card_giftcard"/>
+          <CoopIcon name="'gift'" size="16"/>
           <span class="o_coop_post_count" t-out="this.thanks"/>
         </button>
         <button t-if="this.canStar" class="o_coop_post_act"
                 t-att-class="{ 'o_coop_post_act_on': this.props.message.is_bookmarked }"
                 t-att-title="this.props.message.is_bookmarked ? 'Убрать из избранного' : 'В избранное'"
                 t-on-click="this.onStar">
-          <i class="oi" data-icon="star" t-att-class="{'oi-filled': this.props.message.is_bookmarked}"/>
+          <CoopIcon name="'star'" size="16"/>
           <span class="o_coop_post_count" t-out="this.stars"/>
         </button>
       </div>
