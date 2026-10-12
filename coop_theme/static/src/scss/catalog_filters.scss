@@ -374,3 +374,66 @@
 .o_coop_tags {
   margin-top: 8px;
 }
+
+// ── Над картой — панель поперёк ──────────────────────────────────────
+//
+// Владелец 12.10.2026: «горизонтальный фильтр сверху, где это уместно,
+// например где карта». Карте нужна вся ширина листа, а колонка в 224
+// точки справа отнимала у неё четверть. Поэтому на карте панель встаёт
+// над ней: условия в ряд с переносом, кнопки — в тот же ряд. В плитке
+// и списке панель остаётся справа, как в эталоне (`FilterPanel`).
+// Только большой экран: до 900 точек панель — нижняя шторка по кнопке.
+@media (min-width: 901px) {
+  .o_coop_map .o_content > .o_coop_filters {
+    flex: 0 0 100%;
+    width: 100%;
+    order: -1;
+    margin-top: 0;
+  }
+
+  // Края карты — вровень с краями панели над ней.
+  .o_coop_map .o_content > .o_coop_mapboard {
+    flex: 1 1 100%;
+    padding: 0;
+  }
+
+  .o_coop_map .o_coop_filters_body {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px 14px;
+    padding: 12px 16px 14px;
+
+    > .o_coop_filters_title,
+    > .o_coop_filters_none,
+    > .o_coop_saved {
+      flex: 0 0 100%;
+      margin: 0;
+    }
+
+    > .o_coop_field {
+      flex: 1 1 170px;
+      max-width: 260px;
+      margin: 0;
+    }
+
+    // Быстрые фильтры — чипы, им нужна строка подлиннее.
+    > .o_coop_field:has(> .o_coop_chips) {
+      flex-basis: 320px;
+      max-width: none;
+    }
+  }
+
+  // Длинный список флажков в ряду не должен растягивать ряд на пол-экрана.
+  .o_coop_map .o_coop_multi {
+    max-height: 112px;
+  }
+
+  .o_coop_map .o_coop_filters .o_coop_btn {
+    flex: none;
+    width: auto;
+    margin: 0;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}
