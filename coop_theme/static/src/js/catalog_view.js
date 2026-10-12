@@ -608,6 +608,18 @@ patch(ListController.prototype, {
     get coopBaseDomain() {
         return this.env.searchModel?.globalDomain || [];
     },
+
+    /** Пояснение раздела над списком — всегда, а не только в пустом
+     *  разделе, как штатная справка движка (эталон `SettlementsPage`).
+     *  Из действия (`coop_intro` в контексте), по той же причине, что и
+     *  подпись кнопки создания: контекст списка до него не доходит. */
+    get coopIntro() {
+        if (this.env.inDialog) {
+            return "";
+        }
+        const action = this.env.services.action?.currentAction;
+        return action?.context?.coop_intro || this.props.context?.coop_intro || "";
+    },
 });
 
 // Строка поиска каталога: без штатного выпадающего меню и со своей

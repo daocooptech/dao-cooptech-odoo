@@ -1162,3 +1162,16 @@
   align-self: flex-start;
   bottom: auto;
 }
+
+// ── Пояснение раздела над списком ────────────────────────────────────
+//
+// Абзац из `coop_intro` действия (`coopIntro`, `catalog_view.js`): как
+// `.o_coop_wallet_intro` эталона — во всю строку над таблицей, не шире
+// строки чтения.
+.o_content > .o_coop_list_intro {
+  flex: 1 1 100%;
+  max-width: 760px;
+  margin: 16px 0 18px;
+  font: 400 12.5px/1.55 'Manrope', sans-serif;
+  color: var(--coop-slate, #4a4a44);
+}

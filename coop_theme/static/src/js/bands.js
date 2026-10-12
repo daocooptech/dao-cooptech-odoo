@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { browser } from "@web/core/browser/browser";
+import { TABLER } from "@coop_theme/js/icons";
 
 /**
  * Полосы страницы: сворачиваются и листаются стрелками.
@@ -65,9 +66,24 @@ function setupBand(band) {
     arrow.setAttribute("aria-label", "Свернуть или раскрыть");
     head.appendChild(arrow);
 
+    // Контур Tabler, как в эталоне (`Band`), а не символы «▲ ▼»: глиф
+    // шрифта рисуется залитым треугольником и в каждом начертании своим.
+    const svgNS = "http://www.w3.org/2000/svg";
+    const chevron = document.createElementNS(svgNS, "svg");
+    for (const [key, value] of Object.entries({
+        width: "14", height: "14", viewBox: "0 0 24 24", fill: "none",
+        stroke: "currentColor", "stroke-width": "1.75",
+        "stroke-linecap": "round", "stroke-linejoin": "round", "aria-hidden": "true",
+    })) {
+        chevron.setAttribute(key, value);
+    }
+    const chevronPath = document.createElementNS(svgNS, "path");
+    chevron.appendChild(chevronPath);
+    arrow.appendChild(chevron);
+
     const apply = (isClosed) => {
         band.classList.toggle("o_coop_band_closed", isClosed);
-        arrow.textContent = isClosed ? "▼" : "▲";
+        chevronPath.setAttribute("d", TABLER[isClosed ? "chevron-down" : "chevron-up"][0]);
         arrow.setAttribute("aria-expanded", isClosed ? "false" : "true");
     };
     apply(closed.has(name));

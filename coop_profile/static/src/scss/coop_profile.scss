@@ -281,7 +281,9 @@
   // переносит длинные русские подписи по букве в строку.
   .o_coop_key {
     flex: 0 0 92px;
-    color: var(--coop-slate-light, #8f8f88);
+    // `coop-slate`, как в эталоне (`InfoBox`): светлый серый на белом
+    // не читается.
+    color: var(--coop-slate, #4a4a44);
   }
 
   // ── Правая колонка ─────────────────────────────────────────────────
@@ -769,6 +771,8 @@
 }
 
 .o_coop_band_arrow {
+  display: inline-flex;
+  align-items: center;
   margin-left: auto;
   padding: 0 2px;
   border: 0;

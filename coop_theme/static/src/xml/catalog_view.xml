@@ -291,6 +291,10 @@
        в плитке: раскладку по ширине поля решают те же правила
        (`catalog_filters.scss`). -->
   <t t-name="coop_theme.ListViewFilters" t-inherit="web.ListView" t-inherit-mode="extension">
+    <!-- Пояснение раздела над списком — `coopIntro` в `js/catalog_view.js`. -->
+    <xpath expr="//t[@t-component='this.props.Renderer']" position="before">
+      <p t-if="this.coopIntro" class="o_coop_list_intro" t-out="this.coopIntro"/>
+    </xpath>
     <xpath expr="//t[@t-elif='this.model.couldNotLoadRootOffline']" position="after">
       <CoopFilters t-if="this.coopHasFilters" t-key="'coop_filters'"
                    resModel="this.props.resModel" baseDomain="this.coopBaseDomain"/>

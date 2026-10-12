@@ -608,6 +608,7 @@
     <field name="res_model">coop.settlement</field>
     <field name="path">settlements</field>
     <field name="view_mode">list</field>
+    <field name="context">{'coop_intro': 'Одно число «баланс» не отвечает на главный вопрос: кто кому должен и когда. Здесь тот же оборот разложен по контрагентам.'}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Взаимных расчётов нет</p>
       <p>

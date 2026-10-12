@@ -35,11 +35,23 @@
     // тёмную; на светлой белая полоса внутри белой панели не видна и
     // потому не мешала, а лишней остаётся всё равно.
     --breadcrumb-bg: transparent;
-    --breadcrumb-divider: "→";
+    --breadcrumb-divider: "";
     --breadcrumb-divider-color: var(--coop-slate-light, #8a8a80);
     --breadcrumb-item-padding-x: 8px;
 
     font: 400 12.5px/1.4 'Manrope', sans-serif;
+  }
+
+  // Разделитель — уголок Tabler `chevron-right`, как в эталоне (`Crumbs`),
+  // а не стрелка «→»: стрелка спорит с кнопкой возврата слева, у которой
+  // своя стрелка. Маской, а не картинкой: цвет берётся из переменной
+  // движка и сам меняется в тёмной теме.
+  .breadcrumb-item + .breadcrumb-item::before,
+  .o_back_button a::after {
+    width: calc(12px + var(--breadcrumb-item-padding-x));
+    height: 1.4em;
+    background-color: var(--breadcrumb-divider-color);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 6l6 6l-6 6'/%3E%3C/svg%3E") center / 12px 12px no-repeat content-box;
   }
 
   .breadcrumb-item {
