@@ -9,7 +9,8 @@
   background: #2f3a45;
 }
 
-.o_coop_barter_sign { font-size: 56px; line-height: 1; }
+// Контур (`coop_sign`) берёт цвет текста — на тёмной подложке светлый.
+.o_coop_barter_sign { font-size: 56px; line-height: 1; color: rgba(255, 255, 255, .6); }
 
 .o_coop_barter_head {
   display: flex;
