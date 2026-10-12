@@ -1122,3 +1122,47 @@
     color: var(--coop-teal-dark, #0e4f4a);
   }
 }
+
+// ── Планшет: одна колонка по ширине листа, а не окна ─────────────────
+//
+// Владелец 12.10.2026: «на планшете надо объединить рабочее поле в одну
+// колонку, сейчас в две и это не читабельно». Окно планшета шире 900, а
+// лист между планкой, меню подразделов и краем — около 600: правой
+// колонке после левой в 300 оставалось 260 точек. Поэтому раскладка
+// переключается по ширине самого листа (контейнерный запрос), и та же
+// одна колонка, что на телефоне, включается, когда лист уже 820.
+.o_coop_profile .o_form_sheet_bg {
+  container: coop-profile / inline-size;
+}
+
+@container coop-profile (max-width: 820px) {
+  .o_coop_profile .o_form_sheet:has(> .o-mail-Form-chatter) {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "name"
+      "side"
+      "main"
+      "wall";
+    grid-template-rows: none;
+    row-gap: 0;
+
+    .o_coop_name_row,
+    .o_coop_profile_side {
+      margin-bottom: 18px;
+    }
+  }
+
+  .o_coop_profile .o_coop_profile_layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "name"
+      "side"
+      "main";
+    grid-template-rows: none;
+    gap: 18px;
+  }
+
+  .o_coop_profile .o_coop_profile_side {
+    width: 100%;
+  }
+}

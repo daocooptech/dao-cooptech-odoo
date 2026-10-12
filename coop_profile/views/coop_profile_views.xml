@@ -68,7 +68,10 @@
                   invisible="not is_company or coop_is_self or coop_friend_state != 'none'"/>
           <button name="action_coop_befriend" type="object"
                   string="Принять дружбу" class="btn-primary"
-                  invisible="coop_friend_state != 'pending_in'"/>
+                  invisible="is_company or coop_friend_state != 'pending_in'"/>
+          <button name="action_coop_befriend" type="object"
+                  string="Принять в связи" class="btn-primary"
+                  invisible="not is_company or coop_friend_state != 'pending_in'"/>
           <button name="action_coop_follow" type="object" string="Подписаться"
                   invisible="coop_is_self or coop_is_following"/>
           <button name="action_coop_follow" type="object" string="Отписаться"
@@ -108,9 +111,14 @@
             <h2><field name="name" nolabel="1" readonly="1"/></h2>
             <p>Участник открывает свою страницу только своим связям и
                сторонам совместных сделок.</p>
-            <p class="text-muted">Напишите ему в сообщениях, если он
-               принимает письма от всех. Появится общая сделка или он
-               примет ваше предложение дружбы — страница откроется.</p>
+            <p class="text-muted" invisible="is_company">Напишите ему в
+               сообщениях, если он принимает письма от всех. Появится общая
+               сделка или он примет ваше предложение дружбы — страница
+               откроется.</p>
+            <p class="text-muted" invisible="not is_company">Напишите
+               организации в сообщениях, если она принимает письма от всех.
+               Появится общая сделка или она примет вас в связи — страница
+               откроется.</p>
             <button name="action_coop_message" type="object"
                     string="Написать" class="btn-primary"/>
           </div>
@@ -203,7 +211,11 @@
                 <div invisible="not coop_follower_count or (not coop_is_self and not coop_show_followers)">Подписчиков:
                   <b><field name="coop_follower_count" nolabel="1" readonly="1"/></b>
                 </div>
-                <div invisible="not coop_friend_count or (not coop_is_self and not coop_show_friends)">Друзей:
+                <!-- С организацией не дружат, а состоят в связи (владелец
+                     12.10.2026): поле то же, подпись своя. -->
+                <div invisible="not coop_friend_count or (not coop_is_self and not coop_show_friends)">
+                  <span invisible="is_company">Друзей:</span>
+                  <span invisible="not is_company">Связей:</span>
                   <b><field name="coop_friend_count" nolabel="1" readonly="1"/></b>
                 </div>
               </div>
@@ -499,7 +511,8 @@
               <div class="o_coop_band"
                    invisible="not coop_friend_ids or (not coop_is_self and not coop_show_friends)">
                 <div class="o_coop_band_head">
-                  <span>Друзья</span>
+                  <span invisible="is_company">Друзья</span>
+                  <span invisible="not is_company">Связи</span>
                   <button name="action_coop_my_friends" type="object"
                           class="o_coop_band_all">смотреть все</button>
                 </div>
