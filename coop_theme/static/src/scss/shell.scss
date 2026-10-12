@@ -787,6 +787,71 @@ body.o_dark_mode .o_coop_logo img {
   font-size: 1em;
 }
 
+// ── Значки движка в шапке — контуры Tabler (дизайн-система, `TopMenu`) ──
+//
+// «Сообщения» и «Дела» движок рисует шрифтом Material Symbols: буквы
+// значка — в `::before` из `data-icon`. Шаблоны движка не трогаем —
+// подменяем только глиф маской с контуром Tabler того же размера и
+// толщины, что у своих значков ряда (18, линия 1.75). Цвет — от текста.
+.o_main_navbar .o_menu_systray i.oi[data-icon="forum"],
+.o_main_navbar .o_menu_systray i.oi[data-icon="schedule"] {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+
+  &::before {
+    content: "";
+    width: 18px;
+    height: 18px;
+    background: currentColor;
+    -webkit-mask: var(--coop-systray-icon) center / 18px 18px no-repeat;
+    mask: var(--coop-systray-icon) center / 18px 18px no-repeat;
+  }
+}
+
+// `message-circle`
+.o_main_navbar .o_menu_systray i.oi[data-icon="forum"] {
+  --coop-systray-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 20l1.3 -3.9c-2.324 -3.437 -1.426 -7.872 2.1 -10.374c3.526 -2.501 8.59 -2.296 11.845 .48c3.255 2.777 3.695 7.266 1.029 10.501c-2.666 3.235 -7.615 4.215 -11.574 2.293l-4.7 1'/%3E%3C/svg%3E");
+}
+
+// `clock`
+.o_main_navbar .o_menu_systray i.oi[data-icon="schedule"] {
+  --coop-systray-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0'/%3E%3Cpath d='M12 7v5l3 3'/%3E%3C/svg%3E");
+}
+
+// Счётчик на значке — один на весь ряд (дизайн-система, `TopMenu`):
+// зелёная плашка 16 в правом верхнем углу клетки, обведённая цветом
+// шапки. Прежде у переписки и дел был зелёный значок движка, у колокола —
+// жёлтый свой, и стояли они по-разному.
+@media (min-width: 901px) {
+  .o_web_client .o_main_navbar .o_menu_systray > button,
+  .o_web_client .o_main_navbar .o_menu_systray > div > button {
+    position: relative;
+  }
+
+  .o_main_navbar .o_menu_systray .o-mail-MessagingMenuInDropdown-counter,
+  .o_main_navbar .o_menu_systray .o-mail-ActivityMenu-counter,
+  .o_main_navbar .o_menu_systray .o_coop_bell_count {
+    position: absolute;
+    top: 2px;
+    right: 0;
+    left: auto;
+    box-sizing: border-box;
+    min-width: 16px;
+    height: 16px;
+    margin: 0;
+    padding: 0 4px;
+    border-radius: var(--coop-radius-pill);
+    background: var(--coop-teal);
+    color: var(--coop-btn-fg);
+    box-shadow: 0 0 0 2px var(--coop-nav-active);
+    font: 700 10px/16px 'Manrope', sans-serif;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    transform: none;
+  }
+}
+
 // Тумблер темы и переключатель полномочий — не кнопки, а переключатели:
 // у них своя ширина и видимый край на самой границе. Чтобы зазор между
 // значками читался одинаково, вокруг них добавлено ровно то поле,
