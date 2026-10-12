@@ -1,0 +1,73 @@
+// ── Segmented — переключатель из двух-пяти положений в одной рамке ──────
+//
+// Эталон — `.claude/design-system/components/Segmented` (решение 459):
+// вид графика, период, сторона заявки, категория. Общий для всех экранов:
+// до 13.10.2026 у биржи токенов были свои `o_coop_dex_cat*` и
+// `o_coop_tx_seg`, и одинаковые по смыслу переключатели выглядели
+// по-разному.
+//
+// Разметка: `.coop-seg` > `button.coop-seg_item` (+ `.coop-seg_on` у
+// выбранного), число — `span.coop-seg_count`; `.coop-seg_small` —
+// моноширинные заглавные подписи (периоды), `.coop-seg_block` — во всю
+// ширину.
+
+.coop-seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--coop-line, #e6e6e1);
+  border-radius: 8px;
+  background: var(--coop-surface, #f2f2ee);
+}
+
+.coop-seg_block {
+  display: flex;
+
+  .coop-seg_item { flex: 1 1 0; }
+}
+
+.coop-seg_item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  font: 600 12.5px/1.2 'Manrope', sans-serif;
+  color: var(--coop-slate, #4a4a44);
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover { color: var(--coop-ink, #14171a); }
+  &:focus-visible {
+    outline: 2px solid var(--coop-teal, #146b64);
+    outline-offset: 1px;
+  }
+  &:disabled { opacity: .45; cursor: default; }
+}
+
+.coop-seg_on {
+  background: var(--coop-white, #fff);
+  color: var(--coop-ink, #14171a);
+  box-shadow: 0 1px 2px rgba(20, 23, 26, .12);
+
+  &.coop-seg_ink {
+    background: var(--coop-ink, #14171a);
+    color: var(--coop-white, #fff);
+  }
+}
+
+.coop-seg_small .coop-seg_item {
+  padding: 4px 8px;
+  font: 500 11px/1.2 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.coop-seg_count {
+  font: 500 11px/1 'JetBrains Mono', ui-monospace, monospace;
+  color: var(--coop-slate, #4a4a44);
+}

@@ -29,13 +29,15 @@
       <!-- Категории — как вкладки «Тренд / Новые / Растущие» на биржах,
            переведённые на товар. Число рядом с подписью: без него
            непонятно, есть ли там что смотреть. -->
-      <div class="o_coop_dex_cats">
+      <!-- Общий `Segmented` темы (`coop_theme/scss/segmented.scss`),
+           как в эталоне TokenExchangePage. -->
+      <div class="o_coop_dex_cats coop-seg">
         <button t-foreach="this.constructor.CATEGORIES" t-as="c" t-key="c.key"
-                class="o_coop_dex_cat"
-                t-att-class="{ 'o_coop_dex_caton': this.state.category === c.key }"
+                class="coop-seg_item"
+                t-att-class="{ 'coop-seg_on': this.state.category === c.key }"
                 t-on-click="() => this.setCategory(c.key)">
           <t t-out="c.label"/>
-          <span class="o_coop_dex_catn" t-if="this.counts[c.key] !== undefined" t-out="this.counts[c.key]"/>
+          <span class="coop-seg_count" t-if="this.counts[c.key] !== undefined" t-out="this.counts[c.key]"/>
         </button>
       </div>
 
@@ -194,17 +196,17 @@
               </div>
             </div>
             <div class="o_coop_tx_controls">
-              <div class="o_coop_tx_seg">
-                <button t-att-class="{ 'o_coop_tx_seg_on': this.state.chart === 'candles' }"
+              <div class="coop-seg">
+                <button class="coop-seg_item" t-att-class="{ 'coop-seg_on': this.state.chart === 'candles' }"
                         t-on-click="() => this.setChart('candles')">Свечи</button>
-                <button t-att-class="{ 'o_coop_tx_seg_on': this.state.chart === 'line' }"
+                <button class="coop-seg_item" t-att-class="{ 'coop-seg_on': this.state.chart === 'line' }"
                         t-on-click="() => this.setChart('line')">Линия</button>
-                <button t-att-class="{ 'o_coop_tx_seg_on': this.state.chart === 'depth' }"
+                <button class="coop-seg_item" t-att-class="{ 'coop-seg_on': this.state.chart === 'depth' }"
                         t-on-click="() => this.setChart('depth')">Глубина</button>
               </div>
-              <div class="o_coop_tx_seg" t-if="this.state.chart !== 'depth'">
+              <div class="coop-seg coop-seg_small" t-if="this.state.chart !== 'depth'">
                 <button t-foreach="this.ranges" t-as="r" t-key="r.key"
-                        t-att-class="{ 'o_coop_tx_seg_on': this.state.range === r.key }"
+                        class="coop-seg_item" t-att-class="{ 'coop-seg_on': this.state.range === r.key }"
                         t-on-click="() => this.setRange(r.key)" t-out="r.label"/>
               </div>
             </div>

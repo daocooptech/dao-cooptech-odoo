@@ -61,6 +61,7 @@
             'coop_theme/static/src/js/catalog_filters.js',
             'coop_theme/static/src/xml/catalog_filters.xml',
             'coop_theme/static/src/scss/catalog_filters.scss',
+            'coop_theme/static/src/scss/segmented.scss',
             'coop_theme/static/src/js/catalog_shelves.js',
             'coop_theme/static/src/xml/catalog_shelves.xml',
             'coop_theme/static/src/scss/catalog_shelves.scss',
