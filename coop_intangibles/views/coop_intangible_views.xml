@@ -28,7 +28,7 @@
                 <img class="o_coop_media_logo" t-elif="record.owner_id.raw_value" loading="lazy"
                      t-attf-src="/web/image/res.partner/#{record.owner_id.raw_value}/image_512"
                      t-att-alt="record.owner_id.value"/>
-                <span t-else="" class="o_coop_media_sign">💡</span>
+                <span t-else="" class="o_coop_media_sign"><field name="id" widget="coop_sign" options="{'icon': 'bulb'}"/></span>
                 <span class="o_coop_locbar" t-if="record.city.raw_value">
                   <i class="oi" data-icon="location_on" role="img" aria-label="Город"/>
                   <field name="city"/>
@@ -291,7 +291,7 @@
                 <img class="o_coop_media_logo" t-if="record.licensor_id.raw_value" loading="lazy"
                      t-attf-src="/web/image/res.partner/#{record.licensor_id.raw_value}/image_512"
                      t-att-alt="record.licensor_id.value"/>
-                <span t-else="" class="o_coop_media_sign">📄</span>
+                <span t-else="" class="o_coop_media_sign"><field name="id" widget="coop_sign" options="{'icon': 'file-text'}"/></span>
               </div>
               <div class="o_coop_listing_body">
                 <div class="o_coop_listing_title"><field name="intangible_id"/></div>

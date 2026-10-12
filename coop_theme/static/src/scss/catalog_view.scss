@@ -211,6 +211,17 @@
   opacity: .45;
 }
 
+// Значок записи без снимка (`coop_sign`) — контур вместо эмодзи. Обёртка
+// поля движка — блок с межстрочным интервалом: без сброса значок съезжал
+// вниз от центра квадрата.
+.o_field_coop_sign,
+.o_coop_sign {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
 .o_coop_rows .o_coop_media.o_coop_media {
   flex: none;
   width: 180px;

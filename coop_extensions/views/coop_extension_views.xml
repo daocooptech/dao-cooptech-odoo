@@ -38,7 +38,9 @@
                  карточек с настоящими снимками. -->
             <div class="o_coop_listing o_coop_ext_card">
               <div class="o_coop_listing_ico o_coop_ext_ico">
-                <t t-out="record.icon.value"/>
+                <!-- Контур по разделу (виджет `coop_sign`), а не эмодзи
+                     из поля `icon`: эталон `ExtensionsPage`. -->
+                <field name="category" widget="coop_sign" options="{'size': 22, 'icon': 'puzzle', 'map': {'accounting': 'receipt', 'process': 'settings', 'sales': 'shopping-cart', 'finance': 'credit-card', 'community': 'building-community', 'integration': 'plug-connected'}}"/>
               </div>
               <div class="o_coop_listing_body">
               <div class="o_coop_ext_cat">

@@ -66,6 +66,8 @@
             'coop_theme/static/src/scss/catalog_shelves.scss',
             'coop_theme/static/src/js/tabs_field.js',
             'coop_theme/static/src/xml/tabs_field.xml',
+            'coop_theme/static/src/js/sign_field.js',
+            'coop_theme/static/src/xml/sign_field.xml',
             'coop_theme/static/src/js/about_field.js',
             'coop_theme/static/src/xml/about_field.xml',
             'coop_theme/static/src/js/inline_field.js',

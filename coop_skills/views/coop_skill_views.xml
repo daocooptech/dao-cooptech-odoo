@@ -40,7 +40,7 @@
                 <img class="o_coop_media_logo" t-elif="record.partner_id.raw_value" loading="lazy"
                      t-attf-src="/web/image/res.partner/#{record.partner_id.raw_value}/image_512"
                      t-att-alt="record.partner_id.value"/>
-                <span t-else="" class="o_coop_media_sign">🛠</span>
+                <span t-else="" class="o_coop_media_sign"><field name="id" widget="coop_sign" options="{'icon': 'tools'}"/></span>
                 <!-- Аватар владельца адресом изображения: помощника
                      kanban_image в Odoo 19 больше нет. -->
                 <img class="o_coop_skill_owner"

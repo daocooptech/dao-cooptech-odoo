@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <t t-name="coop_theme.SignField">
+    <span class="o_coop_sign">
+      <CoopIcon name="this.iconName" size="this.props.size || 40" stroke="1.5"/>
+    </span>
+  </t>
+
+</templates>

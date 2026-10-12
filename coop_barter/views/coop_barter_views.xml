@@ -27,7 +27,7 @@
                 <img t-if="record.has_photo.raw_value" loading="lazy"
                      t-attf-src="/web/image/coop.resource/#{record.resource_id.raw_value}/image_512"
                      t-att-alt="record.name.value"/>
-                <span t-else="" class="o_coop_barter_sign"><t t-out="record.icon.value"/></span>
+                <span t-else="" class="o_coop_barter_sign"><field name="id" widget="coop_sign" options="{'icon': 'arrows-exchange'}"/></span>
                 <img class="o_coop_face" loading="lazy" t-if="record.partner_id.raw_value"
                      t-attf-src="/web/image/res.partner/#{record.partner_id.raw_value}/avatar_128"
                      t-att-alt="record.partner_id.value"/>
@@ -37,7 +37,7 @@
               </div>
               <div class="o_coop_listing_body">
                 <div class="o_coop_barter_head">
-                  <span class="o_coop_badge"><t t-out="record.icon.value"/> <field name="category_id"/></span>
+                  <span class="o_coop_badge"><field name="category_id"/></span>
                   <span class="o_coop_badge o_coop_barter_busy" t-if="record.state.raw_value == 'reserved'">идёт обмен</span>
                   <span class="o_coop_badge" t-if="record.state.raw_value == 'done'">обменяно</span>
                 </div>

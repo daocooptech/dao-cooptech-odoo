@@ -29,7 +29,7 @@
                 <img class="o_coop_media_logo" t-if="record.debtor_id.raw_value" loading="lazy"
                      t-attf-src="/web/image/res.partner/#{record.debtor_id.raw_value}/image_512"
                      t-att-alt="record.debtor_id.value"/>
-                <span t-else="" class="o_coop_media_sign">🤝</span>
+                <span t-else="" class="o_coop_media_sign"><field name="id" widget="coop_sign" options="{'icon': 'arrows-exchange'}"/></span>
               </div>
               <div class="o_coop_listing_body">
                 <div class="o_coop_listing_title">

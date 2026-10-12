@@ -22,7 +22,7 @@
           <t t-name="card">
             <div class="o_coop_listing o_coop_mining_card">
               <div class="o_coop_media o_coop_mining_media">
-                <span class="o_coop_mining_sign"><t t-out="record.icon.value"/></span>
+                <span class="o_coop_mining_sign"><field name="kind" widget="coop_sign" options="{'icon': 'cpu', 'map': {'hosting': 'building', 'equipment': 'server', 'hashrate': 'bolt', 'service': 'tools'}}"/></span>
                 <span class="o_coop_locbar" t-if="record.city.raw_value">
                   <i class="oi" data-icon="location_on" role="img" aria-label="Город"/> <t t-out="record.city.value"/>
                 </span>

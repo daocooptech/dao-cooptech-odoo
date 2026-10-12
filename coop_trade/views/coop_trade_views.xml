@@ -36,7 +36,7 @@
                 <div class="o_coop_trade_head">
                   <span class="o_coop_badge o_coop_trade_dir"
                         t-att-class="'o_coop_trade_' + record.direction.raw_value">
-                    <t t-out="record.icon.value"/> <field name="direction"/>
+                    <field name="direction" widget="coop_sign" options="{'size': 14, 'icon': 'download', 'map': {'export_goods': 'upload', 'export_services': 'upload'}}"/> <field name="direction"/>
                   </span>
                   <span class="o_coop_badge o_coop_trade_state"
                         t-att-class="'o_coop_trade_st_' + record.state.raw_value">

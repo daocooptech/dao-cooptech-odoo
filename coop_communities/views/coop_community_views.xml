@@ -36,7 +36,9 @@
                 <!-- Обложки нет — вместо битой плитки значок на подложке.
                      Геометрия та же, ряд не разъезжается. -->
                 <div t-else="" class="o_coop_cover_icon">
-                  <t t-out="record.icon.raw_value or '👥'"/>
+                  <!-- Контур, а не эмодзи из поля `icon` (эталон
+                       `CommunitiesPage`). -->
+                  <field name="id" widget="coop_sign" options="{'icon': 'users-group'}"/>
                 </div>
                 <span class="o_coop_badge"
                       t-att-class="'o_coop_kind_' + record.kind.raw_value">
