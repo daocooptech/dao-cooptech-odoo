@@ -482,8 +482,16 @@
 .o_coop_dex_thead,
 .o_coop_dex_trow {
   display: grid;
-  grid-template-columns: 150px 1fr 1fr 100px 84px;
+  // `minmax(0, 1fr)`, а не `1fr`: голая доля не уже самого длинного слова
+  // («ПОКУПАТЕЛЬ», «Уральские»), и на рабочем поле в 550 точек ряд
+  // вылезал за край карточки на 17. Длинное слово переносится, а не
+  // распирает колонку.
+  grid-template-columns: 150px minmax(0, 1fr) minmax(0, 1fr) 100px 84px;
   gap: 10px;
+
+  > * {
+    overflow-wrap: anywhere;
+  }
 }
 
 .o_coop_dex_thead {
@@ -528,7 +536,7 @@
 
   .o_coop_dex_thead,
   .o_coop_dex_trow {
-    grid-template-columns: 1fr 1fr 84px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 84px;
   }
 
   .o_coop_dex_thead > :nth-child(2),

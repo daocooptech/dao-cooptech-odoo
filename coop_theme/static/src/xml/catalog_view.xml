@@ -137,7 +137,7 @@
       вкладку, а места занимает столько же.
     -->
     <xpath expr="//div[hasclass('o_control_panel_breadcrumbs')]" position="inside">
-      <CoopTabs t-if="this.coopHasTabs"/>
+      <t t-if="this.coopHasTabs" t-component="this.coopTabsComponent"/>
     </xpath>
 
     <!--

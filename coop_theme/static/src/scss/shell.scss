@@ -1884,6 +1884,26 @@ body.o_dark_mode .o_coop_loader_mark {
     font: 700 24px/1.25 'Manrope', sans-serif;
     color: var(--coop-ink);
   }
+
+  // Вне каталога заголовок стоит в строке пути вместе с кнопками
+  // создания, а строка не переносится: заголовок во всю ширину выталкивал
+  // «Новое» за правый край — в CRM, документах, справочниках кнопки не
+  // было видно вовсе (12.10.2026). По эталону `PageHeader` кнопки справа
+  // от заголовка; путь с кнопкой возврата, если он есть, — строкой выше.
+  .o_control_panel:not(.o_coop_catalog) .o_control_panel_breadcrumbs:has(.o_coop_pagehead) {
+    flex-wrap: wrap;
+    align-items: flex-end;
+
+    .o_coop_pagehead {
+      flex: 1 1 auto;
+      margin-bottom: 0;
+    }
+
+    .o_breadcrumb {
+      order: -2;
+      flex: 0 0 100%;
+    }
+  }
 }
 
 .o_coop_tabs_wrap {

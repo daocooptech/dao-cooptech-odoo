@@ -289,9 +289,18 @@ registry.category("views").add("coop_catalog_kanban", {
 // Вкладки раздела рисуются самой панелью: только так они попадают в одну
 // строку с переключателем вида, а поиск с кнопкой добавления — в
 // следующую. Отдельным блоком над панелью этого не собрать.
-ControlPanel.components = { ...ControlPanel.components, CoopTabs };
-
+//
+// Компонент отдаётся геттером через `t-component`, а не дописывается в
+// `ControlPanel.components`: наследники вроде `CrmControlPanel` копируют
+// этот список при своей загрузке (`...ControlPanel.components`), раньше
+// нашей правки, и CRM падал словами «Cannot find the definition of
+// component "CoopTabs"» (12.10.2026). Прототип наследуют все.
 patch(ControlPanel.prototype, {
+    get coopTabsComponent() {
+        return CoopTabs;
+    },
+
+
     /**
      * Кнопка отбора стоит здесь, а не над каталогом.
      *
