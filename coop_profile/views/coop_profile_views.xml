@@ -145,9 +145,15 @@
                          options="{'wrap': True}"
                          readonly="not coop_is_self"
                          placeholder="Имя и фамилия"/></h1>
+              <!-- У организации нет личности — подтверждается сама
+                   компания (ЕГРЮЛ, устав); владелец 12.10.2026. -->
               <span class="o_coop_verified"
-                    invisible="coop_verification_level != 'identity'">
+                    invisible="is_company or coop_verification_level != 'identity'">
                 Личность подтверждена
+              </span>
+              <span class="o_coop_verified"
+                    invisible="not is_company or coop_verification_level != 'identity'">
+                Компания подтверждена
               </span>
             </div>
 
