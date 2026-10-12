@@ -3,7 +3,7 @@
 
   <!-- Вкладки страницы из поля выбора — `js/tabs_field.js`. -->
   <t t-name="coop_theme.TabsField">
-    <div class="o_coop_tabs o_coop_tabs_page" role="tablist">
+    <div class="o_coop_tabs o_coop_tabs_page o_coop_tabs_field" role="tablist">
       <button t-foreach="this.items" t-as="item" t-key="item.value"
               type="button" role="tab" class="o_coop_tab"
               t-att-class="{ 'active': item.value === this.current }"
