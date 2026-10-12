@@ -33,7 +33,6 @@
     'assets': {
         'web.assets_backend': [
             'coop_settings/static/src/js/settings_button.js',
-            'coop_settings/static/src/xml/settings_button.xml',
             'coop_settings/static/src/scss/coop_settings.scss',
         ],
     },

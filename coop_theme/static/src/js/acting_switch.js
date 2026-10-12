@@ -53,7 +53,28 @@ export class CoopActingMenu extends Component {
         // Перезагрузка целиком: от имени зависит почти всё на экране —
         // своя страница, кошелёк, каталоги «мои». Досчитывать это по
         // кусочкам значило бы держать вторую копию тех же правил.
-        window.location.reload();
+        //
+        // «Моя страница» в адресе несёт номер карточки (`/my-page/11`), и
+        // перезагрузка того же адреса снова открывала прежнее лицо:
+        // выбрали ПК «Родник» — а на экране страница человека (владелец
+        // 12.10.2026). Без номера страницу выбирает сервер — по новому лицу.
+        //
+        // Номер держит и сам движок: последнее действие с его ответом он
+        // хранит во вкладке (`current_action`, `current_state`) и после
+        // перезагрузки берёт оттуда, не спрашивая сервер. Сбрасываем.
+        try {
+            window.sessionStorage.removeItem("current_action");
+            window.sessionStorage.removeItem("current_state");
+        } catch {
+            // Хранилище закрыто — помнить движку тоже нечем.
+        }
+        const path = window.location.pathname;
+        const myPage = path.match(/^(.*\/my-page)\/\d+/);
+        if (myPage) {
+            window.location.assign(myPage[1]);
+        } else {
+            window.location.reload();
+        }
     }
 }
 

@@ -1,39 +1,44 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { Component, usePlugin, useProps } from "@odoo/owl";
-import { ActionPlugin } from "@web/webclient/actions/action_plugin";
+import { useService } from "@web/core/utils/hooks";
 
 /**
- * Шестерёнка настроек в шапке.
+ * «Настройки» — пунктом в меню под аватаром.
  *
- * В макете она там и стоит — и стоит на всех 66 страницах, рядом с
- * поиском и колоколом. На движке её не было вовсе: настройки участника
- * было попросту неоткуда открыть, и владелец 16 сентября 2026 сказал, что
- * страницы настроек в макете нет, — он искал её в боковом меню.
+ * Прежде это была шестерёнка в шапке, как в макете. Владелец 12.10.2026:
+ * «убрать иконку настроек из верхнего меню и добавить как пункт в меню,
+ * которое при нажатии на аватар». Так и в эталоне (`AccountMenu`): под
+ * аватаром — от чьего имени действую, «Настройки», «О программе»,
+ * «Выйти».
  *
  * Со сбросом следа: настройки — не углубление в раздел, откуда пришли, а
  * выход из него. Иначе путь копит цепочку «каталог → запись → настройки».
  */
-export class CoopSettingsButton extends Component {
-    static template = "coop_settings.Button";
-    props = useProps();
-
-    setup() {
-        this.action = usePlugin(ActionPlugin);
-    }
-
-    open() {
-        return this.action.doAction("coop_settings.action_coop_settings", {
+export function coopSettingsItem() {
+    const action = useService("action");
+    return {
+        type: "item",
+        id: "coop_settings",
+        description: "Настройки",
+        callback: () => action.doAction("coop_settings.action_coop_settings", {
             clearBreadcrumbs: true,
-        });
-    }
+        }),
+        sequence: 50,
+    };
 }
 
-registry.category("systray").add(
-    "coop_settings.button",
-    { Component: CoopSettingsButton },
-    // Рядом с колоколом и тумблером темы: это органы управления собой, а
-    // не уведомления о чужих действиях.
-    { sequence: 14 }
-);
+const items = registry.category("user_menuitems");
+items.add("coop_settings", coopSettingsItem);
+
+// Пункты движка, которых в меню платформы нет (эталон `AccountMenu`):
+// «Shortcuts» — палитра команд по Ctrl+K, по-английски и для знающих
+// движок изнутри (сама палитра по Ctrl+K работает); «Мои предпочтения» —
+// окно учётной системы, которое повторяет «Настройки»; «В сети» — выбор
+// статуса переписки (статус и так ставится сам: в сети, отошёл);
+// «Установить приложение» — предложение браузера, не пункт меню.
+for (const name of ["shortcuts", "preferences", "im_status", "install_pwa"]) {
+    if (items.contains(name)) {
+        items.remove(name);
+    }
+}
