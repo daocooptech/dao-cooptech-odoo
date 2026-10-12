@@ -63,6 +63,7 @@
       <aside class="o_coop_sidebar o_coop_rail"
              t-att-class="{ 'o_coop_sidebar_open': this.ui.open, 'o_coop_rail_wide': this.ui.railWide }"
              t-on-mouseleave="() => this.hideFly()"
+             t-on-scroll="() => this.hideFly()"
              t-on-keydown="(ev) => this.onRailKey(ev)">
       <!-- Стрелка сворачивания — на самой планке, как у меню подразделов
            (владелец 12.10.2026). Только на большом экране (shell.scss). -->
