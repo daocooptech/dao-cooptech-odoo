@@ -208,19 +208,23 @@
     margin-left: auto;
   }
 
+  // Кнопка карточки — вторичная, как в эталоне (`Button`, `CatalogCard`):
+  // белая с рамкой. Бирюзовой кнопки на платформе нет намеренно — бирюза
+  // здесь цвет связей и состояний, и залитая кнопка на каждой карточке
+  // делала каталог пёстрым (решение 459, шаг 3б).
   .btn.o_coop_vac_btn {
-    background: var(--coop-teal, #146b64);
-    border-color: var(--coop-teal, #146b64);
-    color: #fff;
+    background: var(--coop-white, #fff);
+    border-color: var(--coop-line, #e6e6e1);
+    color: var(--coop-ink, #14171a);
     font-weight: 600;
     font-size: 12px;
     padding: 6px 14px;
     border-radius: 7px;
 
     &:hover {
-      background: var(--coop-teal-dark, #0e4f4a);
-      border-color: var(--coop-teal-dark, #0e4f4a);
-      color: #fff;
+      background: var(--coop-white, #fff);
+      border-color: var(--coop-teal, #146b64);
+      color: var(--coop-teal-dark, #0e4f4a);
     }
   }
 
