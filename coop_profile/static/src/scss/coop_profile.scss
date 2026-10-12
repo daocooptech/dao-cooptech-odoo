@@ -316,6 +316,26 @@
       font: inherit;
       color: inherit;
     }
+
+    // Кнопки — в строке имени, как в эталоне (OrgPage, PersonPage):
+    // полосой над страницей они отрывались от того, к кому относятся.
+    // Не влезают рядом с именем — переносятся под него от левого края,
+    // как в эталоне; на телефоне переносятся и между собой.
+    .o_coop_name_actions {
+      display: flex;
+      flex: 0 1 auto;
+      flex-wrap: wrap;
+      gap: 8px;
+
+      .btn { margin: 0; }
+
+      // «Уже сделано» — подписка оформлена (Button variant="on" эталона).
+      .btn.o_coop_btn_on {
+        background: var(--coop-teal-tint, #e3efed);
+        border-color: var(--coop-teal-tint, #e3efed);
+        color: var(--coop-teal-dark, #0e4f4a);
+      }
+    }
   }
 
   .o_coop_verified {

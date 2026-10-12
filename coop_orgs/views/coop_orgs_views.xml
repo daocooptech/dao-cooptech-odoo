@@ -168,35 +168,6 @@
         лежит.
       -->
       <form string="Организация" class="o_coop_profile o_coop_org_form">
-        <header>
-          <button name="action_coop_org_message" type="object"
-                  string="Написать" class="btn-primary"/>
-          <button name="action_coop_org_follow" type="object"
-                  string="Подписаться" invisible="coop_org_is_following"/>
-          <button name="action_coop_org_follow" type="object"
-                  string="Вы подписаны" invisible="not coop_org_is_following"/>
-          <!--
-            Вступление. Модель членства была описана до мелочей, а подать
-            заявление участник не мог: путь к составу вёл только через
-            загрузчик демо-данных и администраторский список.
-
-            Четыре состояния — четыре кнопки, потому что человеку важно
-            не только что он может сделать, но и где он сейчас: подано
-            заявление, состоит, выходит или не состоит вовсе.
-          -->
-          <button name="action_coop_join" type="object" string="Вступить"
-                  class="btn-secondary" invisible="not coop_can_join"/>
-          <button name="action_coop_withdraw" type="object"
-                  string="Отозвать заявление"
-                  invisible="coop_my_membership_state != 'applied'"/>
-          <button name="action_coop_leave" type="object" string="Выйти"
-                  invisible="coop_my_membership_state != 'active'"
-                  confirm="Подать заявление о выходе из организации?"/>
-          <button name="action_coop_applications" type="object"
-                  class="btn-primary"
-                  invisible="not coop_application_count"
-                  string="Заявления"/>
-        </header>
         <sheet class="o_coop_profile_sheet">
           <field name="coop_has_members" invisible="1"/>
           <field name="coop_org_is_following" invisible="1"/>
@@ -243,6 +214,39 @@
                   <span class="o_coop_verified" invisible="not coop_is_cooperative">
                     Кооперативная организация
                   </span>
+                  <!--
+                    Кнопки — в строке имени, а не полосой над страницей
+                    (эталон OrgPage, решение 459). Порядок эталона: «Выйти»,
+                    «Вы подписаны», «Написать» — главное действие справа.
+
+                    Вступление: четыре состояния — четыре кнопки, потому что
+                    человеку важно не только что он может сделать, но и где
+                    он сейчас: подано заявление, состоит, выходит или не
+                    состоит вовсе.
+                  -->
+                  <div class="o_coop_name_actions">
+                    <button name="action_coop_applications" type="object"
+                            class="btn btn-secondary"
+                            invisible="not coop_application_count"
+                            string="Заявления"/>
+                    <button name="action_coop_join" type="object" string="Вступить"
+                            class="btn btn-secondary" invisible="not coop_can_join"/>
+                    <button name="action_coop_withdraw" type="object"
+                            string="Отозвать заявление" class="btn btn-secondary"
+                            invisible="coop_my_membership_state != 'applied'"/>
+                    <button name="action_coop_leave" type="object" string="Выйти"
+                            class="btn btn-secondary"
+                            invisible="coop_my_membership_state != 'active'"
+                            confirm="Подать заявление о выходе из организации?"/>
+                    <button name="action_coop_org_follow" type="object"
+                            string="Подписаться" class="btn btn-secondary"
+                            invisible="coop_org_is_following"/>
+                    <button name="action_coop_org_follow" type="object"
+                            string="Вы подписаны" class="btn btn-secondary o_coop_btn_on"
+                            invisible="not coop_org_is_following"/>
+                    <button name="action_coop_org_message" type="object"
+                            string="Написать" class="btn btn-primary"/>
+                  </div>
                 </div>
                 <div class="o_coop_role">
                   <field name="coop_legal_form_id" widget="coop_inline" readonly="not coop_can_edit_card"
