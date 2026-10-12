@@ -55,39 +55,6 @@
     <field name="priority">1</field>
     <field name="arch" type="xml">
       <form string="Участник" class="o_coop_profile">
-        <header>
-          <button name="action_coop_message" type="object" string="Написать"
-                  class="btn-primary" invisible="coop_is_self"/>
-          <!-- С организацией не дружат, а состоят в связи (владелец
-               12.10.2026); действие то же. -->
-          <button name="action_coop_befriend" type="object"
-                  string="Добавить в друзья"
-                  invisible="is_company or coop_is_self or coop_friend_state != 'none'"/>
-          <button name="action_coop_befriend" type="object"
-                  string="Добавить в связи"
-                  invisible="not is_company or coop_is_self or coop_friend_state != 'none'"/>
-          <button name="action_coop_befriend" type="object"
-                  string="Принять дружбу" class="btn-primary"
-                  invisible="is_company or coop_friend_state != 'pending_in'"/>
-          <button name="action_coop_befriend" type="object"
-                  string="Принять в связи" class="btn-primary"
-                  invisible="not is_company or coop_friend_state != 'pending_in'"/>
-          <button name="action_coop_follow" type="object" string="Подписаться"
-                  invisible="coop_is_self or coop_is_following"/>
-          <button name="action_coop_follow" type="object" string="Отписаться"
-                  invisible="coop_is_self or not coop_is_following"/>
-          <!--
-            Блокировка — последней и без выделения: это редкое
-            действие, и яркая кнопка рядом с «Написать» предлагала бы
-            его наравне с разговором.
-          -->
-          <field name="coop_is_blocked_by_me" invisible="1"/>
-          <button name="action_coop_block" type="object" string="Заблокировать"
-                  invisible="coop_is_self or coop_is_blocked_by_me"
-                  confirm="Заблокировать участника? Он не сможет вам писать. Извещения об этом он не получит."/>
-          <button name="action_coop_unblock" type="object" string="Разблокировать"
-                  invisible="coop_is_self or not coop_is_blocked_by_me"/>
-        </header>
         <sheet class="o_coop_profile_sheet">
           <!--
             Вкладка «Мои объявления» убрана словом владельца 14 сентября
@@ -119,8 +86,19 @@
                организации в сообщениях, если она принимает письма от всех.
                Появится общая сделка или она примет вас в связи — страница
                откроется.</p>
-            <button name="action_coop_message" type="object"
-                    string="Написать" class="btn-primary"/>
+            <!-- Текст выше обещает, что страница откроется, когда примут
+                 дружбу, — значит, предложить её надо отсюда же: строка
+                 имени с кнопками на закрытой странице скрыта. -->
+            <div class="o_coop_closed_actions">
+              <button name="action_coop_befriend" type="object"
+                      string="Добавить в друзья" class="btn btn-secondary"
+                      invisible="is_company or coop_is_self or coop_friend_state != 'none'"/>
+              <button name="action_coop_befriend" type="object"
+                      string="Добавить в связи" class="btn btn-secondary"
+                      invisible="not is_company or coop_is_self or coop_friend_state != 'none'"/>
+              <button name="action_coop_message" type="object"
+                      string="Написать" class="btn btn-primary"/>
+            </div>
           </div>
 
           <div class="o_coop_profile_layout" invisible="not coop_page_visible">
@@ -155,6 +133,51 @@
                     invisible="not is_company or coop_verification_level != 'identity'">
                 Компания подтверждена
               </span>
+              <!--
+                Кнопки — в строке имени, а не полосой над страницей
+                (эталон PersonPage, решение 459). Порядок эталона:
+                «Заблокировать» значком «ещё», подписка, дружба, «Написать».
+                Основная кнопка одна — «Написать»: «Принять дружбу» рядом
+                с ней тоже яркой предлагала бы два главных действия сразу.
+
+                Блокировка — значком и без выделения: это редкое действие,
+                и кнопка со словом рядом с «Написать» предлагала бы его
+                наравне с разговором. «Разблокировать» — словом: это
+                состояние, его надо видеть.
+              -->
+              <div class="o_coop_name_actions">
+                <field name="coop_is_blocked_by_me" invisible="1"/>
+                <button name="action_coop_block" type="object"
+                        icon="more_horiz" title="Заблокировать"
+                        aria-label="Заблокировать" class="btn btn-secondary"
+                        invisible="coop_is_self or coop_is_blocked_by_me"
+                        confirm="Заблокировать участника? Он не сможет вам писать. Извещения об этом он не получит."/>
+                <button name="action_coop_unblock" type="object" string="Разблокировать"
+                        class="btn btn-secondary"
+                        invisible="coop_is_self or not coop_is_blocked_by_me"/>
+                <button name="action_coop_follow" type="object" string="Подписаться"
+                        class="btn btn-secondary"
+                        invisible="coop_is_self or coop_is_following"/>
+                <button name="action_coop_follow" type="object" string="Отписаться"
+                        class="btn btn-secondary o_coop_btn_on"
+                        invisible="coop_is_self or not coop_is_following"/>
+                <!-- С организацией не дружат, а состоят в связи (владелец
+                     12.10.2026); действие то же. -->
+                <button name="action_coop_befriend" type="object"
+                        string="Добавить в друзья" class="btn btn-secondary"
+                        invisible="is_company or coop_is_self or coop_friend_state != 'none'"/>
+                <button name="action_coop_befriend" type="object"
+                        string="Добавить в связи" class="btn btn-secondary"
+                        invisible="not is_company or coop_is_self or coop_friend_state != 'none'"/>
+                <button name="action_coop_befriend" type="object"
+                        string="Принять дружбу" class="btn btn-secondary"
+                        invisible="is_company or coop_friend_state != 'pending_in'"/>
+                <button name="action_coop_befriend" type="object"
+                        string="Принять в связи" class="btn btn-secondary"
+                        invisible="not is_company or coop_friend_state != 'pending_in'"/>
+                <button name="action_coop_message" type="object" string="Написать"
+                        class="btn btn-primary" invisible="coop_is_self"/>
+              </div>
             </div>
 
             <!-- ── Левая колонка ─────────────────────────────────── -->

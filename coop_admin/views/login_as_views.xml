@@ -12,10 +12,10 @@
     <field name="model">res.partner</field>
     <field name="inherit_id" ref="coop_profile.view_coop_profile_form"/>
     <field name="arch" type="xml">
-      <xpath expr="//header" position="inside">
+      <xpath expr="//div[hasclass('o_coop_name_actions')]" position="inside">
         <field name="user_ids" invisible="1" groups="base.group_system"/>
         <button name="action_coop_login_as" type="object" string="Войти как"
-                groups="base.group_system"
+                groups="base.group_system" class="btn btn-secondary"
                 invisible="coop_is_self or not user_ids"/>
       </xpath>
     </field>

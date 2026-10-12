@@ -1054,6 +1054,14 @@
   max-width: 520px;
   padding: 24px 0;
 
+  .o_coop_closed_actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    .btn { margin: 0; }
+  }
+
   h2 {
     margin-bottom: 10px;
     font-size: 20px;
