@@ -39,7 +39,7 @@
                       t-att-class="{ 'o_coop_chip_on': this.isQuick(option.value) }"
                       t-att-aria-pressed="this.isQuick(option.value) ? 'true' : 'false'"
                       t-on-click="() => this.toggleQuick(option.value)">
-                <t t-out="option.label"/>
+                <t t-out="this.plainLabel(option.label)"/>
               </button>
             </div>
           </div>
@@ -48,7 +48,7 @@
             <label>
               <t t-out="block.label"/>
               <span class="o_coop_hint" t-if="block.hint" role="img"
-                    t-att-title="block.hint" t-att-aria-label="block.hint">ⓘ</span>
+                    t-att-title="block.hint" t-att-aria-label="block.hint">?</span>
             </label>
             <select class="o_coop_input"
                     t-on-change="(ev) => this.onChange(block.code, ev.target.value)">
@@ -66,7 +66,7 @@
             <label>
               <t t-out="block.label"/>
               <span class="o_coop_hint" t-if="block.hint" role="img"
-                    t-att-title="block.hint" t-att-aria-label="block.hint">ⓘ</span>
+                    t-att-title="block.hint" t-att-aria-label="block.hint">?</span>
             </label>
             <!-- Подсказка значений, если каталог их дал: город в макете —
                  свободный ввод со списком известных городов. -->
@@ -89,7 +89,7 @@
             <label>
               <t t-out="block.label"/>
               <span class="o_coop_hint" t-if="block.hint" role="img"
-                    t-att-title="block.hint" t-att-aria-label="block.hint">ⓘ</span>
+                    t-att-title="block.hint" t-att-aria-label="block.hint">?</span>
             </label>
             <input type="text" class="o_coop_input"
                    t-att-list="'coop-suggest-' + block.code"
@@ -115,7 +115,7 @@
             <label>
               <t t-out="block.label"/>
               <span class="o_coop_hint" t-if="block.hint" role="img"
-                    t-att-title="block.hint" t-att-aria-label="block.hint">ⓘ</span>
+                    t-att-title="block.hint" t-att-aria-label="block.hint">?</span>
             </label>
             <input type="text" class="o_coop_input"
                    t-att-list="'coop-suggest-' + block.code"
@@ -134,7 +134,7 @@
             <label>
               <t t-out="block.label"/>
               <span class="o_coop_hint" t-if="block.hint" role="img"
-                    t-att-title="block.hint" t-att-aria-label="block.hint">ⓘ</span>
+                    t-att-title="block.hint" t-att-aria-label="block.hint">?</span>
             </label>
             <div class="o_coop_multi">
               <label class="o_coop_multi_item" t-foreach="block.options"
@@ -152,7 +152,7 @@
             <label>
               <t t-out="block.label"/>
               <span class="o_coop_hint" t-if="block.hint" role="img"
-                    t-att-title="block.hint" t-att-aria-label="block.hint">ⓘ</span>
+                    t-att-title="block.hint" t-att-aria-label="block.hint">?</span>
             </label>
             <div class="o_coop_range">
               <input type="date" class="o_coop_input" aria-label="с"
@@ -168,7 +168,7 @@
             <label>
               <t t-out="block.label"/><t t-if="block.unit">, <t t-out="block.unit"/></t>
               <span class="o_coop_hint" t-if="block.hint" role="img"
-                    t-att-title="block.hint" t-att-aria-label="block.hint">ⓘ</span>
+                    t-att-title="block.hint" t-att-aria-label="block.hint">?</span>
             </label>
             <div class="o_coop_range">
               <input type="number" class="o_coop_input" placeholder="от"
@@ -215,7 +215,10 @@
         </button>
 
         <button type="button" class="o_coop_btn o_coop_btn_light"
-                t-on-click="() => this.saveSearch()">🔔 Сохранить поиск</button>
+                t-on-click="() => this.saveSearch()">
+          <CoopIcon name="'bell'" size="14"/>
+          Сохранить поиск
+        </button>
 
         <button type="button" class="o_coop_btn o_coop_btn_light"
                 t-on-click="() => this.toggleSaved()">

@@ -4,6 +4,7 @@ import { NotificationPlugin } from "@web/core/notifications/notification_plugin"
 import { useService } from "@web/core/utils/hooks";
 import { coopSort, coopSortOptionsFor, setCoopSort } from "@coop_theme/js/catalog_sort";
 import { Component, onWillStart, proxy, t, usePlugin, useProps } from "@odoo/owl";
+import { CoopIcon } from "@coop_theme/js/icons";
 
 /**
  * Панель фильтров каталога — та же, что в макете.
@@ -30,6 +31,7 @@ export const coopFiltersUi = proxy({ open: false });
 
 export class CoopFilters extends Component {
     static template = "coop_theme.CatalogFilters";
+    static components = { CoopIcon };
     props = useProps({
         resModel: t.string(),
         // Домен самого раздела: «Организую», «Мои закупки», «Опубликованные».
@@ -324,6 +326,15 @@ export class CoopFilters extends Component {
         } catch {
             this.state.preview = null;
         }
+    }
+
+    /** Подпись быстрого фильтра без эмодзи (эталон `FilterPanel`):
+     *  подписи задают модели разделов, и у многих впереди картинка —
+     *  «🔥 Срочно». Рядом с чипами без неё ряд читался пёстрым. */
+    plainLabel(label) {
+        return String(label || "")
+            .replace(/[\p{Extended_Pictographic}\u{FE0F}\u{200D}]/gu, "")
+            .trim();
     }
 
     isQuick(value) {
