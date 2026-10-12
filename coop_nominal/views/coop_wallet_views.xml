@@ -12,7 +12,7 @@
     <field name="inherit_id" ref="coop_wallet.view_coop_wallet_form"/>
     <field name="arch" type="xml">
       <button name="action_fiat_withdraw" position="after">
-        <button name="action_nominal_statement" type="object"
+        <button name="action_nominal_statement" type="object" class="btn-secondary"
                 string="Выписка за период" invisible="tab != 'fiat'"/>
       </button>
       <xpath expr="//div[hasclass('o_coop_wallet_intro')][following-sibling::div//field[@name='fiat_balance']]"

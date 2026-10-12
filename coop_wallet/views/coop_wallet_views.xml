@@ -18,19 +18,29 @@
     <field name="model">coop.wallet</field>
     <field name="arch" type="xml">
       <form string="Кошелёк" class="o_coop_wallet" create="false">
-        <header>
-          <button name="action_crypto_send" type="object" string="Отправить"
-                  class="btn-primary" invisible="tab != 'crypto'"/>
-          <button name="action_crypto_receive" type="object" string="Получить"
-                  invisible="tab != 'crypto'"/>
-          <button name="action_fiat_topup" type="object" string="Пополнить"
-                  class="btn-primary" invisible="tab != 'fiat'"/>
-          <button name="action_fiat_withdraw" type="object" string="Вывести"
-                  invisible="tab != 'fiat'"/>
-        </header>
         <sheet>
-          <div class="oe_title">
-            <h1><field name="display_name" readonly="1"/></h1>
+          <!-- Заголовок экрана по эталону (`PageHeader` в `WalletPage`):
+               раздел мелко, «Мой кошелёк» крупно, кнопки вкладки справа,
+               основная — последней. Полоса кнопок движка (`<header>`)
+               стояла над заголовком и читалась как «этапы» записи, а не
+               как действия с кошельком. Имя владельца в заголовке не
+               нужно: кошелёк всегда того, от чьего имени действуете, а это
+               видно по аватару. -->
+          <div class="o_coop_wallet_head">
+            <div class="o_coop_wallet_head_text">
+              <div class="o_coop_wallet_head_crumbs">Кошелёк</div>
+              <h1 class="o_coop_wallet_head_title">Мой кошелёк</h1>
+            </div>
+            <div class="o_coop_wallet_head_actions">
+              <button name="action_crypto_receive" type="object" string="Получить"
+                      class="btn-secondary" invisible="tab != 'crypto'"/>
+              <button name="action_crypto_send" type="object" string="Отправить"
+                      class="btn-primary" invisible="tab != 'crypto'"/>
+              <button name="action_fiat_withdraw" type="object" string="Вывести"
+                      class="btn-secondary" invisible="tab != 'fiat'"/>
+              <button name="action_fiat_topup" type="object" string="Пополнить"
+                      class="btn-primary" invisible="tab != 'fiat'"/>
+            </div>
           </div>
           <field name="tab" widget="coop_tabs" nolabel="1"/>
 

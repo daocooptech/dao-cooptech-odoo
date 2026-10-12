@@ -133,3 +133,42 @@
     flex-wrap: nowrap;
   }
 }
+
+// Заголовок экрана — по эталону `PageHeader` (дизайн-система, `WalletPage`):
+// «Кошелёк» мелко, «Мой кошелёк» крупно стилем `page-title`, кнопки
+// вкладки справа по нижнему краю заголовка. На узком экране кнопки
+// переносятся под заголовок, а не сжимают его.
+.o_coop_wallet .o_coop_wallet_head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.o_coop_wallet .o_coop_wallet_head_text {
+  min-width: 0;
+}
+
+.o_coop_wallet .o_coop_wallet_head_crumbs {
+  margin-bottom: 6px;
+  font: 500 12.5px/1.4 'Manrope', sans-serif;
+  color: var(--coop-slate);
+}
+
+.o_coop_wallet .o_coop_wallet_head_title {
+  margin: 0;
+  font: 700 24px/1.25 'Manrope', sans-serif;
+  color: var(--coop-ink);
+}
+
+.o_coop_wallet .o_coop_wallet_head_actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  .btn {
+    margin: 0;
+  }
+}
