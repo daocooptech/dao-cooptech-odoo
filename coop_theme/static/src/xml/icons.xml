@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <!-- Контур Tabler: сетка 24, линия 1.75, цвет — у текста (решение 459). -->
+  <t t-name="coop_theme.Icon">
+    <svg class="o_coop_icon" t-att-width="this.size" t-att-height="this.size"
+         viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         t-att-stroke-width="this.props.stroke || 1.75"
+         stroke-linecap="round" stroke-linejoin="round"
+         t-att-role="this.props.title ? 'img' : undefined"
+         t-att-aria-label="this.props.title || undefined"
+         t-att-aria-hidden="this.props.title ? undefined : 'true'">
+      <path t-foreach="this.paths" t-as="d" t-key="d_index" t-att-d="d"/>
+    </svg>
+  </t>
+</templates>

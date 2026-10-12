@@ -80,6 +80,8 @@
             'coop_theme/static/src/js/form_save.js',
             'coop_theme/static/src/xml/form_save.xml',
             'coop_theme/static/src/js/catalog_view.js',
+            'coop_theme/static/src/js/icons.js',
+            'coop_theme/static/src/xml/icons.xml',
             'coop_theme/static/src/js/shell.js',
             'coop_theme/static/src/js/bell.js',
             'coop_theme/static/src/js/tier_review_gate.js',

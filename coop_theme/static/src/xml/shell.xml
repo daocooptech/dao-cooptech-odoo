@@ -53,25 +53,38 @@
   <t t-name="coop_theme.Sidebar">
     <div class="o_coop_sidebar_wrap">
       <div class="o_coop_scrim" t-if="this.ui.open" t-on-click="() => this.toggle()"/>
-      <aside class="o_coop_sidebar" t-att-class="{ 'o_coop_sidebar_open': this.ui.open }">
-      <nav aria-label="Разделы платформы">
+      <!--
+        Планка разделов — дизайн-система, решение 459 (`Rail`): тёмная
+        полоса значков; развёрнутая — значок и название. Сворачивает её
+        кнопка слева в шапке, выбор хранится за участником. На узком
+        экране она же выезжает панелью по той же кнопке (`ui.open`).
+      -->
+      <aside class="o_coop_sidebar o_coop_rail"
+             t-att-class="{ 'o_coop_sidebar_open': this.ui.open, 'o_coop_rail_wide': this.ui.railWide }">
+      <nav class="o_coop_rail_main" aria-label="Разделы платформы">
         <a t-foreach="this.state.main" t-as="item" t-key="item.label"
            href="#" class="o_coop_nav_item"
            t-att-class="{ 'active': this.isActive(item) }"
+           t-att-title="this.ui.railWide ? undefined : item.label"
+           t-att-aria-current="this.isActive(item) ? 'page' : undefined"
            t-on-click.prevent="() => this.open(item)">
-          <i class="oi oi-fw" t-att-data-icon="item.icon" role="img" aria-hidden="true"/>
-          <span t-out="item.label"/>
+          <CoopIcon name="item.icon" size="18"/>
+          <span class="o_coop_nav_label" t-out="item.label"/>
         </a>
       </nav>
 
-      <!-- Рубрика расширений набрана моноширинным, как в макете: она не
-           пункт меню, а заголовок раздела меню, и читаться должна иначе. -->
+      <div class="o_coop_rail_sep" aria-hidden="true"/>
+      <!-- Рубрика расширений — у развёрнутой планки; у свёрнутой её место
+           занимает черта, а «+» стоит под расширениями. -->
       <div class="o_coop_ext_title">
         Расширения
         <button type="button" class="o_coop_ext_add" title="Добавить расширение"
-                t-on-click="() => this.openCatalog()">+</button>
+                aria-label="Добавить расширение"
+                t-on-click="() => this.openCatalog()">
+          <CoopIcon name="'plus'" size="14"/>
+        </button>
       </div>
-      <nav aria-label="Расширения">
+      <nav class="o_coop_rail_ext" aria-label="Расширения">
         <!-- Раздел без действия ещё не перенесён на движок. Пункт
              оставлен намеренно, но выглядеть он должен иначе: без
              пометки меню читается как наполовину сломанное, а не как
@@ -79,23 +92,36 @@
         <a t-foreach="this.state.extensions" t-as="item" t-key="item.label"
            href="#" class="o_coop_nav_item"
            t-att-class="{ 'active': this.isActive(item), 'o_coop_nav_soon': !item.actionId }"
-           t-att-title="item.actionId ? undefined : 'Раздел ещё не перенесён на движок'"
+           t-att-title="item.actionId ? (this.ui.railWide ? undefined : item.label) : 'Раздел ещё не перенесён на движок'"
+           t-att-aria-current="this.isActive(item) ? 'page' : undefined"
            t-on-click.prevent="() => this.open(item)">
-          <span t-out="item.label"/>
+          <CoopIcon name="item.icon" size="18"/>
+          <span class="o_coop_nav_label" t-out="item.label"/>
           <span class="o_coop_soon_mark" t-if="!item.actionId">скоро</span>
         </a>
       </nav>
+      <button type="button" class="o_coop_rail_add" title="Добавить расширение"
+              aria-label="Добавить расширение"
+              t-on-click="() => this.openCatalog()">
+        <CoopIcon name="'plus'" size="16"/>
+      </button>
 
+      <div class="o_coop_rail_gap"/>
       <!-- Порядок пунктов у каждого свой: кто-то живёт в ресурсах, кто-то
            в сделках. Разделы платформы при этом убрать нельзя — по ним
            люди договариваются, где что лежит. -->
         <button type="button" class="o_coop_nav_settings"
-                t-on-click="() => this.openSettings()">Настроить меню</button>
+                t-att-title="this.ui.railWide ? undefined : 'Настроить меню'"
+                t-on-click="() => this.openSettings()">
+          <CoopIcon name="'adjustments-horizontal'" size="18"/>
+          <span class="o_coop_nav_label">Настроить меню</span>
+        </button>
         <!-- Только на телефоне (shell.scss): на большом экране выход — в
              меню учётной записи в шапке. -->
         <button type="button" class="o_coop_nav_settings o_coop_nav_logout"
                 t-on-click="() => this.logout()">
-          <i class="oi oi-fw" data-icon="logout" role="img" aria-hidden="true"/> Выйти
+          <CoopIcon name="'logout'" size="18"/>
+          <span class="o_coop_nav_label">Выйти</span>
         </button>
       </aside>
 
@@ -114,7 +140,7 @@
            t-att-class="{ 'active': this.isActive(item) }"
            t-att-aria-current="this.isActive(item) ? 'page' : undefined"
            t-on-click.prevent="() => this.open(item)">
-          <i class="oi oi-fw" t-att-data-icon="item.icon" role="img" aria-hidden="true"/>
+          <CoopIcon name="item.icon" size="20"/>
           <span t-out="item.label"/>
         </a>
       </nav>
@@ -136,15 +162,15 @@
   -->
   <t t-name="coop_theme.NavBar" t-inherit="web.NavBar" t-inherit-mode="extension">
     <xpath expr="//div[hasclass('o_navbar_breadcrumbs')]" position="before">
-      <button type="button" class="o_coop_burger" aria-label="Меню разделов"
-              t-att-aria-expanded="this.coopShell.open ? 'true' : 'false'"
+      <!-- Слева в шапке: на большом экране сворачивает и разворачивает
+           планку разделов (дизайн-система, `TopMenu`), на узком — выдвигает
+           меню разделов. -->
+      <button type="button" class="o_coop_burger"
+              t-att-aria-label="this.coopBurgerLabel"
+              t-att-title="this.coopBurgerLabel"
+              t-att-aria-expanded="(this.coopShell.open || this.coopShell.railWide) ? 'true' : 'false'"
               t-on-click="() => this.coopToggleSidebar()">
-        <!-- Значок из дизайн-макета (`app.js`, `I.burger`). -->
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-             aria-hidden="true">
-          <path d="M4 7h16M4 12h16M4 17h16"/>
-        </svg>
+        <CoopIcon name="this.coopShell.railWide ? 'layout-sidebar-left-collapse' : 'layout-sidebar-left-expand'" size="18"/>
       </button>
       <a class="o_coop_logo" href="/odoo/my-page" title="На свою страницу">
         <img src="/coop_theme/static/src/img/cooptech-logo.png"

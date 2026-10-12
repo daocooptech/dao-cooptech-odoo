@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import json
+
 from odoo import api, models
 
 
@@ -34,7 +36,8 @@ class CoopShell(models.AbstractModel):
         """
         env = self.env
         Users = env['res.users']
-        data = {'acting': self.acting_options()}
+        data = {'acting': self.acting_options(),
+                'menu': env.user._coop_menu_state()}
 
         if 'coop.sidebar.item' in env:
             data['sidebar'] = env['coop.sidebar.item'].items_for_current_user()
@@ -109,3 +112,19 @@ class CoopShell(models.AbstractModel):
             partner_id = False
         user.action_coop_act_as(partner_id)
         return True
+
+    @api.model
+    def set_menu_state(self, rail_wide=None, sub_collapsed=None):
+        """Запомнить вид меню за участником (дизайн-система, решение 459).
+
+        Пишется под sudo: поле служебное, участнику его не видно, а права
+        писать в свою учётную запись у него нет.
+        """
+        user = self.env.user
+        state = user._coop_menu_state()
+        if rail_wide is not None:
+            state['rail_wide'] = bool(rail_wide)
+        if sub_collapsed is not None:
+            state['sub_collapsed'] = bool(sub_collapsed)
+        user.sudo().coop_menu_state = json.dumps(state)
+        return state

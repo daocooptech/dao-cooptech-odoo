@@ -255,8 +255,25 @@
 
 // Пункты расширений сдвинуты вправо, как в макете: по отступу видно, что
 // они принадлежат рубрике, а не идут наравне с основными разделами.
-.o_coop_ext_title + nav .o_coop_nav_item {
-  padding-left: 37px;
+// Значки у пунктов есть всегда (решение 459) — отступ под их отсутствие
+// у расширений больше не нужен.
+.o_coop_nav_item .o_coop_icon,
+.o_coop_nav_settings .o_coop_icon {
+  flex: none;
+}
+
+// Части планки, которых у выдвижного меню телефона нет: черта, «+» под
+// расширениями и распорка до «Настроить меню».
+.o_coop_rail_sep,
+.o_coop_rail_add,
+.o_coop_rail_gap {
+  display: none;
+}
+
+.o_coop_nav_settings {
+  display: flex;
+  align-items: center;
+  gap: 9px;
 }
 
 // ── Подвал ───────────────────────────────────────────────────────────────
@@ -1161,4 +1178,279 @@ body.o_dark_mode .o_coop_loader_mark {
 @keyframes o_coop_offline_pulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(217, 154, 30, .55); }
   50% { box-shadow: 0 0 0 6px rgba(217, 154, 30, 0); }
+}
+
+
+// ── Оболочка по дизайн-системе (решение 459) ────────────────────────────
+//
+// Эталон — `.claude/design-system` (`Shell`, `TopMenu`, `Rail`). Части
+// оболочки — приподнятые плашки на фоне `nav-bg` и не касаются ни краёв
+// окна, ни друг друга: шапка, тёмная планка разделов, лист рабочей
+// области. Прокручивается только лист.
+//
+// Только для большого экрана: узкий (до 900) остаётся прежним —
+// выдвижное меню и нижняя панель, его очередь — этап 7 переноса.
+@media (min-width: 901px) {
+  .o_web_client {
+    background: var(--coop-nav-bg);
+  }
+
+  .o_web_client > .o_navbar {
+    padding: var(--coop-shell-gap) var(--coop-shell-gap) 0;
+    background: var(--coop-nav-bg);
+  }
+
+  .o_web_client .o_main_navbar {
+    height: var(--coop-header-height);
+    border: 1px solid var(--coop-line);
+    border-radius: var(--coop-radius-panel);
+    background: var(--coop-nav-active);
+    box-shadow: var(--coop-shadow-card);
+  }
+
+  .o_coop_layout {
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: var(--coop-shell-gap);
+    padding: var(--coop-shell-gap);
+    overflow: hidden;
+  }
+
+  .o_coop_main {
+    max-width: none;
+    min-height: 0;
+    padding: 20px;
+    overflow-y: auto;
+    background: var(--coop-paper);
+    border: 1px solid var(--coop-line);
+    border-radius: var(--coop-radius-panel);
+  }
+
+  // Переписке и конструктору сайта высоту прежде считали от окна; теперь
+  // её задаёт сам лист.
+  .o_coop_main:has(.o-mail-Discuss),
+  .o_coop_main:has(.o_website_preview) {
+    height: auto;
+  }
+
+  // ── Планка разделов ──
+  // Высота — от раскладки, а не по содержимому: прежнее правило меню
+  // прижимало его к верху (`align-self: flex-start`), и планка с тремя
+  // десятками значков вылезала ниже окна.
+  .o_coop_rail {
+    flex: 0 0 auto;
+    position: static;
+    align-self: stretch;
+    min-height: 0;
+    width: var(--coop-rail-width);
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 0;
+    border: 0;
+    border-radius: var(--coop-radius-panel);
+    background: var(--coop-rail-bg);
+    overflow: hidden;
+
+    nav {
+      align-items: center;
+      gap: 2px;
+    }
+  }
+
+  .o_coop_rail_main {
+    flex: none;
+  }
+
+  .o_coop_rail_ext {
+    flex: 0 1 auto;
+    min-height: 36px;
+    overflow-y: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .o_coop_rail_sep {
+    display: block;
+    flex: none;
+    width: 24px;
+    height: 1px;
+    margin: 6px 0;
+    background: var(--coop-rail-fg);
+    opacity: .28;
+  }
+
+  .o_coop_rail_gap {
+    display: block;
+    flex: 1 1 auto;
+  }
+
+  .o_web_client a.o_coop_nav_item,
+  .o_coop_rail .o_coop_nav_item,
+  .o_coop_rail .o_coop_nav_settings {
+    flex: none;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    margin: 0;
+    padding: 0;
+    border-radius: var(--coop-radius-item);
+    background: none;
+    color: var(--coop-rail-fg);
+
+    &:hover,
+    &:hover:not(.btn) {
+      background: var(--coop-rail-active);
+      color: var(--coop-rail-fg);
+    }
+
+    &.active,
+    &.active:not(.btn) {
+      background: var(--coop-rail-active);
+      color: var(--coop-rail-accent);
+    }
+
+    &:focus-visible {
+      outline-color: var(--coop-rail-accent);
+    }
+  }
+
+  .o_coop_rail .o_coop_nav_soon {
+    opacity: .45;
+  }
+
+  // «Выйти» — только в выдвижном меню телефона; на большом экране выход
+  // в меню учётной записи.
+  .o_coop_rail .o_coop_nav_logout {
+    display: none;
+  }
+
+  .o_coop_rail .o_coop_nav_label,
+  .o_coop_rail .o_coop_soon_mark,
+  .o_coop_rail .o_coop_ext_title {
+    display: none;
+  }
+
+  .o_coop_rail_add {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    margin: 4px 0;
+    padding: 0;
+    border: 1px dashed var(--coop-rail-fg);
+    border-radius: var(--coop-radius-item);
+    background: none;
+    color: var(--coop-rail-fg);
+    opacity: .75;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 1;
+      color: var(--coop-rail-accent);
+      border-color: var(--coop-rail-accent);
+    }
+  }
+
+  // ── Развёрнутая планка: значок и название ──
+  .o_coop_rail.o_coop_rail_wide {
+    align-items: stretch;
+    width: var(--coop-rail-width-wide);
+    padding-left: 8px;
+    padding-right: 8px;
+
+    nav {
+      align-items: stretch;
+    }
+
+    .o_coop_nav_item,
+    .o_coop_nav_settings {
+      justify-content: flex-start;
+      gap: 10px;
+      width: auto;
+      padding: 0 10px;
+      text-align: left;
+    }
+
+    .o_coop_nav_label {
+      display: block;
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font: 500 13px/1.3 'Manrope', sans-serif;
+      color: var(--coop-rail-text);
+    }
+
+    .o_coop_nav_item.active .o_coop_nav_label {
+      font-weight: 600;
+    }
+
+    .o_coop_soon_mark {
+      display: inline-block;
+      flex: none;
+      padding: 1px 6px;
+      border-radius: var(--coop-radius-pill);
+      background: var(--coop-rail-active);
+      color: var(--coop-rail-fg);
+      font: 600 9.5px/1.5 'Manrope', sans-serif;
+      letter-spacing: .02em;
+    }
+
+    .o_coop_rail_sep,
+    .o_coop_rail_add {
+      display: none;
+    }
+
+    .o_coop_ext_title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 6px 0 0;
+      padding: 10px 4px 6px 10px;
+      border-top: 1px solid var(--coop-rail-active);
+      border-bottom: 0;
+      font: 700 11px/1 'JetBrains Mono', ui-monospace, monospace;
+      letter-spacing: .09em;
+      color: var(--coop-rail-fg);
+    }
+
+    .o_coop_ext_add {
+      width: 24px;
+      height: 24px;
+      border: 1px dashed var(--coop-rail-fg);
+      background: none;
+      color: var(--coop-rail-fg);
+
+      &:hover {
+        color: var(--coop-rail-accent);
+        border-color: var(--coop-rail-accent);
+      }
+    }
+  }
+
+  // Кнопка разделов в шапке — клетка 36×36, как остальные значки шапки.
+  .o_coop_burger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    margin-left: 6px;
+    border-radius: var(--coop-radius-item);
+    color: var(--coop-slate);
+
+    &:hover {
+      background: var(--coop-surface);
+      color: var(--coop-ink);
+    }
+  }
 }

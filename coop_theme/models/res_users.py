@@ -25,6 +25,27 @@ class ResUsers(models.Model):
         help='Служебное: какие расширения из списка по умолчанию участнику '
              'уже показывали. Убранное им расширение не возвращается.')
 
+    # Дизайн-система (решение 459): оба меню — разделов и подразделов —
+    # сворачиваются до значков, и выбор «запоминается за участником и
+    # действует во всех разделах». За участником, а не за браузером: сел
+    # за другой компьютер — меню такое же.
+    coop_menu_state = fields.Char(
+        string='Вид меню', copy=False,
+        help='Служебное: развёрнута ли планка разделов и свёрнуто ли меню '
+             'подразделов.')
+
+    def _coop_menu_state(self):
+        self.ensure_one()
+        try:
+            state = json.loads(self.sudo().coop_menu_state or '{}')
+        except ValueError:
+            state = {}
+        if not isinstance(state, dict):
+            state = {}
+        # По умолчанию разделы свёрнуты, подразделы развёрнуты.
+        return {'rail_wide': bool(state.get('rail_wide')),
+                'sub_collapsed': bool(state.get('sub_collapsed'))}
+
     def _coop_sidebar_defaults(self):
         self.ensure_one()
         try:

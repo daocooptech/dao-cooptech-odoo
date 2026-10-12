@@ -13,6 +13,8 @@ import { router, routerBus } from "@web/core/browser/router";
 import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 import { WebClient } from "@web/webclient/webclient";
 import { NavBar } from "@web/webclient/navbar/navbar";
+import { CoopIcon } from "@coop_theme/js/icons";
+import { render } from "@web/owl2/utils";
 
 /**
  * Боковое меню и подвал — как в прототипе.
@@ -226,7 +228,28 @@ export class CoopTabs extends Component {
  * обе стороны видят одно и то же: нажатие открывает панель, а панель
  * возвращает кнопке правильный `aria-expanded`.
  */
-export const coopShellUi = proxy({ open: false });
+export const coopShellUi = proxy({ open: false, railWide: false, subCollapsed: false });
+
+/**
+ * Запомнить вид меню за участником (дизайн-система, решение 459): выбор
+ * действует во всех разделах и на других устройствах. Не дождались ответа
+ * — не беда: на экране вид уже сменился, сервер догонит.
+ */
+/**
+ * Сообщить оболочке, что вид меню сменился.
+ *
+ * Общий объект `coopShellUi` компоненты при отрисовке читают, но на его
+ * изменение не перерисовываются — проверено на стенде 12.10.2026: значение
+ * менялось, класс планки нет. Под это попадало и выдвижное меню телефона
+ * (`open`). Поэтому меню и шапка слушают событие и перерисовываются сами.
+ */
+export function coopShellChanged(env) {
+    env.bus.trigger("COOP_SHELL_UI");
+}
+
+export function coopSaveMenuState(orm, values) {
+    orm.call("coop.shell", "set_menu_state", [], values).catch(() => {});
+}
 
 /**
  * Разделы нижней панели на телефоне — те же пять, что в макете
@@ -240,6 +263,7 @@ const TABBAR_LABELS = ["Моя страница", "Сообщения", "Рес�
 
 export class CoopSidebar extends Component {
     static template = "coop_theme.Sidebar";
+    static components = { CoopIcon };
     props = useProps();
 
     setup() {
@@ -248,6 +272,7 @@ export class CoopSidebar extends Component {
         this.boot = useService("coopBoot");
         // Открытие панели общее с кнопкой в шапке — см. `coopShellUi`.
         this.ui = proxy(coopShellUi);
+        useBus(this.env.bus, "COOP_SHELL_UI", () => render(this));
         this.state = proxy({
             main: [], extensions: [], admin: [], current: null, model: null,
             acting: null, actors: [],
@@ -334,7 +359,13 @@ export class CoopSidebar extends Component {
             // Из общего запуска, а не своим вызовом: меню,
             // колокольчик и переключатели спрашивали сервер
             // порознь и занимали соединения впереди раздела.
-            items = (await this.boot.get()).sidebar || [];
+            const boot = await this.boot.get();
+            items = boot.sidebar || [];
+            if (boot.menu) {
+                this.ui.railWide = Boolean(boot.menu.rail_wide);
+                this.ui.subCollapsed = Boolean(boot.menu.sub_collapsed);
+                coopShellChanged(this.env);
+            }
         } catch {
             // Меню не загрузилось — оболочка всё равно должна открыться:
             // пустая полоса слева хуже, чем недоступная платформа целиком.
@@ -615,6 +646,7 @@ export class CoopSidebar extends Component {
     /** Бургер узкого экрана: 216 пикселей из 360 — это меню вместо страницы. */
     toggle() {
         this.ui.open = !this.ui.open;
+        coopShellChanged(this.env);
     }
 
     /**
@@ -636,7 +668,10 @@ export class CoopSidebar extends Component {
     open(item) {
         // Выбрали раздел — панель на узком экране закрывается сама: она
         // перекрывает страницу, ради которой её и открывали.
-        this.ui.open = false;
+        if (this.ui.open) {
+            this.ui.open = false;
+            coopShellChanged(this.env);
+        }
         // Переход по боковому меню начинает новый путь, а не продолжает
         // старый: раздел — это верхний уровень, и «Люди» внутри «Сделок»
         // в хлебных крошках означали бы вложенность, которой нет.
@@ -727,16 +762,41 @@ export const coopBootUi = proxy({ loading: true });
  * находится; низ экрана теперь занимает панель пяти разделов, и место
  * под неё зарезервировано было давно — 84 точки в `.o_coop_main`.
  */
+patch(NavBar, {
+    components: { ...NavBar.components, CoopIcon },
+});
+
 patch(NavBar.prototype, {
     setup() {
         super.setup();
         this.coopShell = proxy(coopShellUi);
+        this.coopOrm = useService("orm");
+        useBus(this.env.bus, "COOP_SHELL_UI", () => this.render());
+    },
+
+    /** Узкий экран — меню выезжает панелью; большой — планка
+     *  сворачивается до значков и разворачивается (решение 459). */
+    get coopNarrow() {
+        return browser.innerWidth <= 900;
+    },
+
+    get coopBurgerLabel() {
+        if (this.coopNarrow) {
+            return "Меню разделов";
+        }
+        return this.coopShell.railWide ? "Свернуть разделы" : "Развернуть разделы";
     },
 
     /** Методом, а не присваиванием прямо в шаблоне: присваивание в
      *  выражении шаблона молча ничего не делает. */
     coopToggleSidebar() {
-        this.coopShell.open = !this.coopShell.open;
+        if (this.coopNarrow) {
+            this.coopShell.open = !this.coopShell.open;
+        } else {
+            this.coopShell.railWide = !this.coopShell.railWide;
+            coopSaveMenuState(this.coopOrm, { rail_wide: this.coopShell.railWide });
+        }
+        coopShellChanged(this.env);
     },
 });
 
@@ -797,9 +857,13 @@ patch(WebClient.prototype, {
             // Сброс — следующим кадром: в момент события разметка новой
             // страницы ещё не на месте, и слой короче, чем станет.
             browser.requestAnimationFrame(() => {
-                const layout = document.querySelector(".o_coop_layout");
-                if (layout) {
-                    layout.scrollTop = 0;
+                // На большом экране прокручивается лист (решение 459),
+                // на узком — весь слой; сбрасываем оба.
+                for (const selector of [".o_coop_layout", ".o_coop_main"]) {
+                    const node = document.querySelector(selector);
+                    if (node) {
+                        node.scrollTop = 0;
+                    }
                 }
             });
         });
