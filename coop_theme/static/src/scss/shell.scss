@@ -1816,3 +1816,75 @@ body.o_dark_mode .o_coop_loader_mark {
     display: none;
   }
 }
+
+// ── Значки переключателя вида — контуры Tabler (дизайн-система, `ViewSwitch`) ──
+//
+// Владелец 12.10.2026: «не вижу иконок вида каталогов». Значки вида движок
+// рисует шрифтами (Material Symbols и свой `odoo_ui_icons`) по `data-icon`;
+// шрифты урезаны до набора самого движка, и глиф, которого в наборе нет,
+// выходит пустым местом. Глиф подменяется маской с контуром — от шрифтов
+// значок больше не зависит. Шаблоны движка не тронуты.
+.o_switch_view i.oi[data-icon] {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+
+  &::before {
+    content: "";
+    width: 18px;
+    height: 18px;
+    background: currentColor;
+    -webkit-mask: var(--coop-view-icon) center / 18px 18px no-repeat;
+    mask: var(--coop-view-icon) center / 18px 18px no-repeat;
+  }
+}
+
+// Значок без своего контура в списке ниже остаётся шрифтовым.
+.o_switch_view i.oi[data-icon]:not([data-icon="oi_view-kanban"]):not([data-icon="format_align_justify"]):not([data-icon="location_on"]):not([data-icon="table_chart"]):not([data-icon="reorder"]):not([data-icon="calendar_today"]):not([data-icon="schedule"])::before {
+  content: attr(data-icon);
+  width: auto;
+  height: auto;
+  background: none;
+  -webkit-mask: none;
+  mask: none;
+}
+
+.o_switch_view i.oi[data-icon="oi_view-kanban"] {
+  // `layout-kanban`
+  --coop-view-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 4l6 0'/%3E%3Cpath d='M14 4l6 0'/%3E%3Cpath d='M4 8m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z'/%3E%3Cpath d='M14 8m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z'/%3E%3C/svg%3E");
+}
+
+.o_switch_view i.oi[data-icon="format_align_justify"] {
+  // `layout-list`
+  --coop-view-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z'/%3E%3Cpath d='M4 14m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z'/%3E%3C/svg%3E");
+}
+
+.o_switch_view i.oi[data-icon="location_on"] {
+  // `map-pin`
+  --coop-view-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0'/%3E%3Cpath d='M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z'/%3E%3C/svg%3E");
+}
+
+.o_switch_view i.oi[data-icon="table_chart"] {
+  // `table`
+  --coop-view-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z'/%3E%3Cpath d='M3 10h18'/%3E%3Cpath d='M10 3v18'/%3E%3C/svg%3E");
+}
+
+.o_switch_view i.oi[data-icon="reorder"] {
+  // `list`
+  --coop-view-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 6l11 0'/%3E%3Cpath d='M9 12l11 0'/%3E%3Cpath d='M9 18l11 0'/%3E%3Cpath d='M5 6l0 .01'/%3E%3Cpath d='M5 12l0 .01'/%3E%3Cpath d='M5 18l0 .01'/%3E%3C/svg%3E");
+}
+
+.o_switch_view i.oi[data-icon="calendar_today"] {
+  // `calendar`
+  --coop-view-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z'/%3E%3Cpath d='M16 3v4'/%3E%3Cpath d='M8 3v4'/%3E%3Cpath d='M4 11h16'/%3E%3Cpath d='M11 15h1'/%3E%3Cpath d='M12 15v3'/%3E%3C/svg%3E");
+}
+
+.o_switch_view i.oi[data-icon="schedule"] {
+  // `clock`
+  --coop-view-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0'/%3E%3Cpath d='M12 7v5l3 3'/%3E%3C/svg%3E");
+}
+
+// «Плиткой» каталога — `layout-grid`; штатный «Канбан» остаётся `layout-kanban`.
+.o_switch_view.o_coop_tiles i.oi[data-icon="oi_view-kanban"] {
+  --coop-view-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z'/%3E%3Cpath d='M14 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z'/%3E%3Cpath d='M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z'/%3E%3Cpath d='M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z'/%3E%3C/svg%3E");
+}
