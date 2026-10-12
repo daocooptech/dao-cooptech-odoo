@@ -266,7 +266,9 @@
 // расширениями и распорка до «Настроить меню».
 .o_coop_rail_sep,
 .o_coop_rail_add,
-.o_coop_rail_gap {
+.o_coop_rail_gap,
+.o_coop_rail_head,
+.o_coop_rail_fly {
   display: none;
 }
 
@@ -1260,8 +1262,96 @@ body.o_dark_mode .o_coop_loader_mark {
     }
   }
 
+  // Стрелка сворачивания — как у меню подразделов, в цветах планки.
+  .o_coop_rail_head {
+    display: flex;
+    flex: none;
+    justify-content: center;
+    margin-bottom: 4px;
+  }
+
+  .o_coop_rail_toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--coop-radius-item);
+    background: none;
+    color: var(--coop-rail-fg);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--coop-rail-active);
+      color: var(--coop-rail-accent);
+    }
+
+    &:focus-visible {
+      outline-color: var(--coop-rail-accent);
+    }
+  }
+
   .o_coop_rail_main {
     flex: none;
+  }
+
+  // ── Выезд у свёрнутой планки: имя раздела и подразделы ──
+  // Левое поле — мостик: курсор идёт от значка к плашке, не покидая
+  // планки, и плашка не гаснет на полпути.
+  .o_coop_rail_fly {
+    display: block;
+    position: fixed;
+    z-index: 30;
+    padding-left: 10px;
+  }
+
+  .o_coop_rail_flybox {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 200px;
+    max-width: 280px;
+    padding: 8px;
+    border: 1px solid var(--coop-line);
+    border-radius: var(--coop-radius-card);
+    background: var(--coop-white);
+    box-shadow: var(--coop-shadow-popover);
+
+    .o_coop_subnav_item:hover {
+      background: var(--coop-surface);
+    }
+
+    .o_coop_subnav_item.active {
+      background: var(--coop-teal-tint);
+      border-color: transparent;
+      box-shadow: none;
+    }
+  }
+
+  .o_coop_rail_flytitle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 4px 10px 6px;
+    font: 700 13px/1.35 'Manrope', sans-serif;
+    color: var(--coop-ink);
+    white-space: nowrap;
+
+    &:last-child {
+      padding-bottom: 4px;
+    }
+  }
+
+  .o_coop_rail_flysoon {
+    padding: 1px 6px;
+    border-radius: var(--coop-radius-pill);
+    background: var(--coop-surface);
+    color: var(--coop-slate);
+    font: 600 9.5px/1.5 'Manrope', sans-serif;
   }
 
   .o_coop_rail_ext {
@@ -1368,6 +1458,10 @@ body.o_dark_mode .o_coop_loader_mark {
 
     nav {
       align-items: stretch;
+    }
+
+    .o_coop_rail_head {
+      justify-content: flex-end;
     }
 
     .o_coop_nav_item,

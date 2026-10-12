@@ -400,6 +400,7 @@ export class CoopSidebar extends Component {
     setup() {
         this.action = usePlugin(ActionPlugin);
         this.orm = useService("orm");
+        this.menus = useService("menu");
         this.boot = useService("coopBoot");
         // Открытие панели общее с кнопкой в шапке — см. `coopShellUi`.
         this.ui = proxy(coopShellUi);
@@ -409,6 +410,7 @@ export class CoopSidebar extends Component {
             acting: null, actors: [],
             route: router.current?.action ?? null,
             soonLabel: null,
+            fly: null,
         });
 
         onWillStart(async () => {
@@ -774,6 +776,83 @@ export class CoopSidebar extends Component {
         browser.location.href = "/web/session/logout";
     }
 
+    /** Стрелка на планке: значки или значки с названиями (решение 459),
+     *  выбор за участником — как у меню подразделов. */
+    toggleRail() {
+        this.ui.railWide = !this.ui.railWide;
+        this.state.fly = null;
+        coopSaveMenuState(this.orm, { rail_wide: this.ui.railWide });
+        coopShellChanged(this.env);
+    }
+
+    /**
+     * Подразделы раздела — те же пункты меню модуля, что в меню
+     * подразделов (`CoopSubnav.refresh`): один подраздел — это сам раздел,
+     * у «Сообщений» подразделов нет.
+     */
+    subsFor(item) {
+        if (!item.actionId) {
+            return [];
+        }
+        const own = this.menus.getAll().find((menu) => menu.actionID === item.actionId);
+        const app = own ? this.menus.getMenu(own.appID) : null;
+        if (!app || NO_SUBNAV_APPS.includes(app.xmlid)) {
+            return [];
+        }
+        const children = this.menus.getMenuAsTree(app.id).childrenTree || [];
+        return children.length > 1 ? children : [];
+    }
+
+    /**
+     * Выезд у свёрнутой планки (дизайн-система, `Rail`): по наведению и по
+     * фокусу рядом со значком — имя раздела и его подразделы. У
+     * развёрнутой планки названия и так видны, на узком экране планка —
+     * выдвижная панель с подписями.
+     */
+    showFly(item, ev) {
+        if (this.ui.railWide || browser.innerWidth <= 900) {
+            return;
+        }
+        const rect = ev.currentTarget.getBoundingClientRect();
+        const children = this.subsFor(item);
+        const openId = this.action?.currentController?.action?.id;
+        const current = this.isActive(item)
+            ? (children.find((sub) => sub.actionID === openId) || {}).id : null;
+        // У нижних значков плашка поднимается, чтобы не уйти за край окна:
+        // заголовок ~44 точки, пункт — 38.
+        const height = 44 + 38 * children.length;
+        this.state.fly = {
+            key: item.label,
+            label: item.label,
+            soon: !item.actionId,
+            top: Math.round(Math.max(8, Math.min(rect.top, browser.innerHeight - height - 8))),
+            left: Math.round(rect.right),
+            children,
+            current: current || null,
+        };
+    }
+
+    hideFly() {
+        if (this.state.fly) {
+            this.state.fly = null;
+        }
+    }
+
+    onRailKey(ev) {
+        if (ev.key === "Escape") {
+            this.hideFly();
+        }
+    }
+
+    subIcon(name) {
+        return subnavIcon(name);
+    }
+
+    openSub(sub) {
+        this.state.fly = null;
+        this.menus.selectMenu(sub);
+    }
+
     /** Бургер узкого экрана: 216 пикселей из 360 — это меню вместо страницы. */
     toggle() {
         this.ui.open = !this.ui.open;
@@ -797,6 +876,7 @@ export class CoopSidebar extends Component {
     }
 
     open(item) {
+        this.hideFly();
         // Выбрали раздел — панель на узком экране закрывается сама: она
         // перекрывает страницу, ради которой её и открывали.
         if (this.ui.open) {

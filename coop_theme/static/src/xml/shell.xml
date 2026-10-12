@@ -61,13 +61,28 @@
         экране она же выезжает панелью по той же кнопке (`ui.open`).
       -->
       <aside class="o_coop_sidebar o_coop_rail"
-             t-att-class="{ 'o_coop_sidebar_open': this.ui.open, 'o_coop_rail_wide': this.ui.railWide }">
+             t-att-class="{ 'o_coop_sidebar_open': this.ui.open, 'o_coop_rail_wide': this.ui.railWide }"
+             t-on-mouseleave="() => this.hideFly()"
+             t-on-keydown="(ev) => this.onRailKey(ev)">
+      <!-- Стрелка сворачивания — на самой планке, как у меню подразделов
+           (владелец 12.10.2026). Только на большом экране (shell.scss). -->
+      <div class="o_coop_rail_head">
+        <button type="button" class="o_coop_rail_toggle"
+                t-att-title="this.ui.railWide ? 'Свернуть разделы' : 'Развернуть разделы'"
+                t-att-aria-label="this.ui.railWide ? 'Свернуть разделы' : 'Развернуть разделы'"
+                t-att-aria-expanded="this.ui.railWide ? 'true' : 'false'"
+                t-on-click="() => this.toggleRail()">
+          <CoopIcon name="this.ui.railWide ? 'chevrons-left' : 'chevrons-right'" size="16"/>
+        </button>
+      </div>
       <nav class="o_coop_rail_main" aria-label="Разделы платформы">
         <a t-foreach="this.state.main" t-as="item" t-key="item.label"
            href="#" class="o_coop_nav_item"
            t-att-class="{ 'active': this.isActive(item) }"
-           t-att-title="this.ui.railWide ? undefined : item.label"
+           t-att-aria-label="item.label"
            t-att-aria-current="this.isActive(item) ? 'page' : undefined"
+           t-on-mouseenter="(ev) => this.showFly(item, ev)"
+           t-on-focus="(ev) => this.showFly(item, ev)"
            t-on-click.prevent="() => this.open(item)">
           <CoopIcon name="item.icon" size="18"/>
           <span class="o_coop_nav_label" t-out="item.label"/>
@@ -93,8 +108,11 @@
         <a t-foreach="this.state.extensions" t-as="item" t-key="item.label"
            href="#" class="o_coop_nav_item"
            t-att-class="{ 'active': this.isActive(item), 'o_coop_nav_soon': !item.actionId }"
-           t-att-title="item.actionId ? (this.ui.railWide ? undefined : item.label) : 'Раздел ещё не перенесён на движок'"
+           t-att-title="item.actionId ? undefined : 'Раздел ещё не перенесён на движок'"
+           t-att-aria-label="item.label"
            t-att-aria-current="this.isActive(item) ? 'page' : undefined"
+           t-on-mouseenter="(ev) => this.showFly(item, ev)"
+           t-on-focus="(ev) => this.showFly(item, ev)"
            t-on-click.prevent="() => this.open(item)">
           <CoopIcon name="item.icon" size="18"/>
           <span class="o_coop_nav_label" t-out="item.label"/>
@@ -103,6 +121,7 @@
       </nav>
       <button type="button" class="o_coop_rail_add" title="Добавить расширение"
               aria-label="Добавить расширение"
+              t-on-mouseenter="() => this.hideFly()"
               t-on-click="() => this.openCatalog()">
         <CoopIcon name="'plus'" size="16"/>
       </button>
@@ -113,6 +132,7 @@
            люди договариваются, где что лежит. -->
         <button type="button" class="o_coop_nav_settings"
                 t-att-title="this.ui.railWide ? undefined : 'Настроить меню'"
+                t-on-mouseenter="() => this.hideFly()"
                 t-on-click="() => this.openSettings()">
           <CoopIcon name="'adjustments-horizontal'" size="18"/>
           <span class="o_coop_nav_label">Настроить меню</span>
@@ -124,6 +144,30 @@
           <CoopIcon name="'logout'" size="18"/>
           <span class="o_coop_nav_label">Выйти</span>
         </button>
+        <!--
+          Выезд у свёрнутой планки (дизайн-система, `Rail`, `flyout`):
+          имя раздела и его подразделы рядом со значком. Внутри планки, а
+          не отдельно: курсор, перешедший на плашку, планку не покидает, и
+          плашка не гаснет на полпути. Положение — от значка, `fixed`.
+        -->
+        <div t-if="this.state.fly" class="o_coop_rail_fly"
+             t-att-style="'top: ' + this.state.fly.top + 'px; left: ' + this.state.fly.left + 'px'">
+          <div class="o_coop_rail_flybox"
+               t-att-role="this.state.fly.children.length ? 'menu' : 'tooltip'">
+            <div class="o_coop_rail_flytitle">
+              <t t-out="this.state.fly.label"/>
+              <span class="o_coop_rail_flysoon" t-if="this.state.fly.soon">скоро</span>
+            </div>
+            <a t-foreach="this.state.fly.children" t-as="sub" t-key="sub.id"
+               href="#" role="menuitem" class="o_coop_subnav_item"
+               t-att-class="{ 'active': sub.id === this.state.fly.current }"
+               t-att-aria-current="sub.id === this.state.fly.current ? 'page' : undefined"
+               t-on-click.prevent="() => this.openSub(sub)">
+              <CoopIcon name="this.subIcon(sub.name)" size="18"/>
+              <span class="o_coop_subnav_label" t-out="sub.name"/>
+            </a>
+          </div>
+        </div>
       </aside>
 
       <!--
