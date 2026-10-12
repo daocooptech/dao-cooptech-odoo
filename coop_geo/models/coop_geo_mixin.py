@@ -41,6 +41,11 @@ class CoopGeoMixin(models.AbstractModel):
         """Без запросов наружу: автотесты и загрузка демо-данных."""
         if self.env.context.get('coop_geo_offline'):
             return True
+        # Установка и обновление модулей: загрузчики данных переписывают
+        # город у тысяч записей, и поиск по каждой шёл бы в сеть — так
+        # 12.10.2026 обновление боевой встало на двадцать минут.
+        if not self.env.registry.ready:
+            return True
         in_test = getattr(self.env.registry, 'in_test_mode', None)
         return bool(in_test and in_test())
 
@@ -85,12 +90,18 @@ class CoopGeoMixin(models.AbstractModel):
         return records
 
     def write(self, vals):
-        result = super().write(vals)
         # Сменили адрес или город, а точку не передали — ищем заново.
-        # Точку передают загрузчики данных: им искать нечего.
-        if ('coop_address' in vals or 'city' in vals) and 'coop_lat' not in vals:
-            self.filtered('coop_address')._coop_geo_refresh()
-            self.filtered(lambda r: not r.coop_address and r.coop_lat).with_context(
+        # Точку передают загрузчики данных: им искать нечего. Ищем только
+        # у записей, где место и правда стало другим: запись того же
+        # города поверх прежнего — не повод идти в сеть.
+        watch = ('coop_address' in vals or 'city' in vals) and 'coop_lat' not in vals
+        before = {record.id: (record.coop_address, record.city) for record in self} if watch else {}
+        result = super().write(vals)
+        if watch:
+            moved = self.filtered(
+                lambda r: (r.coop_address, r.city) != before.get(r.id))
+            moved.filtered('coop_address')._coop_geo_refresh()
+            moved.filtered(lambda r: not r.coop_address and r.coop_lat).with_context(
                 coop_geo_offline=True)._coop_geo_refresh()
         return result
 
