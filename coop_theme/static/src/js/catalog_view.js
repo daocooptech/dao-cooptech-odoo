@@ -410,7 +410,7 @@ patch(ControlPanel.prototype, {
         if (!this.coopIsCatalog) {
             return entries;
         }
-        return entries.flatMap((entry) => {
+        const result = entries.flatMap((entry) => {
             if (entry.type === "list") {
                 // «Списком» в макете называется вид карточками во всю
                 // ширину, а не таблица движка. Оставить у таблицы то же
@@ -444,6 +444,14 @@ patch(ControlPanel.prototype, {
                 },
             ];
         });
+        // Порядок эталона (`ViewSwitch`, решение 459, шаг 4): Плиткой,
+        // Списком, Таблицей, На карте. Карта рождается из канбана вместе с
+        // плиткой и строками и без перестановки вставала третьей — перед
+        // таблицей, которая приходит следующим видом действия.
+        return [
+            ...result.filter((entry) => entry.type !== "coop_map"),
+            ...result.filter((entry) => entry.type === "coop_map"),
+        ];
     },
 
     switchView(viewType, isMiddleClick) {
