@@ -622,6 +622,7 @@
     <field name="res_model">coop.credit.line</field>
     <field name="path">credit</field>
     <field name="view_mode">list,form</field>
+    <field name="context">{'coop_create_label': 'Открыть линию'}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Линий взаимного кредита нет</p>
       <p>
