@@ -14,7 +14,7 @@
     python fetch_odoo_apps.py <выходной.jsonl> [--series 19.0] [--delay 1.0]
 
 Строка вывода — одна карточка: технический модуль, серия, название,
-краткое описание, автор, цена, голоса, покупки, картинка, адрес.
+краткое описание, автор, цена, голоса, скачивания (у платных — покупки), картинка, адрес.
 """
 import argparse
 import html
@@ -37,7 +37,9 @@ TITLE = re.compile(r'<h5 title="([^"]*)"')
 AUTHOR = re.compile(r'loempia_panel_author">\s*<b>(.*?)</b>', re.S)
 PRICE = re.compile(r'loempia_panel_price[^>]*>(.*?)</div>', re.S)
 VOTES = re.compile(r'title="(\d+) votes"')
-BUYS = re.compile(r'Total Purchases: (\d+)')
+# Платные показывают покупки, бесплатные — скачивания; это один счётчик
+# «сколько раз взяли», и ранжировать по нему нужно оба вида.
+TAKEN = re.compile(r'Total (Purchases|Downloads): (\d+)(?:, Last month: (\d+))?')
 IMAGE = re.compile(r'module_image\?image_id=(\d+)')
 LAST_PAGE = re.compile(r'/apps/modules/browse/page/(\d+)\?')
 
@@ -70,7 +72,7 @@ def parse(page_html, page):
         price_text = text(price.group(1)) if price else ''
         amount = re.search(r'([0-9][0-9.,]*)', price_text)
         votes = VOTES.search(block)
-        buys = BUYS.search(block)
+        taken = TAKEN.search(block)
         image = IMAGE.search(block)
         cards.append({
             'module': href.group(2),
@@ -81,7 +83,9 @@ def parse(page_html, page):
             'price': float(amount.group(1).replace(',', '')) if amount else 0.0,
             'price_text': price_text or 'Free',
             'votes': int(votes.group(1)) if votes else 0,
-            'purchases': int(buys.group(1)) if buys else 0,
+            'downloads': int(taken.group(2)) if taken else 0,
+            'downloads_month': int(taken.group(3)) if taken and taken.group(3) else 0,
+            'is_paid': bool(taken and taken.group(1) == 'Purchases'),
             'image_id': image.group(1) if image else '',
             'url': f'{BASE}/apps/modules/{href.group(1)}/{href.group(2)}',
             'page': page,
@@ -94,6 +98,8 @@ def main():
     parser.add_argument('out')
     parser.add_argument('--series', default='19.0')
     parser.add_argument('--delay', type=float, default=1.0)
+    parser.add_argument('--top', type=int, default=0,
+                        help='после сбора записать N самых скачиваемых в <out>.topN.jsonl')
     args = parser.parse_args()
 
     done = set()
@@ -130,6 +136,23 @@ def main():
                 print(f'страница {page}/{last}, карточек за проход {total}', flush=True)
             time.sleep(args.delay)
     print(f'готово: карточек за проход {total}', flush=True)
+
+    if args.top:
+        # Сортировки списка на сайте `robots.txt` запрещает (`?order=`), так
+        # что «самые скачиваемые» отбираются здесь, по полному списку.
+        best = {}
+        with open(args.out, encoding='utf-8') as handle:
+            for line in handle:
+                card = json.loads(line)
+                if card['module'] not in best or card['downloads'] > best[card['module']]['downloads']:
+                    best[card['module']] = card
+        top = sorted(best.values(), key=lambda c: c['downloads'], reverse=True)[:args.top]
+        path = f'{os.path.splitext(args.out)[0]}.top{args.top}.jsonl'
+        with open(path, 'w', encoding='utf-8') as handle:
+            for card in top:
+                handle.write(json.dumps(card, ensure_ascii=False) + '\n')
+        print(f'лучшие {len(top)}: {path}; у последнего скачиваний '
+              f'{top[-1]["downloads"] if top else 0}', flush=True)
 
 
 if __name__ == '__main__':
