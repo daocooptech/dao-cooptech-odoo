@@ -573,8 +573,10 @@
   <menuitem id="menu_coop_project_share" name="Доли в проектах"
             parent="menu_coop_tokenomics_root"
             action="action_coop_project_share" sequence="30"/>
+  <!-- В разделе «Кошелёк», а не «Токеномика» (владелец 12.10.2026):
+       токены на руках — это то, что у человека есть, рядом с деньгами. -->
   <menuitem id="menu_coop_ton_wallet" name="Кошелёк TON"
-            parent="menu_coop_tokenomics_root"
-            action="action_coop_ton_wallet" sequence="40"/>
+            parent="coop_wallet.menu_coop_wallet_root"
+            action="action_coop_ton_wallet" sequence="70"/>
 
 </odoo>
