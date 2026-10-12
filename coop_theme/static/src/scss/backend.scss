@@ -42,6 +42,39 @@
   --coop-btn-bg: #14171a;
   --coop-btn-fg: #ffffff;
 
+  // Оболочка по дизайн-системе (решение 459, `.claude/design-system`):
+  // оболочка лежит на `nav-bg`, верхнее меню и активный пункт подразделов —
+  // приподнятые плоскости `nav-active`; единственная тёмная плоскость
+  // светлой темы — планка разделов `rail-*`.
+  --coop-nav-bg: var(--coop-surface);
+  --coop-nav-active: var(--coop-white);
+  --coop-rail-bg: var(--coop-ink);
+  --coop-rail-fg: var(--coop-line-strong);
+  --coop-rail-text: #eef2f0;
+  --coop-rail-active: #2b2e31;
+  --coop-rail-accent: #7fd8cd;
+
+  // Форма и раскладка — ступени дизайн-системы. Числа здесь, а не по
+  // месту: оболочка, панели и карточки должны меняться вместе.
+  --coop-radius-badge: 4px;
+  --coop-radius-chip: 6px;
+  --coop-radius-control: 7px;
+  --coop-radius-item: 8px;
+  --coop-radius-card: 10px;
+  --coop-radius-panel: 14px;
+  --coop-radius-pill: 999px;
+  --coop-shadow-card: 0 1px 2px rgba(20, 23, 26, .05);
+  --coop-shadow-card-hover: 0 4px 8px rgba(20, 23, 26, .06), 0 14px 28px rgba(20, 23, 26, .1);
+  --coop-shadow-float: 0 1px 3px rgba(20, 23, 26, .18);
+  --coop-shadow-popover: 0 6px 18px rgba(0, 0, 0, .12);
+  --coop-header-height: 56px;
+  --coop-rail-width: 52px;
+  --coop-rail-width-wide: 208px;
+  --coop-sidebar-width: 228px;
+  --coop-filters-width: 224px;
+  --coop-content-max: 1214px;
+  --coop-shell-gap: 10px;
+
   // Заголовки — Manrope, как в прототипе. Заголовок должен читаться
   // заголовком, а не текстом покрупнее.
   h1, h2, h3, h4,
@@ -170,6 +203,19 @@
   --coop-gold: #e0b061;
   --coop-gold-tint: #221c11;
   --coop-gold-text: #e0b061;
+  // Ошибка в тёмной теме — светлее и теплее: кирпичный светлой темы на
+  // тёмной карточке читался как грязное пятно (дизайн-система, 459).
+  --coop-error: #e0776f;
+  --coop-error-tint: #2a1615;
+  --coop-error-text: #f0a39d;
+  // Оболочка: в тёмной теме плоскости меняются местами, планка — на
+  // подложке, а не чернильная.
+  --coop-nav-bg: var(--coop-white);
+  --coop-nav-active: var(--coop-surface);
+  --coop-rail-bg: var(--coop-surface);
+  --coop-rail-fg: var(--coop-slate);
+  --coop-rail-text: var(--coop-ink);
+  --coop-rail-active: var(--coop-line);
   // Чернильная кнопка на тёмном фоне неразличима, поэтому в тёмной теме
   // основное действие набрано бирюзой по тёмному тексту — как в
   // прототипе.
