@@ -374,7 +374,12 @@ patch(ControlPanel.prototype, {
             // тем, что про них сказано.
             return Boolean(context.coop_settings);
         }
-        return Boolean(context.coop_catalog || context.coop_section);
+        // Корневой экран-список без признака раздела («Продвижение»): его
+        // единственная крошка спрятана (`coopSingleCrumb`), и без строки
+        // вкладок у листа не оставалось имени вовсе — заголовок экрана
+        // (`PageHeader`) живёт в ней же.
+        return Boolean(context.coop_catalog || context.coop_section)
+            || (this.breadcrumbs?.length || 0) <= 1;
     },
 
     /**

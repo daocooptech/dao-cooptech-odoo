@@ -222,6 +222,16 @@
       Имя выборки вместо вкладок: человек смотрит свой список, а не
       раздел, и подразделы раздела здесь только сбивают.
     -->
+    <div class="o_coop_tabs_wrap">
+    <!--
+      Заголовок экрана (дизайн-система, `PageHeader`) — на большом экране,
+      где подразделы ушли в меню слева (shell.scss). На узком остаются
+      вкладки.
+    -->
+    <div class="o_coop_pagehead" t-if="this.pageTitle">
+      <div class="o_coop_pagehead_crumbs" t-if="this.pageSection" t-out="this.pageSection"/>
+      <h1 class="o_coop_pagehead_title" t-out="this.pageTitle"/>
+    </div>
     <div class="o_coop_tabs" t-if="this.state.label">
       <span class="o_coop_tab o_coop_tab_label" t-out="this.state.label"/>
     </div>
@@ -238,6 +248,7 @@
          t-on-click.prevent="() => this.openFav()">
         Избранное <span class="o_coop_tab_count" t-out="this.state.fav.count"/>
       </a>
+    </div>
     </div>
   </t>
 

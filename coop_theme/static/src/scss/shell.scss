@@ -1743,4 +1743,44 @@ body.o_dark_mode .o_coop_loader_mark {
   .o_coop_tabs:not(:has(.o_coop_tab_label)) {
     display: none;
   }
+
+  // Заголовок экрана (`PageHeader`): раздел мелко, подраздел или выборка
+  // крупно — стиль `page-title`. Первой строкой панели, во всю ширину.
+  // Имя выборки вкладкой рядом больше не нужно — оно и есть заголовок.
+  .o_coop_tabs_wrap:has(.o_coop_pagehead) .o_coop_tabs {
+    display: none;
+  }
+
+  .o_coop_pagehead {
+    display: block;
+    order: -1;
+    flex: 1 0 100%;
+    min-width: 0;
+    margin: 0 0 4px;
+  }
+
+  .o_coop_pagehead_crumbs {
+    margin-bottom: 6px;
+    font: 500 12.5px/1.4 'Manrope', sans-serif;
+    color: var(--coop-slate);
+  }
+
+  .o_coop_pagehead_title {
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font: 700 24px/1.25 'Manrope', sans-serif;
+    color: var(--coop-ink);
+  }
+}
+
+.o_coop_tabs_wrap {
+  display: contents;
+}
+
+@media (max-width: 900px) {
+  .o_coop_pagehead {
+    display: none;
+  }
 }
