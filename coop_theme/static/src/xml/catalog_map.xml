@@ -2,18 +2,20 @@
 <templates xml:space="preserve">
 
   <!--
-    Схематичная карта России с метками по городам — та же, что в
-    прототипе. Размер метки — сколько объявлений в городе с учётом
-    текущего отбора; щелчок по метке отбирает город.
+    Настоящая карта (OpenStreetMap) с метками по городам. Метки ставит
+    сам компонент (`catalog_map.js`, Leaflet): число в кружке — сколько
+    записей в городе с учётом текущего отбора; щелчок по метке отбирает
+    город. Сообщения о загрузке и пустом отборе — поверх карты.
   -->
   <t t-name="coop_theme.CatalogMap">
     <div class="o_coop_mapboard">
-      <div class="o_coop_map_canvas"
-           t-att-aria-busy="this.state.loading ? 'true' : 'false'">
+      <div class="o_coop_map_frame">
+        <div class="o_coop_map_canvas" t-ref="this.canvas"
+             t-att-aria-busy="this.state.loading ? 'true' : 'false'"/>
         <div class="o_coop_map_empty" t-if="this.state.failed" role="alert">
           Не удалось посчитать метки. Попробуйте открыть карту ещё раз.
         </div>
-        <!-- Пока считаем — так и написано. Пустая сетка без единой метки
+        <!-- Пока считаем — так и написано. Карта без единой метки
              неотличима от «ничего не нашлось», и человек успевает менять
              отбор, который ещё не применился. -->
         <div class="o_coop_map_empty" t-elif="this.state.loading">
@@ -22,21 +24,11 @@
         <div class="o_coop_map_empty" t-elif="!this.state.pins.length">
           Нет городов, подходящих под текущий отбор
         </div>
-        <button t-foreach="this.state.pins" t-as="pin" t-key="pin.city"
-                type="button" class="o_coop_pin"
-                t-attf-style="left:{{ pin.left }}%;top:{{ pin.top }}%"
-                t-attf-title="Показать записи из города {{ pin.city }}"
-                t-on-click="() => this.selectCity(pin.city)">
-          <span class="o_coop_pin_dot"
-                t-attf-style="width:{{ pin.size }}px;height:{{ pin.size }}px"/>
-          <span class="o_coop_pin_label">
-            <t t-out="pin.city"/> · <span class="o_coop_pin_count" t-out="pin.count"/>
-          </span>
-        </button>
       </div>
       <p class="o_coop_map_note">
-        Размер метки — сколько записей в городе с учётом текущего отбора.
-        Нажмите на метку: отберём этот город и покажем записи плиткой.
+        Число в метке — сколько записей в городе с учётом текущего отбора;
+        названия городов видны при приближении. Нажмите на метку: отберём
+        этот город и покажем записи плиткой.
         <t t-if="this.state.other">
           Ещё <t t-out="this.state.other"/> без города или вне карты.
         </t>

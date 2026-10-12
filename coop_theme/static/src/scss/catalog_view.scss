@@ -504,8 +504,9 @@
 
 // ── Каталог на карте ──────────────────────────────────────────────────
 //
-// Подложка — сетка, а не картографические тайлы: платформа показывается
-// без выхода в интернет, а место у записи указано городом, а не точкой.
+// Настоящая карта — тайлы OpenStreetMap через Leaflet (`catalog_map.js`).
+// Под тайлами осталась прежняя сетка: без сети тайлы не придут, и метки
+// будут стоять на ней, а не на пустом листе.
 //
 // Класс подложки — `o_coop_mapboard`, а не `o_coop_map`: последний
 // ставится на корень представления в этом виде, и одно правило красило
@@ -519,10 +520,17 @@
   padding: 12px 16px;
 }
 
+.o_coop_map_frame {
+  position: relative;
+}
+
 .o_coop_map_canvas {
   position: relative;
+  z-index: 0;
   width: 100%;
   aspect-ratio: 16 / 9;
+  min-height: 360px;
+  max-height: calc(100vh - 260px);
   border: 1px solid var(--coop-line, #e6e6e1);
   border-radius: 14px;
   overflow: hidden;
@@ -531,42 +539,63 @@
     linear-gradient(var(--coop-line, #e6e6e1) 1px, transparent 1px),
     linear-gradient(90deg, var(--coop-line, #e6e6e1) 1px, transparent 1px);
   background-size: 5% 10%;
+  font: inherit;
+
+  .leaflet-control-attribution {
+    font-size: 10.5px;
+  }
+
+  .leaflet-bar a {
+    color: var(--coop-ink, #14171a);
+  }
+}
+
+// Тёмная тема: тайлы тускнеют, чтобы не слепили посреди тёмного листа.
+[data-bs-theme="dark"] .o_coop_map_canvas .leaflet-tile-pane {
+  filter: brightness(.72) contrast(1.1) saturate(.8);
 }
 
 .o_coop_map_empty {
   position: absolute;
   top: 50%;
   left: 50%;
+  z-index: 1000;
   transform: translate(-50%, -50%);
+  padding: 8px 14px;
+  border: 1px solid var(--coop-line, #e6e6e1);
+  border-radius: 999px;
+  background: var(--coop-white, #fff);
   color: var(--coop-slate, #4a4a44);
   font-size: 12.5px;
   text-align: center;
+  pointer-events: none;
 }
 
-.o_coop_pin {
-  position: absolute;
-  // Остриё метки приходится на точку города, а не её середина.
-  transform: translate(-50%, -100%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
+// Метка: кружок с числом по центру города, название — справа от него.
+.o_coop_lpin {
   cursor: pointer;
 }
 
-.o_coop_pin_dot {
-  border-radius: 50% 50% 50% 0;
-  transform: rotate(-45deg);
-  background: var(--coop-teal, #146b64);
+.o_coop_lpin_dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
   border: 2px solid var(--coop-white, #fff);
-  box-shadow: 0 1px 3px rgba(20, 23, 26, .35);
+  border-radius: 50%;
+  background: var(--coop-teal, #146b64);
+  box-shadow: 0 1px 4px rgba(20, 23, 26, .4);
+  color: #fff;
+  font: 700 11px/1 'Inter', sans-serif;
 }
 
-.o_coop_pin_label {
-  margin-top: 3px;
+.o_coop_lpin_label {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 4px);
+  transform: translateY(-50%);
   padding: 2px 8px;
   border: 1px solid var(--coop-line, #e6e6e1);
   border-radius: 999px;
@@ -575,22 +604,33 @@
   font-size: 11px;
   font-weight: 500;
   white-space: nowrap;
+
+  b {
+    color: var(--coop-teal-dark, #0e4f4a);
+    font-weight: 700;
+  }
 }
 
-.o_coop_pin_count {
-  color: var(--coop-teal-dark, #0e4f4a);
-  font-weight: 700;
+// Названия — при приближении и у метки под курсором или в фокусе.
+.o_coop_map_names .o_coop_lpin_label,
+.o_coop_lpin:hover .o_coop_lpin_label,
+.o_coop_lpin:focus-visible .o_coop_lpin_label {
+  display: block;
 }
 
-.o_coop_pin:hover .o_coop_pin_dot { background: var(--coop-teal-dark, #0e4f4a); }
-.o_coop_pin:hover .o_coop_pin_label { border-color: var(--coop-teal, #146b64); }
+.o_coop_lpin:hover .o_coop_lpin_dot {
+  background: var(--coop-teal-dark, #0e4f4a);
+}
 
 // Клавиатурой метка выделяется так же заметно, как мышью: без этого до
 // города можно дойти табом и не понять, на какой метке стоишь.
-.o_coop_pin:focus-visible {
-  outline: 2px solid var(--coop-focus, #0e4f4a);
-  outline-offset: 2px;
-  border-radius: 6px;
+.o_coop_lpin:focus-visible {
+  outline: none;
+
+  .o_coop_lpin_dot {
+    outline: 2px solid var(--coop-focus, #0e4f4a);
+    outline-offset: 2px;
+  }
 }
 
 .o_coop_map_note {

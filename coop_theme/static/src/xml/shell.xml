@@ -90,6 +90,22 @@
           <CoopIcon name="'plus'" size="14"/>
         </button>
       </div>
+      <!--
+        Прокручиваются только расширения (дизайн-система, `Rail`): разделы
+        и «Настроить меню» остаются на месте. Полосы нет — у края, за
+        которым есть ещё пункты, планка затухает, а по наведению там
+        появляется стрелка.
+      -->
+      <div class="o_coop_rail_scrollbox"
+           t-att-class="{ 'o_coop_rail_more_up': this.state.moreUp, 'o_coop_rail_more_down': this.state.moreDown }">
+      <button type="button" class="o_coop_rail_arrow o_coop_rail_arrow_up"
+              tabindex="-1" aria-hidden="true" t-if="this.state.moreUp"
+              t-on-mouseenter="() => this.hideFly()"
+              t-on-click="() => this.scrollExt(-1)">
+        <CoopIcon name="'chevron-up'" size="14"/>
+      </button>
+      <div class="o_coop_rail_scroll" t-ref="this.extScroll"
+           t-on-scroll="() => this.onExtScroll()">
       <nav class="o_coop_rail_ext" aria-label="Расширения">
         <!-- Раздел без действия ещё не перенесён на движок. Пункт
              оставлен намеренно, но выглядеть он должен иначе: без
@@ -109,6 +125,14 @@
           <span class="o_coop_soon_mark" t-if="!item.actionId">скоро</span>
         </a>
       </nav>
+      </div>
+      <button type="button" class="o_coop_rail_arrow o_coop_rail_arrow_down"
+              tabindex="-1" aria-hidden="true" t-if="this.state.moreDown"
+              t-on-mouseenter="() => this.hideFly()"
+              t-on-click="() => this.scrollExt(1)">
+        <CoopIcon name="'chevron-down'" size="14"/>
+      </button>
+      </div>
       <button type="button" class="o_coop_rail_add" title="Добавить расширение"
               aria-label="Добавить расширение"
               t-on-mouseenter="() => this.hideFly()"

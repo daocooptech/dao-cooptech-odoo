@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, onMounted, onWillStart, onWillUnmount, proxy, usePlugin, useProps } from "@odoo/owl";
+import { Component, onMounted, onWillStart, onWillUnmount, proxy, signal, usePlugin, useProps } from "@odoo/owl";
 import { patch } from "@web/core/utils/patch";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
@@ -427,6 +427,26 @@ export function coopSaveMenuState(orm, values) {
  */
 const TABBAR_LABELS = ["Моя страница", "Сообщения", "Ресурсы", "Проекты", "Кошелёк"];
 
+// Где остановилась прокрутка расширений — за браузером, как вид каталога:
+// вернувшись, человек видит планку такой, какой оставил.
+const RAIL_SCROLL_KEY = "coop_theme.rail_scroll";
+
+function readRailScroll() {
+    try {
+        return Number(browser.localStorage.getItem(RAIL_SCROLL_KEY)) || 0;
+    } catch {
+        return 0;
+    }
+}
+
+function writeRailScroll(value) {
+    try {
+        browser.localStorage.setItem(RAIL_SCROLL_KEY, String(Math.round(value)));
+    } catch {
+        // Хранилище закрыто (приватное окно) — помнить просто нечем.
+    }
+}
+
 export class CoopSidebar extends Component {
     static template = "coop_theme.Sidebar";
     static components = { CoopIcon };
@@ -446,7 +466,27 @@ export class CoopSidebar extends Component {
             route: router.current?.action ?? null,
             soonLabel: null,
             fly: null,
+            moreUp: false, moreDown: false,
         });
+        this.extScroll = signal.ref();
+        // Есть ли ещё пункты выше и ниже видимой части — от этого зависят
+        // затухание у края и стрелки. Меняется не только от прокрутки:
+        // окно сузили, планку развернули, добавили расширение.
+        this.extResize = new ResizeObserver(() => this.measureExt());
+        onMounted(() => {
+            const box = this.extScroll();
+            if (!box) {
+                return;
+            }
+            box.scrollTop = readRailScroll();
+            this.revealActive();
+            this.measureExt();
+            this.extResize.observe(box);
+            if (box.firstElementChild) {
+                this.extResize.observe(box.firstElementChild);
+            }
+        });
+        onWillUnmount(() => this.extResize.disconnect());
 
         onWillStart(async () => {
             await this.load();
@@ -716,6 +756,61 @@ export class CoopSidebar extends Component {
         if (this.state.soonLabel !== label) {
             this.state.soonLabel = label;
         }
+        this.revealActive();
+    }
+
+    /**
+     * Открытое расширение — в видимой части планки. Двигаем, только когда
+     * открытое сменилось: иначе каждые треть секунды планка возвращалась
+     * бы к нему, сколько её ни прокручивай.
+     */
+    revealActive() {
+        const box = this.extScroll();
+        const item = box?.querySelector(".o_coop_nav_item.active");
+        const key = item?.getAttribute("aria-label") || null;
+        if (!box || key === this.revealed) {
+            return;
+        }
+        this.revealed = key;
+        if (!item) {
+            return;
+        }
+        // Запас — чтобы пункт не стоял в затухании у края.
+        const pad = 24;
+        const top = item.offsetTop;
+        const bottom = top + item.offsetHeight;
+        if (top < box.scrollTop + pad) {
+            box.scrollTop = top - pad;
+        } else if (bottom > box.scrollTop + box.clientHeight - pad) {
+            box.scrollTop = bottom - box.clientHeight + pad;
+        }
+    }
+
+    measureExt() {
+        const box = this.extScroll();
+        if (!box) {
+            return;
+        }
+        const up = box.scrollTop > 1;
+        const down = box.scrollTop + box.clientHeight < box.scrollHeight - 1;
+        if (this.state.moreUp !== up) {
+            this.state.moreUp = up;
+        }
+        if (this.state.moreDown !== down) {
+            this.state.moreDown = down;
+        }
+    }
+
+    onExtScroll() {
+        // Плашка выезда стоит по месту значка; значок уехал — уезжает и она.
+        this.hideFly();
+        this.measureExt();
+        writeRailScroll(this.extScroll().scrollTop);
+    }
+
+    /** Стрелка у края: на три пункта в её сторону. */
+    scrollExt(direction) {
+        this.extScroll()?.scrollBy({ top: direction * 114, behavior: "smooth" });
     }
 
     /** Есть ли такое действие среди пунктов меню. */

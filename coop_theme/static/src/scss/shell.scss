@@ -267,6 +267,7 @@
 .o_coop_rail_sep,
 .o_coop_rail_add,
 .o_coop_rail_gap,
+.o_coop_rail_arrow,
 .o_coop_rail_fly {
   display: none;
 }
@@ -1350,9 +1351,9 @@ body.o_dark_mode .o_coop_loader_mark {
     border: 0;
     border-radius: var(--coop-radius-panel);
     background: var(--coop-rail-bg);
-    // Не помещается — прокручивается вся планка, полоса видна (владелец
-    // 12.10.2026). Прежде прокручивались одни расширения без полосы, и
-    // догадаться, что там есть ещё, было не по чему.
+    // Прокручиваются одни расширения (`.o_coop_rail_scroll`, вариант 1
+    // владельца, 12.10.2026). Вся планка прокручивается, только если не
+    // помещаются уже и разделы — на очень низком окне.
     overflow-x: hidden;
     overflow-y: auto;
     scrollbar-width: thin;
@@ -1427,6 +1428,83 @@ body.o_dark_mode .o_coop_loader_mark {
 
   .o_coop_rail_ext {
     flex: none;
+  }
+
+  // ── Прокрутка расширений ──
+  // Сжимается первой, когда планка не помещается в окно, но не меньше
+  // двух пунктов: совсем исчезнувшие расширения не найти.
+  .o_coop_rail_scrollbox {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 0 1 auto;
+    width: 100%;
+    min-height: 84px;
+  }
+
+  // Полосы нет: о том, что пункты есть ещё, говорит затухание у края.
+  .o_coop_rail_scroll {
+    position: relative;
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .o_coop_rail_more_up .o_coop_rail_scroll {
+    mask-image: linear-gradient(to bottom, transparent 0, #000 32px);
+  }
+
+  .o_coop_rail_more_down .o_coop_rail_scroll {
+    mask-image: linear-gradient(to top, transparent 0, #000 32px);
+  }
+
+  .o_coop_rail_more_up.o_coop_rail_more_down .o_coop_rail_scroll {
+    mask-image: linear-gradient(to bottom, transparent 0, #000 32px,
+                                #000 calc(100% - 32px), transparent 100%);
+  }
+
+  // Стрелки — по наведению на планку, у того края, за которым есть ещё.
+  .o_coop_rail_arrow {
+    display: flex;
+    position: absolute;
+    left: 50%;
+    z-index: 1;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 18px;
+    margin-left: -14px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--coop-radius-pill);
+    background: var(--coop-rail-active);
+    color: var(--coop-rail-fg);
+    opacity: 0;
+    transition: opacity .15s;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--coop-rail-accent);
+    }
+  }
+
+  .o_coop_rail_arrow_up {
+    top: 0;
+  }
+
+  .o_coop_rail_arrow_down {
+    bottom: 0;
+  }
+
+  .o_coop_rail:hover .o_coop_rail_arrow {
+    opacity: 1;
   }
 
   .o_coop_rail_sep {
