@@ -101,14 +101,16 @@
   // Отметка о продвижении. Обязательна и убирать её нельзя: объявление
   // наверху не потому, что оно лучше, а потому что за него заплачено, и
   // читатель имеет право это знать.
-  // Отметка о продвижении — под меткой вида, золотой заливкой, как в
-  // макете. Правый верхний угол оставлен под избранное.
+  // Отметка о продвижении — под меткой вида, золотой парой токенов, как
+  // в эталоне (`ResourceCard`): белое по `coop-gold` давало 2.9:1.
+  // Правый верхний угол оставлен под избранное.
   .o_coop_res_promo {
     position: absolute;
     top: 34px;
     left: 10px;
-    background: var(--coop-gold, #c98a2b);
-    color: #fff;
+    background: var(--coop-gold-tint, #f7ecd9);
+    color: var(--coop-gold-text, #8a5f1c);
+    border: 1px solid var(--coop-gold, #c98a2b);
     font: 600 10px/1 'Manrope', sans-serif;
     padding: 3px 9px;
     border-radius: 999px;

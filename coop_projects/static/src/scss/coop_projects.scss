@@ -64,22 +64,25 @@
 
   // Вид проекта различается цветом, как в макете: кооперативный —
   // фирменным, коммерческий — золотым, некоммерческий — обводкой.
+  // Парами токенов эталона (`o_coop_card_tag_*`): белое по `coop-gold`
+  // давало 2.9:1 и не читалось.
   .o_coop_kind_cooperative {
     background: var(--coop-teal, #146b64);
-    color: #fff;
+    color: var(--coop-btn-fg, #fff);
   }
   .o_coop_kind_commercial {
-    background: var(--coop-gold, #c98a2b);
-    color: #fff;
+    background: var(--coop-gold-tint, #f7ecd9);
+    color: var(--coop-gold-text, #8a5f1c);
+    box-shadow: inset 0 0 0 1px var(--coop-gold, #c98a2b);
   }
   .o_coop_kind_nonprofit {
     background: var(--coop-white, #fff);
     color: var(--coop-slate, #4a4a44);
-    box-shadow: inset 0 0 0 1px var(--coop-line, #e6e6e1);
+    box-shadow: inset 0 0 0 1px var(--coop-line-strong, var(--coop-line, #e6e6e1));
   }
   .o_coop_kind_dao {
     background: var(--coop-ink, #14171a);
-    color: #fff;
+    color: var(--coop-paper, #fafaf7);
   }
 
   .o_coop_loc {

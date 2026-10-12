@@ -97,12 +97,18 @@
     background: var(--coop-slate, #4a4a44);
   }
 
+  // Пары токенов эталона (`CatalogCard`, `o_coop_card_tag_*`): белое по
+  // `coop-gold` давало 2.9:1.
   .o_coop_vac_kind_share {
-    background: var(--coop-gold, #c98a2b);
+    background: var(--coop-gold-tint, #f7ecd9);
+    color: var(--coop-gold-text, #8a5f1c);
+    box-shadow: inset 0 0 0 1px var(--coop-gold, #c98a2b);
   }
 
   .o_coop_vac_kind_barter {
-    background: var(--coop-teal, #146b64);
+    background: var(--coop-teal-tint, #e3efed);
+    color: var(--coop-teal-dark, #0e4f4a);
+    box-shadow: inset 0 0 0 1px var(--coop-teal, #146b64);
   }
 
   .o_coop_vac_kind_volunteer {
