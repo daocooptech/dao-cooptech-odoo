@@ -352,21 +352,6 @@
     color: var(--coop-slate, #4a4a44);
   }
 
-  .o_coop_notice {
-    margin: 0 0 14px;
-    padding: 10px 12px;
-    border-radius: 8px;
-    font-size: 12.5px;
-    line-height: 1.45;
-    background: var(--coop-surface, #f2f2ee);
-    color: var(--coop-slate, #4a4a44);
-  }
-
-  .o_coop_notice_wait {
-    background: var(--coop-gold-tint, #f7ecd9);
-    color: var(--coop-gold-text, #8a5f1c);
-  }
-
   // ── Полосы владений ────────────────────────────────────────────────
 
   .o_coop_band {
@@ -636,6 +621,25 @@
     display: inline-block;
     width: auto;
   }
+}
+
+// ── Строка-напоминание (`Notice` эталона) ─────────────────────────────
+//
+// Вне `.o_coop_profile`: напоминание стоит и на других формах — справка
+// поставки (`coop_escrow_views.xml`) над полями, как в эталоне.
+.o_coop_notice {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  background: var(--coop-surface, #f2f2ee);
+  color: var(--coop-slate, #4a4a44);
+}
+
+.o_coop_notice_wait {
+  background: var(--coop-gold-tint, #f7ecd9);
+  color: var(--coop-gold-text, #8a5f1c);
 }
 
 // ── Напоминание о залежавшемся объявлении ─────────────────────────────

@@ -24,6 +24,10 @@
     <field name="name">Настройка меню</field>
     <field name="res_model">coop.sidebar.item</field>
     <field name="view_mode">list</field>
+    <!-- Расширение добавляется из каталога, как «+» на планке, а не
+         пустой строкой списка (эталон `MenuSettingsPage`); кнопка —
+         `coop_create_action` в `js/catalog_view.js`. -->
+    <field name="context">{'coop_create_label': 'Добавить расширение', 'coop_create_action': 'coop_extensions.action_coop_extension_catalog'}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Меню собирается при первом входе</p>
       <p>

@@ -609,6 +609,23 @@ patch(ListController.prototype, {
         return this.env.searchModel?.globalDomain || [];
     },
 
+    /** Кнопка создания открывает другое действие — по внешнему имени из
+     *  `coop_create_action` в контексте действия. «Настройка меню»: пункт
+     *  добавляется из каталога расширений, а не пустой строкой. Своим
+     *  видом с кнопкой в `coop_extensions` нельзя: новый вид в модуле,
+     *  загружаемом раньше `website`, не создаётся — `website` объявляет у
+     *  видов обязательное `visibility` без умолчания в базе (12.10.2026).
+     *  Имя разрешается при нажатии, поэтому порядок модулей не важен. */
+    async onClickCreate() {
+        const action = this.env.services.action;
+        const target = action?.currentAction?.context?.coop_create_action
+            || this.props.context?.coop_create_action;
+        if (target && !this.env.inDialog) {
+            return action.doAction(target);
+        }
+        return super.onClickCreate(...arguments);
+    },
+
     /** Пояснение раздела над списком — всегда, а не только в пустом
      *  разделе, как штатная справка движка (эталон `SettlementsPage`).
      *  Из действия (`coop_intro` в контексте), по той же причине, что и
