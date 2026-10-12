@@ -95,5 +95,7 @@ export class CoopFavoritesButton extends Component {
     }
 }
 
+// После «Дел» (`mail.activity_menu`, 20) и перед «Настройками» (14) —
+// владелец 12.10.2026: «иконку избранного перенеси после задач».
 registry.category("systray").add(
-    "coop_theme.favorites", { Component: CoopFavoritesButton }, { sequence: 21 });
+    "coop_theme.favorites", { Component: CoopFavoritesButton }, { sequence: 19 });
