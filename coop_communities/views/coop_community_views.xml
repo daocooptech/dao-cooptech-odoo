@@ -44,10 +44,6 @@
                       t-att-class="'o_coop_kind_' + record.kind.raw_value">
                   <t t-out="record.kind.value"/>
                 </span>
-                <span class="o_coop_badge o_coop_badge_right">
-                  <i class="oi oi-filled" data-icon="group" aria-hidden="true"/>
-                  <t t-out="record.member_count.value"/>
-                </span>
                 <span class="o_coop_loc" t-if="record.city.raw_value">
                   <i class="oi" data-icon="location_on" aria-hidden="true"/>
                   <t t-out="record.city.value"/>
@@ -68,10 +64,27 @@
                   молча выводил из сообщества по клику.
                 -->
                 <div class="o_coop_tile_actions">
+                  <!-- Число участников — внизу, слева от кнопок, как в
+                       эталоне (`CommunitiesPage`): правый угол обложки
+                       занят закладкой избранного. Контур Tabler `users`. -->
+                  <span class="o_coop_card_note" title="Участников">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true">
+                      <path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/>
+                      <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                      <path d="M21 21v-2a4 4 0 0 0 -3 -3.85"/>
+                    </svg>
+                    <t t-out="record.member_count.value"/>
+                  </span>
+                  <div class="o_coop_card_actions">
+                  <!-- «Вступить» — обычной кнопкой, не залитой (эталон):
+                       главное действие каталога — открыть сообщество. -->
                   <button t-if="record.coop_member_state.raw_value == 'none'
                                 and record.state.raw_value == 'published'"
                           name="action_join" type="object"
-                          class="btn btn-primary btn-sm o_coop_join">
+                          class="btn btn-secondary btn-sm o_coop_join">
                     <t t-if="record.access.raw_value == 'public'">Вступить</t>
                     <t t-else="">Подать заявку</t>
                   </button>
@@ -98,6 +111,7 @@
                     <i class="oi" data-icon="notifications" aria-hidden="true"
                        t-att-class="{'oi-filled': record.coop_is_subscribed.raw_value}"/>
                   </button>
+                  </div>
                 </div>
               </div>
             </div>

@@ -83,15 +83,6 @@
     color: var(--coop-ink, #14171a);
   }
 
-  .o_coop_badge_right {
-    left: auto;
-    right: 8px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    background: rgba(255, 255, 255, .92);
-  }
-
   // Тип сообщества различается цветом — так же, как вид у проекта.
   .o_coop_kind_neighbourhood {
     background: var(--coop-teal, #146b64);
@@ -178,6 +169,25 @@
   .o_coop_join {
     padding: 4px 14px;
     font-size: 12px;
+  }
+
+  // Число участников слева, кнопки справа — `.o_coop_card_note` и
+  // `.o_coop_card_actions` эталона.
+  .o_coop_card_note {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11.5px;
+    color: var(--coop-slate, #4a4a44);
+    white-space: nowrap;
+  }
+
+  .o_coop_card_actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
   }
 
   // Состояние участия — надпись, а не кнопка. Кнопкой оно приглашало

@@ -244,14 +244,16 @@
   border-radius: 50%;
   margin-right: 7px;
   vertical-align: middle;
-  background: var(--coop-muted, #6b6f72);
+  background: var(--coop-slate-light, #8a8a80);
 }
 
-.o_coop_run_on_track  { background: #1f9d55; }   // идёт по плану
-.o_coop_run_at_risk   { background: #e0a800; }   // есть риск
-.o_coop_run_off_track { background: #d64545; }   // отстаёт
-.o_coop_run_on_hold   { background: #8a8f94; }   // приостановлен
-.o_coop_run_done      { background: #146b64; }   // завершён
+// Цветами системы, как в эталоне (`ProjectsPage`), а не своими
+// зелёным, жёлтым и красным: те не менялись в тёмной теме.
+.o_coop_run_on_track  { background: var(--coop-teal, #146b64); }       // идёт по плану
+.o_coop_run_at_risk   { background: var(--coop-gold, #c98a2b); }       // есть риск
+.o_coop_run_off_track { background: var(--coop-error, #b3413a); }      // отстаёт
+.o_coop_run_on_hold   { background: var(--coop-slate-light, #8a8a80); } // приостановлен
+.o_coop_run_done      { background: var(--coop-teal-dark, #0e4f4a); }  // завершён
 
 // Засечка порога запуска на полосе готовности.
 //

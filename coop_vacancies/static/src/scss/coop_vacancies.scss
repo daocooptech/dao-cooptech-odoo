@@ -86,10 +86,16 @@
   // принципиально другое предложение, чем зарплата, и разницу человек
   // должен видеть до того, как прочитал строку. У денег метки нет: это
   // случай по умолчанию, и помечать его значит зашумлять каталог.
+  // Справа от аватара нанимателя, по его середине, как в эталоне
+  // (`VacanciesPage`, `o_coop_card_tag_shift`): правый угол — закладке.
   .o_coop_vac_kind {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 17px;
+    left: 52px;
+    max-width: calc(100% - 100px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     font: 600 10.5px/1 'Manrope', sans-serif;
     padding: 5px 9px;
     border-radius: 999px;
