@@ -475,8 +475,26 @@
 
   // Лента под панелью — во всю ширину поля.
   .o_content > .o_kanban_renderer,
+  .o_content > .o_list_renderer,
   .o_content > .o_coop_shelves {
     flex: 1 1 100%;
+  }
+
+  // Плитка с полками — не ряд, а сетка из двух колонок
+  // (`catalog_shelves.scss`), и `flex`/`order` выше на неё не действуют:
+  // панель оставалась во второй колонке шириной в ноль (замер 12.10.2026,
+  // окно 925 — «плиткой фильтров не увидел»). Саму сетку запрос по полю
+  // перестроить не может — поле и есть контейнер, — поэтому каждый
+  // ребёнок встаёт во всю ширину своей строкой, панель первой.
+  .o_web_client .o_content:has(> .o_coop_shelves) {
+    // Колонка — у каждого по имени класса: общее `> *` весит меньше,
+    // чем `grid-area` из `catalog_shelves.scss`, и проигрывало ему.
+    > .o_coop_filters { grid-column: 1 / -1; grid-row: 1; }
+    > .o_coop_shelves { grid-column: 1 / -1; grid-row: 2; }
+    > .o_kanban_renderer,
+    > .o_list_renderer,
+    > .o_renderer { grid-column: 1 / -1; grid-row: 3; }
+    > .o_coop_pager { grid-column: 1 / -1; grid-row: 4; }
   }
 
   // Отступ вровень с первой полкой нужен колонке справа, а не панели
@@ -493,5 +511,20 @@
 @container coop-filters (min-width: 430px) {
   .o_coop_filters_body > .o_coop_field:has(> .o_coop_chips) {
     grid-column: span 2;
+  }
+}
+
+// Вид «Таблицей»: панель справа от списка, как в плитке. Поле списка у
+// движка — блок, и панель вставала бы под таблицу; рядом — флексом.
+// Ширина таблицы от панели не зависит: она прокручивается в своём поле.
+.o_list_view .o_content:has(> .o_coop_filters) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0 16px;
+
+  > .o_list_renderer {
+    flex: 1 1 0;
+    min-width: 0;
   }
 }

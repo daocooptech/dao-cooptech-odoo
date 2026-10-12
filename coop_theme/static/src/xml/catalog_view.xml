@@ -286,4 +286,15 @@
     </xpath>
   </t>
 
+  <!-- Панель отбора в виде «Таблицей» — `ListController`, `coopHasFilters`
+       в `js/catalog_view.js`. Встаёт в рабочее поле рядом со списком, как
+       в плитке: раскладку по ширине поля решают те же правила
+       (`catalog_filters.scss`). -->
+  <t t-name="coop_theme.ListViewFilters" t-inherit="web.ListView" t-inherit-mode="extension">
+    <xpath expr="//t[@t-elif='this.model.couldNotLoadRootOffline']" position="after">
+      <CoopFilters t-if="this.coopHasFilters" t-key="'coop_filters'"
+                   resModel="this.props.resModel" baseDomain="this.coopBaseDomain"/>
+    </xpath>
+  </t>
+
 </templates>

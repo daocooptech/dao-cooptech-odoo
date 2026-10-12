@@ -571,6 +571,28 @@ function coopOwnCreate() {
 patch(KanbanController.prototype, coopOwnCreate());
 patch(ListController.prototype, coopOwnCreate());
 
+// Панель отбора — и в виде «Таблицей». Каталог тот же, отбор тот же, а
+// панели в списке не было вовсе: она встроена в контроллер каталожной
+// плитки, а «Таблицей» — штатный список движка (владелец 12.10.2026:
+// «в каталогах если выводить списком не увидел фильтров»). Признак — тот
+// же, что у кнопки отбора в панели управления (`coopHasFilters`), чтобы
+// кнопка и панель не расходились.
+ListController.components = { ...ListController.components, CoopFilters };
+patch(ListController.prototype, {
+    get coopHasFilters() {
+        if (this.env.inDialog) {
+            return false;
+        }
+        const context = this.env.searchModel?.globalContext || {};
+        return Boolean(context.coop_catalog || context.coop_filters);
+    },
+
+    /** Домен раздела без поиска — как у плитки (`coopBaseDomain` выше). */
+    get coopBaseDomain() {
+        return this.env.searchModel?.globalDomain || [];
+    },
+});
+
 // Строка поиска каталога: без штатного выпадающего меню и со своей
 // подсказкой. Признак каталога тот же, что у панели управления, — из
 // контекста действия.
