@@ -24,6 +24,7 @@ import re
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 
 BASE = 'https://apps.odoo.com'
@@ -93,6 +94,99 @@ def parse(page_html, page):
     return cards
 
 
+CATEGORY = re.compile(r'href="/apps/modules/category/([^/"]+)/browse\?series=')
+
+
+def by_category(args):
+    """N карточек поровну из категорий магазина.
+
+    Владелец 12.10.2026: «давай не будем проходить все 51 тыс, 2500 пройди
+    по равным частям из разных каталогов». Из каждой категории берутся
+    первые карточки в порядке самого магазина; модуль, уже взятый из
+    другой категории, второй раз не считается. Где категория меньше доли
+    (в «Tutorial» их полтора десятка), недостача добирается вторым
+    проходом из остальных — поровну, по кругу.
+    """
+    first = get(f'{BASE}/apps/modules/browse?series={args.series}')
+    names = sorted(set(html.unescape(n) for n in CATEGORY.findall(first)))
+    if not names:
+        raise RuntimeError('список категорий пуст — разметка магазина поменялась')
+    print(f'категорий {len(names)}: {", ".join(names)}', flush=True)
+
+    seen, taken = set(), {name: [] for name in names}
+    cursor = {name: 1 for name in names}        # следующая страница категории
+    pending = {name: [] for name in names}      # прочитано, но ещё не взято
+    exhausted = set()                           # страниц больше нет
+
+    def pull(name, need):
+        """Добрать в категорию `need` новых карточек; False — взять неоткуда."""
+        while need > 0:
+            if not pending[name]:
+                if name in exhausted:
+                    return False
+                quoted = urllib.parse.quote(name)
+                page = cursor[name]
+                url = (f'{BASE}/apps/modules/category/{quoted}/browse?series={args.series}'
+                       if page == 1 else
+                       f'{BASE}/apps/modules/category/{quoted}/browse/page/{page}?series={args.series}')
+                cards = parse(get(url), page)
+                cursor[name] += 1
+                time.sleep(args.delay)
+                if len(cards) < 20:
+                    exhausted.add(name)
+                pending[name].extend(cards)
+                continue
+            card = pending[name].pop(0)
+            if card['module'] in seen:
+                continue
+            card['category'] = name
+            seen.add(card['module'])
+            taken[name].append(card)
+            need -= 1
+        return True
+
+    # Порядок магазина — не по скачиваниям: в первых двухстах было 195
+    # платных при медиане 12 скачиваний. Сортировку на сайте `robots.txt`
+    # запрещает, поэтому читается `--scan` страниц категории, и из них
+    # берутся самые скачиваемые (владелец: «у которых больше всего
+    # скачиваний»).
+    if args.scan:
+        for name in names:
+            while cursor[name] <= args.scan and name not in exhausted:
+                quoted = urllib.parse.quote(name)
+                page = cursor[name]
+                url = (f'{BASE}/apps/modules/category/{quoted}/browse?series={args.series}'
+                       if page == 1 else
+                       f'{BASE}/apps/modules/category/{quoted}/browse/page/{page}?series={args.series}')
+                cards = parse(get(url), page)
+                cursor[name] += 1
+                time.sleep(args.delay)
+                if len(cards) < 20:
+                    exhausted.add(name)
+                pending[name].extend(cards)
+            pending[name].sort(key=lambda c: c['downloads'], reverse=True)
+            exhausted.add(name)
+
+    share = args.by_category // len(names)
+    for name in names:
+        pull(name, share)
+        print(f'  {name}: {len(taken[name])}', flush=True)
+    # Недостача — по одной карточке из ещё не кончившихся категорий по кругу.
+    alive = [name for name in names if pending[name] or name not in exhausted]
+    while len(seen) < args.by_category and alive:
+        for name in list(alive):
+            if len(seen) >= args.by_category:
+                break
+            if not pull(name, 1):
+                alive.remove(name)
+
+    with open(args.out, 'w', encoding='utf-8') as out:
+        for name in names:
+            for card in taken[name]:
+                out.write(json.dumps(card, ensure_ascii=False) + '\n')
+    print(f'готово: {len(seen)} карточек из {len(names)} категорий → {args.out}', flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('out')
@@ -100,7 +194,14 @@ def main():
     parser.add_argument('--delay', type=float, default=1.0)
     parser.add_argument('--top', type=int, default=0,
                         help='после сбора записать N самых скачиваемых в <out>.topN.jsonl')
+    parser.add_argument('--by-category', type=int, default=0, metavar='N',
+                        help='вместо полного обхода — N карточек поровну из категорий')
+    parser.add_argument('--scan', type=int, default=0, metavar='K',
+                        help='с --by-category: читать K страниц категории и брать самые скачиваемые')
     args = parser.parse_args()
+
+    if args.by_category:
+        return by_category(args)
 
     done = set()
     if os.path.exists(args.out):
