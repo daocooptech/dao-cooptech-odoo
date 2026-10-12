@@ -776,15 +776,6 @@ export class CoopSidebar extends Component {
         browser.location.href = "/web/session/logout";
     }
 
-    /** Стрелка на планке: значки или значки с названиями (решение 459),
-     *  выбор за участником — как у меню подразделов. */
-    toggleRail() {
-        this.ui.railWide = !this.ui.railWide;
-        this.state.fly = null;
-        coopSaveMenuState(this.orm, { rail_wide: this.ui.railWide });
-        coopShellChanged(this.env);
-    }
-
     /**
      * Подразделы раздела — те же пункты меню модуля, что в меню
      * подразделов (`CoopSubnav.refresh`): один подраздел — это сам раздел,

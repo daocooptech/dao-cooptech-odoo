@@ -65,17 +65,6 @@
              t-on-mouseleave="() => this.hideFly()"
              t-on-scroll="() => this.hideFly()"
              t-on-keydown="(ev) => this.onRailKey(ev)">
-      <!-- Стрелка сворачивания — на самой планке, как у меню подразделов
-           (владелец 12.10.2026). Только на большом экране (shell.scss). -->
-      <div class="o_coop_rail_head">
-        <button type="button" class="o_coop_rail_toggle"
-                t-att-title="this.ui.railWide ? 'Свернуть разделы' : 'Развернуть разделы'"
-                t-att-aria-label="this.ui.railWide ? 'Свернуть разделы' : 'Развернуть разделы'"
-                t-att-aria-expanded="this.ui.railWide ? 'true' : 'false'"
-                t-on-click="() => this.toggleRail()">
-          <CoopIcon name="this.ui.railWide ? 'chevrons-left' : 'chevrons-right'" size="16"/>
-        </button>
-      </div>
       <nav class="o_coop_rail_main" aria-label="Разделы платформы">
         <a t-foreach="this.state.main" t-as="item" t-key="item.label"
            href="#" class="o_coop_nav_item"

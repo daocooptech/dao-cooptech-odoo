@@ -267,7 +267,6 @@
 .o_coop_rail_sep,
 .o_coop_rail_add,
 .o_coop_rail_gap,
-.o_coop_rail_head,
 .o_coop_rail_fly {
   display: none;
 }
@@ -1333,37 +1332,6 @@ body.o_dark_mode .o_coop_loader_mark {
     }
   }
 
-  // Стрелка сворачивания — как у меню подразделов, в цветах планки.
-  .o_coop_rail_head {
-    display: flex;
-    flex: none;
-    justify-content: center;
-    margin-bottom: 4px;
-  }
-
-  .o_coop_rail_toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 28px;
-    padding: 0;
-    border: 0;
-    border-radius: var(--coop-radius-item);
-    background: none;
-    color: var(--coop-rail-fg);
-    cursor: pointer;
-
-    &:hover {
-      background: var(--coop-rail-active);
-      color: var(--coop-rail-accent);
-    }
-
-    &:focus-visible {
-      outline-color: var(--coop-rail-accent);
-    }
-  }
-
   .o_coop_rail_main {
     flex: none;
   }
@@ -1522,10 +1490,6 @@ body.o_dark_mode .o_coop_loader_mark {
 
     nav {
       align-items: stretch;
-    }
-
-    .o_coop_rail_head {
-      justify-content: flex-end;
     }
 
     .o_coop_nav_item,
