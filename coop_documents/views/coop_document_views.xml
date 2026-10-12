@@ -294,7 +294,7 @@
           первое находит записи, которые нечем проверить, второе —
           то, что ещё не разложено.
         -->
-        <filter name="favorite" string="☆ Избранное" domain="[('coop_is_favorite', '=', True)]"/>
+        <filter name="favorite" string="Избранное" domain="[('coop_is_favorite', '=', True)]"/>
         <filter name="awaits" string="Жду подписи" domain="[('awaits_me', '=', True)]"/>
         <filter name="shared" string="Доступные мне" domain="[('shared_with_me', '=', True)]"/>
         <filter name="trash" string="Корзина" domain="[('active', '=', False)]"/>

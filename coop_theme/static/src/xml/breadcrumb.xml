@@ -13,7 +13,16 @@
             t-att-title="this.coopBack.title" t-att-aria-label="this.coopBack.title"
             data-hotkey="b"
             t-on-click="() => this.coopGoBack()">
-      <i class="oi oi-arrow-left" role="img" aria-hidden="true"/>
+      <!-- Контур Tabler `arrow-left`. Шрифтовой `oi-arrow-left` в Odoo 20
+           пуст: значки `oi` теперь рисуются по `data-icon`, и от кнопки
+           оставалась одна рамка (владелец 12.10.2026). -->
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+           stroke-linejoin="round" aria-hidden="true">
+        <path d="M5 12l14 0"/>
+        <path d="M5 12l6 6"/>
+        <path d="M5 12l6 -6"/>
+      </svg>
       <span class="o_coop_back_label" t-out="this.coopBack.label"/>
     </button>
   </t>
