@@ -2,6 +2,7 @@
 
 import { patch } from "@web/core/utils/patch";
 import { FormController } from "@web/views/form/form_controller";
+import { proxy, useListener } from "@odoo/owl";
 import { coopIsPlatformModel } from "@coop_theme/js/platform_page";
 
 /**
@@ -35,8 +36,82 @@ import { coopIsPlatformModel } from "@coop_theme/js/platform_page";
  * списком оставила бы эти случаи без сохранения вовсе — тупик хуже
  * кнопки в шапке. Одна полоса ловит любое изменение, откуда бы оно ни
  * пришло.
+ *
+ * Владелец 12 октября 2026 — полосу убрать везде: «сохранять только тот
+ * пункт который редактируется, мы это уже обсуждали». Поэтому на
+ * страницах платформы запись сохраняется сама, как только правка
+ * закончена: поле — сразу после изменения, строка встроенного списка —
+ * когда с неё ушли (пока строка в правке, сохранение ждёт: иначе
+ * недописанная строка с пустым обязательным полем завалила бы проверку на
+ * каждой букве). Крючок на завершение строки движок не даёт (см. выше),
+ * поэтому уход со строки ловится щелчком и уходом фокуса — тем же
+ * событием, по которому движок саму строку и закрывает.
+ *
+ * Полоса остаётся в двух случаях: новая запись (сохранить её — значит
+ * создать, это решение человека, а не побочный эффект правки) и
+ * сохранение, не прошедшее проверку (иначе неверная правка осталась бы
+ * без выхода — ни сохранить, ни отменить).
  */
+const COOP_AUTOSAVE_DELAY = 400;
+
+/** Есть ли в записи строка встроенного списка, открытая на правку. */
+function coopRowInEdit(record) {
+    for (const value of Object.values(record.data || {})) {
+        if (value && typeof value === "object" && "editedRecord" in value && value.editedRecord) {
+            return true;
+        }
+    }
+    return false;
+}
+
 patch(FormController.prototype, {
+    setup() {
+        super.setup(...arguments);
+        this.coopSave = proxy({ failed: false });
+        this.coopSaveTimer = null;
+        const schedule = () => this.coopScheduleSave();
+        useListener(window, "click", schedule, true);
+        useListener(window, "focusout", schedule, true);
+    },
+
+    onRecordChanged() {
+        super.onRecordChanged(...arguments);
+        this.coopScheduleSave();
+    },
+
+    /**
+     * Отложенное сохранение правки на странице платформы.
+     *
+     * Обёрнуто, как и признаки ниже: зовётся на каждый щелчок по странице,
+     * и брошенное исключение не должно ронять ничего, кроме самого
+     * автосохранения, — тогда остаётся полоса и сохранение руками.
+     */
+    coopScheduleSave() {
+        try {
+            if (!this.coopIsPlatformPage) {
+                return;
+            }
+            clearTimeout(this.coopSaveTimer);
+            this.coopSaveTimer = setTimeout(() => this.coopAutoSave(), COOP_AUTOSAVE_DELAY);
+        } catch (error) {
+            console.warn("[форма] автосохранение не запланировано:", error);
+        }
+    },
+
+    async coopAutoSave() {
+        try {
+            const root = this.model?.root;
+            if (!root || root.isNew || !root.dirty || coopRowInEdit(root)) {
+                return;
+            }
+            const saved = await this.save();
+            this.coopSave.failed = !saved;
+        } catch (error) {
+            console.warn("[форма] автосохранение не прошло:", error);
+            this.coopSave.failed = true;
+        }
+    },
+
     /** Платформенная ли это страница записи. */
     get coopIsPlatformPage() {
         // Форма в окне — мастер или запись из списка: у окна свой подвал
@@ -55,7 +130,8 @@ patch(FormController.prototype, {
     },
 
     /**
-     * Есть ли что сохранять.
+     * Нужна ли полоса сохранения: новая запись или правка, которую
+     * автосохранение не пропустило.
      *
      * Всё вычисление обёрнуто: getter зовётся на каждой отрисовке формы, а
      * форма — это каждая карточка платформы. Брошенное отсюда исключение
@@ -66,7 +142,10 @@ patch(FormController.prototype, {
     get coopHasChanges() {
         try {
             const root = this.model?.root;
-            return Boolean(root && (root.dirty || root.isNew));
+            if (!root) {
+                return false;
+            }
+            return Boolean(root.isNew || (root.dirty && this.coopSave.failed));
         } catch (error) {
             console.warn("[форма] не удалось решить, есть ли правки:", error);
             return false;
