@@ -58,9 +58,14 @@
         <header>
           <button name="action_coop_message" type="object" string="Написать"
                   class="btn-primary" invisible="coop_is_self"/>
+          <!-- С организацией не дружат, а состоят в связи (владелец
+               12.10.2026); действие то же. -->
           <button name="action_coop_befriend" type="object"
                   string="Добавить в друзья"
-                  invisible="coop_is_self or coop_friend_state != 'none'"/>
+                  invisible="is_company or coop_is_self or coop_friend_state != 'none'"/>
+          <button name="action_coop_befriend" type="object"
+                  string="Добавить в связи"
+                  invisible="not is_company or coop_is_self or coop_friend_state != 'none'"/>
           <button name="action_coop_befriend" type="object"
                   string="Принять дружбу" class="btn-primary"
                   invisible="coop_friend_state != 'pending_in'"/>
