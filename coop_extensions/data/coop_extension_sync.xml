@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!--
+    Каталог из трёх источников (решение 463, кусок 1): коробка движка,
+    модули DAO COOPTECH, двести сторонних из магазина Odoo. При каждом
+    обновлении модуля — дополняет недостающее и не трогает правленое
+    руками (`coop.extension._coop_sync_catalog`).
+  -->
+  <function model="coop.extension" name="_coop_sync_catalog"/>
+</odoo>

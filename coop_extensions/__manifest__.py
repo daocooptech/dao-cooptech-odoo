@@ -26,6 +26,7 @@
         'views/coop_extension_views.xml',
         'views/coop_extension_menus.xml',
         'data/coop_extension_data.xml',
+        'data/coop_extension_sync.xml',
         'security/ir.access.csv',
     ],
     'assets': {

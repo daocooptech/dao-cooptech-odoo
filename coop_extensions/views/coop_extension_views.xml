@@ -30,6 +30,8 @@
         <field name="is_official"/>
         <field name="pricing"/>
         <field name="icon"/>
+        <field name="source"/>
+        <field name="store_url"/>
         <templates>
           <t t-name="card">
             <!-- Общая карточка каталога: слева квадрат, справа тело.
@@ -40,11 +42,11 @@
               <div class="o_coop_listing_ico o_coop_ext_ico">
                 <!-- Контур по разделу (виджет `coop_sign`), а не эмодзи
                      из поля `icon`: эталон `ExtensionsPage`. -->
-                <field name="category" widget="coop_sign" options="{'size': 22, 'icon': 'puzzle', 'map': {'accounting': 'receipt', 'process': 'settings', 'sales': 'shopping-cart', 'finance': 'credit-card', 'community': 'building-community', 'integration': 'plug-connected'}}"/>
+                <field name="category" widget="coop_sign" options="{'size': 22, 'icon': 'puzzle', 'map': {'accounting': 'receipt', 'process': 'settings', 'sales': 'shopping-cart', 'finance': 'credit-card', 'community': 'building-community', 'integration': 'plug-connected', 'localization': 'world'}}"/>
               </div>
               <div class="o_coop_listing_body">
               <div class="o_coop_ext_cat">
-                <field name="category"/>
+                <field name="category"/> · <field name="source"/>
               </div>
               <div class="o_coop_ext_title">
                 <field name="name"/>
@@ -58,10 +60,10 @@
                         class="o_coop_badge o_coop_on">✓ Подключено</span>
                   <span t-if="!record.is_installed.raw_value and record.module_id.raw_value"
                         class="o_coop_badge o_coop_off">Не подключено</span>
-                  <span t-if="!record.module_id.raw_value"
+                  <span t-if="!record.module_id.raw_value and record.source.raw_value != 'third'"
                         class="o_coop_badge o_coop_off">Заявлено</span>
-                  <span t-if="!record.is_official.raw_value"
-                        class="o_coop_badge o_coop_third">Стороннее</span>
+                  <span t-if="record.source.raw_value == 'third'"
+                        class="o_coop_badge o_coop_third">Магазин Odoo</span>
                 </div>
                 <div class="d-flex align-items-center gap-2">
                   <span class="o_coop_ext_price"
@@ -71,9 +73,17 @@
                   <button t-if="!record.is_installed.raw_value and record.module_id.raw_value"
                           name="action_install" type="object"
                           class="btn o_coop_action"
+                          groups="base.group_system,coop_base.group_coop_platform"
                           confirm="Подключить расширение? Модуль будет установлен в вашу
   базу, в интерфейсе появятся его разделы. Отключение делается там же, в каталоге.">
                     Подключить
+                  </button>
+                  <!-- Стороннее — витрина и ссылка (решение 463): кода
+                       на платформе нет, подключать нечего. -->
+                  <button t-if="record.source.raw_value == 'third' and record.store_url.raw_value"
+                          name="action_open_store" type="object"
+                          class="btn o_coop_action">
+                    В магазине Odoo
                   </button>
                 </div>
               </div>
@@ -112,6 +122,7 @@
         <header>
           <button name="action_install" type="object" string="Подключить"
                   class="btn-primary" invisible="is_installed or not module_id"
+                  groups="base.group_system,coop_base.group_coop_platform"
                   confirm="Подключить расширение? Модуль будет установлен в вашу базу."/>
           <button name="action_publish" type="object" string="Опубликовать в каталоге"
                   invisible="publication_state == 'published'"/>

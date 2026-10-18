@@ -39,13 +39,29 @@ class CoopExtension(models.Model):
         ('finance', 'Финансы'),
         ('community', 'Сообщество'),
         ('integration', 'Интеграции'),
+        ('localization', 'Локализации'),
     ], string='Раздел', required=True, default='process')
+
+    # Откуда модуль (решение 463): коробка движка, модули рабочей группы,
+    # мировой каталог apps.odoo.com. Сторонние — витрина и ссылка: их кода
+    # на платформе нет, «Подключить» у них не бывает.
+    source = fields.Selection([
+        ('odoo', 'Odoo'),
+        ('cooptech', 'DAO COOPTECH'),
+        ('third', 'Сторонние приложения'),
+    ], string='Источник', required=True, default='odoo', index=True)
+    store_url = fields.Char(string='Страница в магазине Odoo')
+    vendor = fields.Char(
+        string='Разработчик',
+        help='Автор модуля, как он подписан в манифесте или в магазине.')
+    downloads = fields.Integer(string='Скачиваний')
 
     # Значок раздела — чтобы карточка расширения читалась как остальные
     # каталоги: слева квадрат с символом, а не пустое место. Фотографии
     # у модуля нет и быть не может, но геометрия одна.
     ICONS = {'accounting': '🧾', 'process': '⚙️', 'sales': '🛍',
-             'finance': '💳', 'community': '🏘️', 'integration': '🔌'}
+             'finance': '💳', 'community': '🏘️', 'integration': '🔌',
+             'localization': '🌐'}
 
     icon = fields.Char(string='Значок', compute='_compute_icon')
 
@@ -128,8 +144,25 @@ class CoopExtension(models.Model):
                     suffix.get(record.pricing, ''))
 
     def action_install(self):
-        """Подключить расширение — то есть поставить настоящий модуль Odoo."""
+        """Подключить расширение — то есть поставить настоящий модуль Odoo.
+
+        Ставит модуль в общую базу платформы, поэтому — только рабочая
+        группа платформы и администратор (решение 463: установка — после
+        одобрения всей рабочей группы). Пока каталог состоял из двадцати
+        отобранных модулей, кнопку видели все; с коробкой движка в каталоге
+        любой участник мог бы поставить на боевую любой из шестисот.
+        """
         self.ensure_one()
+        user = self.env.user
+        if not (user.has_group('base.group_system')
+                or user.has_group('coop_base.group_coop_platform')):
+            raise UserError(
+                'Модуль ставится в общую базу платформы, поэтому подключает '
+                'его рабочая группа платформы после проверки кода.')
+        if self.source == 'third':
+            raise UserError(
+                'Стороннего приложения на платформе нет — это витрина магазина '
+                'Odoo. Откройте его страницу в магазине.')
         if not self.module_id:
             raise UserError(
                 'Это расширение пока заявлено, но не готово к установке: '
@@ -148,6 +181,139 @@ class CoopExtension(models.Model):
             'view_mode': 'form',
             'target': 'current',
         }
+
+    def action_open_store(self):
+        self.ensure_one()
+        if not self.store_url:
+            raise UserError('У приложения нет страницы в магазине.')
+        return {'type': 'ir.actions.act_url', 'url': self.store_url,
+                'target': 'new'}
+
+    # ── Каталог из трёх источников (решение 463, кусок 1) ───────────────
+    #
+    # Разделы магазина и категорий движка — к шести разделам каталога.
+    # Ключ — первое слово категории («Sales/Point of Sale» → «Sales»).
+    CATEGORY_MAP = {
+        'Accounting': 'accounting', 'Invoicing': 'accounting',
+        'Payment Providers': 'finance', 'Banking': 'finance',
+        'Sales': 'sales', 'Point of Sale': 'sales', 'Website': 'sales',
+        'eCommerce': 'sales', 'CRM': 'sales', 'Marketing': 'sales',
+        'Email Marketing': 'sales', 'Live Chat': 'sales',
+        'Discuss': 'community', 'Events': 'community',
+        'eLearning': 'community', 'Productivity': 'community',
+        'Social Network': 'community', 'Communication': 'community',
+        'Account Charts': 'localization', 'Localization': 'localization',
+        'EDI': 'localization',
+        'Technical': 'integration', 'Technical Settings': 'integration',
+        'Tools': 'integration', 'Extra Tools': 'integration',
+        'Connector': 'integration', 'Dashboard': 'integration',
+        'Uncategorized': 'integration', 'Theme': 'integration',
+    }
+    # Это не товар: внутренности движка и тесты.
+    SKIP_CATEGORIES = ('Hidden', 'Tests')
+
+    @api.model
+    def _coop_category_of(self, name):
+        head = (name or '').split('/')[0].strip()
+        return self.CATEGORY_MAP.get(head, 'process')
+
+    @api.model
+    def _coop_sync_catalog(self):
+        """Дополнить каталог модулями коробки, рабочей группы и магазина.
+
+        Идёт при каждом обновлении модуля. Добавляет недостающее по имени
+        модуля и проставляет источник у уже заведённых; описания, условия
+        и снятие с публикации, сделанные руками, не трогает.
+        """
+        existing = {rec.module_name: rec for rec in
+                    self.sudo().with_context(active_test=False).search(
+                        [('module_name', '!=', False)])}
+        vals_list = []
+        modules = self.env['ir.module.module'].sudo().with_context(lang='en_US')
+        for module in modules.search([]):
+            # Названия категории и её родителей, от своей к корню: в Odoo 20
+            # у категории модуля нет `complete_name`, а раздел решает
+            # ближайшее известное название («Account Charts» под «Accounting»
+            # — локализация, а не учёт).
+            names, cat = [], module.category_id
+            while cat:
+                names.append(cat.name)
+                cat = cat.parent_id
+            category = next((n for n in names if n in self.CATEGORY_MAP),
+                            names[-1] if names else '')
+            source = 'cooptech' if module.name.startswith('coop_') else 'odoo'
+            rec = existing.get(module.name)
+            if rec:
+                if rec.source != 'third' and rec.source != source:
+                    rec.source = source
+                continue
+            if (set(names) & set(self.SKIP_CATEGORIES)
+                    or module.name.startswith('test_')):
+                continue
+            vals_list.append({
+                'name': module.shortdesc or module.name,
+                'summary': module.summary or module.shortdesc or module.name,
+                'module_name': module.name,
+                'source': source,
+                'vendor': module.author or False,
+                'category': self._coop_category_of(category),
+                'is_official': source == 'cooptech',
+                'publication_state': 'published',
+                'sequence': 50,
+            })
+            existing[module.name] = True
+        vals_list += self._coop_store_vals(existing)
+        if vals_list:
+            # Без записей «создано» в ленте: шестьсот сообщений о том, что
+            # каталог наполнен, никому не нужны.
+            self.sudo().with_context(tracking_disable=True, mail_create_nolog=True,
+                                     mail_notrack=True).create(vals_list)
+        return len(vals_list)
+
+    @api.model
+    def _coop_store_vals(self, existing):
+        """Сторонние приложения — 200 карточек apps.odoo.com (12.10.2026).
+
+        Файл собран сборщиком `tools/fetch_odoo_apps.py --by-category 200
+        --scan 5`: поровну из 18 разделов магазина, самые скачиваемые.
+        """
+        import json
+        from odoo.tools.misc import file_path
+        path = file_path('coop_extensions/data/odoo_apps_19.jsonl')
+        rub = self.env.ref('base.RUB', raise_if_not_found=False)
+        usd = self.env.ref('base.USD', raise_if_not_found=False)
+        # Уже заведённые сторонние узнаются по странице в магазине: имени
+        # модуля у них нет (см. ниже), а без этой сверки каждое обновление
+        # модуля заводило бы все двести заново.
+        seen = set(self.sudo().with_context(active_test=False).search(
+            [('source', '=', 'third')]).mapped('store_url'))
+        vals_list = []
+        with open(path, encoding='utf-8') as handle:
+            for line in handle:
+                app = json.loads(line)
+                if app['url'] in seen or app['module'] in existing:
+                    continue
+                seen.add(app['url'])
+                vals_list.append({
+                    'name': app['name'],
+                    'summary': app.get('summary') or app['name'],
+                    # Имя модуля стороннего — для справки, не для установки:
+                    # `module_name` пуст, иначе карточка искала бы его в
+                    # коробке и предлагала «Подключить».
+                    'description': '<p>Модуль <code>%s</code> в магазине Odoo, '
+                                   'серия %s.</p>' % (app['module'], app['series']),
+                    'source': 'third',
+                    'store_url': app['url'],
+                    'vendor': app.get('author') or False,
+                    'downloads': app.get('downloads') or 0,
+                    'category': self._coop_category_of(app.get('category')),
+                    'pricing': 'once' if app.get('is_paid') else 'free',
+                    'price': app.get('price') or 0.0,
+                    'currency_id': (usd or rub or self.env.company.currency_id).id,
+                    'publication_state': 'published',
+                    'sequence': 90,
+                })
+        return vals_list
 
     def action_publish(self):
         self.write({'publication_state': 'published'})
@@ -180,6 +346,11 @@ class CoopExtensionCatalogFilters(models.Model):
                     for code, label in self._fields[name].selection]
 
         return [
+            {'code': 'source', 'label': 'Источник',
+             'hint': 'Коробка Odoo, модули DAO COOPTECH или магазин Odoo — '
+                     'сторонние приложения там только витриной и ссылкой.',
+             'widget': 'select', 'field': 'source', 'placeholder': 'Любой',
+             'options': choice('source')},
             {'code': 'category', 'label': 'Раздел',
              'hint': 'Учёт, процессы, сбыт, финансы, сообщество, интеграции.',
              'widget': 'select', 'field': 'category', 'placeholder': 'Любой',
@@ -200,10 +371,11 @@ class CoopExtensionCatalogFilters(models.Model):
                   'domain': [('is_installed', '=', False),
                              ('module_name', '!=', False)]},
                  {'value': 'planned', 'label': '🕓 Заявлено',
-                  'domain': [('module_name', '=', False)]},
-                 {'value': 'official', 'label': '🏛 Платформы',
-                  'domain': [('is_official', '=', True)]},
+                  'domain': [('module_name', '=', False),
+                             ('source', '!=', 'third')]},
+                 {'value': 'official', 'label': '🏛 DAO COOPTECH',
+                  'domain': [('source', '=', 'cooptech')]},
                  {'value': 'third', 'label': '🧩 Стороннее',
-                  'domain': [('is_official', '=', False)]},
+                  'domain': [('source', '=', 'third')]},
              ]},
         ]
