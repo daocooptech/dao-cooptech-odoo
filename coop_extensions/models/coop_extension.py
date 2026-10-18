@@ -120,7 +120,12 @@ class CoopExtension(models.Model):
 
     color = fields.Integer(string='Цвет')
 
-    @api.depends('module_name')
+    # И от состояния модуля, а не только от имени: модуль ставят после того,
+    # как карточка заведена, и без этой зависимости «Подключено» оставалось
+    # ложью — на копии боевой так стояли 7 карточек, среди них `project`
+    # (18.10.2026: «Управление проектами» в меню организации висело
+    # «устанавливается»).
+    @api.depends('module_name', 'module_id.state')
     def _compute_module(self):
         modules = self.env['ir.module.module'].sudo()
         for record in self:
@@ -262,6 +267,14 @@ class CoopExtension(models.Model):
                 'sequence': 50,
             })
             existing[module.name] = True
+        # Карточки, у которых признак «стоит» разошёлся с модулем, —
+        # пересчитать (см. `_compute_module`).
+        stale = self.sudo().with_context(active_test=False).search(
+            [('module_id', '!=', False)]).filtered(
+            lambda r: r.is_installed != (r.module_id.state == 'installed'))
+        if stale:
+            self.env.add_to_compute(self._fields['is_installed'], stale)
+            stale.flush_recordset(['is_installed'])
         vals_list += self._coop_store_vals(existing)
         if vals_list:
             # Без записей «создано» в ленте: шестьсот сообщений о том, что
@@ -365,10 +378,11 @@ class CoopExtensionCatalogFilters(models.Model):
              'widget': 'range', 'field': 'price'},
             {'code': 'quick', 'label': 'Быстрые фильтры', 'widget': 'quick',
              'options': [
+                 # Подключено — в меню текущего лица (решение 468).
                  {'value': 'installed', 'label': '✓ Подключено',
-                  'domain': [('is_installed', '=', True)]},
+                  'domain': [('coop_connected', '=', True)]},
                  {'value': 'available', 'label': '⬇ Можно подключить',
-                  'domain': [('is_installed', '=', False),
+                  'domain': [('coop_connected', '=', False),
                              ('module_name', '!=', False)]},
                  {'value': 'planned', 'label': '🕓 Заявлено',
                   'domain': [('module_name', '=', False),

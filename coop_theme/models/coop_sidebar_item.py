@@ -338,6 +338,10 @@ class CoopSidebarItem(models.Model):
                     item.sudo().write({'is_required': False})
                     item.sudo().unlink()
                     dropped += 1
+            # Удалённые выше дальше не читаются: проход ниже по ним падал
+            # MissingError, как только убирать стало что (CRM из личных
+            # меню, 18.10.2026).
+            existing = existing.exists()
 
             # Расширения, снятые из умолчаний (RETIRED_EXTENSIONS), — сразу
             # при обновлении, а не при следующей загрузке меню участником

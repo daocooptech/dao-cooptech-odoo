@@ -17,13 +17,17 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.0.0',
+    'version': '20.0.1.1.0',
     'license': 'LGPL-3',
     # coop_theme — панель отбора каталога: вид расширений берёт её
     # поведение и компонент, а не только css-класс.
-    'depends': ['base', 'mail', 'coop_base', 'coop_theme'],
+    # website — ради порядка загрузки: в движке 20 поле вида `visibility`
+    # из website обязательное, и новый вид этого модуля, заведённый при
+    # `-u` раньше website, падал на NOT NULL (18.10.2026, меню организации).
+    'depends': ['base', 'mail', 'website', 'coop_base', 'coop_theme'],
     'data': [
         'views/coop_extension_views.xml',
+        'views/coop_extension_connection_views.xml',
         'views/coop_extension_menus.xml',
         'data/coop_extension_data.xml',
         'data/coop_extension_sync.xml',

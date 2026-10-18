@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!--
+    Меню организации (решение 468): общее для всех её представителей,
+    ведёт руководитель. Сюда ведёт «Настроить меню», когда человек
+    действует от имени организации (`coop.shell.boot`, `menuSettings`).
+    Переставить — перетаскиванием, убрать — удалением строки; права
+    проверяет модель (`_coop_check_manage`).
+  -->
+  <record id="view_coop_extension_connection_list" model="ir.ui.view">
+    <field name="name">coop.extension.connection.list</field>
+    <field name="model">coop.extension.connection</field>
+    <field name="arch" type="xml">
+      <list string="Меню организации" create="false" editable="bottom">
+        <field name="sequence" widget="handle"/>
+        <field name="extension_id" readonly="1" string="Расширение"/>
+        <field name="state" widget="badge" decoration-success="state == 'on'"
+               decoration-warning="state == 'installing'"/>
+        <field name="user_id" readonly="1" optional="show"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="action_coop_org_menu" model="ir.actions.act_window">
+    <field name="name">Меню организации</field>
+    <field name="path">org-menu</field>
+    <field name="res_model">coop.extension.connection</field>
+    <field name="view_mode">list</field>
+    <field name="domain">[('partner_id', '=', user.coop_acting_as_id.id or user.partner_id.id)]</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">В меню организации пока нет расширений</p>
+      <p>Подключите их в каталоге расширений кнопкой «Подключить».</p>
+    </field>
+  </record>
+</odoo>

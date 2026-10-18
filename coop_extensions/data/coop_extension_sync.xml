@@ -7,4 +7,7 @@
     руками (`coop.extension._coop_sync_catalog`).
   -->
   <function model="coop.extension" name="_coop_sync_catalog"/>
+  <!-- Меню по лицу (решение 468): CRM уходит из личных меню в меню
+       организаций — у людей CRM нет (решение 450). -->
+  <function model="coop.sidebar.item" name="resync_defaults"/>
 </odoo>

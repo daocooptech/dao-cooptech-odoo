@@ -2,3 +2,5 @@ id,name,model_id,group_id/id,operation,domain
 access_coop_extension_user,coop.extension user,coop.extension,base.group_user,r,
 access_coop_extension_board,coop.extension board,coop.extension,coop_base.group_coop_board,cru,
 access_coop_extension_platform,coop.extension platform,coop.extension,coop_base.group_coop_platform,crud,
+access_coop_extension_connection_user,coop.extension.connection user,coop.extension.connection,base.group_user,rud,
+access_coop_extension_connection_platform,coop.extension.connection platform,coop.extension.connection,coop_base.group_coop_platform,crud,

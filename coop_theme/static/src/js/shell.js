@@ -569,6 +569,9 @@ export class CoopSidebar extends Component {
             // порознь и занимали соединения впереди раздела.
             const boot = await this.boot.get();
             items = boot.sidebar || [];
+            // От имени организации «Настроить меню» ведёт в её общее меню
+            // (решение 468, `coop_extensions`), а не в личное.
+            this.orgSettingsId = boot.menuSettings || false;
             if (boot.menu) {
                 this.ui.railWide = Boolean(boot.menu.rail_wide);
                 this.ui.subCollapsed = Boolean(boot.menu.sub_collapsed);
@@ -888,10 +891,11 @@ export class CoopSidebar extends Component {
     }
 
     openSettings() {
-        if (!this.settingsId) {
+        const target = this.orgSettingsId || this.settingsId;
+        if (!target) {
             return;
         }
-        return this.action.doAction(this.settingsId, { clearBreadcrumbs: true });
+        return this.action.doAction(target, { clearBreadcrumbs: true });
     }
 
     /**
@@ -946,6 +950,7 @@ export class CoopSidebar extends Component {
             key: item.label,
             label: item.label,
             soon: !item.actionId,
+            pending: Boolean(item.pending),
             top: Math.round(Math.max(8, Math.min(rect.top, browser.innerHeight - height - 8))),
             left: Math.round(rect.right),
             children,
@@ -1013,7 +1018,7 @@ export class CoopSidebar extends Component {
                 type: "ir.actions.client",
                 tag: "coop_soon",
                 name: item.label,
-                params: { label: item.label },
+                params: { label: item.label, pending: Boolean(item.pending) },
             }, options);
         }
         return this.action.doAction(item.actionId, options);
@@ -1062,6 +1067,7 @@ export class CoopSoon extends Component {
 
     setup() {
         this.label = this.props.action?.params?.label || this.props.action?.name || "Раздел";
+        this.pending = Boolean(this.props.action?.params?.pending);
     }
 }
 

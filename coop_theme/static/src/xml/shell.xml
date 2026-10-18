@@ -114,7 +114,7 @@
         <a t-foreach="this.state.extensions" t-as="item" t-key="item.label"
            href="#" class="o_coop_nav_item"
            t-att-class="{ 'active': this.isActive(item), 'o_coop_nav_soon': !item.actionId }"
-           t-att-title="item.actionId ? undefined : 'Раздел ещё не перенесён на движок'"
+           t-att-title="item.actionId ? undefined : (item.pending ? 'Модуль устанавливается на платформу' : 'Раздел ещё не перенесён на движок')"
            t-att-aria-label="item.label"
            t-att-aria-current="this.isActive(item) ? 'page' : undefined"
            t-on-mouseenter="(ev) => this.showFly(item, ev)"
@@ -122,7 +122,10 @@
            t-on-click.prevent="() => this.open(item)">
           <CoopIcon name="item.icon" size="18"/>
           <span class="o_coop_nav_label" t-out="item.label"/>
-          <span class="o_coop_soon_mark" t-if="!item.actionId">скоро</span>
+          <!-- «устанавливается» — подключено из каталога, модуль ставит
+               рабочая группа (решение 463). -->
+          <span class="o_coop_soon_mark" t-if="!item.actionId"
+                t-out="item.pending ? 'устанавливается' : 'скоро'"/>
         </a>
       </nav>
       </div>
@@ -170,7 +173,8 @@
                t-att-role="this.state.fly.children.length ? 'menu' : 'tooltip'">
             <div class="o_coop_rail_flytitle">
               <t t-out="this.state.fly.label"/>
-              <span class="o_coop_rail_flysoon" t-if="this.state.fly.soon">скоро</span>
+              <span class="o_coop_rail_flysoon" t-if="this.state.fly.soon"
+                    t-out="this.state.fly.pending ? 'устанавливается' : 'скоро'"/>
             </div>
             <a t-foreach="this.state.fly.children" t-as="sub" t-key="sub.id"
                href="#" role="menuitem" class="o_coop_subnav_item"
@@ -326,6 +330,14 @@
     <div class="o_coop_soon" t-att-class="this.props.className">
       <div class="o_coop_soon_box">
         <h2 t-out="this.label"/>
+        <t t-if="this.pending">
+        <p>
+          Расширение подключено и устанавливается на платформу: рабочая
+          группа проверяет код модуля и ставит его. Пункт откроется сам, как
+          только установка закончится, — нажимать «Подключить» ещё раз не нужно.
+        </p>
+        </t>
+        <t t-else="">
         <p>
           Раздел ещё не перенесён на движок. Он есть в макете платформы и
           появится здесь по мере переноса — порядок разделов в меню задан
@@ -335,6 +347,7 @@
           Пункт меню оставлен намеренно: меню без него выглядело бы полным,
           и понять, что раздела не хватает, было бы неоткуда.
         </p>
+        </t>
       </div>
     </div>
   </t>
