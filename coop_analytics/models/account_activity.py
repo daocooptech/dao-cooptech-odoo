@@ -143,38 +143,45 @@ class ResPartner(models.Model):
                     break
             vmax = step * 4
             avg = sum(values) / len(values)
-            w, h = 600, 180
-            x = lambda i: 40 + i * (w - 50) / 11
-            yv = lambda v: 10 + (1 - v / vmax) * (h - 30)
-            line = ' '.join('%s %.1f %.1f' % ('L' if i else 'M', x(i), yv(v))
-                            for i, v in enumerate(values))
-            area = '%s L %.1f %.1f L %.1f %.1f Z' % (line, x(11), yv(0), x(0), yv(0))
-            grid = ''.join(
-                '<line x1="40" x2="%d" y1="%.1f" y2="%.1f" class="o_coop_an_grid"/>'
-                '<text x="34" y="%.1f" class="o_coop_an_tick">%d</text>'
-                % (w - 10, yv(step * k), yv(step * k), yv(step * k) + 3, step * k)
-                for k in range(5))
-            labels = ''.join('<text x="%.1f" y="%d" class="o_coop_an_month">%s</text>'
-                             % (x(i), h - 4, self.MONTHS[m - 1])
-                             for i, (_y, m) in enumerate(months))
+            # Как LineChart эталона: поле 600×200 растягивается по ширине,
+            # линия — плавная (кубические кривые через середины), под ней
+            # штриховка, линейки на ¼, ½, ¾ и верхе; подписи осей — HTML
+            # рядом с полем, а не текст внутри растянутого SVG.
+            w, h = 600, 200
+            pts = [(i * w / 11.0, h - v * h / float(vmax)) for i, v in enumerate(values)]
+            line = 'M%.1f %.1f' % pts[0]
+            for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+                mx = (x0 + x1) / 2
+                line += ' C%.1f %.1f %.1f %.1f %.1f %.1f' % (mx, y0, mx, y1, x1, y1)
+            area = '%s L%d %d L0 %d Z' % (line, w, h, h)
+            ya = h - avg * h / float(vmax)
+            rules = ''.join('<line class="o_coop_an_rule" x1="0" x2="%d" y1="%.1f" y2="%.1f"/>'
+                            % (w, h - g * h, h - g * h) for g in (0.25, 0.5, 0.75, 1))
             svg = (
-                '<svg viewBox="0 0 %d %d" class="o_coop_an_chart" role="img" '
-                'aria-label="Действий по месяцам: %s">%s'
-                '<path d="%s" class="o_coop_an_area"/>'
-                '<path d="%s" class="o_coop_an_line"/>'
-                '<line x1="40" x2="%d" y1="%.1f" y2="%.1f" class="o_coop_an_avg"/>'
-                '%s</svg>'
-            ) % (w, h, escape(', '.join(str(v) for v in values)), grid, area, line,
-                 w - 10, yv(avg), yv(avg), labels)
+                '<svg viewBox="0 0 %d %d" preserveAspectRatio="none" aria-hidden="true">'
+                '<defs><pattern id="o_coop_an_hatch" width="6" height="6" '
+                'patternUnits="userSpaceOnUse" patternTransform="rotate(45)">'
+                '<line x1="0" y1="0" x2="0" y2="6" class="o_coop_an_hatch"/></pattern></defs>'
+                '%s<path d="%s" fill="url(#o_coop_an_hatch)" stroke="none"/>'
+                '<path d="%s" fill="none" class="o_coop_an_line"/>'
+                '<path d="M0 %.1f L%d %.1f" fill="none" class="o_coop_an_line o_coop_an_dashed"/>'
+                '</svg>') % (w, h, rules, area, line, ya, w, ya)
+            ticks = ''.join('<span>%d</span>' % (step * k) for k in range(4, -1, -1))
+            labels = ''.join('<span>%s</span>' % self.MONTHS[m - 1] for _y, m in months)
             partner.coop_activity_chart = Markup(
                 '<div class="o_coop_an_panel">'
                 '<div class="o_coop_an_panel_head"><h3>Активность</h3>'
                 '<a href="/odoo/analytics-activity" class="btn btn-secondary btn-sm">Вся активность</a></div>'
-                '<div class="o_coop_an_keys"><span class="o_coop_an_key">действий в месяц</span>'
-                '<span class="o_coop_an_key o_coop_an_key_dash">средний месяц · %s</span></div>'
-                '%s<p class="o_coop_an_caption">Записи, сообщения, комментарии, сделки, '
-                'новые друзья, уроки, обмены и вклады — по месяцам.</p></div>'
-                % (escape(('%.1f' % avg).replace('.', ',').replace(',0', '')), Markup(svg)))
+                '<figure class="o_coop_an_chart" role="img" aria-label="Действий по месяцам: %s">'
+                '<ul class="o_coop_an_keys"><li><i class="o_coop_an_key"></i>действий в месяц</li>'
+                '<li><i class="o_coop_an_key o_coop_an_key_dash"></i>средний месяц <b>%s</b></li></ul>'
+                '<div class="o_coop_an_plot"><div class="o_coop_an_axis" aria-hidden="true">%s</div>'
+                '<div class="o_coop_an_box">%s<div class="o_coop_an_x">%s</div></div></div>'
+                '<figcaption class="o_coop_an_caption">Записи, сообщения, комментарии, сделки, '
+                'новые друзья, уроки, обмены и вклады — по месяцам.</figcaption></figure></div>'
+                % (escape(', '.join(str(v) for v in values)),
+                   escape(('%.1f' % avg).replace('.', ',').replace(',0', '')),
+                   Markup(ticks), Markup(svg), Markup(labels)))
 
     # Искры в плитках «Моего аккаунта» (эталон AnalyticsAccountPage, Spark):
     # справа от числа — ход за год, двенадцать штрихов по месяцам, текущий
