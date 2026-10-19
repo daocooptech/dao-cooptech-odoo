@@ -30,4 +30,7 @@
     действие надо.
   -->
   <function model="coop.sidebar.item" name="repoint_obligatory"/>
+  <!-- Знак «Рабочей группы платформы», пока своей картинки нет
+       (`res.partner._coop_team_logo`). -->
+  <function model="res.partner" name="_coop_team_logo"/>
 </odoo>

@@ -5,3 +5,4 @@ from . import coop_catalog
 from . import res_users
 from . import coop_favorite_page
 from . import ir_http
+from . import res_partner
