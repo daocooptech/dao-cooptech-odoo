@@ -355,16 +355,14 @@ if [ "$engine_switch" = "1" ]; then
         exit 1
     fi
     say "Движок: $engine_tag"
-    # Русский перевод модулей, у которых он сменился в движке, — в базу.
-    # Подписи полей, меню и фильтров хранятся в базе, обычное обновление
-    # их не перезаписывает (deploy/engine_i18n.py). Сравнение по файлам:
-    # клон мелкий, истории для git diff в нём нет.
-    i18n_mods=$(cd "$ENGINE_DIR" && for po in addons/*/i18n/ru.po odoo/addons/*/i18n/ru.po; do
-                    [ -f "$po" ] || continue
-                    if ! cmp -s "$po" "$ODOO_HOME/odoo-prev/$po"; then
-                        basename "$(dirname "$(dirname "$po")")"
-                    fi
-                done | sort -u | tr '
+    # Русский перевод всех установленных модулей — в базу. Подписи полей,
+    # меню, фильтров и тексты шаблонов хранятся в базе, обычное обновление
+    # их не перезаписывает (deploy/engine_i18n.py). Раньше перезаливались
+    # только модули, чей ru.po сменился, и в базе застревали старые тексты
+    # (20.10.2026: «Follow and comments tasks of your projects» на портале
+    # при готовом переводе в `project/i18n/ru.po`). Все 183 модуля на копии
+    # боевой — 19 с.
+    i18n_mods=$(run psql -d "$DB" -tAc                 "select name from ir_module_module where state = 'installed' order by name"                 | tr '
 ' ' ')
     if [ -n "${i18n_mods// /}" ]; then
         printf '%s
