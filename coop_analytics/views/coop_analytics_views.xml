@@ -242,6 +242,7 @@
         <field name="coop_community_count"/>
         <field name="coop_membership_count"/>
         <field name="coop_activity_30"/>
+        <field name="coop_activity_chart"/>
         <templates>
           <t t-name="card">
             <div class="o_coop_an_tiles">
@@ -254,6 +255,9 @@
               <div><b t-out="record.coop_community_count.raw_value"/><span>сообществ</span></div>
               <div><b t-out="record.coop_membership_count.raw_value"/><span>кооперативов</span></div>
             </div>
+            <!-- Эталон AnalyticsAccountPage: под плитками — график
+                 «Активность» (действий в месяц и средний месяц). -->
+            <t t-out="record.coop_activity_chart.value"/>
           </t>
         </templates>
       </kanban>
