@@ -412,8 +412,13 @@ export class CoopExchange extends Component {
         if (!c.length) {
             return { min: 0, max: 0 };
         }
-        const min = Math.min(...c.map((x) => x.l));
-        const max = Math.max(...c.map((x) => x.h));
+        // Цена выпуска входит в шкалу: линия выпуска не уходит за край,
+        // даже когда торгуются далеко от неё.
+        const issue = this.issuePrice;
+        const lows = c.map((x) => x.l).concat(issue ? [issue] : []);
+        const highs = c.map((x) => x.h).concat(issue ? [issue] : []);
+        const min = Math.min(...lows);
+        const max = Math.max(...highs);
         const pad = (max - min) * 0.06 || max * 0.01;
         return { min: min - pad, max: max + pad };
     }
@@ -503,6 +508,18 @@ export class CoopExchange extends Component {
             pts.push(`${pts.length ? "L" : "M"} ${(step * i + step / 2).toFixed(2)} ${this._y(avg).toFixed(2)}`);
         }
         return pts.join(" ");
+    }
+
+    /** Опорная цена выпуска — по ней поставщик выпустил токены (владелец
+     *  19.10.2026: линия рядом со средней, подпись «выпуск»). */
+    get issuePrice() {
+        const row = this.currentRow;
+        return (row && row.issue_price) || 0;
+    }
+
+    get issuePriceLine() {
+        const v = this.issuePrice;
+        return v && this.candles.length ? { y: this._y(v), v } : null;
     }
 
     get lastPriceLine() {

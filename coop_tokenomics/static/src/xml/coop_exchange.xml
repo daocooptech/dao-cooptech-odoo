@@ -237,6 +237,9 @@
                     <path t-att-d="this.closeLine.line" class="o_coop_tx_line" fill="none"
                           vector-effect="non-scaling-stroke"/>
                   </t>
+                  <line t-if="this.issuePriceLine" x1="0" x2="100"
+                        t-att-y1="this.issuePriceLine.y" t-att-y2="this.issuePriceLine.y"
+                        class="o_coop_tx_issueline" vector-effect="non-scaling-stroke"/>
                   <line t-if="this.lastPriceLine" x1="0" x2="100"
                         t-att-y1="this.lastPriceLine.y" t-att-y2="this.lastPriceLine.y"
                         t-att-class="'o_coop_tx_lastline ' + (this.lastPriceLine.up ? 'o_coop_tx_lastup' : 'o_coop_tx_lastdown')"
@@ -251,6 +254,10 @@
                 <div class="o_coop_tx_ticks">
                   <span t-foreach="this.priceTicks" t-as="tk" t-key="tk_index"
                         t-attf-style="top: {{ tk.top }}%" t-out="this.money(tk.v)"/>
+                  <span t-if="this.issuePriceLine" class="o_coop_tx_issuetag"
+                        t-attf-style="top: {{ this.issuePriceLine.y }}%"
+                        t-att-title="'Цена выпуска: ' + this.money(this.issuePriceLine.v)"
+                        t-out="'выпуск ' + this.money(this.issuePriceLine.v)"/>
                   <span t-if="this.lastPriceLine" class="o_coop_tx_lasttag"
                         t-att-class="this.lastPriceLine.up ? 'o_coop_tx_tagup' : 'o_coop_tx_tagdown'"
                         t-attf-style="top: {{ this.lastPriceLine.y }}%" t-out="this.money(this.lastPriceLine.v)"/>
