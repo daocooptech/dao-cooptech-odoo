@@ -20,10 +20,13 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.2.0',
+    'version': '20.0.1.3.0',
     'license': 'LGPL-3',
+    # website — ради порядка загрузки: в движке 20 его поле вида `visibility`
+    # обязательное, и новый вид модуля, загруженного раньше website, падает
+    # при `-u` (список отзывов, 19.10.2026; грабли «Odoo 20: новый вид»).
     'depends': ['coop_base', 'coop_resources', 'coop_skills', 'coop_vacancies',
-                'coop_projects', 'mail'],
+                'coop_projects', 'mail', 'website'],
     'data': [
         'data/coop_deal_data.xml',
         'report/coop_deal_reports.xml',

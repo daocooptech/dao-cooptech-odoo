@@ -408,10 +408,32 @@
     </field>
   </record>
 
+  <!-- Список отзывов по эталону ReviewsPage: столбцы по полям модели.
+       Кнопки создания нет — отзыв оставляют со страницы завершённой
+       сделки окном «Отзыв». -->
+  <record id="view_coop_deal_review_list" model="ir.ui.view">
+    <field name="name">coop.deal.review.list</field>
+    <field name="model">coop.deal.review</field>
+    <field name="arch" type="xml">
+      <list string="Отзывы по сделкам" create="false">
+        <field name="deal_id"/>
+        <field name="author_id"/>
+        <field name="target_id"/>
+        <field name="rating" widget="badge"
+               decoration-success="rating in ('4', '5')"
+               decoration-warning="rating == '3'"
+               decoration-danger="rating in ('1', '2')"/>
+        <field name="body"/>
+        <field name="visible" widget="boolean" string="Раскрыт"/>
+      </list>
+    </field>
+  </record>
+
   <record id="action_coop_deal_review" model="ir.actions.act_window">
     <field name="name">Отзывы по сделкам</field>
     <field name="res_model">coop.deal.review</field>
     <field name="view_mode">list,form</field>
+    <field name="view_id" ref="view_coop_deal_review_list"/>
       <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Отзывов пока нет</p>
       <p>Отзыв пишется после завершения сделки, обеими сторонами. Оба показываются только когда написаны оба — иначе первый отзыв влиял бы на второй, а не описывал сделку.</p>
