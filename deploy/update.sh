@@ -50,6 +50,12 @@ start_service() {
     systemctl "$@" coop-odoo
 }
 
+# Служба остановлена этим запуском — значит, при откате кода её надо
+# перезапустить: работающая служба держит в памяти тот код, с которым
+# поднялась.
+service_touched=0
+stop_service() { service_touched=1; systemctl stop coop-odoo; }
+
 say() { printf '\n\033[1m== %s\033[0m\n' "$*"; }
 run() { sudo -u "$USER" "$@"; }
 
@@ -97,6 +103,28 @@ before=$(run git rev-parse HEAD)
 run git fetch --quiet origin main
 run git reset --hard --quiet origin/main
 after=$(run git rev-parse HEAD)
+
+# Код модулей на диске и схема базы должны совпадать. `git reset` выше
+# уже положил новый код, а схему меняет только `-u` ниже; любой выход
+# между ними оставлял новый код на старой базе. 19.10.2026 так и вышло:
+# движок не скачался (обрыв HTTP/2), выкатка «отменена, портал не
+# тронут», а на диске уже `db8c77a`; на втором заходе откат движка
+# перезапустил службу — и она поднялась на новом коде без столбца
+# `coop_extension.kind`. Вдобавок следующий запуск видел before = after
+# и модули не обновлял бы вовсе. Поэтому до успешного обновления модулей
+# любой ненулевой выход возвращает код на прежний коммит.
+code_kept=0
+keep_old_code() {
+    local rc=$?
+    if [ "$rc" != 0 ] && [ "$code_kept" = 0 ] && [ "$before" != "$after" ]; then
+        run git -C "$ODOO_HOME/coop-addons" reset --hard --quiet "$before" || true
+        say "Код модулей возвращён на ${before:0:7} — следующий запуск повторит выкатку"
+        if [ "$service_touched" = 1 ]; then
+            start_service restart || true
+        fi
+    fi
+}
+trap keep_old_code EXIT
 
 # Движок — свой форк без обращений к Odoo S.A. (решения 439, 441, 442).
 #
@@ -243,6 +271,50 @@ fi
 
 say "Обновление $before → $after"
 
+# Какие модули задеты. Первый уровень каталогов и есть имена модулей.
+#
+# `if`, а не `[ -f … ] && echo`: при `set -e` и `pipefail` последняя
+# проверка в цикле задаёт его код возврата, и папка без манифеста,
+# оказавшаяся в списке последней, роняла всю выкатку. Так и вышло с
+# `forks/`: правка README форков остановила обновление уже после
+# `git reset` — код на сервере обновился, а модули нет, и следующий
+# запуск изменений уже не видел.
+# Форки лежат уровнем ниже — `forks/<модуль>/…`: для них имя модуля —
+# вторая часть пути. Раньше их правки не видела ни одна проверка, и
+# исправленный план счетов (`forks/l10n_ru`, 28.09.2026) на боевую бы не
+# доехал: код обновился бы, модуль — нет.
+changed=$(run git diff --name-only "$before" "$after" \
+          | awk -F/ 'NF>2 && $1=="forks" {print $2; next} NF>1 {print $1}' | sort -u \
+          | while read -r d; do
+                if [ -f "$ODOO_HOME/coop-addons/$d/__manifest__.py" ] \
+                   || [ -f "$ODOO_HOME/coop-addons/forks/$d/__manifest__.py" ]; then
+                    echo "$d"
+                fi
+            done \
+          | paste -sd, -)
+
+# Правки в static/ — это стили, скрипты и шаблоны браузера. Базы они не
+# касаются, и обновлять ради них модули незачем: обновление останавливает
+# службу на десятки секунд, а перезапуск занимает секунды. При выкладке
+# раз в минуту разница видна невооружённым глазом.
+#
+# Считаем в переменную, а не проверяем `grep -q` прямо в условии.
+# Причина — 20 сентября 2026: в выкатке приехало 425 снимков и девять
+# файлов кода, а сценарий отчитался «изменения только в static» и
+# модули не тронул. `grep -q` выходит на первом же совпадении, git
+# получает SIGPIPE, при `set -o pipefail` весь конвейер считается
+# упавшим, и отрицание превращает «код изменился» в «изменений нет».
+# Молча: в журнале осталась строка про static, и загрузчик данных не
+# выполнялся вовсе.
+# Имя переменной латиницей: bash не принимает кириллицу в имени и
+# выполняет такую строку как команду — «не_static=…: нет такого файла».
+non_static=$(run git diff --name-only "$before" "$after" \
+            | grep -v '/static/' | head -1 || true)
+if [ -n "$changed" ] && [ -z "$non_static" ]; then
+    say "Изменения только в static — обновление модулей не нужно"
+    changed=""
+fi
+
 # Смена движка. Снимок — до остановки; очистка (этап 2: update_list и
 # пометка удалённых из движка модулей) — уже на новом дереве. Упала —
 # прежний каталог возвращается на место, и служба поднимается на нём.
@@ -253,11 +325,27 @@ if [ "$engine_switch" = "1" ]; then
         exit 1
     fi
     engine_snapshot="$LAST_DUMP"
-    systemctl stop coop-odoo
+    stop_service
     rm -rf "$ODOO_HOME/odoo-prev"
     mv "$ENGINE_DIR" "$ODOO_HOME/odoo-prev"
     mv "$ENGINE_NEXT" "$ENGINE_DIR"
-    if ! run "$ODOO_HOME/venv/bin/python" "$ENGINE_DIR/odoo-bin" shell             -c "$CONF" -d "$DB" --no-http             < "$ODOO_HOME/coop-addons/deploy/engine_cleanup.py"; then
+    # Схема модулей — раньше очистки: очистка поднимает реестр на новом
+    # коде, и поле, которого ещё нет в базе, роняет её «UndefinedColumn»
+    # (19.10.2026, `coop_extension.kind`: движок не встал). Поэтому сперва
+    # `-u` изменившихся модулей новым движком, потом очистка.
+    engine_ok=1
+    if [ -n "$changed" ]; then
+        say "Обновляю вместе с движком: $changed"
+        if run "$ODOO_HOME/venv/bin/python" "$ENGINE_DIR/odoo-bin"                 -c "$CONF" -d "$DB" -u "$changed" --stop-after-init --no-http; then
+            modules_updated=1
+        else
+            engine_ok=0
+        fi
+    fi
+    if [ "$engine_ok" = 1 ] && ! run "$ODOO_HOME/venv/bin/python" "$ENGINE_DIR/odoo-bin" shell             -c "$CONF" -d "$DB" --no-http             < "$ODOO_HOME/coop-addons/deploy/engine_cleanup.py"; then
+        engine_ok=0
+    fi
+    if [ "$engine_ok" = 0 ]; then
         say "ДВИЖОК $engine_tag НЕ ВСТАЛ — возвращаю прежний"
         rm -rf "$ODOO_HOME/odoo-failed"
         mv "$ENGINE_DIR" "$ODOO_HOME/odoo-failed"
@@ -305,49 +393,6 @@ if [ "$engine_switch" = "1" ]; then
     fi
 fi
 
-# Какие модули задеты. Первый уровень каталогов и есть имена модулей.
-#
-# `if`, а не `[ -f … ] && echo`: при `set -e` и `pipefail` последняя
-# проверка в цикле задаёт его код возврата, и папка без манифеста,
-# оказавшаяся в списке последней, роняла всю выкатку. Так и вышло с
-# `forks/`: правка README форков остановила обновление уже после
-# `git reset` — код на сервере обновился, а модули нет, и следующий
-# запуск изменений уже не видел.
-# Форки лежат уровнем ниже — `forks/<модуль>/…`: для них имя модуля —
-# вторая часть пути. Раньше их правки не видела ни одна проверка, и
-# исправленный план счетов (`forks/l10n_ru`, 28.09.2026) на боевую бы не
-# доехал: код обновился бы, модуль — нет.
-changed=$(run git diff --name-only "$before" "$after" \
-          | awk -F/ 'NF>2 && $1=="forks" {print $2; next} NF>1 {print $1}' | sort -u \
-          | while read -r d; do
-                if [ -f "$ODOO_HOME/coop-addons/$d/__manifest__.py" ] \
-                   || [ -f "$ODOO_HOME/coop-addons/forks/$d/__manifest__.py" ]; then
-                    echo "$d"
-                fi
-            done \
-          | paste -sd, -)
-
-# Правки в static/ — это стили, скрипты и шаблоны браузера. Базы они не
-# касаются, и обновлять ради них модули незачем: обновление останавливает
-# службу на десятки секунд, а перезапуск занимает секунды. При выкладке
-# раз в минуту разница видна невооружённым глазом.
-#
-# Считаем в переменную, а не проверяем `grep -q` прямо в условии.
-# Причина — 20 сентября 2026: в выкатке приехало 425 снимков и девять
-# файлов кода, а сценарий отчитался «изменения только в static» и
-# модули не тронул. `grep -q` выходит на первом же совпадении, git
-# получает SIGPIPE, при `set -o pipefail` весь конвейер считается
-# упавшим, и отрицание превращает «код изменился» в «изменений нет».
-# Молча: в журнале осталась строка про static, и загрузчик данных не
-# выполнялся вовсе.
-# Имя переменной латиницей: bash не принимает кириллицу в имени и
-# выполняет такую строку как команду — «не_static=…: нет такого файла».
-non_static=$(run git diff --name-only "$before" "$after" \
-            | grep -v '/static/' | head -1 || true)
-if [ -n "$changed" ] && [ -z "$non_static" ]; then
-    say "Изменения только в static — обновление модулей не нужно"
-    changed=""
-fi
 
 # Новые модули: их надо не обновить, а поставить.
 #
@@ -382,7 +427,7 @@ if [ -n "$new_modules" ]; then
         say "ВНИМАНИЕ: снимок базы не сделан — установка отменена"
         exit 1
     fi
-    systemctl stop coop-odoo
+    stop_service
     if ! run "$ODOO_HOME/venv/bin/python" "$ODOO_HOME/odoo/odoo-bin"             -c "$CONF" -d "$DB" -i "$new_modules" --stop-after-init --no-http; then
         say "УСТАНОВКА УПАЛА: $new_modules"
         start_service start || true
@@ -391,7 +436,9 @@ if [ -n "$new_modules" ]; then
     start_service start
 fi
 
-if [ -z "$changed" ]; then
+if [ "${modules_updated:-0}" = "1" ]; then
+    say "Модули обновлены вместе с движком"
+elif [ -z "$changed" ]; then
     say "Изменения вне модулей — только перезапуск"
 else
     # Снимок базы до обновления.
@@ -414,7 +461,7 @@ else
     fi
 
     say "Обновляю: $changed"
-    systemctl stop coop-odoo
+    stop_service
     # Код возврата обновления ловим сами: при `set -e` сценарий вышел бы
     # молча, не сказав, откуда откатываться. Тринадцатого сентября
     # обновление уже роняло загрузку реестра целиком, оставив в базе
@@ -426,6 +473,9 @@ else
         exit 1
     fi
 fi
+
+# Схема базы сошлась с кодом — откатывать код больше незачем.
+code_kept=1
 
 # Службы Odoo S.A. — решения 439 (п. 4), 441, 442.
 #
@@ -447,7 +497,7 @@ if [ -f "$ODOO_HOME/coop-addons/deploy/engine.remove" ]; then
             say "ВНИМАНИЕ: снимок базы не сделан — очистка отменена"
             exit 1
         fi
-        systemctl stop coop-odoo
+        stop_service
         if ! run "$ODOO_HOME/venv/bin/python" "$ODOO_HOME/odoo/odoo-bin" shell \
                 -c "$CONF" -d "$DB" --no-http \
                 < "$ODOO_HOME/coop-addons/deploy/engine_cleanup.py"; then
