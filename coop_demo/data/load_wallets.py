@@ -499,22 +499,70 @@ def fill_main_history(env, login='dashkevich', target=200):
     user = env['res.users'].sudo().search([('login', '=', login)], limit=1)
     if not user:
         return 0
-    partner = user.partner_id
+    wallet = env['coop.wallet'].sudo().wallet_for(user.partner_id)
+    if not wallet.method_ids:
+        _fill_methods(env, wallet, 0)
+    return _fill_history(env, wallet, wallet.method_ids, target,
+                         fields.Date.to_date('2024-01-08'),
+                         'main-history:%s' % user.partner_id.id)
+
+
+# Расчётные счета организаций: юрлицо пополняет кошелёк и выводит с него
+# через банк, а не картой или СБП.
+ORG_ACCOUNTS = ['Сбербанк', 'ВТБ', 'Т-Банк', 'Альфа-Банк', 'Россельхозбанк', 'ПСБ']
+
+
+def fill_org_history(env, login='dashkevich'):
+    """История кошельков организаций главного участника витрины за год.
+
+    Владелец 19.10.2026: «сделай историю платежей, так чтобы видели
+    полноценный пример аналитики». У пяти его организаций было от нуля до
+    шести движений за два с половиной года — их кошельки и аналитика
+    выглядели заброшенными. Здесь у каждой — 100–150 движений за последние
+    двенадцать месяцев: банк, расчёты по сделкам, переводы членам и от
+    них, корректировки, в работе, отклонённые и отменённые.
+    """
+    user = env['res.users'].sudo().search([('login', '=', login)], limit=1)
+    if not user or 'coop.membership' not in env:
+        return 0
+    orgs = env['coop.membership'].sudo().search([
+        ('partner_id', '=', user.partner_id.id), ('state', '=', 'active'),
+    ]).mapped('organization_id')
+    Method = env['coop.wallet.method'].sudo()
+    today = fields.Date.context_today(user)
+    created = 0
+    for org in orgs:
+        wallet = env['coop.wallet'].sudo().wallet_for(org)
+        accounts = wallet.method_ids.filtered(lambda m: m.kind == 'account')
+        if not accounts:
+            for offset in range(2):
+                accounts |= Method.create({
+                    'wallet_id': wallet.id,
+                    'kind': 'account',
+                    'label': 'Расчётный счёт •• %04d (%s)' % (
+                        (org.id * 7919 + offset * 3301) % 9000 + 1000,
+                        ORG_ACCOUNTS[(org.id + offset) % len(ORG_ACCOUNTS)]),
+                    'sequence': 5 + offset,
+                    'is_default': not wallet.method_ids and offset == 0,
+                })
+        created += _fill_history(env, wallet, accounts, 100 + (org.id * 7) % 51,
+                                 today - timedelta(days=365), 'org-history:%s' % org.id)
+    return created
+
+
+def _fill_history(env, wallet, methods, target, start, seed):
+    """Довести историю кошелька до `target` движений с даты `start`."""
+    partner = wallet.partner_id
     # Без записей в ленте: двести движений завели бы двести сообщений.
     Movement = env['coop.wallet.movement'].sudo().with_context(
         tracking_disable=True, mail_create_nolog=True, mail_notrack=True)
-    wallet = env['coop.wallet'].sudo().wallet_for(partner)
     have = Movement.search_count([('wallet_id', '=', wallet.id)])
     if have >= target:
         return 0
-    if not wallet.method_ids:
-        _fill_methods(env, wallet, 0)
-    methods = wallet.method_ids
     default = methods.filtered('is_default')[:1] or methods[:1]
 
-    rnd = random.Random('main-history:%s' % partner.id)
+    rnd = random.Random(seed)
     today = fields.Date.context_today(wallet)
-    start = fields.Date.to_date('2024-01-08')
     span = (today - start).days
 
     deals = env['coop.deal'].sudo().search([
@@ -642,8 +690,8 @@ def fill_main_history(env, login='dashkevich', target=200):
         if state == 'confirmed':
             balance += value
         created += 1
-    _logger.info('Кошелёк главного участника %s: добавлено движений %s, остаток %.0f',
-                 login, created, balance)
+    _logger.info('Кошелёк %s: добавлено движений %s, остаток %.0f',
+                 partner.name, created, balance)
     return created
 
 

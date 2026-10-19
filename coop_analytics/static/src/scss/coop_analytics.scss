@@ -64,14 +64,25 @@
     gap: 8px;
     width: 100%;
 
+    // Число с подписью слева, мини-график справа по нижней линии (эталон).
+    // Узкой плитке не хватает места на оба — график уходит под число:
+    // иначе подпись ломалась посреди слова («подпи·счико·в»).
     > div {
       display: flex;
-      flex-direction: column;
-      gap: 2px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 8px;
       padding: 10px 12px;
       background: var(--coop-white, #fff);
       border: 1px solid var(--coop-line, #e6e6e1);
       border-radius: 10px;
+
+      > div {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
     }
 
     b {
@@ -80,10 +91,28 @@
       font-variant-numeric: tabular-nums;
     }
 
-    span {
+    > div > div > span {
       font-size: 11.5px;
       color: var(--coop-slate-light, #8f8f88);
     }
+  }
+
+  // Искра (Spark): двенадцать штрихов, текущий месяц — чернильный.
+  .o_coop_spark {
+    display: inline-flex;
+    flex: none;
+    align-items: flex-end;
+    gap: 3px;
+    height: 28px;
+
+    i {
+      display: block;
+      width: 2px;
+      border-radius: 1px;
+      background: var(--coop-line-strong, #d2d2cb);
+    }
+
+    i.o_coop_spark_on { background: var(--coop-ink, #14171a); }
   }
 }
 

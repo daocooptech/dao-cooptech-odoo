@@ -243,17 +243,26 @@
         <field name="coop_membership_count"/>
         <field name="coop_activity_30"/>
         <field name="coop_activity_chart"/>
+        <field name="coop_spark_friends"/>
+        <field name="coop_spark_followers"/>
+        <field name="coop_spark_activity"/>
+        <field name="coop_spark_deals"/>
+        <field name="coop_spark_trust"/>
+        <field name="coop_spark_projects"/>
+        <field name="coop_spark_communities"/>
+        <field name="coop_spark_coops"/>
         <templates>
           <t t-name="card">
+            <!-- Справа от числа — искра: ход за год (эталон, Spark). -->
             <div class="o_coop_an_tiles">
-              <div><b t-out="record.coop_friend_count.raw_value"/><span>друзей</span></div>
-              <div><b t-out="record.coop_follower_count.raw_value"/><span>подписчиков</span></div>
-              <div><b t-out="record.coop_activity_30.raw_value"/><span>действий за 30 дней</span></div>
-              <div><b t-out="record.coop_deal_count.raw_value"/><span>сделок</span></div>
-              <div><b><t t-out="record.coop_trust.raw_value || '—'"/><t t-if="record.coop_trust.raw_value">%</t></b><span>уровень доверия</span></div>
-              <div><b t-out="record.coop_project_count.raw_value"/><span>проектов</span></div>
-              <div><b t-out="record.coop_community_count.raw_value"/><span>сообществ</span></div>
-              <div><b t-out="record.coop_membership_count.raw_value"/><span>кооперативов</span></div>
+              <div><div><b t-out="record.coop_friend_count.raw_value"/><span>друзей</span></div><t t-out="record.coop_spark_friends.value"/></div>
+              <div><div><b t-out="record.coop_follower_count.raw_value"/><span>подписчиков</span></div><t t-out="record.coop_spark_followers.value"/></div>
+              <div><div><b t-out="record.coop_activity_30.raw_value"/><span>действий за 30 дней</span></div><t t-out="record.coop_spark_activity.value"/></div>
+              <div><div><b t-out="record.coop_deal_count.raw_value"/><span>сделок</span></div><t t-out="record.coop_spark_deals.value"/></div>
+              <div><div><b><t t-out="record.coop_trust.raw_value || '—'"/><t t-if="record.coop_trust.raw_value">%</t></b><span>уровень доверия</span></div><t t-out="record.coop_spark_trust.value"/></div>
+              <div><div><b t-out="record.coop_project_count.raw_value"/><span>проектов</span></div><t t-out="record.coop_spark_projects.value"/></div>
+              <div><div><b t-out="record.coop_community_count.raw_value"/><span>сообществ</span></div><t t-out="record.coop_spark_communities.value"/></div>
+              <div><div><b t-out="record.coop_membership_count.raw_value"/><span>кооперативов</span></div><t t-out="record.coop_spark_coops.value"/></div>
             </div>
             <!-- Эталон AnalyticsAccountPage: под плитками — график
                  «Активность» (действий в месяц и средний месяц). -->

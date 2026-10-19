@@ -28,6 +28,7 @@ from ..data import load_favorites
 from ..data import load_okved
 from ..data import load_accounts
 from ..data import load_vat
+from ..data import load_social_dates
 from ..data import load_staff
 from ..data import load_crm
 from ..data import load_deal_leads
@@ -231,6 +232,9 @@ class CoopDemoLoader(models.AbstractModel):
         # движений (владелец 27.09.2026); после сделок: часть движений —
         # расчёты по его настоящим сделкам.
         load_wallets.fill_main_history(self.env)
+        # История кошельков его организаций за год (владелец 19.10.2026:
+        # «полноценный пример аналитики») — тоже после сделок.
+        load_wallets.fill_org_history(self.env)
         # Договор и способ выплаты у вакансий кооперативов (решение 425) —
         # когда все вакансии, из каталога и из потребностей проектов, уже
         # заведены.
@@ -385,6 +389,9 @@ class CoopDemoLoader(models.AbstractModel):
         # Ответственные сторон и дела по сделкам (решение 450) — после
         # обращений: дела ставятся и по ним.
         load_deal_activities.load_deal_activities(self.env)
+        # Даты дружбы и подписок — последними: их заводят шаги выше, и
+        # дата каждой выводится из номера записи.
+        load_social_dates.spread_social_dates(self.env)
         return True
 
     def _load_rubrics(self):
