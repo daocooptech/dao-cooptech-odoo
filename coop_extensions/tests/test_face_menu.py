@@ -56,20 +56,32 @@ class TestFaceMenu(TransactionCase):
         ext.action_coop_disconnect()
         self.assertNotIn(self.waiting.name, self._ext_labels(self.seller))
 
-    def test_person_defaults_count_as_connected(self):
-        """Выданные платформой пункты каталог видит подключёнными."""
+    def test_new_person_has_no_given_extensions(self):
+        """Расширения платформа не выдаёт: только разделы, дальше — из каталога."""
         if not self.ready:
             self.skipTest('нет coop_documents')
-        self._ext_labels(self.seller)
-        self.assertEqual(self.ready.with_user(self.seller).coop_connect_state, 'on')
+        self.assertNotIn('Документы', self._ext_labels(self.seller))
+        ext = self.ready.with_user(self.seller)
+        self.assertEqual(ext.coop_connect_state, 'off')
+        ext.action_coop_connect()
+        ext.invalidate_recordset()
+        self.assertEqual(ext.coop_connect_state, 'on')
+        self.assertIn('Документы', self._ext_labels(self.seller))
+
+    def test_person_cannot_connect_org_accounting(self):
+        """Учёт организации человеку не подключить: внутри было бы «нет доступа»."""
+        stock = self.env['coop.extension'].sudo().search(
+            [('module_name', '=', 'stock'), ('is_installed', '=', True)], limit=1)
+        if not stock or self.seller.has_group('stock.group_stock_user'):
+            self.skipTest('нет склада или у продавца есть права склада')
+        with self.assertRaises(UserError):
+            stock.with_user(self.seller).action_coop_connect()
 
     def test_org_menu_is_shared_and_led_by_head(self):
         self.seller.coop_acting_as_id = self.org
         self.head.coop_acting_as_id = self.org
-        labels = self._ext_labels(self.seller)
-        # Тот же набор, что у людей (владелец 18.10.2026).
-        if self.ready:
-            self.assertIn('Документы', labels)
+        # Набора по умолчанию нет (владелец 19.10.2026).
+        self.assertNotIn('Документы', self._ext_labels(self.seller))
         if not self.waiting:
             return
         with self.assertRaises(UserError):

@@ -246,6 +246,17 @@ class CoopExtension(models.Model):
                 'разделов и уже включён на платформе.') % self.name)
         user = self.env.user
         face = self._coop_face()
+        # Пункт, по которому внутри «нет доступа», в меню не ставится
+        # (владелец 19.10.2026). Человеку так не подключить учёт
+        # организации — склад, закупки, бухгалтерию.
+        if entry[2] and not self.env['coop.sidebar.item']._coop_can_open(user, entry[2]):
+            if face == user.partner_id:
+                raise UserError(_(
+                    '«%s» работает в учёте организации. Подключите его, '
+                    'действуя от имени организации.') % entry[0])
+            raise UserError(_(
+                'У вас нет доступа к разделу «%s» в этой организации, и пункт '
+                'в меню не открылся бы.') % entry[0])
         if face != user.partner_id and not (
                 user.has_group('base.group_system') or user.coop_has_power('sign', face)):
             raise UserError(_(

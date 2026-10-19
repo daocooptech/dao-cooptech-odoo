@@ -468,7 +468,14 @@ class CoopSidebarItem(models.Model):
                 'is_required': True,
             })
         for index, (name, icon, xmlid) in enumerate(EXTENSION_ITEMS):
-            if name in REQUIRES and self._requirement(name, user) is not True:
+            # Расширения платформа больше не выдаёт (владелец 19.10.2026):
+            # у нового участника — только разделы и «+», расширение встаёт в
+            # меню, когда его подключили из каталога. EXTENSION_ITEMS
+            # остаётся справочником — каким пунктом встаёт подключённое.
+            # Здесь — только пункты по участию.
+            if name not in REQUIRES:
+                continue
+            if self._requirement(name, user) is not True:
                 continue
             action = self.env.ref(xmlid, raise_if_not_found=False) if xmlid else None
             values.append({
