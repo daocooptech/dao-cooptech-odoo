@@ -41,4 +41,5 @@
     },
     'post_init_hook': '_post_init',
     'installable': True,
+    'application': True,
 }

@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
+import re
+
 from odoo import api, fields, models
 from odoo.exceptions import UserError
+
+_CYRILLIC = re.compile('[А-Яа-яЁё]')
 
 
 class CoopExtension(models.Model):
@@ -90,6 +94,16 @@ class CoopExtension(models.Model):
                                 compute='_compute_module', store=True)
     module_state = fields.Selection(
         related='module_id.state', string='Состояние модуля', store=True)
+    # Как в Odoo (владелец 19.10.2026: «модули и плагины надо сделать как в
+    # одоо»): расширение — модуль-приложение (`application` в манифесте),
+    # у него свой раздел и пункт в меню. Остальное — плагины: они работают
+    # внутри других разделов, пункта меню у них нет, и «Подключить» им не
+    # нужно. Раньше подключить можно было любой модуль, и на плагине
+    # человек получал «нет своего раздела».
+    kind = fields.Selection([
+        ('app', 'Расширение'),
+        ('plugin', 'Плагин'),
+    ], string='Вид', compute='_compute_kind', store=True, index=True)
     is_installed = fields.Boolean(
         string='Подключено', compute='_compute_module', store=True)
 
@@ -133,6 +147,17 @@ class CoopExtension(models.Model):
                 if record.module_name else modules.browse()
             record.module_id = module
             record.is_installed = module.state == 'installed' if module else False
+
+    @api.depends('source', 'module_id.application')
+    def _compute_kind(self):
+        for record in self:
+            # Стороннее из магазина — витрина приложений apps.odoo.com.
+            # Заявленное без модуля — тоже расширение: его заявляют ради
+            # раздела, а не ради добавки к чужому.
+            if record.source == 'third' or not record.module_id:
+                record.kind = 'app'
+            else:
+                record.kind = 'app' if record.module_id.application else 'plugin'
 
     @api.depends('pricing', 'price', 'currency_id')
     def _compute_price_label(self):
@@ -276,12 +301,62 @@ class CoopExtension(models.Model):
             self.env.add_to_compute(self._fields['is_installed'], stale)
             stale.flush_recordset(['is_installed'])
         vals_list += self._coop_store_vals(existing)
+        # Русские названия коробки (владелец 19.10.2026: «некоторые модули
+        # из коробки не переведены на русский»). Перевод движка покрывает
+        # 49 названий из 565, поэтому свой словарь. Правим только то, что
+        # ещё латиницей: название, переписанное руками, не трогаем.
+        names = self._coop_ru_names()
+        for vals in vals_list:
+            ru = names.get(vals.get('module_name'))
+            if ru and vals.get('source') == 'odoo':
+                vals.update(name=ru[0], summary=ru[1])
+        for name, rec in existing.items():
+            ru = names.get(name)
+            if not ru or rec is True or rec.source != 'odoo':
+                continue
+            values = {}
+            if not _CYRILLIC.search(rec.name or ''):
+                values['name'] = ru[0]
+            if not _CYRILLIC.search(rec.summary or ''):
+                values['summary'] = ru[1]
+            if values:
+                rec.with_context(tracking_disable=True).write(values)
         if vals_list:
             # Без записей «создано» в ленте: шестьсот сообщений о том, что
             # каталог наполнен, никому не нужны.
             self.sudo().with_context(tracking_disable=True, mail_create_nolog=True,
                                      mail_notrack=True).create(vals_list)
         return len(vals_list)
+
+    @api.model
+    def _coop_drop_plugin_menus(self):
+        """Убрать из меню плагины, подключённые до разделения.
+
+        До 19.10.2026 «Подключить» было у любого модуля, и плагин вставал
+        в меню пунктом, который никуда не ведёт или ведёт в чужой раздел.
+        """
+        plugins = self.sudo().search([('kind', '=', 'plugin')])
+        items = self.env['coop.sidebar.item'].sudo().search(
+            [('extension_id', 'in', plugins.ids)])
+        conns = self.env['coop.extension.connection'].sudo().search(
+            [('extension_id', 'in', plugins.ids)])
+        items.write({'is_required': False})
+        items.unlink()
+        conns.unlink()
+        return len(items) + len(conns)
+
+    @api.model
+    def _coop_ru_names(self):
+        """{модуль: (название, коротко)} из `data/odoo_modules_ru.tsv`."""
+        from odoo.tools.misc import file_path
+        result = {}
+        path = file_path('coop_extensions/data/odoo_modules_ru.tsv')
+        with open(path, encoding='utf-8') as f:
+            for line in f:
+                parts = line.rstrip('\n').split('\t')
+                if len(parts) == 3 and parts[0]:
+                    result[parts[0]] = (parts[1], parts[2])
+        return result
 
     @api.model
     def _coop_store_vals(self, existing):
@@ -383,7 +458,8 @@ class CoopExtensionCatalogFilters(models.Model):
                   'domain': [('coop_connected', '=', True)]},
                  {'value': 'available', 'label': '⬇ Можно подключить',
                   'domain': [('coop_connected', '=', False),
-                             ('module_name', '!=', False)]},
+                             ('module_name', '!=', False),
+                             ('kind', '=', 'app')]},
                  {'value': 'planned', 'label': '🕓 Заявлено',
                   'domain': [('module_name', '=', False),
                              ('source', '!=', 'third')]},

@@ -13,6 +13,10 @@
             parent="menu_coop_extensions_root"
             action="action_coop_extension_catalog" sequence="20"/>
 
+  <menuitem id="menu_coop_extensions_plugins" name="Плагины"
+            parent="menu_coop_extensions_root"
+            action="action_coop_extension_plugins" sequence="25"/>
+
   <menuitem id="menu_coop_extensions_mine" name="Мои публикации"
             parent="menu_coop_extensions_root"
             action="action_coop_extension_mine" sequence="30"/>

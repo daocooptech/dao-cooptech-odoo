@@ -60,4 +60,5 @@
         ],
     },
     'installable': True,
+    'application': True,
 }

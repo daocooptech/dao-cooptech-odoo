@@ -91,8 +91,8 @@ class CoopExtension(models.Model):
     _inherit = 'coop.extension'
 
     coop_connect_state = fields.Selection(
-        [('on', 'Подключено'), ('installing', 'Устанавливается'),
-         ('off', 'Не подключено')],
+        [('base', 'Раздел платформы'), ('on', 'Подключено'),
+         ('installing', 'Устанавливается'), ('off', 'Не подключено')],
         string='В моём меню', compute='_compute_coop_connect_state',
         search='_search_coop_connect_state',
         help='У того лица, от имени которого вы сейчас действуете.')
@@ -137,7 +137,13 @@ class CoopExtension(models.Model):
         result = {}
         for conn in Connection.search([('partner_id', '=', face.id)]):
             result[conn.extension_id.id] = conn.state
-        modules = set(self._coop_base_modules())
+        # Разделы платформы — отдельным состоянием: они в меню у всех, и
+        # кнопки «Убрать» на их карточке быть не должно.
+        base = self._coop_base_modules()
+        for ext in self.sudo().search([('module_name', 'in', list(base)),
+                                       ('is_installed', '=', True)]):
+            result[ext.id] = 'base'
+        modules = set()
         if not self._coop_face_is_org():
             # У человека в меню стоят ещё и выданные платформой пункты —
             # «Документы», «Аукционы»… — без записи о подключении. Их модули
@@ -147,8 +153,12 @@ class CoopExtension(models.Model):
                 ('action_id', '!=', False)])
             modules |= set(self._coop_action_modules(items.mapped('action_id').ids).values())
         if modules:
+            # Только расширения: действие пункта «Склад» лежит в плагине
+            # «Продажи и склад», и плагин без этого отбора выглядел
+            # подключённым, а «Убрать» на нём сносило чужой пункт.
             for ext in self.sudo().search([('module_name', 'in', list(modules)),
-                                           ('is_installed', '=', True)]):
+                                           ('is_installed', '=', True),
+                                           ('kind', '=', 'app')]):
                 result.setdefault(ext.id, 'on')
         return result
 
@@ -229,6 +239,10 @@ class CoopExtension(models.Model):
                 'технический модуль для него не указан.'))
         if self.module_name in self._coop_base_modules():
             raise UserError(_('Этот раздел есть в меню у всех участников платформы.'))
+        if self.kind == 'plugin':
+            raise UserError(_(
+                '«%s» — плагин: своего раздела у него нет, он работает внутри '
+                'других разделов. В меню его ставить не нужно.') % self.name)
 
     def action_coop_connect(self):
         """Подключить расширение лицу, от имени которого человек действует.

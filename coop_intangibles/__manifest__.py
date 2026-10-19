@@ -41,4 +41,5 @@
         'security/ir.access.csv',
     ],
     'installable': True,
+    'application': True,
 }

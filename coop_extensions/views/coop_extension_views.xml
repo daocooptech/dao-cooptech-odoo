@@ -28,11 +28,13 @@
         <field name="is_installed"/>
         <field name="coop_connect_state"/>
         <field name="module_id"/>
+        <field name="module_state"/>
         <field name="is_official"/>
         <field name="pricing"/>
         <field name="icon"/>
         <field name="source"/>
         <field name="store_url"/>
+        <field name="kind"/>
         <templates>
           <t t-name="card">
             <!-- Общая карточка каталога: слева квадрат, справа тело.
@@ -47,7 +49,7 @@
               </div>
               <div class="o_coop_listing_body">
               <div class="o_coop_ext_cat">
-                <field name="category"/> · <field name="source"/>
+                <field name="kind"/> · <field name="category"/> · <field name="source"/>
               </div>
               <div class="o_coop_ext_title">
                 <field name="name"/>
@@ -60,11 +62,20 @@
                   <!-- «Подключено» — в меню того лица, от имени которого
                        человек действует (решение 468), а не «стоит на
                        платформе»: модуль ставится один раз на всех. -->
+                  <span t-if="record.coop_connect_state.raw_value == 'base'"
+                        class="o_coop_badge o_coop_on">✓ Есть у всех</span>
                   <span t-if="record.coop_connect_state.raw_value == 'on'"
                         class="o_coop_badge o_coop_on">✓ Подключено</span>
                   <span t-if="record.coop_connect_state.raw_value == 'installing'"
                         class="o_coop_badge o_coop_wait">Устанавливается</span>
-                  <span t-if="record.coop_connect_state.raw_value == 'off' and record.module_id.raw_value"
+                  <!-- Плагин в меню не ставится (как в Odoo, владелец
+                       19.10.2026): у него только «включён на платформе» или
+                       нет. -->
+                  <span t-if="record.kind.raw_value == 'plugin' and record.module_state.raw_value == 'installed'"
+                        class="o_coop_badge o_coop_on">✓ Включён на платформе</span>
+                  <span t-if="record.kind.raw_value == 'plugin' and record.module_id.raw_value and record.module_state.raw_value != 'installed'"
+                        class="o_coop_badge o_coop_off">Не установлен</span>
+                  <span t-if="record.kind.raw_value == 'app' and record.coop_connect_state.raw_value == 'off' and record.module_id.raw_value"
                         class="o_coop_badge o_coop_off">Не подключено</span>
                   <span t-if="!record.module_id.raw_value and record.source.raw_value != 'third'"
                         class="o_coop_badge o_coop_off">Заявлено</span>
@@ -80,10 +91,19 @@
                        — в общее (решение 468). Модуля на платформе нет —
                        пункт встаёт «устанавливается», это заявка рабочей
                        группе (решение 463). -->
-                  <button t-if="record.coop_connect_state.raw_value == 'off' and record.module_id.raw_value"
+                  <button t-if="record.kind.raw_value == 'app' and record.coop_connect_state.raw_value == 'off' and record.module_id.raw_value"
                           name="action_coop_connect" type="object"
                           class="btn o_coop_action">
                     Подключить
+                  </button>
+                  <!-- Убрать из своего меню — здесь же, на карточке
+                       (владелец 19.10.2026: «нет возможности удалить модуль
+                       у пользователя, чтобы он исчез из левого меню»).
+                       Модуль на платформе остаётся. -->
+                  <button t-if="record.coop_connect_state.raw_value == 'on' or record.coop_connect_state.raw_value == 'installing'"
+                          name="action_coop_disconnect" type="object"
+                          class="btn o_coop_action o_coop_action_off">
+                    Убрать из меню
                   </button>
                   <!-- Стороннее — витрина и ссылка (решение 463): кода
                        на платформе нет, подключать нечего. -->
@@ -130,9 +150,9 @@
           <field name="coop_connect_state" invisible="1"/>
           <button name="action_coop_connect" type="object" string="Подключить"
                   class="btn-primary"
-                  invisible="coop_connect_state != 'off' or not module_id"/>
+                  invisible="coop_connect_state != 'off' or not module_id or kind == 'plugin'"/>
           <button name="action_coop_disconnect" type="object" string="Убрать из меню"
-                  invisible="coop_connect_state == 'off'"/>
+                  invisible="coop_connect_state in ('off', 'base')"/>
           <button name="action_install" type="object" string="Установить на платформу"
                   invisible="is_installed or not module_id"
                   groups="base.group_system,coop_base.group_coop_platform"
@@ -152,6 +172,7 @@
           </div>
           <group>
             <group string="Что это">
+              <field name="kind"/>
               <field name="category"/>
               <field name="author_id"/>
               <field name="is_official"/>
@@ -198,6 +219,9 @@
         <field name="name"/>
         <field name="summary"/>
         <field name="author_id"/>
+        <filter name="apps" string="Расширения" domain="[('kind', '=', 'app')]"/>
+        <filter name="plugins" string="Плагины" domain="[('kind', '=', 'plugin')]"/>
+        <separator/>
         <filter name="installed" string="Подключённые" domain="[('coop_connected', '=', True)]"/>
         <filter name="available" string="Доступные" domain="[('coop_connected', '=', False)]"/>
         <separator/>
@@ -205,6 +229,7 @@
         <filter name="official" string="Расширения платформы" domain="[('is_official', '=', True)]"/>
         <filter name="third" string="Сторонние" domain="[('is_official', '=', False)]"/>
         <group>
+          <filter name="by_kind" string="По виду" context="{'group_by': 'kind'}"/>
           <filter name="by_cat" string="По разделу" context="{'group_by': 'category'}"/>
           <filter name="by_price" string="По условиям" context="{'group_by': 'pricing'}"/>
         </group>
@@ -235,11 +260,28 @@
     <field name="path">extensions</field>
     <field name="context">{'coop_filters': True}</field>
     <field name="view_mode">kanban,list,form</field>
-    <field name="domain">[('publication_state', '=', 'published')]</field>
+    <field name="domain">[('publication_state', '=', 'published'), ('kind', '=', 'app')]</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">В каталоге пока пусто</p>
       <p>Своё расширение может опубликовать любой участник и сам назначить
          условия: бесплатно, помесячно, за год или единовременно навсегда.</p>
+    </field>
+  </record>
+
+  <!-- Плагины — отдельно от расширений, как в Odoo (владелец 19.10.2026):
+       своего раздела у них нет, в меню они не ставятся. Включает их на
+       платформе рабочая группа. -->
+  <record id="action_coop_extension_plugins" model="ir.actions.act_window">
+    <field name="name">Плагины</field>
+    <field name="res_model">coop.extension</field>
+    <field name="path">plugins</field>
+    <field name="context">{'coop_filters': True}</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="domain">[('publication_state', '=', 'published'), ('kind', '=', 'plugin')]</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Плагинов пока нет</p>
+      <p>Плагин работает внутри других разделов — добавляет поле, печатную
+         форму, способ оплаты. Своего пункта в меню у него нет.</p>
     </field>
   </record>
 

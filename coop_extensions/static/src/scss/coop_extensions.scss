@@ -187,6 +187,18 @@
       background: var(--coop-teal-dark);
       border-color: var(--coop-teal-dark);
     }
+
+    // «Убрать из меню» — второстепенное действие: контуром, не заливкой,
+    // чтобы рядом с «Подключить» в каталоге не спорить с ним.
+    &.o_coop_action_off {
+      background: transparent;
+      color: var(--coop-teal);
+
+      &:hover {
+        background: transparent;
+        color: var(--coop-teal-dark);
+      }
+    }
   }
 }
 

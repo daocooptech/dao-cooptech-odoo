@@ -347,6 +347,7 @@ const SUBNAV_EXACT = {
     "Отчеты": "report-analytics",
     "Отчетность": "report-analytics",
     "Панели управления": "layout-dashboard",
+    "Плагины": "puzzle",
     "Поставщики": "building-store",
     "Предложения мощностей": "cpu",
     "Продажи": "filter",

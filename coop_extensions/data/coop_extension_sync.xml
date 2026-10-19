@@ -7,6 +7,9 @@
     руками (`coop.extension._coop_sync_catalog`).
   -->
   <function model="coop.extension" name="_coop_sync_catalog"/>
+  <!-- Плагины в меню не ставятся (как в Odoo, владелец 19.10.2026):
+       подключённые раньше — убираются из личных и общих меню. -->
+  <function model="coop.extension" name="_coop_drop_plugin_menus"/>
   <!-- Меню по лицу (решение 468): CRM уходит из личных меню в меню
        организаций — у людей CRM нет (решение 450). -->
   <function model="coop.sidebar.item" name="resync_defaults"/>
