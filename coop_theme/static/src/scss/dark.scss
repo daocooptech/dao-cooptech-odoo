@@ -211,6 +211,21 @@
     }
   }
 
+  // Раскрытый список браузер рисует сам и по умолчанию светлым, а текст
+  // пунктов берёт наш светлый — пункты пропадали на белом (владелец
+  // 19.10.2026, фильтр «Условия» в каталоге расширений). Тёмная схема —
+  // браузеру, цвета — пунктам, на случай, если схему он не учтёт.
+  select,
+  .form-select {
+    color-scheme: dark;
+
+    option,
+    optgroup {
+      background-color: var(--coop-surface);
+      color: var(--coop-ink);
+    }
+  }
+
   .form-control:focus,
   .form-select:focus,
   .o_input:focus {
