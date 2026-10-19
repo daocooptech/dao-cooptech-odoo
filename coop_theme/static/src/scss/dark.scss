@@ -42,6 +42,46 @@
   --link-color: var(--coop-teal-dark);
   --link-hover-color: var(--coop-teal);
 
+  // Те же цвета тройками чисел — для правил, что прикладывают к цвету
+  // прозрачность (`rgba(var(--body-color-rgb), …)`). Числа — тёмные
+  // значения токенов (`backend.scss`): ink #eef2f0, slate #c3cec9,
+  // paper #0e1211, surface #1b2422.
+  --body-color-rgb: 238, 242, 240;
+  --emphasis-color-rgb: 238, 242, 240;
+  --secondary-color-rgb: 195, 206, 201;
+  --body-bg-rgb: 14, 18, 17;
+  --secondary-bg-rgb: 27, 36, 34;
+  --tertiary-bg-rgb: 27, 36, 34;
+
+  // Плашки сводки «Продаж» (`o_dashboard_card`) остаются светлыми — их
+  // подложки движок вкомпилировал литералами, — а подпись брала светлый
+  // цвет текста страницы: «To Confirm» по персиковому, 1.1:1. Подпись —
+  // тёмным, как число рядом.
+  .o_dashboard_card {
+    color: #14171a;
+  }
+
+  // Выбор периода над сводкой: движок красит кнопку чёрным литералом.
+  .o_date_filter_wrapper .o-dropdown {
+    color: inherit;
+  }
+
+  // Утилиты Bootstrap собраны светлыми литералами и с `!important`
+  // (`.text-body { color: rgb(20, 23, 26) !important }`), переменные их
+  // не трогают. На экранах коробки «Заказы на продажу», «Sales Revenue»
+  // шли тёмным по тёмному — 1:1, подложка выбора периода `bg-200` —
+  // светлой под светлым текстом (замер 19.10.2026, владелец:
+  // «нечитабельные шрифты»). Перекрываются тем же оружием.
+  .text-body {
+    color: var(--coop-ink) !important;
+  }
+
+  .bg-100,
+  .bg-200,
+  .bg-300 {
+    --background-color: rgba(27, 36, 34, var(--bg-opacity, 1));
+  }
+
   background-color: var(--coop-paper);
   color: var(--coop-ink);
 

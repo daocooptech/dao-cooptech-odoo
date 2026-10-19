@@ -764,6 +764,41 @@
   <menuitem id="menu_coop_my_projects" name="Мои проекты"
             parent="menu_coop_projects_root" action="action_coop_my_projects"
             sequence="15"/>
+  <!--
+    «Дела» в подразделах проектов (владелец 19.10.2026: «добавить дела в
+    подкатегорию проектов, чтобы в них можно было переходить из левого
+    меню»). Виды — те же, что у «My Activities» движка: строка и карточка
+    открывают сам документ дела. Действие своё: переименовать движковое
+    нельзя — его русский перевод «Мои активности» лежит поверх имени.
+  -->
+  <record id="action_coop_my_activities" model="ir.actions.act_window">
+    <field name="name">Мои дела</field>
+    <field name="res_model">mail.activity</field>
+    <field name="view_mode">list,kanban,calendar</field>
+    <field name="search_view_id" ref="mail.mail_activity_view_search"/>
+    <field name="context">{'force_search_count': 1, 'search_default_filter_activities_my': 1}</field>
+  </record>
+  <record id="action_coop_my_activities_list" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">list</field>
+    <field name="view_id" ref="mail.mail_activity_view_tree_open_target"/>
+    <field name="act_window_id" ref="action_coop_my_activities"/>
+  </record>
+  <record id="action_coop_my_activities_kanban" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">kanban</field>
+    <field name="view_id" ref="mail.mail_activity_view_kanban_open_target"/>
+    <field name="act_window_id" ref="action_coop_my_activities"/>
+  </record>
+  <record id="action_coop_my_activities_calendar" model="ir.actions.act_window.view">
+    <field name="sequence">3</field>
+    <field name="view_mode">calendar</field>
+    <field name="view_id" ref="mail.mail_activity_view_calendar"/>
+    <field name="act_window_id" ref="action_coop_my_activities"/>
+  </record>
+  <menuitem id="menu_coop_project_activities" name="Дела"
+            parent="menu_coop_projects_root" action="action_coop_my_activities"
+            sequence="20"/>
   <menuitem id="menu_coop_project_category" name="Темы"
             parent="menu_coop_projects_root" action="action_coop_project_category"
             sequence="90" groups="coop_base.group_coop_platform"/>
