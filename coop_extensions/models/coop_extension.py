@@ -335,11 +335,17 @@ class CoopExtension(models.Model):
         До 19.10.2026 «Подключить» было у любого модуля, и плагин вставал
         в меню пунктом, который никуда не ведёт или ведёт в чужой раздел.
         """
+        from .coop_extension_connection import ORG_ONLY_MODULES
         plugins = self.sudo().search([('kind', '=', 'plugin')])
+        # Учёт организации (склад) — тоже вон из личных меню; в общих меню
+        # организаций он остаётся.
+        org_only = self.sudo().search([('module_name', 'in', list(ORG_ONLY_MODULES))])
         items = self.env['coop.sidebar.item'].sudo().search(
-            [('extension_id', 'in', plugins.ids)])
-        conns = self.env['coop.extension.connection'].sudo().search(
-            [('extension_id', 'in', plugins.ids)])
+            [('extension_id', 'in', (plugins | org_only).ids)])
+        Connection = self.env['coop.extension.connection'].sudo()
+        conns = Connection.search([('extension_id', 'in', plugins.ids)])
+        conns |= Connection.search([('extension_id', 'in', org_only.ids)]).filtered(
+            lambda c: c.partner_id.user_ids)
         items.write({'is_required': False})
         items.unlink()
         conns.unlink()

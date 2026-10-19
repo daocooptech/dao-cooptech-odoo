@@ -174,5 +174,13 @@ class CoopSidebarItem(models.Model):
             for item in items:
                 if item.get('id') in pending:
                     item['pending'] = True
+            # Плагины в меню не ставятся (решение 472). Уборка при обновлении
+            # (`_coop_drop_plugin_menus`) может пройти раньше, чем модуль
+            # стал плагином: модули обновляются по очереди. Поэтому — и при
+            # чтении, а пункт уберётся при следующем обновлении.
+            plugins = set(self.sudo().search([
+                ('user_id', '=', user.id),
+                ('extension_id.kind', '=', 'plugin')]).ids)
+            items = [i for i in items if i.get('id') not in plugins]
         return [i for i in items if i.get('section') != 'ext'
                 or self._coop_can_open(user, i.get('actionId'))]
