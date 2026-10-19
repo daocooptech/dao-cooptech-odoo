@@ -103,8 +103,13 @@ class CoopSidebarItem(models.Model):
     def _coop_org_items(self, user, org):
         conns = self.env['coop.extension.connection'].sudo().search(
             [('partner_id', '=', org.id)])
+        # Модуль, ставший разделом платформы (настройки — 19.10.2026), уже
+        # стоит в разделах; подключение из каталога второй строкой не нужно.
+        base = self.env['coop.extension']._coop_base_modules()
         rows = []
         for conn in conns:
+            if conn.extension_id.module_name in base:
+                continue
             entry = conn.extension_id._coop_menu_entry()
             if not entry:
                 continue

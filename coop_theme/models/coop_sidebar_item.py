@@ -49,6 +49,11 @@ MAIN_ITEMS = [
     ('Сообщества', 'forum', 'coop_communities.action_coop_communities'),
     ('Кошелёк', 'credit_card', 'coop_wallet.action_coop_my_wallet'),
     ('Сделки', 'handshake', 'coop_deals.action_coop_deals'),
+    # Владелец 19.10.2026: «настройки ДАО КООПТЕХ — участника переименовать
+    # в настройки пользователя и закрепить навсегда в верхней части меню
+    # после пункта сделки». До этого настройки были расширением из каталога
+    # и стояли в меню именем модуля; прежний пункт — в RENAMED_ITEMS.
+    ('Настройки пользователя', 'settings', 'coop_settings.action_coop_settings'),
 ]
 
 # Расширения — те же тринадцать, что в макете, и в том же порядке.
@@ -159,7 +164,8 @@ MAIN_BY_NAME = {name: xmlid for name, _icon, xmlid in MAIN_ITEMS}
 # Переименованные разделы: прежнее название → нынешнее. Меню участника
 # живёт записями, и без переименования на месте `resync_defaults` завёл бы
 # рядом со старым пунктом новый — у всех, у кого раздел уже был.
-RENAMED_ITEMS = {'Майнинг': 'Биржа мощностей'}
+RENAMED_ITEMS = {'Майнинг': 'Биржа мощностей',
+                 'ДАО КООПТЕХ — настройки участника': 'Настройки пользователя'}
 
 RETIRED_EXTENSIONS = {'Каталог расширений', 'Помощь проекту', 'Обмен цифровой валюты',
                       'Библиотеки', 'Здоровье'}
@@ -299,12 +305,8 @@ class CoopSidebarItem(models.Model):
 
             # Сначала — переименованные разделы: иначе ниже пункт с новым
             # названием не найдётся и заведётся вторым рядом со старым.
-            for item in existing:
-                new_name = RENAMED_ITEMS.get(item.name)
-                if new_name and not existing.filtered(
-                        lambda i, n=new_name, s=item.section: i.name == n and i.section == s):
-                    item.sudo().name = new_name
-                    renamed += 1
+            renamed += self._coop_apply_renames(existing, defaults)
+            existing = existing.exists()
 
             # Раздел, переехавший из основных в расширения, надо перенести,
             # а не завести заново: иначе он окажется в меню дважды.
@@ -409,6 +411,39 @@ class CoopSidebarItem(models.Model):
                          'перенесено %s, убрано %s, подключено %s, переименовано %s',
                          added, renumbered, moved, dropped, rewired, renamed)
         return True
+
+    @api.model
+    def _coop_apply_renames(self, items, defaults):
+        """Переименовать пункты из RENAMED_ITEMS и поставить их на место.
+
+        Новое имя может значить и новую часть меню: настройки были
+        расширением, а стали разделом платформы. Если пункт с новым именем
+        у участника уже есть — его завела сборка меню при входе раньше,
+        чем обновление дошло сюда, — старый просто убирается: второй такой
+        же пункт не нужен, а переименовать в занятое имя не даст
+        уникальность.
+        """
+        wanted = {v['name']: v for v in defaults}
+        count = 0
+        for item in items.sudo():
+            new_name = RENAMED_ITEMS.get(item.name)
+            if not new_name:
+                continue
+            # `exists()` — убранные этим же проходом дальше не читаются.
+            if items.exists().filtered(lambda i, n=new_name: i.name == n):
+                item.write({'is_required': False})
+                item.unlink()
+                count += 1
+                continue
+            values = {'name': new_name}
+            target = wanted.get(new_name)
+            if target and target['section'] != item.section:
+                values.update(section=target['section'],
+                              is_required=target['is_required'],
+                              sequence=target['sequence'])
+            item.write(values)
+            count += 1
+        return count
 
     @api.model
     def repoint_obligatory(self):
@@ -603,6 +638,11 @@ class CoopSidebarItem(models.Model):
         дописываются только те, которых в нём нет.
         """
         defaults = self._defaults_for_user(user)
+        # Переименования — и при входе, а не только при обновлении: иначе
+        # до ночной выкатки у участника стояли бы оба пункта, старый и новый.
+        if any(name in RENAMED_ITEMS for name in items.mapped('name')):
+            self._coop_apply_renames(items, defaults)
+            items = items.exists()
         known = set(items.filtered(lambda i: i.section == 'main').mapped('name'))
         missing = [v for v in defaults
                    if v['section'] == 'main' and v['name'] not in known]

@@ -258,31 +258,128 @@ export class CoopTabs extends Component {
 /**
  * Значок подраздела — по названию пункта меню (дизайн-система, `Sidebar`).
  * В коде у пунктов меню значков нет; один смысл — один значок во всех
- * разделах, поэтому опознаём по началу названия, а не по разделу.
+ * разделах, поэтому опознаём по названию, а не по разделу.
+ *
+ * Владелец 19.10.2026: «вставить или отрисовать все иконки в подменю у всех
+ * пунктов меню, где есть подменю». Раньше значок был у восемнадцати
+ * названий, остальные получали один и тот же «список». Теперь — по
+ * названию целиком: пары из образцов дизайн-системы (`Sidebar` в
+ * `components/*\/preview.html`), недостающие — из того же набора Tabler.
  */
-const SUBNAV_ICONS = [
-    ["Мои отклики", "send"],
-    ["Мой кошелёк", "wallet"],
-    ["Мои сделки", "contract"],
+const SUBNAV_EXACT = {
+    // Из образцов дизайн-системы.
+    "Аккаунт": "user-circle",
+    "Активность": "history",
+    "Безопасность": "shield-check",
+    "Биржа мощностей": "arrows-exchange",
+    "Биржа": "chart-candle",
+    "Взаиморасчёты": "arrows-exchange",
+    "Все документы": "files",
+    "Все закупки": "basket",
+    "Все торги": "gavel",
+    "Дашборды": "device-desktop-analytics",
+    "Деньги": "cash",
+    "Договорённости": "contract",
+    "Доли в проектах": "chart-pie",
+    "Заявки": "list-details",
+    "Календарь событий": "calendar-event",
+    "Калькулятор порога": "calculator",
+    "Каталог ЦФА": "certificate",
+    "Каталог курсов": "school",
+    "Контракты": "contract",
+    "Корзина": "trash",
+    "Кошелёк TON": "wallet",
+    "Лента": "news",
+    "Линии взаимного кредита": "credit-card",
+    "Мои ЦФА": "wallet",
+    "Мои выпуски": "file-certificate",
+    "Мои отклики": "send",
+    "Мои сделки": "contract",
+    "Мои склады": "building-warehouse",
+    "Мои токены": "coin",
+    "Мой аккаунт": "user-circle",
+    "Мой кошелёк": "wallet",
+    "Моя панель": "layout-dashboard",
+    "Недавние": "history",
+    "Номинальный счёт": "building-bank",
+    "Обмены": "arrows-exchange",
+    "Обучение": "school",
+    "Операторы": "building-bank",
+    "Отзывы": "star",
+    "Оформление": "sun",
+    "Паевые счета": "coins",
+    "Подходит мне": "target-arrow",
+    "Портфель": "briefcase",
+    "Поставки": "truck-delivery",
+    "Приватность": "lock",
+    "Прогноз и план": "target-arrow",
+    "Сделки": "heart-handshake",
+    "Уведомления": "bell",
+    "Установленные": "checks",
+    "Уступки требований": "transfer",
+    "Язык и регион": "language",
+    // Подпункты, которых в образцах нет.
+    "Авансовые счета": "file-invoice",
+    "Взаимозачёты": "repeat",
+    "Возврат комиссии": "receipt-refund",
+    "Вклады в проекты": "rocket",
+    "Все программы": "flag",
+    "Дела": "checklist",
+    "Доступные мне": "share",
+    "Жду подписи": "signature",
+    "Задачи": "list-check",
+    "Заказы": "shopping-cart",
+    "Избранное": "bookmark",
+    "История звонков": "phone",
+    "Календарь": "calendar",
+    "Каналы": "messages",
+    "Клиенты": "users",
+    "Конфигурация": "settings",
+    "Лицензии": "license",
+    "Майнеры": "server",
+    "Обзор": "layout-dashboard",
+    "Обсуждения": "message-circle",
+    "Объявления": "clipboard-list",
+    "Операции": "arrows-sort",
+    "Организую": "users-group",
+    "Отделения": "building",
+    "Отчет": "report-analytics",
+    "Отчеты": "report-analytics",
+    "Отчетность": "report-analytics",
+    "Панели управления": "layout-dashboard",
+    "Поставщики": "building-store",
+    "Предложения мощностей": "cpu",
+    "Продажи": "filter",
+    "Продвижение": "speakerphone",
+    "Проекты": "rocket",
+    "Пулы проектов": "droplet",
+    "Сайт": "world-www",
+    "Свой узел Komodo": "server",
+    "События": "calendar-event",
+    "Стойка регистрации": "id-badge-2",
+    "Товары": "package",
+    "Уклады кооперативов": "scale",
+    "Управление": "users-group",
+    "Формы собственности": "building-community",
+};
+
+// Запасные правила по началу названия — для подпунктов, которые появятся
+// позже: «Каталог …» — сетка, «Мои …» — человек, как в образцах.
+const SUBNAV_PREFIX = [
     ["Каталог", "layout-grid"],
     ["Общий каталог", "layout-grid"],
+    ["Все ", "layout-grid"],
     ["Мои", "user"],
     ["Мой", "user"],
-    ["Лента", "news"],
-    ["Избранное", "bookmark"],
-    ["Продвижение", "speakerphone"],
-    ["Взаиморасчёты", "arrows-exchange"],
-    ["Линии взаимного кредита", "credit-card"],
-    ["Взаимозачёты", "repeat"],
-    ["Паевые счета", "coins"],
-    ["Номинальный счёт", "building-bank"],
-    ["Отзывы", "star"],
-    ["Уступки требований", "transfer"],
-    ["Установленные", "puzzle"],
+    ["Моя", "user"],
 ];
 
 export function subnavIcon(name) {
-    const found = SUBNAV_ICONS.find(([prefix]) => (name || "").startsWith(prefix));
+    const label = (name || "").trim();
+    if (SUBNAV_EXACT[label]) {
+        return SUBNAV_EXACT[label];
+    }
+    const found = SUBNAV_PREFIX.find(([prefix]) => label.startsWith(prefix));
     return found ? found[1] : "layout-list";
 }
 
