@@ -554,9 +554,14 @@
 // активности — переписка вдобавок есть в нижней панели) и переключатель
 // полномочий: он нужен раз в месяц и тому, кто в этот момент сидит за
 // столом. В макете на телефоне остаётся и вовсе один колокол.
+//
+// «Дела» ищутся по своему классу: шрифтовой значок `data-icon="schedule"`
+// с 12.10.2026 заменён контуром (`shell.xml`), и правило по нему молча
+// перестало срабатывать — на экранах коробки «Дела» возвращались, и
+// страница на 375 выходила шире на 2 точки.
 @media (max-width: 900px) {
   .o_menu_systray > .o-mail-DiscussSystray-class,
-  .o_menu_systray > button:has(> [data-icon="schedule"]),
+  .o_menu_systray > button:has(> .o_coop_tray_activity),
   .o_menu_systray > button:has(> [data-icon="edit_square"]),
   .o_menu_systray > .o_coop_admin_switch {
     display: none !important;
