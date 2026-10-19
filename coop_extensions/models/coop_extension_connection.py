@@ -276,7 +276,10 @@ class CoopExtension(models.Model):
             })
         if face == user.partner_id:
             self.env['coop.sidebar.item']._coop_place_extension(user, self, entry)
-        return {'type': 'ir.actions.client', 'tag': 'reload'}
+        # Без действия: каталог сам перечитает карточку и сохранит отбор, а
+        # боковое меню обновит вид каталога (`extension_kanban.js`). Раньше
+        # здесь была перезагрузка страницы, и фильтры сбрасывались.
+        return False
 
     def action_coop_disconnect(self):
         """Убрать расширение из меню текущего лица. Модуль остаётся на платформе."""
@@ -288,4 +291,7 @@ class CoopExtension(models.Model):
         conns.unlink()
         if face == user.partner_id:
             self.env['coop.sidebar.item']._coop_remove_extension(user, self)
-        return {'type': 'ir.actions.client', 'tag': 'reload'}
+        # Без действия: каталог сам перечитает карточку и сохранит отбор, а
+        # боковое меню обновит вид каталога (`extension_kanban.js`). Раньше
+        # здесь была перезагрузка страницы, и фильтры сбрасывались.
+        return False

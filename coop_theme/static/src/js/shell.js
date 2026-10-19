@@ -460,6 +460,13 @@ export class CoopSidebar extends Component {
         // Открытие панели общее с кнопкой в шапке — см. `coopShellUi`.
         this.ui = proxy(coopShellUi);
         useBus(this.env.bus, "COOP_SHELL_UI", () => render(this));
+        // Подключили или убрали расширение — перечитываем только меню. Раньше
+        // кнопка перезагружала страницу целиком, и каталог терял фильтры
+        // (владелец 19.10.2026).
+        useBus(this.env.bus, "COOP_SIDEBAR_CHANGED", async () => {
+            await this.boot.refresh();
+            await this.load();
+        });
         this.state = proxy({
             main: [], extensions: [], admin: [], current: null, model: null,
             acting: null, actors: [],

@@ -125,7 +125,7 @@
     <field name="name">coop.extension.form</field>
     <field name="model">coop.extension</field>
     <field name="arch" type="xml">
-      <form string="Расширение">
+      <form string="Расширение" js_class="coop_extension_form">
         <header>
           <field name="coop_connect_state" invisible="1"/>
           <button name="action_coop_connect" type="object" string="Подключить"
