@@ -353,7 +353,7 @@ class CoopExtension(models.Model):
         path = file_path('coop_extensions/data/odoo_modules_ru.tsv')
         with open(path, encoding='utf-8') as f:
             for line in f:
-                parts = line.rstrip('\n').split('\t')
+                parts = line.rstrip('\r\n').split('\t')
                 if len(parts) == 3 and parts[0]:
                     result[parts[0]] = (parts[1], parts[2])
         return result
