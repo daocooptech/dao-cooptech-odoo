@@ -380,7 +380,9 @@ if [ "$engine_switch" = "1" ]; then
     # дерева, что работает, — каждая выкаченная метка остаётся доступной, даже
     # если GitHub закроет доступ. Архивом, а не голым репозиторием: клон
     # мелкий, и «глупый» протокол git не находит родительских коммитов
-    # (замер 29.09: «Cannot obtain needed commit»). Старые архивы не удалять.
+    # (замер 29.09: «Cannot obtain needed commit»). Хранится только архив
+    # работающей метки: прежние есть в форке на GitHub, а по 188 МБ на смену
+    # движка они съели бы диск (владелец 20.10.2026: «архивы надо удалять»).
     mkdir -p "$ODOO_HOME/src"
     archive="$ODOO_HOME/src/odoo-$engine_tag.tar.gz"
     if [ ! -s "$archive" ]; then
@@ -390,6 +392,9 @@ if [ "$engine_switch" = "1" ]; then
             rm -f "$archive.part"
             say "ВНИМАНИЕ: архив исходника не собран — метка $engine_tag только на GitHub"
         fi
+    fi
+    if [ -s "$archive" ]; then
+        find "$ODOO_HOME/src" -maxdepth 1 -name 'odoo-*.tar.gz' ! -name "$(basename "$archive")" -delete
     fi
 fi
 
