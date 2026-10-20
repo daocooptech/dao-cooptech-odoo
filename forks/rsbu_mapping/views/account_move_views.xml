@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="account.view_move_form"/>
         <field name="arch" type="xml">
             <notebook position="inside">
-                <page string="РСБУ" name="rsbu">
+                <page string="РСБУ" name="rsbu" groups="rsbu_journal.group_rsbu_journal_user">
                     <group>
                         <field name="rsbu_template_id"/>
                         <field name="rsbu_move_id" readonly="1"/>

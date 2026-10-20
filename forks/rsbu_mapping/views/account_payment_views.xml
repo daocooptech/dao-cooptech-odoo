@@ -6,8 +6,8 @@
         <field name="inherit_id" ref="account.view_account_payment_form"/>
         <field name="arch" type="xml">
             <field name="amount" position="after">
-                <field name="rsbu_vat_amount"/>
-                <field name="rsbu_template_id"/>
+                <field name="rsbu_vat_amount" groups="rsbu_journal.group_rsbu_journal_user"/>
+                <field name="rsbu_template_id" groups="rsbu_journal.group_rsbu_journal_user"/>
             </field>
         </field>
     </record>

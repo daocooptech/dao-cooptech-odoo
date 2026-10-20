@@ -35,8 +35,9 @@ class RsbuOperationMatrix(models.Model):
         'rsbu.operation.template', string='Шаблон РСБУ', required=True,
         check_company=True)
     priority = fields.Integer(string='Приоритет', default=10)
+    # Только с компанией: правило без компании действовало бы на весь пул.
     company_id = fields.Many2one(
-        'res.company', string='Компания',
+        'res.company', string='Компания', required=True, index=True,
         default=lambda self: self.env.company)
     active = fields.Boolean(default=True)
 

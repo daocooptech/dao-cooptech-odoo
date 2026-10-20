@@ -43,7 +43,7 @@ class AccountMove(models.Model):
         # документ, может не иметь прав на РСБУ-модели.
         Matrix = self.env['rsbu.operation.matrix'].sudo()
         rules = Matrix.search([
-            ('company_id', 'in', (False, self.company_id.id)),
+            ('company_id', '=', self.company_id.id),
         ], order='priority, id')
         for rule in rules:
             if rule._match(self):

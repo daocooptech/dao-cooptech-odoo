@@ -8,6 +8,8 @@ class TestRsbuMapping(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.company = cls.env.company
+        # Слой включается по организации (у выпуска — всегда).
+        cls.company.rsbu_enabled = True
         cls.partner = cls.env['res.partner'].create({'name': 'Map Клиент'})
         cls.journal_bank = cls.env['account.journal'].search(
             [('type', '=', 'bank'), ('company_id', '=', cls.company.id)],
@@ -255,7 +257,8 @@ class TestRsbuMapping(TransactionCase):
         (realization_id пуст). Модель-источник авансового НДС — rsbu.invoice,
         без изменений. Платёж двигает только деньги.
         """
-        self.company.rsbu_vat_mode = 'vat_5'
+        if 'rsbu_vat_mode' in self.company._fields:  # поле — из rsbu_vat (К5)
+            self.company.rsbu_vat_mode = 'vat_5'
         self._customer_payment_template()
         p = self.env['res.partner'].create({'name': 'Аванс-клиент'})
         pay = self._inbound(p, 105000.0, '2026-03-01')
@@ -271,7 +274,8 @@ class TestRsbuMapping(TransactionCase):
 
     def test_customer_payment_postpaid(self):
         """Платёж при наличии долга → погашение 62.01, без аванса и НДС."""
-        self.company.rsbu_vat_mode = 'vat_5'
+        if 'rsbu_vat_mode' in self.company._fields:  # поле — из rsbu_vat (К5)
+            self.company.rsbu_vat_mode = 'vat_5'
         self._customer_payment_template()
         p = self.env['res.partner'].create({'name': 'Постоплата-клиент'})
         self._debt(p, 50000.0, '2026-03-05')
@@ -289,7 +293,8 @@ class TestRsbuMapping(TransactionCase):
 
         Авансовый НДС в платеже не начисляется (вынесен в СФ на аванс).
         """
-        self.company.rsbu_vat_mode = 'vat_5'
+        if 'rsbu_vat_mode' in self.company._fields:  # поле — из rsbu_vat (К5)
+            self.company.rsbu_vat_mode = 'vat_5'
         self._customer_payment_template()
         p = self.env['res.partner'].create({'name': 'Переплата-клиент'})
         self._debt(p, 30000.0, '2026-03-06')

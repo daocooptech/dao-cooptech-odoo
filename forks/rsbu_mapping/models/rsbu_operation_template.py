@@ -30,8 +30,9 @@ class RsbuOperationTemplate(models.Model):
         selection=lambda self: resolver_selection(),
         string='Резолвер', required=True,
         help='Python-резолвер (в коде модуля), формирующий проводки.')
+    # Только с компанией: правило без компании действовало бы на весь пул.
     company_id = fields.Many2one(
-        'res.company', string='Компания',
+        'res.company', string='Компания', required=True, index=True,
         default=lambda self: self.env.company)
     role_ids = fields.One2many(
         'rsbu.operation.template.role', 'template_id', string='Роли счетов')

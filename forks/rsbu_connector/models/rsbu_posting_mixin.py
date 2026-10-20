@@ -18,10 +18,18 @@ class RsbuPostingMixin(models.AbstractModel):
     rsbu_move_count = fields.Integer(
         string='РСБУ-проводки', compute='_compute_rsbu_move_count')
 
+    def _rsbu_source_domain(self):
+        self.ensure_one()
+        return [('source_model', '=', self._name),
+                ('source_res_id', '=', self.id)]
+
     @api.depends('rsbu_move_id')
     def _compute_rsbu_move_count(self):
+        # Вместе со сторно и прежними проводками перепроведённого документа.
+        Move = self.env['rsbu.move'].sudo()
         for rec in self:
-            rec.rsbu_move_count = 1 if rec.rsbu_move_id else 0
+            rec.rsbu_move_count = Move.search_count(
+                rec._rsbu_source_domain()) if rec.id else 0
 
     # ------------------------------------------------------------------
     # Точки расширения (реализуются Этапом 4)
@@ -74,6 +82,13 @@ class RsbuPostingMixin(models.AbstractModel):
         self.ensure_one()
         if self.env.context.get('rsbu_skip'):
             return
+        # Слой включается по организации и с даты (решение владельца
+        # 20.10.2026: флажком по организации, учёт с 01.01.2027).
+        company = self.company_id
+        if not company.rsbu_enabled:
+            return
+        if company.rsbu_start_date                 and self._rsbu_move_date() < company.rsbu_start_date:
+            return
         if not self._rsbu_is_applicable() or self.rsbu_move_id:
             return
         lines = self._rsbu_build_lines()
@@ -107,24 +122,38 @@ class RsbuPostingMixin(models.AbstractModel):
         self.sudo().rsbu_move_id = move.id
 
     def _rsbu_remove(self):
-        """Зеркалирование отмены: удалить связанную РСБУ-операцию."""
+        """Зеркалирование отмены: сторнировать связанную РСБУ-операцию.
+
+        У выпуска операция удалялась — проведённый учёт пропадал без следа,
+        в том числе в закрытом периоде. Черновик (не проведён) удаляется.
+        """
         for rec in self:
             move = rec.rsbu_move_id.sudo()
             if move:
                 rec.sudo().rsbu_move_id = False
                 if move.state == 'posted':
-                    move.action_draft()
-                move.unlink()
+                    move._reverse()
+                else:
+                    move.unlink()
 
     # ------------------------------------------------------------------
     # Навигация
     # ------------------------------------------------------------------
     def action_view_rsbu_move(self):
         self.ensure_one()
+        moves = self.env['rsbu.move'].search(self._rsbu_source_domain())
+        if len(moves) == 1:
+            return {
+                'type': 'ir.actions.act_window',
+                'name': _('РСБУ-проводка'),
+                'res_model': 'rsbu.move',
+                'view_mode': 'form',
+                'res_id': moves.id,
+            }
         return {
             'type': 'ir.actions.act_window',
-            'name': _('РСБУ-проводка'),
+            'name': _('РСБУ-проводки'),
             'res_model': 'rsbu.move',
-            'view_mode': 'form',
-            'res_id': self.rsbu_move_id.id,
+            'view_mode': 'list,form',
+            'domain': [('id', 'in', moves.ids)],
         }

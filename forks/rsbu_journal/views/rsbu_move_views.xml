@@ -71,6 +71,11 @@
                             <group>
                                 <field name="source_model" readonly="1"/>
                                 <field name="source_res_id" readonly="1"/>
+                                <field name="reversed_move_id"
+                                       invisible="not reversed_move_id"/>
+                                <field name="reversal_move_ids"
+                                       widget="many2many_tags"
+                                       invisible="not reversal_move_ids"/>
                             </group>
                             <field name="note"/>
                         </page>

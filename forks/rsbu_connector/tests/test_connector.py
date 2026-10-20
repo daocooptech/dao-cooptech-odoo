@@ -1,4 +1,5 @@
 from unittest.mock import patch
+from odoo import fields
 from odoo.tests import TransactionCase, tagged
 from odoo.exceptions import UserError
 
@@ -10,6 +11,8 @@ class TestRsbuConnector(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.company = cls.env.company
+        # Слой включается по организации (у выпуска — всегда).
+        cls.company.rsbu_enabled = True
         cls.partner = cls.env['res.partner'].create({'name': 'Cn Клиент'})
         cls.acc_51 = cls._acc(cls, '51')
         cls.acc_62av = cls._acc(cls, '62.АВ')
@@ -105,7 +108,43 @@ class TestRsbuConnector(TransactionCase):
         self.assertTrue(move.exists())
         pay.action_cancel()
         self.assertFalse(pay.rsbu_move_id)
-        self.assertFalse(move.exists())
+        # Проведённая операция не удаляется, а гасится красным сторно.
+        self.assertTrue(move.exists())
+        self.assertEqual(move.state, 'posted')
+        reversal = move.reversal_move_ids
+        self.assertEqual(len(reversal), 1)
+        self.assertEqual(reversal.state, 'posted')
+        self.assertEqual(sum(reversal.line_ids.mapped('debit')),
+                         -sum(move.line_ids.mapped('debit')))
+        self.assertEqual(pay.rsbu_move_count, 2)
+
+    def test_disabled_company_no_generation(self):
+        self.company.rsbu_enabled = False
+        pay = self._make_payment()
+        with self._patch_applicable(),                 self._patch_build_lines(self._balanced_lines()):
+            pay.action_post()
+        self.assertFalse(pay.rsbu_move_id)
+
+    def test_before_start_date_no_generation(self):
+        self.company.rsbu_start_date = '2099-01-01'
+        pay = self._make_payment()
+        with self._patch_applicable(),                 self._patch_build_lines(self._balanced_lines()):
+            pay.action_post()
+        self.assertFalse(pay.rsbu_move_id)
+
+    def test_closed_period_blocks_post_and_storno_goes_to_today(self):
+        pay = self._make_payment()
+        pay.date = '2026-01-15'
+        with self._patch_applicable(),                 self._patch_build_lines(self._balanced_lines()):
+            pay.action_post()
+            move = pay.rsbu_move_id
+            self.company.rsbu_lock_date = move.date
+            with self.assertRaises(UserError):
+                move.action_draft()
+            pay.action_cancel()
+        reversal = move.reversal_move_ids
+        self.assertEqual(reversal.date, fields.Date.context_today(reversal))
+        self.assertTrue(reversal.date > self.company.rsbu_lock_date)
 
     def test_mirror_then_repost_creates_new(self):
         pay = self._make_payment()

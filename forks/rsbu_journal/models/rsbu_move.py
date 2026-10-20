@@ -49,6 +49,14 @@ class RsbuMove(models.Model):
     line_count = fields.Integer(
         string='Кол-во строк', compute='_compute_line_count')
 
+    # Красное сторно: отмена документа-источника не удаляет проведённую
+    # операцию, а гасит её такой же с обратным знаком сумм.
+    reversed_move_id = fields.Many2one(
+        'rsbu.move', string='Сторнирует', copy=False, readonly=True,
+        index=True, ondelete='restrict')
+    reversal_move_ids = fields.One2many(
+        'rsbu.move', 'reversed_move_id', string='Сторно')
+
     # ------------------------------------------------------------------
     # Вычисляемые поля
     # ------------------------------------------------------------------
@@ -109,10 +117,64 @@ class RsbuMove(models.Model):
     # ------------------------------------------------------------------
     # Жизненный цикл
     # ------------------------------------------------------------------
+    def _check_period_open(self, date=None):
+        """Дата операции позже даты закрытия периода её компании."""
+        for move in self:
+            lock = move.company_id.rsbu_lock_date
+            check = fields.Date.to_date(date or move.date)
+            if lock and check and check <= lock:
+                raise UserError(_(
+                    'Период РСБУ организации «%(company)s» закрыт по '
+                    '%(lock)s: операцию от %(date)s нельзя провести, '
+                    'вернуть в черновик или сторнировать этой датой.',
+                    company=move.company_id.name,
+                    lock=fields.Date.to_string(lock),
+                    date=fields.Date.to_string(check)))
+
+    def _reverse(self):
+        """Сторнировать проведённые операции (красное сторно).
+
+        Дата сторно — дата операции, если её период открыт, иначе сегодня:
+        закрытый период не трогаем.
+        """
+        reversals = self.browse()
+        for move in self:
+            if move.state != 'posted':
+                raise UserError(_(
+                    'Сторнировать можно только проведённую операцию «%s».')
+                    % move.display_name)
+            if move.reversal_move_ids:
+                raise UserError(_(
+                    'Операция «%s» уже сторнирована.') % move.display_name)
+            lock = move.company_id.rsbu_lock_date
+            date = move.date
+            if lock and date <= lock:
+                date = fields.Date.context_today(move)
+            lines = []
+            for line in move.line_ids:
+                vals = line.copy_data()[0]
+                vals.pop('move_id', None)
+                vals['debit'] = -line.debit
+                vals['credit'] = -line.credit
+                lines.append((0, 0, vals))
+            reversal = self.create({
+                'date': date,
+                'company_id': move.company_id.id,
+                'ref': _('Сторно %s', move.name),
+                'source_model': move.source_model,
+                'source_res_id': move.source_res_id,
+                'reversed_move_id': move.id,
+                'line_ids': lines,
+            })
+            reversal.action_post()
+            reversals |= reversal
+        return reversals
+
     def action_post(self):
         for move in self:
             if move.state == 'posted':
                 continue
+            move._check_period_open()
             move._check_has_lines()
             move._check_balanced()
             move._check_required_subconto()
@@ -144,6 +206,8 @@ class RsbuMove(models.Model):
 
     def action_draft(self):
         for move in self:
+            if move.state == 'posted':
+                move._check_period_open()
             move.state = 'draft'
         return True
 

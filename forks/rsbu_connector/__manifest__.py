@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'РСБУ — Коннектор документов',
-    'version': '19.0.2026.09.17',
+    'version': '20.0.2026.09.17',
     'summary': 'Миксин-коннектор: генерация РСБУ-проводок по проведению документов',
     'description': """
 РСБУ — Коннектор документов
@@ -32,6 +32,7 @@
     'data': [
         'views/account_move_views.xml',
         'views/account_payment_views.xml',
+        'views/res_company_views.xml',
     ],
     'installable': True,
     'application': False,
