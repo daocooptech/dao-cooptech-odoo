@@ -696,6 +696,25 @@
   font-variant-numeric: tabular-nums;
 }
 
+// ── Выбор меры у графика и сводной ───────────────────────────────────
+//
+// Движок ставит кнопке мер `btn-primary` — у нас это чёрная залитая плашка
+// над каждым графиком «Панели управления» (владелец 21.10). Основное
+// действие экрана одно; выбор меры — обычная кнопка с рамкой.
+.o_report_measures.btn-primary {
+  background-color: var(--coop-white);
+  border-color: var(--coop-line);
+  color: var(--coop-ink);
+
+  &:hover,
+  &:focus,
+  &.show {
+    background-color: var(--coop-surface);
+    border-color: var(--coop-line-strong, var(--coop-line));
+    color: var(--coop-ink);
+  }
+}
+
 // ── Экраны коробки на телефоне ────────────────────────────────────────
 //
 // Метка состояния в карточке канбана движок ставит в одну строку

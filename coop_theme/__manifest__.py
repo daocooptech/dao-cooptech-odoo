@@ -106,6 +106,11 @@
             'coop_theme/static/src/xml/shell.xml',
             'coop_theme/static/src/xml/chatter.xml',
         ],
+        # Графики и сводная грузятся ленивым пакетом: в основном их модуля
+        # ещё нет, и заплатка там не находит `graph_renderer`.
+        'web.assets_backend_lazy': [
+            'coop_theme/static/src/js/graph_style.js',
+        ],
         'web.assets_frontend': [
             'coop_theme/static/src/scss/fonts.scss',
         ],
