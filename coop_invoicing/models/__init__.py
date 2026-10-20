@@ -5,3 +5,4 @@ from . import coop_membership
 from . import coop_deal
 from . import account_move
 from . import upd_legacy
+from . import upd_data

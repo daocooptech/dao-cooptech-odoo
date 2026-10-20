@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!--
+    Данные, без которых УПД не собирается (задача 298).
+
+    Код ОКЕИ — у каждой строки документа: по нему единица читается
+    одинаково у продавца, покупателя и в налоговой. Движок кодов не знает,
+    поэтому они ставятся на штатные единицы здесь — вызовом write: записи
+    движка помечены «не обновлять», и <record> из другого модуля их пропустил бы. Месяц и условная
+    единица — единицы сделок платформы («мес.» у аренды, «усл.» у услуг),
+    в движке их нет.
+  -->
+  <function model="uom.uom" name="write" eval="[[ref('uom.product_uom_unit')], {'okei': '796'}]"/>
+  <function model="uom.uom" name="write" eval="[[ref('uom.product_uom_hour')], {'okei': '356'}]"/>
+  <function model="uom.uom" name="write" eval="[[ref('uom.product_uom_day')], {'okei': '359'}]"/>
+  <function model="uom.uom" name="write" eval="[[ref('uom.product_uom_minute')], {'okei': '355'}]"/>
+  <function model="uom.uom" name="write" eval="[[ref('uom.product_uom_millimeter')], {'okei': '003'}]"/>
+  <function model="uom.uom" name="write" eval="[[ref('uom.product_uom_cm')], {'okei': '004'}]"/>
+  <function model="uom.uom" name="write" eval="[[ref('uom.product_uom_meter')], {'okei': '006'}]"/>
+  <function model="uom.uom" name="write" eval="[[ref('uom.product_uom_km')], {'okei': '008'}]"/>
+  <function model="uom.uom" name="write" eval="[[ref('uom.product_uom_square_meter')], {'okei': '055'}]"/>
+  <function model="uom.uom" name="write" eval="[[ref('uom.product_uom_milliliter')], {'okei': '111'}]"/>
+  <function model="uom.uom" name="write" eval="[[ref('uom.product_uom_litre')], {'okei': '112'}]"/>
+  <function model="uom.uom" name="write" eval="[[ref('uom.product_uom_cubic_meter')], {'okei': '113'}]"/>
+  <function model="uom.uom" name="write" eval="[[ref('uom.product_uom_gram')], {'okei': '163'}]"/>
+  <function model="uom.uom" name="write" eval="[[ref('uom.product_uom_kgm')], {'okei': '166'}]"/>
+  <function model="uom.uom" name="write" eval="[[ref('uom.product_uom_ton')], {'okei': '168'}]"/>
+
+  <record id="uom_month" model="uom.uom">
+    <field name="name">мес.</field>
+    <field name="relative_factor">30</field>
+    <field name="relative_uom_id" ref="uom.product_uom_day"/>
+    <field name="okei">362</field>
+  </record>
+  <record id="uom_service" model="uom.uom">
+    <field name="name">усл. ед.</field>
+    <field name="relative_factor">1</field>
+    <field name="relative_uom_id" ref="uom.product_uom_unit"/>
+    <field name="okei">876</field>
+  </record>
+
+  <!-- Договор у счёта по сделке — сама сделка: её номер и дата
+       подписания. Вид у всех один. -->
+  <record id="contract_profile_deal" model="contract.profile">
+    <field name="name">Договор по сделке на платформе</field>
+  </record>
+</odoo>

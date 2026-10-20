@@ -156,3 +156,79 @@ def _register_payment(env, move, amount, when):
     except Exception as error:  # noqa: BLE001
         # Оплата — украшение витрины: без неё документ остаётся проведённым.
         _logger.warning('Оплата %s не записана: %s', move.name, error)
+
+
+def orgs_as_buyers(env):
+    """Покупатель по счёту — организация, а не человек (задача 298).
+
+    УПД выставляется организации: человек покупает от имени той, где он
+    состоит. Сторона-плательщик сделки переходит на его организацию (не на
+    продавца; с режимом НДС — первой), за ней платежи сделки и уже
+    выставленные счета: счёт снимается в черновик, меняет покупателя и
+    проводится снова, оплата перевешивается на организацию. Покупатель с
+    режимом НДС отражает полученный документ у себя, как в `load_invoices`.
+    Повторный прогон ничего не меняет: плательщиков-людей больше нет.
+    """
+    Deal = env['coop.deal'].sudo()
+    Membership = env['coop.membership'].sudo()
+    deals = Deal.search([
+        ('state', 'in', ('active', 'acceptance', 'done')),
+        ('way', 'in', ('sale', 'purchase', 'batch', 'rent', 'service', 'job')),
+        ('amount', '>', 0),
+    ], order='id')
+    moved = rebilled = 0
+    for deal in deals:
+        seller = deal.coop_seller_id
+        payer = deal._coop_payer_payee()[0]
+        if not seller.is_company or payer.is_company:
+            continue
+        orgs = Membership.search([('partner_id', '=', payer.id), ('state', '=', 'active')],
+                                 order='id').organization_id.filtered(
+            lambda o: o.is_company and o.coop_is_participant) - seller
+        if not orgs:
+            continue
+        shipped = deal._coop_shipped_on()
+        pool = orgs.filtered(lambda o: o._coop_vat_regime_at(shipped)) or orgs
+        org = pool[deal.id % len(pool)]
+        deal.write({'party_a_id' if deal.party_a_id == payer else 'party_b_id': org.id})
+        deal.payment_ids.filtered(lambda p: p.payer_id == payer).write({'payer_id': org.id})
+        moved += 1
+        for move in deal.coop_invoice_ids.filtered(
+                lambda m: m.move_type == 'out_invoice' and m.partner_id == payer):
+            _rebill(env, deal, move, org, shipped)
+            rebilled += 1
+    _logger.info('Покупатели-организации: сделок %s, счетов переоформлено %s', moved, rebilled)
+    return moved
+
+
+def _rebill(env, deal, move, org, shipped):
+    state = move.state
+    payments = move.matched_payment_ids
+    if state != 'draft':
+        move.button_draft()
+    move.write({'partner_id': org.id, 'gruzopol': org.id})
+    if state == 'cancel':
+        move.button_cancel()
+        return
+    if state != 'posted':
+        return
+    move.action_post()
+    for payment in payments:
+        # Платёж без проводки (у компании нет счёта поступлений) — меняется
+        # только плательщик; с проводкой — её строки сверяются заново.
+        payment.with_context(skip_account_move_synchronization=True).partner_id = org
+        payment.move_id.line_ids.with_context(
+            skip_account_move_synchronization=True).partner_id = org
+        receivable = (move.line_ids | payment.move_id.line_ids).filtered(
+            lambda l: l.account_id.account_type == 'asset_receivable' and not l.reconciled)
+        if len(receivable) > 1:
+            receivable.reconcile()
+    rnd = random.Random(20261020 + deal.id)
+    if org._coop_vat_regime_at(shipped) and rnd.random() < 0.85:
+        company = org._coop_ensure_company()
+        company._coop_prepare_taxes()
+        bill = env['account.move'].sudo().with_company(company).create(move._coop_bill_vals())
+        bill.action_post()
+        paid = move.amount_total - move.amount_residual
+        if paid > 0:
+            _register_payment(env, bill, paid, max(move.invoice_date, bill.invoice_date))

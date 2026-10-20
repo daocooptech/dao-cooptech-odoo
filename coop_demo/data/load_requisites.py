@@ -24,7 +24,8 @@
 import hashlib
 import logging
 
-from .load_org_profiles import INN_WEIGHTS_10, INN_WEIGHTS_11, INN_WEIGHTS_12, _inn, _ogrn
+from .load_org_profiles import (INN_WEIGHTS_10, INN_WEIGHTS_11, INN_WEIGHTS_12,
+                                _inn, _kpp, _ogrn, region_of)
 
 _logger = logging.getLogger(__name__)
 
@@ -103,7 +104,7 @@ def load_requisites(env):
     taken = set(Partner.with_context(active_test=False).search(
         [('coop_inn', '!=', False)]).mapped('coop_inn'))
     cities = [c for c in orgs.mapped('city') if c]
-    stats = dict(inn=0, kpp=0, ogrn=0, okpo=0, edi=0, city=0, renamed=0,
+    stats = dict(inn=0, kpp=0, ogrn=0, okpo=0, edi=0, city=0,
                  function=0, chief=0, accountant=0, no_chief=0)
 
     for org in orgs:
@@ -111,12 +112,17 @@ def load_requisites(env):
         seed = 5000 + org.id
         values = {}
 
+        region = region_of(org.city)
+        size = 12 if individual else 10
+
+        def usable(value):
+            return _valid_inn(value) and len(value) == size and value[:2] != '00'
+
         inn = org.coop_inn
-        if not inn:
-            inn = org.vat if _valid_inn(org.vat) and len(org.vat) == (12 if individual else 10) \
-                and org.vat not in taken else False
+        if not usable(inn):
+            inn = org.vat if usable(org.vat) and org.vat not in taken else False
             while not inn or inn in taken:
-                inn = _inn(seed, individual)
+                inn = _inn(seed, individual, region)
                 seed += 7919
             taken.add(inn)
             values['coop_inn'] = inn
@@ -124,33 +130,31 @@ def load_requisites(env):
         if org.vat != inn:
             values['vat'] = inn
 
+        # КПП и ОГРН — того же региона, что ИНН: код инспекции в КПП — первые
+        # четыре цифры ИНН, регион в ОГРН — четвёртая и пятая.
         kpp = org.coop_kpp
-        if not individual and not kpp:
-            kpp = inn[:4] + '01001'
+        if not individual and (not kpp or kpp[:4] != inn[:4]):
+            kpp = _kpp(inn)
             values['coop_kpp'] = kpp
             stats['kpp'] += 1
         if (org.kpp or False) != (kpp or False):
             values['kpp'] = kpp or False
 
-        if not org.coop_ogrn:
-            values['coop_ogrn'] = _ogrn(seed, individual)
+        ogrn = org.coop_ogrn
+        if not ogrn or ogrn[3:5] != inn[:2]:
+            values['coop_ogrn'] = _ogrn(seed, individual, inn[:2])
             stats['ogrn'] += 1
+        if not org.edi or inn not in org.edi:
+            values['edi'] = _edi(seed, inn, kpp)
+            stats['edi'] += 1
         if not org.okpo:
             values['okpo'] = _okpo(seed, individual)
             stats['okpo'] += 1
-        if not org.edi:
-            values['edi'] = _edi(seed, inn, kpp)
-            stats['edi'] += 1
         if not org.city and cities:
             values['city'] = cities[seed % len(cities)]
             stats['city'] += 1
 
         signer = _ensure_signatory(org, env)
-        # Наименование ИП — фамилия, имя и отчество: по нему документ
-        # заполняет сведения о предпринимателе. Вывеска в кавычках — не имя.
-        if individual and signer and ('«' in org.name or len(org.name.split()) != 4):
-            values['name'] = 'ИП ' + signer.partner_id.name
-            stats['renamed'] += 1
         if values:
             org.write(values)
 
@@ -162,7 +166,7 @@ def load_requisites(env):
         if not company:
             continue
         company_values = {}
-        if not company.edi:
+        if company.edi != org.edi:
             company_values['edi'] = org.edi
         if not company.edi_operator:
             company_values['edi_operator'] = EDI_OPERATOR

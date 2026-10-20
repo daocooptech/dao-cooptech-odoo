@@ -384,6 +384,12 @@ class CoopDemoLoader(models.AbstractModel):
         # Реквизиты для документов (задача 297) — после компаний учёта:
         # руководителя и ID ЭДО получает уже заведённая компания.
         load_requisites.load_requisites(self.env)
+        # Покупатель-организация вместо человека и данные счёта для УПД
+        # (задача 298) — после реквизитов; затем архив выданных УПД.
+        if 'coop.vat.regime' in self.env:
+            load_vat.orgs_as_buyers(self.env)
+            self.env['account.move']._coop_fill_upd_data()
+            self.env['account.move']._coop_archive_upd_xml()
         # Лиды CRM (решение 450) — последними: их ведут держатели «Сделок»,
         # которым компании учёта и отделы продаж выданы шагами выше.
         load_crm.load_crm(self.env)

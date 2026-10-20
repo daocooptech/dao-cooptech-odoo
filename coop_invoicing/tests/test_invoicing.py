@@ -107,6 +107,23 @@ class TestCoopInvoicing(TransactionCase):
         self.assertEqual(len(files), 1)
         self.assertEqual(files.name, '%s.xml' % move.edi)
 
+    def test_invoice_carries_upd_data(self):
+        """Задача 298: договор — сделка, передаёт подписант продавца,
+        грузоотправитель — продавец, у строки единица с кодом ОКЕИ."""
+        signer = self._member('Подписант Пробы', ['sign'])
+        signer.partner_id.function = 'Председатель'
+        self._regime('2026-01-01', 'usn_5')
+        action = self.deal.with_user(self.keeper).action_coop_create_invoice()
+        move = self.env['account.move'].browse(action['res_id'])
+        self.assertEqual(move.mt_contract_id.name, self.deal.number)
+        self.assertEqual(move.mt_contract_id.partner_id, self.buyer)
+        self.assertEqual(move.kladov, signer)
+        self.assertEqual((move.gruzootpr, move.gruzopol), (self.seller, self.buyer))
+        self.assertEqual(move.invoice_line_ids.product_uom_id.okei, '796')
+        self.env['account.move']._coop_fill_upd_data()
+        self.assertEqual(self.env['partner.contract.customer'].search_count(
+            [('name', '=', self.deal.number)]), 1)
+
     def test_exempt_gives_primary_document_and_blocks_tax(self):
         self._regime('2026-01-01', 'exempt_145')
         action = self.deal.with_user(self.keeper).action_coop_create_invoice()

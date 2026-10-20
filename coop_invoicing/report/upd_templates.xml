@@ -33,6 +33,22 @@
     </xpath>
   </template>
 
+  <!--
+    Дополнительные сведения о товаре — только заполненные. Форк пишет
+    код товара, ГТИН и код вида товара пустыми строками, а схема 5.03
+    пустых значений не принимает (КодТов — от 1 знака, ГТИН — 14,
+    КодВидТов — 10). Атрибут со значением None QWeb не выводит.
+  -->
+  <template id="upd_xml_goods_extra" inherit_id="l10n_ru_upd_xml.demo_report_xml_view">
+    <xpath expr="//ДопСведТов" position="attributes">
+      <attribute name="t-att">{
+                                    'КодТов': line.product_id and line.product_id.default_code or None,
+                                    'ГТИН': ('0' + line.product_id.barcode) if line.product_id and line.product_id.barcode else None,
+                                    'КодВидТов': line.product_id and line.product_id.get_hs_code() or None
+                                }</attribute>
+    </xpath>
+  </template>
+
   <!-- Печатный УПД: статус 1 — счёт-фактура и первичный, 2 — только первичный. -->
   <template id="report_upd_status" inherit_id="l10n_ru_doc.report_upd">
     <xpath expr="//TD[@CLASS='RE15CE2box']/SPAN" position="replace">

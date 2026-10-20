@@ -60,6 +60,7 @@ class CoopDeal(models.Model):
             'name': line.name,
             'quantity': line.quantity or 1.0,
             'price_unit': line.price_unit,
+            'product_uom_id': self._coop_upd_uom(line.uom_name).id,
             'tax_ids': [(6, 0, tax.ids)],
         }) for line in self.line_ids if line.price_unit]
         if not lines:
@@ -68,9 +69,10 @@ class CoopDeal(models.Model):
                 'name': self.name,
                 'quantity': 1.0,
                 'price_unit': self.amount,
+                'product_uom_id': self._coop_upd_uom().id,
                 'tax_ids': [(6, 0, tax.ids)],
             })]
-        return {
+        return dict(self._coop_upd_vals(company, buyer), **{
             'move_type': 'out_invoice',
             'company_id': company.id,
             'partner_id': buyer.id,
@@ -79,7 +81,7 @@ class CoopDeal(models.Model):
             'ref': self.name,
             'coop_deal_id': self.id,
             'invoice_line_ids': lines,
-        }
+        })
 
     def action_coop_create_invoice(self):
         """Выставить счёт по сделке от имени продавца.
