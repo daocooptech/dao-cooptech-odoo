@@ -67,9 +67,11 @@ export class CoopTabs extends Component {
         // так же, как боковое меню.
         this.env.bus.addEventListener("ACTION_MANAGER:UPDATE", ({ detail }) => {
             const action = this._actionFromEvent(detail);
-            if (action?.id) {
-                this.lastActionId = action.id;
-            }
+            // Сбрасывается и у экрана без номера действия: у «Настроек»
+            // (серверное действие) его нет, и прежний номер оставлял над
+            // ними шапку «Ресурсы / Каталог ресурсов» — экрана, откуда
+            // пришли (находка № 257, владелец 20.10: «Чинить»).
+            this.lastActionId = action?.id || null;
             this.refresh();
         });
     }
