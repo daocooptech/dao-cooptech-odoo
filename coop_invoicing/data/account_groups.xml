@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Администратор бухгалтерии (владелец площадки, режим администратора)
+       получает и «Basic»: без неё панель «Выставления счетов» отвечает
+       окном «нет доступа к панели бухгалтерии» (владелец 20.10.2026). -->
+  <record id="account.group_account_manager" model="res.groups">
+    <field name="implied_ids" eval="[(4, ref('account.group_account_basic'))]"/>
+  </record>
+
+</odoo>

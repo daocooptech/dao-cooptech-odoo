@@ -56,8 +56,13 @@ class ResUsers(models.Model):
         компанию своей организации и группу «Счета». Другие модули
         добавляют своё (CRM — по полномочию «Сделки») и зовут super().
         Возвращает {компания: группы}.
+
+        Группа — «Basic» (включает «Счета»): панель «Выставления счетов»
+        движок открывает только с ней, со «Счетами» держатель видел окно
+        «нет доступа к панели бухгалтерии» (владелец 20.10.2026: выдать).
+        Проводок она не даёт — только панель и простую сверку с банком.
         """
-        group = self.env.ref('account.group_account_invoice')
+        group = self.env.ref('account.group_account_basic')
         grants = {}
         for org in (user.coop_treasury_partner_ids - user.partner_id):
             if org.coop_company_id:

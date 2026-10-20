@@ -79,6 +79,17 @@ class TestCoopInvoicing(TransactionCase):
         with self.assertRaises(UserError):
             self.deal.with_user(self.member).action_coop_create_invoice()
 
+    def test_treasury_opens_invoicing_dashboard(self):
+        # Панель «Выставления счетов» движок открывает только с «Basic».
+        # Компания учёта и доступ к ней появляются с первым счётом.
+        self._regime('2026-01-01', 'usn_5')
+        self.deal.with_user(self.keeper).action_coop_create_invoice()
+        self.assertTrue(self.keeper.has_group('account.group_account_basic'))
+        self.assertFalse(self.member.has_group('account.group_account_basic'))
+        self.env['account.journal'].with_user(self.keeper).with_company(
+            self.seller.coop_company_id).get_account_dashboard_kpis()
+        self.assertTrue(self.env.ref('base.user_admin').has_group('account.group_account_basic'))
+
     def test_invoice_without_regime_is_refused(self):
         with self.assertRaises(UserError):
             self.deal.with_user(self.keeper).action_coop_create_invoice()
