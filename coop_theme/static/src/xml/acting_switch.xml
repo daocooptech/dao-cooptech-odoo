@@ -25,4 +25,25 @@
     </t>
   </t>
 
+  <!--
+    Аватар в шапке — того, от чьего имени действуешь (задача 299).
+    `mail` поставил сюда аватар человека с отметкой «в сети»; от
+    организации — её знак, отметки у неё нет. Размер — как у `mail`, 26px.
+  -->
+  <t t-inherit="web.UserMenu" t-inherit-mode="extension">
+    <xpath expr="//DiscussAvatar" position="replace">
+      <img t-if="this.coopActingAvatar" class="o_coop_acting_pic rounded"
+           t-att-src="this.coopActingAvatar" alt="Действую от имени"/>
+      <DiscussAvatar t-elif="this.store.self_user" record="this.store.self_user" size="26"/>
+    </xpath>
+  </t>
+
+  <t t-inherit="web.BurgerMenu" t-inherit-mode="extension">
+    <xpath expr="//DiscussAvatar" position="replace">
+      <img t-if="this.coopActingAvatar" class="o_coop_acting_pic rounded"
+           t-att-src="this.coopActingAvatar" alt="Действую от имени"/>
+      <DiscussAvatar t-elif="this.store.self_user" record="this.store.self_user" size="26"/>
+    </xpath>
+  </t>
+
 </templates>

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 
-from odoo import api, models
+from odoo import api, fields, models
 
 from ..node_path import NODE_PATH
 
@@ -13,6 +13,17 @@ class IrHttp(models.AbstractModel):
         """Имя узла для браузера: роутер строит по нему адреса /nn1/…"""
         info = super().session_info()
         info['coop_node_path'] = NODE_PATH
+        # Аватар в шапке — того, от чьего имени действуешь (задача 299):
+        # движок и `mail` всегда рисуют там человека. Кладётся сюда, а не
+        # в `coop.shell.boot`: шапка рисуется сразу, и ждать ответа на
+        # отдельный запрос значило бы мигнуть сперва чужим лицом.
+        # Переключение лица перезагружает страницу, так что значение
+        # всегда свежее.
+        acting = self.env.user.coop_acting_as_id
+        info['coop_acting'] = {
+            'id': acting.id,
+            'write_date': fields.Datetime.to_string(acting.write_date),
+        } if acting else False
         return info
 
     # «Odoo» в переводах веб-клиента — «Ошибка сервера Odoo», «Сессия Odoo

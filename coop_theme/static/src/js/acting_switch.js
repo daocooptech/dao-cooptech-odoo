@@ -2,6 +2,11 @@
 
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+import { patch } from "@web/core/utils/patch";
+import { imageUrl } from "@web/core/utils/urls";
+import { session } from "@web/session";
+import { BurgerMenu } from "@web/webclient/burger_menu/burger_menu";
+import { UserMenu } from "@web/webclient/user_menu/user_menu";
 import { Component, onWillStart, proxy, useProps } from "@odoo/owl";
 
 /**
@@ -77,6 +82,38 @@ export class CoopActingMenu extends Component {
         }
     }
 }
+
+/**
+ * Аватар в шапке — того, от чьего имени действуешь (задача 299).
+ *
+ * Движок и `mail` рисуют там человека всегда: выбрал организацию — а в
+ * углу по-прежнему своё лицо, и «кто я сейчас» видно только в меню.
+ * Действуешь от себя — остаётся аватар `mail` с отметкой «в сети»;
+ * от организации — её знак, без отметки: «в сети» у кооператива не бывает.
+ * Лицо берётся из `session_info` (`coop_acting`), а не запросом: шапка
+ * рисуется сразу, и до ответа в углу мелькнул бы человек.
+ */
+function actingAvatar() {
+    const acting = session.coop_acting;
+    return acting
+        ? imageUrl("res.partner", acting.id, "avatar_128", { unique: acting.write_date })
+        : null;
+}
+
+patch(UserMenu.prototype, {
+    setup() {
+        super.setup();
+        this.coopActingAvatar = actingAvatar();
+    },
+});
+
+// Та же картинка на телефоне — кнопка выдвижного меню в шапке.
+patch(BurgerMenu.prototype, {
+    setup() {
+        super.setup();
+        this.coopActingAvatar = actingAvatar();
+    },
+});
 
 // Первым в меню: это ответ на вопрос «кто я сейчас», а он предшествует
 // всему остальному — настройкам, справке и выходу.
