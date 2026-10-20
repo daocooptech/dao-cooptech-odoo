@@ -7,6 +7,11 @@
     руками (`coop.extension._coop_sync_catalog`).
   -->
   <function model="coop.extension" name="_coop_sync_catalog"/>
+  <!-- Вид (расширение/плагин) — заново по `application` модулей: признак
+       чужого модуля меняется в `update_list`, раньше чем загружена эта
+       модель, и сохранённый вид оставался прежним (20.10.2026:
+       «основа» и «помощь проекту» после снятия `application`). -->
+  <function model="coop.extension" name="_coop_recompute_kind"/>
   <!-- Плагины в меню не ставятся (как в Odoo, владелец 19.10.2026):
        подключённые раньше — убираются из личных и общих меню. -->
   <function model="coop.extension" name="_coop_drop_plugin_menus"/>

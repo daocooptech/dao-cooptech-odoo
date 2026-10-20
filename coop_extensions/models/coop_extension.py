@@ -159,6 +159,12 @@ class CoopExtension(models.Model):
             else:
                 record.kind = 'app' if record.module_id.application else 'plugin'
 
+    @api.model
+    def _coop_recompute_kind(self):
+        records = self.with_context(active_test=False).search([])
+        self.env.add_to_compute(self._fields['kind'], records)
+        records.flush_recordset(['kind'])
+
     @api.depends('pricing', 'price', 'currency_id')
     def _compute_price_label(self):
         suffix = {'month': ' в месяц', 'year': ' в год', 'once': ' навсегда'}
