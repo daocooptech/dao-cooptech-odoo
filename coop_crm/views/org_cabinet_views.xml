@@ -144,6 +144,13 @@
                         invisible="not coop_app_stock or not coop_company_id">открыть</button>
               </div>
               <div class="o_coop_app_row">
+                <span class="o_coop_key">Закупки</span>
+                <field name="coop_app_purchase" widget="coop_autosave_toggle" nolabel="1"
+                       readonly="not coop_can_manage_apps"/>
+                <button name="action_coop_app_purchase" type="object" class="o_coop_band_all"
+                        invisible="not coop_app_purchase or not coop_company_id">открыть</button>
+              </div>
+              <div class="o_coop_app_row">
                 <span class="o_coop_key">Проекты</span>
                 <field name="coop_app_project" widget="coop_autosave_toggle" nolabel="1"
                        readonly="not coop_can_manage_apps"/>

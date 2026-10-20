@@ -17,6 +17,9 @@ from odoo.exceptions import UserError
 APPS = {
     'crm': (('deal',), 'sales_team.group_sale_salesman_all_leads'),
     'stock': (('deal', 'treasury'), 'stock.group_stock_user'),
+    # Закупки — как CRM, только у организаций (владелец 20.10.2026):
+    # запросы КП и заказы поставщикам ведёт организация, не человек.
+    'purchase': (('deal', 'treasury'), 'purchase.group_purchase_user'),
     'project': (('sign', 'deal'), 'project.group_project_user'),
     'hr': (('roster', 'powers'), 'hr.group_hr_user'),
 }
@@ -24,8 +27,8 @@ APPS = {
 # ведёт своих проектов, пока руководитель не включит, но участвует в
 # чужих — команда проекта открывает их её людям и без переключателя.
 DEFAULTS = {
-    'commercial': ('crm', 'stock', 'hr'),
-    'cooperative': ('crm', 'stock'),
+    'commercial': ('crm', 'stock', 'purchase', 'hr'),
+    'cooperative': ('crm', 'stock', 'purchase'),
     'nonprofit': ('hr',),
     'decentralized': (),
 }
@@ -37,6 +40,7 @@ class ResPartner(models.Model):
 
     coop_app_crm = fields.Boolean(string='CRM')
     coop_app_stock = fields.Boolean(string='Склад')
+    coop_app_purchase = fields.Boolean(string='Закупки')
     coop_app_project = fields.Boolean(string='Проекты')
     coop_app_hr = fields.Boolean(string='Сотрудники')
     coop_can_manage_apps = fields.Boolean(compute='_compute_coop_can_manage_apps')
@@ -106,6 +110,9 @@ class ResPartner(models.Model):
 
     def action_coop_app_stock(self):
         return self._coop_app_action('stock.action_picking_tree_all', _('Склад'))
+
+    def action_coop_app_purchase(self):
+        return self._coop_app_action('purchase.purchase_rfq', _('Закупки'))
 
     def action_coop_app_project(self):
         """Проекты, которые организация ведёт или где она вкладчик.

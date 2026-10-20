@@ -95,6 +95,12 @@ class CoopSidebarItem(models.Model):
             if 'coop_app_crm' in org._fields and not org.coop_app_crm:
                 return False
             return user.has_group('sales_team.group_sale_salesman')
+        if name == 'Закупки':
+            # Как CRM (владелец 20.10.2026): пункт стоит, пока у организации
+            # включено приложение «Закупки».
+            if 'coop_app_purchase' in org._fields and not org.coop_app_purchase:
+                return False
+            return user.has_group('purchase.group_purchase_user')
         if name in REQUIRES:
             return bool(self._requirement(name, user))
         return True

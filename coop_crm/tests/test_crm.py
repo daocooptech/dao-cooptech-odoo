@@ -115,12 +115,24 @@ class TestCoopCrm(TransactionCase):
         self.assertTrue(self.seller.has_group('sales_team.group_sale_salesman_all_leads'))
         self.assertIn(company, self.seller.company_ids)
 
+    def test_purchase_app(self):
+        """«Закупки» — как CRM (владелец 20.10.2026): включил руководитель —
+        доступ у держателей «Сделок» и «Казны», выключил — снят."""
+        group = 'purchase.group_purchase_user'
+        self.assertFalse(self.seller.has_group(group))
+        self.org.with_user(self.head).write({'coop_app_purchase': True})
+        self.assertTrue(self.seller.has_group(group))
+        self.assertTrue(self.keeper.has_group(group))
+        self.assertFalse(self.head.has_group(group))
+        self.org.with_user(self.head).write({'coop_app_purchase': False})
+        self.assertFalse(self.seller.has_group(group))
+
     def test_default_apps_by_form(self):
         group = self.env.ref('coop_base.legal_group_cooperative')
         form = self.env['coop.legal.form'].search([('group_id', '=', group.id)], limit=1)
         coop = self.env['res.partner'].create({
             'name': 'ПК «Набор по форме»', 'is_company': True,
             'coop_legal_form_id': form.id})
-        self.assertTrue(coop.coop_app_crm and coop.coop_app_stock)
+        self.assertTrue(coop.coop_app_crm and coop.coop_app_stock and coop.coop_app_purchase)
         # «Проекты» выключены у всех форм (решение 452).
         self.assertFalse(coop.coop_app_hr or coop.coop_app_project)
