@@ -66,13 +66,24 @@ fi
 # загрузились. В разговор из него идёт только выжимка ниже. Odoo журнал
 # дописывает — обнуляем, иначе посчитаем строки прошлого запуска.
 : > "$LOG"
+# С --test-enable движок и при --no-http поднимает тестовый сервер на порту
+# из odoo.conf (8070) — открытые вкладки стенда стучатся в него и сыплют
+# в журнал «cursor already closed» (20.10: 84 «ошибки» при 0 упавших).
 "$ROOT/venv/Scripts/python.exe" "$ROOT/odoo/odoo-bin" -c "$ROOT/odoo.conf" \
-    -d "$DB" --db-filter "^${DB}$" --stop-after-init --no-http \
+    -d "$DB" --db-filter "^${DB}$" --stop-after-init --no-http --http-port 8099 \
     --log-level=info --logfile "$LOG" "$@"
 rc=$?
 
 # Опечатку в имени модуля Odoo пропускает предупреждением и рапортует успех.
-errors=$(grep -cE ' (ERROR|CRITICAL) |^Traceback|invalid module names' "$LOG")
+# Трассировка — ошибка, только если она под записью ERROR/CRITICAL или вне
+# записи журнала: уборка filestore на Windows пишет свои под INFO (20.10:
+# 65 «ошибок» при 0 упавших тестах).
+bad_lines() {
+    awk '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9:,]+ [0-9]+ [A-Z]+ /{lvl=$4}
+         / (ERROR|CRITICAL) |invalid module names/{print NR": "$0; next}
+         /^Traceback/ && lvl!="INFO" && lvl!="WARNING" && lvl!="DEBUG"{print NR": "$0}' "$LOG"
+}
+errors=$(bad_lines | wc -l | tr -d ' ')
 loaded=$(grep -cE 'Modules loaded\.' "$LOG")
 echo "odoo_run: база $DB, код $rc, ошибок $errors, «Modules loaded» $loaded, журнал $LOG"
 # С --test-enable — итог тестов и имена упавших, без чтения журнала руками.
@@ -80,8 +91,10 @@ grep -E 'tests? when loading|of [0-9]+ tests' "$LOG" | sed 's/^.*odoo.tests.resu
 grep -E ' (FAIL|ERROR): Test' "$LOG" | sed 's/^.*: \(FAIL\|ERROR\): /odoo_run: упал — \1 /' | head -10
 if [ "$errors" -gt 0 ]; then
     # Первые пять ошибок и первая трассировка — этого хватает для диагноза.
-    grep -nE ' (ERROR|CRITICAL) |^Traceback|invalid module names' "$LOG" | cut -c1-300 | head -5
+    bad_lines | cut -c1-300 | head -5
     echo '--- первая трассировка:'
-    awk '/^Traceback/{t=1} t{print; n++} n>=25{exit}' "$LOG"
+    awk '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9:,]+ [0-9]+ [A-Z]+ /{lvl=$4}
+         /^Traceback/ && lvl!="INFO" && lvl!="WARNING" && lvl!="DEBUG"{t=1}
+         t{print; n++} n>=25{exit}' "$LOG"
 fi
 [ "$rc" -eq 0 ] && [ "$errors" -eq 0 ] && [ "$loaded" -gt 0 ]
