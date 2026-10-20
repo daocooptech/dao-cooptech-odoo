@@ -696,3 +696,73 @@
     flex-wrap: wrap;
   }
 }
+
+// Плашки сводки «Закупок» (`o_purchase_dashboard`) — плитками `StatCard`:
+// белая ячейка в рамке, число моноширинным 20px, подпись 11.5px. Движок
+// красит их утилитами `bg-dark-subtle` / `bg-info-subtle` с `!important`,
+// поэтому и здесь `!important`. Ненулевая плашка («есть что сделать») —
+// рамкой и числом фирменного цвета вместо голубой заливки.
+.o_purchase_dashboard .purchase-dashboard-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 12px 14px !important;
+  border: 1px solid var(--coop-line) !important;
+  border-radius: 10px !important;
+  background-color: var(--coop-white) !important;
+  color: var(--coop-slate) !important;
+  font-size: 11.5px;
+  line-height: 1.4;
+  text-align: left;
+  white-space: normal;
+
+  .fs-2 {
+    margin-bottom: 3px;
+    font: 700 20px/1.2 'JetBrains Mono', ui-monospace, monospace !important;
+    color: var(--coop-ink);
+  }
+
+  &.bg-info-subtle {
+    border-color: var(--coop-teal) !important;
+
+    .fs-2 {
+      color: var(--coop-teal-dark);
+    }
+  }
+
+  // Среднее «от запроса до заказа» дольше срока закупки — движок ставит
+  // `btn-warning`; у нас рамка `coop-gold`, число остаётся тёмным (золото
+  // текстом не читается, 2.9:1).
+  &.btn-warning {
+    border-color: var(--coop-gold) !important;
+  }
+
+  &:hover {
+    text-decoration: none;
+    border-color: var(--coop-teal) !important;
+  }
+
+  &.o_no_hover:not(.btn-warning):hover {
+    border-color: var(--coop-line) !important;
+  }
+}
+
+// На телефоне движок ставит пять плашек в один ряд по 59 точек — подпись
+// рвалась по слову в строку. По эталону ячейка не уже 140 и переносится.
+@media (max-width: 767.98px) {
+  .o_purchase_dashboard .grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+
+    > [class*='g-col-'] {
+      flex: 1 1 140px;
+    }
+
+    > .g-col-1:empty,
+    > .d-none {
+      display: none !important;
+    }
+  }
+}
