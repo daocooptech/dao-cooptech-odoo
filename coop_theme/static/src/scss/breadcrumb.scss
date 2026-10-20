@@ -54,6 +54,15 @@
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 6l6 6l-6 6'/%3E%3C/svg%3E") center / 12px 12px no-repeat content-box;
   }
 
+  // Уголок после предка: в Odoo 20 движок перестал давать этому
+  // псевдоэлементу содержимое (`content: none`), и путь слипался —
+  // «ПроектыДАО КООПТЕХ», «MVP DAO COOPTECHЗадачи» (№ 278).
+  .o_back_button a::after {
+    content: "";
+    display: inline-block;
+    vertical-align: middle;
+  }
+
   .breadcrumb-item {
     // Каждая крошка обрезается сама по себе, а не строка целиком: имя,
     // оборванное на «Кооператив «Реч…», всё равно узнаётся, а строка,
