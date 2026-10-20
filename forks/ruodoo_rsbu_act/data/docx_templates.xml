@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Печатная форма акта сверки взаиморасчётов (DOCX). -->
+        <record id="docx_template_act" model="docx.template">
+            <field name="name">Акт сверки (РСБУ) DOCX</field>
+            <field name="report_type">docx-docx</field>
+            <field name="model">ruodoo.rsbu.act</field>
+            <field name="docx_output_type">docx</field>
+            <field name="docx_model_id"
+                   search="[('model','=','ruodoo.rsbu.act')]" model="ir.model"/>
+            <field name="global_template" eval="True"/>
+            <field name="filename_pattern">'Акт сверки ' + (object.name or '')</field>
+            <field name="report_docx_template" type="base64"
+                   file="ruodoo_rsbu_act/static/src/docx/act_sverki.docx"/>
+            <field name="report_docx_template_filename">act_sverki.docx</field>
+            <field name="docx_custom_field_ids" eval="[
+                (5, 0, 0),
+                (0, 0, {'technical_name': 'seller', 'name': 'Организация',
+                        'value_python': 'record.act_docx_seller()'}),
+                (0, 0, {'technical_name': 'buyer', 'name': 'Контрагент',
+                        'value_python': 'record.act_docx_buyer()'}),
+                (0, 0, {'technical_name': 'totals', 'name': 'Итоги',
+                        'value_python': 'record.act_docx_totals()'}),
+                (0, 0, {'technical_name': 'signer', 'name': 'Подписант',
+                        'value_python': 'record.act_docx_signer()'}),
+                (0, 0, {'technical_name': 'summary', 'name': 'Итог',
+                        'value_python': 'record.act_docx_summary()'}),
+            ]"/>
+        </record>
+    </data>
+</odoo>

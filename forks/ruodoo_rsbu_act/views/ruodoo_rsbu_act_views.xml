@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_rsbu_act_list" model="ir.ui.view">
+        <field name="name">ruodoo.rsbu.act.list</field>
+        <field name="model">ruodoo.rsbu.act</field>
+        <field name="arch" type="xml">
+            <list string="Акты сверки">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="closing_debit"/>
+                <field name="closing_credit"/>
+                <field name="state" widget="badge"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_rsbu_act_form" model="ir.ui.view">
+        <field name="name">ruodoo.rsbu.act.form</field>
+        <field name="model">ruodoo.rsbu.act</field>
+        <field name="arch" type="xml">
+            <form string="Акт сверки взаиморасчётов">
+                <header>
+                    <button name="action_compute" type="object"
+                            string="Рассчитать" class="btn-primary"/>
+                    <button name="action_print_docx" type="object"
+                            string="Печать (DOCX)"
+                            invisible="state == 'draft'"/>
+                    <button name="action_export_xml" type="object"
+                            string="Выгрузить (XML)"
+                            invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                            <field name="company_id"
+                                   groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Сальдо и обороты">
+                            <field name="opening_debit"/>
+                            <field name="opening_credit"/>
+                            <field name="turnover_debit"/>
+                            <field name="turnover_credit"/>
+                            <field name="closing_debit"/>
+                            <field name="closing_credit"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <field name="account_ids" widget="many2many_tags"
+                           placeholder="Все счета расчётов (60/62/76)"/>
+                    <field name="line_ids">
+                        <list>
+                            <field name="date"/>
+                            <field name="doc_name"/>
+                            <field name="doc_number"/>
+                            <field name="name"/>
+                            <field name="debit"/>
+                            <field name="credit"/>
+                            <field name="currency_id" column_invisible="1"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_rsbu_act" model="ir.actions.act_window">
+        <field name="name">Акты сверки</field>
+        <field name="res_model">ruodoo.rsbu.act</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_rsbu_act"
+              name="Акты сверки"
+              parent="rsbu_chart_of_accounts.menu_rsbu_reports"
+              action="action_rsbu_act" sequence="80"/>
+</odoo>

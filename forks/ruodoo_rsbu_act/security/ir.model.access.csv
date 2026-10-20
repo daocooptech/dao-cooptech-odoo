@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ruodoo_rsbu_act_user,ruodoo.rsbu.act user,model_ruodoo_rsbu_act,rsbu_chart_of_accounts.group_rsbu_account_user,1,0,0,0
+access_ruodoo_rsbu_act_mgr,ruodoo.rsbu.act manager,model_ruodoo_rsbu_act,rsbu_journal.group_rsbu_journal_manager,1,1,1,1
+access_ruodoo_rsbu_act_line_user,ruodoo.rsbu.act.line user,model_ruodoo_rsbu_act_line,rsbu_chart_of_accounts.group_rsbu_account_user,1,0,0,0
+access_ruodoo_rsbu_act_line_mgr,ruodoo.rsbu.act.line manager,model_ruodoo_rsbu_act_line,rsbu_journal.group_rsbu_journal_manager,1,1,1,1
