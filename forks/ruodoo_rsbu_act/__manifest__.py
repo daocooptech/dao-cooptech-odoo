@@ -32,9 +32,9 @@ res.partner (rsbu_reporting_base, l10n_ru).
         'docx_report',
     ],
     'data': [
-        'security/ir.model.access.csv',
         'data/docx_templates.xml',
         'views/ruodoo_rsbu_act_views.xml',
+        'security/ir.access.csv',
     ],
     'external_dependencies': {
         'python': ['lxml'],
