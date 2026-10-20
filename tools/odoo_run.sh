@@ -27,6 +27,41 @@ if [ "$NEW" -eq 1 ] && [ "$exists" = "1" ]; then
     echo "odoo_run: база $DB уже есть, --new не нужен."; exit 1
 fi
 
+# Синтаксис Python у модулей из -i/-u — до запуска движка: опечатка в тесте
+# иначе всплывает через минуту прогона трассировкой загрузчика (20.10 — два
+# лишних прогона). Модули ищутся в coop-addons/ и coop-addons/forks/.
+mods=""; prev=""
+for a in "$@"; do
+    case "$prev" in -u|-i) mods="$mods,$a" ;; esac
+    case "$a" in -u?*|-i?*) mods="$mods,${a#-?}" ;; --update=*|--init=*) mods="$mods,${a#*=}" ;; esac
+    prev="$a"
+done
+dirs=""
+for m in $(echo "$mods" | tr ',' ' '); do
+    for d in "$ROOT/coop-addons/$m" "$ROOT/coop-addons/forks/$m"; do
+        # Windows-Python путь /d/… не понимает и молча не находит файлов.
+        [ -f "$d/__manifest__.py" ] && dirs="$dirs|$(cygpath -m "$d")"
+    done
+done
+if [ -n "$dirs" ]; then
+    if ! "$ROOT/venv/Scripts/python.exe" -X utf8 -c '
+import ast, pathlib, sys
+bad = seen = 0
+for d in sys.argv[1].strip("|").split("|"):
+    for p in pathlib.Path(d).rglob("*.py"):
+        seen += 1
+        try:
+            ast.parse(p.read_text(encoding="utf-8"), str(p))
+        except SyntaxError as e:
+            bad += 1
+            print("odoo_run: синтаксис %s:%s — %s" % (p, e.lineno, e.msg))
+if not seen:  # пустой обход — сломан сам инструмент, а не «всё чисто»
+    print("odoo_run: проверка синтаксиса не нашла ни одного .py в", sys.argv[1]); bad = 1
+sys.exit(1 if bad else 0)' "$dirs"; then
+        echo "odoo_run: движок не запускал — сперва синтаксис."; exit 1
+    fi
+fi
+
 # Журнал на диск — полный (info): по нему видно, что модули действительно
 # загрузились. В разговор из него идёт только выжимка ниже. Odoo журнал
 # дописывает — обнуляем, иначе посчитаем строки прошлого запуска.
@@ -40,6 +75,9 @@ rc=$?
 errors=$(grep -cE ' (ERROR|CRITICAL) |^Traceback|invalid module names' "$LOG")
 loaded=$(grep -cE 'Modules loaded\.' "$LOG")
 echo "odoo_run: база $DB, код $rc, ошибок $errors, «Modules loaded» $loaded, журнал $LOG"
+# С --test-enable — итог тестов и имена упавших, без чтения журнала руками.
+grep -E 'tests? when loading|of [0-9]+ tests' "$LOG" | sed 's/^.*odoo.tests.result: /odoo_run: тесты — /'
+grep -E ' (FAIL|ERROR): Test' "$LOG" | sed 's/^.*: \(FAIL\|ERROR\): /odoo_run: упал — \1 /' | head -10
 if [ "$errors" -gt 0 ]; then
     # Первые пять ошибок и первая трассировка — этого хватает для диагноза.
     grep -nE ' (ERROR|CRITICAL) |^Traceback|invalid module names' "$LOG" | cut -c1-300 | head -5
