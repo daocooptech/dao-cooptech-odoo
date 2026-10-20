@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'РСБУ — Реквизиты отчётности (фундамент)',
-    'version': '19.0.2026.09.29',
+    'version': '20.0.2026.09.29',
     'summary': 'Реквизиты компании и сотрудников для отчётности ФНС/СФР',
     'description': """
 РСБУ — Реквизиты отчётности (фундамент этапов 8–10)
@@ -32,7 +32,7 @@
     'author': 'MK.Lab, RuOdoo',
     'website': 'https://ruodoo.ru',
     'category': 'Accounting/Localizations',
-    'depends': ['rsbu_payroll'],
+    'depends': ['rsbu_vat'],  # у выпуска rsbu_payroll — в коде не используется
     'data': [
         'views/res_config_settings_views.xml',
         'views/res_partner_views.xml',

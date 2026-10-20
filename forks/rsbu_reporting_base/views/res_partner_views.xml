@@ -6,7 +6,8 @@
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
             <xpath expr="//notebook" position="inside">
-                <page string="РСБУ — ЭДО" name="rsbu_edo">
+                <page string="РСБУ — ЭДО" name="rsbu_edo"
+                      groups="rsbu_journal.group_rsbu_journal_user">
                     <group>
                         <field name="rsbu_edo_participant_id"/>
                     </group>
