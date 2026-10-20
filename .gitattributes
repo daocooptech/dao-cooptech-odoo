@@ -9,3 +9,4 @@ deploy/*.conf    text eol=lf
 *.scss           text eol=lf
 *.js             text eol=lf
 tools/*.sh       text eol=lf
+tools/pre-push text eol=lf
