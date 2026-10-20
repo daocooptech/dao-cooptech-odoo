@@ -643,8 +643,14 @@ patch(ListController.prototype, {
 // подсказкой. Признак каталога тот же, что у панели управления, — из
 // контекста действия.
 patch(SearchBar.prototype, {
+    // Экраны с панелью «Фильтр» без плиток (каталог расширений) — та же
+    // строка поиска: отбирает панель, штатное меню рядом с полем лишнее и
+    // оставляло его открытым справа (владелец 21.10, снимок «Общего
+    // каталога»: «поиск прилип к фильтру… и отличается от поиска по
+    // платформе»).
     get coopIsCatalog() {
-        return Boolean(this.env.searchModel?.globalContext?.coop_catalog);
+        const context = this.env.searchModel?.globalContext || {};
+        return Boolean(context.coop_catalog || context.coop_filters);
     },
 
     get coopPlaceholder() {

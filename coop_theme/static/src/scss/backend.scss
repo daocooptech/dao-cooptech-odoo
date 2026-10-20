@@ -669,6 +669,40 @@
   font-size: 12px;
 }
 
+// ── Поиск раздела — как поиск по платформе ──────────────────────────
+//
+// Поле поиска над записями было белым «пилюлей» с рамкой, а поиск в шапке
+// — серой плашкой без рамки: два разных поля на одном экране (владелец
+// 21.10, «Общий каталог»: «отличается от поиска по платформе»). Теперь
+// оба — `coop-surface`, скругление 8, рамка появляется только при фокусе,
+// как у поля в шапке.
+.o_control_panel .o_cp_searchview .o_searchview {
+  // `!important` — против утилиты движка `bg-view` на самом поле.
+  background-color: var(--coop-surface) !important;
+  border-color: transparent !important;
+  border-radius: 8px !important;
+  box-shadow: none;
+}
+
+.o_control_panel .o_cp_searchview .o_searchview:focus-within {
+  border-color: var(--coop-line-strong, var(--coop-line)) !important;
+}
+
+// На экранах движка рядом с полем остаётся кнопка штатного меню
+// фильтров — была белым полукругом, приставленным к серой плашке. Одна
+// плашка на двоих: у поля справа прямой угол, кнопка — той же заливки.
+.o_control_panel .o_cp_searchview .o_searchview:has(+ .o_searchview_dropdown_toggler) {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+.o_control_panel .o_cp_searchview .o_searchview_dropdown_toggler {
+  background-color: var(--coop-surface) !important;
+  border-color: transparent !important;
+  border-radius: 0 8px 8px 0 !important;
+  color: var(--coop-slate);
+}
+
 // ── Таблица записей — эталон `Table` ────────────────────────────────
 //
 // Шапка — на `coop-surface`, текст `coop-slate`; в светлой теме движок

@@ -250,7 +250,12 @@
 // (`flex-lg-nowrap`, `order-lg-*`, `flex-grow-1`), объявленные с
 // `!important`. Без него строка не переносится и порядок блоков не
 // меняется.
-.o_control_panel.o_coop_catalog {
+//
+// `o_coop_filters_bar` — экраны с панелью «Фильтр» без плиток (каталог
+// расширений): строка та же, только пагинатор остаётся наверху — снизу
+// его у них нет (см. ниже).
+.o_control_panel.o_coop_catalog,
+.o_control_panel.o_coop_filters_bar {
 
   // Панель отбивается от содержимого. В прототипе строка поиска отбита
   // двадцатью четырьмя (`.search-row` с `margin-bottom: 24px`); восемь
@@ -356,9 +361,11 @@
   .o_cp_searchview .o_searchview {
     border-right-width: var(--border-width, 1px) !important;
     border-right-style: solid !important;
-    border-right-color: var(--coop-line-strong, var(--coop-line, #e6e6e1)) !important;
-    border-top-right-radius: var(--border-radius, .25rem);
-    border-bottom-right-radius: var(--border-radius, .25rem);
+    // С 21.10 поле — как поиск в шапке (backend.scss): рамка прозрачная,
+    // видна только при фокусе; скругление со всех сторон.
+    border-right-color: transparent !important;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
   }
 
   // Пагинатор ушёл вниз, под плитки.
@@ -522,6 +529,18 @@
 // переключать нечего.
 .o_control_panel.o_coop_catalog .o_cp_pager {
   display: none !important;
+}
+
+// …кроме экранов без плиток: пагинатора под записями у них нет, и без
+// верхнего листать было бы нечем.
+.o_control_panel.o_coop_filters_bar:not(.o_coop_catalog) .o_cp_pager {
+  display: flex !important;
+}
+
+// Панель «Фильтр» стоит сразу под строкой поиска, без ленты между
+// ними: восьми точек каталога не хватает — поле прилипало к панели.
+.o_control_panel.o_coop_filters_bar:not(.o_coop_catalog) {
+  padding-bottom: 16px !important;
 }
 
 // ── Каталог на карте ──────────────────────────────────────────────────

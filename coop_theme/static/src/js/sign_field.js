@@ -2,7 +2,7 @@
 
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
-import { Component, useProps } from "@odoo/owl";
+import { Component, t, useProps } from "@odoo/owl";
 import { CoopIcon } from "@coop_theme/js/icons";
 
 /**
@@ -25,9 +25,9 @@ export class CoopSignField extends Component {
     static components = { CoopIcon };
     props = useProps({
         ...standardFieldProps,
-        map: { type: Object, optional: true },
-        icon: { type: String, optional: true },
-        size: { type: Number, optional: true },
+        map: t.object().optional(),
+        icon: t.string().optional(),
+        size: t.number().optional(),
     });
 
     get iconName() {

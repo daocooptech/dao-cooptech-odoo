@@ -129,7 +129,7 @@
       место с названием раздела и пагинатором.
     -->
     <xpath expr="//div[hasclass('o_control_panel')]" position="attributes">
-      <attribute name="t-att-class">{ o_coop_catalog: this.coopIsCatalog, o_coop_lone_crumb: this.coopSingleCrumb }</attribute>
+      <attribute name="t-att-class">{ o_coop_catalog: this.coopIsCatalog, o_coop_filters_bar: this.coopHasFilters, o_coop_lone_crumb: this.coopSingleCrumb }</attribute>
     </xpath>
 
     <!--
@@ -146,7 +146,7 @@
       ширинам, а не по тому, как элементы растянутся потом.
     -->
     <xpath expr="//div[hasclass('o_control_panel_navigation')]" position="after">
-      <div class="o_coop_row_break" t-if="this.coopIsCatalog"/>
+      <div class="o_coop_row_break" t-if="this.coopHasFilters"/>
     </xpath>
 
     <!--
