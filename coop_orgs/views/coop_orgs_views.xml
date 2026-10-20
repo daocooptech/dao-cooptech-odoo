@@ -17,6 +17,7 @@
         <field name="avatar_256"/>
         <field name="city"/>
         <field name="coop_okved_name"/>
+        <field name="coop_card_label"/>
         <templates>
           <t t-name="card">
             <div class="o_coop_org">
@@ -30,6 +31,13 @@
               <div class="o_coop_org_text">
                 <div class="o_coop_org_name">
                   <field name="name"/>
+                </div>
+                <!-- Вид организации меткой — коммерческая, кооперативная,
+                     некоммерческая, децентрализованная: просьба владельца
+                     08.10 («на карточках нет ярлыка вида организации»),
+                     `badge` эталона `CatalogCard`. -->
+                <div class="o_coop_org_kind_line" t-if="record.coop_card_label.raw_value">
+                  <span class="o_coop_badge"><field name="coop_card_label"/></span>
                 </div>
                 <!-- Вид деятельности по ОКВЭД под названием — как
                      специализации под именем у людей (Н1). -->

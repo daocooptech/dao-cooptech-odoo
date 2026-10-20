@@ -84,6 +84,11 @@
 
   // Вид деятельности — одной строкой с многоточием, цветом строки
   // специализации на странице участника.
+  .o_coop_org_kind_line {
+    padding: 6px 12px 0;
+    line-height: 1;
+  }
+
   .o_coop_org_spec {
     padding: 2px 12px 12px;
     min-height: calc(1.35em + 14px);
@@ -155,6 +160,10 @@
 
   .o_coop_org_name {
     padding: 14px 16px 0 0;
+  }
+
+  .o_coop_org_kind_line {
+    padding: 6px 16px 0 0;
   }
 
   .o_coop_org_spec {
