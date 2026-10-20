@@ -211,12 +211,12 @@
           <button name="action_message_owner" type="object"
                   string="Написать владельцу" invisible="not can_respond"/>
           <button name="action_publish" type="object" string="Опубликовать"
-                  class="btn-primary" invisible="state == 'published'"/>
+                  class="btn-primary" invisible="state == 'published' or not coop_can_edit"/>
           <button name="%(action_coop_resource_promote)d" type="action"
-                  string="Продвинуть" invisible="state != 'published'"
+                  string="Продвинуть" invisible="state != 'published' or not coop_can_edit"
                   context="{'default_resource_id': id}"/>
           <button name="action_close" type="object" string="Закрыть"
-                  invisible="state == 'closed'"/>
+                  invisible="state == 'closed' or not coop_can_edit"/>
           <field name="can_respond" invisible="1"/>
           <field name="respond_label" invisible="1"/>
           <field name="state" widget="statusbar"
@@ -347,6 +347,12 @@
   <record id="view_coop_resource_add" model="ir.ui.view">
     <field name="name">coop.resource.add</field>
     <field name="model">coop.resource</field>
+    <!-- Приоритет ниже формы записи: виды упорядочены по `priority, name`,
+         и при равном приоритете «coop.resource.add» по алфавиту обгоняла
+         «coop.resource.form» — каталог открывал объявление формой ввода, без
+         отклика, владельца и переписки (сверка дизайна 20.10, эталон
+         `ResourcePage`). Сюда ведёт только `action_new_listing` — явно. -->
+    <field name="priority">30</field>
     <field name="arch" type="xml">
       <form string="Разместить объявление">
         <header>

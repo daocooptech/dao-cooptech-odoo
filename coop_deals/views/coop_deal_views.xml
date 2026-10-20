@@ -458,10 +458,10 @@
   <record id="view_coop_resource_form_buyers" model="ir.ui.view">
     <field name="name">coop.resource.form.buyers</field>
     <field name="model">coop.resource</field>
-    <field name="inherit_id" ref="coop_resources.view_coop_resource_add"/>
+    <field name="inherit_id" ref="coop_resources.view_coop_resource_form"/>
     <field name="arch" type="xml">
-      <!-- Страницу ресурса рисует форма размещения — и для нового
-           объявления, и для открытого. Строка под заголовком, как
+      <!-- Страница ресурса — форма записи (с 20.10; до того её рисовала
+           форма размещения). Строка под заголовком, как
            «Сделки: 16 — реестр сделок» на своей странице; у нового
            объявления покупателей нет, и строки не видно. -->
       <xpath expr="//div[hasclass('oe_title')]/h1" position="after">
@@ -484,7 +484,7 @@
   <record id="view_coop_resource_form_rights" model="ir.ui.view">
     <field name="name">coop.resource.form.rights</field>
     <field name="model">coop.resource</field>
-    <field name="inherit_id" ref="coop_resources.view_coop_resource_add"/>
+    <field name="inherit_id" ref="coop_resources.view_coop_resource_form"/>
     <field name="arch" type="xml">
       <xpath expr="//notebook" position="inside">
         <page string="История прав" name="rights" invisible="not coop_has_rights_history">
