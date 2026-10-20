@@ -10,6 +10,8 @@
 подписки движок не хранит (`mail.followers` без дат), их число — на
 карточке «Мой аккаунт».
 """
+import datetime
+
 from odoo import api, fields, models, tools
 
 KINDS = [
@@ -185,9 +187,9 @@ class ResPartner(models.Model):
 
     # Искры в плитках «Моего аккаунта» (эталон AnalyticsAccountPage, Spark):
     # справа от числа — ход за год, двенадцать штрихов по месяцам, текущий
-    # выделен. Запасы (друзья, подписчики, проекты, сообщества,
-    # кооперативы) — сколько было на конец месяца; потоки (действия,
-    # сделки) — сколько за месяц; доверие — каким было на конец месяца.
+    # выделен. Штрих — показатель плитки на конец месяца по ежедневным
+    # снимкам (`coop.account.snapshot`, решение 473), текущий — то же число,
+    # что в плитке.
     coop_spark_friends = fields.Html(compute='_compute_coop_sparks', sanitize=False)
     coop_spark_followers = fields.Html(compute='_compute_coop_sparks', sanitize=False)
     coop_spark_activity = fields.Html(compute='_compute_coop_sparks', sanitize=False)
@@ -196,6 +198,17 @@ class ResPartner(models.Model):
     coop_spark_projects = fields.Html(compute='_compute_coop_sparks', sanitize=False)
     coop_spark_communities = fields.Html(compute='_compute_coop_sparks', sanitize=False)
     coop_spark_coops = fields.Html(compute='_compute_coop_sparks', sanitize=False)
+
+    SPARKS = [
+        ('friends', 'coop_spark_friends', 'друзей'),
+        ('followers', 'coop_spark_followers', 'подписчиков'),
+        ('activity', 'coop_spark_activity', 'действий за 30 дней'),
+        ('deals', 'coop_spark_deals', 'сделок'),
+        ('trust', 'coop_spark_trust', 'уровень доверия, %'),
+        ('projects', 'coop_spark_projects', 'проектов'),
+        ('communities', 'coop_spark_communities', 'сообществ'),
+        ('coops', 'coop_spark_coops', 'кооперативов'),
+    ]
 
     def _coop_year_months(self):
         start = fields.Date.context_today(self).replace(day=1)
@@ -221,6 +234,30 @@ class ResPartner(models.Model):
             bars))
 
     def _compute_coop_sparks(self):
+        from .account_snapshot import METRICS
+        months = self._coop_year_months()
+        keys = [y * 12 + m for y, m in months]
+        since = datetime.date(months[0][0], months[0][1], 1)
+        last = {}
+        # По возрастанию даты: в месяце остаётся последний снимок.
+        for snap in self.env['coop.account.snapshot'].sudo().search(
+                [('partner_id', 'in', self.ids), ('date', '>=', since)], order='date, id'):
+            last[(snap.partner_id.id, snap.date.year * 12 + snap.date.month)] = snap
+        for partner in self:
+            for metric, field, label in self.SPARKS:
+                values = [last[(partner.id, month)][metric] if (partner.id, month) in last else 0
+                          for month in keys[:-1]]
+                values.append(partner[METRICS[metric]] or 0)
+                partner[field] = self._coop_spark(values, label)
+
+    def _coop_rebuild_months(self):
+        """Показатели плиток на конец каждого из двенадцати месяцев — по записям.
+
+        Для истории до первого снимка (решение 473). Запасы (друзья,
+        подписчики, сделки, проекты, сообщества, кооперативы) — сколько
+        набралось к концу месяца; действия — сколько за месяц; доверие —
+        доля положительных отзывов к концу месяца, как считается сейчас.
+        """
         months = self._coop_year_months()
         keys = [y * 12 + m for y, m in months]
 
@@ -228,13 +265,8 @@ class ResPartner(models.Model):
             return day.year * 12 + day.month
 
         def stock(dates):
-            # Сколько набралось к концу каждого месяца.
             marks = sorted(key(d) for d in dates if d)
             return [sum(1 for k in marks if k <= month) for month in keys]
-
-        def flow(dates):
-            marks = [key(d) for d in dates if d]
-            return [marks.count(month) for month in keys]
 
         Deal = self.env['coop.deal'].sudo()
         Review = self.env['coop.deal.review'].sudo()
@@ -251,44 +283,37 @@ class ResPartner(models.Model):
                 ['partner_id', 'date:month'], ['count:sum']):
             activity[(partner.id, month.year * 12 + month.month)] = total
 
+        result = {}
         for partner in self:
             links = Friendship.search([
                 ('state', '=', 'accepted'),
                 '|', ('requester_id', '=', partner.id), ('addressee_id', '=', partner.id)])
-            friends = stock(links.mapped(lambda l: (l.write_date or l.create_date).date()))
-            followers = stock(Followers.search([
-                ('res_model', '=', 'res.partner'), ('res_id', '=', partner.id)]
-            ).mapped(lambda f: f.create_date and f.create_date.date()))
-            actions = [activity.get((partner.id, month), 0) for month in keys]
             deals = Deal.search(['|', ('party_a_id', '=', partner.id),
                                  ('party_b_id', '=', partner.id)])
-            deal_flow = flow(deals.mapped(lambda d: d.signed_on or d.create_date.date()))
-            # Доверие на конец месяца — так же, как сейчас: доля
-            # положительных среди отзывов о человеке. Отзыв датируется
-            # закрытием сделки: оставляют его, когда сделка завершена.
+            # Отзыв датируется закрытием сделки: оставляют его, когда
+            # сделка завершена.
             reviews = [((r.deal_id.closed_on or r.create_date.date()), r.rating in ('4', '5'))
                        for r in Review.search([('target_id', '=', partner.id)])]
             trust = []
             for month in keys:
                 seen = [good for day, good in reviews if key(day) <= month]
                 trust.append(round(sum(seen) * 100.0 / len(seen)) if seen else 0)
-            projects = stock(Project.search([('partner_id', '=', partner.id)]).mapped(
-                lambda p: p.create_date.date()))
-            communities = stock(Member.search([
-                ('partner_id', '=', partner.id), ('state', '=', 'active')]).mapped(
-                lambda m: m.joined_on or m.create_date.date())) if Member is not None else [0] * 12
-            coops = stock(Membership.search([
-                ('partner_id', '=', partner.id), ('state', '=', 'active')]).mapped(
-                lambda m: m.joined_on or m.create_date.date()))
-            spark = self._coop_spark
-            partner.coop_spark_friends = spark(friends, 'друзей')
-            partner.coop_spark_followers = spark(followers, 'подписчиков')
-            partner.coop_spark_activity = spark(actions, 'действий в месяц')
-            partner.coop_spark_deals = spark(deal_flow, 'сделок в месяц')
-            partner.coop_spark_trust = spark(trust, 'уровень доверия, %')
-            partner.coop_spark_projects = spark(projects, 'проектов')
-            partner.coop_spark_communities = spark(communities, 'сообществ')
-            partner.coop_spark_coops = spark(coops, 'кооперативов')
+            result[partner.id] = {
+                'friends': stock([(l.write_date or l.create_date).date() for l in links]),
+                'followers': stock([f.create_date.date() for f in Followers.search([
+                    ('res_model', '=', 'res.partner'), ('res_id', '=', partner.id)])
+                    if f.create_date]),
+                'activity': [activity.get((partner.id, month), 0) for month in keys],
+                'deals': stock([d.signed_on or d.create_date.date() for d in deals]),
+                'trust': trust,
+                'projects': stock([p.create_date.date() for p in Project.search(
+                    [('partner_id', '=', partner.id)])]),
+                'communities': stock([m.joined_on or m.create_date.date() for m in Member.search([
+                    ('partner_id', '=', partner.id), ('state', '=', 'active')])]) if Member is not None else [0] * 12,
+                'coops': stock([m.joined_on or m.create_date.date() for m in Membership.search([
+                    ('partner_id', '=', partner.id), ('state', '=', 'active')])]),
+            }
+        return result
 
     def _compute_coop_activity_30(self):
         since = fields.Datetime.subtract(fields.Datetime.now(), days=30)
