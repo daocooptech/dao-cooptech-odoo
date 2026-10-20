@@ -2039,3 +2039,36 @@ body.o_dark_mode .o_coop_loader_mark {
 .o_switch_view.o_coop_tiles i.oi[data-icon="oi_view-kanban"] {
   --coop-view-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z'/%3E%3Cpath d='M14 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z'/%3E%3Cpath d='M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z'/%3E%3Cpath d='M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z'/%3E%3C/svg%3E");
 }
+
+// ── Режим отладки ────────────────────────────────────────────────────
+//
+// Кнопка инструментов разработчика в шапке была залита `coop-ink` со
+// значком того же цвета — чёрный квадрат рядом со знаком «coop», а
+// открытой — с бирюзовой рамкой (владелец 21.10, снимки). Теперь она как
+// соседние значки шапки: прозрачная, значок графитовый, под курсором и
+// открытой — подложка `coop-surface`.
+.o_debug_manager > .dropdown-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0 !important;
+  border-radius: 10px;
+  background: transparent !important;
+  color: var(--coop-slate) !important;
+  box-shadow: none !important;
+
+  &:hover,
+  &.show,
+  &[aria-expanded="true"] {
+    background: var(--coop-surface) !important;
+    color: var(--coop-ink) !important;
+  }
+}
+
+// В меню отладки пункт-ссылка («Запустить модульные тесты») брал цвет
+// ссылок платформы и выделялся бирюзовым среди чернильных соседей.
+.o-dropdown--menu a.dropdown-item:not(:hover):not(.active) {
+  color: var(--coop-ink);
+}

@@ -703,6 +703,31 @@
   color: var(--coop-slate);
 }
 
+// Остальные поля поиска — тем же видом (владелец 21.10: «тогда сделай так
+// везде»): поиск по платформе в шапке, по диалогам в «Сообщениях», монеты
+// на бирже. Без фокуса рамки нет, при фокусе — со всех четырёх сторон.
+// Рамка прозрачная заранее, чтобы при фокусе поле не прыгало на точку.
+.o_web_client .o_coop_search_field {
+  border: 1px solid transparent;
+  padding: 4px 9px;
+
+  &:focus-within {
+    border-color: var(--coop-line-strong, var(--coop-line));
+  }
+}
+
+.o_coop_msg_search .o_coop_input,
+.o_coop_dx_pairs input[type="search"] {
+  background-color: var(--coop-surface) !important;
+  border: 1px solid transparent !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+
+  &:focus {
+    border-color: var(--coop-line-strong, var(--coop-line)) !important;
+  }
+}
+
 // ── Таблица записей — эталон `Table` ────────────────────────────────
 //
 // Шапка — на `coop-surface`, текст `coop-slate`; в светлой теме движок
