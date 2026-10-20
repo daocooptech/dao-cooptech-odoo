@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_docx_template_user,docx.template user,model_docx_template,base.group_user,1,0,0,0
+access_docx_template_manager,docx.template manager,model_docx_template,base.group_system,1,1,1,1
+access_docx_custom_field_admin,access_docx_custom_field_admin,model_docx_custom_field,base.group_system,1,1,1,1
