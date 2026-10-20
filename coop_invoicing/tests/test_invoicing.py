@@ -64,6 +64,18 @@ class TestCoopInvoicing(TransactionCase):
         self.assertTrue(company.rsbu_enabled)
         self.assertEqual(company.rsbu_start_date, date(2026, 11, 1))
 
+    def test_company_without_layer_waits_for_first_invoice(self):
+        # Решение 480: компания для модуля коробки — без слоя; первый счёт
+        # (вызов с rsbu=True) включает его с 1-го числа следующего месяца.
+        company = self.seller._coop_ensure_company(rsbu=False)
+        self.assertFalse(company.rsbu_enabled)
+        self.assertTrue(company.coop_rsbu_pending)
+        self.assertEqual(self.seller._coop_ensure_company(rsbu=False), company)
+        self.assertFalse(company.rsbu_enabled)
+        self.seller._coop_ensure_company()
+        self.assertTrue(company.rsbu_enabled)
+        self.assertFalse(company.coop_rsbu_pending)
+
     def test_rsbu_layer_off_only_without_moves(self):
         company = self.seller._coop_ensure_company()
         company.rsbu_enabled = False

@@ -16,6 +16,10 @@
         <field name="extension_id" readonly="1" string="Расширение"/>
         <field name="state" widget="badge" decoration-success="state == 'on'"
                decoration-warning="state == 'installing'"/>
+        <field name="access_user_ids" widget="many2many_tags" optional="show"
+               options="{'no_create': True}"
+               domain="[('id', 'in', coop_member_user_ids)]"/>
+        <field name="coop_member_user_ids" column_invisible="1"/>
         <field name="user_id" readonly="1" optional="show"/>
       </list>
     </field>
@@ -26,7 +30,7 @@
     <field name="path">org-menu</field>
     <field name="res_model">coop.extension.connection</field>
     <field name="view_mode">list</field>
-    <field name="domain">[('partner_id', '=', user.coop_acting_as_id.id or user.partner_id.id)]</field>
+    <field name="domain">[('coop_my_face', '=', True)]</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">В меню организации пока нет расширений</p>
       <p>Подключите их в каталоге расширений кнопкой «Подключить».</p>

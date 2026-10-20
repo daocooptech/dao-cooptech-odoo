@@ -42,7 +42,7 @@ class ResPartner(models.Model):
             lambda r: r.date_from <= date).sorted('date_from', reverse=True)
         return regimes[:1].regime or False
 
-    def _coop_ensure_company(self):
+    def _coop_ensure_company(self, rsbu=True):
         """Компания учёта организации: завести, если её ещё нет.
 
         Под sudo: заводит её человек с полномочием «Бухгалтерия и счета»,
@@ -52,22 +52,27 @@ class ResPartner(models.Model):
         организация видна всем, как и была.
 
         Учёт в РСБУ-слое у новой компании включён с рождения — с первого
-        числа следующего месяца (решение 472).
+        числа следующего месяца (решение 472). Компания, заведённая не для
+        счетов (`rsbu=False`: организация подключила модуль коробки,
+        решение 480), рождается без слоя; он включится при первом счёте —
+        первом вызове с `rsbu=True` — или кнопкой бухгалтера.
         """
         self.ensure_one()
         if not self.is_company:
             raise UserError(_('Компания учёта заводится только у организации.'))
         if self.coop_company_id:
-            return self.coop_company_id
+            company = self.coop_company_id
+            if rsbu and company.sudo().coop_rsbu_pending:
+                company.sudo().write(company._coop_rsbu_birth_vals())
+            return company
         org = self.sudo()
         company = self.env['res.company'].sudo().create({
             'name': org.name,
             'partner_id': org.id,
             'currency_id': self.env.ref('base.RUB').id,
             'country_id': self.env.ref('base.ru').id,
-            'rsbu_enabled': True,
-            'rsbu_start_date': fields.Date.context_today(self).replace(day=1)
-                               + relativedelta(months=1),
+            **(self.env['res.company']._coop_rsbu_birth_vals() if rsbu
+               else {'coop_rsbu_pending': True}),
         })
         self.env['account.chart.template'].sudo().try_loading(
             'ru', company=company, install_demo=False)
@@ -105,7 +110,24 @@ class ResPartner(models.Model):
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
+    coop_rsbu_pending = fields.Boolean(
+        'РСБУ-слой — при первом счёте', copy=False,
+        help='Компания учёта заведена не для счетов (модуль коробки, '
+             'решение 480): РСБУ-слой включится при первом счёте.')
+
+    @api.model
+    def _coop_rsbu_birth_vals(self):
+        """Слой с первого числа следующего месяца (решение 472)."""
+        return {
+            'rsbu_enabled': True,
+            'rsbu_start_date': fields.Date.context_today(self).replace(day=1)
+                               + relativedelta(months=1),
+            'coop_rsbu_pending': False,
+        }
+
     def write(self, vals):
+        if vals.get('rsbu_enabled'):
+            vals = dict(vals, coop_rsbu_pending=False)
         if 'rsbu_enabled' in vals and not vals['rsbu_enabled']:
             used = self.env['rsbu.move'].sudo().search(
                 [('company_id', 'in', self.filtered('rsbu_enabled').ids)], limit=1)

@@ -44,6 +44,17 @@ class CoopExtensionConnection(models.Model):
         'res.users', string='Подключил', default=lambda self: self.env.user,
         ondelete='set null')
     sequence = fields.Integer('Порядок', default=10)
+    access_user_ids = fields.Many2many(
+        'res.users', 'coop_extension_connection_access_rel', 'connection_id', 'user_id',
+        string='Доступ у',
+        help='Кому из организации открыт модуль: руководитель отмечает людей '
+             '(решение 476). Подключивший руководитель — по умолчанию.')
+    coop_my_face = fields.Boolean(
+        compute='_compute_coop_my_face', search='_search_coop_my_face',
+        help='Меню того лица, от имени которого человек действует сейчас.')
+    coop_member_user_ids = fields.Many2many(
+        'res.users', compute='_compute_coop_member_user_ids',
+        help='Из кого выбирать «Доступ у»: действующие члены организации.')
     name = fields.Char(related='extension_id.name', string='Название')
     state = fields.Selection(
         [('on', 'Работает'), ('installing', 'Устанавливается')],
@@ -58,6 +69,33 @@ class CoopExtensionConnection(models.Model):
     def _compute_state(self):
         for record in self:
             record.state = 'on' if record.extension_id.is_installed else 'installing'
+
+    def _coop_current_face(self):
+        user = self.env.user
+        return user.coop_acting_as_id or user.partner_id
+
+    @api.depends_context('uid')
+    def _compute_coop_my_face(self):
+        face = self._coop_current_face()
+        for record in self:
+            record.coop_my_face = record.partner_id == face
+
+    def _search_coop_my_face(self, operator, value):
+        # Отбор на сервере: в домене действия `user.coop_acting_as_id`
+        # клиент Odoo 20 не вычисляет («Name 'user' is not defined»), и
+        # «Меню организации» не открывалось вовсе.
+        if operator not in ('=', '!=') or not isinstance(value, bool):
+            return NotImplemented
+        positive = (operator == '=') == value
+        return [('partner_id', '=' if positive else '!=', self._coop_current_face().id)]
+
+    @api.depends('partner_id')
+    def _compute_coop_member_user_ids(self):
+        Membership = self.env['coop.membership'].sudo()
+        for record in self:
+            record.coop_member_user_ids = Membership.search([
+                ('organization_id', '=', record.partner_id.id), ('state', '=', 'active'),
+            ]).partner_id.user_ids.filtered(lambda u: not u.share)
 
     def _coop_check_manage(self):
         """Менять меню организации вправе только её руководитель.
@@ -225,6 +263,35 @@ class CoopExtension(models.Model):
                 return self.name, icon, menu.action.id
         return None
 
+    def _coop_module_groups(self):
+        """Группы, которые открывают раздел модуля коробки (решение 476).
+
+        Берутся с корневого пункта меню модуля (нет там — с пункта его
+        действия), и только роли модуля — группы с областью (`privilege_id`),
+        не из `base`: служебные («этапы», «повторяющиеся задачи») и общие
+        роли движка выдавать нельзя. Из ролей — младшая: группа, которая
+        подразумевает другую из набора, — уровень руководителя модуля.
+        """
+        self.ensure_one()
+        Groups = self.env['res.groups']
+        if self.source == 'cooptech' or not self.is_installed:
+            return Groups
+        menus = self.env['ir.model.data'].sudo().search(
+            [('module', '=', self.module_name), ('model', '=', 'ir.ui.menu')])
+        Menu = self.env['ir.ui.menu'].sudo()
+        roots = Menu.browse(menus.mapped('res_id')).exists().filtered(lambda m: not m.parent_id)
+        groups = roots.group_ids
+        entry = self._coop_menu_entry()
+        if not groups and entry and entry[2]:
+            groups = Menu.search([('id', 'child_of', roots.ids),
+                                  ('action', '!=', False)]).filtered(
+                lambda m: m.action.id == entry[2]).group_ids
+        xmlids = groups.sudo().get_external_id()
+        groups = groups.sudo().filtered(
+            lambda g: g.privilege_id and not (xmlids.get(g.id) or '').startswith('base.'))
+        return groups.filtered(
+            lambda g: not ((g.all_implied_ids - g) & groups))
+
     # ── Подключить и убрать ─────────────────────────────────────────────
 
     def _coop_check_connectable(self):
@@ -263,7 +330,11 @@ class CoopExtension(models.Model):
         # Пункт, по которому внутри «нет доступа», в меню не ставится
         # (владелец 19.10.2026). Человеку так не подключить учёт
         # организации — склад, закупки, бухгалтерию.
-        if entry[2] and not self.env['coop.sidebar.item']._coop_can_open(user, entry[2]):
+        # Модуль коробки организации открывается тем, кому руководитель дал
+        # доступ (решение 476) — группы выдаются при подключении, поэтому
+        # «сейчас нет доступа» у организации не помеха.
+        org_box = face != user.partner_id and self.source != 'cooptech'
+        if entry[2] and not org_box                 and not self.env['coop.sidebar.item']._coop_can_open(user, entry[2]):
             if face == user.partner_id:
                 raise UserError(_(
                     '«%s» работает в учёте организации. Подключите его, '
@@ -287,6 +358,7 @@ class CoopExtension(models.Model):
                 'extension_id': self.id,
                 'user_id': user.id,
                 'sequence': (last.sequence if last else 1000) + 10,
+                'access_user_ids': [(6, 0, user.ids)] if org_box else [],
             })
         if face == user.partner_id:
             self.env['coop.sidebar.item']._coop_place_extension(user, self, entry)
