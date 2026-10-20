@@ -198,6 +198,12 @@ class TestDocxReport(TransactionCase):
         from odoo.exceptions import UserError
         ok = self._template("{{ record.name }} {{ record.parent_id.city }}")
         self.assertEqual(ok.action_validate_docx_template()["params"]["type"], "success")
+        escaped = self._template(
+            "{{ &quot;{:.2f}&quot;.format(record.credit_limit) }} "
+            "{{ record.bank_ids[0].account_number if record.bank_ids else &apos;&apos; }}"
+        )
+        self.assertEqual(escaped.action_validate_docx_template()["params"]["type"], "success",
+                         "экранированные кавычки и индекс [0] — не неизвестные переменные")
         bad = self._template("{{ record.no_such_field }}")
         with self.assertRaises(UserError):
             bad.action_validate_docx_template()

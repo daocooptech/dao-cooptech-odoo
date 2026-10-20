@@ -1,3 +1,4 @@
+import html
 import re
 import zipfile
 from base64 import b64decode
@@ -196,7 +197,9 @@ class DocxTemplate(models.Model):
         for name in zf.namelist():
             if not name.startswith("word/") or not name.endswith(".xml"):
                 continue
-            xml = zf.read(name).decode("utf-8", errors="ignore")
+            # Текст в XML экранирован (&quot;, &apos;): без раскодирования
+            # кавычки в выражениях читаются как переменная «quot».
+            xml = html.unescape(zf.read(name).decode("utf-8", errors="ignore"))
 
             for match in pattern.finditer(xml):
                 expr = match.group(1)
@@ -252,14 +255,17 @@ class DocxTemplate(models.Model):
             if not core:
                 continue
 
-            match = re.search(r'[a-zA-Z_][a-zA-Z0-9_.\[\]\'\"]*', core)
+            core = re.sub(r"\[\d+\]", "", core)  # bank_ids[0] — элемент того же поля
+            core = re.sub(r"\['([^']+)'\]", r".\1", core)
+            core = re.sub(r'\["([^"]+)"\]', r".\1", core)
+            # Строки вырезаем, а имя после точки — метод, не переменная:
+            # в "{:.2f}".format(record.x) проверять надо record.x, а не «f».
+            core = re.sub(r"'[^']*'|\"[^\"]*\"", "", core)
+            match = re.search(r"(?<![\w.])[a-zA-Z_][a-zA-Z0-9_.]*", core)
             if not match:
                 continue
 
             token = match.group(0)
-
-            token = re.sub(r"\['([^']+)']", r".\1", token)
-            token = re.sub(r'\["([^"]+)"]', r".\1", token)
 
             parts = token.split(".")
             root = parts[0]
