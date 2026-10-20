@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="view_coop_rsbu_start_form" model="ir.ui.view">
+    <field name="name">coop.rsbu.start.form</field>
+    <field name="model">coop.rsbu.start</field>
+    <field name="arch" type="xml">
+      <form string="Начать учёт в РСБУ">
+        <group>
+          <field name="organization_id"/>
+          <field name="start_date"/>
+          <field name="vat_regime" placeholder="не указан"/>
+        </group>
+        <p class="text-muted">
+          С этой даты проведённые счета и платежи организации получают
+          проводки РСБУ-слоя. Следующий шаг — остатки на день перед ней.
+        </p>
+        <footer>
+          <button name="action_start" type="object" string="Начать учёт"
+                  class="btn-primary"/>
+          <button special="cancel" string="Отмена"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+</odoo>

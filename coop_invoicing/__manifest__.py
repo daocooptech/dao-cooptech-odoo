@@ -17,7 +17,7 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.6.0',
+    'version': '20.0.1.7.0',
     'license': 'LGPL-3',
     'depends': [
         'coop_base', 'coop_orgs', 'coop_deals',
@@ -29,6 +29,7 @@
         'data/account_groups.xml',
         'data/upd_data.xml',
         'views/res_partner_views.xml',
+        'views/coop_rsbu_start_views.xml',
         'views/coop_deal_views.xml',
         'report/upd_templates.xml',
     ],

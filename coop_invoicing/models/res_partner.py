@@ -19,6 +19,8 @@ class ResPartner(models.Model):
     # пустой план счетов на триста с лишним строк ничего не показывает.
     coop_company_id = fields.Many2one(
         'res.company', string='Компания учёта', readonly=True, copy=False, index=True)
+    coop_rsbu_enabled = fields.Boolean(related='coop_company_id.rsbu_enabled')
+    coop_rsbu_start_date = fields.Date(related='coop_company_id.rsbu_start_date')
 
     @api.depends('coop_vat_regime_ids.date_from', 'coop_vat_regime_ids.regime')
     def _compute_coop_vat_regime(self):
@@ -73,6 +75,17 @@ class ResPartner(models.Model):
         org.coop_company_id = company
         self.env['res.users']._coop_sync_accounting_access(org)
         return company
+
+    def action_coop_rsbu_start(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Начать учёт в РСБУ'),
+            'res_model': 'coop.rsbu.start',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_organization_id': self.id},
+        }
 
     def _coop_sale_tax_at(self, date):
         """Налог строки продажи по режиму организации на дату."""

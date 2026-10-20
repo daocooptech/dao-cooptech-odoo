@@ -27,6 +27,11 @@
                 <field name="note" optional="show"/>
               </list>
             </field>
+            <field name="coop_rsbu_enabled" invisible="1"/>
+            <div invisible="not coop_rsbu_enabled"><span class="o_coop_key">Учёт в РСБУ-слое</span>
+              с <field name="coop_rsbu_start_date" readonly="1"/></div>
+            <button name="action_coop_rsbu_start" type="object" string="Начать учёт в РСБУ"
+                    class="btn-secondary" invisible="not coop_can_edit_vat or coop_rsbu_enabled"/>
           </div>
         </div>
       </xpath>

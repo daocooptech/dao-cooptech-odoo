@@ -72,6 +72,30 @@ class TestCoopInvoicing(TransactionCase):
         with self.assertRaises(UserError):
             company.rsbu_enabled = False
 
+    def _rsbu_start(self, user, day):
+        return self.env['coop.rsbu.start'].with_user(user).create(
+            {'organization_id': self.seller.id, 'start_date': day})
+
+    def test_rsbu_start_wizard_for_existing_company(self):
+        # Действующая организация: компания есть, слой выключен — бухгалтер
+        # включает его мастером и переходит к вводу остатков.
+        company = self.seller._coop_ensure_company()
+        company.rsbu_enabled = False
+        self._regime('2026-01-01', 'usn_5')
+        with self.assertRaises(AccessError):
+            self._rsbu_start(self.member, date(2027, 1, 1)).action_start()
+        with self.assertRaises(UserError):
+            self._rsbu_start(self.keeper, date(2027, 1, 15)).action_start()
+        action = self._rsbu_start(self.keeper, date(2027, 1, 1)).action_start()
+        self.assertTrue(company.rsbu_enabled)
+        self.assertEqual(company.rsbu_start_date, date(2027, 1, 1))
+        self.assertEqual(action['res_model'], 'rsbu.opening.balance.wizard')
+        self.assertEqual(action['context']['default_company_id'], company.id)
+
+    def test_rsbu_start_needs_vat_regime(self):
+        with self.assertRaises(UserError):
+            self._rsbu_start(self.keeper, date(2027, 1, 1)).action_start()
+
     def test_rsbu_vat_mode_follows_regime_history(self):
         # РСБУ-слой считает НДС по режиму организации на дату документа.
         company = self.seller._coop_ensure_company()
