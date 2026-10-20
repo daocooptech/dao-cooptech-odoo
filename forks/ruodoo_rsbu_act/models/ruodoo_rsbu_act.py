@@ -32,9 +32,11 @@ class RuodooRsbuAct(models.Model):
 
     name = fields.Char(string='Номер акта', default='/', copy=False,
                        index=True)
+    # По умолчанию — единственная организация со слоем среди выбранных;
+    # компания по умолчанию в пуле — платформа (все компании разрешены).
     company_id = fields.Many2one(
         'res.company', string='Организация', required=True, index=True,
-        default=lambda self: self.env.company)
+        default=lambda self: self._default_rsbu_company())
     partner_id = fields.Many2one(
         'res.partner', string='Контрагент', required=True, index=True)
     date_from = fields.Date(
@@ -45,7 +47,8 @@ class RuodooRsbuAct(models.Model):
         default=fields.Date.context_today)
     account_ids = fields.Many2many(
         'rsbu.account', string='Счета расчётов',
-        domain="[('subconto_partner', '=', True), ('is_group', '=', False)]",
+        domain="[('subconto_partner', '=', True), ('is_group', '=', False), "
+               "('company_id', '=', company_id)]",
         help='Счета расчётов для сверки (активно-пассивные с субконто '
              '«Контрагент»: 60/62/76). Пусто — берутся все такие счета.')
     currency_id = fields.Many2one(
@@ -76,14 +79,23 @@ class RuodooRsbuAct(models.Model):
         string='Сальдо кон. (кредит)', currency_field='currency_id',
         compute='_compute_totals', store=True)
 
+    @api.model
+    def _default_rsbu_company(self):
+        companies = self.env.companies.filtered('rsbu_enabled')
+        return companies if len(companies) == 1 else self.env['res.company']
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
             if vals.get('name', '/') == '/':
-                seq = self.env['ir.sequence'].with_company(
-                    vals.get('company_id') or self.env.company.id)
-                vals['name'] = (seq.next_by_code('ruodoo.rsbu.act')
-                                or 'АКТ-%s' % fields.Date.today())
+                # У выпуска последовательности нет — номер «АКТ-дата»
+                # повторялся. Нумерация своя у каждой организации.
+                company = self.env['res.company'].browse(
+                    vals.get('company_id') or self._default_rsbu_company().id
+                    or self.env.company.id)
+                vals['name'] = self.env['ir.sequence']._rsbu_next_for_company(
+                    'ruodoo_rsbu_act.seq_ruodoo_rsbu_act', company,
+                    vals.get('date_to'))
         return super().create(vals_list)
 
     @api.depends('line_ids', 'line_ids.debit', 'line_ids.credit',
@@ -114,6 +126,7 @@ class RuodooRsbuAct(models.Model):
         if self.account_ids:
             return self.account_ids
         accounts = self.env['rsbu.account'].search([
+            ('company_id', '=', self.company_id.id),
             ('subconto_partner', '=', True),
             ('is_group', '=', False),
         ])
@@ -210,9 +223,9 @@ class RuodooRsbuAct(models.Model):
         self.ensure_one()
         errors = []
         company_partner = self.company_id.partner_id
-        if not (company_partner.inn or '').strip():
+        if not company_partner._rsbu_inn():
             errors.append('ИНН организации')
-        if not (self.partner_id.inn or '').strip():
+        if not self.partner_id._rsbu_inn():
             errors.append('ИНН контрагента')
         if not self.line_ids and not (self.opening_debit or
                                       self.opening_credit):

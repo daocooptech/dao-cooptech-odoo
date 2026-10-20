@@ -135,11 +135,11 @@ class RsbuRealizationUpd(models.Model):
         errors = []
         company = self.company_id
         partner = company.partner_id
-        if not partner._coop_upd_inn():
+        if not partner._rsbu_inn():
             errors.append(_('ИНН организации-продавца'))
         if not self.partner_id:
             errors.append(_('контрагент-покупатель'))
-        elif not self.partner_id._coop_upd_inn():
+        elif not self.partner_id._rsbu_inn():
             errors.append(_('ИНН покупателя'))
         source = self._source_invoice()
         if not source:
@@ -184,7 +184,7 @@ class RsbuRealizationUpd(models.Model):
             attrs['ОКПО'] = partner.okpo
         node = etree.Element(tag, attrs)
         idsv = etree.SubElement(node, 'ИдСв')
-        inn = partner._coop_upd_inn()
+        inn = partner._rsbu_inn()
         if len(inn) == 12:
             names = (partner.name or '').replace('ИП', '').split()
             svip = etree.SubElement(idsv, 'СвИП', {
@@ -198,8 +198,8 @@ class RsbuRealizationUpd(models.Model):
             etree.SubElement(idsv, 'СвЮЛУч', {
                 'НаимОрг': partner.name or '',
                 'ИННЮЛ': inn,
-                **({'КПП': partner._coop_upd_kpp()}
-                   if partner._coop_upd_kpp() else {}),
+                **({'КПП': partner._rsbu_kpp()}
+                   if partner._rsbu_kpp() else {}),
             })
         # Адрес текстом (АдрИнф) — упрощённый, достаточно по XSD.
         addr = etree.SubElement(node, 'Адрес')

@@ -14,9 +14,10 @@ dd10b7d) без деклараций, НДФЛ и РСВ: XML по формат�
     'author': 'MK.Lab, RuOdoo, ДАО КООПТЕХ',
     'website': 'https://ruodoo.ru',
     'category': 'Accounting/Localizations',
-    'version': '20.0.1.0.0',
+    'version': '20.0.1.1.0',
     'license': 'LGPL-3',
-    'depends': ['rsbu_vat', 'rsbu_reporting_base', 'docx_report', 'coop_invoicing'],
+    'depends': ['rsbu_vat', 'rsbu_reporting_base', 'docx_report', 'coop_invoicing',
+                'ruodoo_rsbu_act'],
     'data': [
         'data/upd_docx_template.xml',
         'views/rsbu_invoice_upd_views.xml',

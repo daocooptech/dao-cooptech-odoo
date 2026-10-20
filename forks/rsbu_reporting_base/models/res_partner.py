@@ -15,3 +15,13 @@ class ResPartner(models.Model):
         help='Уникальный идентификатор контрагента в системе ЭДО, '
              'присвоенный оператором (УИПол — получатель — в имени файла '
              'обмена УПД). При обмене не через оператора — GUID участника.')
+
+    # ИНН и КПП для документов слоя (УПД, акт сверки). Пул переопределяет:
+    # у него реквизиты организаций — в каталоге (coop_inn / coop_kpp).
+    def _rsbu_inn(self):
+        self.ensure_one()
+        return (getattr(self, 'inn', '') or '').strip()
+
+    def _rsbu_kpp(self):
+        self.ensure_one()
+        return (getattr(self, 'kpp', '') or '').strip()

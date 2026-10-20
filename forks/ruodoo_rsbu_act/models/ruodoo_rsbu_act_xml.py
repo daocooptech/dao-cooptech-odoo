@@ -13,7 +13,6 @@
           │   └ ДогСв(договор + сальдо) → ДокСв(документ) → СвОпер(операция)
           └ Подписант(ФИО, Должн)
 """
-import base64
 import os
 import uuid
 from datetime import date, datetime
@@ -64,7 +63,7 @@ class RuodooRsbuActXml(models.Model):
             attrs['ОКПО'] = partner.okpo
         node = etree.Element(tag, attrs)
         idsv = etree.SubElement(node, 'ИдСв')
-        inn = (partner.inn or '').strip()
+        inn = partner._rsbu_inn()
         name = company_name or partner.name or ''
         if len(inn) == 12:
             svip = etree.SubElement(idsv, 'СвИП', {
@@ -77,7 +76,7 @@ class RuodooRsbuActXml(models.Model):
             etree.SubElement(idsv, 'СвЮЛУч', {
                 'НаимОрг': name,
                 'ИННЮЛ': inn,
-                'КПП': (getattr(partner, 'kpp', '') or '').strip(),
+                'КПП': partner._rsbu_kpp(),
                 'ОГРН': (getattr(partner, 'ogrn', '') or '').strip(),
             })
         else:
@@ -248,7 +247,7 @@ class RuodooRsbuActXml(models.Model):
             'res_model': self._name,
             'res_id': self.id,
             'type': 'binary',
-            'datas': base64.b64encode(xml_bytes),
+            'raw': xml_bytes,
             'mimetype': 'application/xml',
         })
         return {

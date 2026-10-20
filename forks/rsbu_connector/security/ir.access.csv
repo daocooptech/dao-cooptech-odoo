@@ -1,0 +1,3 @@
+id,name,model_id,group_id/id,operation,domain
+access_rsbu_opening_balance_wizard,rsbu.opening.balance.wizard manager,rsbu.opening.balance.wizard,rsbu_journal.group_rsbu_journal_manager,crud,
+access_rsbu_opening_balance_line,rsbu.opening.balance.line manager,rsbu.opening.balance.line,rsbu_journal.group_rsbu_journal_manager,crud,

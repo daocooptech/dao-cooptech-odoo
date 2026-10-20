@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Образец: у каждой организации — своя копия (_rsbu_next_for_company). -->
+    <record id="seq_ruodoo_rsbu_act" model="ir.sequence">
+        <field name="name">РСБУ Акт сверки</field>
+        <field name="code">ruodoo.rsbu.act</field>
+        <field name="prefix">АС/%(range_year)s/</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+</odoo>

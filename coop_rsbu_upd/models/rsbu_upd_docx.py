@@ -169,8 +169,8 @@ class RsbuRealizationUpdDocx(models.Model):
     def _party_dict(self, partner, name=None):
         return {
             'name': name or partner.name or '',
-            'inn': partner._coop_upd_inn(),
-            'kpp': partner._coop_upd_kpp(),
+            'inn': partner._rsbu_inn(),
+            'kpp': partner._rsbu_kpp(),
             'okpo': getattr(partner, 'okpo', '') or '',
             'address': self._clean_address(partner),
             'bank': self._bank_requisites(partner),
@@ -229,17 +229,17 @@ class RsbuRealizationUpdDocx(models.Model):
         self.ensure_one()
         p = self.company_id.partner_id
         return '%s, ИНН/КПП %s/%s' % (
-            self.company_id.name or '', p._coop_upd_inn(),
-            p._coop_upd_kpp())
+            self.company_id.name or '', p._rsbu_inn(),
+            p._rsbu_kpp())
 
     def upd_docx_buyer_subject(self):
         """Наименование экономического субъекта — покупателя (21)."""
         self.ensure_one()
         p = self.partner_id
-        kpp = p._coop_upd_kpp()
+        kpp = p._rsbu_kpp()
         return '%s%s' % (p.name or '',
-                         ', ИНН/КПП %s/%s' % (p._coop_upd_inn(), kpp)
-                         if p._coop_upd_inn() else '')
+                         ', ИНН/КПП %s/%s' % (p._rsbu_inn(), kpp)
+                         if p._rsbu_inn() else '')
 
     def upd_docx_signer(self):
         """Подписант (руководитель организации-продавца)."""

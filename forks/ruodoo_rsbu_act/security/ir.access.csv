@@ -3,3 +3,5 @@ access_ruodoo_rsbu_act_user,ruodoo.rsbu.act user,ruodoo.rsbu.act,rsbu_chart_of_a
 access_ruodoo_rsbu_act_mgr,ruodoo.rsbu.act manager,ruodoo.rsbu.act,rsbu_journal.group_rsbu_journal_manager,crud,
 access_ruodoo_rsbu_act_line_user,ruodoo.rsbu.act.line user,ruodoo.rsbu.act.line,rsbu_chart_of_accounts.group_rsbu_account_user,r,
 access_ruodoo_rsbu_act_line_mgr,ruodoo.rsbu.act.line manager,ruodoo.rsbu.act.line,rsbu_journal.group_rsbu_journal_manager,crud,
+ruodoo_rsbu_act_company_rule,РСБУ Акт сверки: мультикомпания,ruodoo.rsbu.act,,crud,"[('company_id', 'in', company_ids)]"
+ruodoo_rsbu_act_line_company_rule,РСБУ Строка акта: мультикомпания,ruodoo.rsbu.act.line,,crud,"[('act_id.company_id', 'in', company_ids)]"

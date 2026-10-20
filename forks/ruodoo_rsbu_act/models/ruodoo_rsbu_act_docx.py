@@ -15,8 +15,8 @@ class RuodooRsbuActDocx(models.Model):
     def _party(partner, name=None):
         return {
             'name': name or partner.name or '',
-            'inn': (partner.inn or '').strip(),
-            'kpp': (getattr(partner, 'kpp', '') or '').strip(),
+            'inn': partner._rsbu_inn(),
+            'kpp': partner._rsbu_kpp(),
             'ogrn': (getattr(partner, 'ogrn', '') or '').strip(),
         }
 

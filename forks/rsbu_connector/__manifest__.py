@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'РСБУ — Коннектор документов',
-    'version': '20.0.2026.09.17',
+    'version': '20.0.2026.10.20',
     'summary': 'Миксин-коннектор: генерация РСБУ-проводок по проведению документов',
     'description': """
 РСБУ — Коннектор документов
@@ -30,9 +30,11 @@
     'category': 'Accounting/Localizations',
     'depends': ['rsbu_journal', 'account'],
     'data': [
+        'security/ir.access.csv',
         'views/account_move_views.xml',
         'views/account_payment_views.xml',
         'views/res_company_views.xml',
+        'views/rsbu_opening_balance_views.xml',
     ],
     'installable': True,
     'application': False,

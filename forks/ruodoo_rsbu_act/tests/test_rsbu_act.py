@@ -10,22 +10,27 @@ class TestRsbuAct(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.company = cls.env.company
+        # ИНН и КПП в пуле — coop_inn / coop_kpp (каталог организаций).
+        pool = 'coop_inn' in cls.env['res.partner']._fields
+        inn, kpp = ('coop_inn', 'coop_kpp') if pool else ('inn', 'kpp')
         cls.company.partner_id.write({
-            'inn': '5050164162', 'kpp': '505001001',
+            inn: '5050164162', kpp: '505001001',
             'ogrn': '1234567890123'})
         user = cls.env['res.users'].search([], limit=1)
         user.partner_id.write({'name': 'Коробков Сергей Васильевич',
                                'function': 'Генеральный директор'})
         cls.company.rsbu_signatory_id = user.id
         cls.partner = cls.env['res.partner'].create({
-            'name': 'ООО Контрагент', 'inn': '7701234567',
-            'kpp': '770101001', 'ogrn': '1027700132195'})
+            'name': 'ООО Контрагент', inn: '7701234567',
+            kpp: '770101001', 'ogrn': '1027700132195'})
 
+        # Счета своей компании: в пуле планов по числу организаций.
         A = cls.env['rsbu.account']
-        cls.acc62 = (A.search([('code', '=', '62.01')], limit=1)
-                     or A.search([('code', '=', '62')], limit=1))
-        cls.acc_other = A.search([('is_group', '=', False),
-                                  ('subconto_partner', '=', False)], limit=1)
+        own = [('company_id', '=', cls.company.id)]
+        cls.acc62 = (A.search(own + [('code', '=', '62.01')], limit=1)
+                     or A.search(own + [('code', '=', '62')], limit=1))
+        cls.acc_other = A.search(own + [('is_group', '=', False),
+                                        ('subconto_partner', '=', False)], limit=1)
         cls.Move = cls.env['rsbu.move']
         cls.Act = cls.env['ruodoo.rsbu.act']
 
@@ -92,3 +97,12 @@ class TestRsbuAct(TransactionCase):
             'date_from': '2026-01-01', 'date_to': '2026-12-31'})
         act.action_compute()
         self.assertAlmostEqual(act.opening_debit, 30000.0, 2)
+
+
+    def test_pool_act_numbering_per_company(self):
+        other = self.env['res.company'].create({'name': 'Акт Вторая организация'})
+        first = self.Act.create({'company_id': other.id, 'partner_id': self.partner.id})
+        second = self.Act.create({'company_id': other.id, 'partner_id': self.partner.id})
+        self.assertTrue(first.name.startswith('АС/'), first.name)
+        self.assertTrue(first.name.endswith('00001'), first.name)
+        self.assertTrue(second.name.endswith('00002'), second.name)

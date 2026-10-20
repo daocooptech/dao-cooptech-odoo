@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'РСБУ — Акт сверки взаиморасчётов',
-    'version': '19.0.2026.10.01',
+    'version': '20.0.2026.10.01',
     'summary': 'Акт сверки по РСБУ-слою: выгрузка в DOCX и в XML (приказ ФНС 405)',
     'description': """
 РСБУ — Акт сверки взаиморасчётов
@@ -35,6 +35,7 @@ res.partner (rsbu_reporting_base, l10n_ru).
         'data/docx_templates.xml',
         'views/ruodoo_rsbu_act_views.xml',
         'security/ir.access.csv',
+        'data/ir_sequence_data.xml',
     ],
     'external_dependencies': {
         'python': ['lxml'],

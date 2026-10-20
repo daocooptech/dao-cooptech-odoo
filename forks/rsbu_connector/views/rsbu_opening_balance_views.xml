@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_rsbu_opening_balance_wizard_form" model="ir.ui.view">
+        <field name="name">rsbu.opening.balance.wizard.form</field>
+        <field name="model">rsbu.opening.balance.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Ввод начальных остатков">
+                <group>
+                    <group>
+                        <field name="company_id"/>
+                        <field name="date"/>
+                    </group>
+                    <group>
+                        <button name="action_fill_from_accounting" type="object"
+                                string="Заполнить из бухгалтерии"
+                                class="btn-secondary"/>
+                    </group>
+                </group>
+                <field name="line_ids">
+                    <list editable="bottom">
+                        <field name="company_id" column_invisible="1"/>
+                        <field name="account_id"/>
+                        <field name="partner_id"/>
+                        <field name="contract_id" optional="hide"/>
+                        <field name="debit" sum="Дебет"/>
+                        <field name="credit" sum="Кредит"/>
+                    </list>
+                </field>
+                <footer>
+                    <button name="action_post" type="object"
+                            string="Провести остатки" class="btn-primary"/>
+                    <button string="Отмена" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_rsbu_opening_balance_wizard" model="ir.actions.act_window">
+        <field name="name">Ввод начальных остатков</field>
+        <field name="res_model">rsbu.opening.balance.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_rsbu_opening_balance" name="Ввод начальных остатков"
+              parent="rsbu_chart_of_accounts.menu_rsbu_regular_ops"
+              action="action_rsbu_opening_balance_wizard" sequence="5"
+              groups="rsbu_journal.group_rsbu_journal_manager"/>
+</odoo>
