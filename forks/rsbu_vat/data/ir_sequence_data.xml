@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="seq_rsbu_invoice" model="ir.sequence">
+        <field name="name">РСБУ Счёт-фактура</field>
+        <field name="code">rsbu.invoice</field>
+        <field name="prefix">СФ/%(range_year)s/</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+    <record id="seq_rsbu_realization" model="ir.sequence">
+        <field name="name">РСБУ Документ реализации</field>
+        <field name="code">rsbu.realization</field>
+        <field name="prefix">РЕАЛ/%(range_year)s/</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+</odoo>

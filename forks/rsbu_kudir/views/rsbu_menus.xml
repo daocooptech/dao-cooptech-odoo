@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- КУДиР — отдельный пункт верхнего уровня. -->
+    <menuitem id="menu_rsbu_kudir" name="КУДиР"
+              parent="rsbu_chart_of_accounts.menu_rsbu_root"
+              action="action_rsbu_kudir_line" sequence="40"
+              groups="rsbu_chart_of_accounts.group_rsbu_account_user"/>
+
+    <!-- Пересчёт КУДиР — в «Регламентные операции». -->
+    <menuitem id="menu_rsbu_kudir_recompute" name="Пересчёт КУДиР"
+              parent="rsbu_chart_of_accounts.menu_rsbu_regular_ops"
+              action="action_rsbu_kudir_recompute_wizard" sequence="20"
+              groups="rsbu_journal.group_rsbu_journal_user"/>
+</odoo>

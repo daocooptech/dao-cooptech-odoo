@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_rsbu_period_close_list" model="ir.ui.view">
+        <field name="name">rsbu.period.close.list</field>
+        <field name="model">rsbu.period.close</field>
+        <field name="arch" type="xml">
+            <list string="Закрытие месяца">
+                <field name="name"/>
+                <field name="period_month"/>
+                <field name="usn_tax_amount"/>
+                <field name="move_count" string="Проводок"/>
+                <field name="state" widget="badge"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_rsbu_period_close_form" model="ir.ui.view">
+        <field name="name">rsbu.period.close.form</field>
+        <field name="model">rsbu.period.close</field>
+        <field name="arch" type="xml">
+            <form string="Закрытие месяца">
+                <header>
+                    <button name="compute_usn_tax" type="object"
+                            string="Рассчитать налог УСН"
+                            invisible="state != 'draft'"/>
+                    <button name="action_close" type="object"
+                            string="Закрыть месяц" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_close_expenses" type="object"
+                            string="Закрыть 26 → 90.08"
+                            invisible="state != 'draft'"/>
+                    <button name="action_close_pl" type="object"
+                            string="Закрыть 90/91 → 99"
+                            invisible="state != 'draft'"/>
+                    <button name="action_vat_deduction" type="object"
+                            string="Вычет ав. НДС"
+                            invisible="state != 'draft'"/>
+                    <button name="action_ens_transfer" type="object"
+                            string="Перенос на ЕНС"
+                            invisible="state != 'draft'"/>
+                    <button name="action_accrue_usn" type="object"
+                            string="Начислить УСН"
+                            invisible="state != 'draft'"/>
+                    <button name="action_reform_balance" type="object"
+                            string="Реформация баланса"
+                            invisible="state != 'draft'"/>
+                    <button name="action_reopen" type="object"
+                            string="Переоткрыть"
+                            invisible="state != 'done'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Период">
+                            <field name="period_month"/>
+                            <field name="date_from" readonly="1"/>
+                            <field name="date_to" readonly="1"/>
+                            <field name="company_id"
+                                   groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Налог УСН (нараст. с начала года)">
+                            <field name="usn_tax_base" readonly="1"/>
+                            <field name="usn_reduction"/>
+                            <field name="usn_advance_paid" readonly="1"/>
+                            <field name="usn_tax_amount"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Регламентные проводки"
+                              name="moves">
+                            <field name="move_ids" readonly="1">
+                                <list>
+                                    <field name="date"/>
+                                    <field name="ref"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_rsbu_period_close" model="ir.actions.act_window">
+        <field name="name">Закрытие периода</field>
+        <field name="res_model">rsbu.period.close</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

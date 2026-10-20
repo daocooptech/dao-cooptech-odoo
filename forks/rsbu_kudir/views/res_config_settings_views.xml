@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_rsbu" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.rsbu</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="30"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app string="РСБУ" name="rsbu_kudir"
+                     img="/rsbu_kudir/static/description/icon.png">
+                    <block title="Учёт по УСН" name="rsbu_usn_setting_container">
+                        <setting id="rsbu_usn_mode_setting"
+                                 string="Режим УСН"
+                                 help="Объект налогообложения для КУДиР">
+                            <field name="rsbu_usn_mode"/>
+                        </setting>
+                        <setting id="rsbu_accounting_start_setting"
+                                 string="Дата начала учёта"
+                                 help="Месяц этой даты — первый доступный для закрытия периода">
+                            <field name="rsbu_accounting_start"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>

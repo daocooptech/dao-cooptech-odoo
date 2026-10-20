@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_rsbu_kudir_line_list" model="ir.ui.view">
+        <field name="name">rsbu.kudir.line.list</field>
+        <field name="model">rsbu.kudir.line</field>
+        <field name="arch" type="xml">
+            <list string="КУДиР">
+                <field name="date"/>
+                <field name="section"/>
+                <field name="document_ref"/>
+                <field name="narration"/>
+                <field name="income_amount" sum="Итого доходы"/>
+                <field name="expense_amount" sum="Итого расходы"/>
+                <field name="is_refund"/>
+                <field name="period_key"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_rsbu_kudir_line_search" model="ir.ui.view">
+        <field name="name">rsbu.kudir.line.search</field>
+        <field name="model">rsbu.kudir.line</field>
+        <field name="arch" type="xml">
+            <search string="Поиск по КУДиР">
+                <field name="document_ref"/>
+                <field name="narration"/>
+                <filter name="section_1" string="Раздел I"
+                        domain="[('section', '=', 'section_1')]"/>
+                <filter name="section_4" string="Раздел IV"
+                        domain="[('section', '=', 'section_4')]"/>
+                <separator/>
+                <filter name="group_section" string="Раздел"
+                        context="{'group_by': 'section'}"/>
+                <filter name="group_period" string="Период"
+                        context="{'group_by': 'period_key'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_rsbu_kudir_line" model="ir.actions.act_window">
+        <field name="name">КУДиР</field>
+        <field name="res_model">rsbu.kudir.line</field>
+        <field name="view_mode">list</field>
+        <field name="search_view_id" ref="view_rsbu_kudir_line_search"/>
+    </record>
+</odoo>

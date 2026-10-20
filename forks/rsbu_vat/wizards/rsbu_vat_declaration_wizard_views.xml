@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_rsbu_vat_declaration_wizard_form" model="ir.ui.view">
+        <field name="name">rsbu.vat.declaration.wizard.form</field>
+        <field name="model">rsbu.vat.declaration.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Расчёт декларации НДС">
+                <group>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                    <field name="company_id"
+                           groups="base.group_multi_company"/>
+                    <field name="currency_id" invisible="1"/>
+                    <field name="computed" invisible="1"/>
+                </group>
+                <group string="Итоги за период" invisible="not computed">
+                    <field name="vat_charged"/>
+                    <field name="vat_deducted"/>
+                    <field name="vat_payable"/>
+                </group>
+                <footer>
+                    <button name="action_compute" type="object"
+                            string="Рассчитать" class="btn-primary"/>
+                    <button string="Закрыть" class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_rsbu_vat_declaration_wizard" model="ir.actions.act_window">
+        <field name="name">Расчёт декларации НДС</field>
+        <field name="res_model">rsbu.vat.declaration.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

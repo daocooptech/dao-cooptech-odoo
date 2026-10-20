@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_rsbu_vat_book_line_list" model="ir.ui.view">
+        <field name="name">rsbu.vat.book.line.list</field>
+        <field name="model">rsbu.vat.book.line</field>
+        <field name="arch" type="xml">
+            <list string="Книги НДС">
+                <field name="date"/>
+                <field name="book"/>
+                <field name="partner_id"/>
+                <field name="base_amount"/>
+                <field name="vat_amount" sum="Итого НДС"/>
+                <field name="period_key"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_rsbu_vat_book_line_search" model="ir.ui.view">
+        <field name="name">rsbu.vat.book.line.search</field>
+        <field name="model">rsbu.vat.book.line</field>
+        <field name="arch" type="xml">
+            <search string="Поиск по книгам НДС">
+                <field name="partner_id"/>
+                <filter name="sales" string="Книга продаж"
+                        domain="[('book', '=', 'sales')]"/>
+                <filter name="purchases" string="Книга покупок"
+                        domain="[('book', '=', 'purchases')]"/>
+                <separator/>
+                <filter name="group_book" string="Книга"
+                        context="{'group_by': 'book'}"/>
+                <filter name="group_period" string="Квартал"
+                        context="{'group_by': 'period_key'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_rsbu_vat_book_line" model="ir.actions.act_window">
+        <field name="name">Книги НДС</field>
+        <field name="res_model">rsbu.vat.book.line</field>
+        <field name="view_mode">list</field>
+        <field name="search_view_id" ref="view_rsbu_vat_book_line_search"/>
+    </record>
+</odoo>

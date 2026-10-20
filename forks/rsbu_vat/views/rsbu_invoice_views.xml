@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_rsbu_invoice_list" model="ir.ui.view">
+        <field name="name">rsbu.invoice.list</field>
+        <field name="model">rsbu.invoice</field>
+        <field name="arch" type="xml">
+            <list string="Счета-фактуры">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="invoice_type"/>
+                <field name="partner_id"/>
+                <field name="base_amount"/>
+                <field name="vat_amount"/>
+                <field name="state" widget="badge"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_rsbu_invoice_form" model="ir.ui.view">
+        <field name="name">rsbu.invoice.form</field>
+        <field name="model">rsbu.invoice</field>
+        <field name="arch" type="xml">
+            <form string="Счёт-фактура">
+                <header>
+                    <button name="action_confirm" type="object"
+                            string="Подтвердить" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_cancel" type="object"
+                            string="Отменить"
+                            invisible="state == 'cancelled'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="invoice_type"/>
+                            <field name="date"/>
+                            <field name="partner_id"/>
+                        </group>
+                        <group>
+                            <field name="vat_rate"/>
+                            <field name="base_amount"/>
+                            <field name="vat_amount"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="company_id"
+                                   groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <group string="Источник">
+                        <field name="origin_move_id" readonly="1"
+                               invisible="invoice_type != 'advance'"/>
+                        <field name="source_model" readonly="1"/>
+                        <field name="source_res_id" readonly="1"/>
+                        <field name="rsbu_move_id" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_rsbu_invoice_search" model="ir.ui.view">
+        <field name="name">rsbu.invoice.search</field>
+        <field name="model">rsbu.invoice</field>
+        <field name="arch" type="xml">
+            <search string="Счета-фактуры">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <filter name="type_advance" string="Авансовые"
+                        domain="[('invoice_type', '=', 'advance')]"/>
+                <filter name="type_shipment" string="Отгрузочные"
+                        domain="[('invoice_type', '=', 'shipment')]"/>
+                <separator/>
+                <filter name="state_confirmed" string="Подтверждённые"
+                        domain="[('state', '=', 'confirmed')]"/>
+                <filter name="state_draft" string="Черновики"
+                        domain="[('state', '=', 'draft')]"/>
+                <separator/>
+                <filter name="group_type" string="Тип СФ"
+                        context="{'group_by': 'invoice_type'}"/>
+                <filter name="group_partner" string="Контрагент"
+                        context="{'group_by': 'partner_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_rsbu_invoice" model="ir.actions.act_window">
+        <field name="name">Счета-фактуры</field>
+        <field name="res_model">rsbu.invoice</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_rsbu_invoice_search"/>
+    </record>
+</odoo>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_rsbu_operation_template_form_kudir" model="ir.ui.view">
+        <field name="name">rsbu.operation.template.form.kudir</field>
+        <field name="model">rsbu.operation.template</field>
+        <field name="inherit_id"
+                ref="rsbu_mapping.view_rsbu_operation_template_form"/>
+        <field name="arch" type="xml">
+            <field name="resolver_key" position="after">
+                <field name="usn_recognition"/>
+                <field name="is_refund"/>
+            </field>
+        </field>
+    </record>
+</odoo>

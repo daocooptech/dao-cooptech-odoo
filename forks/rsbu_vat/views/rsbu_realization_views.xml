@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_rsbu_realization_list" model="ir.ui.view">
+        <field name="name">rsbu.realization.list</field>
+        <field name="model">rsbu.realization</field>
+        <field name="arch" type="xml">
+            <list string="Документы реализации">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="partner_id"/>
+                <field name="amount_untaxed"/>
+                <field name="amount_tax"/>
+                <field name="upd_function"/>
+                <field name="invoice_id"/>
+                <field name="state" widget="badge"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_rsbu_realization_form" model="ir.ui.view">
+        <field name="name">rsbu.realization.form</field>
+        <field name="model">rsbu.realization</field>
+        <field name="arch" type="xml">
+            <form string="Документ реализации">
+                <header>
+                    <button name="action_cancel" type="object"
+                            string="Отменить"
+                            invisible="state == 'cancelled'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="partner_id"/>
+                            <field name="upd_function"/>
+                        </group>
+                        <group>
+                            <field name="amount_untaxed"/>
+                            <field name="amount_tax"/>
+                            <field name="invoice_id" readonly="1"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="company_id"
+                                   groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <group string="Реквизиты УПД">
+                        <group>
+                            <field name="upd_shipper_id"/>
+                            <field name="upd_consignee_id"/>
+                            <field name="upd_transferred_by_id"/>
+                            <field name="upd_received_by_id"/>
+                        </group>
+                        <group>
+                            <field name="upd_transport"/>
+                            <field name="upd_basis"/>
+                            <field name="upd_operation_content"/>
+                        </group>
+                    </group>
+                    <group string="Источник">
+                        <field name="source_model" readonly="1"/>
+                        <field name="source_res_id" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_rsbu_realization_search" model="ir.ui.view">
+        <field name="name">rsbu.realization.search</field>
+        <field name="model">rsbu.realization</field>
+        <field name="arch" type="xml">
+            <search string="Документы реализации">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <filter name="with_sf" string="С счётом-фактурой"
+                        domain="[('invoice_id', '!=', False)]"/>
+                <filter name="without_sf" string="Без счёта-фактуры"
+                        domain="[('invoice_id', '=', False)]"/>
+                <separator/>
+                <filter name="state_confirmed" string="Подтверждённые"
+                        domain="[('state', '=', 'confirmed')]"/>
+                <filter name="state_draft" string="Черновики"
+                        domain="[('state', '=', 'draft')]"/>
+                <separator/>
+                <filter name="group_partner" string="Контрагент"
+                        context="{'group_by': 'partner_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_rsbu_realization" model="ir.actions.act_window">
+        <field name="name">Документы реализации</field>
+        <field name="res_model">rsbu.realization</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_rsbu_realization_search"/>
+    </record>
+</odoo>

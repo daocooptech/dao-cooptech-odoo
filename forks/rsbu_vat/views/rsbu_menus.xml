@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Журнал счетов-фактур — в разделе «Операции». -->
+    <menuitem id="menu_rsbu_invoice" name="Журнал счетов-фактур"
+              parent="rsbu_chart_of_accounts.menu_rsbu_operations"
+              action="action_rsbu_invoice" sequence="20"
+              groups="rsbu_chart_of_accounts.group_rsbu_account_user"/>
+    <!-- Документы реализации — рядом с журналом счетов-фактур. -->
+    <menuitem id="menu_rsbu_realization" name="Документы реализации"
+              parent="rsbu_chart_of_accounts.menu_rsbu_operations"
+              action="action_rsbu_realization" sequence="25"
+              groups="rsbu_chart_of_accounts.group_rsbu_account_user"/>
+
+    <!-- Закрытие периода и пересчёты — в «Регламентные операции». -->
+    <menuitem id="menu_rsbu_period_close" name="Закрытие периода"
+              parent="rsbu_chart_of_accounts.menu_rsbu_regular_ops"
+              action="action_rsbu_period_close" sequence="10"
+              groups="rsbu_chart_of_accounts.group_rsbu_account_user"/>
+    <menuitem id="menu_rsbu_vat_recompute" name="Пересчёт книг НДС"
+              parent="rsbu_chart_of_accounts.menu_rsbu_regular_ops"
+              action="action_rsbu_vat_recompute_wizard" sequence="30"
+              groups="rsbu_journal.group_rsbu_journal_user"/>
+
+    <!-- Книги и итоги НДС — в «Отчётность». -->
+    <menuitem id="menu_rsbu_vat_book" name="Книги продаж/покупок"
+              parent="rsbu_chart_of_accounts.menu_rsbu_reports"
+              action="action_rsbu_vat_book_line" sequence="60"
+              groups="rsbu_chart_of_accounts.group_rsbu_account_user"/>
+    <menuitem id="menu_rsbu_vat_summary" name="Итоги НДС"
+              parent="rsbu_chart_of_accounts.menu_rsbu_reports"
+              action="action_rsbu_vat_summary" sequence="70"
+              groups="rsbu_chart_of_accounts.group_rsbu_account_user"/>
+</odoo>

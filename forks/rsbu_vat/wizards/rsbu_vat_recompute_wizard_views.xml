@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_rsbu_vat_recompute_wizard_form" model="ir.ui.view">
+        <field name="name">rsbu.vat.recompute.wizard.form</field>
+        <field name="model">rsbu.vat.recompute.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Пересчёт книг НДС">
+                <group>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                    <field name="company_id"
+                           groups="base.group_multi_company"/>
+                </group>
+                <footer>
+                    <button name="action_recompute" type="object"
+                            string="Пересчитать" class="btn-primary"/>
+                    <button string="Отмена" class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_rsbu_vat_recompute_wizard" model="ir.actions.act_window">
+        <field name="name">Пересчёт книг НДС</field>
+        <field name="res_model">rsbu.vat.recompute.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>
