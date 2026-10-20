@@ -227,6 +227,19 @@ class CoopSkillOffer(models.Model):
             record.experience_display = 'Опыт ' + ' '.join(parts)
             record.experience_level = 'senior' if years >= 3 else 'junior'
 
+    def _coop_recompute_money_display(self):
+        """Пересчитать хранимую строку суммы у всех записей.
+
+        Строка хранится и считается от валюты записи, но валюту демо-набора
+        меняли мимо ORM — и в каталоге стояло «от 4 500 $» при сумме в
+        рублях на самой странице (сверка дизайна 20.10, решение 482).
+        Зовётся из `data/coop_money_display.xml` при каждом обновлении
+        модуля: дёшево и ничего не портит при повторе.
+        """
+        records = self.sudo().with_context(active_test=False).search([])
+        self.env.add_to_compute(self._fields['rate_display'], records)
+        records.flush_recordset(['rate_display'])
+
     @api.depends('rate', 'rate_kind', 'rate_period', 'currency_id')
     def _compute_rate_display(self):
         periods = {'month': 'в месяц', 'day': 'в день', 'hour': 'в час',

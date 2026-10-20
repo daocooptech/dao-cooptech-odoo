@@ -23,6 +23,7 @@
     'data': [
         'views/coop_skill_views.xml',
         'security/ir.access.csv',
+        'data/coop_money_display.xml',
     ],
     'assets': {
         'web.assets_backend': [

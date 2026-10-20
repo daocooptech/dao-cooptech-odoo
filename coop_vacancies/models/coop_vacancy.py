@@ -349,6 +349,19 @@ class CoopVacancy(models.Model):
             else:
                 record.share_percent = 0
 
+    def _coop_recompute_money_display(self):
+        """Пересчитать хранимую строку суммы у всех записей.
+
+        Строка хранится и считается от валюты записи, но валюту демо-набора
+        меняли мимо ORM — и в каталоге стояло «… $» при сумме в рублях
+        (сверка дизайна 20.10, решение 482). Зовётся из
+        `data/coop_money_display.xml` при каждом обновлении модуля: дёшево
+        и ничего не портит при повторе.
+        """
+        records = self.sudo().with_context(active_test=False).search([])
+        self.env.add_to_compute(self._fields['reward_display'], records)
+        records.flush_recordset(['reward_display'])
+
     @api.depends('reward_kind', 'pay_from', 'pay_to', 'pay_period',
                  'share_percent', 'contribution_value', 'currency_id',
                  'contract_kind', 'pay_method')

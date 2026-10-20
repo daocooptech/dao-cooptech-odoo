@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Строка суммы — заново при каждом обновлении модуля:
+       `_coop_recompute_money_display` в модели. -->
+  <function model="coop.resource" name="_coop_recompute_money_display" eval="[[]]"/>
+</odoo>

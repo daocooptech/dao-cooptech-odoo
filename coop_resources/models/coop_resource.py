@@ -309,6 +309,19 @@ class CoopResource(models.Model):
         ('closed', 'Закрыто'),
     ], string='Состояние', default='published', required=True, tracking=True, index=True)
 
+    def _coop_recompute_money_display(self):
+        """Пересчитать хранимую строку суммы у всех записей.
+
+        Строка хранится и считается от валюты записи, но валюту демо-набора
+        меняли мимо ORM — и в каталоге стояло «от 4 500 $» при сумме в
+        рублях на самой странице (сверка дизайна 20.10, решение 482).
+        Зовётся из `data/coop_money_display.xml` при каждом обновлении
+        модуля: дёшево и ничего не портит при повторе.
+        """
+        records = self.sudo().with_context(active_test=False).search([])
+        self.env.add_to_compute(self._fields['price_display'], records)
+        records.flush_recordset(['price_display'])
+
     @api.depends('price', 'price_kind', 'price_unit_label', 'currency_id')
     def _compute_price_display(self):
         prefix = {'from': 'от ', 'to': 'до ', 'exact': '', 'none': ''}

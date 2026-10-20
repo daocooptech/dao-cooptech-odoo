@@ -25,6 +25,7 @@
         'data/coop_resource_cron.xml',
         'views/coop_resource_views.xml',
         'security/ir.access.csv',
+        'data/coop_money_display.xml',
     ],
     'assets': {
         'web.assets_backend': [

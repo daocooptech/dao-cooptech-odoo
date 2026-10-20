@@ -25,6 +25,7 @@
     'data': [
         'views/coop_vacancy_views.xml',
         'security/ir.access.csv',
+        'data/coop_money_display.xml',
     ],
     'assets': {
         'web.assets_backend': [
