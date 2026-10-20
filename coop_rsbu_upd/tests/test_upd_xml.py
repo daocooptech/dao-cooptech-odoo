@@ -14,8 +14,9 @@ class TestUpdXml(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.company = cls.env.company
+        cls.company.rsbu_enabled = True  # слой — по флажку организации (К4)
         cls.company.partner_id.write({
-            'inn': '7704567896', 'kpp': '770401001',
+            'coop_inn': '7704567896', 'coop_kpp': '770401001',
             'city': 'Москва', 'street': 'ул. Тестовая, 1'})
         # Подписант.
         cls.user = cls.env['res.users'].search([], limit=1)
@@ -26,7 +27,7 @@ class TestUpdXml(TransactionCase):
         cls.company.rsbu_edo_participant_id = '2BM-SENDER-1'
         # Покупатель (с идентификатором участника ЭДО).
         cls.buyer = cls.env['res.partner'].create({
-            'name': 'ООО Покупатель', 'inn': '7730179829',
+            'name': 'ООО Покупатель', 'coop_inn': '7730179829',
             'city': 'Москва', 'street': 'ул. Клиент, 2',
             'rsbu_edo_participant_id': '2BM-BUYER-1'})
         # Товар/услуга с ОКЕИ на единице.
@@ -156,6 +157,7 @@ class TestUpdGeneration(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.company = cls.env.company
+        cls.company.rsbu_enabled = True  # слой — по флажку организации (К4)
         cls.company.rsbu_vat_mode = 'vat_5'
         cls.partner = cls.env['res.partner'].create({'name': 'УПД Клиент'})
         cls.journal_bank = cls.env['account.journal'].search(
@@ -326,9 +328,10 @@ class TestUpdConsistency(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.company = cls.env.company
+        cls.company.rsbu_enabled = True  # слой — по флажку организации (К4)
         cls.company.rsbu_vat_mode = 'vat_5'
         cls.company.partner_id.write({
-            'inn': '7704567896', 'kpp': '770401001',
+            'coop_inn': '7704567896', 'coop_kpp': '770401001',
             'city': 'Москва', 'street': 'ул. Тестовая, 1'})
         cls.user = cls.env['res.users'].search([], limit=1)
         cls.company.rsbu_signatory_id = cls.user.id
@@ -336,7 +339,7 @@ class TestUpdConsistency(TransactionCase):
         cls.company.rsbu_edo_operator_code = '2BM'
         cls.company.rsbu_edo_participant_id = '2BM-SENDER-1'
         cls.buyer = cls.env['res.partner'].create({
-            'name': 'ООО Покупатель', 'inn': '7730179829',
+            'name': 'ООО Покупатель', 'coop_inn': '7730179829',
             'city': 'Москва', 'street': 'ул. Клиент, 2',
             'rsbu_edo_participant_id': '2BM-BUYER-1'})
         cls.product = cls.env['product.product'].create({

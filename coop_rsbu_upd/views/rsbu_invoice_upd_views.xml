@@ -27,17 +27,33 @@
             <xpath expr="//header" position="inside">
                 <button name="action_create_realization" type="object"
                         string="Создать документ реализации" class="btn-primary"
-                        invisible="move_type != 'out_invoice' or state != 'posted' or rsbu_realization_id != False"/>
+                        groups="rsbu_journal.group_rsbu_journal_user"
+                        invisible="not coop_rsbu_enabled or move_type != 'out_invoice' or state != 'posted' or rsbu_realization_id != False"/>
                 <button name="action_open_realization" type="object"
                         string="Открыть УПД"
-                        invisible="rsbu_realization_id == False"/>
+                        groups="rsbu_journal.group_rsbu_journal_user"
+                        invisible="not coop_rsbu_enabled or rsbu_realization_id == False"/>
                 <field name="closing_document" widget="statusbar"
                        statusbar_visible="not_done,issued,signed"
-                       invisible="move_type != 'out_invoice'"/>
+                       groups="rsbu_journal.group_rsbu_journal_user"
+                       invisible="not coop_rsbu_enabled or move_type != 'out_invoice'"/>
             </xpath>
             <xpath expr="//sheet//field[@name='invoice_date']" position="after">
                 <field name="rsbu_realization_id" invisible="1"/>
+                <field name="coop_rsbu_enabled" invisible="1"/>
             </xpath>
+        </field>
+    </record>
+
+    <!-- Прежняя кнопка УПД — только у организаций без слоя. -->
+    <record id="view_move_form_upd_legacy_button" model="ir.ui.view">
+        <field name="name">account.move.form.upd.legacy.button</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="l10n_ru_upd_xml.account_move_form_upd_button_header"/>
+        <field name="arch" type="xml">
+            <button name="print_upd" position="attributes">
+                <attribute name="invisible">coop_rsbu_enabled or state != 'posted' or move_type not in ('out_invoice','out_refund')</attribute>
+            </button>
         </field>
     </record>
 
@@ -49,10 +65,10 @@
         <field name="arch" type="xml">
             <xpath expr="//search" position="inside">
                 <separator/>
-                <filter name="upd_not_done"
+                <filter name="upd_not_done" groups="rsbu_journal.group_rsbu_journal_user"
                         string="Нет закрывающих документов"
                         domain="[('move_type', '=', 'out_invoice'), ('closing_document', '=', 'not_done')]"/>
-                <filter name="upd_waiting_sign"
+                <filter name="upd_waiting_sign" groups="rsbu_journal.group_rsbu_journal_user"
                         string="Ждём подпись клиента"
                         domain="[('move_type', '=', 'out_invoice'), ('closing_document', '=', 'issued')]"/>
             </xpath>

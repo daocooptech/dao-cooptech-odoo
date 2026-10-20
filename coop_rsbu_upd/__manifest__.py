@@ -21,5 +21,6 @@ dd10b7d) без деклараций, НДФЛ и РСВ: XML по формат�
         'data/upd_docx_template.xml',
         'views/rsbu_invoice_upd_views.xml',
     ],
+    'post_init_hook': 'post_init_move_upd_requisites',
     'installable': True,
 }

@@ -5,3 +5,6 @@ access_rsbu_op_role_user,rsbu.operation.template.role user,rsbu.operation.templa
 access_rsbu_op_role_mgr,rsbu.operation.template.role manager,rsbu.operation.template.role,rsbu_journal.group_rsbu_journal_manager,crud,
 access_rsbu_op_matrix_user,rsbu.operation.matrix user,rsbu.operation.matrix,rsbu_chart_of_accounts.group_rsbu_account_user,r,
 access_rsbu_op_matrix_mgr,rsbu.operation.matrix manager,rsbu.operation.matrix,rsbu_journal.group_rsbu_journal_manager,crud,
+rsbu_operation_template_company_rule,РСБУ Шаблон операции: мультикомпания,rsbu.operation.template,,crud,"[('company_id', 'in', company_ids)]"
+rsbu_operation_template_role_company_rule,РСБУ Роль счёта: мультикомпания,rsbu.operation.template.role,,crud,"[('company_id', 'in', company_ids)]"
+rsbu_operation_matrix_company_rule,РСБУ Матрица: мультикомпания,rsbu.operation.matrix,,crud,"[('company_id', 'in', company_ids)]"

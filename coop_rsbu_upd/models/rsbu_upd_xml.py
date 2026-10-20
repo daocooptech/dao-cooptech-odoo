@@ -14,11 +14,13 @@
 Заменяет устаревший l10n_ru_upd_xml (формат 5.01 из account.move).
 Кодировка windows-1251, кириллические имена элементов, валидация по XSD.
 """
-import base64
+import uuid
 from datetime import date, datetime
 
 from odoo import _, api, models
 from odoo.exceptions import UserError
+
+from odoo.addons.coop_invoicing.models.upd_legacy import ARCHIVE_NOTE
 
 KND_UPD = '1115131'
 UPD_FORMAT_VERSION = '5.03'
@@ -27,6 +29,7 @@ VAT_RATE_LABEL = {
     'vat_exempt': 'без НДС',
     'vat_5': '5%',
     'vat_7': '7%',
+    'vat_22': '22%',
     'vat_10': '10%',
     'vat_20': '20%',
 }
@@ -35,6 +38,7 @@ VAT_RATE_PCT = {
     'vat_exempt': 0.0,
     'vat_5': 0.05,
     'vat_7': 0.07,
+    'vat_22': 0.22,
     'vat_10': 0.10,
     'vat_20': 0.20,
 }
@@ -79,23 +83,51 @@ class RsbuRealizationUpd(models.Model):
         емости/маркировки (0); N7 — двузначный код (00).
         """
         self.ensure_one()
-        import uuid
+        # Выданный прежним модулем УПД (архив К1) сохраняет свой ИдФайл:
+        # повторная выгрузка не должна порождать «новый» документ.
+        archived = self._upd_archived_filename()
+        if archived:
+            return archived
         company = self.company_id
         operator = (company.rsbu_edo_operator_code or '000').strip()
         # Отправитель (продавец) — идентификатор нашей организации в ЭДО.
+        # Без него — постоянный GUID организации, а не случайный (у выпуска
+        # uuid4: каждая выгрузка давала новое имя файла).
         sender = (company.rsbu_edo_participant_id or '').strip() \
-            or str(uuid.uuid4())
+            or self._upd_uuid('company', company.id)
         # Получатель (покупатель) — идентификатор контрагента в ЭДО.
         receiver = (self.partner_id.rsbu_edo_participant_id or '').strip() \
-            or str(uuid.uuid4())
+            or self._upd_uuid('partner', self.partner_id.id)
         a = '%s%s' % (operator, receiver)   # А — получатель
         o = '%s%s' % (operator, sender)     # О — отправитель
-        today = date.today().strftime('%Y%m%d')
-        guid = str(uuid.uuid4())            # N1
+        # Дата и GUID — от документа: ИдФайл одного УПД всегда один.
+        day = self._upd_schf_date().strftime('%Y%m%d')
+        guid = self._upd_uuid('realization', company.id, self.id)  # N1
         # N2..N7 — признаки прослеживаемости/маркировки/спецрежимов (по
         # умолчанию отсутствуют).
         flags = '0_0_0_0_0_00'
-        return 'ON_NSCHFDOPPR_%s_%s_%s_%s_%s' % (a, o, today, guid, flags)
+        return 'ON_NSCHFDOPPR_%s_%s_%s_%s_%s' % (a, o, day, guid, flags)
+
+    @api.model
+    def _upd_uuid(self, *parts):
+        """Постоянный GUID (UUID5) по базе и частям ключа."""
+        base = self.env['ir.config_parameter'].sudo().get_str('database.uuid')
+        key = ':'.join(str(p) for p in (base, 'coop-upd') + parts)
+        return str(uuid.uuid5(uuid.NAMESPACE_URL, key))
+
+    def _upd_archived_filename(self):
+        """ИдФайл УПД, выданного по счёту прежним модулем (архив К1)."""
+        self.ensure_one()
+        source = self._source_invoice()
+        if not source:
+            return False
+        attachment = self.env['ir.attachment'].sudo().search([
+            ('res_model', '=', 'account.move'),
+            ('res_id', '=', source.id),
+            ('description', '=', ARCHIVE_NOTE),
+        ], limit=1)
+        name = attachment.name or ''
+        return name[:-4] if name.endswith('.xml') else False
 
     def _upd_validate(self):
         """Проверить наличие данных, обязательных для УПД."""
@@ -103,11 +135,11 @@ class RsbuRealizationUpd(models.Model):
         errors = []
         company = self.company_id
         partner = company.partner_id
-        if not partner.inn:
+        if not partner._coop_upd_inn():
             errors.append(_('ИНН организации-продавца'))
         if not self.partner_id:
             errors.append(_('контрагент-покупатель'))
-        elif not self.partner_id.inn:
+        elif not self.partner_id._coop_upd_inn():
             errors.append(_('ИНН покупателя'))
         source = self._source_invoice()
         if not source:
@@ -152,7 +184,7 @@ class RsbuRealizationUpd(models.Model):
             attrs['ОКПО'] = partner.okpo
         node = etree.Element(tag, attrs)
         idsv = etree.SubElement(node, 'ИдСв')
-        inn = (partner.inn or '').strip()
+        inn = partner._coop_upd_inn()
         if len(inn) == 12:
             names = (partner.name or '').replace('ИП', '').split()
             svip = etree.SubElement(idsv, 'СвИП', {
@@ -166,8 +198,8 @@ class RsbuRealizationUpd(models.Model):
             etree.SubElement(idsv, 'СвЮЛУч', {
                 'НаимОрг': partner.name or '',
                 'ИННЮЛ': inn,
-                **({'КПП': partner.kpp} if getattr(partner, 'kpp', False)
-                   else {}),
+                **({'КПП': partner._coop_upd_kpp()}
+                   if partner._coop_upd_kpp() else {}),
             })
         # Адрес текстом (АдрИнф) — упрощённый, достаточно по XSD.
         addr = etree.SubElement(node, 'Адрес')
@@ -290,7 +322,8 @@ class RsbuRealizationUpd(models.Model):
             uom = line.product_uom_id
             sved = E('СведТов', {
                 'НомСтр': str(idx),
-                'НаимТов': line.name or (line.product_id.name or 'Товар'),
+                # Odoo 20: название позиции — label, name — только описание.
+                'НаимТов': line.label or (line.product_id.name or 'Товар'),
                 'НаимЕдИзм': uom.name or '',
                 'КолТов': self._qty(line.quantity),
                 'ЦенаТов': self._qty(
@@ -387,8 +420,9 @@ class RsbuRealizationUpd(models.Model):
         import os
         from odoo.modules import get_module_path
         return os.path.join(
-            get_module_path('rsbu_fns_reporting'), 'data', 'schemas',
-            'ON_NSCHFDOPPR_1_997_01_05_03_02.xsd')
+            get_module_path('coop_rsbu_upd'), 'data', 'schemas',
+            # Редакция с 01.01.2026 (ставки 22 %, 22/122); у выпуска 05_03_02.
+            'ON_NSCHFDOPPR_1_997_01_05_03_05.xsd')
 
     def _upd_validate_xml(self, xml_bytes):
         """Валидация УПД против XSD. Возвращает (ok, errors)."""
@@ -414,7 +448,7 @@ class RsbuRealizationUpd(models.Model):
             'res_model': self._name,
             'res_id': self.id,
             'type': 'binary',
-            'datas': base64.b64encode(xml_bytes),
+            'raw': xml_bytes,
             'mimetype': 'application/xml',
         })
         return {

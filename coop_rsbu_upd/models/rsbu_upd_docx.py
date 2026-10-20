@@ -59,8 +59,8 @@ class RsbuRealizationUpdDocx(models.Model):
         if not bank:
             return ''
         parts = []
-        if bank.acc_number:
-            parts.append('Р/с %s' % bank.acc_number)
+        if bank.account_number:
+            parts.append('Р/с %s' % bank.account_number)
         name = getattr(bank, 'bank_name', '') or (
             bank.bank_id.name if bank.bank_id else '')
         if name:
@@ -114,7 +114,7 @@ class RsbuRealizationUpdDocx(models.Model):
             rows.append({
                 'num': idx,
                 'code': product.default_code or '',          # А
-                'name': line.name or (product.name or 'Товар'),  # 1а
+                'name': line.label or (product.name or 'Товар'),  # 1а (Odoo 20: label)
                 'type_code': '',                              # 1б (прослеж.)
                 'okei': getattr(uom, 'okei', '') or '',       # 2
                 'uom': uom.name or '',                        # 2а
@@ -169,8 +169,8 @@ class RsbuRealizationUpdDocx(models.Model):
     def _party_dict(self, partner, name=None):
         return {
             'name': name or partner.name or '',
-            'inn': (partner.inn or '').strip(),
-            'kpp': (getattr(partner, 'kpp', '') or '').strip(),
+            'inn': partner._coop_upd_inn(),
+            'kpp': partner._coop_upd_kpp(),
             'okpo': getattr(partner, 'okpo', '') or '',
             'address': self._clean_address(partner),
             'bank': self._bank_requisites(partner),
@@ -229,17 +229,17 @@ class RsbuRealizationUpdDocx(models.Model):
         self.ensure_one()
         p = self.company_id.partner_id
         return '%s, ИНН/КПП %s/%s' % (
-            self.company_id.name or '', (p.inn or '').strip(),
-            (getattr(p, 'kpp', '') or '').strip())
+            self.company_id.name or '', p._coop_upd_inn(),
+            p._coop_upd_kpp())
 
     def upd_docx_buyer_subject(self):
         """Наименование экономического субъекта — покупателя (21)."""
         self.ensure_one()
         p = self.partner_id
-        kpp = (getattr(p, 'kpp', '') or '').strip()
+        kpp = p._coop_upd_kpp()
         return '%s%s' % (p.name or '',
-                         ', ИНН/КПП %s/%s' % ((p.inn or '').strip(), kpp)
-                         if p.inn else '')
+                         ', ИНН/КПП %s/%s' % (p._coop_upd_inn(), kpp)
+                         if p._coop_upd_inn() else '')
 
     def upd_docx_signer(self):
         """Подписант (руководитель организации-продавца)."""

@@ -21,15 +21,18 @@ class TestRealizationAcceptance(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        if 'rsbu_signatory_id' not in cls.env['res.company']._fields:
-            # Подписант и реквизиты УПД — из rsbu_reporting_base (К6).
-            raise unittest.SkipTest('нужен rsbu_reporting_base')
+        if not hasattr(cls.env['account.move'], 'action_create_realization'):
+            # Документ реализации и УПД — из coop_rsbu_upd (К6).
+            raise unittest.SkipTest('нужен coop_rsbu_upd')
+        # ИНН и КПП в пуле — coop_inn / coop_kpp (каталог организаций).
+        pool = 'coop_inn' in cls.env['res.partner']._fields
+        inn, kpp = ('coop_inn', 'coop_kpp') if pool else ('inn', 'kpp')
         cls.company = cls.env.company
         cls.company.rsbu_enabled = True  # слой — по флажку организации (К4)
         cls.company.rsbu_vat_mode = 'vat_5'
         # Реквизиты для прохождения _upd_validate (XML/XSD).
         cls.company.partner_id.write({
-            'inn': '7704567896', 'kpp': '770401001',
+            inn: '7704567896', kpp: '770401001',
             'city': 'Москва', 'street': 'ул. Тестовая, 1'})
         cls.user = cls.env['res.users'].search([], limit=1)
         cls.company.rsbu_signatory_id = cls.user.id
@@ -37,7 +40,7 @@ class TestRealizationAcceptance(TransactionCase):
         cls.company.rsbu_edo_operator_code = '2BM'
         cls.company.rsbu_edo_participant_id = '2BM-SENDER-1'
         cls.buyer = cls.env['res.partner'].create({
-            'name': 'ООО Покупатель', 'inn': '7730179829',
+            'name': 'ООО Покупатель', inn: '7730179829',
             'city': 'Москва', 'street': 'ул. Клиент, 2',
             'rsbu_edo_participant_id': '2BM-BUYER-1'})
         cls.product = cls.env['product.product'].create({
