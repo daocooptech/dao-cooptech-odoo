@@ -368,6 +368,13 @@
     border-bottom-right-radius: 8px;
   }
 
+  // При фокусе рамка — со всех четырёх сторон. Правило выше весомее общего
+  // правила фокуса (backend.scss) и оставляло правую сторону прозрачной:
+  // поле выглядело обрезанным справа (владелец 21.10, снимок).
+  .o_cp_searchview .o_searchview:focus-within {
+    border-right-color: var(--coop-line-strong, var(--coop-line)) !important;
+  }
+
   // Пагинатор ушёл вниз, под плитки.
   .o_cp_pager {
     display: none !important;
