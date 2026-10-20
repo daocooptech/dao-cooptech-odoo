@@ -44,7 +44,7 @@ export class CoopTabs extends Component {
         this.menus = useService("menu");
         this.action = usePlugin(ActionPlugin);
         this.orm = useService("orm");
-        this.state = proxy({ tabs: [], current: null, label: null, fav: null, section: null, known: false, screen: null });
+        this.state = proxy({ tabs: [], current: null, label: null, fav: null, section: null, known: false });
         useBus(this.env.bus, "COOP_FAVORITE_CHANGED", () => this.refreshFav());
         // Строка вкладок рисуется раньше, чем открывается сам каталог, и
         // первый расчёт вкладки «Избранное» не находил действия — вкладка
@@ -132,7 +132,6 @@ export class CoopTabs extends Component {
             this.state.tabs = [];
             this.state.current = null;
             this.state.label = label;
-            this.state.screen = null;
             // Только по своему пункту меню: «последнее выбранное
             // приложение» движка показало бы над выборкой чужой раздел.
             const ownApp = this.menus.getAll().find((menu) => menu.actionID === this.actionId);
@@ -161,7 +160,6 @@ export class CoopTabs extends Component {
         if (!appId) {
             this.state.tabs = [];
             this.state.section = null;
-            this.state.screen = null;
             return;
         }
         this.state.section = own ? this.menus.getMenu(appId)?.name || null : null;
@@ -176,14 +174,6 @@ export class CoopTabs extends Component {
         // строке вкладок не показан, и подсвечивать было нечего.
         const active = children.find((tab) => tab.actionID === actionId);
         this.state.current = active ? active.id : (children[0] || {}).id;
-        // Свой пункт есть, но глубже вкладок («Закупки → Заказы → Запросы
-        // на КП»): вкладка-группа своего действия не имеет, подсвечена
-        // первая, и заголовок назывался «Заказы». Тогда заголовок — имя
-        // самого пункта (решение 473, владелец 20.10.2026). Корень раздела
-        // открывает то же действие, что и пункт, — поэтому ищем ниже корня.
-        const deep = active ? null : this.menus.getAll().find(
-            (menu) => menu.actionID === actionId && menu.id !== menu.appID);
-        this.state.screen = deep ? deep.name : null;
         this.refreshFav();
     }
 
@@ -247,9 +237,6 @@ export class CoopTabs extends Component {
         }
         if (this.state.fav?.on) {
             return "Избранное";
-        }
-        if (this.state.screen) {
-            return this.state.screen;
         }
         const tab = this.state.known
             ? this.state.tabs.find((t) => t.id === this.state.current) : null;
