@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- «Ничего не нашли» — см. `empty_state.js`. -->
+    <t t-inherit="web.ActionHelper" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('o_nocontent_help')]" position="attributes">
+            <attribute name="t-if">!this.coopQuery</attribute>
+        </xpath>
+        <xpath expr="//div[hasclass('o_nocontent_help')]" position="after">
+            <div t-else="" class="o_nocontent_help o_coop_notfound">
+                <span class="o_coop_notfound_icon"><i class="oi" data-icon="search" role="img" aria-hidden="true"/></span>
+                <p class="o_coop_notfound_title">
+                    <t t-if="this.coopQuery.terms.length">Ничего не нашли по «<t t-out="this.coopQuery.terms.join(', ')"/>»</t>
+                    <t t-else="">Ничего не нашли</t>
+                </p>
+                <p>
+                    <t t-if="this.coopQuery.filtered">Ослабьте условия фильтра или нажмите «Сбросить».</t>
+                    <t t-else="">Проверьте написание или попробуйте другое слово.</t>
+                </p>
+            </div>
+        </xpath>
+    </t>
+
+</templates>

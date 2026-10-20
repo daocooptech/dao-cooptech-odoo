@@ -93,15 +93,18 @@
     <field name="name">coop.resource.list</field>
     <field name="model">coop.resource</field>
     <field name="arch" type="xml">
+      <!-- Столбцы по эталону `CatalogPage` «Таблицей»: название, вид
+           объявления, город, цена, состояние. Остальное — скрыто, но
+           включается в выборе столбцов. -->
       <list string="Ресурсы">
         <field name="name"/>
         <field name="listing_type"/>
-        <field name="resource_type"/>
-        <field name="category_id" optional="show"/>
-        <field name="method_ids" widget="many2many_tags" optional="show"/>
-        <field name="owner_id"/>
+        <field name="resource_type" optional="hide"/>
+        <field name="category_id" optional="hide"/>
+        <field name="method_ids" widget="many2many_tags" optional="hide"/>
+        <field name="owner_id" optional="hide"/>
         <field name="city"/>
-        <field name="price_display" string="Цена"/>
+        <field name="price_display" string="Цена" class="o_coop_num"/>
         <field name="is_promoted" string="Продвигается" optional="hide"/>
         <field name="state" widget="badge"
                decoration-success="state == 'published'"

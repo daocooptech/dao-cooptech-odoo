@@ -1009,6 +1009,40 @@ body.o_dark_mode .o_coop_logo img {
   height: auto;
 }
 
+// «Ничего не нашли» — эталон `Empty`: значок в круге `coop-teal-tint`,
+// заголовок и строка пояснения, без иллюстраций движка.
+.o_coop_notfound {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  color: var(--coop-slate);
+
+  .o_coop_notfound_icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--coop-teal-tint);
+    color: var(--coop-teal-dark, #0f6b63);
+    font-size: 26px;
+  }
+
+  .o_coop_notfound_title {
+    margin: 4px 0 0;
+    color: var(--coop-ink);
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
 // Под «здесь пока ничего нет» движок рисует бледные строки-образцы
 // (`o_view_sample_data`): пустой список выглядел сломанным, таблица образца
 // шире экрана давала прокрутку и обрезанные заголовки (владелец 19.10,

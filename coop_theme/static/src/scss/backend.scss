@@ -669,6 +669,33 @@
   font-size: 12px;
 }
 
+// ── Таблица записей — эталон `Table` ────────────────────────────────
+//
+// Шапка — на `coop-surface`, текст `coop-slate`; в светлой теме движок
+// оставлял её прозрачной с почти чёрным текстом (сверка 20.10). Числа —
+// вправо и моноширинным: в колонке цифр разной ширины глаз величины не
+// сравнит. Цена-строка (`price_display`) — тоже число для глаза.
+// Вес — выше штатного `.o_list_renderer .o_list_table thead th`, который
+// красит шапку переменной движка (в светлой теме она пустая).
+.o_list_renderer {
+  --ListRenderer-thead-bg-color: var(--coop-surface);
+}
+
+.o_list_renderer .o_list_table > thead > tr > th {
+  background-color: var(--coop-surface);
+  color: var(--coop-slate);
+}
+
+.o_list_table td.o_coop_num,
+.o_list_table > thead > tr > th[data-name="price_display"] {
+  text-align: right;
+}
+
+.o_list_table td.o_coop_num {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
 // ── Экраны коробки на телефоне ────────────────────────────────────────
 //
 // Метка состояния в карточке канбана движок ставит в одну строку
