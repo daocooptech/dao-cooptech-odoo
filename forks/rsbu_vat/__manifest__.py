@@ -31,7 +31,6 @@
     'category': 'Accounting/Localizations',
     'depends': ['rsbu_kudir'],
     'data': [
-        'security/ir.model.access.csv',
         'data/ir_sequence_data.xml',
         'wizards/rsbu_vat_recompute_wizard_views.xml',
         'wizards/rsbu_vat_declaration_wizard_views.xml',
@@ -42,6 +41,7 @@
         'views/rsbu_vat_summary_views.xml',
         'views/rsbu_period_close_views.xml',
         'views/rsbu_menus.xml',
+        'security/ir.access.csv',
     ],
     'installable': True,
     'application': False,

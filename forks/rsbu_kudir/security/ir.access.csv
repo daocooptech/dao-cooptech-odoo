@@ -1,0 +1,8 @@
+id,name,model_id,group_id/id,operation,domain
+access_rsbu_kudir_line_user,rsbu.kudir.line user,rsbu.kudir.line,rsbu_chart_of_accounts.group_rsbu_account_user,r,
+access_rsbu_kudir_line_mgr,rsbu.kudir.line manager,rsbu.kudir.line,rsbu_journal.group_rsbu_journal_manager,crud,
+access_rsbu_kudir_recompute_wizard,rsbu.kudir.recompute.wizard,rsbu.kudir.recompute.wizard,rsbu_journal.group_rsbu_journal_user,crud,
+access_rsbu_kudir_summary_user,rsbu.kudir.summary user,rsbu.kudir.summary,rsbu_chart_of_accounts.group_rsbu_account_user,r,
+access_rsbu_kudir_summary_mgr,rsbu.kudir.summary manager,rsbu.kudir.summary,rsbu_journal.group_rsbu_journal_manager,crud,
+rsbu_kudir_line_company_rule,РСБУ КУДиР: мультикомпания,rsbu.kudir.line,,crud,"[('company_id', 'in', company_ids)]"
+rsbu_kudir_summary_company_rule,РСБУ Итоги КУДиР: мультикомпания,rsbu.kudir.summary,,crud,"[('company_id', 'in', company_ids)]"

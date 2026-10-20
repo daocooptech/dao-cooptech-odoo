@@ -1,6 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_rsbu_kudir_line_user,rsbu.kudir.line user,model_rsbu_kudir_line,rsbu_chart_of_accounts.group_rsbu_account_user,1,0,0,0
-access_rsbu_kudir_line_mgr,rsbu.kudir.line manager,model_rsbu_kudir_line,rsbu_journal.group_rsbu_journal_manager,1,1,1,1
-access_rsbu_kudir_recompute_wizard,rsbu.kudir.recompute.wizard,model_rsbu_kudir_recompute_wizard,rsbu_journal.group_rsbu_journal_user,1,1,1,1
-access_rsbu_kudir_summary_user,rsbu.kudir.summary user,model_rsbu_kudir_summary,rsbu_chart_of_accounts.group_rsbu_account_user,1,0,0,0
-access_rsbu_kudir_summary_mgr,rsbu.kudir.summary manager,model_rsbu_kudir_summary,rsbu_journal.group_rsbu_journal_manager,1,1,1,1

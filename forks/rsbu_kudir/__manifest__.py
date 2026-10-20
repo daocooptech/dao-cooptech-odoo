@@ -32,12 +32,12 @@
     'category': 'Accounting/Localizations',
     'depends': ['rsbu_mapping'],
     'data': [
-        'security/ir.model.access.csv',
         'wizards/rsbu_kudir_recompute_wizard_views.xml',
         'views/res_config_settings_views.xml',
         'views/rsbu_operation_template_views.xml',
         'views/rsbu_kudir_views.xml',
         'views/rsbu_menus.xml',
+        'security/ir.access.csv',
     ],
     'installable': True,
     'application': False,

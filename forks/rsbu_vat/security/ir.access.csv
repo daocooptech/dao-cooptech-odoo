@@ -1,0 +1,18 @@
+id,name,model_id,group_id/id,operation,domain
+access_rsbu_invoice_user,rsbu.invoice user,rsbu.invoice,rsbu_chart_of_accounts.group_rsbu_account_user,r,
+access_rsbu_invoice_mgr,rsbu.invoice manager,rsbu.invoice,rsbu_journal.group_rsbu_journal_manager,crud,
+access_rsbu_realization_user,rsbu.realization user,rsbu.realization,rsbu_chart_of_accounts.group_rsbu_account_user,r,
+access_rsbu_realization_mgr,rsbu.realization manager,rsbu.realization,rsbu_journal.group_rsbu_journal_manager,crud,
+access_rsbu_vat_book_user,rsbu.vat.book.line user,rsbu.vat.book.line,rsbu_chart_of_accounts.group_rsbu_account_user,r,
+access_rsbu_vat_book_mgr,rsbu.vat.book.line manager,rsbu.vat.book.line,rsbu_journal.group_rsbu_journal_manager,crud,
+access_rsbu_vat_summary_user,rsbu.vat.summary user,rsbu.vat.summary,rsbu_chart_of_accounts.group_rsbu_account_user,r,
+access_rsbu_vat_summary_mgr,rsbu.vat.summary manager,rsbu.vat.summary,rsbu_journal.group_rsbu_journal_manager,crud,
+access_rsbu_vat_recompute_wiz,rsbu.vat.recompute.wizard,rsbu.vat.recompute.wizard,rsbu_journal.group_rsbu_journal_user,crud,
+access_rsbu_vat_declaration_wiz,rsbu.vat.declaration.wizard,rsbu.vat.declaration.wizard,rsbu_journal.group_rsbu_journal_user,crud,
+access_rsbu_period_close_user,rsbu.period.close user,rsbu.period.close,rsbu_chart_of_accounts.group_rsbu_account_user,r,
+access_rsbu_period_close_mgr,rsbu.period.close manager,rsbu.period.close,rsbu_journal.group_rsbu_journal_manager,crud,
+rsbu_invoice_company_rule,РСБУ Счёт-фактура: мультикомпания,rsbu.invoice,,crud,"[('company_id', 'in', company_ids)]"
+rsbu_realization_company_rule,РСБУ Реализация: мультикомпания,rsbu.realization,,crud,"[('company_id', 'in', company_ids)]"
+rsbu_vat_book_line_company_rule,РСБУ Книги НДС: мультикомпания,rsbu.vat.book.line,,crud,"[('company_id', 'in', company_ids)]"
+rsbu_vat_summary_company_rule,РСБУ Сводка НДС: мультикомпания,rsbu.vat.summary,,crud,"[('company_id', 'in', company_ids)]"
+rsbu_period_close_company_rule,РСБУ Закрытие периода: мультикомпания,rsbu.period.close,,crud,"[('company_id', 'in', company_ids)]"
