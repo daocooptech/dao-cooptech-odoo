@@ -689,39 +689,136 @@
   }
 }
 
-// Ряд плашек сводки над канбаном «Продаж» (`o_website_sale_dashboard`)
-// не переносится, и последняя плашка уезжала за край на телефоне.
-@media (max-width: 767.98px) {
-  .o_website_sale_dashboard > .d-flex {
-    flex-wrap: wrap;
-  }
-}
-
-// Плашки сводки «Закупок» (`o_purchase_dashboard`) — плитками `StatCard`:
-// белая ячейка в рамке, число моноширинным 20px, подпись 11.5px. Движок
-// красит их утилитами `bg-dark-subtle` / `bg-info-subtle` с `!important`,
-// поэтому и здесь `!important`. Ненулевая плашка («есть что сделать») —
-// рамкой и числом фирменного цвета вместо голубой заливки.
-.o_purchase_dashboard .purchase-dashboard-card {
-  display: flex;
+// Плашки сводки штатных разделов — плитками `StatCard`: белая ячейка в
+// рамке, число моноширинным 20px, подпись 11.5px под ним. Движок красит
+// плашки утилитами Bootstrap (`bg-dark-subtle`, `bg-300`, `d-md-flex`…) с
+// `!important`, поэтому и здесь `!important`. `$value` — элемент числа.
+@mixin coop-stat-card($value) {
+  display: flex !important;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  min-width: 140px;
   padding: 12px 14px !important;
   border: 1px solid var(--coop-line) !important;
   border-radius: 10px !important;
   background-color: var(--coop-white) !important;
   color: var(--coop-slate) !important;
   font-size: 11.5px;
+  font-weight: 400;
   line-height: 1.4;
   text-align: left;
   white-space: normal;
 
-  .fs-2 {
-    margin-bottom: 3px;
+  #{$value} {
+    margin: 0 0 3px;
     font: 700 20px/1.2 'JetBrains Mono', ui-monospace, monospace !important;
     color: var(--coop-ink);
   }
+
+  &:hover {
+    text-decoration: none;
+    border-color: var(--coop-teal) !important;
+  }
+}
+
+// «Продажи» (`o_website_sale_dashboard`): слева — плашки «К подтверждению»,
+// «К отгрузке», «Необходимо выставить счёт» в персиковой, сиреневой и
+// голубой заливке, хоть там и ноль (признака «пусто» движок не ставит). По
+// эталону — нейтральные `StatCard`; выбранная (по ней включён фильтр) —
+// рамкой вдвое толще и числом фирменного цвета.
+.o_website_sale_dashboard .o_dashboard_card {
+  @include coop-stat-card('.o_dashboard_card_data');
+
+  &.disabled {
+    opacity: 1;
+  }
+
+  &.active {
+    outline: 0;
+    border-color: var(--coop-teal) !important;
+    box-shadow: inset 0 0 0 1px var(--coop-teal);
+
+    .o_dashboard_card_data {
+      color: var(--coop-teal-dark);
+    }
+  }
+}
+
+// Справа — «Заказы на продажу» и «Выручка от продаж» за период: те же
+// ячейки (число над подписью), рамка и подложка — по эталону. Процент к
+// прошлому периоду («Н/Д», «+12 %») убран: в `StatCard` стрелок роста и
+// процентов «к прошлому месяцу» нет.
+.o_website_sale_dashboard > .d-flex:last-child {
+  border-color: var(--coop-line) !important;
+  border-radius: 10px !important;
+  background-color: var(--coop-white) !important;
+
+  .o_date_filter_wrapper {
+    background-color: transparent !important;
+  }
+
+  .o_cards_container > .d-flex {
+    flex-direction: column-reverse !important;
+    font-size: 11.5px;
+    line-height: 1.4;
+
+    > .text-body {
+      font-weight: 400 !important;
+      color: var(--coop-slate) !important;
+    }
+
+    .fs-4 {
+      margin-bottom: 3px;
+      font: 700 20px/1.2 'JetBrains Mono', ui-monospace, monospace !important;
+      color: var(--coop-ink);
+    }
+  }
+
+  .o_dashboard_card_evolution {
+    display: none;
+  }
+}
+
+// Ряд плашек «Продаж» не переносился, и последняя плашка уезжала за край на
+// телефоне. По эталону ячейка не уже 140 и переносится.
+@media (max-width: 767.98px) {
+  .o_website_sale_dashboard > .d-flex {
+    flex-wrap: wrap;
+    gap: 6px !important;
+    padding: 0 !important;
+  }
+
+  .o_website_sale_dashboard .o_dashboard_card {
+    flex: 1 1 140px !important;
+  }
+}
+
+// «Выставление счетов» — ряд показателей над журналами
+// (`o_account_dashboard_kpis`): у движка подпись сверху, число под ней
+// жирным 20px — по эталону число сверху, моноширинным. Плашка
+// «Оформление счёта» (пунктир, картинка) — приглашение настроить, не
+// показатель, её не трогаю.
+.o_account_dashboard_kpi_card:not(.o_account_dashboard_kpi_invoice_layout_card) {
+  @include coop-stat-card('.o_account_dashboard_kpi_value');
+
+  .o_account_dashboard_kpi_content {
+    flex-direction: column-reverse;
+  }
+
+  .o_account_dashboard_kpi_header {
+    font-size: 11.5px;
+    font-weight: 400;
+    color: var(--coop-slate);
+  }
+}
+
+// «Закупки» (`o_purchase_dashboard`). Ненулевая плашка («есть что
+// сделать», движок — `bg-info-subtle`) — рамкой и числом фирменного цвета
+// вместо голубой заливки.
+.o_purchase_dashboard .purchase-dashboard-card {
+  @include coop-stat-card('.fs-2');
+  min-width: 0;
 
   &.bg-info-subtle {
     border-color: var(--coop-teal) !important;
@@ -736,11 +833,6 @@
   // текстом не читается, 2.9:1).
   &.btn-warning {
     border-color: var(--coop-gold) !important;
-  }
-
-  &:hover {
-    text-decoration: none;
-    border-color: var(--coop-teal) !important;
   }
 
   &.o_no_hover:not(.btn-warning):hover {
