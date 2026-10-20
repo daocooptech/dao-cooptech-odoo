@@ -1,0 +1,7 @@
+id,name,model_id,group_id/id,operation,domain
+access_rsbu_op_template_user,rsbu.operation.template user,rsbu.operation.template,rsbu_chart_of_accounts.group_rsbu_account_user,r,
+access_rsbu_op_template_mgr,rsbu.operation.template manager,rsbu.operation.template,rsbu_journal.group_rsbu_journal_manager,crud,
+access_rsbu_op_role_user,rsbu.operation.template.role user,rsbu.operation.template.role,rsbu_chart_of_accounts.group_rsbu_account_user,r,
+access_rsbu_op_role_mgr,rsbu.operation.template.role manager,rsbu.operation.template.role,rsbu_journal.group_rsbu_journal_manager,crud,
+access_rsbu_op_matrix_user,rsbu.operation.matrix user,rsbu.operation.matrix,rsbu_chart_of_accounts.group_rsbu_account_user,r,
+access_rsbu_op_matrix_mgr,rsbu.operation.matrix manager,rsbu.operation.matrix,rsbu_journal.group_rsbu_journal_manager,crud,

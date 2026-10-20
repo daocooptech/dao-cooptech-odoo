@@ -30,11 +30,11 @@
     'category': 'Accounting/Localizations',
     'depends': ['rsbu_connector', 'account'],
     'data': [
-        'security/ir.model.access.csv',
         'views/rsbu_operation_views.xml',
         'views/account_move_views.xml',
         'views/account_payment_views.xml',
         'views/rsbu_menus.xml',
+        'security/ir.access.csv',
     ],
     'installable': True,
     'application': False,
