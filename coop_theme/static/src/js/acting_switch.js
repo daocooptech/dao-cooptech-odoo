@@ -86,13 +86,13 @@ registry.category("user_menuitems").add("coop_theme.acting", () => ({
     sequence: 1,
 }));
 
-// «О программе» — лицензия движка и ссылка на исходник той версии, что
+// «О платформе» (до 20.10.2026 — «О программе») — лицензия движка и ссылка на исходник той версии, что
 // работает (решение 442; LGPL-3, GPL-3 §5(d), §6(d)). Страница публичная,
 // открывается в новой вкладке, чтобы не терять место в кабинете.
 registry.category("user_menuitems").add("coop_theme.about", () => ({
     type: "item",
     id: "coop_about",
-    description: "О программе",
+    description: "О платформе",
     href: "/about/software",
     callback: () => window.open("/about/software", "_blank"),
     sequence: 65,

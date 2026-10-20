@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from datetime import date
 
 from odoo.exceptions import AccessError, UserError
@@ -82,6 +84,28 @@ class TestCoopInvoicing(TransactionCase):
         move.action_post()
         self.assertEqual(move._coop_upd_function(), 'СЧФДОП')
         self.assertEqual(move._coop_upd_status(), '1')
+
+    def test_issued_upd_is_archived_once(self):
+        """К1 задачи 294: выданный УПД — вложением под прежним `ИдФайл`,
+        повторный проход второй копии не делает; без реквизитов старый
+        модуль УПД не собирает — вложения нет, проход не падает."""
+        self._regime('2026-01-01', 'usn_5')
+        action = self.deal.with_user(self.keeper).action_coop_create_invoice()
+        move = self.env['account.move'].browse(action['res_id'])
+        move.action_post()
+        Move = self.env['account.move']
+        note = 'УПД, выданный до перехода на РСБУ-слой'
+        domain = [('res_model', '=', 'account.move'), ('res_id', '=', move.id),
+                  ('description', '=', note)]
+        Move._coop_archive_upd_xml()
+        self.assertFalse(self.env['ir.attachment'].search(domain))
+        Report = type(self.env['ir.actions.report'])
+        with patch.object(Report, '_render_qweb_xml', return_value=('<Файл/>'.encode(), 'xml')):
+            Move._coop_archive_upd_xml()
+            Move._coop_archive_upd_xml()
+        files = self.env['ir.attachment'].search(domain)
+        self.assertEqual(len(files), 1)
+        self.assertEqual(files.name, '%s.xml' % move.edi)
 
     def test_exempt_gives_primary_document_and_blocks_tax(self):
         self._regime('2026-01-01', 'exempt_145')
