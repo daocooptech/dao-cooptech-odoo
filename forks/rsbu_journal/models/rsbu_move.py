@@ -117,10 +117,30 @@ class RsbuMove(models.Model):
             move._check_balanced()
             move._check_required_subconto()
             if move.name == '/' or not move.name:
-                move.name = self.env['ir.sequence'].with_company(
-                    move.company_id).next_by_code('rsbu.move') or '/'
+                move.name = move._rsbu_move_sequence().next_by_id(
+                    sequence_date=move.date)
             move.state = 'posted'
         return True
+
+    def _rsbu_move_sequence(self):
+        """Нумерация операций — своя у каждой организации пула.
+
+        У выпуска одна последовательность без компании на всю базу: номера
+        шли бы сквозь все организации. Последовательность компании
+        заводится копией общей при первом проведении.
+        """
+        self.ensure_one()
+        Sequence = self.env['ir.sequence'].sudo()
+        sequence = Sequence.search([
+            ('code', '=', 'rsbu.move'),
+            ('company_id', '=', self.company_id.id),
+        ], limit=1)
+        if not sequence:
+            sequence = self.env.ref('rsbu_journal.seq_rsbu_move').sudo().copy({
+                'company_id': self.company_id.id,
+                'number_next': 1,
+            })
+        return sequence
 
     def action_draft(self):
         for move in self:

@@ -75,3 +75,12 @@ class TestRsbuAccount(TransactionCase):
             ('code', '=', '62.АВ'), ('company_id', '=', self.company.id)])
         self.assertTrue(acc62av, 'Субсчёт 62.АВ должен быть загружен')
         self.assertEqual(acc62av.parent_id.code, '62')
+
+    def test_chart_loaded_for_new_company(self):
+        # Организация заведена после установки модуля — план у неё сразу.
+        company = self.env['res.company'].create({'name': 'Тест Новая организация'})
+        accounts = self.Account.search([('company_id', '=', company.id)])
+        self.assertTrue(accounts.filtered(lambda a: a.code == '62.АВ'))
+        self.assertEqual(len(accounts), self.Account.search_count([
+            ('company_id', '=', self.company.id),
+            ('code', 'in', accounts.mapped('code'))]))

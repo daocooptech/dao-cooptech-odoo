@@ -118,3 +118,30 @@ class TestRsbuMove(TransactionCase):
         # не проводим
         bal = self.acc_51.get_balance(company_id=self.company.id)
         self.assertEqual(bal['debit'], 0.0)
+
+    def test_numbering_per_company(self):
+        # Номера операций у каждой организации свои, не сквозь пул.
+        other = self.env['res.company'].create({'name': 'Тест Вторая организация'})
+        self.env.user.company_ids |= other
+        moves = self.Move
+        for company in (self.company, other, other):
+            env = self.env(context=dict(self.env.context,
+                                        allowed_company_ids=[company.id]))
+            acc = env['rsbu.account'].search([
+                ('company_id', '=', company.id), ('code', 'in', ('51', '90.01'))])
+            by_code = {a.code: a for a in acc}
+            move = env['rsbu.move'].create({
+                'date': '2026-01-15',
+                'company_id': company.id,
+                'line_ids': [
+                    (0, 0, {'account_id': by_code['51'].id, 'debit': 100.0}),
+                    (0, 0, {'account_id': by_code['90.01'].id, 'credit': 100.0}),
+                ],
+            })
+            move.action_post()
+            moves |= move
+        own, first, second = moves
+        self.assertTrue(first.name.endswith('00001'), first.name)
+        self.assertTrue(second.name.endswith('00002'), second.name)
+        self.assertEqual(self.env['ir.sequence'].sudo().search_count([
+            ('code', '=', 'rsbu.move'), ('company_id', '=', other.id)]), 1)

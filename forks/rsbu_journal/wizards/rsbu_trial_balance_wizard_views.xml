@@ -51,7 +51,7 @@
                 <field name="closing_credit" sum="Сальдо кон. Кт"/>
                 <field name="currency_id" column_invisible="1"/>
                 <button name="action_open_entries" type="object"
-                        string="Проводки" icon="fa-search"/>
+                        string="Проводки" icon="search"/>
             </list>
         </field>
     </record>

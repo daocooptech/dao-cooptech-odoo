@@ -67,7 +67,7 @@
                 <field name="name"/>
                 <filter name="groups" string="Только группы"
                         domain="[('is_group', '=', True)]"/>
-                <filter name="postable" string="Постингуемые"
+                <filter name="postable" string="Для проводок"
                         domain="[('is_group', '=', False)]"/>
                 <separator/>
                 <filter name="group_kind" string="Признак счёта"
