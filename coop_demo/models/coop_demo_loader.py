@@ -33,6 +33,7 @@ from ..data import load_staff
 from ..data import load_crm
 from ..data import load_deal_leads
 from ..data import load_deal_activities
+from ..data import load_requisites
 from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_cessions,
                     load_tokens,
@@ -380,6 +381,9 @@ class CoopDemoLoader(models.AbstractModel):
             load_vat.load_vat_regimes(self.env)
             load_vat.load_companies(self.env)
             load_vat.load_invoices(self.env)
+        # Реквизиты для документов (задача 297) — после компаний учёта:
+        # руководителя и ID ЭДО получает уже заведённая компания.
+        load_requisites.load_requisites(self.env)
         # Лиды CRM (решение 450) — последними: их ведут держатели «Сделок»,
         # которым компании учёта и отделы продаж выданы шагами выше.
         load_crm.load_crm(self.env)
