@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form_rsbu_edo" model="ir.ui.view">
+        <field name="name">res.partner.form.rsbu.edo</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="РСБУ — ЭДО" name="rsbu_edo">
+                    <group>
+                        <field name="rsbu_edo_participant_id"/>
+                    </group>
+                    <div class="alert alert-info" role="alert">
+                        Идентификатор участника в системе ЭДО используется
+                        в имени файла обмена УПД (получатель/отправитель).
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

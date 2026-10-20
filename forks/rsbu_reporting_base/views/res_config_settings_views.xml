@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_rsbu_reporting"
+            model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.rsbu.reporting</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="35"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app string="РСБУ — Отчётность" name="rsbu_reporting_base"
+                     img="/rsbu_reporting_base/static/description/icon.png">
+                    <block title="Реквизиты налогоплательщика"
+                           name="rsbu_reporting_taxpayer">
+                        <setting string="Территория и налоговый орган"
+                                 help="ОКТМО, код ИФНС, ОКВЭД для деклараций">
+                            <div class="content-group">
+                                <div class="row">
+                                    <label for="rsbu_oktmo" class="col-lg-4"/>
+                                    <field name="rsbu_oktmo"/>
+                                </div>
+                                <div class="row">
+                                    <label for="rsbu_tax_office_code"
+                                           class="col-lg-4"/>
+                                    <field name="rsbu_tax_office_code"/>
+                                </div>
+                                <div class="row">
+                                    <label for="rsbu_okved" class="col-lg-4"/>
+                                    <field name="rsbu_okved"/>
+                                </div>
+                            </div>
+                        </setting>
+                        <setting string="КБК по налогам и взносам"
+                                 help="Коды бюджетной классификации (сверить)">
+                            <div class="content-group">
+                                <div class="row">
+                                    <label for="rsbu_kbk_usn" class="col-lg-4"/>
+                                    <field name="rsbu_kbk_usn"/>
+                                </div>
+                                <div class="row">
+                                    <label for="rsbu_kbk_nds" class="col-lg-4"/>
+                                    <field name="rsbu_kbk_nds"/>
+                                </div>
+                                <div class="row">
+                                    <label for="rsbu_kbk_ndfl" class="col-lg-4"/>
+                                    <field name="rsbu_kbk_ndfl"/>
+                                </div>
+                                <div class="row">
+                                    <label for="rsbu_kbk_insurance"
+                                           class="col-lg-4"/>
+                                    <field name="rsbu_kbk_insurance"/>
+                                </div>
+                                <div class="row">
+                                    <label for="rsbu_kbk_injury"
+                                           class="col-lg-4"/>
+                                    <field name="rsbu_kbk_injury"/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                    <block title="Реквизиты страхователя (СФР)"
+                           name="rsbu_reporting_sfr">
+                        <setting string="Регистрация в СФР"
+                                 help="Рег. номер и класс профриска для ЕФС-1">
+                            <div class="content-group">
+                                <div class="row">
+                                    <label for="rsbu_sfr_reg_number"
+                                           class="col-lg-4"/>
+                                    <field name="rsbu_sfr_reg_number"/>
+                                </div>
+                                <div class="row">
+                                    <label for="rsbu_profrisk_class"
+                                           class="col-lg-4"/>
+                                    <field name="rsbu_profrisk_class"/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                    <block title="Подписант отчётности"
+                           name="rsbu_reporting_signatory">
+                        <setting string="Подписант"
+                                 help="Лицо, подписывающее отчётность">
+                            <field name="rsbu_signatory_id"/>
+                            <div class="mt8">
+                                <field name="rsbu_signatory_is_representative"
+                                       class="oe_inline"/>
+                                <label for="rsbu_signatory_is_representative"
+                                       string="Подписант — уполномоченный представитель"/>
+                            </div>
+                        </setting>
+                    </block>
+                    <block title="Электронный документооборот (ЭДО)"
+                           name="rsbu_reporting_edo">
+                        <setting string="Реквизиты ЭДО"
+                                 help="Для имени файла обмена УПД">
+                            <div class="content-group">
+                                <div class="row">
+                                    <label for="rsbu_edo_operator_code"
+                                           class="col-lg-5"/>
+                                    <field name="rsbu_edo_operator_code"/>
+                                </div>
+                                <div class="row">
+                                    <label for="rsbu_edo_participant_id"
+                                           class="col-lg-5"/>
+                                    <field name="rsbu_edo_participant_id"/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>
