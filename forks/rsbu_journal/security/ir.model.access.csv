@@ -1,7 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_rsbu_move_user,rsbu.move user,model_rsbu_move,group_rsbu_journal_user,1,1,1,0
-access_rsbu_move_manager,rsbu.move manager,model_rsbu_move,group_rsbu_journal_manager,1,1,1,1
-access_rsbu_move_line_user,rsbu.move.line user,model_rsbu_move_line,group_rsbu_journal_user,1,1,1,1
-access_rsbu_move_line_manager,rsbu.move.line manager,model_rsbu_move_line,group_rsbu_journal_manager,1,1,1,1
-access_rsbu_tb_wizard_user,rsbu.trial.balance.wizard user,model_rsbu_trial_balance_wizard,group_rsbu_journal_user,1,1,1,1
-access_rsbu_tb_line_user,rsbu.trial.balance.line user,model_rsbu_trial_balance_line,group_rsbu_journal_user,1,1,1,1

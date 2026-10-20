@@ -1,4 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_rsbu_account_user,rsbu.account user,model_rsbu_account,group_rsbu_account_user,1,0,0,0
-access_rsbu_account_manager,rsbu.account manager,model_rsbu_account,group_rsbu_account_manager,1,1,1,1
-access_rsbu_account_load_wizard,rsbu.account.load.wizard manager,model_rsbu_account_load_wizard,group_rsbu_account_manager,1,1,1,1

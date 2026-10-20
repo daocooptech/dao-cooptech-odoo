@@ -1,0 +1,8 @@
+id,name,model_id,group_id/id,operation,domain
+access_rsbu_move_user,rsbu.move user,rsbu.move,rsbu_journal.group_rsbu_journal_user,cru,
+access_rsbu_move_manager,rsbu.move manager,rsbu.move,rsbu_journal.group_rsbu_journal_manager,crud,
+rsbu_move_company_rule,РСБУ Операция: мультикомпания,rsbu.move,,crud,"[('company_id', 'in', company_ids)]"
+access_rsbu_move_line_user,rsbu.move.line user,rsbu.move.line,rsbu_journal.group_rsbu_journal_user,crud,
+rsbu_move_line_company_rule,РСБУ Строка: мультикомпания,rsbu.move.line,,crud,"[('company_id', 'in', company_ids)]"
+access_rsbu_tb_wizard_user,rsbu.trial.balance.wizard user,rsbu.trial.balance.wizard,rsbu_journal.group_rsbu_journal_user,crud,
+access_rsbu_tb_line_user,rsbu.trial.balance.line user,rsbu.trial.balance.line,rsbu_journal.group_rsbu_journal_user,crud,

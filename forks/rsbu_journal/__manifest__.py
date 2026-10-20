@@ -29,12 +29,12 @@
     'depends': ['rsbu_chart_of_accounts', 'hr', 'product', 'l10n_ru_contract'],
     'data': [
         'security/rsbu_journal_security.xml',
-        'security/ir.model.access.csv',
         'data/ir_sequence_data.xml',
         'views/rsbu_move_views.xml',
         'wizards/rsbu_trial_balance_wizard_views.xml',
         'report/rsbu_trial_balance_templates.xml',
         'views/rsbu_menus.xml',
+        'security/ir.access.csv',
     ],
     'installable': True,
     'application': False,

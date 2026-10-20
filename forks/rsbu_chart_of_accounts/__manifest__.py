@@ -27,10 +27,10 @@
     'depends': ['base', 'mail'],
     'data': [
         'security/rsbu_security.xml',
-        'security/ir.model.access.csv',
         'wizards/rsbu_account_load_wizard_views.xml',
         'views/rsbu_account_views.xml',
         'views/rsbu_menus.xml',
+        'security/ir.access.csv',
     ],
     'post_init_hook': 'post_init_load_chart',
     'installable': True,
