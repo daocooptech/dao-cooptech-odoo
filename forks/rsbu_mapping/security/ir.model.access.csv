@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_rsbu_op_template_user,rsbu.operation.template user,model_rsbu_operation_template,rsbu_chart_of_accounts.group_rsbu_account_user,1,0,0,0
+access_rsbu_op_template_mgr,rsbu.operation.template manager,model_rsbu_operation_template,rsbu_journal.group_rsbu_journal_manager,1,1,1,1
+access_rsbu_op_role_user,rsbu.operation.template.role user,model_rsbu_operation_template_role,rsbu_chart_of_accounts.group_rsbu_account_user,1,0,0,0
+access_rsbu_op_role_mgr,rsbu.operation.template.role manager,model_rsbu_operation_template_role,rsbu_journal.group_rsbu_journal_manager,1,1,1,1
+access_rsbu_op_matrix_user,rsbu.operation.matrix user,model_rsbu_operation_matrix,rsbu_chart_of_accounts.group_rsbu_account_user,1,0,0,0
+access_rsbu_op_matrix_mgr,rsbu.operation.matrix manager,model_rsbu_operation_matrix,rsbu_journal.group_rsbu_journal_manager,1,1,1,1

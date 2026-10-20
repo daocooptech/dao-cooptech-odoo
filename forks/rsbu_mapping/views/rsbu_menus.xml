@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_rsbu_operation_template" name="Шаблоны операций"
+              parent="rsbu_chart_of_accounts.menu_rsbu_config"
+              action="action_rsbu_operation_template" sequence="20"
+              groups="rsbu_journal.group_rsbu_journal_manager"/>
+
+    <menuitem id="menu_rsbu_operation_matrix" name="Матрица связности"
+              parent="rsbu_chart_of_accounts.menu_rsbu_config"
+              action="action_rsbu_operation_matrix" sequence="30"
+              groups="rsbu_journal.group_rsbu_journal_manager"/>
+</odoo>

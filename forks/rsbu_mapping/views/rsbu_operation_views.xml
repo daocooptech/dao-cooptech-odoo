@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Шаблон операции -->
+    <record id="view_rsbu_operation_template_form" model="ir.ui.view">
+        <field name="name">rsbu.operation.template.form</field>
+        <field name="model">rsbu.operation.template</field>
+        <field name="arch" type="xml">
+            <form string="Шаблон типовой операции">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="name"/>
+                            <field name="resolver_key"/>
+                        </group>
+                        <group>
+                            <field name="company_id"
+                                   groups="base.group_multi_company"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Роли счетов">
+                            <field name="role_ids">
+                                <list editable="bottom">
+                                    <field name="role"/>
+                                    <field name="account_id"/>
+                                    <field name="subconto_source"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Описание">
+                            <field name="note"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_rsbu_operation_template_list" model="ir.ui.view">
+        <field name="name">rsbu.operation.template.list</field>
+        <field name="model">rsbu.operation.template</field>
+        <field name="arch" type="xml">
+            <list string="Шаблоны типовых операций">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="resolver_key"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_rsbu_operation_template" model="ir.actions.act_window">
+        <field name="name">Шаблоны типовых операций</field>
+        <field name="res_model">rsbu.operation.template</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Матрица связности -->
+    <record id="view_rsbu_operation_matrix_list" model="ir.ui.view">
+        <field name="name">rsbu.operation.matrix.list</field>
+        <field name="model">rsbu.operation.matrix</field>
+        <field name="arch" type="xml">
+            <list string="Матрица связности" editable="bottom">
+                <field name="priority" widget="handle"/>
+                <field name="name"/>
+                <field name="doc_kind"/>
+                <field name="has_advance"/>
+                <field name="partner_kind"/>
+                <field name="template_id"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_rsbu_operation_matrix" model="ir.actions.act_window">
+        <field name="name">Матрица связности</field>
+        <field name="res_model">rsbu.operation.matrix</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>
