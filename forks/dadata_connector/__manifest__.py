@@ -1,10 +1,11 @@
 {
     "name": "DaData Connector",
     "summary": """Obtaining data on legal entities from the DaData service""",
-    "author": "MK.lab",
-    "website": "#",
+    "author": "MK.Lab, RuOdoo",
+    "license": "LGPL-3",
+    "website": "https://ruodoo.ru",
     "category": "Marketing",
-    "version": "20.0.2025.12.03",
+    "version": "20.0.2026.09.17",
     "depends": ["base", "web", "contacts", "account", "l10n_ru_doc"],
     "external_dependencies": {"python": ["dadata==21.10.1"]},
     "data": [

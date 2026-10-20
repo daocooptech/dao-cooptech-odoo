@@ -1,7 +1,7 @@
 from dadata import Dadata
 from httpx import HTTPStatusError
 
-from odoo import api, fields, models, _
+from odoo import api, models, _
 from odoo.exceptions import ValidationError
 
 okopf = {
@@ -38,12 +38,12 @@ class ResPartner(models.Model):
         dadata = Dadata(token)
         try:
             result = dadata.find_by_id("party", vat, branch_type="MAIN")
-        except HTTPStatusError:
+        except HTTPStatusError as e:
             raise ValidationError(
                 _(
                     "Failed to connect to DaData server. The token in the settings may be incorrect."
                 )
-            )
+            ) from e
 
         if result:
             wizard_data, new_data = self._parse_dadata_response(result)

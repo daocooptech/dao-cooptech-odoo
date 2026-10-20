@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tests for l10n_ru_advance_payments — advance payment invoices.
 

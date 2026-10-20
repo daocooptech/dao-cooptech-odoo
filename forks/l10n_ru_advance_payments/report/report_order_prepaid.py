@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from odoo import models
 from odoo.addons.l10n_ru_advance_payments.report_helper import QWebHelper
 

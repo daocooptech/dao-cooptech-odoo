@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Российская локализация - Авансовые счета',
-    'version': '20.0.2025.06.06',
+    'version': '20.0.2026.09.17',
     'description': """Модуль создания новой модели - Авансовые счета. Он добавляет функционал построенный на базовых 
     функциях бухгалтерии.""",
 
-    'author': "MK.Lab",
-    'website': "https://www.inf-centre.ru/",
+    'author': "MK.Lab, RuOdoo",
+    'license': 'LGPL-3',
+    'website': "https://ruodoo.ru",
 
     'depends': ['account',
                 'sale',
