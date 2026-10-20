@@ -17,11 +17,12 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.2.0',
+    'version': '20.0.1.3.0',
     'license': 'LGPL-3',
     'depends': [
         'coop_base', 'coop_orgs', 'coop_deals',
         'account', 'l10n_ru', 'l10n_ru_doc', 'l10n_ru_upd_xml', 'l10n_ru_contract',
+        'docx_report',
     ],
     'data': [
         'security/ir.access.csv',

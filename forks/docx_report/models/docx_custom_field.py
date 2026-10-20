@@ -32,10 +32,7 @@ class DocxCustomField(models.Model):
         ),
     )
 
-    _sql_constraints = [
-        (
-            "uniq_report_technical_name",
-            "unique(report_id, technical_name)",
-            "Техническое имя кастомной переменной должно быть уникально в рамках одного отчёта.",
-        )
-    ]
+    _uniq_report_technical_name = models.Constraint(
+        "unique(report_id, technical_name)",
+        "Техническое имя кастомной переменной должно быть уникально в рамках одного отчёта.",
+    )

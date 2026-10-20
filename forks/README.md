@@ -78,7 +78,8 @@ Odoo 19, репозиторий Rudoo `ruodoo-public`; OCA-модули в нё�
 | `l10n_ru_contract` | Rudoo, MK.Lab | ключа нет | `t-esc`/`t-raw` → `t-out` (246), `datas` → `raw`, base64 → строка, `pycompat` убран, `pymorphy2` → `pymorphy3`, `ir.access` |
 | `l10n_ru_act_rev` | Rudoo, MK.Lab | ключа нет | `t-out`, `read_group` → `formatted_read_group` (помощник `_read_group_dicts`), `account.account.group_id` убран, `ir.access` |
 | `l10n_ru_upd_xml` | Rudoo, MK.Lab | ключа нет | `t-out`, импорты контроллера, место группы XML-отчёта в форме отчёта, `hs_code` через `get_hs_code()`, `name` черновика, `line.label`; осиротевший `ir.model.access.csv` убран |
-| `docx_report_generation` | Rudoo, RYDLAB | LGPL-3 | `get_param` → `get_str`, `request.website` → `env.website`, `BinaryValue.content` вместо `b64decode`, импорты контроллера |
+| `docx_report_generation` | Rudoo, RYDLAB | LGPL-3 | `get_param` → `get_str`, `request.website` → `env.website`, `BinaryValue.content` вместо `b64decode`, импорты контроллера; из выпуска 16.10 — `options` не съедаются у обычных отчётов, ветка PDF из DOCX срабатывает, в ответ идут байты, а не пара; имя файла — отдельным методом |
+| `docx_report` | Rudoo, выпуск 16.10 (`dd10b7d`) | LGPL-3 | поверх `docx_report_generation` (решение владельца 20.10, № 294): оставлена только разница — каталог `docx.template`, кастомные переменные, проверка шаблона, имя файла, шаблоны договора и счёта; второй обработчик печати в JS и бумага A4 с `default=True` убраны; меню — в «Технические → Отчёты»; `ir.access`, `models.Constraint`, `BinaryValue`, many2one в JS — объект; тип отчёта ставится и без явного формата |
 | `custom_report_field` | Rudoo, RYDLAB | LGPL-3 | `ir.access` |
 | `report_monetary_helpers` | Rudoo, RYDLAB | LGPL-3 | только версия |
 | `l10n_ru` | OCA, наш форк 19 | AGPL-3 | пустой `account.group-ru.csv` убран, данные компании в шаблоне плана счетов (`receivable/payable/expense/income_account_id`, storno, сумма прописью) |

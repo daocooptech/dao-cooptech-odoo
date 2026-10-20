@@ -1,3 +1,4 @@
+import re
 from json import dumps as json_dumps, loads as json_loads
 from werkzeug.urls import url_decode
 
@@ -11,12 +12,24 @@ from odoo.addons.web.controllers.report import ReportController
 
 
 class DocxReportController(ReportController):
+    def _get_docx_report_from_name(self, reportname):
+        return request.env["ir.actions.report"]._get_report_from_name(reportname)
+
     @route()
     def report_routes(self, reportname, docids=None, converter=None, **data):
         """
         Запускает генерацию файла отчета и возвращает его
         """
-        report = request.env["ir.actions.report"]._get_report_from_name(reportname)
+        report = self._get_docx_report_from_name(reportname)
+        # Ветку решаем до разбора `data`: ниже `options` вынимается pop'ом,
+        # и штатный контроллер уже не восстановил бы параметры мастера у
+        # обычных (qweb) отчётов. Поэтому их отдаём в super() нетронутыми.
+        is_docx = converter == "docx" or (
+            converter == "pdf" and "docx" in (report.report_type or "")
+        )
+        if not is_docx:
+            return super().report_routes(reportname, docids, converter, **data)
+
         context = dict(request.env.context)
         _data = dict()
         _docids = [int(i) for i in docids.split(",")] if docids else []
@@ -31,6 +44,7 @@ class DocxReportController(ReportController):
             context.update(_data["context"])
         if converter == "docx":
             docx = report.with_context(context)._render_docx_docx(_docids, data=_data)
+            docx = docx[0] if isinstance(docx, tuple) else docx
             docxhttpheaders = [
                 (
                     "Content-Type",
@@ -38,20 +52,34 @@ class DocxReportController(ReportController):
                 ),
             ]
             return request.make_response(docx, headers=docxhttpheaders)
-        elif converter == "pdf" and report.report_type == "docx":
-            pdf = report.with_context(context)._render_docx_pdf(_docids, data=_data)
-            pdfhttpheaders = [
-                (
-                    "Content-Type",
-                    "application/pdf",
-                ),
-                ("Content-Length", len(pdf[0])),
-            ]
-            return request.make_response(pdf, headers=pdfhttpheaders)
-        else:
-            return super(DocxReportController, self).report_routes(
-                reportname, docids, converter, **data
-            )
+        pdf = report.with_context(context)._render_docx_pdf(_docids, data=_data)
+        pdf = pdf[0] if isinstance(pdf, tuple) else pdf
+        pdfhttpheaders = [
+            ("Content-Type", "application/pdf"),
+            ("Content-Length", len(pdf)),
+        ]
+        return request.make_response(pdf, headers=pdfhttpheaders)
+
+    def _get_docx_filename_pattern(self, report):
+        """Выражение имени файла: `object` — запись, без расширения."""
+        return report.print_report_name
+
+    def _get_docx_output_filename(self, report, docids, extension):
+        filename = "%s.%s" % (report.name, extension)
+        pattern = self._get_docx_filename_pattern(report)
+        ids = [int(x) for x in docids.split(",") if x.isdigit()] if docids else []
+        if not pattern or len(ids) != 1:
+            return filename
+        obj = request.env[report.model].browse(ids)
+        try:
+            report_name = safe_eval(pattern, {"object": obj, "time": time})
+        except Exception:
+            # print_report_name может быть просто именем файла, а не Python-выражением
+            report_name = pattern
+        if not isinstance(report_name, str) or not report_name.strip():
+            return filename
+        report_name = re.sub(r"\.(docx?|pdf)$", "", report_name.strip(), flags=re.IGNORECASE)
+        return "%s.%s" % (report_name, extension)
 
     @route()
     def report_download(self, data, context=None, token=None, readonly=True):
@@ -81,7 +109,7 @@ class DocxReportController(ReportController):
                     # Particular report:
                     data = dict(
                         url_decode(url.split("?")[1]).items()
-                    )  # decoding the args represented in JSON
+                    ) if "?" in url else {}  # decoding the args represented in JSON
                     if "context" in data:
                         context, data_context = json_loads(context or "{}"), json_loads(
                             data.pop("context")
@@ -91,29 +119,11 @@ class DocxReportController(ReportController):
                         reportname, converter=converter, context=context, **data
                     )
 
-                report = request.env["ir.actions.report"]._get_report_from_name(
-                    reportname
-                )
-                filename = "%s.%s" % (report.name, extension)
-
-                if docids:
-                    ids = [int(x) for x in docids.split(",")]
-                    obj = request.env[report.model].browse(ids)
-                    if report.print_report_name and not len(obj) > 1:
-                        try:
-                            report_name = safe_eval(
-                                report.print_report_name, {"object": obj, "time": time}
-                            )
-                        except Exception:
-                            # print_report_name может быть просто именем файла, а не Python-выражением
-                            import re as _re
-                            report_name = _re.sub(r'\.(docx?|pdf)$', '', report.print_report_name, flags=_re.IGNORECASE)
-                        filename = "%s.%s" % (report_name, extension)
+                report = self._get_docx_report_from_name(reportname)
+                filename = self._get_docx_output_filename(report, docids, extension)
                 response.headers.add(
                     "Content-Disposition", content_disposition(filename)
                 )
-                # token is dummy in 15 version
-                # response.set_cookie("fileToken", token)
                 return response
             else:
                 return super(DocxReportController, self).report_download(

@@ -11,7 +11,7 @@ from odoo.tests.common import TransactionCase
 from odoo.tests import tagged
 
 
-def _make_minimal_docx():
+def _make_minimal_docx(body_text="Test"):
     """
     Build a minimal valid DOCX (ZIP) file in memory and return it as base64.
 
@@ -45,7 +45,7 @@ def _make_minimal_docx():
             "word/document.xml",
             '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
-            "<w:body><w:p><w:r><w:t>Test</w:t></w:r></w:p></w:body>"
+            "<w:body><w:p><w:r><w:t>" + body_text + "</w:t></w:r></w:p></w:body>"
             "</w:document>",
         )
         zf.writestr(
@@ -150,3 +150,67 @@ class TestDocxReport(TransactionCase):
             template.report_docx_template,
             "report_docx_template should be set after write()",
         )
+
+    # ------------------------------------------------------------------
+    # Наше (Odoo 20, поверх docx_report_generation)
+    # ------------------------------------------------------------------
+
+    def _template(self, body_text, **vals):
+        return self.env["docx.template"].create(dict({
+            "name": "Проверка рендера",
+            "docx_model_id": self.ir_model.id,
+            "report_docx_template": _make_minimal_docx(body_text),
+        }, **vals))
+
+    def _text(self, stream):
+        from docx import Document
+        return "\n".join(p.text for p in Document(stream).paragraphs)
+
+    def test_render_walks_relations_and_custom_variables(self):
+        """Запись отдаётся в шаблон целиком, кастомная переменная вычисляется."""
+        company = self.env["res.partner"].create({"name": "ПК «Север»", "is_company": True})
+        person = self.env["res.partner"].create({"name": "Иванов", "parent_id": company.id})
+        template = self._template("{{ docs.parent_id.name }} / {{ greeting }}")
+        self.assertEqual(template.report_type, "docx-docx", "тип выводится из формата вывода")
+        self.assertEqual(template.model, "res.partner", "модель выводится из «Модели документа»")
+        self.env["docx.custom.field"].create({
+            "report_id": template.report_id.id,
+            "technical_name": "greeting",
+            "name": "Приветствие",
+            "value_python": "'Здравствуйте, ' + record.name",
+        })
+        stream = template.report_id._render_docx([person.id])
+        self.assertEqual(self._text(stream), "ПК «Север» / Здравствуйте, Иванов")
+
+    def test_broken_custom_variable_is_reported(self):
+        from odoo.exceptions import UserError
+        template = self._template("{{ broken }}")
+        self.env["docx.custom.field"].create({
+            "report_id": template.report_id.id,
+            "technical_name": "broken",
+            "name": "Сломанная",
+            "value_python": "record.no_such_field",
+        })
+        with self.assertRaises(UserError):
+            template.report_id._render_docx([self.env.user.partner_id.id])
+
+    def test_validation_finds_unknown_fields(self):
+        from odoo.exceptions import UserError
+        ok = self._template("{{ record.name }} {{ record.parent_id.city }}")
+        self.assertEqual(ok.action_validate_docx_template()["params"]["type"], "success")
+        bad = self._template("{{ record.no_such_field }}")
+        with self.assertRaises(UserError):
+            bad.action_validate_docx_template()
+
+    def test_shipped_templates_are_loaded(self):
+        for xmlid in ("docx_report.docx_template_contract", "docx_report.docx_template_saleorder"):
+            template = self.env.ref(xmlid)
+            self.assertEqual(template.report_type, "docx-docx")
+            self.assertTrue(template.report_docx_template, xmlid)
+            self.assertTrue(template.report_name, xmlid)
+
+    def test_report_name_resolves_to_docx_report(self):
+        """Маршрут печати находит отчёт шаблона по имени — через наш базовый модуль."""
+        template = self._template("x")
+        found = self.env["ir.actions.report"]._get_report_from_name(template.report_name)
+        self.assertEqual(found, template.report_id)

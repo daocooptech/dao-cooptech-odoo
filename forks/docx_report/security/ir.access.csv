@@ -1,0 +1,4 @@
+id,name,model_id,group_id/id,operation,domain
+access_docx_template_user,docx.template user,docx.template,base.group_user,r,
+access_docx_template_manager,docx.template manager,docx.template,base.group_system,crud,
+access_docx_custom_field_admin,access_docx_custom_field_admin,docx.custom.field,base.group_system,crud,

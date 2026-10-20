@@ -1,15 +1,14 @@
 import re
 import zipfile
-from io import BytesIO
 from base64 import b64decode
-
+from io import BytesIO
 from logging import getLogger
-
-_logger = getLogger(__name__)
-
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+
+_logger = getLogger(__name__)
+
 
 class DocxTemplate(models.Model):
     """
@@ -135,7 +134,9 @@ class DocxTemplate(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            output_type = vals.get("docx_output_type")
+            # Формат по умолчанию тоже задаёт тип: иначе шаблон, созданный
+            # без явного формата (из кода, из данных), остаётся qweb-pdf.
+            output_type = vals.setdefault("docx_output_type", "docx")
             if output_type and not vals.get("report_type"):
                 if output_type == "docx":
                     vals["report_type"] = "docx-docx"
@@ -176,7 +177,9 @@ class DocxTemplate(models.Model):
             raise UserError(_("Заполните поле 'Модель документа'."))
 
         try:
-            raw = b64decode(self.report_docx_template)
+            # Odoo 20: Binary-поле отдаёт BinaryValue (сырые байты), а не base64.
+            tpl = self.report_docx_template
+            raw = tpl.content if hasattr(tpl, "content") else b64decode(tpl)
             zf = zipfile.ZipFile(BytesIO(raw))
         except Exception as e:
             raise UserError(_("Файл шаблона повреждён или не является DOCX: %s") % e)

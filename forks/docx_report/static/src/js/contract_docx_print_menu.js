@@ -59,7 +59,8 @@ patch(FormController.prototype, {
         }
 
         const tplVal = record.data.docx_template_id;
-        const currentTemplateId = tplVal && tplVal[0];
+        // Odoo 20: many2one в record.data — объект {id, display_name}, не пара.
+        const currentTemplateId = tplVal && (tplVal.id ?? tplVal[0]);
         const hasTemplate = !!currentTemplateId;
 
         if (!items.print?.length) {
