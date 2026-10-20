@@ -60,3 +60,9 @@ class TestUpdPool(TestUpdXml):
         group = self.env.ref('rsbu_journal.group_rsbu_journal_manager')
         self.assertIn(group, user.group_ids)
         self.assertIn(company, user.company_ids)
+        # Решение 476: выключили слой — журнал РСБУ снят, компания осталась.
+        company.rsbu_enabled = False
+        self.assertNotIn(group, user.group_ids)
+        self.assertIn(company, user.company_ids)
+        company.rsbu_enabled = True
+        self.assertIn(group, user.group_ids)

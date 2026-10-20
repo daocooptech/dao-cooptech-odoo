@@ -30,6 +30,7 @@ class ResUsers(models.Model):
         # членства (coop_base): в той же транзакции, где полномочие только
         # что сняли, он отдал бы прежнее значение, и компания осталась бы.
         users.sudo().invalidate_recordset(['coop_treasury_partner_ids'])
+        revocable = self._coop_revocable_groups()
         for user in users.sudo():
             grants = self._coop_company_grants(user)
             granted = self.env['res.company'].browse([c.id for c in grants])
@@ -43,10 +44,22 @@ class ResUsers(models.Model):
                 if user.company_id not in wanted:
                     vals['company_id'] = (wanted - coop_companies)[:1].id
             missing = groups - user.group_ids
-            if missing:
-                vals['group_ids'] = [Command.link(g.id) for g in missing]
+            # Снимаются только группы, которые синхронизация считает своими
+            # (решение 476); у администратора — ничего.
+            extra = (user.group_ids & revocable) - groups                 if not user.has_group('base.group_system') else self.env['res.groups']
+            if missing or extra:
+                vals['group_ids'] = [Command.link(g.id) for g in missing]                     + [Command.unlink(g.id) for g in extra]
             if vals:
                 user.write(vals)
+
+    @api.model
+    def _coop_revocable_groups(self):
+        """Группы, которые синхронизация снимает, когда они больше не положены.
+
+        Здесь — никаких: «Basic» и группы CRM бывают выданы и иначе. Модули
+        добавляют свои и зовут super().
+        """
+        return self.env['res.groups']
 
     @api.model
     def _coop_company_grants(self, user):

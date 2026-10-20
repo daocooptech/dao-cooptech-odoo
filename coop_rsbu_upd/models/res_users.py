@@ -19,3 +19,9 @@ class ResUsers(models.Model):
             if company and company.rsbu_enabled:
                 grants[company] = grants.get(company, self.env['res.groups']) | group
         return grants
+
+    @api.model
+    def _coop_revocable_groups(self):
+        """Выключили слой у организации — журнал РСБУ у держателя снимается
+        (решение 476), если слой не включён у другой его организации."""
+        return super()._coop_revocable_groups()             | self.env.ref('rsbu_journal.group_rsbu_journal_manager')
