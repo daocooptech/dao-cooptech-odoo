@@ -24,6 +24,7 @@
 Возвращает ненулевой код, если нашла беду, — чтобы вставать в pre-commit.
 """
 import argparse
+import copy
 import io
 import os
 import re
@@ -88,10 +89,18 @@ def check_duplicate_names(problems):
 
 
 def odoo_templates(odoo_root):
-    """Имя шаблона → разобранный узел, по всем статическим файлам движка."""
-    found = {}
+    """Имя шаблона → разобранный узел, по всем статическим файлам движка.
+
+    Вторым — что расширения движка вставляют в чужие шаблоны: имя
+    шаблона → список вставок, каждая отдельным документом. `mail`,
+    например, ставит в `web.UserMenu` свой `DiscussAvatar` на место
+    картинки, и наш прицел на него в браузере попадает, а в исходнике
+    `web` такого узла нет (задача 299: ворота сочли прицел пустым и
+    остановили выкатку).
+    """
+    found, inserted = {}, {}
     if not os.path.isdir(odoo_root):
-        return found
+        return found, inserted
     for root, dirs, files in os.walk(odoo_root):
         dirs[:] = [d for d in dirs if d not in ('.git', '__pycache__', 'node_modules')]
         if 'static' not in root:
@@ -105,6 +114,17 @@ def odoo_templates(odoo_root):
             except Exception:
                 continue
             for node in tree.getroot():
+                target = node.get('t-inherit')
+                if target and node.get('t-inherit-mode') == 'extension':
+                    for op in node.iter('xpath'):
+                        if op.get('position') == 'attributes' or not len(op):
+                            continue
+                        # Свой документ на вставку — по той же причине,
+                        # что и у шаблонов ниже.
+                        piece = etree.Element('t')
+                        piece.extend(copy.deepcopy(child) for child in op)
+                        inserted.setdefault(target, []).append(
+                            etree.ElementTree(piece).getroot())
                 tname = node.get('t-name')
                 if tname and tname not in found:
                     # Каждый шаблон — в свой документ.
@@ -117,7 +137,7 @@ def odoo_templates(odoo_root):
                     # отдельно. Проверка обязана повторять его устройство,
                     # иначе меряет не то.
                     found[tname] = etree.fromstring(etree.tostring(node))
-    return found
+    return found, inserted
 
 
 HASCLASS = re.compile(r"hasclass\(([^)]*)\)")
@@ -141,7 +161,7 @@ def expand_hasclass(expr):
 
 def check_xpaths(problems, odoo_root, ours):
     """Прицел наследования обязан попадать ровно в один узел."""
-    base = odoo_templates(odoo_root)
+    base, inserted = odoo_templates(odoo_root)
     if not base:
         problems.append(
             'Движок не найден в %s — прицелы xpath не проверены. '
@@ -171,6 +191,11 @@ def check_xpaths(problems, odoo_root, ours):
                     continue
                 try:
                     hits = base_node.xpath(expand_hasclass(expr))
+                    if not hits:
+                        # В исходнике нет — может, узел вставило расширение
+                        # движка, от которого наш модуль зависит.
+                        hits = [hit for piece in inserted.get(target, ())
+                                for hit in piece.xpath(expand_hasclass(expr))]
                 except Exception as error:
                     problems.append('%s: прицел «%s» не разбирается: %s'
                                     % (path, expr, error))
