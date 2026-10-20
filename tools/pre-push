@@ -1,0 +1,41 @@
+#!/bin/sh
+# Ворота MVP до пуша: тема, виды, подстановки.
+#
+# Сервер при выкатке (`coop-update.service`) гоняет те же три проверки и
+# отменяет выкатку на первой беде. 20.10.2026 так остановилась выкатка
+# задачи 299: правка была проверена тестами и в браузере, а ворота забыли
+# — и узнали об этом через пять минут ожидания на боевой. Здесь они
+# занимают секунды.
+#
+# Ставится копированием: `cp tools/pre-push "$(git rev-parse --git-path hooks)/pre-push"`.
+# Каталог хуков общий для всех рабочих копий клона (линии 19 и 20),
+# поэтому проверяется та копия, из которой пушат, а копия без ворот
+# пропускается.
+# Обойти разово (только осознанно): `git push --no-verify`.
+
+top=$(git rev-parse --show-toplevel) || exit 1
+[ -f "$top/tools/check_theme.py" ] || exit 0
+
+py=python
+command -v "$py" >/dev/null 2>&1 || py=python3
+export PYTHONIOENCODING=utf-8
+
+failed=0
+for gate in check_theme check_views check_formats; do
+    [ -f "$top/tools/$gate.py" ] || continue
+    out=$("$py" "$top/tools/$gate.py" 2>&1)
+    code=$?
+    if [ $code -ne 0 ]; then
+        echo "== $gate: не прошёл (код $code)"
+        echo "$out"
+        failed=1
+    else
+        echo "== $gate: $(printf '%s\n' "$out" | tail -1)"
+    fi
+done
+
+if [ $failed -ne 0 ]; then
+    echo "== Пуш отменён: сервер всё равно остановил бы выкатку."
+    exit 1
+fi
+exit 0
