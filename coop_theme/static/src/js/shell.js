@@ -50,7 +50,14 @@ export class CoopTabs extends Component {
         // первый расчёт вкладки «Избранное» не находил действия — вкладка
         // не появлялась вовсе (найдено глазами 24 сентября 2026). Считаем
         // ещё раз, когда экран дорисован, и когда сама строка на месте.
-        useBus(this.env.bus, "ACTION_MANAGER:UI-UPDATED", () => this.refreshFav());
+        // Пересчёт и после смены экрана: на «UPDATE» текущим у службы
+        // действий ещё числится прежний экран, а у формы из серверного
+        // действия («Настройки») своего номера нет — шапка оставалась от
+        // прежнего экрана (решение 479).
+        useBus(this.env.bus, "ACTION_MANAGER:UI-UPDATED", () => {
+            this.refresh();
+            this.refreshFav();
+        });
         onMounted(() => this.refreshFav());
         this.lastActionId = null;
         this.refresh();
@@ -156,10 +163,16 @@ export class CoopTabs extends Component {
         // Устаревшее меню лечится обычным обновлением страницы — ценой
         // одного нажатия у одного участника один раз. Поломка переписки
         // стоит дороже.
-        const appId = own ? own.appID : this.menus.getCurrentApp()?.id;
+        // Экран без своего пункта, открытый с начала пути (боковая панель
+        // сбрасывает крошки), разделу не принадлежит: «текущее приложение»
+        // движка — то, где человек был раньше, и «Настройки» стояли под
+        // шапкой «Сделки / Мои сделки» (решение 479).
+        const nested = (this.env.config?.breadcrumbs?.length || 0) > 1;
+        const appId = own ? own.appID : nested ? this.menus.getCurrentApp()?.id : null;
         if (!appId) {
             this.state.tabs = [];
             this.state.section = null;
+            this.state.known = false;
             return;
         }
         this.state.section = own ? this.menus.getMenu(appId)?.name || null : null;

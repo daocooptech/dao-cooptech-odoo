@@ -397,7 +397,7 @@
     <t t-set="title">О платформе — DAO COOPTECH</t>
     <t t-call="coop_website.coop_legal_layout">
       <h1>О платформе</h1>
-      <p>Платформа работает на программе, построенной на основе Odoo 19 Community Edition,
+      <p>Платформа работает на программе, построенной на основе Odoo <t t-out="sw['series']"/> Community Edition,
         © 2004–2015 Odoo S.A. и участники, лицензия GNU LGPL v3.
         <t t-if="sw['modified']">Сборка изменена ДАО КООПТЕХ: удалены обращения к службам Odoo S.A. и модули,
           которые от них зависят; перечень изменений — в файле NOTICE.coop.</t></p>

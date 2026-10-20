@@ -15,7 +15,7 @@ import base64
 import logging
 import os
 
-from odoo import api, models
+from odoo import api, models, release
 
 _logger = logging.getLogger(__name__)
 
@@ -166,9 +166,11 @@ class CoopWebsiteLanding(models.AbstractModel):
         Берётся из deploy/engine.ref — того же файла, по которому выкатка
         ставит движок, — а не пишется руками: метка, прописанная в шаблоне,
         разошлась бы с тем, что работает. Формат файла: `<метка> <sha>`.
-        Пока файла нет, работает неизменённый Odoo 19.0, и страница честно
-        ведёт на его коммит.
+        Пока файла нет, работает неизменённый Odoo, и страница честно
+        ведёт на его коммит. Серия («Odoo 20») — из самого движка, не из
+        шаблона (решение 479: на странице стояло «19» при движке 20).
         """
+        series = '%s' % release.version_info[0]
         ref = os.path.join(os.path.dirname(os.path.dirname(HERE)), 'deploy', 'engine.ref')
         tag, sha = '', 'df0149e3'
         if os.path.exists(ref):
@@ -184,14 +186,16 @@ class CoopWebsiteLanding(models.AbstractModel):
                 'mirror_url': '/src/odoo-%s.tar.gz' % tag,
                 'notice_url': 'https://github.com/daocooptech/odoo/blob/%s/NOTICE.coop' % tag,
                 'sha': sha,
+                'series': series,
             }
         return {
             'modified': False,
-            'label': '19.0 @ %s' % sha,
+            'label': '%s.0 @ %s' % (series, sha),
             'source_url': 'https://github.com/odoo/odoo/tree/%s' % sha,
             'mirror_url': '',
             'notice_url': '',
             'sha': sha,
+            'series': series,
         }
 
     @api.model
