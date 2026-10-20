@@ -2047,6 +2047,12 @@ body.o_dark_mode .o_coop_loader_mark {
 // открытой — с бирюзовой рамкой (владелец 21.10, снимки). Теперь она как
 // соседние значки шапки: прозрачная, значок графитовый, под курсором и
 // открытой — подложка `coop-surface`.
+// Кнопка стоит в ряду шапки сразу за знаком и прилипала к нему (0 точек,
+// владелец 21.10).
+.o_debug_manager {
+  margin-left: 12px;
+}
+
 .o_debug_manager > .dropdown-toggle {
   display: inline-flex;
   align-items: center;
