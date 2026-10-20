@@ -98,6 +98,36 @@ class TestFaceMenu(TransactionCase):
         self.waiting.with_user(self.head).action_coop_disconnect()
         self.assertNotIn(self.waiting.name, self._ext_labels(self.seller))
 
+    def test_org_access_tab_instead_of_org_menu(self):
+        """Экрана «Меню организации» нет: «Доступ у» — во вкладке «Настроек»
+        «Права доступа», «Настроить меню» от организации — только разделы
+        (решение 481 п. 5)."""
+        self.assertFalse(self.env.ref('coop_extensions.action_coop_org_menu',
+                                      raise_if_not_found=False))
+        self.head.coop_acting_as_id = self.org
+        boot = self.env['coop.shell'].with_user(self.head).boot()
+        self.assertEqual(boot['menuSettings'], self.env.ref(
+            'coop_extensions.action_coop_sidebar_sections').id)
+        Conn = self.env['coop.extension.connection']
+        if not self.waiting:
+            return
+        self.waiting.with_user(self.head).action_coop_connect()
+        action = Conn.with_user(self.head).action_coop_open_access()
+        rows = Conn.with_user(self.head).search(action['domain'])
+        self.assertEqual(rows.extension_id, self.waiting)
+        self.assertEqual(rows.access_user_ids, self.head)
+        self.assertTrue(rows.coop_can_manage)
+        # Продавец видит, но отмечать людей не вправе.
+        self.assertFalse(rows.with_user(self.seller).coop_can_manage)
+        with self.assertRaises(UserError):
+            rows.with_user(self.seller).access_user_ids = [(4, self.seller.id)]
+        rows.with_user(self.head).access_user_ids = [(4, self.seller.id)]
+        # От себя продавец видит модуль организации, открытый ему.
+        self.seller.coop_acting_as_id = False
+        mine = Conn.with_user(self.seller).action_coop_open_access()
+        self.assertTrue(mine['context']['coop_access_person'])
+        self.assertIn(rows, Conn.with_user(self.seller).search(mine['domain']))
+
     def test_no_crm_in_person_menu(self):
         if 'crm.lead' not in self.env:
             self.skipTest('нет crm')

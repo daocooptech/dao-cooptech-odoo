@@ -17,14 +17,16 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.4.0',
+    'version': '20.0.1.5.0',
     'license': 'LGPL-3',
     # coop_theme — панель отбора каталога: вид расширений берёт её
     # поведение и компонент, а не только css-класс.
     # website — ради порядка загрузки: в движке 20 поле вида `visibility`
     # из website обязательное, и новый вид этого модуля, заведённый при
     # `-u` раньше website, падал на NOT NULL (18.10.2026, меню организации).
-    'depends': ['base', 'mail', 'website', 'coop_base', 'coop_theme'],
+    # coop_settings — вкладка «Права доступа» стоит среди его вкладок
+    # (решение 481 п. 5).
+    'depends': ['base', 'mail', 'website', 'coop_base', 'coop_theme', 'coop_settings'],
     'data': [
         'views/coop_extension_views.xml',
         'views/coop_extension_connection_views.xml',

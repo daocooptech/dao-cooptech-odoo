@@ -324,6 +324,7 @@ const SUBNAV_EXACT = {
     "Подходит мне": "target-arrow",
     "Портфель": "briefcase",
     "Поставки": "truck-delivery",
+    "Права доступа": "user-check",
     "Приватность": "lock",
     "Прогноз и план": "target-arrow",
     "Сделки": "heart-handshake",

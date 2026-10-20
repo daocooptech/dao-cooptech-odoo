@@ -1,39 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
   <!--
-    Меню организации (решение 468): общее для всех её представителей,
-    ведёт руководитель. Сюда ведёт «Настроить меню», когда человек
-    действует от имени организации (`coop.shell.boot`, `menuSettings`).
-    Переставить — перетаскиванием, убрать — удалением строки; права
-    проверяет модель (`_coop_check_manage`).
+    «Права доступа» — вкладка «Настроек» (решение 481 п. 5). До 20.10.2026
+    был отдельный экран «Меню организации» (`org-menu`); владелец: «меню
+    вообще надо убрать, подключаем модуль в расширениях, а в настройках уже
+    вкладки по темам, в том числе по правам доступа». Подключить и убрать —
+    в каталоге расширений, кому из организации открыт модуль коробки — здесь.
+    Отметить людей может только руководитель (`_coop_check_manage`).
   -->
-  <record id="view_coop_extension_connection_list" model="ir.ui.view">
-    <field name="name">coop.extension.connection.list</field>
+  <record id="view_coop_extension_access_list" model="ir.ui.view">
+    <field name="name">coop.extension.connection.access.list</field>
     <field name="model">coop.extension.connection</field>
     <field name="arch" type="xml">
-      <list string="Меню организации" create="false" editable="bottom">
-        <field name="sequence" widget="handle"/>
-        <field name="extension_id" readonly="1" string="Расширение"/>
+      <list string="Права доступа" create="false" delete="false" editable="bottom">
+        <field name="partner_id" string="Организация" readonly="1"
+               column_invisible="not context.get('coop_access_person')"/>
+        <field name="extension_id" readonly="1" string="Модуль"/>
         <field name="state" widget="badge" decoration-success="state == 'on'"
                decoration-warning="state == 'installing'"/>
-        <field name="access_user_ids" widget="many2many_tags" optional="show"
-               options="{'no_create': True}"
+        <field name="access_user_ids" widget="many2many_tags"
+               options="{'no_create': True}" readonly="not coop_can_manage"
                domain="[('id', 'in', coop_member_user_ids)]"/>
         <field name="coop_member_user_ids" column_invisible="1"/>
+        <field name="coop_can_manage" column_invisible="1"/>
         <field name="user_id" readonly="1" optional="show"/>
       </list>
     </field>
   </record>
 
-  <record id="action_coop_org_menu" model="ir.actions.act_window">
-    <field name="name">Меню организации</field>
-    <field name="path">org-menu</field>
-    <field name="res_model">coop.extension.connection</field>
+  <record id="action_coop_settings_access" model="ir.actions.server">
+    <field name="name">Права доступа</field>
+    <field name="path">my-access</field>
+    <field name="model_id" ref="base.model_res_partner"/>
+    <field name="state">code</field>
+    <field name="code">action = env['coop.extension.connection'].action_coop_open_access()</field>
+  </record>
+
+  <menuitem id="menu_coop_settings_access" name="Права доступа"
+            parent="coop_settings.menu_coop_settings_root"
+            action="action_coop_settings_access" sequence="45"/>
+
+  <!--
+    «Настроить меню» от имени организации: только порядок разделов
+    платформы — он свой у каждого и от имени организации тот же.
+    Расширения организации подключают и убирают в каталоге; личные
+    расширения здесь не показываются, иначе руководитель правил бы своё
+    меню, думая, что правит общее (`coop.shell.boot`, `menuSettings`).
+  -->
+  <record id="action_coop_sidebar_sections" model="ir.actions.act_window">
+    <field name="name">Настройка меню</field>
+    <field name="res_model">coop.sidebar.item</field>
     <field name="view_mode">list</field>
-    <field name="domain">[('coop_my_face', '=', True)]</field>
+    <field name="domain">[('section', '=', 'main')]</field>
+    <field name="context">{'coop_create_label': 'Добавить расширение', 'coop_create_action': 'coop_extensions.action_coop_extension_catalog'}</field>
     <field name="help" type="html">
-      <p class="o_view_nocontent_smiling_face">В меню организации пока нет расширений</p>
-      <p>Подключите их в каталоге расширений кнопкой «Подключить».</p>
+      <p class="o_view_nocontent_smiling_face">Меню собирается при первом входе</p>
+      <p>
+        Разделы платформы можно переставить местами. Расширения организации
+        подключают и убирают в каталоге расширений, а кому они открыты —
+        во вкладке «Права доступа» в настройках.
+      </p>
     </field>
   </record>
 </odoo>

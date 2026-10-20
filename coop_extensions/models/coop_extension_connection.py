@@ -62,6 +62,9 @@ class CoopExtensionConnection(models.Model):
     coop_member_user_ids = fields.Many2many(
         'res.users', compute='_compute_coop_member_user_ids',
         help='Из кого выбирать «Доступ у»: действующие члены организации.')
+    coop_can_manage = fields.Boolean(
+        compute='_compute_coop_can_manage',
+        help='Отмечать «Доступ у» вправе руководитель организации.')
     name = fields.Char(related='extension_id.name', string='Название')
     state = fields.Selection(
         [('on', 'Работает'), ('installing', 'Устанавливается')],
@@ -103,6 +106,51 @@ class CoopExtensionConnection(models.Model):
             record.coop_member_user_ids = Membership.search([
                 ('organization_id', '=', record.partner_id.id), ('state', '=', 'active'),
             ]).partner_id.user_ids.filtered(lambda u: not u.share)
+
+    @api.depends_context('uid')
+    def _compute_coop_can_manage(self):
+        user = self.env.user
+        admin = user.has_group('base.group_system')
+        for record in self:
+            record.coop_can_manage = admin or record.partner_id == user.partner_id \
+                or user.coop_has_power('sign', record.partner_id)
+
+    @api.model
+    def action_coop_open_access(self):
+        """Вкладка «Права доступа» в «Настройках» (решение 481 п. 5).
+
+        От имени организации — её модули коробки и кому они открыты (у
+        своих расширений платформы групп нет, отмечать некого). От себя —
+        модули организаций, открытые этому человеку: вкладки «Настроек» у
+        обоих лиц одни и те же.
+        """
+        user = self.env.user
+        face = self._coop_current_face()
+        person = face == user.partner_id
+        if person:
+            domain = [('access_user_ids', 'in', user.id),
+                      ('partner_id', '!=', user.partner_id.id)]
+            empty = _('Вам пока не открыт ни один модуль организаций')
+            hint = _('Доступ к модулю организации даёт её руководитель — во '
+                     'вкладке «Права доступа», действуя от имени организации.')
+        else:
+            domain = [('partner_id', '=', face.id),
+                      ('extension_id.source', '!=', 'cooptech')]
+            empty = _('Организация пока не подключала модулей')
+            hint = _('Подключите модуль в каталоге расширений — здесь появится, '
+                     'кому из организации он открыт.')
+        view = self.env.ref('coop_extensions.view_coop_extension_access_list')
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Права доступа'),
+            'res_model': 'coop.extension.connection',
+            'view_mode': 'list',
+            'views': [(view.id, 'list')],
+            'domain': domain,
+            'target': 'current',
+            'context': {'coop_settings': True, 'coop_access_person': person},
+            'help': '<p class="o_view_nocontent_smiling_face">%s</p><p>%s</p>' % (empty, hint),
+        }
 
     def _coop_check_manage(self):
         """Менять меню организации вправе только её руководитель.
