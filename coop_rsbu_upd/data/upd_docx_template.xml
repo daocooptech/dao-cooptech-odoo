@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Печатный УПД (DOCX) из документа РСБУ-слоя «Счёт-фактура»
+             (rsbu.invoice, отгрузочный). Источник данных — Вариант B:
+             счёт-фактурная часть из rsbu.invoice, товарные позиции из
+             инвойса-источника, пересчёт НДС по ставке РСБУ. Сам .docx —
+             в модуле docx_report (как и прежний шаблон УПД). -->
+        <record id="docx_template_rsbu_upd" model="docx.template">
+            <field name="name">УПД (РСБУ) DOCX</field>
+            <field name="report_type">docx-docx</field>
+            <field name="model">rsbu.realization</field>
+            <field name="docx_output_type">docx</field>
+            <field name="docx_model_id"
+                   search="[('model','=','rsbu.realization')]" model="ir.model"/>
+            <field name="global_template" eval="True"/>
+            <field name="filename_pattern">'UPD_' + (object.name or '').replace('/', '_')</field>
+            <field name="report_docx_template" type="base64"
+                   file="docx_report/static/src/docx/report_rsbu_upd_templates.docx"/>
+            <field name="report_docx_template_filename">report_rsbu_upd_templates.docx</field>
+            <field name="docx_custom_field_ids" eval="[
+                (5, 0, 0),
+                (0, 0, {'technical_name': 'seller', 'name': 'Продавец',
+                        'value_python': 'record.upd_docx_seller()'}),
+                (0, 0, {'technical_name': 'buyer', 'name': 'Покупатель',
+                        'value_python': 'record.upd_docx_buyer()'}),
+                (0, 0, {'technical_name': 'totals', 'name': 'Итоги',
+                        'value_python': 'record.upd_docx_totals()'}),
+                (0, 0, {'technical_name': 'signer', 'name': 'Подписант',
+                        'value_python': 'record.upd_docx_signer()'}),
+                (0, 0, {'technical_name': 'transferer', 'name': 'Передал',
+                        'value_python': 'record.upd_docx_transferer()'}),
+                (0, 0, {'technical_name': 'receiver', 'name': 'Принял',
+                        'value_python': 'record.upd_docx_receiver()'}),
+            ]"/>
+        </record>
+
+        <!-- УПД без печатей (DOCX, РСБУ). -->
+        <record id="docx_template_rsbu_updn" model="docx.template">
+            <field name="name">УПД без печатей (РСБУ) DOCX</field>
+            <field name="report_type">docx-docx</field>
+            <field name="model">rsbu.realization</field>
+            <field name="docx_output_type">docx</field>
+            <field name="docx_model_id"
+                   search="[('model','=','rsbu.realization')]" model="ir.model"/>
+            <field name="global_template" eval="True"/>
+            <field name="filename_pattern">'UPDn_' + (object.name or '').replace('/', '_')</field>
+            <field name="report_docx_template" type="base64"
+                   file="docx_report/static/src/docx/report_rsbu_updn_templates.docx"/>
+            <field name="report_docx_template_filename">report_rsbu_updn_templates.docx</field>
+            <field name="docx_custom_field_ids" eval="[
+                (5, 0, 0),
+                (0, 0, {'technical_name': 'seller', 'name': 'Продавец',
+                        'value_python': 'record.upd_docx_seller()'}),
+                (0, 0, {'technical_name': 'buyer', 'name': 'Покупатель',
+                        'value_python': 'record.upd_docx_buyer()'}),
+                (0, 0, {'technical_name': 'totals', 'name': 'Итоги',
+                        'value_python': 'record.upd_docx_totals()'}),
+                (0, 0, {'technical_name': 'signer', 'name': 'Подписант',
+                        'value_python': 'record.upd_docx_signer()'}),
+                (0, 0, {'technical_name': 'transferer', 'name': 'Передал',
+                        'value_python': 'record.upd_docx_transferer()'}),
+                (0, 0, {'technical_name': 'receiver', 'name': 'Принял',
+                        'value_python': 'record.upd_docx_receiver()'}),
+            ]"/>
+        </record>
+    </data>
+</odoo>
