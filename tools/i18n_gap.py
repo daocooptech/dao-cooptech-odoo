@@ -121,6 +121,13 @@ def quote(text):
     return '"%s"' % text.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n').replace('\t', '\\t')
 
 
+def unquote(chunk):
+    chunk = chunk.strip()
+    if len(chunk) < 2 or chunk[0] != '"' or chunk[-1] != '"':
+        return chunk
+    return re.sub(r'\\(.)', lambda m: {'n': '\n', 't': '\t'}.get(m.group(1), m.group(1)), chunk[1:-1])
+
+
 def mod_of(path):
     return os.path.basename(os.path.dirname(os.path.dirname(path)))
 
@@ -163,21 +170,33 @@ def merge(batchfile, donefile):
     written = 0
     for path, entries in by_file.items():
         lines = open(path, encoding='utf-8').read().split('\n')
-        for start, forms in entries.items():
+        # Снизу вверх: многострочный msgstr сжимается в одну строку, и номера
+        # строк у записей ниже него сдвигаются (20.10.2026 — IndexError).
+        for start, forms in sorted(entries.items(), reverse=True):
             i = start - 1
             # От строки msgid вниз до msgstr; пустой — «msgstr ""» без продолжения.
             while i < len(lines) and not lines[i].startswith('msgstr'):
                 i += 1
+            if i >= len(lines):
+                rejected.append(('%s:%d' % (mod_of(path), start), 'msgstr не найден'))
+                continue
             for n, form in enumerate(forms):
                 head = 'msgstr[%d] ' % n if lines[i].startswith('msgstr[') else 'msgstr '
-                # Пустой msgstr или ровно английский оригинал одной строкой.
+                # Пустой msgstr или ровно английский оригинал — одной строкой
+                # или в несколько (`msgstr ""` и строки-продолжения).
                 item = batch['%s#%d' % (mod_of(path), start)]
-                fits = lines[i] in (head + '""', head + quote(item['src']))
-                if not fits or (i + 1 < len(lines) and lines[i + 1].startswith('"')):
+                end = i + 1
+                while end < len(lines) and lines[end].startswith('"'):
+                    end += 1
+                have = ''.join(unquote(chunk) for chunk in
+                               [lines[i][len(head):]] + lines[i + 1:end])
+                # `cur` — известный неудачный перевод (полуанглийский), его
+                # тоже можно заменить; любой другой готовый перевод не трогаем.
+                if have not in ('', item['src'], item.get('cur')):
                     rejected.append(('%s:%d' % (os.path.basename(os.path.dirname(os.path.dirname(path))), start),
                                      'msgstr уже не пуст'))
                     break
-                lines[i] = head + quote(form)
+                lines[i:end] = [head + quote(form)]
                 i += 1
             else:
                 written += 1

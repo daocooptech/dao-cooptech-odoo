@@ -26,6 +26,7 @@
         'views/coop_contact_views.xml',
         'views/coop_legal.xml',
         'views/coop_signup.xml',
+        'views/coop_page_titles.xml',
         'data/coop_website_lang.xml',
         'data/coop_website_setup.xml',
         'security/ir.access.csv',

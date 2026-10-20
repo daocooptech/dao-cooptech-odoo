@@ -215,6 +215,14 @@
     <xpath expr="//nav[hasclass('o_cp_switch_buttons')]//t[@t-foreach='this.env.config.viewSwitcherEntries']" position="attributes">
       <attribute name="t-foreach">this.coopViewEntries</attribute>
     </xpath>
+    <!--
+      Подпись кнопки вида для экранной читалки движок склеивает по-английски:
+      `view.name + ' View'` → «Список View» (20.10.2026). Имя вида уже
+      переведено и само по себе понятно.
+    -->
+    <xpath expr="//button[hasclass('o_switch_view')]" position="attributes">
+      <attribute name="t-att-aria-label">view.name</attribute>
+    </xpath>
   </t>
 
   <!--

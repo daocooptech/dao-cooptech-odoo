@@ -57,19 +57,19 @@ msgstr "Код страны"
 #: model:ir.model.fields,field_description:l10n_ru_banks.field_res_bank_corracc__create_uid
 #: model:ir.model.fields,field_description:l10n_ru_banks.field_update_ru_banks_wizard__create_uid
 msgid "Created by"
-msgstr ""
+msgstr "Создал"
 
 #. module: l10n_ru_banks
 #: model:ir.model.fields,field_description:l10n_ru_banks.field_res_bank_corracc__create_date
 #: model:ir.model.fields,field_description:l10n_ru_banks.field_update_ru_banks_wizard__create_date
 msgid "Created on"
-msgstr ""
+msgstr "Создано"
 
 #. module: l10n_ru_banks
 #: model:ir.model.fields,field_description:l10n_ru_banks.field_res_bank_corracc__display_name
 #: model:ir.model.fields,field_description:l10n_ru_banks.field_update_ru_banks_wizard__display_name
 msgid "Display Name"
-msgstr ""
+msgstr "Отображаемое имя"
 
 #. module: l10n_ru_banks
 #. odoo-python
@@ -132,13 +132,13 @@ msgstr "В загруженном файле обнаружена ошибка �
 #: model:ir.model.fields,field_description:l10n_ru_banks.field_res_bank_corracc__write_uid
 #: model:ir.model.fields,field_description:l10n_ru_banks.field_update_ru_banks_wizard__write_uid
 msgid "Last Updated by"
-msgstr ""
+msgstr "Последний раз изменил"
 
 #. module: l10n_ru_banks
 #: model:ir.model.fields,field_description:l10n_ru_banks.field_res_bank_corracc__write_date
 #: model:ir.model.fields,field_description:l10n_ru_banks.field_update_ru_banks_wizard__write_date
 msgid "Last Updated on"
-msgstr ""
+msgstr "Последнее изменение"
 
 #. module: l10n_ru_banks
 #. odoo-python
@@ -176,7 +176,7 @@ msgstr "Обновить"
 #. module: l10n_ru_banks
 #: model:ir.actions.server,name:l10n_ru_banks.ir_cron_action_update_ru_banks_ir_actions_server
 msgid "Update Banks Russian"
-msgstr ""
+msgstr "Обновить банки России"
 
 #. module: l10n_ru_banks
 #: model:ir.model,name:l10n_ru_banks.model_update_ru_banks_wizard

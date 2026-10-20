@@ -42,7 +42,7 @@ msgid ""
 "<span invisible=\"state != 'draft' or name != '/'\">\n"
 "                                Draft\n"
 "                            </span>"
-msgstr ""
+msgstr "<span invisible=\"state != 'draft' or name != '/'\">\n                                Черновик\n                            </span>"
 
 #. module: l10n_ru_advance_payments
 #: model_terms:ir.ui.view,arch_db:l10n_ru_advance_payments.template_order_prepaid_invoice_body

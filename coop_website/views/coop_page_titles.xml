@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Заголовок вкладки на страницах сайта собирается из имени вида
+       (`website.layout`: `main_object.sudo().name`), а имя вида не
+       переводится — отсюда «Login | ДАО КООПТЕХ» и «My Portal | …»
+       (20.10.2026). Своё `additional_title` до вызова раскладки
+       заменяет имя вида. -->
+  <template id="coop_title_login" inherit_id="web.login" priority="99">
+    <xpath expr="(//t[@t-set='head'])[1]" position="before">
+      <t t-set="additional_title">Вход</t>
+    </xpath>
+  </template>
+
+  <template id="coop_title_signup" inherit_id="auth_signup.signup" priority="99">
+    <xpath expr="//t[@t-call='web.login_layout']" position="before">
+      <t t-set="additional_title">Регистрация</t>
+    </xpath>
+  </template>
+
+  <template id="coop_title_reset_password" inherit_id="auth_signup.reset_password" priority="99">
+    <xpath expr="//t[@t-call='web.login_layout']" position="before">
+      <t t-set="additional_title">Сброс пароля</t>
+    </xpath>
+  </template>
+
+  <template id="coop_title_portal_home" inherit_id="portal.portal_my_home" priority="99">
+    <xpath expr="//t[@t-call='portal.portal_layout']" position="before">
+      <t t-set="additional_title">Личный кабинет</t>
+    </xpath>
+  </template>
+</odoo>

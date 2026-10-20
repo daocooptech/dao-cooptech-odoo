@@ -313,7 +313,7 @@ msgstr ""
 #. module: custom_report_field
 #: model:ir.model.fields,help:custom_report_field.field_custom_report_field__visible
 msgid "To show this field in fields list in verification wizard."
-msgstr ""
+msgstr "Показывать это поле в списке полей в мастере проверки."
 
 #. module: custom_report_field
 #: model:ir.model.fields,field_description:custom_report_field.field_ir_actions_report__validate_custom_report_field

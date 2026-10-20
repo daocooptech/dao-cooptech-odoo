@@ -108,7 +108,7 @@ msgstr "Печать"
 #. module: l10n_ru_doc
 #: model:ir.model.fields,help:l10n_ru_doc.field_res_company__print_anywhere
 msgid "Uncheck this, if you want add Facsimile and Stamp only in email."
-msgstr "Снимите отметку, если хотите добавлять подписи и печать только в email."
+msgstr "Снимите отметку, если хотите добавлять подписи и печать только в сообщения эл. почты."
 
 #. module: l10n_ru_doc
 #: model:ir.actions.report,name:l10n_ru_doc.report_account_invoice_upd

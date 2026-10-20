@@ -38,17 +38,17 @@ msgstr "Контакт"
 #. module: dadata_connector
 #: model:ir.model.fields,field_description:dadata_connector.field_res_partner_auto_data_wizard__create_uid
 msgid "Created by"
-msgstr ""
+msgstr "Создал"
 
 #. module: dadata_connector
 #: model:ir.model.fields,field_description:dadata_connector.field_res_partner_auto_data_wizard__create_date
 msgid "Created on"
-msgstr ""
+msgstr "Создано"
 
 #. module: dadata_connector
 #: model:ir.model.fields,field_description:dadata_connector.field_res_config_settings__dadata_token
 msgid "DaData token"
-msgstr ""
+msgstr "Токен DaData"
 
 #. module: dadata_connector
 #. odoo-javascript
@@ -61,7 +61,7 @@ msgstr "Данные обновлены."
 #. module: dadata_connector
 #: model:ir.model.fields,field_description:dadata_connector.field_res_partner_auto_data_wizard__display_name
 msgid "Display Name"
-msgstr ""
+msgstr "Отображаемое имя"
 
 #. module: dadata_connector
 #. odoo-python
@@ -98,7 +98,7 @@ msgstr "ИНН"
 #. module: dadata_connector
 #: model:ir.model.fields,help:dadata_connector.field_res_partner_auto_data_wizard__vat
 msgid "Identification Number for selected type"
-msgstr ""
+msgstr "Идентификационный номер для выбранного типа"
 
 #. module: dadata_connector
 #: model:ir.model.fields.selection,name:dadata_connector.selection__res_partner_auto_data_wizard__organization_type__individual
@@ -108,17 +108,17 @@ msgstr "Индивидуальный предприниматель"
 #. module: dadata_connector
 #: model:ir.model.fields,field_description:dadata_connector.field_res_partner_auto_data_wizard____last_update
 msgid "Last Modified on"
-msgstr ""
+msgstr "Дата последнего изменения"
 
 #. module: dadata_connector
 #: model:ir.model.fields,field_description:dadata_connector.field_res_partner_auto_data_wizard__write_uid
 msgid "Last Updated by"
-msgstr ""
+msgstr "Последний раз изменил"
 
 #. module: dadata_connector
 #: model:ir.model.fields,field_description:dadata_connector.field_res_partner_auto_data_wizard__write_date
 msgid "Last Updated on"
-msgstr ""
+msgstr "Последнее изменение"
 
 #. module: dadata_connector
 #: model:ir.model.fields.selection,name:dadata_connector.selection__res_partner_auto_data_wizard__organization_type__legal

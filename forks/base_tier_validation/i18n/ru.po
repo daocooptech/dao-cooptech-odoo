@@ -9,17 +9,12 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
 
 #. module: base_tier_validation
-#: model:ir.actions.act_window,name:base_tier_validation.tier_definition_action
-#: model:ir.model,name:base_tier_validation.model_tier_definition
-#: model:ir.ui.menu,name:base_tier_validation.menu_tier_definition
-#: model_terms:ir.ui.view,arch_db:base_tier_validation.tier_definition_view_form
+#: model:ir.actions.act_window,name:base_tier_validation.tier_definition_action model:ir.model,name:base_tier_validation.model_tier_definition model:ir.ui.menu,name:base_tier_validation.menu_tier_definition model_terms:ir.ui.view,arch_db:base_tier_validation.tier_definition_view_form
 msgid "Tier Definition"
 msgstr "Уровни согласования"
 
 #. module: base_tier_validation
-#: model:ir.actions.act_window,name:base_tier_validation.tier_validation_exception_action
-#: model:ir.ui.menu,name:base_tier_validation.menu_tier_validation_exception
-#: model_terms:ir.ui.view,arch_db:base_tier_validation.tier_validation_exception_form
+#: model:ir.actions.act_window,name:base_tier_validation.tier_validation_exception_action model:ir.ui.menu,name:base_tier_validation.menu_tier_validation_exception model_terms:ir.ui.view,arch_db:base_tier_validation.tier_validation_exception_form
 msgid "Tier Validation Exception"
 msgstr "Исключения согласования"
 
@@ -27,3 +22,774 @@ msgstr "Исключения согласования"
 #: model:ir.ui.menu,name:base_tier_validation.menu_tier_confirmation
 msgid "Tier Validations"
 msgstr "Многоуровневые согласования"
+
+#. module: base_tier_validation
+#: model_terms:ir.ui.view,arch_db:base_tier_validation.tier_validation_label
+msgid ""
+"<i class=\"fa fa-lg fa-info-circle\"/>\n"
+"                This Record needs to be\n"
+"                validated."
+msgstr "<i class=\"fa fa-lg fa-info-circle\"/>\n                Эту запись необходимо\n                утвердить."
+
+#. module: base_tier_validation
+#: model_terms:ir.ui.view,arch_db:base_tier_validation.tier_validation_label
+msgid ""
+"<i class=\"fa fa-lg fa-thumbs-down\"/>\n"
+"                Operation has been\n"
+"                <b>rejected</b>\n"
+"                ."
+msgstr "<i class=\"fa fa-lg fa-thumbs-down\"/>\n                Операция\n                <b>отклонена</b>\n                ."
+
+#. module: base_tier_validation
+#: model_terms:ir.ui.view,arch_db:base_tier_validation.tier_validation_label
+msgid ""
+"<i class=\"fa fa-lg fa-thumbs-up\"/>\n"
+"                Operation has been\n"
+"                <b>validated</b>\n"
+"                !"
+msgstr "<i class=\"fa fa-lg fa-thumbs-up\"/>\n                Операция\n                <b>утверждена</b>\n                !"
+
+#. module: base_tier_validation
+#: model_terms:ir.ui.view,arch_db:base_tier_validation.tier_definition_view_form
+msgid "<span class=\"oe_edit_only\">Name</span>"
+msgstr "<span class=\"oe_edit_only\">Название</span>"
+
+#. module: base_tier_validation
+#: model_terms:ir.ui.view,arch_db:base_tier_validation.tier_definition_view_form
+msgid "<span>Bypass, if previous tier was validated by same reviewer</span>"
+msgstr "<span>Пропустить, если предыдущий уровень утвердил тот же согласующий</span>"
+
+#. module: base_tier_validation
+#. odoo-python
+#: code:addons/base_tier_validation/models/tier_validation.py:0
+msgid "A record to be reviewed has been created by %s."
+msgstr "Запись, требующая согласования, создана пользователем %s."
+
+#. module: base_tier_validation
+#. odoo-python
+#: code:addons/base_tier_validation/models/tier_review.py:0
+msgid "A review has been requested %s days ago."
+msgstr "Согласование запрошено %s дн. назад."
+
+#. module: base_tier_validation
+#. odoo-python
+#: code:addons/base_tier_validation/models/tier_validation.py:0
+msgid "A review has been requested by %s."
+msgstr "Согласование запрошено пользователем %s."
+
+#. module: base_tier_validation
+#. odoo-python
+#: code:addons/base_tier_validation/models/tier_validation.py:0
+msgid "A review was accepted"
+msgstr "Согласование принято"
+
+#. module: base_tier_validation
+#. odoo-python
+#: code:addons/base_tier_validation/models/tier_validation.py:0
+msgid "A review was accepted. (%s)"
+msgstr "Согласование принято. (%s)"
+
+#. module: base_tier_validation
+#. odoo-python
+#: code:addons/base_tier_validation/models/tier_validation.py:0
+msgid "A review was rejected by %(user)s. (%(comment)s)"
+msgstr "Согласование отклонено пользователем %(user)s. (%(comment)s)"
+
+#. module: base_tier_validation
+#. odoo-python
+#: code:addons/base_tier_validation/models/tier_validation.py:0
+msgid "A review was rejected by %s."
+msgstr "Согласование отклонено пользователем %s."
+
+#. module: base_tier_validation
+#. odoo-python
+#: code:addons/base_tier_validation/models/tier_validation.py:0
+msgid "A validation process is still open for at least one record."
+msgstr "По крайней мере для одной записи процесс согласования ещё не завершён."
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__active
+msgid "Active"
+msgstr "Активно"
+
+#. module: base_tier_validation
+#: model_terms:ir.ui.view,arch_db:base_tier_validation.tier_definition_view_search
+msgid "All"
+msgstr "Все"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__allow_write_for_reviewer
+msgid "Allow Write For Reviewers"
+msgstr "Разрешить запись согласующим"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,help:base_tier_validation.field_tier_validation_exception__group_ids
+msgid "Allowed groups to use this Tier Validation Exception"
+msgstr "Группы, которым разрешено использовать это исключение согласования по уровням"
+
+#. module: base_tier_validation
+#: model:ir.model.fields.selection,name:base_tier_validation.selection__tier_definition__review_type__group
+msgid "Any user in a specific group"
+msgstr "Любой пользователь определённой группы"
+
+#. module: base_tier_validation
+#: model_terms:ir.ui.view,arch_db:base_tier_validation.tier_definition_view_form
+msgid "Apply On"
+msgstr "Применять к"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,help:base_tier_validation.field_tier_definition__approve_sequence model:ir.model.fields,help:base_tier_validation.field_tier_review__approve_sequence
+msgid "Approval order by the specified sequence number"
+msgstr "Утверждение в порядке заданного номера очерёдности"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__approve_sequence_bypass model:ir.model.fields,field_description:base_tier_validation.field_tier_review__approve_sequence_bypass
+msgid "Approve Sequence Bypass"
+msgstr "Пропуск очерёдности утверждения"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__approve_sequence model:ir.model.fields,field_description:base_tier_validation.field_tier_review__approve_sequence
+msgid "Approve by sequence"
+msgstr "Утверждать по очерёдности"
+
+#. module: base_tier_validation
+#: model:ir.model.fields.selection,name:base_tier_validation.selection__tier_review__status__approved
+msgid "Approved"
+msgstr "Утверждено"
+
+#. module: base_tier_validation
+#: model_terms:ir.ui.view,arch_db:base_tier_validation.tier_definition_view_form
+msgid "Archived"
+msgstr "В архиве"
+
+#. module: base_tier_validation
+#. odoo-python
+#: code:addons/base_tier_validation/models/tier_validation_exception.py:0
+msgid "At least one of these fields must be checked! Write under Validation, Write after Validation"
+msgstr "Необходимо отметить хотя бы одно из этих полей: «Запись при согласовании», «Запись после согласования»!"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,help:base_tier_validation.field_tier_definition__approve_sequence_bypass model:ir.model.fields,help:base_tier_validation.field_tier_review__approve_sequence_bypass
+msgid "Bypassed (auto validated), if previous tier was validated by same reviewer"
+msgstr "Пропущено (утверждено автоматически), если предыдущий уровень утвердил тот же согласующий"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_review__can_review model:ir.model.fields,field_description:base_tier_validation.field_tier_validation__can_review
+msgid "Can Review"
+msgstr "Может согласовать"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,help:base_tier_validation.field_tier_review__can_review
+msgid ""
+"Can review will be marked if the review is pending and the\n"
+"        approve sequence has been achieved"
+msgstr "«Может согласовать» отмечается, если согласование ожидается и\n        очерёдность утверждения достигнута"
+
+#. module: base_tier_validation
+#: model_terms:ir.ui.view,arch_db:base_tier_validation.view_comment_wizard
+msgid "Cancel"
+msgstr "Отмена"
+
+#. module: base_tier_validation
+#. odoo-javascript
+#. odoo-python
+#: code:addons/base_tier_validation/models/tier_validation.py:0 code:addons/base_tier_validation/static/src/components/tier_review_widget/tier_review_widget.xml:0 model:ir.model.fields,field_description:base_tier_validation.field_comment_wizard__comment model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__has_comment model:ir.model.fields,field_description:base_tier_validation.field_tier_review__has_comment model_terms:ir.ui.view,arch_db:base_tier_validation.view_comment_wizard
+msgid "Comment"
+msgstr "Комментарий"
+
+#. module: base_tier_validation
+#: model:ir.model,name:base_tier_validation.model_comment_wizard
+msgid "Comment Wizard"
+msgstr "Мастер комментариев"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_review__comment
+msgid "Comments"
+msgstr "Комментарии"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__company_id model:ir.model.fields,field_description:base_tier_validation.field_tier_review__company_id model:ir.model.fields,field_description:base_tier_validation.field_tier_validation_exception__company_id model_terms:ir.ui.view,arch_db:base_tier_validation.tier_validation_exception_search
+msgid "Company"
+msgstr "Организация"
+
+#. module: base_tier_validation
+#: model:ir.model,name:base_tier_validation.model_res_config_settings
+msgid "Config Settings"
+msgstr "Параметры настройки"
+
+#. module: base_tier_validation
+#: model_terms:ir.actions.act_window,help:base_tier_validation.tier_validation_exception_action
+msgid "Create a new Validation Exception!"
+msgstr "Создайте новое исключение согласования!"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_comment_wizard__create_uid model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__create_uid model:ir.model.fields,field_description:base_tier_validation.field_tier_review__create_uid model:ir.model.fields,field_description:base_tier_validation.field_tier_validation_exception__create_uid
+msgid "Created by"
+msgstr "Создал"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_comment_wizard__create_date model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__create_date model:ir.model.fields,field_description:base_tier_validation.field_tier_review__create_date model:ir.model.fields,field_description:base_tier_validation.field_tier_validation_exception__create_date
+msgid "Created on"
+msgstr "Создано"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__definition_type model:ir.model.fields,field_description:base_tier_validation.field_tier_review__definition_id
+msgid "Definition"
+msgstr "Определение"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__definition_domain
+msgid "Definition Domain"
+msgstr "Домен определения"
+
+#. module: base_tier_validation
+#. odoo-javascript
+#: code:addons/base_tier_validation/static/src/components/tier_review_widget/tier_review_widget.xml:0 model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__name
+msgid "Description"
+msgstr "Описание"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_comment_wizard__display_name model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__display_name model:ir.model.fields,field_description:base_tier_validation.field_tier_review__display_name model:ir.model.fields,field_description:base_tier_validation.field_tier_validation_exception__display_name
+msgid "Display Name"
+msgstr "Отображаемое имя"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_review__display_status
+msgid "Display Status"
+msgstr "Отображаемый статус"
+
+#. module: base_tier_validation
+#: model:ir.model.fields.selection,name:base_tier_validation.selection__tier_definition__definition_type__domain
+msgid "Domain"
+msgstr "Домен"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_review__done_by
+msgid "Done By"
+msgstr "Выполнил"
+
+#. module: base_tier_validation
+#. odoo-javascript
+#: code:addons/base_tier_validation/static/src/components/tier_review_widget/tier_review_widget.xml:0
+msgid "Done by"
+msgstr "Выполнил"
+
+#. module: base_tier_validation
+#: model:ir.model.fields.selection,name:base_tier_validation.selection__tier_definition__review_type__field
+msgid "Field in related record"
+msgstr "Поле в связанной записи"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_validation_exception__field_ids
+msgid "Fields"
+msgstr "Поля"
+
+#. module: base_tier_validation
+#. odoo-python
+#: code:addons/base_tier_validation/models/tier_review.py:0
+msgid "Group %s"
+msgstr "Группа %s"
+
+#. module: base_tier_validation
+#: model_terms:ir.ui.view,arch_db:base_tier_validation.tier_definition_view_search
+msgid "Group By"
+msgstr "Группировать по"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_validation_exception__group_ids
+msgid "Groups"
+msgstr "Группы"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_validation__has_comment
+msgid "Has Comment"
+msgstr "Есть комментарий"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_validation__hide_reviews
+msgid "Hide Reviews"
+msgstr "Скрыть согласования"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_comment_wizard__id model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__id model:ir.model.fields,field_description:base_tier_validation.field_tier_review__id model:ir.model.fields,field_description:base_tier_validation.field_tier_validation_exception__id
+msgid "ID"
+msgstr ""
+
+#. module: base_tier_validation
+#: model:ir.model.fields,help:base_tier_validation.field_tier_validation__has_comment
+msgid "If set, Allow the reviewer to leave a comment on the review."
+msgstr "Если отмечено, согласующий сможет оставить комментарий к согласованию."
+
+#. module: base_tier_validation
+#: model:ir.model.fields,help:base_tier_validation.field_tier_definition__notify_on_create
+msgid "If set, all possible reviewers will be notified by email when this definition is triggered."
+msgstr "Если отмечено, все возможные согласующие получат уведомление по электронной почте при срабатывании этого определения."
+
+#. module: base_tier_validation
+#: model:ir.model.fields,help:base_tier_validation.field_tier_definition__notify_on_pending
+msgid "If set, all possible reviewers will be notified by email when this status is reached.Usefull in an Approve by sequence scenario. An notification request to review is sent out when it's their turn to review."
+msgstr "Если отмечено, все возможные согласующие получат уведомление по электронной почте при достижении этого статуса. Полезно при утверждении по очерёдности: запрос на согласование отправляется, когда наступает очередь согласующего."
+
+#. module: base_tier_validation
+#: model:ir.model.fields,help:base_tier_validation.field_tier_definition__notify_on_accepted
+msgid "If set, reviewers will be notified by email when a review related to this definition is accepted."
+msgstr "Если отмечено, согласующие получат уведомление по электронной почте, когда согласование по этому определению принято."
+
+#. module: base_tier_validation
+#: model:ir.model.fields,help:base_tier_validation.field_tier_definition__notify_on_rejected
+msgid "If set, reviewers will be notified by email when a review related to this definition is rejected."
+msgstr "Если отмечено, согласующие получат уведомление по электронной почте, когда согласование по этому определению отклонено."
+
+#. module: base_tier_validation
+#: model:ir.model.fields,help:base_tier_validation.field_tier_definition__notify_on_restarted
+msgid "If set, reviewers will be notified by email when a reviews related to this definition are restarted."
+msgstr "Если отмечено, согласующие получат уведомление по электронной почте, когда согласования по этому определению перезапущены."
+
+#. module: base_tier_validation
+#: model_terms:ir.actions.act_window,help:base_tier_validation.tier_validation_exception_action
+msgid "It's fully validated"
+msgstr "Полностью утверждено"
+
+#. module: base_tier_validation
+#: model_terms:ir.actions.act_window,help:base_tier_validation.tier_validation_exception_action
+msgid "It's in the validation process"
+msgstr "В процессе согласования"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_review__last_reminder_date
+msgid "Last Reminder Date"
+msgstr "Дата последнего напоминания"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_comment_wizard__write_uid model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__write_uid model:ir.model.fields,field_description:base_tier_validation.field_tier_review__write_uid model:ir.model.fields,field_description:base_tier_validation.field_tier_validation_exception__write_uid
+msgid "Last Updated by"
+msgstr "Последний раз изменил"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_comment_wizard__write_date model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__write_date model:ir.model.fields,field_description:base_tier_validation.field_tier_review__write_date model:ir.model.fields,field_description:base_tier_validation.field_tier_validation_exception__write_date
+msgid "Last Updated on"
+msgstr "Последнее изменение"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__model model:ir.model.fields,field_description:base_tier_validation.field_tier_validation_exception__model_id model_terms:ir.ui.view,arch_db:base_tier_validation.tier_definition_view_search model_terms:ir.ui.view,arch_db:base_tier_validation.tier_validation_exception_search
+msgid "Model"
+msgstr "Модель"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_validation_exception__model_name
+msgid "Model Name"
+msgstr "Название модели"
+
+#. module: base_tier_validation
+#: model_terms:ir.ui.view,arch_db:base_tier_validation.tier_definition_view_form
+msgid "More Options"
+msgstr "Дополнительные параметры"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_review__name model:ir.model.fields,field_description:base_tier_validation.field_tier_validation_exception__name
+msgid "Name"
+msgstr "Название"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_validation__need_validation
+msgid "Need Validation"
+msgstr "Требуется согласование"
+
+#. module: base_tier_validation
+#. odoo-python
+#: code:addons/base_tier_validation/models/tier_definition.py:0
+msgid "New Tier Validation"
+msgstr "Новое согласование по уровням"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_validation__next_review
+msgid "Next Review"
+msgstr "Следующее согласование"
+
+#. module: base_tier_validation
+#. odoo-python
+#: code:addons/base_tier_validation/models/tier_validation.py:0
+msgid "Next: %s"
+msgstr "Далее: %s"
+
+#. module: base_tier_validation
+#. odoo-javascript
+#: code:addons/base_tier_validation/static/src/components/tier_review_menu/tier_review_menu.xml:0
+msgid "No reviews to do."
+msgstr "Нет согласований для выполнения."
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__notify_on_accepted
+msgid "Notify Reviewers on Accepted"
+msgstr "Уведомлять согласующих о принятии"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__notify_on_create
+msgid "Notify Reviewers on Creation"
+msgstr "Уведомлять согласующих о создании"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__notify_on_rejected
+msgid "Notify Reviewers on Rejected"
+msgstr "Уведомлять согласующих об отклонении"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__notify_on_restarted
+msgid "Notify Reviewers on Restarted"
+msgstr "Уведомлять согласующих о перезапуске"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__notify_on_pending
+msgid "Notify Reviewers on reaching Pending"
+msgstr "Уведомлять согласующих при переходе в ожидание"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,help:base_tier_validation.field_tier_definition__notify_reminder_delay
+msgid "Number of days after which a message must be posted to remind about pending validation  (0 = no reminder)"
+msgstr "Число дней, по истечении которых нужно отправить сообщение с напоминанием об ожидающем согласовании (0 = без напоминаний)"
+
+#. module: base_tier_validation
+#: model_terms:ir.actions.act_window,help:base_tier_validation.tier_validation_exception_action
+msgid "Once created, you can decide which fields you want to be editable when the record:"
+msgstr "После создания вы сможете выбрать, какие поля можно редактировать, когда запись:"
+
+#. module: base_tier_validation
+#: model_terms:ir.ui.view,arch_db:base_tier_validation.res_config_settings_view_form_budget
+msgid "Option to use python formula to get reviewers and find documents"
+msgstr "Возможность использовать формулу на Python для определения согласующих и поиска документов"
+
+#. module: base_tier_validation
+#. odoo-javascript
+#: code:addons/base_tier_validation/static/src/components/tier_review_menu/tier_review_menu.xml:0 model:ir.model.fields.selection,name:base_tier_validation.selection__tier_review__status__pending model:ir.model.fields.selection,name:base_tier_validation.selection__tier_validation__validation_status__pending
+msgid "Pending"
+msgstr "Ожидает"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__model_id
+msgid "Referenced Model"
+msgstr "Связанная модель"
+
+#. module: base_tier_validation
+#: model_terms:ir.ui.view,arch_db:base_tier_validation.tier_validation_label
+msgid "Reject"
+msgstr "Отклонить"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_validation__rejected model:ir.model.fields.selection,name:base_tier_validation.selection__tier_review__status__rejected model:ir.model.fields.selection,name:base_tier_validation.selection__tier_validation__validation_status__rejected
+msgid "Rejected"
+msgstr "Отклонено"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_validation__rejected_message
+msgid "Rejected Message"
+msgstr "Сообщение об отклонении"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_review__res_id
+msgid "Related Document ID"
+msgstr "ID связанного документа"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_review__model
+msgid "Related Document Model"
+msgstr "Модель связанного документа"
+
+#. module: base_tier_validation
+#: model_terms:ir.ui.view,arch_db:base_tier_validation.tier_validation_buttons
+msgid "Request Validation"
+msgstr "Запросить согласование"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_review__requested_by
+msgid "Requested By"
+msgstr "Запросил"
+
+#. module: base_tier_validation
+#. odoo-javascript
+#: code:addons/base_tier_validation/static/src/components/tier_review_widget/tier_review_widget.xml:0
+msgid "Requested by"
+msgstr "Запросил"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_comment_wizard__res_id
+msgid "Res"
+msgstr "Ресурс"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_comment_wizard__res_model
+msgid "Res Model"
+msgstr "Модель ресурса"
+
+#. module: base_tier_validation
+#: model_terms:ir.ui.view,arch_db:base_tier_validation.tier_validation_buttons
+msgid "Restart Validation"
+msgstr "Перезапустить согласование"
+
+#. module: base_tier_validation
+#. odoo-javascript
+#: code:addons/base_tier_validation/static/src/components/tier_review_menu/tier_review_menu.xml:0 model:ir.model.fields,field_description:base_tier_validation.field_comment_wizard__review_ids
+msgid "Review"
+msgstr "Согласование"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__reviewer_id model:ir.model.fields,field_description:base_tier_validation.field_tier_review__reviewer_id
+msgid "Reviewer"
+msgstr "Согласующий"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__reviewer_field_id model:ir.model.fields,field_description:base_tier_validation.field_tier_review__reviewer_field_id
+msgid "Reviewer field"
+msgstr "Поле согласующего"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__reviewer_group_id model:ir.model.fields,field_description:base_tier_validation.field_tier_review__reviewer_group_id
+msgid "Reviewer group"
+msgstr "Группа согласующих"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_review__reviewer_ids model:ir.model.fields,field_description:base_tier_validation.field_tier_validation__reviewer_ids
+msgid "Reviewers"
+msgstr "Согласующие"
+
+#. module: base_tier_validation
+#. odoo-javascript
+#: code:addons/base_tier_validation/static/src/components/tier_review_menu/tier_review_menu.xml:0 code:addons/base_tier_validation/static/src/components/tier_review_widget/tier_review_widget.xml:0 model:ir.model.fields,field_description:base_tier_validation.field_res_users__review_ids
+msgid "Reviews"
+msgstr "Согласования"
+
+#. module: base_tier_validation
+#: model:ir.actions.server,name:base_tier_validation.ir_cron_auto_tier_validation_ir_actions_server
+msgid "Send Tier Review Reminder"
+msgstr "Отправлять напоминания о согласовании"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__notify_reminder_delay
+msgid "Send reminder message on pending reviews"
+msgstr "Отправлять напоминание об ожидающих согласованиях"
+
+#. module: base_tier_validation
+#. odoo-javascript
+#: code:addons/base_tier_validation/static/src/components/tier_review_widget/tier_review_widget.xml:0 model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__sequence
+msgid "Sequence"
+msgstr "Очерёдность"
+
+#. module: base_tier_validation
+#: model:ir.model.fields.selection,name:base_tier_validation.selection__tier_definition__review_type__individual
+msgid "Specific user"
+msgstr "Конкретный пользователь"
+
+#. module: base_tier_validation
+#. odoo-javascript
+#: code:addons/base_tier_validation/static/src/components/tier_review_widget/tier_review_widget.xml:0 model:ir.model.fields,field_description:base_tier_validation.field_tier_review__status
+msgid "Status"
+msgstr "Статус"
+
+#. module: base_tier_validation
+#. odoo-python
+#: code:addons/base_tier_validation/models/tier_validation.py:0
+msgid "The review has been reset by %s."
+msgstr "Согласование сброшено пользователем %s."
+
+#. module: base_tier_validation
+#. odoo-python
+#: code:addons/base_tier_validation/models/tier_validation.py:0
+msgid ""
+"This action needs to be validated for at least one record. Reviews pending:\n"
+" - %s \n"
+"Please request a validation."
+msgstr "Это действие нужно утвердить как минимум для одной записи. Ожидающие согласования:\n - %s \nЗапросите согласование."
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_review__sequence
+msgid "Tier"
+msgstr "Уровень согласования"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_res_config_settings__module_base_tier_validation_formula
+msgid "Tier Formula"
+msgstr "Формула уровня"
+
+#. module: base_tier_validation
+#: model:ir.model,name:base_tier_validation.model_tier_review
+msgid "Tier Review"
+msgstr "Согласование уровня"
+
+#. module: base_tier_validation
+#: model_terms:ir.ui.view,arch_db:base_tier_validation.res_config_settings_view_form_budget
+msgid "Tier Validation"
+msgstr "Согласование по уровням"
+
+#. module: base_tier_validation
+#: model:ir.model,name:base_tier_validation.model_tier_validation
+msgid "Tier Validation (abstract)"
+msgstr "Согласование по уровням (абстрактная модель)"
+
+#. module: base_tier_validation
+#: model:mail.message.subtype,name:base_tier_validation.mt_tier_validation_accepted
+msgid "Tier Validation Accepted Notification"
+msgstr "Уведомление о принятии согласования по уровням"
+
+#. module: base_tier_validation
+#: model:ir.model,name:base_tier_validation.model_tier_validation_exception
+msgid "Tier Validation Exceptions"
+msgstr "Исключения согласования по уровням"
+
+#. module: base_tier_validation
+#: model:mail.message.subtype,name:base_tier_validation.mt_tier_validation_rejected
+msgid "Tier Validation Rejected Notification"
+msgstr "Уведомление об отклонении согласования по уровням"
+
+#. module: base_tier_validation
+#: model:mail.activity.type,name:base_tier_validation.mail_act_tier_validation_reminder model:mail.message.subtype,name:base_tier_validation.mt_tier_validation_reminder
+msgid "Tier Validation Reminder"
+msgstr "Напоминание о согласовании по уровням"
+
+#. module: base_tier_validation
+#: model:mail.message.subtype,name:base_tier_validation.mt_tier_validation_requested
+msgid "Tier Validation Requested"
+msgstr "Запрошено согласование по уровням"
+
+#. module: base_tier_validation
+#: model:mail.message.subtype,name:base_tier_validation.mt_tier_validation_restarted
+msgid "Tier Validation Restarted"
+msgstr "Согласование по уровням перезапущено"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_validation__to_validate_message
+msgid "To Validate Message"
+msgstr "Сообщение «На утверждение»"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_review__todo_by
+msgid "Todo By"
+msgstr "Ожидается от"
+
+#. module: base_tier_validation
+#. odoo-javascript
+#: code:addons/base_tier_validation/static/src/components/tier_review_widget/tier_review_widget.xml:0
+msgid "Todo by"
+msgstr "Ожидается от"
+
+#. module: base_tier_validation
+#: model:ir.model,name:base_tier_validation.model_res_users
+msgid "User"
+msgstr "Пользователь"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_validation_exception__valid_model_field_ids
+msgid "Valid Model Field"
+msgstr "Допустимое поле модели"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__valid_reviewer_field_ids
+msgid "Valid Reviewer Field"
+msgstr "Допустимое поле согласующего"
+
+#. module: base_tier_validation
+#: model_terms:ir.ui.view,arch_db:base_tier_validation.tier_validation_label
+msgid "Validate"
+msgstr "Утвердить"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_comment_wizard__validate_reject
+msgid "Validate Reject"
+msgstr "Утвердить отклонение"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_validation__validated model:ir.model.fields.selection,name:base_tier_validation.selection__tier_validation__validation_status__validated
+msgid "Validated"
+msgstr "Утверждено"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_validation__validated_message
+msgid "Validated Message"
+msgstr "Сообщение об утверждении"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__review_type model:ir.model.fields,field_description:base_tier_validation.field_tier_review__review_type
+msgid "Validated by"
+msgstr "Утвердил"
+
+#. module: base_tier_validation
+#. odoo-javascript
+#: code:addons/base_tier_validation/static/src/components/tier_review_widget/tier_review_widget.xml:0 model:ir.model.fields,field_description:base_tier_validation.field_tier_review__reviewed_date
+msgid "Validation Date"
+msgstr "Дата утверждения"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_review__reviewed_formated_date
+msgid "Validation Formated Date"
+msgstr "Отформатированная дата утверждения"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_validation__validation_status
+msgid "Validation Status"
+msgstr "Статус согласования"
+
+#. module: base_tier_validation
+#. odoo-python
+#: code:addons/base_tier_validation/models/tier_review.py:0
+msgid "Validation reviewer field should be of the appropriate type"
+msgstr "Поле согласующего должно быть подходящего типа"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_validation__review_ids
+msgid "Validations"
+msgstr "Согласования"
+
+#. module: base_tier_validation
+#: model:ir.model.fields.selection,name:base_tier_validation.selection__tier_review__status__waiting model:ir.model.fields.selection,name:base_tier_validation.selection__tier_validation__validation_status__waiting
+msgid "Waiting"
+msgstr "Ожидание"
+
+#. module: base_tier_validation
+#: model:ir.model.fields.selection,name:base_tier_validation.selection__tier_validation__validation_status__no
+msgid "Without validation"
+msgstr "Без согласования"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_validation_exception__allowed_to_write_after_validation
+msgid "Write after Validation"
+msgstr "Запись после согласования"
+
+#. module: base_tier_validation
+#: model_terms:ir.ui.view,arch_db:base_tier_validation.tier_validation_exception_search
+msgid "Write after validation"
+msgstr "Запись после согласования"
+
+#. module: base_tier_validation
+#: model:ir.model.fields,field_description:base_tier_validation.field_tier_validation_exception__allowed_to_write_under_validation
+msgid "Write under Validation"
+msgstr "Запись при согласовании"
+
+#. module: base_tier_validation
+#: model_terms:ir.ui.view,arch_db:base_tier_validation.tier_validation_exception_search
+msgid "Write under validation"
+msgstr "Запись при согласовании"
+
+#. module: base_tier_validation
+#. odoo-python
+#: code:addons/base_tier_validation/models/tier_validation.py:0
+msgid ""
+"You are not allowed to write those fields after validation.\n"
+"- %(not_allowed_fields_str)s\n"
+"\n"
+"Only those fields can be modified:\n"
+"- %(allowed_fields_str)s"
+msgstr "Вам нельзя изменять эти поля после согласования.\n- %(not_allowed_fields_str)s\n\nМожно изменять только эти поля:\n- %(allowed_fields_str)s"
+
+#. module: base_tier_validation
+#. odoo-python
+#: code:addons/base_tier_validation/models/tier_validation.py:0
+msgid ""
+"You are not allowed to write those fields under validation.\n"
+"- %(not_allowed_fields_str)s\n"
+"\n"
+"Only those fields can be modified:\n"
+"- %(allowed_fields_str)s"
+msgstr "Вам нельзя изменять эти поля во время согласования.\n- %(not_allowed_fields_str)s\n\nМожно изменять только эти поля:\n- %(allowed_fields_str)s"
+
+#. module: base_tier_validation
+#: model_terms:ir.ui.view,arch_db:base_tier_validation.tier_definition_view_form
+msgid "e.g. Tier Validation for..."
+msgstr "напр., Согласование по уровням для..."

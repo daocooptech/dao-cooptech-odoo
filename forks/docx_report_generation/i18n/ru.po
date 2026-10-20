@@ -54,7 +54,7 @@ msgstr "Тип отчета"
 #. module: docx_report
 #: model:ir.model.fields,field_description:docx_report.field_ir_actions_report__report_docx_template
 msgid "Report docx template"
-msgstr "Шаблон для отчета docx"
+msgstr "Шаблон отчёта DOCX"
 
 #. module: docx_report
 #: model:ir.model.fields,field_description:docx_report.field_ir_actions_report__report_name
