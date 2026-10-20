@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_rsbu_account_list" model="ir.ui.view">
+        <field name="name">rsbu.account.list</field>
+        <field name="model">rsbu.account</field>
+        <field name="arch" type="xml">
+            <list string="План счетов РСБУ">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="account_kind"/>
+                <field name="is_group"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_rsbu_account_form" model="ir.ui.view">
+        <field name="name">rsbu.account.form</field>
+        <field name="model">rsbu.account</field>
+        <field name="arch" type="xml">
+            <form string="Счёт РСБУ">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="name"/>
+                            <field name="parent_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="account_kind"/>
+                            <field name="is_group"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <group string="Обязательные субконто">
+                        <field name="subconto_partner"/>
+                        <field name="subconto_product"/>
+                        <field name="subconto_user"/>
+                        <field name="subconto_employee"/>
+                    </group>
+                    <notebook>
+                        <page string="Субсчета">
+                            <field name="child_ids">
+                                <list>
+                                    <field name="code"/>
+                                    <field name="name"/>
+                                    <field name="account_kind"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Примечание">
+                            <field name="note"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_rsbu_account_search" model="ir.ui.view">
+        <field name="name">rsbu.account.search</field>
+        <field name="model">rsbu.account</field>
+        <field name="arch" type="xml">
+            <search string="Поиск по плану счетов">
+                <field name="code"/>
+                <field name="name"/>
+                <filter name="groups" string="Только группы"
+                        domain="[('is_group', '=', True)]"/>
+                <filter name="postable" string="Постингуемые"
+                        domain="[('is_group', '=', False)]"/>
+                <separator/>
+                <filter name="group_kind" string="Признак счёта"
+                        context="{'group_by': 'account_kind'}"/>
+                <filter name="group_parent" string="Родитель"
+                        context="{'group_by': 'parent_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_rsbu_account" model="ir.actions.act_window">
+        <field name="name">План счетов РСБУ</field>
+        <field name="res_model">rsbu.account</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_rsbu_account_search"/>
+    </record>
+</odoo>

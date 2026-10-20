@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_rsbu_account_load_wizard_form" model="ir.ui.view">
+        <field name="name">rsbu.account.load.wizard.form</field>
+        <field name="model">rsbu.account.load.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Загрузка типового плана счетов 94н">
+                <group>
+                    <field name="company_id"/>
+                    <field name="overwrite"/>
+                </group>
+                <footer>
+                    <button name="action_load" type="object" string="Загрузить"
+                            class="btn-primary"/>
+                    <button string="Отмена" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_rsbu_account_load_wizard" model="ir.actions.act_window">
+        <field name="name">Загрузить типовой план счетов 94н</field>
+        <field name="res_model">rsbu.account.load.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Журнал хозяйственных операций — в разделе «Операции». -->
+    <menuitem id="menu_rsbu_journal" name="Журнал хозяйственных операций"
+              parent="rsbu_chart_of_accounts.menu_rsbu_operations"
+              action="action_rsbu_move" sequence="10"
+              groups="group_rsbu_journal_user"/>
+
+    <!-- Оборотно-сальдовая ведомость — отдельный пункт верхнего уровня. -->
+    <menuitem id="menu_rsbu_trial_balance"
+              name="Оборотно-сальдовая ведомость"
+              parent="rsbu_chart_of_accounts.menu_rsbu_root"
+              action="action_rsbu_trial_balance_wizard" sequence="50"
+              groups="group_rsbu_journal_user"/>
+</odoo>

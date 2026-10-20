@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Мастер параметров ОСВ. -->
+    <record id="view_rsbu_trial_balance_wizard_form" model="ir.ui.view">
+        <field name="name">rsbu.trial.balance.wizard.form</field>
+        <field name="model">rsbu.trial.balance.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Оборотно-сальдовая ведомость">
+                <group>
+                    <group>
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                    <group>
+                        <field name="company_id"
+                               groups="base.group_multi_company"/>
+                        <field name="hide_zero"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_generate" type="object"
+                            string="Сформировать" class="btn-primary"/>
+                    <button string="Отмена" special="cancel"
+                            class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_rsbu_trial_balance_wizard" model="ir.actions.act_window">
+        <field name="name">Оборотно-сальдовая ведомость</field>
+        <field name="res_model">rsbu.trial.balance.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Табличный просмотр строк ОСВ с drill-down по счёту. -->
+    <record id="view_rsbu_trial_balance_line_list" model="ir.ui.view">
+        <field name="name">rsbu.trial.balance.line.list</field>
+        <field name="model">rsbu.trial.balance.line</field>
+        <field name="arch" type="xml">
+            <list string="ОСВ" create="false" delete="false"
+                  default_order="code">
+                <field name="code" string="Счёт"/>
+                <field name="name" string="Наименование"/>
+                <field name="opening_debit" sum="Сальдо нач. Дт"/>
+                <field name="opening_credit" sum="Сальдо нач. Кт"/>
+                <field name="turnover_debit" sum="Оборот Дт"/>
+                <field name="turnover_credit" sum="Оборот Кт"/>
+                <field name="closing_debit" sum="Сальдо кон. Дт"/>
+                <field name="closing_credit" sum="Сальдо кон. Кт"/>
+                <field name="currency_id" column_invisible="1"/>
+                <button name="action_open_entries" type="object"
+                        string="Проводки" icon="fa-search"/>
+            </list>
+        </field>
+    </record>
+</odoo>

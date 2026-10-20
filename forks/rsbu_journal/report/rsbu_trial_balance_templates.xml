@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_rsbu_trial_balance">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.internal_layout">
+                    <div class="page osv-report">
+                        <style>
+                            .osv-report { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif; }
+                            .osv-table { width: 100%; border-collapse: collapse; font-size: 12px; font-family: inherit; }
+                            .osv-table th, .osv-table td { border: 1px solid #b7c3b0; padding: 3px 6px; }
+                            .osv-table thead th { background: #d7e4c9; text-align: center; font-weight: bold; }
+                            .osv-table td.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+                            .osv-table tr.grp td { background: #eaf2e1; font-weight: bold; }
+                            .osv-table tr.total td { background: #cddcc0; font-weight: bold; }
+                            .osv-acc { white-space: nowrap; }
+                        </style>
+                        <h3>
+                            Оборотно-сальдовая ведомость
+                        </h3>
+                        <p>
+                            за период
+                            <strong><span t-field="doc.date_from"/></strong>
+                            —
+                            <strong><span t-field="doc.date_to"/></strong>,
+                            <span t-field="doc.company_id.name"/>
+                        </p>
+                        <table class="osv-table">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2">Счёт</th>
+                                    <th rowspan="2">Наименование</th>
+                                    <th colspan="2">Сальдо на начало периода</th>
+                                    <th colspan="2">Обороты за период</th>
+                                    <th colspan="2">Сальдо на конец периода</th>
+                                </tr>
+                                <tr>
+                                    <th>Дебет</th>
+                                    <th>Кредит</th>
+                                    <th>Дебет</th>
+                                    <th>Кредит</th>
+                                    <th>Дебет</th>
+                                    <th>Кредит</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.line_ids" t-as="line">
+                                    <tr t-att-class="'grp' if line.is_group else ''">
+                                        <td class="osv-acc"
+                                            t-att-style="'padding-left: %dpx' % (6 + 14 * (line.level or 0))">
+                                            <span t-esc="line.code"/>
+                                        </td>
+                                        <td><span t-esc="line.name"/></td>
+                                        <td class="num">
+                                            <span t-esc="line.opening_debit"
+                                                  t-options='{"widget": "monetary", "display_currency": line.currency_id}'
+                                                  t-if="line.opening_debit"/>
+                                        </td>
+                                        <td class="num">
+                                            <span t-esc="line.opening_credit"
+                                                  t-options='{"widget": "monetary", "display_currency": line.currency_id}'
+                                                  t-if="line.opening_credit"/>
+                                        </td>
+                                        <td class="num">
+                                            <span t-esc="line.turnover_debit"
+                                                  t-options='{"widget": "monetary", "display_currency": line.currency_id}'
+                                                  t-if="line.turnover_debit"/>
+                                        </td>
+                                        <td class="num">
+                                            <span t-esc="line.turnover_credit"
+                                                  t-options='{"widget": "monetary", "display_currency": line.currency_id}'
+                                                  t-if="line.turnover_credit"/>
+                                        </td>
+                                        <td class="num">
+                                            <span t-esc="line.closing_debit"
+                                                  t-options='{"widget": "monetary", "display_currency": line.currency_id}'
+                                                  t-if="line.closing_debit"/>
+                                        </td>
+                                        <td class="num">
+                                            <span t-esc="line.closing_credit"
+                                                  t-options='{"widget": "monetary", "display_currency": line.currency_id}'
+                                                  t-if="line.closing_credit"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <t t-set="tot" t-value="totals_by_wizard[doc.id]"/>
+                                <tr class="total">
+                                    <td colspan="2">Итого</td>
+                                    <td class="num">
+                                        <span t-esc="tot['opening_debit']"
+                                              t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                    </td>
+                                    <td class="num">
+                                        <span t-esc="tot['opening_credit']"
+                                              t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                    </td>
+                                    <td class="num">
+                                        <span t-esc="tot['turnover_debit']"
+                                              t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                    </td>
+                                    <td class="num">
+                                        <span t-esc="tot['turnover_credit']"
+                                              t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                    </td>
+                                    <td class="num">
+                                        <span t-esc="tot['closing_debit']"
+                                              t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                    </td>
+                                    <td class="num">
+                                        <span t-esc="tot['closing_credit']"
+                                              t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_rsbu_trial_balance" model="ir.actions.report">
+        <field name="name">Оборотно-сальдовая ведомость</field>
+        <field name="model">rsbu.trial.balance.wizard</field>
+        <field name="report_type">qweb-html</field>
+        <field name="report_name">rsbu_journal.report_rsbu_trial_balance</field>
+        <field name="report_file">rsbu_journal.report_rsbu_trial_balance</field>
+        <field name="print_report_name">'ОСВ %s' % (object.date_to or '')</field>
+    </record>
+</odoo>

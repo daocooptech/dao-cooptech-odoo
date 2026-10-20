@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Корень раздела РСБУ. -->
+    <menuitem id="menu_rsbu_root" name="РСБУ"
+              groups="group_rsbu_account_user"/>
+
+    <!-- Контейнерные разделы верхнего уровня (порядок задаётся sequence). -->
+    <menuitem id="menu_rsbu_operations" name="Операции"
+              parent="menu_rsbu_root" sequence="10"/>
+
+    <menuitem id="menu_rsbu_regular_ops" name="Регламентные операции"
+              parent="menu_rsbu_root" sequence="20"/>
+
+    <menuitem id="menu_rsbu_reports" name="Отчётность"
+              parent="menu_rsbu_root" sequence="30"/>
+
+    <!-- Настройки (бывшая «Настройка»). -->
+    <menuitem id="menu_rsbu_config" name="Настройки"
+              parent="menu_rsbu_root" sequence="90"/>
+
+    <!-- План счетов — внутри «Настройки». -->
+    <menuitem id="menu_rsbu_account" name="План счетов"
+              parent="menu_rsbu_config" action="action_rsbu_account"
+              sequence="5"/>
+
+    <menuitem id="menu_rsbu_account_load" name="Загрузить типовой план 94н"
+              parent="menu_rsbu_config"
+              action="action_rsbu_account_load_wizard"
+              groups="group_rsbu_account_manager" sequence="10"/>
+</odoo>

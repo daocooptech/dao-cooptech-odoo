@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_rsbu_move_list" model="ir.ui.view">
+        <field name="name">rsbu.move.list</field>
+        <field name="model">rsbu.move</field>
+        <field name="arch" type="xml">
+            <list string="Журнал операций РСБУ">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="ref"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'posted'"
+                       decoration-info="state == 'draft'"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_rsbu_move_form" model="ir.ui.view">
+        <field name="name">rsbu.move.form</field>
+        <field name="model">rsbu.move</field>
+        <field name="arch" type="xml">
+            <form string="Операция РСБУ">
+                <header>
+                    <button name="action_post" type="object" string="Провести"
+                            class="btn-primary" invisible="state == 'posted'"/>
+                    <button name="action_draft" type="object"
+                            string="В черновик"
+                            invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,posted"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="ref"/>
+                        </group>
+                        <group>
+                            <field name="company_id"
+                                   groups="base.group_multi_company"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Проводки">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="account_id"/>
+                                    <field name="name"/>
+                                    <field name="partner_id"/>
+                                    <field name="product_id"
+                                           optional="hide"/>
+                                    <field name="user_id" optional="hide"/>
+                                    <field name="employee_id"
+                                           optional="hide"/>
+                                    <field name="debit"/>
+                                    <field name="credit"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer">
+                                <field name="total_debit"/>
+                                <field name="total_credit"/>
+                            </group>
+                        </page>
+                        <page string="Источник / Примечание">
+                            <group>
+                                <field name="source_model" readonly="1"/>
+                                <field name="source_res_id" readonly="1"/>
+                            </group>
+                            <field name="note"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_rsbu_move_search" model="ir.ui.view">
+        <field name="name">rsbu.move.search</field>
+        <field name="model">rsbu.move</field>
+        <field name="arch" type="xml">
+            <search string="Поиск операций">
+                <field name="name"/>
+                <field name="ref"/>
+                <filter name="draft" string="Черновики"
+                        domain="[('state', '=', 'draft')]"/>
+                <filter name="posted" string="Проведённые"
+                        domain="[('state', '=', 'posted')]"/>
+                <separator/>
+                <filter name="group_state" string="Состояние"
+                        context="{'group_by': 'state'}"/>
+                <filter name="group_date" string="Дата"
+                        context="{'group_by': 'date'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_rsbu_move" model="ir.actions.act_window">
+        <field name="name">Журнал операций РСБУ</field>
+        <field name="res_model">rsbu.move</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_rsbu_move_search"/>
+    </record>
+</odoo>
