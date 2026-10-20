@@ -1,4 +1,4 @@
-from odoo import api, fields, models, exceptions, _
+from odoo import fields, models
 
 class Company(models.Model):
     _inherit = 'res.company'

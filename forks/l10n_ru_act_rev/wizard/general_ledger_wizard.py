@@ -1,4 +1,3 @@
-import logging
 import time
 from ast import literal_eval
 from odoo import _, api, fields, models
@@ -308,7 +307,7 @@ class GeneralLedgerReportWizard(models.TransientModel):
             ('date', '>=', self.date_from)
         ])
         if self.target_move == 'posted' and not account_data.filtered(lambda p: p.parent_state == 'posted') or not account_data:
-            raise UserError(f'Проводок для формирования акта по введенным условиям не найдено.')
+            raise UserError('Проводок для формирования акта по введенным условиям не найдено.')
         return {
             'type': 'ir.actions.act_url',
             'url': '/my/act_revise_contact/%s?date_to=%s&date_from=%s&target_move=%s&company=%s&partner=%s' % (
@@ -358,7 +357,7 @@ class GeneralLedgerReportWizard(models.TransientModel):
 
     def get_data_format(self, date):
         if date and date != 'False':
-            return dt.ru_strftime(u'%d.%m.%Y г.', date=datetime.strptime(str(date), "%Y-%m-%d"), inflected=True)
+            return dt.ru_strftime('%d.%m.%Y г.', date=datetime.strptime(str(date), "%Y-%m-%d"), inflected=True)
         return ''
 
     def initials(self, fio):
@@ -370,7 +369,7 @@ class GeneralLedgerReportWizard(models.TransientModel):
         "Transform sum number in rubles to text"
         text_rubles = numeral.rubles(int(sum))
         copeck = round((sum - int(sum)) * 100)
-        text_copeck = numeral.choose_plural(int(copeck), (u"копейка", u"копейки", u"копеек"))
+        text_copeck = numeral.choose_plural(int(copeck), ("копейка", "копейки", "копеек"))
         return ("%s %02d %s") % (text_rubles, copeck, text_copeck)
 
     def img(self, img, type='png', width=0, height=0):

@@ -17,7 +17,8 @@
     'website': "https://www.inf-centre.ru/",
 
     'category': 'Uncategorized',
-    'version': '20.0.2025.12.11',
+    'version': '20.0.2026.09.17',
+    'license': 'LGPL-3',
     "depends": ["web", "base", "account", "account_payment", "stock_delivery", "l10n_ru_doc", "l10n_ru_base", "uom"],
     "data": [
         "views/ir_actions_report_view.xml",

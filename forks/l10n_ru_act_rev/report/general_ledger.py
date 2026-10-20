@@ -5,7 +5,6 @@ import operator
 from odoo.exceptions import UserError
 from odoo import _, api, models
 from odoo.tools import float_is_zero
-import logging
 
 class GeneralLedgerReport(models.AbstractModel):
     _name = "report.l10n_ru_act_rev.general_ledger"
@@ -534,7 +533,7 @@ class GeneralLedgerReport(models.AbstractModel):
         elif move_line_data["name"] == "":
             ref_label = move_line_data["ref"]
         else:
-            ref_label = move_line_data["ref"] + str(" - ") + move_line_data["name"]
+            ref_label = move_line_data["ref"] + " - " + move_line_data["name"]
         move_line_data.update({"ref_label": ref_label})
         return move_line_data
 
@@ -953,14 +952,6 @@ class GeneralLedgerReport(models.AbstractModel):
 
     @api.model
     def _get_report_values(self, docids, data):
-        logging.info(f'@@@@ general_ledger ')
-        logging.info(f'@@@@---------------------------------------------------------------------------------------------- _get_report_values ')
-        logging.info(f'@@@@----------------------------------------------------------------------------------------------' )
-        logging.info(f'@@@@---------------------------------------------------------------------------------------------- ')
-        logging.info(f'@@@@----------------------------------------------------------------------------------------------' )
-        logging.info(f'@@@@---------------------------------------------------------------------------------------------- ')
-        logging.info(f'@@@@---------------------------------------------------------------------------------------------- ')
-
         wizard_id = data["wizard_id"]
         company = self.env["res.company"].browse(data["company_id"])
         company_id = data["company_id"]
@@ -1034,13 +1025,8 @@ class GeneralLedgerReport(models.AbstractModel):
                         account[grouped_by] = False
                         del account["list_grouped"]
         general_ledger = sorted(general_ledger, key=lambda k: k["code"])
-        logging.info(f'@@@@ general_ledger ')
-        logging.info(f'@@@@ general_ledger ')
-        logging.info(f'@@@@ general_ledger {general_ledger}')
-        logging.info(f'@@@@ general_ledger ')
-        logging.info(f'@@@@ general_ledger ')
         if not general_ledger:
-            raise UserError(f'Проводок для формирования акта по введенным условиям не найдено.') 
+            raise UserError('Проводок для формирования акта по введенным условиям не найдено.') 
         return {
             "doc_ids": [wizard_id],
             "doc_model": "general.ledger.act_revise.wizard",

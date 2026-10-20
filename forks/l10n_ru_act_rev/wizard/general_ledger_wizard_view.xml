@@ -121,29 +121,6 @@
             </form>
         </field>
     </record>
-<!--    <act_window-->
-<!--        id="action_general_ledger_wizard"-->
-<!--        name="Акт сверки"-->
-<!--        res_model="general.ledger.act_revise.wizard"-->
-<!--        view_mode="form"-->
-<!--        view_id="general_ledger_wizard"-->
-<!--        target="new"-->
-<!--    />-->
-<!--    &lt;!&ndash;Add to res.partner action&ndash;&gt;-->
-<!--    <act_window-->
-<!--        id="act_action_general_ledger_wizard_partner_relation"-->
-<!--        name="Печатать акт сверки"-->
-<!--        res_model="general.ledger.act_revise.wizard"-->
-<!--        binding_model="res.partner"-->
-<!--        view_mode="form"-->
-<!--        context="{-->
-<!--                    'default_receivable_accounts_only':1,-->
-<!--                    'default_payable_accounts_only':1,-->
-<!--                    }"-->
-<!--        groups="account.group_account_manager"-->
-<!--        target="new"-->
-<!--    />-->
-
     <record id="action_general_ledger_wizard" model="ir.actions.act_window">
         <field name="name">Акт сверки</field>
         <field name="res_model">general.ledger.act_revise.wizard</field>

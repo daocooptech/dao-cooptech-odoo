@@ -4,7 +4,7 @@ from pytils import numeral, dt
 from markupsafe import Markup
 
 
-class QWebHelper(object):
+class QWebHelper:
 
     def img(self, img, type='png', width=0, height=0):
         # Odoo 20: Binary-поле отдаёт BinaryValue, а не base64-текст; вывод через t-out

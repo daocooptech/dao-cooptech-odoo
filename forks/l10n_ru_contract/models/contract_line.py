@@ -1,4 +1,4 @@
-from odoo import api, fields, models, exceptions, tools, _
+from odoo import fields, models
 
 class ContractLine(models.Model):
     _name = 'contract.line'

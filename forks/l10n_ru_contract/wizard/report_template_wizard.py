@@ -1,5 +1,6 @@
 import base64
-from odoo import models, fields, api
+from odoo import models, fields
+from odoo.exceptions import UserError
 from io import BytesIO
 
 try:

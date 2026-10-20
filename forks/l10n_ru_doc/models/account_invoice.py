@@ -64,8 +64,10 @@ class AccountInvoice(models.Model):
     #     }
 
     def bill_print(self):
-        assert len(self) == 1, 'This option should only be used for a single id at a time.'
-        return self.env['report'].get_action(self, 'l10n_ru_doc.report_upd')
+        self.ensure_one()
+        # Современный API вместо устаревшего self.env['report'].get_action().
+        return self.env.ref('l10n_ru_doc.report_account_invoice_upd_new') \
+            .report_action(self)
 
     def get_delivery_doc_name(self):
         for s in self:

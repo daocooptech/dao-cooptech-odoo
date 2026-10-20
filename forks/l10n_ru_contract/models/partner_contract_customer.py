@@ -148,7 +148,7 @@ class PartnerContractCustomer(models.Model):
             self.contract_header_template_id = view
         try:
             html = self.env["ir.qweb"]._render(view.key, {"object": self})
-        except Exception as e:
+        except Exception:
             return ""
         return tools.html_sanitize(html or "")
 
@@ -218,6 +218,19 @@ class PartnerContractCustomer(models.Model):
                 self.message_post(body=msg)
         return super().write(values)
 
+
+    def get_dateend(self):
+        """Дата окончания договора по умолчанию — 11 месяцев от начала.
+
+        Если дата начала не задана, считается от текущей даты. Возвращает
+        строку (используется в печатных формах и значениях по умолчанию).
+        """
+        from datetime import datetime
+        from dateutil.relativedelta import relativedelta
+        for s in self:
+            base = (fields.Datetime.from_string(s.date_start)
+                    if s.date_start else datetime.today())
+            return fields.Datetime.to_string(base + relativedelta(months=+11))
 
     def action_set_on_approval(self):
         for rec in self:

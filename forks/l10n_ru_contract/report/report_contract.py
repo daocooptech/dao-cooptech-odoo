@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-from odoo import api, models
+from odoo import models
 
 class ContractCustomerReport(models.AbstractModel):
     _name = 'contract.customer.report'

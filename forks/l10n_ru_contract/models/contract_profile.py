@@ -1,4 +1,4 @@
-from odoo import api, fields, models, exceptions, _
+from odoo import fields, models, _
 
 class ContractProfile(models.Model):
     _name = 'contract.profile'

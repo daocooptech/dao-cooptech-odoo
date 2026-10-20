@@ -1,7 +1,5 @@
 from odoo import models, fields, api
-from datetime import datetime
-import re
-from pytils import numeral, dt
+from pytils import numeral
 
 
 class SaleOrder(models.Model):

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp>
+<odoo>
     <data>
         <template id="report_updn">
             <t t-call="web.basic_layout">
@@ -1174,4 +1174,4 @@
             </t>
         </template>
     </data>
-</openerp>
+</odoo>

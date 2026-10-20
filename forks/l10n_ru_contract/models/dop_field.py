@@ -1,92 +1,78 @@
 from odoo import models
 from datetime import datetime
+from decimal import Decimal
 import re
 import pymorphy3
 from markupsafe import Markup
 
 FRACTIONS = (
-    (u"десятая", u"десятых", u"десятых"),
-    (u"сотая", u"сотых", u"сотых"),
-    (u"тысячная", u"тысячных", u"тысячных"),
-    (u"десятитысячная", u"десятитысячных", u"десятитысячных"),
-    (u"стотысячная", u"стотысячных", u"стотысячных"),
-    (u"миллионная", u"милллионных", u"милллионных"),
-    (u"десятимиллионная", u"десятимилллионных", u"десятимиллионных"),
-    (u"стомиллионная", u"стомилллионных", u"стомиллионных"),
-    (u"миллиардная", u"миллиардных", u"миллиардных"),
+    ("десятая", "десятых", "десятых"),
+    ("сотая", "сотых", "сотых"),
+    ("тысячная", "тысячных", "тысячных"),
+    ("десятитысячная", "десятитысячных", "десятитысячных"),
+    ("стотысячная", "стотысячных", "стотысячных"),
+    ("миллионная", "милллионных", "милллионных"),
+    ("десятимиллионная", "десятимилллионных", "десятимиллионных"),
+    ("стомиллионная", "стомилллионных", "стомиллионных"),
+    ("миллиардная", "миллиардных", "миллиардных"),
 )
 
 ONES = {
-    0: (u"", u"", u""),
-    1: (u"один", u"одна", u"одно"),
-    2: (u"два", u"две", u"два"),
-    3: (u"три", u"три", u"три"),
-    4: (u"четыре", u"четыре", u"четыре"),
-    5: (u"пять", u"пять", u"пять"),
-    6: (u"шесть", u"шесть", u"шесть"),
-    7: (u"семь", u"семь", u"семь"),
-    8: (u"восемь", u"восемь", u"восемь"),
-    9: (u"девять", u"девять", u"девять"),
+    0: ("", "", ""),
+    1: ("один", "одна", "одно"),
+    2: ("два", "две", "два"),
+    3: ("три", "три", "три"),
+    4: ("четыре", "четыре", "четыре"),
+    5: ("пять", "пять", "пять"),
+    6: ("шесть", "шесть", "шесть"),
+    7: ("семь", "семь", "семь"),
+    8: ("восемь", "восемь", "восемь"),
+    9: ("девять", "девять", "девять"),
 }
 
 TENS = {
-    0: u"",
-    10: u"десять",
-    11: u"одиннадцать",
-    12: u"двенадцать",
-    13: u"тринадцать",
-    14: u"четырнадцать",
-    15: u"пятнадцать",
-    16: u"шестнадцать",
-    17: u"семнадцать",
-    18: u"восемнадцать",
-    19: u"девятнадцать",
-    2: u"двадцать",
-    3: u"тридцать",
-    4: u"сорок",
-    5: u"пятьдесят",
-    6: u"шестьдесят",
-    7: u"семьдесят",
-    8: u"восемьдесят",
-    9: u"девяносто",
+    0: "",
+    10: "десять",
+    11: "одиннадцать",
+    12: "двенадцать",
+    13: "тринадцать",
+    14: "четырнадцать",
+    15: "пятнадцать",
+    16: "шестнадцать",
+    17: "семнадцать",
+    18: "восемнадцать",
+    19: "девятнадцать",
+    2: "двадцать",
+    3: "тридцать",
+    4: "сорок",
+    5: "пятьдесят",
+    6: "шестьдесят",
+    7: "семьдесят",
+    8: "восемьдесят",
+    9: "девяносто",
 }
 
 HUNDREDS = {
-    0: u"",
-    1: u"сто",
-    2: u"двести",
-    3: u"триста",
-    4: u"четыреста",
-    5: u"пятьсот",
-    6: u"шестьсот",
-    7: u"семьсот",
-    8: u"восемьсот",
-    9: u"девятьсот",
+    0: "",
+    1: "сто",
+    2: "двести",
+    3: "триста",
+    4: "четыреста",
+    5: "пятьсот",
+    6: "шестьсот",
+    7: "семьсот",
+    8: "восемьсот",
+    9: "девятьсот",
 }
 
 MALE = 1
 FEMALE = 2
 
-import sys
-import types
-
-PY2 = sys.version_info[0] == 2
-PY3 = sys.version_info[0] == 3
-
-if PY3:
-    string_types = str,
-    integer_types = int,
-    class_types = type,
-    text_type = str
-    binary_type = bytes
-
-    MAXSIZE = sys.maxsize
-else:
-    string_types = basestring,
-    integer_types = (int, long)
-    class_types = (type, types.ClassType)
-    text_type = unicode
-    binary_type = str
+# Псевдонимы типов (наследие переносимости py2/py3; проект только на py3).
+string_types = (str,)
+integer_types = (int,)
+text_type = str
+binary_type = bytes
 
 
 class Report_contract_customer(models.Model):
@@ -114,12 +100,12 @@ class Report_contract_customer(models.Model):
 
     def ru_date(self, date):
         if date and date != 'False':
-            return dt.ru_strftime(u'"%d" %B %Y года', date=datetime.strptime(str(date), "%Y-%m-%d"), inflected=True)
+            return dt.ru_strftime('"%d" %B %Y года', date=datetime.strptime(str(date), "%Y-%m-%d"), inflected=True)
         return ''
 
     def ru_date2(self, date):
         if date and date != 'False':
-            return dt.ru_strftime(u'%d %B %Y г.', date=datetime.strptime(str(date), "%Y-%m-%d %H:%M:%S"),
+            return dt.ru_strftime('%d %B %Y г.', date=datetime.strptime(str(date), "%Y-%m-%d %H:%M:%S"),
                                   inflected=True)
         return ''
 
@@ -130,14 +116,14 @@ class Report_contract_customer(models.Model):
         "Transform sum number in rubles to text"
         text_rubles = self.numeral_rubles(int(sum))
         copeck = round((sum - int(sum)) * 100)
-        text_copeck = self.numeral_choose_plural(int(copeck), (u"копейка", u"копейки", u"копеек"))
+        text_copeck = self.numeral_choose_plural(int(copeck), ("копейка", "копейки", "копеек"))
         return ("%s %02d %s") % (text_rubles, copeck, text_copeck)
 
     def numeral_rubles(self, amount, zero_for_kopeck=False):
         self.check_positive(amount)
         pts = []
         amount = round(amount, 2)
-        pts.append(self.sum_string(int(amount), 1, (u"рубль", u"рубля", u"рублей")))
+        pts.append(self.sum_string(int(amount), 1, ("рубль", "рубля", "рублей")))
         remainder = self._get_float_remainder(amount, 2)
         iremainder = int(remainder)
 
@@ -145,8 +131,8 @@ class Report_contract_customer(models.Model):
             if iremainder < 10 and len(remainder) == 1:
                 iremainder *= 10
             pts.append(self.sum_string(iremainder, 2,
-                                       (u"копейка", u"копейки", u"копеек")))
-        return u" ".join(pts)
+                                       ("копейка", "копейки", "копеек")))
+        return " ".join(pts)
 
     def _get_float_remainder(self, fvalue, signs=9):
         self.check_positive(fvalue)
@@ -159,23 +145,23 @@ class Report_contract_customer(models.Model):
         if isinstance(items, text_type):
             items = split_values(items)
         if items is None:
-            items = (u"", u"", u"")
+            items = ("", "", "")
         try:
             one_item, two_items, five_items = items
         except ValueError:
-            raise ValueError("Items must be 3-element sequence")
+            raise ValueError("Items must be 3-element sequence") from None
         self.check_positive(amount)
         if amount == 0:
-            return u"ноль %s" % five_items
-        into = u''
+            return "ноль %s" % five_items
+        into = ''
         tmp_val = amount
         into, tmp_val = self._sum_string_fn(into, tmp_val, gender, items)
         into, tmp_val = self._sum_string_fn(into, tmp_val, FEMALE,
-                                            (u"тысяча", u"тысячи", u"тысяч"))
+                                            ("тысяча", "тысячи", "тысяч"))
         into, tmp_val = self._sum_string_fn(into, tmp_val, MALE,
-                                            (u"миллион", u"миллиона", u"миллионов"))
+                                            ("миллион", "миллиона", "миллионов"))
         into, tmp_val = self._sum_string_fn(into, tmp_val, MALE,
-                                            (u"миллиард", u"миллиарда", u"миллиардов"))
+                                            ("миллиард", "миллиарда", "миллиардов"))
         if tmp_val == 0:
             return into
         else:
@@ -183,7 +169,7 @@ class Report_contract_customer(models.Model):
 
     def _sum_string_fn(self, into, tmp_val, gender, items=None):
         if items is None:
-            items = (u"", u"", u"")
+            items = ("", "", "")
         one_item, two_items, five_items = items
         self.check_positive(tmp_val)
         if tmp_val == 0:
@@ -192,8 +178,8 @@ class Report_contract_customer(models.Model):
         rest = tmp_val % 1000
         tmp_val = tmp_val // 1000
         if rest == 0:
-            if into == u"":
-                into = u"%s " % five_items
+            if into == "":
+                into = "%s " % five_items
             return into, tmp_val
         end_word = five_items
         words.append(HUNDREDS[rest // 100])
@@ -208,7 +194,7 @@ class Report_contract_customer(models.Model):
         words.append(end_word)
         words.append(into)
         words = filter(lambda x: len(x) > 0, words)
-        return u" ".join(words).strip(), tmp_val
+        return " ".join(words).strip(), tmp_val
 
     def check_positive(self, value, strict=False):
         if not strict and value < 0:

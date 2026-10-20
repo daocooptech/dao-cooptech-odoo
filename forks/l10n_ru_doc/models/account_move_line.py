@@ -1,4 +1,3 @@
-from datetime import datetime
 from odoo import api, fields, models
 
 class AccountMoveLine(models.Model):

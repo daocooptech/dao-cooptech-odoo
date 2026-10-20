@@ -22,7 +22,8 @@
     'website': "https://www.inf-centre.ru/",
 
     'category': 'Uncategorized',
-    'version': '0.1',
+    'version': '20.0.2026.09.17',
+    'license': 'LGPL-3',
 
     # any module necessary for this one to work correctly
     "depends": ["account", "portal", "website", 'contacts', "l10n_ru_doc", 'l10n_ru_contract', 'l10n_ru_base'],

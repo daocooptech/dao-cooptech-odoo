@@ -81,45 +81,45 @@ class TestContractStates(TransactionCase):
         super().setUp()
         self.contract = _make_contract(self.env)
 
-    def test_contract_action_confirm_draft_to_progress(self):
-        """Req 4.2 — contract_action_confirm moves draft → progress."""
+    def test_action_set_on_approval_draft_to_progress(self):
+        """Req 4.2 — action_set_on_approval moves draft → progress."""
         self.assertEqual(self.contract.state, 'draft')
-        self.contract.contract_action_confirm()
+        self.contract.action_set_on_approval()
         self.assertEqual(
             self.contract.state, 'progress',
-            "contract_action_confirm should move draft contract to progress"
+            "action_set_on_approval should move draft contract to progress"
         )
 
-    def test_contract_action_confirm_progress_to_signed(self):
-        """Req 4.2 — second call to contract_action_confirm moves progress → signed."""
-        self.contract.contract_action_confirm()  # draft → progress
-        self.contract.contract_action_confirm()  # progress → signed
+    def test_action_confirm_progress_to_signed(self):
+        """Req 4.2 — action_confirm moves progress → signed."""
+        self.contract.action_set_on_approval()  # draft → progress
+        self.contract.action_confirm()           # progress → signed
         self.assertEqual(
             self.contract.state, 'signed',
-            "Second contract_action_confirm should move progress contract to signed"
+            "action_confirm should move progress contract to signed"
         )
 
-    def test_contract_in_draft_returns_to_draft(self):
-        """Req 4.3 — contract_in_draft moves any state back to draft."""
-        self.contract.contract_action_confirm()  # draft → progress
+    def test_action_reset_to_draft_from_progress(self):
+        """Req 4.3 — action_reset_to_draft moves any state back to draft."""
+        self.contract.action_set_on_approval()  # draft → progress
         self.assertEqual(self.contract.state, 'progress')
 
-        self.contract.contract_in_draft()
+        self.contract.action_reset_to_draft()
         self.assertEqual(
             self.contract.state, 'draft',
-            "contract_in_draft should return contract to draft state"
+            "action_reset_to_draft should return contract to draft state"
         )
 
-    def test_contract_in_draft_from_signed(self):
-        """Req 4.3 — contract_in_draft from signed state returns to draft."""
-        self.contract.contract_action_confirm()  # draft → progress
-        self.contract.contract_action_confirm()  # progress → signed
+    def test_action_reset_to_draft_from_signed(self):
+        """Req 4.3 — action_reset_to_draft from signed state returns to draft."""
+        self.contract.action_set_on_approval()  # draft → progress
+        self.contract.action_confirm()           # progress → signed
         self.assertEqual(self.contract.state, 'signed')
 
-        self.contract.contract_in_draft()
+        self.contract.action_reset_to_draft()
         self.assertEqual(
             self.contract.state, 'draft',
-            "contract_in_draft should return signed contract to draft"
+            "action_reset_to_draft should return signed contract to draft"
         )
 
 

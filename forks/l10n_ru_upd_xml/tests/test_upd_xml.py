@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tests for l10n_ru_upd_xml — УПД XML generation.
 
