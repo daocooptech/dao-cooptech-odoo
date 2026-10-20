@@ -55,9 +55,8 @@ class TestUpdPool(TestUpdXml):
             'state': 'active', 'admission_basis': 'Решение правления № 1',
             'power_ids': [(6, 0, self.env['coop.power'].search(
                 [('code', '=', 'treasury')]).ids)]})
+        # Слой включён с рождения компании учёта (решение 472).
         company = org._coop_ensure_company()
         group = self.env.ref('rsbu_journal.group_rsbu_journal_manager')
-        self.assertNotIn(group, user.group_ids)
-        company.rsbu_enabled = True
         self.assertIn(group, user.group_ids)
         self.assertIn(company, user.company_ids)

@@ -57,6 +57,21 @@ class TestCoopInvoicing(TransactionCase):
         self.assertEqual(self.seller._coop_vat_regime_at(date(2026, 7, 1)), 'usn_5')
         self.assertFalse(self.seller._coop_vat_regime_at(date(2025, 12, 31)))
 
+    def test_rsbu_layer_on_from_next_month(self):
+        # Решение 472: слой включён с рождения компании учёта, с 1-го числа.
+        with patch('odoo.fields.Date.context_today', return_value=date(2026, 10, 20)):
+            company = self.seller._coop_ensure_company()
+        self.assertTrue(company.rsbu_enabled)
+        self.assertEqual(company.rsbu_start_date, date(2026, 11, 1))
+
+    def test_rsbu_layer_off_only_without_moves(self):
+        company = self.seller._coop_ensure_company()
+        company.rsbu_enabled = False
+        company.rsbu_enabled = True
+        self.env['rsbu.move'].create({'company_id': company.id, 'date': date(2026, 11, 2)})
+        with self.assertRaises(UserError):
+            company.rsbu_enabled = False
+
     def test_rsbu_vat_mode_follows_regime_history(self):
         # РСБУ-слой считает НДС по режиму организации на дату документа.
         company = self.seller._coop_ensure_company()

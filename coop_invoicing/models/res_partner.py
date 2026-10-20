@@ -1,3 +1,5 @@
+from dateutil.relativedelta import relativedelta
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
@@ -46,6 +48,9 @@ class ResPartner(models.Model):
         Карточка организации остаётся общей: движок при создании компании
         из готовой карточки её `company_id` не трогает, и в каталоге
         организация видна всем, как и была.
+
+        Учёт в РСБУ-слое у новой компании включён с рождения — с первого
+        числа следующего месяца (решение 472).
         """
         self.ensure_one()
         if not self.is_company:
@@ -58,6 +63,9 @@ class ResPartner(models.Model):
             'partner_id': org.id,
             'currency_id': self.env.ref('base.RUB').id,
             'country_id': self.env.ref('base.ru').id,
+            'rsbu_enabled': True,
+            'rsbu_start_date': fields.Date.context_today(self).replace(day=1)
+                               + relativedelta(months=1),
         })
         self.env['account.chart.template'].sudo().try_loading(
             'ru', company=company, install_demo=False)
@@ -83,6 +91,16 @@ class ResPartner(models.Model):
 
 class ResCompany(models.Model):
     _inherit = 'res.company'
+
+    def write(self, vals):
+        if 'rsbu_enabled' in vals and not vals['rsbu_enabled']:
+            used = self.env['rsbu.move'].sudo().search(
+                [('company_id', 'in', self.filtered('rsbu_enabled').ids)], limit=1)
+            if used:
+                raise UserError(_(
+                    'У «%s» в РСБУ-слое уже есть операции — выключить учёт в '
+                    'слое нельзя.') % used.company_id.name)
+        return super().write(vals)
 
     def _coop_prepare_taxes(self):
         """Налоги организации: цены в сделках — с налогом.
