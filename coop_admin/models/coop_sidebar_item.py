@@ -12,7 +12,7 @@ ADMIN_ITEMS = [
     # на её странице, а этот экран — взгляд узла целиком, и место ему
     # здесь. Решение владельца 16 сентября 2026.
     ('Членство', 'badge', 'coop_base.action_coop_membership'),
-    ('Настройки', 'settings', 'base_setup.action_general_configuration'),
+    ('Настройки узла', 'settings', 'base_setup.action_general_configuration'),
     ('Модели и поля', 'database', 'base.action_model_model'),
     ('Журнал действий', 'history', 'base.action_ir_logging'),
     # Справочники узла — правовые формы, специализации, сферы
