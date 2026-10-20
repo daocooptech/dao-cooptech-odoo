@@ -260,7 +260,7 @@
     <field name="path">extensions</field>
     <field name="context">{'coop_filters': True}</field>
     <field name="view_mode">kanban,list,form</field>
-    <field name="domain">[('publication_state', '=', 'published'), ('kind', '=', 'app')]</field>
+    <field name="domain">[('publication_state', '=', 'published'), ('kind', '=', 'app'), ('coop_for_face', '=', True)]</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">В каталоге пока пусто</p>
       <p>Своё расширение может опубликовать любой участник и сам назначить
@@ -277,7 +277,7 @@
     <field name="path">plugins</field>
     <field name="context">{'coop_filters': True}</field>
     <field name="view_mode">kanban,list,form</field>
-    <field name="domain">[('publication_state', '=', 'published'), ('kind', '=', 'plugin')]</field>
+    <field name="domain">[('publication_state', '=', 'published'), ('kind', '=', 'plugin'), ('coop_for_face', '=', True)]</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Плагинов пока нет</p>
       <p>Плагин работает внутри других разделов — добавляет поле, печатную

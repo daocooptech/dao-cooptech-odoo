@@ -422,7 +422,7 @@
                 <rect class="lx-box" width="240" height="270" rx="14"/>
                 <text class="lx-title" x="16" y="62">daocoop.tech</text><text class="lx-sub" x="16" y="80">общий сервер сети</text>
                 <text class="lx-mono" x="16" y="100">did:web:daocoop.tech</text>
-                <rect class="lx-layer" x="16" y="116" width="208" height="30" rx="8"/><text class="lx-layer-t" x="28" y="136">Учёт: Odoo 19 / Rudoo</text>
+                <rect class="lx-layer" x="16" y="116" width="208" height="30" rx="8"/><text class="lx-layer-t" x="28" y="136">Учёт: Odoo 20 / Rudoo</text>
                 <rect class="lx-layer" x="16" y="152" width="208" height="30" rx="8"/><text class="lx-layer-t" x="28" y="172">Журнал фактов с подписью</text>
                 <rect class="lx-layer" x="16" y="188" width="208" height="30" rx="8"/><text class="lx-mono" x="28" y="208">did.json · /federation/log</text>
                 <text class="lx-layer-t" x="16" y="246">Резервный ключ — у правления</text>
@@ -512,7 +512,7 @@ GET /federation/log?after=-1</pre>
               <details class="lx-card">
                 <summary><h3>5. Движок и открытый код</h3></summary>
                 <ul>
-                  <li>Odoo 19 с российскими модулями Rudoo, база PostgreSQL. Около сорока наших модулей: членство, паи, доли,
+                  <li>Odoo 20 с российскими модулями Rudoo, база PostgreSQL. Около сорока наших модулей: членство, паи, доли,
                     взаимный кредит, сеть; учёт, склад, проекты, курсы и сайт даёт движок.</li>
                   <li><a href="https://github.com/daocooptech/dao-cooptech-odoo" target="_blank" rel="noopener">github.com/daocooptech/dao-cooptech-odoo</a> — модули платформы, LGPL-3.</li>
                   <li><a href="https://github.com/daocooptech/dao-cooptech" target="_blank" rel="noopener">github.com/daocooptech/dao-cooptech</a> — спецификация обмена и эталонная реализация с тестами.</li>

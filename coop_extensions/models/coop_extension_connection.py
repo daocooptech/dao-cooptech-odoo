@@ -11,6 +11,13 @@ CATEGORY_ICONS = {
 }
 
 
+# «Строго организационное» (решение 481, «Учёт компании»): модули коробки,
+# которые по цепочке зависимостей опираются на учёт компании, и сторонние
+# из этих разделов магазина. Человеку в каталоге не показываются.
+ORG_ONLY_ROOTS = {'account', 'stock', 'sale', 'purchase', 'mrp', 'hr', 'crm'}
+ORG_ONLY_STORE_CATEGORIES = ('accounting', 'sales', 'localization')
+
+
 def _module_of(xmlid):
     return xmlid.split('.', 1)[0] if xmlid else False
 
@@ -134,6 +141,10 @@ class CoopExtension(models.Model):
         string='В моём меню', compute='_compute_coop_connect_state',
         search='_search_coop_connect_state',
         help='У того лица, от имени которого вы сейчас действуете.')
+    coop_for_face = fields.Boolean(
+        compute='_compute_coop_for_face', search='_search_coop_for_face',
+        help='Показывать лицу, от имени которого человек действует: учёт '
+             'компании — только организации (решение 481).')
     coop_connected = fields.Boolean(
         string='Подключено мне', compute='_compute_coop_connect_state',
         search='_search_coop_connected')
@@ -145,6 +156,55 @@ class CoopExtension(models.Model):
         """Лицо, от имени которого человек действует: он сам или организация."""
         user = self.env.user
         return user.coop_acting_as_id or user.partner_id
+
+    @api.model
+    def _coop_org_only_modules(self):
+        """Имена модулей, которые зависят от учёта компании (замыкание)."""
+        self.env.cr.execute("""
+            SELECT m.name, d.name FROM ir_module_module_dependency d
+            JOIN ir_module_module m ON m.id = d.module_id""")
+        deps = {}
+        for module, dep in self.env.cr.fetchall():
+            deps.setdefault(module, set()).add(dep)
+        org = set(ORG_ONLY_ROOTS)
+        grown = True
+        while grown:
+            grown = False
+            for module, needs in deps.items():
+                if module not in org and needs & org:
+                    org.add(module)
+                    grown = True
+        return org
+
+    def _coop_is_org_only(self):
+        self.ensure_one()
+        if self.source == 'third':
+            return self.category in ORG_ONLY_STORE_CATEGORIES
+        # Свои расширения платформы не отсеиваются: они тянут учёт через
+        # общие модули, но сделаны для всех (бартер, биржа, сделки).
+        return self.source == 'odoo' and bool(self.module_name)             and self.module_name in self._coop_org_only_modules()
+
+    @api.depends_context('uid')
+    def _compute_coop_for_face(self):
+        person = not self._coop_face_is_org()
+        org_only = self._coop_org_only_modules() if person else set()
+        for record in self:
+            record.coop_for_face = not person or not (
+                record.category in ORG_ONLY_STORE_CATEGORIES
+                if record.source == 'third'
+                else record.source == 'odoo' and record.module_name in org_only)
+
+    def _search_coop_for_face(self, operator, value):
+        if operator not in ('=', '!=') or not isinstance(value, bool):
+            return NotImplemented
+        positive = (operator == '=') == value
+        if self._coop_face_is_org():
+            return [] if positive else [('id', '=', False)]
+        org_only = ['|', '&', ('source', '=', 'odoo'),
+                    ('module_name', 'in', list(self._coop_org_only_modules())),
+                    '&', ('source', '=', 'third'),
+                    ('category', 'in', list(ORG_ONLY_STORE_CATEGORIES))]
+        return ['!'] + org_only if positive else org_only
 
     @api.model
     def _coop_face_is_org(self):
@@ -306,6 +366,10 @@ class CoopExtension(models.Model):
                 'технический модуль для него не указан.'))
         if self.module_name in self._coop_base_modules():
             raise UserError(_('Этот раздел есть в меню у всех участников платформы.'))
+        if not self._coop_face_is_org() and self._coop_is_org_only():
+            raise UserError(_(
+                '«%s» работает в учёте организации. Подключите его, действуя '
+                'от имени организации.') % self.name)
         if self.kind == 'plugin':
             raise UserError(_(
                 '«%s» — плагин: своего раздела у него нет, он работает внутри '
