@@ -1,7 +1,5 @@
 from odoo import fields, models
 
-# Расчётная доля НДС в сумме по режиму НДС компании (аналог ставки 5/105).
-_ADVANCE_VAT_FRACTION = {'vat_5': 5.0 / 105.0, 'vat_7': 7.0 / 107.0}
 
 
 class RsbuMove(models.Model):
@@ -71,7 +69,7 @@ class AccountMove(models.Model):
         сейчас: −(зачтённая сумма × расчётная доля НДС). Возвращает <= 0.
         """
         self.ensure_one()
-        fraction = _ADVANCE_VAT_FRACTION.get(self.company_id.rsbu_vat_mode, 0.0)
+        fraction = self.company_id._rsbu_vat_fraction_at(self._rsbu_move_date())
         if not fraction:
             return 0.0
         advance = template.sudo()._account_or_none('advance_received')
@@ -144,7 +142,7 @@ class AccountPayment(models.Model):
         vat = abs(self.rsbu_vat_amount or 0.0)
         if vat:
             return round(vat, 2)
-        fraction = _ADVANCE_VAT_FRACTION.get(self.company_id.rsbu_vat_mode, 0.0)
+        fraction = self.company_id._rsbu_vat_fraction_at(self._rsbu_move_date())
         if fraction and self._rsbu_payment_is_taxable():
             return round(abs(self.amount) * fraction, 2)
         return 0.0

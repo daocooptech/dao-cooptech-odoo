@@ -6,3 +6,4 @@ from . import coop_deal
 from . import account_move
 from . import upd_legacy
 from . import upd_data
+from . import res_company

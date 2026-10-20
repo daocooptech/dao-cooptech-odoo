@@ -22,7 +22,7 @@
     'depends': [
         'coop_base', 'coop_orgs', 'coop_deals',
         'account', 'l10n_ru', 'l10n_ru_doc', 'l10n_ru_upd_xml', 'l10n_ru_contract',
-        'docx_report', 'rsbu_mapping',
+        'docx_report', 'rsbu_vat',
     ],
     'data': [
         'security/ir.access.csv',

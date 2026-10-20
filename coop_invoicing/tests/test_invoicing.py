@@ -57,6 +57,17 @@ class TestCoopInvoicing(TransactionCase):
         self.assertEqual(self.seller._coop_vat_regime_at(date(2026, 7, 1)), 'usn_5')
         self.assertFalse(self.seller._coop_vat_regime_at(date(2025, 12, 31)))
 
+    def test_rsbu_vat_mode_follows_regime_history(self):
+        # РСБУ-слой считает НДС по режиму организации на дату документа.
+        company = self.seller._coop_ensure_company()
+        self._regime('2026-01-01', 'usn_5')
+        self._regime('2027-01-01', 'general_22')
+        self.assertEqual(company._rsbu_vat_mode_at(date(2026, 12, 31)), 'vat_5')
+        self.assertEqual(company._rsbu_vat_mode_at(date(2027, 1, 1)), 'vat_22')
+        self.assertAlmostEqual(company._rsbu_vat_fraction_at(date(2027, 3, 1)), 22.0 / 122.0)
+        # До первого режима — поле компании, как у выпуска.
+        self.assertEqual(company._rsbu_vat_mode_at(date(2025, 6, 1)), 'vat_exempt')
+
     def test_only_treasury_edits_regime_and_invoices(self):
         with self.assertRaises(AccessError):
             self.env['coop.vat.regime'].with_user(self.member).create(

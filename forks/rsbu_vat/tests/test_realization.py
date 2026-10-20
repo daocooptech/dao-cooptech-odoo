@@ -1,3 +1,4 @@
+import unittest
 # -*- coding: utf-8 -*-
 """Приёмочные тесты рефакторинга «Документ реализации» (Stage 6).
 
@@ -20,7 +21,11 @@ class TestRealizationAcceptance(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        if 'rsbu_signatory_id' not in cls.env['res.company']._fields:
+            # Подписант и реквизиты УПД — из rsbu_reporting_base (К6).
+            raise unittest.SkipTest('нужен rsbu_reporting_base')
         cls.company = cls.env.company
+        cls.company.rsbu_enabled = True  # слой — по флажку организации (К4)
         cls.company.rsbu_vat_mode = 'vat_5'
         # Реквизиты для прохождения _upd_validate (XML/XSD).
         cls.company.partner_id.write({

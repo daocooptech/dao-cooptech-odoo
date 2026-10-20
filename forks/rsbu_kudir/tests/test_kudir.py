@@ -8,6 +8,7 @@ class TestRsbuKudir(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.company = cls.env.company
+        cls.company.rsbu_enabled = True  # слой — по флажку организации (К4)
         cls.partner = cls.env['res.partner'].create({'name': 'Kudir Клиент'})
         cls.journal_bank = cls.env['account.journal'].search(
             [('type', '=', 'bank'), ('company_id', '=', cls.company.id)],

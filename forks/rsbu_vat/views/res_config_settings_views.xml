@@ -10,7 +10,7 @@
                 <block title="НДС на УСН" name="rsbu_vat_setting_container">
                     <setting id="rsbu_vat_mode_setting"
                              string="Режим НДС"
-                             help="Ставка НДС для УСН (освобождён / 5% / 7%)">
+                             help="Для компании без истории режимов. У организации пула режим на дату документа берётся из её карточки (Режим НДС).">
                         <field name="rsbu_vat_mode"/>
                     </setting>
                 </block>

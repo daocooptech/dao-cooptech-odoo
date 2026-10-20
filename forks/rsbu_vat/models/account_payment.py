@@ -9,7 +9,7 @@
 from odoo import models
 
 # Ставочные режимы НДС на УСН (при них начисляется авансовый НДС).
-_VAT_RATE_MODES = ('vat_5', 'vat_7')
+_VAT_RATE_MODES = ('vat_5', 'vat_7', 'vat_22')
 
 
 class AccountPayment(models.Model):
@@ -38,7 +38,7 @@ class AccountPayment(models.Model):
         if getattr(self, '_rsbu_is_calibration', None) \
                 and self._rsbu_is_calibration():
             return
-        if self.company_id.rsbu_vat_mode not in _VAT_RATE_MODES:
+        if self.company_id._rsbu_vat_mode_at(self.date) not in _VAT_RATE_MODES:
             return
         move = self.rsbu_move_id
         if not move:

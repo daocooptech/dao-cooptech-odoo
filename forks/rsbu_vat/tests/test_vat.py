@@ -10,6 +10,7 @@ class TestRsbuVat(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.company = cls.env.company
+        cls.company.rsbu_enabled = True  # слой — по флажку организации (К4)
         cls.partner = cls.env['res.partner'].create({'name': 'Vat Клиент'})
         cls.journal_bank = cls.env['account.journal'].search(
             [('type', '=', 'bank'), ('company_id', '=', cls.company.id)],
@@ -176,6 +177,7 @@ class TestPeriodClosePl(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.company = cls.env.company
+        cls.company.rsbu_enabled = True  # слой — по флажку организации (К4)
         # Изолируем тесты финрезультата от налога УСН (ставка 0 → УСН=0,
         # проводок начисления на 99 не будет).
         cls.company.rsbu_usn_rate = 0.0

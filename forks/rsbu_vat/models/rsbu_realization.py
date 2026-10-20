@@ -3,6 +3,7 @@ from odoo.exceptions import UserError
 
 # Процент ставки налога строки → значение vat_rate счёта-фактуры.
 _PCT_TO_VAT_RATE = [
+    (22.0, 'vat_22'),
     (20.0, 'vat_20'),
     (10.0, 'vat_10'),
     (7.0, 'vat_7'),
@@ -103,9 +104,10 @@ class RsbuRealization(models.Model):
     def create(self, vals_list):
         for vals in vals_list:
             if vals.get('name', '/') == '/':
-                seq = self.env['ir.sequence'].with_company(
+                company = self.env['res.company'].browse(
                     vals.get('company_id') or self.env.company.id)
-                vals['name'] = seq.next_by_code('rsbu.realization') or '/'
+                vals['name'] = self.env['ir.sequence']._rsbu_next_for_company(
+                    'rsbu_vat.seq_rsbu_realization', company, vals.get('date'))
         return super().create(vals_list)
 
     # ------------------------------------------------------------------

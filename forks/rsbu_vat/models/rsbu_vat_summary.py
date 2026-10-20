@@ -28,8 +28,6 @@ class RsbuVatSummary(models.Model):
         for rec in self:
             rec.currency_id = rec.company_id.currency_id
 
-    # Доля НДС в сумме по ставочному режиму (для восстановления базы из НДС).
-    _VAT_FRACTION = {'vat_5': 5.0 / 105.0, 'vat_7': 7.0 / 107.0}
 
     @api.model
     def recompute_period(self, date_from, date_to, company):
@@ -51,7 +49,9 @@ class RsbuVatSummary(models.Model):
         for bl in book_lines:
             data = by_period.setdefault(
                 bl.period_key,
-                {'charged': 0.0, 'deducted': 0.0, 'base': 0.0})
+                {'charged': 0.0, 'deducted': 0.0, 'base': 0.0,
+                 'date': bl.date})
+            data['date'] = max(data['date'], bl.date)
             if bl.book == 'sales':
                 data['charged'] += bl.vat_amount
                 # База из строки, если задана; иначе восстановим ниже по ставке.
@@ -59,10 +59,11 @@ class RsbuVatSummary(models.Model):
             else:
                 data['deducted'] += bl.vat_amount
 
-        fraction = self._VAT_FRACTION.get(company.rsbu_vat_mode, 0.0)
         result = self.browse()
         for period_key, data in by_period.items():
             tax_base = data['base']
+            # Режим НДС — на конец квартала (у выпуска — «сейчас»).
+            fraction = company._rsbu_vat_fraction_at(data['date'])
             # Если база в строках не заполнена — восстановить из НДС по ставке.
             if not tax_base and fraction and data['charged']:
                 # база = НДС / доля − НДС = НДС × (1/доля − 1)

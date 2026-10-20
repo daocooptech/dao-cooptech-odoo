@@ -114,7 +114,7 @@ class RsbuPeriodClose(models.Model):
     def _role_account(self, role):
         rec = self.env['rsbu.operation.template.role'].sudo().search([
             ('role', '=', role),
-            ('company_id', 'in', (False, self.company_id.id)),
+            ('company_id', '=', self.company_id.id),
         ], limit=1)
         return rec.account_id
 
@@ -558,6 +558,12 @@ class RsbuPeriodClose(models.Model):
             if rec._is_year_end():
                 rec.action_reform_balance()
             rec.state = 'done'
+            # Закрытый месяц охраняется датой закрытия периода компании
+            # (rsbu_journal): задним числом в него не провести.
+            company = rec.company_id.sudo()
+            if not company.rsbu_lock_date \
+                    or company.rsbu_lock_date < rec.date_to:
+                company.rsbu_lock_date = rec.date_to
         return True
 
     def _check_can_close(self):
@@ -635,6 +641,19 @@ class RsbuPeriodClose(models.Model):
     def action_reopen(self):
         """Отменить регламентные проводки и вернуть в черновик."""
         for rec in self:
+            later = self.search_count([
+                ('company_id', '=', rec.company_id.id),
+                ('state', '=', 'done'),
+                ('date_from', '>', rec.date_from),
+            ])
+            if later:
+                raise UserError(_(
+                    'Сначала переоткройте более поздние месяцы: '
+                    'переоткрытие идёт в обратном порядке.'))
+            company = rec.company_id.sudo()
+            if company.rsbu_lock_date \
+                    and company.rsbu_lock_date >= rec.date_from:
+                company.rsbu_lock_date = rec.date_from - timedelta(days=1)
             moves = rec.move_ids.sudo()
             posted = moves.filtered(lambda m: m.state == 'posted')
             if posted:

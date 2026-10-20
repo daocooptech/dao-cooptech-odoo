@@ -47,7 +47,8 @@ class RsbuInvoice(models.Model):
 
     vat_rate = fields.Selection(
         selection=[('vat_exempt', 'Без НДС'), ('vat_5', '5%'),
-                   ('vat_7', '7%'), ('vat_20', '20%'), ('vat_10', '10%')],
+                   ('vat_7', '7%'), ('vat_22', '22%'), ('vat_20', '20%'),
+                   ('vat_10', '10%')],
         string='Ставка НДС', default='vat_5')
     base_amount = fields.Monetary(string='Налоговая база',
                                   currency_field='currency_id')
@@ -78,14 +79,13 @@ class RsbuInvoice(models.Model):
     def create(self, vals_list):
         for vals in vals_list:
             if vals.get('name', '/') == '/':
-                seq = self.env['ir.sequence'].with_company(
+                company = self.env['res.company'].browse(
                     vals.get('company_id') or self.env.company.id)
-                vals['name'] = seq.next_by_code('rsbu.invoice') or '/'
+                vals['name'] = self.env['ir.sequence']._rsbu_next_for_company(
+                    'rsbu_vat.seq_rsbu_invoice', company, vals.get('date'))
         return super().create(vals_list)
 
     # ------------------------------------------------------------------
-    # Расчётная доля НДС в авансе по режиму НДС компании.
-    _ADVANCE_VAT_FRACTION = {'vat_5': 5.0 / 105.0, 'vat_7': 7.0 / 107.0}
 
     def _role_account(self, role):
         """Счёт РСБУ по роли маппинга (vat_output/vat_advance) для компании."""
@@ -98,7 +98,7 @@ class RsbuInvoice(models.Model):
         Role = self.env['rsbu.operation.template.role'].sudo()
         rec = Role.search([
             ('role', '=', role),
-            ('company_id', 'in', (False, company.id)),
+            ('company_id', '=', company.id),
         ], limit=1)
         return rec.account_id
 
@@ -114,7 +114,7 @@ class RsbuInvoice(models.Model):
                 or not self._role_account('vat_output'):
             return False
         has_vat = bool(self.vat_amount) or bool(
-            self._ADVANCE_VAT_FRACTION.get(self.company_id.rsbu_vat_mode))
+            self.company_id._rsbu_vat_fraction_at(self._rsbu_move_date()))
         return has_vat
 
     def _rsbu_move_date(self):
@@ -135,8 +135,8 @@ class RsbuInvoice(models.Model):
             return []
         vat = self.vat_amount
         if not vat:
-            fraction = self._ADVANCE_VAT_FRACTION.get(
-                self.company_id.rsbu_vat_mode, 0.0)
+            fraction = self.company_id._rsbu_vat_fraction_at(
+                self._rsbu_move_date())
             vat = round((self.base_amount or 0.0) * fraction, 2)
         if vat <= 0:
             return []
