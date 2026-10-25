@@ -83,7 +83,7 @@ class CoopWarehouseOffer(models.Model):
                               store=True)
     currency_id = fields.Many2one(
         'res.currency', string='Валюта',
-        default=lambda self: self.env.company.currency_id)
+        default=lambda self: self.env.user._coop_acting_partner()._coop_currency())
     main_price = fields.Monetary(
         string='Главная цена', currency_field='currency_id',
         compute='_compute_labels', store=True,

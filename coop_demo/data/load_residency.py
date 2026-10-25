@@ -131,6 +131,7 @@ def load_residency(env):
                                    ('country_id', '=', False)]):
         put(partner, True, True)
     _logger.info('Резидентство участников: %s', counts)
+    load_currency(env)
 
 
 def _org_home_cities():
@@ -144,3 +145,92 @@ def _org_home_cities():
         for row in rows:
             cities.setdefault(row[0], row[1])
     return cities
+
+
+# Валюта участника по стране — решение 482: у нерезидентов не рубли. Курсы —
+# приблизительные, рублей за единицу (осень 2026): курсов в базе нет, а
+# «4 500 юаней» вместо «4 500 рублей» читалось бы как ошибка, поэтому суммы
+# пересчитываются, а не просто меняют знак.
+CURRENCY_BY_COUNTRY = {
+    'CN': 'CNY', 'IN': 'INR', 'BY': 'BYN', 'KZ': 'KZT', 'AE': 'AED', 'TR': 'TRY',
+    'BR': 'BRL', 'ZA': 'ZAR', 'US': 'USD', 'DE': 'EUR', 'FI': 'EUR', 'LV': 'EUR',
+    'UZ': 'USD', 'VN': 'USD', 'AM': 'USD', 'GE': 'USD', 'RS': 'EUR', 'TH': 'USD',
+}
+RUB_PER_UNIT = {
+    'USD': 95.0, 'EUR': 103.0, 'CNY': 13.0, 'INR': 1.1, 'BYN': 29.0, 'KZT': 0.19,
+    'AED': 26.0, 'TRY': 2.8, 'BRL': 17.0, 'ZAR': 5.2,
+}
+# Объявления и проекты — по стороне, от чьего имени размещены.
+LISTINGS = [('coop.resource', 'owner_id'), ('coop.skill.offer', 'partner_id'),
+            ('coop.vacancy', 'partner_id'), ('coop.warehouse.offer', 'owner_id'),
+            ('coop.auction', 'owner_id'), ('coop.intangible', 'owner_id'),
+            ('coop.project', 'partner_id')]
+
+
+def _nice(amount):
+    """Круглая сумма: 346,15 → 350, 1 234 → 1 250, 7,4 → 7."""
+    if not amount:
+        return amount
+    step = 50 if amount >= 1000 else 5 if amount >= 100 else 1
+    return max(step, round(amount / step) * step)
+
+
+def _convert(record, rate):
+    """Денежные поля записи и её строк, у которых валюта — от записи."""
+    values = {name: _nice(record[name] / rate) for name, field in record._fields.items()
+              if field.type == 'monetary' and field.store and not field.compute
+              and not field.related and field.get_currency_field(record) == 'currency_id'
+              and record[name]}
+    for name, field in record._fields.items():
+        if field.type != 'one2many' or not field.store:
+            continue
+        lines = record[name]
+        cur = lines._fields.get('currency_id')
+        if not lines or not cur or not cur.related or cur.related[-1] != 'currency_id':
+            continue
+        for line in lines:
+            line_values = {n: _nice(line[n] / rate) for n, f in line._fields.items()
+                           if f.type == 'monetary' and f.store and not f.compute
+                           and not f.related and line[n]}
+            if line_values:
+                line.write(line_values)
+    return values
+
+
+def load_currency(env):
+    Partner = env['res.partner'].sudo()
+    if 'coop_currency_id' not in Partner._fields:
+        return
+    Currency = env['res.currency'].sudo().with_context(active_test=False)
+    rub = env.ref('base.RUB')
+    codes = set(CURRENCY_BY_COUNTRY.values())
+    currencies = {c.name: c for c in Currency.search([('name', 'in', list(codes))])}
+    for currency in currencies.values():
+        if not currency.active:
+            currency.active = True
+    chosen = 0
+    for partner in Partner.search([('coop_is_participant', '=', True),
+                                   ('coop_currency_id', '=', False)]):
+        if partner._coop_rub_only():
+            continue
+        currency = currencies.get(CURRENCY_BY_COUNTRY.get(partner.country_id.code, 'USD'))
+        if currency:
+            partner.coop_currency_id = currency
+            chosen += 1
+    converted = 0
+    for model, field in LISTINGS:
+        if model not in env or 'currency_id' not in env[model]._fields:
+            continue
+        records = env[model].sudo().with_context(tracking_disable=True).search([
+            ('currency_id', '=', rub.id), (field + '.coop_currency_id', '!=', False)])
+        for record in records:
+            currency = record[field]._coop_currency()
+            rate = RUB_PER_UNIT.get(currency.name)
+            if currency == rub or not rate:
+                continue
+            values = _convert(record, rate)
+            values['currency_id'] = currency.id
+            record.write(values)
+            converted += 1
+    _logger.info('Валюта участников: выбрана у %s, записей пересчитано %s', chosen, converted)
+

@@ -221,7 +221,7 @@ class CoopProject(models.Model):
     # ── Ресурсы проекта ──────────────────────────────────────────────────
     currency_id = fields.Many2one(
         'res.currency', string='Валюта',
-        default=lambda self: self.env.company.currency_id)
+        default=lambda self: self.env.user._coop_acting_partner()._coop_currency())
     required_total = fields.Monetary(
         string='Нужно', currency_field='currency_id', tracking=True,
         help='Денежная оценка всего, что проекту нужно: деньгами, '

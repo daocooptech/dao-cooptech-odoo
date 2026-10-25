@@ -113,6 +113,41 @@ class ResPartner(models.Model):
                     ok=(_('Допустимо: %s.') % ', '.join(names[a].lower() for a in allowed))
                     if allowed else _('Эта форма — не кооператив.')))
 
+    # Валюта участника — решение 482, владелец 20.10.2026: «у граждан рф и
+    # организаций рф должны быть рубли, у других пользователей из других
+    # стран единица валюты ставиться при первом запуске и настройке
+    # аккаунта». Хранится выбор; действующую валюту отдаёт
+    # `_coop_currency()`: у кого рубли без выбора, поле не читается вовсе.
+    coop_currency_id = fields.Many2one(
+        'res.currency', string='Валюта', ondelete='restrict',
+        domain=[('active', '=', True)],
+        help='В ней по умолчанию ставятся цены ваших объявлений. Гражданам '
+             'и организациям России — рубли без выбора.')
+
+    def _coop_rub_only(self):
+        """Рубли без выбора. Здесь — по стране; модуль настроек уточняет по
+        валютному резидентству (гражданин РФ, где бы ни жил)."""
+        self.ensure_one()
+        return not self.country_id or self.country_id.code == 'RU'
+
+    def _coop_currency(self):
+        """Действующая валюта участника."""
+        self.ensure_one()
+        rub = self.env.ref('base.RUB')
+        if self._coop_rub_only():
+            return rub
+        return self.coop_currency_id or rub
+
+    @api.constrains('coop_currency_id')
+    def _check_coop_currency(self):
+        rub = self.env.ref('base.RUB')
+        for partner in self:
+            currency = partner.coop_currency_id
+            if currency and currency != rub and partner._coop_rub_only():
+                raise UserError(_(
+                    'У граждан и организаций России валюта — рубль, другую '
+                    'выбрать нельзя.'))
+
     # Специализация одна на людей и организации: и человек, и кооператив
     # отвечают на один вопрос — чем занимаются. Разводить это на два поля
     # значит немедленно получить две несходящиеся группировки в каталогах.

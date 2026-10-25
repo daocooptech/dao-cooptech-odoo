@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import _, api, models
+from odoo import _, api, fields, models
 
 
 class ResUsers(models.Model):
@@ -11,6 +11,19 @@ class ResUsers(models.Model):
     """
 
     _inherit = 'res.users'
+
+    # Валюта — участника, а не учётной записи: переключившись на
+    # организацию, человек ставит цены в её валюте (решение 482). Здесь —
+    # только его собственная, для вкладки «Язык и регион».
+    coop_currency_id = fields.Many2one(
+        related='partner_id.coop_currency_id', readonly=False)
+    coop_currency_rub_only = fields.Boolean(
+        compute='_compute_coop_currency_rub_only')
+
+    @api.depends('partner_id.country_id', 'partner_id.coop_fx_resident')
+    def _compute_coop_currency_rub_only(self):
+        for user in self:
+            user.coop_currency_rub_only = user.partner_id._coop_rub_only()
 
     @api.model
     def action_coop_open_user_settings(self, view_xmlid, name):

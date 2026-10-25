@@ -96,7 +96,7 @@ class CoopSkillOffer(models.Model):
     rate = fields.Monetary(string='Ставка', currency_field='currency_id')
     currency_id = fields.Many2one(
         'res.currency', string='Валюта',
-        default=lambda self: self.env.company.currency_id)
+        default=lambda self: self.env.user._coop_acting_partner()._coop_currency())
     rate_kind = fields.Selection([
         ('from', 'от'),
         ('exact', 'ровно'),

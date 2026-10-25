@@ -56,7 +56,7 @@ class CoopAuction(models.Model):
     description = fields.Html(string='Описание лота')
 
     currency_id = fields.Many2one(
-        'res.currency', default=lambda self: self.env.company.currency_id)
+        'res.currency', default=lambda self: self.env.user._coop_acting_partner()._coop_currency())
     start_price = fields.Monetary(
         string='Стартовая цена', required=True, currency_field='currency_id',
         help='На повышение — с чего начинаем. В редукционе — потолок, выше '

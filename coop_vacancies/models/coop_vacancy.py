@@ -159,7 +159,7 @@ class CoopVacancy(models.Model):
 
     currency_id = fields.Many2one(
         'res.currency', string='Валюта',
-        default=lambda self: self.env.company.currency_id)
+        default=lambda self: self.env.user._coop_acting_partner()._coop_currency())
     pay_from = fields.Monetary(string='Оплата от', currency_field='currency_id')
     pay_to = fields.Monetary(string='Оплата до', currency_field='currency_id')
     pay_period = fields.Selection([

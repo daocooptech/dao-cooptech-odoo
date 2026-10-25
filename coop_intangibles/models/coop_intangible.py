@@ -83,7 +83,7 @@ class CoopIntangible(models.Model):
     # ── Учёт по ФСБУ 14/2022 ─────────────────────────────────────────────
     currency_id = fields.Many2one(
         'res.currency', string='Валюта',
-        default=lambda self: self.env.company.currency_id)
+        default=lambda self: self.env.user._coop_acting_partner()._coop_currency())
     initial_cost = fields.Monetary(
         string='Первоначальная стоимость', currency_field='currency_id',
         tracking=True,

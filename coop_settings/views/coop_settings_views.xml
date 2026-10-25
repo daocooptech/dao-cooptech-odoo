@@ -426,6 +426,26 @@
               </div>
             </div>
           </div>
+          <!-- Валюта — решение 482: гражданам и организациям России рубли
+               без выбора, остальным — выбор здесь и при первом входе. -->
+          <div class="o_coop_band">
+            <div class="o_coop_band_head">
+              <span>Валюта</span>
+            </div>
+            <div class="o_coop_band_body">
+              <field name="coop_currency_rub_only" invisible="1"/>
+              <div invisible="not coop_currency_rub_only">
+                Рубль. Гражданам и организациям России валюта не выбирается.
+              </div>
+              <group invisible="coop_currency_rub_only">
+                <field name="coop_currency_id" required="not coop_currency_rub_only"
+                       options="{'no_create': True, 'no_open': True}"/>
+              </group>
+              <div class="text-muted">
+                В этой валюте по умолчанию ставятся цены ваших объявлений.
+              </div>
+            </div>
+          </div>
         </sheet>
       </form>
     </field>
