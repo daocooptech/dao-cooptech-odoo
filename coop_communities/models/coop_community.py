@@ -75,7 +75,7 @@ class CoopCommunity(models.Model):
 
     partner_id = fields.Many2one(
         'res.partner', string='Владелец', required=True, index=True,
-        default=lambda self: self.env.user._coop_acting_partner(),
+        default=lambda self: self.env.user._coop_publishing_partner(),
         help='От чьего имени сообщество заведено — человека или организации.')
     author_id = fields.Many2one(
         'res.users', string='Создал', readonly=True,

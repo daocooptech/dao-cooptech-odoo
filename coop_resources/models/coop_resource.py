@@ -208,7 +208,7 @@ class CoopResource(models.Model):
 
     owner_id = fields.Many2one(
         'res.partner', string='Владелец', required=True, index=True,
-        default=lambda self: self.env.user._coop_acting_partner(), tracking=True,
+        default=lambda self: self.env.user._coop_publishing_partner(), tracking=True,
         help='Человек или организация. Обе стороны сделки равноправны, '
              'поэтому владельцем может быть и то и другое.')
     author_id = fields.Many2one(

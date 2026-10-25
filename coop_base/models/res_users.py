@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import _, api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
 
 
 class ResUsers(models.Model):
@@ -130,6 +130,27 @@ class ResUsers(models.Model):
         """
         self.ensure_one()
         return self.coop_acting_as_id or self.partner_id
+
+    def _coop_publishing_partner(self):
+        """От чьего имени человек сейчас размещает объявление, событие, проект.
+
+        Действовать от имени организации можно с любым исполнительным
+        полномочием, а публиковать за неё — только с «Публикациями»: у
+        бухгалтера есть счета, но не витрина. Без этой проверки форма
+        создания открывалась, а сохранение молча упиралось в правило
+        доступа (21.10, ТСН «Прибрежное» на стенде). Умолчание стороны у
+        публикаций берётся отсюда: объяснение — сразу, до заполнения формы.
+        """
+        self.ensure_one()
+        partner = self._coop_acting_partner()
+        if partner not in self.coop_publisher_partner_ids:
+            raise UserError(_(
+                'Публиковать от имени %s нельзя: в этой организации у вас '
+                'нет полномочия «Публикации». Переключитесь на свой профиль '
+                'или попросите руководителя организации выдать это '
+                'полномочие.'
+            ) % partner.display_name)
+        return partner
 
     def _coop_manageable_partner_ids(self):
         """Чьи объявления человек вправе править.

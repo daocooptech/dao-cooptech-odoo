@@ -110,7 +110,7 @@ class CoopVacancy(models.Model):
     # ── Кто ищет ─────────────────────────────────────────────────────────
     partner_id = fields.Many2one(
         'res.partner', string='Кто ищет', required=True, index=True,
-        default=lambda self: self.env.user._coop_acting_partner(), tracking=True,
+        default=lambda self: self.env.user._coop_publishing_partner(), tracking=True,
         help='Человек или организация. Вакансию может разместить и частное '
              'лицо: в макете таких двенадцать из ста.')
     author_id = fields.Many2one(

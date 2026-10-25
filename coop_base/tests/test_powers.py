@@ -6,7 +6,7 @@
 любой правки вычисления, и снаружи расхождение не видно: человек просто
 получает лишнее и молчит об этом.
 """
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tests import tagged
 
 from .common import CoopCase
@@ -86,3 +86,17 @@ class TestPowers(CoopCase):
                          self.publisher.partner_id)
         self.publisher.coop_acting_as_id = self.org
         self.assertEqual(self.publisher._coop_acting_partner(), self.org)
+
+    def test_publikovat_bez_polnomochiya_nelzya(self):
+        """Казначей действует от имени организации, но не публикует за неё.
+
+        Умолчание стороны у публикаций должно сказать это сразу, а не
+        отдать форму, которую потом молча не сохранит правило доступа.
+        """
+        self.treasurer.coop_acting_as_id = self.org
+        with self.assertRaises(UserError):
+            self.treasurer._coop_publishing_partner()
+        self.publisher.coop_acting_as_id = self.org
+        self.assertEqual(self.publisher._coop_publishing_partner(), self.org)
+        self.assertEqual(self.outsider._coop_publishing_partner(),
+                         self.outsider.partner_id)

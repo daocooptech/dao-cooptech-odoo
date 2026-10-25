@@ -207,7 +207,7 @@ class CoopProject(models.Model):
 
     partner_id = fields.Many2one(
         'res.partner', string='Инициатор', required=True, index=True,
-        default=lambda self: self.env.user._coop_acting_partner(), tracking=True,
+        default=lambda self: self.env.user._coop_publishing_partner(), tracking=True,
         help='Человек или организация, которые собирают проект.')
     author_id = fields.Many2one(
         'res.partner', string='Разместил', readonly=True, index=True,

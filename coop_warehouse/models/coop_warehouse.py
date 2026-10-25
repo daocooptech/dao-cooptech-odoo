@@ -86,7 +86,7 @@ class CoopWarehouse(models.Model):
 
     owner_id = fields.Many2one(
         'res.partner', string='Владелец', required=True, index=True,
-        default=lambda self: self.env.user._coop_acting_partner(),
+        default=lambda self: self.env.user._coop_publishing_partner(),
         tracking=True)
     keeper_id = fields.Many2one(
         'res.partner', string='Ответственный за склад',

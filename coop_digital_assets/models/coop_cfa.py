@@ -81,7 +81,7 @@ class CoopCfaIssue(models.Model):
 
     issuer_id = fields.Many2one(
         'res.partner', string='Эмитент', required=True, index=True,
-        default=lambda self: self.env.user._coop_acting_partner(),
+        default=lambda self: self.env.user._coop_publishing_partner(),
         help='Кто выпускает. Обязательства по выпуску несёт он, а не '
              'платформа и не оператор.')
     operator_id = fields.Many2one(

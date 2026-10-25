@@ -58,7 +58,7 @@ class CoopGroupBuy(models.Model):
 
     organizer_id = fields.Many2one(
         'res.partner', string='Организатор', required=True, index=True,
-        default=lambda self: self.env.user._coop_acting_partner(),
+        default=lambda self: self.env.user._coop_publishing_partner(),
         tracking=True,
         help='Находит поставщика, ведёт сбор заказов, принимает партию и '
              'раздаёт её участникам.')

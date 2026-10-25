@@ -52,7 +52,7 @@ class CoopWarehouseOffer(models.Model):
 
     owner_id = fields.Many2one(
         'res.partner', string='Кто разместил', required=True, index=True,
-        default=lambda self: self.env.user._coop_acting_partner(),
+        default=lambda self: self.env.user._coop_publishing_partner(),
         tracking=True)
     warehouse_id = fields.Many2one(
         'coop.warehouse', string='Склад', index=True, ondelete='cascade',

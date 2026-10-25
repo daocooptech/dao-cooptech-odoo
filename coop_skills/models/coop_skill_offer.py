@@ -42,7 +42,7 @@ class CoopSkillOffer(models.Model):
 
     partner_id = fields.Many2one(
         'res.partner', string='Кто предлагает', required=True, index=True,
-        default=lambda self: self.env.user._coop_acting_partner(), tracking=True)
+        default=lambda self: self.env.user._coop_publishing_partner(), tracking=True)
     author_id = fields.Many2one(
         'res.partner', string='Разместил', readonly=True,
         default=lambda self: self.env.user.partner_id, index=True,

@@ -40,7 +40,7 @@ class CoopAuction(models.Model):
 
     owner_id = fields.Many2one(
         'res.partner', string='Организатор', required=True, index=True,
-        default=lambda self: self.env.user._coop_acting_partner(), tracking=True)
+        default=lambda self: self.env.user._coop_publishing_partner(), tracking=True)
     resource_id = fields.Many2one(
         'coop.resource', string='Объявление',
         help='Если лот уже описан объявлением в каталоге ресурсов.')
