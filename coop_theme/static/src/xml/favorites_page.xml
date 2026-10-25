@@ -63,7 +63,7 @@
             <img t-if="p.image" class="o_coop_favorites_post_img" t-att-src="p.image" alt="" loading="lazy"/>
             <button class="o_coop_favorites_unstar" title="Убрать из избранного"
                     t-on-click.stop="() => this.unstar(p)">
-              <i class="oi oi-filled" data-icon="star"/>
+              <CoopIcon name="'bookmark'" size="18"/>
             </button>
           </div>
         </div>

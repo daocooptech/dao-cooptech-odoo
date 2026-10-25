@@ -70,7 +70,7 @@
             <div class="o_coop_thread_main">
               <div class="o_coop_thread_row">
                 <span class="o_coop_thread_name">
-                  <t t-if="thread.coop_pinned">📌 </t>
+                  <CoopIcon t-if="thread.coop_pinned" name="'pin'" size="13"/>
                   <t t-out="thread.displayName"/>
                 </span>
                 <span class="o_coop_thread_time" t-out="this.stampOf(thread)"/>

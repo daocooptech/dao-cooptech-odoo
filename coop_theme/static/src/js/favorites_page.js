@@ -5,6 +5,7 @@ import { deserializeDateTime } from "@web/core/l10n/dates";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { ActionPlugin } from "@web/webclient/actions/action_plugin";
+import { CoopIcon } from "@coop_theme/js/icons";
 
 /**
  * Страница «Избранное» — решение 408.
@@ -16,6 +17,7 @@ import { ActionPlugin } from "@web/webclient/actions/action_plugin";
  */
 export class CoopFavoritesPage extends Component {
     static template = "coop_theme.FavoritesPage";
+    static components = { CoopIcon };
     props = useProps();
 
     setup() {

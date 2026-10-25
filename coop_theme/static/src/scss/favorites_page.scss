@@ -143,9 +143,18 @@
 .o_coop_favorites_unstar {
   border: 0;
   background: none;
-  color: var(--o-color-1, #e4a11b);
-  font-size: 18px;
+  color: var(--coop-teal-dark, #0e4f4a);
   padding: 0 4px;
+  line-height: 0;
+
+  // Отмеченная закладка — как на ленте (`.o_coop_post_act_on`).
+  svg { fill: var(--coop-teal-tint, #e3efed); }
+}
+
+[data-bs-theme="dark"] .o_coop_favorites_unstar {
+  color: var(--coop-teal, #146b64);
+
+  svg { fill: transparent; }
 }
 
 @media (max-width: 575.98px) {

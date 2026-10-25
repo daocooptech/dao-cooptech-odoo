@@ -285,6 +285,13 @@
   color: var(--coop-ink, #14171a);
 }
 
+// Закреплённая переписка — контур `pin` перед названием (ThreadItem).
+.o_coop_thread_name .o_coop_icon {
+  margin-right: 4px;
+  vertical-align: -2px;
+  color: var(--coop-slate, #4a4a44);
+}
+
 .o_coop_thread_unread .o_coop_thread_name {
   font-weight: 700;
 }

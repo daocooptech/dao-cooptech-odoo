@@ -20,6 +20,7 @@ import { DiscussChannel } from "@mail/discuss/core/common/discuss_channel_model"
 import { composerActionsRegistry } from "@mail/core/common/composer_actions";
 import { useSubEnv } from "@web/owl2/utils";
 import { ActionPlugin } from "@web/webclient/actions/action_plugin";
+import { CoopIcon } from "@coop_theme/js/icons";
 
 // Luxon в движке подключён библиотекой, а не модулем: импортировать его
 // нельзя — сборщик не найдёт «luxon», наш файл не определится, и вместе
@@ -367,7 +368,7 @@ for (const [id, label] of Object.entries(ACTION_LABELS)) {
 
 export class CoopMessages extends Component {
     static template = "coop_messages.Messages";
-    static components = { Thread: ThreadComponent, Composer, ActionList, Dropdown };
+    static components = { Thread: ThreadComponent, Composer, ActionList, Dropdown, CoopIcon };
     props = useProps();
 
     setup() {

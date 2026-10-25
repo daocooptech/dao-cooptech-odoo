@@ -244,7 +244,7 @@ class CoopBarterOffer(models.Model):
 
     def _coop_catalog_filters(self, domain):
         categories = self.env['coop.barter.category'].search([])
-        options = [{'value': str(c.id), 'label': '%s %s' % (c.icon or '', c.name)} for c in categories]
+        options = [{'value': str(c.id), 'label': c.name} for c in categories]
         return [
             {'code': 'category', 'label': 'Что отдают', 'widget': 'select', 'field': 'category_id',
              'placeholder': 'Любое', 'options': options, 'number': True},
