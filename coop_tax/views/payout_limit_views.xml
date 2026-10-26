@@ -9,7 +9,7 @@
     <field name="model">coop.tax.payout.limit</field>
     <field name="arch" type="xml">
       <list decoration-danger="remaining &lt; 0" decoration-muted="limit == 0">
-        <field name="year" options="{'format': false}"/>
+        <field name="year" options="{'enable_formatting': false}"/>
         <field name="cooperative_id"/>
         <field name="base_kind" optional="show"/>
         <field name="base" sum="База"/>
@@ -34,7 +34,7 @@
             </button>
           </div>
           <div class="oe_title">
-            <h1>Лимит выплат за <field name="year" class="oe_inline" options="{'format': false}"/> год</h1>
+            <h1>Лимит выплат за <field name="year" class="oe_inline" options="{'enable_formatting': false}"/> год</h1>
           </div>
           <group>
             <group>

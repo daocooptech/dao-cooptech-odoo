@@ -52,7 +52,7 @@
       <!-- Решение 517: за какой год начислено; без лимита того года
            строка подсвечена — начисление ни с чем не сверено. -->
       <xpath expr="//field[@name='move_ids']/list/field[@name='kind']" position="after">
-        <field name="coop_result_year" optional="show" options="{'format': false}"
+        <field name="coop_result_year" optional="show" options="{'enable_formatting': false}"
                invisible="kind != 'accrual'"/>
         <field name="coop_limit_missing" column_invisible="True"/>
       </xpath>
