@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Паевой счёт: «на руки» — за вычетом НДФЛ, и что будет при выходе. -->
+  <record id="view_coop_share_account_form_tax" model="ir.ui.view">
+    <field name="name">coop.share.account.form.tax</field>
+    <field name="model">coop.share.account</field>
+    <field name="inherit_id" ref="coop_wallet.view_coop_share_account_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='paid_out']/.." position="replace">
+        <div class="o_coop_kpi_num">
+          <field name="paid_net" widget="monetary" nolabel="1"/>
+        </div>
+      </xpath>
+      <xpath expr="//div[hasclass('o_coop_kpi')]" position="after">
+        <div class="o_coop_note" invisible="not ndfl_withheld">
+          Выплачено всего <field name="paid_out" widget="monetary" nolabel="1" class="oe_inline"/>,
+          из них удержан НДФЛ <field name="ndfl_withheld" widget="monetary" nolabel="1" class="oe_inline"/>.
+        </div>
+        <group invisible="state == 'closed' or balance &lt;= 0">
+          <group string="Если вернуть пай сейчас">
+            <field name="balance" string="Сумма" widget="monetary"/>
+            <label for="return_ndfl" string="НДФЛ"/>
+            <div>
+              <field name="return_ndfl" widget="monetary" class="oe_inline"/>
+              <span class="text-muted" invisible="not return_rate"> · <field name="return_rate" class="oe_inline"/></span>
+            </div>
+            <field name="return_net" string="На руки" widget="monetary"/>
+          </group>
+        </group>
+        <field name="ndfl_share_base" invisible="1"/>
+        <div class="o_coop_note" invisible="ndfl_share_base != 'excess'">
+          Кооператив удерживает НДФЛ только со сверх внесённого: внесённое
+          возвращается без налога. Минфин считает доходом всю сумму пая,
+          так что риск доначисления — на кооперативе.
+        </div>
+        <div class="o_coop_note" invisible="ndfl_share_base == 'excess'">
+          НДФЛ удерживается со всей суммы выплаты — так велит Минфин
+          (письмо 30.10.2020 № 03-04-05/94934). Удерживает кооператив,
+          платформа только считает.
+        </div>
+      </xpath>
+      <xpath expr="//field[@name='move_ids']/list/field[@name='amount']" position="after">
+        <field name="ndfl_rate" optional="hide"/>
+        <field name="ndfl_amount" sum="НДФЛ" optional="show"
+               invisible="kind not in ('payout', 'return') or state == 'declined'"/>
+        <field name="net_amount" sum="На руки" optional="show"
+               invisible="kind not in ('payout', 'return') or state == 'declined'"/>
+      </xpath>
+    </field>
+  </record>
+
+  <!-- Настройки: ставка по соглашению у человека, выбор узла у кооператива. -->
+  <record id="view_coop_settings_account_form_tax" model="ir.ui.view">
+    <field name="name">coop.settings.account.form.tax</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="coop_settings.view_coop_settings_account_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='coop_tax_resident']" position="after">
+        <field name="coop_tax_treaty_rate" invisible="is_company or coop_tax_resident"/>
+      </xpath>
+      <xpath expr="//field[@name='coop_payout_currency_id']/ancestor::div[hasclass('o_coop_band')][1]" position="after">
+        <field name="coop_is_cooperative" invisible="1"/>
+        <div class="o_coop_band" invisible="not coop_is_cooperative">
+          <div class="o_coop_band_head">
+            <span>Налоговый агент</span>
+          </div>
+          <div class="o_coop_band_body">
+            <div class="text-muted mb-2">
+              Платя пайщикам, кооператив удерживает и перечисляет НДФЛ.
+              Где закон оставил выбор, его делает кооператив, а платформа
+              считает по выбранному.
+            </div>
+            <group>
+              <group>
+                <field name="coop_ndfl_share_base" widget="radio"/>
+              </group>
+            </group>
+            <div class="alert alert-warning" role="alert"
+                 invisible="coop_ndfl_share_base != 'excess'">
+              Минфин считает доходом всю стоимость пая при выходе (письмо
+              30.10.2020 № 03-04-05/94934). Удерживая только со сверх
+              внесённого, кооператив рискует штрафом 20 % от недоудержанного
+              (ст. 123 НК) и пенями.
+            </div>
+          </div>
+        </div>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>
