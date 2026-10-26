@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+  <!-- С 1 января неудержанное за прошлый год становится «не удержан»:
+       удерживать больше нельзя, остаётся сообщение до 25 февраля. -->
+  <record id="cron_close_natural_income_years" model="ir.cron">
+    <field name="name">НДФЛ с натуральных доходов: закрыть прошедший год</field>
+    <field name="model_id" ref="model_coop_tax_natural_income"/>
+    <field name="state">code</field>
+    <field name="code">model._coop_close_years()</field>
+    <field name="interval_number">1</field>
+    <field name="interval_type">days</field>
+  </record>
+</odoo>

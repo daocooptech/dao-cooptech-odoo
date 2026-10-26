@@ -45,6 +45,9 @@
           <group>
             <group>
               <field name="reward_tokens" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="payment_mode" widget="radio" readonly="not coop_can_edit"/>
+              <field name="reward_rub" invisible="payment_mode != 'rub_offset'"/>
+              <field name="payer_id" options="{'no_create': True}" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="coop_specialization_id" options="{'no_create': True}" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="deadline" widget="coop_inline" readonly="not coop_can_edit"/>
             </group>
@@ -93,6 +96,7 @@
         <field name="name"/>
         <field name="coop_specialization_id" optional="show"/>
         <field name="reward_tokens" sum="Всего токенов"/>
+        <field name="payment_mode" optional="show"/>
         <field name="deadline"/>
         <field name="assignee_id"/>
         <field name="application_count" string="Заявок"/>
@@ -168,6 +172,11 @@
                 domain="[('state', 'in', ('assigned', 'submitted'))]"/>
         <filter name="mine" string="Мои задачи"
                 domain="[('assignee_id.user_ids', 'in', [uid])]"/>
+        <separator/>
+        <filter name="pay_offset" string="Цена в ₽, токены зачётом"
+                domain="[('payment_mode', '=', 'rub_offset')]"/>
+        <filter name="pay_tokens" string="Токенами"
+                domain="[('payment_mode', '=', 'tokens')]"/>
         <separator/>
         <filter name="overdue" string="Просроченные"
                 domain="[('deadline', '&lt;', context_today().strftime('%Y-%m-%d')),

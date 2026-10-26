@@ -25,6 +25,12 @@ class CoopShareMove(models.Model):
     ndfl_rate = fields.Char(string='Ставка', readonly=True)
     net_amount = fields.Monetary(
         string='На руки', currency_field='currency_id', readonly=True)
+    # Решение 515: НДФЛ с вознаграждений токенами удерживается из
+    # ближайшей денежной выплаты того же агента — не больше половины.
+    natural_withheld = fields.Monetary(
+        string='НДФЛ с натуральных доходов', currency_field='currency_id', readonly=True,
+        help='Удержан из этой выплаты за вознаграждения токенами, по '
+             'которым налог исчислен, но удержать было не из чего.')
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -42,8 +48,18 @@ class CoopShareMove(models.Model):
         return result
 
     def _coop_tax_fill(self):
+        Income = self.env['coop.tax.natural.income'].sudo()
         for move in self.sorted(lambda m: (m.date, m.id)):
-            move.write(move._coop_tax_values())
+            values = move._coop_tax_values()
+            withheld = move.natural_withheld
+            if move.state == 'confirmed' and not withheld and values['net_amount'] > 0:
+                withheld = Income._coop_withhold(
+                    move.account_id.partner_id, move.account_id.cooperative_id,
+                    values['net_amount'], move.date,
+                    '%s от %s' % (move.name, move.date.strftime('%d.%m.%Y')))
+            values['natural_withheld'] = withheld
+            values['net_amount'] -= withheld
+            move.write(values)
 
     def _coop_tax_values(self):
         """НДФЛ с этого движения, если провести его сейчас."""
@@ -81,13 +97,13 @@ class CoopShareAccount(models.Model):
         compute='_compute_return_preview')
     return_rate = fields.Char(string='Ставка при возврате', compute='_compute_return_preview')
 
-    @api.depends('move_ids.ndfl_amount', 'move_ids.net_amount', 'move_ids.state',
-                 'move_ids.kind', 'paid_out')
+    @api.depends('move_ids.ndfl_amount', 'move_ids.natural_withheld',
+                 'move_ids.net_amount', 'move_ids.state', 'move_ids.kind', 'paid_out')
     def _compute_ndfl_totals(self):
         for record in self:
             paid = record.move_ids.filtered(
                 lambda m: m.state == 'confirmed' and m.kind in PAID)
-            record.ndfl_withheld = sum(paid.mapped('ndfl_amount'))
+            record.ndfl_withheld = sum(paid.mapped('ndfl_amount'))                 + sum(paid.mapped('natural_withheld'))
             record.paid_net = record.paid_out - record.ndfl_withheld
 
     @api.depends('balance', 'cooperative_id.coop_ndfl_share_base',

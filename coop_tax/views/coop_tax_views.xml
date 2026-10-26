@@ -44,6 +44,8 @@
         <field name="ndfl_rate" optional="hide"/>
         <field name="ndfl_amount" sum="НДФЛ" optional="show"
                invisible="kind not in ('payout', 'return') or state == 'declined'"/>
+        <field name="natural_withheld" sum="С натуральных доходов" optional="hide"
+               invisible="not natural_withheld"/>
         <field name="net_amount" sum="На руки" optional="show"
                invisible="kind not in ('payout', 'return') or state == 'declined'"/>
       </xpath>
@@ -76,6 +78,10 @@
                 <field name="coop_ndfl_share_base" widget="radio"/>
               </group>
             </group>
+            <button name="%(coop_tax.action_coop_tax_natural_income)d" type="action"
+                    class="btn-link ps-0" icon="fa-list"
+                    string="Реестр доходов в натуральной форме"
+                    context="{'search_default_agent_id': id}"/>
             <div class="alert alert-warning" role="alert"
                  invisible="coop_ndfl_share_base != 'excess'">
               Минфин считает доходом всю стоимость пая при выходе (письмо

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="view_coop_tax_natural_income_list" model="ir.ui.view">
+    <field name="name">coop.tax.natural.income.list</field>
+    <field name="model">coop.tax.natural.income</field>
+    <field name="arch" type="xml">
+      <list string="Доходы в натуральной форме" create="false">
+        <header>
+          <button name="action_fns_message" type="object" string="Сообщение в налоговую"
+                  class="btn-primary"/>
+        </header>
+        <field name="date"/>
+        <field name="partner_id"/>
+        <field name="name" optional="show"/>
+        <field name="agent_id" optional="show"/>
+        <field name="currency_id" column_invisible="1"/>
+        <field name="amount" sum="Доход"/>
+        <field name="rate" optional="hide"/>
+        <field name="ndfl_amount" sum="Исчислен"/>
+        <field name="withheld" sum="Удержан"/>
+        <field name="remaining" sum="Не удержан"/>
+        <field name="reported_on" optional="show"/>
+        <field name="state" widget="badge"
+               decoration-success="state == 'withheld'"
+               decoration-info="state == 'calculated'"
+               decoration-danger="state == 'not_withheld' and not reported_on"
+               decoration-warning="state == 'not_withheld' and reported_on"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_tax_natural_income_form" model="ir.ui.view">
+    <field name="name">coop.tax.natural.income.form</field>
+    <field name="model">coop.tax.natural.income</field>
+    <field name="arch" type="xml">
+      <form string="Доход в натуральной форме" create="false">
+        <header>
+          <field name="state" widget="statusbar"/>
+        </header>
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="name" readonly="1"/></h1>
+          </div>
+          <group>
+            <group>
+              <field name="partner_id" readonly="1"/>
+              <field name="agent_id" readonly="1"/>
+              <field name="task_id" readonly="1"/>
+              <field name="date" readonly="1"/>
+            </group>
+            <group>
+              <field name="currency_id" invisible="1"/>
+              <field name="tokens" readonly="1"/>
+              <field name="amount" readonly="1"/>
+              <field name="rate" readonly="1"/>
+              <field name="ndfl_amount" readonly="1"/>
+              <field name="withheld" readonly="1"/>
+              <field name="withheld_note" readonly="1" invisible="not withheld_note"/>
+              <field name="remaining"/>
+              <field name="reported_on" readonly="1"/>
+            </group>
+          </group>
+          <div class="text-muted">
+            Вознаграждение токенами — доход в натуральной форме. Налог
+            исчисляется в день приёмки работы и удерживается из ближайшей
+            денежной выплаты тому же человеку, не больше половины выплаты.
+            Что не удержано до конца года, сообщается человеку и в налоговую
+            до 25 февраля следующего года.
+          </div>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_tax_natural_income_search" model="ir.ui.view">
+    <field name="name">coop.tax.natural.income.search</field>
+    <field name="model">coop.tax.natural.income</field>
+    <field name="arch" type="xml">
+      <search string="Доходы в натуральной форме">
+        <field name="partner_id"/>
+        <field name="agent_id"/>
+        <field name="task_id"/>
+        <filter name="calculated" string="Исчислен" domain="[('state', '=', 'calculated')]"/>
+        <filter name="withheld" string="Удержан" domain="[('state', '=', 'withheld')]"/>
+        <filter name="not_withheld" string="Не удержан" domain="[('state', '=', 'not_withheld')]"/>
+        <separator/>
+        <filter name="to_report" string="Сообщить в налоговую"
+                domain="[('state', '=', 'not_withheld'), ('reported_on', '=', False)]"/>
+        <group>
+          <filter name="by_year" string="По году" context="{'group_by': 'year'}"/>
+          <filter name="by_agent" string="По агенту" context="{'group_by': 'agent_id'}"/>
+          <filter name="by_state" string="По состоянию" context="{'group_by': 'state'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_tax_natural_income" model="ir.actions.act_window">
+    <field name="name">Доходы в натуральной форме</field>
+    <field name="res_model">coop.tax.natural.income</field>
+    <field name="view_mode">list,form</field>
+    <field name="context">{'search_default_by_year': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Доходов в натуральной форме нет</p>
+      <p>Сюда попадают задачи, оплаченные сразу токенами: по каждой —
+        исчисленный, удержанный и не удержанный НДФЛ.</p>
+    </field>
+  </record>
+
+  <!-- На задаче, оплаченной токенами, — сколько НДФЛ и в каком он
+       состоянии: автор видит налог там же, где назначил способ оплаты. -->
+  <record id="view_coop_bounty_task_form_tax" model="ir.ui.view">
+    <field name="name">coop.bounty.task.form.tax</field>
+    <field name="model">coop.bounty.task</field>
+    <field name="inherit_id" ref="coop_bounty.view_coop_bounty_task_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='payer_id']" position="after">
+        <field name="natural_currency_id" invisible="1"/>
+        <field name="natural_ndfl" invisible="not natural_income_ids"/>
+        <field name="natural_ndfl_state" invisible="not natural_income_ids"/>
+        <field name="natural_income_ids" invisible="1"/>
+      </xpath>
+    </field>
+  </record>
+
+  <menuitem id="menu_coop_tax_natural_income" name="НДФЛ с натуральных доходов"
+            parent="coop_wallet.menu_coop_wallet_root"
+            action="action_coop_tax_natural_income" sequence="55"/>
+
+</odoo>

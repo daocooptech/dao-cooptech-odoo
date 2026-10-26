@@ -35,6 +35,28 @@ class CoopBountyTask(models.Model):
         string='Вознаграждение, токенов', required=True, tracking=True,
         help='Зачисляется исполнителю в кошелёк после приёмки работы.')
 
+    # Решение 515: как платить, выбирает автор задачи. Разница налоговая:
+    # цена в рублях с зачётом токенами — денежный доход на дату зачёта
+    # (пп. 4 п. 1 ст. 223 НК), сразу токенами — натуральный (пп. 2 п. 1
+    # ст. 223), его НДФЛ удерживать не из чего, и он идёт в реестр.
+    payment_mode = fields.Selection([
+        ('rub_offset', 'Цена в ₽, токены зачётом'),
+        ('tokens', 'Токенами'),
+    ], string='Способ оплаты', default='rub_offset', required=True, tracking=True,
+        help='Цена в рублях, токены зачётом — исполнитель получает денежный '
+             'доход на дату зачёта. Токенами — доход в натуральной форме: '
+             'НДФЛ исчисляет тот, кто платит, и удерживает из ближайшей '
+             'денежной выплаты, а не удержанное сообщает в налоговую.')
+    reward_rub = fields.Integer(
+        string='Цена, ₽', compute='_compute_reward_rub',
+        help='1 токен = 1 ₽ (решение 249).')
+    payer_id = fields.Many2one(
+        'res.partner', string='Кто платит', tracking=True,
+        default=lambda self: self.env.company.partner_id,
+        domain=[('is_company', '=', True)],
+        help='Организация, от имени которой опубликована задача: она '
+             'выплачивает вознаграждение и по нему — налоговый агент.')
+
     coop_specialization_id = fields.Many2one(
         'coop.specialization', string='Специализация',
         help='По ней задача находится теми, кто умеет её делать.')
@@ -76,6 +98,11 @@ class CoopBountyTask(models.Model):
         ('rejected', 'Заявка отклонена'),
     ], string='Моя заявка', compute='_compute_my_application')
     is_mine = fields.Boolean(string='Я исполнитель', compute='_compute_my_application')
+
+    @api.depends('reward_tokens')
+    def _compute_reward_rub(self):
+        for record in self:
+            record.reward_rub = record.reward_tokens
 
     @api.depends('application_ids')
     def _compute_application_count(self):

@@ -10,13 +10,20 @@
 Где закон оставил выбор, выбирает узел (решения 513, 514, 517): с какой
 суммы пая удерживать НДФЛ при выходе, платить ли взносы на травматизм с
 выплат членам, от чего считать потолок кооперативных выплат.
+
+Задача, оплаченная сразу токенами, — доход в натуральной форме
+(решение 515): реестр с исчисленным, удержанным и не удержанным НДФЛ,
+удержание из ближайшей выплаты пая и сообщение в налоговую.
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.0.0',
+    'version': '20.0.1.1.0',
     'license': 'LGPL-3',
-    'depends': ['coop_base', 'coop_wallet', 'coop_settings'],
+    'depends': ['coop_base', 'coop_wallet', 'coop_settings', 'coop_bounty'],
     'data': [
+        'security/ir.access.csv',
+        'data/coop_tax_cron.xml',
+        'views/natural_income_views.xml',
         'views/coop_tax_views.xml',
     ],
     'post_init_hook': 'post_init_hook',
