@@ -49,6 +49,16 @@
         <field name="net_amount" sum="На руки" optional="show"
                invisible="kind not in ('payout', 'return') or state == 'declined'"/>
       </xpath>
+      <!-- Решение 517: за какой год начислено; без лимита того года
+           строка подсвечена — начисление ни с чем не сверено. -->
+      <xpath expr="//field[@name='move_ids']/list/field[@name='kind']" position="after">
+        <field name="coop_result_year" optional="show" options="{'format': false}"
+               invisible="kind != 'accrual'"/>
+        <field name="coop_limit_missing" column_invisible="True"/>
+      </xpath>
+      <xpath expr="//field[@name='move_ids']/list" position="attributes">
+        <attribute name="decoration-warning">coop_limit_missing and state != 'declined'</attribute>
+      </xpath>
     </field>
   </record>
 
@@ -77,11 +87,18 @@
               <group>
                 <field name="coop_ndfl_share_base" widget="radio"/>
               </group>
+              <group>
+                <field name="coop_payout_limit_base" widget="radio"/>
+              </group>
             </group>
             <button name="%(coop_tax.action_coop_tax_natural_income)d" type="action"
                     class="btn-link ps-0" icon="fa-list"
                     string="Реестр доходов в натуральной форме"
                     context="{'search_default_agent_id': id}"/>
+            <button name="%(coop_tax.action_coop_tax_payout_limit)d" type="action"
+                    class="btn-link ps-0" icon="fa-balance-scale"
+                    string="Лимит кооперативных выплат по годам"
+                    context="{'search_default_cooperative_id': id, 'default_cooperative_id': id}"/>
             <div class="alert alert-warning" role="alert"
                  invisible="coop_ndfl_share_base != 'excess'">
               Минфин считает доходом всю стоимость пая при выходе (письмо

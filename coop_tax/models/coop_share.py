@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
+from odoo.tools.misc import format_amount
 
 from .ndfl import ndfl
 
@@ -31,6 +33,57 @@ class CoopShareMove(models.Model):
         string='НДФЛ с натуральных доходов', currency_field='currency_id', readonly=True,
         help='Удержан из этой выплаты за вознаграждения токенами, по '
              'которым налог исчислен, но удержать было не из чего.')
+    # Решение 517: начисление по итогам года сверяется с лимитом того
+    # года, за который начислено, — обычно прошлого.
+    coop_result_year = fields.Integer(
+        string='По итогам года', compute='_compute_coop_result_year',
+        store=True, readonly=False, index=True,
+        help='За какой год начислено. Начисление сверяется с лимитом '
+             'кооперативных выплат этого года.')
+    coop_limit_missing = fields.Boolean(compute='_compute_coop_limit_missing')
+
+    @api.depends('kind', 'date')
+    def _compute_coop_result_year(self):
+        for move in self:
+            if move.kind == 'accrual' and move.date and not move.coop_result_year:
+                move.coop_result_year = move.date.year - 1
+            elif move.kind != 'accrual':
+                move.coop_result_year = 0
+
+    @api.depends('kind', 'coop_result_year', 'account_id.cooperative_id')
+    def _compute_coop_limit_missing(self):
+        Limit = self.env['coop.tax.payout.limit'].sudo()
+        for move in self:
+            move.coop_limit_missing = move.kind == 'accrual' and not Limit.search_count([
+                ('cooperative_id', '=', move.account_id.cooperative_id.id),
+                ('year', '=', move.coop_result_year)])
+
+    @api.constrains('kind', 'amount', 'state', 'coop_result_year', 'account_id')
+    def _check_payout_limit(self):
+        """Проведённые начисления за год — не больше лимита этого года.
+
+        Лимит не внесён — начисление проходит, а на нём предупреждение:
+        год ещё не закрыт или бухгалтер не внёс базу. Запрет без базы
+        остановил бы все начисления до закрытия года.
+        """
+        Limit = self.env['coop.tax.payout.limit'].sudo()
+        for move in self.filtered(lambda m: m.kind == 'accrual' and m.state == 'confirmed'):
+            limit = Limit.search([
+                ('cooperative_id', '=', move.account_id.cooperative_id.id),
+                ('year', '=', move.coop_result_year)], limit=1)
+            # Начислено считается поиском, без зависимостей: значение в
+            # кэше могло застать год без этого движения.
+            limit.invalidate_recordset(['accrued', 'remaining'])
+            if limit and limit.remaining < -0.005:
+                raise ValidationError(_(
+                    'Начисления по итогам %(year)s года превышают лимит '
+                    'кооперативных выплат: можно %(limit)s, начислено бы '
+                    '%(accrued)s. Лимит — 20 %% от базы по уставу, но не '
+                    'больше нераспределённой прибыли после фондов (п. 2 '
+                    'ст. 24 закона 3085-1).',
+                    year=move.coop_result_year,
+                    limit=format_amount(self.env, limit.limit, limit.currency_id),
+                    accrued=format_amount(self.env, limit.accrued, limit.currency_id)))
 
     @api.model_create_multi
     def create(self, vals_list):

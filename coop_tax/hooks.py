@@ -33,6 +33,57 @@ def post_init_hook(env):
     moves = env['coop.share.move'].search([('kind', 'in', ('payout', 'return'))])
     moves._coop_tax_fill()
     demo_natural_income(env)
+    demo_payout_limits(env)
+
+
+def demo_payout_limits(env):
+    """Лимит кооперативных выплат по годам (решение 517).
+
+    Каждый пятый кооператив считает от доходов после обязательных
+    платежей, остальные — от чистой прибыли. Итоги 2024 и 2025 годов — у
+    всех, кроме тех, кто 2025 ещё не закрыл; 2022–2023 — там, где за них
+    начисляли. Потолок подогнан под проведённые начисления с запасом,
+    у трёх лет начислено сверх лимита (до появления контроля), в
+    убыточные годы выплат нет.
+    """
+    Limit = env['coop.tax.payout.limit'].sudo()
+    if Limit.search_count([]):
+        return
+    rng = random.Random(517)
+    accounts = env['coop.share.account'].sudo().search([])
+    coops = accounts.mapped('cooperative_id').sorted('id')
+    coops.filtered(lambda c: c.id % 5 == 0).write({'coop_payout_limit_base': 'income_after_taxes'})
+    accrued = {}
+    for move in env['coop.share.move'].sudo().search([
+            ('kind', '=', 'accrual'), ('state', '=', 'confirmed')]):
+        key = (move.account_id.cooperative_id.id, move.coop_result_year)
+        accrued[key] = accrued.get(key, 0.0) + move.amount
+    open_2025 = set(rng.sample(coops.ids, min(8, len(coops))))
+    keys = [(coop, year) for coop in coops for year in (2024, 2025)
+            if not (year == 2025 and coop.id in open_2025)]
+    keys += [(coop, year) for coop in coops for year in (2022, 2023)
+             if accrued.get((coop.id, year))]
+    over = set(rng.sample([k for k in keys if accrued.get((k[0].id, k[1]))], 3))
+    for coop, year in sorted(keys, key=lambda k: (k[1], k[0].id)):
+        done = accrued.get((coop.id, year), 0.0)
+        if not done and rng.random() < 0.15:
+            net, income, retained = 0.0, rng.randrange(2, 30) * 100000.0, 0.0
+        else:
+            net = rng.randrange(15, 400) * 10000.0
+            income = net * rng.uniform(2.5, 7.0)
+            retained = net * rng.uniform(0.55, 0.9)
+            base = net if coop.coop_payout_limit_base == 'net_profit' else income
+            limit = min(0.2 * base, retained)
+            if done:
+                target = done * (rng.uniform(0.7, 0.9) if (coop, year) in over
+                                 else rng.uniform(1.1, 3.0))
+                scale = target / limit
+                net, income, retained = net * scale, income * scale, retained * scale
+        Limit.create({
+            'cooperative_id': coop.id, 'year': year,
+            'net_profit': round(net, -3), 'income_after_taxes': round(income, -3),
+            'retained': round(retained, -3),
+        })
 
 
 def demo_natural_income(env):

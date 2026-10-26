@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Решение 517: лимит кооперативных выплат по годам. Бухгалтер вносит
+       три числа после закрытия года, платформа считает потолок и сверяет
+       с ним начисления. -->
+  <record id="view_coop_tax_payout_limit_list" model="ir.ui.view">
+    <field name="name">coop.tax.payout.limit.list</field>
+    <field name="model">coop.tax.payout.limit</field>
+    <field name="arch" type="xml">
+      <list decoration-danger="remaining &lt; 0" decoration-muted="limit == 0">
+        <field name="year" options="{'format': false}"/>
+        <field name="cooperative_id"/>
+        <field name="base_kind" optional="show"/>
+        <field name="base" sum="База"/>
+        <field name="retained" optional="hide"/>
+        <field name="limit" sum="Можно начислить"/>
+        <field name="accrued"/>
+        <field name="remaining"/>
+        <field name="currency_id" column_invisible="True"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_tax_payout_limit_form" model="ir.ui.view">
+    <field name="name">coop.tax.payout.limit.form</field>
+    <field name="model">coop.tax.payout.limit</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <div class="oe_button_box" name="button_box">
+            <button name="action_open_accruals" type="object" class="oe_stat_button" icon="fa-list">
+              <field name="accrued" widget="statinfo" string="Начислено"/>
+            </button>
+          </div>
+          <div class="oe_title">
+            <h1>Лимит выплат за <field name="year" class="oe_inline" options="{'format': false}"/> год</h1>
+          </div>
+          <group>
+            <group>
+              <field name="cooperative_id" options="{'no_create': True}"/>
+              <field name="base_kind" widget="radio"/>
+            </group>
+            <group string="Итоги года">
+              <field name="net_profit" required="base_kind == 'net_profit'"/>
+              <field name="income_after_taxes" required="base_kind == 'income_after_taxes'"/>
+              <field name="retained"/>
+            </group>
+          </group>
+          <group>
+            <group string="Лимит">
+              <field name="base"/>
+              <field name="limit"/>
+              <field name="accrued"/>
+              <field name="remaining" decoration-danger="remaining &lt; 0"/>
+            </group>
+          </group>
+          <field name="currency_id" invisible="1"/>
+          <div class="o_coop_note">
+            Кооперативные выплаты «не должны превышать 20 процентов от
+            доходов» (п. 2 ст. 24 закона 3085-1). Что считать доходами,
+            закон не говорит — базу выбирает кооператив в уставе. При любой
+            базе выплатить больше нераспределённой прибыли после фондов
+            нельзя. Начисление сверх лимита не проводится.
+          </div>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_tax_payout_limit_search" model="ir.ui.view">
+    <field name="name">coop.tax.payout.limit.search</field>
+    <field name="model">coop.tax.payout.limit</field>
+    <field name="arch" type="xml">
+      <search>
+        <field name="cooperative_id"/>
+        <field name="year"/>
+        <filter name="net_profit" string="От чистой прибыли" domain="[('base_kind', '=', 'net_profit')]"/>
+        <filter name="income_after_taxes" string="От доходов после платежей"
+                domain="[('base_kind', '=', 'income_after_taxes')]"/>
+        <separator/>
+        <filter name="no_payout" string="Выплат нет" domain="[('limit', '=', 0)]"/>
+        <group>
+          <filter name="by_year" string="По году" context="{'group_by': 'year'}"/>
+          <filter name="by_cooperative" string="По кооперативу" context="{'group_by': 'cooperative_id'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_tax_payout_limit" model="ir.actions.act_window">
+    <field name="name">Лимит кооперативных выплат</field>
+    <field name="res_model">coop.tax.payout.limit</field>
+    <field name="view_mode">list,form</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Лимит ещё не внесён</p>
+      <p>После закрытия года бухгалтер кооператива вносит чистую прибыль,
+        доходы после обязательных платежей и нераспределённую прибыль после
+        фондов. Платформа считает, сколько можно начислить пайщикам.</p>
+    </field>
+  </record>
+
+  <menuitem id="menu_coop_tax_payout_limit" name="Лимит кооперативных выплат"
+            parent="coop_wallet.menu_coop_wallet_root"
+            action="action_coop_tax_payout_limit" sequence="56"/>
+
+</odoo>

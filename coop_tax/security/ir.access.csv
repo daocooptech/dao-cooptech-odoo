@@ -2,3 +2,6 @@ id,name,model_id,group_id/id,operation,domain
 rule_natural_income_own,Свои доходы в натуральной форме,coop.tax.natural.income,base.group_user,r,"[('partner_id', 'in', user.coop_actor_partner_ids.ids)]"
 rule_natural_income_agent,Реестр своей организации — налоговый агент,coop.tax.natural.income,base.group_user,cru,"[('agent_id', 'in', user.coop_treasury_partner_ids.ids)]"
 rule_natural_income_admin,Реестр натуральных доходов — администратор,coop.tax.natural.income,base.group_system,crud,
+rule_payout_limit_member,Лимит выплат своего кооператива — пайщик,coop.tax.payout.limit,base.group_user,r,"[('cooperative_id', 'in', user.coop_share_cooperative_ids.ids)]"
+rule_payout_limit_agent,Лимит выплат своего кооператива — счета,coop.tax.payout.limit,base.group_user,cru,"[('cooperative_id', 'in', user.coop_treasury_partner_ids.ids)]"
+rule_payout_limit_admin,Лимит кооперативных выплат — администратор,coop.tax.payout.limit,base.group_system,crud,
