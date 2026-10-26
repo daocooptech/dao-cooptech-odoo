@@ -36,6 +36,10 @@ from .fed_identity import utc_now
 
 _logger = logging.getLogger(__name__)
 
+# Государства — члены ЕАЭС: шифровальные средства между ними — без
+# нотификации (Положение ЕЭК № 30 — о торговле с третьими странами).
+EAEU = {'RU', 'BY', 'KZ', 'AM', 'KG'}
+
 CONNECT_TIMEOUT = 5
 READ_TIMEOUT = 15
 PAGE = 200
@@ -67,7 +71,41 @@ class CoopFedPeer(models.Model):
     event_count = fields.Integer('Событий принято', compute='_compute_event_count')
     divergence_ids = fields.One2many('coop.fed.divergence', 'peer_id', string='Расхождения')
 
+    # Чек-лист подключения узла (решения 501, 502). Сборка узла передаётся
+    # с шифрованием вложений, поэтому изъятие п. 3 «в» ПП № 313 к ней не
+    # применяется: передаёт оператор-лицензиат ФСБ (пп. 21 и 25 Положения).
+    # Узлу в третьей стране — ещё нотификация ЕАЭС (Положение ЕЭК № 30,
+    # п. 5): для КНР нужна, для Беларуси и Казахстана нет.
+    check_crypto = fields.Boolean(
+        'Сборка передана лицензиатом ФСБ',
+        help='Сборка узла содержит шифрование вложений. Передаёт её оператор — '
+             'лицензиат ФСБ по пп. 21 и 25 Положения о лицензировании, '
+             'утверждённого постановлением Правительства РФ № 313.')
+    eaeu_notice_needed = fields.Boolean(
+        'Нужна нотификация ЕАЭС', compute='_compute_eaeu_notice_needed')
+    check_eaeu_notice = fields.Boolean(
+        'Нотификация ЕАЭС в едином реестре',
+        help='Ввоз и вывоз шифровального средства в торговле с третьими странами — '
+             'при наличии нотификации в едином реестре нотификаций (решение '
+             'Коллегии ЕЭК № 30, приложение № 9, п. 5).')
+    messages_foreign = fields.Boolean(
+        'Узел за рубежом', compute='_compute_eaeu_notice_needed',
+        help='Переписка с участием граждан и организаций России на этот узел не '
+             'уходит — только события сделок (ч. 3 ст. 10.1 149-ФЗ).')
+    checklist_done = fields.Boolean(
+        'Чек-лист пройден', compute='_compute_eaeu_notice_needed')
+
     _did_uniq = models.Constraint('unique(did)', 'Такой сосед уже есть.')
+
+    @api.depends('country_id', 'check_crypto', 'check_eaeu_notice')
+    def _compute_eaeu_notice_needed(self):
+        # Страна не объявлена — считаем узел зарубежным и вне ЕАЭС: строже.
+        for peer in self:
+            code = peer.country_id.code or ''
+            peer.eaeu_notice_needed = code not in EAEU
+            peer.messages_foreign = code != 'RU'
+            peer.checklist_done = peer.check_crypto and (
+                peer.check_eaeu_notice or not peer.eaeu_notice_needed)
 
     @api.constrains('did')
     def _check_did(self):

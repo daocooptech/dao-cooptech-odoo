@@ -12,16 +12,20 @@
 резидентству сторон`, раздел 12): первое сработавшее запрещающее
 выигрывает, предупреждающие показываются со сноской, остальное разрешено.
 Цена — из справочника способов (`coop.settlement.method.cost_hint`,
-разбор бухгалтера). Перечень стран, с резидентами которых сделки сейчас
-невозможны, — данные с датой и основанием, а не константа в коде.
+разбор бухгалтера). Перечень 430-р — данные с датой и основанием, а не
+константа в коде.
 
 Слов «недружественное государство» на экранах платформы нет (решение 427).
-Текст — юриста (решение 428, владелец 28.09.2026: «да менять»): сделки не
-«невозможны по закону» — ограничены отдельные виды расчётов, — а платформа
-их сейчас не проводит. Внутренние имена полей остались прежними — их никто
-не читает.
+Общего значка «Сделки временно недоступны» (решение 428) больше нет
+(решение 500, владелец 26.10.2026: «как в указах»): с 01.10.2026 платформа
+не вправе ограничивать доступ, кроме случаев, прямо названных законом
+(ч. 2 ст. 3 289-ФЗ), а само 430-р ничего не запрещает. Закрываются только
+виды сделок, которые ограничивают указы, — и только по гражданству и месту
+регистрации стороны (Указ № 95, п. 1), а не по стране проживания. Внутренние
+имена полей остались прежними — их никто не читает.
 """
 from odoo import api, fields, models
+from odoo.exceptions import UserError
 
 # Распоряжение Правительства РФ от 05.03.2022 № 430-р (с изменениями).
 # Коды ISO; ЕС — все 27 государств-членов. Сверить с актуальной редакцией
@@ -40,6 +44,17 @@ UNFRIENDLY = {
 UNFRIENDLY_SINCE = '2022-03-05'
 UNFRIENDLY_BASIS = 'Распоряжение Правительства РФ от 05.03.2022 № 430-р (с изменениями)'
 
+# Что закрывают указы (решение 500). Тексты прочитаны 26.10.2026:
+# Указ № 81 — base.garant.ru/403590982, Указ № 95 — consultant.ru,
+# cons_doc_LAW_410994. Ценных бумаг на платформе нет, а займы и
+# недвижимость — есть: кредитная сделка и продажа объекта недвижимости.
+DECREE_81 = 'Указ Президента РФ от 01.03.2022 № 81'
+DECREE_95 = 'Указ Президента РФ от 05.03.2022 № 95'
+DECREE_95_LIMIT = 10_000_000        # Указ № 95, п. 2: свыше 10 млн ₽ в месяц
+REAL_ESTATE_ROOT = 'Недвижимость'   # корень дерева категорий ресурсов
+# Способы, при которых у получателя возникает право собственности.
+OWNERSHIP_WAYS = ('sale', 'purchase', 'batch', 'exchange', 'gift')
+
 REGISTRATION_THRESHOLD = 3_000_000  # постановка контракта на учёт, Инструкция ЦБ 181-И
 GIFT_LIMIT = 3000                   # п. 1 ст. 575 ГК
 
@@ -47,10 +62,12 @@ class ResCountry(models.Model):
     _inherit = 'res.country'
 
     coop_unfriendly = fields.Boolean(
-        string='Сделки временно недоступны',
-        help='В данный момент сделки с участниками из этой страны на платформе '
-             'не проводятся: законодательство России и этой страны ограничивает '
-             'такие расчёты. Перечень меняется; основание и дата — рядом.')
+        string='В перечне 430-р',
+        help='Само распоряжение ничего не запрещает. С гражданами этой страны '
+             'и организациями, зарегистрированными в ней, указы № 81 и № 95 '
+             'ограничивают отдельные сделки: займы, недвижимость, ценные '
+             'бумаги. Остальные сделки проводятся как обычно. Перечень '
+             'меняется; основание и дата — рядом.')
     coop_unfriendly_since = fields.Date(string='В перечне с')
     coop_unfriendly_basis = fields.Char(string='Основание')
 
@@ -69,6 +86,26 @@ class ResCountry(models.Model):
 
 class ResPartner(models.Model):
     _inherit = 'res.partner'
+
+    @api.model
+    def _coop_fill_citizenship(self):
+        """Гражданство тем, у кого его нет (решение 500), — при каждом
+        обновлении, только пустым. Валютный резидент-человек — гражданин
+        РФ: так его и записывали (ФЗ-173), иностранцев с ВНЖ поправляют
+        вручную; нерезидент — гражданин страны, где живёт; организация —
+        страна регистрации, она же страна из карточки."""
+        russia = self.env.ref('base.ru', raise_if_not_found=False)
+        empty = self.sudo().with_context(tracking_disable=True).search([
+            ('coop_citizenship_id', '=', False),
+            '|', ('coop_is_participant', '=', True), ('is_company', '=', True)])
+        for partner in empty:
+            if partner.is_company or not partner.coop_fx_resident:
+                country = partner.country_id or russia
+            else:
+                country = russia
+            if country:
+                partner.coop_citizenship_id = country
+        return True
 
     coop_fx_resident = fields.Boolean(
         string='Валютный резидент РФ', default=True,
@@ -120,17 +157,12 @@ class CoopSettlementMethod(models.Model):
         fx_a, fx_b = payer.coop_fx_resident, payee.coop_fx_resident
         cross = fx_a != fx_b
         kind_a, kind_b = payer._coop_kind(), payee._coop_kind()
-        unfriendly = [p for p in (payer, payee) if p.country_id.coop_unfriendly]
-        blocked = _blocked_text(unfriendly)
         out = []
         for method in self.search([]):
             code = method.code
             deny, warn = [], []
             if method.status == 'planned':
                 out.append(self._coop_row(method, 'planned', [], []))
-                continue
-            if blocked:
-                out.append(self._coop_row(method, 'deny', [blocked], []))
                 continue
             # ── запрещающие, по убыванию силы ──
             if code == 'share':
@@ -198,8 +230,71 @@ class CoopDeal(models.Model):
     # сторон, затем по способу сделки (решение 427). То же правило ведёт
     # график платежей, и вкладка с графиком не расходится.
 
-    @api.depends('party_a_id', 'party_b_id', 'way', 'amount', 'role_a', 'role_b',
-                 'payment_ids.payer_id', 'payment_ids.payee_id')
+    def _coop_decree_block(self):
+        """Чем закрыта сделка по указам — или пустая строка (решение 500).
+
+        Указы ограничивают сделки резидента с лицом, связанным со страной
+        перечня 430-р, — по гражданству и месту регистрации (Указ № 81,
+        п. 1 «а»; Указ № 95, п. 1). Закрыты три случая:
+        - заём такому лицу от резидента — только с разрешения
+          Правительственной комиссии (Указ № 81, п. 1 «а», абз. 2, «б»);
+        - возврат займа такому лицу свыше 10 млн ₽ — через счёт типа «С»
+          (Указ № 95, пп. 1–3);
+        - право собственности на недвижимость — только с разрешения
+          Правительственной комиссии (Указ № 81, п. 1 «а», абз. 3, «б»).
+        Разрешений Правительственной комиссии и счетов «С» платформа не
+        ведёт, поэтому такие сделки не проводит. Остальное — как обычно."""
+        self.ensure_one()
+        if not self.party_a_id or not self.party_b_id:
+            return ''
+        payer, payee = self._coop_payer_payee()
+
+        def listed(p):
+            return p._coop_citizenship().coop_unfriendly
+
+        def pair(foreign, resident):
+            return listed(foreign) and not listed(resident) and resident.coop_fx_resident
+
+        def country(p):
+            return p._coop_citizenship().name
+        credit = self.way == 'credit' or self.subject == 'credit'
+        # В кредитной сделке платит заёмщик, получает кредитор.
+        if credit and pair(payer, payee):
+            return ('Заём участнику — гражданину или организации страны «%s» резидент РФ '
+                    'может дать только с разрешения Правительственной комиссии по контролю '
+                    'за осуществлением иностранных инвестиций (%s, п. 1 «а», «б»). '
+                    'Таких разрешений платформа не оформляет, поэтому кредитную сделку '
+                    'не проводит. Остальные сделки с этим участником — как обычно.'
+                    % (country(payer), DECREE_81))
+        if credit and pair(payee, payer) and (self.amount or 0.0) > DECREE_95_LIMIT:
+            return ('Возврат займа кредитору — гражданину или организации страны «%s» — '
+                    'свыше 10 млн ₽ в месяц идёт только через счёт типа «С» (%s, пп. 1–3). '
+                    'Таких счетов платформа не ведёт, поэтому кредитную сделку на эту '
+                    'сумму не проводит. До 10 млн ₽ и все остальные сделки — как обычно.'
+                    % (country(payee), DECREE_95))
+        category = self.resource_id.category_id
+        estate = category and (category.complete_name or '').split(' / ')[0] == REAL_ESTATE_ROOT
+        if estate and self.way in OWNERSHIP_WAYS and (pair(payer, payee) or pair(payee, payer)):
+            foreign = payer if listed(payer) else payee
+            return ('Сделку, по которой возникает право собственности на недвижимость, с '
+                    'гражданином или организацией страны «%s» резидент РФ может совершить '
+                    'только с разрешения Правительственной комиссии по контролю за '
+                    'осуществлением иностранных инвестиций (%s, п. 1 «а», «б»). Таких '
+                    'разрешений платформа не оформляет, поэтому эту сделку не проводит. '
+                    'Аренда и остальные сделки — как обычно.' % (country(foreign), DECREE_81))
+        return ''
+
+    def action_agree(self):
+        """Сделку, закрытую указом, не согласовать (решение 500): объяснение
+        — тем же текстом, что во вкладке «Как рассчитаться»."""
+        for record in self:
+            block = record._coop_decree_block()
+            if block:
+                raise UserError(block)
+        return super().action_agree()
+
+    @api.depends('party_a_id', 'party_b_id', 'way', 'subject', 'amount', 'role_a', 'role_b',
+                 'resource_id', 'payment_ids.payer_id', 'payment_ids.payee_id')
     def _compute_coop_settlement_html(self):
         Method = self.env['coop.settlement.method'].sudo()
         labels = {'ok': 'Можно', 'warn': 'Можно, с оговоркой', 'deny': 'Нельзя',
@@ -216,6 +311,12 @@ class CoopDeal(models.Model):
                         'налоговый %s' % ('резидент' if p.coop_tax_resident else 'нерезидент')]
                 if p.country_id:
                     bits.append(p.country_id.name)
+                # Гражданство — когда оно не совпадает со страной: по нему,
+                # а не по проживанию, считают указы (решение 500).
+                citizenship = p._coop_citizenship()
+                if citizenship and citizenship != p.country_id:
+                    bits.append('%s — %s' % ('регистрация' if p.is_company else 'гражданство',
+                                             citizenship.name))
                 regime = dict(p._fields['coop_tax_regime']._description_selection(p.env)).get(p.coop_tax_regime)
                 if regime and p.coop_tax_regime != 'none':
                     bits.append(regime)
@@ -223,16 +324,20 @@ class CoopDeal(models.Model):
 
             html = ['<div class="o_coop_settle">',
                     '<p class="o_coop_settle_who">Платит %s.<br/>Получает %s.</p>' % (who(payer), who(payee))]
-            blocked = _blocked_text([p for p in (payer, payee) if p.country_id.coop_unfriendly])
-            if blocked:
-                # Способы перечислять незачем: ни один не годится.
-                title, _dot, text = blocked.partition('. ')
-                html.append('<p class="o_coop_settle_block"><b>%s</b><br/>%s</p>'
-                            % (_esc(title), _esc(text)))
-                html.append('<p class="o_coop_settle_note">Перечень стран — по распоряжению '
-                            'Правительства РФ от 05.03.2022 № 430-р (с изменениями).</p></div>')
+            block = deal._coop_decree_block()
+            if block:
+                # Способы перечислять незачем: сделка не проводится.
+                html.append('<p class="o_coop_settle_block"><b>Эту сделку платформа не '
+                            'проводит</b><br/>%s</p></div>' % _esc(block))
                 deal.coop_settlement_html = ''.join(html)
                 continue
+            listed = [p for p in (payer, payee) if p._coop_citizenship().coop_unfriendly]
+            if listed:
+                html.append('<p class="o_coop_settle_note">%s — из страны перечня по '
+                            'распоряжению Правительства РФ от 05.03.2022 № 430-р. Указы № 81 и '
+                            '№ 95 ограничивают с такими участниками только займы, сделки с '
+                            'недвижимостью и ценными бумагами; эта сделка к ним не относится.</p>'
+                            % _esc(', '.join(p.name for p in listed)))
             for verdict in ('ok', 'warn', 'deny', 'planned'):
                 group = [r for r in rows if r['verdict'] == verdict]
                 if not group:
@@ -248,19 +353,6 @@ class CoopDeal(models.Model):
             html.append('<p class="o_coop_settle_note">Цена — сквозная: всё, что уходит в бюджет с обеих '
                         'сторон вместе. Правила — из разбора юриста 22.09.</p></div>')
             deal.coop_settlement_html = ''.join(html)
-
-
-def _blocked_text(parties):
-    """«Сделки временно недоступны» — по стране стороны (решения 427, 428)."""
-    names = sorted({p.country_id.name for p in parties if p.country_id})
-    if not names:
-        return ''
-    country = ('страны «%s»' % names[0]) if len(names) == 1 else (
-        'стран: %s' % ', '.join('«%s»' % n for n in names))
-    return ('Сделки временно недоступны. В данный момент сделки с участниками из %s '
-            'на платформе не проводятся: законодательство России и этой страны '
-            'ограничивает такие расчёты — специальные счета, разрешения '
-            'Правительственной комиссии, санкционные запреты.' % country)
 
 
 def _esc(text):

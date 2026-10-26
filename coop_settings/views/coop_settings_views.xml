@@ -160,13 +160,18 @@
                   <field name="coop_payout_currency_id"/>
                   <field name="coop_tax_regime"/>
                 </group>
-                <!-- Резидентство (решения 118, 414, п. 1): три поля
-                     независимо друг от друга — валютное (по гражданству и
-                     ВНЖ), налоговое (по дням), страна. По ним в сделке
-                     видно, какие способы расчёта законны для пары сторон. -->
+                <!-- Резидентство (решения 118, 414, п. 1): валютное (по
+                     гражданству и ВНЖ), налоговое (по дням), страна
+                     проживания — независимо друг от друга. Гражданство —
+                     отдельно (решение 500): по нему считают указы. -->
                 <group>
                   <field name="coop_fx_resident"/>
                   <field name="coop_tax_resident"/>
+                  <field name="coop_citizenship_id" invisible="is_company"
+                         options="{'no_create': True, 'no_open': True}"/>
+                  <field name="coop_citizenship_id" string="Страна регистрации"
+                         invisible="not is_company"
+                         options="{'no_create': True, 'no_open': True}"/>
                   <field name="country_id" string="Страна проживания"
                          options="{'no_create': True, 'no_open': True}"/>
                 </group>

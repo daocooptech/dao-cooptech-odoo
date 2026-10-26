@@ -12,7 +12,12 @@
   налоговый нерезидент (меньше 183 дней в России);
 - иностранец без вида на жительство: нерезидент в обоих смыслах;
 - иностранец с видом на жительство, живущий в России: резидент в обоих;
-- житель недружественного государства — режим спецсчетов и разрешений.
+- гражданин страны перечня 430-р, живущий там: займы и недвижимость с ним
+  закрыты указами № 81 и № 95, остальное — как обычно (решение 500).
+
+Гражданство ставится вместе со страной (решение 500): у живущего за
+границей россиянина — Россия, у иностранца — его страна, у иностранца с
+видом на жительство — страна, откуда он приехал.
 
 Организации не переселяются. Первая версия (4327bfa) отправила пять
 российских компаний в Алматы, Минск, Гуанчжоу и Дубай — «КФХ „Медовый
@@ -59,9 +64,14 @@ def load_residency(env):
     counts = {'abroad': 0, 'foreign': 0, 'permit': 0, 'unfriendly': 0,
               'org_home': 0, 'resident': 0}
 
-    def put(partner, fx, tax, code=None, city=None, key='resident'):
+    def put(partner, fx, tax, code=None, city=None, key='resident', citizen=None):
         country = countries.get(code) if code else russia
+        # Гражданство: у валютного резидента — Россия (кроме ВНЖ, там
+        # передают явно), у нерезидента — страна, где живёт.
+        nationality = countries.get(citizen) if citizen else (russia if fx else country)
         values = {}
+        if 'coop_citizenship_id' in partner._fields and nationality                 and partner.coop_citizenship_id != nationality:
+            values['coop_citizenship_id'] = nationality.id
         if partner.coop_fx_resident != fx:
             values['coop_fx_resident'] = fx
         if partner.coop_tax_resident != tax:
@@ -91,7 +101,8 @@ def load_residency(env):
             put(partner, False, False, code, city, 'foreign')
         elif seed % 29 == 0:
             # Вид на жительство: живёт в России, город прежний.
-            put(partner, True, True, key='permit')
+            put(partner, True, True, key='permit',
+                citizen=FOREIGN[seed % len(FOREIGN)][0])
         elif (not partner.coop_fx_resident or not partner.coop_tax_resident
               or not partner.country_id):
             # Обычный случай: резидент, живёт в России. Страну ставим и

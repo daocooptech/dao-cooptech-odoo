@@ -16,6 +16,13 @@
 сериализацией. Запечатанную строку нельзя ни изменить, ни удалить — это
 держит триггер в самой базе, а не метод `write`: загрузчики и ручные
 запросы ходят мимо ORM.
+
+Переписка (`message.*`) с участием гражданина или организации России идёт
+и хранится только на узлах в России (решение 502): узел, через который она
+проходит, становится организатором распространения информации и обязан
+хранить её в России (ч. 1 и 3 ст. 10.1 149-ФЗ). Зарубежным узлам с такими
+участниками уходят только события сделок. Правило держит постановка, а не
+печать: отказ — в транзакции автора, с объяснением.
 """
 import json
 import logging
@@ -27,6 +34,8 @@ from ..lib.fedproto import canonical, log as fed_log
 from .fed_identity import utc_now
 
 _logger = logging.getLogger(__name__)
+
+MESSAGE_PREFIX = 'message.'
 
 
 class CoopFedEvent(models.Model):
@@ -104,13 +113,18 @@ class CoopFedEvent(models.Model):
     # -- постановка -------------------------------------------------------
 
     @api.model
-    def _enqueue(self, type_, subject, body, to=None):
+    def _enqueue(self, type_, subject, body, to=None, participants=None):
         """Положить событие в очередь на печать. Тело канонизируется сразу:
         дробное число или иной непредставимый тип — ошибка здесь, в
-        транзакции автора, а не молчаливый пропуск при печати."""
+        транзакции автора, а не молчаливый пропуск при печати.
+
+        `participants` — участники переписки (партнёры); для `message.*`
+        по ним выбирается маршрут (решение 502)."""
         identity = self.env['coop.fed.identity'].sudo().search([], limit=1)
         if not identity:
             raise UserError('Узел сети ещё не заведён.')
+        if type_.startswith(MESSAGE_PREFIX):
+            self._check_message_route(identity, to, participants)
         record = self.sudo().create({
             'origin': 'local',
             'node': identity.did,
@@ -124,6 +138,29 @@ class CoopFedEvent(models.Model):
         if cron:
             cron.sudo()._trigger()
         return record
+
+    @api.model
+    def _check_message_route(self, identity, to, participants):
+        """Переписка с россиянами — только узлам в России (решение 502).
+
+        Участники не названы — считаем, что россиянин среди них есть: без
+        списка маршрут не проверить, а ошибиться в строгую сторону безопасно.
+        Сосед, не объявивший страну, — не российский узел."""
+        if participants is not None and not any(
+                p._coop_is_russian() for p in participants):
+            return
+        rule = ('Переписка с участием граждан и организаций России идёт и хранится '
+                'только на узлах в России (ч. 3 ст. 10.1 149-ФЗ). ')
+        if (identity.country_id.code or '') != 'RU':
+            raise UserError(rule + 'Этот узел не в России: такую переписку он не ведёт.')
+        if to is None:
+            raise UserError(rule + 'Общим событием её отправить нельзя — только адресно.')
+        peers = self.env['coop.fed.peer'].sudo().search([('did', 'in', list(to))])
+        russian = set(peers.filtered(lambda p: p.country_id.code == 'RU').mapped('did'))
+        foreign = sorted(set(to) - russian - {identity.did})
+        if foreign:
+            raise UserError(rule + 'Зарубежным узлам уходят только события сделок, а '
+                            'здесь адресаты: %s.' % ', '.join(foreign))
 
     # -- печать -----------------------------------------------------------
 

@@ -164,6 +164,34 @@
             </group>
           </group>
           <notebook>
+            <!-- Чек-лист подключения узла (решения 501, 502). -->
+            <page string="Чек-лист подключения" name="checklist">
+              <group>
+                <group>
+                  <field name="check_crypto"/>
+                  <field name="eaeu_notice_needed" invisible="1"/>
+                  <field name="check_eaeu_notice" invisible="not eaeu_notice_needed"/>
+                  <field name="checklist_done"/>
+                </group>
+                <group>
+                  <field name="messages_foreign" invisible="1"/>
+                  <div colspan="2" class="text-muted">
+                    Сборка узла передаётся с шифрованием вложений: передаёт её
+                    оператор — лицензиат ФСБ (пп. 21 и 25 Положения о
+                    лицензировании, постановление Правительства РФ № 313).
+                    <span invisible="not eaeu_notice_needed">Узлу вне ЕАЭС, например
+                    в Китае, — ещё нотификация ЕАЭС о шифровальном средстве
+                    (решение Коллегии ЕЭК № 30, приложение № 9, п. 5); для
+                    Беларуси и Казахстана она не нужна.</span>
+                  </div>
+                  <div colspan="2" class="text-muted" invisible="not messages_foreign">
+                    Узел за рубежом: переписка с участием граждан и организаций
+                    России на него не уходит, только события сделок
+                    (ч. 3 ст. 10.1 149-ФЗ).
+                  </div>
+                </group>
+              </group>
+            </page>
             <page string="Расхождения" name="divergences" invisible="not divergence_ids">
               <field name="divergence_ids">
                 <list create="false" delete="false">

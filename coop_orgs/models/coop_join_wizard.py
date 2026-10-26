@@ -46,6 +46,11 @@ class CoopJoinWizard(models.TransientModel):
         string='Должность',
         help='Как называется место в организации. На права не влияет.')
     note = fields.Text(string='Пара слов о себе')
+    # Гражданину КНР — предупреждение об одобрении SAFE (решение 503):
+    # принимаем всех, где бы ни жили, но перевести деньги на пай из Китая
+    # можно только с одобрения валютного ведомства (ст. 16 правил КНР о
+    # валюте физических лиц).
+    safe_notice = fields.Boolean(compute='_compute_safe_notice')
 
     # По заявлению возникают только эти два основания. Пайщиком берут
     # в кооператив, сотрудником — куда угодно; а вот учредителем
@@ -60,6 +65,13 @@ class CoopJoinWizard(models.TransientModel):
         # Но справочник может быть ещё не заведён на свежей базе.
         Role = self.env['coop.membership.role']
         return Role.search([('code', '=', 'member')], limit=1)
+
+    @api.depends('role_id')
+    def _compute_safe_notice(self):
+        citizenship = self.env.user.partner_id._coop_citizenship()
+        for record in self:
+            record.safe_notice = (record.role_id.code == 'member'
+                                  and citizenship.code == 'CN')
 
     @api.depends('organization_id')
     def _compute_allowed_role_ids(self):
