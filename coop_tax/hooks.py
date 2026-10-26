@@ -96,3 +96,50 @@ def demo_natural_income(env):
 
     for task in tasks.filtered(lambda t: t.state == 'accepted' and t.payment_mode == 'tokens'):
         Income._coop_register_task(task)
+    demo_natural_income_showcase(env)
+
+
+def demo_natural_income_showcase(env, login='dashkevich'):
+    """Свои доходы в натуральной форме у витринного человека.
+
+    Реестр он видит по правилу «свои доходы»: без своих строк раздел у него
+    пуст. Восемь задач за два года — удержано из выплаты пая, удержано
+    наполовину, не удержано и сообщено, не удержано и не сообщено,
+    исчислено в текущем году.
+    """
+    Income = env['coop.tax.natural.income'].sudo()
+    user = env['res.users'].sudo().search([('login', '=', login)], limit=1)
+    if not user or Income.search_count([('partner_id', '=', user.partner_id.id)]):
+        return
+    partner = user.partner_id
+    platform = env.company.partner_id
+    account = env['coop.share.account'].sudo().search(
+        [('partner_id', '=', partner.id)], order='id', limit=1)
+    coop = account.cooperative_id or platform
+    # (дата, агент, токены, удержано: 'full' / 'half' / None, сообщено)
+    plan = (
+        (date(2025, 3, 14), coop, 320, 'full', False),
+        (date(2025, 6, 2), platform, 450, None, True),
+        (date(2025, 9, 23), coop, 180, 'half', True),
+        (date(2025, 11, 17), platform, 600, None, False),
+        (date(2026, 2, 9), coop, 240, 'full', False),
+        (date(2026, 5, 28), platform, 380, None, False),
+        (date(2026, 8, 12), coop, 520, 'half', False),
+        (date(2026, 10, 6), platform, 150, None, False),
+    )
+    for when, agent, tokens, withheld, reported in plan:
+        amount = float(tokens)
+        tax, rate = Income._coop_ndfl(partner, agent, amount, when)
+        values = {
+            'name': 'Вознаграждение за задачу «%s»' % PAST_TASKS[when.month % len(PAST_TASKS)],
+            'partner_id': partner.id, 'agent_id': agent.id, 'date': when,
+            'tokens': tokens, 'amount': amount, 'rate': rate or False,
+            'ndfl_amount': tax,
+        }
+        if withheld and agent != platform:
+            note = 'Выплата пая от %s' % (when + timedelta(days=21)).strftime('%d.%m.%Y')
+            values.update(withheld=tax if withheld == 'full' else int(tax / 2),
+                          withheld_note=note)
+        if reported:
+            values['reported_on'] = date(2026, 2, 20)
+        Income.create(values)
