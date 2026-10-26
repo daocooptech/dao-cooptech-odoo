@@ -17,7 +17,7 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.2.0',
+    'version': '20.0.1.3.0',
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_wallet', 'coop_settings', 'coop_bounty'],
     'data': [
@@ -25,6 +25,7 @@
         'data/coop_tax_cron.xml',
         'views/natural_income_views.xml',
         'views/payout_limit_views.xml',
+        'views/labor_payout_views.xml',
         'views/coop_tax_views.xml',
     ],
     'post_init_hook': 'post_init_hook',

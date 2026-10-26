@@ -90,7 +90,21 @@
               <group>
                 <field name="coop_payout_limit_base" widget="radio"/>
               </group>
+              <group>
+                <field name="coop_injury_insurance"/>
+                <field name="coop_injury_rate" invisible="not coop_injury_insurance"/>
+              </group>
+              <group>
+                <field name="coop_tax_sme"/>
+              </group>
             </group>
+            <div class="alert alert-warning" role="alert" invisible="coop_injury_insurance">
+              Взносы на травматизм с выплат членам не платятся. Закон прямо
+              не обязывает (членов кооператива нет в п. 1 ст. 5 закона
+              125-ФЗ), но ст. 19 закона 41-ФЗ даёт им социальное страхование
+              наравне с наёмными: если СФР признает его обязательным,
+              кооператив доплатит взносы с пенями.
+            </div>
             <button name="%(coop_tax.action_coop_tax_natural_income)d" type="action"
                     class="btn-link ps-0" icon="fa-list"
                     string="Реестр доходов в натуральной форме"
@@ -98,6 +112,10 @@
             <button name="%(coop_tax.action_coop_tax_payout_limit)d" type="action"
                     class="btn-link ps-0" icon="fa-balance-scale"
                     string="Лимит кооперативных выплат по годам"
+                    context="{'search_default_cooperative_id': id, 'default_cooperative_id': id}"/>
+            <button name="%(coop_tax.action_coop_tax_labor_payout)d" type="action"
+                    class="btn-link ps-0" icon="fa-users"
+                    string="Выплаты членам за трудовое участие"
                     context="{'search_default_cooperative_id': id, 'default_cooperative_id': id}"/>
             <div class="alert alert-warning" role="alert"
                  invisible="coop_ndfl_share_base != 'excess'">

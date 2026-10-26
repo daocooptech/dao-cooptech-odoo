@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from odoo import fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class ResPartner(models.Model):
@@ -37,3 +38,30 @@ class ResPartner(models.Model):
              'оспорить решение собрания труднее. Доходы после обязательных '
              'платежей — буквально по закону, потолок выше, но выплатить '
              'больше нераспределённой прибыли после фондов всё равно нельзя.')
+
+    # Решение 514 (владелец 26.10.2026: «Каждый кооператив решает сам»).
+    # Членов артели нет в п. 1 ст. 5 125-ФЗ, но ст. 19 41-ФЗ даёт им
+    # социальное страхование наравне с наёмными.
+    coop_injury_insurance = fields.Boolean(
+        string='Взносы на травматизм с выплат членам',
+        help='Платить ли взносы на страхование от несчастных случаев с '
+             'выплат членам за трудовое участие. Не платя, кооператив '
+             'рискует недоимкой и пенями, если СФР признает это '
+             'страхование обязательным.')
+    coop_injury_rate = fields.Float(
+        string='Тариф по классу риска, %', digits=(5, 2), default=0.2,
+        help='От 0,2 до 8,5 % — по классу профессионального риска '
+             'основного вида деятельности.')
+    coop_tax_sme = fields.Boolean(
+        string='МСП из перечня — пониженный тариф взносов',
+        help='П. 2.4 ст. 427 НК: 15 % с части выплат сверх 1,5 МРОТ в месяц, '
+             'если кооператив в реестре МСП и основной вид деятельности — '
+             'из перечня.')
+
+    @api.constrains('coop_injury_insurance', 'coop_injury_rate')
+    def _check_coop_injury_rate(self):
+        for partner in self.filtered('coop_injury_insurance'):
+            if not 0.2 <= partner.coop_injury_rate <= 8.5:
+                raise ValidationError(_(
+                    'Тариф на травматизм — от 0,2 до 8,5 % по классу '
+                    'профессионального риска.'))

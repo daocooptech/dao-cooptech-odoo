@@ -6,3 +6,4 @@ from . import natural_income
 from . import coop_bounty
 from . import payout_limit
 from . import res_users
+from . import labor_payout

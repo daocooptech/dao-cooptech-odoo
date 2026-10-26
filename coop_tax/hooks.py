@@ -34,6 +34,68 @@ def post_init_hook(env):
     moves._coop_tax_fill()
     demo_natural_income(env)
     demo_payout_limits(env)
+    demo_labor_payouts(env)
+
+
+def demo_labor_payouts(env, login='dashkevich'):
+    """Выплаты членам артелей за трудовое участие (решения 514, 516).
+
+    Три артели из пяти платят взносы на травматизм — тариф по классу
+    риска, у большинства низкий; две из пяти — МСП из перечня. Выплаты
+    2025–2026 годов, раз в месяц-два: последняя — ещё начислена, редкие —
+    отменены. Нерезиденты-члены работают кто в России с патентом или
+    разрешением, кто за рубежом. Витринный человек получает выплаты в
+    артели, где у него пай или членство.
+    """
+    Payout = env['coop.tax.labor.payout'].sudo()
+    if Payout.search_count([]):
+        return
+    rng = random.Random(514)
+    coops = env['res.partner'].sudo().search(
+        [('coop_cooperative_kind', 'in', ('production', 'agri_production'))], order='id')
+    if not coops:
+        return
+    rates = (0.2, 0.2, 0.2, 0.3, 0.4, 0.5, 0.7, 0.9, 1.2, 1.7, 2.5, 4.1, 8.5)
+    for coop in coops:
+        paying = rng.random() < 0.6
+        coop.write({'coop_injury_insurance': paying,
+                    'coop_injury_rate': rng.choice(rates) if paying else 0.2,
+                    'coop_tax_sme': rng.random() < 0.4})
+    members = env['coop.membership'].sudo().search([
+        ('organization_id', 'in', coops.ids), ('state', '=', 'active'),
+        ('partner_id.is_company', '=', False)], order='id')
+    pairs = [(m.organization_id, m.partner_id) for m in members]
+    rng.shuffle(pairs)
+    pairs = pairs[:42]
+    user = env['res.users'].sudo().search([('login', '=', login)], limit=1)
+    if user:
+        own = env['coop.share.account'].sudo().search(
+            [('partner_id', '=', user.partner_id.id),
+             ('cooperative_id', 'in', coops.ids)], limit=1).cooperative_id
+        own = own or members.filtered(lambda m: m.partner_id == user.partner_id)[:1].organization_id
+        pairs.append((own or coops[0], user.partner_id))
+
+    rows = []
+    months = [(2025, m) for m in range(1, 13)] + [(2026, m) for m in range(1, 11)]
+    for coop, person in pairs:
+        showcase = user and person == user.partner_id
+        picked = months[-6:] if showcase else sorted(rng.sample(months, rng.randint(3, 5)))
+        base = rng.randrange(50, 360) * 500
+        extra = {}
+        if not person.coop_tax_resident:
+            if rng.random() < 0.5:
+                extra = {'work_place': 'abroad'}
+            else:
+                extra = {'work_place': 'ru', 'permit': rng.choice(('patent', 'permit'))}
+        for year, month in picked:
+            amount = max(15000, base + rng.randrange(-20, 21) * 500)
+            rows.append((date(year, month, 25 if month != 12 else 20), coop, person, amount, extra))
+    last = max(r[0] for r in rows)
+    for when, coop, person, amount, extra in sorted(rows, key=lambda r: (r[0], r[1].id, r[2].id)):
+        state = 'draft' if when == last else ('cancelled' if rng.random() < 0.05 else 'paid')
+        Payout.create(dict(extra, cooperative_id=coop.id, partner_id=person.id,
+                           date=when, amount=float(amount), state=state,
+                           name='Выплата за трудовое участие, %02d.%d' % (when.month, when.year)))
 
 
 def demo_payout_limits(env):

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Решения 514, 516: выплата члену артели за трудовое участие — сколько
+       уходит в НДФЛ и взносы, сколько на руки и во что обходится. -->
+  <record id="view_coop_tax_labor_payout_list" model="ir.ui.view">
+    <field name="name">coop.tax.labor.payout.list</field>
+    <field name="model">coop.tax.labor.payout</field>
+    <field name="arch" type="xml">
+      <list decoration-muted="state == 'cancelled'" decoration-info="state == 'draft'">
+        <field name="date"/>
+        <field name="partner_id"/>
+        <field name="cooperative_id"/>
+        <field name="amount" sum="Начислено"/>
+        <field name="ndfl_amount" sum="НДФЛ"/>
+        <field name="insurance" sum="Взносы"/>
+        <field name="injury" sum="Травматизм" optional="show"/>
+        <field name="net_amount" sum="На руки"/>
+        <field name="cost" sum="Обходится" optional="show"/>
+        <field name="work_place" optional="hide"/>
+        <field name="state" widget="badge" decoration-success="state == 'paid'"
+               decoration-info="state == 'draft'"/>
+        <field name="currency_id" column_invisible="True"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_tax_labor_payout_form" model="ir.ui.view">
+    <field name="name">coop.tax.labor.payout.form</field>
+    <field name="model">coop.tax.labor.payout</field>
+    <field name="arch" type="xml">
+      <form>
+        <header>
+          <button name="action_pay" type="object" string="Выплачено" class="btn-primary"
+                  invisible="state != 'draft'"/>
+          <button name="action_cancel" type="object" string="Отменить"
+                  invisible="state != 'draft'"/>
+          <field name="state" widget="statusbar" statusbar_visible="draft,paid"/>
+        </header>
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="name" readonly="state != 'draft'"/></h1>
+          </div>
+          <group>
+            <group>
+              <field name="cooperative_id" options="{'no_create': True}" readonly="state != 'draft'"/>
+              <field name="partner_id" options="{'no_create': True}" readonly="state != 'draft'"/>
+              <field name="date" readonly="state != 'draft'"/>
+              <field name="amount" readonly="state != 'draft'"/>
+            </group>
+            <group string="Как облагается">
+              <field name="resident" readonly="state != 'draft'"/>
+              <field name="treaty_rate" invisible="resident" readonly="state != 'draft'"/>
+              <field name="foreigner" readonly="state != 'draft'"/>
+              <field name="work_place" invisible="resident" readonly="state != 'draft'"/>
+              <field name="permit" invisible="resident or work_place != 'ru'"
+                     required="not resident and work_place == 'ru'" readonly="state != 'draft'"/>
+              <field name="sme" readonly="state != 'draft'"/>
+              <field name="injury_rate" readonly="state != 'draft'"/>
+            </group>
+          </group>
+          <group>
+            <group string="Расчёт">
+              <field name="amount" string="Начислено"/>
+              <label for="ndfl_amount"/>
+              <div>
+                <field name="ndfl_amount" class="oe_inline"/>
+                <span class="text-muted" invisible="not ndfl_rate"> · <field name="ndfl_rate" class="oe_inline"/></span>
+              </div>
+              <field name="net_amount"/>
+            </group>
+            <group string="Сверх начисленного платит кооператив">
+              <label for="insurance"/>
+              <div>
+                <field name="insurance" class="oe_inline"/>
+                <span class="text-muted" invisible="not insurance_rate"> · <field name="insurance_rate" class="oe_inline"/></span>
+              </div>
+              <field name="injury"/>
+              <field name="cost"/>
+            </group>
+          </group>
+          <field name="currency_id" invisible="1"/>
+          <div class="o_coop_note">
+            Выплата члену за трудовое участие облагается страховыми взносами
+            как у наёмных работников (письмо Минфина 18.07.2017
+            № 03-15-06/45648); иностранцу за работу за рубежом — без взносов
+            (п. 5 ст. 420 НК). Взносы на травматизм — по решению кооператива.
+            Резидентство, гражданство и тарифы взяты на дату выплаты.
+          </div>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_tax_labor_payout_search" model="ir.ui.view">
+    <field name="name">coop.tax.labor.payout.search</field>
+    <field name="model">coop.tax.labor.payout</field>
+    <field name="arch" type="xml">
+      <search>
+        <field name="partner_id"/>
+        <field name="cooperative_id"/>
+        <filter name="draft" string="Начислено" domain="[('state', '=', 'draft')]"/>
+        <filter name="paid" string="Выплачено" domain="[('state', '=', 'paid')]"/>
+        <filter name="cancelled" string="Отменено" domain="[('state', '=', 'cancelled')]"/>
+        <separator/>
+        <filter name="nonresident" string="Нерезиденты" domain="[('resident', '=', False)]"/>
+        <filter name="abroad" string="Работа за рубежом" domain="[('work_place', '=', 'abroad')]"/>
+        <filter name="with_injury" string="С травматизмом" domain="[('injury', '>', 0)]"/>
+        <group>
+          <filter name="by_year" string="По году" context="{'group_by': 'year'}"/>
+          <filter name="by_cooperative" string="По кооперативу" context="{'group_by': 'cooperative_id'}"/>
+          <filter name="by_partner" string="По члену" context="{'group_by': 'partner_id'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_tax_labor_payout" model="ir.actions.act_window">
+    <field name="name">Выплаты за трудовое участие</field>
+    <field name="res_model">coop.tax.labor.payout</field>
+    <field name="view_mode">list,form</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Выплат за трудовое участие нет</p>
+      <p>Здесь артель начисляет членам за личный труд: платформа считает НДФЛ,
+        страховые взносы, взносы на травматизм, сумму на руки и во что
+        выплата обходится кооперативу.</p>
+    </field>
+  </record>
+
+  <menuitem id="menu_coop_tax_labor_payout" name="Выплаты за трудовое участие"
+            parent="coop_wallet.menu_coop_wallet_root"
+            action="action_coop_tax_labor_payout" sequence="57"/>
+
+</odoo>
