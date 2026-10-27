@@ -643,7 +643,6 @@
                       <field name="free_mode"/>
                       <field name="free_to"/>
                       <field name="vat"/>
-                      <field name="is_vehicle"/>
                       <field name="seller_name"/>
                       <field name="use_rate"/>
                       <field name="repairs"/>

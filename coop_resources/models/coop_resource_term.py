@@ -77,12 +77,6 @@ class CoopResourceTerm(models.Model):
     ], string='Оператор')
     included = fields.Char(string='Входит в цену', help='Метки через запятую: топливо, расходники, доставка.')
     available_from = fields.Date(string='Свободно с')
-    # Аренда с экипажем — только у транспортного средства (ГК ст. 632);
-    # остальная техника с оператором — аренда и услуга (`legal-counsel`).
-    is_vehicle = fields.Selection([
-        ('yes', 'транспортное средство'),
-        ('no', 'не транспортное средство'),
-    ], string='Что сдаёте')
     long_discount = fields.Char(string='Скидка за длинный срок')
     # Рассрочка и лизинг
     down_pct = fields.Float(string='Первый взнос, %')
@@ -203,7 +197,7 @@ class CoopResourceTerm(models.Model):
                  'down_pct', 'months', 'pay_every', 'markup_pct', 'ownership', 'buyout',
                  'payment_manual', 'lessor', 'lessor_name', 'insurance', 'contribution', 'expect',
                  'project_scope', 'surcharge', 'surcharge_amount', 'free_mode', 'free_to',
-                 'vat', 'is_vehicle', 'seller_name', 'use_rate', 'repairs', 'loss')
+                 'vat', 'seller_name', 'use_rate', 'repairs', 'loss')
     def _compute_summary(self):
         prefix = {'from': 'от ', 'to': 'до ', 'exact': ''}
         for term in self:
@@ -244,8 +238,6 @@ class CoopResourceTerm(models.Model):
             if code == 'rent':
                 if term.operator:
                     parts.append(term._label('operator'))
-                if term.operator in ('yes', 'option') and term.is_vehicle == 'yes':
-                    parts.append('аренда с экипажем')
                 if term.included:
                     parts.append('в цене: %s' % term.included)
                 if term.available_from:
@@ -376,7 +368,7 @@ class CoopResource(models.Model):
         Разборы 27.10.2026 (решение 629): `legal-counsel` — рассрочка без
         срока и платежей не договор (ГК ст. 489 п. 1), лизингодатель
         покупает вещь у продавца (ГК ст. 665), аренда с экипажем — только
-        транспорт (ГК ст. 632); `coop-economist` — вклад в пользование без
+        транспорт (ГК ст. 632) — владелец 27.10.2026: «оставить без проверки»; `coop-economist` — вклад в пользование без
         срока, ставки, ремонта и утраты не даёт посчитать долю;
         `accountant` — организации нужны документы и НДС, оценка дара
         организациям и мены. Спрос проверяется мягче: условия там пишет
@@ -398,9 +390,6 @@ class CoopResource(models.Model):
             if term.code == 'leasing' and offer and term.lessor == 'self' and not term.seller_name:
                 problems.append(_('«%(method)s»: лизингодатель покупает вещь у продавца — укажите продавца '
                                   'или сдайте свою вещь через «Аренду».', method=name))
-            if term.code == 'rent' and offer and term.operator in ('yes', 'option') and not term.is_vehicle:
-                problems.append(_('«%(method)s»: с оператором — отметьте, транспортное ли это средство: от '
-                                  'этого зависит, кто отвечает за вред.', method=name))
             if term.code == 'project' and offer and term.contribution == 'use' and not (
                     term.months > 0 and term.use_rate and term.repairs and term.wear and term.loss):
                 problems.append(_('«%(method)s»: в пользование — нужны срок, ставка в месяц, кто чинит, '

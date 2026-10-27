@@ -291,8 +291,6 @@ def tidy_term_details(env):
 
 # Проверки публикации по разборам агентов 27.10.2026 (решение 629): чего
 # требует `_coop_terms_problems`, то у опубликованных демо-объявлений есть.
-VEHICLE_WORDS = ('автомоб', 'самосвал', 'кран', 'манипулятор', 'грузов', 'тягач', 'автобус',
-                 'фургон', 'газел', 'трактор', 'прицеп', 'мотоцикл', 'квадроцикл')
 SELLERS = ['ООО «СибТехТорг»', 'ООО «Агротехника-Центр»', 'дилер «Ростсельмаш»',
            'ООО «Спецмаш-Урал»', 'ООО «ТехноПарк Поволжье»', 'завод-изготовитель']
 WEAR = ['царапины и потёртости корпуса', 'пробег до 5 000 км в месяц',
@@ -320,8 +318,6 @@ def fill_term_checks(env):
                 vals['documents'] = rnd.choice(['upd', 'upd', 'upd', 'receipt', 'act'])
             if not term.vat:
                 vals['vat'] = rnd.choice(['none', 'none', '22', '22', '5', '7'])
-        elif term.code == 'rent' and term.operator in ('yes', 'option') and not term.is_vehicle:
-            vals['is_vehicle'] = 'yes' if any(w in name for w in VEHICLE_WORDS) else 'no'
         elif term.code == 'leasing' and term.lessor == 'self' and not term.seller_name:
             vals['seller_name'] = rnd.choice(SELLERS)
         elif term.code == 'installment' and not (term.months > 0 and term.pay_every):

@@ -32,7 +32,6 @@ const { DateTime } = luxon;
 const DOCUMENTS = [["none", "без документов"], ["receipt", "чек ККТ"], ["npd", "чек самозанятого"],
                    ["upd", "УПД"], ["act", "накладная или акт"]];
 const VAT = [["none", "без НДС"], ["5", "5 %"], ["7", "7 %"], ["10", "10 %"], ["22", "22 %"]];
-const VEHICLE = [["yes", "транспортное средство"], ["no", "не транспортное средство"]];
 const REPAIRS = [["owner", "я"], ["project", "проект"]];
 const LOSS = [["compensate", "проект возмещает стоимость"], ["own", "вклад переходит в «насовсем»"]];
 const OPERATOR = [["no", "без оператора"], ["yes", "с оператором"], ["option", "оператор за доплату"]];
@@ -69,20 +68,11 @@ const LAYOUT = {
             ["min_term", "text", "Наименьший срок", { request: "На какой срок", ph: "Например, 3 дня" }],
             ["max_term", "text", "Наибольший срок", { offer: true, ph: "Например, 2 месяца" }],
             ["operator", "seg", "Оператор", { options: OPERATOR }],
-            ["is_vehicle", "seg", "Что сдаёте", { options: VEHICLE, offer: true,
-                when: (t) => ["yes", "option"].includes(t.data.operator) }],
             ["included", "chips", "Входит в цену", { options: INCLUDED }],
             ["available_from", "date", "Свободно с", { request: "Нужно с" }],
             ["long_discount", "text", "Скидка за длинный срок", { offer: true, ph: "От месяца — 15 %" }],
         ],
         note: "Что ещё важно, как вернуть",
-        // Разбор `legal-counsel` 27.10.2026, ГК ст. 632, 640.
-        hints: [
-            [(t, w) => !w.isRequest && ["yes", "option"].includes(t.data.operator) && t.data.is_vehicle === "yes",
-             "Аренда транспорта с экипажем: за вред, причинённый третьим лицам, отвечает арендодатель (ГК ст. 640)."],
-            [(t, w) => !w.isRequest && ["yes", "option"].includes(t.data.operator) && t.data.is_vehicle === "no",
-             "Техника с оператором — это аренда и услуга оператора: в сделке оформляются обе."],
-        ],
     },
     installment: {
         price: "Полная цена, ₽", request: "Готов заплатить всего, ₽", unit: "шт., комплект",
@@ -485,7 +475,7 @@ registry.category("fields").add("coop_method_tabs", {
             ["contribution", "selection"], ["expect", "selection"], ["project_scope", "char"],
             ["surcharge", "selection"], ["surcharge_amount", "monetary"],
             ["free_mode", "selection"], ["free_to", "selection"], ["vat", "selection"],
-            ["is_vehicle", "selection"], ["seller_name", "char"], ["use_rate", "monetary"],
+            ["seller_name", "char"], ["use_rate", "monetary"],
             ["repairs", "selection"], ["wear", "char"], ["loss", "selection"]].map(([name, type]) => ({ name, type })),
     ],
 });
