@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Склад платформы ↔ склад в учёте организации (владелец 27.10.2026). -->
+  <record id="view_coop_warehouse_form_stock" model="ir.ui.view">
+    <field name="name">coop.warehouse.form.stock</field>
+    <field name="model">coop.warehouse</field>
+    <field name="inherit_id" ref="coop_warehouse.view_coop_warehouse_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//header" position="inside">
+        <field name="stock_warehouse_id" invisible="1"/>
+        <button name="action_open_stock_warehouse" type="object" string="Склад в учёте"
+                invisible="not stock_warehouse_id or not coop_can_edit"
+                groups="stock.group_stock_user"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_warehouse_form_coop" model="ir.ui.view">
+    <field name="name">stock.warehouse.form.coop</field>
+    <field name="model">stock.warehouse</field>
+    <field name="inherit_id" ref="stock.view_warehouse"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='code']" position="after">
+        <field name="coop_warehouse_ids" widget="many2many_tags" readonly="1"
+               invisible="not coop_warehouse_ids"/>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

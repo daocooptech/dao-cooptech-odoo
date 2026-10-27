@@ -11,14 +11,15 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.6.0',
+    'version': '20.0.1.6.2',
     'license': 'LGPL-3',
     'depends': ['crm', 'stock', 'purchase', 'mrp', 'project', 'hr', 'coop_invoicing', 'coop_deals', 'coop_extensions',
-                'coop_profile'],
+                'coop_profile', 'coop_warehouse'],
     'data': [
         'views/crm_lead_views.xml',
         'views/coop_deal_views.xml',
         'views/org_cabinet_views.xml',
+        'views/coop_warehouse_views.xml',
     ],
     'assets': {
         'web.assets_backend': [

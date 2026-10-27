@@ -14,6 +14,14 @@ def _duration(minutes):
     return '%d ч %d мин' % (hours, rest) if rest else '%d ч' % hours
 
 
+def _amount(qty, uom):
+    """«112 м³», «50 кг», «12 500 шт.» — «Единицы» движка здесь лишние."""
+    unit = uom.env.ref('uom.product_uom_unit', raise_if_not_found=False)
+    label = 'шт.' if uom == unit else uom.name
+    number = ('{:,.3f}'.format(qty).rstrip('0').rstrip('.')).replace(',', ' ').replace('.', ',')
+    return '%s %s' % (number, label)
+
+
 class CoopResource(models.Model):
     _inherit = 'coop.resource'
 
@@ -86,11 +94,14 @@ class CoopResource(models.Model):
         count = len(steps)
         word = 'этап' if count % 10 == 1 and count % 100 != 11 else (
             'этапа' if 2 <= count % 10 <= 4 and not 12 <= count % 100 <= 14 else 'этапов')
-        caption = '%d %s · %s' % (count, word, _duration(total))
+        # Время операций в техкарте — на её объём, а партия бывает другой:
+        # «5 ч на 75 м³», а не «5 ч на партию в 112 м³».
+        caption = '%d %s, %s на %s' % (count, word, _duration(total),
+                                       _amount(bom.product_qty, bom.uom_id))
         if batch:
-            caption = 'Партия № %s от %s · %s на %s %s' % (
-                batch.name, batch.date_finished.strftime('%d.%m.%Y'), caption,
-                ('%g' % batch.qty_produced).replace('.', ','), batch.uom_id.name)
+            caption = 'Партия № %s от %s — %s · %s' % (
+                batch.name, fields.Datetime.context_timestamp(self, batch.date_finished).strftime('%d.%m.%Y'),
+                _amount(batch.qty_produced, batch.uom_id), caption)
         return steps, caption
 
     def coop_process_doc(self, operation_id, kind):
@@ -118,7 +129,7 @@ class CoopResource(models.Model):
              if wo.date_finished else '—'),
             ('Заняло', _duration(wo.duration)),
             ('По плану', _duration(wo.duration_expected)),
-            ('Выпущено', '%s %s' % (('%g' % wo.qty_produced).replace('.', ','), batch.uom_id.name)),
+            ('Выпущено', _amount(wo.qty_produced, batch.uom_id)),
         ]
         body = Markup('<dl class="coop-process_doc">%s</dl>') % Markup('').join(
             Markup('<dt>%s</dt><dd>%s</dd>') % (escape(k), escape(v)) for k, v in rows)

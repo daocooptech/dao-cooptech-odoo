@@ -71,6 +71,7 @@ class ResPartner(models.Model):
         records = super().create(vals_list)
         fresh = records.filtered(lambda p: p.is_company and not any(p[f] for f in FIELDS))
         fresh.sudo()._coop_default_apps()
+        records._coop_ensure_warehouse()
         return records
 
     def write(self, vals):
@@ -92,7 +93,55 @@ class ResPartner(models.Model):
             orgs = self.filtered('coop_company_id')
             if orgs:
                 self.env['res.users'].sudo()._coop_sync_accounting_access(orgs)
+            self._coop_ensure_warehouse()
         return result
+
+    def _coop_ensure_warehouse(self):
+        """Склады учёта — у кого включены «Склад» или «Производство».
+
+        Движок 20 заводит склад новой компании только в тестах, а без
+        склада нет ни перемещений, ни выпусков: «Склад» открывался пустым,
+        а первый же выпуск падал с «создайте склад для компании».
+
+        Каждому складу организации на платформе — свой склад в учёте
+        (владелец 27.10.2026: «соедини их со складами на платформе»): то,
+        что выставлено на бирже, и то, куда приходят партии, — одно место.
+        Свободный склад учёта занимается первым, прежде чем заводить новый;
+        нет складов на платформе — один склад учёта на компанию.
+        """
+        Warehouse = self.env['stock.warehouse'].sudo().with_context(active_test=False)
+        Platform = self.env['coop.warehouse'].sudo()
+        for org in self.sudo().filtered(
+                lambda o: o.coop_company_id and (o.coop_app_stock or o.coop_app_mrp)):
+            company = org.coop_company_id
+            existing = Warehouse.search([('company_id', '=', company.id)], order='id')
+            platform = Platform.search([('owner_id', '=', org.id)], order='id')
+            free = existing - platform.stock_warehouse_id
+            for place in platform.filtered(lambda w: not w.stock_warehouse_id):
+                if free:
+                    stock = free[0]
+                    free -= stock
+                    if stock.name != place.name and not existing.filtered(
+                            lambda w: w.name == place.name):
+                        stock.name = place.name
+                else:
+                    stock = Warehouse.with_company(company).create(
+                        org._coop_warehouse_vals(place.name, existing))
+                    existing |= stock
+                place.stock_warehouse_id = stock
+            if not existing:
+                Warehouse.with_company(company).create(
+                    org._coop_warehouse_vals(_('Склад %s') % org.name, existing))
+
+    def _coop_warehouse_vals(self, name, existing):
+        # Код склада — до пяти знаков и свой в компании: «СКЛ», «СКЛ2»…
+        codes = set(existing.mapped('code'))
+        code = next(c for c in ['СКЛ'] + ['СКЛ%d' % n for n in range(2, 100)] if c not in codes)
+        names = set(existing.mapped('name'))
+        if name in names:
+            name = '%s (%s)' % (name, code)
+        return {'name': name, 'code': code,
+                'company_id': self.coop_company_id.id, 'partner_id': self.id}
 
     def _coop_sync_sales_team(self):
         # Выключен CRM — отдел продаж пустеет: лидов организации никто не ведёт.
@@ -104,20 +153,24 @@ class ResPartner(models.Model):
 
     # ── Переходы в приложения ────────────────────────────────────────
 
-    def _coop_app_action(self, xml_id, name):
+    def _coop_app_action(self, xml_id, name, create_label):
+        # Подпись кнопки создания — своя у каждого приложения: форма
+        # организации, из которой нажато «открыть», отдаёт свой контекст
+        # вниз, и без неё над списком вставало «Добавить организацию».
         self.ensure_one()
         action = self.env['ir.actions.act_window']._for_xml_id(xml_id)
         action['name'] = '%s — %s' % (name, self.name)
         action['domain'] = [('company_id', '=', self.coop_company_id.id)]
         action['context'] = {'default_company_id': self.coop_company_id.id,
-                             'coop_catalog': False, 'coop_section': False}
+                             'coop_catalog': False, 'coop_section': False,
+                             'coop_create_label': create_label}
         return action
 
     def action_coop_app_stock(self):
-        return self._coop_app_action('stock.action_picking_tree_all', _('Склад'))
+        return self._coop_app_action('stock.action_picking_tree_all', _('Склад'), _('Новое перемещение'))
 
     def action_coop_app_purchase(self):
-        return self._coop_app_action('purchase.purchase_rfq', _('Закупки'))
+        return self._coop_app_action('purchase.purchase_rfq', _('Закупки'), _('Новый запрос цен'))
 
     def action_coop_app_project(self):
         """Проекты, которые организация ведёт или где она вкладчик.
@@ -127,18 +180,19 @@ class ResPartner(models.Model):
         компании выкинула бы остальных из команды. Организация-инициатор
         и принятые вкладчики — подписчики проекта (`_project_followers`).
         """
-        action = self._coop_app_action('project.open_view_project_all', _('Проекты'))
+        action = self._coop_app_action('project.open_view_project_all', _('Проекты'), _('Новый проект'))
         action['domain'] = ['|', ('partner_id', '=', self.id),
                             ('message_partner_ids', 'in', [self.id])]
         action['context'] = {'default_partner_id': self.id,
-                             'coop_catalog': False, 'coop_section': False}
+                             'coop_catalog': False, 'coop_section': False,
+                             'coop_create_label': _('Новый проект')}
         return action
 
     def action_coop_app_mrp(self):
-        return self._coop_app_action('mrp.mrp_bom_form_action', _('Производство'))
+        return self._coop_app_action('mrp.mrp_bom_form_action', _('Производство'), _('Новая спецификация'))
 
     def action_coop_app_hr(self):
-        return self._coop_app_action('hr.open_view_employee_list_my', _('Сотрудники'))
+        return self._coop_app_action('hr.open_view_employee_list_my', _('Сотрудники'), _('Новый сотрудник'))
 
 
 class ResUsers(models.Model):

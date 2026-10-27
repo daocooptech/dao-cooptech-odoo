@@ -78,7 +78,7 @@ class TestResourceProcess(TransactionCase):
         self.assertEqual(steps[1]['duration'], '1 ч 30 мин')
         self.assertEqual([c['title'] for c in steps[0]['children']], ['Осмотр ульев', 'Отбор рамок'])
         self.assertEqual([l['kind'] for l in steps[0]['children'][0]['links']], ['instruction'])
-        self.assertEqual(listing.process_caption, '2 этапа · 2 ч 10 мин')
+        self.assertEqual(listing.process_caption, '2 этапа, 2 ч 10 мин на 1 шт.')
 
     def test_doc_only_for_shown_operation(self):
         self.org.coop_show_process = True
