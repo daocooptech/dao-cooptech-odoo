@@ -32,36 +32,48 @@
       <form>
         <header>
           <button name="action_pay" type="object" string="Выплачено" class="btn-primary"
-                  invisible="state != 'draft'"/>
+                  invisible="state != 'draft' or not coop_can_edit"/>
           <button name="action_cancel" type="object" string="Отменить"
-                  invisible="state != 'draft'"/>
+                  invisible="state != 'draft' or not coop_can_edit"/>
           <field name="state" widget="statusbar" statusbar_visible="draft,paid"/>
         </header>
         <sheet>
+          <!-- № 363: без права записи (пайщик смотрит свою выплату) поля
+               только для чтения, а условия расчёта — текстом. -->
+          <field name="coop_can_edit" invisible="1"/>
           <div class="oe_title">
-            <h1><field name="name" readonly="state != 'draft'"/></h1>
+            <h1><field name="name" readonly="state != 'draft' or not coop_can_edit"/></h1>
           </div>
           <group>
             <group>
-              <field name="cooperative_id" options="{'no_create': True}" readonly="state != 'draft'"/>
-              <field name="partner_id" options="{'no_create': True}" readonly="state != 'draft'"/>
-              <field name="date" readonly="state != 'draft'"/>
-              <field name="amount" readonly="state != 'draft'"/>
+              <field name="cooperative_id" options="{'no_create': True}"
+                     readonly="state != 'draft' or not coop_can_edit"/>
+              <field name="partner_id" options="{'no_create': True}"
+                     readonly="state != 'draft' or not coop_can_edit"/>
+              <field name="date" readonly="state != 'draft' or not coop_can_edit"/>
+              <field name="amount" readonly="state != 'draft' or not coop_can_edit"/>
             </group>
             <group string="Как облагается">
-              <field name="resident" readonly="state != 'draft'"/>
-              <field name="treaty_rate" invisible="resident" readonly="state != 'draft'"/>
-              <field name="foreigner" readonly="state != 'draft'"/>
-              <field name="work_place" invisible="resident" readonly="state != 'draft'"/>
+              <field name="tax_summary" nolabel="1" colspan="2" readonly="1"/>
+            </group>
+          </group>
+          <group string="Условия расчёта" invisible="state != 'draft' or not coop_can_edit">
+            <group>
+              <field name="resident"/>
+              <field name="treaty_rate" invisible="resident"/>
+              <field name="foreigner"/>
+              <field name="work_place" invisible="resident"/>
               <field name="permit" invisible="resident or work_place != 'ru'"
-                     required="not resident and work_place == 'ru'" readonly="state != 'draft'"/>
-              <field name="sme" readonly="state != 'draft'"/>
-              <field name="injury_rate" readonly="state != 'draft'"/>
+                     required="not resident and work_place == 'ru'"/>
+            </group>
+            <group>
+              <field name="sme"/>
+              <field name="injury_rate"/>
             </group>
           </group>
           <group>
             <group string="Расчёт">
-              <field name="amount" string="Начислено"/>
+              <field name="amount" string="Начислено" readonly="1"/>
               <label for="ndfl_amount"/>
               <div>
                 <field name="ndfl_amount" class="oe_inline"/>

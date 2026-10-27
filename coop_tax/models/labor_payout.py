@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from markupsafe import escape
+
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
@@ -95,6 +97,14 @@ class CoopTaxLaborPayout(models.Model):
         string='Обходится кооперативу', currency_field='currency_id',
         compute='_compute_amounts', store=True)
 
+    # Пайщик видит свою выплату, но править её не может (правило
+    # `rule_labor_payout_own`). Форма о правилах записи не знает и рисует
+    # флажки всем, у кого есть право на модель, — нажатие кончалось
+    # ошибкой доступа (№ 363). Право берём у движка, как в `coop.page`.
+    coop_can_edit = fields.Boolean(string='Могу править', compute='_compute_coop_can_edit')
+    tax_summary = fields.Html(
+        string='Как облагается', compute='_compute_tax_summary', sanitize=True)
+
     _amount_positive = models.Constraint(
         'check(amount > 0)', 'Начислено должно быть больше нуля.')
 
@@ -123,6 +133,58 @@ class CoopTaxLaborPayout(models.Model):
             coop = self.cooperative_id
             self.sme = coop.coop_tax_sme
             self.injury_rate = coop.coop_injury_rate if coop.coop_injury_insurance else 0.0
+
+    @api.depends_context('uid')
+    def _compute_coop_can_edit(self):
+        for record in self:
+            origin = record._origin
+            record.coop_can_edit = origin.has_access('write') if origin.id \
+                else self.browse().has_access('create')
+
+    @api.depends('resident', 'foreigner', 'work_place', 'permit', 'sme',
+                 'injury_rate', 'ndfl_rate', 'insurance_rate', 'partner_id')
+    def _compute_tax_summary(self):
+        """Тот же расчёт словами: чей резидент, какие налоги и взносы, кто
+        их платит и что ещё удерживается (владелец 26.10: «что бы всё по
+        честному»)."""
+        for record in self:
+            person = record.partner_id.sudo()
+            abroad = record.work_place == 'abroad'
+            if record.resident:
+                lines = [_('Налоговый резидент России.')]
+            elif person.country_id and person.country_id.code != 'RU':
+                lines = [_('Налоговый резидент страны «%s», не России.', person.country_id.name)]
+            else:
+                lines = [_('Не налоговый резидент России.')]
+            citizenship = person._coop_citizenship() if person else False
+            if citizenship:
+                lines.append(_('Гражданство — %s.', citizenship.name))
+            if not record.resident:
+                if abroad:
+                    lines.append(_('Работает за рубежом.'))
+                else:
+                    permit = dict(self._fields['permit'].selection).get(record.permit)
+                    lines.append(_('Работает в России, документ — %s.', (permit or _('не указан')).lower()))
+            if abroad and not record.resident:
+                lines.append(_('НДФЛ не удерживается — доход вне России.'))
+            elif record.ndfl_rate:
+                lines.append(_('НДФЛ: %s. Удерживает кооператив из начисленного.', record.ndfl_rate))
+            if abroad and record.foreigner:
+                lines.append(_('Страховых взносов нет — иностранец работает за рубежом.'))
+            elif record.insurance_rate:
+                insurance = _('Страховые взносы: %s', record.insurance_rate)
+                if record.sme:
+                    insurance += _(' (кооператив — МСП из перечня)')
+                lines.append(insurance + _('. Платит кооператив сверх начисленного.'))
+            if abroad:
+                lines.append(_('Взносов на травматизм нет — работа за рубежом.'))
+            elif record.injury_rate:
+                lines.append(_('Взносы на травматизм: %s %%. Платит кооператив сверх начисленного.',
+                               ('%g' % record.injury_rate).replace('.', ',')))
+            else:
+                lines.append(_('Взносов на травматизм нет — кооператив их не платит.'))
+            lines.append(_('Других удержаний и комиссий нет: на руки — начисленное минус НДФЛ.'))
+            record.tax_summary = ''.join('<p class="mb-1">%s</p>' % escape(line) for line in lines)
 
     @api.depends('date')
     def _compute_year(self):

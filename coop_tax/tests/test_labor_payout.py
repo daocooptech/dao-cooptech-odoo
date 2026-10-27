@@ -17,7 +17,8 @@ class TestLaborPayout(CoopCase):
         super().setUpClass()
         cls.coop = cls._make_org('Артель пробы выплат')
         cls.coop.write({'coop_injury_insurance': True, 'coop_injury_rate': 0.2})
-        cls.person = cls._make_person('Член артели пробы').partner_id
+        cls.member = cls._make_person('Член артели пробы')
+        cls.person = cls.member.partner_id
 
     def _pay(self, amount=110000, date='2026-03-25', **values):
         return self.env['coop.tax.labor.payout'].create(dict(
@@ -59,3 +60,20 @@ class TestLaborPayout(CoopCase):
     def test_tarif_travmatizma(self):
         with self.assertRaises(ValidationError):
             self.coop.coop_injury_rate = 9.0
+
+    def test_pajshchik_ne_pravit(self):
+        # № 363: свою выплату пайщик видит, но не правит — и форма не
+        # рисует ему флажков, нажатие на которые кончалось ошибкой доступа.
+        pay = self._pay(resident=True)
+        self.assertFalse(pay.with_user(self.member).coop_can_edit)
+        self.assertTrue(pay.coop_can_edit)
+
+    def test_kak_oblagaetsya_tekstom(self):
+        summary = str(self._pay(resident=True).tax_summary)
+        for text in ('Налоговый резидент России', 'НДФЛ: 13 %',
+                     'Страховые взносы: 30 %', 'травматизм: 0,2 %', 'комиссий нет'):
+            self.assertIn(text, summary)
+        summary = str(self._pay(resident=False, foreigner=True, work_place='abroad').tax_summary)
+        for text in ('Работает за рубежом', 'НДФЛ не удерживается',
+                     'Страховых взносов нет', 'Взносов на травматизм нет'):
+            self.assertIn(text, summary)
