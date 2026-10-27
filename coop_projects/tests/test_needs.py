@@ -133,3 +133,45 @@ class TestProjectNeeds(CoopProjectCase):
         offer = self._make_offer(project, giver, need=need)
         offer.with_user(agent).action_accept()
         self.assertEqual(offer.state, 'accepted')
+
+    # ── Запущенный проект добирает открытые потребности ────────────────
+    #
+    # Владелец 28.10.2026: пока у запущенного проекта есть открытые
+    # потребности, «Участвовать» в строках остаётся; «сбор закрыт» — у
+    # завершённого, отменённого, замороженного и несостоявшегося.
+
+    def test_zapushchennyy_prinimaet_vklad_v_potrebnost(self):
+        project = self._make_project(state='running')
+        need = self._make_need(project)
+        giver = self._make_person('Пришедший После Запуска')
+        need_seen = need.with_user(giver)
+        self.assertTrue(need_seen.need_can_join)
+        self.assertFalse(need_seen.need_join_note)
+        self.env['coop.project.contribute'].with_user(giver).create({
+            'project_id': project.id,
+            'need_id': need.id,
+            'kind': 'material',
+            'name': 'Привезу доски',
+            'value': 50000,
+        }).action_offer()
+        self.assertEqual(need.need_offer_count, 1)
+
+    def test_zapushchennyy_ne_prinimaet_vklad_vne_potrebnosti(self):
+        project = self._make_project(state='running')
+        giver = self._make_person('Вкладчик Без Строки')
+        wizard = self.env['coop.project.contribute'].with_user(giver).create({
+            'project_id': project.id,
+            'kind': 'money',
+            'name': 'Денежный вклад',
+            'value': 10000,
+        })
+        with self.assertRaises(UserError):
+            wizard.action_offer()
+
+    def test_zavershyonnyy_sbor_zakryt(self):
+        project = self._make_project(state='done')
+        need = self._make_need(project)
+        giver = self._make_person('Опоздавший Вкладчик')
+        need_seen = need.with_user(giver)
+        self.assertFalse(need_seen.need_can_join)
+        self.assertEqual(need_seen.need_join_note, 'сбор закрыт')

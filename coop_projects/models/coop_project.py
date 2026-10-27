@@ -1523,8 +1523,10 @@ class CoopProjectContribution(models.Model):
             gathering = record.project_id.state == 'gathering'
             if record.state == 'offered':
                 # Непринятый вклад отзывается свободно: проект на него
-                # ещё не рассчитывал.
-                record.can_withdraw = gathering
+                # ещё не рассчитывал. Запущенный тоже принимает отклики
+                # на открытые потребности — и их тоже можно отозвать.
+                record.can_withdraw = record.project_id.state in (
+                    'gathering', 'running')
             elif record.state == 'accepted' and record.withdraw_until:
                 record.can_withdraw = (gathering
                                        and not record.delivered_on

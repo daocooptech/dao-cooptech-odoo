@@ -20,6 +20,11 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
+# В каких состояниях проекта строка потребности принимает вклад: в сборе
+# и в запущенном — тот добирает недостающее по ходу работы (владелец
+# 28.10.2026). Окно вклада проверяет то же самое.
+OPEN_FOR_NEEDS = ('gathering', 'running')
+
 
 class CoopResource(models.Model):
     _inherit = 'coop.resource'
@@ -72,10 +77,11 @@ class CoopResource(models.Model):
         help='Стоимость потребности к общей потребности проекта.')
     need_can_join = fields.Boolean(
         string='Можно участвовать', compute='_compute_need_can_join')
-    # Что стоит в строке потребности на месте «Участвовать», когда сбор не
-    # идёт. Владелец 28 октября 2026: вклад — только во время сбора, а на
-    # месте кнопки — «сбор закрыт». Пустая колонка у запущенного проекта
-    # читалась как поломка страницы.
+    # Что стоит в строке потребности на месте «Участвовать», когда вклад
+    # не принимается. Владелец 28 октября 2026: запущенный проект добирает
+    # открытые потребности по ходу работы (так и обещает его план «если
+    # соберём не всё»), а «сбор закрыт» — у завершённого, отменённого,
+    # замороженного и несостоявшегося. Пустая колонка читалась как поломка.
     need_join_note = fields.Char(
         string='Участие', compute='_compute_need_join_note')
 
@@ -100,7 +106,7 @@ class CoopResource(models.Model):
         for record in self:
             record.need_can_join = bool(
                 record.project_id
-                and record.project_id.state == 'gathering'
+                and record.project_id.state in OPEN_FOR_NEEDS
                 and record.state == 'published'
                 and not record.need_accepted_id
                 and record.project_id.partner_id not in mine)
@@ -109,7 +115,7 @@ class CoopResource(models.Model):
     def _compute_need_join_note(self):
         for record in self:
             state = record.project_id.state
-            if not state or state == 'gathering':
+            if not state or state in OPEN_FOR_NEEDS:
                 record.need_join_note = False
             elif state == 'draft':
                 record.need_join_note = _('сбор не начат')

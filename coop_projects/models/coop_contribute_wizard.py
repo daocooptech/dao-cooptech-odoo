@@ -59,10 +59,14 @@ class CoopContributeWizard(models.TransientModel):
     def action_offer(self):
         self.ensure_one()
         project = self.project_id
-        if project.state != 'gathering':
+        # Запущенный проект добирает недостающее — но только в открытые
+        # потребности: вклад «вообще» после сбора смете не к чему отнести.
+        open_need = (project.state == 'running' and self.need_id
+                     and self.need_id.need_can_join)
+        if project.state != 'gathering' and not open_need:
             raise UserError(_(
-                'Вложиться можно в проект, который собирает. Сейчас он в '
-                'состоянии «%s».') % dict(
+                'Вложиться можно в проект, который собирает, или в открытую '
+                'потребность запущенного. Сейчас он в состоянии «%s».') % dict(
                     project._fields['state'].selection).get(project.state))
         me = self.env.user._coop_acting_partner()
         if project.partner_id == me:
