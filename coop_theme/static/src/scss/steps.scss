@@ -1,0 +1,70 @@
+// ── Steps — строка состояний записи ─────────────────────────────────────
+//
+// Эталон — `.claude/design-system/components/Steps` (решение 625):
+// пройденное — `coop-teal-tint` с галочкой, текущее — белая плашка с
+// границей `coop-teal` и жирной подписью, предстоящее — `coop-surface`.
+// Плашки ровные, без стрелок: до 27.10.2026 строка оставалась штатной
+// (стрелки на `clip-path` в рамке), и на витрине ресурса выпадала из вида.
+//
+// Разметка движка (`web.StatusBarField`): `.o_statusbar_status` >
+// `.o_arrow_button_wrap` > `button.o_arrow_button`, у текущего
+// `.o_arrow_button_current`. Ряд идёт `row-reverse`: первое в разметке —
+// последнее на экране, поэтому пройденные — соседи текущего *после* него.
+
+.o_form_view .o_field_statusbar > .o_statusbar_status {
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+
+  .o_arrow_button_wrap { margin: 0; }
+
+  .o_arrow_button:not(.d-none) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 0;
+    padding: 7px 12px;
+    border: 1px solid transparent;
+    border-radius: var(--coop-radius-item, 8px);
+    clip-path: none;
+    background: var(--coop-surface, #f2f2ee);
+    color: var(--coop-slate, #4a4a44);
+    font: 500 12px/1.3 'Manrope', sans-serif;
+    white-space: nowrap;
+    box-shadow: none;
+
+    &:not(:disabled):hover {
+      border-color: var(--coop-line-strong, #d2d2cb);
+    }
+
+    // Движок гасит недоступные плашки до `text-muted` — предстоящее
+    // по эталону набрано `coop-slate`.
+    &:disabled { color: var(--coop-slate, #4a4a44); }
+  }
+
+  .o_arrow_button_wrap:has(> .o_arrow_button_current) ~ .o_arrow_button_wrap > .o_arrow_button {
+    background: var(--coop-teal-tint, #e3efed);
+    color: var(--coop-teal-dark, #0e4f4a);
+
+    // Пройдено — галочкой, а не только цветом. Контур Tabler `check`.
+    &::before {
+      content: "";
+      width: 14px;
+      height: 14px;
+      flex: none;
+      background: currentColor;
+      -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5l10 -10'/%3E%3C/svg%3E") center / contain no-repeat;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5l10 -10'/%3E%3C/svg%3E") center / contain no-repeat;
+    }
+  }
+
+  .o_arrow_button.o_arrow_button_current:disabled {
+    background: var(--coop-white, #ffffff);
+    border-color: var(--coop-teal, #146b64);
+    color: var(--coop-ink, #14171a);
+    font-weight: 700;
+  }
+}
