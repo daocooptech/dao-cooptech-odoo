@@ -347,22 +347,24 @@
                 </dl>
               </section>
               <!--
-                Кто делает и из чего. Блок прячется, когда ничего не
-                заполнено и править нельзя: у большинства объявлений состава
-                нет и не будет, и пустой блок читался бы как недоделка
-                платформы, а не как «у этого производителя такого учёта нет»
-                (решение 370).
+                Кто делает и из чего. Блок и каждая его часть показываются
+                только там, где заполнены, — в том числе владельцу: витрина
+                показывает объявление, а заполняют состав в «Разместить
+                объявление». У большинства объявлений состава нет и не будет,
+                и пустой блок читался бы как недоделка платформы, а не как
+                «у этого производителя такого учёта нет» (решение 370;
+                владелец 27.10.2026).
               -->
               <section class="coop-show_block" name="making"
-                       invisible="not coop_can_edit and made_of_count == 0 and not manufacturer_ids">
+                       invisible="made_of_count == 0 and not manufacturer_ids">
                 <h2>Кто делает и из чего</h2>
-                <group>
+                <group invisible="not manufacturer_ids">
                   <field name="manufacturer_ids" widget="many2many_tags"
                          readonly="not coop_can_edit"
                          placeholder="Кто это делает — их может быть несколько"/>
                 </group>
-                <group>
-                  <group string="Сырьё">
+                <group invisible="made_of_count == 0">
+                  <group string="Сырьё" invisible="not material_ids">
                     <field name="material_ids" nolabel="1" colspan="2"
                            readonly="not coop_can_edit"
                            context="{'coop_catalog': True}">
@@ -374,7 +376,7 @@
                       </list>
                     </field>
                   </group>
-                  <group string="Оборудование">
+                  <group string="Оборудование" invisible="not equipment_ids">
                     <field name="equipment_ids" nolabel="1" colspan="2"
                            readonly="not coop_can_edit"
                            context="{'coop_catalog': True}">
@@ -387,7 +389,7 @@
                     </field>
                   </group>
                 </group>
-                <div class="text-muted mt-2">
+                <div class="text-muted mt-2" invisible="not coop_can_edit or made_of_count == 0">
                   Сырьё и оборудование — объявлениями о тех же ресурсах, а не
                   текстом: по связи видно, у кого это взять, а по слову — нет.
                   Дальше сюда же придут техпроцесс, партия и остаток на складе —
