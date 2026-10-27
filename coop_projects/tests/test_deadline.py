@@ -155,7 +155,9 @@ class TestFundingDeadline(CoopProjectCase):
             project.action_fail()
 
     def test_investitsionnyy_sbor_zakryt_bez_statusa_operatora(self):
-        """Заём и доля через платформу требуют статуса оператора."""
+        """Узел без статуса оператора закрывает инвестиционный сбор."""
+        self.env['ir.config_parameter'].sudo().set_str(
+            'coop.investment_operator', 'False')
         project = self._make_project()
         project.contribution_basis = 'investment'
         project.fallback_plan = 'Первая очередь.'
@@ -163,8 +165,7 @@ class TestFundingDeadline(CoopProjectCase):
             project.action_open_gathering()
 
     def test_so_statusom_operatora_investitsii_otkryvayutsya(self):
-        self.env['ir.config_parameter'].sudo().set_str(
-            'coop.investment_operator', 'True')
+        """Платформа — оператор (решение 633): открыто по умолчанию."""
         project = self._make_project()
         project.contribution_basis = 'investment'
         project.fallback_plan = 'Первая очередь.'

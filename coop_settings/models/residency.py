@@ -202,7 +202,7 @@ class CoopSettlementMethod(models.Model):
             if code == 'netting' and (payer.coop_tax_regime or '').startswith('usn'):
                 warn.append('На УСН доход по зачёту — в день подписания акта (п. 1 ст. 346.17 НК).')
             if cross and code == 'cfa' and not deny:
-                warn.append('Только через оператора информационной системы — у платформы его пока нет.')
+                warn.append('Нерезидент проходит идентификацию в информационной системе платформы.')
             verdict = 'deny' if deny else ('warn' if warn else 'ok')
             out.append(self._coop_row(method, verdict, deny, warn))
         order = {'ok': 0, 'warn': 1, 'deny': 2, 'planned': 3}
