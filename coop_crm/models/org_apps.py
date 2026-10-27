@@ -21,6 +21,10 @@ APPS = {
     # запросы КП и заказы поставщикам ведёт организация, не человек.
     'purchase': (('deal', 'treasury'), 'purchase.group_purchase_user'),
     'project': (('sign', 'deal'), 'project.group_project_user'),
+    # Производство (решение 630): техкарты, участки, выпуски. Руководителя
+    # группы, а не пользователя: техкарту в движке правит только он, а без
+    # своей техкарты техпроцесс на карточке ресурса показывать нечего.
+    'mrp': (('deal', 'treasury'), 'mrp.group_mrp_manager'),
     'hr': (('roster', 'powers'), 'hr.group_hr_user'),
 }
 # «Проекты» по умолчанию выключены у всех (решение 452): организация не
@@ -43,6 +47,7 @@ class ResPartner(models.Model):
     coop_app_purchase = fields.Boolean(string='Закупки')
     coop_app_project = fields.Boolean(string='Проекты')
     coop_app_hr = fields.Boolean(string='Сотрудники')
+    coop_app_mrp = fields.Boolean(string='Производство')
     coop_can_manage_apps = fields.Boolean(compute='_compute_coop_can_manage_apps')
 
     @api.depends_context('uid')
@@ -128,6 +133,9 @@ class ResPartner(models.Model):
         action['context'] = {'default_partner_id': self.id,
                              'coop_catalog': False, 'coop_section': False}
         return action
+
+    def action_coop_app_mrp(self):
+        return self._coop_app_action('mrp.mrp_bom_form_action', _('Производство'))
 
     def action_coop_app_hr(self):
         return self._coop_app_action('hr.open_view_employee_list_my', _('Сотрудники'))

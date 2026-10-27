@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Технологический процесс на витрине ресурса (решение 630, эталон
+    `ResourcePage` и `ProcessSteps`): после «Кто делает и из чего», перед
+    отзывами. Пустой блок не показывается — нет техкарты или организация
+    не включила показ (решения 370, 374).
+  -->
+  <record id="view_coop_resource_form_process" model="ir.ui.view">
+    <field name="name">coop.resource.form.process</field>
+    <field name="model">coop.resource</field>
+    <field name="inherit_id" ref="coop_resources.view_coop_resource_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//section[@name='making']" position="after">
+        <section class="coop-show_block" name="process" invisible="not process_steps">
+          <h2>Технологический процесс</h2>
+          <field name="process_steps" widget="coop_process_steps" nolabel="1"/>
+          <p class="coop-process_caption"><field name="process_caption" nolabel="1"/></p>
+        </section>
+      </xpath>
+      <!-- Техкарту выбирает владелец — из «Производства» своей организации. -->
+      <xpath expr="//field[@name='owner_id'][@widget='coop_inline']" position="after">
+        <field name="coop_owner_company_id" invisible="1"/>
+        <field name="bom_id" options="{'no_create': True}" widget="coop_inline"
+               invisible="not coop_owner_company_id"
+               placeholder="Техкарта из «Производства» организации"/>
+      </xpath>
+    </field>
+  </record>
+
+  <!-- Показ техпроцесса — рядом с приложением «Производство». -->
+  <record id="view_coop_orgs_form_process" model="ir.ui.view">
+    <field name="name">coop.orgs.form.process</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="coop_crm.view_coop_orgs_form_cabinet"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='coop_app_mrp']/.." position="after">
+        <div class="o_coop_app_row" invisible="not coop_app_mrp">
+          <span class="o_coop_key">Техпроцесс на карточках</span>
+          <field name="coop_show_process" widget="coop_autosave_toggle" nolabel="1"
+                 readonly="not coop_can_manage_apps"/>
+        </div>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="mrp_routing_workcenter_form_instruction" model="ir.ui.view">
+    <field name="name">mrp.routing.workcenter.form.instruction</field>
+    <field name="model">mrp.routing.workcenter</field>
+    <field name="inherit_id" ref="mrp.mrp_routing_workcenter_form_view"/>
+    <field name="arch" type="xml">
+      <xpath expr="//sheet/group" position="after">
+        <field name="coop_instruction" placeholder="Как выполнять операцию — откроется по ссылке «Инструкция» на карточке ресурса"/>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

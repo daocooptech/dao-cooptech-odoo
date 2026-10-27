@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!-- Технологический процесс — разметка образца `ProcessSteps`. -->
+  <t t-name="coop_mrp.ProcessSteps">
+    <div class="coop-process">
+      <div class="coop-process_bar" role="img" aria-label="Доля этапов во времени">
+        <t t-foreach="this.steps" t-as="step" t-key="step_index">
+          <i t-att-class="step_index === this.state.open ? 'coop-process_on' : ''"
+             t-att-style="'flex-grow: ' + (step.minutes || 1)"
+             t-att-title="step.title + ' — ' + step.duration"/>
+        </t>
+      </div>
+      <ol class="coop-process_list">
+        <t t-foreach="this.steps" t-as="step" t-key="step_index">
+          <t t-set="on" t-value="step_index === this.state.open"/>
+          <li class="coop-process_step" t-att-class="{'coop-process_step_on': on}">
+            <button type="button" class="coop-process_head" t-att-aria-expanded="on ? 'true' : 'false'"
+                    t-on-click="() => this.toggle(step_index)">
+              <span class="coop-process_n" t-esc="step_index + 1"/>
+              <span class="coop-process_title" t-esc="step.title"/>
+              <span class="coop-process_dur" t-esc="step.duration"/>
+              <span class="coop-process_pct" t-esc="this.pct(step)"/>
+              <CoopIcon name="on ? 'chevron-up' : 'chevron-down'" size="16"/>
+            </button>
+            <ol t-if="on and step.children" class="coop-process_sub">
+              <t t-foreach="step.children" t-as="op" t-key="op_index">
+                <li>
+                  <span class="coop-process_subn" t-esc="(step_index + 1) + '.' + (op_index + 1)"/>
+                  <span class="coop-process_subt" t-esc="op.title"/>
+                  <span class="coop-process_dur" t-esc="op.duration"/>
+                  <span class="coop-process_links">
+                    <t t-foreach="op.links" t-as="link" t-key="link.kind">
+                      <a href="#" t-on-click.prevent="() => this.openDoc(link)" t-esc="link.label"/>
+                    </t>
+                  </span>
+                </li>
+              </t>
+            </ol>
+          </li>
+        </t>
+      </ol>
+    </div>
+  </t>
+
+  <t t-name="coop_mrp.ProcessDoc">
+    <Dialog title="this.props.title" size="'md'">
+      <div class="coop-process_docbody" t-out="this.props.body"/>
+      <t t-set-slot="footer">
+        <button class="btn btn-primary" t-on-click="this.props.close">Закрыть</button>
+      </t>
+    </Dialog>
+  </t>
+
+</templates>

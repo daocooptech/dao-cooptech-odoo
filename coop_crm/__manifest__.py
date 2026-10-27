@@ -11,9 +11,9 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.5.0',
+    'version': '20.0.1.6.0',
     'license': 'LGPL-3',
-    'depends': ['crm', 'stock', 'purchase', 'project', 'hr', 'coop_invoicing', 'coop_deals', 'coop_extensions',
+    'depends': ['crm', 'stock', 'purchase', 'mrp', 'project', 'hr', 'coop_invoicing', 'coop_deals', 'coop_extensions',
                 'coop_profile'],
     'data': [
         'views/crm_lead_views.xml',
