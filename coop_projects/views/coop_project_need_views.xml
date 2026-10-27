@@ -52,7 +52,7 @@
         <group string="Потребность проекта" invisible="not project_id">
           <group>
             <field name="project_id" readonly="1"/>
-            <field name="need_manager_id"/>
+            <field name="need_manager_id" readonly="not coop_can_edit"/>
           </group>
           <group>
             <field name="need_offer_count" readonly="1"/>

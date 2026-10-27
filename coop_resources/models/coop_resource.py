@@ -309,6 +309,37 @@ class CoopResource(models.Model):
         ('closed', 'Закрыто'),
     ], string='Состояние', default='published', required=True, tracking=True, index=True)
 
+    # Кто стоит за объявлением — карточкой в боковой колонке витрины
+    # (дизайн-система 25.10, `OwnerCard`, решение 625). Связанными
+    # полями: форма показывает только поля своей модели, а человеку,
+    # который решает, иметь ли дело, нужны знак, доверие и число сделок
+    # владельца рядом с ценой, а не на чужой странице.
+    owner_avatar = fields.Image(
+        related='owner_id.avatar_128', string='Знак владельца')
+    owner_trust = fields.Integer(
+        related='owner_id.coop_trust', string='Доверие владельца, %')
+    owner_deals_done = fields.Integer(
+        related='owner_id.coop_deals_done', string='Сделок у владельца')
+    owner_deals_reviewed = fields.Integer(
+        related='owner_id.coop_deals_reviewed', string='Отзывов о владельце')
+    # «Есть 120 кг» в строке фактов витрины. Строкой, а не самим числом:
+    # дробное поле показывало «1,00» у штучного товара.
+    quantity_display = fields.Char(
+        string='Количество строкой', compute='_compute_quantity_display')
+
+    @api.depends('quantity', 'uom_label')
+    def _compute_quantity_display(self):
+        for record in self:
+            if not record.quantity:
+                record.quantity_display = False
+                continue
+            number = ('%.3f' % record.quantity).rstrip('0').rstrip('.')
+            whole, _dot, frac = number.partition('.')
+            whole = '{:,}'.format(int(whole)).replace(',', ' ')
+            number = whole + (',' + frac if frac else '')
+            record.quantity_display = ' '.join(
+                part for part in (number, record.uom_label) if part)
+
     def _coop_recompute_money_display(self):
         """Пересчитать хранимую строку суммы у всех записей.
 

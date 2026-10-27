@@ -460,16 +460,25 @@
     <field name="model">coop.resource</field>
     <field name="inherit_id" ref="coop_resources.view_coop_resource_form"/>
     <field name="arch" type="xml">
-      <!-- Страница ресурса — форма записи (с 20.10; до того её рисовала
-           форма размещения). Строка под заголовком, как
-           «Сделки: 16 — реестр сделок» на своей странице; у нового
-           объявления покупателей нет, и строки не видно. -->
-      <xpath expr="//div[hasclass('oe_title')]/h1" position="after">
-        <div class="o_coop_buyers_line text-muted" invisible="not coop_buyer_count">
-          Покупатели: <b><field name="coop_buyer_count" readonly="1" nolabel="1"/></b>
-          <button name="action_coop_buyers" type="object"
-                  class="btn btn-link p-0 ms-2" string="сделки по ресурсу →"/>
+      <!-- Страница ресурса — витрина (дизайн-система 25.10, `ResourcePage`):
+           покупатели — третьим числом в карточке владельца и строкой-ссылкой
+           последней в боковой колонке. У нового объявления покупателей нет,
+           и строки не видно. -->
+      <xpath expr="//dl[hasclass('coop-owner_stats')]" position="inside">
+        <div>
+          <dt>покупателей</dt>
+          <dd><field name="coop_buyer_count" readonly="1" nolabel="1"/></dd>
         </div>
+      </xpath>
+      <xpath expr="//aside[hasclass('coop-show_aside')]" position="inside">
+        <button name="action_coop_buyers" type="object" class="coop-link"
+                invisible="not coop_buyer_count">
+          <span class="coop-link_body">
+            <b>Покупатели</b>
+            <span>сделки по этому объявлению</span>
+          </span>
+          <span class="coop-link_side"><field name="coop_buyer_count" readonly="1" nolabel="1"/></span>
+        </button>
       </xpath>
     </field>
   </record>

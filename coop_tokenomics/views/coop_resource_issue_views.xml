@@ -13,10 +13,13 @@
     <field name="arch" type="xml">
 
       <xpath expr="//notebook" position="inside">
-        <page string="Токен на бирже" name="token">
+        <!-- Чужому — только выпущенный токен и только для чтения: галочка
+             выпуска и условия — дело владельца объявления. -->
+        <page string="Токен на бирже" name="token"
+              invisible="not coop_can_edit and not coop_token_issue">
           <group>
             <field name="coop_token_issue"
-                   readonly="state == 'published' and coop_token_claim_id != False"/>
+                   readonly="not coop_can_edit or (state == 'published' and coop_token_claim_id != False)"/>
             <field name="coop_token_claim_id" invisible="1"/>
           </group>
 
@@ -31,19 +34,19 @@
             <group string="Что обещаете">
               <label for="coop_token_quantity"/>
               <div class="o_row">
-                <field name="coop_token_quantity"
+                <field name="coop_token_quantity" readonly="not coop_can_edit"
                        required="coop_token_issue"/>
-                <field name="coop_token_unit" placeholder="кг, т, смена"
+                <field name="coop_token_unit" readonly="not coop_can_edit" placeholder="кг, т, смена"
                        required="coop_token_issue"/>
               </div>
-              <field name="coop_token_quality" required="coop_token_issue"
+              <field name="coop_token_quality" readonly="not coop_can_edit" required="coop_token_issue"
                      placeholder="ГОСТ 32284-2013, первый сорт"/>
-              <field name="coop_token_place" required="coop_token_issue"
+              <field name="coop_token_place" readonly="not coop_can_edit" required="coop_token_issue"
                      placeholder="Красноярск, производственная площадка"/>
-              <field name="coop_token_date" required="coop_token_issue"/>
+              <field name="coop_token_date" readonly="not coop_can_edit" required="coop_token_issue"/>
             </group>
             <group string="Деньги">
-              <field name="coop_token_price" required="coop_token_issue"/>
+              <field name="coop_token_price" readonly="not coop_can_edit" required="coop_token_issue"/>
               <field name="coop_token_total" readonly="1"/>
               <field name="coop_token_deposit" readonly="1"/>
             </group>

@@ -196,20 +196,22 @@
     <field name="name">coop.resource.form</field>
     <field name="model">coop.resource</field>
     <field name="arch" type="xml">
-      <form string="Ресурс">
+      <!--
+        Страница ресурса — витрина, а не форма «подпись — значение»
+        (дизайн-система 25.10, «Витрина записи» и `ResourcePage`, решение
+        625). Человек открывает её, чтобы решить: подходит ли, сколько
+        стоит, кто за этим стоит и как связаться, — поэтому сверху снимок,
+        название и цена с кнопкой, ниже две колонки: описание и состав
+        слева, владелец справа, липко, чтобы связаться можно было с любого
+        места страницы.
+
+        Пустой блок не показывается: карточка — витрина того, что участник
+        согласился показать (решение 370), и пустой блок читался бы как
+        недоделка платформы. Владелец видит ту же витрину, но вместо
+        отклика — свои действия, строку состояний и правку условий.
+      -->
+      <form string="Ресурс" class="o_coop_show">
         <header>
-          <!--
-            Единственное действие участника в самом большом каталоге
-            платформы. До него здесь было три кнопки, и все три — хозяина
-            объявления: опубликовать, закрыть, продвинуть. Тому, кто
-            нашёл нужное, нажать было нечего.
-          -->
-          <button name="action_respond" type="object"
-                  class="btn-primary" invisible="not can_respond">
-            <field name="respond_label" nolabel="1" readonly="1"/>
-          </button>
-          <button name="action_message_owner" type="object"
-                  string="Написать владельцу" invisible="not can_respond"/>
           <button name="action_publish" type="object" string="Опубликовать"
                   class="btn-primary" invisible="state == 'published' or not coop_can_edit"/>
           <button name="%(action_coop_resource_promote)d" type="action"
@@ -217,108 +219,243 @@
                   context="{'default_resource_id': id}"/>
           <button name="action_close" type="object" string="Закрыть"
                   invisible="state == 'closed' or not coop_can_edit"/>
-          <field name="can_respond" invisible="1"/>
-          <field name="respond_label" invisible="1"/>
           <field name="state" widget="statusbar"
-                 statusbar_visible="draft,published,closed"/>
+                 statusbar_visible="draft,published,closed"
+                 invisible="not coop_can_edit"/>
         </header>
         <sheet>
           <field name="coop_can_edit" invisible="1"/>
-          <field name="image_1920" widget="image" class="oe_avatar"/>
-          <div class="oe_title">
-            <h1><field name="name" placeholder="Что предлагаете или ищете" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/></h1>
-          </div>
-          <group>
-            <group string="Что это">
-              <field name="listing_type" widget="radio" options="{'horizontal': True}"
-                     invisible="not coop_can_edit"/>
-              <field name="listing_type" readonly="1" invisible="coop_can_edit"/>
-              <field name="resource_type" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="category_id" options="{'no_create': True}" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="method_ids" widget="many2many_tags"
-                     options="{'no_create': True}"/>
-            </group>
-            <group string="Условия">
-              <field name="price_kind" widget="coop_inline" readonly="not coop_can_edit"/>
-              <label for="price"/>
-              <div class="o_row">
-                <field name="price" readonly="price_kind == 'none'" widget="coop_inline"/>
-                <field name="price_unit_label" placeholder="кг, шт., сутки"
-                       readonly="price_kind == 'none'" widget="coop_inline"/>
-              </div>
-              <field name="currency_id" invisible="1"/>
-              <field name="price_display" readonly="1"/>
-              <field name="terms_html" nolabel="1" colspan="2" invisible="not terms_html"/>
-            </group>
-          </group>
-          <group>
-            <group string="Кто и где">
-              <field name="owner_id" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="city" widget="coop_inline" readonly="not coop_can_edit"/>
-            </group>
-            <group string="Продвижение">
-              <field name="is_promoted" readonly="1"/>
-              <field name="promoted_until" readonly="1"
-                     invisible="not promoted_until"/>
-              <field name="promotion_slot_id" readonly="1"
-                     invisible="not promoted_until"/>
-              <field name="catalog_rank" readonly="1" groups="base.group_no_one"/>
-            </group>
-          </group>
+          <field name="can_respond" invisible="1"/>
           <field name="made_of_count" invisible="1"/>
-          <notebook>
-            <page string="Описание" name="description">
-              <field name="description"
-                     placeholder="Что это, в каком состоянии, на каких условиях." widget="coop_block" readonly="not coop_can_edit"/>
-            </page>
-            <!--
-              Кто делает и из чего. Вкладка прячется, когда ничего не
-              заполнено и править нельзя: у большинства объявлений состава
-              нет и не будет, и пустая вкладка читалась бы как недоделка
-              платформы, а не как «у этого производителя такого учёта нет»
-              (решение 370).
-            -->
-            <page string="Кто делает и из чего" name="making"
-                  invisible="not coop_can_edit and made_of_count == 0 and not manufacturer_ids">
-              <group>
-                <field name="manufacturer_ids" widget="many2many_tags"
+          <field name="currency_id" invisible="1"/>
+          <section class="coop-show_hero">
+            <div class="coop-gallery">
+              <div class="coop-gallery_main">
+                <field name="image_1920" widget="image" class="coop-gallery_img"
                        readonly="not coop_can_edit"
-                       placeholder="Кто это делает — их может быть несколько"/>
-              </group>
-              <group>
-                <group string="Сырьё">
-                  <field name="material_ids" nolabel="1" colspan="2"
-                         readonly="not coop_can_edit"
-                         context="{'coop_catalog': True}">
-                    <list>
-                      <field name="name"/>
-                      <field name="owner_id"/>
-                      <field name="city"/>
-                      <field name="price"/>
-                    </list>
-                  </field>
-                </group>
-                <group string="Оборудование">
-                  <field name="equipment_ids" nolabel="1" colspan="2"
-                         readonly="not coop_can_edit"
-                         context="{'coop_catalog': True}">
-                    <list>
-                      <field name="name"/>
-                      <field name="owner_id"/>
-                      <field name="city"/>
-                      <field name="price"/>
-                    </list>
-                  </field>
-                </group>
-              </group>
-              <div class="text-muted mt-2">
-                Сырьё и оборудование — объявлениями о тех же ресурсах, а не
-                текстом: по связи видно, у кого это взять, а по слову — нет.
-                Дальше сюда же придут техпроцесс, партия и остаток на складе —
-                у тех, кто подключит свои системы учёта.
+                       invisible="not image_1920 and not coop_can_edit"/>
+                <span class="coop-gallery_none" invisible="image_1920 or coop_can_edit">Без снимка</span>
+                <span class="coop-gallery_badge">
+                  <field name="listing_type" readonly="1" nolabel="1"/>
+                </span>
               </div>
-            </page>
-          </notebook>
+            </div>
+            <div class="coop-show_info">
+              <div class="coop-show_kicker">
+                <span class="badge o_coop_show_type">
+                  <field name="resource_type" readonly="1" nolabel="1"/>
+                </span>
+                <field name="category_id" readonly="1" nolabel="1"
+                       options="{'no_open': True}"/>
+              </div>
+              <div class="oe_title">
+                <h1 class="coop-show_title"><field name="name" placeholder="Что предлагаете или ищете" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/></h1>
+              </div>
+              <ul class="coop-show_meta">
+                <li invisible="not city"><field name="city" readonly="1" nolabel="1"/></li>
+                <li invisible="not quantity_display">
+                  <span>Есть</span>
+                  <field name="quantity_display" readonly="1" nolabel="1"/>
+                </li>
+                <li invisible="condition == 'na' or not condition">
+                  <field name="condition" readonly="1" nolabel="1"/>
+                </li>
+              </ul>
+              <hr class="coop-show_rule"/>
+              <div class="coop-price">
+                <span class="coop-price_label">Цена</span>
+                <span class="coop-price_value"><field name="price_display" readonly="1" nolabel="1"/></span>
+                <span class="coop-price_note" invisible="not bargain">Торг уместен</span>
+              </div>
+              <div class="coop-show_ways" invisible="not method_ids">
+                <span class="coop-show_lbl">Способ передачи</span>
+                <field name="method_ids" widget="many2many_tags" readonly="1" nolabel="1"/>
+              </div>
+              <div class="coop-show_terms" invisible="not terms_html">
+                <field name="terms_html" readonly="1" nolabel="1"/>
+              </div>
+              <!--
+                Единственное действие участника в самом большом каталоге
+                платформы. До него здесь было три кнопки, и все три —
+                хозяина объявления: опубликовать, закрыть, продвинуть.
+                Тому, кто нашёл нужное, нажать было нечего.
+              -->
+              <div class="coop-show_acts" invisible="not can_respond">
+                <button name="action_respond" type="object" class="btn-primary">
+                  <field name="respond_label" nolabel="1" readonly="1"/>
+                </button>
+                <button name="action_message_owner" type="object" class="btn-secondary"
+                        string="Написать владельцу"/>
+              </div>
+            </div>
+          </section>
+          <div class="coop-show_grid">
+            <div class="coop-show_main">
+              <!-- Правка условий — только владельцу: остальным те же
+                   значения видны в шапке словами. -->
+              <section class="coop-show_block" invisible="not coop_can_edit">
+                <h2>Условия</h2>
+                <group>
+                  <group>
+                    <field name="listing_type" widget="radio" options="{'horizontal': True}"/>
+                    <field name="resource_type" widget="coop_inline"/>
+                    <field name="category_id" options="{'no_create': True}" widget="coop_inline"/>
+                    <field name="method_ids" widget="many2many_tags"
+                           options="{'no_create': True}"/>
+                  </group>
+                  <group>
+                    <field name="price_kind" widget="coop_inline"/>
+                    <label for="price"/>
+                    <div class="o_row">
+                      <field name="price" readonly="price_kind == 'none'" widget="coop_inline"/>
+                      <field name="price_unit_label" placeholder="кг, шт., сутки"
+                             readonly="price_kind == 'none'" widget="coop_inline"/>
+                    </div>
+                    <label for="quantity"/>
+                    <div class="o_row">
+                      <field name="quantity" widget="coop_inline"/>
+                      <field name="uom_label" placeholder="кг, шт., м²" widget="coop_inline"/>
+                    </div>
+                    <field name="condition" widget="coop_inline"/>
+                    <field name="bargain"/>
+                    <field name="contact_method" widget="coop_inline"/>
+                    <field name="owner_id" widget="coop_inline"/>
+                  </group>
+                </group>
+              </section>
+              <section class="coop-show_block" invisible="not description and not coop_can_edit">
+                <h2>Описание</h2>
+                <field name="description"
+                       placeholder="Что это, в каком состоянии, на каких условиях." widget="coop_block" readonly="not coop_can_edit"/>
+                <dl class="coop-show_facts">
+                  <div invisible="not quantity_display">
+                    <dt>Количество</dt>
+                    <dd><field name="quantity_display" readonly="1" nolabel="1"/></dd>
+                  </div>
+                  <div invisible="condition == 'na' or not condition">
+                    <dt>Состояние</dt>
+                    <dd><field name="condition" readonly="1" nolabel="1"/></dd>
+                  </div>
+                  <div>
+                    <dt>Торг</dt>
+                    <dd><span invisible="not bargain">уместен</span><span invisible="bargain">без торга</span></dd>
+                  </div>
+                  <div invisible="not contact_method">
+                    <dt>Как связываться</dt>
+                    <dd><field name="contact_method" readonly="1" nolabel="1"/></dd>
+                  </div>
+                </dl>
+              </section>
+              <!--
+                Кто делает и из чего. Блок прячется, когда ничего не
+                заполнено и править нельзя: у большинства объявлений состава
+                нет и не будет, и пустой блок читался бы как недоделка
+                платформы, а не как «у этого производителя такого учёта нет»
+                (решение 370).
+              -->
+              <section class="coop-show_block" name="making"
+                       invisible="not coop_can_edit and made_of_count == 0 and not manufacturer_ids">
+                <h2>Кто делает и из чего</h2>
+                <group>
+                  <field name="manufacturer_ids" widget="many2many_tags"
+                         readonly="not coop_can_edit"
+                         placeholder="Кто это делает — их может быть несколько"/>
+                </group>
+                <group>
+                  <group string="Сырьё">
+                    <field name="material_ids" nolabel="1" colspan="2"
+                           readonly="not coop_can_edit"
+                           context="{'coop_catalog': True}">
+                      <list>
+                        <field name="name"/>
+                        <field name="owner_id"/>
+                        <field name="city"/>
+                        <field name="price"/>
+                      </list>
+                    </field>
+                  </group>
+                  <group string="Оборудование">
+                    <field name="equipment_ids" nolabel="1" colspan="2"
+                           readonly="not coop_can_edit"
+                           context="{'coop_catalog': True}">
+                      <list>
+                        <field name="name"/>
+                        <field name="owner_id"/>
+                        <field name="city"/>
+                        <field name="price"/>
+                      </list>
+                    </field>
+                  </group>
+                </group>
+                <div class="text-muted mt-2">
+                  Сырьё и оборудование — объявлениями о тех же ресурсах, а не
+                  текстом: по связи видно, у кого это взять, а по слову — нет.
+                  Дальше сюда же придут техпроцесс, партия и остаток на складе —
+                  у тех, кто подключит свои системы учёта.
+                </div>
+              </section>
+              <!-- Вкладки других модулей: история прав, токен на бирже. -->
+              <notebook class="coop-show_tabs"/>
+            </div>
+            <aside class="coop-show_aside">
+              <div class="coop-owner">
+                <span class="coop-owner_title">Владелец</span>
+                <div class="coop-owner_who">
+                  <field name="owner_avatar" widget="image" readonly="1" nolabel="1"
+                         class="coop-owner_pic" options="{'size': [48, 48]}"/>
+                  <div class="coop-owner_name">
+                    <field name="owner_id" readonly="1" nolabel="1"/>
+                    <span invisible="not city"><field name="city" readonly="1" nolabel="1"/></span>
+                  </div>
+                </div>
+                <div class="coop-owner_trust">
+                  <div class="coop-owner_trust_head">
+                    <span>Уровень доверия</span>
+                    <b><field name="owner_trust" readonly="1" nolabel="1"/> %</b>
+                  </div>
+                  <field name="owner_trust" widget="progressbar" readonly="1" nolabel="1"
+                         class="coop-owner_bar"/>
+                </div>
+                <dl class="coop-owner_stats">
+                  <div>
+                    <dt>сделок</dt>
+                    <dd><field name="owner_deals_done" readonly="1" nolabel="1"/></dd>
+                  </div>
+                  <div>
+                    <dt>отзывов</dt>
+                    <dd><field name="owner_deals_reviewed" readonly="1" nolabel="1"/></dd>
+                  </div>
+                </dl>
+                <ul class="coop-owner_lines" invisible="not contact_method">
+                  <li><field name="contact_method" readonly="1" nolabel="1"/></li>
+                </ul>
+                <div class="coop-owner_acts" invisible="not can_respond">
+                  <button name="action_message_owner" type="object" class="btn-secondary"
+                          string="Написать"/>
+                </div>
+              </div>
+              <section class="coop-show_block" invisible="not city and not pickup_point and not coop_can_edit">
+                <h2>Где забрать</h2>
+                <group class="coop-show_kv">
+                  <field name="city" widget="coop_inline" readonly="not coop_can_edit"/>
+                  <field name="pickup_point" widget="coop_inline" readonly="not coop_can_edit"
+                         invisible="not pickup_point and not coop_can_edit"
+                         placeholder="Адрес или ориентир"/>
+                </group>
+              </section>
+              <section class="coop-show_block" invisible="not coop_can_edit">
+                <h2>Продвижение</h2>
+                <group class="coop-show_kv">
+                  <field name="is_promoted" readonly="1"/>
+                  <field name="promoted_until" readonly="1"
+                         invisible="not promoted_until"/>
+                  <field name="promotion_slot_id" readonly="1"
+                         invisible="not promoted_until"/>
+                  <field name="catalog_rank" readonly="1" groups="base.group_no_one"/>
+                </group>
+              </section>
+            </aside>
+          </div>
         </sheet>
         <chatter/>
       </form>
