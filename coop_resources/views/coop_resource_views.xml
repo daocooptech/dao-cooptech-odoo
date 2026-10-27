@@ -273,31 +273,14 @@
                 </li>
               </ul>
               <hr class="coop-show_rule"/>
-              <div class="coop-price">
-                <span class="coop-price_label">Цена</span>
-                <span class="coop-price_value"><field name="price_display" readonly="1" nolabel="1"/></span>
-                <span class="coop-price_note" invisible="not bargain">Торг уместен</span>
-              </div>
-              <div class="coop-show_ways" invisible="not method_ids">
-                <span class="coop-show_lbl">Способ передачи</span>
-                <field name="method_ids" widget="many2many_tags" readonly="1" nolabel="1"/>
-              </div>
-              <div class="coop-show_terms" invisible="not terms_html">
-                <field name="terms_html" readonly="1" nolabel="1"/>
-              </div>
               <!--
-                Единственное действие участника в самом большом каталоге
-                платформы. До него здесь было три кнопки, и все три —
-                хозяина объявления: опубликовать, закрыть, продвинуть.
-                Тому, кто нашёл нужное, нажать было нечего.
+                Цена, способ передачи, условия способа и отклик — одним
+                переключателем (`ResourcePage`, `Segmented`): у каждого
+                способа своя цена и своя подпись кнопки. Единственное
+                действие участника в самом большом каталоге платформы —
+                кнопок хозяина здесь нет, они в шапке.
               -->
-              <div class="coop-show_acts" invisible="not can_respond">
-                <button name="action_respond" type="object" class="btn-primary">
-                  <field name="respond_label" nolabel="1" readonly="1"/>
-                </button>
-                <button name="action_message_owner" type="object" class="btn-secondary"
-                        string="Написать владельцу"/>
-              </div>
+              <field name="way_cards" widget="coop_way_switch" nolabel="1" readonly="1"/>
             </div>
           </section>
           <div class="coop-show_grid">
@@ -379,11 +362,11 @@
                      его закрывают. Правятся на странице размещения. -->
                 <div class="coop-show_words" invisible="not material_word_ids">
                   <h3>Сырьё</h3>
-                  <field name="material_word_ids" widget="many2many_tags" readonly="1" nolabel="1"/>
+                  <field name="material_word_ids" widget="coop_word_links" readonly="1" nolabel="1" options="{'icon': 'package'}"/>
                 </div>
                 <div class="coop-show_words" invisible="not equipment_word_ids">
                   <h3>Оборудование</h3>
-                  <field name="equipment_word_ids" widget="many2many_tags" readonly="1" nolabel="1"/>
+                  <field name="equipment_word_ids" widget="coop_word_links" readonly="1" nolabel="1" options="{'icon': 'tools'}"/>
                 </div>
               </section>
               <!-- Вкладки других модулей: история прав, токен на бирже. -->

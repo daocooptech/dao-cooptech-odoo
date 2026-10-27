@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!-- Слова состава кнопками: нажатие — поиск по слову в каталоге ресурсов. -->
+  <t t-name="coop_resources.WordLinks">
+    <div class="coop-kws">
+      <t t-foreach="this.words" t-as="word" t-key="word.id">
+        <button type="button" class="coop-kw" t-att-title="this.tip(word)" t-att-aria-label="this.tip(word)"
+                t-on-click="() => this.find(word)">
+          <CoopIcon name="this.icon" size="15"/>
+          <span t-esc="word.data.display_name"/>
+          <em><CoopIcon name="'search'" size="13"/></em>
+        </button>
+      </t>
+    </div>
+  </t>
+
+</templates>

@@ -199,101 +199,110 @@ class CoopResourceTerm(models.Model):
                  'project_scope', 'surcharge', 'surcharge_amount', 'free_mode', 'free_to',
                  'vat', 'seller_name', 'use_rate', 'repairs', 'loss')
     def _compute_summary(self):
-        prefix = {'from': 'от ', 'to': 'до ', 'exact': ''}
         for term in self:
-            parts = []
-            code = term.code
-            if code == 'barter' and term.note:
-                parts.append('взамен: %s' % term.note)
-            if term.price_kind == 'none':
-                parts.append('по договорённости')
-            elif term.price:
-                amount = prefix.get(term.price_kind, '') + term._rub(term.price)
-                parts.append('%s за %s' % (amount, term.price_unit_label)
-                             if term.price_unit_label else amount)
-            if code == 'sale':
-                if term.min_qty:
-                    parts.append('партия от %s' % term._qty(term.min_qty))
-                if term.bulk_qty and term.bulk_price:
-                    parts.append('опт от %s — %s' % (term._qty(term.bulk_qty), term._rub(term.bulk_price)))
-                if term.prepay_pct:
-                    parts.append('предоплата %s %%' % term.prepay_pct)
-                if term.warranty:
-                    parts.append('гарантия %s' % term.warranty)
-                if term.documents:
-                    parts.append(term._label('documents'))
-                if term.vat:
-                    parts.append('НДС %s' % term._label('vat') if term.vat != 'none' else 'без НДС')
-            if term.deposit:
-                parts.append('залог %s' % term._rub(term.deposit))
-            # У рассрочки и лизинга срок — в месяцах (`months`); прежний
-            # текстовый срок показываем, только пока месяцев нет.
-            min_term = term.min_term if not (code in ('installment', 'leasing') and term.months) else False
-            if min_term and term.max_term:
-                parts.append('срок %s – %s' % (min_term, term.max_term))
-            elif min_term:
-                parts.append('срок %s' % min_term)
-            elif term.max_term:
-                parts.append('срок не больше: %s' % term.max_term)
-            if code == 'rent':
-                if term.operator:
-                    parts.append(term._label('operator'))
-                if term.included:
-                    parts.append('в цене: %s' % term.included)
-                if term.available_from:
-                    parts.append('свободно с %s' % term.available_from.strftime('%d.%m.%Y'))
-                if term.long_discount:
-                    parts.append('скидка: %s' % term.long_discount)
-            if code in ('installment', 'leasing'):
-                if term.down_pct:
-                    parts.append('%s %g %%' % ('первый взнос' if code == 'installment' else 'аванс',
-                                               term.down_pct))
+            term.summary = '; '.join(term._coop_summary_parts())
+
+    def _coop_summary_parts(self, with_price=True):
+        """Условия словами. Без цены — для витрины, где цена стоит
+        отдельно крупно над условиями и второй раз её не пишут."""
+        self.ensure_one()
+        term = self
+        prefix = {'from': 'от ', 'to': 'до ', 'exact': ''}
+        parts = []
+        code = term.code
+        if code == 'barter' and term.note:
+            parts.append('взамен: %s' % term.note)
+        if not with_price:
+            pass
+        elif term.price_kind == 'none':
+            parts.append('по договорённости')
+        elif term.price:
+            amount = prefix.get(term.price_kind, '') + term._rub(term.price)
+            parts.append('%s за %s' % (amount, term.price_unit_label)
+                         if term.price_unit_label else amount)
+        if code == 'sale':
+            if term.min_qty:
+                parts.append('партия от %s' % term._qty(term.min_qty))
+            if term.bulk_qty and term.bulk_price:
+                parts.append('опт от %s — %s' % (term._qty(term.bulk_qty), term._rub(term.bulk_price)))
+            if term.prepay_pct:
+                parts.append('предоплата %s %%' % term.prepay_pct)
+            if term.warranty:
+                parts.append('гарантия %s' % term.warranty)
+            if term.documents:
+                parts.append(term._label('documents'))
+            if term.vat:
+                parts.append('НДС %s' % term._label('vat') if term.vat != 'none' else 'без НДС')
+        if term.deposit:
+            parts.append('залог %s' % term._rub(term.deposit))
+        # У рассрочки и лизинга срок — в месяцах (`months`); прежний
+        # текстовый срок показываем, только пока месяцев нет.
+        min_term = term.min_term if not (code in ('installment', 'leasing') and term.months) else False
+        if min_term and term.max_term:
+            parts.append('срок %s – %s' % (min_term, term.max_term))
+        elif min_term:
+            parts.append('срок %s' % min_term)
+        elif term.max_term:
+            parts.append('срок не больше: %s' % term.max_term)
+        if code == 'rent':
+            if term.operator:
+                parts.append(term._label('operator'))
+            if term.included:
+                parts.append('в цене: %s' % term.included)
+            if term.available_from:
+                parts.append('свободно с %s' % term.available_from.strftime('%d.%m.%Y'))
+            if term.long_discount:
+                parts.append('скидка: %s' % term.long_discount)
+        if code in ('installment', 'leasing'):
+            if term.down_pct:
+                parts.append('%s %g %%' % ('первый взнос' if code == 'installment' else 'аванс',
+                                           term.down_pct))
+            if term.months:
+                parts.append('на %s мес.' % term.months)
+            if term.payment:
+                every = 'в месяц' if code == 'leasing' else \
+                    {'week': 'в неделю', 'quarter': 'в квартал'}.get(term.pay_every, 'в месяц')
+                parts.append('%s %s' % (term._rub(term.payment), every))
+            if code == 'installment':
+                parts.append('без наценки' if not term.markup_pct else 'наценка %g %%' % term.markup_pct)
+                if term.ownership:
+                    parts.append('право собственности — %s' % term._label('ownership'))
+            else:
+                if term.buyout:
+                    parts.append('выкуп %s' % term._rub(term.buyout))
+                if term.lessor == 'partner':
+                    parts.append('через %s' % (term.lessor_name or 'лизинговую компанию'))
+                elif term.lessor == 'self' and term.seller_name:
+                    parts.append('покупаю у %s' % term.seller_name)
+                if term.insurance:
+                    parts.append('страховка — %s' % term._label('insurance'))
+        if code == 'project':
+            if term.contribution:
+                parts.append(term._label('contribution'))
+            if term.contribution == 'use':
                 if term.months:
                     parts.append('на %s мес.' % term.months)
-                if term.payment:
-                    every = 'в месяц' if code == 'leasing' else \
-                        {'week': 'в неделю', 'quarter': 'в квартал'}.get(term.pay_every, 'в месяц')
-                    parts.append('%s %s' % (term._rub(term.payment), every))
-                if code == 'installment':
-                    parts.append('без наценки' if not term.markup_pct else 'наценка %g %%' % term.markup_pct)
-                    if term.ownership:
-                        parts.append('право собственности — %s' % term._label('ownership'))
-                else:
-                    if term.buyout:
-                        parts.append('выкуп %s' % term._rub(term.buyout))
-                    if term.lessor == 'partner':
-                        parts.append('через %s' % (term.lessor_name or 'лизинговую компанию'))
-                    elif term.lessor == 'self' and term.seller_name:
-                        parts.append('покупаю у %s' % term.seller_name)
-                    if term.insurance:
-                        parts.append('страховка — %s' % term._label('insurance'))
-            if code == 'project':
-                if term.contribution:
-                    parts.append(term._label('contribution'))
-                if term.contribution == 'use':
-                    if term.months:
-                        parts.append('на %s мес.' % term.months)
-                    if term.use_rate:
-                        parts.append('ставка %s в месяц' % term._rub(term.use_rate))
-                    if term.repairs:
-                        parts.append('чинит %s' % term._label('repairs'))
-                    if term.loss:
-                        parts.append('при утрате — %s' % term._label('loss'))
-                if term.expect:
-                    parts.append('взамен — %s' % term._label('expect'))
-                if term.project_scope:
-                    parts.append('проекты: %s' % term.project_scope)
-            if code == 'barter' and term.surcharge in ('pay', 'want'):
-                parts.append(term._label('surcharge') + (
-                    ' %s' % term._rub(term.surcharge_amount) if term.surcharge_amount else ''))
-            if code == 'free':
-                if term.free_mode:
-                    parts.append(term._label('free_mode'))
-                if term.free_to:
-                    parts.append(term._label('free_to'))
-            if term.note and code != 'barter':
-                parts.append(term.note)
-            term.summary = '; '.join(parts)
+                if term.use_rate:
+                    parts.append('ставка %s в месяц' % term._rub(term.use_rate))
+                if term.repairs:
+                    parts.append('чинит %s' % term._label('repairs'))
+                if term.loss:
+                    parts.append('при утрате — %s' % term._label('loss'))
+            if term.expect:
+                parts.append('взамен — %s' % term._label('expect'))
+            if term.project_scope:
+                parts.append('проекты: %s' % term.project_scope)
+        if code == 'barter' and term.surcharge in ('pay', 'want'):
+            parts.append(term._label('surcharge') + (
+                ' %s' % term._rub(term.surcharge_amount) if term.surcharge_amount else ''))
+        if code == 'free':
+            if term.free_mode:
+                parts.append(term._label('free_mode'))
+            if term.free_to:
+                parts.append(term._label('free_to'))
+        if term.note and code != 'barter':
+            parts.append(term.note)
+        return parts
 
 
 class CoopResource(models.Model):
@@ -317,6 +326,40 @@ class CoopResource(models.Model):
                     Markup(' — %s') % term.summary if term.summary else ''))
             resource.terms_html = Markup('<ul class="o_coop_res_terms">%s</ul>') % \
                 Markup('').join(rows) if rows else False
+
+    # Переключатель способа на витрине (дизайн-система, `ResourcePage`,
+    # `Segmented`): у каждого способа своя цена, свои условия и своя
+    # подпись отклика. Собираем здесь, чтобы подписи и цена считались тем
+    # же кодом, что окно отклика и карточка в каталоге.
+    way_cards = fields.Json(string='Способы на витрине', compute='_compute_way_cards')
+
+    @api.depends('term_ids.price', 'term_ids.price_kind', 'term_ids.price_unit_label',
+                 'term_ids.summary', 'method_ids', 'listing_type', 'price_display')
+    def _compute_way_cards(self):
+        prefix = {'from': 'от ', 'to': 'до ', 'exact': ''}
+        for resource in self:
+            cards = []
+            for method in resource.method_ids.sorted('sequence'):
+                term = resource.term_ids.filtered(lambda t: t.method_id == method)[:1]
+                if term and term.price_kind == 'none':
+                    price = 'по договорённости'
+                elif term and term.price:
+                    price = prefix.get(term.price_kind, '') + term._rub(term.price)
+                    if term.price_unit_label:
+                        price += ' / %s' % term.price_unit_label
+                elif method.code == 'free':
+                    price = 'даром'
+                else:
+                    price = resource.price_display
+                cards.append({
+                    'id': method.id,
+                    'code': method.code,
+                    'name': method.name,
+                    'price': price,
+                    'terms': '; '.join(term._coop_summary_parts(with_price=False)) if term else '',
+                    'cta': resource._coop_respond_label(method),
+                })
+            resource.way_cards = cards
 
     def _coop_sync_terms(self):
         """Строка условий на каждый отмеченный способ — не больше и не меньше."""

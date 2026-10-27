@@ -2,6 +2,7 @@
 import logging
 
 from odoo import _, api, fields, models
+from odoo.tools.safe_eval import safe_eval
 from odoo.exceptions import UserError, ValidationError
 
 _logger = logging.getLogger(__name__)
@@ -269,6 +270,37 @@ class CoopResource(models.Model):
 
     made_of_count = fields.Integer(
         string='Состав', compute='_compute_made_of_count')
+
+    # Город смотрящего — в подсказке слова: «Найти «Вощина» в каталоге
+    # ресурсов · Сочи». Тот же город подставляется в отбор каталога.
+    coop_viewer_city = fields.Char(
+        string='Город смотрящего', compute='_compute_coop_viewer_city')
+
+    @api.depends_context('uid')
+    def _compute_coop_viewer_city(self):
+        city = self.env.user.partner_id.city or False
+        for record in self:
+            record.coop_viewer_city = city
+
+    def action_find_word(self, word_id):
+        """Слово состава → каталог ресурсов с поиском по слову в городе
+        смотрящего (решение владельца 26.10.2026, эталон `ResourcePage`).
+
+        Тот же экран «Каталог ресурсов», не отдельный: при поиске полок
+        нет, лента карточек, все виды и отборы работают как обычно, а
+        «назад» возвращает на ресурс хлебными крошками."""
+        self.ensure_one()
+        word = self.env['coop.resource.word'].browse(word_id).exists()
+        action = self.env['ir.actions.act_window']._for_xml_id(
+            'coop_resources.action_coop_resources')
+        # Контекст каталога (полки, подпись «Добавить ресурс») сохраняем —
+        # иначе это был бы уже другой экран.
+        context = dict(safe_eval(action.get('context') or '{}'),
+                       search_default_name=word.name)
+        if self.coop_viewer_city:
+            context['search_default_city'] = self.coop_viewer_city
+        action['context'] = context
+        return action
 
     # ── Цена ─────────────────────────────────────────────────────────────
     #
@@ -652,19 +684,48 @@ class CoopResource(models.Model):
             record.can_respond = bool(
                 record.state == 'published' and record.owner_id not in mine)
 
-    def action_respond(self):
-        """Окно отклика: завести переговоры по сделке."""
+    # Подпись отклика по выбранному способу — переключатель на витрине
+    # (дизайн-система, `ResourcePage`): подпись меняется вместе со
+    # способом, и человек видит, что именно произойдёт по нажатию.
+    RESPOND_LABELS = {
+        'sale': 'Купить в один клик',
+        'installment': 'Купить в рассрочку',
+        'rent': 'Арендовать',
+        'leasing': 'Взять в лизинг',
+        'project': 'Позвать в проект',
+        'barter': 'Предложить обмен',
+        'free': 'Принять в дар',
+    }
+
+    def _coop_respond_label(self, method):
         self.ensure_one()
+        if self.listing_type == 'request':
+            return 'Предложить своё'
+        return self.RESPOND_LABELS.get(method.code, self.respond_label)
+
+    def action_respond(self):
+        """Окно отклика: завести переговоры по сделке.
+
+        Способ приходит с витрины (`coop_method_id` в контексте) — тот, что
+        выбран переключателем; без него окно берёт первый способ."""
+        self.ensure_one()
+        method = self.env['coop.resource.method'].browse(
+            self.env.context.get('coop_method_id')).exists() & self.method_ids
+        term = self.term_ids.filtered(lambda t: t.method_id == method)[:1]
+        context = {
+            'default_resource_id': self.id,
+            'default_amount': term.price or self.price,
+        }
+        if method:
+            context['default_method_id'] = method.id
+        label = self._coop_respond_label(method) if method else self.respond_label
         return {
             'type': 'ir.actions.act_window',
-            'name': '%s: %s' % (self.respond_label, self.name),
+            'name': '%s: %s' % (label, self.name),
             'res_model': 'coop.resource.respond',
             'view_mode': 'form',
             'target': 'new',
-            'context': {
-                'default_resource_id': self.id,
-                'default_amount': self.price,
-            },
+            'context': context,
         }
 
     def action_publish(self):

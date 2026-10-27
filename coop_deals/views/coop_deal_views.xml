@@ -470,6 +470,19 @@
           <dd><field name="coop_buyer_count" readonly="1" nolabel="1"/></dd>
         </div>
       </xpath>
+      <!-- Отзывы о владельце — под «Кто делает и из чего» (`ResourcePage`):
+           сводка оценок и три последних раскрытых отзыва, «все N» — списком. -->
+      <xpath expr="//section[@name='making']" position="after">
+        <section class="coop-show_block" name="owner_reviews" invisible="not owner_review_count">
+          <h2 class="coop-show_head">
+            <span>Отзывы о владельце</span>
+            <button name="action_coop_owner_reviews" type="object" class="btn btn-link coop-show_more">
+              все <field name="owner_review_count" readonly="1" nolabel="1"/>
+            </button>
+          </h2>
+          <field name="owner_reviews_html" readonly="1" nolabel="1"/>
+        </section>
+      </xpath>
       <xpath expr="//aside[hasclass('coop-show_aside')]" position="inside">
         <button name="action_coop_buyers" type="object" class="coop-link"
                 invisible="not coop_buyer_count">

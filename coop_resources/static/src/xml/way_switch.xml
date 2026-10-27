@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!-- Цена, способ передачи переключателем, условия способа и отклик по нему. -->
+  <t t-name="coop_resources.WaySwitch">
+    <div class="coop-ways">
+      <div class="coop-price">
+        <span class="coop-price_label">Цена</span>
+        <span class="coop-price_value" t-esc="this.current ? this.current.price : this.data.price_display"/>
+        <span class="coop-price_note" t-if="this.data.bargain">Торг уместен</span>
+      </div>
+      <div class="coop-show_ways" t-if="this.cards.length">
+        <span class="coop-show_lbl">Способ передачи</span>
+        <div class="coop-seg" role="tablist" aria-label="Способ передачи">
+          <t t-foreach="this.cards" t-as="card" t-key="card.id">
+            <button type="button" class="coop-seg_item" role="tab"
+                    t-att-class="{ 'coop-seg_on': card.id === this.current.id }"
+                    t-att-aria-selected="card.id === this.current.id ? 'true' : 'false'"
+                    t-on-click="() => this.state.id = card.id"
+                    t-esc="card.name"/>
+          </t>
+        </div>
+      </div>
+      <p class="coop-show_terms" t-if="this.current and this.current.terms">
+        <b t-esc="this.current.name"/> — <t t-esc="this.current.terms"/>
+      </p>
+      <div class="coop-show_acts" t-if="this.data.can_respond">
+        <button type="button" class="btn btn-primary" t-on-click="() => this.respond()"
+                t-esc="this.current ? this.current.cta : 'Откликнуться'"/>
+        <button type="button" class="btn btn-secondary" t-on-click="() => this.message()">Написать владельцу</button>
+      </div>
+    </div>
+  </t>
+
+</templates>

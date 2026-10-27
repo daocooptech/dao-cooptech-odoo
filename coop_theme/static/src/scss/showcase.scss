@@ -483,3 +483,119 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+// Заголовок блока со ссылкой справа: «Отзывы о владельце · все 12».
+.coop-show_block > h2.coop-show_head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.coop-show_more {
+  padding: 0;
+  font: 500 13px/1.3 'Inter', sans-serif;
+  color: var(--coop-teal);
+
+  .o_field_widget { display: inline; }
+}
+
+// Отзывы — сводка оценок и строки (эталон `ResourcePage`, `.score`, `.rev`).
+.coop-stars {
+  display: inline-flex;
+  gap: 1px;
+  font-size: 13px;
+  line-height: 1;
+
+  i { font-style: normal; }
+  .on { color: var(--coop-gold); }
+  .off { color: var(--coop-line-strong); }
+}
+.coop-score {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+
+  > b {
+    font: 700 32px/1 'Manrope', sans-serif;
+    color: var(--coop-ink);
+  }
+}
+.coop-score_sub {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--coop-slate);
+}
+.coop-score_bars {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-width: 260px;
+
+  > div {
+    display: grid;
+    grid-template-columns: 12px minmax(0, 1fr) 22px;
+    gap: 6px;
+    align-items: center;
+    font: 500 10.5px/1 'JetBrains Mono', ui-monospace, monospace;
+    color: var(--coop-slate);
+  }
+  em {
+    display: block;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--coop-surface);
+    overflow: hidden;
+  }
+  i {
+    display: block;
+    height: 100%;
+    border-radius: 3px;
+    background: var(--coop-ink);
+  }
+}
+.coop-rev {
+  padding: 12px 0;
+  border-top: 1px solid var(--coop-line);
+
+  &:first-of-type {
+    border-top: 0;
+    padding-top: 0;
+  }
+  p {
+    margin: 8px 0 0 44px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--coop-ink);
+  }
+}
+.coop-rev_head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  > div:nth-child(2) {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  b {
+    font: 600 13px/1.3 'Manrope', sans-serif;
+    color: var(--coop-ink);
+  }
+  span { font-size: 11.5px; color: var(--coop-slate); }
+}
+.coop-rev_pic {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--coop-teal-tint);
+
+  img { width: 100%; height: 100%; object-fit: cover; }
+}
+
