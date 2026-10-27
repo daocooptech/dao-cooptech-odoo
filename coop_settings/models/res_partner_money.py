@@ -9,7 +9,18 @@
 него подсказка «этот способ обойдётся в 6 %» — угадывание.
 """
 from odoo import _, api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
+
+# Поля вкладки, которые у организации правит держатель «Казначейства».
+MONEY_FIELDS = ('coop_payout_currency_id', 'coop_tax_regime', 'coop_settlement_method_ids',
+                'coop_fx_resident', 'coop_tax_resident')
+
+
+def _default_currency(env):
+    # Рубль явно, а не валюта компании: поле заполнилось при установке,
+    # когда у компании ещё стоял доллар чистого Odoo, и у всех участников
+    # платформы — и у ТСН в России — валютой приёма оказался USD.
+    return env.ref('base.RUB', raise_if_not_found=False) or env.company.currency_id
 
 
 class ResPartner(models.Model):
@@ -17,7 +28,7 @@ class ResPartner(models.Model):
 
     coop_payout_currency_id = fields.Many2one(
         'res.currency', string='Валюта приёма',
-        default=lambda self: self.env.company.currency_id,
+        default=lambda self: _default_currency(self.env),
         help='В чём хотите получать. Мультивалютность держится на п. 2 '
              'ст. 317 ГК: цена может быть выражена в чём угодно, платёж '
              'проходит в рублях.')
@@ -40,6 +51,33 @@ class ResPartner(models.Model):
         help='Чем с вами можно рассчитаться. Рядом с каждым способом '
              'написано, во что он обходится и что нужно, чтобы он '
              'работал.')
+
+    coop_can_edit_money = fields.Boolean(compute='_compute_coop_can_edit_money')
+
+    @api.depends_context('uid')
+    def _compute_coop_can_edit_money(self):
+        user = self.env.user
+        admin = user.has_group('base.group_system')
+        for record in self:
+            record.coop_can_edit_money = bool(record.id) and (
+                admin or user.coop_has_power('treasury', record))
+
+    def write(self, vals):
+        # Деньги организации — держателю «Казначейства»: права на запись
+        # карточки у него может не быть (её правит держатель «Страницы»),
+        # поэтому после проверки полномочия пишется от имени системы.
+        money = {k: vals[k] for k in MONEY_FIELDS if k in vals}
+        if money and not self.env.su and not self.env.user.has_group('base.group_system'):
+            for record in self:
+                if not self.env.user.coop_has_power('treasury', record):
+                    raise UserError(_(
+                        'Деньги и реквизиты «%s» меняет держатель полномочия '
+                        '«Казначейство».') % record.display_name)
+            super(ResPartner, self.sudo()).write(money)
+            vals = {k: v for k, v in vals.items() if k not in money}
+            if not vals:
+                return True
+        return super().write(vals)
 
     coop_conditional_settlement_ids = fields.Many2many(
         'coop.settlement.method', compute='_compute_other_settlements',

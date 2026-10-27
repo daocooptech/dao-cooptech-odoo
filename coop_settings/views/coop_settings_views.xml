@@ -18,7 +18,7 @@
     <field name="model">res.partner</field>
     <field name="priority">100</field>
     <field name="arch" type="xml">
-      <form string="Настройки" create="false" edit="false" duplicate="false"
+      <form string="Настройки" create="false" duplicate="false"
             class="o_coop_profile o_coop_settings">
         <sheet>
           <div class="oe_title">
@@ -157,31 +157,33 @@
             <div class="o_coop_band_body">
               <group>
                 <group>
-                  <field name="coop_payout_currency_id"/>
-                  <field name="coop_tax_regime"/>
+                  <field name="coop_can_edit_money" invisible="1"/>
+                  <field name="coop_payout_currency_id" readonly="not coop_can_edit_money"
+                         options="{'no_create': True, 'no_open': True}"/>
+                  <field name="coop_tax_regime" readonly="not coop_can_edit_money"/>
                 </group>
                 <!-- Резидентство (решения 118, 414, п. 1): валютное (по
                      гражданству и ВНЖ), налоговое (по дням), страна
                      проживания — независимо друг от друга. Гражданство —
                      отдельно (решение 500): по нему считают указы. -->
                 <group>
-                  <field name="coop_fx_resident"/>
-                  <field name="coop_tax_resident"/>
+                  <field name="coop_fx_resident" readonly="not coop_can_edit_money"/>
+                  <field name="coop_tax_resident" readonly="not coop_can_edit_money"/>
                   <field name="coop_citizenship_id" invisible="is_company"
                          options="{'no_create': True, 'no_open': True}"/>
                   <field name="coop_citizenship_id" string="Страна регистрации"
-                         invisible="not is_company"
+                         invisible="not is_company" readonly="1"
                          options="{'no_create': True, 'no_open': True}"/>
-                  <field name="country_id" string="Страна проживания"
+                  <field name="country_id" string="Страна проживания" readonly="is_company"
                          options="{'no_create': True, 'no_open': True}"/>
                 </group>
               </group>
               <separator string="Чем с вами можно рассчитаться"/>
               <field name="coop_settlement_method_ids" nolabel="1"
-                     widget="many2many"
+                     widget="many2many" readonly="not coop_can_edit_money"
                      options="{'no_create': True, 'no_open': True}">
                 <list>
-                  <field name="name"/>
+                  <field name="name" width="190px"/>
                   <field name="cost_hint" string="Во что обходится"/>
                   <field name="cost_note" string="Отчего столько"/>
                 </list>
@@ -195,7 +197,7 @@
               <field name="coop_conditional_settlement_ids" nolabel="1"
                      readonly="1" options="{'no_open': True}">
                 <list create="false" delete="false">
-                  <field name="name"/>
+                  <field name="name" width="190px"/>
                   <field name="condition" string="Что нужно, чтобы работало"/>
                   <field name="cross_border" string="Международные"
                          widget="boolean_toggle"/>
@@ -205,7 +207,7 @@
               <field name="coop_planned_settlement_ids" nolabel="1"
                      readonly="1" options="{'no_open': True}">
                 <list create="false" delete="false">
-                  <field name="name"/>
+                  <field name="name" width="190px"/>
                   <field name="condition" string="Что это будет"/>
                 </list>
               </field>

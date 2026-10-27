@@ -508,6 +508,9 @@ def repair_dates(env):
 
 def load_mrp(env, login='dashkevich'):
     if 'mrp.bom' not in env or 'bom_id' not in env['coop.resource']._fields:
+        # Молча выходить нельзя: 27.10.2026 на боевой так и вышло — данные
+        # coop_demo грузились раньше полей coop_mrp, и демо не появилось.
+        _logger.warning('Производство: coop_mrp не загружен, демо пропущено')
         return 0
     Resource = env['coop.resource'].sudo()
     resources = Resource.with_context(active_test=False).search([
