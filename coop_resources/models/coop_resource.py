@@ -253,6 +253,20 @@ class CoopResource(models.Model):
         'resource_id', 'equipment_id', string='Оборудование',
         help='На чём сделано.')
 
+    # Сырьё и оборудование словами — решение владельца 26.10.2026, эталон
+    # `ResourceAddPage` и `ResourcePage`. Связь с чужим объявлением
+    # устаревает, когда его закрывают, а поиск по слову в своём городе
+    # всегда показывает, где взять сейчас. Связи выше остаются для
+    # заведённых раньше объявлений, новые пишутся словами.
+    material_word_ids = fields.Many2many(
+        'coop.resource.word', 'coop_resource_material_word_rel',
+        'resource_id', 'word_id', string='Сырьё словами',
+        help='Из чего сделано — словами: «Вощина», «Сахар».')
+    equipment_word_ids = fields.Many2many(
+        'coop.resource.word', 'coop_resource_equipment_word_rel',
+        'resource_id', 'word_id', string='Оборудование словами',
+        help='На чём сделано — словами: «Медогонка».')
+
     made_of_count = fields.Integer(
         string='Состав', compute='_compute_made_of_count')
 
@@ -410,11 +424,47 @@ class CoopResource(models.Model):
         action['res_id'] = draft.id
         return action
 
-    @api.depends('material_ids', 'equipment_ids')
+    def action_edit_listing(self):
+        """Открыть своё объявление страницей размещения — править.
+
+        Витрина показывает объявление, а не форму: пустые блоки на ней
+        скрыты (владелец 27.10.2026), и дописать состав или условия там
+        негде. Правка — той же страницей, что и размещение."""
+        self.ensure_one()
+        action = self.env['ir.actions.act_window']._for_xml_id(
+            'coop_resources.action_coop_resource_add')
+        action['res_id'] = self.id
+        return action
+
+    def action_save_draft(self):
+        """«Сохранить черновик»: запись уже сохранена кнопкой — уходим к
+        своим объявлениям, где черновик и ждёт."""
+        action = self.env['ir.actions.act_window']._for_xml_id(
+            'coop_resources.action_coop_my_resources')
+        action['target'] = 'main'
+        return action
+
+    def action_done_editing(self):
+        """«Готово» у опубликованного: обратно на витрину объявления."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'coop.resource',
+            'res_id': self.id,
+            'view_mode': 'form',
+            'views': [(self.env.ref('coop_resources.view_coop_resource_form').id, 'form')],
+            # `main` — путь начинается заново: иначе в крошках копится
+            # «объявление → правка → объявление».
+            'target': 'main',
+        }
+
+    @api.depends('material_ids', 'equipment_ids',
+                 'material_word_ids', 'equipment_word_ids')
     def _compute_made_of_count(self):
         for record in self:
             record.made_of_count = (
-                len(record.material_ids) + len(record.equipment_ids))
+                len(record.material_ids) + len(record.equipment_ids)
+                + len(record.material_word_ids) + len(record.equipment_word_ids))
 
     @api.constrains('material_ids', 'equipment_ids')
     def _check_not_made_of_itself(self):

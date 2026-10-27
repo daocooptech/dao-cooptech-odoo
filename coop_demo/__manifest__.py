@@ -12,7 +12,7 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.0.2',
+    'version': '20.0.1.0.3',
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_people', 'coop_orgs', 'coop_resources', 'coop_skills', 'coop_vacancies', 'coop_projects', 'coop_communities', 'coop_attributes', 'coop_profile', 'coop_deals', 'coop_documents', 'coop_wallet', 'coop_bounty', 'coop_messages', 'coop_wall', 'coop_programs', 'coop_groupbuy', 'coop_events', 'coop_auctions', 'coop_warehouse', 'product', 'project', 'hr_skills', 'sale_management', 'coop_invoicing', 'coop_crm'],
     'data': [

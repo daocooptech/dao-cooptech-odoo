@@ -405,6 +405,7 @@ class CoopDemoLoader(models.AbstractModel):
         load_social_dates.spread_social_dates(self.env)
         # Описания объявлений (владелец 27.10.2026) — после городов,
         # названий и проектов: текст собирается из того, что уже есть в записи.
+        load_descriptions.words_from_links(self.env)
         load_descriptions.fill_resource_descriptions(self.env)
         return True
 

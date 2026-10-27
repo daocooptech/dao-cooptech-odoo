@@ -1,0 +1,398 @@
+// ── Страница добавления ─────────────────────────────────────────────────
+//
+// Эталон — README дизайн-системы, «Страница добавления», и компоненты
+// `AddSection`, `Readiness`, `ChoiceCards`, `PhotoDrop`, `TagInput`
+// (решение 625, сверка 27.10.2026). Одна раскладка для всех «Добавить …»:
+// слева разделы с номерами, справа превью карточки, готовность и кнопки.
+//
+// Форма движка: `form.o_coop_add_form` > `.coop-add`. Поля — штатные
+// виджеты, им здесь задан вид эталонных `Input`, `Segmented`, `TagInput`,
+// `PhotoDrop`.
+//
+// Правая колонка не липкая, хотя эталон её закрепляет: владелец
+// 27.10.2026 — «я не помню где бы мы согласовывали что бы какие кнопки
+// были закреплены на странице».
+
+.o_coop_add_form {
+  .o_form_sheet_bg { padding-top: 0; }
+  .o_form_sheet {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 4px 0 24px;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+}
+
+.coop-add_header {
+  margin: 0 0 18px;
+
+  h1 {
+    margin: 0;
+    font: 700 24px/1.25 'Manrope', sans-serif;
+    color: var(--coop-ink);
+  }
+}
+.coop-add_intro {
+  margin: 6px 0 0;
+  max-width: 640px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--coop-slate);
+}
+
+.coop-add {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 20px;
+  align-items: start;
+}
+.coop-add_main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+.coop-add_aside {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+@media (max-width: 991px) {
+  .coop-add { grid-template-columns: minmax(0, 1fr); }
+}
+
+// ── Раздел ──
+.coop-add_sec {
+  background: var(--coop-white);
+  border: 1px solid var(--coop-line);
+  border-radius: var(--coop-radius-card);
+}
+.coop-add_sec_head {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 16px 20px 0;
+
+  h2 {
+    margin: 2px 0 0;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font: 700 16px/1.3 'Manrope', sans-serif;
+    color: var(--coop-ink);
+  }
+  p {
+    margin: 4px 0 0;
+    max-width: 600px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--coop-slate);
+  }
+  .o_field_widget { flex: none; width: auto; }
+}
+.coop-add_num {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--coop-surface);
+  font: 700 12.5px/1 'JetBrains Mono', ui-monospace, monospace;
+  color: var(--coop-slate);
+}
+.coop-add_num_done {
+  background: var(--coop-teal);
+  color: #fff;
+}
+.coop-add_opt {
+  font: 500 11px/1 'Inter', sans-serif;
+  color: var(--coop-slate-light);
+}
+.coop-add_sec_body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 20px 20px 58px;
+}
+.coop-add_row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.coop-add_pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 140px;
+  gap: 8px;
+  align-items: end;
+}
+.coop-add_top {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 767px) {
+  .coop-add_sec_body { padding-left: 20px; }
+  .coop-add_row,
+  .coop-add_top { grid-template-columns: minmax(0, 1fr); }
+}
+.coop-add_help {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--coop-slate);
+
+  b { color: var(--coop-ink); font-weight: 600; }
+}
+.coop-add_note {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--coop-slate);
+  text-align: center;
+}
+
+// ── Поле: подпись сверху, само поле — как `Input` эталона ──
+.coop-add_field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  > .o_form_label,
+  > label {
+    display: block;
+    margin: 0 0 6px;
+    font: 500 12.5px/1.4 'Manrope', sans-serif;
+    color: var(--coop-ink);
+  }
+  > .o_field_widget { width: 100%; }
+}
+.o_coop_add_form .coop-add_field {
+  input.o_input,
+  textarea.o_input,
+  select.o_input,
+  .o_field_many2one input,
+  .o_field_char input,
+  .o_field_float input,
+  .o_field_monetary input {
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 10px;
+    border: 1px solid var(--coop-line-strong);
+    border-radius: var(--coop-radius-control);
+    background: var(--coop-white);
+    font: 400 13.5px/1.4 'Inter', sans-serif;
+    color: var(--coop-ink);
+    box-sizing: border-box;
+
+    &:focus {
+      border-color: var(--coop-teal);
+      box-shadow: 0 0 0 3px var(--coop-teal-tint);
+      outline: none;
+    }
+  }
+}
+
+// Название — крупным полем без рамки, с линией снизу.
+.o_coop_add_form .coop-add_title {
+  input.o_input {
+    width: 100%;
+    padding: 8px 0;
+    border: 0;
+    border-bottom: 2px solid var(--coop-line);
+    border-radius: 0;
+    background: none;
+    font: 700 22px/1.3 'Manrope', sans-serif;
+    color: var(--coop-ink);
+
+    &:focus { outline: none; box-shadow: none; border-bottom-color: var(--coop-teal); }
+    &::placeholder { color: var(--coop-slate-light); }
+  }
+}
+
+// Выбор из двух-четырёх — `Segmented` (виджет `badges_selection` движка).
+.o_coop_add_form .o_field_badges_selection > div {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--coop-line);
+  border-radius: 8px;
+  background: var(--coop-surface);
+
+  .o_selection_badge {
+    margin: 0 !important;
+    padding: 6px 12px;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    font: 600 12.5px/1.2 'Manrope', sans-serif;
+    color: var(--coop-slate);
+    cursor: pointer;
+
+    &.active {
+      background: var(--coop-white);
+      color: var(--coop-ink);
+      box-shadow: var(--coop-shadow-float);
+    }
+  }
+}
+
+// Метки — `TagInput`: светло-бирюзовые плашки в рамке поля.
+.o_coop_add_form .coop-add_field .o_field_many2many_tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  min-height: 40px;
+  padding: 5px 8px;
+  border: 1px solid var(--coop-line-strong);
+  border-radius: var(--coop-radius-item);
+  background: var(--coop-white);
+
+  &:focus-within {
+    border-color: var(--coop-teal);
+    box-shadow: 0 0 0 3px var(--coop-teal-tint);
+  }
+  .o_tag {
+    margin: 0;
+    padding: 4px 6px 4px 10px;
+    border-radius: 999px;
+    background: var(--coop-teal-tint) !important;
+    font: 500 12.5px/1.2 'Inter', sans-serif;
+    color: var(--coop-teal-dark) !important;
+    box-shadow: none;
+  }
+  .o_field_many2one_selection { flex: 1 1 120px; }
+  input.o_input {
+    min-height: 0;
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 4px;
+  }
+}
+
+// Фото — `PhotoDrop`: квадрат в пунктирной рамке.
+.o_coop_add_form .coop-photo {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border: 1.5px dashed var(--coop-line-strong);
+  border-radius: var(--coop-radius-card);
+  background: var(--coop-surface);
+  overflow: hidden;
+
+  &:hover { border-color: var(--coop-teal); }
+  .o_field_image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  img {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: cover;
+  }
+}
+.coop-photo_hint {
+  margin-top: 6px;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--coop-slate);
+  text-align: center;
+}
+
+// ── Правая колонка ──
+.coop-add_preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  > span {
+    font: 500 10.5px/1.3 'JetBrains Mono', ui-monospace, monospace;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--coop-slate);
+  }
+  .o_field_widget { width: 100%; }
+}
+.coop-add_acts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  .btn { width: 100%; justify-content: center; }
+}
+
+// ── Готовность — `Readiness` ──
+.coop-ready {
+  padding: 14px 16px;
+  background: var(--coop-white);
+  border: 1px solid var(--coop-line);
+  border-radius: var(--coop-radius-card);
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: var(--coop-slate);
+
+    a { flex: 1 1 auto; color: inherit; text-decoration: none; }
+    a:hover { color: var(--coop-teal-dark); text-decoration: underline; }
+    .coop-icon { flex: none; color: var(--coop-slate-light); }
+    em {
+      font: 500 10px/1 'JetBrains Mono', ui-monospace, monospace;
+      font-style: normal;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--coop-gold-text);
+    }
+  }
+  .coop-ready_done {
+    color: var(--coop-ink);
+    .coop-icon { color: var(--coop-teal); }
+  }
+}
+.coop-ready_head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font: 600 13px/1.3 'Manrope', sans-serif;
+  color: var(--coop-ink);
+
+  b {
+    font: 700 12.5px/1 'JetBrains Mono', ui-monospace, monospace;
+    color: var(--coop-slate);
+  }
+}
+.coop-ready_bar {
+  display: flex;
+  gap: 3px;
+  margin: 8px 0 10px;
+
+  i {
+    flex: 1 1 0;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--coop-surface);
+  }
+  i.on { background: var(--coop-teal); }
+}

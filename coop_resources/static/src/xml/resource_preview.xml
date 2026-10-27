@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!-- Плитка каталога по данным черновика — разметкой `view_coop_resource_kanban`. -->
+  <t t-name="coop_resources.ResourcePreview">
+    <div class="o_coop_resources o_coop_res_preview">
+      <div class="o_kanban_record">
+        <div class="o_coop_resource">
+          <div class="o_coop_res_photo o_coop_media">
+            <img t-if="this.image" t-att-src="this.image" alt=""/>
+            <img class="o_coop_media_logo" t-elif="this.owner" alt=""
+                 t-attf-src="/web/image/res.partner/{{ this.owner.id }}/image_512"/>
+            <span t-else="" class="o_coop_media_sign"/>
+            <img class="o_coop_res_owner" t-if="this.image and this.owner" alt=""
+                 t-att-title="this.owner.display_name"
+                 t-attf-src="/web/image/res.partner/{{ this.owner.id }}/avatar_128"/>
+            <span t-if="this.kindLabel" class="o_coop_res_type"
+                  t-att-class="{ o_coop_res_request: this.isRequest }" t-out="this.kindLabel"/>
+            <span class="o_coop_locbar" t-if="this.data.city">
+              <i class="oi" data-icon="location_on" role="img" aria-label="Город"/>
+              <t t-out="this.data.city"/>
+            </span>
+          </div>
+          <div class="o_coop_res_body">
+            <div class="o_coop_res_name" t-out="this.title"/>
+            <div class="o_coop_res_meta o_coop_listing_meta" t-if="this.meta" t-out="this.meta"/>
+            <div class="o_coop_res_price" t-if="this.data.price_display" t-out="this.data.price_display"/>
+          </div>
+        </div>
+      </div>
+    </div>
+  </t>
+
+</templates>

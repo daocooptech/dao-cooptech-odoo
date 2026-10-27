@@ -638,3 +638,59 @@ def fill_resource_descriptions(env):
             filled += 1
     _logger.info('Описания ресурсов: дописано %s', filled)
     return filled
+
+
+_VERBS = re.compile(r'^(продам|сдам|отдам|куплю|ищу|ищем|нужен|нужна|нужно|нужны|'
+                    r'приму|возьму|обменяю)\s+', re.IGNORECASE)
+
+
+def _word(name):
+    """«Продам удобрения и субстрат, 5 тонн — Волгоград» → «Удобрения и субстрат»."""
+    text = (name or '').split(' — ')[0].split(',')[0].strip()
+    text = _VERBS.sub('', text).strip()
+    return text[:1].upper() + text[1:]
+
+
+MATERIAL_KINDS = {'build', 'food', 'home', 'generic'}
+EQUIPMENT_KINDS = {'equipment', 'tool', 'vehicle', 'it'}
+
+
+def words_from_links(env):
+    """Сырьё и оборудование словами — из прежних связей с объявлениями.
+
+    Решение владельца 26.10.2026: состав — словами, а не связями с
+    чужими объявлениями. У заведённых раньше объявлений состав записан
+    связями; слова выводятся из названий связанных объявлений. Связи
+    есть только в демо-наборе, поэтому слова пересчитываются из них
+    каждый прогон; совпало — запись не трогается.
+    """
+    Resource = env['coop.resource'].sudo().with_context(
+        active_test=False, tracking_disable=True, mail_notrack=True)
+    Word = env['coop.resource.word'].sudo()
+    cache = {word.name: word for word in Word.search([])}
+
+    def ids(records, kinds):
+        # Связи в демо-наборе раздавались без разбора, и у саженцев в
+        # оборудовании оказывались «Ищу перевозку холодильника» и
+        # «Стеллажи». Слово берётся только у предложения подходящего вида.
+        records = records.filtered(
+            lambda r: r.listing_type == 'offer' and _kind(r) in kinds)
+        out = []
+        for name in sorted({_word(r.name) for r in records} - {''}):
+            if name not in cache:
+                cache[name] = Word.create({'name': name})
+            out.append(cache[name].id)
+        return out
+
+    filled = 0
+    for record in Resource.search(['|', ('material_ids', '!=', False),
+                                   ('equipment_ids', '!=', False)]):
+        material = ids(record.material_ids, MATERIAL_KINDS)
+        equipment = ids(record.equipment_ids, EQUIPMENT_KINDS)
+        if (set(material) != set(record.material_word_ids.ids)
+                or set(equipment) != set(record.equipment_word_ids.ids)):
+            record.write({'material_word_ids': [(6, 0, material)],
+                          'equipment_word_ids': [(6, 0, equipment)]})
+            filled += 1
+    _logger.info('Состав словами: проставлено у %s объявлений', filled)
+    return filled

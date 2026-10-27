@@ -210,8 +210,7 @@
         625). Человек открывает её, чтобы решить: подходит ли, сколько
         стоит, кто за этим стоит и как связаться, — поэтому сверху снимок,
         название и цена с кнопкой, ниже две колонки: описание и состав
-        слева, владелец справа, липко, чтобы связаться можно было с любого
-        места страницы.
+        слева, владелец справа (не липко — владелец 27.10.2026).
 
         Пустой блок не показывается: карточка — витрина того, что участник
         согласился показать (решение 370), и пустой блок читался бы как
@@ -227,6 +226,10 @@
                   context="{'default_resource_id': id}"/>
           <button name="action_close" type="object" string="Закрыть"
                   invisible="state == 'closed' or not coop_can_edit"/>
+          <!-- Править — страницей размещения: на витрине пустые блоки
+               скрыты, и дописать там нечего (владелец 27.10.2026). -->
+          <button name="action_edit_listing" type="object" string="Изменить объявление"
+                  invisible="not coop_can_edit"/>
           <field name="state" widget="statusbar"
                  statusbar_visible="draft,published,closed"
                  invisible="not coop_can_edit"/>
@@ -364,44 +367,23 @@
                 владелец 27.10.2026).
               -->
               <section class="coop-show_block" name="making"
-                       invisible="made_of_count == 0 and not manufacturer_ids">
+                       invisible="not manufacturer_ids and not material_word_ids and not equipment_word_ids">
                 <h2>Кто делает и из чего</h2>
                 <group invisible="not manufacturer_ids">
                   <field name="manufacturer_ids" widget="many2many_tags"
                          readonly="not coop_can_edit"
                          placeholder="Кто это делает — их может быть несколько"/>
                 </group>
-                <group invisible="made_of_count == 0">
-                  <group string="Сырьё" invisible="not material_ids">
-                    <field name="material_ids" nolabel="1" colspan="2"
-                           readonly="not coop_can_edit"
-                           context="{'coop_catalog': True}">
-                      <list>
-                        <field name="name"/>
-                        <field name="owner_id"/>
-                        <field name="city"/>
-                        <field name="price"/>
-                      </list>
-                    </field>
-                  </group>
-                  <group string="Оборудование" invisible="not equipment_ids">
-                    <field name="equipment_ids" nolabel="1" colspan="2"
-                           readonly="not coop_can_edit"
-                           context="{'coop_catalog': True}">
-                      <list>
-                        <field name="name"/>
-                        <field name="owner_id"/>
-                        <field name="city"/>
-                        <field name="price"/>
-                      </list>
-                    </field>
-                  </group>
-                </group>
-                <div class="text-muted mt-2" invisible="not coop_can_edit or made_of_count == 0">
-                  Сырьё и оборудование — объявлениями о тех же ресурсах, а не
-                  текстом: по связи видно, у кого это взять, а по слову — нет.
-                  Дальше сюда же придут техпроцесс, партия и остаток на складе —
-                  у тех, кто подключит свои системы учёта.
+                <!-- Сырьё и оборудование — словами (решение владельца
+                     26.10.2026): связь с чужим объявлением устаревает, когда
+                     его закрывают. Правятся на странице размещения. -->
+                <div class="coop-show_words" invisible="not material_word_ids">
+                  <h3>Сырьё</h3>
+                  <field name="material_word_ids" widget="many2many_tags" readonly="1" nolabel="1"/>
+                </div>
+                <div class="coop-show_words" invisible="not equipment_word_ids">
+                  <h3>Оборудование</h3>
+                  <field name="equipment_word_ids" widget="many2many_tags" readonly="1" nolabel="1"/>
                 </div>
               </section>
               <!-- Вкладки других модулей: история прав, токен на бирже. -->
@@ -501,117 +483,273 @@
          `ResourcePage`). Сюда ведёт только `action_new_listing` — явно. -->
     <field name="priority">30</field>
     <field name="arch" type="xml">
-      <form string="Разместить объявление">
-        <header>
-          <button name="action_publish" type="object" string="Опубликовать"
-                  class="btn-primary" invisible="state != 'draft' or not coop_can_edit"/>
-          <button name="%(action_coop_resource_promote)d" type="action"
-                  string="Продвинуть" invisible="state != 'published' or not coop_can_edit"
-                  context="{'default_resource_id': id}"/>
-          <field name="state" widget="statusbar"
-                 statusbar_visible="draft,published"/>
-        </header>
+      <!--
+        Страница добавления по дизайн-системе (`ResourceAddPage`, README —
+        «Страница добавления»; решение 625, сверка 27.10.2026): слева
+        разделы с номерами, заполненный — с галочкой; справа живая плитка
+        каталога, «Готово к публикации» и кнопки. Поля — обычные, без
+        карандаша: на странице, которую открыли, чтобы писать, правка по
+        нажатию только мешает. Запись уже есть (черновик заводит
+        `action_new_listing`), движок сохраняет её при уходе и перед
+        кнопкой. Та же страница открывается «Изменить объявление» с витрины.
+      -->
+      <form string="Разместить объявление" class="o_coop_add_form">
         <sheet>
-          <!-- Править объявление может только тот, кому это разрешено
-               правилом записи: хозяин и представители его организаций.
-               Эта форма рисует и открытый чужой ресурс, а условий у полей
-               не было — поля выглядели редактируемыми для всех, хотя
-               сохранить чужое сервер не давал. Владелец 24 сентября:
-               «почему я могу редактировать чужой ресурс, даже
-               возможность такую убери». -->
           <field name="coop_can_edit" invisible="1"/>
-          <field readonly="not coop_can_edit" name="image_1920" widget="image" class="oe_avatar"/>
-          <div class="oe_title">
-            <span class="o_form_label" invisible="state != 'draft'">Разместить объявление</span>
-            <h1>
-              <field readonly="not coop_can_edit" name="name" widget="coop_inline" options="{'wrap': True}"
-                     placeholder="Например, Пельмени домашней лепки, 1 кг"/>
-            </h1>
+          <field name="state" invisible="1"/>
+          <field name="write_date" invisible="1"/>
+          <!-- Не `invisible`: у невидимого поля движок забирает только
+               номер записи, без имени, а превью подписывает плитку именем
+               владельца. -->
+          <field name="owner_id" class="d-none" readonly="1"/>
+          <field name="price_display" invisible="1"/>
+          <field name="currency_id" invisible="1"/>
+          <div class="coop-add_header">
+            <h1 invisible="state != 'draft'">Разместить объявление</h1>
+            <h1 invisible="state == 'draft'">Изменить объявление</h1>
+            <p class="coop-add_intro" invisible="state != 'draft'">
+              Черновик сохраняется сам — можно уйти и вернуться, он будет в
+              «Моих ресурсах». После публикации объявление появится в каталоге
+              ресурсов и на вашей странице.
+            </p>
+            <p class="coop-add_intro" invisible="state == 'draft'">
+              Правки видны в каталоге сразу после сохранения.
+            </p>
           </div>
-          <group>
-            <group string="Что размещаете">
-              <!-- На опубликованном — только выбранное (решение 412, Н6):
-                   «Спрос» без серого «Предложения» рядом. Варианты видит тот,
-                   кто может их поменять. -->
-              <field name="listing_type" widget="radio" invisible="not coop_can_edit"/>
-              <field name="listing_type" readonly="1" invisible="coop_can_edit"/>
-              <field readonly="not coop_can_edit" name="resource_type" widget="coop_inline"/>
-              <field readonly="not coop_can_edit" name="category_id" widget="coop_inline"
-                     options="{'no_create': True}"/>
-              <field name="condition" widget="radio" options="{'horizontal': True}"
-                     invisible="not coop_can_edit"/>
-              <field name="condition" readonly="1"
-                     invisible="coop_can_edit or not condition or condition == 'na'"/>
-            </group>
-            <group string="Сколько">
-              <label for="quantity"/>
-              <div class="o_row">
-                <field readonly="not coop_can_edit" name="quantity" widget="coop_inline"/>
-                <field readonly="not coop_can_edit" name="uom_label" widget="coop_inline"
-                       placeholder="шт., кг, м², сутки…"
-                       invisible="not coop_can_edit and not uom_label"/>
+          <div class="coop-add">
+            <div class="coop-add_main">
+
+              <section class="coop-add_sec" name="add_what">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 1, 'fields': ['name', 'listing_type', 'resource_type'], 'empty': 'Новое объявление'}"/>
+                  <div>
+                    <h2>Что размещаете</h2>
+                    <p>Предлагаете своё или ищете — от этого зависит метка на карточке и кнопка отклика.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_field">
+                    <label for="listing_type" string="Вид объявления"/>
+                    <field name="listing_type" widget="badges_selection" nolabel="1"/>
+                  </div>
+                  <div class="coop-add_top">
+                    <div>
+                      <div class="coop-photo">
+                        <field name="image_1920" widget="image" nolabel="1"/>
+                      </div>
+                      <div class="coop-photo_hint">Фото — первое, на что смотрят в каталоге</div>
+                    </div>
+                    <div class="d-flex flex-column gap-3">
+                      <div class="coop-add_field coop-add_title">
+                        <field name="name" nolabel="1"
+                               placeholder="Например, Пельмени домашней лепки, 1 кг"/>
+                      </div>
+                      <div class="coop-add_row">
+                        <div class="coop-add_field">
+                          <label for="resource_type" string="Тип ресурса"/>
+                          <field name="resource_type" nolabel="1"/>
+                        </div>
+                        <div class="coop-add_field">
+                          <label for="category_id" string="Категория"/>
+                          <field name="category_id" nolabel="1" options="{'no_create': True, 'no_open': True}"/>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="coop-add_sec" name="add_amount">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 2, 'fields': ['quantity', 'condition']}"/>
+                  <div>
+                    <h2>Сколько и в каком состоянии</h2>
+                    <p>Единицу пишите своими словами: шт., кг, рулон, смена.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_pair">
+                    <div class="coop-add_field">
+                      <label for="quantity" string="Количество"/>
+                      <field name="quantity" nolabel="1"/>
+                    </div>
+                    <div class="coop-add_field">
+                      <label for="uom_label" string="Единица"/>
+                      <field name="uom_label" nolabel="1" placeholder="шт., кг, м²"/>
+                    </div>
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="condition" string="Состояние"/>
+                    <field name="condition" widget="badges_selection" nolabel="1"/>
+                  </div>
+                </div>
+              </section>
+
+              <section class="coop-add_sec" name="add_terms">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 3, 'fields': ['method_ids', 'price_kind']}"/>
+                  <div>
+                    <h2>На каких условиях</h2>
+                    <p>Можно выбрать несколько способов — у каждого свои условия ниже.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_field">
+                    <label for="method_ids" string="Способы передачи"/>
+                    <field name="method_ids" widget="many2many_tags" nolabel="1"
+                           options="{'no_create': True}"/>
+                  </div>
+                  <div class="coop-add_row">
+                    <div class="coop-add_field">
+                      <label for="price_kind" string="Цена"/>
+                      <field name="price_kind" nolabel="1"/>
+                    </div>
+                    <div class="coop-add_pair" invisible="price_kind == 'none'">
+                      <div class="coop-add_field">
+                        <label for="price" string="Сумма, ₽"/>
+                        <field name="price" nolabel="1"/>
+                      </div>
+                      <div class="coop-add_field">
+                        <label for="price_unit_label" string="За единицу"/>
+                        <field name="price_unit_label" nolabel="1" placeholder="кг, шт., сутки"/>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <field name="bargain" nolabel="1"/>
+                    <label for="bargain" string="Торг уместен"/>
+                  </div>
+                  <!-- Условия по каждому способу (решение 412, Н5): у продажи
+                       и аренды одной вещи разная цена, у аренды — залог и
+                       срок, у обмена — что возьмёшь взамен. -->
+                  <div class="coop-add_field" invisible="not method_ids">
+                    <label for="term_ids" string="Условия выбранных способов"/>
+                    <field name="term_ids" nolabel="1">
+                      <list editable="bottom" create="false" delete="false">
+                        <field name="method_id" readonly="1"/>
+                        <field name="price"/>
+                        <field name="price_unit_label" placeholder="шт., сутки, месяц"/>
+                        <field name="deposit" optional="show"/>
+                        <field name="min_term" optional="show"/>
+                        <field name="note" placeholder="Оплата, доставка, что возьмёте взамен"/>
+                        <field name="currency_id" column_invisible="1"/>
+                      </list>
+                    </field>
+                  </div>
+                </div>
+              </section>
+
+              <section class="coop-add_sec" name="add_where">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 4, 'fields': ['city', 'contact_method']}"/>
+                  <div>
+                    <h2>Где и как связаться</h2>
+                    <p>Город виден на карточке, точка самовывоза — на странице объявления.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_row">
+                    <div class="coop-add_field">
+                      <label for="city" string="Город"/>
+                      <field name="city" nolabel="1" placeholder="Начните вводить город"/>
+                    </div>
+                    <div class="coop-add_field">
+                      <label for="pickup_point" string="Точка самовывоза"/>
+                      <field name="pickup_point" nolabel="1" placeholder="Адрес или ориентир"/>
+                    </div>
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="contact_method" string="Как связываться"/>
+                    <field name="contact_method" widget="badges_selection" nolabel="1"/>
+                  </div>
+                </div>
+              </section>
+
+              <section class="coop-add_sec" name="add_description">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 5, 'fields': ['description']}"/>
+                  <div>
+                    <h2>Описание</h2>
+                    <p>Главные характеристики — в первом абзаце: размер, материал,
+                      состояние. Честное описание вызывает больше доверия и меньше
+                      лишних вопросов.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_field">
+                    <field name="description" nolabel="1"
+                           placeholder="Что это, в каком состоянии, на каких условиях."/>
+                  </div>
+                </div>
+              </section>
+
+              <section class="coop-add_sec" name="add_making">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 6, 'any': True, 'fields': ['manufacturer_ids', 'material_word_ids', 'equipment_word_ids']}"/>
+                  <div>
+                    <h2>Кто делает и из чего <span class="coop-add_opt">необязательно</span></h2>
+                    <p>Сырьё и оборудование — словами: по слову любой найдёт в своём
+                      городе, у кого это взять сейчас. Пустое на странице объявления
+                      не показывается.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_field">
+                    <label for="manufacturer_ids" string="Производители"/>
+                    <field name="manufacturer_ids" widget="many2many_tags" nolabel="1"
+                           placeholder="Кто это делает — их может быть несколько"/>
+                  </div>
+                  <div class="coop-add_row">
+                    <div class="coop-add_field">
+                      <label for="material_word_ids" string="Сырьё"/>
+                      <field name="material_word_ids" widget="many2many_tags" nolabel="1"
+                             placeholder="Например, вощина"/>
+                    </div>
+                    <div class="coop-add_field">
+                      <label for="equipment_word_ids" string="Оборудование"/>
+                      <field name="equipment_word_ids" widget="many2many_tags" nolabel="1"
+                             placeholder="Например, медогонка"/>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <aside class="coop-add_aside">
+              <div class="coop-add_preview">
+                <span>Так увидят в каталоге</span>
+                <field name="id" widget="coop_resource_preview" nolabel="1"/>
               </div>
-            </group>
-          </group>
-          <group>
-            <group string="На каких условиях">
-              <field readonly="not coop_can_edit" name="method_ids" widget="many2many_tags"
-                     options="{'no_create': True}"
-                     invisible="not coop_can_edit and not method_ids"/>
-              <field readonly="not coop_can_edit" name="price_kind" widget="coop_inline"/>
-              <label for="price"/>
-              <div class="o_row">
-                <field name="price" widget="coop_inline"
-                       readonly="(price_kind == 'none') or not coop_can_edit"/>
-                <field name="price_unit_label" widget="coop_inline"
-                       placeholder="кг, шт., сутки"
-                       readonly="(price_kind == 'none') or not coop_can_edit"
-                       invisible="not coop_can_edit and not price_unit_label"/>
+              <field name="id" widget="coop_add_ready" nolabel="1"
+                     options="{'items': [
+                       {'field': 'name', 'label': 'Название', 'required': True, 'empty': 'Новое объявление', 'anchor': 'add_what'},
+                       {'field': 'image_1920', 'label': 'Фото', 'anchor': 'add_what'},
+                       {'field': 'category_id', 'label': 'Категория', 'anchor': 'add_what'},
+                       {'field': 'quantity', 'label': 'Количество', 'anchor': 'add_amount'},
+                       {'field': 'method_ids', 'label': 'Способы передачи', 'required': True, 'anchor': 'add_terms'},
+                       {'field': 'city', 'label': 'Город', 'required': True, 'anchor': 'add_where'},
+                       {'field': 'description', 'label': 'Описание', 'anchor': 'add_description'},
+                       {'fields': ['manufacturer_ids', 'material_word_ids', 'equipment_word_ids'], 'label': 'Кто делает и из чего', 'anchor': 'add_making'}
+                     ]}"/>
+              <div class="coop-add_acts">
+                <button name="action_publish" type="object" string="Опубликовать"
+                        class="btn-primary" invisible="state != 'draft' or not coop_can_edit"/>
+                <button name="action_save_draft" type="object" string="Сохранить черновик"
+                        class="btn-secondary" invisible="state != 'draft' or not coop_can_edit"/>
+                <button name="action_done_editing" type="object" string="Готово"
+                        class="btn-primary" invisible="state == 'draft'"/>
+                <p class="coop-add_note" invisible="state != 'draft'">
+                  Опубликовать можно, когда заполнено помеченное «нужно».
+                </p>
               </div>
-              <field name="currency_id" invisible="1"/>
-              <field readonly="not coop_can_edit" name="bargain"
-                     invisible="not coop_can_edit and not bargain"/>
-            </group>
-            <group string="Где и как связаться">
-              <field readonly="not coop_can_edit" name="city" widget="coop_inline"
-                     placeholder="Начните вводить город"/>
-              <field readonly="not coop_can_edit" name="pickup_point" widget="coop_inline"
-                     placeholder="Адрес или ориентир"
-                     invisible="not coop_can_edit and not pickup_point"/>
-              <field name="contact_method" widget="radio" invisible="not coop_can_edit"/>
-              <field name="contact_method" readonly="1" invisible="coop_can_edit"/>
-            </group>
-          </group>
-          <!-- Условия по каждому способу (решение 412, Н5): у продажи и
-               аренды одной вещи разная цена, у аренды — залог и срок, у
-               обмена — что возьмёшь взамен. -->
-          <group string="Условия по способам" invisible="not method_ids">
-            <field name="term_ids" nolabel="1" colspan="2" invisible="not coop_can_edit">
-              <list editable="bottom" create="false" delete="false">
-                <field name="method_id" readonly="1"/>
-                <field name="price"/>
-                <field name="price_unit_label" placeholder="шт., сутки, месяц"/>
-                <field name="deposit" optional="show"/>
-                <field name="min_term" optional="show"/>
-                <field name="note" placeholder="Оплата, доставка, что возьмёте взамен"/>
-                <field name="currency_id" column_invisible="1"/>
-              </list>
-            </field>
-            <field name="terms_html" nolabel="1" colspan="2"
-                   invisible="coop_can_edit or not terms_html"/>
-          </group>
-          <notebook>
-            <page string="Описание" name="description"
-                  invisible="not coop_can_edit and not description">
-              <field readonly="not coop_can_edit" name="description" widget="coop_block"
-                     placeholder="Что это, в каком состоянии, на каких условиях."/>
-              <div class="text-muted mt-2" invisible="not coop_can_edit">
-                Главные характеристики — в первом абзаце: размер, материал,
-                состояние. Честное описание вызывает больше доверия и меньше
-                лишних вопросов.
-              </div>
-            </page>
-          </notebook>
+            </aside>
+          </div>
         </sheet>
       </form>
     </field>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!-- Номер раздела страницы добавления; заполненный — галочкой. -->
+  <t t-name="coop_theme.AddStep">
+    <span class="coop-add_num" t-att-class="{ 'coop-add_num_done': this.done }"
+          t-att-title="this.done ? 'Раздел заполнен' : ''">
+      <t t-if="this.done">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M5 12l5 5l10 -10"/>
+        </svg>
+      </t>
+      <t t-else="" t-out="this.props.num"/>
+    </span>
+  </t>
+
+  <!-- «Готово к публикации»: полоска по пунктам и сам список. -->
+  <t t-name="coop_theme.AddReady">
+    <div class="coop-ready">
+      <div class="coop-ready_head">
+        <span t-out="this.props.title or 'Готово к публикации'"/>
+        <b><t t-out="this.doneCount"/> из <t t-out="this.rows.length"/></b>
+      </div>
+      <div class="coop-ready_bar" aria-hidden="true">
+        <t t-foreach="this.rows" t-as="row" t-key="row.key">
+          <i t-att-class="{ on: row.done }"/>
+        </t>
+      </div>
+      <ul>
+        <t t-foreach="this.rows" t-as="row" t-key="row.key">
+          <li t-att-class="{ 'coop-ready_done': row.done }">
+            <svg class="coop-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                 stroke-linejoin="round" aria-hidden="true">
+              <t t-if="row.done"><path d="M5 12l5 5l10 -10"/></t>
+              <t t-else=""><circle cx="12" cy="12" r="8"/></t>
+            </svg>
+            <a href="#" t-on-click.prevent="() => this.go(row.anchor)" t-out="row.label"/>
+            <em t-if="row.required and !row.done">нужно</em>
+          </li>
+        </t>
+      </ul>
+    </div>
+  </t>
+
+</templates>
