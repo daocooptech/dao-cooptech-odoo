@@ -31,6 +31,7 @@ from ..data import load_vat
 from ..data import load_social_dates
 from ..data import load_staff
 from ..data import load_crm
+from ..data import load_mrp
 from ..data import load_deal_leads
 from ..data import load_deal_activities
 from ..data import load_requisites
@@ -396,6 +397,9 @@ class CoopDemoLoader(models.AbstractModel):
         # Лиды CRM (решение 450) — последними: их ведут держатели «Сделок»,
         # которым компании учёта и отделы продаж выданы шагами выше.
         load_crm.load_crm(self.env)
+        # Производство организаций и техпроцесс на карточках (решение 630) —
+        # тоже после компаний учёта: спецификации и выпуски живут в них.
+        load_mrp.load_mrp(self.env)
         # Обращения людей (решение 451) — откликами на объявления, когда
         # у организаций уже есть держатели «Сделок», чтобы отвечать.
         load_deal_leads.load_deal_leads(self.env)
