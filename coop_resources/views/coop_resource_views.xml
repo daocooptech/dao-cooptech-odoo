@@ -44,6 +44,14 @@
                      одинаково во всех каталогах. Привязано к `id`, потому
                      что виджету нужна сама запись, а не значение поля. -->
                 <field name="id" widget="coop_favorite_heart" nolabel="1"/>
+                <!-- Кто разместил — портретом поверх снимка, как у навыков.
+                     Владелец 27.10.2026: «в каталоге навыков я вижу кто
+                     разместил а в ресурсах не вижу». Без своего снимка
+                     лицо владельца и так стоит во всё поле — второй раз
+                     не ставим. -->
+                <img class="o_coop_res_owner" t-if="record.image_512.raw_value and record.owner_id.raw_value"
+                     t-attf-src="/web/image/res.partner/#{record.owner_id.raw_value}/avatar_128"
+                     t-att-title="record.owner_id.value" t-att-alt="record.owner_id.value"/>
                 <span class="o_coop_res_type"
                       t-attf-class="o_coop_res_type #{record.listing_type.raw_value == 'request' ? 'o_coop_res_request' : ''}">
                   <field name="listing_type"/>

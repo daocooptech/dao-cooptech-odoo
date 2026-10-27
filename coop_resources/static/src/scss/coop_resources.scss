@@ -104,6 +104,29 @@
   // Отметка о продвижении — под меткой вида, золотой парой токенов, как
   // в эталоне (`ResourceCard`): белое по `coop-gold` давало 2.9:1.
   // Правый верхний угол оставлен под избранное.
+  // Портрет владельца — как `.o_coop_skill_owner` у навыков; метки
+  // «Спрос / Предложение» и «Продвигается» встают справа от него.
+  .o_coop_res_owner {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 50%;
+    border: 2px solid var(--coop-white, #fff);
+    object-fit: cover;
+    box-shadow: 0 1px 3px rgba(20, 23, 26, .25);
+  }
+  .o_coop_res_owner ~ .o_coop_res_type {
+    top: 14px;
+    left: 52px;
+    max-width: calc(100% - 96px);
+  }
+  .o_coop_res_owner ~ .o_coop_res_promo {
+    top: 36px;
+    left: 52px;
+  }
+
   .o_coop_res_promo {
     position: absolute;
     top: 34px;
