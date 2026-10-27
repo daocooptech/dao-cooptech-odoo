@@ -86,14 +86,40 @@ class CoopResource(models.Model):
                 Term.create([{'resource_id': resource.id, 'method_id': method.id}
                              for method in missing])
 
+    def _coop_price_from_terms(self):
+        """Цена на карточке — из первого способа, где она указана.
+
+        Владелец 27.10.2026: условия вносятся во вкладках способов, «ни
+        каких таблиц» — значит и цену второй раз отдельным полем не
+        спрашиваем. Каталог, фильтр по цене и проверка «нужна цена»
+        по-прежнему читают `price` объявления — оно заполняется отсюда.
+        """
+        for resource in self:
+            priced = resource.term_ids.filtered('price').sorted('sequence')[:1]
+            if not priced:
+                continue
+            values = {}
+            if resource.price != priced.price:
+                values['price'] = priced.price
+            # Единица — того же способа, даже пустая: иначе цена продажи
+            # получала бы «/сутки» от аренды.
+            unit = priced.price_unit_label or False
+            if (resource.price_unit_label or False) != unit:
+                values['price_unit_label'] = unit
+            if values:
+                resource.with_context(coop_no_price_sync=True).write(values)
+
     @api.model_create_multi
     def create(self, vals_list):
         resources = super().create(vals_list)
         resources.filtered('method_ids')._coop_sync_terms()
+        resources.filtered('term_ids')._coop_price_from_terms()
         return resources
 
     def write(self, vals):
         result = super().write(vals)
         if 'method_ids' in vals:
             self._coop_sync_terms()
+        if 'term_ids' in vals and not self.env.context.get('coop_no_price_sync'):
+            self._coop_price_from_terms()
         return result

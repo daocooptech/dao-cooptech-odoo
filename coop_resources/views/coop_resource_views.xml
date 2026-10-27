@@ -590,55 +590,41 @@
               <section class="coop-add_sec" name="add_terms">
                 <div class="coop-add_sec_head">
                   <field name="id" widget="coop_add_step" nolabel="1"
-                         options="{'num': 3, 'fields': ['method_ids', 'price_kind']}"/>
+                         options="{'num': 3, 'fields': ['method_ids']}"/>
                   <div>
                     <h2>На каких условиях</h2>
-                    <p>Можно выбрать несколько способов — у каждого свои условия ниже.</p>
+                    <p>Каждый способ — своя вкладка со своей ценой и условиями. Добавить — «+».</p>
                   </div>
                 </div>
                 <div class="coop-add_sec_body">
-                  <div class="coop-add_field">
-                    <label for="method_ids" string="Способы передачи"/>
-                    <field name="method_ids" widget="many2many_tags" nolabel="1"
-                           options="{'no_create': True}"/>
-                  </div>
+                  <!-- Способы — вкладками, условия — внутри вкладки
+                       (владелец 27.10.2026: «как в браузере вкладками … и в
+                       конце + … ни каких таблиц»). -->
+                  <field name="method_ids" invisible="1"/>
+                  <field name="term_ids" widget="coop_method_tabs" nolabel="1">
+                    <list>
+                      <field name="method_id"/>
+                      <field name="code"/>
+                      <field name="price"/>
+                      <field name="price_unit_label"/>
+                      <field name="deposit"/>
+                      <field name="min_term"/>
+                      <field name="note"/>
+                      <field name="currency_id"/>
+                    </list>
+                  </field>
                   <div class="coop-add_row">
                     <div class="coop-add_field">
-                      <label for="price_kind" string="Цена"/>
-                      <field name="price_kind" nolabel="1"/>
+                      <label for="price_kind" string="Цена на карточке"/>
+                      <field name="price_kind" widget="badges_selection" nolabel="1"/>
                     </div>
-                    <div class="coop-add_pair" invisible="price_kind == 'none'">
-                      <div class="coop-add_field">
-                        <label for="price" string="Сумма, ₽"/>
-                        <field name="price" nolabel="1"/>
-                      </div>
-                      <div class="coop-add_field">
-                        <label for="price_unit_label" string="За единицу"/>
-                        <field name="price_unit_label" nolabel="1" placeholder="кг, шт., сутки"/>
-                      </div>
+                    <div class="d-flex align-items-center gap-2 pt-4">
+                      <field name="bargain" nolabel="1"/>
+                      <label for="bargain" string="Торг уместен"/>
                     </div>
                   </div>
-                  <div class="d-flex align-items-center gap-2">
-                    <field name="bargain" nolabel="1"/>
-                    <label for="bargain" string="Торг уместен"/>
-                  </div>
-                  <!-- Условия по каждому способу (решение 412, Н5): у продажи
-                       и аренды одной вещи разная цена, у аренды — залог и
-                       срок, у обмена — что возьмёшь взамен. -->
-                  <div class="coop-add_field" invisible="not method_ids">
-                    <label for="term_ids" string="Условия выбранных способов"/>
-                    <field name="term_ids" nolabel="1">
-                      <list editable="bottom" create="false" delete="false">
-                        <field name="method_id" readonly="1"/>
-                        <field name="price"/>
-                        <field name="price_unit_label" placeholder="шт., сутки, месяц"/>
-                        <field name="deposit" optional="show"/>
-                        <field name="min_term" optional="show"/>
-                        <field name="note" placeholder="Оплата, доставка, что возьмёте взамен"/>
-                        <field name="currency_id" column_invisible="1"/>
-                      </list>
-                    </field>
-                  </div>
+                  <p class="coop-add_help">На карточке каталога — цена первого способа, где она
+                    указана. «По договорённости» — без суммы.</p>
                 </div>
               </section>
 

@@ -16,7 +16,7 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.2.0',
+    'version': '20.0.1.3.0',
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_tokens', 'coop_theme', 'mail'],
     'data': [
@@ -32,6 +32,8 @@
             'coop_resources/static/src/scss/coop_resources.scss',
             'coop_resources/static/src/js/resource_preview.js',
             'coop_resources/static/src/xml/resource_preview.xml',
+            'coop_resources/static/src/js/method_tabs.js',
+            'coop_resources/static/src/xml/method_tabs.xml',
         ],
     },
     'installable': True,

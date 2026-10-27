@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!-- Способы передачи вкладками, «+» в конце; под вкладкой — условия способа. -->
+  <t t-name="coop_resources.MethodTabs">
+    <div class="coop-mtabs">
+      <div class="coop-mtabs_row" role="tablist">
+        <t t-foreach="this.tabs" t-as="tab" t-key="tab.id">
+          <div class="coop-mtabs_tab" role="tab"
+               t-att-class="{ 'coop-mtabs_on': this.current and this.current.id === tab.id }"
+               t-att-aria-selected="this.current and this.current.id === tab.id ? 'true' : 'false'">
+            <button type="button" class="coop-mtabs_name" t-on-click="() => this.select(tab)"
+                    t-out="tab.name"/>
+            <button type="button" class="coop-mtabs_x" t-if="!this.props.readonly"
+                    t-att-title="'Убрать способ «' + tab.name + '»'"
+                    t-att-aria-label="'Убрать способ «' + tab.name + '»'"
+                    t-on-click="() => this.remove(tab)">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+                <path d="M18 6L6 18M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        </t>
+        <div class="coop-mtabs_add" t-if="!this.props.readonly and this.rest.length">
+          <button type="button" class="coop-mtabs_plus" title="Добавить способ"
+                  aria-label="Добавить способ" t-att-aria-expanded="this.ui.menu ? 'true' : 'false'"
+                  t-on-click="() => this.toggleMenu()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            <span t-if="!this.tabs.length">Добавить способ</span>
+          </button>
+          <div class="coop-mtabs_menu" t-if="this.ui.menu">
+            <t t-foreach="this.rest" t-as="method" t-key="method.id">
+              <button type="button" t-on-click="() => this.add(method)" t-out="method.name"/>
+            </t>
+          </div>
+        </div>
+      </div>
+
+      <div class="coop-mtabs_panel" t-if="this.current">
+        <t t-set="lay" t-value="this.layout"/>
+        <div class="coop-add_field" t-if="lay.noteFirst">
+          <label t-out="lay.note"/>
+          <input class="o_input" type="text" t-att-value="this.value('note')"
+                 t-att-readonly="this.props.readonly"
+                 t-on-change="(ev) => this.onInput('note', ev)"/>
+        </div>
+        <div class="coop-add_pair" t-if="lay.price">
+          <div class="coop-add_field">
+            <label t-out="lay.price"/>
+            <input class="o_input" type="text" inputmode="decimal" t-att-value="this.value('price')"
+                   t-att-readonly="this.props.readonly"
+                   t-on-change="(ev) => this.onInput('price', ev)"/>
+          </div>
+          <div class="coop-add_field" t-if="lay.unit">
+            <label>За что</label>
+            <input class="o_input" type="text" placeholder="шт., кг, сутки, месяц"
+                   t-att-value="this.value('price_unit_label')"
+                   t-att-readonly="this.props.readonly"
+                   t-on-change="(ev) => this.onInput('price_unit_label', ev)"/>
+          </div>
+        </div>
+        <div class="coop-add_row" t-if="lay.deposit or lay.term">
+          <div class="coop-add_field" t-if="lay.deposit">
+            <label>Залог, ₽</label>
+            <input class="o_input" type="text" inputmode="decimal" t-att-value="this.value('deposit')"
+                   t-att-readonly="this.props.readonly"
+                   t-on-change="(ev) => this.onInput('deposit', ev)"/>
+          </div>
+          <div class="coop-add_field" t-if="lay.term">
+            <label t-out="lay.term"/>
+            <input class="o_input" type="text" placeholder="Например, 3 дня"
+                   t-att-value="this.value('min_term')"
+                   t-att-readonly="this.props.readonly"
+                   t-on-change="(ev) => this.onInput('min_term', ev)"/>
+          </div>
+        </div>
+        <div class="coop-add_field" t-if="!lay.noteFirst">
+          <label t-out="lay.note"/>
+          <input class="o_input" type="text" t-att-value="this.value('note')"
+                 t-att-readonly="this.props.readonly"
+                 t-on-change="(ev) => this.onInput('note', ev)"/>
+        </div>
+      </div>
+      <p class="coop-add_help" t-elif="!this.props.readonly">
+        Нажмите «+» и выберите, как готовы передать: продать, сдать в аренду,
+        обменять, отдать даром. У каждого способа — свои условия.
+      </p>
+    </div>
+  </t>
+
+</templates>

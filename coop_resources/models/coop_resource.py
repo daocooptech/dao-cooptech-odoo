@@ -486,7 +486,7 @@ class CoopResource(models.Model):
                 raise ValidationError(_(
                     'Ресурс не может быть сделан из самого себя.'))
 
-    @api.constrains('method_ids', 'price', 'price_kind')
+    @api.constrains('method_ids', 'price', 'price_kind', 'term_ids')
     def _check_price_required(self):
         """Оценка обязательна там, где без неё нельзя посчитать.
 
@@ -495,7 +495,9 @@ class CoopResource(models.Model):
         оценка может пустовать: там договариваются о вещи, а не о сумме.
         """
         for record in self:
-            if record.price or record.price_kind == 'none':
+            # Цена во вкладке способа — тоже цена: на карточку она попадёт
+            # следом (`_coop_price_from_terms`), а проверка идёт раньше.
+            if record.price or record.price_kind == 'none' or any(record.term_ids.mapped('price')):
                 continue
             requiring = record.method_ids.filtered('requires_price')
             if requiring:
