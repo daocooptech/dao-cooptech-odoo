@@ -55,6 +55,7 @@ from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_documents,
                     load_notifications,
                     load_spread,
+                    load_descriptions,
                     load_vacancies, load_verification, load_wallets,
                     load_warehouses)
 
@@ -402,6 +403,9 @@ class CoopDemoLoader(models.AbstractModel):
         # Даты дружбы и подписок — последними: их заводят шаги выше, и
         # дата каждой выводится из номера записи.
         load_social_dates.spread_social_dates(self.env)
+        # Описания объявлений (владелец 27.10.2026) — после городов,
+        # названий и проектов: текст собирается из того, что уже есть в записи.
+        load_descriptions.fill_resource_descriptions(self.env)
         return True
 
     def _load_rubrics(self):
