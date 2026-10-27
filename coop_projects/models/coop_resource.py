@@ -72,6 +72,12 @@ class CoopResource(models.Model):
         help='Стоимость потребности к общей потребности проекта.')
     need_can_join = fields.Boolean(
         string='Можно участвовать', compute='_compute_need_can_join')
+    # Что стоит в строке потребности на месте «Участвовать», когда сбор не
+    # идёт. Владелец 28 октября 2026: вклад — только во время сбора, а на
+    # месте кнопки — «сбор закрыт». Пустая колонка у запущенного проекта
+    # читалась как поломка страницы.
+    need_join_note = fields.Char(
+        string='Участие', compute='_compute_need_join_note')
 
     @api.depends('price', 'project_id.required_total')
     def _compute_need_share(self):
@@ -98,6 +104,17 @@ class CoopResource(models.Model):
                 and record.state == 'published'
                 and not record.need_accepted_id
                 and record.project_id.partner_id not in mine)
+
+    @api.depends('project_id.state')
+    def _compute_need_join_note(self):
+        for record in self:
+            state = record.project_id.state
+            if not state or state == 'gathering':
+                record.need_join_note = False
+            elif state == 'draft':
+                record.need_join_note = _('сбор не начат')
+            else:
+                record.need_join_note = _('сбор закрыт')
 
     # Чем закрывается потребность того или иного вида. Окно вклада
     # спрашивает то же самое; подставляем ответ заранее, чтобы человек,

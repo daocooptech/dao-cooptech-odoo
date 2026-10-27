@@ -451,9 +451,15 @@
                          options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind not in ('commercial', 'dao')"/>
                   <field name="need_offer_count" string="Откликов"/>
+                  <!-- Вне сбора на месте кнопки — «сбор закрыт» (владелец
+                       28.10.2026): пустая колонка читалась как поломка. -->
+                  <field name="need_join_note" nolabel="1"
+                         class="o_coop_needs_note"
+                         column_invisible="parent.state == 'gathering'"/>
                   <button name="action_join_need" type="object"
                           string="Участвовать" class="btn btn-secondary btn-sm"
-                          invisible="not need_can_join"/>
+                          invisible="not need_can_join"
+                          column_invisible="parent.state != 'gathering'"/>
                   <field name="currency_id" column_invisible="1"/>
                 </list>
               </field>
@@ -479,9 +485,15 @@
                          options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind not in ('commercial', 'dao')"/>
                   <field name="need_offer_count" string="Откликов"/>
+                  <!-- Вне сбора на месте кнопки — «сбор закрыт» (владелец
+                       28.10.2026): пустая колонка читалась как поломка. -->
+                  <field name="need_join_note" nolabel="1"
+                         class="o_coop_needs_note"
+                         column_invisible="parent.state == 'gathering'"/>
                   <button name="action_join_need" type="object"
                           string="Участвовать" class="btn btn-secondary btn-sm"
-                          invisible="not need_can_join"/>
+                          invisible="not need_can_join"
+                          column_invisible="parent.state != 'gathering'"/>
                   <field name="currency_id" column_invisible="1"/>
                 </list>
               </field>
@@ -507,9 +519,15 @@
                          options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind not in ('commercial', 'dao')"/>
                   <field name="need_offer_count" string="Откликов"/>
+                  <!-- Вне сбора на месте кнопки — «сбор закрыт» (владелец
+                       28.10.2026): пустая колонка читалась как поломка. -->
+                  <field name="need_join_note" nolabel="1"
+                         class="o_coop_needs_note"
+                         column_invisible="parent.state == 'gathering'"/>
                   <button name="action_join_need" type="object"
                           string="Участвовать" class="btn btn-secondary btn-sm"
-                          invisible="not need_can_join"/>
+                          invisible="not need_can_join"
+                          column_invisible="parent.state != 'gathering'"/>
                   <field name="currency_id" column_invisible="1"/>
                 </list>
               </field>
@@ -535,9 +553,15 @@
                          options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind not in ('commercial', 'dao')"/>
                   <field name="need_offer_count" string="Откликов"/>
+                  <!-- Вне сбора на месте кнопки — «сбор закрыт» (владелец
+                       28.10.2026): пустая колонка читалась как поломка. -->
+                  <field name="need_join_note" nolabel="1"
+                         class="o_coop_needs_note"
+                         column_invisible="parent.state == 'gathering'"/>
                   <button name="action_join_need" type="object"
                           string="Участвовать" class="btn btn-secondary btn-sm"
-                          invisible="not need_can_join"/>
+                          invisible="not need_can_join"
+                          column_invisible="parent.state != 'gathering'"/>
                   <field name="currency_id" column_invisible="1"/>
                 </list>
               </field>

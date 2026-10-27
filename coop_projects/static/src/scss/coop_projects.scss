@@ -357,6 +357,17 @@
       white-space: nowrap;
     }
 
+    // «Сбор закрыт» на месте кнопки — как «закрыто» в дизайн-системе
+    // (`ProjectPage`, `needs_done`): мелкая капитель, приглушённо.
+    td.o_coop_needs_note {
+      text-align: right;
+      white-space: nowrap;
+      font: 500 11px/1 'JetBrains Mono', ui-monospace, monospace;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--coop-slate, #4a4a44);
+    }
+
     // ── На телефоне ────────────────────────────────────────────────
     //
     // Владелец 22 сентября 2026: «ширина столбца где название ресурса
