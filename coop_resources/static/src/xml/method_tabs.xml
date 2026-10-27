@@ -89,7 +89,6 @@
             </select>
           </div>
         </div>
-        <p class="coop-add_help" t-if="lay.help" t-out="lay.help"/>
         <div class="coop-add_field" t-if="lay.deposit and !this.isRequest">
           <label>Залог, ₽</label>
           <input class="o_input" type="text" inputmode="decimal" t-att-value="this.value('deposit')"
@@ -130,10 +129,12 @@
         </div>
         <div class="coop-mtabs_calc" t-if="this.calc">
           <t t-set="calc" t-value="this.calc"/>
-          <span>Платёж: <b t-out="calc.payment"/> <t t-out="calc.every"/></span>
-          <span>Сразу: <b t-out="calc.down"/></span>
-          <span>Всего: <b t-out="calc.total"/></span>
+          <t t-foreach="calc.lines" t-as="line" t-key="line[0]">
+            <span><t t-out="line[0]"/>: <b t-out="line[1]"/></span>
+          </t>
         </div>
+        <p class="coop-add_help coop-mtabs_hint" t-foreach="this.hints" t-as="hint" t-key="hint_index"
+           t-out="hint"/>
         <div class="coop-add_field" t-if="!lay.noteFirst">
           <label t-out="this.noteLabel"/>
           <input class="o_input" type="text" t-att-value="this.value('note')"

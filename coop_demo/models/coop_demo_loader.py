@@ -269,6 +269,7 @@ class CoopDemoLoader(models.AbstractModel):
         load_resource_terms.fill_resource_terms(self.env)
         load_resource_terms.repair_resource_terms(self.env)
         load_resource_terms.fill_term_details(self.env)
+        load_resource_terms.fill_term_checks(self.env)
         # Последним — добор примеров по случаям: он смотрит, чего в
         # данных не хватает, и потому должен видеть всё остальное.
         load_examples.load_examples(self.env)

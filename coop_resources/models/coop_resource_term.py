@@ -11,7 +11,8 @@
 """
 from markupsafe import Markup
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 
 
 class CoopResourceTerm(models.Model):
@@ -51,11 +52,22 @@ class CoopResourceTerm(models.Model):
     bulk_price = fields.Monetary(string='Оптовая цена')
     prepay_pct = fields.Integer(string='Предоплата, %')
     warranty = fields.Char(string='Гарантия')
+    # Варианты — по разбору `accountant` 27.10.2026: «без документов»
+    # только у человека без ИП, у организации — чек или первичный документ.
     documents = fields.Selection([
         ('none', 'без документов'),
-        ('receipt', 'чек'),
+        ('receipt', 'чек ККТ'),
+        ('npd', 'чек самозанятого'),
         ('upd', 'УПД'),
+        ('act', 'накладная или акт'),
     ], string='Документы')
+    vat = fields.Selection([
+        ('none', 'без НДС'),
+        ('5', '5 %'),
+        ('7', '7 %'),
+        ('10', '10 %'),
+        ('22', '22 %'),
+    ], string='НДС')
     # Аренда
     max_term = fields.Char(string='Наибольший срок')
     operator = fields.Selection([
@@ -65,6 +77,12 @@ class CoopResourceTerm(models.Model):
     ], string='Оператор')
     included = fields.Char(string='Входит в цену', help='Метки через запятую: топливо, расходники, доставка.')
     available_from = fields.Date(string='Свободно с')
+    # Аренда с экипажем — только у транспортного средства (ГК ст. 632);
+    # остальная техника с оператором — аренда и услуга (`legal-counsel`).
+    is_vehicle = fields.Selection([
+        ('yes', 'транспортное средство'),
+        ('no', 'не транспортное средство'),
+    ], string='Что сдаёте')
     long_discount = fields.Char(string='Скидка за длинный срок')
     # Рассрочка и лизинг
     down_pct = fields.Float(string='Первый взнос, %')
@@ -86,6 +104,8 @@ class CoopResourceTerm(models.Model):
         ('partner', 'партнёрская лизинговая компания'),
     ], string='Лизингодатель')
     lessor_name = fields.Char(string='Лизинговая компания')
+    # Лизингодатель покупает вещь «у определенного им продавца» (ГК ст. 665).
+    seller_name = fields.Char(string='Продавец предмета')
     insurance = fields.Selection([
         ('lessee', 'лизингополучатель'),
         ('lessor', 'лизингодатель'),
@@ -104,6 +124,19 @@ class CoopResourceTerm(models.Model):
         ('costs', 'возмещение расходов'),
     ], string='Что жду взамен')
     project_scope = fields.Char(string='В какие проекты')
+    # В пользование — доля от арендной стоимости: ставка × срок
+    # (`coop-economist` 27.10.2026); срок — `months`.
+    use_rate = fields.Monetary(string='Ставка в месяц')
+    repairs = fields.Selection([
+        ('owner', 'я'),
+        ('project', 'проект'),
+    ], string='Кто чинит')
+    wear = fields.Char(string='Нормальный износ')
+    loss = fields.Selection([
+        ('compensate', 'проект возмещает стоимость'),
+        ('own', 'вклад переходит в «насовсем»'),
+    ], string='При утрате')
+    use_value = fields.Monetary(string='Вклад для доли', compute='_compute_payment')
     # Обмен
     surcharge = fields.Selection([
         ('none', 'без доплаты'),
@@ -130,7 +163,7 @@ class CoopResourceTerm(models.Model):
     PERIODS_PER_MONTH = {'week': 52 / 12, 'month': 1, 'quarter': 1 / 3}
 
     @api.depends('code', 'price', 'down_pct', 'months', 'pay_every', 'markup_pct',
-                 'buyout', 'payment_manual')
+                 'buyout', 'payment_manual', 'contribution', 'use_rate')
     def _compute_payment(self):
         """Рассрочка: остаток после первого взноса с наценкой — равными
         платежами. Лизинг: стоимость без аванса и выкупа с удорожанием —
@@ -151,6 +184,7 @@ class CoopResourceTerm(models.Model):
                     total = down + payment * term.months + (term.buyout or 0)
             term.payment = round(payment)
             term.total = round(total)
+            term.use_value = (term.use_rate or 0) * (term.months or 0)                 if term.code == 'project' and term.contribution == 'use' else 0
 
     @staticmethod
     def _rub(value):
@@ -168,7 +202,8 @@ class CoopResourceTerm(models.Model):
                  'max_term', 'operator', 'included', 'available_from', 'long_discount',
                  'down_pct', 'months', 'pay_every', 'markup_pct', 'ownership', 'buyout',
                  'payment_manual', 'lessor', 'lessor_name', 'insurance', 'contribution', 'expect',
-                 'project_scope', 'surcharge', 'surcharge_amount', 'free_mode', 'free_to')
+                 'project_scope', 'surcharge', 'surcharge_amount', 'free_mode', 'free_to',
+                 'vat', 'is_vehicle', 'seller_name', 'use_rate', 'repairs', 'loss')
     def _compute_summary(self):
         prefix = {'from': 'от ', 'to': 'до ', 'exact': ''}
         for term in self:
@@ -193,6 +228,8 @@ class CoopResourceTerm(models.Model):
                     parts.append('гарантия %s' % term.warranty)
                 if term.documents:
                     parts.append(term._label('documents'))
+                if term.vat:
+                    parts.append('НДС %s' % term._label('vat') if term.vat != 'none' else 'без НДС')
             if term.deposit:
                 parts.append('залог %s' % term._rub(term.deposit))
             # У рассрочки и лизинга срок — в месяцах (`months`); прежний
@@ -207,6 +244,8 @@ class CoopResourceTerm(models.Model):
             if code == 'rent':
                 if term.operator:
                     parts.append(term._label('operator'))
+                if term.operator in ('yes', 'option') and term.is_vehicle == 'yes':
+                    parts.append('аренда с экипажем')
                 if term.included:
                     parts.append('в цене: %s' % term.included)
                 if term.available_from:
@@ -232,11 +271,22 @@ class CoopResourceTerm(models.Model):
                         parts.append('выкуп %s' % term._rub(term.buyout))
                     if term.lessor == 'partner':
                         parts.append('через %s' % (term.lessor_name or 'лизинговую компанию'))
+                    elif term.lessor == 'self' and term.seller_name:
+                        parts.append('покупаю у %s' % term.seller_name)
                     if term.insurance:
                         parts.append('страховка — %s' % term._label('insurance'))
             if code == 'project':
                 if term.contribution:
                     parts.append(term._label('contribution'))
+                if term.contribution == 'use':
+                    if term.months:
+                        parts.append('на %s мес.' % term.months)
+                    if term.use_rate:
+                        parts.append('ставка %s в месяц' % term._rub(term.use_rate))
+                    if term.repairs:
+                        parts.append('чинит %s' % term._label('repairs'))
+                    if term.loss:
+                        parts.append('при утрате — %s' % term._label('loss'))
                 if term.expect:
                     parts.append('взамен — %s' % term._label('expect'))
                 if term.project_scope:
@@ -258,6 +308,8 @@ class CoopResource(models.Model):
     _inherit = 'coop.resource'
 
     term_ids = fields.One2many('coop.resource.term', 'resource_id', string='Условия по способам')
+    # Организации — без «без документов» и с НДС (`accountant` 27.10.2026).
+    owner_is_company = fields.Boolean(related='owner_id.is_company', string='Владелец — организация')
     terms_html = fields.Html(string='Условия', compute='_compute_terms_html', sanitize=False)
 
     @api.depends('term_ids.summary', 'method_ids')
@@ -317,6 +369,62 @@ class CoopResource(models.Model):
                 values['price_unit_label'] = unit
             if values:
                 resource.with_context(coop_no_price_sync=True).write(values)
+
+    def _coop_terms_problems(self):
+        """Чего не хватает условиям, чтобы договор по ним состоялся.
+
+        Разборы 27.10.2026 (решение 629): `legal-counsel` — рассрочка без
+        срока и платежей не договор (ГК ст. 489 п. 1), лизингодатель
+        покупает вещь у продавца (ГК ст. 665), аренда с экипажем — только
+        транспорт (ГК ст. 632); `coop-economist` — вклад в пользование без
+        срока, ставки, ремонта и утраты не даёт посчитать долю;
+        `accountant` — организации нужны документы и НДС, оценка дара
+        организациям и мены. Спрос проверяется мягче: условия там пишет
+        тот, кто предложит.
+        """
+        self.ensure_one()
+        problems = []
+        offer = self.listing_type != 'request'
+        company = self.owner_id.is_company
+        for term in self.term_ids:
+            name = term.method_id.name
+            if term.code == 'installment':
+                if self.resource_type == 'financial':
+                    problems.append(_('«%(method)s»: деньги в рассрочку не продаются — это заём, его выдают '
+                                      'только банки и финансовые организации.', method=name))
+                if offer and not (term.months > 0 and term.pay_every):
+                    problems.append(_('«%(method)s»: укажите срок в месяцах и как часто платить — без '
+                                      'порядка и сроков платежей договор не заключён.', method=name))
+            if term.code == 'leasing' and offer and term.lessor == 'self' and not term.seller_name:
+                problems.append(_('«%(method)s»: лизингодатель покупает вещь у продавца — укажите продавца '
+                                  'или сдайте свою вещь через «Аренду».', method=name))
+            if term.code == 'rent' and offer and term.operator in ('yes', 'option') and not term.is_vehicle:
+                problems.append(_('«%(method)s»: с оператором — отметьте, транспортное ли это средство: от '
+                                  'этого зависит, кто отвечает за вред.', method=name))
+            if term.code == 'project' and offer and term.contribution == 'use' and not (
+                    term.months > 0 and term.use_rate and term.repairs and term.wear and term.loss):
+                problems.append(_('«%(method)s»: в пользование — нужны срок, ставка в месяц, кто чинит, '
+                                  'нормальный износ и что при утрате.', method=name))
+            if term.code == 'sale' and offer and company:
+                if not term.documents or term.documents == 'none':
+                    problems.append(_('«%(method)s»: организация продаёт с документами — выберите чек '
+                                      'или первичный документ.', method=name))
+                if not term.vat:
+                    problems.append(_('«%(method)s»: укажите НДС или «без НДС».', method=name))
+            if term.code == 'free' and offer and term.free_to == 'org' and not term.price:
+                problems.append(_('«%(method)s»: для организаций нужна оценка — у них это доход по '
+                                  'рыночной цене.', method=name))
+            if term.code == 'barter' and company and not term.price and term.price_kind != 'none':
+                problems.append(_('«%(method)s»: организации нужна оценка своей вещи — мена для неё '
+                                  'продажа.', method=name))
+        return problems
+
+    def action_publish(self):
+        for record in self:
+            problems = record._coop_terms_problems()
+            if problems:
+                raise UserError('\n'.join(problems))
+        return super().action_publish()
 
     @api.model_create_multi
     def create(self, vals_list):

@@ -287,3 +287,64 @@ def tidy_term_details(env):
         term.note = random.Random("tidy:%s" % term.resource_id.id).choice(plain)
         tidied += 1
     return tidied
+
+
+# Проверки публикации по разборам агентов 27.10.2026 (решение 629): чего
+# требует `_coop_terms_problems`, то у опубликованных демо-объявлений есть.
+VEHICLE_WORDS = ('автомоб', 'самосвал', 'кран', 'манипулятор', 'грузов', 'тягач', 'автобус',
+                 'фургон', 'газел', 'трактор', 'прицеп', 'мотоцикл', 'квадроцикл')
+SELLERS = ['ООО «СибТехТорг»', 'ООО «Агротехника-Центр»', 'дилер «Ростсельмаш»',
+           'ООО «Спецмаш-Урал»', 'ООО «ТехноПарк Поволжье»', 'завод-изготовитель']
+WEAR = ['царапины и потёртости корпуса', 'пробег до 5 000 км в месяц',
+        'износ режущих частей, заточка за проектом', 'следы работы, без поломок',
+        'моточасы по счётчику, до 150 в месяц']
+
+
+def fill_term_checks(env):
+    """Дозаполняет то, без чего объявление теперь не опубликовать; написанное
+    человеком не трогает, повторный запуск ничего не меняет."""
+    if 'coop.resource.term' not in env or 'seller_name' not in env['coop.resource.term']._fields:
+        return 0
+    Term = env['coop.resource.term'].sudo()
+    fixed = 0
+    for term in Term.search([]):
+        resource = term.resource_id
+        if resource.listing_type == 'request':
+            continue
+        rnd = random.Random("checks:%s:%s" % (resource.id, term.code))
+        company = resource.owner_id.is_company
+        name = (resource.name or '').lower()
+        vals = {}
+        if term.code == 'sale' and company:
+            if not term.documents or term.documents == 'none':
+                vals['documents'] = rnd.choice(['upd', 'upd', 'upd', 'receipt', 'act'])
+            if not term.vat:
+                vals['vat'] = rnd.choice(['none', 'none', '22', '22', '5', '7'])
+        elif term.code == 'rent' and term.operator in ('yes', 'option') and not term.is_vehicle:
+            vals['is_vehicle'] = 'yes' if any(w in name for w in VEHICLE_WORDS) else 'no'
+        elif term.code == 'leasing' and term.lessor == 'self' and not term.seller_name:
+            vals['seller_name'] = rnd.choice(SELLERS)
+        elif term.code == 'installment' and not (term.months > 0 and term.pay_every):
+            vals = {'months': term.months or rnd.choice([3, 6, 12]), 'pay_every': term.pay_every or 'month'}
+        elif term.code == 'project' and term.contribution == 'use':
+            base = term.price or resource.price or 60000
+            if not term.months:
+                vals['months'] = rnd.choice([3, 6, 12])
+            if not term.use_rate:
+                vals['use_rate'] = _money(base * rnd.choice([0.03, 0.04, 0.05]), 100) or 1000
+            if not term.repairs:
+                vals['repairs'] = rnd.choice(['project', 'project', 'owner'])
+            if not term.wear:
+                vals['wear'] = rnd.choice(WEAR)
+            if not term.loss:
+                vals['loss'] = rnd.choice(['compensate', 'compensate', 'own'])
+        elif term.code == 'free' and term.free_to == 'org' and not term.price:
+            vals['price'] = _money(rnd.randint(3, 60) * 1000, 500)
+        elif term.code == 'barter' and company and not term.price and term.price_kind != 'none':
+            vals['price'] = _money(rnd.randint(5, 120) * 1000, 500)
+        if vals:
+            term.write(vals)
+            fixed += 1
+    if fixed:
+        _logger.info('Ресурсы: условия дозаполнены под проверки публикации у %s строк', fixed)
+    return fixed

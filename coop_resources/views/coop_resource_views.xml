@@ -600,6 +600,7 @@
                   <!-- Способы — вкладками, условия — внутри вкладки
                        (владелец 27.10.2026: «как в браузере вкладками … и в
                        конце + … ни каких таблиц»). -->
+                  <field name="owner_is_company" invisible="1"/>
                   <field name="method_ids" invisible="1"/>
                   <field name="term_ids" widget="coop_method_tabs" nolabel="1">
                     <list>
@@ -641,6 +642,13 @@
                       <field name="surcharge_amount"/>
                       <field name="free_mode"/>
                       <field name="free_to"/>
+                      <field name="vat"/>
+                      <field name="is_vehicle"/>
+                      <field name="seller_name"/>
+                      <field name="use_rate"/>
+                      <field name="repairs"/>
+                      <field name="wear"/>
+                      <field name="loss"/>
                     </list>
                   </field>
                   <div class="d-flex align-items-center gap-2">
