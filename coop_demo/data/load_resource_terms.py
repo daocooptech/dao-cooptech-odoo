@@ -8,8 +8,10 @@
 Заполняются только пустые строки: то, что написал человек, не трогаем, и
 повторный запуск ничего не меняет.
 """
+import datetime
 import logging
 import random
+import re
 
 _logger = logging.getLogger(__name__)
 
@@ -146,3 +148,142 @@ def fill_resource_terms(env):
     if filled:
         _logger.info('Ресурсы: условия по способам заполнены у %s строк', filled)
     return filled
+
+
+# Поля способов (решение 629): то, что написал бы владелец объявления. Около
+# каждой седьмой строки оставляем без подробностей — так и бывает.
+WARRANTY = ['6 месяцев', '1 год', '3 месяца', '2 года', '14 дней на проверку']
+LONG_DISCOUNT = ['от недели — 10 %', 'от месяца — 15 %', 'от трёх дней — 5 %', 'от месяца — 20 %']
+OPERATOR_WORDS = ('экскаватор', 'погрузчик', 'трактор', 'кран', 'манипулятор', 'самосвал',
+                  'бульдозер', 'автовышк', 'каток', 'грейдер', 'фронтальн')
+LESSORS = ['«Сбербанк Лизинг»', '«Европлан»', '«Росагролизинг»', '«Балтийский лизинг»',
+           '«Альфа-Лизинг»', '«Газпромбанк Автолизинг»']
+SCOPES = ['любые', 'стройка и ремонт', 'фермерские проекты', 'проекты кооператива',
+          'мастерские и производство', 'в своём городе', 'экологические проекты']
+
+
+def _first_int(text, default=0):
+    found = re.findall(r'\d+', text or '')
+    if not found:
+        return default
+    numbers = [int(n) for n in found[:2]]
+    return round(sum(numbers) / len(numbers))
+
+
+def fill_term_details(env):
+    """Заполняет поля способов у строк, где их ещё нет; повторный запуск
+    ничего не меняет, написанное человеком не трогает."""
+    if 'coop.resource.term' not in env or 'months' not in env['coop.resource.term']._fields:
+        return 0
+    Term = env['coop.resource.term'].sudo()
+    today = datetime.date.today()
+    filled = 0
+    for term in Term.search([]):
+        if any(term[f] for f in ('min_qty', 'prepay_pct', 'warranty', 'documents', 'max_term',
+                                 'operator', 'included', 'available_from', 'months', 'ownership',
+                                 'lessor', 'contribution', 'expect', 'surcharge', 'free_mode')):
+            continue
+        rnd = random.Random("details:%s:%s" % (term.resource_id.id, term.code))
+        if rnd.random() < 0.14:
+            continue
+        resource = term.resource_id
+        request = resource.listing_type == 'request'
+        name = (resource.name or '').lower()
+        is_org = bool(resource.owner_id.is_company) if 'is_company' in resource.owner_id._fields else False
+        code = term.code
+        vals = {}
+        if code == 'sale':
+            unit = (term.price_unit_label or '').lower()
+            bulk = unit in ('кг', 'т', 'м³', 'м²', 'м', 'шт.', 'шт', 'мешок', 'литр', 'л')
+            if bulk and rnd.random() < 0.6:
+                vals['min_qty'] = rnd.choice([5, 10, 20, 50, 100])
+                if not request and term.price and rnd.random() < 0.5:
+                    vals['bulk_qty'] = vals['min_qty'] * rnd.choice([5, 10])
+                    vals['bulk_price'] = _money(term.price * rnd.choice([0.85, 0.9, 0.93]), 10)
+            if rnd.random() < 0.35:
+                vals['prepay_pct'] = rnd.choice([30, 50, 100])
+            if not request and resource.resource_type in ('material', 'equipment') and rnd.random() < 0.4 \
+                    and resource.condition != 'used':
+                vals['warranty'] = rnd.choice(WARRANTY)
+            vals['documents'] = 'upd' if is_org and rnd.random() < 0.8 else \
+                rnd.choice(['receipt', 'receipt', 'none'])
+        elif code == 'rent':
+            heavy = any(w in name for w in OPERATOR_WORDS)
+            if heavy:
+                vals['operator'] = rnd.choice(['yes', 'option', 'no'])
+                vals['included'] = rnd.choice(['топливо', 'топливо, доставка', 'доставка', False])
+            elif rnd.random() < 0.4:
+                vals['included'] = rnd.choice(['расходники', 'доставка', 'расходники, доставка'])
+            if not request and rnd.random() < 0.5:
+                monthly = (term.price_unit_label or '') == 'месяц'
+                vals['max_term'] = rnd.choice(['год', '11 месяцев', '3 года']) if monthly \
+                    else rnd.choice(['2 недели', 'месяц', '2 месяца'])
+            if rnd.random() < 0.55:
+                vals['available_from'] = today + datetime.timedelta(
+                    days=rnd.choice([0, 1, 3, 7, 10, 14, 21, 30, 45]))
+            if not request and rnd.random() < 0.3:
+                vals['long_discount'] = rnd.choice(LONG_DISCOUNT)
+        elif code == 'installment':
+            vals = {'months': _first_int(term.min_term, 6) or 6,
+                    'down_pct': _first_int(term.note, 20),
+                    'pay_every': 'month' if rnd.random() < 0.85 else rnd.choice(['week', 'quarter']),
+                    'markup_pct': 0 if rnd.random() < 0.6 else rnd.choice([3, 5, 8, 10]),
+                    'ownership': 'end' if rnd.random() < 0.6 else 'now'}
+        elif code == 'leasing':
+            months = _first_int(term.min_term, 24) or 24
+            partner = 'компани' in (term.note or '') or rnd.random() < 0.5
+            vals = {'months': months, 'down_pct': _first_int(term.note, 15),
+                    'markup_pct': rnd.choice([8, 10, 12, 15]),
+                    'buyout': _money((term.price or 0) * rnd.choice([0.01, 0.05, 0.1]), 1000),
+                    'insurance': rnd.choice(['lessee', 'lessee', 'lessor'])}
+            if not request:
+                vals['lessor'] = 'partner' if partner else 'self'
+                if partner:
+                    vals['lessor_name'] = rnd.choice(LESSORS)
+        elif code == 'project':
+            vals = {'contribution': 'use' if 'возврат' in (term.note or '') or rnd.random() < 0.4
+                    else 'own',
+                    'expect': rnd.choice(['share', 'share', 'product', 'costs']),
+                    'project_scope': rnd.choice(SCOPES)}
+        elif code == 'barter':
+            roll = rnd.random()
+            vals['surcharge'] = 'none' if roll < 0.6 else ('pay' if roll < 0.8 else 'want')
+            if vals['surcharge'] != 'none':
+                vals['surcharge_amount'] = _money(max(500, (term.price or 20000) * rnd.choice([0.1, 0.2, 0.3])), 500)
+        elif code == 'free':
+            vals = {'free_mode': 'loan' if rnd.random() < 0.2 else 'forever'}
+            if not request:
+                vals['free_to'] = rnd.choice(['any', 'any', 'any', 'org', 'project'])
+        if vals:
+            term.write(vals)
+            filled += 1
+    filled += tidy_term_details(env)
+    if filled:
+        _logger.info('Ресурсы: поля способов заполнены у %s строк', filled)
+    return filled
+
+
+GENERATED_NOTES = {note for _len, note in INSTALLMENT + LEASING}
+
+
+def tidy_term_details(env):
+    """Текст первого наполнения повторял то, что теперь в полях: «первый
+    взнос 30 %», «аванс 20 %, через лизинговую компанию», «с оператором —
+    за доплату». Снимает только такой текст; написанное человеком — нет."""
+    Term = env['coop.resource.term'].sudo()
+    tidied = 0
+    for term in Term.search([('code', 'in', ('installment', 'leasing')), ('months', '>', 0)]):
+        vals = {}
+        if term.min_term:
+            vals['min_term'] = False
+        if term.note in GENERATED_NOTES:
+            vals['note'] = False
+        if vals:
+            term.write(vals)
+            tidied += 1
+    plain = [n for n in RENT_NOTES if 'оператор' not in n]
+    for term in Term.search([('code', '=', 'rent'), ('operator', '!=', False),
+                             ('note', '=', 'с оператором — за доплату')]):
+        term.note = random.Random("tidy:%s" % term.resource_id.id).choice(plain)
+        tidied += 1
+    return tidied

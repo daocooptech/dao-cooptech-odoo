@@ -612,6 +612,35 @@
                       <field name="min_term"/>
                       <field name="note"/>
                       <field name="currency_id"/>
+                      <!-- Поля способов — решение 629. -->
+                      <field name="min_qty"/>
+                      <field name="bulk_qty"/>
+                      <field name="bulk_price"/>
+                      <field name="prepay_pct"/>
+                      <field name="warranty"/>
+                      <field name="documents"/>
+                      <field name="max_term"/>
+                      <field name="operator"/>
+                      <field name="included"/>
+                      <field name="available_from"/>
+                      <field name="long_discount"/>
+                      <field name="down_pct"/>
+                      <field name="months"/>
+                      <field name="pay_every"/>
+                      <field name="markup_pct"/>
+                      <field name="ownership"/>
+                      <field name="buyout"/>
+                      <field name="payment_manual"/>
+                      <field name="lessor"/>
+                      <field name="lessor_name"/>
+                      <field name="insurance"/>
+                      <field name="contribution"/>
+                      <field name="expect"/>
+                      <field name="project_scope"/>
+                      <field name="surcharge"/>
+                      <field name="surcharge_amount"/>
+                      <field name="free_mode"/>
+                      <field name="free_to"/>
                     </list>
                   </field>
                   <div class="d-flex align-items-center gap-2">

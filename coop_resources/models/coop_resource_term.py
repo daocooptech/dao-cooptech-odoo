@@ -40,27 +40,216 @@ class CoopResourceTerm(models.Model):
     deposit = fields.Monetary(string='Залог')
     min_term = fields.Char(string='Срок', help='Минимальный срок аренды, рассрочки, лизинга.')
     note = fields.Char(string='Условия')
+
+    # Свои поля у каждого способа — решение 629, владелец 27.10.2026:
+    # «продумай какие данные нужно вносить во вкладках продажа, аренда,
+    # лизинг и тд.» Пустое не показывается (Н6), поэтому у выборов нет
+    # значения по умолчанию, кроме периодичности платежей.
+    # Продажа
+    min_qty = fields.Float(string='Наименьшая партия')
+    bulk_qty = fields.Float(string='Опт от')
+    bulk_price = fields.Monetary(string='Оптовая цена')
+    prepay_pct = fields.Integer(string='Предоплата, %')
+    warranty = fields.Char(string='Гарантия')
+    documents = fields.Selection([
+        ('none', 'без документов'),
+        ('receipt', 'чек'),
+        ('upd', 'УПД'),
+    ], string='Документы')
+    # Аренда
+    max_term = fields.Char(string='Наибольший срок')
+    operator = fields.Selection([
+        ('no', 'без оператора'),
+        ('yes', 'с оператором'),
+        ('option', 'оператор за доплату'),
+    ], string='Оператор')
+    included = fields.Char(string='Входит в цену', help='Метки через запятую: топливо, расходники, доставка.')
+    available_from = fields.Date(string='Свободно с')
+    long_discount = fields.Char(string='Скидка за длинный срок')
+    # Рассрочка и лизинг
+    down_pct = fields.Float(string='Первый взнос, %')
+    months = fields.Integer(string='Срок, месяцев')
+    pay_every = fields.Selection([
+        ('week', 'раз в неделю'),
+        ('month', 'раз в месяц'),
+        ('quarter', 'раз в квартал'),
+    ], string='Платежи', default='month')
+    markup_pct = fields.Float(string='Наценка, %')
+    ownership = fields.Selection([
+        ('now', 'сразу'),
+        ('end', 'после последнего платежа'),
+    ], string='Право собственности переходит')
+    buyout = fields.Monetary(string='Выкупная стоимость')
+    payment_manual = fields.Monetary(string='Платёж в месяц, вручную')
+    lessor = fields.Selection([
+        ('self', 'я сам'),
+        ('partner', 'партнёрская лизинговая компания'),
+    ], string='Лизингодатель')
+    lessor_name = fields.Char(string='Лизинговая компания')
+    insurance = fields.Selection([
+        ('lessee', 'лизингополучатель'),
+        ('lessor', 'лизингодатель'),
+        ('none', 'без страховки'),
+    ], string='Страховку платит')
+    payment = fields.Monetary(string='Платёж за период', compute='_compute_payment')
+    total = fields.Monetary(string='Всего заплатить', compute='_compute_payment')
+    # Участие в проекте
+    contribution = fields.Selection([
+        ('own', 'насовсем в проект'),
+        ('use', 'в пользование на срок проекта'),
+    ], string='Как вношу')
+    expect = fields.Selection([
+        ('share', 'долю'),
+        ('product', 'часть продукции'),
+        ('costs', 'возмещение расходов'),
+    ], string='Что жду взамен')
+    project_scope = fields.Char(string='В какие проекты')
+    # Обмен
+    surcharge = fields.Selection([
+        ('none', 'без доплаты'),
+        ('pay', 'готов доплатить'),
+        ('want', 'жду доплату'),
+    ], string='Доплата')
+    surcharge_amount = fields.Monetary(string='Сумма доплаты')
+    # Безвозмездно
+    free_mode = fields.Selection([
+        ('forever', 'насовсем'),
+        ('loan', 'на время, с возвратом'),
+    ], string='Отдаю')
+    free_to = fields.Selection([
+        ('any', 'любому'),
+        ('org', 'организациям'),
+        ('project', 'проектам'),
+    ], string='Кому')
+
     summary = fields.Char(string='Кратко', compute='_compute_summary')
 
     _one_per_method = models.Constraint('unique(resource_id, method_id)',
                                         'Условия этого способа уже есть.')
 
-    @api.depends('price', 'price_kind', 'price_unit_label', 'deposit', 'min_term', 'note', 'method_id')
+    PERIODS_PER_MONTH = {'week': 52 / 12, 'month': 1, 'quarter': 1 / 3}
+
+    @api.depends('code', 'price', 'down_pct', 'months', 'pay_every', 'markup_pct',
+                 'buyout', 'payment_manual')
+    def _compute_payment(self):
+        """Рассрочка: остаток после первого взноса с наценкой — равными
+        платежами. Лизинг: стоимость без аванса и выкупа с удорожанием —
+        по месяцам; платёж, введённый вручную, главнее расчётного."""
+        for term in self:
+            payment = total = 0.0
+            if term.code in ('installment', 'leasing') and term.price and term.months > 0:
+                down = term.price * (term.down_pct or 0) / 100
+                markup = 1 + (term.markup_pct or 0) / 100
+                if term.code == 'installment':
+                    periods = max(1, round(term.months * self.PERIODS_PER_MONTH[term.pay_every or 'month']))
+                    rest = (term.price - down) * markup
+                    payment = rest / periods
+                    total = down + rest
+                else:
+                    payment = term.payment_manual or \
+                        max(0.0, term.price - down - (term.buyout or 0)) * markup / term.months
+                    total = down + payment * term.months + (term.buyout or 0)
+            term.payment = round(payment)
+            term.total = round(total)
+
+    @staticmethod
+    def _rub(value):
+        return '{:,.0f} ₽'.format(value).replace(',', ' ')
+
+    @staticmethod
+    def _qty(value):
+        return ('%g' % value).replace('.', ',')
+
+    def _label(self, name):
+        return dict(self._fields[name]._description_selection(self.env)).get(self[name])
+
+    @api.depends('price', 'price_kind', 'price_unit_label', 'deposit', 'min_term', 'note', 'method_id',
+                 'min_qty', 'bulk_qty', 'bulk_price', 'prepay_pct', 'warranty', 'documents',
+                 'max_term', 'operator', 'included', 'available_from', 'long_discount',
+                 'down_pct', 'months', 'pay_every', 'markup_pct', 'ownership', 'buyout',
+                 'payment_manual', 'lessor', 'lessor_name', 'insurance', 'contribution', 'expect',
+                 'project_scope', 'surcharge', 'surcharge_amount', 'free_mode', 'free_to')
     def _compute_summary(self):
         prefix = {'from': 'от ', 'to': 'до ', 'exact': ''}
         for term in self:
             parts = []
+            code = term.code
+            if code == 'barter' and term.note:
+                parts.append('взамен: %s' % term.note)
             if term.price_kind == 'none':
                 parts.append('по договорённости')
             elif term.price:
-                amount = prefix.get(term.price_kind, '') + '{:,.0f} ₽'.format(term.price).replace(',', ' ')
+                amount = prefix.get(term.price_kind, '') + term._rub(term.price)
                 parts.append('%s за %s' % (amount, term.price_unit_label)
                              if term.price_unit_label else amount)
+            if code == 'sale':
+                if term.min_qty:
+                    parts.append('партия от %s' % term._qty(term.min_qty))
+                if term.bulk_qty and term.bulk_price:
+                    parts.append('опт от %s — %s' % (term._qty(term.bulk_qty), term._rub(term.bulk_price)))
+                if term.prepay_pct:
+                    parts.append('предоплата %s %%' % term.prepay_pct)
+                if term.warranty:
+                    parts.append('гарантия %s' % term.warranty)
+                if term.documents:
+                    parts.append(term._label('documents'))
             if term.deposit:
-                parts.append('залог {:,.0f} ₽'.format(term.deposit).replace(',', ' '))
-            if term.min_term:
-                parts.append('срок %s' % term.min_term)
-            if term.note:
+                parts.append('залог %s' % term._rub(term.deposit))
+            # У рассрочки и лизинга срок — в месяцах (`months`); прежний
+            # текстовый срок показываем, только пока месяцев нет.
+            min_term = term.min_term if not (code in ('installment', 'leasing') and term.months) else False
+            if min_term and term.max_term:
+                parts.append('срок %s – %s' % (min_term, term.max_term))
+            elif min_term:
+                parts.append('срок %s' % min_term)
+            elif term.max_term:
+                parts.append('срок не больше: %s' % term.max_term)
+            if code == 'rent':
+                if term.operator:
+                    parts.append(term._label('operator'))
+                if term.included:
+                    parts.append('в цене: %s' % term.included)
+                if term.available_from:
+                    parts.append('свободно с %s' % term.available_from.strftime('%d.%m.%Y'))
+                if term.long_discount:
+                    parts.append('скидка: %s' % term.long_discount)
+            if code in ('installment', 'leasing'):
+                if term.down_pct:
+                    parts.append('%s %g %%' % ('первый взнос' if code == 'installment' else 'аванс',
+                                               term.down_pct))
+                if term.months:
+                    parts.append('на %s мес.' % term.months)
+                if term.payment:
+                    every = 'в месяц' if code == 'leasing' else \
+                        {'week': 'в неделю', 'quarter': 'в квартал'}.get(term.pay_every, 'в месяц')
+                    parts.append('%s %s' % (term._rub(term.payment), every))
+                if code == 'installment':
+                    parts.append('без наценки' if not term.markup_pct else 'наценка %g %%' % term.markup_pct)
+                    if term.ownership:
+                        parts.append('право собственности — %s' % term._label('ownership'))
+                else:
+                    if term.buyout:
+                        parts.append('выкуп %s' % term._rub(term.buyout))
+                    if term.lessor == 'partner':
+                        parts.append('через %s' % (term.lessor_name or 'лизинговую компанию'))
+                    if term.insurance:
+                        parts.append('страховка — %s' % term._label('insurance'))
+            if code == 'project':
+                if term.contribution:
+                    parts.append(term._label('contribution'))
+                if term.expect:
+                    parts.append('взамен — %s' % term._label('expect'))
+                if term.project_scope:
+                    parts.append('проекты: %s' % term.project_scope)
+            if code == 'barter' and term.surcharge in ('pay', 'want'):
+                parts.append(term._label('surcharge') + (
+                    ' %s' % term._rub(term.surcharge_amount) if term.surcharge_amount else ''))
+            if code == 'free':
+                if term.free_mode:
+                    parts.append(term._label('free_mode'))
+                if term.free_to:
+                    parts.append(term._label('free_to'))
+            if term.note and code != 'barter':
                 parts.append(term.note)
             term.summary = '; '.join(parts)
 
@@ -106,8 +295,11 @@ class CoopResource(models.Model):
         по-прежнему читают `price` объявления — оно заполняется отсюда.
         """
         for resource in self:
+            # Оценка дара — для учёта, не цена: «Безвозмездно» на карточке
+            # с суммой читалось бы как продажа.
             priced = resource.term_ids.filtered(
-                lambda t: t.price or t.price_kind == 'none').sorted('sequence')[:1]
+                lambda t: t.code != 'free' and (t.price or t.price_kind == 'none')
+            ).sorted('sequence')[:1]
             if not priced:
                 continue
             values = {}

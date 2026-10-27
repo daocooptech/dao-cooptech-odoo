@@ -366,7 +366,8 @@
   border-radius: 0 var(--coop-radius-item) var(--coop-radius-item) var(--coop-radius-item);
   background: var(--coop-white);
 
-  input.o_input {
+  input.o_input,
+  select.o_input {
     width: 100%;
     min-height: 40px;
     padding: 8px 10px;
@@ -383,4 +384,37 @@
     font: 500 12.5px/1.4 'Manrope', sans-serif;
     color: var(--coop-ink);
   }
+}
+
+// Поля вкладки по способу (решение 629): выборы и метки — во всю ширину.
+.coop-mtabs_grid:empty { display: none; }
+.coop-mtabs_wide { grid-column: 1 / -1; }
+.coop-mtabs_chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.coop-mtabs_chip {
+  padding: 6px 12px;
+  border: 1px solid var(--coop-line-strong);
+  border-radius: 999px;
+  background: var(--coop-white);
+  font: 500 12.5px/1.2 'Inter', sans-serif;
+  color: var(--coop-ink);
+  cursor: pointer;
+
+  &:hover { border-color: var(--coop-teal); }
+}
+.coop-mtabs_chip_on {
+  border-color: var(--coop-teal);
+  background: var(--coop-teal-tint);
+  color: var(--coop-teal-dark);
+}
+.coop-mtabs_calc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  padding: 10px 12px;
+  border-radius: var(--coop-radius-control);
+  background: var(--coop-surface);
+  font: 400 13px/1.4 'Inter', sans-serif;
+  color: var(--coop-slate);
+
+  b { font-weight: 600; color: var(--coop-ink); }
 }

@@ -43,7 +43,7 @@
       <div class="coop-mtabs_panel" t-if="this.current">
         <t t-set="lay" t-value="this.layout"/>
         <div class="coop-add_field" t-if="lay.noteFirst">
-          <label t-out="lay.note"/>
+          <label t-out="this.noteLabel"/>
           <input class="o_input" type="text" t-att-value="this.value('note')"
                  t-att-readonly="this.props.readonly"
                  t-on-change="(ev) => this.onInput('note', ev)"/>
@@ -59,38 +59,83 @@
             </t>
           </div>
         </div>
-        <div class="coop-add_pair" t-if="lay.price and this.priceKind !== 'none'">
+        <div class="coop-add_pair" t-if="(lay.price and this.priceKind !== 'none') or lay.estimate">
           <div class="coop-add_field">
-            <label t-out="lay.price"/>
+            <label t-out="this.priceLabel"/>
             <input class="o_input" type="text" inputmode="decimal" t-att-value="this.value('price')"
                    t-att-readonly="this.props.readonly"
                    t-on-change="(ev) => this.onInput('price', ev)"/>
           </div>
           <div class="coop-add_field" t-if="lay.unit">
             <label>За что</label>
-            <input class="o_input" type="text" placeholder="шт., кг, сутки, месяц"
+            <input class="o_input" type="text" t-att-placeholder="lay.unit"
                    t-att-value="this.value('price_unit_label')"
                    t-att-readonly="this.props.readonly"
                    t-on-change="(ev) => this.onInput('price_unit_label', ev)"/>
           </div>
+          <div class="coop-add_field" t-if="lay.period">
+            <label>За период</label>
+            <select class="o_input" t-att-disabled="this.props.readonly"
+                    t-on-change="(ev) => this.onInput('price_unit_label', ev)">
+              <option value="" t-att-selected="!this.value('price_unit_label')">—</option>
+              <t t-foreach="this.rentPeriods" t-as="period" t-key="period">
+                <option t-att-value="period" t-att-selected="this.value('price_unit_label') === period"
+                        t-out="period"/>
+              </t>
+              <!-- Своя единица у старых объявлений («смена», «выходные») не теряется. -->
+              <option t-if="this.value('price_unit_label') and !this.rentPeriods.includes(this.value('price_unit_label'))"
+                      t-att-value="this.value('price_unit_label')" selected="selected"
+                      t-out="this.value('price_unit_label')"/>
+            </select>
+          </div>
         </div>
-        <div class="coop-add_row" t-if="lay.deposit or lay.term">
-          <div class="coop-add_field" t-if="lay.deposit">
-            <label>Залог, ₽</label>
-            <input class="o_input" type="text" inputmode="decimal" t-att-value="this.value('deposit')"
-                   t-att-readonly="this.props.readonly"
-                   t-on-change="(ev) => this.onInput('deposit', ev)"/>
-          </div>
-          <div class="coop-add_field" t-if="lay.term">
-            <label t-out="lay.term"/>
-            <input class="o_input" type="text" placeholder="Например, 3 дня"
-                   t-att-value="this.value('min_term')"
-                   t-att-readonly="this.props.readonly"
-                   t-on-change="(ev) => this.onInput('min_term', ev)"/>
-          </div>
+        <p class="coop-add_help" t-if="lay.help" t-out="lay.help"/>
+        <div class="coop-add_field" t-if="lay.deposit and !this.isRequest">
+          <label>Залог, ₽</label>
+          <input class="o_input" type="text" inputmode="decimal" t-att-value="this.value('deposit')"
+                 t-att-readonly="this.props.readonly"
+                 t-on-change="(ev) => this.onInput('deposit', ev)"/>
+        </div>
+        <div class="coop-add_row coop-mtabs_grid">
+          <t t-foreach="this.extraFields" t-as="field" t-key="field.name">
+            <div class="coop-add_field"
+                 t-att-class="{ 'coop-mtabs_wide': ['seg', 'chips'].includes(field.kind) }">
+              <label t-out="field.label"/>
+              <div class="coop-seg" t-if="field.kind === 'seg'">
+                <t t-foreach="field.opt.options" t-as="choice" t-key="choice[0]">
+                  <button type="button" class="coop-seg_item"
+                          t-att-class="{ 'coop-seg_on': this.value(field.name) === choice[0] }"
+                          t-att-disabled="this.props.readonly"
+                          t-on-click="() => this.setChoice(field.name, choice[0])" t-out="choice[1]"/>
+                </t>
+              </div>
+              <div class="coop-mtabs_chips" t-elif="field.kind === 'chips'">
+                <t t-foreach="this.chips(field)" t-as="chip" t-key="chip.option">
+                  <button type="button" class="coop-mtabs_chip"
+                          t-att-class="{ 'coop-mtabs_chip_on': chip.on }"
+                          t-att-aria-pressed="chip.on ? 'true' : 'false'"
+                          t-att-disabled="this.props.readonly"
+                          t-on-click="() => this.toggleChip(field, chip.option)" t-out="chip.option"/>
+                </t>
+              </div>
+              <input t-else="" class="o_input"
+                     t-att-type="field.kind === 'date' ? 'date' : 'text'"
+                     t-att-inputmode="['num', 'int', 'pct', 'money'].includes(field.kind) ? 'decimal' : undefined"
+                     t-att-placeholder="field.opt.ph"
+                     t-att-value="this.inputValue(field)"
+                     t-att-readonly="this.props.readonly"
+                     t-on-change="(ev) => this.onInput(field.name, ev)"/>
+            </div>
+          </t>
+        </div>
+        <div class="coop-mtabs_calc" t-if="this.calc">
+          <t t-set="calc" t-value="this.calc"/>
+          <span>Платёж: <b t-out="calc.payment"/> <t t-out="calc.every"/></span>
+          <span>Сразу: <b t-out="calc.down"/></span>
+          <span>Всего: <b t-out="calc.total"/></span>
         </div>
         <div class="coop-add_field" t-if="!lay.noteFirst">
-          <label t-out="lay.note"/>
+          <label t-out="this.noteLabel"/>
           <input class="o_input" type="text" t-att-value="this.value('note')"
                  t-att-readonly="this.props.readonly"
                  t-on-change="(ev) => this.onInput('note', ev)"/>
