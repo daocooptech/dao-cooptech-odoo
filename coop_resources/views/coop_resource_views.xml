@@ -224,12 +224,15 @@
           <button name="%(action_coop_resource_promote)d" type="action"
                   string="Продвинуть" invisible="state != 'published' or not coop_can_edit"
                   context="{'default_resource_id': id}"/>
-          <button name="action_close" type="object" string="Закрыть"
-                  invisible="state == 'closed' or not coop_can_edit"/>
+          <button name="action_close" type="object" string="Закрыть объявление"
+                  invisible="state == 'closed' or not coop_can_edit"
+                  confirm="Закрыть объявление? Из каталога оно пропадёт, сделки останутся."
+                  help="Из каталога пропадёт, сделки останутся."/>
           <!-- Править — страницей размещения: на витрине пустые блоки
                скрыты, и дописать там нечего (владелец 27.10.2026). -->
           <button name="action_edit_listing" type="object" string="Изменить объявление"
                   invisible="not coop_can_edit"/>
+          <field name="coop_role_label" invisible="not coop_role_label"/>
           <field name="state" widget="statusbar"
                  statusbar_visible="draft,published,closed"
                  invisible="not coop_can_edit"/>

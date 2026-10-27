@@ -207,15 +207,21 @@
           <button name="action_launch" type="object" string="Запустить"
                   class="btn-primary" invisible="state != 'gathering'"/>
           <button name="action_finish" type="object" string="Завершить"
-                  invisible="state != 'running'"/>
+                  class="btn-primary" invisible="state != 'running'"/>
           <button name="action_resume" type="object" string="Возобновить"
                   class="btn-primary" invisible="state != 'frozen'"/>
           <button name="action_fail" type="object" string="Сбор не удался"
                   invisible="state != 'gathering'"/>
           <button name="action_freeze" type="object" string="Заморозить"
                   invisible="state not in ('gathering', 'running')"/>
-          <button name="action_cancel" type="object" string="Отменить"
-                  invisible="state in ('done', 'cancelled')"/>
+          <!-- Необратимое — в меню «⋯» шапки записи: туда уходит кнопка
+               с подтверждением, пояснение берётся из `help`. -->
+          <button name="action_cancel" type="object" string="Отменить проект"
+                  invisible="state in ('done', 'cancelled')"
+                  confirm="Отменить проект? Он закроется совсем — открыть его снова будет нельзя."
+                  cancel-label="Не отменять"
+                  help="Проект закроется совсем — открыть его снова будет нельзя."/>
+          <field name="coop_role_label" invisible="not coop_role_label"/>
           <field name="state" widget="statusbar"
                  statusbar_visible="draft,gathering,running,done"/>
         </header>

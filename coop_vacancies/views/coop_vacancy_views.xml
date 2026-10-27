@@ -135,8 +135,11 @@
                   string="Перенести в набор персонала"
                   invisible="not is_mine or hr_job_id"
                   help="Для организаций, оформляющих человека по трудовому договору: в модуле «Найм» есть этапы отбора и переход в сотрудника."/>
-          <button name="action_close" type="object" string="Закрыть"
-                  invisible="state == 'closed'"/>
+          <button name="action_close" type="object" string="Закрыть вакансию"
+                  invisible="state == 'closed'"
+                  confirm="Закрыть вакансию? Из каталога она пропадёт, отклики останутся."
+                  help="Из каталога пропадёт, отклики останутся."/>
+          <field name="coop_role_label" invisible="not coop_role_label"/>
           <field name="state" widget="statusbar"
                  statusbar_visible="draft,published,closed"/>
         </header>

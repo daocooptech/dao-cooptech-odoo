@@ -96,6 +96,8 @@ class CoopVacancy(models.Model):
     _description = 'Вакансия'
     _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin']
     _coop_page_view = 'coop_vacancies.view_coop_vacancy_form'
+    _coop_role_field = 'partner_id'
+    _coop_role_text = 'Ваша вакансия'
     _order = 'create_date desc, id desc'
 
     name = fields.Char(string='Кто нужен', required=True, tracking=True)

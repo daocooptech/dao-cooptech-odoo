@@ -1,70 +1,295 @@
-// ── Steps — строка состояний записи ─────────────────────────────────────
+// ── Шапка записи — RecordHeader ─────────────────────────────────────────
 //
-// Эталон — `.claude/design-system/components/Steps` (решение 625):
-// пройденное — `coop-teal-tint` с галочкой, текущее — белая плашка с
-// границей `coop-teal` и жирной подписью, предстоящее — `coop-surface`.
-// Плашки ровные, без стрелок: до 27.10.2026 строка оставалась штатной
-// (стрелки на `clip-path` в рамке), и на витрине ресурса выпадала из вида.
+// Эталон — `.claude/design-system/components/RecordHeader` (решение 625,
+// компонент от 27.10.2026). Движок рисует над записью три полосы: путь
+// (`breadcrumb.js`), кнопки-счётчики (`oe_button_box`) и полосу формы
+// (`o_form_statusbar`: кнопки `<header>` и строка состояний). Здесь они
+// одеты по эталону:
+//
+// - полоса формы — одна белая плашка: слева метка роли («Вы инициатор»,
+//   поле `coop_role_label` в `<header>`), ход записи точками на линии,
+//   справа действия — одно главное (`btn-primary`), одно-два обычных,
+//   необратимое — в меню «⋯» (`record_header.js`);
+// - кнопки-счётчики — тихие пилюли: значок, подпись в одну строку,
+//   значение в капсуле. Это переходы, а не действия.
+//
+// Смотрящему без прав полоса не показывается (`showcase.scss`), и она не
+// липнет к верху (`backend.scss`, решение владельца 27.10.2026).
+
+// ── Ряд 2: полоса управления ───────────────────────────────────────────
+
+.o_form_view .o_form_statusbar {
+  // Движок разносит кнопки и ход по краям (`justify-content-between`,
+  // утилита с `!important`); по эталону ход стоит сразу за ролью.
+  justify-content: flex-start !important;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 12px;
+  padding: 8px 8px 8px 16px !important;
+  border: 1px solid var(--coop-line, #e6e6e1);
+  border-radius: var(--coop-radius-card, 10px);
+  background: var(--coop-white, #ffffff);
+
+  // Порядок по эталону: роль, ход, действия. В разметке движка кнопки
+  // идут первыми, поэтому порядок задаётся здесь.
+  > .o_field_widget[name="coop_role_label"] { order: 0; }
+  > .o_field_statusbar { order: 1; flex: 0 1 auto; min-width: 0; }
+  > .o_statusbar_buttons { order: 2; margin-left: auto; gap: 6px !important; }
+
+  .o_statusbar_buttons > .btn {
+    padding: 5px 12px;
+    font: 600 12.5px/1.3 'Manrope', sans-serif;
+  }
+}
+
+// Метка роли — капсула с щитом (Tabler `shield-check`).
+.o_form_view .o_form_statusbar > .o_field_widget[name="coop_role_label"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: auto;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--coop-teal-tint, #e3efed);
+  color: var(--coop-teal-dark, #0e4f4a);
+  font: 600 11px/1.2 'Manrope', sans-serif;
+  white-space: nowrap;
+
+  &::before {
+    content: "";
+    width: 14px;
+    height: 14px;
+    flex: none;
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M11.46 20.846a12 12 0 0 1 -7.96 -14.846a12 12 0 0 0 8.5 -3a12 12 0 0 0 8.5 3a12 12 0 0 1 -.09 7.06'/%3E%3Cpath d='M15 19l2 2l4 -4'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M11.46 20.846a12 12 0 0 1 -7.96 -14.846a12 12 0 0 0 8.5 -3a12 12 0 0 0 8.5 3a12 12 0 0 1 -.09 7.06'/%3E%3Cpath d='M15 19l2 2l4 -4'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+
+  span { white-space: nowrap; }
+}
+
+// ── Ход записи — точки на линии ────────────────────────────────────────
+//
+// Пройдено — залитая точка с галочкой, текущее — кольцо и жирная
+// подпись, предстоящее — пустая точка. До 28.10.2026 ход стоял крупными
+// плашками и спорил с кнопками за внимание; плашки (`Steps`) остаются
+// для экранов, где ход — главное.
 //
 // Разметка движка (`web.StatusBarField`): `.o_statusbar_status` >
 // `.o_arrow_button_wrap` > `button.o_arrow_button`, у текущего
 // `.o_arrow_button_current`. Ряд идёт `row-reverse`: первое в разметке —
-// последнее на экране, поэтому пройденные — соседи текущего *после* него.
+// последнее на экране. Поэтому пройденные — соседи текущего *после* него
+// в разметке, а линия слева от шага — у каждого шага, кроме последнего в
+// разметке (он на экране первый).
+
+// Галочка пройденного шага — белая, фоном поверх заливки точки.
+$coop-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5l10 -10'/%3E%3C/svg%3E");
 
 .o_form_view .o_field_statusbar > .o_statusbar_status {
-  gap: 4px;
+  align-items: center;
+  gap: 0;
   padding: 0;
   border: 0;
   border-radius: 0;
   background: transparent;
 
-  .o_arrow_button_wrap { margin: 0; }
+  .o_arrow_button_wrap {
+    display: flex;
+    align-items: center;
+    margin: 0;
+  }
+
+  // Линия к предыдущему шагу.
+  .o_arrow_button_wrap:not(:last-child)::before {
+    content: "";
+    width: 28px;
+    height: 2px;
+    margin: 0 8px;
+    border-radius: 1px;
+    background: var(--coop-line-strong, #d2d2cb);
+  }
 
   .o_arrow_button:not(.d-none) {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
     gap: 6px;
     margin: 0;
-    padding: 7px 12px;
-    border: 1px solid transparent;
-    border-radius: var(--coop-radius-item, 8px);
+    padding: 0;
+    border: 0;
+    border-radius: 0;
     clip-path: none;
-    background: var(--coop-surface, #f2f2ee);
+    background: transparent;
     color: var(--coop-slate, #4a4a44);
-    font: 500 12px/1.3 'Manrope', sans-serif;
+    font: 500 12.5px/1.2 'Manrope', sans-serif;
     white-space: nowrap;
     box-shadow: none;
 
-    &:not(:disabled):hover {
-      border-color: var(--coop-line-strong, #d2d2cb);
-    }
-
-    // Движок гасит недоступные плашки до `text-muted` — предстоящее
-    // по эталону набрано `coop-slate`.
-    &:disabled { color: var(--coop-slate, #4a4a44); }
-  }
-
-  .o_arrow_button_wrap:has(> .o_arrow_button_current) ~ .o_arrow_button_wrap > .o_arrow_button {
-    background: var(--coop-teal-tint, #e3efed);
-    color: var(--coop-teal-dark, #0e4f4a);
-
-    // Пройдено — галочкой, а не только цветом. Контур Tabler `check`.
+    // Точка.
     &::before {
       content: "";
-      width: 14px;
-      height: 14px;
       flex: none;
-      background: currentColor;
-      -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5l10 -10'/%3E%3C/svg%3E") center / contain no-repeat;
-      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5l10 -10'/%3E%3C/svg%3E") center / contain no-repeat;
+      box-sizing: border-box;
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid var(--coop-line-strong, #d2d2cb);
+      border-radius: 50%;
+      background: var(--coop-white, #ffffff);
+    }
+
+    &:not(:disabled):hover { color: var(--coop-ink, #14171a); }
+
+    // Движок гасит недоступные шаги до `text-muted` — предстоящее по
+    // эталону набрано `coop-slate`.
+    &:disabled { color: var(--coop-slate, #4a4a44); opacity: 1; }
+  }
+
+  // Пройдено.
+  .o_arrow_button_wrap:has(> .o_arrow_button_current) ~ .o_arrow_button_wrap > .o_arrow_button {
+    color: var(--coop-teal-dark, #0e4f4a);
+
+    &::before {
+      border-color: var(--coop-teal, #146b64);
+      background: var(--coop-teal, #146b64) $coop-check center / 10px no-repeat;
     }
   }
 
-  .o_arrow_button.o_arrow_button_current:disabled {
-    background: var(--coop-white, #ffffff);
-    border-color: var(--coop-teal, #146b64);
+  // Линия, идущая от пройденного шага, — цветная: это линия у текущего
+  // и у каждого пройденного, кроме первого на экране.
+  .o_arrow_button_wrap:has(> .o_arrow_button_current)::before,
+  .o_arrow_button_wrap:has(> .o_arrow_button_current) ~ .o_arrow_button_wrap::before {
+    background: var(--coop-teal, #146b64);
+  }
+
+  // Текущее.
+  .o_arrow_button.o_arrow_button_current {
     color: var(--coop-ink, #14171a);
     font-weight: 700;
+
+    &::before { border: 4.5px solid var(--coop-teal, #146b64); }
+  }
+}
+
+// ── Меню «⋯»: необратимое ─────────────────────────────────────────────
+
+.o_coop_rh_more.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 8px;
+}
+
+.o_coop_rh_menu.dropdown-menu {
+  min-width: 240px;
+  padding: 6px;
+  border: 1px solid var(--coop-line, #e6e6e1);
+  border-radius: var(--coop-radius-card, 10px);
+  background: var(--coop-white, #ffffff);
+  box-shadow: var(--coop-shadow-popover, 0 6px 18px rgba(0, 0, 0, .12));
+}
+
+.o_coop_rh_item.dropdown-item {
+  padding: 8px 10px;
+  border-radius: var(--coop-radius-item, 8px);
+  white-space: normal;
+
+  &:hover, &:focus { background: var(--coop-surface, #f2f2ee); }
+
+  .o_coop_rh_item_body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  // Сама кнопка записи — строкой меню, красной: действие необратимое.
+  .btn {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--coop-error-text, #8e2f2a);
+    font: 600 13px/1.3 'Manrope', sans-serif;
+    text-align: left;
+    box-shadow: none;
+  }
+
+  small {
+    font-size: 11.5px;
+    line-height: 1.4;
+    color: var(--coop-slate, #4a4a44);
+  }
+}
+
+// ── Ряд 1: кнопки-счётчики — пилюли ───────────────────────────────────
+
+.o_form_view .o-form-buttonbox {
+  gap: 6px;
+  flex-wrap: wrap;
+
+  .oe_stat_button.btn:not(:has(.o_button_more)) {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    min-height: 0;
+    padding: 0 12px;
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-radius: 999px;
+    background: var(--coop-white, #ffffff);
+    color: var(--coop-ink, #14171a);
+    font: 500 12.5px/1 'Manrope', sans-serif;
+    white-space: nowrap;
+
+    .o_button_icon { color: var(--coop-slate, #4a4a44); font-size: 16px; }
+
+    &:hover {
+      border-color: var(--coop-teal, #146b64);
+      .o_button_icon { color: var(--coop-teal-dark, #0e4f4a); }
+    }
+
+    // Подпись в одну строку, значение — в капсуле после неё. Подпись
+    // движок режет на несколько `o_stat_text` («Управление», «проектом»),
+    // значение стоит в разметке первым — порядок задаётся `order`.
+    .o_stat_info,
+    .o_field_widget.o_stat_info {
+      flex-direction: row;
+      align-items: center;
+      margin: 0;
+      line-height: 1;
+    }
+
+    .o_stat_text {
+      order: 0;
+      font: inherit;
+      color: inherit;
+      white-space: nowrap;
+
+      & + .o_stat_text { margin-left: .3em; }
+    }
+
+    .o_stat_value {
+      order: 1;
+      margin-left: 6px;
+      min-width: 18px;
+      padding: 3px 6px;
+      border-radius: 999px;
+      background: var(--coop-surface, #f2f2ee);
+      font: 600 11.5px/1 'JetBrains Mono', ui-monospace, monospace;
+      color: var(--coop-ink, #14171a);
+      text-align: center;
+    }
+  }
+}
+
+// Тёмная тема: капсула роли и пройденные шаги — на бирюзе по тёмному.
+[data-bs-theme="dark"] .o_web_client {
+  .o_form_view .o_form_statusbar > .o_field_widget[name="coop_role_label"] {
+    background: var(--coop-line);
+    color: var(--coop-teal);
+  }
+  .o_form_view .o_field_statusbar > .o_statusbar_status
+    .o_arrow_button_wrap:has(> .o_arrow_button_current) ~ .o_arrow_button_wrap > .o_arrow_button {
+    color: var(--coop-teal);
   }
 }

@@ -45,6 +45,24 @@ class CoopPageMixin(models.AbstractModel):
         for record in self:
             record.coop_can_edit = bool(record.id) and record.has_access('write')
 
+    # Метка роли в полосе управления записью («Вы инициатор», «Ваше
+    # объявление») — шапка записи по дизайн-системе (`RecordHeader`, 27.10.2026):
+    # сразу видно, почему здесь кнопки. Модель задаёт поле владельца и
+    # подпись; метку видит только тот, от чьего имени запись размещена, —
+    # администратору с правом правки она не положена, он не владелец.
+    _coop_role_field = ''
+    _coop_role_text = ''
+
+    coop_role_label = fields.Char(
+        string='Ваша роль', compute='_compute_coop_role_label')
+
+    @api.depends_context('uid')
+    def _compute_coop_role_label(self):
+        mine = self.env.user.coop_publisher_partner_ids
+        for record in self:
+            owner = record[record._coop_role_field] if record._coop_role_field else False
+            record.coop_role_label = record._coop_role_text if owner and owner in mine else False
+
     # Представление страницы по внешнему идентификатору. Пусто — движок
     # возьмёт форму по умолчанию. Задавать стоит везде, где у модели форм
     # больше одной: у ресурса их три, и страницей работает не любая.

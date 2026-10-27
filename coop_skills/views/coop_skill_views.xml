@@ -128,6 +128,7 @@
           <!-- Публикация, пауза и стадии — только разместившему
                (владелец 08.10.2026); остальным — «Написать» и контакты. -->
           <field name="coop_is_mine" invisible="1"/>
+          <field name="coop_role_label" invisible="not coop_role_label"/>
           <button name="action_publish" type="object" string="Опубликовать"
                   class="btn-primary" invisible="not coop_is_mine or state != 'draft'"/>
           <button name="action_publish" type="object" string="Возобновить"
