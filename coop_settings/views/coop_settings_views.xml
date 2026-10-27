@@ -199,7 +199,7 @@
                 <list create="false" delete="false">
                   <field name="name" width="190px"/>
                   <field name="condition" string="Что нужно, чтобы работало"/>
-                  <field name="cross_border" string="Международные"
+                  <field name="cross_border" string="Международные" width="130px"
                          widget="boolean_toggle"/>
                 </list>
               </field>

@@ -26,8 +26,10 @@
 
 // Названия способов расчёта — целиком, с переносом: «Валюта с
 // нерезидентом» обрезалось до «Валюта с…» (владелец 27.10.2026).
-.o_coop_settings .o_list_renderer .o_data_cell {
-  white-space: normal;
+// У движка `nowrap` на ячейке — правило с пятью `:not()`, и сам он
+// перебивает его для первой колонки через `!important`; так же и здесь.
+.o_coop_settings .o_list_renderer .o_data_row .o_data_cell.o_list_char {
+  white-space: normal !important;
   overflow-wrap: anywhere;
 }
 
