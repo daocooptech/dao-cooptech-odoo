@@ -48,7 +48,18 @@
                  t-att-readonly="this.props.readonly"
                  t-on-change="(ev) => this.onInput('note', ev)"/>
         </div>
-        <div class="coop-add_pair" t-if="lay.price">
+        <div class="coop-add_field" t-if="lay.price">
+          <label>Цена</label>
+          <div class="coop-seg coop-mtabs_kind">
+            <t t-foreach="this.priceKinds" t-as="kind" t-key="kind[0]">
+              <button type="button" class="coop-seg_item"
+                      t-att-class="{ 'coop-seg_on': this.priceKind === kind[0] }"
+                      t-att-disabled="this.props.readonly"
+                      t-on-click="() => this.setKind(kind[0])" t-out="kind[1]"/>
+            </t>
+          </div>
+        </div>
+        <div class="coop-add_pair" t-if="lay.price and this.priceKind !== 'none'">
           <div class="coop-add_field">
             <label t-out="lay.price"/>
             <input class="o_input" type="text" inputmode="decimal" t-att-value="this.value('price')"

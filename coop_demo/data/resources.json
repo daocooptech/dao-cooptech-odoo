@@ -35,7 +35,7 @@
   "promoted": false,
   "price_line": "от 380 ₽/тонна",
   "image": "photos/cement-bag.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "тонна",
   "owner": ""
  },
@@ -55,7 +55,7 @@
   "promoted": false,
   "price_line": "от 620 ₽/м.",
   "image": "photos/timber-beam.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "м.",
   "owner": ""
  },
@@ -74,7 +74,7 @@
   "promoted": false,
   "price_line": "от 58 ₽/шт.",
   "image": "photos/rebar-steel.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "шт.",
   "owner": ""
  },
@@ -93,7 +93,7 @@
   "promoted": false,
   "price_line": "от 1 800 ₽/сутки",
   "image": "photos/concrete-mixer.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "сутки",
   "owner": ""
  },
@@ -130,7 +130,7 @@
   "promoted": false,
   "price_line": "от 12 000 ₽/сутки",
   "image": "photos/excavator-work.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "сутки",
   "owner": ""
  },
@@ -149,7 +149,7 @@
   "promoted": false,
   "price_line": "от 890 ₽/м³",
   "image": "photos/wood-planks.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "м³",
   "owner": ""
  },
@@ -187,7 +187,7 @@
   "promoted": false,
   "price_line": "от 11 ₽/шт.",
   "image": "photos/brick-stack.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "шт.",
   "owner": ""
  },
@@ -223,7 +223,7 @@
   "promoted": false,
   "price_line": "от 4 900 ₽/м³",
   "image": "photos/concrete-truck.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "м³",
   "owner": ""
  },
@@ -242,7 +242,7 @@
   "promoted": false,
   "price_line": "от 350 ₽/сутки",
   "image": "photos/scaffolding.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "сутки",
   "owner": ""
  },
@@ -261,7 +261,7 @@
   "promoted": false,
   "price_line": "от 620 ₽/м²",
   "image": "photos/mineral-wool.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "м²",
   "owner": ""
  },
@@ -298,7 +298,7 @@
   "promoted": false,
   "price_line": "от 2 500 ₽/сутки",
   "image": "photos/diesel-generator.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "сутки",
   "owner": ""
  },
@@ -336,7 +336,7 @@
   "promoted": false,
   "price_line": "от 1 600 ₽/сутки",
   "image": "photos/apiary-hives.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "сутки",
   "owner": ""
  },
@@ -373,7 +373,7 @@
   "promoted": false,
   "price_line": "от 210 ₽/м.",
   "image": "photos/metal-roof.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "м.",
   "owner": ""
  },
@@ -391,7 +391,7 @@
   "promoted": false,
   "price_line": "от 350 000 ₽",
   "image": "photos/garage-building.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "",
   "owner": ""
  },
@@ -409,7 +409,7 @@
   "promoted": false,
   "price_line": "от 45 000 ₽/мес",
   "image": "photos/office-rent.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "мес",
   "owner": ""
  },
@@ -428,7 +428,7 @@
   "promoted": false,
   "price_line": "от 1 500 ₽/сутки",
   "image": "photos/apple-orchard.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "сутки",
   "owner": ""
  },
@@ -447,7 +447,7 @@
   "promoted": false,
   "price_line": "от 18 000 ₽",
   "image": "photos/cctv-camera.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "",
   "owner": ""
  },
@@ -486,7 +486,7 @@
   "promoted": false,
   "price_line": "от 42 000 ₽",
   "image": "photos/cargo-bike.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "",
   "owner": ""
  },
@@ -505,7 +505,7 @@
   "promoted": false,
   "price_line": "от 3 200 ₽/сутки",
   "image": "photos/car-rental.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "сутки",
   "owner": ""
  },
@@ -524,7 +524,7 @@
   "promoted": false,
   "price_line": "от 1 800 ₽/сутки",
   "image": "photos/excavator.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "сутки",
   "owner": ""
  },
@@ -542,7 +542,7 @@
   "promoted": false,
   "price_line": "от 950 ₽/м² в год",
   "image": "photos/office-desk.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "м²",
   "owner": ""
  },
@@ -561,7 +561,7 @@
   "promoted": false,
   "price_line": "от 65 000 ₽/сотка",
   "image": "photos/land-plot.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "сотка",
   "owner": ""
  },
@@ -580,7 +580,7 @@
   "promoted": false,
   "price_line": "от 14 500 ₽",
   "image": "photos/printer3d-arm.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "",
   "owner": ""
  },
@@ -599,7 +599,7 @@
   "promoted": false,
   "price_line": "от 6 900 ₽/комплект",
   "image": "photos/playground.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "комплект",
   "owner": ""
  },
@@ -637,7 +637,7 @@
   "promoted": false,
   "price_line": "от 3 100 ₽",
   "image": "photos/camping-tent.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "",
   "owner": ""
  },
@@ -656,7 +656,7 @@
   "promoted": false,
   "price_line": "от 28 ₽/кг",
   "image": "photos/potato-crate.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "кг",
   "owner": ""
  },
@@ -676,7 +676,7 @@
   "promoted": false,
   "price_line": "от 650 ₽/кг",
   "image": "photos/honey-extraction.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "кг",
   "owner": ""
  },
@@ -695,7 +695,7 @@
   "promoted": false,
   "price_line": "от 32 000 ₽/тонна",
   "image": "photos/grain-silo.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "тонна",
   "owner": ""
  },
@@ -714,7 +714,7 @@
   "promoted": false,
   "price_line": "от 95 ₽/л",
   "image": "photos/milk-bottles.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "л",
   "owner": ""
  },
@@ -733,7 +733,7 @@
   "promoted": false,
   "price_line": "от 1 850 000 ₽",
   "image": "photos/printer3d-construction.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "",
   "owner": "проект «Строительный 3д принтер»"
  },
@@ -752,7 +752,7 @@
   "promoted": false,
   "price_line": "от 1 400 000 ₽",
   "image": "photos/printer3d-nozzle.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "",
   "owner": "проект «Строительный 3д принтер»"
  },
@@ -790,7 +790,7 @@
   "promoted": false,
   "price_line": "от 1 200 ₽/нед.",
   "image": "photos/vegbox-csa.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "нед.",
   "owner": "проект «Круглогодичная теплица»"
  },
@@ -809,7 +809,7 @@
   "promoted": false,
   "price_line": "от 2 100 ₽/нед.",
   "image": "photos/greenhouse-interior.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "нед.",
   "owner": "проект «Круглогодичная теплица»"
  },
@@ -828,7 +828,7 @@
   "promoted": false,
   "price_line": "от 3 400 ₽/нед.",
   "image": "photos/greenhouse-lettuce.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "нед.",
   "owner": "проект «Круглогодичная теплица»"
  },
@@ -1208,7 +1208,7 @@
   "promoted": false,
   "price_line": "от 620 ₽",
   "image": "photos/pottery-wheel.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "",
   "owner": ""
  },
@@ -1227,7 +1227,7 @@
   "promoted": false,
   "price_line": "от 620 ₽/тонна",
   "image": "photos/poultry-house.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "тонна",
   "owner": ""
  },
@@ -1246,7 +1246,7 @@
   "promoted": false,
   "price_line": "от 18 000 ₽",
   "image": "photos/bakery.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "",
   "owner": ""
  },
@@ -1283,7 +1283,7 @@
   "promoted": false,
   "price_line": "от 380 ₽/сутки",
   "image": "photos/apiary-hives.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "сутки",
   "owner": ""
  },
@@ -1302,7 +1302,7 @@
   "promoted": false,
   "price_line": "от 120 ₽/кг",
   "image": "photos/beef-meat.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "кг",
   "owner": ""
  },
@@ -1355,7 +1355,7 @@
   "promoted": false,
   "price_line": "от 380 ₽",
   "image": "photos/welding-work.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "",
   "owner": ""
  },
@@ -1374,7 +1374,7 @@
   "promoted": false,
   "price_line": "от 1 400 ₽/тонна",
   "image": "photos/milk-bottles.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "тонна",
   "owner": ""
  },
@@ -1392,7 +1392,7 @@
   "promoted": false,
   "price_line": "от 42 000 ₽/м³",
   "image": "photos/mineral-wool.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "м³",
   "owner": ""
  },
@@ -1443,7 +1443,7 @@
   "promoted": false,
   "price_line": "от 4 800 ₽/шт.",
   "image": "photos/bicycle-repair.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "шт.",
   "owner": ""
  },
@@ -1481,7 +1481,7 @@
   "promoted": false,
   "price_line": "от 2 600 ₽",
   "image": "photos/sheep-flock.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "",
   "owner": ""
  },
@@ -1516,7 +1516,7 @@
   "promoted": false,
   "price_line": "от 18 000 ₽/сутки",
   "image": "photos/open-source-crm.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "сутки",
   "owner": ""
  },
@@ -1553,7 +1553,7 @@
   "promoted": false,
   "price_line": "от 42 000 ₽",
   "image": "photos/hay-bales.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "",
   "owner": ""
  },
@@ -1571,7 +1571,7 @@
   "promoted": false,
   "price_line": "от 2 600 ₽/м² в год",
   "image": "photos/timber-beam.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "м²",
   "owner": ""
  },
@@ -1590,7 +1590,7 @@
   "promoted": false,
   "price_line": "от 2 600 ₽/кг",
   "image": "photos/concrete-truck.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "кг",
   "owner": ""
  },
@@ -1628,7 +1628,7 @@
   "promoted": false,
   "price_line": "от 9 500 ₽/шт.",
   "image": "photos/cheese-making.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "шт.",
   "owner": ""
  },
@@ -1647,7 +1647,7 @@
   "promoted": false,
   "price_line": "от 250 ₽/сутки",
   "image": "photos/cattle-barn.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "сутки",
   "owner": ""
  },
@@ -1666,7 +1666,7 @@
   "promoted": false,
   "price_line": "от 120 ₽/м²",
   "image": "photos/bridge-repair.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "м²",
   "owner": ""
  },
@@ -1685,7 +1685,7 @@
   "promoted": false,
   "price_line": "от 380 ₽",
   "image": "photos/bakery.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "",
   "owner": ""
  },
@@ -1704,7 +1704,7 @@
   "promoted": false,
   "price_line": "от 1 400 ₽/шт.",
   "image": "photos/cement-bag.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "шт.",
   "owner": ""
  },
@@ -1793,7 +1793,7 @@
   "promoted": false,
   "price_line": "от 42 000 ₽/м.",
   "image": "photos/grain-silo.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "м.",
   "owner": ""
  },
@@ -1813,7 +1813,7 @@
   "promoted": false,
   "price_line": "от 42 000 ₽",
   "image": "photos/beef-meat.jpg",
-  "price_kind": "from",
+  "price_kind": "exact",
   "price_unit": "",
   "owner": ""
  },

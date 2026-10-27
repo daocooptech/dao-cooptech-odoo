@@ -135,8 +135,8 @@
     <field name="arch" type="xml">
       <!-- Страница размещения — разделами по дизайн-системе (27.10.2026),
            групп в ней нет: адрес — своим полем в разделе «Где и как
-           связаться», рядом с городом. -->
-      <xpath expr="//section[@name='add_where']//field[@name='pickup_point']/.." position="after">
+           связаться», рядом с городом (точки самовывоза нет с 27.10.2026). -->
+      <xpath expr="//div[@name='add_city']" position="after">
         <div class="coop-add_field">
           <label for="coop_address" string="Адрес"/>
           <field name="coop_address" nolabel="1" placeholder="Улица, дом"/>

@@ -284,7 +284,8 @@ class CoopResource(models.Model):
         ('to', 'до'),
         ('exact', 'ровно'),
         ('none', 'по договорённости'),
-    ], string='Уточнение цены', default='from', required=True)
+    ], string='Уточнение цены', default='exact', required=True,
+        help='Обычно цена точная; «от» и «до» — редкость (владелец 27.10.2026).')
     price_unit_label = fields.Char(
         string='За единицу',
         help='Как в объявлении: кг, тонна, шт., сутки, м². Свободный текст, '
@@ -497,7 +498,8 @@ class CoopResource(models.Model):
         for record in self:
             # Цена во вкладке способа — тоже цена: на карточку она попадёт
             # следом (`_coop_price_from_terms`), а проверка идёт раньше.
-            if record.price or record.price_kind == 'none' or any(record.term_ids.mapped('price')):
+            if (record.price or record.price_kind == 'none'
+                    or any(t.price or t.price_kind == 'none' for t in record.term_ids)):
                 continue
             requiring = record.method_ids.filtered('requires_price')
             if requiring:

@@ -270,7 +270,7 @@ def load_project_needs(env, target=TARGET_NEEDS):
                     # находится ни одним отбором по месту.
                     'city': project.city or project.partner_id.city or '',
                     'price': price,
-                    'price_kind': 'to',
+                    'price_kind': 'exact',
                     'description': '<p>Потребность проекта «%s».</p>' % project.name,
                     'state': 'published',
                     # Рубрика выводится из названия тут же: объявление без
@@ -1144,7 +1144,7 @@ def diversify_project_needs(env, min_needs=4, max_needs=12):
                     'need_manager_id': manager.id if manager else False,
                     'city': project.city,
                     'price': price,
-                    'price_kind': 'to',
+                    'price_kind': 'exact',
                     'price_unit_label': unit_label,
                     'description': '<p>Потребность проекта «%s».</p>' % project.name,
                     'state': 'published',

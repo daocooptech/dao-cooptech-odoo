@@ -593,7 +593,7 @@
                          options="{'num': 3, 'fields': ['method_ids']}"/>
                   <div>
                     <h2>На каких условиях</h2>
-                    <p>Каждый способ — своя вкладка со своей ценой и условиями. Добавить — «+».</p>
+                    <p>Каждый способ — своя вкладка со своей ценой и условиями. Добавить — «+». На карточке каталога — цена первой вкладки, где она указана.</p>
                   </div>
                 </div>
                 <div class="coop-add_sec_body">
@@ -605,6 +605,7 @@
                     <list>
                       <field name="method_id"/>
                       <field name="code"/>
+                      <field name="price_kind"/>
                       <field name="price"/>
                       <field name="price_unit_label"/>
                       <field name="deposit"/>
@@ -613,18 +614,10 @@
                       <field name="currency_id"/>
                     </list>
                   </field>
-                  <div class="coop-add_row">
-                    <div class="coop-add_field">
-                      <label for="price_kind" string="Цена на карточке"/>
-                      <field name="price_kind" widget="badges_selection" nolabel="1"/>
-                    </div>
-                    <div class="d-flex align-items-center gap-2 pt-4">
-                      <field name="bargain" nolabel="1"/>
-                      <label for="bargain" string="Торг уместен"/>
-                    </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <field name="bargain" nolabel="1"/>
+                    <label for="bargain" string="Торг уместен"/>
                   </div>
-                  <p class="coop-add_help">На карточке каталога — цена первого способа, где она
-                    указана. «По договорённости» — без суммы.</p>
                 </div>
               </section>
 
@@ -634,18 +627,16 @@
                          options="{'num': 4, 'fields': ['city', 'contact_method']}"/>
                   <div>
                     <h2>Где и как связаться</h2>
-                    <p>Город виден на карточке, точка самовывоза — на странице объявления.</p>
+                    <p>Город виден на карточке, адрес — на странице объявления.</p>
                   </div>
                 </div>
                 <div class="coop-add_sec_body">
+                  <!-- Точки самовывоза нет (владелец 27.10.2026: «убрать
+                       точку самовывоза») — где забрать, говорит адрес. -->
                   <div class="coop-add_row">
-                    <div class="coop-add_field">
+                    <div class="coop-add_field" name="add_city">
                       <label for="city" string="Город"/>
                       <field name="city" nolabel="1" placeholder="Начните вводить город"/>
-                    </div>
-                    <div class="coop-add_field">
-                      <label for="pickup_point" string="Точка самовывоза"/>
-                      <field name="pickup_point" nolabel="1" placeholder="Адрес или ориентир"/>
                     </div>
                   </div>
                   <div class="coop-add_field">

@@ -34,6 +34,14 @@ const LAYOUT = {
     project: { price: "Оценка вклада, ₽", note: "В какой проект, на каких условиях" },
 };
 
+/** «от / до / ровно / по договорённости» — у каждой вкладки своё. */
+const PRICE_KINDS = [
+    ["from", "от"],
+    ["to", "до"],
+    ["exact", "ровно"],
+    ["none", "по договорённости"],
+];
+
 export class CoopMethodTabs extends Component {
     static template = "coop_resources.MethodTabs";
     props = useProps(standardFieldProps);
@@ -98,6 +106,23 @@ export class CoopMethodTabs extends Component {
 
     toggleMenu() {
         this.ui.menu = !this.ui.menu;
+    }
+
+    get priceKinds() {
+        return PRICE_KINDS;
+    }
+
+    get priceKind() {
+        return this.value("price_kind") || "exact";
+    }
+
+    async setKind(kind) {
+        const term = await this.ensureTerm();
+        if (term) {
+            // Сумму при «по договорённости» не обнуляем: она просто не
+            // показывается, а вернулся к «от» — она на месте.
+            await term.update({ price_kind: kind });
+        }
     }
 
     select(method) {
@@ -173,6 +198,7 @@ registry.category("fields").add("coop_method_tabs", {
     supportedTypes: ["one2many"],
     relatedFields: [
         { name: "method_id", type: "many2one", relation: "coop.resource.method" },
+        { name: "price_kind", type: "selection" },
         { name: "price", type: "monetary" },
         { name: "price_unit_label", type: "char" },
         { name: "deposit", type: "monetary" },

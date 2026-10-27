@@ -353,7 +353,7 @@ def ensure_personal_offers(env):
                 'city': person.city or '',
                 'resource_type': kind,
                 'state': 'published',
-                'price_kind': 'none' if negotiable else 'from',
+                'price_kind': 'none' if negotiable else 'exact',
                 'price': 0 if negotiable else 300 * (1 + (place + shift) % 15),
             }
             method = methods.get(code) or (list(methods.values())[0] if methods else None)
@@ -407,7 +407,7 @@ def ensure_personal_needs(env):
                 'city': person.city or '',
                 'resource_type': 'material',
                 'state': 'published',
-                'price_kind': 'none' if negotiable else 'to',
+                'price_kind': 'none' if negotiable else 'exact',
                 'price': 0 if negotiable else 500 * (1 + (place + shift) % 12),
             }
             if method:

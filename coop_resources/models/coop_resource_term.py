@@ -27,6 +27,14 @@ class CoopResourceTerm(models.Model):
     sequence = fields.Integer(related='method_id.sequence', store=True)
     is_monetary = fields.Boolean(related='method_id.is_monetary')
     currency_id = fields.Many2one(related='resource_id.currency_id')
+    # «от / до / ровно / по договорённости» — у каждого способа своё
+    # (владелец 27.10.2026: «цена настраивается в каждой вкладке»).
+    price_kind = fields.Selection([
+        ('from', 'от'),
+        ('to', 'до'),
+        ('exact', 'ровно'),
+        ('none', 'по договорённости'),
+    ], string='Уточнение цены', default='exact', required=True)
     price = fields.Monetary(string='Цена')
     price_unit_label = fields.Char(string='За что', help='шт., кг, сутки, месяц')
     deposit = fields.Monetary(string='Залог')
@@ -37,12 +45,15 @@ class CoopResourceTerm(models.Model):
     _one_per_method = models.Constraint('unique(resource_id, method_id)',
                                         'Условия этого способа уже есть.')
 
-    @api.depends('price', 'price_unit_label', 'deposit', 'min_term', 'note', 'method_id')
+    @api.depends('price', 'price_kind', 'price_unit_label', 'deposit', 'min_term', 'note', 'method_id')
     def _compute_summary(self):
+        prefix = {'from': 'от ', 'to': 'до ', 'exact': ''}
         for term in self:
             parts = []
-            if term.price:
-                amount = '{:,.0f} ₽'.format(term.price).replace(',', ' ')
+            if term.price_kind == 'none':
+                parts.append('по договорённости')
+            elif term.price:
+                amount = prefix.get(term.price_kind, '') + '{:,.0f} ₽'.format(term.price).replace(',', ' ')
                 parts.append('%s за %s' % (amount, term.price_unit_label)
                              if term.price_unit_label else amount)
             if term.deposit:
@@ -95,12 +106,18 @@ class CoopResource(models.Model):
         по-прежнему читают `price` объявления — оно заполняется отсюда.
         """
         for resource in self:
-            priced = resource.term_ids.filtered('price').sorted('sequence')[:1]
+            priced = resource.term_ids.filtered(
+                lambda t: t.price or t.price_kind == 'none').sorted('sequence')[:1]
             if not priced:
                 continue
             values = {}
-            if resource.price != priced.price:
-                values['price'] = priced.price
+            if resource.price_kind != priced.price_kind:
+                values['price_kind'] = priced.price_kind
+            # «По договорённости» — без суммы на объявлении: её читает
+            # фильтр каталога по цене. Во вкладке сумма остаётся.
+            price = 0 if priced.price_kind == 'none' else priced.price
+            if resource.price != price:
+                values['price'] = price
             # Единица — того же способа, даже пустая: иначе цена продажи
             # получала бы «/сутки» от аренды.
             unit = priced.price_unit_label or False
