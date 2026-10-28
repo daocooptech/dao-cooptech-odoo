@@ -479,6 +479,17 @@ patch(ControlPanel.prototype, {
     },
 });
 
+// Контекст действия текущего экрана — синхронно, из контроллера.
+// `action.currentAction` в Odoo 20 стал асинхронным: геттер отдавал
+// обещание, и контекст из него не доходил ни разу, а у записи, открытой
+// по прямой ссылке (`/resources/207`), обещание падало на
+// `JSON.parse(undefined)` — окном «Упс!» поверх страницы (владелец
+// 28.10.2026). У восстановленного по ссылке контроллера контекста может
+// не быть — тогда остаётся `props.context`.
+function coopActionContext(env) {
+    return env.services.action?.currentController?.action?.context || {};
+}
+
 // Кнопка создания в списках подписывается так же, как в каталоге.
 //
 // В плитке подпись своя с самого начала — «Добавить ресурс», «Добавить
@@ -508,8 +519,7 @@ function createLabelPatch() {
         // измерено 15 сентября 2026, подпись просто не доезжала. В
         // плитке контекст свой, поэтому там подпись работала с самого
         // начала, и расхождение выглядело необъяснимым.
-        const action = this.env.services.action?.currentAction;
-        return action?.context?.coop_create_label
+        return coopActionContext(this.env).coop_create_label
             || this.props.context?.coop_create_label
             || "Новое";
     },
@@ -548,9 +558,8 @@ patch(KanbanController.prototype, createLabelPatch());
 function coopOwnCreate() {
     return {
     async createRecord() {
-        const action = this.env.services.action?.currentAction;
         const method =
-            action?.context?.coop_create_method ||
+            coopActionContext(this.env).coop_create_method ||
             this.props.context?.coop_create_method;
         if (!method) {
             return super.createRecord(...arguments);
@@ -618,7 +627,7 @@ patch(ListController.prototype, {
      *  Имя разрешается при нажатии, поэтому порядок модулей не важен. */
     async onClickCreate() {
         const action = this.env.services.action;
-        const target = action?.currentAction?.context?.coop_create_action
+        const target = coopActionContext(this.env).coop_create_action
             || this.props.context?.coop_create_action;
         if (target && !this.env.inDialog) {
             return action.doAction(target);
@@ -634,8 +643,7 @@ patch(ListController.prototype, {
         if (this.env.inDialog) {
             return "";
         }
-        const action = this.env.services.action?.currentAction;
-        return action?.context?.coop_intro || this.props.context?.coop_intro || "";
+        return coopActionContext(this.env).coop_intro || this.props.context?.coop_intro || "";
     },
 });
 
