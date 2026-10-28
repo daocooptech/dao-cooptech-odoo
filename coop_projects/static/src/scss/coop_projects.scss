@@ -384,10 +384,28 @@
     // словам; остальные колонки сжаты по содержимому. Копейки убраны в
     // самом виде (`hide_trailing_zeros`), доля — до одного знака после
     // запятой: точность там справочная, а ширины она стоила заметной.
+    //
+    // Владелец 28.10.2026: «между стоимостью и долей большое расстояние,
+    // сделай так что бы было видно всю информацию без прокрутки». Правила
+    // ниже не срабатывали: движок ставит таблице `table-layout: fixed` и
+    // каждой колонке ширину прямо в `style` (замер на 375 px: 124 + 122 +
+    // 117 + 105 + 83 = 551 px при ширине блока 313). Раскладка — снова
+    // по содержимому, ширины из разметки перебиты.
     @media (max-width: 900px) {
+        table {
+            table-layout: auto !important;
+            width: 100% !important;
+            min-width: 0 !important;
+        }
+
         th, td {
-            padding-left: 6px !important;
-            padding-right: 6px !important;
+            padding-left: 4px !important;
+            padding-right: 4px !important;
+        }
+
+        .o_list_button button {
+            padding: 3px 8px;
+            font-size: 11.5px;
         }
 
         // Название: переносится и занимает остаток ширины.
@@ -397,17 +415,17 @@
         // ширина достаётся колонке без него.
         th:first-child,
         td:first-child {
-            width: auto;
+            width: auto !important;
             white-space: normal !important;
             overflow: visible;
             text-overflow: clip;
             overflow-wrap: anywhere;
-            min-width: 7rem;
+            min-width: 5rem;
         }
 
         th:not(:first-child),
         td:not(:first-child) {
-            width: 1%;
+            width: 1% !important;
             white-space: nowrap;
         }
 
@@ -417,6 +435,64 @@
 
         thead th {
             font-size: 11px;
+        }
+    }
+
+    // На телефоне пять колонок в строку не встают ни при какой ужимке
+    // (замер на 375 px: 435 px по содержимому при ширине блока 313), и
+    // прокрутка вбок прятала то кнопку, то доли. Поэтому строка — в два
+    // ряда: название во всю ширину, под ним кнопка, стоимость, доля и
+    // отклики. Шапка разложена так же, ширины колонок заданы, чтобы ряды
+    // разных строк стояли друг под другом. Без колонки доли (у
+    // некоммерческого проекта) колонок на одну меньше.
+    @media (max-width: 480px) {
+        table, thead, tbody {
+            display: block !important;
+            width: 100% !important;
+        }
+
+        thead tr,
+        tbody tr.o_data_row {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) 104px 44px 58px;
+            align-items: center;
+            border-bottom: 1px solid var(--coop-line, #e6e6e1);
+        }
+
+        thead tr:not(:has(> :nth-child(5))),
+        tbody tr.o_data_row:not(:has(> :nth-child(5))) {
+            grid-template-columns: minmax(0, 1fr) 104px 58px;
+        }
+
+        th, td {
+            width: auto !important;
+            min-width: 0 !important;
+            border: 0 !important;
+        }
+
+        th:first-child,
+        td:first-child {
+            grid-column: 1 / -1;
+            padding-bottom: 2px !important;
+        }
+
+        th:first-child {
+            padding-bottom: 0 !important;
+        }
+
+        // `width: auto` — и здесь, с той же точностью селектора, что у
+        // правила «1%» выше: иначе оно побеждает, и ячейки сжимаются до
+        // 12 px внутри своих колонок сетки.
+        th:not(:first-child),
+        td:not(:first-child) {
+            width: auto !important;
+            text-align: right;
+        }
+
+        td.o_list_button,
+        th.o_list_button,
+        td.o_coop_needs_note {
+            text-align: left !important;
         }
     }
 

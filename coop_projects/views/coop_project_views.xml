@@ -442,6 +442,19 @@
                 <list class="o_coop_needs_list" create="false" delete="false">
                   <field name="need_can_join" column_invisible="1"/>
                   <field name="name" string="Ресурс"/>
+                  <!-- «Участвовать» — сразу за названием: на телефоне таблица
+                       уходит вбок, и кнопка в последней колонке за краем
+                       экрана не видна (владелец 28.10.2026; замер — за
+                       краем и на 709, и на 375 px). -->
+                  <!-- Где вклад не принимается — «сбор закрыт» (владелец
+                       28.10.2026): пустая колонка читалась как поломка. -->
+                  <field name="need_join_note" nolabel="1"
+                         class="o_coop_needs_note"
+                         column_invisible="parent.state in ('gathering', 'running')"/>
+                  <button name="action_join_need" type="object"
+                          string="Участвовать" class="btn btn-secondary btn-sm"
+                          invisible="not need_can_join"
+                          column_invisible="parent.state not in ('gathering', 'running')"/>
                   <field name="price" string="Стоимость"
                          options="{'hide_trailing_zeros': true}"/>
                   <!-- Пай, доля или ничего — по виду проекта. Решение
@@ -457,15 +470,6 @@
                          options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind not in ('commercial', 'dao')"/>
                   <field name="need_offer_count" string="Откликов"/>
-                  <!-- Где вклад не принимается — «сбор закрыт» (владелец
-                       28.10.2026): пустая колонка читалась как поломка. -->
-                  <field name="need_join_note" nolabel="1"
-                         class="o_coop_needs_note"
-                         column_invisible="parent.state in ('gathering', 'running')"/>
-                  <button name="action_join_need" type="object"
-                          string="Участвовать" class="btn btn-secondary btn-sm"
-                          invisible="not need_can_join"
-                          column_invisible="parent.state not in ('gathering', 'running')"/>
                   <field name="currency_id" column_invisible="1"/>
                 </list>
               </field>
@@ -476,6 +480,15 @@
                 <list class="o_coop_needs_list" create="false" delete="false">
                   <field name="need_can_join" column_invisible="1"/>
                   <field name="name" string="Ресурс"/>
+                  <!-- Где вклад не принимается — «сбор закрыт» (владелец
+                       28.10.2026): пустая колонка читалась как поломка. -->
+                  <field name="need_join_note" nolabel="1"
+                         class="o_coop_needs_note"
+                         column_invisible="parent.state in ('gathering', 'running')"/>
+                  <button name="action_join_need" type="object"
+                          string="Участвовать" class="btn btn-secondary btn-sm"
+                          invisible="not need_can_join"
+                          column_invisible="parent.state not in ('gathering', 'running')"/>
                   <field name="price" string="Стоимость"
                          options="{'hide_trailing_zeros': true}"/>
                   <!-- Пай, доля или ничего — по виду проекта. Решение
@@ -491,15 +504,6 @@
                          options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind not in ('commercial', 'dao')"/>
                   <field name="need_offer_count" string="Откликов"/>
-                  <!-- Где вклад не принимается — «сбор закрыт» (владелец
-                       28.10.2026): пустая колонка читалась как поломка. -->
-                  <field name="need_join_note" nolabel="1"
-                         class="o_coop_needs_note"
-                         column_invisible="parent.state in ('gathering', 'running')"/>
-                  <button name="action_join_need" type="object"
-                          string="Участвовать" class="btn btn-secondary btn-sm"
-                          invisible="not need_can_join"
-                          column_invisible="parent.state not in ('gathering', 'running')"/>
                   <field name="currency_id" column_invisible="1"/>
                 </list>
               </field>
@@ -510,6 +514,15 @@
                 <list class="o_coop_needs_list" create="false" delete="false">
                   <field name="need_can_join" column_invisible="1"/>
                   <field name="name" string="Ресурс"/>
+                  <!-- Где вклад не принимается — «сбор закрыт» (владелец
+                       28.10.2026): пустая колонка читалась как поломка. -->
+                  <field name="need_join_note" nolabel="1"
+                         class="o_coop_needs_note"
+                         column_invisible="parent.state in ('gathering', 'running')"/>
+                  <button name="action_join_need" type="object"
+                          string="Участвовать" class="btn btn-secondary btn-sm"
+                          invisible="not need_can_join"
+                          column_invisible="parent.state not in ('gathering', 'running')"/>
                   <field name="price" string="Стоимость"
                          options="{'hide_trailing_zeros': true}"/>
                   <!-- Пай, доля или ничего — по виду проекта. Решение
@@ -525,15 +538,6 @@
                          options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind not in ('commercial', 'dao')"/>
                   <field name="need_offer_count" string="Откликов"/>
-                  <!-- Где вклад не принимается — «сбор закрыт» (владелец
-                       28.10.2026): пустая колонка читалась как поломка. -->
-                  <field name="need_join_note" nolabel="1"
-                         class="o_coop_needs_note"
-                         column_invisible="parent.state in ('gathering', 'running')"/>
-                  <button name="action_join_need" type="object"
-                          string="Участвовать" class="btn btn-secondary btn-sm"
-                          invisible="not need_can_join"
-                          column_invisible="parent.state not in ('gathering', 'running')"/>
                   <field name="currency_id" column_invisible="1"/>
                 </list>
               </field>
@@ -544,6 +548,15 @@
                 <list class="o_coop_needs_list" create="false" delete="false">
                   <field name="need_can_join" column_invisible="1"/>
                   <field name="name" string="Ресурс"/>
+                  <!-- Где вклад не принимается — «сбор закрыт» (владелец
+                       28.10.2026): пустая колонка читалась как поломка. -->
+                  <field name="need_join_note" nolabel="1"
+                         class="o_coop_needs_note"
+                         column_invisible="parent.state in ('gathering', 'running')"/>
+                  <button name="action_join_need" type="object"
+                          string="Участвовать" class="btn btn-secondary btn-sm"
+                          invisible="not need_can_join"
+                          column_invisible="parent.state not in ('gathering', 'running')"/>
                   <field name="price" string="Стоимость"
                          options="{'hide_trailing_zeros': true}"/>
                   <!-- Пай, доля или ничего — по виду проекта. Решение
@@ -559,15 +572,6 @@
                          options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind not in ('commercial', 'dao')"/>
                   <field name="need_offer_count" string="Откликов"/>
-                  <!-- Где вклад не принимается — «сбор закрыт» (владелец
-                       28.10.2026): пустая колонка читалась как поломка. -->
-                  <field name="need_join_note" nolabel="1"
-                         class="o_coop_needs_note"
-                         column_invisible="parent.state in ('gathering', 'running')"/>
-                  <button name="action_join_need" type="object"
-                          string="Участвовать" class="btn btn-secondary btn-sm"
-                          invisible="not need_can_join"
-                          column_invisible="parent.state not in ('gathering', 'running')"/>
                   <field name="currency_id" column_invisible="1"/>
                 </list>
               </field>
