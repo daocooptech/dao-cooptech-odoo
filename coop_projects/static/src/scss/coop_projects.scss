@@ -454,14 +454,17 @@
         thead tr,
         tbody tr.o_data_row {
             display: grid !important;
-            grid-template-columns: minmax(0, 1fr) 104px 44px 58px;
+            // Ширины — по самому широкому содержимому при отступах 3 px:
+            // «2 950 000 ₽» — 92, «Доля, %» — 44, «Откликов» — 52. При 44
+            // и 58 подписи шапки обрезались многоточием («Дол…»).
+            grid-template-columns: minmax(0, 1fr) 98px 50px 58px;
             align-items: center;
             border-bottom: 1px solid var(--coop-line, #e6e6e1);
         }
 
         thead tr:not(:has(> :nth-child(5))),
         tbody tr.o_data_row:not(:has(> :nth-child(5))) {
-            grid-template-columns: minmax(0, 1fr) 104px 58px;
+            grid-template-columns: minmax(0, 1fr) 98px 58px;
         }
 
         th, td {
@@ -487,12 +490,21 @@
         td:not(:first-child) {
             width: auto !important;
             text-align: right;
+            padding-left: 3px !important;
+            padding-right: 3px !important;
         }
 
         td.o_list_button,
         th.o_list_button,
         td.o_coop_needs_note {
             text-align: left !important;
+        }
+
+        // Пустая ячейка шапки над кнопкой ниже соседних (16 px против 30)
+        // и стояла посередине ряда: сверху и снизу от неё просвечивала
+        // белая полоса. Тянется на всю высоту ряда.
+        th.o_list_button {
+            align-self: stretch;
         }
     }
 
@@ -501,6 +513,13 @@
     // под ней зияют четыре пустые полосы: список читается как
     // недогрузившийся. Строк ровно столько, сколько потребностей.
     tbody tr:not(.o_data_row) {
+      display: none;
+    }
+
+    // Итогов у потребностей нет, а пустой подвал движка оставался под
+    // последней строкой полосой в 10 px — на телефоне, где таблица
+    // разложена сеткой, она висела отдельной белой лентой.
+    tfoot:not(:has(td:not(:empty))) {
       display: none;
     }
 
