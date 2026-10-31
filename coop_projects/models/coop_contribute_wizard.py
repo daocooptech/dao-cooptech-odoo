@@ -49,6 +49,59 @@ class CoopContributeWizard(models.TransientModel):
     need_id = fields.Many2one(
         'coop.resource', string='Потребность', readonly=True)
 
+    # ── Свой ресурс из каталога ──────────────────────────────────────────
+    #
+    # Владелец 28.10.2026: «Когда нажимаешь участвовать нету возможности
+    # предложить уже добавленный в каталог ресурс (мои ресурсы)». До этого
+    # вклад описывали словами, и объявление, которое человек уже завёл,
+    # в проект не попадало — а инициатору приходилось верить описанию.
+    resource_id = fields.Many2one(
+        'coop.resource', string='Мой ресурс',
+        help='Объявление из каталога: подставит название и оценку, и '
+             'инициатор увидит, о каком именно ресурсе речь.')
+    # Что можно выбрать: только своё и только подходящего вида. Список
+    # считается, а не берётся доменом вида, потому что «своё» — это я и
+    # организации, от чьего имени я действую.
+    my_resource_ids = fields.Many2many(
+        'coop.resource', string='Мои ресурсы',
+        compute='_compute_my_resources')
+
+    # Вид вклада ↔ вид ресурса в каталоге. У «помещения» и «знаний»
+    # своего вида в каталоге нет: там подойдёт любой свой ресурс.
+    KIND_RESOURCE = {
+        'money': 'financial',
+        'material': 'material',
+        'resource': 'equipment',
+        'labour': 'labour',
+    }
+
+    @api.depends('kind', 'need_id')
+    @api.depends_context('uid')
+    def _compute_my_resources(self):
+        me = self.env.user.coop_actor_partner_ids
+        Resource = self.env['coop.resource']
+        for wizard in self:
+            # Вид берём у потребности, если пришли из её строки: строка
+            # уже знает, что нужно — материал, техника или труд.
+            kind = (wizard.need_id.resource_type
+                    or wizard.KIND_RESOURCE.get(wizard.kind))
+            domain = [('owner_id', 'in', me.ids)]
+            if kind in ('material', 'equipment', 'financial', 'labour'):
+                domain.append(('resource_type', '=', kind))
+            wizard.my_resource_ids = Resource.search(domain, limit=200)
+
+    @api.onchange('resource_id')
+    def _onchange_resource_id(self):
+        """Взяли свой ресурс — название и оценка уже есть."""
+        for wizard in self:
+            resource = wizard.resource_id
+            if not resource:
+                continue
+            if not wizard.name:
+                wizard.name = resource.name
+            if not wizard.value:
+                wizard.value = resource.price
+
     @api.onchange('kind')
     def _onchange_kind(self):
         """Деньгам название не нужно — оно и есть сумма."""
@@ -77,6 +130,7 @@ class CoopContributeWizard(models.TransientModel):
         contribution = self.env['coop.project.contribution'].sudo().create({
             'project_id': project.id,
             'need_id': self.need_id.id,
+            'resource_id': self.resource_id.id,
             'partner_id': me.id,
             'kind': self.kind,
             'name': self.name,

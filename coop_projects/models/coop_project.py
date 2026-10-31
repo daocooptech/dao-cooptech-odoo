@@ -1253,6 +1253,12 @@ class CoopProjectContribution(models.Model):
     name = fields.Char(
         string='Что именно', required=True,
         help='Смена экскаваторщика, месяц аренды склада, комплект досок.')
+    resource_id = fields.Many2one(
+        'coop.resource', string='Из моих ресурсов', index=True,
+        ondelete='set null',
+        help='Объявление каталога, которым закрывают потребность. Словами '
+             'описанный вклад никуда не ведёт: по этой связи видно, что '
+             'именно человек отдаёт проекту.')
     value = fields.Monetary(
         string='Оценка, ₽', currency_field='currency_id', required=True,
         tracking=True,
