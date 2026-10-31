@@ -80,6 +80,15 @@
       </nav>
 
       <div class="o_coop_rail_sep" aria-hidden="true"/>
+      <!-- «+» у свёрнутой планки — сразу под разделительной полосой
+           (владелец 31.10.2026). Раньше он стоял под списком расширений и
+           читался как «добавить в конец», хотя добавляет новый раздел. -->
+      <button type="button" class="o_coop_rail_add" title="Добавить расширение"
+              aria-label="Добавить расширение"
+              t-on-mouseenter="() => this.hideFly()"
+              t-on-click="() => this.openCatalog()">
+        <CoopIcon name="'plus'" size="16"/>
+      </button>
       <!-- Рубрика расширений — у развёрнутой планки; у свёрнутой её место
            занимает черта, а «+» стоит под расширениями. -->
       <div class="o_coop_ext_title">
@@ -136,17 +145,21 @@
         <CoopIcon name="'chevron-down'" size="14"/>
       </button>
       </div>
-      <button type="button" class="o_coop_rail_add" title="Добавить расширение"
-              aria-label="Добавить расширение"
-              t-on-mouseenter="() => this.hideFly()"
-              t-on-click="() => this.openCatalog()">
-        <CoopIcon name="'plus'" size="16"/>
-      </button>
-
       <div class="o_coop_rail_gap"/>
       <!-- Порядок пунктов у каждого свой: кто-то живёт в ресурсах, кто-то
            в сделках. Разделы платформы при этом убрать нельзя — по ним
            люди договариваются, где что лежит. -->
+        <!-- «Избранное» на телефоне — здесь, а не закладкой в шапке:
+             вместе с аватаром значки не помещаются в 375 точек (задача
+             341, 31.10.2026). На большом экране пункт скрыт (`shell.scss`):
+             там закладка живёт в шапке. -->
+        <button type="button" class="o_coop_nav_settings o_coop_nav_fav"
+                aria-label="Избранное"
+                t-on-mouseenter="() => this.hideFly()"
+                t-on-click="() => this.openFavorites()">
+          <CoopIcon name="'bookmark'" size="18"/>
+          <span class="o_coop_nav_label">Избранное</span>
+        </button>
         <button type="button" class="o_coop_nav_settings"
                 t-att-title="this.ui.railWide ? undefined : 'Настроить меню'"
                 t-on-mouseenter="() => this.hideFly()"

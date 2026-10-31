@@ -1144,6 +1144,22 @@ export class CoopSidebar extends Component {
         }
         return this.action.doAction(item.actionId, options);
     }
+
+    /**
+     * «Избранное» из выдвижного меню телефона.
+     *
+     * В шапке на узком экране закладке нет места: вместе с аватаром
+     * полоса значков шире экрана на 54 точки (замер 375×667, 31.10.2026).
+     * Поэтому на телефоне закладка уехала в меню — перед «Настроить меню».
+     */
+    openFavorites() {
+        this.hideFly();
+        if (this.ui.open) {
+            this.ui.open = false;
+            coopShellChanged(this.env);
+        }
+        return this.action.doAction("coop_theme.action_coop_favorites", { clearBreadcrumbs: true });
+    }
 }
 
 export class CoopFooter extends Component {
