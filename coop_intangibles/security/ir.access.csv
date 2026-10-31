@@ -7,3 +7,7 @@ rule_intangible_license_side,Лицензию видят её стороны,coo
           ('intangible_id.owner_id', 'in', user.coop_actor_partner_ids.ids)]"
 rule_intangible_license_owner,Лицензию выдаёт правообладатель,coop.intangible.license,base.group_user,cu,"[('intangible_id.owner_id', 'in', user.coop_publisher_partner_ids.ids)]"
 rule_intangible_license_owner_1,Лицензию выдаёт правообладатель,coop.intangible.license,base.group_system,cud,"[('intangible_id.owner_id', 'in', user.coop_publisher_partner_ids.ids)]"
+access_intangible_need_user,Потребность проекта в НМА — участник,coop.intangible.need,base.group_user,r,
+rule_intangible_need_read,Потребность в НМА видна всем,coop.intangible.need,base.group_user,r,"[]"
+rule_intangible_need_write,Потребность в НМА заводит и правит инициатор проекта,coop.intangible.need,base.group_user,cu,"[('project_id.partner_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_intangible_need_write_1,Потребность в НМА — администратор,coop.intangible.need,base.group_system,crud,"[]"

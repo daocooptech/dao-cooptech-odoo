@@ -109,6 +109,15 @@ class CoopContributeWizard(models.TransientModel):
             if wizard.kind == 'money' and not wizard.name:
                 wizard.name = _('Денежный вклад')
 
+    def _coop_offer_values(self):
+        """Что добавить к вкладу сверх общего набора.
+
+        Пусто здесь и переопределяется там, где вклад бывает не только
+        вещью, трудом или деньгами: нематериальные активы живут своим
+        модулем, и знать про них окну вклада незачем.
+        """
+        return {}
+
     def action_offer(self):
         self.ensure_one()
         project = self.project_id
@@ -127,7 +136,7 @@ class CoopContributeWizard(models.TransientModel):
                 'Это ваш проект. Вклад инициатора учитывается сметой, а не '
                 'предложением самому себе.'))
 
-        contribution = self.env['coop.project.contribution'].sudo().create({
+        values = {
             'project_id': project.id,
             'need_id': self.need_id.id,
             'resource_id': self.resource_id.id,
@@ -136,7 +145,12 @@ class CoopContributeWizard(models.TransientModel):
             'name': self.name,
             'value': self.value,
             'state': 'offered',
-        })
+        }
+        # Чем ещё может быть вклад — решает тот модуль, который это умеет:
+        # нематериальные живут отдельно от каталога ресурсов и знают про
+        # окно вклада только они (см. `_coop_offer_values`).
+        values.update(self._coop_offer_values())
+        contribution = self.env['coop.project.contribution'].sudo().create(values)
 
         # Инициатору — иначе предложение лежит в проекте, и о нём никто
         # не знает: вкладчик ждёт ответа, проект стоит недособранным.

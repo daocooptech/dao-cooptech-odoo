@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Четвёртый список сметы — «Необходимые нематериальные ресурсы»
+    (решение владельца 632 от 28.10.2026). Стоит рядом с материальными,
+    трудовыми и финансовыми, после них: за вещами и трудом идут права.
+
+    Строка — ссылка на запись модуля «Нематериальные», а не текст: у
+    актива уже есть правообладатель, оценка и правовое основание, и
+    вкладчик видит, что именно просят.
+  -->
+  <record id="view_coop_project_form_intangible_needs" model="ir.ui.view">
+    <field name="name">coop.project.form.intangible.needs</field>
+    <field name="model">coop.project</field>
+    <field name="inherit_id" ref="coop_projects.view_coop_project_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//div[hasclass('o_coop_needs')]" position="inside">
+        <div class="o_coop_needs_group" invisible="not need_intangible_ids">
+          <div class="o_coop_needs_title">Необходимые нематериальные ресурсы</div>
+          <field name="need_intangible_ids" nolabel="1" readonly="not coop_can_edit">
+            <list class="o_coop_needs_list" create="1" delete="1">
+              <field name="intangible_id"/>
+              <field name="price" string="Оценка"
+                     options="{'hide_trailing_zeros': true}"/>
+              <field name="state" string="Состояние" optional="show"/>
+              <field name="note" optional="hide"/>
+              <button name="action_join" type="object"
+                      string="Участвовать" class="btn btn-secondary btn-sm"
+                      invisible="state != 'open'"/>
+            </list>
+          </field>
+        </div>
+      </xpath>
+    </field>
+  </record>
+
+  <!-- Окно строки: что именно просим и за сколько. -->
+  <record id="view_coop_intangible_need_form" model="ir.ui.view">
+    <field name="name">coop.intangible.need.form</field>
+    <field name="model">coop.intangible.need</field>
+    <field name="arch" type="xml">
+      <form string="Потребность в нематериальном">
+        <group>
+          <field name="project_id" readonly="1"/>
+          <field name="intangible_id"
+                 options="{'no_create': True}"
+                 placeholder="Рецептура, программа, товарный знак"/>
+          <field name="price"/>
+          <field name="currency_id" invisible="1"/>
+          <field name="manager_id"
+                 placeholder="Кто решает — по умолчанию инициатор"/>
+          <field name="note" placeholder="Зачем проекту этот актив"/>
+        </group>
+      </form>
+    </field>
+  </record>
+
+  <!-- В окне вклада — свой актив, когда вклад пришёл на строку НМА. -->
+  <record id="view_coop_contribute_form_intangible" model="ir.ui.view">
+    <field name="name">coop.project.contribute.form.intangible</field>
+    <field name="model">coop.project.contribute</field>
+    <field name="inherit_id" ref="coop_projects.view_coop_contribute_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='resource_id']" position="after">
+        <field name="my_intangible_ids" invisible="1"/>
+        <field name="need_intangible_id" invisible="1"/>
+        <field name="intangible_id" invisible="not need_intangible_id"
+               options="{'no_create': True, 'no_open': True}"
+               domain="[('id', 'in', my_intangible_ids)]"
+               placeholder="Выберите из «Моих нематериальных»"/>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>
