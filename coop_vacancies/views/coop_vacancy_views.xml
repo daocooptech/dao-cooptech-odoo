@@ -127,7 +127,7 @@
       <form string="Вакансия">
         <header>
           <button name="action_publish" type="object" string="Опубликовать"
-                  class="btn-primary" invisible="state == 'published'"/>
+                  class="btn-primary" invisible="(state == 'published') or not coop_can_edit"/>
           <button name="action_apply" type="object" string="Откликнуться"
                   class="btn-primary"
                   invisible="state != 'published' or is_mine or my_application_state != 'none'"/>
@@ -136,7 +136,7 @@
                   invisible="not is_mine or hr_job_id"
                   help="Для организаций, оформляющих человека по трудовому договору: в модуле «Найм» есть этапы отбора и переход в сотрудника."/>
           <button name="action_close" type="object" string="Закрыть вакансию"
-                  invisible="state == 'closed'"
+                  invisible="(state == 'closed') or not coop_can_edit"
                   confirm="Закрыть вакансию? Из каталога она пропадёт, отклики останутся."
                   help="Из каталога пропадёт, отклики останутся."/>
           <field name="coop_role_label" invisible="not coop_role_label"/>

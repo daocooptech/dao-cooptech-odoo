@@ -202,22 +202,27 @@
                проект собирал деньги и вещи, а внести их было нечем. -->
           <button name="action_contribute" type="object" string="Участвовать"
                   class="btn-primary" invisible="not can_contribute"/>
+          <!-- Кнопки ведения проекта — только тому, кто может его править
+               (задача 391, слово владельца 28.10: «зашел в чужой проект и
+               давай че то добавлять и править»). Смотрящему со стороны
+               остаётся «Участвовать»: она не правит проект, а заводит его
+               вклад. -->
           <button name="action_open_gathering" type="object" string="Открыть сбор"
-                  class="btn-primary" invisible="state != 'draft'"/>
+                  class="btn-primary" invisible="state != 'draft' or not coop_can_edit"/>
           <button name="action_launch" type="object" string="Запустить"
-                  class="btn-primary" invisible="state != 'gathering'"/>
+                  class="btn-primary" invisible="state != 'gathering' or not coop_can_edit"/>
           <button name="action_finish" type="object" string="Завершить"
-                  class="btn-primary" invisible="state != 'running'"/>
+                  class="btn-primary" invisible="state != 'running' or not coop_can_edit"/>
           <button name="action_resume" type="object" string="Возобновить"
-                  class="btn-primary" invisible="state != 'frozen'"/>
+                  class="btn-primary" invisible="state != 'frozen' or not coop_can_edit"/>
           <button name="action_fail" type="object" string="Сбор не удался"
-                  invisible="state != 'gathering'"/>
+                  invisible="state != 'gathering' or not coop_can_edit"/>
           <button name="action_freeze" type="object" string="Заморозить"
-                  invisible="state not in ('gathering', 'running')"/>
+                  invisible="state not in ('gathering', 'running') or not coop_can_edit"/>
           <!-- Необратимое — в меню «⋯» шапки записи: туда уходит кнопка
                с подтверждением, пояснение берётся из `help`. -->
           <button name="action_cancel" type="object" string="Отменить проект"
-                  invisible="state in ('done', 'cancelled')"
+                  invisible="state in ('done', 'cancelled') or not coop_can_edit"
                   confirm="Отменить проект? Он закроется совсем — открыть его снова будет нельзя."
                   cancel-label="Не отменять"
                   help="Проект закроется совсем — открыть его снова будет нельзя."/>

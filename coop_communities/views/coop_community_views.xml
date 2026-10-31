@@ -149,7 +149,7 @@
       <form string="Сообщество" class="o_coop_wall_form">
         <header>
           <button name="action_publish" type="object" string="Открыть сообщество"
-                  class="btn-primary" invisible="state != 'draft'"/>
+                  class="btn-primary" invisible="(state != 'draft') or not coop_can_edit"/>
           <button name="action_join" type="object" string="Вступить"
                   class="btn-primary"
                   invisible="state != 'published' or coop_member_state != 'none' or access != 'public'"/>
@@ -162,13 +162,13 @@
           <button name="action_toggle_subscription" type="object"
                   string="Новости в ленте"/>
           <button name="action_freeze" type="object" string="Заморозить"
-                  invisible="state != 'published'"
+                  invisible="(state != 'published') or not coop_can_edit"
                   groups="base.group_system"/>
           <button name="action_archive_community" type="object" string="Закрыть"
-                  invisible="state == 'archived'" groups="base.group_system"
+                  invisible="(state == 'archived') or not coop_can_edit" groups="base.group_system"
                   confirm="Закрыть сообщество? Оно останется в каталоге и в истории участников, но принимать новых перестанет."/>
           <button name="action_resync_channel" type="object"
-                  string="Свести состав с каналом" invisible="not channel_id"/>
+                  string="Свести состав с каналом" invisible="(not channel_id) or not coop_can_edit"/>
           <field name="state" widget="statusbar"
                  statusbar_visible="draft,published,archived"/>
         </header>

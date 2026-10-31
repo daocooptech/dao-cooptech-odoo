@@ -113,13 +113,13 @@
           <button name="action_respond" type="object" string="Отправить отклик"
                   class="btn-primary" invisible="not can_respond"/>
           <button name="action_publish" type="object" string="Опубликовать"
-                  class="btn-primary" invisible="state == 'published'"/>
+                  class="btn-primary" invisible="(state == 'published') or not coop_can_edit"/>
           <button name="action_matched" type="object" string="Договорились"
-                  invisible="state != 'published'"/>
+                  invisible="(state != 'published') or not coop_can_edit"/>
           <button name="action_close" type="object" string="Снять"
-                  invisible="state in ('draft', 'closed')"/>
+                  invisible="(state in ('draft', 'closed')) or not coop_can_edit"/>
           <button name="action_back_to_draft" type="object" string="В черновик"
-                  invisible="state == 'draft'"/>
+                  invisible="(state == 'draft') or not coop_can_edit"/>
           <field name="state" widget="statusbar"
                  statusbar_visible="draft,published,matched"/>
         </header>

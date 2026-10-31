@@ -18,7 +18,7 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.3.9',
+    'version': '20.0.1.3.10',
     'license': 'LGPL-3',
     # `mail` в зависимостях не ради моделей, а ради порядка загрузки:
     # ленту в правую колонку уводит сам почтовый модуль, и наша
@@ -69,6 +69,7 @@
             'coop_theme/static/src/js/add_page.js',
             'coop_theme/static/src/xml/add_page.xml',
             'coop_theme/static/src/scss/showcase.scss',
+            'coop_theme/static/src/scss/foreign.scss',
             'coop_theme/static/src/js/catalog_shelves.js',
             'coop_theme/static/src/xml/catalog_shelves.xml',
             'coop_theme/static/src/scss/catalog_shelves.scss',
@@ -92,6 +93,7 @@
             'coop_theme/static/src/xml/empty_state.xml',
             'coop_theme/static/src/js/control_panel.js',
             'coop_theme/static/src/js/form_save.js',
+            'coop_theme/static/src/js/readonly_page.js',
             'coop_theme/static/src/xml/form_save.xml',
             'coop_theme/static/src/js/catalog_view.js',
             'coop_theme/static/src/js/icons.js',

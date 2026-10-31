@@ -134,7 +134,7 @@
         <header>
           <button name="action_publish_free" type="object"
                   string="Выставить свободные мощности" class="btn-primary"
-                  invisible="free &lt;= 0"/>
+                  invisible="(free &lt;= 0) or not coop_can_edit"/>
           <button name="action_open_deals" type="object"
                   string="Договорённости"/>
         </header>

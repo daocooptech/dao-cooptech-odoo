@@ -140,11 +140,11 @@
           <button name="action_buy" type="object" string="Приобрести"
                   class="btn-primary" invisible="not can_buy"/>
           <button name="action_submit" type="object" string="Передать оператору"
-                  class="btn-primary" invisible="state != 'draft'"/>
+                  class="btn-primary" invisible="(state != 'draft') or not coop_can_edit"/>
           <button name="action_mark_issued" type="object" string="Отметить выпущенным"
-                  invisible="state not in ('submitted', 'accepted')"/>
+                  invisible="(state not in ('submitted', 'accepted')) or not coop_can_edit"/>
           <button name="action_reject" type="object" string="Отказ оператора"
-                  invisible="state not in ('submitted', 'accepted')"/>
+                  invisible="(state not in ('submitted', 'accepted')) or not coop_can_edit"/>
           <field name="state" widget="statusbar"
                  statusbar_visible="draft,submitted,accepted,issued"/>
         </header>

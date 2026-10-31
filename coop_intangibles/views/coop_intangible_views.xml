@@ -104,7 +104,7 @@
                   string="Запросить лицензию" class="btn-primary"
                   invisible="not can_request_license"/>
           <button name="action_activate" type="object" string="Право действует"
-                  class="btn-primary" invisible="state == 'active'"/>
+                  class="btn-primary" invisible="(state == 'active') or not coop_can_edit"/>
           <field name="state" widget="statusbar"
                  statusbar_visible="draft,active"/>
         </header>

@@ -11,19 +11,19 @@
                состоянию: набор «опубликовать / принять / вернуть» на
                черновике только сбивал бы с толку. -->
           <button name="action_publish" type="object" string="Опубликовать"
-                  class="btn-primary" invisible="state != 'draft'"
+                  class="btn-primary" invisible="(state != 'draft') or not coop_can_edit"
                   groups="coop_bounty.group_coop_community_manager"/>
           <button name="action_accept" type="object" string="Принять работу"
-                  class="btn-primary" invisible="state != 'submitted'"
+                  class="btn-primary" invisible="(state != 'submitted') or not coop_can_edit"
                   groups="coop_bounty.group_coop_community_manager"/>
           <button name="action_return_for_revision" type="object"
-                  string="Вернуть на доработку" invisible="state != 'submitted'"
+                  string="Вернуть на доработку" invisible="(state != 'submitted') or not coop_can_edit"
                   groups="coop_bounty.group_coop_community_manager"/>
           <button name="action_cancel" type="object" string="Отменить"
-                  invisible="state in ('accepted', 'cancelled')"
+                  invisible="(state in ('accepted', 'cancelled')) or not coop_can_edit"
                   groups="coop_bounty.group_coop_community_manager"/>
           <button name="action_reset_to_draft" type="object" string="В черновик"
-                  invisible="state != 'cancelled'"
+                  invisible="(state != 'cancelled') or not coop_can_edit"
                   groups="coop_bounty.group_coop_community_manager"/>
 
           <!-- Действия участника. -->

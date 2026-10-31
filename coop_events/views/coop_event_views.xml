@@ -116,13 +116,13 @@
           <button name="action_cancel_signup" type="object" string="Не смогу прийти"
                   invisible="not am_i_signed"/>
           <button name="action_open" type="object" string="Открыть запись"
-                  invisible="state != 'draft'"/>
+                  invisible="(state != 'draft') or not coop_can_edit"/>
           <button name="action_close" type="object" string="Закрыть запись"
-                  invisible="state != 'open'"/>
+                  invisible="(state != 'open') or not coop_can_edit"/>
           <button name="action_hold" type="object" string="Состоялось"
-                  invisible="state not in ('open', 'closed')"/>
+                  invisible="(state not in ('open', 'closed')) or not coop_can_edit"/>
           <button name="action_cancel" type="object" string="Отменить событие"
-                  invisible="state in ('held', 'cancelled')"
+                  invisible="(state in ('held', 'cancelled')) or not coop_can_edit"
                   confirm="Записавшиеся увидят отмену в ленте события. Отменить?"/>
           <field name="state" widget="statusbar"
                  statusbar_visible="draft,open,closed,held"/>
