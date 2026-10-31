@@ -171,11 +171,11 @@
           <button name="action_bid" type="object" string="Сделать ставку"
                   class="btn-primary" invisible="not can_bid"/>
           <button name="action_start" type="object" string="Открыть торги"
-                  class="btn-primary" invisible="state != 'draft'"/>
+                  class="btn-primary" invisible="state != 'draft' or not coop_can_edit"/>
           <button name="action_finish" type="object" string="Подвести итог"
-                  invisible="state != 'running'"/>
+                  invisible="state != 'running' or not coop_can_edit"/>
           <button name="action_cancel" type="object" string="Отменить"
-                  invisible="state in ('finished', 'cancelled', 'no_bids')"/>
+                  invisible="state in ('finished', 'cancelled', 'no_bids') or not coop_can_edit"/>
           <field name="state" widget="statusbar"
                  statusbar_visible="draft,running,finished"/>
         </header>

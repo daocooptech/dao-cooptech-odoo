@@ -288,7 +288,12 @@ class CoopCession(models.Model):
                 'cession_id': record.id,
                 'partner_id': me.id,
             })
-            record.state = 'negotiating'
+            # Отклик переводит предложение в переговоры — и это делает не
+            # владелец предложения, а откликнувшийся. Правило записи
+            # (31.10.2026) пускает к правке только владельца, поэтому
+            # смену состояния пишем от системы: сама правка проверена
+            # выше (состояние, своё предложение, повторный отклик).
+            record.sudo().write({'state': 'negotiating'})
         return True
 
     def action_complete(self):
