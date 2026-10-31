@@ -143,10 +143,15 @@ class CoopResource(models.Model):
 
     resource_type = fields.Selection([
         ('material', 'Материальный'),
-        ('equipment', 'Оборудование'),
         ('financial', 'Финансовый'),
         ('labour', 'Труд'),
-    ], string='Тип ресурса', required=True, default='material', index=True)
+    ], string='Тип ресурса', required=True, default='material', index=True,
+        help='Решение владельца 632 от 28.10.2026: видов три — '
+             'материальные (сырьё, оборудование, инструмент, техника, '
+             'помещения, земля), трудовые и финансовые. «Оборудование» '
+             'влито в материальные: и то и другое — вещь. Нематериальные '
+             '(знания, программы, чертежи, ноу-хау, бренд) живут отдельным '
+             'модулем coop_intangibles и своим видом здесь не заводятся.')
 
     category_id = fields.Many2one(
         'coop.resource.category', string='Категория',

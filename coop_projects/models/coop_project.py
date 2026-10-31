@@ -297,21 +297,23 @@ class CoopProject(models.Model):
     need_count = fields.Integer(string='Потребностей',
                                 compute='_compute_need_count')
 
-    # Потребности по видам — четырьмя списками, как в макете: «Необходимые
+    # Потребности по видам — списками, как в макете: «Необходимые
     # материальные ресурсы», «…трудовые», и так далее. Одним списком на
     # три десятка строк вкладчик не поймёт, что из этого он может закрыть:
     # сварщик ищет глазами труд, а не цемент.
     #
     # Отбор вида задан здесь, а не в представлении: тогда пустой раздел
-    # прячется сам по пустоте поля, и держать четыре счётчика не нужно.
+    # прячется сам по пустоте поля, и держать счётчики не нужно.
+    #
+    # Списков три, а не четыре: решение владельца 632 от 28.10.2026 —
+    # «Оборудование» больше не отдельный вид, оно внутри материальных.
+    # Нематериальные (знания, чертежи, программы) — четвёртый список, но
+    # не здесь: они живут своим модулем `coop_intangibles`.
     NEED_PICK = [('listing_type', '=', 'request'),
                          ('state', '=', 'published')]
     need_material_ids = fields.One2many(
         'coop.resource', 'project_id', string='Материальные потребности',
         domain=NEED_PICK + [('resource_type', '=', 'material')])
-    need_equipment_ids = fields.One2many(
-        'coop.resource', 'project_id', string='Потребности в оборудовании',
-        domain=NEED_PICK + [('resource_type', '=', 'equipment')])
     need_labour_ids = fields.One2many(
         'coop.resource', 'project_id', string='Трудовые потребности',
         domain=NEED_PICK + [('resource_type', '=', 'labour')])

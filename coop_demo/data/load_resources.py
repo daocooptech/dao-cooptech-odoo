@@ -23,7 +23,7 @@ PHOTO_DIR = os.path.join(os.path.dirname(HERE), 'static', 'img', 'resources')
 
 TYPES = {
     'Материальный': 'material',
-    'Оборудование': 'equipment',
+    'Оборудование': 'material',
     'Финансовый': 'financial',
     'Труд': 'labour',
 }
@@ -734,7 +734,7 @@ def _fill_making(env):
     # труд не производят, а выполняют. Поставить там производителя —
     # значит приучить читателя не верить этому полю.
     goods = Resource.search([
-        ('resource_type', 'in', ('material', 'equipment')),
+        ('resource_type', 'in', ('material',)),
         ('manufacturer_ids', '=', False),
     ])
 

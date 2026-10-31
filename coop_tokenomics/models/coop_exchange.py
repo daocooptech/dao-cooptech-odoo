@@ -15,8 +15,9 @@ CATEGORIES = ['all', 'soon', 'new', 'up', 'down']
 GROUPINGS = ['none', 'type', 'due', 'place', 'issuer']
 
 TYPE_LABELS = {
-    'material': 'Материалы',
-    'equipment': 'Оборудование',
+    # «Оборудование» влито в материальные (решение владельца 632,
+    # 28.10.2026): на бирже это одна полка, а не две.
+    'material': 'Материалы и оборудование',
     'labour': 'Труд',
     'financial': 'Финансы',
 }

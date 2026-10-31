@@ -338,7 +338,7 @@ def ensure_personal_offers(env):
             # «отдам» безвозмездно, «помогу» и «свяжу» — труд.
             bottom = title.lower()
             if bottom.startswith('сдам'):
-                code, kind = 'rent', 'equipment'
+                code, kind = 'rent', 'material'
             elif bottom.startswith('отдам'):
                 code, kind = 'free', 'material'
             elif bottom.startswith(('помогу', 'свяжу', 'сложу')):

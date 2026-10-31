@@ -202,7 +202,7 @@ def fill_term_details(env):
                     vals['bulk_price'] = _money(term.price * rnd.choice([0.85, 0.9, 0.93]), 10)
             if rnd.random() < 0.35:
                 vals['prepay_pct'] = rnd.choice([30, 50, 100])
-            if not request and resource.resource_type in ('material', 'equipment') and rnd.random() < 0.4 \
+            if not request and resource.resource_type == 'material' and rnd.random() < 0.4 \
                     and resource.condition != 'used':
                 vals['warranty'] = rnd.choice(WARRANTY)
             vals['documents'] = 'upd' if is_org and rnd.random() < 0.8 else \

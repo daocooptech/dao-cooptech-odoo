@@ -128,7 +128,6 @@ class CoopResource(models.Model):
     # руками.
     CONTRIBUTION_KIND = {
         'material': 'material',
-        'equipment': 'resource',
         'labour': 'labour',
         'financial': 'money',
     }

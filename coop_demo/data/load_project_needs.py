@@ -258,9 +258,9 @@ def load_project_needs(env, target=TARGET_NEEDS):
                     'name': title,
                     'listing_type': 'request',
                     'resource_type': {
-                        'labour': 'labour', 'equipment': 'equipment',
-                        'material': 'material', 'transport': 'equipment',
-                        'space': 'equipment', 'service': 'labour',
+                        'labour': 'labour', 'equipment': 'material',
+                        'material': 'material', 'transport': 'material',
+                        'space': 'material', 'service': 'labour',
                     }.get(kind, 'material'),
                     'project_id': project.id,
                     'owner_id': project.partner_id.id,

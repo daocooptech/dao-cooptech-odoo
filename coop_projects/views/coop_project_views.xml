@@ -446,7 +446,7 @@
                  этом словами. Исчезнувший раздел читается как поломка
                  страницы, а не как «участвовать сейчас не в чем». -->
             <div class="o_coop_needs_empty"
-                 invisible="need_material_ids or need_equipment_ids or need_labour_ids or need_financial_ids">
+                 invisible="need_material_ids or need_labour_ids or need_financial_ids">
               Все потребности проекта закрыты — участвовать сейчас не в чем.
               Инициатор объявит новые, когда они появятся.
             </div>
@@ -460,40 +460,6 @@
                        уходит вбок, и кнопка в последней колонке за краем
                        экрана не видна (владелец 28.10.2026; замер — за
                        краем и на 709, и на 375 px). -->
-                  <!-- Где вклад не принимается — «сбор закрыт» (владелец
-                       28.10.2026): пустая колонка читалась как поломка. -->
-                  <field name="need_join_note" nolabel="1"
-                         class="o_coop_needs_note"
-                         column_invisible="parent.state in ('gathering', 'running')"/>
-                  <button name="action_join_need" type="object"
-                          string="Участвовать" class="btn btn-secondary btn-sm"
-                          invisible="not need_can_join"
-                          column_invisible="parent.state not in ('gathering', 'running')"/>
-                  <field name="price" string="Стоимость"
-                         options="{'hide_trailing_zeros': true}"/>
-                  <!-- Пай, доля или ничего — по виду проекта. Решение
-                       владельца 15 сентября 2026. Поле-двойник, потому
-                       что подпись колонки задаётся разметкой, а одно и
-                       то же поле дважды в списке движок не берёт. -->
-                  <field name="need_share_percent" string="Пай, %"
-                         widget="float" digits="[5,1]"
-                         options="{'hide_trailing_zeros': true}"
-                         column_invisible="parent.kind != 'cooperative'"/>
-                  <field name="need_share_ratio" string="Доля, %"
-                         widget="float" digits="[5,1]"
-                         options="{'hide_trailing_zeros': true}"
-                         column_invisible="parent.kind not in ('commercial', 'dao')"/>
-                  <field name="need_offer_count" string="Откликов"/>
-                  <field name="currency_id" column_invisible="1"/>
-                </list>
-              </field>
-            </div>
-            <div class="o_coop_needs_group" invisible="not need_equipment_ids">
-              <div class="o_coop_needs_title">Необходимое оборудование</div>
-              <field name="need_equipment_ids" nolabel="1" readonly="1">
-                <list class="o_coop_needs_list" create="false" delete="false">
-                  <field name="need_can_join" column_invisible="1"/>
-                  <field name="name" string="Ресурс"/>
                   <!-- Где вклад не принимается — «сбор закрыт» (владелец
                        28.10.2026): пустая колонка читалась как поломка. -->
                   <field name="need_join_note" nolabel="1"

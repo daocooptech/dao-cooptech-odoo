@@ -9,7 +9,7 @@ from odoo.exceptions import UserError
 # не передают — в историю прав они не попадают.
 TRANSFER_WAYS = ('sale', 'batch', 'gift', 'exchange')
 # Что вообще может иметь историю прав: вещь, а не труд и не деньги.
-OWNABLE_TYPES = ('material', 'equipment')
+OWNABLE_TYPES = ('material',)
 
 
 def canonical(obj):

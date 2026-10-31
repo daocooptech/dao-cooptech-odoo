@@ -71,7 +71,7 @@ class CoopContributeWizard(models.TransientModel):
     KIND_RESOURCE = {
         'money': 'financial',
         'material': 'material',
-        'resource': 'equipment',
+        'resource': 'material',
         'labour': 'labour',
     }
 
@@ -86,7 +86,7 @@ class CoopContributeWizard(models.TransientModel):
             kind = (wizard.need_id.resource_type
                     or wizard.KIND_RESOURCE.get(wizard.kind))
             domain = [('owner_id', 'in', me.ids)]
-            if kind in ('material', 'equipment', 'financial', 'labour'):
+            if kind in ('material', 'financial', 'labour'):
                 domain.append(('resource_type', '=', kind))
             wizard.my_resource_ids = Resource.search(domain, limit=200)
 

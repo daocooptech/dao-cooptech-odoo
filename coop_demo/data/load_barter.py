@@ -356,7 +356,7 @@ def load_barter(env, login='dashkevich'):
     # Вещи из «Ресурсов» — со снимком и владельцем.
     Resource = env['coop.resource'].sudo()
     resources = Resource.search([('state', '=', 'published'), ('listing_type', '=', 'offer'),
-                                 ('resource_type', 'in', ('material', 'equipment')),
+                                 ('resource_type', 'in', ('material',)),
                                  ('owner_id', '!=', False), ('image_1920', '!=', False)])
     # Только вещи с собственным названием: шаблонные «Сдам бетономешалку на
     # выходные» стоят в «Ресурсах» по десятку раз, а копии одной строки
