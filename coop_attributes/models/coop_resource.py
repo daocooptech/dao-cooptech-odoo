@@ -199,7 +199,9 @@ class CoopResource(models.Model):
         """
         blocks = super()._coop_catalog_filters(domain)
         category = self._coop_filter_category(domain)
-        if not category:
+        # Параметры появляются, когда выбран подраздел без вложенных:
+        # у раздела «Недвижимость» нет общего смысла в «этаже» и «пробеге».
+        if not category or category.child_ids:
             return blocks
 
         # Как характеристика фильтруется, задано в справочнике отдельным
@@ -486,11 +488,14 @@ class CoopResource(models.Model):
 
     def _coop_filter_category(self, domain):
         """Рубрика, выбранная в панели, если она одна."""
+        Category = self.env['coop.resource.category']
+        chosen = Category
         for leaf in domain or []:
             if (isinstance(leaf, (list, tuple)) and len(leaf) == 3
                     and leaf[0] == 'category_id'
                     and leaf[1] in ('=', 'child_of')):
-                category = self.env['coop.resource.category'].sudo().browse(
-                    int(leaf[2]))
-                return category.exists()
-        return self.env['coop.resource.category']
+                chosen |= Category.sudo().browse(int(leaf[2])).exists()
+        # Выбрано несколько уровней цепочки «раздел → подраздел» — берём
+        # самый глубокий.
+        return max(chosen, key=lambda c: (c.parent_path or '').count('/'),
+                   default=Category)

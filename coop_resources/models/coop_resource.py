@@ -782,13 +782,67 @@ class CoopResourceCatalogFilters(models.Model):
 
     _inherit = 'coop.resource'
 
+    def _coop_category_blocks(self, domain):
+        """Рубрика цепочкой: раздел → подраздел → … (владелец 10.11.2026).
+
+        Одним длинным списком «Недвижимость / Жилая / Квартиры» искать
+        неудобно. Выбрал раздел — появился выбор подразделов, выбрал
+        подраздел — появились его параметры (их добавляет `coop_attributes`
+        для рубрики без вложенных). Каждое поле ветка: объявления её
+        подразделов входят в отбор.
+        """
+        Category = self.env['coop.resource.category'].sudo()
+        ids = [int(leaf[2]) for leaf in domain or []
+               if isinstance(leaf, (list, tuple)) and len(leaf) == 3
+               and leaf[0] == 'category_id' and leaf[1] in ('=', 'child_of')
+               and isinstance(leaf[2], (int, str)) and str(leaf[2]).isdigit()]
+        chosen = Category.browse(ids).exists()
+        deepest = max(chosen, key=lambda c: (c.parent_path or '').count('/'),
+                      default=Category)
+        path = []
+        node = deepest
+        while node:
+            path.insert(0, node)
+            node = node.parent_id
+        # Числа у вариантов считаются по остальным условиям, без выбора
+        # рубрики: иначе у соседнего раздела всегда будет ноль.
+        rest = [leaf for leaf in domain or []
+                if not (isinstance(leaf, (list, tuple)) and len(leaf) == 3
+                        and leaf[0] == 'category_id')]
+        totals = {}
+        for category, count in self._read_group(
+                rest, ['category_id'], ['__count']):
+            node = category
+            while node:
+                totals[node.id] = totals.get(node.id, 0) + count
+                node = node.parent_id
+        blocks = []
+        for level, parent in enumerate([Category] + path):
+            children = Category.search([('parent_id', '=', parent.id or False)])
+            if not children:
+                continue
+            blocks.append({
+                'code': 'category_l%d' % level,
+                # Раздел, подраздел, а глубже — по имени родителя («Жилая»):
+                # два поля «Подраздел» подряд не различить.
+                'label': ('Раздел' if level == 0 else 'Подраздел'
+                          if level == 1 else parent.name),
+                'hint': 'Выберите раздел, затем подраздел: у каждого свои '
+                        'параметры. В разделе — объявления всех его '
+                        'подразделов.' if level == 0 else None,
+                'widget': 'select', 'field': 'category_id',
+                'operator': 'child_of', 'reload': True,
+                'placeholder': 'Любой' if level == 0 else 'Любой подраздел',
+                'options': [{'value': c.id, 'label': c.name,
+                             'count': totals.get(c.id, 0)}
+                            for c in children],
+            })
+        return blocks
+
     def _coop_catalog_filters(self, domain):
         methods = self.env['coop.resource.method'].sudo().search([])
         exchange = methods.filtered(lambda m: 'бмен' in m.name)
         free = methods.filtered(lambda m: 'езвозмезд' in m.name)
-
-        categories = self.env['coop.resource.category'].sudo().search(
-            [], order='complete_name')
 
         quick = []
         # Значки в подписях — из макета: чипы стоят в ряд, и по значку
@@ -813,15 +867,7 @@ class CoopResourceCatalogFilters(models.Model):
              'options': [{'value': code, 'label': label}
                          for code, label in
                          self._fields['listing_type'].selection]},
-            {'code': 'category_id', 'label': 'Категория',
-             'hint': 'Рубрика каталога. Ветка включает все свои подразделы; '
-                     'от неё зависят характеристики ниже.',
-             'widget': 'select', 'field': 'category_id', 'placeholder': 'Любая',
-             # Ветка с подразделами, а не одна рубрика: у «Недвижимости»
-             # нет своих объявлений, они лежат в «Квартирах» и «Домах».
-             'operator': 'child_of', 'reload': True,
-             'options': [{'value': c.id, 'label': c.complete_name}
-                         for c in categories]},
+            *self._coop_category_blocks(domain),
             {'code': 'city', 'label': 'Город',
              'hint': 'Можно ввести часть названия.',
              'widget': 'text', 'field': 'city', 'operator': 'ilike',

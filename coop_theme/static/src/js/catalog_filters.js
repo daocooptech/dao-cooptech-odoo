@@ -222,6 +222,18 @@ export class CoopFilters extends Component {
 
     async onChange(code, value) {
         this.state.values[code] = value;
+        // Рубрика цепочкой: сменили раздел — выбор подраздела и глубже
+        // сбрасывается, иначе в запросе остался бы подраздел прежнего
+        // раздела и каталог показал бы пустоту.
+        const level = /^category_l(\d+)$/.exec(code);
+        if (level) {
+            for (const key of Object.keys(this.state.values)) {
+                const deeper = /^category_l(\d+)$/.exec(key);
+                if (deeper && Number(deeper[1]) > Number(level[1])) {
+                    delete this.state.values[key];
+                }
+            }
+        }
         this.previewCount();
         // От этого поля зависят другие — подкатегория от сферы, как в
         // макете: их набор перечитывается сразу, не дожидаясь «Показать».
