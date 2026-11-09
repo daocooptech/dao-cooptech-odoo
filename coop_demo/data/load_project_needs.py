@@ -1190,7 +1190,8 @@ def link_offers_to_resources(env):
     return linked
 
 
-USE_WORDS = ('аренд', 'лизинг', 'прокат', 'во временное', 'в пользование')
+USE_WORDS = ('аренд', 'лизинг', 'прокат', 'временн', 'на время',
+             'в пользование')
 
 
 def set_ownership_kinds(env):
