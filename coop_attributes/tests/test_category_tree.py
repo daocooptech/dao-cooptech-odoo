@@ -6,7 +6,7 @@ from odoo.addons.coop_resources.models.coop_resource_tree import (
 
 ROOTS = [
     'Сырьё и материалы', 'Оборудование и станки', 'Инструмент',
-    'Техника и транспорт', 'Помещения и земля', 'Электроника и оргтехника',
+    'Техника и транспорт', 'Недвижимость', 'Электроника и оргтехника',
     'Продовольствие и сельхозпродукция', 'Для дома и быта',
     'Вещи и экипировка',
 ]
@@ -64,3 +64,58 @@ class TestCategoryTree(TransactionCase):
         rebuild_category_tree(self.env)
         self.assertFalse(dup.exists())
         self.assertEqual(resource.category_id.name, 'Стройматериалы')
+
+    # ── Задача 398 ───────────────────────────────────────────────────────
+
+    def _path(self, category):
+        names = []
+        while category:
+            names.insert(0, category.name)
+            category = category.parent_id
+        return ' / '.join(names)
+
+    def test_398_real_estate_split(self):
+        old = self._old('Склады и коммерческая недвижимость')
+        store = self._res('Помещение под временное хранение', old)
+        office = self._res('Офис в бизнес-центре в аренду', old)
+        rebuild_category_tree(self.env)
+        self.assertEqual(self._path(store.category_id),
+                         'Недвижимость / Коммерческая / Склады')
+        self.assertEqual(self._path(office.category_id),
+                         'Недвижимость / Коммерческая / Офисы')
+        flat = self.env['coop.resource.category'].search(
+            [('name', '=', 'Квартиры')])
+        self.assertEqual(self._path(flat), 'Недвижимость / Жилая / Квартиры')
+
+    def test_398_no_other_and_no_orphans(self):
+        rebuild_category_tree(self.env)
+        tractor = self._res('Мотоблок с навесным', self.env[
+            'coop.resource.category'].search(
+                [('name', '=', 'Оборудование и станки')], limit=1))
+        tractor.category_id = False
+        welder = self._res('Сдам сварочный аппарат', self.env[
+            'coop.resource.category'])
+        generic = self._res('Оборудование под нужды проекта, 1 шт.',
+                            self.env['coop.resource.category'])
+        rebuild_category_tree(self.env)
+        self.assertEqual(tractor.category_id.name, 'Сельхозтехника')
+        self.assertEqual(welder.category_id.name, 'Инструмент в прокат')
+        self.assertEqual(generic.category_id.name, 'Оборудование и станки')
+        self.assertFalse(self.env['coop.resource.category'].search(
+            [('name', 'in', ['Прочее оборудование', 'Аренда спецтехники'])]))
+
+    def test_398_labour_and_finance_leave_goods(self):
+        rebuild_category_tree(self.env)
+        warehouse = self.env['coop.resource.category'].search(
+            [('name', '=', 'Склады')], limit=1)
+        work = self.env['coop.resource'].create({
+            'name': 'Разнорабочие на монтаж, 4 смены', 'listing_type': 'request',
+            'resource_type': 'labour', 'owner_id': self.env.user.partner_id.id,
+            'category_id': warehouse.id})
+        fee = self.env['coop.resource'].create({
+            'name': 'Гос. пошлина за регистрацию', 'listing_type': 'request',
+            'resource_type': 'financial',
+            'owner_id': self.env.user.partner_id.id})
+        rebuild_category_tree(self.env)
+        self.assertEqual(work.category_id.name, 'Работа и подряд')
+        self.assertEqual(fee.category_id.name, 'Платежи и обязательные расходы')
