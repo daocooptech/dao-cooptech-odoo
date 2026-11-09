@@ -405,12 +405,16 @@
     overscroll-behavior: contain;
     z-index: 60;
     transform: translateX(-100%);
-    transition: transform .22s ease;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, .28);
+    transition: transform .22s ease, box-shadow .22s ease;
+    // Тень — только у выдвинутого меню. Замер 09.11.2026 (375×812): у
+    // закрытого, стоящего за левым краем (x = -216), тень в 40 точек
+    // просачивалась на экран серой полосой.
+    box-shadow: none;
   }
 
   .o_coop_sidebar_open {
     transform: none;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, .28);
   }
 
   // ── Шапка на телефоне: аватар на месте закладки (задача 341, 31.10.2026) ──
@@ -949,6 +953,35 @@ body.o_dark_mode .o_coop_logo img {
   // ряду не хватало 2 точек.
   .o_main_navbar .o_menu_systray .o_coop_theme_switch {
     margin: 0 8px;
+  }
+
+  // Счётчики на значках: светлый текст на зелёной и золотой плашке давал
+  // контраст 1,99–2,77 при норме 4,5 (замер 09.11.2026, тёмная тема).
+  // Тёмные чернила дают 5,7–9,0 на обеих плашках в обеих темах.
+  .o_main_navbar .o_menu_systray .o-mail-MessagingMenuInDropdown-counter,
+  .o_main_navbar .o_menu_systray .o-mail-ActivityMenu-counter,
+  .o_main_navbar .o_menu_systray .o_coop_bell_count {
+    color: #14171a;
+  }
+}
+
+// Шапка на 320: ряду значков не хватало 47 точек, страница получала
+// горизонтальную прокрутку, аватар обрезался (замер 09.11.2026). Клетки
+// 40 → 32 (выше минимума 24 из WCAG 2.2), зазоры убраны, поля тумблера
+// 8 → 4: итого с запасом, ряд кончается на 306 из 320.
+@media (max-width: 360px) {
+  .o_web_client .o_main_navbar .o_menu_systray {
+    gap: 0;
+    padding-right: 2px;
+  }
+
+  .o_web_client .o_main_navbar .o_menu_systray > button:not(.o_coop_theme_switch),
+  .o_web_client .o_main_navbar .o_menu_systray > div > button {
+    width: 32px;
+  }
+
+  .o_main_navbar .o_menu_systray .o_coop_theme_switch {
+    margin: 0 4px;
   }
 }
 
