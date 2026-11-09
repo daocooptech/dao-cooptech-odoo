@@ -42,6 +42,10 @@ class CoopContributeWizard(models.TransientModel):
         string='Оценка, ₽', currency_field='currency_id', required=True,
         help='Денежная оценка вклада. Только через неё труд и деньги '
              'сводятся в одну величину, из которой считается доля.')
+    ownership_kind = fields.Selection([
+        ('property', 'В собственность'),
+        ('use', 'В пользование'),
+    ], string='Передаётся', default='property', required=True)
     note = fields.Text(string='Пара слов инициатору')
     # Заполнено, когда пришли из строки потребности. Тогда
     # предложение видно ответственному за неё, а не только
@@ -140,6 +144,7 @@ class CoopContributeWizard(models.TransientModel):
             'project_id': project.id,
             'need_id': self.need_id.id,
             'resource_id': self.resource_id.id,
+            'ownership_kind': self.ownership_kind,
             'partner_id': me.id,
             'kind': self.kind,
             'name': self.name,

@@ -301,6 +301,7 @@
                            options="{'no_create': True}"/>
                   </group>
                   <group>
+                    <field name="ownership_kind" widget="coop_inline"/>
                     <field name="price_kind" widget="coop_inline"/>
                     <label for="price"/>
                     <div class="o_row">

@@ -52,6 +52,7 @@ from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_reference, load_residency, load_resources, load_sections,
                     load_skills,
                     load_project_needs, load_project_tasks,
+                    load_intangible_needs,
                     load_photos,
                     load_documents,
                     load_notifications,
@@ -199,6 +200,11 @@ class CoopDemoLoader(models.AbstractModel):
             # (труд и деньги), которых не бывает у первого шага.
             load_project_needs.diversify_project_needs(self.env)
             load_project_needs.link_offers_to_resources(self.env)
+            load_project_needs.set_ownership_kinds(self.env)
+        # Потребности в нематериальном — после активов и проектов:
+        # просить можно только то, что у кого-то уже есть.
+        if 'coop.intangible' in self.env:
+            load_intangible_needs.load_intangible_needs(self.env)
         # Задачи проектов — после того, как сборы вкладов обзавелись
         # проектами в управлении: задача заводится в управляемом проекте,
         # а исполнители берутся из вкладчиков сбора.

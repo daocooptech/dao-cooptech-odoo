@@ -1188,3 +1188,32 @@ def link_offers_to_resources(env):
             linked += 1
     _logger.info('Отклики со своим ресурсом: %s из %s', linked, len(offers))
     return linked
+
+
+USE_WORDS = ('аренд', 'лизинг', 'прокат', 'во временное', 'в пользование')
+
+
+def set_ownership_kinds(env):
+    """«Передаётся: в собственность или в пользование» (решение 632).
+
+    По умолчанию у строки стоит «в собственность». В пользование идёт то,
+    что сдают, а не продают: по названию (аренда, лизинг, прокат) и по
+    единице цены за срок (сутки, час, месяц, смена). Вклады берут признак
+    у своей потребности. Безвреден при повторном запуске.
+    """
+    Resource = env['coop.resource'].sudo()
+    rows = Resource.search([('ownership_kind', '=', 'property')])
+    rows = rows.filtered(lambda r: any(
+        w in (r.name or '').lower() for w in USE_WORDS)
+        or any(t in (r.price_unit_label or '').lower()
+               for t in ('сут', 'час', 'мес', 'смен', 'день')))
+    if rows:
+        rows.write({'ownership_kind': 'use'})
+    Contribution = env['coop.project.contribution'].sudo()
+    moved = 0
+    for contribution in Contribution.search([('need_id', '!=', False)]):
+        if contribution.ownership_kind != contribution.need_id.ownership_kind:
+            contribution.ownership_kind = contribution.need_id.ownership_kind
+            moved += 1
+    _logger.info('В пользование: ресурсов %s, вкладов %s', len(rows), moved)
+    return len(rows)

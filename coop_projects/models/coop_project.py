@@ -1255,6 +1255,12 @@ class CoopProjectContribution(models.Model):
     name = fields.Char(
         string='Что именно', required=True,
         help='Смена экскаваторщика, месяц аренды склада, комплект досок.')
+    ownership_kind = fields.Selection([
+        ('property', 'В собственность'),
+        ('use', 'В пользование'),
+    ], string='Передаётся', default='property', required=True,
+        help='Насовсем или на время. Приходит из строки потребности: '
+             'арендованное возвращают, подаренное — нет.')
     resource_id = fields.Many2one(
         'coop.resource', string='Из моих ресурсов', index=True,
         ondelete='set null',

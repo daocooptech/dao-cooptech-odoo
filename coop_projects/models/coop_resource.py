@@ -146,6 +146,7 @@ class CoopResource(models.Model):
                 'default_need_id': self.id,
                 'default_name': self.name,
                 'default_value': self.price,
+                'default_ownership_kind': self.ownership_kind,
                 'default_kind': self.CONTRIBUTION_KIND.get(
                     self.resource_type, 'resource'),
             },

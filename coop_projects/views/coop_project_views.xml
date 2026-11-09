@@ -456,6 +456,11 @@
                 <list class="o_coop_needs_list" create="false" delete="false">
                   <field name="need_can_join" column_invisible="1"/>
                   <field name="name" string="Ресурс"/>
+                  <!-- Насовсем или на время (решение 632): от этого зависит
+                       и оценка вклада, и что с ним будет, если сбор не
+                       состоится. -->
+                  <field name="ownership_kind" string="Передаётся"
+                         optional="show"/>
                   <!-- «Участвовать» — сразу за названием: на телефоне таблица
                        уходит вбок, и кнопка в последней колонке за краем
                        экрана не видна (владелец 28.10.2026; замер — за
