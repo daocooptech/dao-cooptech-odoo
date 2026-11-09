@@ -1155,3 +1155,36 @@ def diversify_project_needs(env, min_needs=4, max_needs=12):
     _logger.info('Разброс потребностей: заведено %s, проектов пропущено %s',
                  done, skipped)
     return done
+
+
+def link_offers_to_resources(env):
+    """Часть откликов на потребности — с ресурсом из «Моих ресурсов» (№ 390).
+
+    Отклик участника на материальную потребность чаще всего и есть его
+    уже размещённое объявление. Берём у автора отклика опубликованное
+    предложение того же вида и связываем; у каждого третьего отклика
+    оставляем текстовое описание без ресурса — так бывает и в жизни.
+    Безвреден при повторном запуске: трогает только отклики без ресурса.
+    """
+    Contribution = env['coop.project.contribution'].sudo()
+    Resource = env['coop.resource'].sudo()
+    offers = Contribution.search([
+        ('need_id', '!=', False), ('resource_id', '=', False),
+        ('kind', '!=', 'money')], order='id')
+    linked = 0
+    for offer in offers:
+        if offer.id % 3 == 0:
+            continue
+        kind = offer.need_id.resource_type
+        mine = Resource.search([
+            ('owner_id', '=', offer.partner_id.id),
+            ('listing_type', '=', 'offer'),
+            ('state', '=', 'published'),
+            ('resource_type', '=', kind)], order='id')
+        if not mine:
+            continue
+        with env.cr.savepoint():
+            offer.write({'resource_id': mine[offer.id % len(mine)].id})
+            linked += 1
+    _logger.info('Отклики со своим ресурсом: %s из %s', linked, len(offers))
+    return linked

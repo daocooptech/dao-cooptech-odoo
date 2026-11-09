@@ -198,6 +198,7 @@ class CoopDemoLoader(models.AbstractModel):
             # число потребностей до правдоподобного и закрывает виды
             # (труд и деньги), которых не бывает у первого шага.
             load_project_needs.diversify_project_needs(self.env)
+            load_project_needs.link_offers_to_resources(self.env)
         # Задачи проектов — после того, как сборы вкладов обзавелись
         # проектами в управлении: задача заводится в управляемом проекте,
         # а исполнители берутся из вкладчиков сбора.
