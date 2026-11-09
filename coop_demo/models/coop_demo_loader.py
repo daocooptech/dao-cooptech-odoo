@@ -428,6 +428,9 @@ class CoopDemoLoader(models.AbstractModel):
         from odoo.addons.coop_resources.models.coop_resource_tree import (
             rebuild_category_tree)
         rebuild_category_tree(self.env)
+        # Земля и гаражи (задача 398): после перестройки — рубрики уже на месте.
+        from ..data import load_land_garage
+        load_land_garage.load_land_garage(self.env)
         return True
 
     def _load_rubrics(self):
