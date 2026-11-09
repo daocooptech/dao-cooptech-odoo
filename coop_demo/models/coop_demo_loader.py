@@ -422,6 +422,12 @@ class CoopDemoLoader(models.AbstractModel):
         # названий и проектов: текст собирается из того, что уже есть в записи.
         load_descriptions.words_from_links(self.env)
         load_descriptions.fill_resource_descriptions(self.env)
+        # Девять разделов материальных ресурсов (задача 396) — последним
+        # шагом: загрузчики выше заводят категории по прежним названиям,
+        # перестройка переименует их и сольёт дубли. Идемпотентна.
+        from odoo.addons.coop_resources.models.coop_resource_tree import (
+            rebuild_category_tree)
+        rebuild_category_tree(self.env)
         return True
 
     def _load_rubrics(self):
