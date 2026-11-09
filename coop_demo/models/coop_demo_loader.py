@@ -431,6 +431,9 @@ class CoopDemoLoader(models.AbstractModel):
         # Земля и гаражи (задача 398): после перестройки — рубрики уже на месте.
         from ..data import load_land_garage
         load_land_garage.load_land_garage(self.env)
+        # Пустые листья дерева (задача 399).
+        from ..data import load_empty_leaves
+        load_empty_leaves.load_empty_leaves(self.env)
         return True
 
     def _load_rubrics(self):
