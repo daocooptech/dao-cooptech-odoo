@@ -434,6 +434,9 @@ class CoopDemoLoader(models.AbstractModel):
         # Пустые листья дерева (задача 399).
         from ..data import load_empty_leaves
         load_empty_leaves.load_empty_leaves(self.env)
+        # Характеристики по веткам дерева (задача 399).
+        from ..data import load_branch_attributes
+        load_branch_attributes.load_branch_attributes(self.env)
         return True
 
     def _load_rubrics(self):

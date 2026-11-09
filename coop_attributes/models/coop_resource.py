@@ -220,12 +220,55 @@ class CoopResource(models.Model):
                 [('attribute_id.code', 'in', codes), ('active', '=', False)])
         }
 
+        # Флажки («Как фильтруется» = «Флажки») выводятся пилюлями с
+        # множественным выбором и счётчиками, как у Авито и Юлы; прежний
+        # выпадающий список брал за раз одно значение. Счётчики считает
+        # `_coop_attr_counts` — одним запросом на всю рубрику.
+        def pills(item):
+            attribute = by_code.get(item.get('name'))
+            wanted = attribute.filter_widget if attribute else 'checkbox'
+            return (wanted == 'checkbox'
+                    and item.get('type') in ('selection', 'tags',
+                                             'integer'))
+
+        counted = [item.get('name') for item in definition
+                   if item.get('name') and pills(item)]
+        counts = self._coop_attr_counts(domain, counted) if counted else {}
+
         extra = []
         for item in definition:
             code = item.get('name')
             kind = item.get('type')
             attribute = by_code.get(code)
             if attribute and attribute.filter_widget == 'none':
+                continue
+            if pills(item):
+                found = counts.get(code, {})
+                if kind == 'integer':
+                    # Целое с флажками (комнат, оперативная память): варианты
+                    # — те числа, что есть у объявлений.
+                    values = sorted(found, key=lambda v: float(v))
+                    options = [{'value': float(v) if '.' in v else int(v),
+                                'label': v, 'count': found[v]}
+                               for v in values]
+                    if not options:
+                        continue
+                else:
+                    source = (item.get('selection') if kind == 'selection'
+                              else item.get('tags')) or []
+                    options = [
+                        {'value': pair[0], 'label': pair[1],
+                         'count': found.get(pair[0], 0)}
+                        for pair in source if (code, pair[0]) not in retired]
+                extra.append({
+                    'code': 'attr_%s' % code,
+                    'field': 'attrs.%s' % code,
+                    'label': item.get('string') or code,
+                    'unit': item.get('suffix') or '',
+                    'widget': 'multi', 'pills': True,
+                    'number': kind == 'integer',
+                    'options': options,
+                })
                 continue
             block = {
                 'code': 'attr_%s' % code,
@@ -445,7 +488,8 @@ class CoopResource(models.Model):
         """Рубрика, выбранная в панели, если она одна."""
         for leaf in domain or []:
             if (isinstance(leaf, (list, tuple)) and len(leaf) == 3
-                    and leaf[0] == 'category_id' and leaf[1] == '='):
+                    and leaf[0] == 'category_id'
+                    and leaf[1] in ('=', 'child_of')):
                 category = self.env['coop.resource.category'].sudo().browse(
                     int(leaf[2]))
                 return category.exists()

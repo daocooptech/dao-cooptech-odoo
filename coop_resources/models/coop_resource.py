@@ -814,8 +814,12 @@ class CoopResourceCatalogFilters(models.Model):
                          for code, label in
                          self._fields['listing_type'].selection]},
             {'code': 'category_id', 'label': 'Категория',
-             'hint': 'Рубрика каталога. От неё зависят характеристики ниже.',
+             'hint': 'Рубрика каталога. Ветка включает все свои подразделы; '
+                     'от неё зависят характеристики ниже.',
              'widget': 'select', 'field': 'category_id', 'placeholder': 'Любая',
+             # Ветка с подразделами, а не одна рубрика: у «Недвижимости»
+             # нет своих объявлений, они лежат в «Квартирах» и «Домах».
+             'operator': 'child_of', 'reload': True,
              'options': [{'value': c.id, 'label': c.complete_name}
                          for c in categories]},
             {'code': 'city', 'label': 'Город',
