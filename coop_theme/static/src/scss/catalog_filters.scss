@@ -499,7 +499,6 @@
     // Колонка — у каждого по имени класса: общее `> *` весит меньше,
     // чем `grid-area` из `catalog_shelves.scss`, и проигрывало ему.
     > .o_coop_filters { grid-column: 1 / -1; grid-row: 1; }
-    > .o_coop_buyer_mode { grid-column: 1 / -1; grid-row: 2; }
     > .o_coop_shelves { grid-column: 1 / -1; grid-row: 3; }
     > .o_kanban_renderer,
     > .o_list_renderer,

@@ -77,9 +77,7 @@
                   <t t-if="record.category_id.raw_value"><t t-out="record.category_id.value"/></t>
                 </div>
                 <div class="o_coop_res_price"><field name="price_display"/></div>
-                <!-- Опт — только в режиме «как организация» (решение 634):
-                     класс `o_coop_buyer_org` на `body` ставит переключатель
-                     над каталогом. -->
+                <!-- Опт — на карточке всегда; отбор «Только с оптовой ценой» — в панели. -->
                 <div class="o_coop_res_ws" t-if="record.has_wholesale.raw_value">
                   <span class="o_coop_res_wsbadge">оптом дешевле</span>
                   <field name="wholesale_display"/>
@@ -822,7 +820,7 @@
     <field name="name">Ресурсы</field>
     <field name="res_model">coop.resource</field>
     <field name="path">resources</field>
-    <field name="context">{'bin_size': True,'coop_catalog': True, 'coop_create_label': 'Добавить ресурс', 'coop_create_method': 'action_new_listing', 'coop_shelf_field': 'category_id', 'coop_buyer_mode': True}</field>
+    <field name="context">{'bin_size': True,'coop_catalog': True, 'coop_create_label': 'Добавить ресурс', 'coop_create_method': 'action_new_listing', 'coop_shelf_field': 'category_id'}</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('state', '=', 'published')]</field>
     <field name="search_view_id" ref="view_coop_resource_search"/>

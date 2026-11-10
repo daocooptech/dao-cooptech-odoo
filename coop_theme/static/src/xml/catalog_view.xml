@@ -63,7 +63,6 @@
       чужого `t-if` его больше не трогает.
     -->
     <xpath expr="//t[@t-component='this.props.Renderer']" position="before">
-      <CoopBuyerMode t-if="this.coopBuyerMode" t-key="'coop_buyer_mode'"/>
       <CoopShelves t-if="this.coopShelvesVisible" t-key="'coop_shelves'"
                    resModel="this.props.resModel"
                    field="this.coopShelfField"
