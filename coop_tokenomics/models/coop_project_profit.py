@@ -208,6 +208,55 @@ class CoopProjectProfit(models.Model):
             record.state = 'cancelled'
         return True
 
+    def action_pay(self):
+        """Выплатить: каждому вкладчику — движение по кошельку.
+
+        Платёж идёт в фиатный кошелёк (`coop.wallet.movement`, вид
+        «Выплата прибыли»), а не в сеть: прибыль объявлена в валюте
+        проекта. Движение проведённое, а потому не удаляется —
+        ошибку исправляют встречным. Повторно строка не платится:
+        у оплаченной есть ссылка на движение, и вторая выплата по ней
+        невозможна.
+        """
+        Wallet = self.env['coop.wallet']
+        Movement = self.env['coop.wallet.movement'].sudo()
+        for record in self:
+            if record.state != 'declared':
+                raise UserError(_(
+                    'Выплатить можно только объявленную прибыль.'))
+            if not record.line_ids:
+                raise UserError(_('В объявлении нет строк распределения.'))
+            for line in record.line_ids.filtered(lambda l: not l.movement_id):
+                if line.net <= 0:
+                    continue
+                wallet = Wallet.wallet_for(line.partner_id)
+                line.sudo().movement_id = Movement.create({
+                    'wallet_id': wallet.id,
+                    'kind': 'profit',
+                    'name': _('Прибыль проекта «%(project)s» за %(start)s — %(end)s',
+                              project=record.project_id.name,
+                              start=fields.Date.to_string(record.period_from),
+                              end=fields.Date.to_string(record.period_to)),
+                    'amount': line.net,
+                    'currency_id': record.currency_id.id or wallet.currency_id.id,
+                    'counterparty_id': record.initiator_id.id,
+                    'profit_line_id': line.id,
+                    'state': 'confirmed',
+                })
+                line.partner_id.sudo().message_notify(
+                    partner_ids=[line.partner_id.id],
+                    subject=_('Выплата прибыли проекта «%s»', record.project_id.name),
+                    body=_('На ваш кошелёк зачислено %(amount)s %(cur)s — '
+                           'доля %(pct)s %% прибыли проекта «%(project)s».',
+                           amount=line.net, cur=record.currency_id.name or '',
+                           pct=line.share_percent, project=record.project_id.name))
+            record.write({'state': 'paid', 'paid_on': fields.Datetime.now()})
+            record.message_post(body=_(
+                'Прибыль выплачена: %(count)s вкладчикам, итого %(total)s.',
+                count=len(record.line_ids.filtered('movement_id')),
+                total=record.net_total))
+        return True
+
     def action_dispute(self):
         for record in self:
             if record.state != 'declared':
@@ -247,6 +296,10 @@ class CoopProjectProfitLine(models.Model):
     share_percent = fields.Float(string='Доля, %', digits=(8, 4))
     amount = fields.Monetary(string='Начислено', currency_field='currency_id')
     withheld = fields.Monetary(string='Удержано', currency_field='currency_id')
+    movement_id = fields.Many2one(
+        'coop.wallet.movement', string='Движение по кошельку', readonly=True,
+        copy=False, index=True, ondelete='restrict')
+    paid_on = fields.Datetime(related='profit_id.paid_on', string='Выплачена')
     net = fields.Monetary(
         string='К выплате', currency_field='currency_id',
         compute='_compute_net', store=True)
@@ -260,3 +313,23 @@ class CoopProjectProfitLine(models.Model):
         'unique(profit_id, partner_id)',
         'Один вкладчик — одна строка в объявлении.',
     )
+
+
+class CoopWalletMovementProfit(models.Model):
+    _inherit = 'coop.wallet.movement'
+
+    kind = fields.Selection(
+        selection_add=[('profit', 'Выплата прибыли')],
+        ondelete={'profit': 'set default'})
+    profit_line_id = fields.Many2one(
+        'coop.project.profit.line', string='Строка прибыли', index=True,
+        readonly=True, copy=False, ondelete='set null')
+
+
+class CoopProjectProfitLink(models.Model):
+    _inherit = 'coop.project'
+
+    profit_ids = fields.One2many(
+        'coop.project.profit', 'project_id', string='Объявления прибыли')
+    profit_line_ids = fields.One2many(
+        'coop.project.profit.line', 'project_id', string='Выплаты по долям')

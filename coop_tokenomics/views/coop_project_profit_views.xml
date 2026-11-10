@@ -39,6 +39,9 @@
                   invisible="state != 'draft'"/>
           <button name="action_declare" type="object" string="Объявить"
                   class="btn-primary" invisible="state != 'draft'"/>
+          <button name="action_pay" type="object" string="Выплатить"
+                  class="btn-primary" invisible="state != 'declared'"
+                  confirm="Зачислить доли прибыли на кошельки вкладчиков? Проведённые движения не удаляются."/>
           <button name="action_dispute" type="object" string="Оспорить"
                   invisible="state != 'declared'"/>
           <button name="action_cancel" type="object" string="Отменить"
@@ -79,6 +82,7 @@
                   <field name="amount" string="Начислено" sum="Всего"/>
                   <field name="withheld" string="Удержано" sum="Всего"/>
                   <field name="net" string="К выплате" sum="Всего"/>
+                  <field name="movement_id" string="Движение" optional="show"/>
                   <field name="currency_id" column_invisible="1"/>
                 </list>
               </field>
@@ -121,6 +125,89 @@
          период, платформа делит её по долям вкладчиков.</p>
     </field>
   </record>
+
+  <!-- История выплат: у вкладчика — его строки, у проекта — страница на
+       карточке. Сами зачисления видны и в «Кошельке», вид «Выплата
+       прибыли». -->
+  <record id="view_coop_project_profit_line_list" model="ir.ui.view">
+    <field name="name">coop.project.profit.line.list</field>
+    <field name="model">coop.project.profit.line</field>
+    <field name="arch" type="xml">
+      <list string="Выплаты по долям" create="false" edit="false"
+            decoration-success="state == 'paid'"
+            decoration-muted="state in ('cancelled', 'draft')">
+        <field name="project_id" string="Проект"/>
+        <field name="profit_id" string="Объявление"/>
+        <field name="partner_id" string="Вкладчик"/>
+        <field name="share_percent" string="Доля, %"/>
+        <field name="amount" string="Начислено" sum="Всего"/>
+        <field name="net" string="К выплате" sum="Всего"/>
+        <field name="paid_on" string="Выплачена"/>
+        <field name="currency_id" column_invisible="1"/>
+        <field name="state" string="Состояние" widget="badge"
+               decoration-success="state == 'paid'"
+               decoration-info="state == 'declared'"
+               decoration-warning="state == 'disputed'"
+               decoration-muted="state in ('draft', 'cancelled')"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_project_profit_line_search" model="ir.ui.view">
+    <field name="name">coop.project.profit.line.search</field>
+    <field name="model">coop.project.profit.line</field>
+    <field name="arch" type="xml">
+      <search string="Выплаты по долям">
+        <field name="project_id"/>
+        <field name="partner_id"/>
+        <filter name="paid" string="Выплачено" domain="[('state', '=', 'paid')]"/>
+        <filter name="declared" string="Объявлено" domain="[('state', '=', 'declared')]"/>
+        <group>
+          <filter name="by_project" string="Проект" context="{'group_by': 'project_id'}"/>
+          <filter name="by_state" string="Состояние" context="{'group_by': 'state'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_project_profit_line" model="ir.actions.act_window">
+    <field name="name">Выплаты по долям</field>
+    <field name="res_model">coop.project.profit.line</field>
+    <field name="view_mode">list</field>
+    <field name="domain">[('state', 'in', ['declared', 'paid', 'disputed'])]</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Выплат по долям пока нет</p>
+      <p>Когда проект, в котором у вас есть доля, объявит и выплатит
+         прибыль, здесь появится ваша часть.</p>
+    </field>
+  </record>
+
+  <record id="view_coop_project_form_profit" model="ir.ui.view">
+    <field name="name">coop.project.form.profit</field>
+    <field name="model">coop.project</field>
+    <field name="inherit_id" ref="coop_projects.view_coop_project_form"/>
+    <field name="arch" type="xml">
+      <notebook position="inside">
+        <page string="Прибыль и выплаты" name="profit"
+              invisible="kind not in ('commercial', 'dao')">
+          <field name="profit_ids" nolabel="1">
+            <list>
+              <field name="period_from" string="С"/>
+              <field name="period_to" string="По"/>
+              <field name="amount" string="Прибыль"/>
+              <field name="line_count" string="Вкладчиков"/>
+              <field name="currency_id" column_invisible="1"/>
+              <field name="state" string="Состояние" widget="badge"/>
+            </list>
+          </field>
+        </page>
+      </notebook>
+    </field>
+  </record>
+
+  <menuitem id="menu_coop_project_profit_lines" name="Выплаты по долям"
+            parent="menu_coop_tokenomics_root"
+            action="action_coop_project_profit_line" sequence="36"/>
 
   <menuitem id="menu_coop_project_profit" name="Прибыль проектов"
             parent="menu_coop_tokenomics_root"

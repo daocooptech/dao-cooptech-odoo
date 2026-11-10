@@ -76,3 +76,21 @@ class TestProjectProfit(TransactionCase):
         profit = self._profit(project=self._project('commercial'))
         with self.assertRaises(UserError):
             profit.action_compute()
+
+    def test_pay_credits_wallets_once(self):
+        profit = self._profit(100001.0)
+        with self.assertRaises(UserError):
+            profit.action_pay()
+        profit.action_declare()
+        profit.action_pay()
+        self.assertEqual(profit.state, 'paid')
+        moves = profit.line_ids.mapped('movement_id')
+        self.assertEqual(len(moves), 3)
+        self.assertEqual(set(moves.mapped('kind')), {'profit'})
+        self.assertAlmostEqual(sum(moves.mapped('amount')), 100001.0, places=2)
+        for line in profit.line_ids:
+            self.assertEqual(line.movement_id.partner_id, line.partner_id)
+        with self.assertRaises(UserError):
+            profit.action_pay()
+        with self.assertRaises(UserError):
+            profit.action_cancel()
