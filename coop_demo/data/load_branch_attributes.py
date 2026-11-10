@@ -29,8 +29,14 @@ NEW_ATTRIBUTES = [
       'Дизайнерский']),
     ('bathroom', 'Санузел', 'selection', '', 'checkbox', False,
      ['Совмещённый', 'Раздельный', 'Два и более']),
-    ('balcony', 'Балкон или лоджия', 'boolean', '', 'switch', False, []),
-    ('elevator', 'Лифт', 'boolean', '', 'switch', False, []),
+    # Задача 399, владелец 10.11: «да/нет» заменено выбором — у лифта
+    # число и тип, у балкона вид. Прежние `balcony` и `elevator` сняты.
+    ('balcony_kind', 'Балкон или лоджия', 'selection', '', 'checkbox', False,
+     ['Нет', 'Балкон', 'Лоджия', 'Балкон и лоджия']),
+    ('elevator_count', 'Лифт', 'selection', '', 'checkbox', False,
+     ['Нет', '1', '2', '3 и более']),
+    ('elevator_kind', 'Тип лифта', 'tags', '', 'checkbox', False,
+     ['Пассажирский', 'Грузовой']),
     ('wall_material', 'Материал стен', 'selection', '', 'checkbox', True,
      ['Кирпич', 'Брус', 'Бревно', 'Газобетон', 'Каркас', 'Монолит']),
     ('commercial_purpose', 'Назначение', 'selection', '', 'checkbox', True,
@@ -94,7 +100,8 @@ ROLLED = ['rolled_kind', 'steel_grade', 'gost', 'thickness_mm', 'length_m',
 ASSIGN = {
     P + 'Жилая / Квартиры': ['flat_rooms', 'floor', 'floors_total',
                              'house_type', 'renovation', 'build_year',
-                             'bathroom', 'balcony', 'elevator'],
+                             'bathroom', 'balcony_kind', 'elevator_count',
+                             'elevator_kind'],
     P + 'Жилая / Комнаты': ['floor', 'floors_total', 'house_type',
                             'renovation', 'build_year'],
     P + 'Жилая / Дома, дачи, коттеджи': ['wall_material', 'renovation',
@@ -118,6 +125,7 @@ ASSIGN = {
 
 # Что снять (чужое после перестройки дерева).
 REMOVE = {
+    P + 'Жилая / Квартиры': ['balcony', 'elevator'],
     P.strip(' /'): ['utilities'],
     P + 'Гаражи и машиноместа': ['floor'],
     P + 'Коммерческая / Склады': ['floor', 'floors_total'],
@@ -228,6 +236,10 @@ def load_branch_attributes(env):
                                      ('code', 'in', [_slug(x) for x in pool])])
             assignment.option_ids = [(6, 0, allowed.ids)]
 
+    # Прежние «да/нет» заменены выбором; характеристику со значениями не
+    # удаляем, а убираем из обращения.
+    Attribute.search([('code', 'in', ['balcony', 'elevator'])]).write(
+        {'active': False})
     env.flush_all()
     filled = _fill(env, category)
     _logger.info('Ветки: привязок поставлено %s, снято %s, значения у %s '
@@ -461,7 +473,22 @@ def _generate(code, branch, rnd, options, cur):
             labels = [x for x in labels if x in options[code]] or list(
                 options[code])
         return _pick(options, code, labels, rnd)
-    if code in ('balcony', 'elevator', 'separate_entrance', 'heated', 'ramp'):
+    if code == 'balcony_kind':
+        return _pick(options, code, ['Нет', 'Балкон', 'Балкон', 'Лоджия',
+                                     'Балкон и лоджия'], rnd)
+    if code == 'elevator_count':
+        total = cur.get('floors_total') or 9
+        labels = (['Нет'] if total <= 5 else
+                  ['1', '1', '2', '3 и более'] if total >= 16 else
+                  ['Нет', '1', '1', '2'])
+        return _pick(options, code, labels, rnd)
+    if code == 'elevator_kind':
+        if cur.get('elevator_count') in (None, options['elevator_count'].get('Нет')):
+            return None
+        labels = rnd.choice([['Пассажирский'], ['Пассажирский'],
+                             ['Пассажирский', 'Грузовой']])
+        return [options['elevator_kind'][x] for x in labels]
+    if code in ('separate_entrance', 'heated', 'ramp'):
         return rnd.random() < 0.55
     if code == 'ceiling_height_m':
         return round(rnd.uniform(2.5, 6.0), 1)

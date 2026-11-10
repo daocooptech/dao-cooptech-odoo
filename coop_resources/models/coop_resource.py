@@ -841,24 +841,11 @@ class CoopResourceCatalogFilters(models.Model):
 
     def _coop_catalog_filters(self, domain):
         methods = self.env['coop.resource.method'].sudo().search([])
-        exchange = methods.filtered(lambda m: 'бмен' in m.name)
-        free = methods.filtered(lambda m: 'езвозмезд' in m.name)
 
-        quick = []
-        # Значки в подписях — из макета: чипы стоят в ряд, и по значку
-        # нужный находится быстрее, чем по прочтении трёх подписей.
-        if exchange:
-            quick.append({'value': 'exchange', 'label': '🔄 На обмен',
-                          'domain': [('method_ids', 'in', exchange.ids)]})
-        if free:
-            quick.append({'value': 'free', 'label': '🎁 Безвозмездно',
-                          'domain': [('method_ids', 'in', free.ids)]})
-        quick.insert(0, {'value': 'photo', 'label': '📷 С фото',
-                         'domain': [('image_1920', '!=', False)]})
-
-        # Быстрые фильтры стоят последними, перед кнопками: это ярлыки
-        # к тому, что уже есть выше, и открывать ими панель значит
-        # предлагать выбор до того, как человек понял, из чего выбирает.
+        # «Быстрые фильтры» (с фото, на обмен, безвозмездно) убраны по
+        # слову владельца 10.11.2026: «обмен» и «безвозмездно» уже есть
+        # в «Способе получения», а отдельный ряд чипов только загромождал
+        # панель.
         return [
             {'code': 'listing_type', 'label': 'Спрос или предложение',
              'hint': 'Предложение — «отдам, продам, сдам». '
@@ -887,6 +874,4 @@ class CoopResourceCatalogFilters(models.Model):
              'widget': 'select', 'field': 'method_ids', 'operator': '=',
              'placeholder': 'Любой',
              'options': [{'value': m.id, 'label': m.name} for m in methods]},
-            {'code': 'quick', 'label': 'Быстрые фильтры', 'widget': 'quick',
-             'options': quick},
         ]
