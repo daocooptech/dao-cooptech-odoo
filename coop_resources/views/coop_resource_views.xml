@@ -1067,8 +1067,9 @@
   </record>
 
   <menuitem id="menu_coop_resources_root" name="Ресурсы" sequence="60"/>
-  <!-- «Материальные» — владелец 10.11.2026, было «Каталог ресурсов». -->
-  <menuitem id="menu_coop_resources" name="Материальные"
+  <!-- 10.11.2026 владелец переименовал в «Материальные» и в тот же вечер
+       вернул: «верни каталог ресурсов вместо материальных». -->
+  <menuitem id="menu_coop_resources" name="Каталог ресурсов"
             parent="menu_coop_resources_root" action="action_coop_resources" sequence="10"/>
   <menuitem id="menu_coop_my_resources" name="Мои ресурсы"
             parent="menu_coop_resources_root" action="action_coop_my_resources"
