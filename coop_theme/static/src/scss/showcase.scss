@@ -984,11 +984,13 @@
 }
 
 // Значки строки под названием (эталон: `map-pin`, `package`, `check`,
-// 14 px). Маской — цвет берётся у текста и в тёмной теме тоже.
+// 14 px). Маской — цвет берётся у текста и в тёмной теме тоже. Низ значка —
+// по линии текста (владелец 10.11.2026: «по нижнему краю»): у пустого
+// блока базовая линия — нижний край, и `baseline` ставит его на строку.
 .coop-show_meta li[class^="coop-meta_"]::before {
   content: "";
   flex: none;
-  align-self: center;
+  align-self: baseline;
   width: 14px;
   height: 14px;
   background: currentColor;
