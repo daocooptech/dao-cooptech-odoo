@@ -103,6 +103,9 @@
           <button name="action_request_license" type="object"
                   string="Запросить лицензию" class="btn-primary"
                   invisible="not can_request_license"/>
+          <button name="action_to_project" type="object" string="Внести в проект"
+                  class="btn-primary"
+                  invisible="state != 'active' or not coop_can_edit"/>
           <button name="action_activate" type="object" string="Право действует"
                   class="btn-primary" invisible="(state == 'active') or not coop_can_edit"/>
           <field name="state" widget="statusbar"

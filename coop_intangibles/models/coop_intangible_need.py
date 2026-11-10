@@ -207,6 +207,11 @@ class CoopContributeWizardIntangible(models.TransientModel):
         values = super()._coop_offer_values()
         if self.intangible_id:
             values['intangible_id'] = self.intangible_id.id
+            # Актив принадлежит организации, а нажал её представитель, —
+            # вкладчик организация: право вносит правообладатель.
+            owner = self.intangible_id.owner_id
+            if owner and owner in self.env.user.coop_actor_partner_ids:
+                values['partner_id'] = owner.id
         if self.need_intangible_id:
             values['need_intangible_id'] = self.need_intangible_id.id
         return values

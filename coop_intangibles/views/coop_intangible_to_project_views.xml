@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Внести актив в проект с карточки актива (№ 395, слово владельца
+       10.11.2026: «чтобы НМА могли участвовать в проектах»). -->
+  <record id="view_coop_intangible_to_project_form" model="ir.ui.view">
+    <field name="name">coop.intangible.to.project.form</field>
+    <field name="model">coop.intangible.to.project</field>
+    <field name="arch" type="xml">
+      <form string="Внести актив в проект">
+        <field name="project_ids" invisible="1"/>
+        <field name="currency_id" invisible="1"/>
+        <group>
+          <field name="intangible_id" readonly="1"/>
+          <field name="project_id" options="{'no_create': True, 'no_open': True}"/>
+          <field name="ownership_kind" widget="radio"/>
+          <field name="value"/>
+          <field name="note" placeholder="Что именно и на каких условиях вы вносите"/>
+        </group>
+        <div class="text-muted small">
+          Предложение уйдёт инициатору проекта. Принять его может инициатор
+          или ответственный за потребность; принятый вклад даёт пай или долю
+          по денежной оценке, как у любого другого вклада.
+        </div>
+        <footer>
+          <button name="action_offer" type="object" string="Предложить" class="btn-primary"/>
+          <button string="Отмена" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <!-- Карточка организации: активы организации в проектах. -->
+  <record id="view_coop_org_form_asset_projects" model="ir.ui.view">
+    <field name="name">res.partner.form.coop.asset.projects</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="coop_orgs.view_coop_orgs_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//div[@invisible='not coop_member_count']" position="before">
+        <div invisible="not coop_asset_project_count">Активов в проектах:
+          <b><field name="coop_asset_project_count" nolabel="1" readonly="1"/></b>
+          <button name="action_coop_assets_in_projects" type="object"
+                  class="o_coop_stat_note">смотреть →</button>
+        </div>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>
