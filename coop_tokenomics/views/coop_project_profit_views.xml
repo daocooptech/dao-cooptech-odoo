@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Прибыль проектов по долям (решение 633, задача № 387, кусок 1).
+       Объявление и расчёт; выплата в кошельки — следующий кусок. -->
+
+  <record id="view_coop_project_profit_list" model="ir.ui.view">
+    <field name="name">coop.project.profit.list</field>
+    <field name="model">coop.project.profit</field>
+    <field name="arch" type="xml">
+      <list string="Прибыль проектов"
+            decoration-success="state == 'paid'"
+            decoration-warning="state == 'disputed'"
+            decoration-muted="state == 'cancelled'">
+        <field name="project_id" string="Проект"/>
+        <field name="period_from" string="С"/>
+        <field name="period_to" string="По"/>
+        <field name="amount" string="Прибыль" sum="Всего"/>
+        <field name="line_count" string="Вкладчиков"/>
+        <field name="net_total" string="К выплате" optional="hide"/>
+        <field name="declared_on" string="Объявлена" optional="show"/>
+        <field name="currency_id" column_invisible="1"/>
+        <field name="state" string="Состояние" widget="badge"
+               decoration-info="state == 'declared'"
+               decoration-success="state == 'paid'"
+               decoration-warning="state == 'disputed'"
+               decoration-muted="state in ('draft', 'cancelled')"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_project_profit_form" model="ir.ui.view">
+    <field name="name">coop.project.profit.form</field>
+    <field name="model">coop.project.profit</field>
+    <field name="arch" type="xml">
+      <form string="Прибыль проекта">
+        <header>
+          <button name="action_compute" type="object" string="Рассчитать по долям"
+                  invisible="state != 'draft'"/>
+          <button name="action_declare" type="object" string="Объявить"
+                  class="btn-primary" invisible="state != 'draft'"/>
+          <button name="action_dispute" type="object" string="Оспорить"
+                  invisible="state != 'declared'"/>
+          <button name="action_cancel" type="object" string="Отменить"
+                  invisible="state not in ('draft', 'declared', 'disputed')"/>
+          <button name="action_to_draft" type="object" string="В черновик"
+                  invisible="state not in ('cancelled', 'disputed')"/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="draft,declared,paid"/>
+        </header>
+        <sheet>
+          <h1><field name="name"/></h1>
+          <group>
+            <group>
+              <field name="project_id" readonly="state != 'draft'"/>
+              <field name="initiator_id"/>
+              <field name="period_from" readonly="state != 'draft'"/>
+              <field name="period_to" readonly="state != 'draft'"/>
+            </group>
+            <group>
+              <field name="currency_id" invisible="1"/>
+              <field name="amount" readonly="state != 'draft'"/>
+              <field name="distributed_total"/>
+              <field name="withheld_total"/>
+              <field name="net_total"/>
+              <field name="declared_on"/>
+            </group>
+          </group>
+          <group invisible="state != 'disputed'">
+            <field name="dispute_reason"/>
+          </group>
+          <notebook>
+            <page string="Распределение" name="lines">
+              <field name="line_ids" nolabel="1" readonly="1">
+                <list>
+                  <field name="partner_id" string="Вкладчик"/>
+                  <field name="share_tokens" string="Долей"/>
+                  <field name="share_percent" string="Доля, %"/>
+                  <field name="amount" string="Начислено" sum="Всего"/>
+                  <field name="withheld" string="Удержано" sum="Всего"/>
+                  <field name="net" string="К выплате" sum="Всего"/>
+                  <field name="currency_id" column_invisible="1"/>
+                </list>
+              </field>
+            </page>
+            <page string="Пояснение" name="note">
+              <field name="note" nolabel="1"/>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_project_profit_search" model="ir.ui.view">
+    <field name="name">coop.project.profit.search</field>
+    <field name="model">coop.project.profit</field>
+    <field name="arch" type="xml">
+      <search string="Прибыль проектов">
+        <field name="project_id"/>
+        <field name="initiator_id"/>
+        <filter name="declared" string="Объявлена" domain="[('state', '=', 'declared')]"/>
+        <filter name="paid" string="Выплачена" domain="[('state', '=', 'paid')]"/>
+        <filter name="disputed" string="Спорная" domain="[('state', '=', 'disputed')]"/>
+        <group>
+          <filter name="by_project" string="Проект" context="{'group_by': 'project_id'}"/>
+          <filter name="by_state" string="Состояние" context="{'group_by': 'state'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_coop_project_profit" model="ir.actions.act_window">
+    <field name="name">Прибыль проектов</field>
+    <field name="res_model">coop.project.profit</field>
+    <field name="view_mode">list,form</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Прибыли пока не объявляли</p>
+      <p>Инициатор коммерческого проекта или ДАО объявляет прибыль за
+         период, платформа делит её по долям вкладчиков.</p>
+    </field>
+  </record>
+
+  <menuitem id="menu_coop_project_profit" name="Прибыль проектов"
+            parent="menu_coop_tokenomics_root"
+            action="action_coop_project_profit" sequence="35"/>
+
+</odoo>

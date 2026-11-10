@@ -17,3 +17,8 @@ access_coop_share_rate_user,Ставки долей — участник,coop.pr
 access_coop_share_rate_admin,Ставки долей — администратор,coop.project.share.rate,base.group_system,crud,
 access_coop_token_escrow_user,Эскроу — участник,coop.token.escrow,base.group_user,ru,
 access_coop_token_escrow_admin,Эскроу — администратор,coop.token.escrow,base.group_system,crud,
+coop_project_profit_read,Прибыль проекта — инициатор и получатели,coop.project.profit,base.group_user,r,"['|', ('initiator_id', 'in', user.coop_actor_partner_ids.ids), ('line_ids.partner_id', 'in', user.coop_actor_partner_ids.ids)]"
+coop_project_profit_write_own,Прибыль проекта — правит инициатор,coop.project.profit,base.group_user,cu,"[('initiator_id', 'in', user.coop_actor_partner_ids.ids)]"
+coop_project_profit_admin,Прибыль проекта — администратор,coop.project.profit,base.group_system,crud,
+coop_project_profit_line_read,Строки прибыли — свои и по своему проекту,coop.project.profit.line,base.group_user,r,"['|', ('partner_id', 'in', user.coop_actor_partner_ids.ids), ('profit_id.initiator_id', 'in', user.coop_actor_partner_ids.ids)]"
+coop_project_profit_line_admin,Строки прибыли — администратор,coop.project.profit.line,base.group_system,crud,

@@ -7,4 +7,5 @@ from . import coop_token_order
 from . import coop_token_escrow
 from . import coop_exchange
 from . import coop_project_share
+from . import coop_project_profit
 from . import coop_resource_issue
