@@ -5,6 +5,9 @@
   gap: 0.5rem;
   flex-wrap: wrap;
   margin: 0 0 0.75rem;
+  // Там, где `.o_content` — ряд, а не сетка: на всю ширину и первым.
+  flex: 1 1 100%;
+  order: -1;
 }
 
 .o_coop_buyer_btn {

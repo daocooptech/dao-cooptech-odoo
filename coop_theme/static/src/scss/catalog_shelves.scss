@@ -22,13 +22,17 @@
 .o_content:has(> .o_coop_shelves) {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
+  // Первая строка — режим покупателя (`buyer_mode.scss`); без него она
+  // нулевой высоты и ничего не сдвигает.
   grid-template-areas:
+    "buyer   filters"
     "shelves filters"
     "grid    filters"
     "pager   pager";
   align-items: start;
   align-content: start;
 
+  > .o_coop_buyer_mode   { grid-area: buyer; }
   > .o_coop_shelves      { grid-area: shelves; }
   > .o_kanban_renderer,
   > .o_list_renderer,

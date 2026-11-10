@@ -499,11 +499,12 @@
     // Колонка — у каждого по имени класса: общее `> *` весит меньше,
     // чем `grid-area` из `catalog_shelves.scss`, и проигрывало ему.
     > .o_coop_filters { grid-column: 1 / -1; grid-row: 1; }
-    > .o_coop_shelves { grid-column: 1 / -1; grid-row: 2; }
+    > .o_coop_buyer_mode { grid-column: 1 / -1; grid-row: 2; }
+    > .o_coop_shelves { grid-column: 1 / -1; grid-row: 3; }
     > .o_kanban_renderer,
     > .o_list_renderer,
-    > .o_renderer { grid-column: 1 / -1; grid-row: 3; }
-    > .o_coop_pager { grid-column: 1 / -1; grid-row: 4; }
+    > .o_renderer { grid-column: 1 / -1; grid-row: 4; }
+    > .o_coop_pager { grid-column: 1 / -1; grid-row: 5; }
   }
 
   // Отступ вровень с первой полкой нужен колонке справа, а не панели
