@@ -279,12 +279,14 @@
                 <h1 class="coop-show_title"><field name="name" placeholder="Что предлагаете или ищете" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/></h1>
               </div>
               <ul class="coop-show_meta">
-                <li invisible="not city"><field name="city" readonly="1" nolabel="1"/></li>
-                <li invisible="not quantity_display">
+                <!-- Значки перед словами — как в эталоне `ResourcePage`
+                     (владелец 10.11.2026): метка, коробка, галочка. -->
+                <li class="coop-meta_city" invisible="not city"><field name="city" readonly="1" nolabel="1"/></li>
+                <li class="coop-meta_qty" invisible="not quantity_display">
                   <span>Есть</span>
                   <field name="quantity_display" readonly="1" nolabel="1"/>
                 </li>
-                <li invisible="condition == 'na' or not condition">
+                <li class="coop-meta_state" invisible="condition == 'na' or not condition">
                   <field name="condition" readonly="1" nolabel="1"/>
                 </li>
               </ul>
