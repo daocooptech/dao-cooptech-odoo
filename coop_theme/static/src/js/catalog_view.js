@@ -347,6 +347,13 @@ patch(ControlPanel.prototype, {
      * по-прежнему включает его заодно.
      */
     get coopHasFilters() {
+        // На странице записи отбирать нечего. Действие у неё то же, что у
+        // каталога, и признак каталога достаётся ей заодно — на узком
+        // экране над витриной стояла кнопка «Фильтр», которая ничего не
+        // открывала (владелец 10.11.2026). Так же, как вкладки раздела.
+        if (this.env.config?.viewType === "form") {
+            return false;
+        }
         const context = this.env.searchModel?.globalContext || {};
         return Boolean(context.coop_catalog || context.coop_filters);
     },
