@@ -138,3 +138,60 @@ def spread_recent_money(env, target=RECENT_MONEY):
         moved += 1
     _logger.info('Свежие денежные вклады: сдвинуто %s', moved)
     return moved
+
+
+def link_cfa_to_projects(env):
+    """Выпуски ЦФА под проекты (№ 395): выпуск привязывается к проекту
+    своего эмитента. Эмитент выпускает под свой проект — проверка в модели
+    `coop.cfa.issue`; кто не ведёт проектов, остаётся без привязки.
+    Идемпотентно: привязанные не трогаем, привязывается примерно каждый
+    второй из подходящих, чтобы у проектов с выпуском и без него было
+    поровну."""
+    if 'coop.cfa.issue' not in env or 'project_id' not in env['coop.cfa.issue']._fields:
+        return 0
+    Issue = env['coop.cfa.issue'].sudo().with_context(tracking_disable=True)
+    Project = env['coop.project'].sudo()
+    linked = 0
+    free = Issue.search([('project_id', '=', False), ('issuer_id', '!=', False)], order='id')
+    for position, issue in enumerate(free):
+        if position % 2:
+            continue
+        projects = Project.search([('partner_id', '=', issue.issuer_id.id)], order='id')
+        if not projects:
+            continue
+        issue.project_id = projects[position // 2 % len(projects)]
+        linked += 1
+    _logger.info('ЦФА под проекты: привязано %s выпусков', linked)
+    return linked
+
+
+def place_project_cfa(env):
+    """Размещено у участников: у выпусков под проект — по одному-три
+    владения на 10–60 % единиц, чтобы полоса «Размещено» на вкладке «ЦФА»
+    не была пустой везде. Идемпотентно: у выпуска с владениями не трогаем."""
+    if 'coop.cfa.holding' not in env:
+        return 0
+    Holding = env['coop.cfa.holding'].sudo().with_context(tracking_disable=True)
+    people = env['res.partner'].sudo().search([('is_company', '=', False)], order='id', limit=200)
+    if not people:
+        return 0
+    rnd = random.Random(20261112)
+    made = 0
+    issues = env['coop.cfa.issue'].sudo().search(
+        [('project_id', '!=', False), ('state', 'in', ('issued', 'redeemed'))], order='id')
+    for issue in issues:
+        if Holding.search_count([('issue_id', '=', issue.id)]):
+            continue
+        share = rnd.uniform(0.1, 0.6)
+        units = max(issue.unit_count, 1)
+        for step in range(rnd.randint(1, 3)):
+            holder = people[(issue.id * 7 + step * 13) % len(people)]
+            Holding.create({
+                'partner_id': holder.id, 'operator_id': issue.operator_id.id,
+                'issue_id': issue.id, 'name': issue.name,
+                'quantity': max(1, round(units * share / 3)),
+                'value': 0, 'maturity_date': issue.maturity_date,
+            })
+            made += 1
+    _logger.info('Размещение ЦФА под проекты: владений %s', made)
+    return made

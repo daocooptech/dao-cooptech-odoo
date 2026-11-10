@@ -212,6 +212,8 @@ class CoopDemoLoader(models.AbstractModel):
         if 'coop.deal' in self.env:
             load_project_deals.load_project_deals(self.env)
         load_project_deals.spread_recent_money(self.env)
+        load_project_deals.link_cfa_to_projects(self.env)
+        load_project_deals.place_project_cfa(self.env)
         # Задачи проектов — после того, как сборы вкладов обзавелись
         # проектами в управлении: задача заводится в управляемом проекте,
         # а исполнители берутся из вкладчиков сбора.

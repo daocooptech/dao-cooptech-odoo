@@ -186,6 +186,7 @@
           <group string="Обеспечение">
             <field name="collateral" placeholder="Залог техники, поручительство кооператива" widget="coop_inline" readonly="not coop_can_edit"/>
             <field name="intangible_id" options="{'no_create': True}" widget="coop_inline" readonly="not coop_can_edit"/>
+            <field name="project_id" options="{'no_create': True}" widget="coop_inline" readonly="not coop_can_edit"/>
             <div colspan="2" class="text-muted small" invisible="collateral or intangible_id">
               Обеспечения нет. Покупатель должен видеть это прямо, а не
               догадываться по отсутствию строки.
@@ -387,4 +388,35 @@
   <menuitem id="menu_coop_cfa_operator" name="Операторы"
             parent="menu_coop_cfa_root" action="action_coop_cfa_operator" sequence="30"/>
 
+  <!-- Аналитика проекта, вкладка «ЦФА» (№ 395). -->
+  <record id="view_coop_project_form_cfa_analytics" model="ir.ui.view">
+    <field name="name">coop.project.form.cfa.analytics</field>
+    <field name="model">coop.project</field>
+    <field name="inherit_id" ref="coop_projects.view_coop_project_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//notebook[@name='analytics_tabs']" position="inside">
+        <page string="ЦФА" name="an_cfa">
+          <field name="analytics_cfa" nolabel="1"/>
+        </page>
+      </xpath>
+    </field>
+  </record>
+
+  <!-- Карточка организации: сколько у неё выпусков ЦФА и переход к ним. -->
+  <record id="view_coop_org_form_cfa" model="ir.ui.view">
+    <field name="name">res.partner.form.coop.cfa</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="coop_orgs.view_coop_orgs_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//div[@invisible='not coop_member_count']" position="before">
+        <div invisible="not coop_cfa_count">Выпусков ЦФА:
+          <b><field name="coop_cfa_count" nolabel="1" readonly="1"/></b>
+          <button name="action_coop_cfa_issues" type="object"
+                  class="o_coop_stat_note">смотреть →</button>
+        </div>
+      </xpath>
+    </field>
+  </record>
+
 </odoo>
+

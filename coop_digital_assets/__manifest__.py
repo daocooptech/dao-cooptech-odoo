@@ -29,9 +29,9 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.1.0',
+    'version': '20.0.1.2.0',
     'license': 'LGPL-3',
-    'depends': ['coop_base', 'coop_people', 'coop_intangibles'],
+    'depends': ['coop_base', 'coop_people', 'coop_orgs', 'coop_projects', 'coop_intangibles'],
     'data': [
         'data/coop_cfa_operators.xml',
         'views/coop_cfa_views.xml',

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 
 class CoopCfaOperator(models.Model):
@@ -135,6 +135,11 @@ class CoopCfaIssue(models.Model):
     intangible_id = fields.Many2one(
         'coop.intangible', string='Обеспечен активом',
         help='Нематериальный актив из реестра, если обеспечение — он.')
+    project_id = fields.Many2one(
+        'coop.project', string='Проект', index=True, ondelete='set null',
+        domain="[('partner_id', '=', issuer_id)]",
+        help='Проект, под который идёт выпуск. Выпускает его инициатор: '
+             'обязательства по выпуску несёт эмитент, а проект — его.')
 
     state = fields.Selection([
         ('draft', 'Черновик'),
@@ -155,6 +160,16 @@ class CoopCfaIssue(models.Model):
 
     import_key = fields.Char(string='Ключ источника', index=True, copy=False)
 
+
+    @api.constrains('project_id', 'issuer_id')
+    def _check_project_issuer(self):
+        for record in self:
+            if record.project_id and record.project_id.partner_id != record.issuer_id:
+                raise ValidationError(_(
+                    'Выпуск под проект «%(project)s» может сделать только его '
+                    'инициатор — «%(owner)s». Эмитент выпуска — другая '
+                    'организация.', project=record.project_id.name,
+                    owner=record.project_id.partner_id.display_name))
 
     is_mine = fields.Boolean(
         string='Моё', compute='_compute_is_mine', search='_search_is_mine',
@@ -383,3 +398,100 @@ class CoopCfaHolding(models.Model):
             raise ValueError('Поддерживается только «моё: да» или «моё: нет».')
         return [('partner_id', 'in' if positive else 'not in',
                  self._my_partners().ids)]
+
+
+class CoopProjectCfa(models.Model):
+    """Выпуски ЦФА под проект и вкладка «ЦФА» в аналитике проекта (№ 395)."""
+    _inherit = 'coop.project'
+
+    cfa_issue_ids = fields.One2many(
+        'coop.cfa.issue', 'project_id', string='Выпуски ЦФА')
+    cfa_issue_count = fields.Integer(
+        string='Выпусков ЦФА', compute='_compute_cfa_issue_count')
+    analytics_cfa = fields.Html(
+        string='ЦФА проекта', compute='_compute_analytics_cfa', sanitize=False)
+
+    @api.depends('cfa_issue_ids.state')
+    def _compute_cfa_issue_count(self):
+        for project in self:
+            project.cfa_issue_count = len(project.cfa_issue_ids.filtered(
+                lambda issue: issue.state != 'draft'))
+
+    @api.depends_context('uid')
+    def _compute_analytics_cfa(self):
+        """Выпуски под проект: размещено из объёма, номинал, обеспечение,
+        срок до погашения (№ 395). Размещённое — по владениям участников
+        в выпусках платформы, а не по заявленному объёму."""
+        from odoo.addons.coop_projects.models.coop_project import _money, analytics_html
+        today = fields.Date.context_today(self)
+        states = dict(self.env['coop.cfa.issue']._fields['state'].selection)
+        for project in self:
+            issues = project.sudo().cfa_issue_ids.filtered(lambda i: i.state != 'draft')
+            placed = {issue.id: sum(
+                h.quantity * issue.unit_price
+                for h in self.env['coop.cfa.holding'].sudo().search([('issue_id', '=', issue.id)]))
+                for issue in issues}
+            live = issues.filtered(lambda i: i.state in ('accepted', 'issued'))
+            volume = sum(live.mapped('amount'))
+            total_placed = min(sum(placed[i.id] for i in live), volume)
+            dates = [i.maturity_date for i in live if i.maturity_date and i.maturity_date >= today]
+            nearest = min(dates) if dates else False
+            rows = []
+            for issue in issues:
+                left = (issue.maturity_date - today).days if issue.maturity_date else None
+                rows.append((
+                    issue.name, issue.issuer_id.display_name,
+                    issue.operator_id.name or '—',
+                    _money(issue.amount),
+                    _money(min(placed[issue.id], issue.amount)),
+                    issue.collateral or (issue.intangible_id.name if issue.intangible_id else _('нет')),
+                    ('%s дн.' % left) if left is not None and left >= 0
+                    else (_('просрочен') if left is not None else '—'),
+                    states.get(issue.state, '')))
+            share = (total_placed / volume) if volume else 0.0
+            project.analytics_cfa = analytics_html(
+                stats=[(_('Выпусков'), str(len(issues))),
+                       (_('Объём, ₽'), _money(volume)),
+                       (_('Размещено, ₽'), _money(total_placed)),
+                       (_('Ближайшее погашение'),
+                        nearest.strftime('%d.%m.%Y') if nearest else '—')] if issues else [],
+                bars=[(_('Размещено'), share, '%d %%' % round(share * 100))] if volume else [],
+                table=([_('Выпуск'), _('Эмитент'), _('Оператор'), _('Объём, ₽'),
+                        _('Размещено, ₽'), _('Обеспечение'), _('До погашения'), _('Состояние')],
+                       rows),
+                empty=_('Выпусков ЦФА под этот проект нет. Выпуск оформляет инициатор '
+                        'проекта в разделе «ЦФА».'))
+
+
+class ResPartnerCfa(models.Model):
+    """Счётчик выпусков ЦФА на карточке организации."""
+    _inherit = 'res.partner'
+
+    coop_cfa_count = fields.Integer(
+        string='Выпусков ЦФА', compute='_compute_coop_cfa_count')
+
+    def _compute_coop_cfa_count(self):
+        """Публичная величина, как число проектов: считается через sudo,
+        чтобы карточка не зависела от прав на сами выпуски. Черновики
+        не в счёт — это ещё не выпуск."""
+        Issue = self.env['coop.cfa.issue'].sudo()
+        counts = {}
+        if self.ids:
+            for group in Issue._read_group(
+                    [('issuer_id', 'in', self.ids),
+                     ('state', 'in', ('submitted', 'accepted', 'issued', 'redeemed'))],
+                    ['issuer_id'], ['__count']):
+                counts[group[0].id] = group[1]
+        for partner in self:
+            partner.coop_cfa_count = counts.get(partner.id, 0)
+
+    def action_coop_cfa_issues(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Выпуски ЦФА — %s', self.display_name),
+            'res_model': 'coop.cfa.issue',
+            'view_mode': 'kanban,list,form',
+            'domain': [('issuer_id', '=', self.id), ('state', '!=', 'draft')],
+        }
+

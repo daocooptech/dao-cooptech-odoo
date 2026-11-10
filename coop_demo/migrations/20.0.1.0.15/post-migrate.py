@@ -10,3 +10,4 @@ def migrate(cr, version):
     if 'coop.deal' in env:
         load_project_deals.load_project_deals(env)
     load_project_deals.spread_recent_money(env)
+    load_project_deals.link_cfa_to_projects(env)
