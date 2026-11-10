@@ -952,3 +952,46 @@ class CoopDealReview(models.Model):
                 'Отзыв не переписывают: он часть истории сделки. Если '
                 'обстоятельства изменились, скажите об этом ответом.'))
         return super().write(vals)
+
+
+class CoopProjectDeals(models.Model):
+    """Аналитика проекта: вкладка «Контракты» (№ 395)."""
+    _inherit = 'coop.project'
+
+    analytics_deals = fields.Html(
+        string='Контракты проекта', compute='_compute_analytics_deals',
+        sanitize=False)
+
+    @api.depends_context('uid')
+    def _compute_analytics_deals(self):
+        """Сделки проекта: число, сумма, оплачено, просрочено и таблица.
+
+        Читается то, что видит сам пользователь: правила доступа к сделкам
+        остаются теми же, отдельного права на аналитику нет."""
+        from odoo.addons.coop_projects.models.coop_project import _money, analytics_html
+        today = fields.Date.context_today(self)
+        states = dict(self.env['coop.deal']._fields['state'].selection)
+        for project in self:
+            deals = self.env['coop.deal'].search(
+                [('project_id', '=', project.id), ('state', '!=', 'cancelled')],
+                order='signed_on desc, id desc')
+            hidden = self.env['coop.deal'].sudo().search_count(
+                [('project_id', '=', project.id), ('state', '!=', 'cancelled')]) - len(deals)
+            payments = deals.mapped('payment_ids').filtered(lambda p: p.state != 'cancelled')
+            overdue = payments.filtered(
+                lambda p: p.state == 'overdue' or (p.state == 'planned' and p.due_on < today))
+            project.analytics_deals = analytics_html(
+                stats=[(_('Контрактов'), str(len(deals))),
+                       (_('Сумма, ₽'), _money(sum(deals.mapped('amount')))),
+                       (_('Оплачено, ₽'), _money(sum(deals.mapped('amount_paid')))),
+                       (_('Просрочено, ₽'), _money(sum(overdue.mapped('amount'))))] if deals else [],
+                table=([_('Сделка'), _('Стороны'), _('Сумма, ₽'), _('Оплачено, ₽'),
+                        _('Осталось, ₽'), _('Состояние')],
+                       [(d.display_name, '%s — %s' % (d.party_a_id.display_name,
+                                                      d.party_b_id.display_name),
+                         _money(d.amount), _money(d.amount_paid), _money(d.amount_due),
+                         states.get(d.state, '')) for d in deals]),
+                empty=(_('У проекта контрактов: %s. Суммы и условия видны только сторонам '
+                         'сделки (решение 487).', hidden) if hidden
+                       else _('Контрактов по проекту пока нет.')))
+

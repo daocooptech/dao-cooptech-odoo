@@ -52,7 +52,7 @@ from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_reference, load_residency, load_resources, load_sections,
                     load_skills,
                     load_project_needs, load_project_tasks,
-                    load_intangible_needs, load_rights_history,
+                    load_intangible_needs, load_rights_history, load_project_deals,
                     load_photos,
                     load_documents,
                     load_notifications,
@@ -207,6 +207,11 @@ class CoopDemoLoader(models.AbstractModel):
         # просить можно только то, что у кого-то уже есть.
         if 'coop.intangible' in self.env:
             load_intangible_needs.load_intangible_needs(self.env)
+        # Аналитика проекта (№ 395): контракты проектов и вклады последних
+        # недель — после сделок и вкладов, которые они читают.
+        if 'coop.deal' in self.env:
+            load_project_deals.load_project_deals(self.env)
+        load_project_deals.spread_recent_money(self.env)
         # Задачи проектов — после того, как сборы вкладов обзавелись
         # проектами в управлении: задача заводится в управляемом проекте,
         # а исполнители берутся из вкладчиков сбора.

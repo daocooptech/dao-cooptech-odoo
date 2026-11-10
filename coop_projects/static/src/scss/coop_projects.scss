@@ -799,3 +799,52 @@
     gap: 8px;
   }
 }
+
+// Аналитика проекта (№ 395): плитки итогов, столбики по неделям, таблица.
+.o_coop_an_stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+
+  .o_coop_an_stat {
+    padding: 10px 12px;
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-radius: 10px;
+  }
+
+  .o_coop_an_num {
+    font-size: 20px;
+    font-weight: 600;
+  }
+}
+
+.o_coop_an_bars {
+  margin-bottom: 14px;
+
+  .o_coop_an_bar {
+    display: grid;
+    grid-template-columns: 110px 1fr 90px;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+    font-size: 13px;
+  }
+
+  .o_coop_an_bar_track {
+    height: 10px;
+    border-radius: 5px;
+    background: var(--coop-surface, #f2f2ee);
+    overflow: hidden;
+  }
+
+  .o_coop_an_bar_fill {
+    display: block;
+    height: 100%;
+    background: var(--coop-ink, #1a1a17);
+  }
+
+  .o_coop_an_bar_value {
+    text-align: right;
+  }
+}

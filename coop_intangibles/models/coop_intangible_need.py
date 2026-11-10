@@ -107,6 +107,38 @@ class CoopProjectIntangible(models.Model):
         for project in self:
             project.need_intangible_count = len(project.need_intangible_ids)
 
+    analytics_intangibles = fields.Html(
+        string='Нематериальные вклады', compute='_compute_analytics_intangibles',
+        sanitize=False)
+
+    @api.depends('contribution_ids.intangible_id', 'contribution_ids.state',
+                 'contribution_ids.value')
+    def _compute_analytics_intangibles(self):
+        """Вклады проекта нематериальными активами: вид, кто вложил, оценка
+        и остаточная стоимость, лицензии и залог (№ 395)."""
+        from odoo.addons.coop_projects.models.coop_project import _money, analytics_html
+        for project in self:
+            offers = project.contribution_ids.filtered(
+                lambda c: c.intangible_id and c.state in ('offered', 'accepted'))
+            kinds = dict(self.env['coop.intangible']._fields['kind'].selection)
+            rows = [(c.intangible_id.name, kinds.get(c.intangible_id.kind, ''),
+                     c.partner_id.display_name, _money(c.value),
+                     _money(c.intangible_id.residual_value),
+                     str(c.intangible_id.license_count),
+                     c.intangible_id.pledge_holder_id.display_name or '—',
+                     dict(c._fields['state'].selection).get(c.state, ''))
+                    for c in offers]
+            accepted = offers.filtered(lambda c: c.state == 'accepted')
+            project.analytics_intangibles = analytics_html(
+                stats=[(_('Активов вложено'), str(len(accepted))),
+                       (_('Оценка, ₽'), _money(sum(accepted.mapped('value')))),
+                       (_('Остаточная стоимость, ₽'),
+                        _money(sum(accepted.mapped('intangible_id.residual_value')))),
+                       (_('Ждут решения'), str(len(offers) - len(accepted)))] if offers else [],
+                table=([_('Актив'), _('Вид'), _('Кто вложил'), _('Оценка, ₽'),
+                        _('Остаточная, ₽'), _('Лицензий'), _('Залог'), _('Состояние')], rows),
+                empty=_('Нематериальными активами в проект пока не вкладывались.'))
+
 
 class CoopProjectContributionIntangible(models.Model):
     """Вклад может быть внесён нематериальным активом."""

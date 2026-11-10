@@ -73,4 +73,18 @@
     </field>
   </record>
 
+  <!-- Аналитика проекта, вкладка «Нематериальные активы» (№ 395). -->
+  <record id="view_coop_project_form_intangible_analytics" model="ir.ui.view">
+    <field name="name">coop.project.form.intangible.analytics</field>
+    <field name="model">coop.project</field>
+    <field name="inherit_id" ref="coop_projects.view_coop_project_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//notebook[@name='analytics_tabs']" position="inside">
+        <page string="Нематериальные активы" name="an_intangibles">
+          <field name="analytics_intangibles" nolabel="1"/>
+        </page>
+      </xpath>
+    </field>
+  </record>
+
 </odoo>

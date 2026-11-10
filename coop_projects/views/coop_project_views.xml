@@ -605,6 +605,16 @@
               </field>
               </div></div>
             </page>
+            <!-- Аналитика проекта (№ 395, образец дизайн-системы): вкладки
+                 «Финансовые вклады», «НМА», «Контракты» дополняют модули,
+                 у которых эти данные есть. -->
+            <page string="Аналитика" name="analytics">
+              <notebook name="analytics_tabs">
+                <page string="Финансовые вклады" name="an_money">
+                  <field name="analytics_money" nolabel="1"/>
+                </page>
+              </notebook>
+            </page>
             <page string="Вклады" name="contributions">
               <div class="alert alert-info" role="status">
                 Краудресурсинг: скидываются не только деньгами. Смена

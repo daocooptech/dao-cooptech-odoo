@@ -17,6 +17,39 @@ def _money(amount):
     return '{:,.0f}'.format(amount or 0).replace(',', ' ')
 
 
+def analytics_html(stats, table=None, bars=None, empty=''):
+    """Блок аналитики проекта (№ 395): итоги плитками, столбики, таблица.
+
+    Всё, что попадает в разметку, экранируется здесь, поэтому поле с
+    таким содержимым не санируется движком: санитайзер вырезал бы ширину
+    столбиков. `stats` — пары (подпись, значение), `bars` — пары (подпись,
+    доля от 0 до 1, значение), `table` — (заголовки, строки).
+    """
+    from markupsafe import Markup, escape
+    parts = []
+    if stats:
+        parts.append('<div class="o_coop_an_stats">%s</div>' % ''.join(
+            '<div class="o_coop_an_stat"><div class="o_coop_an_num">%s</div>'
+            '<div class="text-muted">%s</div></div>' % (escape(value), escape(label))
+            for label, value in stats))
+    if bars:
+        parts.append('<div class="o_coop_an_bars">%s</div>' % ''.join(
+            '<div class="o_coop_an_bar"><span class="o_coop_an_bar_label">%s</span>'
+            '<span class="o_coop_an_bar_track"><span class="o_coop_an_bar_fill" '
+            'style="width:%d%%"></span></span><span class="o_coop_an_bar_value">%s</span></div>'
+            % (escape(label), round(max(0.0, min(1.0, share)) * 100), escape(value))
+            for label, share, value in bars))
+    if table and table[1]:
+        head = ''.join('<th>%s</th>' % escape(title) for title in table[0])
+        body = ''.join('<tr>%s</tr>' % ''.join('<td>%s</td>' % escape(cell) for cell in row)
+                       for row in table[1])
+        parts.append('<table class="table table-sm o_coop_an_table"><thead><tr>%s</tr>'
+                     '</thead><tbody>%s</tbody></table>' % (head, body))
+    if not parts:
+        parts.append('<p class="text-muted">%s</p>' % escape(empty))
+    return Markup(''.join(parts))
+
+
 class CoopProjectCategory(models.Model):
     """Тема проекта и её раздел.
 
@@ -416,6 +449,41 @@ class CoopProject(models.Model):
         for record in self:
             record.need_count = len(record.need_ids.filtered(
                 lambda need: need.state == 'published'))
+
+    analytics_money = fields.Html(
+        string='Финансовые вклады', compute='_compute_analytics_money',
+        sanitize=False)
+
+    @api.depends('contribution_ids.state', 'contribution_ids.value',
+                 'contribution_ids.kind', 'contribution_ids.accepted_on')
+    def _compute_analytics_money(self):
+        """Финансовые вклады: собрано, вкладчиков, средний вклад, возвращено
+        и поступления по неделям (последние восемь), № 395."""
+        today = fields.Date.context_today(self)
+        week_start = today - timedelta(days=today.weekday())
+        for project in self:
+            money = project.contribution_ids.filtered(lambda c: c.kind == 'money')
+            taken = money.filtered(lambda c: c.state == 'accepted')
+            returned = money.filtered(lambda c: c.state in ('returned', 'compensated'))
+            total = sum(taken.mapped('value'))
+            people = len(set(taken.mapped('partner_id').ids))
+            weeks = []
+            for back in range(7, -1, -1):
+                start = week_start - timedelta(weeks=back)
+                end = start + timedelta(days=7)
+                amount = sum(c.value for c in taken
+                             if c.accepted_on and start <= c.accepted_on < end)
+                weeks.append((start, amount))
+            top = max((amount for _start, amount in weeks), default=0) or 1
+            project.analytics_money = analytics_html(
+                stats=[(_('Собрано, ₽'), _money(total)),
+                       (_('Вкладчиков'), str(people)),
+                       (_('Средний вклад, ₽'), _money(total / people if people else 0)),
+                       (_('Возвращено, ₽'), _money(sum(returned.mapped('value'))))],
+                bars=[(_('нед. с %s', start.strftime('%d.%m')), amount / top, _money(amount))
+                      for start, amount in weeks],
+                empty=_('Денежных вкладов пока нет.')) if money else analytics_html(
+                    [], empty=_('Денежных вкладов пока нет.'))
 
     @api.depends('contribution_ids.state', 'contribution_ids.need_id')
     def _compute_new_offer_count(self):
