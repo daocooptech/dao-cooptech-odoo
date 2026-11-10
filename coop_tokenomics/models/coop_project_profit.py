@@ -243,6 +243,8 @@ class CoopProjectProfit(models.Model):
                     'profit_line_id': line.id,
                     'state': 'confirmed',
                 })
+                if self.env.context.get('coop_skip_profit_notify'):
+                    continue
                 line.partner_id.sudo().message_notify(
                     partner_ids=[line.partner_id.id],
                     subject=_('Выплата прибыли проекта «%s»', record.project_id.name),

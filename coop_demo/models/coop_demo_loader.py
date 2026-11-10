@@ -437,6 +437,10 @@ class CoopDemoLoader(models.AbstractModel):
         # Характеристики по веткам дерева (задача 399).
         from ..data import load_branch_attributes
         load_branch_attributes.load_branch_attributes(self.env)
+        # Прибыль проектов по долям (задача 387): после проектов, вкладов и
+        # кошельков — делится то, что уже заведено.
+        from ..data import load_profits
+        load_profits.load_profits(self.env)
         return True
 
     def _load_rubrics(self):
