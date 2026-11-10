@@ -16,7 +16,7 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.7.0',
+    'version': '20.0.1.7.1',
     'license': 'LGPL-3',
     # `website` — ради порядка загрузки: он добавляет к видам колонку
     # `visibility` (NOT NULL), и новый вид, созданный раньше него, не
@@ -40,6 +40,8 @@
             'coop_resources/static/src/xml/method_tabs.xml',
             'coop_resources/static/src/js/way_switch.js',
             'coop_resources/static/src/xml/way_switch.xml',
+            'coop_resources/static/src/js/phone_reveal.js',
+            'coop_resources/static/src/xml/phone_reveal.xml',
             'coop_resources/static/src/js/word_links.js',
             'coop_resources/static/src/xml/word_links.xml',
             'coop_resources/static/src/js/gallery.js',

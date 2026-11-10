@@ -30,8 +30,7 @@ class CoopGeoMixin(models.AbstractModel):
 
     coop_address = fields.Char(
         string='Адрес',
-        help='Улица и дом. По адресу объявление встаёт точкой на карте; '
-             'пусто — на карте его нет, только в списке и плиткой.')
+        help='Улица и дом — по ним точка на карте.')
     coop_lat = fields.Float(string='Широта', digits=(10, 6), copy=False)
     coop_lon = fields.Float(string='Долгота', digits=(10, 6), copy=False)
 

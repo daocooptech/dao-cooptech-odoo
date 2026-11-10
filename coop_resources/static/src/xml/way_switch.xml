@@ -25,9 +25,10 @@
         <b t-esc="this.current.name"/> — <t t-esc="this.current.terms"/>
       </p>
       <div class="coop-show_acts" t-if="this.data.can_respond">
+        <!-- «Написать владельцу» — в карточке владельца, а не здесь
+             (владелец 10.11.2026). -->
         <button type="button" class="btn btn-primary" t-on-click="() => this.respond()"
                 t-esc="this.current ? this.current.cta : 'Откликнуться'"/>
-        <button type="button" class="btn btn-secondary" t-on-click="() => this.message()">Написать владельцу</button>
       </div>
     </div>
   </t>

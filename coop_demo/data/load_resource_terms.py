@@ -258,8 +258,51 @@ def fill_term_details(env):
             term.write(vals)
             filled += 1
     filled += tidy_term_details(env)
+    filled += fill_project_terms(env)
     if filled:
         _logger.info('Ресурсы: поля способов заполнены у %s строк', filled)
+    return filled
+
+
+def fill_project_terms(env):
+    """«Участие в проекте» — конкретно: какие проекты, направления, где.
+
+    Владелец 10.11.2026: «Участие в проекте — какие проекты, направления,
+    где территориально». Проекты берутся настоящие — идущие и собирающие
+    в городе объявления, направления — их темы; нет таких в городе — тема
+    наугад и «город и область» или «вся страна». Заполняет только строки
+    без направлений и территории; повторный запуск ничего не меняет.
+    """
+    Term = env['coop.resource.term'].sudo()
+    if 'project_area' not in Term._fields or 'coop.project' not in env:
+        return 0
+    Project = env['coop.project'].sudo()
+    themes = env['coop.project.category'].sudo().search([('parent_id', '=', False)]).mapped('name')
+    filled = 0
+    for term in Term.search([('code', '=', 'project'), ('project_area', '=', False),
+                             ('project_directions', '=', False)]):
+        resource = term.resource_id
+        rnd = random.Random('project-scope:%s' % resource.id)
+        near = Project.search([('city', '=', resource.city),
+                               ('state', 'in', ('gathering', 'running'))],
+                              order='id', limit=12) if resource.city else Project
+        vals = {}
+        if near and rnd.random() < 0.75:
+            picked = near.browse(rnd.sample(near.ids, min(len(near), rnd.choice([1, 1, 2]))))
+            vals['project_scope'] = ', '.join('«%s»' % p.name for p in picked)
+            directions = [d for d in dict.fromkeys(picked.mapped('category_id.name')) if d]
+            vals['project_area'] = rnd.choice(['city', 'city', 'region'])
+        else:
+            vals['project_scope'] = 'любые'
+            directions = []
+            vals['project_area'] = rnd.choice(['region', 'country'])
+        if not directions and themes:
+            directions = rnd.sample(themes, min(len(themes), rnd.choice([1, 2])))
+        # «ИТ» — аббревиатура, строчной её не делаем.
+        vals['project_directions'] = ', '.join(
+            d if d[1:2].isupper() else d[:1].lower() + d[1:] for d in directions[:2])
+        term.write(vals)
+        filled += 1
     return filled
 
 

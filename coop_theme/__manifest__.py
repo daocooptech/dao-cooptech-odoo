@@ -69,6 +69,8 @@
             'coop_theme/static/src/js/add_page.js',
             'coop_theme/static/src/xml/add_page.xml',
             'coop_theme/static/src/scss/showcase.scss',
+            'coop_theme/static/src/js/minimap.js',
+            'coop_theme/static/src/xml/minimap.xml',
             'coop_theme/static/src/scss/foreign.scss',
             'coop_theme/static/src/js/catalog_shelves.js',
             'coop_theme/static/src/xml/catalog_shelves.xml',

@@ -428,9 +428,11 @@
                 <div class="coop-owner_acts" invisible="not can_respond">
                   <button name="action_message_owner" type="object" class="btn-secondary"
                           string="Написать"/>
+                  <field name="owner_has_phone" widget="coop_phone_reveal" nolabel="1"
+                         readonly="1" invisible="not owner_has_phone"/>
                 </div>
               </div>
-              <section class="coop-show_block" invisible="not city and not pickup_point and not coop_can_edit">
+              <section class="coop-show_block" name="pickup" invisible="not city and not pickup_point and not coop_can_edit">
                 <h2>Где забрать</h2>
                 <group class="coop-show_kv">
                   <field name="city" widget="coop_inline" readonly="not coop_can_edit"/>
@@ -667,6 +669,8 @@
                       <field name="contribution"/>
                       <field name="expect"/>
                       <field name="project_scope"/>
+                      <field name="project_directions"/>
+                      <field name="project_area"/>
                       <field name="surcharge"/>
                       <field name="surcharge_amount"/>
                       <field name="free_mode"/>

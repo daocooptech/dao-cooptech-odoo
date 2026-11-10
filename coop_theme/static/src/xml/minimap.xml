@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!-- Мини-карта: неподвижная карта с меткой и подписью адреса. -->
+  <t t-name="coop_theme.MiniMap">
+    <a class="coop-minimap" t-att-href="this.href" target="_blank" rel="noopener"
+       t-att-title="'Открыть на карте: ' + this.label"
+       t-att-aria-label="'Открыть на карте: ' + this.label">
+      <div class="coop-minimap_map" t-ref="this.canvas"/>
+      <span class="coop-minimap_label" t-if="this.label" t-esc="this.label"/>
+    </a>
+  </t>
+
+</templates>

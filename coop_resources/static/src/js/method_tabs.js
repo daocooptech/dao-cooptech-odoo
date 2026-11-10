@@ -42,6 +42,7 @@ const INSURANCE = [["lessee", "лизингополучатель"], ["lessor", 
 const CONTRIBUTION = [["own", "насовсем в проект"], ["use", "в пользование на срок проекта"]];
 const EXPECT = [["share", "долю"], ["product", "часть продукции"], ["costs", "возмещение расходов"]];
 const SURCHARGE = [["none", "без доплаты"], ["pay", "готов доплатить"], ["want", "жду доплату"]];
+const AREA = [["city", "только мой город"], ["region", "город и область"], ["country", "по всей стране"]];
 const FREE_MODE = [["forever", "насовсем"], ["loan", "на время, с возвратом"]];
 const FREE_TO = [["any", "любому"], ["org", "организациям"], ["project", "проектам"]];
 const RENT_PERIODS = ["час", "сутки", "неделя", "месяц"];
@@ -128,7 +129,9 @@ const LAYOUT = {
                 when: (t) => t.data.contribution === "use" }],
             ["loss", "seg", "При утрате", { options: LOSS, when: (t) => t.data.contribution === "use" }],
             ["expect", "seg", "Что жду взамен", { options: EXPECT, request: "Что даём взамен" }],
-            ["project_scope", "text", "В какие проекты", { ph: "Любые, направление или название проекта" }],
+            ["project_scope", "text", "Какие проекты", { ph: "Названия проектов или «любые»" }],
+            ["project_directions", "text", "Направления", { ph: "Например: фермерство, стройка" }],
+            ["project_area", "seg", "Где", { options: AREA }],
         ],
         // `coop-economist` 27.10.2026: доля — только при «долю»; в пользование —
         // от арендной стоимости, а не от оценки вещи.
@@ -524,6 +527,7 @@ registry.category("fields").add("coop_method_tabs", {
             ["ownership", "selection"], ["buyout", "monetary"], ["payment_manual", "monetary"],
             ["lessor", "selection"], ["lessor_name", "char"], ["insurance", "selection"],
             ["contribution", "selection"], ["expect", "selection"], ["project_scope", "char"],
+            ["project_directions", "char"], ["project_area", "selection"],
             ["surcharge", "selection"], ["surcharge_amount", "monetary"],
             ["free_mode", "selection"], ["free_to", "selection"], ["vat", "selection"],
             ["seller_name", "char"], ["use_rate", "monetary"],

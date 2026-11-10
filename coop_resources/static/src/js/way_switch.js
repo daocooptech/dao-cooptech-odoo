@@ -53,10 +53,6 @@ export class CoopWaySwitch extends Component {
     respond() {
         return this.call("action_respond", { coop_method_id: this.current.id });
     }
-
-    message() {
-        return this.call("action_message_owner");
-    }
 }
 
 registry.category("fields").add("coop_way_switch", {

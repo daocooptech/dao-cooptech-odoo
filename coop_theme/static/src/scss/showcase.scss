@@ -76,12 +76,13 @@
   font-size: 12.5px;
   color: var(--coop-slate);
 
+  // Как `Badge` эталона: Inter 500, 11 px, серым (сверка 10.11.2026).
   .o_coop_show_type {
-    padding: 3px 8px;
+    padding: 3px 7px;
     border-radius: var(--coop-radius-badge);
     background: var(--coop-surface);
-    color: var(--coop-ink);
-    font: 600 11.5px/1.3 'Manrope', sans-serif;
+    color: var(--coop-slate);
+    font: 500 11px/1.3 'Inter', sans-serif;
   }
 }
 .o_form_view.o_coop_show .oe_title {
@@ -923,4 +924,70 @@
   .coop-process_links {
     grid-column: 2 / -1;
   }
+}
+
+// Мини-карта под адресом (эталон `MiniMap`: 120 px, метка-капля, подпись
+// адреса внизу). Карта неподвижна, нажатие открывает место в новой вкладке.
+// Обёртка поля у движка — строчная, без ширины: карта сжималась в 2 px.
+.o_field_coop_minimap {
+  display: block;
+  width: 100%;
+}
+.coop-minimap {
+  position: relative;
+  display: block;
+  height: 120px;
+  margin-top: 10px;
+  border-radius: var(--coop-radius-item);
+  overflow: hidden;
+  border: 1px solid var(--coop-line);
+  background: var(--coop-surface);
+  color: inherit;
+  text-decoration: none;
+
+  &:hover, &:focus-visible { border-color: var(--coop-line-strong); }
+}
+
+.coop-minimap_map {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  cursor: pointer;
+
+  // Подпись OpenStreetMap — мелко в углу, над подписью адреса.
+  .leaflet-control-attribution {
+    font-size: 9px;
+    line-height: 1.3;
+    padding: 0 4px;
+  }
+  .leaflet-bottom { bottom: 30px; }
+}
+
+.coop-minimap_pin span {
+  display: block;
+  width: 30px;
+  height: 30px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  background: var(--coop-teal);
+  border: 2px solid var(--coop-white);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .25);
+}
+
+.coop-minimap_label {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  z-index: 500;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--coop-white);
+  color: var(--coop-ink);
+  font-size: 11.5px;
+  line-height: 1.35;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .12);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

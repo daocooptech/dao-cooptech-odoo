@@ -123,7 +123,17 @@ class CoopResourceTerm(models.Model):
         ('product', 'часть продукции'),
         ('costs', 'возмещение расходов'),
     ], string='Что жду взамен')
-    project_scope = fields.Char(string='В какие проекты')
+    # Конкретика вместо «любые» (владелец 10.11.2026): какие проекты,
+    # каких направлений и где — по этому участник решает, его ли это.
+    project_scope = fields.Char(string='Какие проекты',
+                                help='Названия проектов или «любые».')
+    project_directions = fields.Char(string='Направления',
+                                     help='Например: фермерство, стройка.')
+    project_area = fields.Selection([
+        ('city', 'только мой город'),
+        ('region', 'город и область'),
+        ('country', 'по всей стране'),
+    ], string='Где')
     # В пользование — доля от арендной стоимости: ставка × срок
     # (`coop-economist` 27.10.2026); срок — `months`.
     use_rate = fields.Monetary(string='Ставка в месяц')
@@ -225,6 +235,16 @@ class CoopResourceTerm(models.Model):
                  (self.bulk3_qty, self.bulk3_price)]
         return sorted((q, p) for q, p in tiers if q and p)
 
+    def _coop_area_text(self):
+        """«Бийск и область» — с городом объявления, без него — словами."""
+        self.ensure_one()
+        city = self.resource_id.city
+        if city and self.project_area == 'city':
+            return 'только %s' % city
+        if city and self.project_area == 'region':
+            return '%s и область' % city
+        return self._label('project_area')
+
     def _label(self, name):
         return dict(self._fields[name]._description_selection(self.env)).get(self[name])
 
@@ -234,7 +254,7 @@ class CoopResourceTerm(models.Model):
                  'max_term', 'operator', 'included', 'available_from', 'long_discount',
                  'down_pct', 'months', 'pay_every', 'markup_pct', 'ownership', 'buyout',
                  'payment_manual', 'lessor', 'lessor_name', 'insurance', 'contribution', 'expect',
-                 'project_scope', 'surcharge', 'surcharge_amount', 'free_mode', 'free_to',
+                 'project_scope', 'project_directions', 'project_area', 'surcharge', 'surcharge_amount', 'free_mode', 'free_to',
                  'vat', 'seller_name', 'use_rate', 'repairs', 'loss')
     def _compute_summary(self):
         for term in self:
@@ -330,6 +350,10 @@ class CoopResourceTerm(models.Model):
                 parts.append('взамен — %s' % term._label('expect'))
             if term.project_scope:
                 parts.append('проекты: %s' % term.project_scope)
+            if term.project_directions:
+                parts.append('направления: %s' % term.project_directions)
+            if term.project_area:
+                parts.append('где: %s' % term._coop_area_text())
         if code == 'barter' and term.surcharge in ('pay', 'want'):
             parts.append(term._label('surcharge') + (
                 ' %s' % term._rub(term.surcharge_amount) if term.surcharge_amount else ''))

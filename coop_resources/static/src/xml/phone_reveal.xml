@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!-- «Показать номер»: кнопка, после нажатия — номер ссылкой `tel:`. -->
+  <t t-name="coop_resources.PhoneReveal">
+    <a t-if="this.state.phone" class="btn btn-link coop-owner_phone" t-att-href="this.tel">
+      <CoopIcon name="'phone'" size="16"/>
+      <span t-esc="this.state.phone"/>
+    </a>
+    <button t-else="" type="button" class="btn btn-link coop-owner_phone"
+            t-att-disabled="this.state.loading" t-on-click="() => this.reveal()">
+      <CoopIcon name="'phone'" size="16"/>
+      <span>Показать номер</span>
+    </button>
+  </t>
+
+</templates>
