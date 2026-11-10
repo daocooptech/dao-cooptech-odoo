@@ -1658,7 +1658,7 @@ class CoopProjectContribution(models.Model):
                 # сбор: основание отпало, проекта не будет (решение 294).
                 record.return_mode = ('money_back' if basis != 'share'
                                       else 'money_back')
-            elif record.kind in ('material', 'knowledge'):
+            elif record.kind in ('material', 'knowledge', 'intangible'):
                 record.return_mode = 'compensation'
             else:
                 record.return_mode = 'in_kind'

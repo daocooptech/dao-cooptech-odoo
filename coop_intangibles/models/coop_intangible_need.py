@@ -79,7 +79,7 @@ class CoopIntangibleNeed(models.Model):
                 'default_need_intangible_id': self.id,
                 'default_name': self.intangible_id.name,
                 'default_value': self.price,
-                'default_kind': 'knowledge',
+                'default_kind': 'intangible',
             },
         }
 
@@ -170,6 +170,9 @@ class CoopContributeWizardIntangible(models.TransientModel):
     """Окно вклада: свой нематериальный актив вместо описания словами."""
     _inherit = 'coop.project.contribute'
 
+    kind = fields.Selection(
+        selection_add=[('intangible', 'Нематериальный актив')],
+        ondelete={'intangible': 'set default'})
     need_intangible_id = fields.Many2one(
         'coop.intangible.need', string='Потребность в нематериальном',
         readonly=True)
@@ -188,7 +191,7 @@ class CoopContributeWizardIntangible(models.TransientModel):
         правообладатель не соглашался."""
         mine = self.env.user.coop_actor_partner_ids
         found = self.env['coop.intangible'].search(
-            [('owner_id', 'in', mine.ids)], limit=200)
+            [('owner_id', 'in', mine.ids), ('state', '=', 'active')], limit=500)
         for wizard in self:
             wizard.my_intangible_ids = found
 

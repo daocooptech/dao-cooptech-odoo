@@ -65,3 +65,30 @@ class TestIntangibleToProject(CoopProjectCase):
         self._offer()
         offer = self.asset.contribution_ids
         self.assertEqual(offer.need_intangible_id, need)
+
+    def test_uchastvovat_vidom_nma_s_poiskom_po_nazvaniyu(self):
+        """В обычном «Участвовать» — вид «Нематериальный актив» и выбор из своих
+        действующих активов (поиск по началу названия — штатный поиск поля)."""
+        user = self.initiator
+        mine = user.partner_id
+        asset = self.env['coop.intangible'].create({
+            'name': 'Программа учёта смен', 'owner_id': mine.id, 'kind': 'software',
+            'state': 'active', 'initial_cost': 80000,
+            'legal_basis': 'Свидетельство о регистрации программы № 1',
+        })
+        draft = self.env['coop.intangible'].create({
+            'name': 'Программа в черновике', 'owner_id': mine.id, 'kind': 'software',
+            'legal_basis': 'Свидетельство о регистрации программы № 2',
+        })
+        wizard = self.env['coop.project.contribute'].with_user(user).create({
+            'project_id': self.project.id, 'kind': 'intangible', 'name': 'x', 'value': 50000,
+            'intangible_id': asset.id})
+        self.assertIn(asset, wizard.my_intangible_ids)
+        self.assertNotIn(draft, wizard.my_intangible_ids)
+        found = self.env['coop.intangible'].search(
+            [('id', 'in', wizard.my_intangible_ids.ids), ('name', 'ilike', 'Программа у')])
+        self.assertEqual(found, asset)
+        wizard.action_offer()
+        offer = asset.contribution_ids
+        self.assertEqual((offer.kind, offer.return_mode), ('intangible', 'compensation'))
+

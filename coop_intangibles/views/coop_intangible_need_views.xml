@@ -66,10 +66,15 @@
         <field name="my_intangible_ids" invisible="1"/>
         <field name="need_intangible_id" invisible="1"/>
         <field name="kind" invisible="1"/>
-        <field name="intangible_id" invisible="kind != 'knowledge' and not need_intangible_id"
+        <field name="intangible_id" invisible="kind != 'intangible' and not need_intangible_id"
+               required="kind == 'intangible'"
                options="{'no_create': True, 'no_open': True}"
                domain="[('id', 'in', my_intangible_ids)]"
-               placeholder="Выберите из «Моих нематериальных»"/>
+               placeholder="Начните вводить название актива"/>
+      </xpath>
+      <!-- Свой ресурс из каталога — для вещей; актив выбирается своим полем. -->
+      <xpath expr="//field[@name='resource_id']" position="attributes">
+        <attribute name="invisible">kind in ('money', 'intangible')</attribute>
       </xpath>
     </field>
   </record>

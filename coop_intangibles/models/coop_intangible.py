@@ -400,6 +400,10 @@ class CoopProjectContribution(models.Model):
     """
     _inherit = 'coop.project.contribution'
 
+    kind = fields.Selection(
+        selection_add=[('intangible', 'Нематериальный актив')],
+        ondelete={'intangible': 'set default'})
+
     intangible_id = fields.Many2one(
         'coop.intangible', string='Нематериальный актив', index=True,
         help='Заполняется, когда вклад — право, а не вещь и не деньги.')

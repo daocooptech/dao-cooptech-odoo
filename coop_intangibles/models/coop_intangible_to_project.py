@@ -69,7 +69,7 @@ class CoopIntangibleToProject(models.TransientModel):
             ('intangible_id', '=', asset.id), ('state', '=', 'open')], limit=1)
         wizard = self.env['coop.project.contribute'].create({
             'project_id': self.project_id.id,
-            'kind': 'knowledge',
+            'kind': 'intangible',
             'name': asset.name,
             'value': self.value,
             'ownership_kind': self.ownership_kind,
