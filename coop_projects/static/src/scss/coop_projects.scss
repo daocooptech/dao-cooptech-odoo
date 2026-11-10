@@ -738,3 +738,64 @@
   line-height: 1.5;
   background: var(--coop-surface, #f2f2ee);
 }
+
+// Разбор заявок на потребности (№ 395): карточка заявки в колонке
+// потребности. Токены цвета и линий — как у остальных карточек.
+.o_coop_offers .o_coop_offer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--coop-line, #e6e6e1);
+  border-radius: 10px;
+  background: var(--coop-card, #fff);
+
+  &.o_coop_offer_accepted {
+    border-color: var(--coop-accent, #1f6f43);
+    background: var(--coop-surface, #f2f2ee);
+  }
+
+  &.o_coop_offer_declined {
+    opacity: .6;
+  }
+
+  .o_coop_offer_head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .o_coop_offer_ava {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex: none;
+  }
+
+  .o_coop_offer_who {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .o_coop_offer_name {
+    font-weight: 600;
+  }
+
+  .o_coop_offer_value {
+    text-align: right;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .o_coop_offer_diff {
+    font-size: 12px;
+    font-weight: 400;
+  }
+
+  .o_coop_offer_actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+}

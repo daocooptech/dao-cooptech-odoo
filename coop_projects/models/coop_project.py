@@ -296,6 +296,8 @@ class CoopProject(models.Model):
              'На каждое приходят предложения, и утверждается одно.')
     need_count = fields.Integer(string='Потребностей',
                                 compute='_compute_need_count')
+    new_offer_count = fields.Integer(
+        string='Новых заявок', compute='_compute_new_offer_count')
 
     # Потребности по видам — списками, как в макете: «Необходимые
     # материальные ресурсы», «…трудовые», и так далее. Одним списком на
@@ -414,6 +416,32 @@ class CoopProject(models.Model):
         for record in self:
             record.need_count = len(record.need_ids.filtered(
                 lambda need: need.state == 'published'))
+
+    @api.depends('contribution_ids.state', 'contribution_ids.need_id')
+    def _compute_new_offer_count(self):
+        for record in self:
+            record.new_offer_count = len(record.contribution_ids.filtered(
+                lambda offer: offer.need_id and offer.state == 'offered'))
+
+    def action_open_offers(self):
+        """Страница разбора заявок: потребности слева, заявки карточками.
+
+        Колонки канбана — потребности проекта, карточки — предложения на
+        них. Принять и отклонить — прежние действия вклада, права и
+        извещения те же (`action_accept`, `action_decline`)."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Заявки на потребности — %s', self.name),
+            'res_model': 'coop.project.contribution',
+            'view_mode': 'kanban,list,form',
+            'views': [(self.env.ref('coop_projects.view_coop_contribution_offers_kanban').id, 'kanban'),
+                      (False, 'list'), (False, 'form')],
+            'search_view_id': self.env.ref('coop_projects.view_coop_contribution_offers_search').id,
+            'domain': [('project_id', '=', self.id), ('need_id', '!=', False)],
+            'context': {'default_project_id': self.id,
+                        'search_default_new_offers': 1},
+        }
 
     @api.depends('contribution_ids.value', 'contribution_ids.state')
     def _compute_contribution_total(self):
@@ -1380,6 +1408,38 @@ class CoopProjectContribution(models.Model):
     offered_on = fields.Date(
         string='Предложен', default=fields.Date.context_today)
     accepted_on = fields.Date(string='Принят')
+
+    # Для страницы разбора заявок (№ 395, образец OffersReviewPage):
+    # оценку заявки сравнивают со стоимостью потребности, а человека
+    # смотрят по доверию. Ничего не хранится — всё читается из соседних
+    # записей, и правка потребности или отзыва сразу меняет карточку.
+    need_price = fields.Float(
+        string='Стоимость потребности', compute='_compute_offer_review',
+        digits=(16, 2))
+    value_diff = fields.Float(
+        string='Разница со стоимостью, %', compute='_compute_offer_review',
+        digits=(7, 1))
+    value_diff_label = fields.Char(
+        string='К стоимости', compute='_compute_offer_review')
+    partner_trust = fields.Integer(
+        string='Доверие, %', related='partner_id.coop_trust')
+    partner_deals_done = fields.Integer(
+        string='Сделок', related='partner_id.coop_deals_done')
+
+    @api.depends('value', 'need_id.price')
+    def _compute_offer_review(self):
+        for record in self:
+            price = record.need_id.price if record.need_id else 0.0
+            record.need_price = price
+            if price:
+                diff = (record.value - price) / price * 100.0
+                record.value_diff = diff
+                sign = '+' if diff > 0 else ('−' if diff < 0 else '')
+                record.value_diff_label = _('%(sign)s%(num)d %% к стоимости',
+                                            sign=sign, num=round(abs(diff)))
+            else:
+                record.value_diff = 0.0
+                record.value_diff_label = _('стоимость потребности не задана')
 
     @api.depends('value', 'state', 'project_id.contribution_total')
     def _compute_share_percent(self):

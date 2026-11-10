@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Разбор заявок на потребности проекта (№ 395, образец дизайн-системы
+    OffersReviewPage: «как отклики на фрилансе»). Колонки — потребности
+    проекта, карточки — предложения на них: человек, доверие, оценка вклада
+    и разница со стоимостью потребности, как оформлен труд, кнопки
+    «Принять» и «Отклонить». Правила прежние: принимает инициатор,
+    ответственный за потребность или уполномоченный организации
+    (`action_accept`); принятие закрывает потребность и отклоняет остальные
+    заявки с извещением.
+  -->
+
+  <record id="view_coop_contribution_offers_search" model="ir.ui.view">
+    <field name="name">coop.project.contribution.offers.search</field>
+    <field name="model">coop.project.contribution</field>
+    <field name="arch" type="xml">
+      <search string="Заявки на потребности">
+        <field name="name" string="Что именно"/>
+        <field name="partner_id" string="Человек"/>
+        <field name="need_id" string="Потребность"/>
+        <filter name="new_offers" string="Новые" domain="[('state', '=', 'offered')]"/>
+        <filter name="accepted_offers" string="Принятые" domain="[('state', '=', 'accepted')]"/>
+        <filter name="declined_offers" string="Отклонённые" domain="[('state', '=', 'declined')]"/>
+        <group>
+          <filter name="group_need" string="Потребность" context="{'group_by': 'need_id'}"/>
+          <filter name="group_state" string="Состояние" context="{'group_by': 'state'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="view_coop_contribution_offers_kanban" model="ir.ui.view">
+    <field name="name">coop.project.contribution.offers.kanban</field>
+    <field name="model">coop.project.contribution</field>
+    <field name="arch" type="xml">
+      <kanban default_group_by="need_id" group_create="0" group_delete="0"
+              group_edit="0" records_draggable="0" quick_create="0"
+              class="o_coop_offers" create="0">
+        <field name="partner_id"/>
+        <field name="state"/>
+        <field name="kind"/>
+        <field name="name"/>
+        <field name="value"/>
+        <field name="currency_id"/>
+        <field name="need_price"/>
+        <field name="value_diff"/>
+        <field name="value_diff_label"/>
+        <field name="labour_form"/>
+        <field name="offered_on"/>
+        <field name="share_percent"/>
+        <field name="partner_trust"/>
+        <field name="partner_deals_done"/>
+        <field name="accepted_on"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_offer"
+                 t-att-class="'o_coop_offer_' + record.state.raw_value">
+              <div class="o_coop_offer_head">
+                <img class="o_coop_offer_ava" loading="lazy"
+                     t-attf-src="/web/image/res.partner/#{record.partner_id.raw_value}/avatar_128"
+                     t-att-alt="record.partner_id.value"/>
+                <div class="o_coop_offer_who">
+                  <div class="o_coop_offer_name"><field name="partner_id"/></div>
+                  <div class="o_coop_offer_meta text-muted">
+                    доверие <t t-out="record.partner_trust.value"/> % ·
+                    сделок <t t-out="record.partner_deals_done.value"/>
+                  </div>
+                </div>
+                <div class="o_coop_offer_value">
+                  <field name="value" widget="monetary"/>
+                  <div class="o_coop_offer_diff"
+                       t-att-class="record.need_price.raw_value ? (record.value_diff.raw_value &gt; 0 ? 'text-danger' : 'text-success') : 'text-muted'">
+                    <t t-out="record.value_diff_label.value"/>
+                  </div>
+                </div>
+              </div>
+              <div class="o_coop_offer_body">
+                <div class="o_coop_offer_what">
+                  <t t-out="record.kind.value"/>: <field name="name"/>
+                </div>
+                <div class="text-muted" t-if="record.labour_form.raw_value">
+                  Как оформлен труд: <t t-out="record.labour_form.value"/>
+                </div>
+                <div class="text-muted">
+                  предложено <t t-out="record.offered_on.value"/>
+                </div>
+                <div class="o_coop_offer_state" t-if="record.state.raw_value == 'accepted'">
+                  Принят — пай <t t-out="record.share_percent.value"/> %,
+                  отозвать можно 7 дней
+                </div>
+                <div class="o_coop_offer_state text-muted" t-elif="record.state.raw_value == 'declined'">
+                  Отклонён · извещение отправлено
+                </div>
+              </div>
+              <div class="o_coop_offer_actions" t-if="record.state.raw_value == 'offered'">
+                <button name="action_decline" type="object" class="btn btn-secondary btn-sm">Отклонить</button>
+                <button name="action_accept" type="object" class="btn btn-primary btn-sm"
+                        confirm="Принять предложение? Потребность закроется, остальные предложения по ней отклонятся сразу, откликнувшиеся получат извещение.">
+                  Принять
+                </button>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <!-- Вход со страницы проекта: кнопка над списком потребностей. -->
+  <record id="view_coop_project_form_offers_button" model="ir.ui.view">
+    <field name="name">coop.project.form.offers.button</field>
+    <field name="model">coop.project</field>
+    <field name="inherit_id" ref="coop_projects.view_coop_project_form_needs"/>
+    <field name="arch" type="xml">
+      <xpath expr="//page[@name='needs']/field[@name='need_ids']" position="before">
+        <field name="new_offer_count" invisible="1"/>
+        <div class="mb-2" invisible="not new_offer_count">
+          <button name="action_open_offers" type="object" class="btn btn-primary">
+            Разобрать заявки · <field name="new_offer_count" class="oe_inline"/>
+          </button>
+          <span class="text-muted ms-2">
+            Потребности слева, заявки карточками: оценка, доверие, «Принять» и «Отклонить».
+          </span>
+        </div>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>
