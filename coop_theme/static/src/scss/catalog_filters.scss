@@ -137,16 +137,6 @@
   cursor: pointer;
 }
 
-.o_coop_chip_count {
-  font: 600 10.5px/1 'JetBrains Mono', ui-monospace, monospace;
-  color: var(--coop-slate, #4a4a44);
-  opacity: .7;
-}
-
-.o_coop_chip_zero {
-  opacity: .45;
-}
-
 // Строка вместо полей там, где их ещё нет. Приглушена: это пояснение, а
 // не поле и не ошибка.
 .o_coop_filters_none {

@@ -139,15 +139,18 @@
             <!-- Пилюли с числом объявлений (задача 399): выбор нескольких
                  значений характеристики, значения без объявлений приглушены. -->
             <div class="o_coop_chips o_coop_pills" t-if="block.pills">
-              <button type="button" class="o_coop_chip"
-                      t-foreach="block.options" t-as="option" t-key="option.value"
-                      t-att-class="{ 'o_coop_chip_on': this.isPicked(block, option),
-                                     'o_coop_chip_zero': !option.count and !this.isPicked(block, option) }"
-                      t-att-aria-pressed="this.isPicked(block, option) ? 'true' : 'false'"
-                      t-on-click="() => this.toggleMulti(block.code, option.value)">
-                <t t-out="option.label"/>
-                <span class="o_coop_chip_count" t-if="option.count" t-out="option.count"/>
-              </button>
+              <!-- Варианты без объявлений не показываются: пустая пилюля
+                   ничего не отбирает и только загромождает панель.
+                   Выбранный остаётся, чтобы его можно было снять. -->
+              <t t-foreach="block.options" t-as="option" t-key="option.value">
+                <button type="button" class="o_coop_chip"
+                        t-if="option.count or this.isPicked(block, option)"
+                        t-att-class="{ 'o_coop_chip_on': this.isPicked(block, option) }"
+                        t-att-aria-pressed="this.isPicked(block, option) ? 'true' : 'false'"
+                        t-on-click="() => this.toggleMulti(block.code, option.value)">
+                  <t t-out="option.label"/>
+                </button>
+              </t>
               <div class="o_coop_multi_empty" t-if="!block.options.length">Выбирать пока не из чего</div>
             </div>
             <div class="o_coop_multi" t-else="">
