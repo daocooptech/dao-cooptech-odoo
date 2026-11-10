@@ -122,12 +122,12 @@ class TestCurrency(TransactionCase):
         self.assertEqual(both.coop_summary_currency(), self.kzt)
         nobody = self.env['res.partner'].create({'name': 'Без гражданства'})
         self.assertEqual(nobody.coop_summary_currency(), self.rub)
-        self.assertTrue(both.coop_ru_resident)
+        self.assertTrue(both.coop_is_ru_resident())
         foreign = self.env['res.partner'].create({
             'name': 'Иностранец', 'coop_citizenship_ids': [(6, 0, [kz.id])]})
-        self.assertFalse(foreign.coop_ru_resident)
+        self.assertFalse(foreign.coop_is_ru_resident())
         foreign.coop_ru_residence_permit = True
-        self.assertTrue(foreign.coop_ru_resident)
+        self.assertTrue(foreign.coop_is_ru_resident())
 
     def test_currency_warning_only_between_ru_residents(self):
         ru = self.env.ref('base.ru')
@@ -135,6 +135,9 @@ class TestCurrency(TransactionCase):
         a = Partner.create({'name': 'А', 'coop_citizenship_ids': [(6, 0, [ru.id])]})
         b = Partner.create({'name': 'Б', 'coop_citizenship_ids': [(6, 0, [ru.id])]})
         c = Partner.create({'name': 'В'})
+        if 'coop_fx_resident' in Partner._fields:
+            # С модулем настроек у участника без списка — прежняя отметка.
+            c.coop_fx_resident = False
         self.assertTrue(a.coop_currency_warning(b, self.usd))
         self.assertFalse(a.coop_currency_warning(b, self.rub))
         self.assertFalse(a.coop_currency_warning(c, self.usd))

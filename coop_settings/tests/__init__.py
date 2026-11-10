@@ -3,3 +3,4 @@ from . import test_currency
 from . import test_decree
 from . import test_safe
 from . import test_money_settings
+from . import test_citizenships

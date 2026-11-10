@@ -453,6 +453,31 @@
               </div>
             </div>
           </div>
+          <!-- Кошелёк (задача 400, решение 640): страна сводки и
+               гражданства. Резидентство считается по ним со слов, расчёт
+               валютой не блокируется — только предупреждение. -->
+          <div class="o_coop_band">
+            <div class="o_coop_band_head">
+              <span>Страна и валюта кошелька</span>
+            </div>
+            <div class="o_coop_band_body">
+              <group>
+                <field name="coop_citizenship_ids" widget="many2many_tags"
+                       options="{'no_create': True, 'no_open': True}"/>
+                <field name="coop_ru_residence_permit"/>
+                <field name="coop_summary_country_id"
+                       options="{'no_create': True, 'no_open': True}"/>
+              </group>
+              <div class="text-muted">
+                В кошельке на вкладке «Все» суммы пересчитываются в валюту
+                этой страны. Пусто — страна первого гражданства, иначе
+                Россия. Резидентство РФ платформа определяет по вашим
+                словам (гражданство или вид на жительство) и только
+                предупреждает при расчёте валютой; налоговое резидентство
+                (183 дня) она не определяет.
+              </div>
+            </div>
+          </div>
         </sheet>
       </form>
     </field>

@@ -120,6 +120,33 @@ class ResPartner(models.Model):
              'валютного: гражданин РФ, живущий в Ереване, — валютный '
              'резидент, но не налоговый.')
 
+    def coop_is_ru_resident(self):
+        """Резидент России для кошелька: по спискам из профиля, а у кого
+        их нет — по прежней отметке «валютный резидент» (одна правда,
+        а не две: список — уточнение, не второй источник)."""
+        self.ensure_one()
+        if self.coop_citizenship_ids or self.coop_ru_residence_permit:
+            return super().coop_is_ru_resident()
+        return bool(self.coop_fx_resident)
+
+    def write(self, vals):
+        """Список гражданств ведёт прежние поля: первое гражданство —
+        `coop_citizenship_id` (по нему считают указы), валютное
+        резидентство — по гражданству РФ или ВНЖ (ФЗ-173). Отметку, которую
+        правят в той же записи вручную, не трогаем."""
+        res = super().write(vals)
+        if 'coop_citizenship_ids' in vals or 'coop_ru_residence_permit' in vals:
+            for partner in self.filtered(lambda p: not p.is_company):
+                extra = {}
+                if partner.coop_citizenship_ids and 'coop_citizenship_id' not in vals:
+                    extra['coop_citizenship_id'] = partner.coop_citizenship_ids[0].id
+                if 'coop_fx_resident' not in vals and (
+                        partner.coop_citizenship_ids or partner.coop_ru_residence_permit):
+                    extra['coop_fx_resident'] = partner.coop_is_ru_resident()
+                if extra:
+                    super(ResPartner, partner).write(extra)
+        return res
+
     def _coop_rub_only(self):
         """Гражданин РФ — валютный резидент, где бы ни жил; российская
         организация — тоже (ФЗ-173). Иностранец с ВНЖ в РФ — резидент и

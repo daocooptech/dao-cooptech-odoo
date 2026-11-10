@@ -91,18 +91,17 @@ class ResPartner(models.Model):
                         ('coop_country_id', '=', country.id)], limit=1)
         return self.env.ref('base.RUB')
 
-    @api.depends('coop_citizenship_ids', 'coop_ru_residence_permit')
-    def _compute_coop_ru_resident(self):
-        ru = self.env.ref('base.ru', raise_if_not_found=False)
-        for partner in self:
-            partner.coop_ru_resident = bool(
-                partner.coop_ru_residence_permit
-                or (ru and ru in partner.coop_citizenship_ids))
+    def coop_is_ru_resident(self):
+        """Резидент России со слов: гражданство РФ или ВНЖ.
 
-    coop_ru_resident = fields.Boolean(
-        string='Резидент России', compute='_compute_coop_ru_resident',
-        help='Считается со слов: гражданство РФ или ВНЖ. Налоговое '
-             'резидентство (183 дня) платформа не определяет.')
+        Налоговое резидентство (183 дня) платформа не определяет. Модуль
+        настроек дополняет: у кого списка гражданств ещё нет — берётся
+        прежняя отметка «валютный резидент».
+        """
+        self.ensure_one()
+        ru = self.env.ref('base.ru', raise_if_not_found=False)
+        return bool(self.coop_ru_residence_permit
+                    or (ru and ru in self.coop_citizenship_ids))
 
     def coop_currency_warning(self, other, currency):
         """Предупреждение о расчёте валютой между резидентами РФ (решение 640).
@@ -112,7 +111,7 @@ class ResPartner(models.Model):
         """
         self.ensure_one()
         if (currency != self.env.ref('base.RUB')
-                and self.coop_ru_resident and other.coop_ru_resident):
+                and self.coop_is_ru_resident() and other.coop_is_ru_resident()):
             return ('Оба участника — резиденты России: расчёты между '
                     'резидентами, как правило, идут в рублях. Проверьте, '
                     'что расчёт валютой допустим для вашей сделки.')
@@ -122,7 +121,7 @@ class ResPartner(models.Model):
         """Подсказка резиденту РФ при добавлении иностранного счёта."""
         self.ensure_one()
         ru = self.env.ref('base.ru', raise_if_not_found=False)
-        if self.coop_ru_resident and country and ru and country != ru:
+        if self.coop_is_ru_resident() and country and ru and country != ru:
             return ('Резидент России уведомляет налоговую об открытии, закрытии '
                     'и смене реквизитов счёта в иностранном банке в течение '
                     'месяца; у физлиц бывают исключения. Платформа за вас '

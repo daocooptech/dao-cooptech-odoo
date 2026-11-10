@@ -34,6 +34,9 @@
     'assets': {
         'web.assets_backend': [
             'coop_wallet/static/src/scss/coop_wallet.scss',
+            'coop_wallet/static/src/scss/currency_switch.scss',
+            'coop_wallet/static/src/js/currency_switch.js',
+            'coop_wallet/static/src/xml/currency_switch.xml',
         ],
     },
     'installable': True,

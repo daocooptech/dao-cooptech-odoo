@@ -17,6 +17,17 @@ class ResUsers(models.Model):
     # только его собственная, для вкладки «Язык и регион».
     coop_currency_id = fields.Many2one(
         related='partner_id.coop_currency_id', readonly=False)
+    # Страна сводки кошелька и гражданства — в «Язык и регион» (задача 400,
+    # решение 640); хранятся на карточке участника.
+    coop_summary_country_id = fields.Many2one(
+        related='partner_id.coop_summary_country_id', readonly=False,
+        user_writeable=True)
+    coop_citizenship_ids = fields.Many2many(
+        related='partner_id.coop_citizenship_ids', readonly=False,
+        user_writeable=True)
+    coop_ru_residence_permit = fields.Boolean(
+        related='partner_id.coop_ru_residence_permit', readonly=False,
+        user_writeable=True)
     coop_currency_rub_only = fields.Boolean(
         compute='_compute_coop_currency_rub_only')
 

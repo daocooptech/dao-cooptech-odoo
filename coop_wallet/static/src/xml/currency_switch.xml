@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <t t-name="coop_wallet.CurrencySwitch">
+    <div class="o_coop_cursw">
+      <div class="o_coop_cursw_scroll" t-ref="scroller" t-on-scroll="syncScroll">
+        <div class="o_coop_cursw_seg" role="group" aria-label="Валюта">
+          <t t-foreach="this.tabs" t-as="tab" t-key="tab.code">
+            <button type="button" class="o_coop_cursw_item"
+                    t-att-class="{ 'o_coop_cursw_on': tab.code === this.value }"
+                    t-att-aria-pressed="tab.code === this.value ? 'true' : 'false'"
+                    t-on-click="() => this.pick(tab.code)">
+              <t t-out="tab.label"/>
+            </button>
+          </t>
+        </div>
+      </div>
+      <div class="o_coop_cursw_more" t-if="this.rest.length">
+        <button type="button" class="o_coop_cursw_btn" t-ref="more"
+                aria-haspopup="listbox"
+                t-att-aria-expanded="this.state.open ? 'true' : 'false'"
+                t-on-click="toggleMore">
+          Ещё <t t-out="this.rest.length"/>
+        </button>
+        <div class="o_coop_cursw_pop" t-if="this.state.open" t-on-keydown="onKeydown">
+          <input type="text" class="o_coop_cursw_search" autofocus="autofocus"
+                 placeholder="Код или страна" aria-label="Найти валюту"
+                 t-att-value="this.state.query" t-on-input="onSearch"/>
+          <ul class="o_coop_cursw_list" role="listbox" t-if="this.found.length">
+            <t t-foreach="this.found" t-as="item" t-key="item.code">
+              <li role="option" class="o_coop_cursw_opt"
+                  t-att-aria-selected="item_index === this.state.cursor ? 'true' : 'false'"
+                  t-on-click="() => this.choose(item)">
+                <b t-out="item.code"/>
+                <span t-out="item.country"/>
+              </li>
+            </t>
+          </ul>
+          <div class="o_coop_cursw_none" t-else="">Такой валюты нет</div>
+        </div>
+      </div>
+    </div>
+  </t>
+
+</templates>
