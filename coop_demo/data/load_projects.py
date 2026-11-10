@@ -18,6 +18,7 @@ import json
 import logging
 import os
 import random
+import zlib
 from datetime import timedelta
 
 from . import emblems
@@ -331,6 +332,8 @@ def load_projects(env, extra=100):
             project = Project.create(values)
             created += 1
             is_new = True
+
+        _investment_basis(project, key)
 
         # Состояние решается до вкладов, а не после: готовность у записи
         # считается от вкладов, и брать её как основание для выбора
@@ -649,9 +652,8 @@ def _basis_for(row, initiator=None):
 
     Кооперативный проект собирает паевые взносы, некоммерческий —
     пожертвования, остальные — предоплату за вознаграждение.
-    Инвестирование в наполнение придёт вместе с распределением прибыли по
-    долям (задача 387): без выплат такой проект показывал бы долю, которая
-    ничего не приносит.
+    Инвестирование проставляет `_investment_basis` по настоящему
+    инициатору проекта (задача 387).
 
     Пай — только у организации: паевого фонда у человека нет, и
     проверка вклада такой проект отвергает. ДАО-проект с инициатором-
@@ -665,6 +667,27 @@ def _basis_for(row, initiator=None):
     if basis == 'share' and initiator is not None and not initiator.is_company:
         return 'prepay'
     return basis
+
+
+def _investment_basis(project, key):
+    """Половина коммерческих проектов и все ДАО организаций — инвестиционные.
+
+    Решение 633: платформа — оператор инвестиционной платформы, доля
+    даёт часть прибыли (задача 387). Проект с основанием «Инвестирование»
+    без выплат показывал бы долю, которая ничего не приносит, поэтому
+    основание появилось вместе с выплатой. Выбор по ключу, а не по
+    номеру: порядок списка меняется, и проект не должен перепрыгивать
+    из основания в основание при каждой загрузке. Смотрим на настоящего
+    инициатора проекта — на повторной загрузке его не переписывают.
+    """
+    if project.kind not in ('commercial', 'dao'):
+        return
+    if not project.partner_id.is_company:
+        return
+    if project.kind == 'commercial' and zlib.crc32(key.encode('utf-8')) % 2:
+        return
+    if project.contribution_basis in ('prepay', 'donation'):
+        project.contribution_basis = 'investment'
 
 
 def _fallback_for(row):

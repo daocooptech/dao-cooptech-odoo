@@ -563,6 +563,29 @@ class CoopProject(models.Model):
             record.state = 'gathering'
         return True
 
+    @api.constrains('contribution_basis', 'kind', 'partner_id')
+    def _check_investment_basis(self):
+        """Инвестирование — коммерческому проекту и ДАО организации.
+
+        Заём, доля и ЦФА через инвестиционную платформу привлекает
+        юридическое лицо или предприниматель, а не человек от своего
+        имени; и доля, которая должна приносить прибыль (задача 387),
+        бывает только в коммерческом проекте и в ДАО.
+        """
+        for record in self:
+            if record.contribution_basis != 'investment':
+                continue
+            if record.kind not in ('commercial', 'dao'):
+                raise ValidationError(_(
+                    'Инвестирование возможно в коммерческом проекте или в '
+                    'ДАО. В кооперативном вносят паевые взносы, в '
+                    'некоммерческом — пожертвования.'))
+            if not record.partner_id.is_company:
+                raise ValidationError(_(
+                    'Инвестиции привлекает организация, а не человек от '
+                    'своего имени. Выберите предоплату или пожертвование '
+                    'либо разместите проект от имени организации.'))
+
     def _check_investment_allowed(self):
         """Инвестиционный сбор — на узле со статусом оператора.
 

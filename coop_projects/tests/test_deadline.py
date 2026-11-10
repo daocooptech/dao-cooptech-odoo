@@ -154,20 +154,27 @@ class TestFundingDeadline(CoopProjectCase):
         with self.assertRaises(UserError):
             project.action_fail()
 
+    def _make_investment_project(self):
+        """Инвестирование — у коммерческого проекта организации (задача 387)."""
+        org = self.env['res.partner'].create(
+            {'name': 'ООО Инвест', 'is_company': True})
+        self._confirm(org, 'identity')
+        project = self._make_project(partner=org)
+        project.write({'kind': 'commercial', 'contribution_basis': 'investment'})
+        return project
+
     def test_investitsionnyy_sbor_zakryt_bez_statusa_operatora(self):
         """Узел без статуса оператора закрывает инвестиционный сбор."""
         self.env['ir.config_parameter'].sudo().set_str(
             'coop.investment_operator', 'False')
-        project = self._make_project()
-        project.contribution_basis = 'investment'
+        project = self._make_investment_project()
         project.fallback_plan = 'Первая очередь.'
         with self.assertRaises(UserError):
             project.action_open_gathering()
 
     def test_so_statusom_operatora_investitsii_otkryvayutsya(self):
         """Платформа — оператор (решение 633): открыто по умолчанию."""
-        project = self._make_project()
-        project.contribution_basis = 'investment'
+        project = self._make_investment_project()
         project.fallback_plan = 'Первая очередь.'
         project.action_open_gathering()
         self.assertEqual(project.state, 'gathering')
