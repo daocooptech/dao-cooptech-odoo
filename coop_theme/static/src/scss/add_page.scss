@@ -311,6 +311,47 @@
   text-align: center;
 }
 
+// «Ещё снимки» под главным — сеткой квадратиков по три, а не столбиком
+// снимков во весь размер (лента витрины, владелец 10.11.2026).
+.coop-photo_more {
+  margin-top: 12px;
+
+  .o_x2m_control_panel {
+    margin: 6px 0 0 !important;
+  }
+  .o_kanban_renderer {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    padding: 6px 0 0 !important;
+  }
+  .o_kanban_record {
+    width: auto !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: var(--coop-radius-item);
+    border: 1px solid var(--coop-line);
+  }
+  .o_kanban_ghost {
+    display: none !important;
+  }
+  .coop-photo_more_img,
+  .coop-photo_more_img > div {
+    display: block !important;
+    width: 100%;
+    height: 100%;
+  }
+  .coop-photo_more_img img {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: cover;
+  }
+}
+
 // ── Правая колонка ──
 .coop-add_preview {
   display: flex;

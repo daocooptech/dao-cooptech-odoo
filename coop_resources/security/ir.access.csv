@@ -23,3 +23,7 @@ access_resource_word_user,Слова состава — чтение и доба
 access_resource_word_admin,Слова состава — ведение,coop.resource.word,coop_base.group_coop_platform,crud,
 access_resource_uom_user,Единицы измерения — чтение,coop.resource.uom,base.group_user,r,
 access_resource_uom_admin,Единицы измерения — ведение,coop.resource.uom,coop_base.group_coop_platform,crud,
+rule_resource_image_read,Снимки опубликованных объявлений — чтение,coop.resource.image,base.group_user,r,"[('resource_id.state', '=', 'published')]"
+rule_resource_image_own_read,Снимки своих объявлений — чтение,coop.resource.image,base.group_user,r,"[('resource_id.owner_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_resource_image_own,Снимки своего объявления — правка,coop.resource.image,base.group_user,cud,"[('resource_id.owner_id', 'in', user.coop_publisher_partner_ids.ids)]"
+rule_resource_image_system,Снимки объявлений — администратор,coop.resource.image,base.group_system,crud,

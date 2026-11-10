@@ -250,16 +250,22 @@
           <field name="made_of_count" invisible="1"/>
           <field name="currency_id" invisible="1"/>
           <section class="coop-show_hero">
+            <!-- Снимки — галереей с лентой миниатюр (`coop_gallery`,
+                 владелец 10.11.2026). Без снимка хозяин загружает его
+                 прямо здесь, смотрящий видит «Без снимка»; остальные
+                 снимки добавляются на странице размещения. -->
             <div class="coop-gallery">
-              <div class="coop-gallery_main">
+              <field name="gallery_data" widget="coop_gallery" nolabel="1" readonly="1"
+                     invisible="not image_1920"/>
+              <div class="coop-gallery_main" invisible="image_1920">
                 <field name="image_1920" widget="image" class="coop-gallery_img"
                        readonly="not coop_can_edit"
-                       invisible="not image_1920 and not coop_can_edit"/>
-                <span class="coop-gallery_none" invisible="image_1920 or coop_can_edit">Без снимка</span>
-                <span class="coop-gallery_badge">
-                  <field name="listing_type" readonly="1" nolabel="1"/>
-                </span>
+                       invisible="not coop_can_edit"/>
+                <span class="coop-gallery_none" invisible="coop_can_edit">Без снимка</span>
               </div>
+              <span class="coop-gallery_badge">
+                <field name="listing_type" readonly="1" nolabel="1"/>
+              </span>
             </div>
             <div class="coop-show_info">
               <div class="coop-show_kicker">
@@ -537,6 +543,27 @@
                         <field name="image_1920" widget="image" nolabel="1"/>
                       </div>
                       <div class="coop-photo_hint">Фото — первое, на что смотрят в каталоге</div>
+                      <!-- Ещё снимки — лентой под главным на витрине
+                           (владелец 10.11.2026). -->
+                      <div class="coop-photo_more">
+                        <div class="coop-photo_hint">Ещё снимки — до восьми, с разных сторон</div>
+                        <field name="image_ids" mode="kanban" nolabel="1"
+                               context="{'default_resource_id': id}">
+                          <kanban>
+                            <field name="id"/>
+                            <field name="image_256"/>
+                            <templates>
+                              <t t-name="card" class="p-0">
+                                <field name="image_256" widget="image" class="coop-photo_more_img"/>
+                              </t>
+                            </templates>
+                          </kanban>
+                          <form string="Снимок">
+                            <field name="image_1920" widget="image" nolabel="1"/>
+                            <field name="name" placeholder="Подпись, если нужна"/>
+                          </form>
+                        </field>
+                      </div>
                     </div>
                     <div class="d-flex flex-column gap-3">
                       <div class="coop-add_field coop-add_title">

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!-- Главный снимок и лента миниатюр под ним (`Gallery`). Метка вида
+       объявления стоит поверх снимка разметкой формы, не здесь. -->
+  <t t-name="coop_resources.Gallery">
+    <div class="coop-gallery_view" t-if="this.images.length" tabindex="0"
+         aria-roledescription="галерея" t-on-keydown="(ev) => this.onKeydown(ev)">
+      <div class="coop-gallery_frame">
+        <img class="coop-gallery_photo" t-att-src="this.current.src" t-att-alt="this.current.alt"/>
+        <t t-if="this.images.length > 1">
+          <button type="button" class="coop-gallery_nav coop-gallery_prev"
+                  aria-label="Предыдущий снимок" t-on-click="() => this.step(-1)">‹</button>
+          <button type="button" class="coop-gallery_nav coop-gallery_next"
+                  aria-label="Следующий снимок" t-on-click="() => this.step(1)">›</button>
+          <span class="coop-gallery_count"><t t-esc="this.state.index + 1"/> / <t t-esc="this.images.length"/></span>
+        </t>
+      </div>
+      <div class="coop-gallery_thumbs" t-if="this.images.length > 1" t-ref="this.strip">
+        <t t-foreach="this.images" t-as="image" t-key="image.id">
+          <button type="button" class="coop-gallery_thumb"
+                  t-att-class="{ 'coop-gallery_thumb_on': image_index === this.state.index }"
+                  t-att-aria-label="'Снимок ' + (image_index + 1)"
+                  t-att-aria-current="image_index === this.state.index ? 'true' : 'false'"
+                  t-on-click="() => this.select(image_index)">
+            <img t-att-src="image.thumb" alt="" loading="lazy"/>
+          </button>
+        </t>
+      </div>
+    </div>
+  </t>
+
+</templates>

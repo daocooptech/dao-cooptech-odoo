@@ -7,3 +7,4 @@ from . import coop_respond_wizard
 from . import coop_resource_term
 from . import coop_resource_word
 from . import coop_resource_uom
+from . import coop_resource_image
