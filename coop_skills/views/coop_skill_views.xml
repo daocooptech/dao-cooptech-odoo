@@ -165,10 +165,8 @@
             </div>
             <div class="coop-show_info">
               <div class="coop-show_kicker">
-                <span class="badge o_coop_show_type" invisible="not coop_specialization_category_id">
-                  <field name="coop_specialization_category_id" readonly="1" nolabel="1"
-                         options="{'no_open': True}"/>
-                </span>
+                <!-- Плашки над названием нет (владелец 10.11.2026: «везде
+                     убери эту таблетку»). -->
                 <field name="coop_specialization_id" readonly="1" nolabel="1"
                        options="{'no_open': True}"/>
               </div>
