@@ -32,3 +32,7 @@ access_coop_settlement_method_admin,Способы расчёта — веден
 rule_share_account_board,Паевые счета своего кооператива — правление,coop.share.account,coop_base.group_coop_board,r,"[('cooperative_id.coop_member_ids', 'any', [('partner_id', '=', user.partner_id.id), ('state', '=', 'active'), ('role', 'in', ('board', 'audit'))])]"
 rule_share_account_audit,Паевые счета своего кооператива — ревизия,coop.share.account,coop_base.group_coop_audit,r,"[('cooperative_id.coop_member_ids', 'any', [('partner_id', '=', user.partner_id.id), ('state', '=', 'active'), ('role', 'in', ('board', 'audit'))])]"
 access_coop_wallet_operation,Окно операции по кошельку — участник,coop.wallet.operation,base.group_user,crud,
+access_coop_currency_rate_user,Курсы валют — чтение,coop.currency.rate,base.group_user,r,
+access_coop_currency_rate_admin,Курсы валют — ведение,coop.currency.rate,coop_base.group_coop_platform,crud,
+rule_wallet_account_own,Свои счета,coop.wallet.account,base.group_user,crud,"[('partner_id', 'in', user.coop_treasury_partner_ids.ids)]"
+rule_wallet_account_admin,Счета — администратор,coop.wallet.account,base.group_system,crud,

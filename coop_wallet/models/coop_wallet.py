@@ -165,12 +165,16 @@ class CoopWallet(models.Model):
             record.asset_count = len(record.asset_ids)
             record.network_count = len(record.asset_ids.mapped('network_id'))
 
-    @api.depends('movement_ids.amount', 'movement_ids.state')
+    @api.depends('movement_ids.amount', 'movement_ids.state',
+                 'movement_ids.currency_id', 'currency_id')
     def _compute_fiat(self):
         Settlement = self.env['coop.settlement'].sudo()
         for record in self:
+            # Остаток кошелька — в валюте кошелька; остальные валюты — по
+            # `coop_balances()`, без пересчёта в одну цифру.
             confirmed = record.movement_ids.filtered(
-                lambda m: m.state == 'confirmed')
+                lambda m: m.state == 'confirmed'
+                and m.currency_id == record.currency_id)
             record.fiat_balance = sum(confirmed.mapped('amount'))
             record.movement_count = len(record.movement_ids)
             promised = sum(Settlement.search([
@@ -355,7 +359,14 @@ class CoopWalletMovement(models.Model):
     amount = fields.Monetary(
         string='Сумма', currency_field='currency_id', required=True,
         help='Плюс — пришло, минус — ушло.')
-    currency_id = fields.Many2one(related='wallet_id.currency_id', store=True)
+    # Своя валюта у каждого движения (задача 400): по кошельку их несколько.
+    # По умолчанию — валюта кошелька; прежние записи так и остались в ней.
+    currency_id = fields.Many2one(
+        'res.currency', string='Валюта', compute='_compute_currency',
+        store=True, readonly=False, precompute=True, required=True, index=True)
+    account_id = fields.Many2one(
+        'coop.wallet.account', string='Счёт', ondelete='set null',
+        domain="[('wallet_id', '=', wallet_id)]")
 
     kind = fields.Selection([
         ('topup', 'Пополнение'),
@@ -387,6 +398,11 @@ class CoopWalletMovement(models.Model):
         'check(amount != 0)',
         'Движение на ноль не имеет смысла.',
     )
+
+    @api.depends('wallet_id')
+    def _compute_currency(self):
+        for record in self:
+            record.currency_id = record.currency_id or record.wallet_id.currency_id
 
     @api.constrains('kind', 'method_id')
     def _check_method(self):

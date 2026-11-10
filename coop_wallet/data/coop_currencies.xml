@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Валюты фиатного кошелька (задача 400, решения 639, 640): БРИКС, СНГ, евро,
+  доллар, партнёры БРИКС. Состав — `WALLET_CURRENCIES` в
+  `models/coop_currency.py`; функцией, потому что валюты принадлежат `base`
+  и помечены там «не обновлять».
+-->
+<odoo>
+  <function model="res.currency" name="coop_enable_wallet_currencies"/>
+</odoo>

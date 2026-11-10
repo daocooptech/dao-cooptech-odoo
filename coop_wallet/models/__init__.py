@@ -6,3 +6,6 @@ from . import coop_wallet
 from . import coop_wallet_tx
 from . import coop_wallet_operation
 from . import coop_settlement_method
+from . import coop_currency
+from . import coop_wallet_account
+from . import coop_wallet_multi
