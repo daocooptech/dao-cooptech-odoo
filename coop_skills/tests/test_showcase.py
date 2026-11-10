@@ -64,6 +64,21 @@ class TestSkillShowcase(TransactionCase):
         outer = block[0].xpath('./group')[0]
         self.assertEqual(outer.get('col'), '1')
 
+    def test_experience_short(self):
+        """Под подписью «Опыт» — без второго «Опыт»."""
+        self.offer.experience_months = 38
+        self.assertEqual(self.offer.experience_display, 'Опыт 3 года 2 месяца')
+        self.assertEqual(self.offer.experience_short, '3 года 2 месяца')
+        self.offer.experience_months = 0
+        self.assertEqual(self.offer.experience_short, 'нет')
+
+    def test_facts_like_sample(self):
+        """Факты под описанием — как в образце: ставка, опыт,
+        командировки, город."""
+        arch = self._arch()
+        labels = [dt.text for dt in arch.xpath("//dl[contains(@class, 'coop-show_facts')]/div/dt")]
+        self.assertEqual(labels, ['Ставка', 'Опыт', 'Командировки', 'Город'])
+
     def test_single_message_button(self):
         """«Написать» — одна, в карточке человека, не дублем в шапке."""
         arch = self._arch()

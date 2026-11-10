@@ -235,22 +235,25 @@
                 <h2>Чем могу помочь</h2>
                 <field name="description"
                        placeholder="Что именно готовы делать, с каким оборудованием, какие есть допуски." widget="coop_block" readonly="not coop_can_edit"/>
+                <!-- Четыре факта, как в образце `SkillPage`: ставка, опыт,
+                     командировки, город — короткими значениями, чтобы
+                     плашки не тянулись в три строки. -->
                 <dl class="coop-show_facts">
-                  <div invisible="not experience_display">
+                  <div>
+                    <dt>Ставка</dt>
+                    <dd><field name="rate_display" readonly="1" nolabel="1"/></dd>
+                  </div>
+                  <div>
                     <dt>Опыт</dt>
-                    <dd><field name="experience_display" readonly="1" nolabel="1"/></dd>
+                    <dd><field name="experience_short" readonly="1" nolabel="1"/></dd>
+                  </div>
+                  <div>
+                    <dt>Командировки</dt>
+                    <dd><span invisible="not ready_to_travel">готов</span><span invisible="ready_to_travel">нет</span></dd>
                   </div>
                   <div invisible="not city">
                     <dt>Город</dt>
                     <dd><field name="city" readonly="1" nolabel="1"/></dd>
-                  </div>
-                  <div>
-                    <dt>Командировки</dt>
-                    <dd><span invisible="not ready_to_travel">Готов</span><span invisible="ready_to_travel">Только в своём городе</span></dd>
-                  </div>
-                  <div invisible="not coop_specialization_id">
-                    <dt>Специализация</dt>
-                    <dd><field name="coop_specialization_id" readonly="1" nolabel="1" options="{'no_open': True}"/></dd>
                   </div>
                 </dl>
               </section>

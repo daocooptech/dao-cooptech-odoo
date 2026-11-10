@@ -94,6 +94,8 @@ class CoopSkillOffer(models.Model):
     experience_months = fields.Integer(string='Опыт, месяцев', default=0)
     experience_display = fields.Char(
         string='Опыт', compute='_compute_experience_display', store=True)
+    experience_short = fields.Char(
+        string='Опыт коротко', compute='_compute_experience_short')
     experience_level = fields.Selection([
         ('none', 'Нет опыта'),
         ('junior', 'От года'),
@@ -237,6 +239,19 @@ class CoopSkillOffer(models.Model):
                     rest, 'месяц', 'месяца', 'месяцев')))
             record.experience_display = 'Опыт ' + ' '.join(parts)
             record.experience_level = 'senior' if years >= 3 else 'junior'
+
+    @api.depends('experience_display')
+    def _compute_experience_short(self):
+        # Под подписью «Опыт» на плашке фактов: «Опыт · Опыт 1 год»
+        # читалось дважды (владелец 10.11.2026, образец `SkillPage`:
+        # «Опыт · 3 года 2 месяца»).
+        for record in self:
+            text = record.experience_display or ''
+            if text.startswith('Опыт '):
+                text = text[len('Опыт '):]
+            elif text == 'Без опыта':
+                text = 'нет'
+            record.experience_short = text or False
 
     def _coop_recompute_money_display(self):
         """Пересчитать хранимую строку суммы у всех записей.
