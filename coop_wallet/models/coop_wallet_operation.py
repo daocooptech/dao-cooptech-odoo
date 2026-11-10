@@ -49,6 +49,11 @@ class CoopWalletOperation(models.TransientModel):
     method_id = fields.Many2one(
         'coop.wallet.method', string='Способ оплаты',
         domain="[('wallet_id', '=', wallet_id)]")
+    # Пополнение и вывод — только через цифровой рубль (решение 640, вар. Г).
+    account_id = fields.Many2one(
+        'coop.wallet.account', string='Счёт',
+        domain="[('wallet_id', '=', wallet_id), ('kind', '=', 'cbdc'), "
+               "('currency_id.name', '=', 'RUB')]")
     amount = fields.Monetary(string='Сумма', currency_field='currency_id')
     fiat_available = fields.Monetary(
         related='wallet_id.fiat_available', string='Доступно к выводу',
@@ -74,10 +79,11 @@ class CoopWalletOperation(models.TransientModel):
     @api.onchange('wallet_id', 'mode')
     def _onchange_default_method(self):
         for wizard in self:
-            if wizard.mode in ('topup', 'withdraw') and not wizard.method_id:
-                methods = self.env['coop.wallet.method'].search(
-                    [('wallet_id', '=', wizard.wallet_id.id)])
-                wizard.method_id = methods.filtered('is_default')[:1] or methods[:1]
+            if wizard.mode in ('topup', 'withdraw') and not wizard.account_id:
+                accounts = self.env['coop.wallet.account'].search([
+                    ('wallet_id', '=', wizard.wallet_id.id),
+                    ('kind', '=', 'cbdc'), ('currency_id.name', '=', 'RUB')])
+                wizard.account_id = accounts.filtered('is_main')[:1] or accounts[:1]
 
     # ── Проведение ───────────────────────────────────────────────────────
 
@@ -131,13 +137,15 @@ class CoopWalletOperation(models.TransientModel):
         })
 
     def _fiat_movement(self, kind, amount, name):
-        if not self.method_id:
-            raise UserError(_('Выберите способ оплаты.'))
+        if not self.account_id:
+            raise UserError(_(
+                'Пополнить и вывести можно через цифровой рубль: добавьте '
+                'счёт «Цифровой рубль».'))
         self.env['coop.wallet.movement'].sudo().create({
             'wallet_id': self.wallet_id.id,
             'kind': kind,
             'amount': amount,
-            'method_id': self.method_id.id,
+            'account_id': self.account_id.id,
             'name': name,
             'state': 'confirmed',
         })
@@ -146,7 +154,7 @@ class CoopWalletOperation(models.TransientModel):
         if self.amount <= 0:
             raise UserError(_('Укажите сумму пополнения.'))
         self._fiat_movement('topup', self.amount, _(
-            'Пополнение: %s', self.method_id.label))
+            'Пополнение: %s', self.account_id.label))
 
     def _do_withdraw(self):
         if self.amount <= 0:
@@ -157,4 +165,4 @@ class CoopWalletOperation(models.TransientModel):
                 'взаиморасчётам.',
                 available=self.wallet_id.fiat_available))
         self._fiat_movement('withdraw', -self.amount, _(
-            'Вывод: %s', self.method_id.label))
+            'Вывод: %s', self.account_id.label))

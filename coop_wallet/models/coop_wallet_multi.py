@@ -47,6 +47,9 @@ class CoopWalletMulti(models.Model):
         for row in self.coop_balances():
             count += row['count']
             currency = row['currency']
+            if not row['balance']:
+                # Пустой остаток не нужно пересчитывать: нет курса — не помеха.
+                continue
             converted = Rate.coop_convert(row['balance'], currency, target, on)
             if converted is None:
                 missing.append(currency)

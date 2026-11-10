@@ -404,14 +404,14 @@ class CoopWalletMovement(models.Model):
         for record in self:
             record.currency_id = record.currency_id or record.wallet_id.currency_id
 
-    @api.constrains('kind', 'method_id')
+    @api.constrains('kind', 'method_id', 'account_id')
     def _check_method(self):
         for record in self:
-            if record.kind in ('topup', 'withdraw') and not record.method_id:
+            if (record.kind in ('topup', 'withdraw') and not record.method_id
+                    and not record.account_id):
                 raise ValidationError(_(
-                    'У пополнения и вывода должен быть указан способ оплаты: '
-                    'иначе в истории не из чего собрать, откуда пришло и куда '
-                    'ушло.'))
+                    'У пополнения и вывода должен быть указан счёт: иначе в '
+                    'истории не из чего собрать, откуда пришло и куда ушло.'))
 
     def action_confirm(self):
         self.write({'state': 'confirmed'})

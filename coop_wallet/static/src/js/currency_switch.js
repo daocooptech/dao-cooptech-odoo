@@ -8,10 +8,10 @@
  * сеансами: на входе всегда «Все».
  *
  * Поле-виджет над строкой: значение — «all» или код валюты. Список валют
- * приходит в соседнем поле (`options.items_field`) строкой JSON:
+ * приходит в соседнем поле «<имя>_items» строкой JSON:
  * [{"code": "CNY", "country": "Китай", "shown": true}, …].
  */
-import { Component, onMounted, onPatched, proxy, useProps, useRef } from "@odoo/owl";
+import { Component, onMounted, onPatched, proxy, signal, useProps } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 
@@ -23,15 +23,17 @@ export class CoopCurrencySwitch extends Component {
 
     setup() {
         this.state = proxy({ open: false, query: "", cursor: 0, pinned: [] });
-        this.scroller = useRef("scroller");
-        this.moreButton = useRef("more");
+        this.scroller = signal.ref();
+        this.moreButton = signal.ref();
+        this.search = signal.ref();
+        this.needFocus = false;
         onMounted(() => this.syncScroll());
         onPatched(() => this.syncScroll());
     }
 
     get items() {
-        const field = this.props.options?.items_field;
-        const raw = field ? this.props.record.data[field] : "";
+        // Список валют — в соседнем поле с суффиксом `_items`.
+        const raw = this.props.record.data[this.props.name + "_items"];
         try {
             const list = JSON.parse(raw || "[]");
             return Array.isArray(list) ? list : [];
@@ -83,6 +85,7 @@ export class CoopCurrencySwitch extends Component {
         this.state.open = !this.state.open;
         this.state.cursor = 0;
         this.state.query = "";
+        this.needFocus = this.state.open;
     }
 
     onSearch(ev) {
@@ -97,14 +100,14 @@ export class CoopCurrencySwitch extends Component {
         this.state.open = false;
         this.state.query = "";
         await this.pick(item.code);
-        this.moreButton.el?.focus();
+        this.moreButton()?.focus();
     }
 
     onKeydown(ev) {
         const count = this.found.length;
         if (ev.key === "Escape") {
             this.state.open = false;
-            this.moreButton.el?.focus();
+            this.moreButton()?.focus();
         } else if (ev.key === "ArrowDown") {
             ev.preventDefault();
             this.state.cursor = Math.min(this.state.cursor + 1, count - 1);
@@ -119,7 +122,11 @@ export class CoopCurrencySwitch extends Component {
 
     /** Активное положение — в видимую область, затухание — только у скрытых краёв. */
     syncScroll() {
-        const el = this.scroller.el;
+        if (this.needFocus && this.search()) {
+            this.search().focus();
+            this.needFocus = false;
+        }
+        const el = this.scroller();
         if (!el) {
             return;
         }
@@ -138,5 +145,4 @@ export class CoopCurrencySwitch extends Component {
 registry.category("fields").add("coop_currency_switch", {
     component: CoopCurrencySwitch,
     supportedTypes: ["char"],
-    extractProps: ({ options }) => ({ options }),
 });

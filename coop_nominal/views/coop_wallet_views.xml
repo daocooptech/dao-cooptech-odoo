@@ -15,16 +15,15 @@
         <button name="action_nominal_statement" type="object" class="btn-secondary"
                 string="Выписка за период" invisible="tab != 'fiat'"/>
       </button>
-      <xpath expr="//div[hasclass('o_coop_wallet_intro')][following-sibling::div//field[@name='fiat_balance']]"
-             position="replace">
-        <div class="o_coop_wallet_intro">
-          Обычные рубли — без блокчейна и курсов обмена. По безопасной сделке
-          деньги хранятся в банке на отдельном счёте платформы: до акта они
-          ваши, после акта — продавца, и банк переводит их получателю.
-          Платформа ведёт их учёт и сама ими не распоряжается.
-        </div>
+      <xpath expr="//div[hasclass('o_coop_wallet_intro')][following-sibling::div//field[@name='fiat_currency']]"
+             position="inside">
+        По безопасной сделке деньги хранятся в банке на отдельном счёте
+        платформы: до акта они ваши, после акта — продавца, и банк переводит
+        их получателю. Платформа ведёт их учёт и сама ими не распоряжается;
+        безопасные сделки идут в рублях.
       </xpath>
-      <xpath expr="//div[hasclass('o_coop_kpi')][.//field[@name='fiat_balance']]" position="after">
+      <xpath expr="//div[hasclass('o_coop_note')][.//field[@name='fiat_stat_caption']]" position="after">
+        <div invisible="fiat_currency not in ('all', 'RUB')">
         <separator string="Безопасные сделки"/>
         <div class="o_coop_kpi">
           <div class="o_coop_kpi_cell">
@@ -69,6 +68,7 @@
             <field name="currency_id" column_invisible="True"/>
           </list>
         </field>
+        </div>
       </xpath>
     </field>
   </record>

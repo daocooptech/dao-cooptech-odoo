@@ -37,9 +37,9 @@
               <button name="action_crypto_send" type="object" string="Отправить"
                       class="btn-primary" invisible="tab != 'crypto'"/>
               <button name="action_fiat_withdraw" type="object" string="Вывести"
-                      class="btn-secondary" invisible="tab != 'fiat'"/>
+                      class="btn-secondary" invisible="tab != 'fiat' or not fiat_can_pay"/>
               <button name="action_fiat_topup" type="object" string="Пополнить"
-                      class="btn-primary" invisible="tab != 'fiat'"/>
+                      class="btn-primary" invisible="tab != 'fiat' or not fiat_can_pay"/>
             </div>
           </div>
           <field name="tab" widget="coop_tabs" nolabel="1"/>
@@ -145,57 +145,91 @@
 
           <!-- ═══ Фиат ═════════════════════════════════════════════════ -->
           <div invisible="tab != 'fiat'">
+            <field name="fiat_is_all" invisible="1"/>
+            <field name="fiat_can_pay" invisible="1"/>
             <div class="o_coop_wallet_intro">
-              Обычные рубли — без блокчейна и курсов обмена. Денег платформа
-              не держит: принимать чужие средства и переводить их по команде —
-              банковская операция, и на неё нужна лицензия. Расчёты идут через
-              платёжного агрегатора, здесь — их учёт.
+              Здесь учёт ваших денег в обычных валютах: рублях, юанях, евро и
+              других. Платформа денег не держит: принимать чужие средства и
+              переводить их по команде — банковская операция, на неё нужна
+              лицензия. Расчёты идут через банки и платёжного посредника.
+              Валюты не смешиваются: каждая показана отдельно, а в режиме
+              «Все» общий итог пересчитан в валюту вашей страны.
             </div>
+            <div class="o_coop_cursw_row">
+              <field name="fiat_currency" widget="coop_currency_switch" nolabel="1"/>
+              <field name="fiat_currency_items" invisible="1"/>
+            </div>
+            <div class="o_coop_note" invisible="not fiat_pay_hint">
+              <field name="fiat_pay_hint" nolabel="1"/>
+            </div>
+            <field name="fiat_rates_note" nolabel="1" invisible="not fiat_rates_note"/>
             <div class="o_coop_kpi">
               <div class="o_coop_kpi_cell">
                 <div class="o_coop_kpi_num">
-                  <field name="fiat_balance" widget="monetary" nolabel="1"/>
+                  <field name="fiat_stat_total" nolabel="1"/>
                 </div>
-                <div class="o_coop_kpi_label">Остаток</div>
+                <div class="o_coop_kpi_label">
+                  <span invisible="not fiat_is_all">Всего в пересчёте</span>
+                  <span invisible="fiat_is_all">Остаток</span>
+                </div>
               </div>
               <div class="o_coop_kpi_cell o_coop_kpi_free">
                 <div class="o_coop_kpi_num">
-                  <field name="fiat_available" widget="monetary" nolabel="1"/>
+                  <field name="fiat_stat_free" nolabel="1"/>
                 </div>
                 <div class="o_coop_kpi_label">Доступно к выводу</div>
               </div>
               <div class="o_coop_kpi_cell">
-                <div class="o_coop_kpi_num"><field name="movement_count" nolabel="1"/></div>
+                <div class="o_coop_kpi_num"><field name="fiat_stat_count" nolabel="1"/></div>
                 <div class="o_coop_kpi_label">Операций</div>
               </div>
             </div>
+            <div class="o_coop_note" invisible="not fiat_stat_caption">
+              <field name="fiat_stat_caption" nolabel="1"/>
+            </div>
 
-            <separator string="Привязанные способы оплаты"/>
+            <div invisible="not fiat_is_all or not fiat_by_currency">
+              <separator string="По валютам"/>
+              <field name="fiat_by_currency" nolabel="1"/>
+            </div>
+
+            <separator string="Мои счета"/>
             <div class="o_coop_note">
               Реквизиты не хранятся — только то, по чему вы узнаёте свой
-              способ. Полный номер карты в базе узла не нужен ни для чего:
-              платежи идут через агрегатора, и он хранит их у себя.
+              счёт. Полный номер карты в базе узла не нужен ни для чего.
             </div>
-            <field name="method_ids" nolabel="1">
-              <list editable="bottom">
+            <div class="o_coop_note o_coop_note_boxed" invisible="not fiat_account_hint">
+              <field name="fiat_account_hint" nolabel="1"/>
+            </div>
+            <field name="fiat_account_ids" nolabel="1" readonly="1">
+              <list>
+                <field name="country_id"/>
+                <field name="bank"/>
                 <field name="kind"/>
+                <field name="currency_id"/>
                 <field name="label"/>
-                <field name="is_default" widget="boolean_toggle"/>
+                <field name="is_main" string="Основной" widget="boolean_toggle"/>
               </list>
             </field>
+            <button name="action_add_account" type="object" string="Добавить счёт"
+                    class="btn-secondary"/>
 
             <separator string="История операций"/>
-            <field name="movement_ids" nolabel="1" readonly="1">
+            <div class="o_coop_note" invisible="fiat_movement_ids">
+              Операций в этой валюте пока нет.
+            </div>
+            <field name="fiat_movement_ids" nolabel="1" readonly="1"
+                   invisible="not fiat_movement_ids">
               <list decoration-muted="state == 'cancelled'"
                     decoration-danger="state == 'failed'"
                     decoration-info="state == 'pending'">
                 <field name="date"/>
                 <field name="name"/>
                 <field name="kind" optional="show"/>
-                <field name="method_id" optional="show"/>
+                <field name="account_id" optional="show"/>
                 <field name="counterparty_id" optional="hide"/>
                 <field name="deal_id" optional="show"/>
-                <field name="amount" sum="Итого"/>
+                <field name="amount"/>
                 <field name="currency_id" column_invisible="True"/>
                 <field name="state"/>
               </list>

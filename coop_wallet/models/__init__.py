@@ -9,3 +9,4 @@ from . import coop_settlement_method
 from . import coop_currency
 from . import coop_wallet_account
 from . import coop_wallet_multi
+from . import coop_wallet_fiat

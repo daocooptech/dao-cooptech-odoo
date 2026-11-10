@@ -33,7 +33,7 @@
         </div>
 
         <group invisible="mode not in ('topup', 'withdraw')">
-          <field name="method_id" required="mode in ('topup', 'withdraw')"
+          <field name="account_id" required="mode in ('topup', 'withdraw')"
                  options="{'no_create': True, 'no_open': True}"/>
           <field name="fiat_available" invisible="mode != 'withdraw'"/>
           <field name="amount" required="mode in ('topup', 'withdraw')"/>
@@ -48,6 +48,33 @@
                   class="btn-primary" invisible="mode != 'withdraw'"/>
           <button string="Закрыть" special="cancel" invisible="mode != 'receive'"/>
           <button string="Отмена" special="cancel" invisible="mode == 'receive'"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <!-- Счёт участника: добавить или поправить. Реквизитов нет намеренно. -->
+  <record id="view_coop_wallet_account_form" model="ir.ui.view">
+    <field name="name">coop.wallet.account.form</field>
+    <field name="model">coop.wallet.account</field>
+    <field name="arch" type="xml">
+      <form string="Счёт">
+        <field name="wallet_id" invisible="1"/>
+        <group>
+          <field name="country_id" options="{'no_create': True, 'no_open': True}"/>
+          <field name="bank"/>
+          <field name="kind"/>
+          <field name="currency_id" options="{'no_create': True, 'no_open': True}"/>
+          <field name="label" placeholder="Счёт •• 4412, Сбербанк"/>
+          <field name="is_main"/>
+        </group>
+        <div class="text-muted">
+          Реквизиты не хранятся — только то, по чему вы узнаёте свой счёт.
+          Цифровая валюта ЦБ подключена для рубля, рупии и тенге.
+        </div>
+        <footer>
+          <button string="Сохранить" special="save" class="btn-primary"/>
+          <button string="Отмена" special="cancel"/>
         </footer>
       </form>
     </field>

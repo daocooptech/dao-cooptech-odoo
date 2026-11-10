@@ -139,3 +139,53 @@
   padding: 8px;
   color: var(--coop-slate);
 }
+
+// Вкладка «Фиат»: строка переключателя, панель «По валютам», жёлтая плашка.
+.o_coop_cursw_row {
+  margin: 0 0 0.75rem;
+}
+
+.o_coop_wallet .o_coop_note_warn {
+  background: var(--coop-gold-tint);
+  border-color: var(--coop-gold);
+  color: var(--coop-gold-text);
+}
+
+.o_coop_cur_wrap {
+  overflow-x: auto;
+  border: 1px solid var(--coop-line);
+  border-radius: var(--coop-radius-card);
+  background: var(--coop-white);
+}
+
+.o_coop_cur_table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th {
+    background: var(--coop-surface);
+    color: var(--coop-slate);
+    font-weight: 500;
+    text-align: left;
+    padding: 10px 14px;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 11px 14px;
+    border-top: 1px solid var(--coop-line);
+    white-space: nowrap;
+  }
+
+  .o_coop_cur_num {
+    text-align: right;
+    font-family: var(--font-mono, ui-monospace, monospace);
+  }
+
+  .o_coop_cur_code {
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+}

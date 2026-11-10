@@ -3,7 +3,7 @@
 
   <t t-name="coop_wallet.CurrencySwitch">
     <div class="o_coop_cursw">
-      <div class="o_coop_cursw_scroll" t-ref="scroller" t-on-scroll="syncScroll">
+      <div class="o_coop_cursw_scroll" t-ref="this.scroller" t-on-scroll="() => this.syncScroll()">
         <div class="o_coop_cursw_seg" role="group" aria-label="Валюта">
           <t t-foreach="this.tabs" t-as="tab" t-key="tab.code">
             <button type="button" class="o_coop_cursw_item"
@@ -16,16 +16,16 @@
         </div>
       </div>
       <div class="o_coop_cursw_more" t-if="this.rest.length">
-        <button type="button" class="o_coop_cursw_btn" t-ref="more"
+        <button type="button" class="o_coop_cursw_btn" t-ref="this.moreButton"
                 aria-haspopup="listbox"
                 t-att-aria-expanded="this.state.open ? 'true' : 'false'"
-                t-on-click="toggleMore">
+                t-on-click="() => this.toggleMore()">
           Ещё <t t-out="this.rest.length"/>
         </button>
-        <div class="o_coop_cursw_pop" t-if="this.state.open" t-on-keydown="onKeydown">
-          <input type="text" class="o_coop_cursw_search" autofocus="autofocus"
+        <div class="o_coop_cursw_pop" t-if="this.state.open" t-on-keydown="(ev) => this.onKeydown(ev)">
+          <input type="text" class="o_coop_cursw_search" t-ref="this.search"
                  placeholder="Код или страна" aria-label="Найти валюту"
-                 t-att-value="this.state.query" t-on-input="onSearch"/>
+                 t-att-value="this.state.query" t-on-input="(ev) => this.onSearch(ev)"/>
           <ul class="o_coop_cursw_list" role="listbox" t-if="this.found.length">
             <t t-foreach="this.found" t-as="item" t-key="item.code">
               <li role="option" class="o_coop_cursw_opt"
