@@ -54,6 +54,15 @@ class CoopSkillOffer(models.Model):
              'этого спор «кто это разместил» разбирать нечем.')
     partner_trust = fields.Integer(
         related='partner_id.coop_trust', string='Доверие владельца', store=True)
+    # Карточка человека в боковой колонке витрины (дизайн-система,
+    # `SkillPage` + `OwnerCard`, решение 625) — теми же связанными полями,
+    # что у объявления ресурса.
+    partner_avatar = fields.Image(
+        related='partner_id.avatar_128', string='Знак владельца')
+    partner_deals_done = fields.Integer(
+        related='partner_id.coop_deals_done', string='Сделок у владельца')
+    partner_deals_reviewed = fields.Integer(
+        related='partner_id.coop_deals_reviewed', string='Отзывов о владельце')
 
     coop_specialization_id = fields.Many2one(
         'coop.specialization', string='Специализация', index=True,

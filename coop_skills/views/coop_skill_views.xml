@@ -123,7 +123,7 @@
     <field name="name">coop.skill.offer.form</field>
     <field name="model">coop.skill.offer</field>
     <field name="arch" type="xml">
-      <form string="Предложение навыка">
+      <form string="Предложение навыка" class="o_coop_show">
         <header>
           <!-- Публикация, пауза и стадии — только разместившему
                (владелец 08.10.2026); остальным — «Написать» и контакты. -->
@@ -135,8 +135,6 @@
                   class="btn-primary" invisible="not coop_is_mine or state != 'paused'"/>
           <button name="action_pause" type="object" string="Приостановить"
                   invisible="not coop_is_mine or state != 'published'"/>
-          <button name="action_message_owner" type="object" string="Написать"
-                  invisible="coop_is_mine"/>
           <!-- «Показать контакты» — как в макете (`skill.html`):
                телефон и почта не выставлены сразу, а открываются
                по нажатию. -->
@@ -148,45 +146,149 @@
         </header>
         <sheet>
           <field name="coop_can_edit" invisible="1"/>
-          <field name="image_1920" widget="image" class="oe_avatar"/>
-          <div class="oe_title">
-            <h1><field name="name" placeholder="Чем занимаетесь" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/></h1>
-          </div>
-          <group>
-            <group string="Кто и где">
-              <field name="partner_id" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="city" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="ready_to_travel"/>
-              <field name="coop_specialization_id" options="{'no_create': True}" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="coop_specialization_category_id" readonly="1"/>
-            </group>
-            <group string="Условия">
-              <field name="rate_kind" widget="coop_inline" readonly="not coop_can_edit"/>
-              <label for="rate"/>
-              <div class="o_row">
-                <field name="rate" readonly="rate_kind == 'piece'" widget="coop_inline"/>
-                <field name="rate_period" readonly="rate_kind == 'piece'" widget="coop_inline"/>
+          <field name="currency_id" invisible="1"/>
+          <!--
+            Витрина навыка (дизайн-система, `SkillPage`, решение 625):
+            те же плоскости, что у страницы ресурса — шапка со снимком
+            работы, ставкой и умениями; основная колонка; боковая с
+            карточкой человека. Пустое смотрящему не показывается, а
+            правка условий — отдельным блоком только хозяину.
+          -->
+          <section class="coop-show_hero">
+            <div class="coop-gallery">
+              <div class="coop-gallery_main">
+                <field name="image_1920" widget="image" class="coop-gallery_img"
+                       readonly="not coop_can_edit"
+                       invisible="not image_1920 and not coop_can_edit"/>
+                <span class="coop-gallery_none" invisible="image_1920 or coop_can_edit">Без снимка</span>
               </div>
-              <field name="currency_id" invisible="1"/>
-              <field name="rate_display" readonly="1" string="В каталоге"/>
-              <field name="experience_months"
-                     help="Полных месяцев работы по этому направлению. Ниже видно, как это будет написано в каталоге." widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="experience_display" readonly="1" string="В каталоге"/>
-            </group>
-          </group>
-          <group string="Умения">
-            <!-- Без создания на лету: умение в Odoo обязано принадлежать
-                 типу, а из тега на форме тип не задать — получится запись
-                 мимо справочника. -->
-            <field name="skill_ids" widget="many2many_tags" nolabel="1"
-                   options="{'no_create_edit': True, 'no_create': True}"/>
-          </group>
-          <notebook>
-            <page string="Описание" name="description">
-              <field name="description"
-                     placeholder="Что именно готовы делать, с каким оборудованием, какие есть допуски." widget="coop_block" readonly="not coop_can_edit"/>
-            </page>
-          </notebook>
+            </div>
+            <div class="coop-show_info">
+              <div class="coop-show_kicker">
+                <span class="badge o_coop_show_type" invisible="not coop_specialization_category_id">
+                  <field name="coop_specialization_category_id" readonly="1" nolabel="1"
+                         options="{'no_open': True}"/>
+                </span>
+                <field name="coop_specialization_id" readonly="1" nolabel="1"
+                       options="{'no_open': True}"/>
+              </div>
+              <div class="oe_title">
+                <h1 class="coop-show_title"><field name="name" placeholder="Чем занимаетесь" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/></h1>
+              </div>
+              <ul class="coop-show_meta">
+                <li invisible="not city"><field name="city" readonly="1" nolabel="1"/></li>
+                <li invisible="not ready_to_travel">Готов к командировкам</li>
+                <li invisible="not experience_display">
+                  <field name="experience_display" readonly="1" nolabel="1"/>
+                </li>
+              </ul>
+              <hr class="coop-show_rule"/>
+              <div class="coop-price">
+                <span class="coop-price_label">Ставка</span>
+                <span class="coop-price_value">
+                  <field name="rate_display" readonly="1" nolabel="1"/>
+                </span>
+              </div>
+              <div class="coop-show_words" invisible="not skill_ids">
+                <h3>Умения</h3>
+                <field name="skill_ids" widget="many2many_tags" readonly="1" nolabel="1"
+                       options="{'no_open': True}"/>
+              </div>
+            </div>
+          </section>
+          <div class="coop-show_grid">
+            <div class="coop-show_main">
+              <!-- Условия правит только хозяин; остальным те же значения
+                   видны в шапке словами. -->
+              <section class="coop-show_block" invisible="not coop_can_edit">
+                <h2>Условия</h2>
+                <group>
+                  <group string="Кто и где">
+                    <field name="partner_id" widget="coop_inline"/>
+                    <field name="city" widget="coop_inline"/>
+                    <field name="ready_to_travel"/>
+                    <field name="coop_specialization_id" options="{'no_create': True}" widget="coop_inline"/>
+                  </group>
+                  <group string="Ставка и опыт">
+                    <field name="rate_kind" widget="coop_inline"/>
+                    <label for="rate"/>
+                    <div class="o_row">
+                      <field name="rate" readonly="rate_kind == 'piece'" widget="coop_inline"/>
+                      <field name="rate_period" readonly="rate_kind == 'piece'" widget="coop_inline"/>
+                    </div>
+                    <field name="experience_months"
+                           help="Полных месяцев работы по этому направлению. Ниже видно, как это будет написано в каталоге." widget="coop_inline"/>
+                  </group>
+                </group>
+                <group string="Умения">
+                  <!-- Без создания на лету: умение в Odoo обязано
+                       принадлежать типу, а из тега на форме тип не
+                       задать — получится запись мимо справочника. -->
+                  <field name="skill_ids" widget="many2many_tags" nolabel="1"
+                         options="{'no_create_edit': True, 'no_create': True}"/>
+                </group>
+              </section>
+              <section class="coop-show_block" invisible="not description and not coop_can_edit">
+                <h2>Чем могу помочь</h2>
+                <field name="description"
+                       placeholder="Что именно готовы делать, с каким оборудованием, какие есть допуски." widget="coop_block" readonly="not coop_can_edit"/>
+                <dl class="coop-show_facts">
+                  <div invisible="not experience_display">
+                    <dt>Опыт</dt>
+                    <dd><field name="experience_display" readonly="1" nolabel="1"/></dd>
+                  </div>
+                  <div invisible="not city">
+                    <dt>Город</dt>
+                    <dd><field name="city" readonly="1" nolabel="1"/></dd>
+                  </div>
+                  <div>
+                    <dt>Командировки</dt>
+                    <dd><span invisible="not ready_to_travel">Готов</span><span invisible="ready_to_travel">Только в своём городе</span></dd>
+                  </div>
+                  <div invisible="not coop_specialization_id">
+                    <dt>Специализация</dt>
+                    <dd><field name="coop_specialization_id" readonly="1" nolabel="1" options="{'no_open': True}"/></dd>
+                  </div>
+                </dl>
+              </section>
+              <notebook class="coop-show_tabs"/>
+            </div>
+            <aside class="coop-show_aside">
+              <div class="coop-owner">
+                <span class="coop-owner_title">Кто предлагает</span>
+                <div class="coop-owner_who">
+                  <field name="partner_avatar" widget="image" readonly="1" nolabel="1"
+                         class="coop-owner_pic" options="{'size': [48, 48]}"/>
+                  <div class="coop-owner_name">
+                    <field name="partner_id" readonly="1" nolabel="1"/>
+                    <span invisible="not city"><field name="city" readonly="1" nolabel="1"/></span>
+                  </div>
+                </div>
+                <div class="coop-owner_trust">
+                  <div class="coop-owner_trust_head">
+                    <span>Уровень доверия</span>
+                    <b><field name="partner_trust" readonly="1" nolabel="1"/> %</b>
+                  </div>
+                  <field name="partner_trust" widget="progressbar" readonly="1" nolabel="1"
+                         class="coop-owner_bar"/>
+                </div>
+                <dl class="coop-owner_stats">
+                  <div>
+                    <dt>сделок</dt>
+                    <dd><field name="partner_deals_done" readonly="1" nolabel="1"/></dd>
+                  </div>
+                  <div>
+                    <dt>отзывов</dt>
+                    <dd><field name="partner_deals_reviewed" readonly="1" nolabel="1"/></dd>
+                  </div>
+                </dl>
+                <div class="coop-owner_acts" invisible="coop_is_mine">
+                  <button name="action_message_owner" type="object" class="btn-secondary"
+                          string="Написать"/>
+                </div>
+              </div>
+            </aside>
+          </div>
         </sheet>
         <chatter/>
       </form>
