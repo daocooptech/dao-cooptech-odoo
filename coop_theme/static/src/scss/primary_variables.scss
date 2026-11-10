@@ -77,6 +77,13 @@ $o-headings-font-family: 'Manrope', 'Inter', -apple-system, sans-serif;
 $o-font-family-monospace: 'JetBrains Mono', ui-monospace, SFMono-Regular,
                           Menlo, Consolas, monospace;
 
+// Кнопки — Manrope 600, 12,5 px, как `Button` эталона (tokens.json:
+// «Manrope — всё, чем управляют: меню, вкладки, кнопки, чипы»). Было
+// Inter 500, 14 px от движка (владелец 10.11.2026: «перевести»).
+$btn-font-family: 'Manrope', 'Inter', sans-serif;
+$btn-font-weight: 600;
+$btn-font-size: 0.78125rem;
+
 // Шрифты сайта — без адреса Google (решение 439, п. 4). У модуля «Сайт»
 // Inter и Inter Tight заданы с `url`, и каждая страница daocoop.tech
 // тянула их с fonts.googleapis.com: IP посетителя уходил в Google без
