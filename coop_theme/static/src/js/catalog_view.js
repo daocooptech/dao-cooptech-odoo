@@ -17,6 +17,7 @@ import { CoopTabs } from "@coop_theme/js/shell";
 import { CoopFilters, coopFiltersUi } from "@coop_theme/js/catalog_filters";
 import { CoopMap } from "@coop_theme/js/catalog_map";
 import { CoopShelves } from "@coop_theme/js/catalog_shelves";
+import { CoopBuyerMode } from "@coop_theme/js/buyer_mode";
 import { coopSort, parseOrder } from "@coop_theme/js/catalog_sort";
 import { proxy } from "@odoo/owl";
 
@@ -68,7 +69,7 @@ export class CoopCatalogKanbanController extends KanbanController {
     // панели сверху. Данные берутся те же, что у штатной: представление
     // уже сложило их в настройку экрана, и считать их второй раз значило
     // бы завести второй счётчик, который разойдётся с первым.
-    static components = { ...KanbanController.components, Pager, CoopFilters, CoopMap, CoopShelves };
+    static components = { ...KanbanController.components, Pager, CoopFilters, CoopMap, CoopShelves, CoopBuyerMode };
 
     // Кнопка создания подписывается по разделу: «Добавить ресурс»,
     // «Добавить проект». Штатное «Новое» ничего не говорит о том, что
@@ -83,6 +84,12 @@ export class CoopCatalogKanbanController extends KanbanController {
      *  неё нет намеренно, иначе модули ссылались бы друг на друга. */
     coopShowTiles() {
         setCoopLayout("tiles");
+    }
+
+    /** Режим «как частное лицо / как организация» — `coop_buyer_mode` в
+     *  контексте действия каталога (решение 634). */
+    get coopBuyerMode() {
+        return Boolean(this.props.context?.coop_buyer_mode);
     }
 
     /** По какому полю раскладывать полки. Объявляется в действии

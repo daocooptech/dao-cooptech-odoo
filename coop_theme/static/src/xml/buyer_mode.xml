@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!-- Режим покупателя над каталогом — `js/buyer_mode.js`. -->
+  <t t-name="coop_theme.BuyerMode">
+    <div class="o_coop_buyer_mode" role="group" aria-label="Режим покупателя">
+      <button type="button" class="o_coop_buyer_btn"
+              t-att-class="{ 'o_coop_buyer_on': this.state.mode === 'person' }"
+              t-att-aria-pressed="this.state.mode === 'person' ? 'true' : 'false'"
+              t-on-click="() => this.set('person')">Как частное лицо</button>
+      <button type="button" class="o_coop_buyer_btn"
+              t-att-class="{ 'o_coop_buyer_on': this.state.mode === 'org' }"
+              t-att-aria-pressed="this.state.mode === 'org' ? 'true' : 'false'"
+              t-on-click="() => this.set('org')">Как организация</button>
+      <span class="o_coop_buyer_hint" t-if="this.state.mode === 'org'">
+        Показаны оптовые цены и ступени.
+      </span>
+    </div>
+  </t>
+
+</templates>

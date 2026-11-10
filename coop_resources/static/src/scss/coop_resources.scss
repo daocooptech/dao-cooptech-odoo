@@ -163,6 +163,23 @@
     font: 500 14px/1.3 'JetBrains Mono', ui-monospace, monospace;
     margin-top: 6px;
   }
+
+  // Опт показывается только в режиме «как организация» (coop_theme,
+  // `buyer_mode.scss`); значок — того же роста, что остальные метки карточки.
+  .o_coop_res_ws {
+    font-size: 12px;
+    margin-top: 4px;
+  }
+
+  .o_coop_res_wsbadge {
+    display: inline-block;
+    padding: 1px 8px;
+    margin-right: 6px;
+    border-radius: 999px;
+    background: var(--coop-accent-soft, #e3f1ea);
+    color: var(--coop-accent, #2f6f4f);
+    font-weight: 600;
+  }
 }
 
 // ── Строчный вид ──────────────────────────────────────────────────────
@@ -464,4 +481,11 @@
 .coop-mtabs_hint {
   padding-left: 10px;
   border-left: 2px solid var(--coop-teal);
+}
+
+// Пояснение под строкой «Цена / За что» (задача 401).
+.coop-add_note {
+  font-size: 12px;
+  margin: -4px 0 8px;
+  text-align: left;
 }

@@ -48,8 +48,14 @@ class CoopResourceTerm(models.Model):
     # значения по умолчанию, кроме периодичности платежей.
     # Продажа
     min_qty = fields.Float(string='Наименьшая партия')
+    # Ступени опта «от N — цена», до трёх (решение 634): порог и цену ставит
+    # продавец сам. Первая ступень — прежние `bulk_qty` и `bulk_price`.
     bulk_qty = fields.Float(string='Опт от')
     bulk_price = fields.Monetary(string='Оптовая цена')
+    bulk2_qty = fields.Float(string='Вторая ступень от')
+    bulk2_price = fields.Monetary(string='Цена второй ступени')
+    bulk3_qty = fields.Float(string='Третья ступень от')
+    bulk3_price = fields.Monetary(string='Цена третьей ступени')
     prepay_pct = fields.Integer(string='Предоплата, %')
     warranty = fields.Char(string='Гарантия')
     # Варианты — по разбору `accountant` 27.10.2026: «без документов»
@@ -151,6 +157,25 @@ class CoopResourceTerm(models.Model):
 
     summary = fields.Char(string='Кратко', compute='_compute_summary')
 
+    @api.constrains('bulk_qty', 'bulk_price', 'bulk2_qty', 'bulk2_price',
+                    'bulk3_qty', 'bulk3_price', 'min_qty')
+    def _check_tiers(self):
+        for term in self:
+            pairs = [(term.bulk_qty, term.bulk_price),
+                     (term.bulk2_qty, term.bulk2_price),
+                     (term.bulk3_qty, term.bulk3_price)]
+            for qty, price in pairs:
+                if bool(qty) != bool(price):
+                    raise UserError(_('Ступень опта — это и «от скольки», и цена: '
+                                      'заполните оба поля или оба очистите.'))
+            filled = [(q, p) for q, p in pairs if q and p]
+            if any(q2 <= q1 or p2 >= p1
+                   for (q1, p1), (q2, p2) in zip(filled, filled[1:])):
+                raise UserError(_('Ступени опта идут по возрастанию порога, '
+                                  'а цена с каждой ступенью ниже.'))
+            if filled and term.min_qty and filled[0][0] < term.min_qty:
+                raise UserError(_('Опт начинается не раньше наименьшей партии.'))
+
     _one_per_method = models.Constraint('unique(resource_id, method_id)',
                                         'Условия этого способа уже есть.')
 
@@ -188,11 +213,24 @@ class CoopResourceTerm(models.Model):
     def _qty(value):
         return ('%g' % value).replace('.', ',')
 
+    def _coop_tiers(self):
+        """Ступени опта: [(от скольки, цена)], по возрастанию порога.
+
+        Ступень без порога или без цены не считается: поле могли начать
+        заполнять и бросить, а в карточке «опт от 0» никому не нужен.
+        """
+        self.ensure_one()
+        tiers = [(self.bulk_qty, self.bulk_price),
+                 (self.bulk2_qty, self.bulk2_price),
+                 (self.bulk3_qty, self.bulk3_price)]
+        return sorted((q, p) for q, p in tiers if q and p)
+
     def _label(self, name):
         return dict(self._fields[name]._description_selection(self.env)).get(self[name])
 
     @api.depends('price', 'price_kind', 'price_unit_label', 'deposit', 'min_term', 'note', 'method_id',
-                 'min_qty', 'bulk_qty', 'bulk_price', 'prepay_pct', 'warranty', 'documents',
+                 'min_qty', 'bulk_qty', 'bulk_price', 'bulk2_qty', 'bulk2_price',
+                 'bulk3_qty', 'bulk3_price', 'prepay_pct', 'warranty', 'documents',
                  'max_term', 'operator', 'included', 'available_from', 'long_discount',
                  'down_pct', 'months', 'pay_every', 'markup_pct', 'ownership', 'buyout',
                  'payment_manual', 'lessor', 'lessor_name', 'insurance', 'contribution', 'expect',
@@ -223,8 +261,8 @@ class CoopResourceTerm(models.Model):
         if code == 'sale':
             if term.min_qty:
                 parts.append('партия от %s' % term._qty(term.min_qty))
-            if term.bulk_qty and term.bulk_price:
-                parts.append('опт от %s — %s' % (term._qty(term.bulk_qty), term._rub(term.bulk_price)))
+            for qty, price in term._coop_tiers():
+                parts.append('опт от %s — %s' % (term._qty(qty), term._rub(price)))
             if term.prepay_pct:
                 parts.append('предоплата %s %%' % term.prepay_pct)
             if term.warranty:
@@ -312,6 +350,41 @@ class CoopResource(models.Model):
     # Организации — без «без документов» и с НДС (`accountant` 27.10.2026).
     owner_is_company = fields.Boolean(related='owner_id.is_company', string='Владелец — организация')
     terms_html = fields.Html(string='Условия', compute='_compute_terms_html', sanitize=False)
+
+    # Опт и розница (решение 634). Хранимыми — по ним отбирает панель
+    # каталога («только с оптовой ценой») и режим «как организация».
+    min_batch = fields.Float(
+        string='Наименьшая партия', compute='_compute_wholesale', store=True,
+        help='Из условий продажи: сколько нужно взять минимум.')
+    has_wholesale = fields.Boolean(
+        string='Есть оптовая цена', compute='_compute_wholesale', store=True,
+        help='В условиях продажи есть хотя бы одна ступень «от N — цена».')
+    wholesale_price = fields.Monetary(
+        string='Наименьшая оптовая цена', compute='_compute_wholesale', store=True,
+        currency_field='currency_id',
+        help='Цена самой выгодной ступени: на карточке «оптом от …».')
+
+    wholesale_display = fields.Char(
+        string='Опт строкой', compute='_compute_wholesale', store=True,
+        help='Для карточки организации: «450 ₽/кг при партии от 50».')
+
+    @api.depends('term_ids.min_qty', 'term_ids.bulk_qty', 'term_ids.price_unit_label', 'term_ids.bulk_price',
+                 'term_ids.bulk2_qty', 'term_ids.bulk2_price',
+                 'term_ids.bulk3_qty', 'term_ids.bulk3_price', 'term_ids.code')
+    def _compute_wholesale(self):
+        for resource in self:
+            sale = resource.term_ids.filtered(lambda t: t.code == 'sale')[:1]
+            tiers = sale._coop_tiers() if sale else []
+            resource.min_batch = sale.min_qty if sale else 0.0
+            resource.has_wholesale = bool(tiers)
+            resource.wholesale_price = min(p for _q, p in tiers) if tiers else 0.0
+            if tiers:
+                qty, price = tiers[-1]    # самая выгодная ступень — последняя
+                unit = '/%s' % sale.price_unit_label if sale.price_unit_label else ''
+                resource.wholesale_display = '%s%s при партии от %s' % (
+                    sale._rub(price), unit, sale._qty(qty))
+            else:
+                resource.wholesale_display = False
 
     @api.depends('term_ids.summary', 'method_ids')
     def _compute_terms_html(self):

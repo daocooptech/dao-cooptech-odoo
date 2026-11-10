@@ -3,7 +3,8 @@
 import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { coopSort, coopSortOptionsFor, setCoopSort } from "@coop_theme/js/catalog_sort";
-import { Component, onWillStart, proxy, t, usePlugin, useProps } from "@odoo/owl";
+import { Component, onMounted, onWillStart, proxy, t, usePlugin, useProps } from "@odoo/owl";
+import { router } from "@web/core/browser/router";
 import { CoopIcon } from "@coop_theme/js/icons";
 
 /**
@@ -69,6 +70,63 @@ export class CoopFilters extends Component {
             // каталогом читается как кнопка, которой нечего показать.
             await this.countNow();
         });
+        // Отбор из адресной строки — после того как панель на экране:
+        // применение трогает общий запрос вида (задача 401).
+        onMounted(() => this.restoreFromAddress());
+    }
+
+    /** Состояние панели — строкой в адресе (`coop_f`), чтобы ссылкой можно
+     *  было поделиться, а «назад» возвращало прежний отбор. Строка начинается
+     *  с буквы: роутер Odoo превращает всё числоподобное в число. */
+    encodeState() {
+        const values = Object.fromEntries(Object.entries(this.state.values).filter(
+            ([, v]) => v !== "" && v !== undefined && v !== null && !(Array.isArray(v) && !v.length)));
+        const order = this.state.order || coopSort.orders[this.props.resModel];
+        const packed = {};
+        if (Object.keys(values).length) {
+            packed.v = values;
+        }
+        if (this.state.quick.length) {
+            packed.q = this.state.quick;
+        }
+        if (order && order !== this.sortOptions[0][0]) {
+            packed.o = order;
+        }
+        if (!Object.keys(packed).length) {
+            return undefined;
+        }
+        const bytes = new TextEncoder().encode(JSON.stringify(packed));
+        let binary = "";
+        bytes.forEach((b) => { binary += String.fromCharCode(b); });
+        return "j" + btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    }
+
+    decodeState(text) {
+        try {
+            const base = String(text).slice(1).replace(/-/g, "+").replace(/_/g, "/");
+            const binary = atob(base + "=".repeat((4 - (base.length % 4)) % 4));
+            const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+            const packed = JSON.parse(new TextDecoder().decode(bytes));
+            return packed && typeof packed === "object" ? packed : null;
+        } catch {
+            // Испорченная ссылка — открываем каталог без отбора, а не падаем.
+            return null;
+        }
+    }
+
+    async restoreFromAddress() {
+        const packed = router.current?.coop_f ? this.decodeState(router.current.coop_f) : null;
+        if (!packed) {
+            return;
+        }
+        this.state.values = packed.v || {};
+        this.state.quick = Array.isArray(packed.q) ? packed.q : [];
+        this.state.order = packed.o || null;
+        await this.load();
+        await this.apply(false);
+        // Роутер при старте убирает чужие параметры из адреса; возвращаем
+        // на то же место записи истории, без лишнего шага «назад».
+        router.replaceState({ coop_f: this.encodeState() });
     }
 
     /** Порядок — такое же условие отбора, как остальные, и стоит там же.
@@ -185,7 +243,7 @@ export class CoopFilters extends Component {
         return block.number || /_ids?$/.test(block.field) ? Number(value) : value;
     }
 
-    async apply() {
+    async apply(toAddress = true) {
         // Порядок ставится первым: он меняет запрос представления, а не
         // условия отбора, и обе перезагрузки должны сойтись на одном
         // наборе, а не спорить за последнюю.
@@ -215,6 +273,9 @@ export class CoopFilters extends Component {
             }]);
         }
         this.state.dirty = false;
+        if (toAddress) {
+            router.pushState({ coop_f: this.encodeState() });
+        }
         // Счётчики считаются по остальным условиям, значит после
         // применения они другие.
         await this.load();

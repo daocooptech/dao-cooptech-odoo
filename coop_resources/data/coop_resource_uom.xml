@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+  <!-- Справочник единиц: стартовый набор; остальное — «свой вариант» через модерацию (решение 634). -->
+  <record id="uom_1" model="coop.resource.uom"><field name="name">шт.</field><field name="sequence">10</field></record>
+  <record id="uom_2" model="coop.resource.uom"><field name="name">кг</field><field name="sequence">20</field></record>
+  <record id="uom_3" model="coop.resource.uom"><field name="name">г</field><field name="sequence">30</field></record>
+  <record id="uom_4" model="coop.resource.uom"><field name="name">т</field><field name="sequence">40</field></record>
+  <record id="uom_5" model="coop.resource.uom"><field name="name">л</field><field name="sequence">50</field></record>
+  <record id="uom_6" model="coop.resource.uom"><field name="name">м</field><field name="sequence">60</field></record>
+  <record id="uom_7" model="coop.resource.uom"><field name="name">м²</field><field name="sequence">70</field></record>
+  <record id="uom_8" model="coop.resource.uom"><field name="name">м³</field><field name="sequence">80</field></record>
+  <record id="uom_9" model="coop.resource.uom"><field name="name">комплект</field><field name="sequence">90</field></record>
+  <record id="uom_10" model="coop.resource.uom"><field name="name">упаковка</field><field name="sequence">100</field></record>
+  <record id="uom_11" model="coop.resource.uom"><field name="name">пара</field><field name="sequence">110</field></record>
+  <record id="uom_12" model="coop.resource.uom"><field name="name">рулон</field><field name="sequence">120</field></record>
+  <record id="uom_13" model="coop.resource.uom"><field name="name">мешок</field><field name="sequence">130</field></record>
+  <record id="uom_14" model="coop.resource.uom"><field name="name">паллета</field><field name="sequence">140</field></record>
+  <record id="uom_15" model="coop.resource.uom"><field name="name">коробка</field><field name="sequence">150</field></record>
+  <record id="uom_16" model="coop.resource.uom"><field name="name">бутылка</field><field name="sequence">160</field></record>
+  <record id="uom_17" model="coop.resource.uom"><field name="name">банка</field><field name="sequence">170</field></record>
+  <record id="uom_18" model="coop.resource.uom"><field name="name">ящик</field><field name="sequence">180</field></record>
+  <record id="uom_19" model="coop.resource.uom"><field name="name">сутки</field><field name="sequence">190</field></record>
+  <record id="uom_20" model="coop.resource.uom"><field name="name">час</field><field name="sequence">200</field></record>
+  <record id="uom_21" model="coop.resource.uom"><field name="name">смена</field><field name="sequence">210</field></record>
+  <record id="uom_22" model="coop.resource.uom"><field name="name">месяц</field><field name="sequence">220</field></record>
+  <record id="uom_23" model="coop.resource.uom"><field name="name">ходка</field><field name="sequence">230</field></record>
+</odoo>

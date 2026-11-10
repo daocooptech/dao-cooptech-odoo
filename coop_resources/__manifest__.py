@@ -16,11 +16,15 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.5.6',
+    'version': '20.0.1.6.0',
     'license': 'LGPL-3',
-    'depends': ['coop_base', 'coop_tokens', 'coop_theme', 'mail'],
+    # `website` — ради порядка загрузки: он добавляет к видам колонку
+    # `visibility` (NOT NULL), и новый вид, созданный раньше него, не
+    # записывается (замерено 10.11.2026 на обновлении 20.0.1.6.0).
+    'depends': ['coop_base', 'coop_tokens', 'coop_theme', 'mail', 'website'],
     'data': [
         'data/coop_resource_methods.xml',
+        'data/coop_resource_uom.xml',
         'data/coop_promotion_setup.xml',
         'data/coop_resource_cron.xml',
         'views/coop_resource_views.xml',

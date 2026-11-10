@@ -21,3 +21,5 @@ rule_resource_term_own,Условия правит хозяин объявлен
 rule_resource_term_system,Условия объявлений — администратор узла,coop.resource.term,base.group_system,crud,
 access_resource_word_user,Слова состава — чтение и добавление,coop.resource.word,base.group_user,cr,
 access_resource_word_admin,Слова состава — ведение,coop.resource.word,coop_base.group_coop_platform,crud,
+access_resource_uom_user,Единицы измерения — чтение,coop.resource.uom,base.group_user,r,
+access_resource_uom_admin,Единицы измерения — ведение,coop.resource.uom,coop_base.group_coop_platform,crud,

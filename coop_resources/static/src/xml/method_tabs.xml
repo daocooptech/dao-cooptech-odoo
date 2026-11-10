@@ -68,10 +68,17 @@
           </div>
           <div class="coop-add_field" t-if="lay.unit">
             <label>За что</label>
-            <input class="o_input" type="text" t-att-placeholder="lay.unit"
-                   t-att-value="this.value('price_unit_label')"
-                   t-att-readonly="this.props.readonly"
-                   t-on-change="(ev) => this.onInput('price_unit_label', ev)"/>
+            <input class="o_input" type="text" t-if="this.ui.ownUnit" placeholder="Название единицы"
+                   t-on-change="(ev) => this.addOwnUnit(ev)" t-on-blur="(ev) => this.addOwnUnit(ev)"/>
+            <select class="o_input" t-else="" t-att-disabled="this.props.readonly"
+                    t-on-change="(ev) => this.onUnitChange(ev)">
+              <option value="" t-att-selected="!this.value('price_unit_label')">—</option>
+              <t t-foreach="this.unitChoices" t-as="unit" t-key="unit.name">
+                <option t-att-value="unit.name" t-att-selected="this.value('price_unit_label') === unit.name"
+                        t-out="unit.name"/>
+              </t>
+              <option value="__own__">Своя единица…</option>
+            </select>
           </div>
           <div class="coop-add_field" t-if="lay.period">
             <label>За период</label>
@@ -88,6 +95,11 @@
                       t-out="this.value('price_unit_label')"/>
             </select>
           </div>
+        </div>
+        <!-- Пояснение — под строкой цены, а не внутри поля: иначе поле «За что»
+             становится выше соседнего и строка расходится по высоте. -->
+        <div class="coop-add_note text-muted" t-if="lay.unit and this.unitOnModeration">
+          Единица на модерации: пока видна только вам.
         </div>
         <div class="coop-add_field" t-if="lay.deposit and !this.isRequest">
           <label>Залог, ₽</label>

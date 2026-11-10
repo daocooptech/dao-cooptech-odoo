@@ -20,6 +20,8 @@
         <field name="owner_id"/>
         <field name="listing_type"/>
         <field name="price_display"/>
+        <field name="has_wholesale"/>
+        <field name="wholesale_display"/>
         <field name="is_promoted"/>
         <!-- Объявлено ради выражения в разметке: ниже поле читается как
              `record.can_respond.raw_value`, а разбор представления видит
@@ -75,6 +77,13 @@
                   <t t-if="record.category_id.raw_value"><t t-out="record.category_id.value"/></t>
                 </div>
                 <div class="o_coop_res_price"><field name="price_display"/></div>
+                <!-- Опт — только в режиме «как организация» (решение 634):
+                     класс `o_coop_buyer_org` на `body` ставит переключатель
+                     над каталогом. -->
+                <div class="o_coop_res_ws" t-if="record.has_wholesale.raw_value">
+                  <span class="o_coop_res_wsbadge">оптом дешевле</span>
+                  <field name="wholesale_display"/>
+                </div>
                 <!-- Отклик прямо с витрины: ради этого каталог и
                      открывают. Полоса есть всегда, даже когда
                      откликаться нельзя, — иначе карточки с кнопкой и без
@@ -604,6 +613,10 @@
                       <field name="min_qty"/>
                       <field name="bulk_qty"/>
                       <field name="bulk_price"/>
+                      <field name="bulk2_qty"/>
+                      <field name="bulk2_price"/>
+                      <field name="bulk3_qty"/>
+                      <field name="bulk3_price"/>
                       <field name="prepay_pct"/>
                       <field name="warranty"/>
                       <field name="documents"/>
@@ -809,7 +822,7 @@
     <field name="name">Ресурсы</field>
     <field name="res_model">coop.resource</field>
     <field name="path">resources</field>
-    <field name="context">{'bin_size': True,'coop_catalog': True, 'coop_create_label': 'Добавить ресурс', 'coop_create_method': 'action_new_listing', 'coop_shelf_field': 'category_id'}</field>
+    <field name="context">{'bin_size': True,'coop_catalog': True, 'coop_create_label': 'Добавить ресурс', 'coop_create_method': 'action_new_listing', 'coop_shelf_field': 'category_id', 'coop_buyer_mode': True}</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('state', '=', 'published')]</field>
     <field name="search_view_id" ref="view_coop_resource_search"/>
@@ -1047,6 +1060,43 @@
   <menuitem id="menu_coop_resource_category" name="Категории ресурсов"
             parent="coop_base.menu_coop_reference_root"
             action="action_coop_resource_category" sequence="40"/>
+  <record id="view_coop_resource_uom_list" model="ir.ui.view">
+    <field name="name">coop.resource.uom.list</field>
+    <field name="model">coop.resource.uom</field>
+    <field name="arch" type="xml">
+      <list editable="bottom" decoration-warning="state == 'proposed'"
+            decoration-muted="state == 'rejected'">
+        <field name="name"/>
+        <field name="state"/>
+        <field name="proposed_by_id"/>
+        <field name="sequence" optional="hide"/>
+        <button name="action_approve" type="object" string="Одобрить"
+                invisible="state == 'approved'"/>
+        <button name="action_reject" type="object" string="Отклонить"
+                invisible="state != 'proposed'"/>
+      </list>
+    </field>
+  </record>
+  <record id="action_coop_resource_uom" model="ir.actions.act_window">
+    <field name="name">Единицы измерения</field>
+    <field name="res_model">coop.resource.uom</field>
+    <field name="view_mode">list</field>
+    <field name="context">{'search_default_proposed': 1}</field>
+  </record>
+  <record id="view_coop_resource_uom_search" model="ir.ui.view">
+    <field name="name">coop.resource.uom.search</field>
+    <field name="model">coop.resource.uom</field>
+    <field name="arch" type="xml">
+      <search>
+        <field name="name"/>
+        <filter name="proposed" string="На модерации" domain="[('state', '=', 'proposed')]"/>
+      </search>
+    </field>
+  </record>
+  <menuitem id="menu_coop_resource_uom" name="Единицы измерения"
+            parent="coop_base.menu_coop_reference_root"
+            action="action_coop_resource_uom" sequence="55"/>
+
   <menuitem id="menu_coop_resource_method" name="Способы передачи"
             parent="coop_base.menu_coop_reference_root"
             action="action_coop_resource_method" sequence="50"/>

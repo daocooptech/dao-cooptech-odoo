@@ -54,6 +54,16 @@ const LAYOUT = {
             ["min_qty", "num", "Наименьшая партия", { request: "Сколько нужно" }],
             ["bulk_qty", "num", "Опт от, единиц", { offer: true }],
             ["bulk_price", "money", "Оптовая цена, ₽", { offer: true }],
+            // Ступени опта (решение 634): порог и цену ставит продавец; следующая
+            // ступень появляется, когда заполнена предыдущая.
+            ["bulk2_qty", "num", "Вторая ступень от, единиц", { offer: true,
+                when: (t) => t.data.bulk_qty && t.data.bulk_price }],
+            ["bulk2_price", "money", "Цена второй ступени, ₽", { offer: true,
+                when: (t) => t.data.bulk_qty && t.data.bulk_price }],
+            ["bulk3_qty", "num", "Третья ступень от, единиц", { offer: true,
+                when: (t) => t.data.bulk2_qty && t.data.bulk2_price }],
+            ["bulk3_price", "money", "Цена третьей ступени, ₽", { offer: true,
+                when: (t) => t.data.bulk2_qty && t.data.bulk2_price }],
             ["prepay_pct", "int", "Предоплата, %", { request: "Готов внести предоплату, %" }],
             ["warranty", "text", "Гарантия", { offer: true, ph: "Например, 6 месяцев" }],
             ["documents", "seg", "Документы", { request: "Нужны документы",
@@ -174,8 +184,10 @@ export class CoopMethodTabs extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.ui = proxy({ active: false, menu: false, busy: false });
+        this.ui = proxy({ active: false, menu: false, busy: false, ownUnit: false });
         onWillStart(async () => {
+            // Единицы — справочник с модерацией (решение 634).
+            this.units = await this.orm.call("coop.resource.uom", "coop_choices", []);
             this.methods = await this.orm.searchRead(
                 "coop.resource.method", [], ["name", "code", "sequence"], { order: "sequence, id" });
         });
@@ -431,6 +443,43 @@ export class CoopMethodTabs extends Component {
         return term;
     }
 
+    /** Единицы для выбора; единица из старого объявления, которой нет в справочнике, не теряется. */
+    get unitChoices() {
+        const have = this.value("price_unit_label");
+        const names = this.units.map((unit) => unit.name);
+        return have && !names.includes(have) ? [...this.units, { name: have, proposed: false }] : this.units;
+    }
+
+    get unitOnModeration() {
+        const have = this.value("price_unit_label");
+        return Boolean(have && (this.units.find((unit) => unit.name === have) || {}).proposed);
+    }
+
+    async onUnitChange(ev) {
+        if (ev.target.value === "__own__") {
+            this.ui.ownUnit = true;
+            return;
+        }
+        await this.onInput("price_unit_label", ev);
+    }
+
+    /** «Своя единица»: уходит на модерацию, автору доступна сразу. */
+    async addOwnUnit(ev) {
+        const name = ev.target.value.trim();
+        this.ui.ownUnit = false;
+        if (!name) {
+            return;
+        }
+        const unit = await this.orm.call("coop.resource.uom", "coop_propose", [name]);
+        if (!unit) {
+            return;
+        }
+        if (!this.units.some((item) => item.name === unit.name)) {
+            this.units.push(unit);
+        }
+        await this.onInput("price_unit_label", { target: { value: unit.name } });
+    }
+
     async onInput(name, ev) {
         const term = await this.ensureTerm();
         if (!term) {
@@ -466,6 +515,8 @@ registry.category("fields").add("coop_method_tabs", {
         { name: "note", type: "char" },
         { name: "currency_id", type: "many2one", relation: "res.currency" },
         ...[["min_qty", "float"], ["bulk_qty", "float"], ["bulk_price", "monetary"],
+            ["bulk2_qty", "float"], ["bulk2_price", "monetary"],
+            ["bulk3_qty", "float"], ["bulk3_price", "monetary"],
             ["prepay_pct", "integer"], ["warranty", "char"], ["documents", "selection"],
             ["max_term", "char"], ["operator", "selection"], ["included", "char"],
             ["available_from", "date"], ["long_discount", "char"], ["down_pct", "float"],
