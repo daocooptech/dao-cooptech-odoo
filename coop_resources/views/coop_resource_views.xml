@@ -1067,7 +1067,8 @@
   </record>
 
   <menuitem id="menu_coop_resources_root" name="Ресурсы" sequence="60"/>
-  <menuitem id="menu_coop_resources" name="Каталог ресурсов"
+  <!-- «Материальные» — владелец 10.11.2026, было «Каталог ресурсов». -->
+  <menuitem id="menu_coop_resources" name="Материальные"
             parent="menu_coop_resources_root" action="action_coop_resources" sequence="10"/>
   <menuitem id="menu_coop_my_resources" name="Мои ресурсы"
             parent="menu_coop_resources_root" action="action_coop_my_resources"

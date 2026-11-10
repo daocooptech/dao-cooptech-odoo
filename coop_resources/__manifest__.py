@@ -16,7 +16,7 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.7.1',
+    'version': '20.0.1.7.2',
     'license': 'LGPL-3',
     # `website` — ради порядка загрузки: он добавляет к видам колонку
     # `visibility` (NOT NULL), и новый вид, созданный раньше него, не

@@ -48,6 +48,12 @@ MAIN_ITEMS = [
     ('Организации', 'account_balance', 'coop_orgs.action_coop_orgs'),
     ('Сообщества', 'forum', 'coop_communities.action_coop_communities'),
     ('Кошелёк', 'credit_card', 'coop_wallet.action_coop_my_wallet'),
+    # Владелец 10.11.2026: НМА и ЦФА — из расширений в разделы, «выше
+    # пункта сделки». Были расширениями; `resync_defaults` переносит
+    # уже выданные пункты из одной части меню в другую, а не заводит
+    # вторыми.
+    ('Нематериальные активы', 'lightbulb', 'coop_intangibles.action_coop_intangibles'),
+    ('Цифровые активы', 'verified', 'coop_digital_assets.action_coop_cfa_issue'),
     ('Сделки', 'handshake', 'coop_deals.action_coop_deals'),
     # Владелец 19.10.2026: «настройки ДАО КООПТЕХ — участника переименовать
     # в настройки пользователя и закрепить навсегда в верхней части меню
@@ -100,7 +106,6 @@ EXTENSION_ITEMS = [
     # вёл туда, участник открывал «Токеномику» и видел пустой список
     # служебных начислений.
     ('Токеномика', 'diamond', 'coop_tokenomics.action_coop_exchange_screen'),
-    ('Цифровые активы', 'verified', 'coop_digital_assets.action_coop_cfa_issue'),
     # Решения 392, 410: расчёты резидента с нерезидентом — внешнеторговый
     # контракт, порог учёта в банке, аккредитив, ЦФА по договору.
     ('Международные сделки', 'public', 'coop_trade.action_coop_trade_contract'),
@@ -114,7 +119,6 @@ EXTENSION_ITEMS = [
     # мощностей», 19.10.2026 вернул: «модуль биржа мощностей надо
     # переименовать в Майнинг». Прежнее — в RENAMED_ITEMS.
     ('Майнинг', 'memory', 'coop_mining.action_coop_mining_offer'),
-    ('Нематериальные активы', 'lightbulb', 'coop_intangibles.action_coop_intangibles'),
     ('Целевые программы ПК', 'crisis_alert', 'coop_programs.action_coop_program'),
     ('Совместные закупки', 'shopping_basket', 'coop_groupbuy.action_coop_groupbuy'),
     # Решение 412 (Н7): «в расширения перед аукционом добавь вкладку
