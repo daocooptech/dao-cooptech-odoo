@@ -17,6 +17,8 @@ INSURANCE_BASE = {2026: 2_979_000}
 # в месяц; в пределах — общий тариф. МРОТ на 2026 — 27 093 ₽ (429-ФЗ).
 SME_RATE = 15.0
 MROT = {2026: 27_093}
+# Граждане государств — членов ЕАЭС, кроме России (п. 3 ст. 224 НК).
+EAEU_CITIZEN = ('AM', 'BY', 'KZ', 'KG')
 
 
 def _by_year(table, year):
@@ -36,7 +38,8 @@ class CoopTaxLaborPayout(models.Model):
     - Травматизм: членов артели нет в п. 1 ст. 5 125-ФЗ, и платить ли с
       их выплат, решает кооператив (решение 514).
     - Нерезидент: в РФ — с патентом или разрешением, НДФЛ 30 % (п. 3
-      ст. 224); за рубежом — доход вне РФ (пп. 6 п. 3 ст. 208), агентского
+      ст. 224); по патенту и гражданину ЕАЭС — шкала 13–22 % (п. 3.1,
+      решение 642), с зачётом аванса по патенту; за рубежом — доход вне РФ (пп. 6 п. 3 ст. 208), агентского
       НДФЛ нет (решение 516).
 
     Резидентство, гражданство, тарифы кооператива копируются в строку при
@@ -79,6 +82,16 @@ class CoopTaxLaborPayout(models.Model):
         ('patent', 'Патент'),
         ('permit', 'Разрешение на работу'),
     ], string='Документ на работу в РФ')
+    eaeu = fields.Boolean(
+        string='Гражданин ЕАЭС',
+        help='Гражданину ЕАЭС, работающему в России, НДФЛ считается по шкале '
+             '13–22 %, а не 30 % (п. 3.1 ст. 224 НК, решение 642); разрешение '
+             'на работу ему не нужно.')
+    patent_advance = fields.Monetary(
+        string='Аванс по патенту, зачёт', currency_field='currency_id',
+        help='Фиксированный авансовый платёж по патенту, который работник '
+             'просит зачесть у этого кооператива (ст. 227.1 НК): налог '
+             'уменьшается на эту сумму, но не ниже нуля, остаток не возвращается.')
     sme = fields.Boolean(string='МСП из перечня')
     injury_rate = fields.Float(string='Тариф на травматизм, %', digits=(5, 2))
 
@@ -118,6 +131,7 @@ class CoopTaxLaborPayout(models.Model):
                 vals.setdefault('resident', person.coop_tax_resident)
                 vals.setdefault('treaty_rate', person.coop_tax_treaty_rate)
                 vals.setdefault('foreigner', person._coop_citizenship().code not in (False, 'RU'))
+                vals.setdefault('eaeu', person._coop_citizenship().code in EAEU_CITIZEN)
             if coop:
                 vals.setdefault('sme', coop.coop_tax_sme)
                 vals.setdefault('injury_rate', coop.coop_injury_rate if coop.coop_injury_insurance else 0.0)
@@ -129,6 +143,7 @@ class CoopTaxLaborPayout(models.Model):
             self.resident = self.partner_id.coop_tax_resident
             self.treaty_rate = self.partner_id.coop_tax_treaty_rate
             self.foreigner = self.partner_id._coop_citizenship().code not in (False, 'RU')
+            self.eaeu = self.partner_id._coop_citizenship().code in EAEU_CITIZEN
         if self.cooperative_id:
             coop = self.cooperative_id
             self.sme = coop.coop_tax_sme
@@ -141,7 +156,7 @@ class CoopTaxLaborPayout(models.Model):
             record.coop_can_edit = origin.has_access('write') if origin.id \
                 else self.browse().has_access('create')
 
-    @api.depends('resident', 'foreigner', 'work_place', 'permit', 'sme',
+    @api.depends('resident', 'foreigner', 'eaeu', 'work_place', 'permit', 'sme',
                  'injury_rate', 'ndfl_rate', 'insurance_rate', 'partner_id')
     def _compute_tax_summary(self):
         """Тот же расчёт словами: чей резидент, какие налоги и взносы, кто
@@ -162,6 +177,8 @@ class CoopTaxLaborPayout(models.Model):
             if not record.resident:
                 if abroad:
                     lines.append(_('Работает за рубежом.'))
+                elif record.eaeu and not record.permit:
+                    lines.append(_('Работает в России, гражданин ЕАЭС — разрешение не нужно.'))
                 else:
                     permit = dict(self._fields['permit'].selection).get(record.permit)
                     lines.append(_('Работает в России, документ — %s.', (permit or _('не указан')).lower()))
@@ -204,8 +221,16 @@ class CoopTaxLaborPayout(models.Model):
             domain += [('date', '<=', self.date)]
         return self.search(domain)
 
-    @api.depends('amount', 'date', 'resident', 'treaty_rate', 'foreigner',
-                 'work_place', 'sme', 'injury_rate', 'cooperative_id', 'partner_id')
+    def _on_scale(self):
+        """Нерезидент в России, которому вместо 30 % действует шкала
+        резидента: работа по патенту или гражданин ЕАЭС (решение 642)."""
+        self.ensure_one()
+        return (not self.resident and self.work_place == 'ru'
+                and (self.permit == 'patent' or self.eaeu))
+
+    @api.depends('amount', 'date', 'resident', 'treaty_rate', 'foreigner', 'eaeu',
+                 'permit', 'patent_advance', 'work_place', 'sme', 'injury_rate',
+                 'cooperative_id', 'partner_id')
     def _compute_amounts(self):
         for record in self:
             amount = record.amount or 0.0
@@ -220,7 +245,15 @@ class CoopTaxLaborPayout(models.Model):
                 tax, rate = 0.0, _('доход вне РФ')
             else:
                 tax, rate = ndfl(amount, earlier, resident=record.resident,
-                                 treaty_rate=record.treaty_rate)
+                                 treaty_rate=record.treaty_rate,
+                                 scale=record._on_scale())
+                if record._on_scale():
+                    rate = _('%s — нерезидент по патенту', rate) if record.permit == 'patent' \
+                        else _('%s — гражданин ЕАЭС', rate)
+                    if record.permit == 'patent' and record.patent_advance:
+                        credit = min(tax, record.patent_advance)
+                        tax -= credit
+                        rate = _('%s, зачёт патента %s ₽', rate, int(credit))
             insurance, insurance_rate = record._insurance(amount, earlier, abroad)
             # Страхование по 125-ФЗ — работы в России; за рубежом кооператив
             # платит только начисленное (разбор бухгалтера 26.10, Р8).
@@ -248,7 +281,7 @@ class CoopTaxLaborPayout(models.Model):
             '15,1 %' if not within else _('30 % и 15,1 % сверх базы'))
         return rubles(within * INSURANCE_RATE / 100.0 + over * INSURANCE_RATE_OVER / 100.0), label
 
-    @api.constrains('resident', 'work_place', 'permit')
+    @api.constrains('resident', 'work_place', 'permit', 'eaeu')
     def _check_work_place(self):
         for record in self:
             if record.resident and record.work_place == 'abroad':
@@ -256,10 +289,12 @@ class CoopTaxLaborPayout(models.Model):
                     'Работа за рубежом отмечается у нерезидентов (решение '
                     '516). Резидент РФ платит НДФЛ со всех доходов — '
                     'отметьте «В России».'))
-            if not record.resident and record.work_place == 'ru' and not record.permit:
+            if not record.resident and record.work_place == 'ru' \
+                    and not record.permit and not record.eaeu:
                 raise ValidationError(_(
                     'Нерезидент работает в России с патентом или разрешением '
-                    'на работу (решение 516) — укажите документ.'))
+                    'на работу (решение 516) — укажите документ. Гражданину '
+                    'ЕАЭС документ не нужен — отметьте «Гражданин ЕАЭС».'))
 
     def action_pay(self):
         self.filtered(lambda r: r.state == 'draft').write({'state': 'paid'})

@@ -39,9 +39,32 @@ class TestLaborPayout(CoopCase):
         pay = self._pay(resident=True, sme=True)
         self.assertEqual(pay.insurance, 22596)
 
-    def test_nerezident_v_rossii(self):
+    def test_nerezident_po_patentu(self):
+        # Решение 642: патент — шкала п. 3.1 ст. 224, а не 30 %.
         pay = self._pay(resident=False, work_place='ru', permit='patent')
+        self.assertEqual((pay.ndfl_amount, pay.net_amount, pay.cost), (14300, 95700, 143220))
+        self.assertIn('нерезидент по патенту', pay.ndfl_rate)
+
+    def test_zachet_avansa_po_patentu(self):
+        pay = self._pay(resident=False, work_place='ru', permit='patent', patent_advance=5000)
+        self.assertEqual((pay.ndfl_amount, pay.net_amount), (9300, 100700))
+        pay = self._pay(resident=False, work_place='ru', permit='patent',
+                        patent_advance=50000, date='2026-04-25')
+        self.assertEqual(pay.ndfl_amount, 0)
+
+    def test_nerezident_po_razresheniyu_30(self):
+        pay = self._pay(resident=False, work_place='ru', permit='permit')
         self.assertEqual((pay.ndfl_amount, pay.net_amount, pay.cost), (33000, 77000, 143220))
+
+    def test_grazhdanin_eaes(self):
+        # Без документа: гражданину ЕАЭС разрешение не нужно.
+        pay = self._pay(resident=False, work_place='ru', eaeu=True)
+        self.assertEqual((pay.ndfl_amount, pay.net_amount), (14300, 95700))
+        self.assertIn('ЕАЭС', pay.ndfl_rate)
+        # Гражданство берётся из профиля при создании.
+        self.person.coop_citizenship_id = self.env.ref('base.kz')
+        pay = self._pay(resident=False, work_place='ru', date='2026-05-25')
+        self.assertTrue(pay.eaeu)
 
     def test_inostranec_za_rubezhom(self):
         pay = self._pay(resident=False, foreigner=True, work_place='abroad')

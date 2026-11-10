@@ -41,15 +41,18 @@ def rubles(amount):
     return float(Decimal(str(amount)).quantize(Decimal('1'), rounding=ROUND_HALF_UP))
 
 
-def ndfl(base, earlier_base=0.0, resident=True, treaty_rate=0.0):
+def ndfl(base, earlier_base=0.0, resident=True, treaty_rate=0.0, scale=False):
     """Налог с выплаты и подпись ставки.
 
     `earlier_base` — база по прежним выплатам этого агента этому человеку
     за тот же год: от неё зависит, на какую ступень шкалы попадёт новая.
+    `scale` — нерезидент, которому по п. 3 и 3.1 ст. 224 вместо 30 %
+    действует шкала резидента: работа по патенту (ст. 227.1) или гражданин
+    ЕАЭС (решение 642).
     """
     if base <= 0:
         return 0.0, ''
-    if not resident:
+    if not resident and not scale:
         if treaty_rate and treaty_rate < NON_RESIDENT_RATE:
             return rubles(base * treaty_rate / 100.0), '%g %% по соглашению' % treaty_rate
         return rubles(base * NON_RESIDENT_RATE / 100.0), '%d %% — нерезидент' % NON_RESIDENT_RATE

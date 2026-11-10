@@ -63,8 +63,11 @@
               <field name="treaty_rate" invisible="resident"/>
               <field name="foreigner"/>
               <field name="work_place" invisible="resident"/>
+              <field name="eaeu" invisible="resident or work_place != 'ru'"/>
               <field name="permit" invisible="resident or work_place != 'ru'"
-                     required="not resident and work_place == 'ru'"/>
+                     required="not resident and work_place == 'ru' and not eaeu"/>
+              <field name="patent_advance"
+                     invisible="resident or work_place != 'ru' or permit != 'patent'"/>
             </group>
             <group>
               <field name="sme"/>
