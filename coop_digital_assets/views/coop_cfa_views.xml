@@ -139,23 +139,32 @@
                действия раздела были эмитентскими и операторскими. -->
           <button name="action_buy" type="object" string="Приобрести"
                   class="btn-primary" invisible="not can_buy"/>
+          <field name="operator_is_platform" invisible="1"/>
+          <button name="action_submit" type="object" string="Выпустить на платформе"
+                  class="btn-primary"
+                  invisible="(state != 'draft') or not coop_can_edit or not operator_is_platform"/>
           <button name="action_submit" type="object" string="Передать оператору"
-                  class="btn-primary" invisible="(state != 'draft') or not coop_can_edit"/>
+                  class="btn-primary"
+                  invisible="(state != 'draft') or not coop_can_edit or operator_is_platform"/>
           <button name="action_mark_issued" type="object" string="Отметить выпущенным"
-                  invisible="(state not in ('submitted', 'accepted')) or not coop_can_edit"/>
+                  invisible="(state not in ('submitted', 'accepted')) or not coop_can_edit or operator_is_platform"/>
           <button name="action_reject" type="object" string="Отказ оператора"
-                  invisible="(state not in ('submitted', 'accepted')) or not coop_can_edit"/>
+                  invisible="(state not in ('submitted', 'accepted')) or not coop_can_edit or operator_is_platform"/>
           <field name="state" widget="statusbar"
                  statusbar_visible="draft,submitted,accepted,issued"/>
         </header>
         <sheet>
           <field name="coop_can_edit" invisible="1"/>
           <field name="can_buy" invisible="1"/>
-          <div class="alert alert-info" role="status">
-            Платформа сама ЦФА не выпускает. Выпуск и обращение возможны
-            только в информационной системе оператора из реестра Банка
-            России: здесь собирается заявка и документы, решение принимает
-            оператор.
+          <div class="alert alert-info" role="status" invisible="not operator_is_platform">
+            Выпуск идёт в информационной системе платформы — она оператор
+            из реестра Банка России. Нажмите «Выпустить на платформе»:
+            заявка сразу получит номер в реестре платформы.
+          </div>
+          <div class="alert alert-info" role="status" invisible="operator_is_platform">
+            Выпуск у стороннего оператора идёт в его информационной
+            системе: здесь собирается заявка и документы, решение
+            принимает оператор.
           </div>
           <div class="oe_title">
             <h1><field name="name" placeholder="Требование по поставке зерна урожая 2027" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/></h1>

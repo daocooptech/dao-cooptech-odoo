@@ -13,6 +13,15 @@
     при каждом обновлении модуля.
   -->
 
+  <record id="operator_platform" model="coop.cfa.operator">
+    <field name="name">ДАО КООПТЕХ (платформа)</field>
+    <field name="sequence">1</field>
+    <field name="is_platform" eval="True"/>
+    <field name="issues_what">Денежные требования, права участия, права по ценным бумагам, требования передать вещь</field>
+    <field name="fee_note">Тариф платформы</field>
+    <field name="note">Платформа как оператор информационной системы: выпуск и обращение идут внутри неё, без передачи стороннему оператору. Сторонний оператор — по выбору эмитента.</field>
+  </record>
+
   <record id="operator_atomyze" model="coop.cfa.operator">
     <field name="name">Атомайз</field>
     <field name="sequence">10</field>
