@@ -299,7 +299,11 @@
                    значения видны в шапке словами. -->
               <section class="coop-show_block" invisible="not coop_can_edit">
                 <h2>Условия</h2>
-                <group>
+                <!-- Группы друг под другом, а не в две колонки: основная
+                     колонка витрины узкая, и метки второй группы
+                     наезжали на значения первой (владелец 10.11.2026,
+                     как у навыка). -->
+                <group col="1">
                   <group>
                     <field name="listing_type" widget="radio" options="{'horizontal': True}"/>
                     <field name="resource_type" widget="coop_inline"/>

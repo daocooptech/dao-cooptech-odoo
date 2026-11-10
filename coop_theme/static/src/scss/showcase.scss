@@ -30,6 +30,21 @@
 
   .o_field_widget {
     width: auto;
+    max-width: 100%;
+  }
+  // Ячейки групп сжимаются вместе с колонкой: иначе длинная категория
+  // или имя владельца с карандашом правки раздвигали блок и всю
+  // страницу вбок (ресурс на 1100 точках, владелец 10.11.2026).
+  .o_inner_group .o_cell {
+    min-width: 0;
+  }
+  // Переносим по словам; слово рвётся, только если само шире колонки —
+  // иначе в боковой колонке выходило «Социалист / ический».
+  .o_coop_inline_value {
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: normal;
+    min-width: 0;
   }
   .o_field_many2one a,
   .o_form_uri {
@@ -205,11 +220,21 @@
 .coop-show_kv .o_inner_group {
   margin: 0;
   font-size: 13px;
+  // Подпись над значением, а не слева: в боковой колонке на две
+  // колонки не хватало места — «Точка самовывоза» брала 150 точек из
+  // 258, адрес и «Продвигается» рвались посреди слова (ресурс на 1100,
+  // 10.11.2026).
+  grid-template-columns: minmax(0, 1fr) !important;
+  row-gap: 0;
 
   .o_cell.o_wrap_label {
     width: auto !important;
-    padding-right: 12px;
+    padding: 6px 0 0;
+    font-size: 11.5px;
     color: var(--coop-slate);
+  }
+  .o_cell.o_wrap_input {
+    padding: 0 0 4px;
   }
 }
 .o_notebook.coop-show_tabs:not(:has(.nav-item)) {
@@ -291,6 +316,11 @@
 .o_form_view.o_coop_show .coop-show_block .o_row > .o_field_widget:first-child {
   flex: 0 0 auto;
   min-width: 8em;
+
+  // Сумма с валютой — одной строкой: «₽» уезжал под число.
+  .o_coop_inline_value {
+    white-space: nowrap;
+  }
 }
 // Ставка навыка — строка, а не число: «сдельно, по договорённости» не
 // помещалась в колонку и уводила страницу вширь (задача 397).
