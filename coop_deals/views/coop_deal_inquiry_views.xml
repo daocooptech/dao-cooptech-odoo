@@ -53,7 +53,7 @@
     <field name="path">inquiries</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="view_id" ref="view_coop_deal_inquiry_kanban"/>
-    <field name="domain">[('coop_mine', '=', True), '|', ('state', 'in', ['lead', 'draft', 'agreed']), '&amp;', ('state', '=', 'cancelled'), ('signed_on', '=', False)]</field>
+    <field name="domain">[('coop_mine', '=', True), ('resource_id', '!=', False), '|', ('state', 'in', ['lead', 'draft', 'agreed']), '&amp;', ('state', '=', 'cancelled'), ('signed_on', '=', False)]</field>
     <!-- Пустые стадии исполнения и приёмки здесь не нужны: CRM
          организаций раскрывает все стадии сделки (coop_crm), а воронка
          обращений кончается на «Согласована». -->
@@ -71,5 +71,78 @@
   <menuitem id="menu_coop_deal_inquiries" name="Обращения"
             parent="coop_resources.menu_coop_resources_root"
             action="action_coop_deal_inquiries" sequence="17"/>
+
+  <!-- Обращения — в каждом разделе, где они уместны (владелец 11.11.2026).
+       В «Навыках»: «Написать» и «Показать контакты» на предложении навыка.
+       У вакансий своя воронка — «Мои отклики», у проектов — вклады. -->
+  <record id="action_coop_deal_skill_inquiries" model="ir.actions.act_window">
+    <field name="name">Обращения</field>
+    <field name="res_model">coop.deal</field>
+    <field name="path">skill-inquiries</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="view_id" ref="view_coop_deal_inquiry_kanban"/>
+    <field name="domain">[('coop_mine', '=', True), ('skill_offer_id', '!=', False), '|', ('state', 'in', ['lead', 'draft', 'agreed']), '&amp;', ('state', '=', 'cancelled'), ('signed_on', '=', False)]</field>
+    <field name="context">{'create': False, 'read_group_expand': False}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Обращений пока нет</p>
+      <p>
+        Обращение появляется само, когда вам пишут или запрашивают контакты
+        по вашему предложению навыка — или вы сами пишете исполнителю.
+        Дальше оно идёт по стадиям к сделке.
+      </p>
+    </field>
+  </record>
+
+  <menuitem id="menu_coop_deal_skill_inquiries" name="Обращения"
+            parent="coop_skills.menu_coop_skills_root"
+            action="action_coop_deal_skill_inquiries" sequence="25"/>
+
+  <!-- «Уровень доверия» (решение 89): процент и из чего он сложился —
+       доля положительных отзывов от сделок с отзывом. -->
+  <record id="view_res_partner_coop_trust" model="ir.ui.view">
+    <field name="name">res.partner.coop.trust</field>
+    <field name="model">res.partner</field>
+    <field name="priority">90</field>
+    <field name="arch" type="xml">
+      <form string="Уровень доверия" create="0" edit="0" delete="0">
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="name" readonly="1"/></h1>
+          </div>
+          <group>
+            <group string="Уровень доверия">
+              <field name="coop_trust" readonly="1" invisible="not coop_deals_reviewed"/>
+              <div class="text-muted" colspan="2" invisible="coop_deals_reviewed">
+                Доверие пока не считается: о вас ещё никто не оставил отзыв.
+              </div>
+              <field name="coop_deals_done" readonly="1"/>
+              <field name="coop_deals_reviewed" readonly="1"/>
+              <field name="coop_deals_positive" readonly="1"/>
+            </group>
+            <group string="Как считается">
+              <div colspan="2">
+                Доля сделок с положительным отзывом («хорошо» или «отлично») от
+                завершённых сделок, по которым о вас оставили отзыв. Сделки без
+                отзыва процент не снижают. Число обновляется само после каждой
+                завершённой сделки и каждого отзыва.
+              </div>
+            </group>
+          </group>
+          <button name="action_coop_reviews_about" type="object"
+                  string="Отзывы обо мне" class="btn-secondary"/>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_coop_my_trust" model="ir.actions.server">
+    <field name="name">Уровень доверия</field>
+    <field name="model_id" ref="base.model_res_partner"/>
+    <field name="state">code</field>
+    <field name="code">action = model.action_coop_my_trust()</field>
+  </record>
+
+  <menuitem id="menu_coop_my_trust" name="Уровень доверия"
+            parent="menu_coop_deals_root" action="action_coop_my_trust" sequence="15"/>
 
 </odoo>

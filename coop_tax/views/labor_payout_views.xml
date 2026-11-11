@@ -144,6 +144,6 @@
 
   <menuitem id="menu_coop_tax_labor_payout" name="Выплаты за трудовое участие"
             parent="coop_wallet.menu_coop_wallet_root"
-            action="action_coop_tax_labor_payout" sequence="57"/>
+            action="action_coop_tax_labor_payout" sequence="52"/>
 
 </odoo>

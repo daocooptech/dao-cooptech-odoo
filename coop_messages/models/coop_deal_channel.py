@@ -113,6 +113,18 @@ class CoopDeal(models.Model):
         return res
 
 
+def _coop_open_inquiry_chat(deal):
+    """Действие «открыть переписку обращения» или False, если её нет."""
+    channel = deal and deal._coop_channels('deal')[:1]
+    if not channel:
+        return False
+    return {
+        'type': 'ir.actions.client',
+        'tag': 'mail.action_discuss',
+        'context': {'active_id': 'discuss.channel_%s' % channel.id},
+    }
+
+
 class CoopResource(models.Model):
     _inherit = 'coop.resource'
 
@@ -123,11 +135,15 @@ class CoopResource(models.Model):
         раньше, пустым окном нового разговора."""
         self.ensure_one()
         deal = self.env['coop.deal']._coop_inquiry_for(self, 'message')
-        channel = deal and deal._coop_channels('deal')[:1]
-        if not channel:
-            return super().action_message_owner()
-        return {
-            'type': 'ir.actions.client',
-            'tag': 'mail.action_discuss',
-            'context': {'active_id': 'discuss.channel_%s' % channel.id},
-        }
+        return _coop_open_inquiry_chat(deal) or super().action_message_owner()
+
+
+class CoopSkillOffer(models.Model):
+    _inherit = 'coop.skill.offer'
+
+    def action_message_owner(self):
+        """«Написать» по предложению навыка — тоже обращение (владелец
+        11.11.2026: обращения — в каждом разделе, где они уместны)."""
+        self.ensure_one()
+        deal = self.env['coop.deal']._coop_skill_inquiry_for(self, 'message')
+        return _coop_open_inquiry_chat(deal) or super().action_message_owner()

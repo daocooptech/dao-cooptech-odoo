@@ -369,6 +369,8 @@ const SUBNAV_EXACT = {
     "Продажи": "filter",
     "Продвижение": "speakerphone",
     "Обращения": "inbox",
+    "Уровень доверия": "shield-check",
+    "Реестр оператора": "building-bank",
     "Проекты": "rocket",
     "Пулы проектов": "droplet",
     "Сайт": "world-www",

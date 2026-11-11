@@ -102,6 +102,6 @@
 
   <menuitem id="menu_coop_tax_payout_limit" name="Лимит кооперативных выплат"
             parent="coop_wallet.menu_coop_wallet_root"
-            action="action_coop_tax_payout_limit" sequence="56"/>
+            action="action_coop_tax_payout_limit" sequence="54"/>
 
 </odoo>

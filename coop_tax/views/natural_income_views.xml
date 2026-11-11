@@ -126,6 +126,6 @@
 
   <menuitem id="menu_coop_tax_natural_income" name="НДФЛ с натуральных доходов"
             parent="coop_wallet.menu_coop_wallet_root"
-            action="action_coop_tax_natural_income" sequence="55"/>
+            action="action_coop_tax_natural_income" sequence="56"/>
 
 </odoo>

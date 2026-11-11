@@ -148,3 +148,86 @@ def load_inquiries(env, target=TARGET):
     Deal.invalidate_model(['create_date', 'funnel_date'])
     _logger.info('Обращения из разговоров: %s', stats)
     return stats['made']
+
+
+SKILL_WORDS = [
+    'Здравствуйте! Свободны на следующей неделе?',
+    'Добрый день, нужна консультация — сколько стоит час?',
+    'Можете взяться за небольшой заказ в выходные?',
+    'Подскажите, работаете с организациями по договору?',
+    'Нужен выезд на объект, когда удобно?',
+    'Сколько займёт работа под ключ?',
+]
+SKILL_TARGET = 110
+
+
+def load_skill_inquiries(env, target=SKILL_TARGET):
+    """Обращения по предложениям навыков (владелец 11.11.2026: обращения
+    — в каждом разделе, где уместны). Треть — к единственному предложению
+    dashkevich, остальное — его обращения к исполнителям. Ключ `sinq#N`."""
+    Deal = env['coop.deal'].sudo()
+    me = env['res.users'].sudo().search([('login', '=', OWNER_LOGIN)], limit=1)
+    if not me or not hasattr(Deal, '_coop_skill_inquiry_for'):
+        return 0
+    have = Deal.search_count([('import_key', '=like', 'sinq#%')])
+    if have >= target:
+        return 0
+    Offer = env['coop.skill.offer'].sudo()
+    mine = Offer.search([('state', '=', 'published'), ('partner_id', '=', me.partner_id.id)])
+    others = Offer.search([('state', '=', 'published'), ('partner_id', '!=', me.partner_id.id),
+                           ('partner_id.is_company', '=', False)], order='id')
+    people = env['res.users'].sudo().search([
+        ('partner_id.coop_is_participant', '=', True),
+        ('partner_id.is_company', '=', False),
+        ('partner_id.name', 'not in', TEST_NAMES), ('id', '!=', me.id)], order='id')
+    if not others or not people:
+        return 0
+    stats = dict(made=0, lead=0, draft=0, lost=0, skipped=0)
+    now = datetime.now()
+    number = 0
+    while have + stats['made'] < target and number < target * 4:
+        number += 1
+        key = 'sinq#%s' % number
+        if Deal.search_count([('import_key', '=', key)]):
+            continue
+        rnd = random.Random(20261112 + number)
+        if mine and number % 3 == 0:
+            offer, asker = mine[0], people[rnd.randrange(len(people))]
+        else:
+            offer, asker = others[rnd.randrange(len(others))], me
+        answering = offer.partner_id.user_ids.filtered('active')[:1]
+        if not answering or answering == asker:
+            stats['skipped'] += 1
+            continue
+        source = 'call' if rnd.random() < 0.3 else 'message'
+        try:
+            with env.cr.savepoint():
+                deal = Deal.with_user(asker)._coop_skill_inquiry_for(
+                    offer.with_user(asker), source).sudo()
+                if not deal or deal.import_key:
+                    stats['skipped'] += 1
+                    continue
+                deal.import_key = key
+                if source == 'message':
+                    _say(deal, asker, rnd.choice(SKILL_WORDS))
+                roll = rnd.random()
+                if roll < 0.35:
+                    deal.with_user(answering).action_negotiate()
+                    _say(deal, answering, 'Да, могу. Давайте обсудим объём и сроки.')
+                    stats['draft'] += 1
+                elif roll < 0.55:
+                    deal.with_user(answering if rnd.random() < 0.6 else asker).action_cancel()
+                    stats['lost'] += 1
+                else:
+                    stats['lead'] += 1
+        except Exception as error:
+            _logger.debug('Обращение %s пропущено: %s', key, error)
+            stats['skipped'] += 1
+            continue
+        when = now - timedelta(days=rnd.randint(0, 90), hours=rnd.randint(0, 23))
+        env.cr.execute('UPDATE coop_deal SET create_date = %s, funnel_date = %s '
+                       'WHERE id = %s AND signed_on IS NULL', (when, when.date(), deal.id))
+        stats['made'] += 1
+    Deal.invalidate_model(['create_date', 'funnel_date'])
+    _logger.info('Обращения по навыкам: %s', stats)
+    return stats['made']

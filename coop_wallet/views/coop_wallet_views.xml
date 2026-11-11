@@ -696,14 +696,17 @@
     Взаиморасчёты остаются и отдельным действием: этот же список нужен на
     странице организации. Представление одно, дублирования данных нет.
   -->
+  <!-- Порядок «Кошелька» — предложение архитектора, принято владельцем
+       11.11.2026: кошелёк, пай, расчёты, зачёты, кредит, затем выплаты и
+       налог (coop_tax), служебное — внизу. -->
   <menuitem id="menu_coop_settlement" name="Взаиморасчёты"
             parent="menu_coop_wallet_root" action="action_coop_settlement" sequence="20"/>
   <menuitem id="menu_coop_credit_line" name="Линии взаимного кредита"
             parent="menu_coop_wallet_root" action="action_coop_credit_line" sequence="30"/>
   <menuitem id="menu_coop_clearing" name="Взаимозачёты"
-            parent="menu_coop_wallet_root" action="action_coop_clearing" sequence="40"/>
+            parent="menu_coop_wallet_root" action="action_coop_clearing" sequence="25"/>
   <menuitem id="menu_coop_share_account" name="Паевые счета"
-            parent="menu_coop_wallet_root" action="action_coop_share_account" sequence="50"/>
+            parent="menu_coop_wallet_root" action="action_coop_share_account" sequence="15"/>
   <menuitem id="menu_coop_network" name="Блокчейн-сети"
             parent="menu_coop_wallet_root" action="action_coop_network" sequence="80"
             groups="coop_base.group_coop_platform"/>
