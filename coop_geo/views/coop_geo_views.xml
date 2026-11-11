@@ -15,6 +15,12 @@
       <xpath expr="//group/field[@name='city']" position="after">
         <field name="coop_address" widget="coop_inline" readonly="not coop_can_edit" placeholder="Улица, дом"/>
       </xpath>
+      <!-- Мини-карта — в правой колонке полей, последней (владелец
+           12.11.2026: «мини-карты справа во всех карточках»). -->
+      <xpath expr="(//group/field[@name='city'])[1]/../../group[last()]" position="inside">
+        <field name="coop_lat" widget="coop_minimap" nolabel="1" readonly="1" colspan="2"
+               invisible="not coop_lat"/>
+      </xpath>
     </field>
   </record>
 
@@ -26,6 +32,12 @@
       <xpath expr="//group/field[@name='city']" position="after">
         <field name="coop_address" placeholder="Улица, дом"/>
       </xpath>
+      <!-- Мини-карта — в правой колонке полей, последней (владелец
+           12.11.2026: «мини-карты справа во всех карточках»). -->
+      <xpath expr="(//group/field[@name='city'])[1]/../../group[last()]" position="inside">
+        <field name="coop_lat" widget="coop_minimap" nolabel="1" readonly="1" colspan="2"
+               invisible="not coop_lat"/>
+      </xpath>
     </field>
   </record>
 
@@ -36,6 +48,12 @@
     <field name="arch" type="xml">
       <xpath expr="//group/field[@name='city']" position="after">
         <field name="coop_address" widget="coop_inline" readonly="not coop_can_edit" placeholder="Улица, дом"/>
+      </xpath>
+      <!-- Мини-карта — в правой колонке полей, последней (владелец
+           12.11.2026: «мини-карты справа во всех карточках»). -->
+      <xpath expr="(//group/field[@name='city'])[1]/../../group[last()]" position="inside">
+        <field name="coop_lat" widget="coop_minimap" nolabel="1" readonly="1" colspan="2"
+               invisible="not coop_lat"/>
       </xpath>
     </field>
   </record>
@@ -59,6 +77,12 @@
       <xpath expr="//group/field[@name='city']" position="after">
         <field name="coop_address" widget="coop_inline" readonly="not coop_can_edit" placeholder="Улица, дом"/>
       </xpath>
+      <!-- Мини-карта — в правой колонке полей, последней (владелец
+           12.11.2026: «мини-карты справа во всех карточках»). -->
+      <xpath expr="(//group/field[@name='city'])[1]/../../group[last()]" position="inside">
+        <field name="coop_lat" widget="coop_minimap" nolabel="1" readonly="1" colspan="2"
+               invisible="not coop_lat"/>
+      </xpath>
     </field>
   </record>
 
@@ -69,6 +93,12 @@
     <field name="arch" type="xml">
       <xpath expr="//group/field[@name='city']" position="after">
         <field name="coop_address" widget="coop_inline" readonly="not coop_can_edit" placeholder="Улица, дом"/>
+      </xpath>
+      <!-- Мини-карта — в группе с адресом: она здесь правая колонка, а
+           последняя группа из трёх переносится влево (12.11.2026). -->
+      <xpath expr="(//group/field[@name='city'])[1]/.." position="inside">
+        <field name="coop_lat" widget="coop_minimap" nolabel="1" readonly="1" colspan="2"
+               invisible="not coop_lat"/>
       </xpath>
     </field>
   </record>
@@ -103,6 +133,12 @@
       <xpath expr="//group/field[@name='city']" position="after">
         <field name="coop_address" widget="coop_inline" readonly="not coop_can_edit" placeholder="Улица, дом"/>
       </xpath>
+      <!-- Мини-карта — в правой колонке полей, последней (владелец
+           12.11.2026: «мини-карты справа во всех карточках»). -->
+      <xpath expr="(//group/field[@name='city'])[1]/../../group[last()]" position="inside">
+        <field name="coop_lat" widget="coop_minimap" nolabel="1" readonly="1" colspan="2"
+               invisible="not coop_lat"/>
+      </xpath>
     </field>
   </record>
 
@@ -113,6 +149,12 @@
     <field name="arch" type="xml">
       <xpath expr="//group/field[@name='city']" position="after">
         <field name="coop_address" widget="coop_inline" readonly="not coop_can_edit" placeholder="Улица, дом"/>
+      </xpath>
+      <!-- У проекта правой колонки нет — карта в правой части шапки,
+           под инициатором (12.11.2026). -->
+      <xpath expr="//div[hasclass('coop-pj_owner')]" position="after">
+        <field name="coop_lat" widget="coop_minimap" nolabel="1" readonly="1"
+               invisible="not coop_lat"/>
       </xpath>
     </field>
   </record>
@@ -158,6 +200,14 @@
       <xpath expr="//group/field[@name='city']" position="after">
         <field name="coop_address" widget="coop_inline" readonly="not coop_can_edit" placeholder="Улица, дом"/>
       </xpath>
+      <!-- Мини-карта — в правой колонке витрины, под карточкой
+           владельца, как «Где забрать» у ресурса (12.11.2026). -->
+      <xpath expr="//aside[hasclass('coop-show_aside')]" position="inside">
+        <section class="coop-show_block" name="where" invisible="not coop_lat">
+          <h2>Где работает</h2>
+          <field name="coop_lat" widget="coop_minimap" nolabel="1" readonly="1"/>
+        </section>
+      </xpath>
     </field>
   </record>
 
@@ -168,6 +218,14 @@
     <field name="arch" type="xml">
       <xpath expr="//group/field[@name='city']" position="after">
         <field name="coop_address" widget="coop_inline" readonly="not coop_can_edit" placeholder="Улица, дом"/>
+      </xpath>
+      <!-- Мини-карта — в правой колонке витрины, под карточкой
+           владельца, как «Где забрать» у ресурса (12.11.2026). -->
+      <xpath expr="//aside[hasclass('coop-show_aside')]" position="inside">
+        <section class="coop-show_block" name="where" invisible="not coop_lat">
+          <h2>Место работы</h2>
+          <field name="coop_lat" widget="coop_minimap" nolabel="1" readonly="1"/>
+        </section>
       </xpath>
     </field>
   </record>
@@ -180,6 +238,12 @@
       <xpath expr="//group/field[@name='city']" position="after">
         <field name="coop_address" widget="coop_inline" readonly="not coop_can_edit" placeholder="Улица, дом"/>
       </xpath>
+      <!-- Мини-карта — в правой колонке полей, последней (владелец
+           12.11.2026: «мини-карты справа во всех карточках»). -->
+      <xpath expr="(//group/field[@name='city'])[1]/../../group[last()]" position="inside">
+        <field name="coop_lat" widget="coop_minimap" nolabel="1" readonly="1" colspan="2"
+               invisible="not coop_lat"/>
+      </xpath>
     </field>
   </record>
 
@@ -190,6 +254,12 @@
     <field name="arch" type="xml">
       <xpath expr="//group/field[@name='city']" position="after">
         <field name="coop_address" widget="coop_inline" readonly="not coop_can_edit" placeholder="Улица, дом"/>
+      </xpath>
+      <!-- Мини-карта — в правой колонке полей, последней (владелец
+           12.11.2026: «мини-карты справа во всех карточках»). -->
+      <xpath expr="(//group/field[@name='city'])[1]/../../group[last()]" position="inside">
+        <field name="coop_lat" widget="coop_minimap" nolabel="1" readonly="1" colspan="2"
+               invisible="not coop_lat"/>
       </xpath>
     </field>
   </record>
