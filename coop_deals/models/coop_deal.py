@@ -16,10 +16,17 @@ PAYS_FIRST = ('purchase', 'rent', 'job', 'service', 'share', 'credit')
 # кредитор (так же было и по способу: у кредита первая сторона — заёмщик).
 PAYER_ROLES = ('заказчик', 'покупатель', 'арендатор', 'заёмщик', 'заемщик',
                'наниматель', 'работодатель', 'приобретатель', 'пайщик', 'инвестор',
-               'размещающий', 'участник')
+               'размещающий', 'участник', 'принимает')
 PAYEE_ROLES = ('исполнитель', 'продавец', 'арендодатель', 'кредитор', 'займодавец',
                'подрядчик', 'поставщик', 'работник', 'кооператив', 'проект',
-               'владелец склада', 'инициатор')
+               'владелец склада', 'инициатор', 'передаёт', 'передает')
+# «Передаёт / Принимает» — роли, которые ставят обращение, отклик на
+# объявление и склад: первой стороной идёт тот, кто передаёт вещь, место
+# или работу. Пока эти роли ничего не говорили о деньгах, плательщика
+# решал способ, а у услуги и аренды (`PAYS_FIRST`) платит первая
+# сторона — выходило, что исполнитель платит за свою же работу, а
+# арендодатель — за свою же сдачу (№ 418, СД-2026-001067). У продажи и
+# обмена плательщик от этого не меняется: и раньше платил принимающий.
 
 
 def _money_role(text):
@@ -111,6 +118,11 @@ class CoopDeal(models.Model):
     party_b_id = fields.Many2one(
         'res.partner', string='Вторая сторона', required=True, index=True,
         tracking=True)
+    # Вторая сторона глазами того, кто смотрит. Обращения по одному
+    # объявлению совпадают названием и суммой, и в списке «ждут меня»
+    # их отличает только тот, кто обратился (№ 418).
+    coop_other_party_id = fields.Many2one(
+        'res.partner', string='С кем', compute='_compute_coop_other_party')
     role_a = fields.Char(string='Роль стороны', help='Продавец, арендатор, исполнитель.')
     role_b = fields.Char(string='Роль второй стороны')
     author_id = fields.Many2one(
@@ -506,6 +518,12 @@ class CoopDeal(models.Model):
         mine = self.env.user.coop_actor_partner_ids
         other_item = (self.party_a_id | self.party_b_id) - mine
         return other_item[:1]
+
+    @api.depends_context('uid')
+    @api.depends('party_a_id', 'party_b_id')
+    def _compute_coop_other_party(self):
+        for deal in self:
+            deal.coop_other_party_id = deal._other_partner()
 
     @api.depends_context('uid')
     @api.depends('state', 'review_ids.author_id')

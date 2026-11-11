@@ -498,11 +498,21 @@
                             action="action_coop_open_page" type="object">
                       <field name="state"/>
                       <field name="currency_id"/>
+                      <field name="number"/>
+                      <field name="coop_other_party_id"/>
                       <templates>
                         <t t-name="card">
-                          <div class="o_coop_mini o_coop_mini_text o_coop_day_tile">
-                            <div class="o_coop_mini_note o_coop_day_when">
-                              <field name="number"/>
+                          <!-- Сверху — с кем сделка: обращения по одному
+                               объявлению совпадают названием и суммой и
+                               различаются только тем, кто обратился (№ 418).
+                               Номер — подсказкой, в плитке он ничего не
+                               говорит. -->
+                          <div class="o_coop_mini o_coop_mini_text o_coop_day_tile"
+                               t-att-title="record.number.value">
+                            <div class="o_coop_day_who" t-if="record.coop_other_party_id.raw_value">
+                              <img t-att-src="'/web/image/res.partner/' + record.coop_other_party_id.raw_value + '/avatar_128'"
+                                   alt="" loading="lazy"/>
+                              <span><t t-out="record.coop_other_party_id.value"/></span>
                             </div>
                             <div class="o_coop_mini_label"><field name="name"/></div>
                             <div class="o_coop_day_amount"><field name="amount"/></div>

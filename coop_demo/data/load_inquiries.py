@@ -159,12 +159,67 @@ SKILL_WORDS = [
     'Сколько займёт работа под ключ?',
 ]
 SKILL_TARGET = 110
+# Входящих к единственному навыку dashkevich — несколько, как у живого
+# исполнителя за квартал. Было «каждое третье»: 38 одинаковых обращений
+# «Электромонтажник, 70 000» к одному человеку (№ 418, владелец 11.11:
+# «это не по-настоящему»).
+SKILL_MINE_MAX = 6
+
+
+def _skill_amount(offer, rnd):
+    """Сумма обращения — объём работы, а не одна ставка на всех: ставка
+    навыка — за час или за работу, и каждому нужно своё."""
+    rate = offer.rate or 0.0
+    if not rate:
+        return 0.0
+    amount = rate * rnd.choice((0.5, 0.75, 1, 1, 1.5, 2, 3))
+    step = 500 if amount >= 5000 else 100
+    return max(step, round(amount / step) * step)
+
+
+def trim_skill_inquiries(env, keep=SKILL_MINE_MAX):
+    """Убрать лишние демо-обращения к навыку dashkevich, оставив `keep`
+    самых разных по состоянию. Только демо (`sinq#`), только не начатые."""
+    Deal = env['coop.deal'].sudo()
+    me = env['res.users'].sudo().search([('login', '=', OWNER_LOGIN)], limit=1)
+    if not me:
+        return 0
+    deals = Deal.search([('import_key', '=like', 'sinq#%'),
+                         ('skill_offer_id.partner_id', '=', me.partner_id.id)], order='id')
+    if len(deals) <= keep:
+        return 0
+    kept = deals.browse()
+    for state in ('lead', 'draft', 'cancelled', 'lead', 'draft', 'lead'):
+        pick = (deals - kept).filtered(lambda d: d.state == state)[:1]
+        kept |= pick
+    kept |= (deals - kept)[:max(0, keep - len(kept))]
+    extra = (deals - kept).filtered(lambda d: d.state in ('lead', 'draft', 'cancelled'))
+    env['mail.activity'].sudo().search([
+        ('res_model', '=', 'coop.deal'), ('res_id', 'in', extra.ids)]).unlink()
+    count = len(extra)
+    extra.unlink()
+    _logger.info('Обращения к навыку dashkevich: убрано %s, оставлено %s', count, len(kept))
+    return count
+
+
+def vary_skill_amounts(env):
+    """Разные суммы у уже заведённых демо-обращений по навыкам: раньше
+    у всех обращений к одному навыку стояла одна ставка."""
+    Deal = env['coop.deal'].sudo()
+    deals = Deal.search([('import_key', '=like', 'sinq#%'),
+                         ('state', 'in', ('lead', 'draft', 'cancelled'))])
+    for deal in deals:
+        amount = _skill_amount(deal.skill_offer_id, random.Random(20261111 + deal.id))
+        if amount and amount != deal.amount:
+            deal.amount = amount
+    return len(deals)
 
 
 def load_skill_inquiries(env, target=SKILL_TARGET):
     """Обращения по предложениям навыков (владелец 11.11.2026: обращения
-    — в каждом разделе, где уместны). Треть — к единственному предложению
-    dashkevich, остальное — его обращения к исполнителям. Ключ `sinq#N`."""
+    — в каждом разделе, где уместны). К единственному предложению
+    dashkevich — не больше `SKILL_MINE_MAX`, остальное — его обращения к
+    исполнителям. Ключ `sinq#N`."""
     Deal = env['coop.deal'].sudo()
     me = env['res.users'].sudo().search([('login', '=', OWNER_LOGIN)], limit=1)
     if not me or not hasattr(Deal, '_coop_skill_inquiry_for'):
@@ -191,7 +246,9 @@ def load_skill_inquiries(env, target=SKILL_TARGET):
         if Deal.search_count([('import_key', '=', key)]):
             continue
         rnd = random.Random(20261112 + number)
-        if mine and number % 3 == 0:
+        to_me = Deal.search_count([('import_key', '=like', 'sinq#%'),
+                                   ('skill_offer_id', 'in', mine.ids)]) if mine else 0
+        if mine and number % 3 == 0 and to_me < SKILL_MINE_MAX:
             offer, asker = mine[0], people[rnd.randrange(len(people))]
         else:
             offer, asker = others[rnd.randrange(len(others))], me
@@ -208,6 +265,7 @@ def load_skill_inquiries(env, target=SKILL_TARGET):
                     stats['skipped'] += 1
                     continue
                 deal.import_key = key
+                deal.amount = _skill_amount(offer, rnd)
                 if source == 'message':
                     _say(deal, asker, rnd.choice(SKILL_WORDS))
                 roll = rnd.random()
