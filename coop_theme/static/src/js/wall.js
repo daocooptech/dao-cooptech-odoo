@@ -71,16 +71,44 @@ patch(FormRenderer.prototype, {
  * чтобы что-то рассказать, и лишний щелчок перед пустым полем ничего не
  * экономит. В макете поле стоит открытым, с подсказкой и кнопкой.
  */
+/**
+ * Чья это стена для того, кто смотрит. Писать на странице человека может
+ * только он сам, на странице организации — тот, кто правит её карточку.
+ * Владелец 11.11.2026: «нельзя, убрать поле» — гостю поле публикации на
+ * чужой странице не показывается (образец PersonPage: «у гостя нет поля
+ * публикации»). Проекты и сообщества — общие стены, там поле остаётся.
+ * Признаки берутся из записи формы; формы без них (не витрина) — как
+ * раньше.
+ */
+function coopWallIsMine(chatter) {
+    if (chatter.threadModel() !== "res.partner") {
+        return true;
+    }
+    const data = (chatter.webChatterProps?.record || chatter.props?.record)?.data;
+    if (!data || !("coop_is_self" in data || "coop_can_edit_card" in data)) {
+        return true;
+    }
+    return Boolean(data.coop_is_self || data.coop_can_edit_card);
+}
+
 patch(Chatter.prototype, {
     setup() {
         super.setup();
-        if (WALL_MODELS.includes(this.threadModel())) {
+        if (WALL_MODELS.includes(this.threadModel()) && coopWallIsMine(this)) {
             // Не через `toggleComposer`: тот на неспасённой записи ждёт
             // сохранения и открывает поле уже после него. Здесь запись
             // всегда сохранена — это чужая или своя страница, а не форма
             // создания.
             this.state.composerType = "message";
         }
+    },
+
+    /** На чужой стене поле не открывается и кнопкой. */
+    toggleComposer(mode, options) {
+        if (mode && WALL_MODELS.includes(this.threadModel()) && !coopWallIsMine(this)) {
+            return;
+        }
+        return super.toggleComposer(mode, options);
     },
 
     /**
@@ -96,7 +124,7 @@ patch(Chatter.prototype, {
      */
     onPostCallback() {
         super.onPostCallback();
-        if (WALL_MODELS.includes(this.threadModel())) {
+        if (WALL_MODELS.includes(this.threadModel()) && coopWallIsMine(this)) {
             this.state.composerType = "message";
         }
     },
