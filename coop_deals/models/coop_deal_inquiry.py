@@ -52,6 +52,34 @@ class CoopDeal(models.Model):
         domain = ['|', ('party_a_id', '=', me), ('party_b_id', '=', me)]
         return domain if (operator == '=') == value else ['!'] + domain
 
+    # Подписи столбцов доски обращений: «обращение» — оно, значит
+    # «Согласовано» и «Отменено» (владелец 11.11.2026). В «Сделках»
+    # остаются «Согласована» / «Отменена» — там это сделка.
+    INQUIRY_LABELS = {'agreed': 'Согласовано', 'cancelled': 'Отменено'}
+
+    INQUIRY_ACTIONS = ('coop_deals.action_coop_deal_inquiries',
+                       'coop_deals.action_coop_deal_skill_inquiries')
+
+    @api.model
+    def get_views(self, views, options=None):
+        # Контекст действия клиент при загрузке вида отбрасывает (оставляет
+        # только язык), а номер действия передаёт — по нему и узнаём доску.
+        res = super().get_views(views, options)
+        action_id = (options or {}).get('action_id')
+        if not action_id:
+            return res
+        ids = [self.env.ref(x, raise_if_not_found=False) for x in self.INQUIRY_ACTIONS]
+        if action_id not in [a.id for a in ids if a]:
+            return res
+        fields_ = res.get('models', {}).get(self._name, {}).get('fields', {})
+        if fields_.get('state', {}).get('selection'):
+            state = dict(fields_['state'])
+            state['selection'] = [
+                [key, self.INQUIRY_LABELS.get(key, label)]
+                for key, label in state['selection']]
+            fields_['state'] = state
+        return res
+
     @api.model
     def _coop_inquiry_for(self, listing, source):
         """Обращение по объявлению о ресурсе от того, кто сейчас действует."""

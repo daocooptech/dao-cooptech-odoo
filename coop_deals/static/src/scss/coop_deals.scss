@@ -1,6 +1,37 @@
 // Карточка сделки. В отличие от каталогов, здесь нет снимка: у сделки
 // нечего показывать картинкой, а важны номер, стороны, сумма и состояние.
 
+// Доска обращений (владелец 11.11.2026: «заявки впритык друг к другу и
+// нету нижней прокрутки, не понятно что надо скролить»). Замер: зазор
+// между карточками −1 px, доска высотой 6900 px — её полоса прокрутки
+// вбок стояла в самом низу, под последней карточкой. Теперь доска — по
+// высоте окна и прокручивается сама в обе стороны: полоса вбок видна
+// внизу экрана, шапки столбцов стоят на месте.
+.o_coop_inquiries .o_kanban_renderer.o_kanban_grouped {
+  max-height: calc(100dvh - 200px);
+  overflow: auto;
+  scrollbar-width: auto;
+  scrollbar-color: var(--coop-line-strong, #c9c9c2) transparent;
+
+  .o_kanban_group {
+    width: 300px;
+    min-width: 300px;
+  }
+  .o_kanban_header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--coop-bg, var(--body-bg));
+  }
+  .o_kanban_record {
+    margin: 0 0 8px !important;
+  }
+  // Телефон: внизу нижнее меню — доска кончается над ним.
+  @media (max-width: 767.98px) {
+    max-height: calc(100dvh - 230px);
+  }
+}
+
 .o_coop_deals {
 
   .o_kanban_record {
