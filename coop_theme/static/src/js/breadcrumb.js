@@ -426,12 +426,6 @@ patch(Breadcrumbs.prototype, {
         }
     },
 
-    /** Имя открытой записи — последнее звено пути. */
-    get coopHereName() {
-        const last = (this.props.breadcrumbs || []).at(-1);
-        return (last && last.name) || this.coopTrailState.name || "";
-    },
-
     /**
      * Раздел в начале пути, когда предков нет (прямая ссылка) или они
      * не показываются (страница человека и организации). У контакта

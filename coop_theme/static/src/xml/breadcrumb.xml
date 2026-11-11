@@ -28,8 +28,9 @@
   </t>
 
   <!--
-    Хвост пути на странице записи (№ 407): рубрика и сама запись.
-    Рубрика — ссылкой на каталог, отобранный по ней.
+    Хвост пути на странице записи (№ 407): рубрика ссылкой на каталог,
+    отобранный по ней. Названия записи в пути нет — оно стоит заголовком
+    страницы прямо под ним (владелец 12.11.2026).
   -->
   <t t-name="coop_theme.TrailTail">
     <t t-if="this.coopRubricsHere">
@@ -39,9 +40,6 @@
            t-on-click.prevent="() => this.coopOpenRubric(rubric)" t-out="rubric.name"/>
       </li>
     </t>
-    <li class="breadcrumb-item active d-inline-flex min-w-0 o_coop_here" aria-current="page">
-      <span class="text-truncate" t-out="this.coopHereName"/>
-    </li>
   </t>
 
   <!--
@@ -99,6 +97,7 @@
     -->
     <xpath expr="//ol[hasclass('breadcrumb')]" position="attributes">
       <attribute name="t-if">!this.coopIsPersonPage</attribute>
+      <attribute name="t-att-class">{ o_coop_trail_on: this.coopTrail }</attribute>
     </xpath>
 
     <!--
