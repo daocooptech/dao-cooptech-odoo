@@ -169,6 +169,20 @@ PAYMENT_ROUTES = [
 ]
 
 
+def _days(count):
+    """«1 день», «3 дня», «121 день» — для строки шкалы сбора."""
+    tail = count % 100
+    if 11 <= tail <= 14:
+        word = 'дней'
+    elif count % 10 == 1:
+        word = 'день'
+    elif 2 <= count % 10 <= 4:
+        word = 'дня'
+    else:
+        word = 'дней'
+    return '%s %s' % (count, word)
+
+
 class CoopProject(models.Model):
     """Проект платформы — краудресурсинг.
 
@@ -409,6 +423,35 @@ class CoopProject(models.Model):
         help='Платформа получателем денег не бывает ни в каком варианте.')
 
     import_key = fields.Char(string='Ключ источника', index=True, copy=False)
+
+    # Шкала сбора витрины (`ProjectPage`, `coop-fund`): заливка — готовность,
+    # черта — порог запуска. Ширину и место черты разметкой формы не
+    # задать, поэтому шкала собирается здесь.
+    show_fund_html = fields.Html(
+        string='Шкала сбора', compute='_compute_show_fund_html',
+        sanitize=False)
+
+    @api.depends('readiness', 'funding_threshold', 'funding_rule',
+                 'days_left', 'state')
+    def _compute_show_fund_html(self):
+        from markupsafe import Markup, escape
+        for record in self:
+            done = max(0, min(record.readiness or 0, 100))
+            threshold = (record.funding_threshold
+                         if record.funding_rule == 'threshold' else 100)
+            parts = [Markup('<span>готовность <b>%s %%</b></span>') % done]
+            if record.funding_rule == 'threshold':
+                parts.append(Markup('<span>порог запуска <b>%s %%</b></span>')
+                             % threshold)
+            if record.state == 'gathering' and record.days_left > 0:
+                parts.append(Markup('<span>осталось <b>%s</b></span>')
+                             % escape(_days(record.days_left)))
+            record.show_fund_html = Markup(
+                '<div class="coop-fund"><div class="coop-fund_bar" role="img" '
+                'aria-label="Готовность %s %%, порог запуска %s %%">'
+                '<i style="width:%s%%"></i><em style="left:%s%%"></em></div>'
+                '<div class="coop-fund_row">%s</div></div>') % (
+                    done, threshold, done, threshold, Markup('').join(parts))
 
     @api.depends('date_deadline', 'state')
     def _compute_days_left(self):

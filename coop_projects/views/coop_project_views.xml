@@ -205,12 +205,10 @@
     <field name="name">coop.project.form</field>
     <field name="model">coop.project</field>
     <field name="arch" type="xml">
-      <form string="Проект" class="o_coop_wall_form">
+      <form string="Проект" class="o_coop_wall_form o_coop_show">
         <header>
-          <!-- Единственное действие участника. Кнопки не было вовсе:
-               проект собирал деньги и вещи, а внести их было нечем. -->
-          <button name="action_contribute" type="object" string="Участвовать"
-                  class="btn-primary" invisible="not can_contribute"/>
+          <!-- «Участвовать» — в витрине под шкалой сбора (`ProjectPage`);
+               в шапке — только кнопки ведения. -->
           <!-- Кнопки ведения проекта — только тому, кто может его править
                (задача 391, слово владельца 28.10: «зашел в чужой проект и
                давай че то добавлять и править»). Смотрящему со стороны
@@ -290,113 +288,96 @@
               </div>
             </button>
           </div>
+          <field name="coop_can_edit" invisible="1"/>
+          <field name="currency_id" invisible="1"/>
           <!--
-            Шапка карточки по макету: снимок слева крупно, справа
-            название, вид проекта, инициатор с лицом и кольцо готовности.
-
-            Штатная `oe_avatar` ставит снимок квадратиком в угол — в
-            каталоге проект показан большой фотографией, и открыв его,
-            человек видел ту же фотографию величиной с почтовую марку.
-            Готовность стояла строкой в группе «Ресурсы», ниже трёх
-            экранов полей: главное число страницы читалось последним.
+            Витрина проекта (дизайн-система, `ProjectPage`, решение 625):
+            шапка со снимком и меткой состояния, рубрика над названием без
+            плашки, строка значков, «Собрано» со шкалой порога, инициатор и
+            действия. Сразу под шапкой — «Участие в проекте»: человек со
+            стороны пришёл посмотреть, чем он может войти.
           -->
-          <div class="o_coop_project_hero">
-            <div class="o_coop_hero_photo">
-              <field name="image_1920" widget="image" nolabel="1"
-                     options="{'preview_image': 'image_512'}"/>
+          <section class="coop-show_hero">
+            <div class="coop-gallery">
+              <div class="coop-gallery_main">
+                <field name="image_1920" widget="image" class="coop-gallery_img"
+                       options="{'preview_image': 'image_512'}"
+                       readonly="not coop_can_edit"
+                       invisible="not image_1920 and not coop_can_edit"/>
+                <span class="coop-gallery_none" invisible="image_1920 or coop_can_edit">Без снимка</span>
+              </div>
+              <span class="coop-gallery_badge">
+                <field name="state" readonly="1" nolabel="1"/>
+              </span>
             </div>
-            <div class="o_coop_hero_main">
-              <!--
-                Название и строка каталога правятся по карандашу и
-                переносятся целиком. В поле ввода во всю ширину шапки
-                помещалось около сорока знаков, и «Ретроактивный фонд
-                открытого кода» читался как «ектов с открытым кодом»:
-                владелец 21 сентября 2026 — «в проектах название включает
-                очень мало символов, из-за этого не видно название
-                полностью, описание тоже самое».
-              -->
-              <h1><field name="name" widget="coop_inline" nolabel="1"
+            <div class="coop-show_info">
+              <div class="coop-show_kicker">
+                <!-- Плашки над названием нет (владелец 10.11.2026). -->
+                <field name="subcategory_id" readonly="1" nolabel="1"
+                       options="{'no_open': True}" invisible="not subcategory_id"/>
+                <field name="category_id" readonly="1" nolabel="1"
+                       options="{'no_open': True}" invisible="subcategory_id"/>
+              </div>
+              <div class="oe_title">
+                <!-- Название и строка каталога правятся по карандашу и
+                     переносятся целиком (владелец 21.09.2026). -->
+                <h1 class="coop-show_title"><field name="name" widget="coop_inline" nolabel="1"
                          options="{'wrap': True}"
                          readonly="not coop_can_edit"
                          placeholder="Название проекта"/></h1>
-              <field name="summary" class="o_coop_hero_summary"
+              </div>
+              <field name="summary" class="coop-pj_lead"
                      widget="coop_inline" nolabel="1"
                      options="{'wrap': True}"
                      readonly="not coop_can_edit"
+                     invisible="not summary and not coop_can_edit"
                      placeholder="Одна строка, которую видно в каталоге"/>
-              <div class="o_coop_hero_tags">
-                <field name="kind" widget="badge"
-                       decoration-info="kind == 'cooperative'"
-                       decoration-warning="kind == 'commercial'"
-                       decoration-muted="kind == 'nonprofit'"/>
-                <span class="o_coop_hero_city" invisible="not city">
-                  <field name="city" nolabel="1" readonly="1"/>
+              <ul class="coop-show_meta">
+                <li class="coop-meta_city" invisible="not city"><field name="city" readonly="1" nolabel="1"/></li>
+                <li class="coop-meta_people">
+                  <span>Участников:</span>
+                  <field name="contributor_count" readonly="1" nolabel="1"/>
+                </li>
+                <li class="coop-meta_date" invisible="not date_deadline or state != 'gathering'">
+                  <span>собираем до</span>
+                  <field name="date_deadline" readonly="1" nolabel="1"/>
+                </li>
+              </ul>
+              <hr class="coop-show_rule"/>
+              <div class="coop-price" invisible="state == 'draft'">
+                <span class="coop-price_label">Собрано</span>
+                <span class="coop-price_value">
+                  <field name="contribution_total" readonly="1" nolabel="1"
+                         options="{'hide_trailing_zeros': true}"/>
+                </span>
+                <span class="coop-price_note" invisible="not required_total">
+                  из <field name="required_total" readonly="1" nolabel="1"
+                            options="{'hide_trailing_zeros': true}"/>
                 </span>
               </div>
-              <div class="o_coop_hero_owner">
+              <field name="show_fund_html" nolabel="1" readonly="1"
+                     class="coop-pj_fund" invisible="state == 'draft'"/>
+              <div class="coop-pj_owner">
                 <field name="partner_id" widget="many2one_avatar" nolabel="1"
                        readonly="1"/>
+                <span class="coop-pj_owner_note">
+                  инициатор<span invisible="not author_id or author_id == partner_id"> · разместил
+                  <field name="author_id" readonly="1" nolabel="1"
+                         options="{'no_open': True}"/></span>
+                </span>
               </div>
-              <div class="o_coop_hero_ring" invisible="state == 'draft'">
-                <field name="readiness" widget="coop_readiness_ring"
-                       nolabel="1"/>
+              <div class="coop-show_acts" invisible="not can_contribute and not project_id">
+                <!-- Единственное действие участника: проект собирает
+                     деньги и вещи, и внести их должно быть чем. -->
+                <button name="action_contribute" type="object" string="Участвовать"
+                        class="btn-primary" invisible="not can_contribute"/>
+                <button name="action_open_updates" type="object"
+                        class="btn-secondary" invisible="not project_id">
+                  Ход проекта · <field name="update_count" readonly="1" nolabel="1"/>
+                </button>
               </div>
             </div>
-          </div>
-          <!--
-            Блок сбора идёт во всю ширину листа, а не половиной. У
-            половины поле выбора выходило 156 точек при нужных 159, и
-            «Номинальный счёт в банке» читался как «Номинальный счёт в».
-          -->
-          <group string="Сбор" class="o_coop_funding" invisible="state == 'draft'">
-            <group>
-              <field name="date_start" readonly="1"
-                     invisible="not date_start"/>
-              <field name="date_deadline" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="days_left" invisible="state != 'gathering'"/>
-              <field name="funding_rule" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="funding_threshold" widget="coop_inline"
-                     readonly="not coop_can_edit"
-                     invisible="funding_rule != 'threshold'"/>
-            </group>
-            <group>
-              <field name="contribution_basis" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="payment_route" widget="coop_inline"
-                     readonly="not coop_can_edit"
-                     invisible="not contribution_basis"/>
-            </group>
-          </group>
-          <group string="Если соберём не всё" class="o_coop_fallback"
-                 invisible="funding_rule == 'all_or_nothing' or state == 'draft'">
-            <field name="fallback_plan" nolabel="1" widget="coop_block"
-                   readonly="not coop_can_edit"
-                   placeholder="Что именно будет сделано на неполном сборе"/>
-          </group>
-          <group>
-            <group string="О проекте">
-              <field name="kind" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="category_id" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="subcategory_id" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="city" widget="coop_inline" readonly="not coop_can_edit"
-                     placeholder="не указан"/>
-            </group>
-            <group string="Кто собирает">
-              <field name="partner_id" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="author_id" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="project_id" readonly="1"/>
-            </group>
-          </group>
-          <group>
-            <group string="Ресурсы">
-              <field name="required_total" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="contribution_total"/>
-              <field name="readiness" widget="progressbar"/>
-              <field name="contributor_count"/>
-              <field name="currency_id" invisible="1"/>
-          <field name="coop_can_edit" invisible="1"/>
-            </group>
-          </group>
-
+          </section>
           <!--
             Участие в проекте — главный экран для того, кто пришёл со
             стороны. До него на странице проекта были только действия
@@ -562,7 +543,63 @@
               </field>
             </div>
           </div>
-          <notebook>
+          <!--
+            Блок сбора идёт во всю ширину листа, а не половиной. У
+            половины поле выбора выходило 156 точек при нужных 159, и
+            «Номинальный счёт в банке» читался как «Номинальный счёт в».
+          -->
+          <section class="coop-show_block coop-pj_block" invisible="state == 'draft'">
+          <group string="Сбор" class="o_coop_funding" invisible="state == 'draft'">
+            <group>
+              <field name="date_start" readonly="1"
+                     invisible="not date_start"/>
+              <field name="date_deadline" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="days_left" invisible="state != 'gathering'"/>
+              <field name="funding_rule" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="funding_threshold" widget="coop_inline"
+                     readonly="not coop_can_edit"
+                     invisible="funding_rule != 'threshold'"/>
+            </group>
+            <group>
+              <field name="contribution_basis" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="payment_route" widget="coop_inline"
+                     readonly="not coop_can_edit"
+                     invisible="not contribution_basis"/>
+            </group>
+          </group>
+          <group string="Если соберём не всё" class="o_coop_fallback"
+                 invisible="funding_rule == 'all_or_nothing' or state == 'draft'">
+            <field name="fallback_plan" nolabel="1" widget="coop_block"
+                   readonly="not coop_can_edit"
+                   placeholder="Что именно будет сделано на неполном сборе"/>
+          </group>
+          </section>
+          <section class="coop-show_block coop-pj_block">
+          <group col="3" class="coop-pj_three">
+            <group string="О проекте">
+              <field name="kind" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="category_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="subcategory_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="city" widget="coop_inline" readonly="not coop_can_edit"
+                     placeholder="не указан"/>
+            </group>
+            <group string="Кто собирает">
+              <field name="partner_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="author_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="project_id" readonly="1"/>
+            </group>
+            <group string="Ресурсы">
+              <field name="required_total" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="contribution_total"/>
+              <field name="readiness" widget="progressbar"/>
+              <field name="contributor_count"/>
+              <field name="currency_id" invisible="1"/>
+          <field name="coop_can_edit" invisible="1"/>
+            </group>
+          </group>
+          </section>
+
+          <notebook class="coop-show_tabs">
             <page string="Описание" name="description">
               <field name="description" widget="coop_block" nolabel="1"
                      readonly="not coop_can_edit"

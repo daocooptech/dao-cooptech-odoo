@@ -1013,3 +1013,51 @@
 .coop-meta_people {
   --coop-meta-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 7a4 4 0 1 0 8 0a4 4 0 1 0 -8 0'/%3E%3Cpath d='M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2'/%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'/%3E%3Cpath d='M21 21v-2a4 4 0 0 0 -3 -3.85'/%3E%3C/svg%3E");
 }
+// Проект (`ProjectPage`): срок сбора — календарь.
+.coop-meta_date {
+  --coop-meta-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12'/%3E%3Cpath d='M16 3v4'/%3E%3Cpath d='M8 3v4'/%3E%3Cpath d='M4 11h16'/%3E%3C/svg%3E");
+}
+// Шкала сбора (эталон `coop-fund`, bundle.css): заливка — готовность,
+// черта — порог запуска.
+.coop-fund {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.coop-fund_bar {
+  position: relative;
+  height: 10px;
+  border-radius: 5px;
+  background: var(--coop-surface);
+
+  i {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    border-radius: 5px;
+    background: var(--coop-teal);
+  }
+  em {
+    position: absolute;
+    top: -4px;
+    bottom: -4px;
+    width: 2px;
+    margin-left: -1px;
+    background: var(--coop-ink);
+    border-radius: 1px;
+  }
+}
+.coop-fund_row {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--coop-slate);
+
+  b {
+    font: 600 12px/1.2 'JetBrains Mono', ui-monospace, monospace;
+    color: var(--coop-ink);
+  }
+}

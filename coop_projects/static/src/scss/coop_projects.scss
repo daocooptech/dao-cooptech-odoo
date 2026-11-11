@@ -533,107 +533,81 @@
   }
 }
 
-// Шапка карточки проекта — по макету.
-//
-// Снимок слева на 340 точек, справа название, вид, инициатор и кольцо
-// готовности. В макете это первое, что видит человек, открывший проект:
-// что за проект, чей он и сколько собрано.
-.o_coop_project_hero {
-  display: flex;
-  gap: 24px;
-  align-items: flex-start;
-  margin-bottom: 20px;
-
-  .o_coop_hero_photo {
-    flex: 0 0 340px;
-    max-width: 340px;
-
-    // Поле-картинка движка отводит себе 90 точек. Здесь снимок — не
-    // значок записи, а сама витрина проекта.
-    .o_field_image,
-    img {
-      width: 100%;
-      max-width: 100%;
-      height: auto;
-      border-radius: 10px;
-      display: block;
-    }
-
-    img {
-      aspect-ratio: 1.2;
-      object-fit: cover;
-      border: 1px solid var(--coop-line, #e6e6e1);
-    }
-  }
-
-  .o_coop_hero_main {
-    flex: 1 1 auto;
-    min-width: 0;
-
-    h1 {
-      margin: 0 0 6px;
-      font: 700 24px/1.25 'Manrope', sans-serif;
-      color: var(--coop-ink, #14171a);
-    }
-  }
-
-  .o_coop_hero_summary {
+// Витрина проекта (`ProjectPage`): общие плоскости — `showcase.scss`
+// темы; здесь только своё — строка под названием, шкала, инициатор,
+// «Участие» и нижние блоки плоскостями с промежутком.
+.o_form_view.o_coop_show {
+  .coop-pj_lead {
     display: block;
-    color: var(--coop-slate, #4a4a44);
-    font-size: 13.5px;
-    line-height: 1.45;
-    margin-bottom: 12px;
-
-    // Поле движка берёт ширину по своему значению и обрывает остальное:
-    // «выручка идёт в общий котёл» кончалось на «идёт в». Место справа
-    // при этом пустует — строка одна на весь верх карточки.
-    input,
-    .o_input {
-      width: 100%;
-      max-width: 100%;
-    }
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--coop-slate);
+    max-width: 560px;
   }
-
-  .o_coop_hero_tags {
+  .coop-pj_fund {
+    display: block;
+    width: 100%;
+  }
+  .coop-pj_owner {
     display: flex;
     align-items: center;
-    gap: 10px;
     flex-wrap: wrap;
-  }
+    gap: 4px 10px;
+    min-width: 0;
 
-  .o_coop_hero_city {
-    font-size: 12.5px;
-    color: var(--coop-slate, #4a4a44);
-  }
-
-  .o_coop_hero_owner {
-    margin-top: 18px;
-
-    // Лицо инициатора в макете крупное: доверие к проекту начинается с
-    // того, кто его собирает, а не с суммы. Значок движка — 20 точек,
-    // размером с иконку в строке списка.
-    img {
-      width: 44px !important;
-      height: 44px !important;
-      border-radius: 50%;
+    .o_m2o_avatar img,
+    .o_field_many2one_avatar img {
+      width: 40px !important;
+      height: 40px !important;
+      border-radius: 10px;
       object-fit: cover;
     }
-
-    .o_field_many2one,
+    .o_field_many2one_avatar,
     .o_m2o_avatar {
       display: flex;
       align-items: center;
       gap: 10px;
-    }
-
-    a, .o_form_uri {
-      font-weight: 600;
-      font-size: 13px;
+      font: 600 13.5px/1.3 'Manrope', sans-serif;
+      color: var(--coop-ink);
     }
   }
+  .coop-pj_owner_note {
+    font-size: 12px;
+    color: var(--coop-slate);
 
-  .o_coop_hero_ring {
-    margin-top: 18px;
+    .o_field_widget {
+      display: inline;
+    }
+  }
+  .coop-show_acts .btn-secondary .o_field_widget {
+    display: inline;
+  }
+  // «Участие в проекте» — та же плоскость, что у блоков витрины.
+  .o_coop_needs {
+    margin: 0 0 16px;
+    padding: 16px 20px;
+    background: var(--coop-white);
+    border: 1px solid var(--coop-line);
+    border-radius: var(--coop-radius-card);
+  }
+  .coop-pj_block {
+    margin-bottom: 16px;
+
+    > .o_group {
+      margin: 0;
+    }
+  }
+  // Три колонки фактов, как в образце; уже 900 точек — одна под другой.
+  .coop-pj_three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .coop-show_tabs {
+    margin-bottom: 16px;
+    padding: 0 20px 16px;
+    background: var(--coop-white);
+    border: 1px solid var(--coop-line);
+    border-radius: var(--coop-radius-card);
   }
 }
 
@@ -676,16 +650,10 @@
   }
 }
 
-// Узкий экран: снимок во всю ширину, остальное под ним.
+// Узкий экран: колонки фактов витрины одна под другой.
 @media (max-width: 900px) {
-  .o_coop_project_hero {
-    flex-direction: column;
-
-    .o_coop_hero_photo {
-      flex: 1 1 auto;
-      max-width: 100%;
-      width: 100%;
-    }
+  .o_form_view.o_coop_show .coop-pj_three {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
