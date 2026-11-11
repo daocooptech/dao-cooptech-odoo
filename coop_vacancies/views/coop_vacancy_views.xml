@@ -124,13 +124,12 @@
     <field name="name">coop.vacancy.form</field>
     <field name="model">coop.vacancy</field>
     <field name="arch" type="xml">
-      <form string="Вакансия">
+      <form string="Вакансия" class="o_coop_show">
         <header>
+          <!-- В шапке — только кнопки автора; «Откликнуться» и «Задать
+               вопрос» — в витрине под вознаграждением (`VacancyPage`). -->
           <button name="action_publish" type="object" string="Опубликовать"
                   class="btn-primary" invisible="(state == 'published') or not coop_can_edit"/>
-          <button name="action_apply" type="object" string="Откликнуться"
-                  class="btn-primary"
-                  invisible="state != 'published' or is_mine or my_application_state != 'none'"/>
           <button name="action_to_recruitment" type="object"
                   string="Перенести в набор персонала"
                   invisible="not is_mine or hr_job_id"
@@ -141,23 +140,122 @@
                   help="Из каталога пропадёт, отклики останутся."/>
           <field name="coop_role_label" invisible="not coop_role_label"/>
           <field name="state" widget="statusbar"
-                 statusbar_visible="draft,published,closed"/>
+                 statusbar_visible="draft,published,closed"
+                 invisible="not coop_can_edit"/>
         </header>
         <sheet>
           <field name="coop_can_edit" invisible="1"/>
-          <div class="oe_button_box" name="button_box">
-            <button name="action_open_applications" type="object"
-                    class="oe_stat_button" icon="group">
-              <field name="application_count" widget="statinfo" string="Откликов"/>
-            </button>
-          </div>
-
-          <field name="image_1920" widget="image" class="oe_avatar"/>
-          <div class="oe_title">
-            <h1><field name="name" placeholder="Кто нужен" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/></h1>
-          </div>
-
-          <group>
+          <field name="is_mine" invisible="1"/>
+          <field name="my_application_state" invisible="1"/>
+          <field name="currency_id" invisible="1"/>
+          <!--
+            Витрина вакансии (дизайн-система, `VacancyPage`, решение 625):
+            те же плоскости, что у навыка и ресурса — шапка со снимком,
+            вознаграждением и умениями; основная колонка; боковая с
+            работодателем и проектом. Пустое смотрящему не показывается,
+            условия правит только автор — отдельным блоком.
+          -->
+          <section class="coop-show_hero">
+            <div class="coop-gallery">
+              <div class="coop-gallery_main">
+                <field name="image_1920" widget="image" class="coop-gallery_img"
+                       readonly="not coop_can_edit"
+                       invisible="not image_1920 and not coop_can_edit"/>
+                <span class="coop-gallery_none" invisible="image_1920 or coop_can_edit">Без снимка</span>
+              </div>
+              <span class="coop-gallery_badge" invisible="not employment">
+                <field name="employment" readonly="1" nolabel="1"/>
+              </span>
+            </div>
+            <div class="coop-show_info">
+              <div class="coop-show_kicker">
+                <!-- Плашки над названием нет (владелец 10.11.2026: «везде
+                     убери эту таблетку»). -->
+                <field name="coop_specialization_id" readonly="1" nolabel="1"
+                       options="{'no_open': True}"/>
+              </div>
+              <div class="oe_title">
+                <h1 class="coop-show_title"><field name="name" placeholder="Кто нужен" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/></h1>
+              </div>
+              <ul class="coop-show_meta">
+                <!-- Значки перед словами — как в эталоне: метка, портфель,
+                     люди. -->
+                <li class="coop-meta_city" invisible="not city"><field name="city" readonly="1" nolabel="1"/></li>
+                <li class="coop-meta_exp" invisible="not experience_level">
+                  <span>Опыт:</span>
+                  <field name="experience_level" readonly="1" nolabel="1"/>
+                </li>
+                <li class="coop-meta_people">
+                  <span>Откликов:</span>
+                  <field name="application_count" readonly="1" nolabel="1"/>
+                </li>
+              </ul>
+              <hr class="coop-show_rule"/>
+              <div class="coop-price">
+                <span class="coop-price_label">Вознаграждение</span>
+                <span class="coop-price_value">
+                  <field name="reward_display" readonly="1" nolabel="1"/>
+                </span>
+                <span class="coop-price_note" invisible="reward_kind != 'share' or not contribution_value">
+                  Оценка вклада <field name="contribution_value" readonly="1" nolabel="1"/>
+                </span>
+              </div>
+              <div class="coop-show_words" invisible="not skill_ids">
+                <h3>Что потребуется</h3>
+                <field name="skill_ids" widget="many2many_tags" readonly="1" nolabel="1"
+                       options="{'no_open': True}"/>
+              </div>
+              <div class="coop-show_acts" invisible="is_mine or state != 'published'">
+                <button name="action_apply" type="object" string="Откликнуться"
+                        class="btn-primary"
+                        invisible="my_application_state != 'none'"/>
+                <span class="btn btn-secondary disabled"
+                      invisible="my_application_state == 'none'">
+                  <field name="my_application_state" readonly="1" nolabel="1"/>
+                </span>
+                <button name="action_message_owner" type="object" string="Задать вопрос"
+                        class="btn-secondary"/>
+              </div>
+            </div>
+          </section>
+          <div class="coop-show_grid">
+            <div class="coop-show_main">
+              <section class="coop-show_block" invisible="not description and not coop_can_edit">
+                <h2>Что делать</h2>
+                <field name="description"
+                       placeholder="Задача и условия. Конкретнее, чем «работа в дружном коллективе»." widget="coop_block" readonly="not coop_can_edit"/>
+                <!-- Четыре факта, как в образце: занятость, опыт,
+                     вознаграждение, доля — короткими значениями. -->
+                <dl class="coop-show_facts">
+                  <div invisible="not employment">
+                    <dt>Занятость</dt>
+                    <dd><field name="employment" readonly="1" nolabel="1"/></dd>
+                  </div>
+                  <div invisible="not experience_level">
+                    <dt>Опыт</dt>
+                    <dd><field name="experience_level" readonly="1" nolabel="1"/></dd>
+                  </div>
+                  <div>
+                    <dt>Вознаграждение</dt>
+                    <dd><field name="reward_kind" readonly="1" nolabel="1"/></dd>
+                  </div>
+                  <div invisible="reward_kind != 'share'">
+                    <dt>Доля</dt>
+                    <dd><field name="share_percent" readonly="1" nolabel="1"/> %</dd>
+                  </div>
+                </dl>
+                <p class="coop-price_note" invisible="not reward_note">
+                  <field name="reward_note" readonly="1" nolabel="1"/>
+                </p>
+                <p class="coop-price_note" invisible="not pay_explain">
+                  <field name="pay_explain" readonly="1" nolabel="1"/>
+                </p>
+              </section>
+              <!-- Условия правит только автор; остальным те же значения
+                   видны в шапке и фактах словами. -->
+              <section class="coop-show_block" invisible="not coop_can_edit">
+                <h2>Условия</h2>
+          <group col="1">
             <group string="Кто ищет">
               <field name="partner_id" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="author_id" widget="coop_inline" readonly="not coop_can_edit"/>
@@ -206,22 +304,15 @@
                      class="text-muted"
                      invisible="not pay_explain"/>
               <field name="reward_display" readonly="1" string="В каталоге"/>
-              <field name="is_mine" invisible="1"/>
-              <field name="my_application_state" invisible="1"/>
               <field name="hr_job_id" readonly="1" invisible="not hr_job_id"/>
             </group>
           </group>
-
           <group string="Что потребуется">
             <field name="skill_ids" widget="many2many_tags" nolabel="1"
                    options="{'no_create_edit': True, 'no_create': True}"/>
           </group>
-
-          <notebook>
-            <page string="Что делать" name="description">
-              <field name="description"
-                     placeholder="Задача и условия. Конкретнее, чем «работа в дружном коллективе»." widget="coop_block" readonly="not coop_can_edit"/>
-            </page>
+              </section>
+          <notebook class="coop-show_tabs">
             <page string="Отклики" name="applications" invisible="not is_mine">
               <field name="application_ids" nolabel="1" readonly="1">
                 <list>
@@ -237,6 +328,64 @@
               </field>
             </page>
           </notebook>
+            </div>
+            <aside class="coop-show_aside">
+              <div class="coop-owner">
+                <span class="coop-owner_title">Кто ищет</span>
+                <div class="coop-owner_who">
+                  <field name="partner_avatar" widget="image" readonly="1" nolabel="1"
+                         class="coop-owner_pic" options="{'size': [48, 48]}"/>
+                  <div class="coop-owner_name">
+                    <field name="partner_id" readonly="1" nolabel="1"/>
+                    <span invisible="not city"><field name="city" readonly="1" nolabel="1"/></span>
+                  </div>
+                </div>
+                <div class="coop-owner_trust">
+                  <div class="coop-owner_trust_head">
+                    <span>Уровень доверия</span>
+                    <b><field name="partner_trust" readonly="1" nolabel="1"/> %</b>
+                  </div>
+                  <field name="partner_trust" widget="progressbar" readonly="1" nolabel="1"
+                         class="coop-owner_bar"/>
+                </div>
+                <dl class="coop-owner_stats">
+                  <div>
+                    <dt>сделок</dt>
+                    <dd><field name="partner_deals_done" readonly="1" nolabel="1"/></dd>
+                  </div>
+                  <div>
+                    <dt>отзывов</dt>
+                    <dd><field name="partner_deals_reviewed" readonly="1" nolabel="1"/></dd>
+                  </div>
+                </dl>
+                <ul class="coop-owner_lines" invisible="not author_id">
+                  <li><span>Опубликовал</span> <field name="author_id" readonly="1" nolabel="1"/></li>
+                </ul>
+                <div class="coop-owner_acts" invisible="is_mine">
+                  <button name="action_message_owner" type="object" class="btn-secondary"
+                          string="Написать"/>
+                </div>
+              </div>
+              <section class="coop-show_block" invisible="not project_id">
+                <h2>Проект</h2>
+                <button name="action_open_project" type="object" class="coop-link">
+                  <field name="project_image" widget="image" readonly="1" nolabel="1"
+                         class="coop-owner_pic" options="{'size': [40, 40]}"/>
+                  <span class="coop-link_body">
+                    <b><field name="project_id" readonly="1" nolabel="1" options="{'no_open': True}"/></b>
+                  </span>
+                </button>
+                <div class="coop-owner_trust mt-3" invisible="not project_threshold">
+                  <div class="coop-owner_trust_head">
+                    <span>Собрано, порог <field name="project_threshold" readonly="1" nolabel="1"/> %</span>
+                    <b><field name="project_readiness" readonly="1" nolabel="1"/> %</b>
+                  </div>
+                  <field name="project_readiness" widget="progressbar" readonly="1" nolabel="1"
+                         class="coop-owner_bar"/>
+                </div>
+              </section>
+            </aside>
+          </div>
         </sheet>
         <chatter/>
       </form>

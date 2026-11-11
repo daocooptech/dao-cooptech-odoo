@@ -241,6 +241,33 @@ class CoopVacancy(models.Model):
     ], string='Мой отклик', compute='_compute_my_application')
     is_mine = fields.Boolean(string='Моя вакансия', compute='_compute_my_application')
 
+    # Карточка работодателя и проекта в боковой колонке витрины
+    # (дизайн-система, `VacancyPage` + `OwnerCard`, решение 625) — теми же
+    # связанными полями, что у навыка и ресурса.
+    partner_avatar = fields.Image(
+        related='partner_id.avatar_128', string='Знак работодателя')
+    partner_trust = fields.Integer(
+        related='partner_id.coop_trust', string='Доверие работодателя')
+    partner_deals_done = fields.Integer(
+        related='partner_id.coop_deals_done', string='Сделок у работодателя')
+    partner_deals_reviewed = fields.Integer(
+        related='partner_id.coop_deals_reviewed', string='Отзывов о работодателе')
+    # Сбор вкладов — у `coop.project`, привязанного к штатному проекту.
+    project_image = fields.Image(
+        string='Снимок проекта', compute='_compute_project_card')
+    project_readiness = fields.Integer(
+        string='Собрано, %', compute='_compute_project_card')
+    project_threshold = fields.Integer(
+        string='Порог запуска, %', compute='_compute_project_card')
+
+    @api.depends('project_id')
+    def _compute_project_card(self):
+        for record in self:
+            crowd = record.project_id.sudo().coop_project_id[:1]
+            record.project_image = crowd.image_512
+            record.project_readiness = crowd.readiness
+            record.project_threshold = crowd.funding_threshold
+
     # Связь со штатным наймом Odoo: организация, оформляющая человека по трудовому
     # договору, ведёт кандидатов там, где для этого всё есть.
     hr_job_id = fields.Many2one(
@@ -511,6 +538,30 @@ class CoopVacancy(models.Model):
               lot=self.name, who=me.display_name),
             record=self, kind='vacancy')
         return True
+
+    def action_message_owner(self):
+        """«Задать вопрос» — написать тому, кто ищет."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Написать: %s') % self.partner_id.display_name,
+            'res_model': 'discuss.channel',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_channel_partner_ids': [(4, self.partner_id.id)]},
+        }
+
+    def action_open_project(self):
+        """Строка проекта в боковой колонке витрины ведёт на его страницу."""
+        self.ensure_one()
+        crowd = self.project_id.coop_project_id[:1]
+        target = crowd or self.project_id
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': target._name,
+            'res_id': target.id,
+            'view_mode': 'form',
+        }
 
     def action_open_applications(self):
         self.ensure_one()
