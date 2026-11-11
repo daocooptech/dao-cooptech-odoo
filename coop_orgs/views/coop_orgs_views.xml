@@ -321,7 +321,10 @@
                 <div invisible="not coop_project_count">Проектов:
                   <b><field name="coop_project_count" nolabel="1" readonly="1"/></b>
                 </div>
-                <div invisible="not coop_member_count"><field name="coop_member_label" nolabel="1" readonly="1"/>:
+                <!-- Двоеточие — у самой подписи (`o_coop_stat_label`):
+                     строка показателя — гибкий ряд с промежутком, и
+                     двоеточие отдельным текстом отъезжало: «Пайщики : 9». -->
+                <div invisible="not coop_member_count"><field name="coop_member_label" nolabel="1" readonly="1" class="o_coop_stat_label"/>
                   <b><field name="coop_member_count" nolabel="1" readonly="1"/></b>
                   <button name="action_coop_members" type="object"
                           class="o_coop_stat_note"
