@@ -69,6 +69,10 @@ class ResPartner(models.Model):
         company = self.env['res.company'].sudo().create({
             'name': org.name,
             'partner_id': org.id,
+            # `logo` компании — это картинка её партнёра, а по умолчанию
+            # движок кладёт туда свой «Your logo»: без явного значения знак
+            # организации затирался заглушкой (№ 419).
+            'logo': org.image_1920 or False,
             'currency_id': self.env.ref('base.RUB').id,
             'country_id': self.env.ref('base.ru').id,
             **(self.env['res.company']._coop_rsbu_birth_vals() if rsbu

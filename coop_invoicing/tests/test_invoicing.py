@@ -64,6 +64,20 @@ class TestCoopInvoicing(TransactionCase):
         self.assertTrue(company.rsbu_enabled)
         self.assertEqual(company.rsbu_start_date, date(2026, 11, 1))
 
+    def test_company_keeps_org_logo(self):
+        # № 419: компания учёта не подменяет знак организации заглушкой.
+        mark = ('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8Dw'
+                'HwAFBQIAX8jx0gAAAABJRU5ErkJggg==')
+        self.seller.image_1920 = mark
+        before = self.seller.image_1920.content
+        company = self.seller._coop_ensure_company(rsbu=False)
+        self.assertEqual(self.seller.image_1920.content, before)
+        self.assertFalse(company.uses_default_logo)
+        # Без знака — без заглушки: плитка нарисует свою монограмму.
+        self.buyer.image_1920 = False
+        self.buyer._coop_ensure_company(rsbu=False)
+        self.assertFalse(self.buyer.image_1920)
+
     def test_company_without_layer_waits_for_first_invoice(self):
         # Решение 480: компания для модуля коробки — без слоя; первый счёт
         # (вызов с rsbu=True) включает его с 1-го числа следующего месяца.

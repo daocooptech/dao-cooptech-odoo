@@ -18,6 +18,7 @@
 по ней тут же начнут строиться группировки и правила.
 """
 import base64
+import hashlib
 import json
 import logging
 import random
@@ -535,6 +536,36 @@ def repair_empty_logos(env):
         fixed += 1
     if fixed:
         _logger.info('Организации: пустые снимки заменены монограммой у %s', fixed)
+    return fixed + repair_default_logos(env)
+
+
+def repair_default_logos(env):
+    """Заглушка движка «Your logo» вместо знака — монограммой (№ 419).
+
+    Компания учёта заводилась без явного `logo`, а это поле — картинка
+    партнёра-организации с заглушкой по умолчанию: у организаций с
+    казначейской компанией знак затирался. Ищем по контрольной сумме
+    самого файла движка; повторный запуск ничего не меняет.
+    """
+    from odoo.tools.misc import file_open
+    with file_open('base/static/img/res_company_logo.png', 'rb') as fh:
+        checksum = hashlib.sha1(fh.read()).hexdigest()
+    with open(os.path.join(HERE, 'organizations.json'), encoding='utf-8') as fh:
+        by_name = {org['name']: org for org in json.load(fh)}
+    stubs = env['ir.attachment'].sudo().search([
+        ('res_model', '=', 'res.partner'), ('res_field', '=', 'image_1920'),
+        ('checksum', '=', checksum)])
+    fixed = 0
+    for partner in env['res.partner'].sudo().browse(stubs.mapped('res_id')).exists():
+        if not partner.is_company:
+            continue
+        activity = (by_name.get(partner.name, {}).get('specialization')
+                    or partner.coop_specialization_id.name or '')
+        partner.write({'image_1920': emblems.monogram(partner.name, activity),
+                       'coop_symbol_mark': False})
+        fixed += 1
+    if fixed:
+        _logger.info('Организации: заглушка «Your logo» заменена монограммой у %s', fixed)
     return fixed
 
 
