@@ -61,6 +61,11 @@ patch(Breadcrumbs.prototype, {
         // трёх. Экран не должен ждать его ни секунды: придёт — кнопка
         // дорисуется сама, реактивное состояние вызовет перерисовку.
         this.coopItems = proxy({ list: [] });
+        // Рубрика открытой записи для полного пути (№ 407). Приходит
+        // отдельным запросом и тоже без ожидания — по той же причине.
+        this.coopOrm = useService("orm");
+        this.coopTrailState = proxy({ key: "", rubrics: [], name: "", isCompany: false });
+        this.coopTrailKey = "";
         this.coopBoot
             .get()
             .then((data) => {
@@ -316,4 +321,257 @@ patch(Breadcrumbs.prototype, {
             this.coopActionService.doAction(byModel.actionId, { clearBreadcrumbs: true });
         }
     },
+
+    // ── Полный путь на странице записи (№ 407) ──────────────────────────
+    //
+    // Владелец 10.11.2026 на витрине «Молоковоза»: «почему я не вижу
+    // полного пути?» — в шапке стояло одно «← Ресурсы ›». По эталону
+    // (`ResourcePage` → `Crumbs`) путь доходит до записи через рубрику:
+    // «Ресурсы › Продовольственные товары › Мёд натуральный липовый».
+
+    /** Открытая запись платформы — модель и номер, или пусто. */
+    get coopRecordRef() {
+        if (!this.coopIsRecord) {
+            return null;
+        }
+        const root = this.env.model?.root;
+        const model = root?.resModel;
+        const resId = root?.resId;
+        // Только витрины с рубрикой: ресурс, навык, вакансия, проект,
+        // человек и организация. У кошелька, сделки и прочих записей
+        // пустую полосу убирали намеренно (12.10.2026).
+        if (!model || !resId || !coopIsPlatformModel(model) || !COOP_RUBRICS[model]) {
+            return null;
+        }
+        return { model, resId };
+    },
+
+    /**
+     * Путь до записи, если он есть. Рубрика подгружается при смене
+     * записи, а не при каждой отрисовке: запрос уходит один раз на
+     * запись, ответ дорисовывает путь сам — состояние реактивное.
+     */
+    get coopTrail() {
+        try {
+            const ref = this.coopRecordRef;
+            if (!ref) {
+                return null;
+            }
+            const key = `${ref.model}:${ref.resId}`;
+            if (this.coopTrailKey !== key) {
+                this.coopTrailKey = key;
+                // Писать в состояние посреди отрисовки нельзя — после неё.
+                Promise.resolve().then(() => this.coopLoadTrail(ref, key));
+            }
+            return this.coopTrailState;
+        } catch (error) {
+            console.warn("[крошка] путь до записи не сосчитался:", error);
+            return null;
+        }
+    },
+
+    async coopLoadTrail({ model, resId }, key) {
+        const spec = COOP_RUBRICS[model];
+        const state = this.coopTrailState;
+        state.key = key;
+        state.rubrics = [];
+        state.name = "";
+        try {
+            const fields = ["display_name", ...(spec ? spec.fields : [])];
+            if (model === "res.partner") {
+                fields.push("is_company");
+            }
+            const [record] = await this.coopOrm.read(model, [resId], fields);
+            if (!record || this.coopTrailKey !== key) {
+                return;
+            }
+            const rubrics = [];
+            for (const field of spec ? spec.fields : []) {
+                const value = record[field];
+                if (!value) {
+                    // Нет верхнего уровня — нижний без него не показываем:
+                    // «Проекты › Раздел» без темы читается как тема.
+                    break;
+                }
+                rubrics.push({ field, id: value[0], name: value[1], tree: false });
+            }
+            // Рубрика ресурса — дерево: «Транспорт › Грузовики и автобусы».
+            // Предки — по `parent_path`, одним запросом.
+            if (spec?.tree && rubrics.length) {
+                const [own] = await this.coopOrm.read(spec.tree, [rubrics[0].id], ["parent_path"]);
+                const ids = (own?.parent_path || "").split("/").filter(Boolean).map(Number);
+                if (ids.length > 1 && this.coopTrailKey === key) {
+                    const rows = await this.coopOrm.read(spec.tree, ids, ["name"]);
+                    const byId = new Map(rows.map((row) => [row.id, row.name]));
+                    rubrics.splice(0, 1, ...ids.map((id) => ({
+                        field: rubrics[0].field, id, name: byId.get(id) || "", tree: true,
+                    })));
+                }
+            }
+            if (this.coopTrailKey !== key) {
+                return;
+            }
+            // Без повторов: у навыка специализация и есть его название
+            // («Бизнес-консультант › Бизнес-консультант»), у вакансии
+            // сфера и специализация бывают одним словом («Разнорабочий ›
+            // Разнорабочий»).
+            const name = record.display_name || "";
+            state.rubrics = rubrics.filter((rubric, index) =>
+                rubric.name !== name && (index === 0 || rubric.name !== rubrics[index - 1].name));
+            state.name = name;
+            state.isCompany = Boolean(record.is_company);
+        } catch (error) {
+            // Не пришло — путь остаётся без рубрики, запись открыта.
+            console.warn("[крошка] рубрика не подгрузилась:", error);
+        }
+    },
+
+    /** Имя открытой записи — последнее звено пути. */
+    get coopHereName() {
+        const last = (this.props.breadcrumbs || []).at(-1);
+        return (last && last.name) || this.coopTrailState.name || "";
+    },
+
+    /**
+     * Раздел в начале пути, когда предков нет (прямая ссылка) или они
+     * не показываются (страница человека и организации). У контакта
+     * разделов два — «Люди» и «Организации», выбираем по самой записи.
+     */
+    get coopTrailSection() {
+        try {
+            const ref = this.coopRecordRef;
+            if (ref?.model === "res.partner") {
+                const want = this.coopTrailState.isCompany ? /организац/i : /люди/i;
+                const item = (this.coopItems.list || []).find(
+                    (entry) => entry.model === "res.partner" && entry.actionId && want.test(entry.label || "")
+                );
+                return item ? { label: item.label, actionId: item.actionId } : null;
+            }
+            const section = this.coopSection;
+            if (section) {
+                return { label: section.name, menu: section };
+            }
+            const byModel = this.coopSectionByModel;
+            if (byModel) {
+                return { label: byModel.label, actionId: byModel.actionId };
+            }
+            const own = this.coopOwnMenu;
+            if (own) {
+                const app = this.coopMenus.getMenu(own.appID);
+                return app ? { label: app.name, menu: null } : null;
+            }
+        } catch (error) {
+            console.warn("[крошка] раздел пути не сосчитался:", error);
+        }
+        return null;
+    },
+
+    /**
+     * Рубрики ставятся между разделом и записью — если путь начинается с
+     * раздела. Пришли с «Моей страницы» — путь «Моя страница › Молоковоз»:
+     * рубрика между ними объясняла бы не то, откуда человек пришёл.
+     */
+    get coopRubricsHere() {
+        const parent = this.coopParent;
+        if (!parent || this.coopIsPersonPage) {
+            return true;
+        }
+        const labels = new Set();
+        const section = this.coopTrailSection;
+        if (section) {
+            labels.add(section.label);
+        }
+        const own = this.coopOwnMenu;
+        if (own) {
+            labels.add(own.name);
+            const app = this.coopMenus.getMenu(own.appID);
+            if (app) {
+                labels.add(app.name);
+            }
+        }
+        const model = this.coopRecordRef?.model;
+        for (const item of this.coopItems.list || []) {
+            if (item.model === model) {
+                labels.add(item.label);
+            }
+        }
+        return labels.has(parent.name);
+    },
+
+    coopOpenSection() {
+        const section = this.coopTrailSection;
+        if (section?.menu) {
+            this.coopMenus.selectMenu(section.menu);
+        } else if (section?.actionId) {
+            this.coopActionService.doAction(section.actionId, { clearBreadcrumbs: true });
+        } else {
+            this.coopGoBack();
+        }
+    },
+
+    /**
+     * Рубрика ведёт в каталог, отобранный по ней. Так же, как «Смотреть
+     * все» у полок: через действие с доменом, а не через строку поиска.
+     * Вид и настройки каталога берутся у открытого действия — запись,
+     * открытая из каталога, живёт в его же действии.
+     */
+    async coopOpenRubric(rubric) {
+        const ref = this.coopRecordRef;
+        if (!ref) {
+            return;
+        }
+        // Отбор встаёт в путь вместо записи, а не после неё: «Ресурсы ›
+        // Недвижимость», а не «Ресурсы › участок › Недвижимость». Замена
+        // действия движком тут не годится — запись живёт в действии
+        // каталога, и вместе с ней ушёл бы весь каталог. Поэтому сначала
+        // шаг назад к предку, потом отбор.
+        const parent = this.coopParent;
+        const options = {};
+        if (parent && !this.coopIsPersonPage) {
+            try {
+                const action = this.coopActionService?.currentController?.action || {};
+                // `onSelected` предка обещания не возвращает — шаг назад
+                // ждём через службу, иначе отбор встаёт после записи.
+                await this.coopActionService.restore(parent.jsId);
+                return this.coopDoRubric(rubric, ref, action, options);
+            } catch {
+                // Предок не открылся — открываем отбор с чистого пути.
+            }
+        }
+        options.clearBreadcrumbs = true;
+        return this.coopDoRubric(rubric, ref, this.coopActionService?.currentController?.action || {}, options);
+    },
+
+    coopDoRubric(rubric, ref, action, options) {
+        const own = action.res_model === ref.model;
+        const domain = [[rubric.field, rubric.tree ? "child_of" : "=", rubric.id]];
+        if (own && Array.isArray(action.domain)) {
+            domain.push(...action.domain);
+        }
+        if (ref.model === "res.partner") {
+            domain.push(["is_company", "=", this.coopTrailState.isCompany]);
+        }
+        // Действие каталога взято до шага назад и передано сюда: после
+        // шага открыт уже каталог, а не запись.
+        return this.coopActionService.doAction({
+            type: "ir.actions.act_window",
+            name: rubric.name,
+            res_model: ref.model,
+            domain,
+            context: own ? action.context || {} : {},
+            views: [[false, "kanban"], [false, "list"], [false, "form"]],
+        }, options);
+    },
 });
+
+/**
+ * Какие поля — рубрика записи, сверху вниз. `tree` — у рубрики есть
+ * предки, их тоже показываем.
+ */
+const COOP_RUBRICS = {
+    "coop.resource": { fields: ["category_id"], tree: "coop.resource.category" },
+    "coop.project": { fields: ["category_id", "subcategory_id"] },
+    "coop.skill.offer": { fields: ["coop_specialization_category_id", "coop_specialization_id"] },
+    "coop.vacancy": { fields: ["coop_specialization_category_id", "coop_specialization_id"] },
+    "res.partner": { fields: ["coop_specialization_category_id", "coop_specialization_id"] },
+};

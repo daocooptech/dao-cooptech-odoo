@@ -27,7 +27,51 @@
     </button>
   </t>
 
+  <!--
+    Хвост пути на странице записи (№ 407): рубрика и сама запись.
+    Рубрика — ссылкой на каталог, отобранный по ней.
+  -->
+  <t t-name="coop_theme.TrailTail">
+    <t t-if="this.coopRubricsHere">
+      <li t-foreach="this.coopTrail.rubrics" t-as="rubric" t-key="rubric.field + rubric.id"
+          class="breadcrumb-item d-inline-flex min-w-0 o_coop_rubric">
+        <a href="#" class="text-truncate" t-att-title="rubric.name"
+           t-on-click.prevent="() => this.coopOpenRubric(rubric)" t-out="rubric.name"/>
+      </li>
+    </t>
+    <li class="breadcrumb-item active d-inline-flex min-w-0 o_coop_here" aria-current="page">
+      <span class="text-truncate" t-out="this.coopHereName"/>
+    </li>
+  </t>
+
+  <!--
+    Путь от раздела: прямая ссылка на запись (предков нет) и страница
+    человека или организации (предки не показываются, см.
+    `coopIsPersonPage`).
+  -->
+  <t t-name="coop_theme.Trail">
+    <ol class="breadcrumb flex-nowrap text-nowrap lh-sm o_coop_trail">
+      <li t-if="this.coopTrailSection" class="breadcrumb-item d-inline-flex min-w-0">
+        <a href="#" class="text-truncate" t-on-click.prevent="() => this.coopOpenSection()"
+           t-out="this.coopTrailSection.label"/>
+      </li>
+      <t t-call="coop_theme.TrailTail"/>
+    </ol>
+  </t>
+
   <t t-name="coop_theme.Breadcrumbs" t-inherit="web.Breadcrumbs" t-inherit-mode="extension">
+
+    <!--
+      Путь предков продолжается рубрикой и записью — на странице записи
+      платформы. Имя записи тогда стоит в пути, а не отдельной строкой.
+    -->
+    <xpath expr="//li[hasclass('o_back_button')]" position="after">
+      <t t-if="this.coopTrail" t-call="coop_theme.TrailTail"/>
+    </xpath>
+
+    <xpath expr="//ol[hasclass('breadcrumb')]" position="after">
+      <t t-if="this.coopIsPersonPage and this.coopTrail" t-call="coop_theme.Trail"/>
+    </xpath>
 
     <!--
       Кнопка — первой в полосе, до пути.
@@ -63,7 +107,7 @@
       остаётся один значок настроек, висящий в пустоте.
     -->
     <xpath expr="//div[hasclass('o_last_breadcrumb_item')][hasclass('gap-2')]" position="attributes">
-      <attribute name="t-if">!this.coopIsPersonPage</attribute>
+      <attribute name="t-if">!this.coopIsPersonPage and !this.coopTrail</attribute>
     </xpath>
 
     <!--
@@ -91,6 +135,12 @@
     -->
     <xpath expr="//div[hasclass('o_last_breadcrumb_item')][hasclass('fs-4')]" position="before">
       <t t-call="coop_theme.BackButton"/>
+      <t t-if="this.coopTrail" t-call="coop_theme.Trail"/>
+    </xpath>
+
+    <!-- Имя записи — последним звеном пути, а не отдельно крупно. -->
+    <xpath expr="//div[hasclass('o_last_breadcrumb_item')][hasclass('fs-4')]" position="attributes">
+      <attribute name="t-if">!this.coopTrail</attribute>
     </xpath>
 
   </t>
