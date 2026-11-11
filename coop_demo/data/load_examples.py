@@ -44,6 +44,7 @@ def load_examples(env):
     made.update(_deal_cases(env))
     made.update(_payment_cases(env))
     made.update(_review_cases(env))
+    made.update(balance_thin_trust(env))
     made.update(_token_cases(env))
     made.update(_verification_cases(env))
     made.update(_application_cases(env))
@@ -968,6 +969,120 @@ def _reviews_on_new_deals(env, rating, body, need):
         })
         created += 1
     return created
+
+
+# Сколько отзывов считается «тонкой» историей: одна средняя оценка в ней
+# решает всё. Участник с пятью отзывами и 40 % — честный «спорный»
+# случай, его не трогаем.
+THIN_HISTORY = 3
+TRUST_FLOOR = 50
+MAX_ADDED = 4
+GOOD_TEXTS = (
+    'Всё по договорённости, в срок. Будем работать дальше.',
+    'Хороший контрагент: отвечают быстро, документы в порядке.',
+    'Сделка прошла спокойно, претензий нет. Рекомендуем.',
+)
+
+
+def _seed_trust():
+    """Задуманное в справочниках демо доверие — по имени участника."""
+    import json
+    import os
+    here = os.path.dirname(__file__)
+    seeds = {}
+    for name in ('people.json', 'organizations.json'):
+        with open(os.path.join(here, name), encoding='utf-8') as handle:
+            for row in json.load(handle):
+                if row.get('trust'):
+                    seeds[row['name']] = row['trust']
+    return seeds
+
+
+def balance_thin_trust(env):
+    """Довести доверие участников с тонкой историей до задуманного.
+
+    Средние оценки (`_review_cases`) раздаются первым попавшимся
+    сделкам, и у организации с одной-двумя сделками единственный отзыв
+    оказывался тройкой: доверие 0 % при живой истории (владелец 11.11,
+    ПК «Молочный путь»). Здесь недостающие положительные отзывы пишут
+    контрагенты — сначала по уже завершённым сделкам, где их отзыва нет,
+    затем по новым завершённым сделкам с отзывами обеих сторон.
+    Идемпотентно: трогает только тех, кто ниже порога.
+    """
+    import math
+    Partner = env['res.partner'].sudo()
+    Deal = env['coop.deal'].sudo()
+    Review = env['coop.deal.review'].sudo().with_context(
+        tracking_disable=True, mail_notrack=True)
+    seeds = _seed_trust()
+    thin = Partner.search([
+        ('coop_deals_reviewed', '>', 0),
+        ('coop_deals_reviewed', '<=', THIN_HISTORY),
+        ('coop_trust', '<', TRUST_FLOOR)])
+    pool = Partner.search([('coop_is_participant', '=', True)], limit=120)
+    fixed = written = 0
+    for index, partner in enumerate(thin):
+        # Не выше 80 % и не больше четырёх отзывов: тонкая история и
+        # должна остаться тонкой, а не превратиться в сорок сделок
+        # ради задуманных 95 % (замер на стенде 11.11).
+        target = min(max(seeds.get(partner.name, 75), 60), 80) / 100.0
+        reviewed = partner.coop_deals_reviewed
+        good = partner.coop_deals_positive
+        need = min(MAX_ADDED, max(
+            1, math.ceil((target * reviewed - good) / (1 - target))))
+        added = 0
+        deals = Deal.search([
+            ('state', '=', 'done'),
+            '|', ('party_a_id', '=', partner.id),
+            ('party_b_id', '=', partner.id)])
+        for deal in deals:
+            if added >= need:
+                break
+            mine_a = deal.party_a_id == partner
+            other = deal.party_b_id if mine_a else deal.party_a_id
+            other_side = 'b' if mine_a else 'a'
+            if (not other or other == partner
+                    or other_side in deal.review_ids.mapped('side')):
+                continue
+            Review.create({
+                'deal_id': deal.id, 'author_id': other.id,
+                'target_id': partner.id, 'rating': '5' if added % 2 else '4',
+                'body': GOOD_TEXTS[(index + added) % len(GOOD_TEXTS)]})
+            added += 1
+        step = 0
+        while added < need and pool:
+            other = pool[(index * 7 + step * 13) % len(pool)]
+            step += 1
+            if other == partner:
+                continue
+            key = 'examples.trust.%s.%s' % (partner.id, step)
+            if Deal.search_count([('import_key', '=', key)]):
+                continue
+            deal = Deal.create({
+                'name': 'Поставка по договорённости',
+                'subject': 'resource', 'way': 'sale',
+                'party_a_id': partner.id, 'party_b_id': other.id,
+                'role_a': 'продавец', 'role_b': 'покупатель',
+                'amount': 18000 + (index * 7 + step) * 1700 % 160000,
+                'signed_on': '2026-%02d-%02d' % (2 + step % 8, 3 + index % 25),
+                'state': 'done',
+                'act_confirmed_a': True, 'act_confirmed_b': True,
+                'import_key': key,
+            })
+            Review.create([
+                {'deal_id': deal.id, 'author_id': other.id,
+                 'target_id': partner.id, 'rating': '5' if step % 2 else '4',
+                 'body': GOOD_TEXTS[(index + step) % len(GOOD_TEXTS)]},
+                {'deal_id': deal.id, 'author_id': partner.id,
+                 'target_id': other.id, 'rating': '5',
+                 'body': GOOD_TEXTS[(index + step + 1) % len(GOOD_TEXTS)]},
+            ])
+            added += 1
+        fixed += 1
+        written += added
+    _logger.info('Доверие с тонкой историей: %s участников, %s отзывов',
+                 fixed, written)
+    return {'доверие тонкое': fixed}
 
 
 # ── Токены ──────────────────────────────────────────────────────────────
