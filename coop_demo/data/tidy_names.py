@@ -153,6 +153,9 @@ def _places(env):
     return {n for n in names if n and len(n) < 40}
 
 
+# Срок в названии: «2 недели», «1 месяц», «36 смен».
+DURATION = re.compile(r'\d+\s*(недел[ьяи]|месяц(а|ев)?|смен[ыа]?|дн(я|ей)|день)', re.I)
+
 # Номер копии « (4)», который старый добор ставил после города.
 COPY_NO = re.compile(r'\s*\(\d+\)$')
 
@@ -169,11 +172,16 @@ def _strip(name, places, drop=()):
             kept[-1] = '%s, %s' % (kept[-1], tail.strip())
             continue
         kept.append(part)
-    # «…, недорого, недорого» — повтор уточнения схлопываем.
+    # «…, недорого, недорого» — повтор уточнения схлопываем; второй срок
+    # после первого («, 1 месяц, 1 неделя») — тоже.
     bits = []
     for bit in SEP.join(kept).split(', '):
-        if not bits or bits[-1].strip() != bit.strip():
-            bits.append(bit)
+        if bits and bits[-1].strip() == bit.strip():
+            continue
+        if (bits and DURATION.fullmatch(bit.strip())
+                and any(DURATION.search(b) for b in bits)):
+            continue
+        bits.append(bit)
     return ', '.join(bits).strip()
 
 
@@ -183,6 +191,10 @@ def _unique(group, base, pool, taken):
     have = {bit.strip() for bit in base.split(',')}
     first = [q for q in pool[0] if q not in have]
     second = [q for q in pool[1] if q not in have]
+    if DURATION.search(base):
+        # «Тестировщик, 1 месяц» — срок уже есть, второй («, 1 неделя») не нужен.
+        first = [q for q in first if not DURATION.search(q)]
+        second = [q for q in second if not DURATION.search(q)]
     combos = ([base] + ['%s, %s' % (base, q) for q in first + second]
               + ['%s, %s, %s' % (base, a, b) for a in first for b in second])
     it = iter(c for c in combos)

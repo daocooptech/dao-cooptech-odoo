@@ -453,6 +453,9 @@ class CoopDemoLoader(models.AbstractModel):
         # названия, а копии различаются содержанием.
         from ..data import tidy_names
         tidy_names.tidy_all(self.env)
+        # Готовность без перебора в десятки раз — после цен и вкладов.
+        from ..data import fit_readiness
+        fit_readiness.fit_readiness(self.env)
         return True
 
     def _load_rubrics(self):
