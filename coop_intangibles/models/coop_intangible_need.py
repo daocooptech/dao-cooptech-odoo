@@ -49,6 +49,22 @@ class CoopIntangibleNeed(models.Model):
     closed_by_id = fields.Many2one(
         'res.partner', string='Закрыл', readonly=True, copy=False)
     closed_on = fields.Datetime(string='Закрыта', readonly=True, copy=False)
+    # Пай или доля за закрытие строки — как у материальных, трудовых и
+    # финансовых (решение 652): оценка к «Нужно» проекта, а «Нужно» —
+    # сумма всех четырёх списков. Два поля с одним значением — по той же
+    # причине, что в `coop.resource`: подпись колонки задаётся разметкой.
+    need_share_percent = fields.Float(
+        string='Пай, %', compute='_compute_need_share', digits=(5, 2))
+    need_share_ratio = fields.Float(
+        string='Доля, %', compute='_compute_need_share', digits=(5, 2))
+
+    @api.depends('price', 'project_id.required_total')
+    def _compute_need_share(self):
+        for need in self:
+            total = need.project_id.required_total
+            share = need.price * 100.0 / total if total and need.price else 0.0
+            need.need_share_percent = share
+            need.need_share_ratio = share
 
     def action_close(self):
         """Закрыть потребность — вручную инициатором или при принятии вклада."""
@@ -97,10 +113,26 @@ class CoopProjectIntangible(models.Model):
     need_intangible_ids = fields.One2many(
         'coop.intangible.need', 'project_id',
         string='Нематериальные потребности',
-        domain=[('state', '=', 'open')])
+        # Закрытые — тоже: сумма сделки остаётся в столбце (решение 652).
+        domain=[('state', 'in', ('open', 'closed'))])
     need_intangible_count = fields.Integer(
         string='Нематериальных потребностей',
         compute='_compute_need_intangible_count')
+    # Все строки, а не только открытые: закрытые остаются в «Нужно».
+    need_intangible_all_ids = fields.One2many(
+        'coop.intangible.need', 'project_id',
+        string='Нематериальные потребности, все')
+
+    def _coop_needs_total(self):
+        """«Нужно» — и с нематериальными (решение 652). Снятые не в счёт."""
+        total = super()._coop_needs_total()
+        return total + sum(self.need_intangible_all_ids.filtered(
+            lambda n: n.state in ('open', 'closed')).mapped('price'))
+
+    @api.depends('need_ids.price', 'need_ids.state',
+                 'need_intangible_all_ids.price', 'need_intangible_all_ids.state')
+    def _compute_required_total(self):
+        return super()._compute_required_total()
 
     @api.depends('need_intangible_ids')
     def _compute_need_intangible_count(self):
@@ -158,11 +190,15 @@ class CoopProjectContributionIntangible(models.Model):
         for contribution in self:
             need = contribution.need_intangible_id
             if need and need.state == 'open':
-                need.write({
+                values = {
                     'state': 'closed',
                     'closed_by_id': contribution.partner_id.id,
                     'closed_on': fields.Datetime.now(),
-                })
+                }
+                # Сумма сделки вместо оценки сметы (решение 652).
+                if contribution.value:
+                    values['price'] = contribution.value
+                need.write(values)
         return result
 
 

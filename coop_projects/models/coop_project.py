@@ -272,10 +272,19 @@ class CoopProject(models.Model):
     currency_id = fields.Many2one(
         'res.currency', string='Валюта',
         default=lambda self: self.env.user._coop_acting_partner()._coop_currency())
+    # Решение владельца 652 (11.11.2026): «Нужно» — сумма оценок всех
+    # потребностей проекта, всех четырёх списков. Пай или доля строки
+    # считается от него же, и столбец по всем спискам даёт 100 %. Раньше
+    # «Нужно» вписывал инициатор, и нематериальным в нём места не было.
+    # Закрытые потребности остаются в сумме: готовность не должна падать
+    # от каждого принятого вклада. Проект без перечня потребностей держит
+    # вписанное руками — поэтому поле вычисляемое, но не только для чтения.
     required_total = fields.Monetary(
         string='Нужно', currency_field='currency_id', tracking=True,
-        help='Денежная оценка всего, что проекту нужно: деньгами, '
-             'ресурсами и трудом. Готовность считается от неё.')
+        compute='_compute_required_total', store=True, readonly=False,
+        help='Сумма оценок всех потребностей проекта — материальных, '
+             'трудовых, финансовых и нематериальных. Готовность, паи и '
+             'доли считаются от неё.')
     contribution_ids = fields.One2many(
         'coop.project.contribution', 'project_id', string='Вклады')
     # Участники проекта — люди, чей вклад не отклонён, не отозван и не
@@ -343,6 +352,23 @@ class CoopProject(models.Model):
              'На каждое приходят предложения, и утверждается одно.')
     need_count = fields.Integer(string='Потребностей',
                                 compute='_compute_need_count')
+
+    # Состояния потребности, которые входят в «Нужно» (решение 652):
+    # опубликованная и закрытая; черновик ещё не объявлен.
+    NEED_COUNTED = ('published', 'closed')
+
+    def _coop_needs_total(self):
+        """Сумма оценок потребностей проекта — для «Нужно». Модули с
+        другими видами потребностей (нематериальные) добавляют свои."""
+        self.ensure_one()
+        return sum(self.need_ids.filtered(
+            lambda n: n.state in self.NEED_COUNTED).mapped('price'))
+
+    @api.depends('need_ids.price', 'need_ids.state')
+    def _compute_required_total(self):
+        for project in self:
+            total = project._coop_needs_total()
+            project.required_total = total or project.required_total or 0.0
     new_offer_count = fields.Integer(
         string='Новых заявок', compute='_compute_new_offer_count')
 
@@ -358,8 +384,10 @@ class CoopProject(models.Model):
     # «Оборудование» больше не отдельный вид, оно внутри материальных.
     # Нематериальные (знания, чертежи, программы) — четвёртый список, но
     # не здесь: они живут своим модулем `coop_intangibles`.
+    # Закрытые строки — тоже (решение 652): сумма сделки остаётся в
+    # столбце, и пай по всем спискам даёт 100 %, а не только по открытым.
     NEED_PICK = [('listing_type', '=', 'request'),
-                         ('state', '=', 'published')]
+                         ('state', 'in', ('published', 'closed'))]
     need_material_ids = fields.One2many(
         'coop.resource', 'project_id', string='Материальные потребности',
         domain=NEED_PICK + [('resource_type', '=', 'material')])
@@ -1664,7 +1692,13 @@ class CoopProjectContribution(models.Model):
             lambda offer: offer.id != self.id and offer.state == 'offered')
         if others:
             others.sudo().write({'state': 'declined'})
-        need.sudo().write({'need_accepted_id': self.id, 'state': 'closed'})
+        # Владелец 11.11.2026: смета — примерная; утвердили отклик — в
+        # строке встаёт сумма сделки, «Нужно» пересчитывается, и паи
+        # устаканиваются по мере закрытия строк (решение 652).
+        values = {'need_accepted_id': self.id, 'state': 'closed'}
+        if self.value:
+            values['price'] = self.value
+        need.sudo().write(values)
         need.sudo().message_post(body=_(
             'Потребность закрыта: утверждено предложение «%(what)s» от '
             '%(who)s. Прочих предложений отклонено: %(count)s.',

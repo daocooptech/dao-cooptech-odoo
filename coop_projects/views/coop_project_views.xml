@@ -449,8 +449,7 @@
                   <!-- Где вклад не принимается — «сбор закрыт» (владелец
                        28.10.2026): пустая колонка читалась как поломка. -->
                   <field name="need_join_note" nolabel="1"
-                         class="o_coop_needs_note"
-                         column_invisible="parent.state in ('gathering', 'running')"/>
+                         class="o_coop_needs_note" width="78px"/>
                   <button name="action_join_need" type="object"
                           string="Участвовать" class="btn btn-secondary btn-sm"
                           invisible="not need_can_join"
@@ -483,8 +482,7 @@
                   <!-- Где вклад не принимается — «сбор закрыт» (владелец
                        28.10.2026): пустая колонка читалась как поломка. -->
                   <field name="need_join_note" nolabel="1"
-                         class="o_coop_needs_note"
-                         column_invisible="parent.state in ('gathering', 'running')"/>
+                         class="o_coop_needs_note" width="78px"/>
                   <button name="action_join_need" type="object"
                           string="Участвовать" class="btn btn-secondary btn-sm"
                           invisible="not need_can_join"
@@ -517,8 +515,7 @@
                   <!-- Где вклад не принимается — «сбор закрыт» (владелец
                        28.10.2026): пустая колонка читалась как поломка. -->
                   <field name="need_join_note" nolabel="1"
-                         class="o_coop_needs_note"
-                         column_invisible="parent.state in ('gathering', 'running')"/>
+                         class="o_coop_needs_note" width="78px"/>
                   <button name="action_join_need" type="object"
                           string="Участвовать" class="btn btn-secondary btn-sm"
                           invisible="not need_can_join"
@@ -589,7 +586,11 @@
               <field name="project_id" readonly="1"/>
             </group>
             <group string="Ресурсы">
-              <field name="required_total" widget="coop_inline" readonly="not coop_can_edit"/>
+              <!-- С перечнем потребностей «Нужно» — их сумма (решение
+                   652), вписывать руками нечего. -->
+              <field name="need_count" invisible="1"/>
+              <field name="required_total" widget="coop_inline"
+                     readonly="not coop_can_edit or need_count"/>
               <field name="contribution_total"/>
               <field name="readiness" widget="progressbar"/>
               <field name="contributor_count"/>

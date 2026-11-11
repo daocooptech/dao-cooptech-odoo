@@ -977,6 +977,12 @@ def diversify_project_needs(env, min_needs=4, max_needs=12):
             skipped += 1
             continue
 
+        # Решение 652: у проекта с перечнем «Нужно» — сумма всех четырёх
+        # списков, и добирать до него нечего. Остаток считался от одних
+        # ресурсов, а «Нужно» теперь включает и нематериальные — выходил
+        # положительным, и шаг дописывал строки под чужую сумму.
+        if project._coop_needs_total():
+            continue
         existing_sum = sum(existing.mapped('price'))
         remaining = project.required_total - existing_sum
         if remaining <= 0:
@@ -1138,7 +1144,8 @@ def diversify_project_needs(env, min_needs=4, max_needs=12):
                 Resource.create({
                     'name': item_name,
                     'listing_type': 'request',
-                    'resource_type': rtype,
+                    # Оборудование — внутри материальных (решение 632).
+                    'resource_type': 'material' if rtype == 'equipment' else rtype,
                     'project_id': project.id,
                     'owner_id': project.partner_id.id,
                     'need_manager_id': manager.id if manager else False,

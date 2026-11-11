@@ -23,6 +23,16 @@
               <field name="intangible_id"/>
               <field name="price" string="Оценка"
                      options="{'hide_trailing_zeros': true}"/>
+              <!-- Пай, доля или ничего — по виду проекта, как в трёх
+                   списках выше (решения 316, 652). -->
+              <field name="need_share_percent" string="Пай, %"
+                     widget="float" digits="[5,1]"
+                     options="{'hide_trailing_zeros': true}"
+                     column_invisible="parent.kind != 'cooperative'"/>
+              <field name="need_share_ratio" string="Доля, %"
+                     widget="float" digits="[5,1]"
+                     options="{'hide_trailing_zeros': true}"
+                     column_invisible="parent.kind not in ('commercial', 'dao')"/>
               <field name="state" string="Состояние" optional="show"/>
               <field name="note" optional="hide"/>
               <button name="action_join" type="object"

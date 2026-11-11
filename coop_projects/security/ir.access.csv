@@ -17,3 +17,4 @@ rule_contribution_read_all,Вклады в проект видны всем,coop
 rule_contribution_admin,Вклады — администратор,coop.project.contribution,base.group_system,crud,
 access_coop_project_contribute,Окно вклада — участник,coop.project.contribute,base.group_user,crud,
 rule_coop_task_own,Задачи: свои и своего проекта,project.task,,crud,
+rule_project_need_closed_read,Закрытые потребности проекта видны в его смете (решение 652),coop.resource,base.group_user,r,"[('project_id', '!=', False), ('listing_type', '=', 'request'), ('state', '=', 'closed')]"

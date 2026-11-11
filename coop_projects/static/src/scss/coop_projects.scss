@@ -457,8 +457,8 @@
     // Теперь вся таблица — одна сетка, строки берут её колонки (`subgrid`),
     // и ширина колонки — по самому широкому содержимому во всех строках,
     // а не числом. Каждой ячейке колонка назначена по смыслу: кнопка —
-    // первая (забирает остаток), стоимость — вторая, доля или состояние —
-    // третья, отклики — четвёртая. Название и «Передаётся» — рядами во
+    // первая (забирает остаток), стоимость — вторая, пай или доля —
+    // третья, отклики или состояние — четвёртая. Название и «Передаётся» — рядами во
     // всю ширину. Колонки без содержимого (доли нет у некоммерческого
     // проекта) схлопываются сами.
     @media (max-width: 480px) {
@@ -498,14 +498,25 @@
             padding-right: 30px !important;
         }
 
+        // Кнопка и пометка «закрыто» стоят в строке по одной: где есть
+        // одна, другая пуста. Пустая ячейка заняла бы первую колонку и
+        // столкнула соседку рядом ниже.
+        td.o_list_button:not(:has(button)),
+        td.o_coop_needs_note:empty,
+        th.o_list_button {
+            display: none !important;
+        }
+
         // Колонки по смыслу.
         .o_list_button,
+        [data-name="need_join_note"],
         td.o_coop_needs_note { grid-column: 1; }
         [data-name="price"], td[name="price"] { grid-column: 2; }
         [data-name="need_share_percent"], td[name="need_share_percent"],
-        [data-name="need_share_ratio"], td[name="need_share_ratio"],
-        [data-name="state"], td[name="state"] { grid-column: 3; }
-        [data-name="need_offer_count"], td[name="need_offer_count"] { grid-column: 4; }
+        [data-name="need_share_ratio"], td[name="need_share_ratio"] { grid-column: 3; }
+        // Откликов у нематериальных нет, их место — у состояния.
+        [data-name="need_offer_count"], td[name="need_offer_count"],
+        [data-name="state"], td[name="state"] { grid-column: 4; }
 
         // «Передаётся» и заметка — под названием, во всю ширину.
         [data-name="ownership_kind"], td[name="ownership_kind"],
@@ -553,7 +564,8 @@
         // Пустая ячейка шапки над кнопкой ниже соседних (16 px против 30)
         // и стояла посередине ряда: сверху и снизу от неё просвечивала
         // белая полоса. Тянется на всю высоту ряда.
-        th.o_list_button {
+        th.o_list_button,
+        th[data-name="need_join_note"] {
             align-self: stretch;
         }
     }

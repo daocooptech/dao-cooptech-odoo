@@ -111,11 +111,15 @@ class CoopResource(models.Model):
                 and not record.need_accepted_id
                 and record.project_id.partner_id not in mine)
 
-    @api.depends('project_id.state')
+    @api.depends('project_id.state', 'state')
     def _compute_need_join_note(self):
         for record in self:
             state = record.project_id.state
-            if not state or state in OPEN_FOR_NEEDS:
+            # Закрытая строка остаётся в списке с суммой сделки (владелец
+            # 11.11.2026, решение 652): паи «устаканиваются» на глазах.
+            if record.state == 'closed':
+                record.need_join_note = _('закрыто')
+            elif not state or state in OPEN_FOR_NEEDS:
                 record.need_join_note = False
             elif state == 'draft':
                 record.need_join_note = _('сбор не начат')

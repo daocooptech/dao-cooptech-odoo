@@ -317,6 +317,9 @@ def load_projects(env, extra=100):
             # отношение двух правдоподобных чисел становится ложью.
             if project.contribution_ids:
                 values.pop('required_total', None)
+            # С перечнем потребностей «Нужно» — их сумма (решение 652).
+            elif project._coop_needs_total():
+                values.pop('required_total', None)
             # Владельца и автора — только при заведении. Инициатор берётся
             # по номеру из списка участников, а список растёт от прогона к
             # прогону, — и каждое обновление переписывало владельца у
@@ -426,6 +429,11 @@ def _realign_required(project, readiness):
     округление.
     """
     if not readiness or project.readiness == readiness:
+        return 0
+    # Решение 652 (11.11.2026): у проекта с перечнем потребностей «Нужно» —
+    # их сумма, а не подгонка под готовность из макета. Подгонка здесь
+    # перебивала сумму, и пай по всем спискам давал 124 % вместо 100.
+    if project._coop_needs_total():
         return 0
     if abs(project.readiness - readiness) <= 5:
         return 0
