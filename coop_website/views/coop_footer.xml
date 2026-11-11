@@ -24,11 +24,13 @@
             <div>
               <h5>Платформа</h5>
               <ul class="list-unstyled">
-                <li><a href="/#features">Возможности</a></li>
-                <li><a href="/#cases">Как это работает</a></li>
-                <li><a href="/#directions">Направления</a></li>
-                <li><a href="/#architecture">Как устроено</a></li>
-                <li><a href="/#join">Как присоединиться</a></li>
+                <!-- Якоря лендинга по макету 11.11.2026 (coop_landing.xml). -->
+                <li><a href="/?site=1#kto">Кому это</a></li>
+                <li><a href="/?site=1#karta">Стартовая карточка</a></li>
+                <li><a href="/?site=1#proekt">Расчёт проекта</a></li>
+                <li><a href="/?site=1#put">Путь проекта</a></li>
+                <li><a href="/?site=1#keysy">Сценарии</a></li>
+                <li><a href="/?site=1#platforma">Как устроена платформа</a></li>
               </ul>
             </div>
             <div>
@@ -37,7 +39,8 @@
                 <li><a href="/web/signup">Зарегистрироваться</a></li>
                 <li><a href="/web/login">Войти</a></li>
                 <li><a href="/help-project">Помощь проекту</a></li>
-                <li><a href="/#contact">Написать нам</a></li>
+                <!-- Формы на лендинге больше нет — письмо оператору. -->
+                <li><a t-att-href="'mailto:%s' % request.env['coop.website.landing'].sudo()._legal_facts()['email']">Написать нам</a></li>
                 <li><a href="/privacy">Политика обработки ПДн</a></li>
                 <li><a href="/consent">Согласие на обработку ПДн</a></li>
                 <li><a href="/network-rules">Правила сети</a></li>

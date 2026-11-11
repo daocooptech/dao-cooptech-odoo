@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Обращения — упрощённая воронка у людей (задача 412, владелец
+    10.11.2026). Те же сделки на первых стадиях, доской по стадиям:
+    Обращение → Переговоры → Согласована, отказ — отменённая до
+    заключения. Перетаскивать нельзя: стадию меняют кнопки сделки, у них
+    свои проверки и записи в ленте.
+  -->
+  <record id="view_coop_deal_inquiry_kanban" model="ir.ui.view">
+    <field name="name">coop.deal.inquiry.kanban</field>
+    <field name="model">coop.deal</field>
+    <field name="priority">40</field>
+    <field name="arch" type="xml">
+      <kanban default_group_by="state" records_draggable="0" group_create="0"
+              group_delete="0" group_edit="0" quick_create="0"
+              class="o_coop_deals o_coop_inquiries">
+        <field name="party_a_id"/>
+        <field name="party_b_id"/>
+        <field name="number"/>
+        <field name="city"/>
+        <field name="amount"/>
+        <field name="currency_id"/>
+        <field name="state"/>
+        <field name="inquiry_source"/>
+        <field name="create_date"/>
+        <templates>
+          <t t-name="card">
+            <div class="d-flex justify-content-between gap-2">
+              <span class="o_coop_badge_subject" t-if="record.inquiry_source.raw_value">
+                <t t-out="record.inquiry_source.value"/>
+              </span>
+              <span class="o_coop_deal_no ms-auto"><t t-out="record.number.value"/></span>
+            </div>
+            <field name="name" class="fw-bold"/>
+            <div class="o_coop_deal_parties">
+              <field name="party_a_id"/> ↔ <field name="party_b_id"/>
+            </div>
+            <div class="d-flex justify-content-between">
+              <field name="amount" widget="monetary"/>
+              <field name="create_date" widget="date" class="text-muted"/>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="action_coop_deal_inquiries" model="ir.actions.act_window">
+    <field name="name">Обращения</field>
+    <field name="res_model">coop.deal</field>
+    <field name="path">inquiries</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="view_id" ref="view_coop_deal_inquiry_kanban"/>
+    <field name="domain">[('coop_mine', '=', True), '|', ('state', 'in', ['lead', 'draft', 'agreed']), '&amp;', ('state', '=', 'cancelled'), ('signed_on', '=', False)]</field>
+    <!-- Пустые стадии исполнения и приёмки здесь не нужны: CRM
+         организаций раскрывает все стадии сделки (coop_crm), а воронка
+         обращений кончается на «Согласована». -->
+    <field name="context">{'create': False, 'read_group_expand': False}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Обращений пока нет</p>
+      <p>
+        Обращение появляется само, когда вам пишут или звонят по объявлению,
+        откликаются на него — или вы сами пишете владельцу чужого
+        объявления. Дальше оно идёт по стадиям к сделке.
+      </p>
+    </field>
+  </record>
+
+  <menuitem id="menu_coop_deal_inquiries" name="Обращения"
+            parent="coop_resources.menu_coop_resources_root"
+            action="action_coop_deal_inquiries" sequence="17"/>
+
+</odoo>

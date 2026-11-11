@@ -1193,6 +1193,9 @@ body.o_dark_mode .o_coop_logo img {
 @media (max-width: 640px) {
   .o_coop_main .o_kanban_renderer.o_kanban_grouped .o_kanban_group {
     min-width: calc(100vw - 60px);
+    // И не шире: длинное название карточки распирало колонку за край
+    // экрана (доска «Обращений», 375 точек — 390 при видимых 347).
+    max-width: calc(100vw - 60px);
   }
 }
 

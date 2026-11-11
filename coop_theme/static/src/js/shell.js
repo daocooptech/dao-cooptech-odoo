@@ -368,6 +368,7 @@ const SUBNAV_EXACT = {
     "Предложения мощностей": "cpu",
     "Продажи": "filter",
     "Продвижение": "speakerphone",
+    "Обращения": "inbox",
     "Проекты": "rocket",
     "Пулы проектов": "droplet",
     "Сайт": "world-www",

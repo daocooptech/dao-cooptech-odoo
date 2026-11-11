@@ -53,7 +53,10 @@ class CoopDeal(models.Model):
     # завершённой и отменённой она больше не нужна, а заводить её задним
     # числом пяти сотням закрытых сделок значит засыпать список мёртвыми
     # разговорами.
-    LIVE_STATES = ('draft', 'agreed', 'active', 'acceptance', 'disputed')
+    #
+    # «Обращение» — тоже живое с 11.11.2026 (задача 412): обращение и есть
+    # разговор — «Написать владельцу» заводит его и открывает переписку.
+    LIVE_STATES = ('lead', 'draft', 'agreed', 'active', 'acceptance', 'disputed')
 
     def _coop_channel_specs(self):
         """Одна переписка на сделку: номер и предмет в названии, стороны
@@ -108,3 +111,23 @@ class CoopDeal(models.Model):
         if 'state' in vals:
             self._coop_ensure_channel()
         return res
+
+
+class CoopResource(models.Model):
+    _inherit = 'coop.resource'
+
+    def action_message_owner(self):
+        """«Написать владельцу» — разговор об объявлении, то есть обращение
+        (задача 412): заводим его или находим открытое и открываем его
+        переписку. Своё объявление и объявление без владельца — как
+        раньше, пустым окном нового разговора."""
+        self.ensure_one()
+        deal = self.env['coop.deal']._coop_inquiry_for(self, 'message')
+        channel = deal and deal._coop_channels('deal')[:1]
+        if not channel:
+            return super().action_message_owner()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'mail.action_discuss',
+            'context': {'active_id': 'discuss.channel_%s' % channel.id},
+        }
