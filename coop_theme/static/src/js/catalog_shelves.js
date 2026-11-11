@@ -83,6 +83,12 @@ export class CoopShelves extends Component {
         // у записи, parent: поле рубрики у подрубрики, other: имя полки
         // для мелких подрубрик}`.
         split: t.or([t.object(), t.boolean()]).optional(),
+        // Поле рубрики с её местом на витрине (`coop_shelf_rank` в
+        // контексте действия). Без него полки идут по числу записей, и
+        // наверху каталога ресурсов стояли «Расходники для монтажа», а
+        // «Недвижимость» — внизу. Владелец 10–11.11.2026: «наверху самые
+        // топовые разделы, недвижимость, авто и т. д., как на Авито».
+        rank: t.or([t.string(), t.boolean()]).optional(),
         // Сколько полок собралось. Зовётся один раз, после появления на
         // экране: по этому числу каталог решает, показывать ли ленту.
         onLoaded: t.function().optional(),
@@ -180,9 +186,10 @@ export class CoopShelves extends Component {
      *  видно вовсе.
      *
      *  Ограничение оставлено на случай справочника из сотни рубрик:
-     *  сорок полок — это уже не витрина, и остаток уйдёт в «Другое». */
+     *  Шестьдесят — с 11.11.2026: в каталоге ресурсов 52 рубрики, и при
+     *  полках по месту раздела (`rank`) в «Другое» уходили целые разделы. */
     get maxShelves() {
-        return 24;
+        return 60;
     }
 
     /** Ниже какого числа записей рубрика не становится полкой. Полка из
@@ -256,12 +263,12 @@ export class CoopShelves extends Component {
         let groups = [];
         if (orm.formattedReadGroup) {
             groups = await orm.formattedReadGroup(
-                this.props.resModel, domain, [this.props.field], ["__count"], { limit: 40 }
+                this.props.resModel, domain, [this.props.field], ["__count"], { limit: 200 }
             );
         } else if (orm.readGroup) {
             groups = await orm.readGroup(
                 this.props.resModel, domain, [this.props.field],
-                [this.props.field], { limit: 40 }
+                [this.props.field], { limit: 200 }
             );
         }
         const countOf = (g) => g.__count ?? g[this.props.field + "_count"] ?? 0;
@@ -275,9 +282,10 @@ export class CoopShelves extends Component {
             }
             return this.labels[value] || value;
         };
+        const rankOf = await this.readRanks(groups);
         const eligible = groups
             .filter((g) => g[this.props.field] && countOf(g) >= this.minPerShelf)
-            .sort((a, b) => countOf(b) - countOf(a))
+            .sort((a, b) => rankOf(a) - rankOf(b) || countOf(b) - countOf(a))
             .slice(0, this.maxShelves);
 
         // Всё, что не стало полкой: пустая рубрика и рубрики, в которых
@@ -389,6 +397,23 @@ export class CoopShelves extends Component {
      * полкой «Водитель» внутри «Рабочего персонала» они стать не должны.
      * Мелкие подрубрики (меньше трёх записей) — одной полкой `other`.
      */
+    /** Место рубрики на витрине: значение поля `rank` у самой рубрики.
+     *  Без `rank` — у всех одно место, и решает число записей. */
+    async readRanks(groups) {
+        const field = this.props.field;
+        const relation = this.props.fields[field]?.relation;
+        const idOf = (g) => (Array.isArray(g[field]) ? g[field][0] : g[field]);
+        if (!this.props.rank || !relation) {
+            return () => 0;
+        }
+        const ids = groups.map(idOf).filter(Boolean);
+        const rows = ids.length
+            ? await this.orm.read(relation, ids, [this.props.rank])
+            : [];
+        const ranks = Object.fromEntries(rows.map((r) => [r.id, r[this.props.rank] || 0]));
+        return (g) => ranks[idOf(g)] ?? Number.MAX_SAFE_INTEGER;
+    }
+
     async splitShelf(shelf, id, countOf) {
         const split = this.props.split;
         const field = split.field;

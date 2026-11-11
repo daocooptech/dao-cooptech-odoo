@@ -67,6 +67,7 @@
                    resModel="this.props.resModel"
                    field="this.coopShelfField"
                    split="this.coopShelfSplit"
+                   rank="this.coopShelfRank"
                    domain="this.props.domain or []"
                    orderBy="this.coopShelfOrder"
                    archInfo="this.props.archInfo"

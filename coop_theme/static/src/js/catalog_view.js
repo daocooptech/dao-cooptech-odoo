@@ -99,6 +99,12 @@ export class CoopCatalogKanbanController extends KanbanController {
         return this.props.context?.coop_shelf_split || false;
     }
 
+    /** Поле рубрики с её местом на витрине — `coop_shelf_rank` в
+     *  контексте действия каталога (`js/catalog_shelves.js`). */
+    get coopShelfRank() {
+        return this.props.context?.coop_shelf_rank || false;
+    }
+
     /** Полки только на чистом экране: без поиска, без отбора, без
      *  группировки и только в плитке. В списке витрина по рубрикам
      *  спорит с самим списком. */

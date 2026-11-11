@@ -16,7 +16,7 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.7.3',
+    'version': '20.0.1.8.0',
     'license': 'LGPL-3',
     # `website` — ради порядка загрузки: он добавляет к видам колонку
     # `visibility` (NOT NULL), и новый вид, созданный раньше него, не
@@ -30,6 +30,7 @@
         'views/coop_resource_views.xml',
         'security/ir.access.csv',
         'data/coop_money_display.xml',
+        'data/coop_resource_sections.xml',
     ],
     'assets': {
         'web.assets_backend': [

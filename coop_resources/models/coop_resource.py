@@ -26,9 +26,20 @@ class CoopResourceCategory(models.Model):
     _name = 'coop.resource.category'
     _description = 'Категория ресурсов'
     _parent_store = True
-    _order = 'complete_name'
+    # Разделы — в порядке крупных площадок объявлений, а не по алфавиту и
+    # не по числу записей: владелец 10–11.11.2026 — «наверху самые топовые
+    # разделы, недвижимость, авто и т. д., как на Авито».
+    _order = 'section_sequence, complete_name'
 
     name = fields.Char(string='Название', required=True)
+    sequence = fields.Integer(
+        string='Место на витрине', default=100,
+        help='Чем меньше, тем выше раздел в каталоге и в выборе раздела. '
+             'Задаётся у разделов верхнего уровня, подразделы идут за '
+             'своим разделом.')
+    section_sequence = fields.Integer(
+        string='Место раздела', compute='_compute_section_sequence',
+        recursive=True, store=True, index=True)
     parent_id = fields.Many2one(
         'coop.resource.category', string='Родительская категория',
         ondelete='restrict', index=True)
@@ -49,6 +60,42 @@ class CoopResourceCategory(models.Model):
                     record.parent_id.complete_name, record.name)
             else:
                 record.complete_name = record.name
+
+    @api.depends('sequence', 'parent_id.section_sequence')
+    def _compute_section_sequence(self):
+        for record in self:
+            record.section_sequence = (record.parent_id.section_sequence
+                                       if record.parent_id else record.sequence)
+
+    # Порядок разделов на главной Юлы 11.11.2026: «Недвижимость»,
+    # «Легковые автомобили», «Услуги», дальше одежда, телефоны,
+    # автотовары, вакансии, спецтехника (Авито с адреса стенда не открылся
+    # — 429). Наши разделы шире, поэтому за ними — то, чего на досках
+    # объявлений нет: оборудование, инструмент, сырьё и продовольствие.
+    SECTION_RANKS = [
+        'Недвижимость', 'Техника и транспорт', 'Услуги и финансы',
+        'Электроника и оргтехника', 'Для дома и быта', 'Вещи и экипировка',
+        'Оборудование и станки', 'Инструмент', 'Сырьё и материалы',
+        'Продовольствие и сельхозпродукция',
+    ]
+
+    @api.model
+    def _coop_rank_sections(self):
+        """Места разделов — один раз: потом порядок правят руками в
+        справочнике, и обновление модуля его не затирает."""
+        Config = self.env['ir.config_parameter'].sudo()
+        if Config.get_str('coop_resources.sections_ranked'):
+            return True
+        ranked = self.browse()
+        for place, name in enumerate(self.SECTION_RANKS, start=1):
+            section = self.search([('parent_id', '=', False), ('name', '=', name)])
+            section.write({'sequence': place * 10})
+            ranked |= section
+        # Разделов ещё нет (чистая установка до наполнения) — признак не
+        # ставим, иначе места не встанут и после наполнения.
+        if ranked:
+            Config.set_str('coop_resources.sections_ranked', '1')
+        return True
 
     def _compute_resource_count(self):
         counts = {
