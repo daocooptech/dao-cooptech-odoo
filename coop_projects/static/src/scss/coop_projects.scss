@@ -445,26 +445,43 @@
     // отклики. Шапка разложена так же, ширины колонок заданы, чтобы ряды
     // разных строк стояли друг под другом. Без колонки доли (у
     // некоммерческого проекта) колонок на одну меньше.
+    //
+    // Владелец 11.11.2026 (снимки с телефона): «Участвовать» обрезано до
+    // «Участ», «В собственн…», «520 …». Ширины колонок были заданы числом
+    // (98 / 50 / 58 px) под пять колонок, а после «Передаётся» (решение
+    // 632) у материальных их стало семь, и у нематериальных кнопка (97 px)
+    // попадала в колонку на 50. Замер на 375 px, блок 305: по содержимому
+    // кнопка 105, стоимость 88, доля 50, отклики 58 — в ряд встают, если
+    // «Передаётся» не стоит рядом.
+    //
+    // Теперь вся таблица — одна сетка, строки берут её колонки (`subgrid`),
+    // и ширина колонки — по самому широкому содержимому во всех строках,
+    // а не числом. Каждой ячейке колонка назначена по смыслу: кнопка —
+    // первая (забирает остаток), стоимость — вторая, доля или состояние —
+    // третья, отклики — четвёртая. Название и «Передаётся» — рядами во
+    // всю ширину. Колонки без содержимого (доли нет у некоммерческого
+    // проекта) схлопываются сами.
     @media (max-width: 480px) {
-        table, thead, tbody {
-            display: block !important;
+        table {
+            display: grid !important;
+            grid-template-columns: 1fr auto auto auto;
             width: 100% !important;
+        }
+
+        thead, tbody {
+            display: contents !important;
         }
 
         thead tr,
         tbody tr.o_data_row {
             display: grid !important;
-            // Ширины — по самому широкому содержимому при отступах 3 px:
-            // «2 950 000 ₽» — 92, «Доля, %» — 44, «Откликов» — 52. При 44
-            // и 58 подписи шапки обрезались многоточием («Дол…»).
-            grid-template-columns: minmax(0, 1fr) 98px 50px 58px;
+            grid-column: 1 / -1;
+            grid-template-columns: subgrid;
+            // `dense`: кнопка стоит в первой колонке, а в разметке у
+            // нематериальных она последняя — без него уходила рядом ниже.
+            grid-auto-flow: row dense;
             align-items: center;
             border-bottom: 1px solid var(--coop-line, #e6e6e1);
-        }
-
-        thead tr:not(:has(> :nth-child(5))),
-        tbody tr.o_data_row:not(:has(> :nth-child(5))) {
-            grid-template-columns: minmax(0, 1fr) 98px 58px;
         }
 
         th, td {
@@ -475,8 +492,41 @@
 
         th:first-child,
         td:first-child {
+            grid-row: 1;
             grid-column: 1 / -1;
             padding-bottom: 2px !important;
+            padding-right: 30px !important;
+        }
+
+        // Колонки по смыслу.
+        .o_list_button,
+        td.o_coop_needs_note { grid-column: 1; }
+        [data-name="price"], td[name="price"] { grid-column: 2; }
+        [data-name="need_share_percent"], td[name="need_share_percent"],
+        [data-name="need_share_ratio"], td[name="need_share_ratio"],
+        [data-name="state"], td[name="state"] { grid-column: 3; }
+        [data-name="need_offer_count"], td[name="need_offer_count"] { grid-column: 4; }
+
+        // «Передаётся» и заметка — под названием, во всю ширину.
+        [data-name="ownership_kind"], td[name="ownership_kind"],
+        [data-name="note"], td[name="note"] {
+            grid-column: 1 / -1;
+            text-align: left !important;
+            padding-top: 0 !important;
+            white-space: normal !important;
+        }
+
+        td[name="ownership_kind"] {
+            color: var(--coop-slate, #4a4a44);
+            font-size: 12px;
+        }
+
+        // Значок выбора колонок и корзина — в угол первого ряда.
+        thead > tr > :last-child:not(:first-child):not([data-name]):not(.o_list_button),
+        tbody > tr > :last-child:not(:first-child):not([name]):not(.o_list_button) {
+            grid-row: 1;
+            grid-column: -2 / -1;
+            justify-self: end;
         }
 
         th:first-child {
