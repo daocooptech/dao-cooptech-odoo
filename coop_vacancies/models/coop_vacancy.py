@@ -260,6 +260,32 @@ class CoopVacancy(models.Model):
     project_threshold = fields.Integer(
         string='Порог запуска, %', compute='_compute_project_card')
 
+    # Подписи витрины: оценка вклада без копеек (как в образце), уточнение —
+    # только если не повторяет строку вознаграждения, «Опубликовал» — только
+    # человек, а не системный бот (у вакансий, заведённых загрузкой).
+    contribution_display = fields.Char(
+        string='Оценка вклада строкой', compute='_compute_show_labels')
+    reward_note_shown = fields.Char(
+        string='Уточнение на витрине', compute='_compute_show_labels')
+    author_shown_id = fields.Many2one(
+        'res.partner', string='Опубликовал', compute='_compute_show_labels')
+
+    @api.depends('contribution_value', 'reward_note', 'reward_display', 'author_id')
+    def _compute_show_labels(self):
+        bot = self.env.ref('base.partner_root', raise_if_not_found=False)
+        squash = lambda text: (text or '').lower().replace(' ', '')
+        for record in self:
+            symbol = record.currency_id.symbol or '₽'
+            record.contribution_display = (
+                _format_range(record.contribution_value, 0, symbol)
+                if record.contribution_value else '')
+            note = record.reward_note or ''
+            record.reward_note_shown = (
+                '' if squash(note) and squash(note) in squash(record.reward_display)
+                else note)
+            record.author_shown_id = (
+                record.author_id if record.author_id != bot else False)
+
     @api.depends('project_id')
     def _compute_project_card(self):
         for record in self:

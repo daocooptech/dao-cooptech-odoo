@@ -196,8 +196,8 @@
                 <span class="coop-price_value">
                   <field name="reward_display" readonly="1" nolabel="1"/>
                 </span>
-                <span class="coop-price_note" invisible="reward_kind != 'share' or not contribution_value">
-                  Оценка вклада <field name="contribution_value" readonly="1" nolabel="1"/>
+                <span class="coop-price_note" invisible="reward_kind != 'share' or not contribution_display">
+                  Оценка вклада <field name="contribution_display" readonly="1" nolabel="1"/>
                 </span>
               </div>
               <div class="coop-show_words" invisible="not skill_ids">
@@ -244,8 +244,8 @@
                     <dd><field name="share_percent" readonly="1" nolabel="1"/> %</dd>
                   </div>
                 </dl>
-                <p class="coop-price_note" invisible="not reward_note">
-                  <field name="reward_note" readonly="1" nolabel="1"/>
+                <p class="coop-price_note" invisible="not reward_note_shown">
+                  <field name="reward_note_shown" readonly="1" nolabel="1"/>
                 </p>
                 <p class="coop-price_note" invisible="not pay_explain">
                   <field name="pay_explain" readonly="1" nolabel="1"/>
@@ -358,8 +358,8 @@
                     <dd><field name="partner_deals_reviewed" readonly="1" nolabel="1"/></dd>
                   </div>
                 </dl>
-                <ul class="coop-owner_lines" invisible="not author_id">
-                  <li><span>Опубликовал</span> <field name="author_id" readonly="1" nolabel="1"/></li>
+                <ul class="coop-owner_lines" invisible="not author_shown_id">
+                  <li><span>Опубликовал</span> <field name="author_shown_id" readonly="1" nolabel="1"/></li>
                 </ul>
                 <div class="coop-owner_acts" invisible="is_mine">
                   <button name="action_message_owner" type="object" class="btn-secondary"
