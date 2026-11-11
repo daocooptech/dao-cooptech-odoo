@@ -448,6 +448,11 @@ class CoopDemoLoader(models.AbstractModel):
         # кошельков — делится то, что уже заведено.
         from ..data import load_profits
         load_profits.load_profits(self.env)
+        # Названия без городов и рубрики по смыслу (задача 406) — последним:
+        # добор выше различает копии городом, здесь город уходит из
+        # названия, а копии различаются содержанием.
+        from ..data import tidy_names
+        tidy_names.tidy_all(self.env)
         return True
 
     def _load_rubrics(self):
