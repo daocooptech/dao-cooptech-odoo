@@ -38,3 +38,17 @@ class CoopHome(Website):
                     and user._is_internal():
                 return request.redirect('/odoo/my-page')
         return super().index(**kw)
+
+    # Посадочные лендинга — та же страница с другим первым экраном и
+    # ролью по умолчанию (макет: Masters, Projects, Orgs). Входа не
+    # требуют и вошедшего никуда не уводят: ссылку на посадочную дают
+    # тому, кто о платформе ещё не слышал.
+    LANDINGS = {'masters': (1, 0), 'projects': (2, 1), 'orgs': (3, 2)}
+
+    @http.route(['/for/%s' % who for who in LANDINGS],
+                auth='public', website=True, sitemap=True)
+    def coop_landing_for(self, **kw):
+        who = request.httprequest.path.rstrip('/').rsplit('/', 1)[-1]
+        variant, role = self.LANDINGS[who]
+        return request.render('coop_website.coop_landing',
+                              {'variant': variant, 'role': role})

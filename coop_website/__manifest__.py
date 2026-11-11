@@ -13,7 +13,7 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.2.0.3',
+    'version': '20.0.3.0.0',
     'license': 'LGPL-3',
     # Лендинг считает живые цифры по участникам, специализациям и
     # правовым формам и ведёт в каталоги людей и организаций.
@@ -34,6 +34,13 @@
     'assets': {
         'web.assets_frontend': [
             'coop_website/static/src/scss/landing.scss',
+        ],
+        # Лендинг — своя страница без пакета сайта: стили и логика макета
+        # (tools/build_landing.py) и отрисовщик к ним.
+        'coop_website.landing_assets': [
+            'coop_website/static/src/landing/landing.css',
+            'coop_website/static/src/landing/runtime.js',
+            'coop_website/static/src/landing/landing_page.js',
         ],
     },
     'installable': True,
