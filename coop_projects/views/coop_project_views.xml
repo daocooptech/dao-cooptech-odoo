@@ -287,13 +287,8 @@
           -->
           <section class="coop-show_hero">
             <div class="coop-gallery">
-              <div class="coop-gallery_main">
-                <field name="image_1920" widget="image" class="coop-gallery_img"
-                       options="{'preview_image': 'image_512'}"
-                       readonly="not coop_can_edit"
-                       invisible="not image_1920 and not coop_can_edit"/>
-                <span class="coop-gallery_none" invisible="image_1920 or coop_can_edit">Без снимка</span>
-              </div>
+              <!-- Фото и видео — две карусели (`coop_media`, задача 424). -->
+              <field name="coop_media_data" widget="coop_media" nolabel="1" readonly="1"/>
               <span class="coop-gallery_badge">
                 <field name="state" readonly="1" nolabel="1"/>
               </span>

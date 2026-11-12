@@ -205,7 +205,7 @@ class CoopProject(models.Model):
     """
     _name = 'coop.project'
     _description = 'Проект (краудресурсинг)'
-    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin', 'coop.media.mixin']
     _coop_page_view = 'coop_projects.view_coop_project_form'
     _coop_role_field = 'partner_id'
     _coop_role_text = 'Вы инициатор'

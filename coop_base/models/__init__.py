@@ -16,3 +16,4 @@ from . import coop_admit_wizard
 from . import coop_favorite
 from . import coop_contact_line
 from . import coop_membership_role
+from . import coop_media

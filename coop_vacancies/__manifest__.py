@@ -18,7 +18,7 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.0.3',
+    'version': '20.0.1.0.4',
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_people', 'coop_projects', 'coop_theme',
                 'hr_recruitment', 'hr_skills', 'project', 'mail'],

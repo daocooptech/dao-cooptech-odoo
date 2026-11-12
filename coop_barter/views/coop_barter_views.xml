@@ -106,6 +106,10 @@
               <field name="exchange_count" widget="statinfo" string="Обмены"/>
             </button>
           </div>
+          <!-- Фото и видео — две карусели (`coop_media`, задача 424). -->
+          <div class="coop-gallery coop-media_block">
+            <field name="coop_media_data" widget="coop_media" nolabel="1" readonly="1"/>
+          </div>
           <div class="oe_title">
             <label for="name"/>
             <h1><field name="name" placeholder="Например, мёд липовый, 20 кг"/></h1>

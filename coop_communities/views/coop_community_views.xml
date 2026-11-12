@@ -174,7 +174,10 @@
         </header>
         <sheet>
           <field name="coop_can_edit" invisible="1"/>
-          <field name="image_1920" widget="image" class="oe_avatar"/>
+          <!-- Фото и видео — две карусели (`coop_media`, задача 424). -->
+          <div class="coop-gallery coop-media_block">
+            <field name="coop_media_data" widget="coop_media" nolabel="1" readonly="1"/>
+          </div>
           <div class="oe_button_box" name="button_box">
             <button name="action_open_applications" type="object"
                     class="oe_stat_button" icon="person_add"

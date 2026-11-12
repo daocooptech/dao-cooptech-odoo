@@ -250,19 +250,10 @@
           <field name="made_of_count" invisible="1"/>
           <field name="currency_id" invisible="1"/>
           <section class="coop-show_hero">
-            <!-- Снимки — галереей с лентой миниатюр (`coop_gallery`,
-                 владелец 10.11.2026). Без снимка хозяин загружает его
-                 прямо здесь, смотрящий видит «Без снимка»; остальные
-                 снимки добавляются на странице размещения. -->
+            <!-- Фото и видео — две карусели (`coop_media`, задача 424):
+                 без снимков — заглушка, хозяину «+» в конце ленты. -->
             <div class="coop-gallery">
-              <field name="gallery_data" widget="coop_gallery" nolabel="1" readonly="1"
-                     invisible="not image_1920"/>
-              <div class="coop-gallery_main" invisible="image_1920">
-                <field name="image_1920" widget="image" class="coop-gallery_img"
-                       readonly="not coop_can_edit"
-                       invisible="not coop_can_edit"/>
-                <span class="coop-gallery_none" invisible="coop_can_edit">Без снимка</span>
-              </div>
+              <field name="coop_media_data" widget="coop_media" nolabel="1" readonly="1"/>
               <span class="coop-gallery_badge">
                 <field name="listing_type" readonly="1" nolabel="1"/>
               </span>

@@ -112,6 +112,10 @@
         </header>
         <sheet>
           <field name="coop_can_edit" invisible="1"/>
+          <!-- Фото и видео — две карусели (`coop_media`, задача 424). -->
+          <div class="coop-gallery coop-media_block">
+            <field name="coop_media_data" widget="coop_media" nolabel="1" readonly="1"/>
+          </div>
           <div class="oe_title">
             <h1><field name="name" placeholder="Название программы" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/></h1>
           </div>

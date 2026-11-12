@@ -38,44 +38,38 @@ class CoopResourceImage(models.Model):
 
 
 class CoopResource(models.Model):
-    _inherit = 'coop.resource'
+    _inherit = ['coop.resource', 'coop.media.mixin']
 
     image_ids = fields.One2many(
         'coop.resource.image', 'resource_id', string='Ещё снимки',
         help='Показываются лентой под главным снимком.')
     image_count = fields.Integer(
         string='Снимков', compute='_compute_image_count')
-    # Адреса снимков для витрины (`coop_gallery`): главный первым, за ним
-    # остальные. Собирает сервер — виджету не нужно грузить связанные
-    # записи, а адреса с `unique` не залипают в кэше браузера после замены.
-    gallery_data = fields.Json(
-        string='Снимки для витрины', compute='_compute_gallery_data')
 
     @api.depends('image_1920', 'image_ids')
     def _compute_image_count(self):
         for record in self:
             record.image_count = (1 if record.image_1920 else 0) + len(record.image_ids)
 
-    @api.depends('image_1920', 'image_ids', 'image_ids.image_1920', 'name')
-    def _compute_gallery_data(self):
-        for record in self:
-            images = []
-            if record.image_1920 and record.id:
-                stamp = int(record.write_date.timestamp()) if record.write_date else 0
-                base = '/web/image/coop.resource/%s/' % record.id
-                images.append({
-                    'id': 'main',
-                    'src': base + 'image_1920?unique=%s' % stamp,
-                    'thumb': base + 'image_512?unique=%s' % stamp,
-                    'alt': record.name or '',
-                })
-            for image in record.image_ids.filtered('id'):
-                stamp = int(image.write_date.timestamp()) if image.write_date else 0
-                base = '/web/image/coop.resource.image/%s/' % image.id
-                images.append({
-                    'id': image.id,
-                    'src': base + 'image_1920?unique=%s' % stamp,
-                    'thumb': base + 'image_256?unique=%s' % stamp,
-                    'alt': image.name or record.name or '',
-                })
-            record.gallery_data = images
+    # Своя лента снимков объявления — в общей карусели фото
+    # (`coop_media`, задача 424) сразу за главным снимком.
+    def _coop_media_photos(self):
+        photos = super()._coop_media_photos()
+        for image in self.image_ids.filtered('id') if isinstance(self.id, int) else []:
+            stamp = int(image.write_date.timestamp()) if image.write_date else 0
+            base = '/web/image/coop.resource.image/%s/' % image.id
+            photos.append({
+                'id': 'r%s' % image.id,
+                'src': base + 'image_1920?unique=%s' % stamp,
+                'thumb': base + 'image_256?unique=%s' % stamp,
+                'alt': image.name or self.name or '',
+            })
+        return photos
+
+    def _coop_media_add_photo(self, data, name=None):
+        last = self.image_ids[-1:]
+        self.env['coop.resource.image'].create({
+            'resource_id': self.id, 'image_1920': data, 'name': name or False,
+            'sequence': (last.sequence or 0) + 1,
+        })
+        return True

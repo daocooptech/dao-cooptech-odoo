@@ -430,6 +430,113 @@
   }
 }
 
+// Фото и видео (`coop_media`, задача 424): две карусели одна под другой,
+// без снимков — заглушка, «+» последней плиткой ленты.
+.coop-gallery > .o_field_coop_media {
+  display: block;
+  width: 100%;
+}
+// В формах без шапки витрины — блоком над названием.
+.coop-media_block {
+  max-width: 480px;
+  margin-bottom: 16px;
+}
+.coop-media {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.coop-media_busy {
+  cursor: progress;
+  opacity: .7;
+}
+.coop-media_frame {
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+.coop-media_player {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #000;
+}
+.coop-media_clip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--coop-slate);
+  font: 600 12px/1 'Manrope', sans-serif;
+
+  span { font-size: 10px; }
+}
+.coop-media_add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px dashed var(--coop-line-strong);
+  color: var(--coop-teal);
+  font: 500 26px/1 'Manrope', sans-serif;
+  opacity: 1;
+
+  &:hover { border-color: var(--coop-teal); }
+  &:disabled { cursor: progress; opacity: .5; }
+}
+// Заглушка — временная, позже отрисуем (владелец 12.11.2026).
+.coop-media_stub {
+  aspect-ratio: 4 / 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--coop-radius-card);
+  background: var(--coop-surface);
+  color: var(--coop-slate-light);
+  font-size: 13px;
+  text-align: center;
+}
+.coop-media_stub_video {
+  aspect-ratio: auto;
+  min-height: 96px;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.coop-media_stub_add {
+  padding: 5px 12px;
+  border: 1px solid var(--coop-teal);
+  border-radius: var(--coop-radius-pill);
+  background: transparent;
+  color: var(--coop-teal);
+  font: 600 12.5px/1.3 'Manrope', sans-serif;
+  cursor: pointer;
+
+  &:hover { background: var(--coop-teal); color: #fff; }
+  &:disabled { cursor: progress; opacity: .5; }
+}
+.coop-media_form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--coop-radius-card);
+  background: var(--coop-surface);
+
+  input { width: 100%; }
+}
+.coop-media_form_row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.coop-media_hint {
+  color: var(--coop-slate-light);
+  font-size: 12px;
+}
+
 // PriceTag — главное число карточки.
 .coop-price {
   display: flex;

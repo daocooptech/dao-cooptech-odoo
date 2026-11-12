@@ -50,7 +50,7 @@ _logger = logging.getLogger(__name__)
 class CoopGroupBuy(models.Model):
     _name = 'coop.groupbuy'
     _description = 'Совместная закупка'
-    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin', 'coop.media.mixin']
     _order = 'stop_date, id desc'
 
     name = fields.Char(string='Что закупаем', required=True, tracking=True)

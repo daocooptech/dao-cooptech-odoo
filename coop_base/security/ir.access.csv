@@ -63,3 +63,4 @@ rule_block_own,Чёрный список видит и правит его хо�
 access_coop_membership_role_user,Основания участия — чтение,coop.membership.role,base.group_user,r,
 access_coop_membership_role_admin,Основания участия — ведение,coop.membership.role,coop_base.group_coop_platform,crud,
 rule_contact_line_admin,Администратор узла ведёт все строки контактов,coop.contact.line,coop_base.group_coop_platform,crud,
+access_coop_media_user,Фото и видео записей — участник (право правки берётся у самой записи),coop.media,base.group_user,crud,

@@ -51,7 +51,7 @@ class CoopBarterOffer(models.Model):
     # Свой снимок — для объявлений без ресурса (услуга, то, чего в
     # каталоге ресурсов нет): снимок ресурса им взять неоткуда, а карточка
     # должна быть с картинкой (решение 341).
-    _inherit = ['mail.thread', 'image.mixin']
+    _inherit = ['mail.thread', 'image.mixin', 'coop.media.mixin']
     _order = 'published_on desc, id desc'
 
     name = fields.Char(string='Что отдаю', required=True, tracking=True)

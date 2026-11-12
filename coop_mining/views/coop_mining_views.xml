@@ -93,6 +93,10 @@
             услуги и статуса не требуют. Намайненное платформа на хранение не
             берёт; продают его в разделе «DEX биржа».
           </div>
+          <!-- Фото и видео — две карусели (`coop_media`, задача 424). -->
+          <div class="coop-gallery coop-media_block">
+            <field name="coop_media_data" widget="coop_media" nolabel="1" readonly="1"/>
+          </div>
           <div class="oe_title"><h1><field name="name" placeholder="Например, место под 20 асиков у ГЭС"/></h1></div>
           <group>
             <group>

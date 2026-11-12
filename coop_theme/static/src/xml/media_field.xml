@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!-- Фото и видео записи (`coop_media`): две карусели, без снимков —
+       заглушка, «+» последней плиткой ленты. Метка вида записи стоит
+       поверх снимка разметкой формы, не здесь. -->
+  <t t-name="coop_theme.Media">
+    <div class="coop-media" t-att-class="{ 'coop-media_busy': this.state.busy }">
+      <input type="file" class="d-none" accept="image/*" multiple="multiple"
+             t-ref="this.photoInput" t-on-change="(ev) => this.onPhotoFiles(ev)"/>
+      <input type="file" class="d-none" accept="video/*"
+             t-ref="this.videoInput" t-on-change="(ev) => this.onVideoFile(ev)"/>
+
+      <!-- Фото -->
+      <div class="coop-gallery_view" t-if="this.photos.length" tabindex="0"
+           aria-roledescription="карусель фото" t-on-keydown="(ev) => this.onKeydown('photo', ev)">
+        <div class="coop-gallery_frame">
+          <img class="coop-gallery_photo" t-att-src="this.photo.src" t-att-alt="this.photo.alt"/>
+          <t t-if="this.photos.length > 1">
+            <button type="button" class="coop-gallery_nav coop-gallery_prev"
+                    aria-label="Предыдущий снимок" t-on-click="() => this.step('photo', -1)">‹</button>
+            <button type="button" class="coop-gallery_nav coop-gallery_next"
+                    aria-label="Следующий снимок" t-on-click="() => this.step('photo', 1)">›</button>
+            <span class="coop-gallery_count"><t t-esc="this.state.photo + 1"/> / <t t-esc="this.photos.length"/></span>
+          </t>
+        </div>
+        <div class="coop-gallery_thumbs" t-if="this.photos.length > 1 or this.canAddPhoto" t-ref="this.photoStrip">
+          <t t-foreach="this.photos" t-as="image" t-key="image.id">
+            <button type="button" class="coop-gallery_thumb"
+                    t-att-class="{ 'coop-gallery_thumb_on': image_index === this.state.photo }"
+                    t-att-aria-label="'Снимок ' + (image_index + 1)"
+                    t-att-aria-current="image_index === this.state.photo ? 'true' : 'false'"
+                    t-on-click="() => this.select('photo', image_index)">
+              <img t-att-src="image.thumb" alt="" loading="lazy"/>
+            </button>
+          </t>
+          <button type="button" class="coop-gallery_thumb coop-media_add" t-if="this.canAddPhoto"
+                  aria-label="Добавить фото" title="Добавить фото"
+                  t-att-disabled="this.state.busy" t-on-click="() => this.pickPhoto()">+</button>
+        </div>
+      </div>
+      <div class="coop-media_stub" t-else="">
+        <svg viewBox="0 0 24 24" width="36" height="36" aria-hidden="true" fill="none"
+             stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.8"/>
+          <path d="M21 16l-5-5-8 8"/>
+        </svg>
+        <span>Фото пока нет</span>
+        <button type="button" class="coop-media_stub_add" t-if="this.canAddPhoto"
+                t-att-disabled="this.state.busy" t-on-click="() => this.pickPhoto()">+ Добавить фото</button>
+      </div>
+
+      <!-- Видео -->
+      <div class="coop-gallery_view coop-media_videos" t-if="this.videos.length" tabindex="0"
+           aria-roledescription="карусель видео" t-on-keydown="(ev) => this.onKeydown('video', ev)">
+        <div class="coop-gallery_frame coop-media_frame">
+          <t t-if="this.video.how === 'embed'">
+            <iframe class="coop-media_player" t-att-src="this.video.src" t-key="this.video.id"
+                    t-att-title="this.video.alt or 'Видео'" loading="lazy"
+                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                    allowfullscreen="allowfullscreen"/>
+          </t>
+          <t t-else="">
+            <video class="coop-media_player" t-att-src="this.video.src" t-key="this.video.id"
+                   controls="controls" preload="metadata" playsinline="playsinline"/>
+          </t>
+          <t t-if="this.videos.length > 1">
+            <span class="coop-gallery_count"><t t-esc="this.state.video + 1"/> / <t t-esc="this.videos.length"/></span>
+          </t>
+        </div>
+        <div class="coop-gallery_thumbs" t-if="this.videos.length > 1 or this.canAddVideo" t-ref="this.videoStrip">
+          <t t-foreach="this.videos" t-as="clip" t-key="clip.id">
+            <button type="button" class="coop-gallery_thumb coop-media_clip"
+                    t-att-class="{ 'coop-gallery_thumb_on': clip_index === this.state.video }"
+                    t-att-aria-label="'Видео ' + (clip_index + 1)"
+                    t-att-aria-current="clip_index === this.state.video ? 'true' : 'false'"
+                    t-on-click="() => this.select('video', clip_index)">
+              <span aria-hidden="true">▶</span><t t-esc="clip_index + 1"/>
+            </button>
+          </t>
+          <button type="button" class="coop-gallery_thumb coop-media_add" t-if="this.canAddVideo"
+                  aria-label="Добавить видео" title="Добавить видео"
+                  t-att-disabled="this.state.busy" t-on-click="() => this.openVideoForm()">+</button>
+        </div>
+      </div>
+      <div class="coop-media_stub coop-media_stub_video" t-elif="!this.state.videoForm">
+        <svg viewBox="0 0 24 24" width="32" height="32" aria-hidden="true" fill="none"
+             stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4.5-2.5z"/>
+        </svg>
+        <span>Видео пока нет</span>
+        <button type="button" class="coop-media_stub_add" t-if="this.canAddVideo"
+                t-att-disabled="this.state.busy" t-on-click="() => this.openVideoForm()">+ Добавить видео</button>
+      </div>
+
+      <div class="coop-media_form" t-if="this.state.videoForm">
+        <input type="url" class="o_input" placeholder="Ссылка: YouTube, VK, Rutube или .mp4"
+               t-att-value="this.state.url" t-on-input="(ev) => this.state.url = ev.target.value"
+               t-on-keydown="(ev) => this.onUrlKeydown(ev)"/>
+        <div class="coop-media_form_row">
+          <button type="button" class="btn btn-primary btn-sm" t-att-disabled="this.state.busy or !this.state.url.trim()"
+                  t-on-click="() => this.addVideoUrl()">Добавить</button>
+          <button type="button" class="btn btn-secondary btn-sm" t-att-disabled="this.state.busy"
+                  t-on-click="() => this.pickVideoFile()">Загрузить файл</button>
+          <button type="button" class="btn btn-link btn-sm" t-on-click="() => this.closeVideoForm()">Отмена</button>
+        </div>
+        <span class="coop-media_hint">Файл — до <t t-esc="this.data.video_mb or 50"/> МБ; большое видео дайте ссылкой.</span>
+      </div>
+    </div>
+  </t>
+
+</templates>

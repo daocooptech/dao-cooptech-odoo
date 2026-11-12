@@ -25,7 +25,7 @@ class CoopSkillOffer(models.Model):
     """
     _name = 'coop.skill.offer'
     _description = 'Предложение навыка'
-    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin', 'coop.media.mixin']
     _coop_page_view = 'coop_skills.view_coop_skill_form'
     _coop_role_field = 'partner_id'
     _coop_role_text = 'Ваше объявление'

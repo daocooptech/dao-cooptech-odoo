@@ -51,17 +51,34 @@ class TestResourceShowcase(TransactionCase):
         second = Image.create({'resource_id': self.resource.id, 'sequence': 2, 'image_1920': PIXEL})
         first = Image.create({'resource_id': self.resource.id, 'sequence': 1, 'image_1920': PIXEL})
         self.resource.invalidate_recordset()
-        data = self.resource.gallery_data
-        self.assertEqual([d['id'] for d in data], ['main', first.id, second.id])
+        data = self.resource.coop_media_data['photos']
+        self.assertEqual([d['id'] for d in data], ['main', 'r%s' % first.id, 'r%s' % second.id])
         self.assertIn('/web/image/coop.resource/%s/image_1920' % self.resource.id, data[0]['src'])
         self.assertIn('image_256', data[1]['thumb'])
         self.assertEqual(self.resource.image_count, 3)
 
     def test_gallery_on_showcase(self):
-        """На витрине — виджет галереи на `gallery_data`."""
-        nodes = self._arch().xpath("//field[@name='gallery_data']")
+        """На витрине — две карусели (`coop_media`, задача 424)."""
+        nodes = self._arch().xpath("//field[@name='coop_media_data']")
         self.assertTrue(nodes)
-        self.assertEqual(nodes[0].get('widget'), 'coop_gallery')
+        self.assertEqual(nodes[0].get('widget'), 'coop_media')
+        self.assertFalse(self._arch().xpath("//field[@widget='coop_gallery']"))
+
+    def test_media_add(self):
+        """«+» хозяина: фото — в ленту объявления, видео — ссылкой в
+        общую модель; чужому «+» не положен, добавить он не может."""
+        resource = self.resource.with_user(self.owner)
+        resource.coop_media_add('photo', data=PIXEL)
+        resource.coop_media_add('video', url='https://youtu.be/dQw4w9WgXcQ')
+        self.resource.invalidate_recordset()
+        data = resource.coop_media_data
+        self.assertEqual(len(data['photos']), 2)
+        self.assertEqual(data['videos'][0]['src'], 'https://www.youtube.com/embed/dQw4w9WgXcQ')
+        self.assertEqual(data['videos'][0]['how'], 'embed')
+        self.assertTrue(data['can_add'])
+        self.assertFalse(self.resource.with_user(self.stranger).coop_media_data['can_add'])
+        with self.assertRaises(AccessError):
+            self.resource.with_user(self.stranger).coop_media_add('video', url='https://youtu.be/dQw4w9WgXcQ')
 
     def test_gallery_limit(self):
         """Дополнительных снимков не больше восьми."""

@@ -16,7 +16,7 @@ class CoopCommunity(models.Model):
 
     _name = 'coop.community'
     _description = 'Сообщество'
-    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin', 'coop.media.mixin']
     _coop_page_view = 'coop_communities.view_coop_community_form'
     # Крупные сообщества выше: в каталоге без сортировки первым идёт
     # последнее заведённое, а это чаще всего пустая новая группа.
