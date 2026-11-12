@@ -6,3 +6,4 @@ from . import coop_resource
 from . import coop_resource_transfer
 from . import coop_membership
 from . import coop_deal_inquiry
+from . import catalog_filters
