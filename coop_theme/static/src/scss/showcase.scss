@@ -52,9 +52,12 @@
   }
 }
 
+// Колонка текста — не уже 260 px: уже́ неё длинное слово названия
+// («Овощехранилище,» — 238 px при 26 px) рвалось посреди слова
+// (владелец 12.11.2026). Тесно — уступает галерея, а не текст.
 .coop-show_hero {
   display: grid;
-  grid-template-columns: minmax(0, 400px) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 400px) minmax(260px, 1fr);
   gap: 24px;
   margin-bottom: 16px;
   padding: 20px;
@@ -76,8 +79,11 @@
   font-size: 12.5px;
   color: var(--coop-slate);
 }
+// `max-width: 75%` у `.oe_title` — от движка: на витрине он отрезал
+// четверть колонки, и название в 363 px шло строкой в 272 (замер 12.11).
 .o_form_view.o_coop_show .oe_title {
   margin: 0;
+  max-width: none;
 }
 .coop-show_title {
   margin: 0;

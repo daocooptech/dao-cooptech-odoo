@@ -21,6 +21,14 @@
           <field name="need_intangible_ids" nolabel="1" readonly="not coop_can_edit">
             <list class="o_coop_needs_list" create="1" delete="1">
               <field name="intangible_id"/>
+              <!-- Состояние и «Участвовать» — сразу за названием, на тех же
+                   местах, что «Передаётся» и кнопка в трёх списках выше:
+                   иначе колонки четырёх таблиц сметы стоят вразнобой
+                   (владелец 12.11.2026). -->
+              <field name="state" string="Состояние" width="150px"/>
+              <button name="action_join" type="object"
+                      string="Участвовать" class="btn btn-secondary btn-sm"
+                      invisible="state != 'open'"/>
               <field name="price" string="Оценка"
                      options="{'hide_trailing_zeros': true}"/>
               <!-- Пай, доля или ничего — по виду проекта, как в трёх
@@ -33,11 +41,6 @@
                      widget="float" digits="[5,1]"
                      options="{'hide_trailing_zeros': true}"
                      column_invisible="parent.kind not in ('commercial', 'dao')"/>
-              <field name="state" string="Состояние" optional="show"/>
-              <field name="note" optional="hide"/>
-              <button name="action_join" type="object"
-                      string="Участвовать" class="btn btn-secondary btn-sm"
-                      invisible="state != 'open'"/>
             </list>
           </field>
         </div>

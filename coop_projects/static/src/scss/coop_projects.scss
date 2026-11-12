@@ -368,6 +368,64 @@
       color: var(--coop-slate, #4a4a44);
     }
 
+    // ── На широком экране ──────────────────────────────────────────
+    //
+    // Владелец 12.11.2026: название ресурса обрезано («Помещени…»),
+    // «закрыто» стоит не на месте кнопки, колонки четырёх таблиц сметы
+    // плывут друг относительно друга. Замер на 1440: «Стоимость» в
+    // таблицах на 1052 / 1073 / 1073 / 821 px, «закрыто» — в своей
+    // колонке слева от пустой колонки кнопки (87 + 148 px).
+    //
+    // Ширины правых колонок — одни на все таблицы, название забирает
+    // остаток и переносится по словам. Пометка и кнопка — одно место
+    // в 130 px: ширину держит колонка пометки (она есть всегда, даже
+    // когда кнопку прячет состояние проекта), а кнопка из нулевой
+    // колонки следом ложится поверх неё. Где есть кнопка, пометка
+    // пуста, и наоборот.
+    @media (min-width: 900.02px) {
+        th:first-child,
+        td:first-child {
+            white-space: normal !important;
+            overflow-wrap: break-word;
+            text-overflow: clip;
+        }
+        // Излишек ширины движок делит на все колонки — тогда правые
+        // расходятся на 5–10 px между таблицами. Весь он — названию.
+        th:first-child { width: auto !important; }
+
+        [data-name="ownership_kind"],
+        th[data-name="state"], td[name="state"] { width: 150px !important; }
+        th[data-name="need_join_note"],
+        td.o_coop_needs_note {
+            width: 130px !important;
+            text-align: center;
+        }
+        th.o_list_button { width: 130px !important; }
+        th[data-name="need_join_note"] + th.o_list_button {
+            width: 0 !important;
+            padding: 0 !important;
+        }
+        td.o_coop_needs_note + td.o_list_button {
+            position: relative;
+            width: 0 !important;
+            padding: 0 !important;
+            overflow: visible;
+
+            button {
+                position: absolute;
+                top: 50%;
+                right: 0;
+                width: 130px;
+                transform: translateY(-50%);
+            }
+        }
+        td.o_list_button button { width: 100%; }
+        th[data-name="price"] { width: 120px !important; }
+        th[data-name="need_share_percent"],
+        th[data-name="need_share_ratio"] { width: 90px !important; }
+        th[data-name="need_offer_count"] { width: 100px !important; }
+    }
+
     // ── На телефоне ────────────────────────────────────────────────
     //
     // Владелец 22 сентября 2026: «ширина столбца где название ресурса
