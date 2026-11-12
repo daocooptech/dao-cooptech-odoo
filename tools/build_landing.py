@@ -41,11 +41,15 @@ MARK = '<img class="mark-logo" src="%s" alt="cooptech"/>' % LOGO_URL
 MARK_CSS = ('.mark-logo{display:block;height:28px;width:auto;border-radius:4px;'
             'filter:invert(1)}\n.root.dark .mark-logo{filter:none}')
 
+# Шрифты — как в `coop_theme/static/src/scss/fonts.scss`: переменные
+# файлы на диапазон весов. Отдельные файлы под вес не годятся: латиница
+# Manrope 800 из своего файла не рисуется, и браузер подставлял запасной
+# шрифт — название «DAO COOPTECH» в шапке выходило чужим (владелец
+# 12.11.2026: «разве у нас такой кривой шрифт в названии платформы»).
 FONT_FACES = [
-    ('Inter', 400, 'inter-400'), ('Inter', 500, 'inter-500'), ('Inter', 700, 'inter-700'),
-    ('Manrope', 500, 'manrope-500'), ('Manrope', 600, 'manrope-600'),
-    ('Manrope', 700, 'manrope-700'), ('Manrope', 800, 'manrope-800'),
-    ('JetBrains Mono', 500, 'jetbrains-mono'), ('JetBrains Mono', 700, 'jetbrains-mono'),
+    ('Inter', '400 700', 'inter-400'),
+    ('Manrope', '500 800', 'manrope-600'),
+    ('JetBrains Mono', '100 800', 'jetbrains-mono'),
 ]
 CYR = 'U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116'
 LAT = 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+20BD,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD'
