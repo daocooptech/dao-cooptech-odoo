@@ -305,6 +305,11 @@
                        options="{'no_open': True}" invisible="not subcategory_id"/>
                 <field name="category_id" readonly="1" nolabel="1"
                        options="{'no_open': True}" invisible="subcategory_id"/>
+                <!-- Вид проекта — капсулой справа, в строку с рубрикой
+                     (владелец 12.11.2026: «войдя в проект, не вижу,
+                     коммерческий он, кооперативный, НКО или ДАО»). -->
+                <field name="kind" readonly="1" nolabel="1"
+                       class="coop-pj_kind"/>
               </div>
               <div class="oe_title">
                 <!-- Название и строка каталога правятся по карандашу и
@@ -356,8 +361,10 @@
                          readonly="1"/>
                   <span class="coop-pj_owner_note">инициатор</span>
                 </div>
+                <field name="partner_is_company" invisible="1"/>
                 <div class="coop-pj_who"
-                     invisible="not author_id or author_id == partner_id">
+                     invisible="not partner_is_company or not author_id
+                                or author_id == partner_id">
                   <field name="author_id" widget="many2one_avatar" nolabel="1"
                          readonly="1"/>
                   <span class="coop-pj_owner_note">разместил</span>
@@ -583,7 +590,8 @@
             </group>
             <group string="Кто собирает">
               <field name="partner_id" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="author_id" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="author_id" widget="coop_inline" readonly="not coop_can_edit"
+                     invisible="not partner_is_company"/>
               <field name="project_id" readonly="1"/>
             </group>
             <group string="Ресурсы">
@@ -665,13 +673,16 @@
                    На чужом проекте их не видно (владелец
                    12.11.2026): сервер всё равно откажет. -->
               <field name="contribution_ids">
+                <!-- На виду — кто, что, во сколько оценено, пай или доля и
+                     состояние; остальное включается значком настройки
+                     таблицы (владелец 12.11.2026: «не читаемая»). -->
                 <list editable="bottom">
                   <field name="partner_id"/>
-                  <field name="kind"/>
+                  <field name="kind" optional="hide"/>
                   <field name="name"/>
                   <!-- Откуда взят вклад: если человек выбрал своё
                        объявление, видно, какое именно. -->
-                  <field name="resource_id" optional="show"
+                  <field name="resource_id" optional="hide"
                          options="{'no_open': True}"/>
                   <field name="value" sum="Собрано"/>
                   <field name="share_percent" widget="percentage" readonly="1"
@@ -680,7 +691,7 @@
                   <field name="share_ratio" widget="percentage" readonly="1"
                          string="Доля"
                          column_invisible="parent.kind not in ('commercial', 'dao')"/>
-                  <field name="offered_on"/>
+                  <field name="offered_on" optional="hide"/>
                   <field name="withdraw_until" optional="hide"/>
                   <field name="delivered_on" optional="hide"/>
                   <field name="return_mode" optional="hide"/>

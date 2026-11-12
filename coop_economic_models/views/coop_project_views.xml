@@ -34,7 +34,7 @@
     <field name="arch" type="xml">
 
       <notebook position="inside">
-        <page string="Форма собственности" name="legal_form">
+        <page string="Экономическая модель" name="legal_form">
           <div class="o_coop_legal_head">
           <group>
             <group string="Что выбрано">

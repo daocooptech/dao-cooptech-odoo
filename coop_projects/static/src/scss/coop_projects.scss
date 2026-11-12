@@ -976,3 +976,17 @@
     flex: 0 0 auto;
   }
 }
+
+// Вид проекта — капсула справа в строке рубрики над названием
+// (владелец 12.11.2026). Тот же облик, что у метки роли в полосе
+// управления (`steps.scss`), только без значка.
+.coop-show_kicker .coop-pj_kind {
+  margin-left: auto;
+  width: auto;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--coop-teal-tint, #e3efed);
+  color: var(--coop-teal-dark, #0e4f4a);
+  font: 600 11px/1.2 'Manrope', sans-serif;
+  white-space: nowrap;
+}

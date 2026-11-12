@@ -264,6 +264,11 @@ class CoopProject(models.Model):
         default=lambda self: self.env.user.partner_id,
         help='Кто из людей это разместил. У проекта частного лица '
              'совпадает с инициатором.')
+    # «Разместил» показываем только у проекта организации (владелец
+    # 12.11.2026): у частного лица разместил он сам, а чужой человек
+    # рядом с инициатором-человеком сбивает с толку.
+    partner_is_company = fields.Boolean(
+        related='partner_id.is_company', string='Инициатор — организация')
 
     image_1920 = fields.Image(string='Изображение', max_width=1920, max_height=1920)
     image_512 = fields.Image(related='image_1920', max_width=512, max_height=512, store=True)

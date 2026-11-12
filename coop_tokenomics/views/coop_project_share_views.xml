@@ -14,14 +14,18 @@
     <field name="name">coop.project.form.shares</field>
     <field name="model">coop.project</field>
     <field name="inherit_id" ref="coop_projects.view_coop_project_form"/>
+    <!-- После вида «Экономической модели» (приоритет 16): вкладка
+         должна уже быть, чтобы было куда вставить блок. -->
+    <field name="priority">20</field>
     <field name="arch" type="xml">
-      <notebook position="inside">
-        <!-- В некоммерческом проекте страницы нет вовсе: долей и паёв
-             там не бывает, и объяснять нечего. Решение владельца 15
-             сентября 2026. -->
-        <page string="Экономическая модель" name="share_rates"
-              invisible="kind == 'nonprofit'">
-          <div class="o_coop_share_page">
+      <!-- Не своей вкладкой, а блоком во вкладке «Экономическая модель»
+           (владелец 12.11.2026): коэффициенты — часть модели проекта,
+           и каждый проект настраивает их сам. В некоммерческом блока нет:
+           долей и паёв там не бывает (решение 15.09.2026). -->
+      <xpath expr="//page[@name='legal_form']" position="inside">
+          <div class="o_coop_share_page" name="share_rates"
+               invisible="kind == 'nonprofit'">
+            <h3 class="o_horizontal_separator mt-4">Как считается пай или доля</h3>
             <p>
               Пай в кооперативном проекте и доля в коммерческом считаются
               одинаково: не от рублей напрямую, а от рублей с
@@ -42,7 +46,7 @@
               теперь значило бы пересчитать доли тех, кто вошёл раньше.
             </div>
             <field name="share_rate_ids" nolabel="1"
-                   readonly="share_rates_frozen">
+                   readonly="share_rates_frozen or not coop_can_edit">
               <list editable="bottom">
                 <field name="kind" string="Вид вклада"/>
                 <field name="factor" string="Коэффициент"/>
@@ -72,8 +76,7 @@
               оператора инвестиционной платформы.
             </div>
           </div>
-        </page>
-      </notebook>
+      </xpath>
     </field>
   </record>
 
