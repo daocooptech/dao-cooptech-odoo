@@ -661,6 +661,9 @@
                 в одну величину только через денежную оценку — она и
                 записывается, по соглашению сторон.
               </div>
+              <!-- Кнопки ведения вкладов — инициатору и тем, кто правит проект.
+                   На чужом проекте их не видно (владелец
+                   12.11.2026): сервер всё равно откажет. -->
               <field name="contribution_ids">
                 <list editable="bottom">
                   <field name="partner_id"/>
@@ -693,27 +696,34 @@
                                                      'withdrawn', 'released',
                                                      'consumed')"/>
                   <button name="action_accept" type="object" string="Принять"
-                          icon="check" invisible="state != 'offered'"/>
+                          icon="check" invisible="state != 'offered'
+                                     or not parent.coop_can_edit"/>
                   <button name="action_decline" type="object" string="Отклонить"
-                          icon="close" invisible="state != 'offered'"/>
+                          icon="close" invisible="state != 'offered'
+                                     or not parent.coop_can_edit"/>
                   <button name="action_mark_delivered" type="object"
                           string="Передано" icon="local_shipping"
                           invisible="state != 'accepted' or delivered_on
-                                     or parent.state != 'running'"/>
+                                     or parent.state != 'running'
+                                     or not parent.coop_can_edit"/>
                   <button name="action_consume" type="object"
                           string="Израсходован" icon="whatshot"
                           invisible="state != 'accepted'
-                                     or kind not in ('material', 'knowledge')"/>
+                                     or kind not in ('material', 'knowledge')
+                                     or not parent.coop_can_edit"/>
                   <button name="action_return" type="object" string="Вернуть"
                           icon="undo"
                           invisible="state not in ('accepted', 'consumed')
-                                     or kind != 'money'"/>
+                                     or kind != 'money'
+                                     or not parent.coop_can_edit"/>
                   <button name="action_release" type="object"
                           string="Снять обязательство" icon="link_off"
-                          invisible="state != 'accepted' or kind == 'money'"/>
+                          invisible="state != 'accepted' or kind == 'money'
+                                     or not parent.coop_can_edit"/>
                   <button name="action_compensate" type="object"
                           string="Возместить" icon="payments"
-                          invisible="state != 'consumed'"/>
+                          invisible="state != 'consumed'
+                                     or not parent.coop_can_edit"/>
                 </list>
               </field>
             </page>
