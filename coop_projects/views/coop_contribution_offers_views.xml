@@ -108,24 +108,8 @@
     </field>
   </record>
 
-  <!-- Вход со страницы проекта: кнопка над списком потребностей. -->
-  <record id="view_coop_project_form_offers_button" model="ir.ui.view">
-    <field name="name">coop.project.form.offers.button</field>
-    <field name="model">coop.project</field>
-    <field name="inherit_id" ref="coop_projects.view_coop_project_form_needs"/>
-    <field name="arch" type="xml">
-      <xpath expr="//field[@name='need_ids']" position="before">
-        <field name="new_offer_count" invisible="1"/>
-        <div class="mb-2" invisible="not new_offer_count">
-          <button name="action_open_offers" type="object" class="btn btn-primary">
-            Разобрать заявки · <field name="new_offer_count" class="oe_inline"/>
-          </button>
-          <span class="text-muted ms-2">
-            Потребности слева, заявки карточками: оценка, доверие, «Принять» и «Отклонить».
-          </span>
-        </div>
-      </xpath>
-    </field>
-  </record>
+  <!-- Кнопки «Разобрать заявки» над списком потребностей больше нет:
+       списка на странице проекта нет (владелец 12.11.2026), отклики
+       команда видит счётчиком в смете «Участия в проекте». -->
 
 </odoo>

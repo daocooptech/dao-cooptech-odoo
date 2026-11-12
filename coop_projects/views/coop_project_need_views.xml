@@ -1,62 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-  <!--
-    Потребности проекта. Отдельного экрана у них нет и не нужно: это
-    объявления спроса в каталоге ресурсов, привязанные к проекту.
-    Здесь — только взгляд со стороны проекта и со стороны объявления.
-  -->
 
-  <record id="view_coop_project_form_needs" model="ir.ui.view">
-    <field name="name">coop.project.form.needs</field>
-    <field name="model">coop.project</field>
-    <field name="inherit_id" ref="coop_projects.view_coop_project_form"/>
-    <field name="arch" type="xml">
-      <!-- Не вкладкой, а на самой странице, над «Участием в проекте»
-           (владелец 12.11.2026): сперва что нужно и кто отвечает,
-           потом — чем войти. -->
-      <xpath expr="//div[hasclass('o_coop_needs')]" position="before">
-        <div class="o_coop_need_list" name="needs">
-          <div class="o_coop_needs_head">Потребности</div>
-          <field name="need_ids" context="{'default_project_id': id,
-                                           'default_listing_type': 'request'}">
-            <list editable="bottom">
-              <field name="name" string="Что нужно"/>
-              <field name="category_id" string="Рубрика"/>
-              <field name="city"/>
-              <field name="price_display" string="Сколько готовы дать"/>
-              <field name="need_manager_id" string="Ответственный"/>
-              <field name="need_offer_count" string="Предложений"/>
-              <field name="need_accepted_id" string="Утверждено" readonly="1"/>
-              <field name="state" widget="badge"/>
-              <field name="listing_type" column_invisible="1"/>
-              <button name="action_view_offers" type="object"
-                      string="Предложения" icon="inbox"
-                      invisible="need_offer_count == 0"/>
-            </list>
-          </field>
-          <div class="text-muted mt-2">
-            Потребность — это объявление спроса: оно попадает в каталог
-            ресурсов и видно всем, кто ищет работу или сбыт. На каждую
-            приходят предложения, и ответственный утверждает одно —
-            остальные отклоняются в тот же момент.
-          </div>
-        </div>
-      </xpath>
-    </field>
-  </record>
-
-  <!-- «Аналитика» — последней вкладкой (владелец 12.11.2026). Вкладки
+  <!-- Вкладки страницы проекта (владелец 12.11.2026): весь блок вкладок —
+       над «Участием в проекте», «Аналитика» — последней. Вкладки
        добавляют и другие модули, поэтому переносим поздним видом:
-       приоритет 99 применяется после их наследований. -->
+       приоритет 99 применяется после их наследований. Своей вкладки и
+       своего блока у потребностей нет — ниже расписана смета. -->
   <record id="view_coop_project_form_analytics_last" model="ir.ui.view">
-    <field name="name">coop.project.form.analytics.last</field>
+    <field name="name">coop.project.form.tabs.order</field>
     <field name="model">coop.project</field>
     <field name="inherit_id" ref="coop_projects.view_coop_project_form"/>
     <field name="priority">99</field>
     <field name="arch" type="xml">
       <xpath expr="//notebook[hasclass('coop-show_tabs')]" position="inside">
         <xpath expr="//page[@name='analytics']" position="move"/>
+      </xpath>
+      <xpath expr="//div[hasclass('o_coop_needs')]" position="before">
+        <xpath expr="//notebook[hasclass('coop-show_tabs')]" position="move"/>
       </xpath>
     </field>
   </record>

@@ -188,8 +188,13 @@
     <field name="inherit_id" ref="coop_projects.view_coop_project_form"/>
     <field name="arch" type="xml">
       <notebook position="inside">
+        <!-- Только где прибыль бывает (владелец 12.11.2026): у кооператива
+             и некоммерческого её нет, а до запуска делить ещё нечего —
+             вкладка видна с запуска или когда выплаты уже объявлены. -->
         <page string="Прибыль и выплаты" name="profit"
-              invisible="kind not in ('commercial', 'dao')">
+              invisible="kind not in ('commercial', 'dao')
+                         or (state in ('draft', 'gathering', 'cancelled', 'failed')
+                             and not profit_ids)">
           <field name="profit_ids" nolabel="1">
             <list>
               <field name="period_from" string="С"/>

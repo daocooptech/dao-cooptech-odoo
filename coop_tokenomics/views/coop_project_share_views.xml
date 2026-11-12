@@ -19,7 +19,7 @@
         <!-- В некоммерческом проекте страницы нет вовсе: долей и паёв
              там не бывает, и объяснять нечего. Решение владельца 15
              сентября 2026. -->
-        <page string="Как считается пай или доля" name="share_rates"
+        <page string="Экономическая модель" name="share_rates"
               invisible="kind == 'nonprofit'">
           <div class="o_coop_share_page">
             <p>
