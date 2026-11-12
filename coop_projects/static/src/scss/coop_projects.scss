@@ -878,3 +878,23 @@
     text-align: right;
   }
 }
+
+// Отклики в смете (задача 421): «новых(всего)» у того, кто разбирает
+// заявки. Есть новые — красное с глазом слева, иначе обычная ссылка темы.
+// Красный — через `.o_web_client a`: тема красит ссылки правилом
+// `.o_web_client a:not(.btn)`, и класс счётчика без него проигрывал.
+.o_web_client a.o_coop_offers {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+
+  &.o_coop_offers_new {
+    color: var(--coop-error, #b3413a);
+    font-weight: 600;
+  }
+
+  .o_coop_offers_eye {
+    flex: 0 0 auto;
+  }
+}

@@ -49,6 +49,13 @@ class CoopResource(models.Model):
         'coop.project.contribution', 'need_id', string='Предложения')
     need_offer_count = fields.Integer(
         string='Предложений', compute='_compute_need_offers')
+    # Смета показывает тому, кто разбирает заявки, «новых(всего)» — «4(8)»:
+    # одно число новых не говорит, разобрана ли потребность вовсе или на
+    # неё никто не откликался (владелец 12.11.2026, задача 421).
+    need_offer_total = fields.Integer(
+        string='Предложений всего', compute='_compute_need_offers')
+    need_can_decide = fields.Boolean(
+        string='Разбирает заявки', compute='_compute_need_can_decide')
     need_accepted_id = fields.Many2one(
         'coop.project.contribution', string='Утверждённое предложение',
         readonly=True, copy=False)
@@ -166,6 +173,31 @@ class CoopResource(models.Model):
         for record in self:
             record.need_offer_count = len(record.need_offer_ids.filtered(
                 lambda offer: offer.state == 'offered'))
+            record.need_offer_total = len(record.need_offer_ids)
+
+    @api.depends_context('uid')
+    @api.depends('project_id.partner_id', 'need_manager_id')
+    def _compute_need_can_decide(self):
+        """Те же условия, что у «Принять» (`action_accept`), одним признаком:
+        разойдись они — и счётчик вёл бы на страницу, где принять нельзя."""
+        user = self.env.user
+        for record in self:
+            deciders = record._need_deciders() if record.project_id else (
+                self.env['res.partner'])
+            record.need_can_decide = bool(deciders) and (
+                user.partner_id in deciders
+                or any(user.coop_has_power('deal', partner)
+                       for partner in deciders))
+
+    def action_open_need_offers(self):
+        """Счётчик откликов в смете — вход в разбор заявок проекта."""
+        self.ensure_one()
+        if not self.need_can_decide:
+            raise UserError(_(
+                'Разбирать заявки по проекту «%s» может его инициатор, '
+                'ответственный за потребность или тот, кому организация '
+                'поручила сделки.') % self.project_id.name)
+        return self.project_id.action_open_offers()
 
     def _need_deciders(self):
         """Кто вправе утвердить предложение на эту потребность."""

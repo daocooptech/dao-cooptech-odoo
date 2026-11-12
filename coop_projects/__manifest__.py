@@ -39,6 +39,8 @@
             'coop_projects/static/src/scss/coop_projects.scss',
             'coop_projects/static/src/js/readiness_ring.js',
             'coop_projects/static/src/xml/readiness_ring.xml',
+            'coop_projects/static/src/js/offer_counter.js',
+            'coop_projects/static/src/xml/offer_counter.xml',
         ],
     },
     'installable': True,

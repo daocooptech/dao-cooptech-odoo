@@ -468,7 +468,7 @@
                          widget="float" digits="[5,1]"
                          options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind not in ('commercial', 'dao')"/>
-                  <field name="need_offer_count" string="Откликов"/>
+                  <field name="need_offer_count" string="Откликов" widget="coop_offer_counter"/>
                   <field name="currency_id" column_invisible="1"/>
                 </list>
               </field>
@@ -501,7 +501,7 @@
                          widget="float" digits="[5,1]"
                          options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind not in ('commercial', 'dao')"/>
-                  <field name="need_offer_count" string="Откликов"/>
+                  <field name="need_offer_count" string="Откликов" widget="coop_offer_counter"/>
                   <field name="currency_id" column_invisible="1"/>
                 </list>
               </field>
@@ -534,7 +534,7 @@
                          widget="float" digits="[5,1]"
                          options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind not in ('commercial', 'dao')"/>
-                  <field name="need_offer_count" string="Откликов"/>
+                  <field name="need_offer_count" string="Откликов" widget="coop_offer_counter"/>
                   <field name="currency_id" column_invisible="1"/>
                 </list>
               </field>

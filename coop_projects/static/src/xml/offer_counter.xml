@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <t t-name="coop_projects.OfferCounter">
+    <t t-if="this.canDecide and this.total">
+      <a href="#" class="o_coop_offers"
+         t-att-class="{'o_coop_offers_new': this.fresh}"
+         t-att-title="this.fresh ? 'Новых заявок — ' + this.fresh + ', всего — ' + this.total + '. Разобрать' : 'Заявок — ' + this.total + ', новых нет. Открыть разбор'"
+         t-on-click="this.open">
+        <svg t-if="this.fresh" class="o_coop_offers_eye" width="16" height="16"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+             aria-hidden="true">
+          <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+        <span><t t-out="this.fresh"/>(<t t-out="this.total"/>)</span>
+      </a>
+    </t>
+    <span t-elif="this.canDecide">0(0)</span>
+    <span t-else=""><t t-out="this.fresh"/></span>
+  </t>
+
+</templates>
