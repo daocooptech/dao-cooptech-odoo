@@ -6,17 +6,20 @@ import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { Component, proxy, signal, useProps } from "@odoo/owl";
 
 /**
- * Фото и видео записи — две карусели в шапке витрины (`coop_media`).
+ * Фото и видео записи в шапке витрины (`coop_media`).
  *
  * Владелец 12.11.2026 (задача 424): «везде два слайдера — фото и видео;
- * добавлять при создании и правке; нет фото или видео — карусели нет,
- * стоит заглушка; в конце ленты — „+“». Видео — файлом или ссылкой
- * (решение 654).
+ * добавлять при создании и правке; нет фото или видео — заглушка; в
+ * конце ленты — „+“». Уточнение того же дня: «слайдера два, но
+ * отображение должно быть в одном превью» — один большой кадр, под ним
+ * две ленты: миниатюры фото и плитки видео. Кадр показывает то, что
+ * выбрано в любой из лент; стрелки идут по всем подряд — сначала фото,
+ * потом видео. Видео — файлом или ссылкой (решение 654).
  *
- * Карусель фото — дизайн-система, `Gallery`: снимок 4:3, лента миниатюр,
- * номер «2 / 5». Видео — та же раскладка, кадр 16:9. «+» — последней
- * плиткой ленты: видна, когда ленту прокрутили до конца; только тому, кто
- * может править запись. Новую запись перед добавлением сохраняем.
+ * Раскладка — дизайн-система, `Gallery`: кадр 4:3, лента миниатюр,
+ * номер «2 / 5». «+» — последней плиткой ленты: видна, когда ленту
+ * прокрутили до конца; только тому, кто может править запись. Новую
+ * запись перед добавлением сохраняем.
  *
  * Ставится на `coop_media_data` (примесь `coop.media.mixin`).
  */
@@ -27,7 +30,7 @@ export class CoopMedia extends Component {
     setup() {
         this.orm = useService("orm");
         this.notification = useService("notification");
-        this.state = proxy({ photo: 0, video: 0, videoForm: false, url: "", busy: false });
+        this.state = proxy({ index: 0, videoForm: false, url: "", busy: false });
         this.photoStrip = signal.ref();
         this.videoStrip = signal.ref();
         this.photoInput = signal.ref();
@@ -43,6 +46,17 @@ export class CoopMedia extends Component {
     get videos() {
         return this.data.videos || [];
     }
+    /** Все подряд: фото, затем видео — по ним ходят стрелки. */
+    get items() {
+        return [
+            ...this.photos.map((item) => ({ ...item, kind: "photo" })),
+            ...this.videos.map((item) => ({ ...item, kind: "video" })),
+        ];
+    }
+    get current() {
+        const items = this.items;
+        return items[Math.min(this.state.index, items.length - 1)] || false;
+    }
     get canAdd() {
         return Boolean(this.data.can_add);
     }
@@ -52,15 +66,13 @@ export class CoopMedia extends Component {
     get canAddVideo() {
         return this.canAdd && this.videos.length < ((this.data.limits || {}).video || 8);
     }
-    get photo() {
-        return this.photos[Math.min(this.state.photo, this.photos.length - 1)] || false;
-    }
-    get video() {
-        return this.videos[Math.min(this.state.video, this.videos.length - 1)] || false;
+
+    isOn(kind, index) {
+        return this.state.index === (kind === "photo" ? index : this.photos.length + index);
     }
 
     select(kind, index) {
-        this.state[kind] = index;
+        this.state.index = kind === "photo" ? index : this.photos.length + index;
         const strip = (kind === "photo" ? this.photoStrip : this.videoStrip)();
         const thumb = strip?.children[index];
         if (strip && thumb) {
@@ -71,16 +83,21 @@ export class CoopMedia extends Component {
         }
     }
 
-    step(kind, delta) {
-        const count = (kind === "photo" ? this.photos : this.videos).length;
+    step(delta) {
+        const count = this.items.length;
         if (count) {
-            this.select(kind, (this.state[kind] + delta + count) % count);
+            const next = (this.state.index + delta + count) % count;
+            const photos = this.photos.length;
+            this.select(next < photos ? "photo" : "video", next < photos ? next : next - photos);
         }
     }
 
-    onKeydown(kind, ev) {
+    onKeydown(ev) {
+        if (ev.target.closest("input")) {
+            return;
+        }
         if (ev.key === "ArrowRight" || ev.key === "ArrowLeft") {
-            this.step(kind, ev.key === "ArrowRight" ? 1 : -1);
+            this.step(ev.key === "ArrowRight" ? 1 : -1);
             ev.preventDefault();
         }
     }
@@ -142,17 +159,20 @@ export class CoopMedia extends Component {
     async onPhotoFiles(ev) {
         const files = [...(ev.target.files || [])];
         ev.target.value = "";
+        let added = false;
         for (const file of files) {
             if (!file.type.startsWith("image/")) {
                 this.notification.add(`«${file.name}» — не снимок.`, { type: "warning" });
                 continue;
             }
-            const ok = await this.add("photo", { data: await this.readFile(file), name: file.name });
-            if (!ok) {
+            if (!(await this.add("photo", { data: await this.readFile(file), name: file.name }))) {
                 break;
             }
+            added = true;
         }
-        this.select("photo", Math.max(0, this.photos.length - 1));
+        if (added) {
+            this.select("photo", Math.max(0, this.photos.length - 1));
+        }
     }
 
     async onVideoFile(ev) {

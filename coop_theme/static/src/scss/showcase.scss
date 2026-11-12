@@ -444,15 +444,16 @@
 .coop-media {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   min-width: 0;
 }
 .coop-media_busy {
   cursor: progress;
   opacity: .7;
 }
+// Видео — в том же кадре 4:3, что фото (одно превью, владелец
+// 12.11.2026): кадр не прыгает при переходе с фото на видео.
 .coop-media_frame {
-  aspect-ratio: 16 / 9;
   background: #000;
 }
 .coop-media_player {
@@ -478,8 +479,12 @@
   justify-content: center;
   border: 1.5px dashed var(--coop-line-strong);
   color: var(--coop-teal);
-  font: 500 26px/1 'Manrope', sans-serif;
+  flex-direction: column;
+  gap: 2px;
+  font: 500 24px/1 'Manrope', sans-serif;
   opacity: 1;
+
+  small { font-size: 10.5px; font-weight: 600; }
 
   &:hover { border-color: var(--coop-teal); }
   &:disabled { cursor: progress; opacity: .5; }
@@ -499,11 +504,11 @@
   font-size: 13px;
   text-align: center;
 }
-.coop-media_stub_video {
-  aspect-ratio: auto;
-  min-height: 96px;
-  flex-direction: row;
+.coop-media_stub_row {
+  display: flex;
   flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
 }
 .coop-media_stub_add {
   padding: 5px 12px;

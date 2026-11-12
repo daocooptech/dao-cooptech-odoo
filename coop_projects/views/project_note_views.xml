@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!--
+    Заметки — на штатных To-Do (задача 426, владелец 12.11.2026):
+    «Проекты → Заметки» и вкладка «Заметки» на странице проекта (только
+    свои). Действие своё: переименовать движковое «To-dos» нельзя — его
+    перевод лежит поверх имени.
+  -->
+  <record id="action_coop_notes" model="ir.actions.act_window">
+    <field name="name">Заметки</field>
+    <field name="res_model">project.task</field>
+    <field name="path">notes</field>
+    <field name="domain">[('user_ids', 'in', [uid]), ('project_id', '=', False), ('parent_id', '=', False), ('is_template', '=', False)]</field>
+    <field name="view_mode">kanban,list,form,calendar</field>
+    <field name="search_view_id" ref="project_todo.project_task_view_todo_search"/>
+    <field name="context">{
+      'search_default_open_tasks': 1,
+      'list_view_ref': 'project_todo.project_task_view_todo_tree',
+      'default_project_id': False,
+      'show_todo_mail_helper': True,
+      'show_task_options': False,
+    }</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Заметок пока нет</p>
+      <p>Заметки и дела видите только вы, пока не добавите в них других
+        людей. Заметку можно привязать к проекту — она появится на его
+        странице во вкладке «Заметки».</p>
+    </field>
+  </record>
+  <record id="action_coop_notes_kanban" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">kanban</field>
+    <field name="view_id" ref="project_todo.project_task_view_todo_kanban"/>
+    <field name="act_window_id" ref="action_coop_notes"/>
+  </record>
+  <record id="action_coop_notes_list" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">list</field>
+    <field name="view_id" ref="project_todo.project_task_view_todo_tree"/>
+    <field name="act_window_id" ref="action_coop_notes"/>
+  </record>
+  <record id="action_coop_notes_form" model="ir.actions.act_window.view">
+    <field name="sequence">3</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="project_todo.project_task_view_todo_form"/>
+    <field name="act_window_id" ref="action_coop_notes"/>
+  </record>
+  <record id="action_coop_notes_calendar" model="ir.actions.act_window.view">
+    <field name="sequence">4</field>
+    <field name="view_mode">calendar</field>
+    <field name="view_id" ref="project_todo.project_task_view_todo_calendar"/>
+    <field name="act_window_id" ref="action_coop_notes"/>
+  </record>
+
+  <menuitem id="menu_coop_project_notes" name="Заметки"
+            parent="menu_coop_projects_root" action="action_coop_notes"
+            sequence="25"/>
+
+  <!-- В форме заметки — к какому проекту платформы она относится. -->
+  <record id="view_todo_form_coop_project" model="ir.ui.view">
+    <field name="name">project.task.todo.form.coop.project</field>
+    <field name="model">project.task</field>
+    <field name="inherit_id" ref="project_todo.project_task_view_todo_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='date_deadline']" position="after">
+        <field name="coop_project_id" options="{'no_create': True}"
+               placeholder="Без проекта"/>
+      </xpath>
+    </field>
+  </record>
+  <record id="view_todo_list_coop_project" model="ir.ui.view">
+    <field name="name">project.task.todo.list.coop.project</field>
+    <field name="model">project.task</field>
+    <field name="inherit_id" ref="project_todo.project_task_view_todo_tree"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='name']" position="after">
+        <field name="coop_project_id" optional="show"/>
+      </xpath>
+    </field>
+  </record>
+  <record id="view_todo_search_coop_project" model="ir.ui.view">
+    <field name="name">project.task.todo.search.coop.project</field>
+    <field name="model">project.task</field>
+    <field name="inherit_id" ref="project_todo.project_task_view_todo_search"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='name']" position="after">
+        <field name="coop_project_id"/>
+      </xpath>
+      <xpath expr="//search" position="inside">
+        <group>
+          <filter name="by_coop_project" string="Проект платформы"
+                  context="{'group_by': 'coop_project_id'}"/>
+        </group>
+      </xpath>
+    </field>
+  </record>
+
+  <!-- Вкладка «Заметки» на странице проекта — только свои. -->
+  <record id="view_coop_project_form_notes" model="ir.ui.view">
+    <field name="name">coop.project.form.notes</field>
+    <field name="model">coop.project</field>
+    <field name="inherit_id" ref="coop_projects.view_coop_project_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//notebook[hasclass('coop-show_tabs')]" position="inside">
+        <page string="Заметки" name="notes">
+          <field name="coop_note_count" invisible="1"/>
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            <button name="action_coop_new_note" type="object"
+                    class="btn btn-primary btn-sm" string="+ Заметка"/>
+            <button name="action_coop_notes" type="object"
+                    class="btn btn-secondary btn-sm" string="Все мои заметки по проекту"
+                    invisible="not coop_note_count"/>
+          </div>
+          <p class="text-muted" invisible="coop_note_count">
+            Своих заметок по проекту пока нет. Их видите только вы, пока не
+            добавите в заметку других людей.
+          </p>
+          <field name="coop_note_ids" nolabel="1" readonly="1"
+                 invisible="not coop_note_count"
+                 context="{'form_view_ref': 'project_todo.project_task_view_todo_form'}">
+            <list open_form_view="1" create="0" delete="0">
+              <field name="name" string="Заметка"/>
+              <field name="state" widget="todo_done_checkmark" nolabel="1"/>
+              <field name="date_deadline" optional="show"/>
+              <field name="write_date" string="Изменена" optional="show"/>
+            </list>
+          </field>
+        </page>
+      </xpath>
+    </field>
+  </record>
+</odoo>
