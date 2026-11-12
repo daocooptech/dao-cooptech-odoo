@@ -9,3 +9,4 @@ from . import coop_exchange
 from . import coop_project_share
 from . import coop_project_profit
 from . import coop_resource_issue
+from . import catalog_filters
