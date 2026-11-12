@@ -37,12 +37,17 @@ def load_media_video(env):
         records = env[model].sudo().with_context(active_test=False).search(domain, order='id')
         have = set(Media.search([('res_model', '=', model), ('kind', '=', 'video'),
                                  ('res_id', 'in', records.ids)]).mapped('res_id'))
-        vals = [{'res_model': model, 'res_id': r.id, 'kind': 'video',
-                 'video_file': data, 'video_mimetype': 'video/webm',
-                 'name': CAPTION, 'sequence': 1}
-                for r in records if r.id not in have]
-        if vals:
-            Media.create(vals)
-            created += len(vals)
+        # По одной и со сбросом кэша: пачкой 39 копий ролика (4,4 МБ)
+        # боевая выкатка 12.11 упала с MemoryError — у процесса
+        # обновления лимит памяти ~780 МБ.
+        for record in records:
+            if record.id in have:
+                continue
+            Media.create({'res_model': model, 'res_id': record.id, 'kind': 'video',
+                          'video_file': data, 'video_mimetype': 'video/webm',
+                          'name': CAPTION, 'sequence': 1})
+            env.flush_all()
+            env.invalidate_all()
+            created += 1
     _logger.info('Видео в карусели витрин: добавлено %s', created)
     return created
