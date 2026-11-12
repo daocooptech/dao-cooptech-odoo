@@ -685,11 +685,11 @@
                   <field name="resource_id" optional="hide"
                          options="{'no_open': True}"/>
                   <field name="value" sum="Собрано"/>
-                  <field name="share_percent" widget="percentage" readonly="1"
-                         string="Пай"
+                  <field name="share_percent" readonly="1"
+                         string="Пай, %" options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind != 'cooperative'"/>
-                  <field name="share_ratio" widget="percentage" readonly="1"
-                         string="Доля"
+                  <field name="share_ratio" readonly="1"
+                         string="Доля, %" options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind not in ('commercial', 'dao')"/>
                   <field name="offered_on" optional="hide"/>
                   <field name="withdraw_until" optional="hide"/>
