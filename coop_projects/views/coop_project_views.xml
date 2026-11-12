@@ -375,15 +375,15 @@
                   <span class="coop-pj_owner_note">разместил</span>
                 </div>
               </div>
-              <div class="coop-show_acts" invisible="not can_contribute and not project_id">
+              <!-- «Ход проекта» здесь был вторым — та же кнопка-счётчик
+                   стоит в шапке рядом с «Управлением проектом», видна тем
+                   же людям. Владелец 12.11.2026: «ход проекта в двух
+                   местах — надо поправить»; оставлен один, в шапке. -->
+              <div class="coop-show_acts" invisible="not can_contribute">
                 <!-- Единственное действие участника: проект собирает
                      деньги и вещи, и внести их должно быть чем. -->
                 <button name="action_contribute" type="object" string="Участвовать"
                         class="btn-primary" invisible="not can_contribute"/>
-                <button name="action_open_updates" type="object"
-                        class="btn-secondary" invisible="not project_id">
-                  Ход проекта · <field name="update_count" readonly="1" nolabel="1"/>
-                </button>
               </div>
             </div>
           </section>

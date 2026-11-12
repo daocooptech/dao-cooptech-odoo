@@ -27,6 +27,12 @@
   .o_form_statusbar:not(:has(button, .o_statusbar_status)) {
     display: none !important;
   }
+  // Полоса хода — той же ширины, что витрина под ней: лист ограничен
+  // `--coop-content-max`, а полоса шла на всю ширину и выступала справа
+  // на 55 px (замер 12.11 на 1440: 1269 против 1214).
+  .o_form_statusbar {
+    max-width: var(--coop-content-max);
+  }
 
   .o_field_widget {
     width: auto;
@@ -1065,5 +1071,24 @@
   b {
     font: 600 12px/1.2 'JetBrains Mono', ui-monospace, monospace;
     color: var(--coop-ink);
+  }
+}
+
+// Путь над витриной — от левого края её карточек: кнопка «назад» стояла
+// на 8 px левее витрины и полосы хода (замер 12.11 на 1440: 101 против
+// 109). Владелец 12.11.2026: «можешь выровнять всё по сетке?».
+.o_form_view.o_coop_show .o_control_panel .o_breadcrumb {
+  margin-left: 8px;
+}
+
+// На телефоне движок выводит лист формы за поля (`margin: 0 -16px`
+// у `.o_form_sheet` уже 768 px), полоса хода оставалась внутри — была на
+// 16 px уже витрины с каждой стороны (замер 12.11 на 375: 30–345 против
+// 14–361). Выводим так же.
+@media (max-width: 767.98px) {
+  .o_form_view.o_coop_show .o_form_statusbar {
+    margin-left: -16px;
+    margin-right: -16px;
+    max-width: none;
   }
 }

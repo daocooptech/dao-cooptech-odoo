@@ -100,8 +100,11 @@ $coop-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' v
     margin: 0;
   }
 
-  // Линия к предыдущему шагу.
-  .o_arrow_button_wrap:not(:last-child)::before {
+  // Линия к предыдущему шагу. Не `:last-child`: за первым на экране
+  // шагом движок держит скрытый пункт «…», и линия висела хвостом
+  // слева от «Идеи» (владелец 12.11.2026, «вёрстка криво»). Первый
+  // шаг узнаётся по своей кнопке `.o_last`.
+  .o_arrow_button_wrap:not(:has(> .o_last))::before {
     content: "";
     width: 28px;
     height: 2px;
