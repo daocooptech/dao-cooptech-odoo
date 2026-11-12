@@ -12,8 +12,12 @@
     <field name="model">coop.project</field>
     <field name="inherit_id" ref="coop_projects.view_coop_project_form"/>
     <field name="arch" type="xml">
-      <notebook position="inside">
-        <page string="Потребности" name="needs">
+      <!-- Не вкладкой, а на самой странице, над «Участием в проекте»
+           (владелец 12.11.2026): сперва что нужно и кто отвечает,
+           потом — чем войти. -->
+      <xpath expr="//div[hasclass('o_coop_needs')]" position="before">
+        <div class="o_coop_need_list" name="needs">
+          <div class="o_coop_needs_head">Потребности</div>
           <field name="need_ids" context="{'default_project_id': id,
                                            'default_listing_type': 'request'}">
             <list editable="bottom">
@@ -37,8 +41,23 @@
             приходят предложения, и ответственный утверждает одно —
             остальные отклоняются в тот же момент.
           </div>
-        </page>
-      </notebook>
+        </div>
+      </xpath>
+    </field>
+  </record>
+
+  <!-- «Аналитика» — последней вкладкой (владелец 12.11.2026). Вкладки
+       добавляют и другие модули, поэтому переносим поздним видом:
+       приоритет 99 применяется после их наследований. -->
+  <record id="view_coop_project_form_analytics_last" model="ir.ui.view">
+    <field name="name">coop.project.form.analytics.last</field>
+    <field name="model">coop.project</field>
+    <field name="inherit_id" ref="coop_projects.view_coop_project_form"/>
+    <field name="priority">99</field>
+    <field name="arch" type="xml">
+      <xpath expr="//notebook[hasclass('coop-show_tabs')]" position="inside">
+        <xpath expr="//page[@name='analytics']" position="move"/>
+      </xpath>
     </field>
   </record>
 

@@ -290,7 +290,7 @@
 // объяснение и четыре списка строк со стоимостью, паем и кнопкой.
 // Штатный список движка внутри формы выглядит как таблица настроек —
 // слишком мелко и слишком тесно для того, ради чего человек сюда пришёл.
-.o_coop_needs {
+.o_coop_needs, .o_coop_need_list {
   margin: 22px 0 4px;
 
   .o_coop_needs_head {
@@ -730,7 +730,7 @@
     display: inline;
   }
   // «Участие в проекте» — та же плоскость, что у блоков витрины.
-  .o_coop_needs {
+  .o_coop_needs, .o_coop_need_list {
     margin: 0 0 16px;
     padding: 16px 20px;
     background: var(--coop-white);

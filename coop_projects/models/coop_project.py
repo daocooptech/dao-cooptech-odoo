@@ -376,6 +376,11 @@ class CoopProject(models.Model):
     # потребность видит их, даже если сам ещё не вкладчик: разбирает он.
     coop_offers_visible = fields.Boolean(
         string='Видны отклики', compute='_compute_coop_offers_visible')
+    # «Управление проектом» — рабочая кухня команды, не витрина: кнопку
+    # видят только участники (владелец 12.11.2026). Круг тот же, что у
+    # управления и ленты, — `_project_team_users`.
+    coop_is_team = fields.Boolean(
+        string='В команде проекта', compute='_compute_coop_is_team')
 
     # Потребности по видам — списками, как в макете: «Необходимые
     # материальные ресурсы», «…трудовые», и так далее. Одним списком на
@@ -581,6 +586,14 @@ class CoopProject(models.Model):
                 or Need.search_count([
                     ('project_id', '=', record.id),
                     ('need_manager_id', '=', user.partner_id.id)], limit=1))
+
+    @api.depends_context('uid')
+    @api.depends('partner_id', 'contribution_ids.state')
+    def _compute_coop_is_team(self):
+        user = self.env.user
+        for record in self:
+            record.coop_is_team = bool(
+                record.id and user in record._project_team_users())
 
     def action_open_offers(self):
         """Страница разбора заявок: потребности слева, заявки карточками.

@@ -114,7 +114,7 @@
     <field name="model">coop.project</field>
     <field name="inherit_id" ref="coop_projects.view_coop_project_form_needs"/>
     <field name="arch" type="xml">
-      <xpath expr="//page[@name='needs']/field[@name='need_ids']" position="before">
+      <xpath expr="//field[@name='need_ids']" position="before">
         <field name="new_offer_count" invisible="1"/>
         <div class="mb-2" invisible="not new_offer_count">
           <button name="action_open_offers" type="object" class="btn btn-primary">

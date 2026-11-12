@@ -259,7 +259,7 @@
           </div>
           <div class="oe_button_box" name="button_box">
             <button name="action_open_project" type="object" class="oe_stat_button"
-                    icon="checklist" invisible="not project_id">
+                    icon="checklist" invisible="not project_id or not coop_is_team">
               <div class="o_stat_info">
                 <!-- Этап ведения прямо на кнопке: человек видит, где
                      идут работы, не открывая управление. Пока этапа нет
@@ -271,24 +271,12 @@
                 <span class="o_stat_text">проектом</span>
               </div>
             </button>
-            <!--
-              Отчёты о ходе — штатные `project.update`. Пункт 14 разбора
-              архитектора: «новости проекта» из макета это отчёт о ходе,
-              а не переписка, и он в движке уже есть — с рассылкой
-              подписчикам и показом в управлении.
-            -->
-            <button name="action_open_updates" type="object" class="oe_stat_button"
-                    icon="show_chart" invisible="not project_id">
-              <div class="o_stat_info">
-                <span class="o_stat_value">
-                  <field name="update_count" nolabel="1"/>
-                </span>
-                <span class="o_stat_text">Ход</span>
-                <span class="o_stat_text">проекта</span>
-              </div>
-            </button>
+            <!-- «Ход проекта» убран из карточки (владелец 12.11.2026):
+                 отчёты о ходе читают в «Ленте подписок», пишут в
+                 «Управлении проектом». -->
           </div>
           <field name="coop_can_edit" invisible="1"/>
+          <field name="coop_is_team" invisible="1"/>
           <field name="currency_id" invisible="1"/>
           <!--
             Витрина проекта (дизайн-система, `ProjectPage`, решение 625):
