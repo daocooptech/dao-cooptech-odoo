@@ -58,6 +58,17 @@ class CoopWalletOperation(models.TransientModel):
     fiat_available = fields.Monetary(
         related='wallet_id.fiat_available', string='Доступно к выводу',
         currency_field='currency_id')
+    # Комиссия платформы при выводе — строкой в окне, тариф банка отдельно
+    # и не наш (решение 666).
+    platform_fee = fields.Monetary(
+        string='Комиссия платформы 0,5 %', currency_field='currency_id',
+        compute='_compute_platform_fee',
+        help='Тариф банка — по договору с вашим банком.')
+
+    @api.depends('amount')
+    def _compute_platform_fee(self):
+        for wizard in self:
+            wizard.platform_fee = round(max(0.0, wizard.amount or 0.0) * 0.005, 2)
 
     @api.depends('wallet_id')
     def _compute_address_ids(self):

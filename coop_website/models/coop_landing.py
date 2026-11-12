@@ -19,6 +19,7 @@ import os
 from PIL import Image
 
 from odoo import api, models, release
+from odoo.addons.website.models.website_menu import WebsiteMenu
 
 _logger = logging.getLogger(__name__)
 
@@ -271,6 +272,20 @@ class CoopWebsiteLanding(models.AbstractModel):
             Config.set_str('coop_website.favicon_set', '1')
 
         Menu = self.env['website.menu'].sudo()
+
+        # Одно меню сайта (решение 658 п. 4). Общий корень Odoo — образец,
+        # который копируется в каждый новый сайт; установщики модулей
+        # кладут туда свои пункты («Главная», «Форум», «Курсы»,
+        # «Вакансии»). Чистится при каждой настройке: удалённые записи
+        # установщик при обновлении заводит заново. Удаление — мимо
+        # переопределения Odoo: оно вслед за пунктом образца сносит пункты
+        # всех сайтов с тем же адресом, то есть наши «Форум» и «Курсы».
+        default_root = self.env.ref('website.main_menu', raise_if_not_found=False)
+        if default_root:
+            stubs = Menu.search([('parent_id', '=', default_root.id)])
+            if stubs:
+                super(WebsiteMenu, stubs).unlink()
+
         root = Menu.search([('website_id', '=', website.id),
                             ('parent_id', '=', False)], limit=1)
         if not root:

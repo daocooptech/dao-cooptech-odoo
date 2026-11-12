@@ -37,7 +37,11 @@
                  options="{'no_create': True, 'no_open': True}"/>
           <field name="fiat_available" invisible="mode != 'withdraw'"/>
           <field name="amount" required="mode in ('topup', 'withdraw')"/>
+          <field name="platform_fee" invisible="mode != 'withdraw'"/>
         </group>
+        <p class="text-muted small" invisible="mode != 'withdraw'">
+          Тариф банка — по договору с вашим банком.
+        </p>
 
         <footer>
           <button name="action_confirm" type="object" string="Отправить"
