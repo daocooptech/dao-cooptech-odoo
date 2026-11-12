@@ -579,38 +579,29 @@
                    placeholder="Что именно будет сделано на неполном сборе"/>
           </group>
           </section>
-          <section class="coop-show_block coop-pj_block">
-          <group col="3" class="coop-pj_three">
-            <group string="О проекте">
-              <field name="kind" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="category_id" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="subcategory_id" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="city" widget="coop_inline" readonly="not coop_can_edit"
-                     placeholder="не указан"/>
-            </group>
-            <group string="Кто собирает">
-              <field name="partner_id" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="author_id" widget="coop_inline" readonly="not coop_can_edit"
-                     invisible="not partner_is_company"/>
-              <field name="project_id" readonly="1"/>
-            </group>
-            <group string="Ресурсы">
-              <!-- С перечнем потребностей «Нужно» — их сумма (решение
-                   652), вписывать руками нечего. -->
-              <field name="need_count" invisible="1"/>
-              <field name="required_total" widget="coop_inline"
-                     readonly="not coop_can_edit or need_count"/>
-              <field name="contribution_total"/>
-              <field name="readiness" widget="progressbar"/>
-              <field name="contributor_count"/>
-              <field name="currency_id" invisible="1"/>
-          <field name="coop_can_edit" invisible="1"/>
-            </group>
-          </group>
-          </section>
+          <!-- Блока «О проекте / Кто собирает / Ресурсы» нет (владелец
+               12.11.2026): кто собирает и сколько собрано — в шапке, а
+               вид, тема, раздел, город и адрес — во вкладке «Описание». -->
+          <field name="project_id" invisible="1"/>
 
           <notebook class="coop-show_tabs">
             <page string="Описание" name="description">
+              <group class="coop-pj_about">
+                <group>
+                  <field name="kind" widget="coop_inline" readonly="not coop_can_edit"/>
+                  <field name="category_id" widget="coop_inline" readonly="not coop_can_edit"/>
+                  <field name="subcategory_id" widget="coop_inline" readonly="not coop_can_edit"/>
+                  <field name="city" widget="coop_inline" readonly="not coop_can_edit"
+                         placeholder="не указан"/>
+                </group>
+                <group>
+                  <!-- «Нужно» без перечня потребностей вписывает инициатор;
+                       с перечнем это их сумма (решение 652) и она в шапке. -->
+                  <field name="need_count" invisible="1"/>
+                  <field name="required_total" widget="coop_inline"
+                         invisible="not coop_can_edit or need_count"/>
+                </group>
+              </group>
               <field name="description" widget="coop_block" nolabel="1"
                      readonly="not coop_can_edit"
                      placeholder="Расскажите, что за проект и зачем он"/>
