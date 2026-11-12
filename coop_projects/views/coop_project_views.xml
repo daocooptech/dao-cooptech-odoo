@@ -431,6 +431,7 @@
               Все потребности проекта закрыты — участвовать сейчас не в чем.
               Инициатор объявит новые, когда они появятся.
             </div>
+            <field name="coop_offers_visible" invisible="1"/>
             <div class="o_coop_needs_group" invisible="not need_material_ids">
               <div class="o_coop_needs_title">Необходимые материальные ресурсы</div>
               <field name="need_material_ids" nolabel="1" readonly="1">
@@ -468,7 +469,8 @@
                          widget="float" digits="[5,1]"
                          options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind not in ('commercial', 'dao')"/>
-                  <field name="need_offer_count" string="Откликов" widget="coop_offer_counter"/>
+                  <field name="need_offer_count" string="Откликов" widget="coop_offer_counter"
+                         column_invisible="not parent.coop_offers_visible"/>
                   <field name="currency_id" column_invisible="1"/>
                 </list>
               </field>
@@ -501,7 +503,8 @@
                          widget="float" digits="[5,1]"
                          options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind not in ('commercial', 'dao')"/>
-                  <field name="need_offer_count" string="Откликов" widget="coop_offer_counter"/>
+                  <field name="need_offer_count" string="Откликов" widget="coop_offer_counter"
+                         column_invisible="not parent.coop_offers_visible"/>
                   <field name="currency_id" column_invisible="1"/>
                 </list>
               </field>
@@ -534,7 +537,8 @@
                          widget="float" digits="[5,1]"
                          options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind not in ('commercial', 'dao')"/>
-                  <field name="need_offer_count" string="Откликов" widget="coop_offer_counter"/>
+                  <field name="need_offer_count" string="Откликов" widget="coop_offer_counter"
+                         column_invisible="not parent.coop_offers_visible"/>
                   <field name="currency_id" column_invisible="1"/>
                 </list>
               </field>

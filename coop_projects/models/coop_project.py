@@ -371,6 +371,11 @@ class CoopProject(models.Model):
             project.required_total = total or project.required_total or 0.0
     new_offer_count = fields.Integer(
         string='Новых заявок', compute='_compute_new_offer_count')
+    # Сколько откликов на потребности — дело участников проекта, а не
+    # витрины (владелец 12.11.2026, задача 421). Ответственный за
+    # потребность видит их, даже если сам ещё не вкладчик: разбирает он.
+    coop_offers_visible = fields.Boolean(
+        string='Видны отклики', compute='_compute_coop_offers_visible')
 
     # Потребности по видам — списками, как в макете: «Необходимые
     # материальные ресурсы», «…трудовые», и так далее. Одним списком на
@@ -561,6 +566,21 @@ class CoopProject(models.Model):
         for record in self:
             record.new_offer_count = len(record.contribution_ids.filtered(
                 lambda offer: offer.need_id and offer.state == 'offered'))
+
+    @api.depends_context('uid')
+    @api.depends('partner_id', 'contribution_ids.state')
+    def _compute_coop_offers_visible(self):
+        user = self.env.user
+        Need = self.env['coop.resource']
+        for record in self:
+            if not record.id:
+                record.coop_offers_visible = False
+                continue
+            record.coop_offers_visible = bool(
+                user in record._project_team_users()
+                or Need.search_count([
+                    ('project_id', '=', record.id),
+                    ('need_manager_id', '=', user.partner_id.id)], limit=1))
 
     def action_open_offers(self):
         """Страница разбора заявок: потребности слева, заявки карточками.
