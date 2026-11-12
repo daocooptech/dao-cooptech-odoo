@@ -115,8 +115,13 @@ class CoopIntangibleLicense(models.Model):
                  # правообладателя, на этой территории не использует.
                  {'value': 'exclusive', 'label': 'Только исключительные',
                   'domain': [('is_exclusive', '=', True)]},
-                 {'value': 'mine', 'label': 'Мои лицензии',
-                  'domain': ['|', ('licensee_id', 'in', mine),
-                             ('licensor_id', 'in', mine)]},
+                 # Лицензию видят только её стороны (rule_intangible_license_side),
+                 # так что «мои» — это весь список: отбор «Мои лицензии»
+                 # показывал 74 из 74 (задача 432). Полезно другое — с какой
+                 # стороны договора участник.
+                 {'value': 'granted', 'label': 'Выданные мной',
+                  'domain': [('licensor_id', 'in', mine)]},
+                 {'value': 'received', 'label': 'Полученные мной',
+                  'domain': [('licensee_id', 'in', mine)]},
              ]},
         ]
