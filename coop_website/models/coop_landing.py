@@ -12,8 +12,11 @@ website_id, и отдаётся дальше именно она. Переопр
 `website.homepage`, включая копии сайтов.
 """
 import base64
+import io
 import logging
 import os
+
+from PIL import Image
 
 from odoo import api, models, release
 
@@ -23,6 +26,22 @@ CALL = '<t name="Homepage" t-call="coop_website.coop_landing"/>'
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 LOGO = os.path.join(os.path.dirname(HERE), 'static', 'src', 'img', 'cooptech-logo.png')
+
+
+def square_logo(path=LOGO):
+    """Логотип, вписанный в квадрат на своей чёрной подложке, — байты PNG.
+
+    Значок сайта движок режет по центру в квадрат 256×256: от слова
+    «coop» осталась бы середина. Поле ждёт сырые байты, не base64.
+    """
+    logo = Image.open(path).convert('RGBA')
+    side = max(logo.size)
+    canvas = Image.new('RGBA', (side, side), (0, 0, 0, 255))
+    canvas.alpha_composite(logo, ((side - logo.width) // 2,
+                                  (side - logo.height) // 2))
+    out = io.BytesIO()
+    canvas.save(out, format='PNG')
+    return out.getvalue()
 
 # Меню сайта — разделы платформы в том же порядке, что в макете. Пункты
 # ведут в разделы, которые уже работают: обещать с публичной страницы
@@ -248,8 +267,7 @@ class CoopWebsiteLanding(models.AbstractModel):
         # поэтому ставится один раз и запоминается признаком, как логотип:
         # загруженный руками потом не трогаем.
         if os.path.exists(LOGO) and not Config.get_str('coop_website.favicon_set'):
-            with open(LOGO, 'rb') as fh:
-                website.favicon = base64.b64encode(fh.read()).decode()
+            website.favicon = square_logo()
             Config.set_str('coop_website.favicon_set', '1')
 
         Menu = self.env['website.menu'].sudo()

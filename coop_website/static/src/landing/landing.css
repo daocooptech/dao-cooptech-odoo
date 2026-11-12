@@ -458,3 +458,5 @@ details p{padding:0 20px 18px;color:var(--slate)}
  .nav{margin-left:0}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.mark-logo{display:block;height:28px;width:auto;border-radius:4px;filter:invert(1)}
+.root.dark .mark-logo{filter:none}

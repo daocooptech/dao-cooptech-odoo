@@ -29,6 +29,17 @@ OUT = os.path.join(MODULE, 'static', 'src', 'landing')
 IMG = os.path.join(MODULE, 'static', 'src', 'img', 'landing')
 IMG_URL = '/coop_website/static/src/img/landing/'
 FONTS = '/coop_theme/static/src/fonts/'
+LOGO_URL = '/coop_theme/static/src/img/cooptech-logo.png'
+
+# Знак платформы. В макете лендинга вместо него заглушка — буквы «DC» в
+# тёмном квадрате; на лендинг идёт тот же логотип, что в шапке платформы.
+MARK_RE = re.compile(r'<span class="mark">[^<]*</span>')
+MARK = '<img class="mark-logo" src="%s" alt="cooptech"/>' % LOGO_URL
+# Лого нарисовано для тёмной темы: чёрная подложка, белые буквы. В
+# светлой теме — инверсия (в файле два цвета, без полутонов), в тёмной
+# (`.root.dark`) она снимается — как `.o_coop_logo` в coop_theme.
+MARK_CSS = ('.mark-logo{display:block;height:28px;width:auto;border-radius:4px;'
+            'filter:invert(1)}\n.root.dark .mark-logo{filter:none}')
 
 FONT_FACES = [
     ('Inter', 400, 'inter-400'), ('Inter', 500, 'inter-500'), ('Inter', 700, 'inter-700'),
@@ -89,11 +100,14 @@ def main():
 
     blobs = sorted(set(re.findall(r'/_blob/([0-9a-f]{32})', html)))
     markup, logic = localize(markup), localize(logic)
+    markup, found = MARK_RE.subn(MARK, markup)
+    if not found:
+        sys.exit('В макете не найден знак платформы (<span class="mark">)')
 
     os.makedirs(OUT, exist_ok=True)
     with open(os.path.join(OUT, 'landing.css'), 'w', encoding='utf-8', newline='\n') as fh:
         fh.write('/* Собрано tools/build_landing.py из макета лендинга, руками не править. */\n')
-        fh.write(font_css() + '\n' + localize(css).strip() + '\n')
+        fh.write(font_css() + '\n' + localize(css).strip() + '\n' + MARK_CSS + '\n')
     with open(os.path.join(OUT, 'landing_page.js'), 'w', encoding='utf-8', newline='\n') as fh:
         fh.write('/** @odoo-module ignore */\n')
         fh.write('/* Собрано tools/build_landing.py из макета лендинга, руками не править. */\n')
