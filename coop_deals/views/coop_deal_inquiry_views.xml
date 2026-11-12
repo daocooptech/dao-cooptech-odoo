@@ -53,7 +53,7 @@
     <field name="path">inquiries</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="view_id" ref="view_coop_deal_inquiry_kanban"/>
-    <field name="domain">[('coop_mine', '=', True), ('resource_id', '!=', False), '|', ('state', 'in', ['lead', 'draft', 'agreed']), '&amp;', ('state', '=', 'cancelled'), ('signed_on', '=', False)]</field>
+    <field name="domain">[('coop_mine', '=', True), '|', ('resource_id', '!=', False), ('skill_offer_id', '!=', False), '|', ('state', 'in', ['lead', 'draft', 'agreed']), '&amp;', ('state', '=', 'cancelled'), ('signed_on', '=', False)]</field>
     <!-- Пустые стадии исполнения и приёмки здесь не нужны: CRM
          организаций раскрывает все стадии сделки (coop_crm), а воронка
          обращений кончается на «Согласована». -->
@@ -61,41 +61,21 @@
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Обращений пока нет</p>
       <p>
-        Обращение появляется само, когда вам пишут или звонят по объявлению,
-        откликаются на него — или вы сами пишете владельцу чужого
-        объявления. Дальше оно идёт по стадиям к сделке.
+        Обращение появляется само, когда вам пишут или звонят по объявлению
+        или предложению навыка, откликаются на него — или вы сами пишете
+        владельцу чужого. Дальше оно идёт по стадиям к сделке.
       </p>
     </field>
   </record>
 
+  <!-- Обращения — в «Сделках», одним пунктом за «Моими сделками»
+       (владелец 12.11.2026: «обращения перенести в сделки», задача 430).
+       Раньше были пунктами в «Ресурсах» и «Навыках» (решение 651):
+       обращение — та же сделка на первой стадии (451), и искать его
+       по разделам незачем. -->
   <menuitem id="menu_coop_deal_inquiries" name="Обращения"
-            parent="coop_resources.menu_coop_resources_root"
-            action="action_coop_deal_inquiries" sequence="17"/>
-
-  <!-- Обращения — в каждом разделе, где они уместны (владелец 11.11.2026).
-       В «Навыках»: «Написать» и «Показать контакты» на предложении навыка.
-       У вакансий своя воронка — «Мои отклики», у проектов — вклады. -->
-  <record id="action_coop_deal_skill_inquiries" model="ir.actions.act_window">
-    <field name="name">Обращения</field>
-    <field name="res_model">coop.deal</field>
-    <field name="path">skill-inquiries</field>
-    <field name="view_mode">kanban,list,form</field>
-    <field name="view_id" ref="view_coop_deal_inquiry_kanban"/>
-    <field name="domain">[('coop_mine', '=', True), ('skill_offer_id', '!=', False), '|', ('state', 'in', ['lead', 'draft', 'agreed']), '&amp;', ('state', '=', 'cancelled'), ('signed_on', '=', False)]</field>
-    <field name="context">{'create': False, 'read_group_expand': False}</field>
-    <field name="help" type="html">
-      <p class="o_view_nocontent_smiling_face">Обращений пока нет</p>
-      <p>
-        Обращение появляется само, когда вам пишут или запрашивают контакты
-        по вашему предложению навыка — или вы сами пишете исполнителю.
-        Дальше оно идёт по стадиям к сделке.
-      </p>
-    </field>
-  </record>
-
-  <menuitem id="menu_coop_deal_skill_inquiries" name="Обращения"
-            parent="coop_skills.menu_coop_skills_root"
-            action="action_coop_deal_skill_inquiries" sequence="25"/>
+            parent="menu_coop_deals_root"
+            action="action_coop_deal_inquiries" sequence="12"/>
 
   <!-- «Уровень доверия» (решение 89): процент и из чего он сложился —
        доля положительных отзывов от сделок с отзывом. -->

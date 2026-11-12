@@ -57,8 +57,7 @@ class CoopDeal(models.Model):
     # остаются «Согласована» / «Отменена» — там это сделка.
     INQUIRY_LABELS = {'agreed': 'Согласовано', 'cancelled': 'Отменено'}
 
-    INQUIRY_ACTIONS = ('coop_deals.action_coop_deal_inquiries',
-                       'coop_deals.action_coop_deal_skill_inquiries')
+    INQUIRY_ACTIONS = ('coop_deals.action_coop_deal_inquiries',)
 
     @api.model
     def get_views(self, views, options=None):
