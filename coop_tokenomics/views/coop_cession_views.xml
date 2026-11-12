@@ -193,7 +193,14 @@
     <field name="path">cessions</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="search_view_id" ref="view_coop_cession_search"/>
-    <field name="context">{'search_default_published': 1, 'coop_section': 1, 'coop_catalog': 1, 'coop_create_label': 'Предложить уступку'}</field>
+    <!--
+      Уступленное и снятое — во вкладке «Архив уступок» (решение 593,
+      владелец 13.11.2026). Фильтра «Размещённые» по умолчанию больше нет:
+      панель считает без строки поиска, и «Уступлено · 21» вело в пустой
+      список (задача 438).
+    -->
+    <field name="domain">[('state', 'not in', ('done', 'cancelled'))]</field>
+    <field name="context">{'coop_section': 1, 'coop_catalog': 1, 'coop_create_label': 'Предложить уступку'}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Предложений пока нет</p>
       <p>Здесь участник предлагает своё требование по сделке другому
@@ -213,6 +220,25 @@
   <menuitem id="menu_coop_cession" name="Уступки требований"
             parent="coop_deals.menu_coop_deals_root"
             action="action_coop_cession" sequence="30"/>
+
+  <!-- Архив уступок: уступленное и снятое (решение 593). Итоги сверху — общим механизмом, задача 366. -->
+  <record id="action_coop_cession_archive" model="ir.actions.act_window">
+    <field name="name">Архив уступок</field>
+    <field name="res_model">coop.cession</field>
+    <field name="path">cessions-archive</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="search_view_id" ref="view_coop_cession_search"/>
+    <field name="domain">[('state', 'in', ('done', 'cancelled'))]</field>
+    <field name="context">{'coop_section': 1, 'coop_catalog': 1, 'create': False}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">В архиве пока пусто</p>
+      <p>Сюда попадают уступленные и снятые предложения.</p>
+    </field>
+  </record>
+
+  <menuitem id="menu_coop_cession_archive" name="Архив уступок"
+            parent="coop_deals.menu_coop_deals_root"
+            action="action_coop_cession_archive" sequence="31"/>
 
   <!--
     Признак запрета уступки — на форме сделки, рядом с актом: решается он

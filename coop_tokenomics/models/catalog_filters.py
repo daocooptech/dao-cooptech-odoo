@@ -41,6 +41,10 @@ class CoopCession(models.Model):
 
     def _coop_catalog_filters(self, domain):
         base, without, counts, select = _helpers(self, domain)
+        # «Архив уступок» (решение 593): там купить уже нечего.
+        archive = any(isinstance(leaf, (list, tuple)) and len(leaf) == 3
+                      and leaf[0] == 'state' and leaf[1] == 'in'
+                      for leaf in base)
         return [
             select('state', 'Состояние', 'state', 'Любое',
                    'Размещено — право требования ещё можно купить.'),
@@ -58,9 +62,10 @@ class CoopCession(models.Model):
              'hint': 'Когда должник обязан заплатить.',
              'widget': 'daterange', 'field': 'due_date'},
             {'code': 'quick', 'label': 'Быстрый отбор', 'widget': 'quick',
-             'options': [
+             'options': ([] if archive else [
                  {'value': 'open', 'label': 'Можно купить',
                   'domain': [('state', 'in', ('published', 'negotiating'))]},
+             ]) + [
                  {'value': 'mine', 'label': 'Мои уступки',
                   'domain': [('is_mine', '=', True)]},
              ]},
