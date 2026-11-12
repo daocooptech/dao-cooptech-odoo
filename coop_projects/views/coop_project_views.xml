@@ -357,14 +357,23 @@
               </div>
               <field name="show_fund_html" nolabel="1" readonly="1"
                      class="coop-pj_fund" invisible="state == 'draft'"/>
+              <!-- Инициатор и разместивший — две одинаковые строки: лицо,
+                   имя, под ним роль (эталон `ProjectPage`, `pj_owner`).
+                   Владелец 12.11.2026: «видно плохо, лого того, кто
+                   разместил, нет вовсе» — разместивший был строкой
+                   мелкого серого текста без лица и ссылки. -->
               <div class="coop-pj_owner">
-                <field name="partner_id" widget="many2one_avatar" nolabel="1"
-                       readonly="1"/>
-                <span class="coop-pj_owner_note">
-                  инициатор<span invisible="not author_id or author_id == partner_id"> · разместил
-                  <field name="author_id" readonly="1" nolabel="1"
-                         options="{'no_open': True}"/></span>
-                </span>
+                <div class="coop-pj_who">
+                  <field name="partner_id" widget="many2one_avatar" nolabel="1"
+                         readonly="1"/>
+                  <span class="coop-pj_owner_note">инициатор</span>
+                </div>
+                <div class="coop-pj_who"
+                     invisible="not author_id or author_id == partner_id">
+                  <field name="author_id" widget="many2one_avatar" nolabel="1"
+                         readonly="1"/>
+                  <span class="coop-pj_owner_note">разместил</span>
+                </div>
               </div>
               <div class="coop-show_acts" invisible="not can_contribute and not project_id">
                 <!-- Единственное действие участника: проект собирает
