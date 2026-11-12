@@ -264,6 +264,16 @@ class CoopDeal(models.Model):
         for record in self:
             record.display_name = '%s — %s' % (record.number, record.name or '')
 
+    def _coop_label(self):
+        """Сделка внутри фразы: номер и предмет в кавычках.
+
+        `display_name` («СД-… — Продавец») хорош в заголовке, а вставленный
+        в середину фразы ломает её: «По обращению СД-… — Продавец начаты
+        переговоры» (снимок владельца 12.11.2026, задача 436).
+        """
+        self.ensure_one()
+        return '%s «%s»' % (self.number, self.name) if self.name else self.number
+
     @api.depends('payment_ids.amount', 'payment_ids.state', 'amount')
     def _compute_amount_paid(self):
         for record in self:
@@ -353,7 +363,7 @@ class CoopDeal(models.Model):
                     self.env['coop.notification'].sudo()._notify(
                         user.partner_id, _(
                             'Вы назначены ответственным по сделке %s.')
-                        % record.display_name, record=record, kind='deal')
+                        % record._coop_label(), record=record, kind='deal')
         return result
 
     # ── Ответственные ────────────────────────────────────────────────────
@@ -588,10 +598,10 @@ class CoopDeal(models.Model):
             if record.state != 'lead':
                 raise UserError(_(
                     'Переговоры начинают из обращения. Сделка %s уже дальше.')
-                    % record.display_name)
+                    % record._coop_label())
             record.state = 'draft'
             record._notify_other(_(
-                'По обращению %s начаты переговоры.') % record.display_name)
+                'По обращению %s начаты переговоры.') % record._coop_label())
         return True
 
     def action_agree(self):
@@ -609,7 +619,7 @@ class CoopDeal(models.Model):
             if not record.line_ids:
                 raise UserError(_(
                     'Сделку %s нельзя согласовать без спецификации: сначала '
-                    'запишите, что именно передаётся.') % record.display_name)
+                    'запишите, что именно передаётся.') % record._coop_label())
             for party in (record.party_a_id, record.party_b_id):
                 party.coop_require_level('identity', _('заключить сделку'))
             record.write({
@@ -618,7 +628,7 @@ class CoopDeal(models.Model):
             })
             record._notify_other(_(
                 'Сделка %(number)s согласована: «%(subject)s».',
-                number=record.display_name, subject=record.name))
+                number=record.number, subject=record.name))
         return True
 
     def action_start(self):
@@ -626,7 +636,7 @@ class CoopDeal(models.Model):
             record._require_party()
             record.state = 'active'
             record._notify_other(_(
-                'По сделке %s началось исполнение.') % record.display_name)
+                'По сделке %s началось исполнение.') % record._coop_label())
         return True
 
     def action_confirm_act(self):
@@ -652,13 +662,13 @@ class CoopDeal(models.Model):
                 (record.party_a_id | record.party_b_id).sudo()                    ._coop_recompute_deal_stats()
                 record._notify_other(_(
                     'Сделка %s исполнена: акт подтверждён обеими сторонами. '
-                    'Можно оставить отзыв.') % record.display_name)
+                    'Можно оставить отзыв.') % record._coop_label())
             else:
                 # Пока подтвердила одна сторона, вторая об этом не знает —
                 # и сделка стоит на месте ровно из-за этого.
                 record._notify_other(_(
                     'По сделке %s подтверждён акт с одной стороны — ждём '
-                    'вашего подтверждения.') % record.display_name)
+                    'вашего подтверждения.') % record._coop_label())
         return True
 
     def action_open_dispute(self):
@@ -671,7 +681,7 @@ class CoopDeal(models.Model):
             })
             record._notify_other(_(
                 'По сделке %s открыт спор — требуется ваше решение.')
-                % record.display_name)
+                % record._coop_label())
         return True
 
     def action_resolve_dispute(self):
@@ -700,7 +710,7 @@ class CoopDeal(models.Model):
             (record.party_a_id | record.party_b_id).sudo()                ._coop_recompute_deal_stats()
             record._notify_other(_(
                 'Спор по сделке %s закрыт администратором платформы.')
-                % record.display_name)
+                % record._coop_label())
         return True
 
     def action_cancel(self):
@@ -708,7 +718,7 @@ class CoopDeal(models.Model):
             record._require_party()
             record.state = 'cancelled'
             record._notify_other(_(
-                'Сделка %s отменена второй стороной.') % record.display_name)
+                'Сделка %s отменена второй стороной.') % record._coop_label())
         return True
 
 
@@ -839,7 +849,7 @@ class CoopDealPayment(models.Model):
             # об этом сообщить.
             record.deal_id._notify_other(_(
                 'Платёж по сделке %(number)s получен: %(amount)s.',
-                number=record.deal_id.display_name, amount=record.amount))
+                number=record.deal_id._coop_label(), amount=record.amount))
         return True
 
     @api.model
@@ -957,11 +967,11 @@ class CoopDealReview(models.Model):
             if record.deal_id.reviews_visible:
                 record.deal_id._notify_other(_(
                     'Отзывы по сделке %s раскрыты: обе стороны оценили '
-                    'друг друга.') % record.deal_id.display_name)
+                    'друг друга.') % record.deal_id._coop_label())
             else:
                 record.deal_id._notify_other(_(
                     'По сделке %s вас оценили. Отзыв раскроется, когда вы '
-                    'оставите свой.') % record.deal_id.display_name)
+                    'оставите свой.') % record.deal_id._coop_label())
         return records
 
     def write(self, vals):

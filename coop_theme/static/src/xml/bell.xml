@@ -11,7 +11,7 @@
       Колокол открывает список последних извещений, как значок сообщений;
       весь раздел — ссылкой внизу (задача владельца 08.10.2026).
     -->
-    <Dropdown state="this.dropdown" position="'bottom-end'"
+    <Dropdown state="this.dropdown" position="'bottom-end'" bottomSheet="false"
               menuClass="'o_coop_bell_menu p-0'" beforeOpen="() => this.load()">
       <button class="o_coop_bell" type="button"
               t-att-aria-label="this.state.count ? 'Уведомления: ' + this.state.count + ' новых' : 'Уведомления'"

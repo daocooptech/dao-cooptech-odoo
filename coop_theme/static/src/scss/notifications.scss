@@ -150,6 +150,10 @@
   .o_coop_bell_list {
     max-height: 420px;
     overflow-y: auto;
+    // Системная полоса со стрелками на снимке владельца 12.11 — тонкая,
+    // как у бокового меню (задача 436).
+    scrollbar-width: thin;
+    scrollbar-color: var(--coop-line, #e6e6e1) transparent;
   }
 
   .o_coop_bell_empty {
