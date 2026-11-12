@@ -136,9 +136,14 @@ class CoopMedia(models.Model):
         else:
             src = '/web/content/coop.media/%s/video_file?unique=%s' % (self.id, stamp)
             how = 'file'
+        # Кадр для ленты: у файла его берёт сам браузер из ролика, у
+        # YouTube — готовая картинка по номеру ролика. Rutube и VK
+        # статичного кадра по ссылке не дают — там тёмная плитка.
+        youtube = re.search(r'youtube\.com/embed/([\w-]+)', src or '')
         return {
             'id': 'm%s' % self.id, 'media_id': self.id,
             'src': src, 'how': how, 'mimetype': self.video_mimetype or '',
+            'poster': 'https://i.ytimg.com/vi/%s/hqdefault.jpg' % youtube.group(1) if youtube else '',
             'alt': self.name or '',
         }
 

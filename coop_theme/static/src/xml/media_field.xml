@@ -81,7 +81,10 @@
                   t-att-aria-label="'Видео ' + (clip_index + 1)"
                   t-att-aria-current="this.isOn('video', clip_index) ? 'true' : 'false'"
                   t-on-click="() => this.select('video', clip_index)">
-            <span aria-hidden="true">▶</span><t t-esc="clip_index + 1"/>
+            <img t-if="clip.poster" t-att-src="clip.poster" alt="" loading="lazy"/>
+            <video t-elif="clip.how === 'file'" t-att-src="clip.src + '#t=0.5'" preload="metadata"
+                   muted="muted" playsinline="playsinline" tabindex="-1" aria-hidden="true"/>
+            <span class="coop-media_play" aria-hidden="true"/>
           </button>
         </t>
         <button type="button" class="coop-gallery_thumb coop-media_add" t-if="this.canAddVideo"

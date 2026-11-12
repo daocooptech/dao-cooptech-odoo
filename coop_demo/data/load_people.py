@@ -325,3 +325,33 @@ def repair_admin(env):
                 deal._coop_record_rights(date=dates[deal.id])
     _logger.info('Служебная учётная запись: сделок исправлено %s', len(deals))
     return changed
+
+
+def ensure_phones(env):
+    """Мобильный номер людям-участникам, у которых его нет.
+
+    Без номера в карточке объявления нет кнопки «Показать номер»: у
+    организаций телефоны были, у людей — ни у одного, и у всех частных
+    объявлений связаться можно было только сообщением. Номер — по номеру
+    записи, повторный прогон его не меняет; уже заданный не трогаем.
+    Владельца витрины (dashkevich) не трогаем: это живой вход.
+    """
+    Partner = env['res.partner'].sudo()
+    skip = env['res.users'].sudo().search([('login', 'in', ('dashkevich', 'admin'))]).partner_id
+    people = Partner.search([
+        ('coop_is_participant', '=', True), ('is_company', '=', False),
+        '|', ('phone', '=', False), ('phone', '=', ''),
+        ('id', 'not in', skip.ids),
+    ])
+    codes = (900, 901, 902, 903, 904, 905, 906, 908, 909, 910, 912, 913, 914, 915,
+             916, 917, 918, 919, 920, 921, 922, 923, 925, 926, 927, 928, 929, 950,
+             951, 952, 953, 958, 960, 961, 962, 963, 964, 965, 966, 967, 977, 978,
+             980, 981, 982, 983, 984, 985, 987, 988, 989, 991, 992, 993, 995, 996,
+             997, 999)
+    for partner in people:
+        seed = 7919 * partner.id + 104729
+        partner.phone = '+7 (%03d) %03d-%02d-%02d' % (
+            codes[seed % len(codes)], seed // 7 % 900 + 100,
+            seed // 13 % 100, seed // 17 % 100)
+    _logger.info('Телефоны людям: %s', len(people))
+    return len(people)
