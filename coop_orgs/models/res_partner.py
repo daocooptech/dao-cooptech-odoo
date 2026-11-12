@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo import _, api, fields, models
 
 
@@ -55,6 +55,21 @@ class ResPartner(models.Model):
         help='Полный код, как он написан в выписке: 01.13.1. Хранится '
              'строкой — разбирать классификатор до шестого знака ради '
              'каталога незачем, а для сверки с реестром код нужен целиком.')
+
+    # Решение 657 п. 3: долю итога года в неделимый фонд задаёт кооператив
+    # в уставе, платформа только применяет её при распределении.
+    coop_indivisible_fund_percent = fields.Float(
+        string='В неделимый фонд, %', digits=(5, 2), default=0.0,
+        help='Доля итога года, которая по уставу уходит в неделимый фонд '
+             'и не делится между членами. Задаёт кооператив, платформа '
+             'применяет при распределении. По умолчанию 0 %.')
+
+    @api.constrains('coop_indivisible_fund_percent')
+    def _check_coop_indivisible_fund_percent(self):
+        for record in self:
+            if not 0 <= record.coop_indivisible_fund_percent <= 100:
+                raise ValidationError(_(
+                    'Доля в неделимый фонд — от 0 до 100 %.'))
 
     coop_charter_url = fields.Char(
         string='Устав',

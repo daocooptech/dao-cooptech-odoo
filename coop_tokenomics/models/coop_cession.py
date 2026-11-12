@@ -96,6 +96,16 @@ class CoopCession(models.Model):
         help='Без уведомления исполнение прежнему кредитору остаётся '
              'надлежащим (ст. 382 ГК), то есть уступка для должника не '
              'работает.')
+    debtor_notice_message_id = fields.Many2one(
+        'mail.message', string='Уведомление должника', readonly=True,
+        copy=False, ondelete='set null')
+    debtor_notice_mail_id = fields.Many2one(
+        'mail.mail', string='Письмо должнику', readonly=True, copy=False,
+        ondelete='set null')
+    debtor_notice_status = fields.Char(
+        string='Как уведомлён', compute='_compute_debtor_notice_status',
+        help='Доказательство уведомления: извещение на платформе, '
+             'отправка письма и отметка о прочтении (решение 657).')
 
     response_ids = fields.One2many(
         'coop.cession.response', 'cession_id', string='Отклики')
@@ -315,12 +325,82 @@ class CoopCession(models.Model):
                 'ceded_on': fields.Date.context_today(record),
                 'debtor_notified_on': fields.Date.context_today(record),
             })
-            record.deal_id.message_post(body=_(
-                'Требование по сделке уступлено: %(from)s → %(to)s. '
-                'Должник уведомлён.',
-                **{'from': record.creditor_id.name, 'to': accepted.partner_id.name},
-            ))
+            record._notify_debtor()
         return True
+
+    def _notify_debtor(self):
+        """Уведомить должника событием и письмом (решение 657 п. 1).
+
+        Событие — запись в журнале сделки с должником в получателях: она
+        же приходит ему извещением в колокольчик, если он выбрал извещения
+        на платформе, или письмом, если выбрал почту. Тем, кто выбрал
+        платформу, письмо уходит ещё и отдельно: уведомление об уступке —
+        юридический факт (ст. 382 ГК), а не новость, которую можно
+        отключить. Доказательство — отметки об отправке и прочтении.
+        """
+        self.ensure_one()
+        body = _(
+            'Требование по сделке %(deal)s уступлено: %(from)s → %(to)s. '
+            'Платите по сделке новому кредитору — %(to)s. Согласия должника '
+            'на уступку не требуется (ст. 382 ГК), это уведомление.',
+            deal=self.deal_id.display_name,
+            **{'from': self.creditor_id.name, 'to': self.assignee_id.name},
+        )
+        message = self.deal_id.sudo().message_post(
+            body=body, partner_ids=self.debtor_id.ids,
+            message_type='comment', subtype_xmlid='mail.mt_comment')
+        emailed = message.notification_ids.filtered(
+            lambda n: n.res_partner_id == self.debtor_id
+            and n.notification_type == 'email')
+        mail = self.env['mail.mail']
+        if self.debtor_id.email and not emailed:
+            mail = mail.sudo().create({
+                'mail_message_id': message.id,
+                'subject': _('Уведомление об уступке требования'),
+                'body_html': body,
+                'email_to': self.debtor_id.email_formatted,
+                'auto_delete': False,
+            })
+        self.write({
+            'debtor_notice_message_id': message.id,
+            'debtor_notice_mail_id': mail.id,
+        })
+
+    @api.depends('debtor_notice_message_id.notification_ids.is_read',
+                 'debtor_notice_message_id.notification_ids.notification_status',
+                 'debtor_notice_mail_id.state')
+    def _compute_debtor_notice_status(self):
+        # Через sudo: извещения и письма закрыты от обычного пользователя,
+        # а итог «как уведомлён» виден сторонам уступки.
+        sent = _('письмо отправлено')
+        failed = _('письмо не дошло')
+        queued = _('письмо в очереди')
+        for record in self.sudo():
+            message = record.debtor_notice_message_id
+            if not message:
+                record.debtor_notice_status = False
+                continue
+            mine = message.notification_ids.filtered(
+                lambda n: n.res_partner_id == record.debtor_id)
+            inbox = mine.filtered(lambda n: n.notification_type == 'inbox')
+            email = mine.filtered(lambda n: n.notification_type == 'email')
+            parts = [_('запись в журнале сделки')]
+            if inbox:
+                parts.append(_('извещение прочитано') if any(inbox.mapped('is_read'))
+                             else _('извещение не прочитано'))
+            if not record.debtor_id.email:
+                parts.append(_('почты у должника нет'))
+            elif email:
+                status = email[:1].notification_status
+                parts.append(sent if status == 'sent' else
+                             failed if status in ('bounce', 'exception') else queued)
+            elif record.debtor_notice_mail_id:
+                state = record.debtor_notice_mail_id.state
+                parts.append(sent if state == 'sent' else
+                             failed if state == 'exception' else queued)
+            else:
+                parts.append(_('почты у должника нет'))
+            record.debtor_notice_status = ', '.join(parts)
 
 
 class CoopCessionResponse(models.Model):

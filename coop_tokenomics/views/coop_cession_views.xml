@@ -133,6 +133,7 @@
             <field name="assignee_id" readonly="1" invisible="state != 'done'"/>
             <field name="ceded_on" readonly="1" invisible="state != 'done'"/>
             <field name="debtor_notified_on" readonly="1" invisible="state != 'done'"/>
+            <field name="debtor_notice_status" invisible="not debtor_notice_status"/>
           </group>
           <notebook>
             <page string="Условия словами" name="note">

@@ -377,6 +377,9 @@
                   <div><span class="o_coop_key">Устав</span>
                     <field name="coop_charter_url" widget="coop_inline" readonly="not coop_can_edit_card"
                            placeholder="нет"/></div>
+                  <div invisible="not coop_has_members"><span class="o_coop_key">В неделимый фонд, %</span>
+                    <field name="coop_indivisible_fund_percent" widget="coop_inline"
+                           readonly="not coop_can_edit_card" placeholder="0"/></div>
                   <!-- Вид деятельности стоит среди реквизитов, а не в
                        блоке «На платформе»: это выписка, а не то, что
                        организация о себе рассказала. -->

@@ -327,6 +327,7 @@
                     <field name="condition" widget="coop_inline"/>
                     <field name="bargain"/>
                     <field name="contact_method" widget="coop_inline"/>
+                    <field name="show_phone" invisible="contact_method == 'messages'"/>
                     <field name="owner_id" widget="coop_inline"/>
                   </group>
                 </group>
@@ -704,6 +705,10 @@
                   <div class="coop-add_field">
                     <label for="contact_method" string="Как связываться"/>
                     <field name="contact_method" widget="badges_selection" nolabel="1"/>
+                  </div>
+                  <div class="coop-add_field" invisible="contact_method == 'messages'">
+                    <label for="show_phone" string="Показывать телефон"/>
+                    <field name="show_phone" nolabel="1"/>
                   </div>
                 </div>
               </section>

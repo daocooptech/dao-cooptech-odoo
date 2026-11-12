@@ -744,15 +744,33 @@ class CoopResource(models.Model):
     # 10.11.2026). Номер не лежит в данных витрины — приходит по нажатию:
     # так его не соберёт тот, кто просто листает объявления. При «Только
     # сообщения» кнопки нет — это просьба не звонить.
+    #
+    # Кому номер (решение 661 п. 2): отметка выключена — сторонам сделки
+    # с владельцем и его друзьям; включена — всем вошедшим.
+    show_phone = fields.Boolean(
+        string='Показывать телефон', default=False,
+        help='Выключено — номер видят только ваши друзья и стороны сделок '
+             'с вами. Включено — все вошедшие на платформу.')
     owner_has_phone = fields.Boolean(
         string='Можно показать номер', compute='_compute_owner_has_phone')
 
-    @api.depends('owner_id', 'contact_method')
+    @api.depends_context('uid')
+    @api.depends('owner_id', 'contact_method', 'show_phone')
     def _compute_owner_has_phone(self):
+        user = self.env.user
+        mine = user.coop_actor_partner_ids if not user._is_public() \
+            else self.env['res.partner']
+        closed_owners = self.filtered(
+            lambda r: not r.show_phone and r.owner_id not in mine).owner_id
+        linked = set()
+        for actor in mine:
+            linked |= closed_owners.sudo()._coop_linked_to(actor)
         for record in self:
             owner = record.owner_id.sudo()
+            allowed = bool(mine) and (
+                record.show_phone or owner in mine or owner.id in linked)
             record.owner_has_phone = bool(
-                record.contact_method != 'messages' and owner.phone)
+                allowed and record.contact_method != 'messages' and owner.phone)
 
     def coop_owner_phone(self):
         """Номер владельца по нажатию «Показать номер»."""
