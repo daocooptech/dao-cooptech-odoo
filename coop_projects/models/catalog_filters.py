@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-from datetime import timedelta
-
-from odoo import fields, models
+from odoo import models
 
 
 class CoopProject(models.Model):
@@ -12,8 +10,8 @@ class CoopProject(models.Model):
     «куда-то опять исчезли фильтры из каталога проектов»; «очень важно,
     чтобы были сделаны качественно все фильтры»). Набор — по макету
     `projects.html`: город, тема с разделом, готовность, экономическая
-    модель; сверх макета — состояние сбора и «срок на исходе», которые
-    были в штатном поиске, но до панели не доходили.
+    модель; сверх макета — состояние сбора, которое было в штатном
+    поиске, но до панели не доходило.
     """
     _inherit = 'coop.project'
 
@@ -115,15 +113,6 @@ class CoopProject(models.Model):
                              readiness_base + [('readiness', '>=', step)])}
                         for step in self._COOP_READINESS_STEPS],
         })
-
-        # По дате, а не по «осталось дней»: то поле не хранится, и домен с
-        # ним Odoo отвергает (так же сделан фильтр в штатном поиске).
-        soon = fields.Date.to_string(
-            fields.Date.context_today(self) + timedelta(days=7))
-        blocks.append({
-            'code': 'deadline', 'label': 'Срок', 'widget': 'quick',
-            'options': [{'value': 'soon', 'label': 'Сбор кончается за неделю',
-                         'domain': [('state', '=', 'gathering'),
-                                    ('date_deadline', '<=', soon)]}],
-        })
+        # «Срок на исходе» в панель не ставим (владелец 12.11.2026: «срок
+        # на исходе убери»).
         return blocks
