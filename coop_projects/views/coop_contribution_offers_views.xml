@@ -49,7 +49,7 @@
         <field name="value_diff_label"/>
         <field name="labour_form"/>
         <field name="offered_on"/>
-        <field name="share_percent"/>
+        <field name="share_percent" options="{'hide_trailing_zeros': true}"/>
         <field name="partner_trust"/>
         <field name="partner_deals_done"/>
         <field name="accepted_on"/>
@@ -87,7 +87,7 @@
                   предложено <t t-out="record.offered_on.value"/>
                 </div>
                 <div class="o_coop_offer_state" t-if="record.state.raw_value == 'accepted'">
-                  Принят — пай <t t-out="record.share_percent.value"/> %,
+                  Принят — пай <field name="share_percent" options="{'hide_trailing_zeros': true}"/> %,
                   отозвать можно 7 дней
                 </div>
                 <div class="o_coop_offer_state text-muted" t-elif="record.state.raw_value == 'declined'">

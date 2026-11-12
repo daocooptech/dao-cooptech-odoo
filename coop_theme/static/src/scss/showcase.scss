@@ -24,7 +24,14 @@
   // Ни одной кнопки и ни одного состояния — смотрит не владелец; пустая
   // полоса над витриной выглядела бы сломанной. С `!important`: полоса
   // несёт `d-flex`, а он сам с `!important`.
-  .o_form_statusbar:not(:has(button, .o_statusbar_status)) {
+  .o_form_statusbar:not(:has(.o_statusbar_buttons button,
+                              > .o_field_widget:not(.o_field_statusbar))) {
+    display: none !important;
+  }
+  // Строки этапов («Идея — Сбор — Запущен — Завершён») на витрине нет —
+  // владелец 12.11.2026, решение 654: «он вообще пока не нужен».
+  // Состояние видно меткой на снимке; кнопки владельца остаются.
+  .o_form_statusbar > .o_field_statusbar {
     display: none !important;
   }
   // Полоса хода — той же ширины, что витрина под ней: лист ограничен

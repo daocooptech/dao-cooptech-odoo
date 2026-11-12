@@ -15,6 +15,11 @@
     <field name="model">coop.project</field>
     <field name="inherit_id" ref="coop_projects.view_coop_project_form"/>
     <field name="arch" type="xml">
+      <!-- «Все потребности закрыты» — только когда пуст и этот список,
+           иначе плашка вставала над нематериальными (решение 655). -->
+      <xpath expr="//div[@name='needs_all_closed']" position="attributes">
+        <attribute name="invisible">need_material_ids or need_labour_ids or need_financial_ids or need_intangible_ids</attribute>
+      </xpath>
       <xpath expr="//div[hasclass('o_coop_needs')]" position="inside">
         <div class="o_coop_needs_group" invisible="not need_intangible_ids">
           <div class="o_coop_needs_title">Необходимые нематериальные ресурсы</div>

@@ -80,6 +80,9 @@
                 </div>
                 <div class="o_coop_listing_tags">
                   <span class="o_coop_chip"><field name="rights_kind"/></span>
+                  <span class="o_coop_chip" invisible="investor_access != 'qualified'">
+                    <field name="investor_access"/>
+                  </span>
                   <span class="o_coop_chip" t-if="record.collateral.raw_value">
                     <field name="collateral"/>
                   </span>
@@ -174,6 +177,7 @@
               <field name="issuer_id" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="operator_id" options="{'no_create': True}" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="rights_kind" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="investor_access" widget="coop_inline" readonly="not coop_can_edit"/>
             </group>
             <group string="Параметры выпуска">
               <field name="amount" widget="coop_inline" readonly="not coop_can_edit"/>

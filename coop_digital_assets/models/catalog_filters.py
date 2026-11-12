@@ -6,8 +6,7 @@ class CoopCfaIssue(models.Model):
     """Панель фильтров каталога ЦФА.
 
     Панели не было (задача 422). Набор — по макету `cfa-catalog.html`:
-    вид прав и состояние выпуска; «Кому доступен» из макета не взят —
-    поля о квалификации покупателя у выпуска нет, отбор по нему врал бы.
+    вид прав, кому доступен (решение 654) и состояние выпуска.
     Сверх макета — оператор, город эмитента и объём выпуска.
     """
     _inherit = 'coop.cfa.issue'
@@ -26,6 +25,7 @@ class CoopCfaIssue(models.Model):
                     for value, count in self._read_group(dom, [field], ['__count'])}
 
         kind_counts = counts('rights_kind', without('rights_kind'))
+        access_counts = counts('investor_access', without('investor_access'))
         state_counts = counts('state', without('state'))
         operator_counts = counts('operator_id', without('operator_id'))
         operators = self.env['coop.cfa.operator'].sudo().browse(
@@ -42,6 +42,14 @@ class CoopCfaIssue(models.Model):
              'options': [{'value': code, 'label': label,
                           'count': kind_counts.get(code, 0)}
                          for code, label in self._fields['rights_kind'].selection]},
+            {'code': 'investor_access', 'label': 'Кому доступен',
+             'hint': 'Неквалифицированный инвестор покупает в пределах '
+                     'годового лимита оператора.',
+             'widget': 'select', 'field': 'investor_access', 'operator': '=',
+             'placeholder': 'Любому инвестору', 'counted': True,
+             'options': [{'value': code, 'label': label,
+                          'count': access_counts.get(code, 0)}
+                         for code, label in self._fields['investor_access'].selection]},
             {'code': 'state', 'label': 'Состояние выпуска',
              'hint': 'Приобрести можно выпущенное.',
              'widget': 'select', 'field': 'state', 'operator': '=',

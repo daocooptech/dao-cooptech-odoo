@@ -480,7 +480,7 @@
         <field name="value" string="Оценка"/>
         <field name="share_factor_used" string="Коэффициент"/>
         <field name="share_tokens" string="Долей" sum="Всего долей"/>
-        <field name="share_percent" string="Доля, %"/>
+        <field name="share_percent" string="Доля, %" options="{'hide_trailing_zeros': true}"/>
         <field name="share_minted" string="В сети" widget="boolean_toggle"/>
         <field name="state" widget="badge"
                decoration-success="state == 'accepted'"

@@ -78,7 +78,7 @@
                 <list>
                   <field name="partner_id" string="Вкладчик"/>
                   <field name="share_tokens" string="Долей"/>
-                  <field name="share_percent" string="Доля, %"/>
+                  <field name="share_percent" string="Доля, %" options="{'hide_trailing_zeros': true}"/>
                   <field name="amount" string="Начислено" sum="Всего"/>
                   <field name="withheld" string="Удержано" sum="Всего"/>
                   <field name="net" string="К выплате" sum="Всего"/>
@@ -139,7 +139,7 @@
         <field name="project_id" string="Проект"/>
         <field name="profit_id" string="Объявление"/>
         <field name="partner_id" string="Вкладчик"/>
-        <field name="share_percent" string="Доля, %"/>
+        <field name="share_percent" string="Доля, %" options="{'hide_trailing_zeros': true}"/>
         <field name="amount" string="Начислено" sum="Всего"/>
         <field name="net" string="К выплате" sum="Всего"/>
         <field name="paid_on" string="Выплачена"/>

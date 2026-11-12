@@ -111,7 +111,7 @@
         <!-- Числа, а не строка: по вычисляемому виду сортировка идёт по
              алфавиту, и «120 000» встаёт выше «60 000». -->
         <field name="pay_from" string="Оплата от" optional="show"/>
-        <field name="share_percent" string="Доля, %" optional="hide"/>
+        <field name="share_percent" string="Доля, %" options="{'hide_trailing_zeros': true}" optional="hide"/>
         <field name="application_count" string="Откликов"/>
         <field name="state" widget="badge"
                decoration-success="state == 'published'"
@@ -237,7 +237,7 @@
                   </div>
                   <div invisible="reward_kind != 'share'">
                     <dt>Доля</dt>
-                    <dd><field name="share_percent" readonly="1" nolabel="1"/> %</dd>
+                    <dd><field name="share_percent" readonly="1" nolabel="1" options="{'hide_trailing_zeros': true}"/> %</dd>
                   </div>
                 </dl>
                 <p class="coop-price_note" invisible="not reward_note_shown">
@@ -282,7 +282,7 @@
                    считается от суммы вкладов проекта и меняется, когда в
                    проект вносят что-то ещё. -->
               <field name="contribution_value" invisible="reward_kind != 'share'" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="share_percent" readonly="1" invisible="reward_kind != 'share'"/>
+              <field name="share_percent" readonly="1" options="{'hide_trailing_zeros': true}" invisible="reward_kind != 'share'"/>
               <field name="reward_note" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/>
               <!-- Договор и способ выплаты (решение 425, по заключению
                    юриста): выбирает работодатель, соискатель видит до
