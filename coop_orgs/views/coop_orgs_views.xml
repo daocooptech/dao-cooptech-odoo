@@ -419,6 +419,47 @@
                        placeholder="Чем занимается организация — до 280 знаков"/>
               </div>
 
+              <!-- Заметки организации (решение 655, задача 428): общие для
+                   действующего состава — видит и ведёт каждый, кто сейчас
+                   состоит; остальным полосы нет. Плиткой, как «Мои дела»
+                   на странице человека. -->
+              <field name="coop_my_membership_state" invisible="1"/>
+              <field name="coop_org_note_count" invisible="1"/>
+              <div class="o_coop_band o_coop_my_day o_coop_org_notes"
+                   invisible="coop_my_membership_state not in ('active', 'leaving')">
+                <div class="o_coop_band_head">
+                  <span>Заметки организации</span>
+                  <button name="action_coop_org_new_note" type="object"
+                          class="o_coop_band_all">+ заметка</button>
+                  <button name="action_coop_org_notes" type="object"
+                          class="o_coop_band_all" invisible="not coop_org_note_count">смотреть все</button>
+                </div>
+                <p class="text-muted mb-0" invisible="coop_org_note_count">
+                  Общих заметок пока нет. Их видит и ведёт весь действующий
+                  состав организации.
+                </p>
+                <div class="o_coop_band_body" invisible="not coop_org_note_count">
+                  <field name="coop_org_note_ids" readonly="1" nolabel="1"
+                         context="{'form_view_ref': 'project_todo.project_task_view_todo_form'}">
+                    <kanban class="o_coop_band_kanban" records_draggable="false">
+                      <field name="state"/>
+                      <templates>
+                        <t t-name="card">
+                          <div t-att-class="'o_coop_mini o_coop_mini_text o_coop_day_tile' + (record.state.raw_value == '1_done' ? ' text-muted' : '')">
+                            <div class="o_coop_mini_note o_coop_day_when">
+                              <t t-if="record.coop_deadline_day.raw_value">до <field name="coop_deadline_day"/></t>
+                              <t t-else="">без срока</t>
+                            </div>
+                            <div class="o_coop_mini_label"><field name="name"/></div>
+                            <div class="o_coop_mini_note o_coop_day_where"><field name="create_uid"/></div>
+                          </div>
+                        </t>
+                      </templates>
+                    </kanban>
+                  </field>
+                </div>
+              </div>
+
               <!--
                 Полосы владений — те же, что на странице человека, и в том
                 же порядке, что в макете: сначала люди, потом то, что

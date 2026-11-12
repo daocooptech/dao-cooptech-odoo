@@ -32,6 +32,8 @@ from ..data import load_social_dates
 from ..data import load_staff
 from ..data import load_crm
 from ..data import load_mrp
+from ..data import load_sales
+from ..data import load_org_notes
 from ..data import load_deal_leads
 from ..data import load_deal_activities
 from ..data import load_requisites
@@ -417,6 +419,13 @@ class CoopDemoLoader(models.AbstractModel):
         # Производство организаций и техпроцесс на карточках (решение 630) —
         # тоже после компаний учёта: спецификации и выпуски живут в них.
         load_mrp.load_mrp(self.env)
+        # Заказы продаж и закупок (решение 655, задача 431) — после
+        # производства: строки берут объявления организаций, а пустые
+        # разделы Odoo иначе показывают свой латинский образец.
+        load_sales.load_sales(self.env)
+        load_sales.load_purchases(self.env)
+        # Общие заметки организаций (решение 655, задача 428).
+        load_org_notes.load_org_notes(self.env)
         # Обращения людей (решение 451) — откликами на объявления, когда
         # у организаций уже есть держатели «Сделок», чтобы отвечать.
         load_deal_leads.load_deal_leads(self.env)

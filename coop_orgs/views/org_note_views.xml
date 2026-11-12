@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Заметки организации (решение 655, задача 428): в форме и списке
+       заметки — к какой организации она относится. Выбрать можно только
+       ту, где состоишь. -->
+  <record id="view_todo_form_coop_org" model="ir.ui.view">
+    <field name="name">project.task.todo.form.coop.org</field>
+    <field name="model">project.task</field>
+    <field name="inherit_id" ref="coop_projects.view_todo_form_coop_project"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='coop_project_id']" position="after">
+        <field name="coop_org_id" options="{'no_create': True, 'no_open': True}"
+               placeholder="Личная заметка"
+               domain="[('is_company', '=', True), ('coop_member_ids', 'any', [('partner_id.user_ids', 'in', [uid]), ('state', '=', 'active')])]"/>
+      </xpath>
+    </field>
+  </record>
+  <record id="view_todo_list_coop_org" model="ir.ui.view">
+    <field name="name">project.task.todo.list.coop.org</field>
+    <field name="model">project.task</field>
+    <field name="inherit_id" ref="coop_projects.view_todo_list_coop_project"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='coop_project_id']" position="after">
+        <field name="coop_org_id" optional="show"/>
+      </xpath>
+    </field>
+  </record>
+  <record id="view_todo_search_coop_org" model="ir.ui.view">
+    <field name="name">project.task.todo.search.coop.org</field>
+    <field name="model">project.task</field>
+    <field name="inherit_id" ref="coop_projects.view_todo_search_coop_project"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='coop_project_id']" position="after">
+        <field name="coop_org_id"/>
+      </xpath>
+      <xpath expr="//filter[@name='by_coop_project']" position="after">
+        <filter name="by_coop_org" string="Организация"
+                context="{'group_by': 'coop_org_id'}"/>
+      </xpath>
+    </field>
+  </record>
+</odoo>

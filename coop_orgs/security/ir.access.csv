@@ -7,3 +7,4 @@ access_coop_org_section_all,Кооперативные участки — чит
 access_coop_org_section_admin,Кооперативные участки — настройщики,coop.org.section,base.group_system,crud,
 access_coop_org_section_meeting_all,Собрания участков — читают все,coop.org.section.meeting,base.group_user,r,
 access_coop_org_section_meeting_admin,Собрания участков — настройщики,coop.org.section.meeting,base.group_system,crud,
+rule_org_note_members,Заметки организации — действующий состав,project.task,base.group_user,crud,"[('project_id', '=', False), ('parent_id', '=', False), ('coop_org_id.coop_member_ids', 'any', [('partner_id', '=', user.partner_id.id), ('state', '=', 'active')])]"
