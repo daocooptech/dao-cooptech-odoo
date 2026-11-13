@@ -20,9 +20,33 @@
              invisible="path != 'member' or join_block not in ('closed', 'no_charter')">
           <field name="join_block_note" class="d-inline" readonly="1"/>
         </div>
-        <div class="alert alert-secondary mt-2 mb-0" role="status"
-             invisible="path != 'work' or vacancy_count">
-          Сейчас вакансий нет. Подпишитесь на организацию — узнаете о новых.
+        <div class="o_coop_work mt-2" invisible="path != 'work'">
+          <field name="work_vacancy_ids" readonly="1" nolabel="1"
+                 invisible="not vacancy_count" class="o_coop_work_list">
+            <list create="0" delete="0" no_open="1">
+              <field name="my_application_state" column_invisible="1"/>
+              <field name="is_mine" column_invisible="1"/>
+              <field name="name" string="Вакансия"/>
+              <field name="employment" string="Занятость"/>
+              <field name="reward_display" string="Оплата"/>
+              <field name="contract_kind" string="Оформление"/>
+              <field name="members_pay_note" string="Пометка" class="text-warning"/>
+              <button name="action_apply" type="object" string="Откликнуться"
+                      class="btn-primary btn-sm"
+                      invisible="is_mine or my_application_state != 'none'"/>
+            </list>
+          </field>
+          <div class="o_coop_empty text-center py-3" role="status"
+               invisible="vacancy_count">
+            <i class="fa fa-briefcase fa-2x text-muted" aria-hidden="true"/>
+            <div class="fw-semibold mt-2">Сейчас вакансий нет</div>
+            <div class="text-muted">Можно оставить заявку или подписаться на новые.</div>
+          </div>
+          <p class="text-muted small mt-2 mb-0">
+            Платят деньгами. Продуктом кооператива — не больше 20 % зарплаты
+            и только по вашему заявлению. Токенами и баллами вместо денег
+            платить нельзя.
+          </p>
         </div>
       </xpath>
       <xpath expr="//footer/button[@name='action_offer']" position="after">
@@ -37,10 +61,10 @@
                 string="Сообщить, когда откроется" class="btn-primary"
                 invisible="not members_only or path != 'member' or join_block not in ('closed', 'no_charter')"/>
         <button name="action_coop_vacancies" type="object"
-                string="Смотреть вакансии" class="btn-primary"
+                string="Все вакансии списком"
                 invisible="not members_only or member_state == 'active' or path != 'work' or not vacancy_count"/>
         <button name="action_coop_follow_org" type="object"
-                string="Подписаться на вакансии" class="btn-primary"
+                string="Подписаться на вакансии"
                 invisible="not members_only or member_state == 'active' or path != 'work' or vacancy_count"/>
       </xpath>
     </field>

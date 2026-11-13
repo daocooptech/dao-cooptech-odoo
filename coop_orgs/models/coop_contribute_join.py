@@ -19,6 +19,10 @@ class CoopContributeJoin(models.TransientModel):
     ], compute='_compute_join_block')
     join_block_note = fields.Char(compute='_compute_join_block')
     vacancy_count = fields.Integer(compute='_compute_vacancy_count')
+    # Путь «Работать» внутри окна (задача 445, кусок 3): вакансии проекта,
+    # за ними — организации, с «Откликнуться» в строке.
+    work_vacancy_ids = fields.Many2many(
+        'coop.vacancy', string='Вакансии', compute='_compute_vacancy_count')
 
     @api.depends('project_id')
     def _compute_join_block(self):
@@ -37,10 +41,19 @@ class CoopContributeJoin(models.TransientModel):
 
     @api.depends('project_id')
     def _compute_vacancy_count(self):
-        Vacancy = self.env['coop.vacancy'].sudo()
+        Vacancy = self.env['coop.vacancy']
         for wizard in self:
-            wizard.vacancy_count = (Vacancy.search_count(
-                wizard._coop_vacancy_domain()) if wizard.project_id else 0)
+            if not wizard.project_id:
+                wizard.vacancy_count = 0
+                wizard.work_vacancy_ids = Vacancy
+                continue
+            found = Vacancy.sudo().search(wizard._coop_vacancy_domain())
+            # Сперва вакансии этого проекта, потом остальные организации.
+            project = wizard.project_id
+            found = found.sorted(
+                lambda v: (v.coop_project_id != project, v.id))
+            wizard.vacancy_count = len(found)
+            wizard.work_vacancy_ids = Vacancy.browse(found.ids)
 
     def action_coop_join_org(self):
         """«Читать условия» — заявление в три шага, «Назад» — сюда."""

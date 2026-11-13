@@ -191,6 +191,10 @@ class CoopVacancy(models.Model):
     reward_display = fields.Char(
         string='Вознаграждение строкой', compute='_compute_reward_display',
         store=True)
+    # Окно «Участвовать» нечлена (задача 445): долей платят только
+    # членам кооператива, нечлену такая работа — сделкой за деньги.
+    members_pay_note = fields.Char(
+        string='Пометка', compute='_compute_members_pay_note')
     reward_note = fields.Char(
         string='Уточнение к вознаграждению',
         help='Всё, что не укладывается в поля: «оплата после испытательного», '
@@ -468,6 +472,13 @@ class CoopVacancy(models.Model):
     def _compute_application_count(self):
         for record in self:
             record.application_count = len(record.application_ids)
+
+    @api.depends('reward_kind')
+    def _compute_members_pay_note(self):
+        for record in self:
+            record.members_pay_note = (
+                _('Оплата долей — только членам')
+                if record.reward_kind == 'share' else False)
 
     def _compute_my_application(self):
         me = self.env.user.partner_id

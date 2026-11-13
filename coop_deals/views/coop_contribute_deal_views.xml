@@ -41,7 +41,17 @@
           <field name="deal_money_closed" invisible="1"/>
         </div>
       </xpath>
+      <xpath expr="//div[hasclass('o_coop_members_only')]" position="inside">
+        <field name="work_open" invisible="1"/>
+        <group invisible="not members_only or member_state == 'active' or path != 'work' or work_open">
+          <field name="note" string="Что умеете"
+                 placeholder="Каменщик, 8 лет, свой инструмент; могу с марта"/>
+        </group>
+      </xpath>
       <xpath expr="//footer/button[@name='action_offer']" position="after">
+        <button name="action_coop_offer_self" type="object"
+                string="Предложить себя" class="btn-primary"
+                invisible="not members_only or member_state == 'active' or path != 'work' or work_open"/>
         <button name="action_coop_propose_deal" type="object"
                 string="Предложить сделку" class="btn-primary"
                 invisible="not members_only or member_state == 'active' or path != 'outside'"/>

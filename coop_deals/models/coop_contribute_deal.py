@@ -124,6 +124,56 @@ class CoopContributeDeal(models.TransientModel):
             if wizard.deal_pay_id not in wizard.deal_way_id.pay_ids:
                 wizard.deal_pay_id = wizard.deal_way_id.pay_ids[:1]
 
+    # Путь «Работать» без вакансий — «Предложить себя» (задача 445,
+    # кусок 3): обращение организации, как отклик без объявления.
+    work_open = fields.Boolean(compute='_compute_work_open')
+
+    @api.depends('project_id')
+    def _compute_work_open(self):
+        Vacancy = self.env['coop.vacancy'].sudo()
+        for wizard in self:
+            project = wizard.project_id
+            wizard.work_open = bool(project) and bool(Vacancy.search_count([
+                ('state', '=', 'published'), '|',
+                ('coop_project_id', '=', project.id),
+                ('partner_id', '=', project.partner_id.id)], limit=1))
+
+    def action_coop_offer_self(self):
+        self.ensure_one()
+        project = self.project_id
+        org = project.partner_id
+        me = self.env.user._coop_acting_partner()
+        if org == me:
+            raise UserError(_('Это ваша организация.'))
+        deal = self.env['coop.deal'].sudo().create({
+            'name': _('Готов работать в проекте «%s»') % project.name,
+            'subject': 'work',
+            'way': 'service',
+            'party_a_id': me.id,
+            'party_b_id': org.id,
+            'role_a': _('Исполнитель'),
+            'role_b': _('Заказчик'),
+            'author_id': self.env.user.partner_id.id,
+            'project_id': project.id,
+            'amount': 0.0,
+            'state': 'lead',
+        })
+        if self.note:
+            deal.message_post(body=self.note)
+        body = _('%(who)s предлагает себя на работу в проекте «%(project)s». '
+                 'Обращение %(number)s.', who=me.display_name,
+                 project=project.name, number=deal.number or '')
+        self.env['coop.notification']._notify(
+            org, body, record=project, kind='project')
+        project.sudo().message_post(body=body)
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'coop.deal',
+            'res_id': deal.id,
+            'view_mode': 'form',
+            'target': 'current',
+        }
+
     def action_coop_propose_deal(self):
         self.ensure_one()
         project = self.project_id

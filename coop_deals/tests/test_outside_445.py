@@ -83,3 +83,25 @@ class TestOutside445(CoopProjectCase):
         wizard = self._wizard(self._project('pk'))
         wizard.deal_kind_id = self.env.ref('coop_deals.contribute_kind_labour')
         self.assertIn('Работать', wizard.deal_kind_warning)
+
+    # ── Кусок 3: «Работать» ──────────────────────────────────────────────
+
+    def test_predlozhit_sebya_bez_vakansiy(self):
+        project = self._project('pk')
+        wizard = self._wizard(project)
+        wizard.path = 'work'
+        self.assertFalse(wizard.work_open)
+        wizard.note = 'Каменщик, свой инструмент'
+        action = wizard.action_coop_offer_self()
+        deal = self.env['coop.deal'].sudo().browse(action['res_id'])
+        self.assertEqual(deal.state, 'lead')
+        self.assertEqual(deal.subject, 'work')
+        self.assertEqual(deal.party_a_id, self.stranger.partner_id)
+        self.assertEqual(deal.party_b_id, project.partner_id)
+
+    def test_dolya_tolko_chlenam(self):
+        Vacancy = self.env['coop.vacancy']
+        share = Vacancy.new({'name': 'Прораб', 'reward_kind': 'share'})
+        money = Vacancy.new({'name': 'Прораб', 'reward_kind': 'money'})
+        self.assertIn('только членам', share.members_pay_note)
+        self.assertFalse(money.members_pay_note)
