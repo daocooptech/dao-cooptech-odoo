@@ -45,7 +45,7 @@ from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_communities,
                     load_deals,
                     load_examples, load_memberships, load_messages,
-                    load_org_profiles, load_orgs, load_people, load_projects,
+                    load_join_terms, load_org_profiles, load_orgs, load_people, load_projects,
                     load_auctions,
                     load_events,
                     load_groupbuy,
@@ -105,6 +105,9 @@ class CoopDemoLoader(models.AbstractModel):
         load_orgs.repair_empty_logos(self.env)
         load_org_profiles.load_org_profiles(self.env, specializations, marks)
         load_org_profiles.fill_org_contacts(self.env)
+        # Условия вступления кооперативов (задача 445): документы, взносы,
+        # закрытый набор, нет устава.
+        load_join_terms.load_join_terms(self.env)
         # Состав организаций — до каталогов: правила доступа смотрят на
         # полномочия в членстве, и объявления организаций должны попадать
         # к людям, которым эта организация поручила публикации.

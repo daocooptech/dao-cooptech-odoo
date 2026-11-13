@@ -132,39 +132,65 @@
     <field name="model">coop.org.join</field>
     <field name="arch" type="xml">
       <form string="Заявление о вступлении">
+        <!-- Задача 445: три шага — что вас ждёт, документы с отметкой
+             «ознакомился», заявление. Наёмного здесь нет (решение 678). -->
+        <header>
+          <field name="step" widget="statusbar"/>
+        </header>
         <field name="organization_id" invisible="1"/>
         <field name="is_cooperative" invisible="1"/>
-        <group>
-          <field name="allowed_role_ids" invisible="1"/>
-          <field name="role_code" invisible="1"/>
-          <field name="role_id" widget="radio"
-                 options="{'no_create': True}"/>
-          <field name="job_title" placeholder="Бухгалтер, механик, менеджер по продажам"
-                 invisible="role_code != 'staff'"/>
-          <field name="note" placeholder="Необязательно"/>
-        </group>
-        <div class="alert alert-info" role="status"
-             invisible="role_code != 'member'">
-          Пайщик вносит пай и получает голос на собрании: один член —
-          один голос, независимо от размера пая. Решение о приёме
-          принимает тот, кто ведёт состав организации.
+        <field name="project_id" invisible="1"/>
+        <field name="block" invisible="1"/>
+        <div class="alert alert-secondary" role="status" invisible="not block">
+          <field name="block_note" class="d-inline" readonly="1"/>
         </div>
-        <field name="safe_notice" invisible="1"/>
-        <div class="alert alert-warning" role="alert" invisible="not safe_notice">
-          Вы гражданин Китая. Перевести деньги из Китая на оплату пая можно
-          только с одобрения Государственного валютного управления КНР (SAFE) —
-          ст. 16 правил КНР о валютных операциях физических лиц. Вступить
-          можно уже сейчас; одобрение получите до оплаты пая.
+        <div invisible="step != 'about'">
+          <field name="about_html" readonly="1" nolabel="1"/>
         </div>
-        <div class="alert alert-info" role="status"
-             invisible="role_code != 'staff'">
-          Наёмный сотрудник пая не вносит и голоса на собрании не имеет.
-          Что ему позволено делать от имени организации, задают
-          полномочия — их выдают при приёме.
+        <div invisible="step != 'docs'">
+          <p>Прочитайте документы кооператива до заявления: правила приёма,
+             взносов и распределения записаны в них, а не на платформе.</p>
+          <field name="docs_html" readonly="1" nolabel="1"/>
+          <div class="d-flex align-items-center gap-2 py-2">
+            <field name="acknowledged" nolabel="1" id="coop_join_ack"/>
+            <label for="acknowledged" string="Я ознакомился(лась) с документами кооператива"/>
+          </div>
+        </div>
+        <div invisible="step != 'apply'">
+          <group>
+            <field name="allowed_role_ids" invisible="1"/>
+            <field name="role_code" invisible="1"/>
+            <field name="acknowledged" invisible="1"/>
+            <field name="role_id" widget="radio"
+                   options="{'no_create': True}"/>
+            <field name="note" placeholder="Необязательно"/>
+          </group>
+          <div class="alert alert-info" role="status">
+            Подавая заявление, вы обязуетесь соблюдать устав, вносить
+            взносы и отвечать по долгам кооператива так, как записано в
+            его документах. Решение о приёме принимает правление.
+          </div>
+          <field name="safe_notice" invisible="1"/>
+          <div class="alert alert-warning" role="alert" invisible="not safe_notice">
+            Вы гражданин Китая. Перевести деньги из Китая на оплату пая можно
+            только с одобрения Государственного валютного управления КНР (SAFE) —
+            ст. 16 правил КНР о валютных операциях физических лиц. Вступить
+            можно уже сейчас; одобрение получите до оплаты пая.
+          </div>
         </div>
         <footer>
+          <button name="action_next" type="object" string="Далее"
+                  class="btn-primary" invisible="block or step == 'apply'"/>
           <button name="action_apply" type="object" string="Подать заявление"
-                  class="btn-primary"/>
+                  class="btn-primary" invisible="block or step != 'apply'"
+                  confirm="Подать заявление о вступлении?"/>
+          <button name="action_withdraw" type="object" string="Отозвать заявление"
+                  invisible="block != 'applied'"
+                  confirm="Отозвать заявление о вступлении?"/>
+          <button name="action_follow" type="object" string="Сообщить, когда откроется"
+                  class="btn-primary" invisible="block not in ('closed', 'no_charter')"/>
+          <button name="action_back" type="object" string="Назад"
+                  invisible="step == 'about' and not project_id"/>
           <button string="Отмена" special="cancel"/>
         </footer>
       </form>
@@ -380,6 +406,29 @@
                   <div invisible="not coop_has_members"><span class="o_coop_key">В неделимый фонд, %</span>
                     <field name="coop_indivisible_fund_percent" widget="coop_inline"
                            readonly="not coop_can_edit_card" placeholder="0"/></div>
+                  <!-- Условия вступления — их читает нечлен в заявлении
+                       (задача 445). Только у кооперативов: паёв нет
+                       нигде больше. -->
+                  <div invisible="not coop_is_cooperative"><span class="o_coop_key">Положение о взносах</span>
+                    <field name="coop_fees_rules_url" widget="coop_inline" readonly="not coop_can_edit_card"
+                           placeholder="нет"/></div>
+                  <div invisible="not coop_is_cooperative"><span class="o_coop_key">Положение о прибыли</span>
+                    <field name="coop_profit_rules_url" widget="coop_inline" readonly="not coop_can_edit_card"
+                           placeholder="нет"/></div>
+                  <div invisible="not coop_is_cooperative"><span class="o_coop_key">Отчётность</span>
+                    <field name="coop_report_url" widget="coop_inline" readonly="not coop_can_edit_card"
+                           placeholder="нет"/></div>
+                  <div invisible="not coop_is_cooperative"><span class="o_coop_key">Вступительный взнос, ₽</span>
+                    <field name="coop_entrance_fee" widget="coop_inline" readonly="not coop_can_edit_card"
+                           placeholder="по уставу"/></div>
+                  <div invisible="not coop_is_cooperative"><span class="o_coop_key">Паевой взнос, ₽</span>
+                    <field name="coop_min_share_fee" widget="coop_inline" readonly="not coop_can_edit_card"
+                           placeholder="по уставу"/></div>
+                  <div invisible="not coop_is_cooperative or not coop_can_edit_card"><span class="o_coop_key">Принимает заявления</span>
+                    <field name="coop_join_open" readonly="not coop_can_edit_card"/></div>
+                  <div invisible="not coop_is_cooperative or coop_join_open"><span class="o_coop_key">Почему не принимает</span>
+                    <field name="coop_join_closed_note" widget="coop_inline" readonly="not coop_can_edit_card"
+                           placeholder="не указано"/></div>
                   <!-- Вид деятельности стоит среди реквизитов, а не в
                        блоке «На платформе»: это выписка, а не то, что
                        организация о себе рассказала. -->

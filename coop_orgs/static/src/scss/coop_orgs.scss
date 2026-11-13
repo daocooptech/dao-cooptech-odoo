@@ -184,3 +184,41 @@
 .o_coop_org_notes .o_coop_band_all {
     white-space: nowrap;
 }
+
+// ── Окно «Участвовать»: пути карточками (задача 445) ────────────────────
+//
+// Радио движка — столбик кружков с подписями. Здесь каждый вариант —
+// плитка в рамке, выбранный обведён. На телефоне плитки стопкой, высота
+// не меньше 56 px (проект окна ux-ui-designer 14.11).
+.o_coop_path_cards .o_radio_item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 56px;
+  margin: 0 0 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--coop-line, #e6e6e1);
+  border-radius: var(--coop-radius-card, 10px);
+  background: var(--coop-white, #fff);
+  cursor: pointer;
+
+  .o_radio_input { float: none; margin: 0; }
+  label { margin: 0; font-weight: 600; cursor: pointer; flex: 1 1 auto; }
+
+  &:has(.o_radio_input:checked) {
+    border-color: var(--coop-ink, #1d1d1b);
+    box-shadow: inset 0 0 0 1px var(--coop-ink, #1d1d1b);
+  }
+}
+
+.o_coop_path_cards { display: block; width: 100%; }
+.o_coop_path_cards > [role="radiogroup"] { width: 100%; }
+
+@media (min-width: 768px) {
+  .o_coop_path_cards > [role="radiogroup"] {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+  }
+  .o_coop_path_cards .o_radio_item { flex: 1 1 0; margin-bottom: 8px; }
+}

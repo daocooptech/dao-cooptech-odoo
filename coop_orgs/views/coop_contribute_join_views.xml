@@ -1,15 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-  <!-- Решение 676: нечлену в окне вклада — «Вступить в кооператив». -->
+  <!-- Задача 445: пути «Стать пайщиком» и «Работать» в окне «Участвовать».
+       Путь пайщика виден всегда; заявление не подать — причина и что
+       делать (решение 677). -->
   <record id="view_coop_contribute_form_join" model="ir.ui.view">
     <field name="name">coop.project.contribute.form.join</field>
     <field name="model">coop.project.contribute</field>
     <field name="inherit_id" ref="coop_projects.view_coop_contribute_form"/>
     <field name="arch" type="xml">
+      <xpath expr="//div[hasclass('o_coop_members_only')]" position="inside">
+        <field name="join_block" invisible="1"/>
+        <field name="vacancy_count" invisible="1"/>
+        <div class="alert alert-warning mt-2 mb-0" role="status"
+             invisible="path != 'member' or join_block != 'applied'">
+          <field name="join_block_note" class="d-inline" readonly="1"/>
+          Пока можно участвовать без вступления.
+        </div>
+        <div class="alert alert-secondary mt-2 mb-0" role="status"
+             invisible="path != 'member' or join_block not in ('closed', 'no_charter')">
+          <field name="join_block_note" class="d-inline" readonly="1"/>
+        </div>
+        <div class="alert alert-secondary mt-2 mb-0" role="status"
+             invisible="path != 'work' or vacancy_count">
+          Сейчас вакансий нет. Подпишитесь на организацию — узнаете о новых.
+        </div>
+      </xpath>
       <xpath expr="//footer/button[@name='action_offer']" position="after">
         <button name="action_coop_join_org" type="object"
-                string="Вступить в кооператив" class="btn-primary"
-                invisible="not members_only or member_state != 'none'"/>
+                string="Читать условия" class="btn-primary"
+                invisible="not members_only or member_state == 'active' or path != 'member' or join_block"/>
+        <button name="action_coop_withdraw_join" type="object"
+                string="Отозвать заявление"
+                confirm="Отозвать заявление о вступлении?"
+                invisible="not members_only or path != 'member' or join_block != 'applied'"/>
+        <button name="action_coop_follow_org" type="object"
+                string="Сообщить, когда откроется" class="btn-primary"
+                invisible="not members_only or path != 'member' or join_block not in ('closed', 'no_charter')"/>
+        <button name="action_coop_vacancies" type="object"
+                string="Смотреть вакансии" class="btn-primary"
+                invisible="not members_only or member_state == 'active' or path != 'work' or not vacancy_count"/>
+        <button name="action_coop_follow_org" type="object"
+                string="Подписаться на вакансии" class="btn-primary"
+                invisible="not members_only or member_state == 'active' or path != 'work' or vacancy_count"/>
       </xpath>
     </field>
   </record>

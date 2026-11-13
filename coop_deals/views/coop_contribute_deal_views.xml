@@ -7,7 +7,7 @@
     <field name="inherit_id" ref="coop_projects.view_coop_contribute_form"/>
     <field name="arch" type="xml">
       <xpath expr="//div[hasclass('o_coop_members_only')]" position="after">
-        <group invisible="not members_only or member_state == 'active'"
+        <group invisible="not members_only or member_state == 'active' or path != 'outside'"
                string="Сделка с инициатором">
           <field name="deal_way"/>
           <field name="deal_name" placeholder="Аренда экскаватора на месяц"/>
@@ -16,8 +16,8 @@
       </xpath>
       <xpath expr="//footer/button[@name='action_offer']" position="after">
         <button name="action_coop_propose_deal" type="object"
-                string="Предложить сделку"
-                invisible="not members_only or member_state == 'active'"/>
+                string="Предложить сделку" class="btn-primary"
+                invisible="not members_only or member_state == 'active' or path != 'outside'"/>
       </xpath>
     </field>
   </record>

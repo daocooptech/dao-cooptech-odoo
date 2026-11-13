@@ -77,6 +77,35 @@ class ResPartner(models.Model):
              'не формальность: правила приёма, голосования и распределения '
              'записаны там, а не на платформе.')
 
+    # ── Условия вступления (задача 445, решения 677 и 679) ────────────────
+    #
+    # Владелец 13.11.2026: при заявке «можно дать описание процессу, какие
+    # плюсы и подводные камни от вступления, документы кооператива (устав,
+    # положение о программе и тд)». Документы — ссылками, как и устав:
+    # кооператив держит действующие редакции у себя.
+    coop_fees_rules_url = fields.Char(
+        string='Положение о взносах',
+        help='Размер и порядок вступительного и паевого взносов, возврат '
+             'пая при выходе.')
+    coop_profit_rules_url = fields.Char(
+        string='Положение о распределении прибыли')
+    coop_report_url = fields.Char(string='Последняя отчётность')
+    coop_entrance_fee = fields.Float(
+        string='Вступительный взнос, ₽', digits=(16, 2),
+        help='Не возвращается при выходе. Ноль — размер задан уставом.')
+    coop_min_share_fee = fields.Float(
+        string='Обязательный паевой взнос, ₽', digits=(16, 2),
+        help='Возвращается при выходе на условиях устава. Ноль — размер '
+             'задан уставом.')
+    coop_join_open = fields.Boolean(
+        string='Принимает заявления', default=True,
+        help='Снято — путь «Стать пайщиком» виден, но заявление не подать; '
+             'нечлен видит причину (решение 677).')
+    coop_join_closed_note = fields.Char(
+        string='Почему не принимает',
+        help='Что увидит тот, кто хочет вступить: «набор закрыт до '
+             'собрания в марте».')
+
     # Знак бывает двух видов: символ рода занятий во весь кадр или буква
     # названия с символом над ней. Оба заливают плитку целиком — поле
     # различает только рисунок, а не способ показа.
@@ -271,8 +300,13 @@ class ResPartner(models.Model):
             # Вступают в организацию, основанную на членстве, и не в свою
             # собственную карточку. У фонда и АНО членства нет вовсе —
             # предлагать туда вступить значило бы обещать несуществующее.
+            # По заявлению вступают пайщиком (кооператив) или участником
+            # (НКО, ДАО); в КФХ и товарищество — по договору, не
+            # заявлением (задача 445: наёмного в окне больше нет).
             record.coop_can_join = bool(
                 record.is_company and record.coop_has_members
+                and record.coop_legal_form_group_id.code in (
+                    'cooperative', 'nonprofit', 'decentralized')
                 and record != me and state == 'none')
 
     def action_coop_join(self):
@@ -280,12 +314,36 @@ class ResPartner(models.Model):
         self.ensure_one()
         return {
             'type': 'ir.actions.act_window',
-            'name': _('Вступить в «%s»') % self.name,
+            'name': _('Вступить в %s') % self.name,
             'res_model': 'coop.org.join',
             'view_mode': 'form',
             'target': 'new',
             'context': {'default_organization_id': self.id},
         }
+
+    def _coop_join_block(self):
+        """Почему заявление о вступлении не подать: (код, пояснение).
+
+        Пусто — подать можно. Решения 677 (путь виден всегда, с причиной)
+        и 679 п. 4 (без устава заявления нет).
+        """
+        self.ensure_one()
+        mine = self._coop_my_membership()
+        if mine and mine.state == 'applied':
+            return 'applied', _(
+                'Заявление подано %s и ждёт решения правления.') % (
+                    mine.create_date.strftime('%d.%m.%Y')
+                    if mine.create_date else '')
+        if mine:
+            return 'member', _('Вы уже член «%s».') % self.name
+        if not self.coop_join_open:
+            return 'closed', _('Сейчас не принимает заявления: %s.') % (
+                self.coop_join_closed_note or _('причина не указана'))
+        if not self.coop_charter_url:
+            return 'no_charter', _(
+                'Устав не выложен на платформе, без него заявление не '
+                'подаём. Подпишитесь — узнаете, когда появится.')
+        return False, False
 
     def _coop_my_membership(self):
         """Моё открытое членство в этой организации, если оно есть."""

@@ -36,6 +36,14 @@ class CoopContributeWizard(models.TransientModel):
         ('active', 'Член'),
     ], compute='_compute_members_only')
     org_name = fields.Char(related='project_id.partner_id.name')
+    # Задача 445: нечлену — три пути, выбирает сам. Тело пути дают модули,
+    # которые его умеют: вступление — организации, сделка — сделки,
+    # работа — вакансии.
+    path = fields.Selection([
+        ('member', 'Стать пайщиком'),
+        ('outside', 'Без вступления'),
+        ('work', 'Работать'),
+    ], string='Как участвуете', default='member')
 
     @api.depends('project_id')
     def _compute_members_only(self):

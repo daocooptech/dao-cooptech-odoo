@@ -1008,9 +1008,15 @@ class CoopProject(models.Model):
         деньги и вещи, и собирать их было неоткуда.
         """
         self.ensure_one()
+        # Нечлену кооператива — «Участвовать»: вклад ему закрыт, но
+        # путей три (задача 445).
+        me = self.env.user._coop_acting_partner()
+        title = (_('Участвовать в проекте «%s»')
+                 if self._coop_members_only() and not self._coop_is_member(me)
+                 else _('Вклад в проект «%s»'))
         return {
             'type': 'ir.actions.act_window',
-            'name': _('Вклад в проект «%s»') % self.name,
+            'name': title % self.name,
             'res_model': 'coop.project.contribute',
             'view_mode': 'form',
             'target': 'new',
