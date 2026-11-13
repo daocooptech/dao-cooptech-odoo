@@ -153,13 +153,35 @@
         <field name="project_id" invisible="1"/>
         <field name="currency_id" invisible="1"/>
         <field name="project_kind" invisible="1"/>
+        <field name="members_only" invisible="1"/>
+        <field name="member_state" invisible="1"/>
+        <!-- Решение 676: нечлену вместо формы вклада — два пути.
+             Кнопки «Вступить» и «Предложить сделку» добавляют модули
+             организаций и сделок. -->
+        <div class="alert alert-warning o_coop_members_only" role="status"
+             invisible="not members_only or member_state == 'active'">
+          <p class="mb-1">
+            Вклад в кооперативный проект вносит только член кооператива
+            <field name="org_name" class="d-inline" readonly="1"/>:
+            принятый вклад становится паем, а пай бывает только у членов.
+          </p>
+          <p class="mb-0" invisible="member_state != 'none'">
+            Вступите в кооператив — после решения правления сможете
+            вносить вклад. Или предложите инициатору сделку: аренду,
+            продажу, работу по договору.
+          </p>
+          <p class="mb-0" invisible="member_state != 'applied'">
+            Заявление о вступлении подано и ждёт решения правления. Пока
+            можно предложить инициатору сделку.
+          </p>
+        </div>
         <!-- Пришли из строки потребности — показываем, из какой:
              человек выбрал «Двигатель асинхронный», и окно должно это
              подтвердить, а не спрашивать заново. -->
         <group invisible="not need_id">
           <field name="need_id" readonly="1"/>
         </group>
-        <group>
+        <group invisible="members_only and member_state != 'active'">
           <field name="kind" widget="radio"/>
           <!-- Свой ресурс из каталога вместо описания словами (владелец
                28.10.2026: «нету возможности предложить уже добавленный в
@@ -177,7 +199,7 @@
         <!-- Чем считается принятый вклад — зависит от вида проекта.
              Решение владельца 15 сентября 2026. -->
         <div class="alert alert-info" role="status"
-             invisible="project_kind != 'cooperative'">
+             invisible="project_kind != 'cooperative' or (members_only and member_state != 'active')">
           Инициатор проекта увидит предложение и решит, принять ли его.
           Принятый вклад считается паем: ваша оценка к сумме всех вкладов.
         </div>
@@ -194,7 +216,8 @@
         </div>
         <footer>
           <button name="action_offer" type="object" string="Предложить вклад"
-                  class="btn-primary"/>
+                  class="btn-primary"
+                  invisible="members_only and member_state != 'active'"/>
           <button string="Отмена" special="cancel"/>
         </footer>
       </form>
@@ -680,9 +703,6 @@
                   <field name="share_ratio" readonly="1"
                          string="Доля, %" options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind not in ('commercial', 'dao')"/>
-                  <field name="share_excluded" readonly="1" string="Без пая" width="80px"
-                         optional="show"
-                         column_invisible="parent.kind != 'cooperative'"/>
                   <field name="offered_on" optional="hide"/>
                   <field name="withdraw_until" optional="hide"/>
                   <field name="delivered_on" optional="hide"/>

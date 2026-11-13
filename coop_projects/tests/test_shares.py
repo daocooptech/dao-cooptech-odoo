@@ -97,13 +97,17 @@ class TestProjectShares(CoopProjectCase):
             labour.factor = 2.5
             labour.flush_recordset()
 
-    def test_trud_nechlena_bez_paya(self):
-        """Решение 659 п. 3: труд нечлена — сделкой или задачей, без пая."""
-        org = self._make_org('Артель Пробы Паёв')
+    def test_vklad_v_kooperativ_tolko_chlenu(self):
+        """Решение 676: нечлену вклад в кооперативный проект закрыт."""
+        org = self._make_org('Артель Пробы Членства')
+        org.coop_legal_form_id = self.env['coop.legal.form'].search(
+            [('code', '=', 'artel')], limit=1)
         self.env['coop.membership'].create({
             'partner_id': self.initiator.partner_id.id,
             'organization_id': org.id, 'state': 'active',
             'admission_basis': 'Решение правления № 1',
+            'power_ids': [(6, 0, self.env['coop.power'].search(
+                [('code', 'in', ['deal', 'represent'])]).ids)],
         })
         member = self._make_person('Член Артели')
         self.env['coop.membership'].create({
@@ -111,25 +115,32 @@ class TestProjectShares(CoopProjectCase):
             'organization_id': org.id, 'state': 'active',
             'admission_basis': 'Решение правления № 2',
         })
-        stranger = self._make_person('Посторонний Работник')
+        stranger = self._make_person('Посторонний Мастер')
         project = self._make_project(partner=org, state='gathering')
-        self.assertEqual(project.kind, 'cooperative')
+        self.assertTrue(project._coop_members_only())
 
         own = self.Contribution.create({
             'project_id': project.id, 'partner_id': member.partner_id.id,
             'kind': 'labour', 'name': 'Кладка', 'value': 60000,
-            'state': 'accepted'})
+            'state': 'offered'})
         alien = self.Contribution.create({
             'project_id': project.id, 'partner_id': stranger.partner_id.id,
-            'kind': 'labour', 'name': 'Отделка', 'value': 40000,
-            'state': 'accepted'})
+            'kind': 'resource', 'name': 'Экскаватор', 'value': 40000,
+            'state': 'offered'})
+        own.with_user(self.initiator).action_accept()
+        self.assertEqual(own.state, 'accepted')
+        with self.assertRaises(UserError):
+            alien.with_user(self.initiator).action_accept()
 
-        self.assertFalse(own.share_excluded)
-        self.assertTrue(alien.share_excluded)
-        self.assertEqual(alien.share_percent, 0)
-        self.assertEqual(own.share_percent, 100)
-        # Работа признана: в собранном она есть.
-        self.assertEqual(project.contribution_total, 100000)
-        if 'coop.project.share.rate' in self.env:
-            self.assertFalse(alien.share_tokens)
-            self.assertTrue(own.share_tokens)
+        # Окно вклада нечлену форму не даёт.
+        wizard = self.env['coop.project.contribute'].with_user(
+            stranger).create({'project_id': project.id, 'kind': 'resource',
+                              'name': 'Экскаватор', 'value': 40000})
+        self.assertTrue(wizard.members_only)
+        self.assertEqual(wizard.member_state, 'none')
+        with self.assertRaises(UserError):
+            wizard.action_offer()
+
+        # Демо приводится к правилу приёмом в члены.
+        self.Project._coop_admit_contributors()
+        self.assertTrue(project._coop_is_member(stranger.partner_id))

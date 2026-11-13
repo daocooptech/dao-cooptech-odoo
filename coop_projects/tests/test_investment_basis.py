@@ -26,3 +26,23 @@ class TestInvestmentBasis(TransactionCase):
         for kind in ('cooperative', 'nonprofit'):
             with self.assertRaises(ValidationError):
                 self._project(kind, True)
+
+    def test_pozhertvovanie_ne_u_ooo(self):
+        """Решение 665 п. 3: у ООО вместо пожертвования — «Поддержка»."""
+        form = self.env['coop.legal.form'].search([('code', '=', 'ooo')], limit=1)
+        if not form:
+            self.skipTest('Справочника форм нет')
+        org = self.env['res.partner'].create({
+            'name': 'ООО «Без пожертвований»', 'is_company': True,
+            'coop_legal_form_id': form.id})
+        project = self.env['coop.project'].create({
+            'name': 'Проект ООО', 'kind': 'nonprofit', 'partner_id': org.id})
+        self.assertEqual(project.contribution_basis, 'prepay')
+        with self.assertRaises(ValidationError):
+            project.contribution_basis = 'donation'
+            project.flush_recordset()
+        person = self.env['res.partner'].create({'name': 'Человек'})
+        own = self.env['coop.project'].create({
+            'name': 'Проект человека', 'kind': 'nonprofit',
+            'partner_id': person.id})
+        self.assertEqual(own.contribution_basis, 'donation')

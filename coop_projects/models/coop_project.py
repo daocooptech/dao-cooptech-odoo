@@ -153,10 +153,17 @@ DEFAULT_DAYS = 60
 
 CONTRIBUTION_BASIS = [
     ('donation', 'Пожертвование или целевой взнос'),
-    ('prepay', 'Предоплата за вознаграждение'),
+    ('prepay', 'Поддержка — предоплата за вознаграждение'),
     ('share', 'Паевой взнос пайщика'),
     ('investment', 'Инвестирование'),
 ]
+
+# Решение 665 п. 3: пожертвование принимают НКО, ассоциации,
+# потребительские кооперативы и люди. У коммерческих организаций, включая
+# производственные кооперативы, и у коммерческих проектов вместо него —
+# «Поддержка»: предоплата с вознаграждением.
+NO_DONATION_FORMS = ('ooo', 'ao', 'pao', 'zao', 'oao', 'ip', 'kfh',
+                     'hoz_part', 'pk', 'spk', 'artel')
 
 # Кто держит деньги на время сбора. Счёта самой платформы здесь нет и не
 # будет: деньги вкладчиков на нём — это сразу либо спецсчёт с ККТ и
@@ -183,6 +190,25 @@ def _days(count):
     return '%s %s' % (count, word)
 
 
+class ResPartnerShareholders(models.Model):
+    _inherit = 'res.partner'
+
+    def _coop_has_shareholders(self):
+        """Бывают ли у организации пайщики — по её правовой форме.
+
+        Пайщик (`member`) вступает не во всякую «кооперативную» форму:
+        в ДАО, например, справочник оснований участия его не допускает,
+        и правило «вклад только от члена» (решение 676) там упёрлось бы в
+        членство, которого не получить.
+        """
+        self.ensure_one()
+        if not (self.is_company and self.coop_is_cooperative):
+            return False
+        role = self.env['coop.membership.role'].sudo().search(
+            [('code', '=', 'member')], limit=1)
+        return bool(role) and role.fits_group(self.coop_legal_form_group_id)
+
+
 class CoopProject(models.Model):
     """Проект платформы — краудресурсинг.
 
@@ -206,6 +232,11 @@ class CoopProject(models.Model):
     _name = 'coop.project'
     _description = 'Проект (краудресурсинг)'
     _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin', 'coop.media.mixin']
+    # Лента проекта — для всех, кто его видит, а не только для тех, кто
+    # вправе его править (задача 391 закрыла правку чужим). По умолчанию
+    # движка писать в ленту может только правящий, и владелец 13.11.2026
+    # получил «404: Not Found» на «Отправить сообщение» в чужом проекте.
+    _mail_post_access = 'read'
     _coop_page_view = 'coop_projects.view_coop_project_form'
     _coop_role_field = 'partner_id'
     _coop_role_text = 'Вы инициатор'
@@ -791,6 +822,50 @@ class CoopProject(models.Model):
                     'своего имени. Выберите предоплату или пожертвование '
                     'либо разместите проект от имени организации.'))
 
+    def _coop_donation_allowed(self):
+        self.ensure_one()
+        if self.kind == 'commercial':
+            return False
+        org = self.partner_id
+        return not (org.is_company and org.coop_legal_form_id.code
+                    in NO_DONATION_FORMS)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Без явного основания коммерческому — «Поддержка», не пожертвование.
+
+        Умолчание «пожертвование» верно для людей и НКО; проекту ООО оно
+        запрещено (665 п. 3), и создание упиралось бы в проверку.
+        """
+        Partner = self.env['res.partner']
+        for vals in vals_list:
+            if vals.get('contribution_basis'):
+                continue
+            org = Partner.browse(vals.get('partner_id') or [])
+            if (vals.get('kind') == 'commercial'
+                    or (org.is_company and org.coop_legal_form_id.code
+                        in NO_DONATION_FORMS)):
+                vals['contribution_basis'] = 'prepay'
+        return super().create(vals_list)
+
+    @api.onchange('partner_id', 'kind')
+    def _onchange_donation_basis(self):
+        if (self.contribution_basis == 'donation'
+                and not self._coop_donation_allowed()):
+            self.contribution_basis = 'prepay'
+
+    @api.constrains('contribution_basis', 'kind', 'partner_id')
+    def _check_donation_basis(self):
+        """Пожертвование — только тому, кто вправе его принять (665 п. 3)."""
+        for record in self:
+            if (record.contribution_basis == 'donation'
+                    and not record._coop_donation_allowed()):
+                raise ValidationError(_(
+                    'Пожертвования принимают некоммерческие организации, '
+                    'ассоциации, потребительские кооперативы и люди. Для '
+                    'проекта «%s» выберите «Поддержка — предоплата за '
+                    'вознаграждение».') % record.name)
+
     def _check_investment_allowed(self):
         """Инвестиционный сбор — на узле со статусом оператора.
 
@@ -844,6 +919,86 @@ class CoopProject(models.Model):
             record.can_contribute = bool(
                 record.state == 'gathering'
                 and record.partner_id not in mine)
+
+    def _coop_members_only(self):
+        """Вклад сюда — только от членов (решение 676).
+
+        Пай бывает только в кооперативе: правило — для кооперативного
+        проекта организации кооперативной формы. Рабочая группа платформы
+        или ООО с «кооперативным» проектом паевого фонда не имеют.
+        """
+        self.ensure_one()
+        return (self.kind == 'cooperative'
+                and self.partner_id._coop_has_shareholders())
+
+    def _coop_is_member(self, partner):
+        self.ensure_one()
+        return bool(self.env['coop.membership'].sudo().search_count([
+            ('partner_id', '=', partner.id),
+            ('organization_id', '=', self.partner_id.id),
+            ('state', '=', 'active'),
+        ], limit=1))
+
+    @api.model
+    def _coop_admit_contributors(self):
+        """Демо по решению 676: вкладчиков-нечленов — в члены.
+
+        Выбор владельца 13.11.2026: вклады и паи остаются, а вкладчик
+        оформляется членом кооператива с датой вступления до первого
+        вклада. Открытое заявление принимается, прекращённого членства
+        нет — заводится новое. Вызывается миграцией и последним шагом
+        загрузки демо; повторный вызов ничего не меняет.
+        """
+        Membership = self.env['coop.membership'].sudo()
+        contributions = self.env['coop.project.contribution'].sudo().search([
+            ('project_id.kind', '=', 'cooperative'),
+            ('project_id.partner_id.coop_is_cooperative', '=', True),
+        ], order='offered_on, id').filtered(
+            lambda c: c.project_id.partner_id._coop_has_shareholders())
+        first = {}
+        for contribution in contributions:
+            key = (contribution.partner_id.id,
+                   contribution.project_id.partner_id.id)
+            if contribution.partner_id == contribution.project_id.partner_id:
+                continue
+            day = contribution.offered_on or fields.Date.context_today(self)
+            if key not in first or day < first[key]:
+                first[key] = day
+        admitted = 0
+        for (partner_id, org_id), day in first.items():
+            open_one = Membership.search([
+                ('partner_id', '=', partner_id),
+                ('organization_id', '=', org_id),
+                ('state', 'in', ('applied', 'active', 'leaving')),
+            ], limit=1)
+            if open_one.state in ('active', 'leaving'):
+                continue
+            joined = day - timedelta(days=7 + (partner_id + org_id) % 60)
+            basis = _('Решение правления о приёме от %s') % joined.strftime(
+                '%d.%m.%Y')
+            if open_one:
+                open_one.write({'state': 'active', 'joined_on': joined,
+                                'admission_basis': basis})
+            else:
+                org = self.env['res.partner'].browse(org_id)
+                values = {
+                    'partner_id': partner_id, 'organization_id': org_id,
+                    'state': 'active', 'joined_on': joined,
+                    'admission_basis': basis,
+                }
+                # Роль — по правовой форме кооператива: пайщик, если
+                # подходит, иначе первое подходящее основание участия.
+                group = org.coop_legal_form_group_id
+                allowed = self.env['coop.membership.role'].sudo().search(
+                    []).filtered(lambda r: r.fits_group(group))
+                role = (allowed.filtered(lambda r: r.code == 'member')[:1]
+                        or allowed.filtered(lambda r: r.code in (
+                            'associate', 'participant', 'founder'))[:1])
+                if role:
+                    values['role_id'] = role.id
+                Membership.create(values)
+            admitted += 1
+        return admitted
 
     def action_contribute(self):
         """Открыть окно вклада.
@@ -1285,13 +1440,39 @@ class CoopProject(models.Model):
     SILENT_STATES = ('cancelled', 'frozen', 'failed')
 
     def write(self, vals):
+        # Сменили инициатора или вид, а основание не трогали — умолчание
+        # «пожертвование» у коммерческого переходит в «Поддержку» (665 п. 3).
+        # Явно выбранное пожертвование проверка по-прежнему отвергает.
+        if ('partner_id' in vals or 'kind' in vals) \
+                and 'contribution_basis' not in vals:
+            donating = self.filtered(lambda p: p.contribution_basis == 'donation')
+            if donating:
+                rest = self - donating
+                for project in donating:
+                    probe = project.new({
+                        'kind': vals.get('kind', project.kind),
+                        'partner_id': vals.get('partner_id',
+                                               project.partner_id.id),
+                    })
+                    own = dict(vals)
+                    if not probe._coop_donation_allowed():
+                        own['contribution_basis'] = 'prepay'
+                    super(CoopProject, project).write(own)
+                    project._coop_after_write(vals)
+                if rest:
+                    rest.write(vals)
+                return True
+        result = super().write(vals)
+        self._coop_after_write(vals)
+        return result
+
+    def _coop_after_write(self, vals):
         """Снять объявления, когда проект перестал искать.
 
         Не в `action_cancel`, а в `write`: отменить проект можно и
         загрузчиком, и переносом, и правкой из списка — а объявление в
         каталоге живёт своей жизнью и само о проекте не узнает.
         """
-        result = super().write(vals)
         if vals.get('state') in self.SILENT_STATES:
             stopped = self.filtered(
                 lambda record: record.state in record.SILENT_STATES)
@@ -1303,7 +1484,6 @@ class CoopProject(models.Model):
             stopped.filtered(
                 lambda record: record.state == 'failed'
             )._settle_contributions()
-        return result
 
     recovery_share = fields.Integer(
         string='Доля остатка на покрытие невозвратного, %', default=50,
@@ -1573,17 +1753,6 @@ class CoopProjectContribution(models.Model):
     share_ratio = fields.Float(
         string='Доля, %', related='share_percent', readonly=True,
         digits=(5, 2))
-    # Решение владельца 659 п. 3 (12.11.2026): труд нечлена на кооператив
-    # оформляется сделкой или задачей, доля и пай ему не начисляются.
-    # Вклад остаётся в сборе — работа признана и оценена, — но в делении
-    # паёв не участвует: иначе посторонний получал бы долю в кооперативе
-    # мимо вступления.
-    share_excluded = fields.Boolean(
-        string='Без пая: труд нечлена', compute='_compute_share_excluded',
-        store=True,
-        help='Труд человека, который не состоит в кооперативе-инициаторе. '
-             'Пай и доля не начисляются; оплату оформляют сделкой или '
-             'задачей (решение 659).')
 
     # На какую потребность откликнулись. Пусто у вкладов, предложенных
     # проекту вообще, а не в ответ на объявленную нужду: так вносили до
@@ -1629,41 +1798,38 @@ class CoopProjectContribution(models.Model):
                 record.value_diff = 0.0
                 record.value_diff_label = _('стоимость потребности не задана')
 
-    @api.depends('kind', 'partner_id', 'project_id.kind',
-                 'project_id.partner_id')
-    def _compute_share_excluded(self):
-        """Труд на кооперативный проект организации от не её члена.
-
-        Членство проверяется на момент вклада: пай либо возник при
-        принятии, либо нет, и задним числом его не отнимают и не дают.
-        """
-        Membership = self.env['coop.membership'].sudo()
-        for record in self:
-            project = record.project_id
-            org = project.partner_id
-            if (record.kind != 'labour' or project.kind != 'cooperative'
-                    or not org.is_company or not record.partner_id):
-                record.share_excluded = False
-                continue
-            record.share_excluded = not Membership.search_count([
-                ('partner_id', '=', record.partner_id.id),
-                ('organization_id', '=', org.id),
-                ('state', '=', 'active'),
-            ], limit=1)
-
-    @api.depends('value', 'state', 'share_excluded',
-                 'project_id.contribution_total',
-                 'project_id.contribution_ids.share_excluded')
+    @api.depends('value', 'state', 'project_id.contribution_total')
     def _compute_share_percent(self):
         for record in self:
-            total = sum(record.project_id.contribution_ids.filtered(
-                lambda c: c.state == 'accepted' and not c.share_excluded
-            ).mapped('value'))
-            if (record.state == 'accepted' and total
-                    and not record.share_excluded):
+            total = record.project_id.contribution_total
+            if record.state == 'accepted' and total:
                 record.share_percent = round(record.value / total * 100, 2)
             else:
                 record.share_percent = 0
+
+    # ── Только члены (решение 676) ───────────────────────────────────────
+    #
+    # Владелец 13.11.2026: «как можно внести в кооператив ресурс, если ты
+    # не пайщик, и какой в этом смысл?» — нечлену вклад в кооперативный
+    # проект организации закрыт любым видом. Ему два пути: вступить или
+    # предложить сделку. Пай — только у членов.
+    #
+    # Проверка — там, где человек действует: в окне вклада и при принятии.
+    # Перенос и загрузчики заводят вклады мимо них, и демо приводится к
+    # правилу отдельно (`coop.project._coop_admit_contributors`).
+
+    def _check_members_only(self):
+        for record in self:
+            project = record.project_id
+            if not project._coop_members_only():
+                continue
+            if not project._coop_is_member(record.partner_id):
+                raise UserError(_(
+                    '%(who)s не состоит в «%(org)s». Вклад в кооперативный '
+                    'проект вносит только член кооператива: вступите в него '
+                    'или предложите инициатору сделку.',
+                    who=record.partner_id.display_name,
+                    org=project.partner_id.display_name))
 
     @api.constrains('state', 'kind', 'partner_id', 'project_id')
     def _check_member_for_share_basis(self):
@@ -1719,6 +1885,7 @@ class CoopProjectContribution(models.Model):
         сразу: держать откликнувшихся в ожидании после того, как выбор
         сделан, — неуважение к их времени.
         """
+        self._check_members_only()
         for record in self:
             deciders = record.project_id.partner_id
             if record.need_id:

@@ -27,6 +27,32 @@ class CoopContributeWizard(models.TransientModel):
     # ничем. Обещать долю в некоммерческом проекте нельзя даже вскользь.
     project_kind = fields.Selection(
         related='project_id.kind', readonly=True)
+    # Решение 676: вклад в кооперативный проект организации — только от
+    # члена. Нечлену окно показывает два пути вместо формы вклада.
+    members_only = fields.Boolean(compute='_compute_members_only')
+    member_state = fields.Selection([
+        ('none', 'Не член'),
+        ('applied', 'Подано заявление'),
+        ('active', 'Член'),
+    ], compute='_compute_members_only')
+    org_name = fields.Char(related='project_id.partner_id.name')
+
+    @api.depends('project_id')
+    def _compute_members_only(self):
+        me = self.env.user._coop_acting_partner()
+        Membership = self.env['coop.membership'].sudo()
+        for wizard in self:
+            project = wizard.project_id
+            wizard.members_only = bool(
+                project and project._coop_members_only())
+            state = Membership.search([
+                ('partner_id', '=', me.id),
+                ('organization_id', '=', project.partner_id.id),
+                ('state', 'in', ('applied', 'active', 'leaving')),
+            ], limit=1).state if project else False
+            wizard.member_state = {
+                'active': 'active', 'leaving': 'active',
+                'applied': 'applied'}.get(state, 'none')
     kind = fields.Selection([
         ('money', 'Деньги'),
         ('labour', 'Труд'),
@@ -139,6 +165,12 @@ class CoopContributeWizard(models.TransientModel):
             raise UserError(_(
                 'Это ваш проект. Вклад инициатора учитывается сметой, а не '
                 'предложением самому себе.'))
+        if project._coop_members_only() and not project._coop_is_member(me):
+            raise UserError(_(
+                'Вклад в кооперативный проект «%(project)s» вносит только '
+                'член «%(org)s». Вступите в кооператив или предложите '
+                'инициатору сделку.',
+                project=project.name, org=project.partner_id.name))
 
         values = {
             'project_id': project.id,

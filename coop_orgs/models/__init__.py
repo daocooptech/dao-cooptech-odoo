@@ -7,3 +7,4 @@ from . import catalog_filters
 from . import coop_section
 from . import org_note
 from . import org_media
+from . import coop_contribute_join

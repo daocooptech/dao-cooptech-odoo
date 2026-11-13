@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Решение 676: нечлену в окне вклада — «Предложить сделку». -->
+  <record id="view_coop_contribute_form_deal" model="ir.ui.view">
+    <field name="name">coop.project.contribute.form.deal</field>
+    <field name="model">coop.project.contribute</field>
+    <field name="inherit_id" ref="coop_projects.view_coop_contribute_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//div[hasclass('o_coop_members_only')]" position="after">
+        <group invisible="not members_only or member_state == 'active'"
+               string="Сделка с инициатором">
+          <field name="deal_way"/>
+          <field name="deal_name" placeholder="Аренда экскаватора на месяц"/>
+          <field name="deal_amount"/>
+        </group>
+      </xpath>
+      <xpath expr="//footer/button[@name='action_offer']" position="after">
+        <button name="action_coop_propose_deal" type="object"
+                string="Предложить сделку"
+                invisible="not members_only or member_state == 'active'"/>
+      </xpath>
+    </field>
+  </record>
+</odoo>

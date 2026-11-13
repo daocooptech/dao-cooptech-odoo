@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Решение 676: нечлену в окне вклада — «Вступить в кооператив». -->
+  <record id="view_coop_contribute_form_join" model="ir.ui.view">
+    <field name="name">coop.project.contribute.form.join</field>
+    <field name="model">coop.project.contribute</field>
+    <field name="inherit_id" ref="coop_projects.view_coop_contribute_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//footer/button[@name='action_offer']" position="after">
+        <button name="action_coop_join_org" type="object"
+                string="Вступить в кооператив" class="btn-primary"
+                invisible="not members_only or member_state != 'none'"/>
+      </xpath>
+    </field>
+  </record>
+</odoo>

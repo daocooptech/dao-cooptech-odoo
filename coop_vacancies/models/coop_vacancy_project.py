@@ -134,6 +134,14 @@ class CoopVacancyApplication(models.Model):
                 'ответственный за потребность или тот, кому организация '
                 'поручила сделки.') % project.name)
 
+        # Решение 676 и 659 п. 3: вклад в кооперативный проект — только
+        # от члена. Труд нечлена оформляется сделкой — её заводит модуль
+        # сделок (`_accept_non_member`); без него утвердить нельзя.
+        if (project._coop_members_only()
+                and not project._coop_is_member(self.partner_id)):
+            self._accept_non_member(project)
+            return
+
         # Оценка труда — то, что вакансия обещает за работу. Ноль тоже
         # бывает: волонтёрская вакансия доли не даёт, и это правда, а не
         # недосмотр.
@@ -148,19 +156,32 @@ class CoopVacancyApplication(models.Model):
             'accepted_on': fields.Date.context_today(self),
         })
         self.contribution_id = contribution.id
+        self._close_vacancy_after_accept(
+            {'need_accepted_id': contribution.id},
+            _('труд учтён вкладом на %s ₽') % value)
 
-        # Дальше — последствия уже принятого решения: право утверждать
-        # проверено выше по существу, а прав на саму вакансию и чужие
-        # отклики у ответственного за потребность нет и быть не должно.
+    def _accept_non_member(self, project):
+        """Утверждён нечлен: без модуля сделок оформить нечем."""
+        raise UserError(_(
+            '%(who)s не состоит в «%(org)s», а вклад в кооперативный проект '
+            'вносит только член. Труд нечлена оформляется сделкой: '
+            'пригласите его вступить или договоритесь сделкой.',
+            who=self.partner_id.display_name,
+            org=project.partner_id.display_name))
+
+    def _close_vacancy_after_accept(self, values, how):
+        """Закрыть вакансию и отклонить прочие отклики.
+
+        Последствия уже принятого решения: право утверждать проверено
+        по существу, а прав на саму вакансию и чужие отклики у
+        ответственного за потребность нет и быть не должно.
+        """
         others = self.vacancy_id.application_ids.filtered(
             lambda app: app.id != self.id and app.state == 'applied')
         if others:
             others.sudo().write({'state': 'declined'})
-        self.vacancy_id.sudo().write({
-            'state': 'closed',
-            'need_accepted_id': contribution.id,
-        })
+        self.vacancy_id.sudo().write(dict(values, state='closed'))
         self.vacancy_id.sudo().message_post(body=_(
-            'Вакансия закрыта: утверждён отклик от %(who)s, труд учтён '
-            'вкладом на %(value)s ₽. Прочих откликов отклонено: %(count)s.',
-            who=self.partner_id.display_name, value=value, count=len(others)))
+            'Вакансия закрыта: утверждён отклик от %(who)s, %(how)s. '
+            'Прочих откликов отклонено: %(count)s.',
+            who=self.partner_id.display_name, how=how, count=len(others)))

@@ -20,7 +20,7 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.4.3',
+    'version': '20.0.1.4.4',
     'license': 'LGPL-3',
     # website — ради порядка загрузки: в движке 20 его поле вида `visibility`
     # обязательное, и новый вид модуля, загруженного раньше website, падает
@@ -31,6 +31,7 @@
         'data/coop_deal_data.xml',
         'report/coop_deal_reports.xml',
         'views/coop_deal_views.xml',
+        'views/coop_contribute_deal_views.xml',
         'views/coop_deal_inquiry_views.xml',
         'security/ir.access.csv',
     ],

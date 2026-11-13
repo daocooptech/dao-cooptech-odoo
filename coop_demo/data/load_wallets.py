@@ -345,15 +345,27 @@ def _fill_shares(env, wallet, rnd, index):
                 # Вступительный — невозвратный и небольшой, не паевой
                 # (решение 427): сотни и тысячи рублей, а не сотня тысяч.
                 amount = rnd.choice([500, 1000, 1500, 2000, 3000, 5000])
+            date = '20%02d-%02d-%02d' % (
+                23 + ((index + step) % 4), 1 + (step % 12),
+                1 + ((index + step) % 27))
             if kind == 'accrual':
                 amount = rnd.randint(3000, 22000)
+                # Начисление года — в пределах лимита кооперативных
+                # выплат (ст. 24 3085-1, проверка `coop_tax`): членов
+                # прибавилось (решение 676), и общий итог выходил за лимит.
+                if 'coop.tax.payout.limit' in env:
+                    limit = env['coop.tax.payout.limit'].sudo().search([
+                        ('cooperative_id', '=', account.cooperative_id.id),
+                        ('year', '=', int(date[:4]) - 1)], limit=1)
+                    if limit:
+                        amount = min(amount, int(limit.remaining))
+                        if amount < 1000:
+                            continue
             if kind == 'payout':
                 amount = -rnd.randint(2000, 12000)
             Move.create({
                 'account_id': account.id,
-                'date': '20%02d-%02d-%02d' % (
-                    23 + ((index + step) % 4), 1 + (step % 12),
-                    1 + ((index + step) % 27)),
+                'date': date,
                 'name': title,
                 'kind': kind,
                 'basis': basis,

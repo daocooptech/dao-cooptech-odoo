@@ -131,3 +131,33 @@ class TestProjectVacancy(CoopProjectCase):
             {'name': 'Управляемый для проверки'}).id
         vacancy = self._make_vacancy(project)
         self.assertEqual(vacancy.project_id, project.project_id)
+
+    def test_nechlen_po_vakansii_kooperativa_ne_vkladchik(self):
+        """Решения 659 п. 3 и 676: труд нечлена — сделкой, не паем."""
+        org = self._make_org('Артель Пробы Вакансий')
+        org.coop_legal_form_id = self.env['coop.legal.form'].search(
+            [('code', '=', 'artel')], limit=1)
+        self.env['coop.membership'].create({
+            'partner_id': self.initiator.partner_id.id,
+            'organization_id': org.id, 'state': 'active',
+            'admission_basis': 'Решение правления № 1',
+            'power_ids': [(6, 0, self.env['coop.power'].search(
+                [('code', 'in', ['deal', 'represent'])]).ids)],
+        })
+        project = self._make_project(partner=org, state='gathering')
+        vacancy = self._make_vacancy(project)
+        stranger = self._make_person('Сварщик Со Стороны')
+        application = self._apply(vacancy, stranger)
+
+        if 'coop.deal' not in self.env:
+            with self.assertRaises(UserError):
+                application.with_user(self.initiator).action_invite()
+            return
+        application.with_user(self.initiator).action_invite()
+        self.assertFalse(application.contribution_id)
+        self.assertFalse(project.contribution_ids)
+        deal = self.env['coop.deal'].search([('vacancy_id', '=', vacancy.id)])
+        self.assertEqual(len(deal), 1)
+        self.assertEqual(deal.way, 'job')
+        self.assertEqual(deal.party_a_id, stranger.partner_id)
+        self.assertEqual(vacancy.state, 'closed')

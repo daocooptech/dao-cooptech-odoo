@@ -470,6 +470,10 @@ class CoopDemoLoader(models.AbstractModel):
         # Готовность без перебора в десятки раз — после цен и вкладов.
         from ..data import fit_readiness
         fit_readiness.fit_readiness(self.env)
+        # Решение 676: вклад в кооперативный проект — только член.
+        # Загрузчики заводят вклады от кого придётся; вкладчиков-нечленов
+        # принимаем в члены с датой до первого вклада.
+        self.env['coop.project']._coop_admit_contributors()
         return True
 
     def _load_rubrics(self):

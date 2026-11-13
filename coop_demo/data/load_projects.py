@@ -328,6 +328,9 @@ def load_projects(env, extra=100):
             # данные»).
             values.pop('partner_id', None)
             values.pop('author_id', None)
+            # Основание — по настоящему инициатору, а не по сегодняшнему
+            # из списка: пожертвование у ООО запрещено (665 п. 3).
+            values['contribution_basis'] = _basis_for(row, project.partner_id)
             project.write(values)
             updated += 1
             is_new = False
@@ -619,13 +622,15 @@ def _fix_basis(env, project):
     if not money:
         return 0
     if not org.is_company:
-        project.contribution_basis = 'donation'
+        project.contribution_basis = (
+            'donation' if project._coop_donation_allowed() else 'prepay')
         return 1
     members = set(env['coop.membership'].sudo().search([
         ('organization_id', '=', org.id), ('state', '=', 'active'),
     ]).mapped('partner_id').ids)
     if not set(money.mapped('partner_id').ids) <= members:
-        project.contribution_basis = 'donation'
+        project.contribution_basis = (
+            'donation' if project._coop_donation_allowed() else 'prepay')
         return 1
     return 0
 
@@ -674,6 +679,12 @@ def _basis_for(row, initiator=None):
     }.get(row['project_type'], 'prepay')
     if basis == 'share' and initiator is not None and not initiator.is_company:
         return 'prepay'
+    # Решение 665 п. 3: пожертвование у коммерческой организации и
+    # производственного кооператива — «Поддержка» (предоплата).
+    if basis == 'donation' and initiator is not None and initiator.is_company:
+        from odoo.addons.coop_projects.models.coop_project import NO_DONATION_FORMS
+        if initiator.coop_legal_form_id.code in NO_DONATION_FORMS:
+            return 'prepay'
     return basis
 
 

@@ -226,8 +226,7 @@ class CoopProjectContribution(models.Model):
     # Зависимости исходной формулы повторены: декоратор переопределения
     # заменяет их, а проекты без долей считает она.
     @api.depends('share_tokens', 'state', 'project_id.share_total',
-                 'value', 'share_excluded', 'project_id.contribution_total',
-                 'project_id.contribution_ids.share_excluded')
+                 'value', 'project_id.contribution_total')
     def _compute_share_percent(self):
         """Доля считается от начисленных долей, а не от рублей.
 
@@ -289,15 +288,6 @@ class CoopProjectContribution(models.Model):
         """
         self.ensure_one()
         if self.share_tokens:
-            return
-        if self.share_excluded:
-            # Решение 659 п. 3: труд нечлена — сделкой или задачей.
-            self.sudo().write({'share_tokens': 0, 'share_factor_used': 0})
-            self.project_id.sudo().message_post(body=_(
-                'Вклад «%(what)s» принят без пая: %(who)s не состоит в '
-                'кооперативе. Труд нечлена оформляется сделкой или задачей, '
-                'доля и пай не начисляются.',
-                what=self.name, who=self.partner_id.name))
             return
         # Начисление — следствие уже принятого вклада, а не отдельное
         # решение: право принимать проверено в `action_accept`. Прав на
