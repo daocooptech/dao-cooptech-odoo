@@ -388,6 +388,11 @@ details[open] summary::after{content:'–'}
 details p{padding:0 20px 18px;color:var(--slate)}
 
 /* honest */
+.tprice{font-family:'Manrope',sans-serif;font-weight:800;color:var(--ink);font-size:15px;margin-top:auto}
+#tarify .mods{margin-bottom:8px}
+#tarify .honest{margin-top:24px}
+.tfine{margin-top:8px;max-width:900px}
+.tinv{margin-top:24px}
 .honest{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
 .honest div{padding:18px;border:1px solid var(--line);border-radius:12px;background:var(--white);display:flex;flex-direction:column;gap:6px;color:var(--slate);font-size:15px}
 .honest b{font-family:'Manrope',sans-serif;color:var(--ink);font-size:15px}

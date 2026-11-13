@@ -46,6 +46,12 @@ class CoopLegal(http.Controller):
     def coop_network_rules(self, **kw):
         return request.render('coop_website.coop_network_rules')
 
+    @http.route('/dokumenty', type='http', auth='public', website=True, sitemap=True)
+    def coop_documents(self, **kw):
+        """Документы и тарифы — на неё ссылается раздел «Тарифы» лендинга
+        (решение 674)."""
+        return request.render('coop_website.coop_documents')
+
     @http.route('/about/software', type='http', auth='public', website=True, sitemap=True)
     def coop_about_software(self, **kw):
         return request.render('coop_website.coop_about_software')
