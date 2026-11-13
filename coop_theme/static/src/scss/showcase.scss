@@ -34,6 +34,12 @@
   .o_form_statusbar > .o_field_statusbar {
     display: none !important;
   }
+  // Проект — исключение: ход «Идея — Сбор — Запущен — Завершён» над
+  // страницей показан всем, где он уместен (владелец 14.11.2026).
+  &.o_coop_with_steps .o_form_statusbar.o_form_statusbar,
+  &.o_coop_with_steps .o_form_statusbar > .o_field_statusbar {
+    display: flex !important;
+  }
   // Полоса хода — той же ширины, что витрина под ней: лист ограничен
   // `--coop-content-max`, а полоса шла на всю ширину и выступала справа
   // на 55 px (замер 12.11 на 1440: 1269 против 1214).
