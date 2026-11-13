@@ -147,6 +147,35 @@ def load_skills(env):
     _logger.info('Каталог навыков: из макета %s (создано %s, обновлено %s), '
                  'достроено по участникам %s, по пустым специализациям %s',
                  len(rows), created, updated, generated, filled)
+    spread_employment(env)
+
+
+# Занятость и график (решение 661 п. 4): разброс по демо-записям. Доли —
+# из двадцати: занятость 8 полная / 7 частичная / 5 разово; график
+# 7 полный день / 3 сменный / 6 гибкий / 4 удалённо. Графику к шагу по id
+# добавлен сдвиг на каждые двадцать записей: без него занятость и график
+# шли жёсткими парами (у полной занятости не было сменного графика).
+EMPLOYMENT_SPREAD = ['full'] * 8 + ['part'] * 7 + ['once'] * 5
+SCHEDULE_SPREAD = ['full_day'] * 7 + ['shift'] * 3 + ['flexible'] * 6 + ['remote'] * 4
+
+
+def spread_employment(env):
+    """Заполнить пустые занятость и график у демо-предложений.
+
+    Только записи с `import_key` — загруженные или достроенные демо;
+    предложение, заведённое человеком, не трогаем."""
+    offers = env['coop.skill.offer'].sudo().with_context(active_test=False).search([
+        ('import_key', '!=', False),
+        '|', ('employment', '=', False), ('work_schedule', '=', False)])
+    for offer in offers:
+        values = {}
+        if not offer.employment:
+            values['employment'] = EMPLOYMENT_SPREAD[offer.id % 20]
+        if not offer.work_schedule:
+            values['work_schedule'] = SCHEDULE_SPREAD[(offer.id * 7 + offer.id // 20) % 20]
+        offer.write(values)
+    _logger.info('Навыки: занятость и график разложены у %s демо-предложений',
+                 len(offers))
 
 
 # Ставка подбирается по специализации: сварщик и бухгалтер стоят

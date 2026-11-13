@@ -74,10 +74,11 @@ class TestSkillShowcase(TransactionCase):
 
     def test_facts_like_sample(self):
         """Факты под описанием — как в образце: ставка, опыт,
-        командировки, город."""
+        командировки, город; с решения 661 п. 4 — занятость и график."""
         arch = self._arch()
         labels = [dt.text for dt in arch.xpath("//dl[contains(@class, 'coop-show_facts')]/div/dt")]
-        self.assertEqual(labels, ['Ставка', 'Опыт', 'Командировки', 'Город'])
+        self.assertEqual(labels, ['Ставка', 'Опыт', 'Командировки', 'Город',
+                                  'Занятость', 'График'])
 
     def test_single_message_button(self):
         """«Написать» — одна, в карточке человека, не дублем в шапке."""

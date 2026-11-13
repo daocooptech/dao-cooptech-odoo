@@ -107,6 +107,8 @@
              сортировка идёт по алфавиту, и «от 100 000» встаёт выше
              «от 70 000». Словесный вид остаётся карточке. -->
         <field name="experience_months" string="Опыт, мес."/>
+        <field name="employment" optional="show"/>
+        <field name="work_schedule" optional="show"/>
         <field name="rate" string="Ставка" optional="show"/>
         <field name="rate_kind" string="Уточнение" optional="hide"/>
         <field name="skill_ids" widget="many2many_tags" optional="hide"/>
@@ -205,6 +207,8 @@
                     <field name="city" widget="coop_inline"/>
                     <field name="ready_to_travel"/>
                     <field name="coop_specialization_id" options="{'no_create': True}" widget="coop_inline"/>
+                    <field name="employment" widget="coop_inline"/>
+                    <field name="work_schedule" widget="coop_inline"/>
                   </group>
                   <group string="Ставка и опыт">
                     <field name="rate_kind" widget="coop_inline"/>
@@ -248,6 +252,14 @@
                   <div invisible="not city">
                     <dt>Город</dt>
                     <dd><field name="city" readonly="1" nolabel="1"/></dd>
+                  </div>
+                  <div invisible="not employment">
+                    <dt>Занятость</dt>
+                    <dd><field name="employment" readonly="1" nolabel="1"/></dd>
+                  </div>
+                  <div invisible="not work_schedule">
+                    <dt>График</dt>
+                    <dd><field name="work_schedule" readonly="1" nolabel="1"/></dd>
                   </div>
                 </dl>
               </section>
@@ -329,6 +341,10 @@
           <filter name="by_city" string="По городу" context="{'group_by': 'city'}"/>
           <filter name="by_level" string="По опыту"
                   context="{'group_by': 'experience_level'}"/>
+          <filter name="by_employment" string="По занятости"
+                  context="{'group_by': 'employment'}"/>
+          <filter name="by_schedule" string="По графику"
+                  context="{'group_by': 'work_schedule'}"/>
           <filter name="by_state" string="По состоянию"
                   context="{'group_by': 'state'}"/>
         </group>

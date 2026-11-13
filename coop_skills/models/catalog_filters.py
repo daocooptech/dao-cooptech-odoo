@@ -53,4 +53,15 @@ class CoopSkillOffer(models.Model):
             'options': [{'value': code, 'label': label}
                         for code, label in self._fields['experience_level'].selection],
         })
+        # Решение 661 п. 4: занятость и график — два отбора.
+        for code, label, hint in (
+                ('employment', 'Занятость', 'Полная, частичная или разовая работа.'),
+                ('work_schedule', 'График', 'Как удобно работать.')):
+            blocks.append({
+                'code': code, 'label': label, 'hint': hint,
+                'widget': 'select', 'field': code, 'operator': '=',
+                'placeholder': 'Любой' if code == 'work_schedule' else 'Любая',
+                'options': [{'value': v, 'label': l}
+                            for v, l in self._fields[code].selection],
+            })
         return blocks
