@@ -1573,6 +1573,17 @@ class CoopProjectContribution(models.Model):
     share_ratio = fields.Float(
         string='Доля, %', related='share_percent', readonly=True,
         digits=(5, 2))
+    # Решение владельца 659 п. 3 (12.11.2026): труд нечлена на кооператив
+    # оформляется сделкой или задачей, доля и пай ему не начисляются.
+    # Вклад остаётся в сборе — работа признана и оценена, — но в делении
+    # паёв не участвует: иначе посторонний получал бы долю в кооперативе
+    # мимо вступления.
+    share_excluded = fields.Boolean(
+        string='Без пая: труд нечлена', compute='_compute_share_excluded',
+        store=True,
+        help='Труд человека, который не состоит в кооперативе-инициаторе. '
+             'Пай и доля не начисляются; оплату оформляют сделкой или '
+             'задачей (решение 659).')
 
     # На какую потребность откликнулись. Пусто у вкладов, предложенных
     # проекту вообще, а не в ответ на объявленную нужду: так вносили до
@@ -1618,11 +1629,38 @@ class CoopProjectContribution(models.Model):
                 record.value_diff = 0.0
                 record.value_diff_label = _('стоимость потребности не задана')
 
-    @api.depends('value', 'state', 'project_id.contribution_total')
+    @api.depends('kind', 'partner_id', 'project_id.kind',
+                 'project_id.partner_id')
+    def _compute_share_excluded(self):
+        """Труд на кооперативный проект организации от не её члена.
+
+        Членство проверяется на момент вклада: пай либо возник при
+        принятии, либо нет, и задним числом его не отнимают и не дают.
+        """
+        Membership = self.env['coop.membership'].sudo()
+        for record in self:
+            project = record.project_id
+            org = project.partner_id
+            if (record.kind != 'labour' or project.kind != 'cooperative'
+                    or not org.is_company or not record.partner_id):
+                record.share_excluded = False
+                continue
+            record.share_excluded = not Membership.search_count([
+                ('partner_id', '=', record.partner_id.id),
+                ('organization_id', '=', org.id),
+                ('state', '=', 'active'),
+            ], limit=1)
+
+    @api.depends('value', 'state', 'share_excluded',
+                 'project_id.contribution_total',
+                 'project_id.contribution_ids.share_excluded')
     def _compute_share_percent(self):
         for record in self:
-            total = record.project_id.contribution_total
-            if record.state == 'accepted' and total:
+            total = sum(record.project_id.contribution_ids.filtered(
+                lambda c: c.state == 'accepted' and not c.share_excluded
+            ).mapped('value'))
+            if (record.state == 'accepted' and total
+                    and not record.share_excluded):
                 record.share_percent = round(record.value / total * 100, 2)
             else:
                 record.share_percent = 0

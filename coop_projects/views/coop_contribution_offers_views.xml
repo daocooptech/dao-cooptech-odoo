@@ -50,6 +50,7 @@
         <field name="labour_form"/>
         <field name="offered_on"/>
         <field name="share_percent" options="{'hide_trailing_zeros': true}"/>
+        <field name="share_excluded"/>
         <field name="partner_trust"/>
         <field name="partner_deals_done"/>
         <field name="accepted_on"/>
@@ -86,7 +87,10 @@
                 <div class="text-muted">
                   предложено <t t-out="record.offered_on.value"/>
                 </div>
-                <div class="o_coop_offer_state" t-if="record.state.raw_value == 'accepted'">
+                <div class="o_coop_offer_state" t-if="record.state.raw_value == 'accepted' and record.share_excluded.raw_value">
+                  Принят без пая — не член кооператива; оплата сделкой или задачей
+                </div>
+                <div class="o_coop_offer_state" t-elif="record.state.raw_value == 'accepted'">
                   Принят — пай <field name="share_percent" options="{'hide_trailing_zeros': true}"/> %,
                   отозвать можно 7 дней
                 </div>

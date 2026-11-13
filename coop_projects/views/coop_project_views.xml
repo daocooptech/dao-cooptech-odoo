@@ -680,6 +680,9 @@
                   <field name="share_ratio" readonly="1"
                          string="Доля, %" options="{'hide_trailing_zeros': true}"
                          column_invisible="parent.kind not in ('commercial', 'dao')"/>
+                  <field name="share_excluded" readonly="1" string="Без пая"
+                         optional="show"
+                         column_invisible="parent.kind != 'cooperative'"/>
                   <field name="offered_on" optional="hide"/>
                   <field name="withdraw_until" optional="hide"/>
                   <field name="delivered_on" optional="hide"/>

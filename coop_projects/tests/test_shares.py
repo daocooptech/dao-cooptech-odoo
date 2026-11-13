@@ -96,3 +96,40 @@ class TestProjectShares(CoopProjectCase):
         with self.assertRaises(Exception):
             labour.factor = 2.5
             labour.flush_recordset()
+
+    def test_trud_nechlena_bez_paya(self):
+        """Решение 659 п. 3: труд нечлена — сделкой или задачей, без пая."""
+        org = self._make_org('Артель Пробы Паёв')
+        self.env['coop.membership'].create({
+            'partner_id': self.initiator.partner_id.id,
+            'organization_id': org.id, 'state': 'active',
+            'admission_basis': 'Решение правления № 1',
+        })
+        member = self._make_person('Член Артели')
+        self.env['coop.membership'].create({
+            'partner_id': member.partner_id.id,
+            'organization_id': org.id, 'state': 'active',
+            'admission_basis': 'Решение правления № 2',
+        })
+        stranger = self._make_person('Посторонний Работник')
+        project = self._make_project(partner=org, state='gathering')
+        self.assertEqual(project.kind, 'cooperative')
+
+        own = self.Contribution.create({
+            'project_id': project.id, 'partner_id': member.partner_id.id,
+            'kind': 'labour', 'name': 'Кладка', 'value': 60000,
+            'state': 'accepted'})
+        alien = self.Contribution.create({
+            'project_id': project.id, 'partner_id': stranger.partner_id.id,
+            'kind': 'labour', 'name': 'Отделка', 'value': 40000,
+            'state': 'accepted'})
+
+        self.assertFalse(own.share_excluded)
+        self.assertTrue(alien.share_excluded)
+        self.assertEqual(alien.share_percent, 0)
+        self.assertEqual(own.share_percent, 100)
+        # Работа признана: в собранном она есть.
+        self.assertEqual(project.contribution_total, 100000)
+        if 'coop.project.share.rate' in self.env:
+            self.assertFalse(alien.share_tokens)
+            self.assertTrue(own.share_tokens)
