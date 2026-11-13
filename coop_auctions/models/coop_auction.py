@@ -24,7 +24,8 @@ from odoo.exceptions import UserError
 class CoopAuction(models.Model):
     _name = 'coop.auction'
     _description = 'Аукцион'
-    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin']
+    # Фото и видео лота — слайдер на витрине (задача 444).
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin', 'coop.media.mixin']
     _order = 'date_end, id desc'
 
     name = fields.Char(string='Лот', required=True, tracking=True)
@@ -51,6 +52,25 @@ class CoopAuction(models.Model):
     # снимок хранится у самого аукциона; когда лот всё же ссылается на
     # ресурс, поле заполняется его фотографией.
     image_512 = fields.Image(string='Фото лота', max_width=512, max_height=512)
+
+    def _coop_media_photos(self):
+        """Главный снимок лота — `image_512`, а не `image_1920`."""
+        self.ensure_one()
+        if not self.image_512 or not isinstance(self.id, int):
+            return []
+        stamp = int(self.write_date.timestamp()) if self.write_date else 0
+        src = '/web/image/coop.auction/%s/image_512?unique=%s' % (self.id, stamp)
+        return [{'id': 'main', 'main': True, 'src': src, 'thumb': src,
+                 'alt': self.display_name or ''}]
+
+    def coop_media_add(self, kind, data=None, url=None, name=None, mimetype=None):
+        """Первое фото лота без снимка — главным (оно же на карточке)."""
+        self.ensure_one()
+        if kind == 'photo' and data and not self.image_512:
+            self.check_access('write')
+            self.image_512 = data
+            return True
+        return super().coop_media_add(kind, data=data, url=url, name=name, mimetype=mimetype)
 
     city = fields.Char(string='Город', index=True)
     description = fields.Html(string='Описание лота')

@@ -56,6 +56,7 @@ from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_project_needs, load_project_tasks,
                     load_intangible_needs, load_rights_history, load_project_deals,
                     load_photos,
+                    load_media_gallery,
                     load_documents,
                     load_notifications,
                     load_spread,
@@ -374,6 +375,9 @@ class CoopDemoLoader(models.AbstractModel):
         # досталось при первом прогоне, и правка правила до них не
         # доезжала никогда.
         load_photos.ensure_photos(self.env)
+        # Ленты фото под главным снимком — после главных снимков: подбор
+        # идёт от предмета на главном (задача 444).
+        load_media_gallery.load_media_gallery(self.env)
         # Извещения — самым последним: они порождаются из того, что уже
         # произошло, и до того, как события заведены, порождать их не из
         # чего (решение 375).

@@ -187,6 +187,10 @@
             видимости, уже после того как человек набрал текст.
           -->
           <field name="coop_can_edit" invisible="1"/>
+          <!-- Фото и видео — слайдер (`coop_media`, задачи 424, 444). -->
+          <div class="coop-gallery coop-media_block">
+            <field name="coop_media_data" widget="coop_media" nolabel="1" readonly="1"/>
+          </div>
           <div class="oe_title">
             <h1><field name="name" placeholder="Что разыгрываем"
                        readonly="not coop_can_edit" widget="coop_inline" options="{'wrap': True}"/></h1>

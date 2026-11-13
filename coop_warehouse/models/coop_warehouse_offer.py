@@ -42,7 +42,8 @@ KIND_ICONS = {
 class CoopWarehouseOffer(models.Model):
     _name = 'coop.warehouse.offer'
     _description = 'Объявление на бирже мощностей'
-    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin']
+    # Фото и видео склада — слайдер на витрине (задача 444).
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin', 'coop.media.mixin']
     _order = 'published_on desc, id desc'
 
     name = fields.Char(string='Заголовок', required=True, tracking=True)

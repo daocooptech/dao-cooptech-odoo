@@ -6,3 +6,4 @@ from . import coop_org_link
 from . import catalog_filters
 from . import coop_section
 from . import org_note
+from . import org_media
