@@ -34,7 +34,58 @@ def post_init_hook(env):
     moves._coop_tax_fill()
     demo_natural_income(env)
     demo_payout_limits(env)
+    demo_payout_divisor(env)
     demo_labor_payouts(env)
+
+
+# Доли баз (труд, оборот, паи) по виду кооператива: у артели основа —
+# труд, по паям не больше 50 % (ст. 12 41-ФЗ); у потребительских —
+# оборот; у кредитных — паи.
+DIVISOR_SPLITS = {
+    'production': [(60, 10, 30), (70, 0, 30), (50, 0, 50), (80, 0, 20)],
+    'agri_production': [(60, 20, 20), (50, 30, 20), (70, 10, 20)],
+    'consumer': [(0, 80, 20), (10, 70, 20), (0, 100, 0)],
+    'consumer_society': [(0, 70, 30), (0, 80, 20), (20, 60, 20)],
+    'agri_consumer': [(0, 70, 30), (10, 60, 30)],
+    'credit': [(0, 30, 70), (0, 0, 100), (0, 40, 60)],
+}
+
+
+def demo_payout_divisor(env):
+    """Делитель распределения у внесённых лет (решение 659 п. 2).
+
+    Год с начислениями и прошлые годы — собрание решило, сколько раздать,
+    и делитель заполнен; 2025 без начислений — у половины ещё не решено;
+    убыточные годы — выплат нет. Где начислено сверх лимита (до контроля),
+    к распределению — весь лимит. Повторный прогон не трогает заполненное.
+    """
+    Limit = env['coop.tax.payout.limit'].sudo()
+    Account = env['coop.share.account'].sudo()
+    # Новая колонка у старых строк — NULL: отбор в Python, не доменом.
+    for limit in Limit.search([('limit', '>', 0)], order='year, cooperative_id').filtered(
+            lambda rec: not rec.distribute_total):
+        rng = random.Random('divisor-%s-%s' % (limit.cooperative_id.id, limit.year))
+        if limit.year >= 2025 and not limit.accrued and rng.random() < 0.5:
+            continue
+        members = limit.member_count or Account.search_count(
+            [('cooperative_id', '=', limit.cooperative_id.id)])
+        labor, turnover, share = rng.choice(DIVISOR_SPLITS.get(
+            limit.cooperative_id.coop_cooperative_kind, [(30, 40, 30), (0, 60, 40)]))
+        if not limit.base_shares and share:
+            # Паёв на конец года ещё нет — делить по ним нечего.
+            if labor:
+                labor += share
+            else:
+                turnover += share
+            share = 0
+        total = max(limit.accrued, round(limit.limit * rng.uniform(0.6, 1.0), -2))
+        limit.write({
+            'distribute_total': min(total, limit.limit),
+            'pct_labor': labor, 'pct_turnover': turnover, 'pct_share': share,
+            'base_labor_hours': round(members * rng.uniform(320, 1900)) if labor else 0,
+            'base_turnover': round(members * rng.uniform(40000, 900000), -2)
+            if turnover else 0,
+        })
 
 
 def demo_labor_payouts(env, login='dashkevich'):

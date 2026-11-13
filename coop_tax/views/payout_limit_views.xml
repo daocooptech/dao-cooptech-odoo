@@ -17,6 +17,8 @@
         <field name="limit" sum="Можно начислить"/>
         <field name="accrued"/>
         <field name="remaining"/>
+        <field name="distribute_total" optional="show"/>
+        <field name="member_count" optional="hide"/>
         <field name="currency_id" column_invisible="True"/>
       </list>
     </field>
@@ -54,6 +56,25 @@
               <field name="accrued"/>
               <field name="remaining" decoration-danger="remaining &lt; 0"/>
             </group>
+            <group string="Распределение">
+              <field name="distribute_total"/>
+              <field name="pct_labor"/>
+              <field name="pct_turnover"/>
+              <field name="pct_share"/>
+            </group>
+          </group>
+          <group string="Делитель — видят все члены">
+            <group>
+              <field name="member_count"/>
+              <field name="base_labor_hours"/>
+              <field name="base_turnover"/>
+              <field name="base_shares"/>
+            </group>
+            <group>
+              <field name="per_hour"/>
+              <field name="per_turnover_rub"/>
+              <field name="per_share_rub"/>
+            </group>
           </group>
           <field name="currency_id" invisible="1"/>
           <div class="o_coop_note">
@@ -61,7 +82,11 @@
             доходов» (п. 2 ст. 24 закона 3085-1). Что считать доходами,
             закон не говорит — базу выбирает кооператив в уставе. При любой
             базе выплатить больше нераспределённой прибыли после фондов
-            нельзя. Начисление сверх лимита не проводится.
+            нельзя. Начисление сверх лимита не проводится. Сумму к
+            распределению и базы — часы труда, оборот и паи всех членов —
+            видит каждый член кооператива и может проверить свою долю;
+            чужие начисления не видны. У артели по паям — не больше 50 %
+            (ст. 12 закона 41-ФЗ).
           </div>
         </sheet>
       </form>

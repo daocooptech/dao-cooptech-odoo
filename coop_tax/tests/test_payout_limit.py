@@ -64,3 +64,30 @@ class TestPayoutLimit(CoopCase):
             'kind': 'accrual', 'amount': 500_000, 'basis': 'Протокол № 3',
             'state': 'requested'})
         self.assertEqual(limit.accrued, 0)
+
+    def test_delitel(self):
+        """Решение 659 п. 2: делитель — сумма и базы, на единицу базы."""
+        self.env['coop.share.move'].create({
+            'account_id': self.account.id, 'date': '2025-02-01', 'name': 'Pai',
+            'kind': 'share', 'amount': 100_000, 'basis': 'Protokol 1'})
+        limit = self._limit('net_profit')
+        limit.write({'distribute_total': 200_000, 'pct_labor': 50,
+                     'pct_turnover': 30, 'pct_share': 20,
+                     'base_labor_hours': 1000, 'base_turnover': 600_000})
+        self.assertEqual((limit.base_shares, limit.member_count), (100_000, 1))
+        self.assertAlmostEqual(limit.per_hour, 100)
+        self.assertAlmostEqual(limit.per_turnover_rub, 0.1)
+        self.assertAlmostEqual(limit.per_share_rub, 0.4)
+        with self.assertRaises(ValidationError):
+            limit.write({'pct_share': 30})          # 110 %
+        with self.assertRaises(ValidationError):
+            limit.write({'distribute_total': 300_000})  # больше лимита 280 000
+
+    def test_artel_po_payam_ne_bolshe_poloviny(self):
+        self.coop.coop_legal_form_id = self.env['coop.legal.form'].search(
+            [('code', '=', 'artel')], limit=1)
+        self.assertEqual(self.coop.coop_cooperative_kind, 'production')
+        limit = self._limit('net_profit')
+        with self.assertRaises(ValidationError):
+            limit.write({'distribute_total': 100_000, 'pct_labor': 40, 'pct_share': 60})
+        limit.write({'distribute_total': 100_000, 'pct_labor': 50, 'pct_share': 50})
