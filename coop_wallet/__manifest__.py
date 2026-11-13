@@ -19,7 +19,7 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.2.2',
+    'version': '20.0.1.2.3',
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_tokens', 'coop_deals', 'mail'],
     'data': [
@@ -27,6 +27,7 @@
         'data/coop_settlement_methods.xml',
         'data/coop_currencies.xml',
         'data/coop_currency_cron.xml',
+        'data/coop_network_cron.xml',
         'views/coop_wallet_views.xml',
         'views/coop_wallet_operation_views.xml',
         'security/ir.access.csv',

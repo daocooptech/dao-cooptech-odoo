@@ -456,7 +456,11 @@ class CoopExchange(models.AbstractModel):
         """
         me = self.env.user._coop_acting_partner()
         holdings = self.env['coop.token.holding'].search([('partner_id', '=', me.id)])
+        ton = self.env['coop.wallet.network'].sudo().search([('code', '=', 'ton')], limit=1)
         return {
+            # Сеть не отвечает — плашка над терминалом и выключенные
+            # кнопки заявок (решение 658 п. 1).
+            'network_down': ton._coop_down_note() if ton else '',
             'partner': me.name,
             'address': me.coop_ton_address or '',
             'network': me.coop_ton_network or '',

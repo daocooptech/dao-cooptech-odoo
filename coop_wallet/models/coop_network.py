@@ -1,6 +1,16 @@
 # -*- coding: utf-8 -*-
+import logging
+import urllib.error
+import urllib.request
+
 from odoo import _, api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
+
+_logger = logging.getLogger(__name__)
+
+# Сколько ждать ответа узла сети. Дольше — и проверка всех сетей подряд
+# задержит крон; короче — медленный, но живой узел сочтём упавшим.
+PROBE_TIMEOUT = 8
 
 
 class CoopWalletNetwork(models.Model):
@@ -50,10 +60,76 @@ class CoopWalletNetwork(models.Model):
              'Подключается ровно так же — по адресу узла.')
     active = fields.Boolean(string='Подключена', default=True)
 
+    # Доступность (решение 658 п. 1). Сеть не ответила — показываем
+    # последние данные с плашкой «сеть недоступна, данные на ЧЧ:ММ», а
+    # переводы и заявки биржи выключаем до её возврата: операция, которую
+    # некуда записать, хуже кнопки, которая честно не нажимается.
+    is_down = fields.Boolean(string='Не отвечает', readonly=True)
+    reached_at = fields.Datetime(
+        string='Последний ответ', readonly=True,
+        help='Когда узел сети ответил в последний раз. На это время и '
+             'показаны данные, пока сеть недоступна.')
+    checked_at = fields.Datetime(string='Проверена', readonly=True)
+
     _code_uniq = models.Constraint(
         'unique(code)',
         'Сеть с таким кодом уже подключена.',
     )
+
+    def _coop_probe(self):
+        """Ответил ли узел сети. Любой HTTP-ответ меньше 500 — жив.
+
+        Узел, который отвечает «метод не разрешён» на простой GET, работает:
+        мёртвый не отвечает ничем. Пятисотые — узел есть, а сети за ним нет.
+        """
+        self.ensure_one()
+        request = urllib.request.Request(
+            self.rpc_url, headers={'User-Agent': 'cooptech-node'})
+        try:
+            with urllib.request.urlopen(request, timeout=PROBE_TIMEOUT):
+                return True
+        except urllib.error.HTTPError as error:
+            return error.code < 500
+        except Exception as error:  # noqa: BLE001 — любой сбой сети
+            _logger.info('Сеть %s не ответила: %s', self.code, error)
+            return False
+
+    @api.model
+    def _cron_check_reachability(self):
+        """Раз в несколько минут: отвечают ли сети, у которых указан узел.
+
+        Сеть без адреса узла не проверяется и недоступной не считается —
+        про неё платформа ничего не знает и пугать плашкой не вправе.
+        """
+        now = fields.Datetime.now()
+        for network in self.search([('rpc_url', '!=', False)]):
+            alive = network._coop_probe()
+            values = {'checked_at': now, 'is_down': not alive}
+            if alive:
+                values['reached_at'] = now
+            network.sudo().write(values)
+
+    def _coop_down_note(self):
+        """«Сеть TON недоступна, данные на 14:05» — или пусто, если отвечает."""
+        self.ensure_one()
+        if not self.is_down:
+            return ''
+        if not self.reached_at:
+            return _('Сеть %s недоступна', self.name)
+        stamp = fields.Datetime.context_timestamp(self, self.reached_at)
+        today = fields.Date.context_today(self)
+        when = stamp.strftime('%H:%M') if stamp.date() == today \
+            else stamp.strftime('%d.%m %H:%M')
+        return _('Сеть %(net)s недоступна, данные на %(when)s',
+                 net=self.name, when=when)
+
+    @api.model
+    def _coop_check_up(self, code, action):
+        """Остановить операцию, если сеть не отвечает (решение 658 п. 1)."""
+        network = self.sudo().search([('code', '=', code)], limit=1)
+        if network.is_down:
+            raise UserError(_('%(note)s. %(action)s выключены до возврата сети.',
+                              note=network._coop_down_note(), action=action))
 
 
 class CoopWalletAddress(models.Model):

@@ -389,6 +389,9 @@
                 <field name="coop_show_friends"/>
                 <field name="coop_show_followers"/>
               </group>
+              <group string="Другие узлы платформы">
+                <field name="coop_fed_show_name"/>
+              </group>
               <div class="text-muted">
                 Если скрыть уровень доверия и число сделок, откликаться на
                 ваши объявления будут заметно реже. Сами операции по счёту

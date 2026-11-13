@@ -146,6 +146,10 @@ class CoopTokenOrder(models.Model):
                     'только то, что куплено.'))
 
     def action_open(self):
+        # Расчёт идёт в сети TON: не отвечает она — заявки выключены
+        # до её возврата (решение 658 п. 1).
+        if self:
+            self.env['coop.wallet.network']._coop_check_up('ton', _('Заявки биржи'))
         for record in self:
             if record.kind == 'primary' and record.partner_id != record.claim_id.issuer_id:
                 raise UserError(_(

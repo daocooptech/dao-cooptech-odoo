@@ -262,6 +262,7 @@ export class CoopExchange extends Component {
         const price = this.state.orderType === "market" ? this.marketPrice : this.state.price;
         return Boolean(
             this.state.wallet && this.state.wallet.connected &&
+            !this.state.wallet.network_down &&
             this.state.amount > 0 && price > 0
         );
     }

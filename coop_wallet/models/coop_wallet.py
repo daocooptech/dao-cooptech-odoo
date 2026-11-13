@@ -88,6 +88,21 @@ class CoopWallet(models.Model):
         string='Сеть не отвечает',
         help='Показываем последний известный остаток и говорим об этом '
              'прямо, а не выдаём вчерашнее за сегодняшнее.')
+    # Плашка по сетям, где лежат активы (решение 658 п. 1): «Сеть TON
+    # недоступна, данные на 14:05». Не хранится — состояние сети меняется
+    # кроном, и пересчитывать ради него все кошельки незачем.
+    networks_down_note = fields.Char(
+        string='Недоступные сети', compute='_compute_networks_down_note')
+
+    @api.depends('asset_ids.network_id')
+    def _compute_networks_down_note(self):
+        for wallet in self:
+            networks = wallet.asset_ids.mapped('network_id').filtered('is_down')
+            notes = [network._coop_down_note() for network in networks]
+            tail = _('. Переводы в эту сеть выключены до её возврата.') \
+                if len(notes) == 1 else \
+                _('. Переводы в эти сети выключены до их возврата.')
+            wallet.networks_down_note = ('; '.join(notes) + tail) if notes else False
 
     # ── Фиат ─────────────────────────────────────────────────────────────
     method_ids = fields.One2many(

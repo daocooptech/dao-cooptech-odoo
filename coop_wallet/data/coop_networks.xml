@@ -41,6 +41,7 @@
     <field name="code">ton</field>
     <field name="symbol">TON</field>
     <field name="sequence">40</field>
+    <field name="rpc_url">https://toncenter.com/api/v2/jsonRPC</field>
     <field name="explorer_url">https://tonviewer.com/transaction/</field>
   </record>
 

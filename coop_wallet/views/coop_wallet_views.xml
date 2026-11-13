@@ -77,6 +77,10 @@
               вчерашнее за сегодняшнее здесь нельзя: человек по этой цифре
               принимает решение.
             </div>
+            <div class="o_coop_notice o_coop_notice_wait" role="status"
+                 invisible="not networks_down_note">
+              <field name="networks_down_note" readonly="1" nolabel="1"/>
+            </div>
 
             <separator string="Активы"/>
             <!-- Активы, движения фиата и паевые счета заводит платформа: остаток

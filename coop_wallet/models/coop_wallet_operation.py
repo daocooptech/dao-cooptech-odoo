@@ -41,6 +41,15 @@ class CoopWalletOperation(models.TransientModel):
         help='Если получатель — участник платформы, адрес подставится из '
              'его кошелька в той же сети.')
     peer_address = fields.Char(string='Адрес получателя')
+    # Сеть выбранного актива не отвечает — говорим сразу, а не после
+    # нажатия «Отправить» (решение 658 п. 1).
+    network_down_note = fields.Char(compute='_compute_network_down_note')
+
+    @api.depends('asset_id')
+    def _compute_network_down_note(self):
+        for wizard in self:
+            wizard.network_down_note = wizard.asset_id.network_id._coop_down_note() \
+                if wizard.asset_id.network_id else False
     address_ids = fields.Many2many(
         'coop.wallet.address', string='Мои адреса',
         compute='_compute_address_ids')
@@ -122,6 +131,9 @@ class CoopWalletOperation(models.TransientModel):
         address = (self.peer_address or '').strip()
         if not address:
             raise UserError(_('Укажите адрес получателя или выберите участника.'))
+        if asset.network_id.is_down:
+            raise UserError(_('%s. Переводы выключены до возврата сети.',
+                              asset.network_id._coop_down_note()))
         asset = asset.sudo()
         price = asset.valuation / asset.quantity if asset.quantity else 0.0
         value = price * self.quantity

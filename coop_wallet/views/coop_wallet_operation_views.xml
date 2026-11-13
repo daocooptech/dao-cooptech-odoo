@@ -12,6 +12,11 @@
         <field name="mode" invisible="1"/>
         <field name="currency_id" invisible="1"/>
 
+        <div class="o_coop_notice o_coop_notice_wait" role="status"
+             invisible="mode != 'send' or not network_down_note">
+          <field name="network_down_note" readonly="1" nolabel="1"/>.
+          Переводы выключены до возврата сети.
+        </div>
         <group invisible="mode != 'send'">
           <field name="asset_id" required="mode == 'send'"
                  options="{'no_create': True, 'no_open': True}"/>
@@ -45,7 +50,8 @@
 
         <footer>
           <button name="action_confirm" type="object" string="Отправить"
-                  class="btn-primary" invisible="mode != 'send'"/>
+                  class="btn-primary"
+                  invisible="mode != 'send' or network_down_note"/>
           <button name="action_confirm" type="object" string="Пополнить"
                   class="btn-primary" invisible="mode != 'topup'"/>
           <button name="action_confirm" type="object" string="Вывести"
