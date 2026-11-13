@@ -17,7 +17,8 @@
 """
 import logging
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -37,6 +38,30 @@ class ProjectProject(models.Model):
         'coop.project', 'project_id', string='Сбор вкладов',
         help='Обратная сторона связи: из какого сбора вырос этот проект. '
              'Пусто у проектов, заведённых напрямую в управлении.')
+
+    coop_offer_new = fields.Integer(
+        string='Новых заявок', compute='_compute_coop_offers')
+    coop_offer_can = fields.Boolean(
+        string='Разбирает заявки', compute='_compute_coop_offers')
+
+    @api.depends('coop_project_id.new_offer_count',
+                 'coop_project_id.coop_is_team')
+    def _compute_coop_offers(self):
+        """Заявки на вклады — кнопка в управлении проектом тем, кто вправе
+        их разбирать: команде сбора, из которого вырос проект."""
+        for project in self:
+            sources = project.coop_project_id.filtered('coop_is_team')
+            project.coop_offer_can = bool(sources)
+            project.coop_offer_new = sum(sources.mapped('new_offer_count'))
+
+    def action_coop_open_offers(self):
+        """Разбор заявок на потребности — из управления проектом: тот же
+        канбан, что со страницы сбора (`coop.project.action_open_offers`)."""
+        self.ensure_one()
+        source = self.coop_project_id.filtered('coop_is_team')[:1]
+        if not source:
+            raise UserError(_('Заявки разбирает команда проекта.'))
+        return source.action_open_offers()
 
     # Общие этапы задач: xml-id в coop_projects -> название.
     _COOP_TASK_STAGES = [

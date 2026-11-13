@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Разбор заявок из управления проектом (владелец 14.11.2026: «он
+       должен быть в управлении проектом»). Кнопка среди кнопок-счётчиков
+       формы проекта, только команде сбора, из которого вырос проект; ведёт
+       на тот же канбан заявок, что и страница сбора. -->
+  <record id="view_project_project_form_offers" model="ir.ui.view">
+    <field name="name">project.project.form.coop.offers</field>
+    <field name="model">project.project</field>
+    <field name="inherit_id" ref="project.edit_project"/>
+    <field name="arch" type="xml">
+      <!-- Первой в ряду: остальные кнопки уходят под «Ещё», а разбор
+           заявок должен быть на виду. -->
+      <xpath expr="//div[@name='button_box']/button[@name='action_view_tasks']"
+             position="before">
+        <field name="coop_offer_can" invisible="1"/>
+        <button name="action_coop_open_offers" type="object"
+                class="oe_stat_button" icon="fa-inbox"
+                invisible="not coop_offer_can">
+          <div class="o_stat_info">
+            <span class="o_stat_value">
+              <field name="coop_offer_new" nolabel="1"/>
+            </span>
+            <span class="o_stat_text">Заявки на вклады</span>
+          </div>
+        </button>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

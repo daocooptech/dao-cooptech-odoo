@@ -19,7 +19,7 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.3.10',
+    'version': '20.0.1.3.11',
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_resources', 'project', 'project_todo', 'hr_timesheet', 'mail'],
     'data': [
@@ -28,6 +28,7 @@
         'views/coop_project_need_views.xml',
         'views/coop_contribution_offers_views.xml',
         'views/project_note_views.xml',
+        'views/project_project_views.xml',
         'data/project_task_stage_data.xml',
         'data/coop_project_backfill.xml',
         'data/coop_project_readiness.xml',
