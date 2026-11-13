@@ -115,6 +115,22 @@ class TestCoopCrm(TransactionCase):
         self.assertTrue(self.seller.has_group('sales_team.group_sale_salesman_all_leads'))
         self.assertIn(company, self.seller.company_ids)
 
+    def test_sales_team_sync_idempotent(self):
+        # Задача 443: каждая выкатка заводила по копии участника отдела.
+        team = self.env['crm.team'].search([('company_id', '=', self.org.coop_company_id.id)])
+        Member = self.env['crm.team.member'].with_context(active_test=False)
+        before = Member.search_count([('crm_team_id', '=', team.id)])
+        for _round in range(3):
+            self.env['res.users']._coop_sync_accounting_access(self.org)
+        self.assertEqual(Member.search_count([('crm_team_id', '=', team.id)]), before)
+        # Выключили CRM и включили обратно — участник прежний, не новый.
+        self.org.with_user(self.head).write({'coop_app_project': True})
+        self.org.with_user(self.head).write({'coop_app_crm': False})
+        self.assertFalse(team.member_ids)
+        self.org.with_user(self.head).write({'coop_app_crm': True})
+        self.assertEqual(team.member_ids, self.seller)
+        self.assertEqual(Member.search_count([('crm_team_id', '=', team.id)]), before)
+
     def test_purchase_app(self):
         """«Закупки» — как CRM (владелец 20.10.2026): включил руководитель —
         доступ у держателей «Сделок» и «Казны», выключил — снят."""

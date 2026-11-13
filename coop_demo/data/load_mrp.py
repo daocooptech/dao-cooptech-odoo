@@ -277,7 +277,7 @@ TEMPLATES = [
     },
     {
         'words': ('сено', 'комбикорм'),
-        'products': ('Комбикорм', 'Сено в рулонах — Челябинск', 'Зерносмесь для птицы'),
+        'products': ('Комбикорм', 'Сено в рулонах', 'Зерносмесь для птицы'),
         'components': ('Ячмень', 'Пшеница', 'Шрот подсолнечный', 'Премикс'),
         'uom': 'kg', 'qty': (1000, 8000),
         'stages': [
@@ -334,8 +334,28 @@ def _uom(env, code):
     return env.ref(UOMS[code], raise_if_not_found=False) or env.ref('uom.product_uom_unit')
 
 
+_PLACES = {}
+
+
+def _clean(env, name):
+    """Имя продукта — сразу таким, каким его оставит `tidy_names`.
+
+    К этому шагу у объявлений в названии ещё стоит город («Бетономешалка
+    на 180 л — Воронеж»), а `tidy_names` в конце выкатки его срезает.
+    Продукт, заведённый под именем с городом, следующая выкатка по
+    этому имени не находила и заводила заново: +4 продукта и
+    спецификации на каждую (задача 443).
+    """
+    from . import tidy_names
+    key = env.cr.dbname
+    if key not in _PLACES:
+        _PLACES[key] = tidy_names._places(env)
+    return tidy_names._strip(name, _PLACES[key])
+
+
 def _product(env, company, name, uom, rnd):
     Product = env['product.product'].sudo().with_company(company)
+    name = _clean(env, name)
     product = Product.search([('name', '=', name), ('company_id', '=', company.id)], limit=1)
     if not product:
         product = Product.create({
@@ -512,6 +532,7 @@ def load_mrp(env, login='dashkevich'):
         # coop_demo грузились раньше полей coop_mrp, и демо не появилось.
         _logger.warning('Производство: coop_mrp не загружен, демо пропущено')
         return 0
+    _PLACES.clear()
     Resource = env['coop.resource'].sudo()
     resources = Resource.with_context(active_test=False).search([
         ('listing_type', '=', 'offer'), ('resource_type', '=', 'material'),

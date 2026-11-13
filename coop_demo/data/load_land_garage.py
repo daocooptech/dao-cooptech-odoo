@@ -65,8 +65,13 @@ def load_land_garage(env):
             (garage, GARAGES, 'garage_kind', 'garage_area_m2')):
         for name, city, method, price, unit, kind, area in rows:
             owner = owners[rnd.randrange(len(owners))]
-            if Resource.search_count([('name', '=', name), ('city', '=', city),
-                                      ('category_id', '=', category.id)]):
+            # Своё узнаём и под уточнением: `tidy_names` отличает повтор
+            # названия хвостом «, срочно, фото по запросу», и точный
+            # поиск его не видел — каждая выкатка заводила ещё одну
+            # копию (задача 443). Рубрику не сверяем: её тоже правят.
+            if Resource.with_context(active_test=False).search_count([
+                    '|', ('name', '=', name), ('name', '=like', name + ', %'),
+                    ('city', '=', city)], limit=1):
                 continue
             wanted = name.startswith(('Ищу', 'Нужен'))
             Resource.create({

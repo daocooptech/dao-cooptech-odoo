@@ -143,14 +143,6 @@ class ResPartner(models.Model):
         return {'name': name, 'code': code,
                 'company_id': self.coop_company_id.id, 'partner_id': self.id}
 
-    def _coop_sync_sales_team(self):
-        # Выключен CRM — отдел продаж пустеет: лидов организации никто не ведёт.
-        result = super()._coop_sync_sales_team()
-        Team = self.env['crm.team'].sudo().with_context(active_test=False)
-        for org in self.sudo().filtered(lambda o: o.coop_company_id and not o.coop_app_crm):
-            Team.search([('company_id', '=', org.coop_company_id.id)]).member_ids = False
-        return result
-
     # ── Переходы в приложения ────────────────────────────────────────
 
     def _coop_app_action(self, xml_id, name, create_label):
