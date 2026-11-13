@@ -13,15 +13,19 @@ class TestMediaGallery(TransactionCase):
     def test_every_catalog_form_has_slider(self):
         """Раздел с лентой фото — со слайдером на форме."""
         for model in gallery._models(self.env):
-            # У организации своя форма, не общая форма контакта.
-            view = self.env.ref('coop_orgs.view_coop_orgs_form').id \
-                if model == 'res.partner' else None
-            arch = self.env[model].get_view(view, 'form')['arch']
+            arch = self.env[model].get_view(None, 'form')['arch']
             found = etree.fromstring(arch).xpath(
                 "//field[@name='coop_media_data'][@widget='coop_media']")
             self.assertTrue(found, model)
-        for model in ('coop.warehouse.offer', 'coop.auction', 'res.partner'):
+        for model in ('coop.warehouse.offer', 'coop.auction'):
             self.assertIn(model, gallery._models(self.env))
+
+    def test_no_slider_outside_catalogs(self):
+        """У людей и организаций слайдера нет — он только в каталогах."""
+        self.assertNotIn('coop_media_data', self.env['res.partner']._fields)
+        arch = self.env.ref('coop_orgs.view_coop_orgs_form').arch
+        self.assertNotIn('widget="coop_media"', arch)
+        self.assertFalse(self.env['coop.media'].search_count([('res_model', '=', 'res.partner')]))
 
     def test_demo_records_have_three_to_six(self):
         """У демо-записей — 3–6 медиа, снимки в ленте разные."""

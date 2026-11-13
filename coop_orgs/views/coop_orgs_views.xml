@@ -296,12 +296,6 @@
                 <field name="image_1920" widget="image"
                        options="{'preview_image': 'avatar_256'}"/>
               </div>
-              <!-- Фото и видео организации — слайдер (`coop_media`,
-                   задача 444): цеха, склады, люди за работой. Обложка
-                   выше — отдельно, в слайдер не входит. -->
-              <div class="coop-gallery coop-media_block o_coop_org_media">
-                <field name="coop_media_data" widget="coop_media" nolabel="1" readonly="1"/>
-              </div>
 
               <div class="o_coop_stats">
                 <div invisible="not coop_can_edit_card and not coop_show_trust">Уровень доверия:

@@ -68,9 +68,10 @@ FALLBACK = {
     'coop.warehouse.offer': ('warehouse', 'warehouse-shelves', 'plastic-crates',
                              'cold-storage', 'grain-silo'),
     'coop.auction': ('central-market', 'shop-counter', 'toolbox'),
-    'res.partner': ('office-desk', 'business-meeting', 'community-gathering',
-                    'workshop-class', 'factory-operator', 'warehouse'),
 }
+# Не каталоги: слайдер только в каталогах, у людей и организаций его нет
+# (владелец 14.11). Снимки, разложенные им наполнением 13.11, — убрать.
+NOT_CATALOG = ('res.partner',)
 # Склады — по типу хранения, а не по названию «Аренда места на складе».
 STORAGE = {
     'cold': ('cold-storage', 'milk-tank'),
@@ -127,8 +128,6 @@ def _models(env):
 
 def _records(env, model):
     domain = [('create_uid', '=', SUPERUSER_ID)]
-    if model == 'res.partner':
-        domain += [('is_company', '=', True)]
     return env[model].sudo().with_context(active_test=False).search(domain, order='id')
 
 
@@ -136,6 +135,10 @@ def load_media_gallery(env):
     subjects, by_sum = _index()
     Attachment = env['ir.attachment'].sudo()
     Media = env['coop.media'].sudo()
+    stray = Media.search([('res_model', 'in', NOT_CATALOG), ('create_uid', '=', SUPERUSER_ID)])
+    if stray:
+        _logger.info('Ленты фото: убрано %s снимков не из каталогов', len(stray))
+        stray.unlink()
     total = 0
     for model in _models(env):
         records = _records(env, model)
@@ -158,9 +161,7 @@ def load_media_gallery(env):
                                            ('res_field', '=', field)],
                                           ['res_id', 'checksum']):
             mains[att['res_id']] = att['checksum']
-        main_counts = model != 'res.partner'   # у организации обложка отдельно
-        todo = [rid for rid in ids
-                if _want(model, rid) > have.get(rid, 0) + (1 if main_counts and rid in mains else 0)]
+        todo = [rid for rid in ids if _want(model, rid) > have.get(rid, 0) + (1 if rid in mains else 0)]
         created = 0
         for start in range(0, len(todo), BATCH):
             chunk = env[model].sudo().with_context(active_test=False).browse(
@@ -175,11 +176,6 @@ def load_media_gallery(env):
                 text = record.display_name or ''
                 if model == 'coop.auction' and record.resource_id:
                     text += ' ' + record.resource_id.name
-                # Организация по названию («ООО „Мириталь“») не узнаётся —
-                # предмет даёт вид деятельности по ОКВЭД.
-                if model == 'res.partner' and 'coop_okved_id' in record._fields:
-                    text += ' ' + (record.coop_okved_id.name or '') + ' ' + (
-                        record.coop_okved_section_id.name or '')
                 for subject in _rule_subjects(text):
                     if subject not in order:
                         order.append(subject)
@@ -193,7 +189,7 @@ def load_media_gallery(env):
                 shift = zlib.crc32(('%s:%s' % (model, record.id)).encode())
                 picked = []
                 need = _want(model, record.id) - have.get(record.id, 0) \
-                    - (1 if main_counts and record.id in mains else 0)
+                    - (1 if record.id in mains else 0)
                 for subject in order:
                     files = subjects.get(subject) or []
                     if not files:
