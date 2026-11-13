@@ -29,6 +29,7 @@
                 'coop_projects', 'mail', 'website'],
     'data': [
         'data/coop_deal_data.xml',
+        'data/coop_contribute_ways.xml',
         'report/coop_deal_reports.xml',
         'views/coop_deal_views.xml',
         'views/coop_contribute_deal_views.xml',

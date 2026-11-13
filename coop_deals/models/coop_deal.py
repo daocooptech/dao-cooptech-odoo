@@ -101,6 +101,8 @@ class CoopDeal(models.Model):
         ('rent', 'Аренда'),
         ('exchange', 'Обмен'),
         ('gift', 'Дар'),
+        ('free_use', 'Ссуда'),
+        ('license', 'Лицензия'),
         ('service', 'Услуга'),
         ('job', 'Работа по вакансии'),
         ('share', 'Доля в проекте'),

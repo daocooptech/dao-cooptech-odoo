@@ -20,3 +20,6 @@ rule_review_admin,Отзывы — администратор,coop.deal.review,b
 access_coop_deal_review_wizard,Окно отзыва — участник,coop.deal.review.wizard,base.group_user,crud,
 access_coop_resource_transfer_user,История прав — участник,coop.resource.transfer,base.group_user,r,
 access_coop_resource_transfer_system,История прав — администратор,coop.resource.transfer,base.group_system,crud,
+access_coop_contribute_kind_user,Что передаёт нечлен — чтение,coop.contribute.kind,base.group_user,r,
+access_coop_contribute_way_user,Договор нечлена — чтение,coop.contribute.way,base.group_user,r,
+access_coop_contribute_pay_user,Чем платят нечлену — чтение,coop.contribute.pay,base.group_user,r,

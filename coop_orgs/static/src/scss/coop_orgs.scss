@@ -220,5 +220,7 @@
     flex-direction: row;
     gap: 8px;
   }
-  .o_coop_path_cards .o_radio_item { flex: 1 1 0; margin-bottom: 8px; }
+  // `.o_field_radio .o_radio_item { flex: 0 0 auto }` движка той же
+  // специфичности грузится позже — поднимаем на класс поля.
+  .o_field_radio.o_coop_path_cards .o_radio_item { flex: 1 1 0; margin-bottom: 8px; }
 }

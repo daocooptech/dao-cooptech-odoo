@@ -1,18 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-  <!-- Решение 676: нечлену в окне вклада — «Предложить сделку». -->
+  <!-- Решение 676, задача 445 кусок 2: «Без вступления» — что передаёте,
+       как, что именно, сумма, чем вам платят. Итог — обращение в «Сделки». -->
   <record id="view_coop_contribute_form_deal" model="ir.ui.view">
     <field name="name">coop.project.contribute.form.deal</field>
     <field name="model">coop.project.contribute</field>
     <field name="inherit_id" ref="coop_projects.view_coop_contribute_form"/>
     <field name="arch" type="xml">
       <xpath expr="//div[hasclass('o_coop_members_only')]" position="after">
-        <group invisible="not members_only or member_state == 'active' or path != 'outside'"
-               string="Сделка с инициатором">
-          <field name="deal_way"/>
-          <field name="deal_name" placeholder="Аренда экскаватора на месяц"/>
-          <field name="deal_amount"/>
-        </group>
+        <div class="o_coop_outside"
+             invisible="not members_only or member_state == 'active' or path != 'outside'">
+          <field name="deal_kind_ids" invisible="1"/>
+          <field name="deal_pay_ids" invisible="1"/>
+          <group>
+            <field name="deal_kind_id" widget="radio"
+                   domain="[('id', 'in', deal_kind_ids)]"/>
+          </group>
+          <div class="alert alert-secondary mb-2" role="status"
+               invisible="not deal_money_closed">
+            Деньги этот кооператив принимает только от членов — для этого
+            «Стать пайщиком».
+          </div>
+          <div class="alert alert-warning mb-2" role="alert"
+               invisible="not deal_kind_warning">
+            <field name="deal_kind_warning" readonly="1"/>
+          </div>
+          <group>
+            <field name="deal_way_id" widget="radio"
+                   domain="[('kind_id', '=', deal_kind_id)]"
+                   invisible="not deal_kind_id"/>
+            <field name="deal_name" placeholder="Аренда экскаватора на месяц"/>
+            <field name="deal_amount"/>
+            <field name="deal_pay_id" widget="radio"
+                   domain="[('id', 'in', deal_pay_ids)]"
+                   invisible="not deal_way_id"/>
+          </group>
+          <p class="text-muted small mb-0" invisible="not deal_way_note">
+            <field name="deal_way_note" readonly="1"/>
+          </p>
+          <field name="deal_money_closed" invisible="1"/>
+        </div>
       </xpath>
       <xpath expr="//footer/button[@name='action_offer']" position="after">
         <button name="action_coop_propose_deal" type="object"

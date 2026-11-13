@@ -19,6 +19,34 @@
       <xpath expr="//div[hasclass('o_coop_needs')]" position="before">
         <xpath expr="//notebook[hasclass('coop-show_tabs')]" position="move"/>
       </xpath>
+      <!-- Ход проекта «Идея — Сбор — Запущен — Завершён» над страницей
+           (владелец 14.11.2026: «где прогресс сверху — нравится, где
+           уместно»). Витрины его прячут (решение 654), у проекта класс
+           `o_coop_with_steps` возвращает. -->
+      <xpath expr="//form" position="attributes">
+        <attribute name="class" add="o_coop_with_steps" separator=" "/>
+      </xpath>
+      <!-- Разбор заявок — команде, в заголовке «Участия в проекте»:
+           вкладку «Потребности» убрали 12.11, а канбан заявок остался
+           без входа. Кнопка ведёт на него (`action_open_offers`). -->
+      <xpath expr="//div[hasclass('o_coop_needs')]/div[hasclass('o_coop_needs_head')]"
+             position="after">
+        <field name="new_offer_count" invisible="1"/>
+        <div class="o_coop_needs_review mb-3" invisible="not coop_is_team">
+          <button name="action_open_offers" type="object"
+                  class="btn btn-primary" invisible="not new_offer_count">
+            Разобрать заявки · <field name="new_offer_count" class="oe_inline"/>
+          </button>
+          <button name="action_open_offers" type="object"
+                  class="btn btn-secondary" invisible="new_offer_count">
+            Разобрать заявки
+          </button>
+          <span class="text-muted ms-2">
+            Потребности колонками, заявки карточками: оценка, доверие,
+            «Принять» и «Отклонить».
+          </span>
+        </div>
+      </xpath>
     </field>
   </record>
 

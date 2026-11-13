@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- «Без вступления» (задача 445, кусок 2): что нечлен передаёт
+       проекту, какими договорами и чем ему платят. Таблица — проект окна
+       ux-ui-designer 14.11, без займа (решение 679 п. 1); основания —
+       разбор legal-counsel 14.11. -->
+
+  <!-- Чем платят -->
+  <record id="contribute_pay_money" model="coop.contribute.pay">
+    <field name="name">Деньгами</field><field name="code">money</field>
+    <field name="sequence">10</field>
+  </record>
+  <record id="contribute_pay_product" model="coop.contribute.pay">
+    <field name="name">Продуктом кооператива</field><field name="code">product</field>
+    <field name="sequence">20</field>
+  </record>
+  <record id="contribute_pay_offset" model="coop.contribute.pay">
+    <field name="name">Зачётом долга</field><field name="code">offset</field>
+    <field name="sequence">30</field>
+  </record>
+  <record id="contribute_pay_royalty" model="coop.contribute.pay">
+    <field name="name">Роялти — долей от продаж</field><field name="code">royalty</field>
+    <field name="sequence">40</field>
+  </record>
+  <record id="contribute_pay_none" model="coop.contribute.pay">
+    <field name="name">Ничем — безвозмездно</field><field name="code">none</field>
+    <field name="sequence">90</field>
+  </record>
+
+  <!-- Что передаёте. Деньги нечлена кредитный кооператив не принимает
+       (190-ФЗ ст. 6, 193-ФЗ ст. 40.1), ЖСК и ГСК — только взносы членов. -->
+  <record id="contribute_kind_material" model="coop.contribute.kind">
+    <field name="name">Вещь, материалы</field><field name="code">material</field>
+    <field name="sequence">10</field>
+  </record>
+  <record id="contribute_kind_resource" model="coop.contribute.kind">
+    <field name="name">Техника</field><field name="code">resource</field>
+    <field name="sequence">20</field>
+  </record>
+  <record id="contribute_kind_space" model="coop.contribute.kind">
+    <field name="name">Помещение</field><field name="code">space</field>
+    <field name="sequence">30</field>
+  </record>
+  <record id="contribute_kind_labour" model="coop.contribute.kind">
+    <field name="name">Труд</field><field name="code">labour</field>
+    <field name="sequence">40</field>
+    <field name="warning">Если вы работаете по графику и под руководством кооператива, это найм — выберите «Работать». Подряд вместо трудового договора закон не позволяет.</field>
+  </record>
+  <record id="contribute_kind_knowledge" model="coop.contribute.kind">
+    <field name="name">Знания</field><field name="code">knowledge</field>
+    <field name="sequence">50</field>
+  </record>
+  <record id="contribute_kind_money" model="coop.contribute.kind">
+    <field name="name">Деньги</field><field name="code">money</field>
+    <field name="sequence">60</field>
+    <field name="hide_forms">kpk skpk zhsk gsk</field>
+  </record>
+
+  <!-- Договоры -->
+  <record id="contribute_way_material_sale" model="coop.contribute.way">
+    <field name="name">Продажа</field><field name="sequence">10</field>
+    <field name="kind_id" ref="contribute_kind_material"/>
+    <field name="deal_way">sale</field>
+    <field name="pay_ids" eval="[(6, 0, [ref('contribute_pay_money'), ref('contribute_pay_offset')])]"/>
+  </record>
+  <record id="contribute_way_material_exchange" model="coop.contribute.way">
+    <field name="name">Мена на продукт кооператива</field><field name="sequence">20</field>
+    <field name="kind_id" ref="contribute_kind_material"/>
+    <field name="deal_way">exchange</field>
+    <field name="pay_ids" eval="[(6, 0, [ref('contribute_pay_product')])]"/>
+  </record>
+  <record id="contribute_way_material_free_use" model="coop.contribute.way">
+    <field name="name">Ссуда — безвозмездно во временное пользование</field><field name="sequence">30</field>
+    <field name="kind_id" ref="contribute_kind_material"/>
+    <field name="deal_way">free_use</field>
+    <field name="pay_ids" eval="[(6, 0, [ref('contribute_pay_none')])]"/>
+  </record>
+  <record id="contribute_way_material_gift" model="coop.contribute.way">
+    <field name="name">Дар</field><field name="sequence">40</field>
+    <field name="kind_id" ref="contribute_kind_material"/>
+    <field name="deal_way">gift</field>
+    <field name="pay_ids" eval="[(6, 0, [ref('contribute_pay_none')])]"/>
+  </record>
+
+  <record id="contribute_way_resource_rent" model="coop.contribute.way">
+    <field name="name">Аренда</field><field name="sequence">10</field>
+    <field name="kind_id" ref="contribute_kind_resource"/>
+    <field name="deal_way">rent</field>
+    <field name="pay_ids" eval="[(6, 0, [ref('contribute_pay_money'), ref('contribute_pay_offset')])]"/>
+  </record>
+  <record id="contribute_way_resource_free_use" model="coop.contribute.way">
+    <field name="name">Ссуда — безвозмездно во временное пользование</field><field name="sequence">20</field>
+    <field name="kind_id" ref="contribute_kind_resource"/>
+    <field name="deal_way">free_use</field>
+    <field name="pay_ids" eval="[(6, 0, [ref('contribute_pay_none')])]"/>
+  </record>
+  <record id="contribute_way_resource_sale" model="coop.contribute.way">
+    <field name="name">Продажа</field><field name="sequence">30</field>
+    <field name="kind_id" ref="contribute_kind_resource"/>
+    <field name="deal_way">sale</field>
+    <field name="pay_ids" eval="[(6, 0, [ref('contribute_pay_money'), ref('contribute_pay_offset')])]"/>
+  </record>
+
+  <record id="contribute_way_space_rent" model="coop.contribute.way">
+    <field name="name">Аренда</field><field name="sequence">10</field>
+    <field name="kind_id" ref="contribute_kind_space"/>
+    <field name="deal_way">rent</field>
+    <field name="pay_ids" eval="[(6, 0, [ref('contribute_pay_money'), ref('contribute_pay_offset')])]"/>
+  </record>
+  <record id="contribute_way_space_free_use" model="coop.contribute.way">
+    <field name="name">Ссуда — безвозмездно во временное пользование</field><field name="sequence">20</field>
+    <field name="kind_id" ref="contribute_kind_space"/>
+    <field name="deal_way">free_use</field>
+    <field name="pay_ids" eval="[(6, 0, [ref('contribute_pay_none')])]"/>
+  </record>
+
+  <record id="contribute_way_labour_contract" model="coop.contribute.way">
+    <field name="name">Подряд или услуги — разовый результат</field><field name="sequence">10</field>
+    <field name="kind_id" ref="contribute_kind_labour"/>
+    <field name="deal_way">service</field><field name="deal_subject">service</field>
+    <field name="pay_ids" eval="[(6, 0, [ref('contribute_pay_money'), ref('contribute_pay_product')])]"/>
+    <field name="note">Продуктом — только по соглашению сторон (отступное).</field>
+  </record>
+  <record id="contribute_way_labour_self" model="coop.contribute.way">
+    <field name="name">Услуги самозанятого — с чеком «Мой налог»</field><field name="sequence">20</field>
+    <field name="kind_id" ref="contribute_kind_labour"/>
+    <field name="deal_way">service</field><field name="deal_subject">service</field>
+    <field name="pay_ids" eval="[(6, 0, [ref('contribute_pay_money')])]"/>
+  </record>
+
+  <record id="contribute_way_knowledge_license" model="coop.contribute.way">
+    <field name="name">Лицензия — право пользоваться</field><field name="sequence">10</field>
+    <field name="kind_id" ref="contribute_kind_knowledge"/>
+    <field name="deal_way">license</field>
+    <field name="pay_ids" eval="[(6, 0, [ref('contribute_pay_money'), ref('contribute_pay_royalty')])]"/>
+  </record>
+  <record id="contribute_way_knowledge_service" model="coop.contribute.way">
+    <field name="name">Услуги — консультации, обучение</field><field name="sequence">20</field>
+    <field name="kind_id" ref="contribute_kind_knowledge"/>
+    <field name="deal_way">service</field><field name="deal_subject">service</field>
+    <field name="pay_ids" eval="[(6, 0, [ref('contribute_pay_money')])]"/>
+  </record>
+  <record id="contribute_way_knowledge_gift" model="coop.contribute.way">
+    <field name="name">Дар</field><field name="sequence">30</field>
+    <field name="kind_id" ref="contribute_kind_knowledge"/>
+    <field name="deal_way">gift</field>
+    <field name="pay_ids" eval="[(6, 0, [ref('contribute_pay_none')])]"/>
+  </record>
+
+  <record id="contribute_way_money_gift" model="coop.contribute.way">
+    <field name="name">Дар — пожертвование проекту</field><field name="sequence">10</field>
+    <field name="kind_id" ref="contribute_kind_money"/>
+    <field name="deal_way">gift</field>
+    <field name="pay_ids" eval="[(6, 0, [ref('contribute_pay_none')])]"/>
+  </record>
+</odoo>
