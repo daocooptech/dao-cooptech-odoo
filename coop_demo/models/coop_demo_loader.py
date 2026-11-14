@@ -207,6 +207,7 @@ class CoopDemoLoader(models.AbstractModel):
             load_project_needs.diversify_project_needs(self.env)
             load_project_needs.link_offers_to_resources(self.env)
             load_project_needs.set_ownership_kinds(self.env)
+            load_project_needs.fill_offer_notes(self.env)
             if 'coop.resource.transfer' in self.env:
                 load_rights_history.load_rights_history(self.env)
         # Потребности в нематериальном — после активов и проектов:

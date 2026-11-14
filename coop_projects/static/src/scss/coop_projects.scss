@@ -856,17 +856,14 @@
 // Разбор заявок на потребности (№ 395): карточка заявки в колонке
 // потребности. Токены цвета и линий — как у остальных карточек.
 .o_coop_offers .o_coop_offer {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 12px 14px;
+  padding: 14px;
   border: 1px solid var(--coop-line, #e6e6e1);
-  border-radius: 10px;
-  background: var(--coop-card, #fff);
+  border-radius: var(--radius-card, 12px);
+  background: var(--coop-white, #fff);
 
   &.o_coop_offer_accepted {
-    border-color: var(--coop-accent, #1f6f43);
-    background: var(--coop-surface, #f2f2ee);
+    border-color: var(--coop-teal);
+    box-shadow: inset 0 0 0 1px var(--coop-teal);
   }
 
   &.o_coop_offer_declined {
@@ -874,9 +871,10 @@
   }
 
   .o_coop_offer_head {
-    display: flex;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
     gap: 10px;
+    align-items: center;
   }
 
   .o_coop_offer_ava {
@@ -884,52 +882,220 @@
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
-    flex: none;
   }
 
   .o_coop_offer_who {
-    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
     min-width: 0;
+    font-size: 11.5px;
+    color: var(--coop-slate);
   }
 
   .o_coop_offer_name {
-    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font: 600 13.5px/1.3 'Manrope', sans-serif;
+    color: var(--coop-ink);
+    text-decoration: none;
+    .o_coop_icon { color: var(--coop-teal); }
+    &:hover { color: var(--coop-teal-dark); }
+  }
+
+  .o_coop_offer_rep {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    b { font: 600 11.5px/1 'JetBrains Mono', monospace; color: var(--coop-ink); }
+  }
+
+  .o_coop_stars {
+    display: inline-flex;
+    gap: 1px;
+    i {
+      width: 10px;
+      height: 10px;
+      background: var(--coop-line-strong, #d2d2cb);
+      clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+      &.on { background: var(--coop-gold); }
+    }
   }
 
   .o_coop_offer_value {
-    text-align: right;
-    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
     white-space: nowrap;
+    b { font: 700 16px/1.2 'JetBrains Mono', monospace; color: var(--coop-ink); }
   }
 
   .o_coop_offer_diff {
-    font-size: 12px;
-    font-weight: 400;
+    font-size: 11px;
+    color: var(--coop-slate);
+    &.up { color: var(--coop-error-text); }
+    &.dn { color: var(--coop-teal-dark); }
+  }
+
+  .o_coop_offer_what {
+    margin: 10px 0 0;
+    font-size: 13px;
+    color: var(--coop-slate);
+    b { color: var(--coop-ink); font-weight: 600; }
+  }
+
+  .o_coop_offer_note {
+    margin: 6px 0 0;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--coop-ink);
+    white-space: pre-line;
+  }
+
+  .o_coop_offer_foot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--coop-line, #e6e6e1);
+    font-size: 11.5px;
+    color: var(--coop-slate);
+  }
+
+  .o_coop_offer_when {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 6px;
+  }
+
+  .o_coop_offer_dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--coop-gold);
   }
 
   .o_coop_offer_actions {
     display: flex;
-    justify-content: flex-end;
-    gap: 8px;
+    flex-wrap: wrap;
+    gap: 6px;
+    .btn { display: inline-flex; align-items: center; gap: 4px; }
+  }
+
+  .o_coop_offer_badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    &.ok { color: var(--coop-teal-dark); font-weight: 600; }
   }
 }
 
 // Аналитика проекта (№ 395): плитки итогов, столбики по неделям, таблица.
 .o_coop_an_stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 10px;
-  margin-bottom: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 14px;
+  @container (max-width: 560px) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
   .o_coop_an_stat {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
     padding: 10px 12px;
-    border: 1px solid var(--coop-line, #e6e6e1);
-    border-radius: 10px;
+    border-radius: var(--radius-item, 8px);
+    background: var(--coop-surface, #f2f2ee);
+    dt { font-size: 11.5px; font-weight: 400; color: var(--coop-slate); }
+    span { font-size: 11px; line-height: 1.35; color: var(--coop-slate); }
   }
 
   .o_coop_an_num {
-    font-size: 20px;
-    font-weight: 600;
+    margin: 0;
+    font: 700 17px/1.2 'JetBrains Mono', monospace;
+    color: var(--coop-ink);
+  }
+}
+
+// График из клеток — `BlockChart` дизайн-системы (№ 449). Разметку
+// даёт `block_chart_html`, имена классов — как в эталоне.
+.coop-chart { margin: 0; min-width: 0; }
+.coop-chart_keys {
+  display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0 0 12px; padding: 0; list-style: none;
+  font: 500 11px/1.4 'JetBrains Mono', monospace; letter-spacing: .04em; text-transform: uppercase; color: var(--coop-slate);
+  li { display: flex; align-items: center; gap: 6px; }
+}
+.coop-chart_key { flex: none; width: 7px; height: 7px; border-radius: 1px; background: var(--coop-ink); }
+.coop-chart_plot { display: flex; gap: 10px; align-items: stretch; }
+.coop-chart_axis {
+  flex: none; display: flex; flex-direction: column; justify-content: space-between; padding-bottom: 20px;
+  font: 500 10.5px/1 'JetBrains Mono', monospace; color: var(--coop-slate); text-align: right;
+}
+.coop-chart_x {
+  display: block; margin-top: 6px; font: 500 10.5px/1.2 'JetBrains Mono', monospace; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--coop-slate); text-align: center; white-space: nowrap;
+}
+.coop-chart_note { margin-top: 12px; font-size: 12px; line-height: 1.5; color: var(--coop-slate); }
+.coop-blocks_body { flex: 1 1 auto; min-width: 0; }
+.coop-blocks_grid { display: grid; gap: 2px; align-items: end; }
+.coop-blocks_groups { display: grid; gap: 2px; }
+.coop-blocks_group_now { color: var(--coop-ink); font-weight: 700; }
+.coop-blocks_col { min-width: 0; }
+.coop-blocks_cells {
+  position: relative; display: flex; flex-direction: column-reverse; gap: 2px;
+  i { display: block; width: 100%; aspect-ratio: 1; border-radius: 1px; background: var(--coop-surface, #f2f2ee); }
+}
+// Узкий лист: 56 дней дают клетку в 2 px — оставляем четыре последние
+// недели, клетка снова 6–8 px.
+@container (max-width: 560px) {
+  .o_coop_pm_an {
+    .coop-blocks_grid, .coop-blocks_groups { grid-template-columns: repeat(28, minmax(0, 1fr)) !important; }
+    .coop-blocks_grid > .coop-blocks_col:nth-child(-n+28),
+    .coop-blocks_groups > span:nth-child(-n+4) { display: none; }
+  }
+}
+.coop-blocks_col:hover .coop-blocks_cells i:not([class]) { background: var(--coop-line, #e6e6e1); }
+.coop-chart_ink, .coop-blocks_cells i.coop-chart_ink { background: var(--coop-ink); }
+.coop-chart_teal, .coop-blocks_cells i.coop-chart_teal { background: var(--coop-teal); }
+.coop-chart_gold, .coop-blocks_cells i.coop-chart_gold { background: var(--coop-gold); }
+.coop-chart_slate, .coop-blocks_cells i.coop-chart_slate { background: var(--coop-slate-light, #9a9a92); }
+
+// «Аналитика проекта»: заголовок и переключатель разделов — одной
+// строкой (образец OffersReviewPage). Вкладки движка остаются, рамка
+// книжки распускается (`display: contents`), и её ряд вкладок встаёт
+// в сетку блока справа от заголовка, видом `Segmented`.
+.o_coop_pm_an {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 12px;
+  > .o_coop_pm_title { margin: 0; }
+  // `d-flex` движка ставит display с !important — перебиваем так же.
+  > .o_notebook { display: contents !important; }
+  > .o_notebook > .o_notebook_headers { grid-column: 2; margin: 0; border: 0; }
+  > .o_notebook > .tab-content { grid-column: 1 / -1; margin-top: 14px; padding: 0; border: 0; }
+  @container (max-width: 560px) {
+    grid-template-columns: minmax(0, 1fr);
+    > .o_notebook > .o_notebook_headers { grid-column: 1; margin-top: 8px; }
+  }
+  .o_notebook_headers .nav {
+    display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 3px; border: 1px solid var(--coop-line, #e6e6e1);
+    border-radius: 8px; background: var(--coop-surface, #f2f2ee);
+    .nav-item { margin: 0; }
+    .nav-link {
+      margin: 0; padding: 5px 10px; border: 0; border-radius: 5px; background: transparent;
+      font: 600 11px/1.3 'JetBrains Mono', monospace; letter-spacing: .03em; text-transform: uppercase;
+      color: var(--coop-slate);
+      &.active { background: var(--coop-white, #fff); color: var(--coop-ink); box-shadow: 0 1px 2px rgba(20, 23, 26, .08); }
+      &:hover:not(.active) { color: var(--coop-ink); }
+    }
   }
 }
 
@@ -1125,6 +1291,13 @@ body.o_coop_pm_settings_open .o_form_view .o_coop_pm #coop_pm_settings { display
     border-radius: var(--radius-item, 8px); cursor: pointer;
     &.active { background: var(--coop-teal-tint, #e3efed); border-color: var(--coop-teal, #146b64); }
     &.closed { opacity: .7; }
+    .o_coop_rev_need_ic {
+      flex: none; width: 28px; height: 28px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--coop-surface, #f2f2ee); color: var(--coop-slate);
+    }
+    &.active .o_coop_rev_need_ic { background: var(--coop-white, #fff); color: var(--coop-teal-dark); }
+    .o_coop_rev_done { flex: none; display: inline-flex; color: var(--coop-teal); }
     .o_coop_rev_need_body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
     .o_coop_rev_need_name { font: 500 13px/1.3 'Manrope', sans-serif; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .o_coop_rev_need_sub { font: 500 11px/1.3 'JetBrains Mono', monospace; }
@@ -1134,7 +1307,15 @@ body.o_coop_pm_settings_open .o_form_view .o_coop_pm #coop_pm_settings { display
       &.new { background: var(--coop-ink, #14171a); color: var(--coop-white, #fff); }
     }
   }
-  .o_coop_rev_title { font: 700 16px/1.3 'Manrope', sans-serif; }
+  .o_coop_rev_kind {
+    font: 500 10.5px/1.3 'JetBrains Mono', monospace; letter-spacing: .05em;
+    text-transform: uppercase; color: var(--coop-slate);
+  }
+  .o_coop_rev_title { margin: 2px 0 4px; font: 700 17px/1.3 'Manrope', sans-serif; color: var(--coop-ink); }
+  .o_coop_rev_meta {
+    font-size: 12.5px; color: var(--coop-slate);
+    b { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--coop-ink); }
+  }
   .o_coop_rev_bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin: 10px 0; }
   .o_coop_rev_filters {
     display: inline-flex; background: var(--coop-surface, #f2f2ee); border-radius: 7px; padding: 2px;

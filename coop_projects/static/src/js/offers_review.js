@@ -110,14 +110,62 @@ export class CoopOffersReview extends Component {
             + " " + (symbol || "");
     }
 
-    day(iso) {
+    /** «сегодня», «вчера», «3 дня назад»; старше месяца — числом. */
+    ago(iso) {
         if (!iso) { return ""; }
-        return new Date(iso).toLocaleDateString("ru-RU", { day: "numeric", month: "short" });
+        const then = new Date(iso + "T00:00:00");
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        const days = Math.round((now - then) / 86400000);
+        if (days <= 0) { return "сегодня"; }
+        if (days === 1) { return "вчера"; }
+        if (days > 30) {
+            return then.toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
+        }
+        const n10 = days % 10, n100 = days % 100;
+        const word = n10 === 1 && n100 !== 11 ? "день"
+            : n10 >= 2 && n10 <= 4 && (n100 < 12 || n100 > 14) ? "дня" : "дней";
+        return `${days} ${word} назад`;
+    }
+
+    /** Свежая заявка — точка у даты, как в образце: не старше трёх дней. */
+    fresh(offer) {
+        if (offer.state !== "offered" || !offer.offered_on) { return false; }
+        return (Date.now() - new Date(offer.offered_on + "T00:00:00")) < 4 * 86400000;
+    }
+
+    pct(value) {
+        return String(value).replace(".", ",");
+    }
+
+    stars(rating) {
+        const on = Math.round(rating || 0);
+        return [1, 2, 3, 4, 5].map((i) => i <= on);
+    }
+
+    diffText(offer) {
+        if (!offer.need_price) { return offer.diff_label; }
+        return Math.round(offer.diff) === 0 ? "как в потребности" : offer.diff_label;
     }
 
     diffClass(offer) {
-        if (!offer.need_price) { return "text-muted"; }
-        return offer.diff > 0 ? "text-danger" : "text-success";
+        if (!offer.need_price || Math.round(offer.diff) === 0) { return ""; }
+        return offer.diff > 0 ? "up" : "dn";
+    }
+
+    /** «Написать» — личный чат с откликнувшимся, тот же, что из карточки человека. */
+    async write(offer) {
+        const store = this.env.services["mail.store"];
+        if (store) {
+            await store.openChat({ partnerId: offer.partner_id });
+        }
+    }
+
+    openPartner(offer) {
+        this.action.doAction({
+            type: "ir.actions.act_window", res_model: "res.partner",
+            res_id: offer.partner_id, views: [[false, "form"]],
+        });
     }
 
     pick(id) {

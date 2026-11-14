@@ -96,13 +96,24 @@ class ProjectProject(models.Model):
                 continue
             offers = source.contribution_ids.filtered('need_id')
             needs = source.need_ids | offers.mapped('need_id')
+            # «Пай за строку» — доля стоимости строки в нужном всего;
+            # «пай при принятии» — оценка к собранному вместе с ней: так
+            # и считается пай принятого вклада (`_compute_share_percent`).
+            required = source.required_total
+            collected = source.contribution_total
+            reviews = self._coop_offer_reviews(offers.mapped('partner_id'))
             out_needs, out_offers = [], []
             for need in needs.sorted('id'):
                 mine = offers.filtered(lambda c: c.need_id == need)
                 accepted = need.need_accepted_id
+                kind = self._COOP_NEED_KINDS.get(need.resource_type, ('', 'package'))
                 out_needs.append({
                     'id': need.id,
                     'name': need.name,
+                    'kind': kind[0],
+                    'icon': kind[1],
+                    'line_share': round(need.price / required * 100, 1)
+                    if required and need.price else 0,
                     'price': need.price_display or '',
                     'new': len(mine.filtered(lambda c: c.state == 'offered')),
                     'total': len(mine),
@@ -110,11 +121,24 @@ class ProjectProject(models.Model):
                     'closed_by': accepted.partner_id.name if accepted else '',
                 })
             for c in offers.sorted(lambda c: (c.state != 'offered', -(c.id or 0))):
+                who = c.partner_id
+                # Одна основная специализация, как в образце: полный
+                # перечень растягивал строку на три.
+                role = (who.coop_specialization_id.name
+                        if 'coop_specialization_id' in who._fields else '') or who.function or ''
+                rating, review_count = reviews.get(who.id, (0, 0))
                 out_offers.append({
                     'id': c.id,
                     'need_id': c.need_id.id,
-                    'partner': c.partner_id.name,
-                    'partner_id': c.partner_id.id,
+                    'partner': who.name,
+                    'partner_id': who.id,
+                    'verified': bool(who.coop_verified) if 'coop_verified' in who._fields else False,
+                    'role': ' · '.join(p for p in (role, who.city or '') if p),
+                    'rating': rating,
+                    'reviews': review_count,
+                    'note': c.note or '',
+                    'share_if': round(c.value / (collected + c.value) * 100, 1)
+                    if c.value else 0,
                     'trust': c.partner_trust,
                     'deals': c.partner_deals_done,
                     'value': c.value,
@@ -130,6 +154,29 @@ class ProjectProject(models.Model):
                     'share': c.share_percent,
                 })
             project.coop_offers_json = {'needs': out_needs, 'offers': out_offers}
+
+    # Вид потребности над её названием и значок в списке слева
+    # (OffersReviewPage): подписи — как в образце, не «Материальный».
+    _COOP_NEED_KINDS = {
+        'material': ('Материалы', 'package'),
+        'labour': ('Труд', 'tools'),
+        'financial': ('Деньги', 'cash'),
+    }
+
+    def _coop_offer_reviews(self, partners):
+        """Средняя оценка и число отзывов о людях из заявок — звёзды в
+        карточке. Отзывы ведёт модуль сделок; нет его — звёзд нет."""
+        if not partners or 'coop.deal.review' not in self.env:
+            return {}
+        Review = self.env['coop.deal.review'].sudo()
+        domain = [('target_id', 'in', partners.ids)]
+        if 'visible' in Review._fields:
+            domain.append(('visible', '=', True))
+        marks = {}
+        for review in Review.search_read(domain, ['target_id', 'rating']):
+            if review['rating']:
+                marks.setdefault(review['target_id'][0], []).append(int(review['rating']))
+        return {pid: (round(sum(m) / len(m), 1), len(m)) for pid, m in marks.items()}
 
     # Переходы строк «Сводки»: ключ строки -> метод проекта. Виджет
     # зовёт только `action_coop_summary_open` с ключом из этого списка.

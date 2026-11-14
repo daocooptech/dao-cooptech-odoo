@@ -80,6 +80,7 @@
                 <div class="o_coop_offer_what">
                   <t t-out="record.kind.value"/>: <field name="name"/>
                 </div>
+                <div class="o_coop_offer_note" t-if="record.note.raw_value"><field name="note"/></div>
                 <div class="text-muted" t-if="record.labour_form.raw_value">
                   Как оформлен труд: <t t-out="record.labour_form.value"/>
                 </div>

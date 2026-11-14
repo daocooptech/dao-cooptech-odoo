@@ -17,21 +17,73 @@ def _money(amount):
     return '{:,.0f}'.format(amount or 0).replace(',', ' ')
 
 
-def analytics_html(stats, table=None, bars=None, empty=''):
+def block_chart_html(columns, rows=10, ticks=None, keys=None, groups=None,
+                     caption='', label='', top=None):
+    """График из клеток — `BlockChart` дизайн-системы (№ 449): столбец —
+    период, клетка — доля полной высоты, части складываются снизу вверх.
+
+    `columns` — [{'parts': [(значение, тон)], 'title': подсказка,
+    'now': bool}], `groups` — [(подпись, сколько столбцов, now)],
+    `keys` — [(подпись, тон)]. Тона — `ink`, `teal`, `gold`, `slate`.
+    """
+    from markupsafe import escape
+    top = top or max([sum(v for v, _t in c['parts']) for c in columns] + [0]) or 1
+    count = len(columns)
+    cols = []
+    for col in columns:
+        cells = []
+        for value, tone in col['parts']:
+            n = round(value / top * rows) if value else 0
+            if value and not n:
+                n = 1  # малое поступление всё же видно одной клеткой
+            cells += [tone] * n
+        cells = (cells + [None] * rows)[:rows]
+        cols.append('<div class="coop-blocks_col%s" title="%s"><div class="coop-blocks_cells">%s</div></div>' % (
+            ' coop-blocks_now' if col.get('now') else '', escape(col.get('title') or ''),
+            ''.join('<i class="coop-chart_%s"></i>' % t if t else '<i></i>' for t in cells)))
+    grid = 'grid-template-columns:repeat(%d,minmax(0,1fr))' % count
+    out = ['<figure class="coop-chart coop-blocks" role="img" aria-label="%s">' % escape(label)]
+    if keys:
+        out.append('<ul class="coop-chart_keys">%s</ul>' % ''.join(
+            '<li><i class="coop-chart_key coop-chart_%s"></i>%s</li>' % (tone, escape(text))
+            for text, tone in keys))
+    out.append('<div class="coop-chart_plot">')
+    if ticks:
+        out.append('<div class="coop-chart_axis" aria-hidden="true">%s</div>' % ''.join(
+            '<span>%s</span>' % escape(t) for t in reversed(ticks)))
+    out.append('<div class="coop-blocks_body"><div class="coop-blocks_grid" style="%s">%s</div>' % (grid, ''.join(cols)))
+    if groups:
+        out.append('<div class="coop-blocks_groups" style="%s">%s</div>' % (grid, ''.join(
+            '<span class="coop-chart_x%s" style="grid-column:span %d">%s</span>' % (
+                ' coop-blocks_group_now' if now else '', span, escape(text))
+            for text, span, now in groups)))
+    out.append('</div></div>')
+    if caption:
+        out.append('<figcaption class="coop-chart_note">%s</figcaption>' % escape(caption))
+    out.append('</figure>')
+    return ''.join(out)
+
+
+def analytics_html(stats, table=None, bars=None, empty='', chart=None):
     """Блок аналитики проекта (№ 395): итоги плитками, столбики, таблица.
 
     Всё, что попадает в разметку, экранируется здесь, поэтому поле с
     таким содержимым не санируется движком: санитайзер вырезал бы ширину
-    столбиков. `stats` — пары (подпись, значение), `bars` — пары (подпись,
-    доля от 0 до 1, значение), `table` — (заголовки, строки).
+    столбиков. `stats` — (подпись, значение) или (подпись, значение,
+    пояснение под числом), `bars` — пары (подпись, доля от 0 до 1,
+    значение), `table` — (заголовки, строки), `chart` — готовая разметка
+    `block_chart_html`.
     """
     from markupsafe import Markup, escape
     parts = []
     if stats:
-        parts.append('<div class="o_coop_an_stats">%s</div>' % ''.join(
-            '<div class="o_coop_an_stat"><div class="o_coop_an_num">%s</div>'
-            '<div class="text-muted">%s</div></div>' % (escape(value), escape(label))
-            for label, value in stats))
+        parts.append('<dl class="o_coop_an_stats">%s</dl>' % ''.join(
+            '<div class="o_coop_an_stat"><dt>%s</dt><dd class="o_coop_an_num">%s</dd>%s</div>' % (
+                escape(stat[0]), escape(stat[1]),
+                '<span>%s</span>' % escape(stat[2]) if len(stat) > 2 and stat[2] else '')
+            for stat in stats))
+    if chart:
+        parts.append(chart)
     if bars:
         parts.append('<div class="o_coop_an_bars">%s</div>' % ''.join(
             '<div class="o_coop_an_bar"><span class="o_coop_an_bar_label">%s</span>'
@@ -571,36 +623,98 @@ class CoopProject(models.Model):
         string='Финансовые вклады', compute='_compute_analytics_money',
         sanitize=False)
 
+    # Тон клеток графика по основанию денежного вклада (образец
+    # OffersReviewPage): паевой взнос — чернильным, пожертвование —
+    # акцентом. Основание задаёт проект, поэтому у одного проекта обычно
+    # один тон; расшифровка показывает только встреченные.
+    _MONEY_BASIS_TONES = {
+        'share': ('паевой взнос', 'ink'),
+        'donation': ('пожертвование', 'teal'),
+        'prepay': ('предоплата', 'gold'),
+        'investment': ('инвестиции', 'slate'),
+    }
+
     @api.depends('contribution_ids.state', 'contribution_ids.value',
-                 'contribution_ids.kind', 'contribution_ids.accepted_on')
+                 'contribution_ids.kind', 'contribution_ids.accepted_on',
+                 'contribution_basis', 'need_ids.price')
     def _compute_analytics_money(self):
-        """Финансовые вклады: собрано, вкладчиков, средний вклад, возвращено
-        и поступления по неделям (последние восемь), № 395."""
+        """Финансовые вклады: четыре плитки (собрано, вкладчиков, средний,
+        возвращено) и поступления по дням за восемь недель клетками
+        (`BlockChart`, задача 449)."""
         today = fields.Date.context_today(self)
-        week_start = today - timedelta(days=today.weekday())
         for project in self:
             money = project.contribution_ids.filtered(lambda c: c.kind == 'money')
+            if not money:
+                project.analytics_money = analytics_html(
+                    [], empty=_('Денежных вкладов пока нет.'))
+                continue
             taken = money.filtered(lambda c: c.state == 'accepted')
             returned = money.filtered(lambda c: c.state in ('returned', 'compensated'))
             total = sum(taken.mapped('value'))
             people = len(set(taken.mapped('partner_id').ids))
-            weeks = []
-            for back in range(7, -1, -1):
-                start = week_start - timedelta(weeks=back)
-                end = start + timedelta(days=7)
-                amount = sum(c.value for c in taken
-                             if c.accepted_on and start <= c.accepted_on < end)
-                weeks.append((start, amount))
-            top = max((amount for _start, amount in weeks), default=0) or 1
+            need = sum(project.need_ids.filtered(
+                lambda n: n.resource_type == 'financial').mapped('price'))
+            values = sorted(taken.mapped('value'))
+            median = values[len(values) // 2] if values else 0
+            word, tone = self._MONEY_BASIS_TONES.get(
+                project.contribution_basis, ('вклад', 'ink'))
+
+            # Восемь недель до сегодня; если сбор шёл раньше — восемь
+            # недель до последнего поступления, иначе график пуст.
+            # Дата поступления — принятие; у перенесённых вкладов её нет,
+            # тогда день предложения.
+            def when(c):
+                return c.accepted_on or c.offered_on
+            dates = [when(c) for c in taken if when(c)]
+            last = max(dates) if dates else today
+            end = today if last >= today - timedelta(days=55) else last
+            first = end - timedelta(days=55)
+            days = {}
+            for c in taken:
+                day = when(c)
+                if day and first <= day <= end:
+                    days[day] = days.get(day, 0) + c.value
+            peak = max(days.values(), default=0)
+            # Полная высота — круглое число тысяч, клеток десять: при
+            # пике 37 тыс. ось «0 · 20 · 40», клетка — 4 тыс. ₽.
+            step, scale = 1000, 1
+            while True:
+                found = next((m * scale * 1000 for m in (1, 2, 4, 5)
+                              if m * scale * 1000 * 10 >= peak), None)
+                if found:
+                    step = found
+                    break
+                scale *= 10
+            top = step * 10
+            columns = []
+            for i in range(56):
+                day = first + timedelta(days=i)
+                amount = days.get(day, 0)
+                columns.append({
+                    'parts': [(amount, tone)],
+                    'title': '%s · %s ₽' % (day.strftime('%d.%m'), _money(amount)),
+                    'now': day == today,
+                })
+            groups = [('%d.%02d' % ((first + timedelta(weeks=w)).day, (first + timedelta(weeks=w)).month),
+                       7, w == 7 and end == today) for w in range(8)]
+            chart = block_chart_html(
+                columns, rows=10, top=top,
+                ticks=['0', _money(top / 2000), _money(top / 1000)],
+                keys=[(word, tone)], groups=groups,
+                label=_('Поступления деньгами по дням, тысячи рублей'),
+                caption=_('Столбец — день, клетка — %s ₽. Наведите на столбец — '
+                          'сумма за день.', _money(step)))
             project.analytics_money = analytics_html(
-                stats=[(_('Собрано, ₽'), _money(total)),
-                       (_('Вкладчиков'), str(people)),
-                       (_('Средний вклад, ₽'), _money(total / people if people else 0)),
-                       (_('Возвращено, ₽'), _money(sum(returned.mapped('value'))))],
-                bars=[(_('нед. с %s', start.strftime('%d.%m')), amount / top, _money(amount))
-                      for start, amount in weeks],
-                empty=_('Денежных вкладов пока нет.')) if money else analytics_html(
-                    [], empty=_('Денежных вкладов пока нет.'))
+                stats=[(_('Собрано деньгами'), '%s ₽' % _money(total),
+                        _('из %s ₽ финансовых потребностей', _money(need)) if need else ''),
+                       (_('Вкладчиков'), str(people),
+                        _('основание — %s', word) if people else ''),
+                       (_('Средний вклад'), '%s ₽' % _money(total / people if people else 0),
+                        _('медиана %s ₽', _money(median)) if values else ''),
+                       (_('Возвращено'), '%s ₽' % _money(sum(returned.mapped('value'))),
+                        _('отзывов не было') if not returned else
+                        _('отозвано вкладов: %s', len(returned)))],
+                chart=chart)
 
     @api.depends('contribution_ids.state', 'contribution_ids.need_id')
     def _compute_new_offer_count(self):
@@ -1745,6 +1859,10 @@ class CoopProjectContribution(models.Model):
         help='Неустранимые сомнения толкуются в пользу трудовых '
              'отношений. Без выбора инициатор рискует штрафом и '
              'доначислением взносов.')
+    # Сопроводительный текст заявки (образец OffersReviewPage, № 449):
+    # до 15.11.2026 «пара слов инициатору» уходила только в извещение, и
+    # при разборе заявок её было не найти.
+    note = fields.Text(string='Пара слов инициатору')
 
     share_percent = fields.Float(
         string='Пай, %', compute='_compute_share_percent', store=True,

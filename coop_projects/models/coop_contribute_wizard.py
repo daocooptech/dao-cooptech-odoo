@@ -189,6 +189,7 @@ class CoopContributeWizard(models.TransientModel):
             'kind': self.kind,
             'name': self.name,
             'value': self.value,
+            'note': self.note,
             'state': 'offered',
         }
         # Чем ещё может быть вклад — решает тот модуль, который это умеет:
