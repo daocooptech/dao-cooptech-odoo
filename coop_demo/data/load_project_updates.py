@@ -238,3 +238,64 @@ def densify(env):
             built += 1
     _logger.info('Отчёты о ходе: дописано %s', built)
     return built
+
+
+def load_management_updates(env):
+    """Отчёт о ходе — каждому проекту «Управления проектами».
+
+    Выше отчёты получают только проекты, выросшие из сборов; заведённые
+    прямо в управлении (внутренние проекты организаций, заказы) оставались
+    «Без отчёта» — в каталоге управления это две трети карточек без хода
+    (владелец 14.11.2026: «установи статусы всем проектам»).
+
+    Состояние выводится из положения дел, как у `_state`: все задачи
+    закрыты — завершён; этап «Остановлен» или «Отменён» — приостановлен;
+    срок прошёл — отстаёт; закрыто меньше трети задач при близком сроке —
+    есть риск; иначе по плану. Без задач и сроков — ровным разбросом по
+    номеру проекта, чтобы отбор по ходу проекта не был пустым.
+    Повторный запуск ничего не добавляет: только проектам без отчётов.
+    """
+    if 'project.update' not in env:
+        return 0
+    Report = env['project.update'].sudo()
+    Project = env['project.project'].sudo().with_context(active_test=False)
+    reported = set(Report.search([]).project_id.ids)
+    projects = Project.search([('is_template', '=', False),
+                               ('id', 'not in', list(reported))], order='id')
+    rnd = random.Random(20261114)
+    today = fields.Date.today()
+    spread = ['on_track'] * 6 + ['at_risk'] * 2 + ['off_track', 'on_hold', 'done']
+    admin = env.ref('base.user_admin')
+    built = 0
+    for project in projects:
+        total = project.task_count
+        closed = project.closed_task_count
+        stage = (project.stage_id.name or '').lower()
+        if total and closed >= total:
+            state = 'done'
+        elif 'останов' in stage or 'отмен' in stage or 'cancel' in stage:
+            state = 'on_hold'
+        elif project.date and project.date < today:
+            state = 'off_track'
+        elif (total and project.date and closed * 3 < total
+              and (project.date - today).days < 30):
+            state = 'at_risk'
+        elif total or project.date:
+            state = 'on_track'
+        else:
+            state = spread[project.id % len(spread)]
+        heading, description = rnd.choice(TEXTS[state])
+        progress = int(round(closed * 100.0 / total)) if total else (
+            100 if state == 'done' else rnd.randint(10, 80))
+        Report.create({
+            'name': heading,
+            'project_id': project.id,
+            'status': state,
+            'progress': progress,
+            'date': today - timedelta(days=rnd.randint(1, 40)),
+            'user_id': (project.user_id or admin).id,
+            'description': '<p>%s</p>' % description,
+        })
+        built += 1
+    _logger.info('Отчёты о ходе в управлении проектами: заведено %s', built)
+    return built

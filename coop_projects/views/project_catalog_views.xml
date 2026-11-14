@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Каталог «Управления проектами» — тем же видом, что каталог
+       проектов (владелец 14.11.2026): плиткой, списком, таблицей, на
+       карте, с панелью отбора справа. Карточка — по плитке каталога
+       проектов (`view_coop_project_kanban`): снимок или лицо заказчика,
+       значок хода проекта, точка хода, полоса выполненных задач. Класс
+       `o_coop_projects` — ради её же стилей, а не копии. -->
+  <record id="view_project_catalog_kanban" model="ir.ui.view">
+    <field name="name">project.project.kanban.coop.catalog</field>
+    <field name="model">project.project</field>
+    <field name="priority">90</field>
+    <field name="arch" type="xml">
+      <kanban js_class="coop_catalog_kanban" class="o_coop_projects"
+              default_order="id desc" quick_create="false">
+        <field name="partner_id"/>
+        <field name="user_id"/>
+        <field name="city"/>
+        <field name="last_update_status"/>
+        <field name="task_count"/>
+        <field name="closed_task_count"/>
+        <field name="task_completion_percentage"/>
+        <field name="date"/>
+        <templates>
+          <t t-name="card">
+            <div class="o_coop_tile">
+              <div class="o_coop_tile_image o_coop_media">
+                <img class="o_coop_media_logo" t-if="record.partner_id.raw_value" loading="lazy"
+                     t-attf-src="/web/image/res.partner/#{record.partner_id.raw_value}/image_512"
+                     t-att-alt="record.partner_id.value"/>
+                <span t-else="" class="o_coop_media_sign"><field name="id" widget="coop_sign" options="{'icon': 'rocket'}"/></span>
+                <span class="o_coop_badge o_coop_kind"
+                      t-if="record.last_update_status.raw_value and record.last_update_status.raw_value != 'to_define'">
+                  <t t-out="record.last_update_status.value"/>
+                </span>
+                <span class="o_coop_loc" t-if="record.city.raw_value">
+                  <i class="oi" data-icon="location_on" aria-hidden="true"/>
+                  <t t-out="record.city.value"/>
+                </span>
+              </div>
+              <div class="o_coop_tile_body">
+                <div class="o_coop_tile_name">
+                  <span class="o_coop_run" t-if="record.last_update_status.raw_value and record.last_update_status.raw_value != 'to_define'"
+                        t-att-class="'o_coop_run_' + record.last_update_status.raw_value"
+                        t-att-title="record.last_update_status.value"/>
+                  <field name="name"/>
+                </div>
+                <div class="o_coop_tile_desc">
+                  <t t-if="record.partner_id.raw_value" t-out="record.partner_id.value"/>
+                  <t t-elif="record.user_id.raw_value" t-out="record.user_id.value"/>
+                  <t t-if="record.date.raw_value"> · до <t t-out="record.date.value"/></t>
+                </div>
+                <div class="o_coop_readiness" t-att-title="'Задач закрыто: ' + record.closed_task_count.value + ' из ' + record.task_count.value">
+                  <div class="o_coop_readiness_bar">
+                    <div class="o_coop_readiness_fill"
+                         t-attf-style="width: #{Math.min(100, record.task_completion_percentage.raw_value * 100)}%"/>
+                  </div>
+                  <div class="o_coop_readiness_pct">
+                    <t t-out="Math.round(record.task_completion_percentage.raw_value * 100)"/>%
+                  </div>
+                </div>
+                <div class="o_coop_tile_act">
+                  <button name="action_view_tasks" type="object"
+                          class="btn o_coop_btn o_coop_tile_contribute">Задачи</button>
+                </div>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="view_project_catalog_list" model="ir.ui.view">
+    <field name="name">project.project.list.coop.catalog</field>
+    <field name="model">project.project</field>
+    <field name="priority">90</field>
+    <field name="arch" type="xml">
+      <list string="Управление проектами">
+        <field name="name"/>
+        <field name="partner_id" string="Заказчик" optional="show"/>
+        <field name="user_id" string="Менеджер" widget="many2one_avatar_user" optional="show"/>
+        <field name="city" optional="show"/>
+        <field name="date_start" optional="hide"/>
+        <field name="date" string="Срок" optional="show"/>
+        <field name="task_count" string="Задач" optional="show"/>
+        <field name="last_update_status" string="Ход проекта" widget="badge" optional="show"
+               decoration-success="last_update_status == 'on_track'"
+               decoration-warning="last_update_status == 'at_risk'"
+               decoration-danger="last_update_status == 'off_track'"
+               decoration-muted="last_update_status in ('on_hold', 'done', 'to_define')"/>
+      </list>
+    </field>
+  </record>
+
+</odoo>

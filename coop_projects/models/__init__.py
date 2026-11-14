@@ -6,3 +6,4 @@ from . import coop_contribute_wizard
 from . import res_company
 from . import project_task_note
 from . import catalog_filters
+from . import project_catalog

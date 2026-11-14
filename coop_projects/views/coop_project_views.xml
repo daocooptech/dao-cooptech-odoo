@@ -931,12 +931,26 @@
   <record id="action_coop_project_management" model="ir.actions.act_window">
     <field name="name">Управление проектами</field>
     <field name="res_model">project.project</field>
-    <field name="context">{'display_milestone_deadline': True}</field>
+    <field name="context">{'display_milestone_deadline': True, 'bin_size': True, 'coop_catalog': True, 'coop_create_label': 'Добавить проект', 'coop_shelf_field': 'city'}</field>
     <field name="domain">[("is_template", "=", False)]</field>
-    <field name="view_mode">kanban,list,form,calendar,activity</field>
-    <field name="view_id" ref="project.view_project_kanban"/>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="view_id" ref="view_project_catalog_kanban"/>
     <field name="search_view_id" ref="project.view_project_project_filter"/>
     <field name="target">main</field>
+  </record>
+  <!-- Виды каталога платформы (`project_catalog_views.xml`), владелец
+       14.11.2026: «те же виды, что в каталоге проектов». -->
+  <record id="action_coop_project_management_kanban" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">kanban</field>
+    <field name="view_id" ref="view_project_catalog_kanban"/>
+    <field name="act_window_id" ref="action_coop_project_management"/>
+  </record>
+  <record id="action_coop_project_management_list" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">list</field>
+    <field name="view_id" ref="view_project_catalog_list"/>
+    <field name="act_window_id" ref="action_coop_project_management"/>
   </record>
   <menuitem id="menu_coop_project_management" name="Управление проектами"
             parent="menu_coop_projects_root" action="action_coop_project_management"
