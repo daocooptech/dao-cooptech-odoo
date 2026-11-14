@@ -78,17 +78,8 @@
                       t-on-click="() => this.openResource(res.id)">
                 <img class="o_coop_rev_res_img" loading="lazy" t-att-alt="res.name"
                      t-att-src="'/web/image/coop.resource/' + res.id + '/image_512'"/>
-                <span class="o_coop_rev_res_text">
-                  <span class="o_coop_rev_res_name" t-out="res.name"/>
-                  <span class="o_coop_rev_res_sub" t-if="offer.name and offer.name !== res.name" t-out="offer.name"/>
-                </span>
+                <span class="o_coop_rev_res_name" t-out="res.name"/>
               </button>
-              <div t-else="" class="o_coop_rev_res">
-                <span class="o_coop_rev_res_img o_coop_rev_res_ph"><CoopIcon name="'package'" size="20"/></span>
-                <span class="o_coop_rev_res_text">
-                  <span class="o_coop_rev_res_name" t-out="offer.name"/>
-                </span>
-              </div>
               <div class="text-muted" t-if="offer.labour_form">Как оформлен труд: <t t-out="offer.labour_form"/></div>
               <div class="text-muted">предложено <t t-out="this.day(offer.offered_on)"/></div>
               <div class="o_coop_offer_state" t-if="offer.state === 'accepted'">
