@@ -782,8 +782,8 @@
     transition: stroke-dashoffset .4s ease;
   }
 
-  &.o_coop_ring_low .o_coop_ring_fill { stroke: #d64545; }
-  &.o_coop_ring_full .o_coop_ring_fill { stroke: #1f9d55; }
+  &.o_coop_ring_low .o_coop_ring_fill { stroke: var(--coop-error, #b3413a); }
+  &.o_coop_ring_full .o_coop_ring_fill { stroke: var(--coop-teal-dark, #0e4f4a); }
 
   .o_coop_ring_value {
     font: 700 18px/1.1 'JetBrains Mono', ui-monospace, monospace;
