@@ -238,8 +238,10 @@
 
 @media (max-width: 767.98px) {
   .o_coop_work_list {
+    // У ячеек движка правило с цепочкой :not() сильнее любого нашего
+    // класса — без !important они остаются table-cell в ряд (замер 14.11).
     .o_list_table, .o_list_table tbody, .o_list_table tr, .o_list_table td {
-      display: block;
+      display: block !important;
       width: auto !important;
       min-width: 0 !important;
       max-width: none !important;
@@ -252,8 +254,8 @@
     }
     .o_data_cell {
       border: 0;
-      padding: 2px 0;
-      white-space: normal;
+      padding: 2px 0 !important;
+      white-space: normal !important;
       overflow: visible;
     }
     .o_data_cell:empty { display: none; }
