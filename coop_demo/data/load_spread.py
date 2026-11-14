@@ -311,107 +311,41 @@ def _top_up_people(env, model, field, keep_for_organizations):
     return given
 
 
-def ensure_personal_offers(env):
-    """Личное предложение у каждого — хотя бы одно.
+def _free_titles(Resource, pool):
+    """Строки списка, которых ещё нет на платформе ни у кого.
 
-    То же, что и с потребностями, только в другую сторону: полка
-    «Ресурсы» на странице человека показывает его предложения, а их на
-    платформе было 114 на всех.
+    Своё узнаём и под уточнением: `tidy_names` навешивает хвосты
+    («, срочно»), и точное совпадение их не видит.
+    """
+    Resource = Resource.with_context(active_test=False)
+    return [title for title in pool if not Resource.search_count([
+        '|', ('name', '=', title), ('name', '=like', title + ', %')], limit=1)]
+
+
+def _personal(env, listing_type, pool, target, values_of):
+    """Раздать людям личные объявления: каждая строка — одному человеку.
+
+    Задача 433: из списков по тридцать строк на 160 человек одна строка
+    доставалась пятнадцати — «Ищу гончарный круг» висел у всех сразу.
+    Сначала каждому по одному, потом вторая — пока не кончатся строки.
     """
     Resource = env['coop.resource'].sudo()
     people = _people(env)
-    methods = {m.code: m for m in env['coop.resource.method'].search([])}
-
+    free = _free_titles(Resource, pool)
     created = 0
-    for place, person in enumerate(people):
-        exists = Resource.search_count([
-            ('owner_id', '=', person.id),
-            ('listing_type', '=', 'offer'),
-            ('project_id', '=', False),
-        ])
-        for shift in range(max(OFFERS_COUNT - exists, 0)):
-            title = OFFERS[(place * 7 + shift * 11) % len(OFFERS)]
-            if Resource.search_count([('owner_id', '=', person.id),
-                                      ('name', '=', title)]):
+    for want in range(1, target + 1):
+        for place, person in enumerate(people):
+            if not free:
+                break
+            have = Resource.search_count([
+                ('owner_id', '=', person.id),
+                ('listing_type', '=', listing_type),
+                ('project_id', '=', False),
+            ])
+            if have >= want:
                 continue
-            # Способ передачи — по первому слову: «сдам» это аренда,
-            # «отдам» безвозмездно, «помогу» и «свяжу» — труд.
-            bottom = title.lower()
-            if bottom.startswith('сдам'):
-                code, kind = 'rent', 'material'
-            elif bottom.startswith('отдам'):
-                code, kind = 'free', 'material'
-            elif bottom.startswith(('помогу', 'свяжу', 'сложу')):
-                code, kind = 'sale', 'labour'
-            else:
-                code, kind = 'sale', 'material'
-            negotiable = (place + shift) % 4 == 0 or code == 'free'
-            values = {
-                'name': title,
-                'owner_id': person.id,
-                'listing_type': 'offer',
-                'city': person.city or '',
-                'resource_type': kind,
-                'state': 'published',
-                'price_kind': 'none' if negotiable else 'exact',
-                'price': 0 if negotiable else 300 * (1 + (place + shift) % 15),
-            }
-            method = methods.get(code) or (list(methods.values())[0] if methods else None)
-            if method:
-                values['method_ids'] = [(6, 0, [method.id])]
-            with env.cr.savepoint():
-                record = Resource.create(values)
-                record.flush_recordset()
-            created += 1
-
-    _logger.info('Ресурсы: заведено личных предложений %s', created)
-    return created
-
-
-def ensure_personal_needs(env):
-    """Личная потребность у каждого — хотя бы одна.
-
-    На всю платформу их было три: полка «Потребности» пустовала у ста
-    семидесяти одного человека из ста семидесяти двух. Потребности
-    проектов сюда не считаются — у них своя полка и свой смысл.
-    """
-    Resource = env['coop.resource'].sudo()
-    people = _people(env)
-    methods = {m.code: m for m in env['coop.resource.method'].search([])}
-    method = methods.get('sale') or (list(methods.values())[0] if methods else None)
-    # Способов передачи у объявления может быть несколько — поле
-    # множественное, и одиночное присваивание сюда не подходит.
-
-    created = 0
-    for place, person in enumerate(people):
-        exists = Resource.search_count([
-            ('owner_id', '=', person.id),
-            ('listing_type', '=', 'request'),
-            ('project_id', '=', False),
-        ])
-        needed = NEEDS_COUNT - exists
-        for shift in range(max(needed, 0)):
-            title = NEEDS[(place * 3 + shift * 7) % len(NEEDS)]
-            if Resource.search_count([('owner_id', '=', person.id),
-                                      ('name', '=', title)]):
-                continue
-            # Цена у спроса — сколько человек готов заплатить. Без неё
-            # запись не проходит проверку: «для способа „Продажа“ нужна
-            # цена или оценка». Каждая пятая — договорная: пустая цена
-            # тоже должна попадаться при проверке экрана.
-            negotiable = (place + shift) % 5 == 0
-            values = {
-                'name': title,
-                'owner_id': person.id,
-                'listing_type': 'request',
-                'city': person.city or '',
-                'resource_type': 'material',
-                'state': 'published',
-                'price_kind': 'none' if negotiable else 'exact',
-                'price': 0 if negotiable else 500 * (1 + (place + shift) % 12),
-            }
-            if method:
-                values['method_ids'] = [(6, 0, [method.id])]
+            title = free.pop(0)
+            values = values_of(title, person, place + created)
             with env.cr.savepoint():
                 record = Resource.create(values)
                 # Проверки полей срабатывают при сбросе на диск, а он по
@@ -421,7 +355,86 @@ def ensure_personal_needs(env):
                 # вышло 20 сентября 2026 с ценой у спроса.
                 record.flush_recordset()
             created += 1
+    return created
 
+
+def ensure_personal_offers(env):
+    """Личное предложение у каждого — хотя бы одно, и у всех разное.
+
+    Полка «Ресурсы» на странице человека показывает его предложения без
+    проекта; на платформе их было 114 на всех (решение 342).
+    """
+    from .personal_pool import OFFERS_MORE
+    methods = {m.code: m for m in env['coop.resource.method'].search([])}
+
+    def values_of(title, person, n):
+        # Способ передачи — по первому слову: «сдам» это аренда, «отдам»
+        # безвозмездно, «продам» — продажа, остальное («помогу», «сошью»,
+        # «научу») — работа руками.
+        first = title.split(' ', 1)[0].lower()
+        if first == 'сдам':
+            code, kind = 'rent', 'material'
+        elif first == 'отдам':
+            code, kind = 'free', 'material'
+        elif first == 'продам':
+            code, kind = 'sale', 'material'
+        else:
+            code, kind = 'sale', 'labour'
+        negotiable = n % 4 == 0 or code == 'free'
+        values = {
+            'name': title,
+            'owner_id': person.id,
+            'listing_type': 'offer',
+            'city': person.city or '',
+            'resource_type': kind,
+            'state': 'published',
+            'price_kind': 'none' if negotiable else 'exact',
+            'price': 0 if negotiable else 300 * (1 + n % 15),
+        }
+        method = methods.get(code) or (list(methods.values())[0] if methods else None)
+        if method:
+            values['method_ids'] = [(6, 0, [method.id])]
+        return values
+
+    created = _personal(env, 'offer', OFFERS + OFFERS_MORE, OFFERS_COUNT, values_of)
+    _logger.info('Ресурсы: заведено личных предложений %s', created)
+    return created
+
+
+def ensure_personal_needs(env):
+    """Личная потребность у каждого — хотя бы одна, и у всех разная.
+
+    На всю платформу их было три: полка «Потребности» пустовала у ста
+    семидесяти одного человека из ста семидесяти двух (решение 342).
+    Потребности проектов сюда не считаются — у них своя полка и свой смысл.
+    """
+    from .personal_pool import NEEDS_MORE
+    methods = {m.code: m for m in env['coop.resource.method'].search([])}
+    # Способов передачи у объявления может быть несколько — поле
+    # множественное, и одиночное присваивание сюда не подходит.
+    method = methods.get('sale') or (list(methods.values())[0] if methods else None)
+
+    def values_of(title, person, n):
+        # Цена у спроса — сколько человек готов заплатить. Без неё
+        # запись не проходит проверку: «для способа „Продажа“ нужна
+        # цена или оценка». Каждая пятая — договорная: пустая цена
+        # тоже должна попадаться при проверке экрана.
+        negotiable = n % 5 == 0
+        values = {
+            'name': title,
+            'owner_id': person.id,
+            'listing_type': 'request',
+            'city': person.city or '',
+            'resource_type': 'material',
+            'state': 'published',
+            'price_kind': 'none' if negotiable else 'exact',
+            'price': 0 if negotiable else 500 * (1 + n % 12),
+        }
+        if method:
+            values['method_ids'] = [(6, 0, [method.id])]
+        return values
+
+    created = _personal(env, 'request', NEEDS + NEEDS_MORE, NEEDS_COUNT, values_of)
     _logger.info('Потребности: заведено личных объявлений %s', created)
     return created
 

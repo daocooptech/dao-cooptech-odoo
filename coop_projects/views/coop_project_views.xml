@@ -920,6 +920,27 @@
     <field name="view_id" ref="mail.mail_activity_view_calendar"/>
     <field name="act_window_id" ref="action_coop_my_activities"/>
   </record>
+  <!--
+    «Управление проектами» — подразделом «Проектов» перед «Делами»
+    (владелец 14.11.2026, задача 451: «перенеси блок управление проектами
+    тот что одоо в раздел проекты в подразделы»). Действие своё, копия
+    штатного `project.open_view_project_all_group_stage`: оболочка ищет
+    раздел по действию, и с общим действием экран относился бы к
+    приложению движка, а не к «Проектам».
+  -->
+  <record id="action_coop_project_management" model="ir.actions.act_window">
+    <field name="name">Управление проектами</field>
+    <field name="res_model">project.project</field>
+    <field name="context">{'display_milestone_deadline': True}</field>
+    <field name="domain">[("is_template", "=", False)]</field>
+    <field name="view_mode">kanban,list,form,calendar,activity</field>
+    <field name="view_id" ref="project.view_project_kanban"/>
+    <field name="search_view_id" ref="project.view_project_project_filter"/>
+    <field name="target">main</field>
+  </record>
+  <menuitem id="menu_coop_project_management" name="Управление проектами"
+            parent="menu_coop_projects_root" action="action_coop_project_management"
+            sequence="18"/>
   <menuitem id="menu_coop_project_activities" name="Дела"
             parent="menu_coop_projects_root" action="action_coop_my_activities"
             sequence="20"/>

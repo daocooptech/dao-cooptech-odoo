@@ -604,6 +604,7 @@ def _extra_rows(rows, extra):
         city = cities[(i * 5) % len(cities)] if cities else ''
         row = dict(source)
         row['name'] = '%s — %s' % (EXTRA_TITLES[i % len(EXTRA_TITLES)], city)
+        row['_base'] = EXTRA_TITLES[i % len(EXTRA_TITLES)]
         row['city'] = city
         row['promoted'] = False
         extras.append(row)
@@ -780,7 +781,18 @@ def load_resources(env, extra=45):
     categories = {}
     created = updated = 0
 
+    every = Resource.with_context(active_test=False)
     for index, row in enumerate(rows):
+        # Добор — одна запись на название на всю платформу (задача 433).
+        # `tidy_names` срезает город («Мотопомпа — Тюмень» → «Мотопомпа,
+        # срочно»), владелец по кругу от выкатки к выкатке выпадал другой,
+        # и каждая выкатка заводила все 45 заново: к 14.11 их набралось по
+        # 55 на название.
+        base = row.get('_base')
+        if base and every.search_count([
+                '|', '|', ('name', '=', base), ('name', '=like', base + ', %'),
+                ('name', '=like', base + ' — %')], limit=1):
+            continue
         # Рубрика по названию, а из строки — только если название ни о чём
         # не говорит. Строке верить нельзя: там и наугад проставленные
         # рубрики макета, и копии образца у доборных записей.
@@ -830,10 +842,15 @@ def load_resources(env, extra=45):
         # Ключ — название вместе с городом и владельцем: в макете
         # одинаковые названия встречаются у разных участников («Сварочный
         # аппарат» и в предложении, и в спросе), и схлопывать их нельзя.
-        existing = Resource.search([
+        # Владельца в ключе нет (задача 433): у строк без владельца в макете
+        # он выдаётся по кругу, круг сдвигается с каждым новым участником,
+        # и прежняя запись переставала узнаваться — заводилась копия у
+        # другого. Предложение и спрос с одним названием различает вид.
+        listing = values['listing_type']
+        existing = every.search([
             ('name', '=', row['name']),
             ('city', '=', row['city']),
-            ('owner_id', '=', owner.id),
+            ('listing_type', '=', listing),
         ], limit=1)
         if not existing:
             # Одинаковые заголовки делаются различимыми уточнением после
@@ -843,13 +860,17 @@ def load_resources(env, extra=45):
             # каждое обновление (замер 26.09).
             stem = (row['name'].replace('\\', '\\\\').replace('%', r'\%')
                     .replace('_', r'\_'))
-            existing = Resource.search([
+            existing = every.search([
                 '|', ('name', '=like', stem + ', %'), ('name', '=like', stem + ' — %'),
                 ('city', '=', row['city']),
-                ('owner_id', '=', owner.id),
+                ('listing_type', '=', listing),
             ], limit=1)
         if existing:
             values.pop('name', None)
+            # Владельца у найденной не переписываем: иначе запись
+            # кочевала бы от участника к участнику с каждой выкаткой.
+            if not row['owner']:
+                values.pop('owner_id', None)
             existing.write(values)
             updated += 1
         else:
