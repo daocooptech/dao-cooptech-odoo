@@ -2046,14 +2046,35 @@ body.o_dark_mode .o_coop_loader_mark {
 // На телефоне поиск и так свёрнут в лупу — правило только с `lg`.
 // `!important` — против бутстраповских `flex-lg-nowrap` и `w-lg-auto`,
 // объявленных с ним же.
+//
+// С 14.11.2026 (владелец, экран задач проекта: «перенеси строку поиска
+// ниже в один ряд с выбором вида, выравнивание по левому краю») поиск
+// уходит под путь всегда, а не только когда не хватает места: в одной
+// строке с путём он стоял справа, переключатель вида — строкой ниже, и
+// поиск отрывался от того, что отбирает. Теперь путь — первой строкой,
+// поиск и выбор вида — второй: поиск от левого края, вид — у правого,
+// как в каталогах.
 @media (min-width: 992px) {
   .o_control_panel:not(.o_coop_catalog):not(.o_coop_filters_bar)
     .o_control_panel_main:not(:has(.o_coop_tabs)):has(.o_searchview) {
     flex-wrap: wrap !important;
+    justify-content: flex-start !important;
+
+    .o_control_panel_breadcrumbs {
+      flex: 0 0 100%;
+    }
 
     .o_control_panel_actions {
-      flex: 1 1 420px !important;
+      flex: 0 1 560px !important;
+      justify-content: flex-start !important;
       min-width: 0;
+    }
+
+    // Выбор вида — у правого края той же строки (владелец 14.11.2026:
+    // «а выбор вида — выравнивание по правому»).
+    .o_control_panel_navigation {
+      flex: 0 0 auto !important;
+      margin-left: auto;
     }
   }
 }
