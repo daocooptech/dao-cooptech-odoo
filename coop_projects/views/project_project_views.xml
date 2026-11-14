@@ -40,25 +40,10 @@
         <button name="action_coop_new_task" type="object" class="btn btn-primary ms-2"
                 string="Добавить задачу"/>
       </xpath>
-      <xpath expr="//div[hasclass('oe_title')]" position="inside">
-        <div class="o_coop_pm_meta">
-          <!-- Заказчик и менеджер — один человек: имя один раз, менеджером
-               с портретом (владелец 14.11: «два раза ФИО»). -->
-          <field name="coop_partner_is_manager" invisible="1"/>
-          <!-- Заказчик — с лого и ссылкой на его страницу, как менеджер
-               рядом (владелец 14.11.2026: «почему организация без лого и
-               не кликабельна»). -->
-          <field name="partner_id" readonly="1" nolabel="1" widget="many2one_avatar"
-                 invisible="not partner_id or coop_partner_is_manager"/>
-          <span class="o_coop_pm_sep" invisible="not partner_id or coop_partner_is_manager">·</span>
-          <field name="user_id" readonly="1" nolabel="1" widget="many2one_avatar_user"
-                 invisible="not user_id"/>
-          <span class="o_coop_pm_sep" invisible="not user_id or not date_start">·</span>
-          <field name="date_start" readonly="1" nolabel="1" widget="daterange"
-                 options='{"end_date_field": "date", "always_range": True}'
-                 invisible="not date_start"/>
-        </div>
-      </xpath>
+      <!-- Строка «заказчик · менеджер · сроки» под названием снята:
+           то же самое стоит в «Сведениях» справа (владелец 15.11.2026:
+           «сведения перенеси в правую колонку под карту … тогда надо
+           убрать дублирующую информацию под названием проекта»). -->
 
       <!-- Блоки на месте вкладок. -->
       <xpath expr="//sheet/notebook" position="before">
@@ -100,10 +85,6 @@
                 </page>
               </notebook>
             </div>
-            <div class="o_coop_pm_block">
-              <h3 class="o_coop_pm_title">Сведения</h3>
-              <div id="coop_pm_facts"/>
-            </div>
             <div class="o_coop_pm_block" id="coop_pm_settings">
               <h3 class="o_coop_pm_title">Настройки проекта</h3>
               <div id="coop_pm_settings_body"/>
@@ -120,6 +101,19 @@
             <div class="o_coop_pm_block o_coop_pm_map" invisible="not google_map_iframe">
               <h3 class="o_coop_pm_cap">Карта</h3>
               <div id="coop_pm_map"/>
+            </div>
+            <!-- «Сведения» — справа под картой (владелец 15.11.2026). -->
+            <div class="o_coop_pm_block o_coop_pm_facts">
+              <h3 class="o_coop_pm_cap">Сведения</h3>
+              <div id="coop_pm_facts">
+                <!-- Заказчик — с лого и ссылкой (владелец 14.11.2026); раньше
+                     стоял в строке под названием. -->
+                <field name="coop_partner_is_manager" invisible="1"/>
+                <group invisible="not partner_id or coop_partner_is_manager">
+                  <field name="partner_id" string="Заказчик" readonly="1"
+                         widget="many2one_avatar"/>
+                </group>
+              </div>
             </div>
           </div>
         </div>
@@ -139,6 +133,11 @@
       </xpath>
       <xpath expr="//div[@id='coop_pm_settings_body']" position="inside">
         <xpath expr="//page[@name='settings']/group" position="move"/>
+      </xpath>
+      <!-- Пустые теги в «Сведениях» не показываем: «Выбрать теги» в
+           узкой колонке — пустая строка. Править их — в «Настройках». -->
+      <xpath expr="//div[@id='coop_pm_facts']//field[@name='tag_ids']" position="attributes">
+        <attribute name="invisible">not tag_ids</attribute>
       </xpath>
       <xpath expr="//div[@id='coop_pm_map']" position="inside">
         <xpath expr="//page[@name='map']/field[@name='google_map_iframe']" position="move"/>

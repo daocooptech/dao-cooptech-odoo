@@ -63,8 +63,8 @@ class ProjectProject(models.Model):
 
     @api.depends('partner_id', 'user_id.partner_id')
     def _compute_coop_partner_is_manager(self):
-        """Заказчик — сам менеджер проекта: в строке под названием имя
-        одно, иначе ФИО стоит дважды подряд."""
+        """Заказчик — сам менеджер проекта: в «Сведениях» имя одно, иначе
+        ФИО стоит дважды подряд (владелец 14.11.2026)."""
         for project in self:
             project.coop_partner_is_manager = bool(
                 project.partner_id and project.partner_id == project.user_id.partner_id)
