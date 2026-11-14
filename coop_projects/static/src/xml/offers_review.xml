@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <t t-name="coop_projects.OffersReview">
+    <div class="o_coop_rev" t-if="this.needs.length">
+      <div class="o_coop_rev_needs">
+        <button t-foreach="this.needs" t-as="need" t-key="need.id" type="button"
+                class="o_coop_rev_need"
+                t-att-class="{'active': this.currentNeed and this.currentNeed.id === need.id, 'closed': need.closed}"
+                t-on-click="() => this.pick(need.id)">
+          <span class="o_coop_rev_need_body">
+            <span class="o_coop_rev_need_name" t-out="need.name"/>
+            <span class="o_coop_rev_need_sub text-muted">
+              <t t-if="need.closed">закрыто · <t t-out="need.closed_by"/></t>
+              <t t-else="" t-out="need.price"/>
+            </span>
+          </span>
+          <span class="o_coop_rev_count" t-if="need.closed"><i class="fa fa-check"/></span>
+          <span class="o_coop_rev_count new" t-elif="need.new" t-out="need.new"/>
+          <span class="o_coop_rev_count" t-elif="need.total" t-out="need.total"/>
+        </button>
+      </div>
+      <div class="o_coop_rev_main" t-if="this.currentNeed">
+        <div class="o_coop_rev_head">
+          <div class="o_coop_rev_title" t-out="this.currentNeed.name"/>
+          <div class="text-muted" t-if="this.currentNeed.price">стоимость <t t-out="this.currentNeed.price"/></div>
+        </div>
+        <div class="o_coop_rev_bar">
+          <div class="o_coop_rev_filters">
+            <button type="button" t-att-class="{'on': this.state.filter === 'all'}"
+                    t-on-click="() => this.state.filter = 'all'">Все <t t-out="this.counts.all"/></button>
+            <button type="button" t-att-class="{'on': this.state.filter === 'new'}"
+                    t-on-click="() => this.state.filter = 'new'">Новые <t t-out="this.counts.new"/></button>
+            <button type="button" t-att-class="{'on': this.state.filter === 'declined'}"
+                    t-on-click="() => this.state.filter = 'declined'">Отклонённые</button>
+          </div>
+          <label class="o_coop_rev_sort text-muted">Порядок
+            <select t-on-change="(ev) => this.state.sort = ev.target.value">
+              <option value="new" t-att-selected="this.state.sort === 'new'">сначала новые</option>
+              <option value="value" t-att-selected="this.state.sort === 'value'">по оценке</option>
+              <option value="trust" t-att-selected="this.state.sort === 'trust'">по доверию</option>
+            </select>
+          </label>
+        </div>
+        <div class="o_coop_rev_cards o_coop_offers">
+          <div t-foreach="this.offers" t-as="offer" t-key="offer.id"
+               class="o_coop_offer o_coop_rev_card"
+               t-att-class="'o_coop_offer_' + offer.state">
+            <div class="o_coop_offer_head">
+              <img class="o_coop_offer_ava" loading="lazy"
+                   t-att-src="'/web/image/res.partner/' + offer.partner_id + '/avatar_128'"
+                   t-att-alt="offer.partner"/>
+              <div class="o_coop_offer_who">
+                <div class="o_coop_offer_name" t-out="offer.partner"/>
+                <div class="o_coop_offer_meta text-muted">
+                  доверие <t t-out="offer.trust"/> % · сделок <t t-out="offer.deals"/>
+                </div>
+              </div>
+              <div class="o_coop_offer_value">
+                <span class="o_coop_money" t-out="this.money(offer.value, offer.currency)"/>
+                <div class="o_coop_offer_diff" t-att-class="this.diffClass(offer)" t-out="offer.diff_label"/>
+              </div>
+            </div>
+            <div class="o_coop_offer_body">
+              <div class="o_coop_offer_what"><t t-out="offer.kind"/>: <t t-out="offer.name"/></div>
+              <div class="text-muted" t-if="offer.labour_form">Как оформлен труд: <t t-out="offer.labour_form"/></div>
+              <div class="text-muted">предложено <t t-out="this.day(offer.offered_on)"/></div>
+              <div class="o_coop_offer_state" t-if="offer.state === 'accepted'">
+                Принят — пай <t t-out="offer.share"/> %, отозвать можно 7 дней
+              </div>
+              <div class="o_coop_offer_state text-muted" t-elif="offer.state === 'declined'">
+                Отклонён · извещение отправлено
+              </div>
+            </div>
+            <div class="o_coop_offer_actions" t-if="offer.state === 'offered'">
+              <button type="button" class="btn btn-secondary btn-sm"
+                      t-on-click="() => this.decline(offer)">Отклонить</button>
+              <button type="button" class="btn btn-primary btn-sm"
+                      t-on-click="() => this.accept(offer)">Принять</button>
+            </div>
+          </div>
+          <div class="text-muted" t-if="!this.offers.length">Заявок нет.</div>
+        </div>
+      </div>
+    </div>
+    <div class="text-muted" t-else="">На потребности пока никто не откликнулся.</div>
+  </t>
+
+</templates>

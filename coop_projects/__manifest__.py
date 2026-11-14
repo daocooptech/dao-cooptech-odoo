@@ -19,7 +19,7 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.3.12',
+    'version': '20.0.1.3.19',
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_resources', 'project', 'project_todo', 'hr_timesheet', 'mail'],
     'data': [
@@ -43,6 +43,8 @@
             'coop_projects/static/src/xml/readiness_ring.xml',
             'coop_projects/static/src/js/offer_counter.js',
             'coop_projects/static/src/xml/offer_counter.xml',
+            'coop_projects/static/src/js/offers_review.js',
+            'coop_projects/static/src/xml/offers_review.xml',
         ],
     },
     'installable': True,

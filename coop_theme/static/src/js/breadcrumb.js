@@ -276,7 +276,11 @@ patch(Breadcrumbs.prototype, {
         try {
             const parent = this.coopParent;
             if (parent) {
-                return { label: parent.name || "", title: `Назад: ${parent.name || ""}` };
+                // «Я инициатор» и «Я участвую» — вкладки раздела «Проекты», а
+                // не место в пути (владелец 14.11.2026: «в пути не надо
+                // инициатор или участник — проекты, дальше раздел и подраздел»).
+                const name = COOP_TAB_ROOT[parent.name] || parent.name || "";
+                return { label: name, title: `Назад: ${name}` };
             }
             const section = this.coopSection;
             if (section) {
@@ -562,6 +566,9 @@ patch(Breadcrumbs.prototype, {
  * Какие поля — рубрика записи, сверху вниз. `tree` — у рубрики есть
  * предки, их тоже показываем.
  */
+// Вкладки «Моих проектов»: в пути стоит раздел, а не вкладка.
+const COOP_TAB_ROOT = { "Я инициатор": "Проекты", "Я участвую": "Проекты" };
+
 const COOP_RUBRICS = {
     "coop.resource": { fields: ["category_id"], tree: "coop.resource.category" },
     "coop.project": { fields: ["category_id", "subcategory_id"] },

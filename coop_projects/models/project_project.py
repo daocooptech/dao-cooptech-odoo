@@ -54,43 +54,106 @@ class ProjectProject(models.Model):
             project.coop_offer_can = bool(sources)
             project.coop_offer_new = sum(sources.mapped('new_offer_count'))
 
-    coop_offer_ids = fields.One2many(
-        'coop.project.contribution', compute='_compute_coop_offer_ids',
-        string='Заявки на потребности')
-    coop_analytics = fields.Html(
-        string='Аналитика проекта', compute='_compute_coop_analytics',
+    coop_offers_json = fields.Json(
+        string='Заявки на потребности', compute='_compute_coop_offers_json')
+    coop_summary = fields.Html(
+        string='Сводка', compute='_compute_coop_summary', sanitize=False)
+
+    coop_an_money = fields.Html(
+        string='Финансовые вклады', compute='_compute_coop_analytics',
         sanitize=False)
+    coop_an_intangibles = fields.Html(
+        string='НМА', compute='_compute_coop_analytics', sanitize=False)
+    coop_an_cfa = fields.Html(
+        string='ЦФА', compute='_compute_coop_analytics', sanitize=False)
+    coop_an_deals = fields.Html(
+        string='Контракты', compute='_compute_coop_analytics', sanitize=False)
 
     @api.depends('coop_project_id.contribution_ids.state',
                  'coop_project_id.contribution_ids.need_id',
                  'coop_project_id.coop_is_team')
-    def _compute_coop_offer_ids(self):
-        """Заявки команде — прямо в управлении проектом (образец
-        `OffersReviewPage`, задача 395): карточки с «Принять» и
-        «Отклонить»; новые первыми."""
+    def _compute_coop_offers_json(self):
+        """Разбор заявок на потребности — данные для страницы управления
+        (образец `OffersReviewPage`, задача 395): слева потребности со
+        счётчиками, справа карточки заявок выбранной."""
+        contribution = self.env['coop.project.contribution']
+        kinds = dict(contribution._fields['kind']._description_selection(self.env))
+        forms = dict(contribution._fields['labour_form']._description_selection(self.env))
         for project in self:
-            sources = project.coop_project_id.filtered('coop_is_team')
-            offers = sources.contribution_ids.filtered('need_id')
-            project.coop_offer_ids = offers.sorted(
-                key=lambda c: (c.state != 'offered', c.need_id.id,
-                               -(c.id or 0)))
+            source = project.coop_project_id.filtered('coop_is_team')[:1]
+            if not source:
+                project.coop_offers_json = False
+                continue
+            offers = source.contribution_ids.filtered('need_id')
+            needs = source.need_ids | offers.mapped('need_id')
+            out_needs, out_offers = [], []
+            for need in needs.sorted('id'):
+                mine = offers.filtered(lambda c: c.need_id == need)
+                accepted = need.need_accepted_id
+                out_needs.append({
+                    'id': need.id,
+                    'name': need.name,
+                    'price': need.price_display or '',
+                    'new': len(mine.filtered(lambda c: c.state == 'offered')),
+                    'total': len(mine),
+                    'closed': bool(accepted),
+                    'closed_by': accepted.partner_id.name if accepted else '',
+                })
+            for c in offers.sorted(lambda c: (c.state != 'offered', -(c.id or 0))):
+                out_offers.append({
+                    'id': c.id,
+                    'need_id': c.need_id.id,
+                    'partner': c.partner_id.name,
+                    'partner_id': c.partner_id.id,
+                    'trust': c.partner_trust,
+                    'deals': c.partner_deals_done,
+                    'value': c.value,
+                    'currency': c.currency_id.symbol or '',
+                    'need_price': c.need_price,
+                    'diff': c.value_diff,
+                    'diff_label': c.value_diff_label or '',
+                    'kind': kinds.get(c.kind, ''),
+                    'name': c.name or '',
+                    'labour_form': forms.get(c.labour_form, '') if c.labour_form else '',
+                    'offered_on': fields.Date.to_string(c.offered_on) if c.offered_on else '',
+                    'state': c.state,
+                    'share': c.share_percent,
+                })
+            project.coop_offers_json = {'needs': out_needs, 'offers': out_offers}
+
+    @api.depends('coop_project_id.new_offer_count', 'task_count',
+                 'closed_task_count', 'milestone_count',
+                 'milestone_count_reached', 'last_update_status')
+    def _compute_coop_summary(self):
+        """«Сводка» образца 395: статус, заявки, задачи, вехи, табели."""
+        status = dict(self._fields['last_update_status']._description_selection(self.env))
+        for project in self:
+            source = project.coop_project_id.filtered('coop_is_team')[:1]
+            rows = [(_('Статус'), status.get(project.last_update_status, ''))]
+            if source:
+                total = len(source.contribution_ids.filtered('need_id'))
+                rows.append((_('Заявки'), _('%(n)s новых · %(t)s', n=source.new_offer_count, t=total)))
+            rows.append((_('Задачи'), '%s / %s' % (project.closed_task_count, project.task_count)))
+            rows.append((_('Вехи'), '%s / %s' % (project.milestone_count_reached, project.milestone_count)))
+            if 'total_timesheet_time' in project._fields:
+                rows.append((_('Табели'), '%s ч' % int(project.total_timesheet_time or 0)))
+            project.coop_summary = '<dl class="o_coop_pm_sum">%s</dl>' % ''.join(
+                '<dt>%s</dt><dd>%s</dd>' % (name, value) for name, value in rows)
 
     @api.depends('coop_project_id')
     def _compute_coop_analytics(self):
-        """Аналитика сбора на странице управления: вклады, активы,
-        контракты, ЦФА. Блоки дают модули, которые есть в базе; здесь их
-        только склеиваем."""
-        parts = (('analytics_money', _('Финансовые вклады')),
-                 ('analytics_intangibles', _('Нематериальные активы')),
-                 ('analytics_cfa', _('ЦФА')),
-                 ('analytics_deals', _('Контракты')))
+        """Аналитика сбора на странице управления — четыре переключателя
+        образца 395. Блоки дают модули, что есть в базе; здесь их берём."""
+        names = {'coop_an_money': 'analytics_money',
+                 'coop_an_intangibles': 'analytics_intangibles',
+                 'coop_an_cfa': 'analytics_cfa',
+                 'coop_an_deals': 'analytics_deals'}
         for project in self:
             source = project.coop_project_id[:1]
-            html = ''
-            for name, title in parts:
-                if source and name in source._fields and source[name]:
-                    html += '<h4 class="mt-3">%s</h4>%s' % (title, source[name])
-            project.coop_analytics = html
+            for mine, theirs in names.items():
+                project[mine] = (source[theirs]
+                                 if source and theirs in source._fields
+                                 else False)
 
     def action_coop_open_offers(self):
         """Разбор заявок на потребности — из управления проектом: тот же

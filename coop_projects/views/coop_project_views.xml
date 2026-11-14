@@ -851,7 +851,7 @@
     <field name="path">my-projects</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="context">{'bin_size': True,'coop_catalog': True, 'coop_create_label': 'Добавить проект'}</field>
-    <field name="domain">['|', ('partner_id.user_ids', 'in', [uid]), ('author_id.user_ids', 'in', [uid])]</field>
+    <field name="domain">['|', ('partner_id.user_ids', 'in', [uid]), '&amp;', ('author_id.user_ids', 'in', [uid]), ('partner_id.is_company', '=', True)]</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Своих проектов пока нет</p>
       <p>Заведите проект от себя или от организации — он появится здесь.</p>
@@ -870,7 +870,7 @@
     <field name="path">projects-participate</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="context">{'bin_size': True,'coop_catalog': True}</field>
-    <field name="domain">[('partner_id.user_ids', 'not in', [uid]), ('author_id.user_ids', 'not in', [uid]), ('contribution_ids', 'any', [('partner_id.user_ids', 'in', [uid]), ('state', 'in', ['offered', 'accepted', 'consumed', 'compensated', 'waived'])])]</field>
+    <field name="domain">['&amp;', '&amp;', ('partner_id.user_ids', 'not in', [uid]), '|', ('author_id.user_ids', 'not in', [uid]), ('partner_id.is_company', '=', False), ('contribution_ids', 'any', [('partner_id.user_ids', 'in', [uid]), ('state', 'in', ['offered', 'accepted', 'consumed', 'compensated', 'waived'])])]</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Вы пока не участвуете в чужих проектах</p>
       <p>Найдите проект в каталоге и нажмите «Участвовать» — вкладом

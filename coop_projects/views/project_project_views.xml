@@ -27,23 +27,51 @@
         </button>
       </xpath>
 
-      <!-- Рабочее поле «Управления проектом» по образцу 395: заявки на
-           потребности карточками, ниже — аналитика. Команде сбора. -->
-      <xpath expr="//notebook/page[@name='map']" position="before">
-        <page name="coop_offers" string="Заявки на потребности"
-              invisible="not coop_offer_can">
-          <p class="text-muted mb-2">
-            Утверждаете вы — инициатор. У потребности может быть свой
-            ответственный. Принятая заявка закрывает потребность, остальные
-            отклоняются сразу, откликнувшиеся получают извещение.
-          </p>
-          <field name="coop_offer_ids" nolabel="1" mode="kanban"
-                 readonly="1" context="{'kanban_view_ref': 'coop_projects.view_coop_contribution_offers_kanban_embedded'}"/>
-        </page>
-        <page name="coop_analytics" string="Аналитика проекта"
-              invisible="not coop_offer_can">
-          <field name="coop_analytics" nolabel="1"/>
-        </page>
+      <!-- Рабочее поле «Управления проектом» по образцу 395: блоки на
+           одной странице, как на кадре, — заявки на потребности, под ними
+           аналитика проекта с четырьмя переключателями. Команде сбора. -->
+      <xpath expr="//notebook" position="before">
+        <div class="o_coop_pm" invisible="not coop_offer_can">
+          <div class="o_coop_pm_main">
+            <div class="o_coop_pm_block">
+              <h3 class="o_coop_pm_title">Заявки на потребности</h3>
+              <p class="text-muted mb-2">
+                Утверждаете вы — инициатор. У потребности может быть свой
+                ответственный. Принятая заявка закрывает потребность,
+                остальные отклоняются сразу, откликнувшиеся получают
+                извещение.
+              </p>
+              <field name="coop_offers_json" nolabel="1" widget="coop_offers_review"/>
+            </div>
+            <div class="o_coop_pm_block">
+              <h3 class="o_coop_pm_title">Аналитика проекта</h3>
+              <notebook>
+                <page name="coop_an_money" string="Финансовые вклады"
+                      invisible="not coop_an_money">
+                  <field name="coop_an_money" nolabel="1"/>
+                </page>
+                <page name="coop_an_intangibles" string="НМА"
+                      invisible="not coop_an_intangibles">
+                  <field name="coop_an_intangibles" nolabel="1"/>
+                </page>
+                <page name="coop_an_cfa" string="ЦФА"
+                      invisible="not coop_an_cfa">
+                  <field name="coop_an_cfa" nolabel="1"/>
+                </page>
+                <page name="coop_an_deals" string="Контракты"
+                      invisible="not coop_an_deals">
+                  <field name="coop_an_deals" nolabel="1"/>
+                </page>
+              </notebook>
+            </div>
+          </div>
+          <div class="o_coop_pm_side">
+            <div class="o_coop_pm_block">
+              <h3 class="o_coop_pm_cap">Сводка</h3>
+              <field name="coop_summary" nolabel="1"/>
+            </div>
+          </div>
+        </div>
       </xpath>
     </field>
   </record>
