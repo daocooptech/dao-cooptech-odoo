@@ -450,6 +450,24 @@ class ProjectProject(models.Model):
             users |= Task.search([('project_id', '=', project.id)]).user_ids
             project._coop_add_team(users)
 
+    def _notify_get_recipients(self, message, **kwargs):
+        """Лента проекта — не рассылка (владелец 15.11.2026).
+
+        «Если кого-то отмечают в сообщении — это должно быть в уведомлениях,
+        а обычные посты — в ленте, по всем проектам». Движок шлёт каждый пост
+        письмом всем подписчикам; у людей платформы почты нет, и на каждом
+        посте висела ошибка доставки. Теперь подписчики не берутся вовсе
+        (`notify_skip_followers` — только явные адресаты, то есть
+        упомянутые через @), а людям платформы уведомление приходит во
+        «Входящие», не письмом.
+        """
+        kwargs['notify_skip_followers'] = True
+        recipients = super()._notify_get_recipients(message, **kwargs)
+        for rdata in recipients:
+            if rdata.get('uid') and not rdata.get('ushare'):
+                rdata['notif'] = 'inbox'
+        return recipients
+
 
 class ProjectTask(models.Model):
     _inherit = 'project.task'

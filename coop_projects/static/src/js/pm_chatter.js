@@ -113,7 +113,7 @@ patch(Composer.prototype, {
         if (this.coopPm) {
             return this.props.type === "note"
                 ? "Записать заметку для команды… @ — упомянуть"
-                : "Написать в ленту проекта…";
+                : "Написать в ленту проекта… @ — отметить";
         }
         return super.placeholder;
     },
@@ -133,12 +133,9 @@ patch(Composer.prototype, {
         if (this.props.type === "note") {
             return "видят только участники проекта";
         }
-        // Себе письмо не уходит — как в строке «Кому» у движка.
-        const n = Math.max(0, (this.thread.followersCount ?? 0) - (this.thread.selfFollower ? 1 : 0));
-        const mod10 = n % 10, mod100 = n % 100;
-        const word = mod10 === 1 && mod100 !== 11 ? "подписчик"
-            : mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14) ? "подписчика"
-            : "подписчиков";
-        return n ? `получат ${n} ${word}` : "подписчиков пока нет";
+        // Пост остаётся в ленте, рассылки подписчикам нет (владелец 15.11,
+        // `project_project._notify_get_recipients`): уведомление — только
+        // отмеченным через @.
+        return "уведомление получат только отмеченные через @";
     },
 });

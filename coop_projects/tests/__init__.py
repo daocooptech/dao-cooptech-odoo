@@ -8,3 +8,4 @@ from . import test_refund
 from . import test_stages
 from . import test_team
 from . import test_investment_basis
+from . import test_project_feed
