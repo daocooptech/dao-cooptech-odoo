@@ -74,8 +74,12 @@ def _mix_tasks(env):
                         raise_if_not_found=False)
         if not stage:
             continue
+        # Только проекты на общих этапах платформы: свой канбан (доска
+        # «MVP DAO COOPTECH») не демо, его карточки не переоткрываем —
+        # 10.11 и 14.11 так ушли в «Идею» сотня сделанных задач.
         tops = Task.search([
             ('project_id.stage_id', '=', stage.id),
+            ('project_id.type_ids', 'in', list(stages.values())),
             ('parent_id', '=', False), ('state', '=', '1_done')])
         for task in tops:
             if _bucket('task', task.id) < keep:
