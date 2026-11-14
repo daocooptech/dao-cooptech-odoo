@@ -224,3 +224,39 @@
   // специфичности грузится позже — поднимаем на класс поля.
   .o_field_radio.o_coop_path_cards .o_radio_item { flex: 1 1 0; margin-bottom: 8px; }
 }
+
+// ── Путь «Работать»: вакансии в окне (задача 445, кусок 3) ──────────────
+//
+// Список движка добивает таблицу пустыми строками до четырёх — в окне
+// это дыра под единственной вакансией. На телефоне таблица шириной
+// 1194 px прокручивалась внутри окна, и «Откликнуться» уходило за край
+// (замер 14.11 на 375): там строки — карточками в столбик.
+.o_coop_work_list {
+  tbody tr:not(.o_data_row) { display: none; }
+  tfoot { display: none; }
+}
+
+@media (max-width: 767.98px) {
+  .o_coop_work_list {
+    .o_list_table, .o_list_table tbody, .o_list_table tr, .o_list_table td {
+      display: block;
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: none !important;
+    }
+    .o_list_table { table-layout: auto; }
+    .o_list_table thead { display: none; }
+    .o_data_row {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--coop-line, #e6e6e1);
+    }
+    .o_data_cell {
+      border: 0;
+      padding: 2px 0;
+      white-space: normal;
+      overflow: visible;
+    }
+    .o_data_cell:empty { display: none; }
+    .o_list_button button { width: 100%; min-height: 44px; }
+  }
+}
