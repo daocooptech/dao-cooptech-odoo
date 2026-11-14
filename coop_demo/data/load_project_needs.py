@@ -27,7 +27,7 @@ from datetime import timedelta
 
 from odoo import fields
 
-from . import rubrics
+from . import real_offers, rubrics
 
 _logger = logging.getLogger(__name__)
 
@@ -1164,22 +1164,6 @@ def diversify_project_needs(env, min_needs=4, max_needs=12):
     return done
 
 
-# Хвосты названий своих объявлений: основа (до запятой) — тема
-# потребности, хвост — чем объявление одного владельца отличается от
-# объявления другого. Материалы — партией и со склада, остальное — вещью.
-OFFER_TAILS = {
-    'material': ('в наличии на складе', 'остаток с объекта', 'от производителя',
-                 'с доставкой по городу', 'свежая партия', 'с сертификатом',
-                 'оптом и в розницу', 'самовывоз со склада', 'под заказ за неделю',
-                 'с документами'),
-    'resource': ('своё, в хорошем состоянии', 'после одного проекта',
-                 'с доставкой и монтажом', 'новое, в упаковке',
-                 'с гарантией продавца', 'проверено, готово к работе',
-                 'с обучением на месте', 'в пользование на срок проекта',
-                 'с запасными частями', 'от организации, с договором'),
-    'space': ('свободно сразу', 'надолго, помесячно', 'с охраной и въездом',
-              'на срок проекта', 'с отоплением', 'рядом с объектом'),
-}
 TOPIC_KINDS = ('resource', 'material', 'space')
 
 
@@ -1187,17 +1171,46 @@ def _topic_base(name):
     return (name or '').split(',')[0].strip()
 
 
+def _is_real(name, base):
+    low = (name or '').lower()
+    return any(low.startswith(h.lower()) for h in real_offers.heads(base))
+
+
+def _on_topic(name, base):
+    """По теме: основа названия совпадает или название — из набора темы."""
+    return _topic_base(name).lower() == base.lower() or _is_real(name, base)
+
+
+def _free_real_name(env, base, seed, used):
+    """Свободное название темы «как в жизни»; занятые — во всём каталоге."""
+    if base not in used:
+        heads = real_offers.heads(base)
+        domain = ['|'] * (len(heads) - 1) + [('name', '=ilike', h + '%') for h in heads]
+        used[base] = set(env['coop.resource'].sudo().with_context(
+            active_test=False).search(domain).mapped('name')) if heads else set()
+    taken = used[base]
+    options = real_offers.names(base)
+    start = (seed * 37) % len(options)
+    for i in range(len(options)):
+        name = options[(start + i) % len(options)]
+        if name not in taken:
+            taken.add(name)
+            return name
+    return None
+
+
 def link_offers_to_resources(env):
     """Каждая заявка на вещественную потребность — со своим объявлением
-    по теме (№ 390; владелец 14.11.2026: «предложения не по теме»).
+    по теме (№ 390; владелец 14.11.2026: «предложения не по теме», «как в
+    реальной жизни»).
 
-    Раньше брали любое объявление автора того же вида — на «Игровой
-    комплекс» приходило «место под мастерскую», а у трети заявок ресурса
-    не было вовсе. Теперь основа названия объявления (до запятой) совпадает
-    с основой потребности. У автора такое объявление уже есть — берём его;
-    нет — заводим одно на пару (основа, владелец): фото и рубрика — от
-    потребности, хвост названия, город и цена — свои. Так правило
-    задачи 433 «одна основа у владельца — одна запись» не нарушается.
+    На «Игровой комплекс» приходило «место под мастерскую», а у трети
+    заявок ресурса не было вовсе. Теперь у автора берётся объявление той же
+    темы, нет — заводится одно на пару (тема, владелец), так правило задачи
+    433 «одна основа у владельца — одна запись» не нарушается. Название — как
+    на настоящей доске: модель, размер, состояние (`real_offers`), а не
+    «тема, после одного проекта»; объявления со старыми хвостами
+    переименовываются. Фото и рубрика — от потребности, город и цена — свои.
     Повторный запуск ничего не меняет.
     """
     Contribution = env['coop.project.contribution'].sudo().with_context(
@@ -1206,69 +1219,62 @@ def link_offers_to_resources(env):
         tracking_disable=True, mail_create_nolog=True, mail_notrack=True)
     offers = Contribution.search([
         ('need_id', '!=', False), ('kind', 'in', TOPIC_KINDS)], order='id')
-    cache, used, made, linked, kept = {}, {}, 0, 0, 0
+    cache, used, done = {}, {}, set()
+    made = linked = kept = renamed = 0
     for offer in offers:
         need, who = offer.need_id, offer.partner_id
         base = _topic_base(need.name)
         if not base or not who:
             continue
+        real = base in real_offers.REAL_OFFERS
         current = offer.resource_id
-        if (current and current.owner_id == who
-                and _topic_base(current.name).lower() == base.lower()):
+        if current and current.owner_id == who and _on_topic(current.name, base):
+            res = current
             kept += 1
-            continue
-        key = (base.lower(), who.id)
-        res = cache.get(key)
-        if res is None:
-            res = Resource.search([
-                ('owner_id', '=', who.id), ('listing_type', '=', 'offer'),
-                ('name', '=ilike', base + '%')], order='id', limit=1)
-            res = res.filtered(lambda r: _topic_base(r.name).lower() == base.lower())
+        else:
+            key = (base.lower(), who.id)
+            res = cache.get(key)
+            if res is None:
+                res = Resource.search([
+                    ('owner_id', '=', who.id), ('listing_type', '=', 'offer')],
+                    order='id').filtered(lambda r: _on_topic(r.name, base))[:1]
+                if not res:
+                    name = (_free_real_name(env, base, who.id, used) if real
+                            else None) or base
+                    vals = {
+                        'name': name,
+                        'owner_id': who.id,
+                        'listing_type': 'offer',
+                        'resource_type': need.resource_type or 'material',
+                        'city': who.city or need.city or '',
+                        'state': 'published',
+                        'price_kind': 'exact' if offer.value else 'none',
+                        'price': offer.value or 0,
+                        'image_1920': need.image_1920,
+                    }
+                    if need.category_id:
+                        vals['category_id'] = need.category_id.id
+                    if 'subcategory_id' in Resource._fields and need.subcategory_id:
+                        vals['subcategory_id'] = need.subcategory_id.id
+                    with env.cr.savepoint():
+                        res = Resource.create(vals)
+                        made += 1
+                cache[key] = res
             if not res:
-                tails = OFFER_TAILS.get(offer.kind, OFFER_TAILS['resource'])
-                # Названия разных владельцев не совпадают: иначе чистка
-                # одинаковых названий (`dedupe_resource_titles`) допишет
-                # к ним «недорого», «по договору». Хвост занят — следующий,
-                # кончились одиночные — пары хвостов.
-                if base.lower() not in used:
-                    used[base.lower()] = set(Resource.search(
-                        [('name', '=ilike', base + '%')]).mapped('name'))
-                taken = used[base.lower()]
-                start = (who.id * 7 + sum(map(ord, base))) % len(tails)
-                options = [tails[(start + i) % len(tails)] for i in range(len(tails))]
-                options += ['%s, %s' % (a, b) for i, a in enumerate(options)
-                            for b in options[i + 1:]]
-                name = next(('%s, %s' % (base, t) for t in options
-                             if '%s, %s' % (base, t) not in taken),
-                            '%s, %s' % (base, options[0]))
-                taken.add(name)
-                vals = {
-                    'name': name,
-                    'owner_id': who.id,
-                    'listing_type': 'offer',
-                    'resource_type': need.resource_type or 'material',
-                    'city': who.city or need.city or '',
-                    'state': 'published',
-                    'price_kind': 'exact' if offer.value else 'none',
-                    'price': offer.value or 0,
-                    'image_1920': need.image_1920,
-                }
-                if need.category_id:
-                    vals['category_id'] = need.category_id.id
-                if 'subcategory_id' in Resource._fields and need.subcategory_id:
-                    vals['subcategory_id'] = need.subcategory_id.id
+                continue
+            with env.cr.savepoint():
+                offer.write({'resource_id': res.id})
+                linked += 1
+        if real and res.id not in done and not _is_real(res.name, base):
+            name = _free_real_name(env, base, res.id, used)
+            if name:
                 with env.cr.savepoint():
-                    res = Resource.create(vals)
-                    made += 1
-            cache[key] = res
-        if not res:
-            continue
-        with env.cr.savepoint():
-            offer.write({'resource_id': res.id})
-            linked += 1
+                    res.with_context(tracking_disable=True).write({'name': name})
+                    renamed += 1
+        done.add(res.id)
     _logger.info('Заявки с объявлением по теме: заведено объявлений %s, '
-                 'привязано заявок %s, уже были по теме %s, всего %s',
-                 made, linked, kept, len(offers))
+                 'привязано заявок %s, уже были по теме %s, переименовано %s, '
+                 'всего %s', made, linked, kept, renamed, len(offers))
     return linked
 
 
