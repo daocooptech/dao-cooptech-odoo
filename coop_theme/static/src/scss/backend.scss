@@ -1000,6 +1000,9 @@
 // навигация надо убрать белый фон на всех страницах»).
 .o_web_client .o_action_manager .o_control_panel {
   background-color: transparent !important;
+  // И без полоски под ней (владелец 15.11.2026: «полоску под навигацией
+  // тоже убери»).
+  border-bottom: 0 !important;
 }
 .o-mail-Chatter-top {
   position: static !important;
