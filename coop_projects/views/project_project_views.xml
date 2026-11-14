@@ -26,6 +26,25 @@
           </div>
         </button>
       </xpath>
+
+      <!-- Рабочее поле «Управления проектом» по образцу 395: заявки на
+           потребности карточками, ниже — аналитика. Команде сбора. -->
+      <xpath expr="//notebook/page[@name='map']" position="before">
+        <page name="coop_offers" string="Заявки на потребности"
+              invisible="not coop_offer_can">
+          <p class="text-muted mb-2">
+            Утверждаете вы — инициатор. У потребности может быть свой
+            ответственный. Принятая заявка закрывает потребность, остальные
+            отклоняются сразу, откликнувшиеся получают извещение.
+          </p>
+          <field name="coop_offer_ids" nolabel="1" mode="kanban"
+                 readonly="1" context="{'kanban_view_ref': 'coop_projects.view_coop_contribution_offers_kanban_embedded'}"/>
+        </page>
+        <page name="coop_analytics" string="Аналитика проекта"
+              invisible="not coop_offer_can">
+          <field name="coop_analytics" nolabel="1"/>
+        </page>
+      </xpath>
     </field>
   </record>
 

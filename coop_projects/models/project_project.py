@@ -54,6 +54,44 @@ class ProjectProject(models.Model):
             project.coop_offer_can = bool(sources)
             project.coop_offer_new = sum(sources.mapped('new_offer_count'))
 
+    coop_offer_ids = fields.One2many(
+        'coop.project.contribution', compute='_compute_coop_offer_ids',
+        string='Заявки на потребности')
+    coop_analytics = fields.Html(
+        string='Аналитика проекта', compute='_compute_coop_analytics',
+        sanitize=False)
+
+    @api.depends('coop_project_id.contribution_ids.state',
+                 'coop_project_id.contribution_ids.need_id',
+                 'coop_project_id.coop_is_team')
+    def _compute_coop_offer_ids(self):
+        """Заявки команде — прямо в управлении проектом (образец
+        `OffersReviewPage`, задача 395): карточки с «Принять» и
+        «Отклонить»; новые первыми."""
+        for project in self:
+            sources = project.coop_project_id.filtered('coop_is_team')
+            offers = sources.contribution_ids.filtered('need_id')
+            project.coop_offer_ids = offers.sorted(
+                key=lambda c: (c.state != 'offered', c.need_id.id,
+                               -(c.id or 0)))
+
+    @api.depends('coop_project_id')
+    def _compute_coop_analytics(self):
+        """Аналитика сбора на странице управления: вклады, активы,
+        контракты, ЦФА. Блоки дают модули, которые есть в базе; здесь их
+        только склеиваем."""
+        parts = (('analytics_money', _('Финансовые вклады')),
+                 ('analytics_intangibles', _('Нематериальные активы')),
+                 ('analytics_cfa', _('ЦФА')),
+                 ('analytics_deals', _('Контракты')))
+        for project in self:
+            source = project.coop_project_id[:1]
+            html = ''
+            for name, title in parts:
+                if source and name in source._fields and source[name]:
+                    html += '<h4 class="mt-3">%s</h4>%s' % (title, source[name])
+            project.coop_analytics = html
+
     def action_coop_open_offers(self):
         """Разбор заявок на потребности — из управления проектом: тот же
         канбан, что со страницы сбора (`coop.project.action_open_offers`)."""

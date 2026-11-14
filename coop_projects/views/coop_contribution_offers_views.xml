@@ -108,6 +108,30 @@
     </field>
   </record>
 
+
+  <!-- Те же карточки, но во вкладке управления проектом: без колонок,
+       потребность названа на самой карточке. -->
+  <record id="view_coop_contribution_offers_kanban_embedded" model="ir.ui.view">
+    <field name="name">coop.project.contribution.offers.kanban.embedded</field>
+    <field name="model">coop.project.contribution</field>
+    <field name="inherit_id" ref="coop_projects.view_coop_contribution_offers_kanban"/>
+    <field name="mode">primary</field>
+    <field name="arch" type="xml">
+      <xpath expr="//kanban" position="attributes">
+        <attribute name="default_group_by"/>
+        <attribute name="class">o_coop_offers o_coop_offers_flat</attribute>
+      </xpath>
+      <xpath expr="//field[@name='partner_id']" position="before">
+        <field name="need_id"/>
+      </xpath>
+      <xpath expr="//div[hasclass('o_coop_offer_what')]" position="before">
+        <div class="o_coop_offer_need fw-bold">
+          <t t-out="record.need_id.value"/>
+        </div>
+      </xpath>
+    </field>
+  </record>
+
   <!-- Кнопки «Разобрать заявки» над списком потребностей больше нет:
        списка на странице проекта нет (владелец 12.11.2026), отклики
        команда видит счётчиком в смете «Участия в проекте». -->
