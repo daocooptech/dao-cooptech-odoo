@@ -49,6 +49,7 @@
             'coop_projects/static/src/js/project_summary.js',
             'coop_projects/static/src/xml/project_summary.xml',
             'coop_projects/static/src/xml/task_create_button.xml',
+            'coop_projects/static/src/js/pm_settings_toggle.js',
         ],
     },
     'installable': True,

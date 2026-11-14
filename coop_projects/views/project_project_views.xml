@@ -26,21 +26,30 @@
       <!-- Шапка: название, «В избранное», «Настройки проекта», главная
            «Задача»; под названием — строка «заказчик · менеджер · сроки». -->
       <xpath expr="//field[@name='is_favorite']" position="after">
-        <a href="#coop_pm_settings" class="btn btn-secondary o_coop_pm_gear ms-2"
-           title="Настройки проекта" aria-label="Настройки проекта">
+        <!-- Настройки скрыты и открываются только колёсиком (владелец
+             14.11.2026: «настройки проекта открываются только при нажатии
+             на иконку колесика, а так надо убрать из карточки»).
+             Открывает `static/src/js/pm_settings_toggle.js`. -->
+        <a role="button" tabindex="0" class="btn btn-secondary o_coop_pm_gear ms-2"
+           title="Настройки проекта" aria-label="Настройки проекта"
+           aria-controls="coop_pm_settings" aria-expanded="false">
           <i class="oi" data-icon="settings"/>
         </a>
+        <!-- Подпись как на экране задач; значок «+» движок рисовал
+             чёрточкой — он не нужен (14.11.2026). -->
         <button name="action_coop_new_task" type="object" class="btn btn-primary ms-2"
-                icon="fa-plus" string="Задача"/>
+                string="Добавить задачу"/>
       </xpath>
       <xpath expr="//div[hasclass('oe_title')]" position="inside">
         <div class="o_coop_pm_meta">
           <!-- Заказчик и менеджер — один человек: имя один раз, менеджером
                с портретом (владелец 14.11: «два раза ФИО»). -->
           <field name="coop_partner_is_manager" invisible="1"/>
-          <field name="partner_id" readonly="1" nolabel="1"
-                 invisible="not partner_id or coop_partner_is_manager"
-                 options="{'no_open': True}"/>
+          <!-- Заказчик — с лого и ссылкой на его страницу, как менеджер
+               рядом (владелец 14.11.2026: «почему организация без лого и
+               не кликабельна»). -->
+          <field name="partner_id" readonly="1" nolabel="1" widget="many2one_avatar"
+                 invisible="not partner_id or coop_partner_is_manager"/>
           <span class="o_coop_pm_sep" invisible="not partner_id or coop_partner_is_manager">·</span>
           <field name="user_id" readonly="1" nolabel="1" widget="many2one_avatar_user"
                  invisible="not user_id"/>
@@ -99,15 +108,18 @@
               <h3 class="o_coop_pm_title">Настройки проекта</h3>
               <div id="coop_pm_settings_body"/>
             </div>
-            <div class="o_coop_pm_block o_coop_pm_map" invisible="not google_map_iframe">
-              <h3 class="o_coop_pm_title">Карта</h3>
-              <div id="coop_pm_map"/>
-            </div>
           </div>
           <div class="o_coop_pm_side">
             <div class="o_coop_pm_block">
               <h3 class="o_coop_pm_cap">Сводка</h3>
               <field name="coop_summary" nolabel="1" widget="coop_project_summary"/>
+            </div>
+            <!-- Мини-карта — небольшой справа, под «Сводкой», как во всех
+                 карточках с местом (задача 420, владелец 14.11.2026:
+                 «карту мы договорились размещать небольшую в правой колонке»). -->
+            <div class="o_coop_pm_block o_coop_pm_map" invisible="not google_map_iframe">
+              <h3 class="o_coop_pm_cap">Карта</h3>
+              <div id="coop_pm_map"/>
             </div>
           </div>
         </div>
