@@ -58,6 +58,16 @@ class ProjectProject(models.Model):
         string='Заявки на потребности', compute='_compute_coop_offers_json')
     coop_summary = fields.Json(
         string='Сводка', compute='_compute_coop_summary')
+    coop_partner_is_manager = fields.Boolean(
+        compute='_compute_coop_partner_is_manager')
+
+    @api.depends('partner_id', 'user_id.partner_id')
+    def _compute_coop_partner_is_manager(self):
+        """Заказчик — сам менеджер проекта: в строке под названием имя
+        одно, иначе ФИО стоит дважды подряд."""
+        for project in self:
+            project.coop_partner_is_manager = bool(
+                project.partner_id and project.partner_id == project.user_id.partner_id)
 
     coop_an_money = fields.Html(
         string='Финансовые вклады', compute='_compute_coop_analytics',

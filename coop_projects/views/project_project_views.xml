@@ -35,9 +35,13 @@
       </xpath>
       <xpath expr="//div[hasclass('oe_title')]" position="inside">
         <div class="o_coop_pm_meta">
-          <field name="partner_id" readonly="1" nolabel="1" invisible="not partner_id"
+          <!-- Заказчик и менеджер — один человек: имя один раз, менеджером
+               с портретом (владелец 14.11: «два раза ФИО»). -->
+          <field name="coop_partner_is_manager" invisible="1"/>
+          <field name="partner_id" readonly="1" nolabel="1"
+                 invisible="not partner_id or coop_partner_is_manager"
                  options="{'no_open': True}"/>
-          <span class="o_coop_pm_sep" invisible="not partner_id">·</span>
+          <span class="o_coop_pm_sep" invisible="not partner_id or coop_partner_is_manager">·</span>
           <field name="user_id" readonly="1" nolabel="1" widget="many2one_avatar_user"
                  invisible="not user_id"/>
           <span class="o_coop_pm_sep" invisible="not user_id or not date_start">·</span>
