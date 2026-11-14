@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <t t-name="coop_projects.ProjectSummary">
+    <div class="o_coop_sd">
+      <a href="#" class="o_coop_sd_status" t-on-click="(ev) => this.open(ev, 'status')">
+        <span class="o_coop_sd_head"><CoopIcon name="'circle-check'" size="15"/>Статус</span>
+        <span t-if="this.status.label" t-attf-class="o_coop_sd_pill o_coop_sd_pill_{{ this.status.code }}">
+          <i aria-hidden="true"/><t t-out="this.status.label"/>
+        </span>
+        <span t-else="" class="o_coop_sd_set"><CoopIcon name="'plus'" size="13"/>Задать статус</span>
+      </a>
+      <t t-foreach="this.data.rows" t-as="row" t-key="row.key">
+        <a href="#" class="o_coop_sd_row" t-on-click="(ev) => this.open(ev, row.key)">
+          <CoopIcon name="row.icon" size="15"/>
+          <span class="o_coop_sd_label" t-out="row.label"/>
+          <em t-if="row.pct !== undefined and row.pct !== null" aria-hidden="true"
+              t-attf-class="o_coop_sd_bar {{ row.tone ? 'o_coop_sd_bar_' + row.tone : '' }}">
+            <i t-att-style="this.barStyle(row)"/>
+          </em>
+          <span t-else="" aria-hidden="true"/>
+          <b t-attf-class="o_coop_sd_value {{ row.link ? 'o_coop_sd_link' : '' }}">
+            <t t-if="row.new_label"><span class="o_coop_sd_new" t-out="row.new_label"/> · </t>
+            <t t-out="row.value"/>
+          </b>
+        </a>
+      </t>
+    </div>
+  </t>
+
+</templates>

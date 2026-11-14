@@ -56,8 +56,8 @@ class ProjectProject(models.Model):
 
     coop_offers_json = fields.Json(
         string='Заявки на потребности', compute='_compute_coop_offers_json')
-    coop_summary = fields.Html(
-        string='Сводка', compute='_compute_coop_summary', sanitize=False)
+    coop_summary = fields.Json(
+        string='Сводка', compute='_compute_coop_summary')
 
     coop_an_money = fields.Html(
         string='Финансовые вклады', compute='_compute_coop_analytics',
@@ -121,24 +121,97 @@ class ProjectProject(models.Model):
                 })
             project.coop_offers_json = {'needs': out_needs, 'offers': out_offers}
 
+    # Переходы строк «Сводки»: ключ строки -> метод проекта. Виджет
+    # зовёт только `action_coop_summary_open` с ключом из этого списка.
+    _COOP_SUMMARY_ACTIONS = {
+        'status': 'project_update_all_action',
+        'offers': 'action_coop_open_offers',
+        'tasks': 'action_view_tasks',
+        'miles': 'action_get_list_view',
+        'plan': 'action_real_margin',
+        'fact': 'action_real_margin',
+        'hours': 'action_project_timesheets',
+        'orders': 'action_view_sos',
+        'invoices': 'action_open_project_invoices',
+        'invoice_new': 'action_create_invoice',
+    }
+
+    @staticmethod
+    def _coop_money(amount, currency):
+        """«186 400,00 ₽» — разряды пробелом, копейки запятой, знак после."""
+        text = '{:,.2f}'.format(amount or 0).replace(',', ' ').replace('.', ',')
+        return '%s %s' % (text, currency.symbol or '') if currency else text
+
     @api.depends('coop_project_id.new_offer_count', 'task_count',
                  'closed_task_count', 'milestone_count',
                  'milestone_count_reached', 'last_update_status')
     def _compute_coop_summary(self):
-        """«Сводка» образца 395: статус, заявки, задачи, вехи, табели."""
-        status = dict(self._fields['last_update_status']._description_selection(self.env))
+        """«Сводка» в правой колонке над перепиской (WorkHeaderD, задача
+        449): «Статус» плашкой, затем строки — значок, подпись, тонкая
+        шкала, где есть доля, значение. Каждая строка — переход."""
+        # Подписи — из дизайн-системы: у движка перевода этих значений нет.
+        status = {'on_track': _('По графику'), 'at_risk': _('Под угрозой'),
+                  'off_track': _('Отстаёт'), 'on_hold': _('На паузе'),
+                  'done': _('Завершён')}
+        user = self.env.user
+        sales = user.has_group('sales_team.group_sale_salesman')
+        books = user.has_group('account.group_account_readonly')
         for project in self:
+            code = project.last_update_status or 'to_define'
+            out = {'status': {'code': code,
+                              'label': status.get(code, ''),
+                              'action': 'status'},
+                   'rows': []}
+            rows = out['rows']
+
+            def pct(part, whole):
+                return round(100 * part / whole) if whole else 0
+
             source = project.coop_project_id.filtered('coop_is_team')[:1]
-            rows = [(_('Статус'), status.get(project.last_update_status, ''))]
             if source:
                 total = len(source.contribution_ids.filtered('need_id'))
-                rows.append((_('Заявки'), _('%(n)s новых · %(t)s', n=source.new_offer_count, t=total)))
-            rows.append((_('Задачи'), '%s / %s' % (project.closed_task_count, project.task_count)))
-            rows.append((_('Вехи'), '%s / %s' % (project.milestone_count_reached, project.milestone_count)))
-            if 'total_timesheet_time' in project._fields:
-                rows.append((_('Табели'), '%s ч' % int(project.total_timesheet_time or 0)))
-            project.coop_summary = '<dl class="o_coop_pm_sum">%s</dl>' % ''.join(
-                '<dt>%s</dt><dd>%s</dd>' % (name, value) for name, value in rows)
+                new = source.new_offer_count
+                rows.append({'key': 'offers', 'icon': 'send', 'label': _('Заявки'),
+                             'value': '%s' % total, 'new': new,
+                             'new_label': _('%s новых', new) if new else '',
+                             'pct': pct(new, total), 'tone': 'gold'})
+            rows.append({'key': 'tasks', 'icon': 'list-check', 'label': _('Задачи'),
+                         'value': '%s / %s' % (project.closed_task_count, project.task_count),
+                         'pct': pct(project.closed_task_count, project.task_count)})
+            if project.allow_milestones and project.milestone_count:
+                rows.append({'key': 'miles', 'icon': 'flag', 'label': _('Вехи'),
+                             'value': '%s / %s' % (project.milestone_count_reached, project.milestone_count),
+                             'pct': pct(project.milestone_count_reached, project.milestone_count)})
+            currency = project.currency_id
+            if 'estimated_cost' in project._fields:
+                plan, fact = project.estimated_cost, project.real_cost
+                rows.append({'key': 'plan', 'icon': 'coin', 'label': _('Затраты, план'),
+                             'value': self._coop_money(plan, currency)})
+                rows.append({'key': 'fact', 'icon': 'coin', 'label': _('Затраты, факт'),
+                             'value': self._coop_money(fact, currency),
+                             'pct': min(pct(fact, plan), 100) if plan else None,
+                             'tone': 'error' if plan and fact > plan else None})
+            if project.allow_timesheets:
+                rows.append({'key': 'hours', 'icon': 'clock', 'label': _('Табели'),
+                             'value': '%s ч' % int(project.total_timesheet_time or 0)})
+            if sales and 'sale_order_count' in project._fields:
+                rows.append({'key': 'orders', 'icon': 'receipt', 'label': _('Заказы на продажу'),
+                             'value': '%s' % project.sale_order_count})
+            if books and 'invoice_count' in project._fields:
+                to_bill = sales and project.has_any_so_to_invoice
+                rows.append({'key': 'invoice_new' if to_bill else 'invoices',
+                             'icon': 'file-invoice', 'label': _('Счета'),
+                             'value': _('Выставить') if to_bill else '%s' % project.invoice_count,
+                             'link': bool(to_bill)})
+            project.coop_summary = out
+
+    def action_coop_summary_open(self, key):
+        """Переход из строки «Сводки» — тот же, что у бывшей кнопки-счётчика."""
+        self.ensure_one()
+        method = self._COOP_SUMMARY_ACTIONS.get(key)
+        if not method or not hasattr(self, method):
+            return False
+        return getattr(self.with_context(active_id=self.id), method)()
 
     @api.depends('coop_project_id')
     def _compute_coop_analytics(self):

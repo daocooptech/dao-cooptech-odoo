@@ -1008,12 +1008,6 @@
   }
   .o_coop_pm_title { font: 700 18px/1.3 'Manrope', sans-serif; margin: 0 0 var(--space-8, 8px); }
   .o_coop_pm_cap { font: 600 10.5px/1.4 'Manrope', sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--coop-slate-light); margin: 0 0 var(--space-8, 8px); }
-  .o_coop_pm_sum {
-    display: grid; grid-template-columns: 1fr auto; gap: 0; margin: 0;
-    dt, dd { margin: 0; padding: 8px 0; border-bottom: 1px solid var(--coop-line, #e6e6e1); }
-    dt { font-weight: 500; color: var(--coop-slate); }
-    dd { text-align: right; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
-  }
   // Карта — последним блоком и невысокая (WorkHeaderD): 150 px.
   .o_coop_pm_map iframe { height: 150px !important; width: 100%; border: 0; border-radius: var(--radius-card, 10px); }
 }
@@ -1034,6 +1028,69 @@
 @container (max-width: 900px) {
   .o_coop_pm { grid-template-columns: minmax(0, 1fr) !important; }
   .o_coop_pm .o_coop_pm_side { order: -1; }
+  // Под шапкой «Сводка» в две колонки (холст «Сводка проекта», узкий лист).
+  .o_coop_pm .o_coop_pm_side .o_coop_sd { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; }
+  .o_coop_pm .o_coop_pm_side .o_coop_sd_status { grid-column: 1 / -1; }
+  .o_coop_pm .o_coop_pm_side .o_coop_sd_row { border-top: 1px solid var(--coop-line, #e6e6e1); }
+}
+// На телефоне две колонки сжимают подписи до слова — одна колонка.
+@container (max-width: 520px) {
+  .o_coop_pm .o_coop_pm_side .o_coop_sd { grid-template-columns: minmax(0, 1fr); }
+}
+
+// «Сводка» в правой колонке над перепиской (WorkHeaderD, задача 449,
+// кусок 2). Копия блока из листа стоит в контейнере переписки; видна
+// одна из двух: переписка сбоку — у переписки, переписка внизу — в листе.
+.o_form_view:has(.o-mail-Form-chatter.o-aside .o_coop_pm_aside) .o_coop_pm {
+  grid-template-columns: minmax(0, 1fr) !important;
+  .o_coop_pm_side { display: none; }
+}
+.o-mail-Form-chatter:not(.o-aside) .o_coop_pm_aside { display: none; }
+.o-mail-Form-chatter.o-aside:has(.o_coop_pm_aside) {
+  flex-direction: column;
+  .o_coop_pm_aside { margin: var(--space-16, 16px) var(--space-16, 16px) 0; }
+  .o_coop_pm_block {
+    padding: 12px 14px;
+    background: var(--coop-white, #fff);
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-radius: var(--radius-card, 10px);
+  }
+  .o_coop_pm_cap { font: 500 10.5px/1.3 'JetBrains Mono', monospace; letter-spacing: .05em; text-transform: uppercase; color: var(--coop-slate); margin: 0 0 6px; }
+}
+.o_field_coop_project_summary { display: block; width: 100%; }
+.o_coop_sd {
+  .o_coop_sd_status, .o_coop_sd_row { color: var(--coop-slate); text-decoration: none; font-size: 12.5px; }
+  .o_coop_sd_status {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 4px 0 10px; border-bottom: 1px solid var(--coop-line, #e6e6e1);
+  }
+  .o_coop_sd_head { display: inline-flex; align-items: center; gap: 8px; }
+  .o_coop_sd_pill {
+    display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px;
+    font: 600 11.5px/1.3 'Manrope', sans-serif; background: var(--coop-surface); color: var(--coop-slate);
+    i { width: 7px; height: 7px; border-radius: 50%; background: var(--coop-slate-light); }
+  }
+  .o_coop_sd_pill_on_track { background: var(--coop-teal-tint); color: var(--coop-teal-dark); i { background: var(--coop-teal); } }
+  .o_coop_sd_pill_at_risk { background: var(--coop-gold-tint); color: var(--coop-gold-text); i { background: var(--coop-gold); } }
+  .o_coop_sd_pill_off_track { background: var(--coop-error-tint); color: var(--coop-error-text); i { background: var(--coop-error); } }
+  .o_coop_sd_pill_done { color: var(--coop-ink); i { background: var(--coop-ink); } }
+  .o_coop_sd_set { display: inline-flex; align-items: center; gap: 4px; font: 600 12px/1.3 'Manrope', sans-serif; color: var(--coop-teal-dark); }
+  .o_coop_sd_row {
+    display: grid; grid-template-columns: 18px minmax(0, 1fr) 44px auto; gap: 8px; align-items: center;
+    padding: 7px 0;
+    & + .o_coop_sd_row { border-top: 1px solid var(--coop-line, #e6e6e1); }
+  }
+  .o_coop_sd_status:hover .o_coop_sd_head, .o_coop_sd_row:hover .o_coop_sd_label { color: var(--coop-ink); }
+  .o_coop_sd_bar {
+    display: block; height: 4px; border-radius: 2px; background: var(--coop-surface); overflow: hidden;
+    i { display: block; height: 100%; background: var(--coop-teal); }
+  }
+  .o_coop_sd_bar_gold i { background: var(--coop-gold); }
+  .o_coop_sd_bar_error i { background: var(--coop-error); }
+  .o_coop_sd_value { font: 600 12.5px/1 'JetBrains Mono', monospace; color: var(--coop-ink); white-space: nowrap; }
+  .o_coop_sd_link { font-family: 'Inter', sans-serif; color: var(--coop-teal-dark); }
+  .o_coop_sd_new { color: var(--coop-gold-text); }
+  a:focus-visible { outline: 2px solid var(--coop-teal); outline-offset: 2px; border-radius: 4px; }
 }
 .o_coop_rev {
   display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: var(--space-16, 16px);

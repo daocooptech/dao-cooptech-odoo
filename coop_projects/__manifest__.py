@@ -45,6 +45,8 @@
             'coop_projects/static/src/xml/offer_counter.xml',
             'coop_projects/static/src/js/offers_review.js',
             'coop_projects/static/src/xml/offers_review.xml',
+            'coop_projects/static/src/js/project_summary.js',
+            'coop_projects/static/src/xml/project_summary.xml',
         ],
     },
     'installable': True,

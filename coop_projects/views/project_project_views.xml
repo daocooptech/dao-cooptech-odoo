@@ -103,7 +103,7 @@
           <div class="o_coop_pm_side">
             <div class="o_coop_pm_block">
               <h3 class="o_coop_pm_cap">Сводка</h3>
-              <field name="coop_summary" nolabel="1"/>
+              <field name="coop_summary" nolabel="1" widget="coop_project_summary"/>
             </div>
           </div>
         </div>
