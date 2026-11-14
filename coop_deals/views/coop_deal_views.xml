@@ -34,7 +34,7 @@
                 <img class="o_coop_media_logo" t-elif="record.party_b_id.raw_value" loading="lazy"
                      t-attf-src="/web/image/res.partner/#{record.party_b_id.raw_value}/image_512"
                      t-att-alt="record.party_b_id.value"/>
-                <span t-else="" class="o_coop_media_sign"><t t-out="record.icon.value"/></span>
+                <span t-else="" class="o_coop_media_sign"><field name="subject" widget="coop_sign" options="{'icon': 'package', 'map': {'service': 'tools', 'work': 'briefcase', 'project': 'rocket', 'credit': 'heart-handshake'}}"/></span>
                 <span class="o_coop_locbar" t-if="record.city.raw_value">
                   <i class="oi" data-icon="location_on" role="img" aria-label="Город"/>
                   <field name="city"/>

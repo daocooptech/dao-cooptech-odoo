@@ -159,7 +159,7 @@
         <field name="partner_id"/>
         <field name="city"/>
         <field name="category_id"/>
-        <filter name="fits" string="🎯 Подходит мне" domain="[('fits_me', '=', True)]"/>
+        <filter name="fits" string="Подходит мне" domain="[('fits_me', '=', True)]"/>
         <filter name="mine" string="Мои объявления" domain="[('is_mine', '=', True)]"/>
         <separator/>
         <filter name="surcharge" string="Возможна доплата" domain="[('surcharge_ok', '=', True)]"/>
