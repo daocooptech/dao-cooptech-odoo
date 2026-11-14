@@ -1164,36 +1164,111 @@ def diversify_project_needs(env, min_needs=4, max_needs=12):
     return done
 
 
-def link_offers_to_resources(env):
-    """Часть откликов на потребности — с ресурсом из «Моих ресурсов» (№ 390).
+# Хвосты названий своих объявлений: основа (до запятой) — тема
+# потребности, хвост — чем объявление одного владельца отличается от
+# объявления другого. Материалы — партией и со склада, остальное — вещью.
+OFFER_TAILS = {
+    'material': ('в наличии на складе', 'остаток с объекта', 'от производителя',
+                 'с доставкой по городу', 'свежая партия', 'с сертификатом',
+                 'оптом и в розницу', 'самовывоз со склада', 'под заказ за неделю',
+                 'с документами'),
+    'resource': ('своё, в хорошем состоянии', 'после одного проекта',
+                 'с доставкой и монтажом', 'новое, в упаковке',
+                 'с гарантией продавца', 'проверено, готово к работе',
+                 'с обучением на месте', 'в пользование на срок проекта',
+                 'с запасными частями', 'от организации, с договором'),
+    'space': ('свободно сразу', 'надолго, помесячно', 'с охраной и въездом',
+              'на срок проекта', 'с отоплением', 'рядом с объектом'),
+}
+TOPIC_KINDS = ('resource', 'material', 'space')
 
-    Отклик участника на материальную потребность чаще всего и есть его
-    уже размещённое объявление. Берём у автора отклика опубликованное
-    предложение того же вида и связываем; у каждого третьего отклика
-    оставляем текстовое описание без ресурса — так бывает и в жизни.
-    Безвреден при повторном запуске: трогает только отклики без ресурса.
+
+def _topic_base(name):
+    return (name or '').split(',')[0].strip()
+
+
+def link_offers_to_resources(env):
+    """Каждая заявка на вещественную потребность — со своим объявлением
+    по теме (№ 390; владелец 14.11.2026: «предложения не по теме»).
+
+    Раньше брали любое объявление автора того же вида — на «Игровой
+    комплекс» приходило «место под мастерскую», а у трети заявок ресурса
+    не было вовсе. Теперь основа названия объявления (до запятой) совпадает
+    с основой потребности. У автора такое объявление уже есть — берём его;
+    нет — заводим одно на пару (основа, владелец): фото и рубрика — от
+    потребности, хвост названия, город и цена — свои. Так правило
+    задачи 433 «одна основа у владельца — одна запись» не нарушается.
+    Повторный запуск ничего не меняет.
     """
-    Contribution = env['coop.project.contribution'].sudo()
-    Resource = env['coop.resource'].sudo()
+    Contribution = env['coop.project.contribution'].sudo().with_context(
+        tracking_disable=True, mail_notrack=True)
+    Resource = env['coop.resource'].sudo().with_context(
+        tracking_disable=True, mail_create_nolog=True, mail_notrack=True)
     offers = Contribution.search([
-        ('need_id', '!=', False), ('resource_id', '=', False),
-        ('kind', '!=', 'money')], order='id')
-    linked = 0
+        ('need_id', '!=', False), ('kind', 'in', TOPIC_KINDS)], order='id')
+    cache, used, made, linked, kept = {}, {}, 0, 0, 0
     for offer in offers:
-        if offer.id % 3 == 0:
+        need, who = offer.need_id, offer.partner_id
+        base = _topic_base(need.name)
+        if not base or not who:
             continue
-        kind = offer.need_id.resource_type
-        mine = Resource.search([
-            ('owner_id', '=', offer.partner_id.id),
-            ('listing_type', '=', 'offer'),
-            ('state', '=', 'published'),
-            ('resource_type', '=', kind)], order='id')
-        if not mine:
+        current = offer.resource_id
+        if (current and current.owner_id == who
+                and _topic_base(current.name).lower() == base.lower()):
+            kept += 1
+            continue
+        key = (base.lower(), who.id)
+        res = cache.get(key)
+        if res is None:
+            res = Resource.search([
+                ('owner_id', '=', who.id), ('listing_type', '=', 'offer'),
+                ('name', '=ilike', base + '%')], order='id', limit=1)
+            res = res.filtered(lambda r: _topic_base(r.name).lower() == base.lower())
+            if not res:
+                tails = OFFER_TAILS.get(offer.kind, OFFER_TAILS['resource'])
+                # Названия разных владельцев не совпадают: иначе чистка
+                # одинаковых названий (`dedupe_resource_titles`) допишет
+                # к ним «недорого», «по договору». Хвост занят — следующий,
+                # кончились одиночные — пары хвостов.
+                if base.lower() not in used:
+                    used[base.lower()] = set(Resource.search(
+                        [('name', '=ilike', base + '%')]).mapped('name'))
+                taken = used[base.lower()]
+                start = (who.id * 7 + sum(map(ord, base))) % len(tails)
+                options = [tails[(start + i) % len(tails)] for i in range(len(tails))]
+                options += ['%s, %s' % (a, b) for i, a in enumerate(options)
+                            for b in options[i + 1:]]
+                name = next(('%s, %s' % (base, t) for t in options
+                             if '%s, %s' % (base, t) not in taken),
+                            '%s, %s' % (base, options[0]))
+                taken.add(name)
+                vals = {
+                    'name': name,
+                    'owner_id': who.id,
+                    'listing_type': 'offer',
+                    'resource_type': need.resource_type or 'material',
+                    'city': who.city or need.city or '',
+                    'state': 'published',
+                    'price_kind': 'exact' if offer.value else 'none',
+                    'price': offer.value or 0,
+                    'image_1920': need.image_1920,
+                }
+                if need.category_id:
+                    vals['category_id'] = need.category_id.id
+                if 'subcategory_id' in Resource._fields and need.subcategory_id:
+                    vals['subcategory_id'] = need.subcategory_id.id
+                with env.cr.savepoint():
+                    res = Resource.create(vals)
+                    made += 1
+            cache[key] = res
+        if not res:
             continue
         with env.cr.savepoint():
-            offer.write({'resource_id': mine[offer.id % len(mine)].id})
+            offer.write({'resource_id': res.id})
             linked += 1
-    _logger.info('Отклики со своим ресурсом: %s из %s', linked, len(offers))
+    _logger.info('Заявки с объявлением по теме: заведено объявлений %s, '
+                 'привязано заявок %s, уже были по теме %s, всего %s',
+                 made, linked, kept, len(offers))
     return linked
 
 
