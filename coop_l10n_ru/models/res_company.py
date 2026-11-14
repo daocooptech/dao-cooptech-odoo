@@ -24,9 +24,13 @@ class ResCompany(models.Model):
         нет, то есть доллар нигде не настоящий).
 
         Суммы не пересчитываются: они и были в рублях, неверной была только
-        ссылка на валюту. Повторный прогон ничего не делает. Если у
-        компании платформы появятся проводки, валюту меняет бухгалтер, а не
-        этот шаг.
+        ссылка на валюту. Если у компании платформы появятся проводки,
+        валюту меняет бухгалтер, а не этот шаг.
+
+        Таблицы переводятся только вместе с компанией — один раз. С 10.11
+        доллар на площадке настоящий (курсы ЦБ, счета и движения кошелька,
+        вклады), и повторный прогон при каждом обновлении переписывал их в
+        рубли; 14.11 выкатка упала на двух курсах за день.
         """
         rub = self.env.ref('base.RUB')
         usd = self.env.ref('base.USD', raise_if_not_found=False)
@@ -34,17 +38,18 @@ class ResCompany(models.Model):
         if not company or not usd:
             return
         rub.sudo().active = True
-        if company.currency_id != rub:
-            if 'account.move.line' in self.env and self.env['account.move.line'].sudo().search_count(
-                    [('company_id', '=', company.id)], limit=1):
-                _logger.warning('Валюта платформы: у компании есть проводки, оставляю как есть')
-                return
-            company.sudo().currency_id = rub
-            if 'product.pricelist' in self.env:
-                self.env['product.pricelist'].sudo().search([
-                    ('currency_id', '=', usd.id),
-                    ('company_id', 'in', (company.id, False)),
-                ]).write({'currency_id': rub.id})
+        if company.currency_id == rub:
+            return
+        if 'account.move.line' in self.env and self.env['account.move.line'].sudo().search_count(
+                [('company_id', '=', company.id)], limit=1):
+            _logger.warning('Валюта платформы: у компании есть проводки, оставляю как есть')
+            return
+        company.sudo().currency_id = rub
+        if 'product.pricelist' in self.env:
+            self.env['product.pricelist'].sudo().search([
+                ('currency_id', '=', usd.id),
+                ('company_id', 'in', (company.id, False)),
+            ]).write({'currency_id': rub.id})
         cr = self.env.cr
         cr.execute("""
             SELECT c.table_name FROM information_schema.columns c
