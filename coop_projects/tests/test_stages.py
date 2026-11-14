@@ -69,3 +69,48 @@ class TestProjectStages(CoopProjectCase):
         # Завершение сбора этап ведения не трогает: работы закрывает тот,
         # кто их ведёт, а не тот, кто закрыл сбор.
         self.assertEqual(project.project_id.stage_id, self._stage('work'))
+
+
+@tagged('post_install', '-at_install')
+class TestTaskStageMerge(CoopProjectCase):
+    """Слияние одноимённых этапов задач — только у проектов платформы.
+
+    14.11.2026 обновление модуля слило «В работе» доски «MVP DAO COOPTECH»
+    (свой канбан, ни одного общего этапа) в общий, а за ним снялся её
+    пустой «Ждёт ответа».
+    """
+
+    def _board(self, name, stages):
+        Stage = self.env['project.task.type'].sudo()
+        own = Stage.create([{'name': n, 'sequence': i} for i, n in enumerate(stages, 1)])
+        project = self.env['project.project'].sudo().create(
+            {'name': name, 'type_ids': [(6, 0, own.ids)]})
+        return project, own
+
+    def test_svoy_kanban_ne_slivaetsya(self):
+        Project = self.env['project.project']
+        if len(Project._coop_task_stages()) < 4:
+            self.skipTest('Общих этапов задач на узле нет')
+        project, own = self._board('Своя доска', ['Очередь', 'Ждёт ответа', 'В работе'])
+        doing = own.filtered(lambda s: s.name == 'В работе')
+        task = self.env['project.task'].sudo().create(
+            {'name': 'Карточка', 'project_id': project.id, 'stage_id': doing.id})
+        Project.coop_merge_task_stages()
+        Project.coop_drop_engine_stages()
+        self.assertTrue(own.exists() and all(own.mapped('active')))
+        self.assertEqual(project.type_ids, own)
+        self.assertEqual(task.stage_id, doing)
+
+    def test_dubl_u_proekta_platformy_slivaetsya(self):
+        Project = self.env['project.project']
+        shared = Project._coop_task_stages()
+        if len(shared) < 4:
+            self.skipTest('Общих этапов задач на узле нет')
+        common = shared.filtered(lambda s: s.name == 'В работе')
+        project, twin = self._board('Проект платформы', ['В работе'])
+        project.type_ids = [(4, s.id) for s in shared - common]
+        task = self.env['project.task'].sudo().create(
+            {'name': 'Карточка', 'project_id': project.id, 'stage_id': twin.id})
+        Project.coop_merge_task_stages()
+        self.assertFalse(twin.active)
+        self.assertEqual(task.stage_id, common)

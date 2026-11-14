@@ -302,9 +302,14 @@ class ProjectProject(models.Model):
         Task = self.env['project.task'].sudo().with_context(
             active_test=False, mail_notrack=True, tracking_disable=True)
         merged = 0
-        for stage in self._coop_task_stages():
+        shared = self._coop_task_stages()
+        for stage in shared:
+            # Проект без единого общего этапа ведёт свой канбан — его этап
+            # лишь совпал названием. 14.11.2026 так слили «В работе» доски
+            # «MVP DAO COOPTECH», а за ним снялся её пустой «Ждёт ответа».
             twins = Stage.search([('id', '!=', stage.id), ('user_id', '=', False)]
-                                 ).filtered(lambda s: s.name == stage.name)
+                                 ).filtered(lambda s: s.name == stage.name and all(
+                                     p.type_ids & shared for p in s.project_ids))
             for twin in twins:
                 Task.search([('stage_id', '=', twin.id)]).write({'stage_id': stage.id})
                 for project in twin.project_ids:
