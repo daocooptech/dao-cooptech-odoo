@@ -4,7 +4,7 @@
  * карточки заявок выбранной. «Принять» и «Отклонить» — прежние действия
  * вклада (`action_accept`, `action_decline`): права и извещения те же.
  */
-import { Component, proxy, useProps } from "@odoo/owl";
+import { Component, onWillStart, proxy, useProps } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
@@ -29,7 +29,33 @@ export class CoopOffersReview extends Component {
     setup() {
         this.orm = useService("orm");
         this.dialog = useService("dialog");
-        this.state = proxy({ need: null, filter: "all", sort: "new", busy: false });
+        this.action = useService("action");
+        this.state = proxy({ need: null, filter: "all", sort: "new", busy: false, resources: {} });
+        onWillStart(() => this.loadResources());
+    }
+
+    /** Ресурс заявки — карточкой с фото (владелец 14.11.2026): связь
+     *  `resource_id` берём у вклада, в JSON проекта её нет. */
+    async loadResources() {
+        const ids = this.data.offers.map((o) => o.id);
+        if (!ids.length) { return; }
+        const rows = await this.orm.read("coop.project.contribution", ids, ["resource_id"]);
+        const map = {};
+        for (const r of rows) {
+            if (r.resource_id) {
+                const [id, name] = Array.isArray(r.resource_id)
+                    ? r.resource_id : [r.resource_id.id, r.resource_id.display_name];
+                map[r.id] = { id, name };
+            }
+        }
+        this.state.resources = map;
+    }
+
+    openResource(id) {
+        this.action.doAction({
+            type: "ir.actions.act_window", res_model: "coop.resource",
+            res_id: id, views: [[false, "form"]],
+        });
     }
 
     get data() {
@@ -104,6 +130,7 @@ export class CoopOffersReview extends Component {
         try {
             await this.orm.call("coop.project.contribution", method, [[offer.id]]);
             await this.props.record.load();
+            await this.loadResources();
         } finally {
             this.state.busy = false;
         }
