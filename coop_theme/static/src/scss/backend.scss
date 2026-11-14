@@ -994,6 +994,13 @@
 .o_form_view .o_form_statusbar {
   position: static;
 }
+
+// Полоса навигации (путь «Проекты › Спортивная площадка») — без белого
+// фона на всех страницах, на фоне страницы (владелец 15.11.2026: «где
+// навигация надо убрать белый фон на всех страницах»).
+.o_web_client .o_action_manager .o_control_panel {
+  background-color: transparent !important;
+}
 .o-mail-Chatter-top {
   position: static !important;
 }

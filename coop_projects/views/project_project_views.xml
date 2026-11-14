@@ -134,10 +134,31 @@
       <xpath expr="//div[@id='coop_pm_settings_body']" position="inside">
         <xpath expr="//page[@name='settings']/group" position="move"/>
       </xpath>
-      <!-- Пустые теги в «Сведениях» не показываем: «Выбрать теги» в
-           узкой колонке — пустая строка. Править их — в «Настройках». -->
+      <!-- «Сведения» — только смотреть (владелец 15.11.2026: «есть выбор
+           человека, он тут нужен?»): менеджер и теги без выбора, пустые
+           теги не показываем. Менять их — в «Настройках проекта». -->
       <xpath expr="//div[@id='coop_pm_facts']//field[@name='tag_ids']" position="attributes">
         <attribute name="invisible">not tag_ids</attribute>
+        <attribute name="readonly">1</attribute>
+      </xpath>
+      <xpath expr="//div[@id='coop_pm_facts']//field[@name='user_id']" position="attributes">
+        <attribute name="readonly">1</attribute>
+      </xpath>
+      <xpath expr="//div[@id='coop_pm_settings_body']" position="inside">
+        <group string="Менеджер и теги">
+          <field name="user_id" string="Менеджер проекта" widget="many2one_avatar_user"/>
+          <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+        </group>
+      </xpath>
+      <!-- Избранное — закладкой платформы (`coop.favorite`, страница
+           «Избранное»), а не звездой движка: звезда у нас — оценки
+           (владелец 15.11.2026: «вместо звездочки у нас есть иконка
+           избранного»). -->
+      <xpath expr="//field[@name='is_favorite']" position="attributes">
+        <attribute name="invisible">1</attribute>
+      </xpath>
+      <xpath expr="//field[@name='is_favorite']" position="after">
+        <field name="id" widget="coop_favorite_heart" nolabel="1" class="o_coop_pm_fav"/>
       </xpath>
       <xpath expr="//div[@id='coop_pm_map']" position="inside">
         <xpath expr="//page[@name='map']/field[@name='google_map_iframe']" position="move"/>

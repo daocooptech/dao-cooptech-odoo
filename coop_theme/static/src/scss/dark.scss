@@ -139,7 +139,7 @@
 
   // ── Полоса управления ────────────────────────────────────────────────
   .o_control_panel {
-    background-color: var(--coop-white);
+    background-color: transparent;  // без фона и в тёмной (15.11.2026)
     border-color: var(--coop-line);
     color: var(--coop-ink);
   }

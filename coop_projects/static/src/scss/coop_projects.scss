@@ -1199,6 +1199,20 @@
   .o_cell { margin-bottom: 0 !important; }
   .o_wrap_label .o_form_label { font: 500 11.5px/1.3 'Manrope', sans-serif; color: var(--coop-slate); margin: 0; }
   .o_field_widget { width: 100% !important; max-width: 100%; font-size: 13px; }
+  // ФИО менеджера — целиком, переносом, а не «Голубева Мария Алек…».
+  .o_field_many2one_avatar, .o_field_many2one_avatar * { white-space: normal !important; overflow: visible !important; text-overflow: clip !important; }
+}
+// Закладка «в избранное» в шапке — тем же квадратом 30 px, что колёсико
+// (вместо звезды движка, владелец 15.11.2026).
+.o_form_view .o_coop_pm_fav {
+  display: inline-flex; flex: 0 0 auto; width: auto !important;
+  .o_coop_fav {
+    position: static; width: 30px; height: 30px; border-radius: 8px;
+    border: 1px solid var(--coop-line, #e6e6e1); background: var(--coop-white, #fff); box-shadow: none;
+    svg { width: 18px; height: 18px; }
+    &:hover { transform: none; background: var(--coop-surface, #f2f2ee); }
+    &:focus-visible { outline: 2px solid var(--coop-teal); outline-offset: 2px; }
+  }
 }
 .o_form_view .o_coop_pm_gear { display: inline-flex; align-items: center; justify-content: center; min-width: 38px; height: 30px; }
 // Кнопки шапки — по первой строке названия, а не по середине блока
@@ -1379,4 +1393,23 @@ body.o_coop_pm_settings_open .o_form_view .o_coop_pm #coop_pm_settings { display
   .o_coop_rev_sort_text { display: flex; flex-direction: column; gap: 2px; }
   .o_coop_rev_sort_name { font: 600 13px/1.3 'Manrope', sans-serif; }
   .o_coop_rev_sort_hint { font-size: 12px; color: var(--coop-slate); }
+}
+
+// Стадия проекта — в строке навигации справа (владелец 15.11.2026:
+// «стадию проекта … поставить в одну строку с навигацией и выровнять по
+// правому краю»). Панель навигации и форма — разные части движка, поэтому
+// строку состояний поднимаем стилями: точка отсчёта — весь вид формы,
+// `.o_content` её больше не перехватывает. Узкий экран (< 768 px) — на
+// своём месте под путём: в строке пути там места нет.
+@media (min-width: 768px) {
+  .o_form_view:has(.o_coop_pm) {
+    position: relative;
+    > .o_form_view_container > .o_content, .o_content { position: static; }
+    .o_control_panel_breadcrumbs { padding-right: 240px; }
+    .o_form_statusbar {
+      position: absolute !important; top: 8px; right: 16px; z-index: 2;
+      padding: 0 !important; margin: 0; border: 0 !important; background: transparent !important;
+      .o_statusbar_buttons:empty { display: none !important; }
+    }
+  }
 }
