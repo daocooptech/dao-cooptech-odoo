@@ -2064,6 +2064,16 @@ body.o_dark_mode .o_coop_loader_mark {
       flex: 0 0 100%;
     }
 
+    // Кнопка создания — справа в строке пути, как в эталоне (`PageHeader`)
+    // и в каталогах. Движок ставит её первой, перед «←» и путём, и с
+    // путём во всю ширину она оказывалась у левого края (владелец
+    // 14.11.2026: «почему кнопка новый съехала влево, она должна быть
+    // справа»).
+    .o_control_panel_main_buttons {
+      order: 10;
+      margin-left: auto;
+    }
+
     .o_control_panel_actions {
       flex: 0 1 560px !important;
       justify-content: flex-start !important;

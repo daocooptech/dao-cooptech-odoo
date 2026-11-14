@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <!--
+    Кнопка создания на экране задач проекта (владелец 14.11.2026:
+    «переименуй её грамотно»). Движок рисует её своим выпадающим меню
+    шаблонов задач, а подпись «New» в нём зашита строкой: общая подпись
+    раздела (`coop_create_label`, `coop_theme/js/catalog_view.js`) сюда не
+    доходит. Меню заводит только задачи — подпись одна.
+  -->
+  <t t-name="coop_projects.TemplateDropdown" t-inherit="project.TemplateDropdown" t-inherit-mode="extension">
+    <xpath expr="//button[@t-if]" position="replace">
+      <button t-if="!this.state.taskTemplates.length or this.offlinePlugin.isOffline()" type="button"
+              t-att-data-available-offline="this.isNewButtonAvailableOffline"
+              t-att-class="this.props.newButtonClasses" t-att-data-hotkey="this.props.hotkey"
+              t-on-click.stop="this.props.onCreate" data-bounce-button="">Добавить задачу</button>
+    </xpath>
+    <xpath expr="//Dropdown/button" position="replace">
+      <button t-attf-class="{{ this.props.newButtonClasses }} o-dropdown-caret"
+              t-att-data-hotkey="this.props.hotkey" data-bounce-button="">Добавить задачу</button>
+    </xpath>
+    <xpath expr="//DropdownItem[@onSelected='this.props.onCreate']" position="replace">
+      <DropdownItem tag="'button'" class="'o-task-template btn btn-link'" onSelected="this.props.onCreate">
+        Пустая задача
+      </DropdownItem>
+    </xpath>
+  </t>
+</templates>

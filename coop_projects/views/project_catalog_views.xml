@@ -61,7 +61,7 @@
                   </div>
                 </div>
                 <div class="o_coop_tile_act">
-                  <button name="action_view_tasks" type="object"
+                  <button name="action_view_tasks" type="object" context="{'coop_tasks_named': True}"
                           class="btn o_coop_btn o_coop_tile_contribute">Задачи</button>
                 </div>
               </div>
@@ -92,6 +92,21 @@
                decoration-muted="last_update_status in ('on_hold', 'done', 'to_define')"/>
       </list>
     </field>
+  </record>
+
+  <!-- Задачи проекта: кнопка создания — «Добавить задачу», а не «Новое»
+       (владелец 14.11.2026: «переименуй её грамотно»). Подпись читают
+       список и форма (`coop_create_label`, `coop_theme/js/catalog_view.js`);
+       в плитке её даёт шаблон `static/src/xml/task_create_button.xml`.
+       Контекст движка повторён целиком — поле заменяется, а не дополняется. -->
+  <record id="project.act_project_project_2_project_task_all" model="ir.actions.act_window">
+    <field name="context">{
+        'default_project_id': active_id,
+        'show_project_update': True,
+        'search_default_open_tasks': 1,
+        'display_milestone_deadline': True,
+        'coop_create_label': 'Добавить задачу',
+    }</field>
   </record>
 
 </odoo>

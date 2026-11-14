@@ -78,3 +78,17 @@ class ProjectProject(models.Model):
                              deadline_base + [('date', '<', today)])}],
         })
         return blocks
+
+    def action_view_tasks(self):
+        """Экран задач из карточки проекта называется «Задачи».
+
+        Движок называет его именем проекта, а в пути перед ним уже стоит
+        карточка того же проекта — название шло дважды подряд (владелец
+        14.11.2026: «двойное название в пути»). С плитки каталога карточки
+        в пути нет, и там имя проекта остаётся: кнопка передаёт
+        `coop_tasks_named`.
+        """
+        action = super().action_view_tasks()
+        if not self.env.context.get('coop_tasks_named'):
+            action['display_name'] = 'Задачи'
+        return action

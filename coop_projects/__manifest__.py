@@ -48,6 +48,7 @@
             'coop_projects/static/src/xml/offers_review.xml',
             'coop_projects/static/src/js/project_summary.js',
             'coop_projects/static/src/xml/project_summary.xml',
+            'coop_projects/static/src/xml/task_create_button.xml',
         ],
     },
     'installable': True,
