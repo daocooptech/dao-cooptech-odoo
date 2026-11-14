@@ -6,6 +6,14 @@ import { Chatter } from "@mail/chatter/web_portal_project/chatter";
 import { Composer } from "@mail/core/common/composer";
 import { Thread } from "@mail/core/common/thread";
 import { coopIsPlatformModel } from "@coop_theme/js/platform_page";
+import { messageActionsRegistry } from "@mail/core/common/message_actions";
+
+// Пункт меню сообщения «Вперёд» (Forward) — «Поделиться», везде
+// (владелец 15.11.2026). Определение действия в реестре — обычный объект,
+// подпись меняется на месте; что делает пункт, не трогаем.
+if (messageActionsRegistry.contains("forward")) {
+    messageActionsRegistry.get("forward").name = "Поделиться";
+}
 
 // Записи, у которых лента — публичная стена, а не служебная переписка.
 //

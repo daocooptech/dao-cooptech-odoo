@@ -20,13 +20,14 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.1.2',
+    'version': '20.0.1.1.4',
     'license': 'LGPL-3',
     # auth_totp — двухфакторная проверка во вкладке «Безопасность».
     'depends': ['coop_base', 'coop_theme', 'coop_people', 'coop_profile', 'coop_deals',
                 'coop_orgs', 'coop_wallet', 'auth_totp', 'mail'],
     'data': [
         'data/coop_residency_data.xml',
+        'data/coop_notification_data.xml',
         'views/coop_settings_views.xml',
         'views/coop_residency_views.xml',
     ],
