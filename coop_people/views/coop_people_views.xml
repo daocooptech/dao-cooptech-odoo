@@ -53,7 +53,10 @@
                 </div>
 
                 <div class="o_coop_meta">
-                  <span t-if="record.coop_age.raw_value"><field name="coop_age"/> лет · </span>
+                  <!-- «34 года», «41 год», «25 лет» — склонение по числу, а не
+                       всегда «лет» (замечание к PeoplePage, задача 376). -->
+                  <t t-set="coop_n" t-value="record.coop_age.raw_value"/>
+                  <span t-if="coop_n"><t t-out="coop_n"/><t t-if="coop_n % 10 == 1 and coop_n % 100 != 11"> год</t><t t-elif="coop_n % 10 &gt;= 2 and coop_n % 10 &lt;= 4 and (coop_n % 100 &lt; 12 or coop_n % 100 &gt; 14)"> года</t><t t-else=""> лет</t> · </span>
                   <span t-if="record.coop_trust.raw_value">Уровень доверия <field name="coop_trust"/>%</span>
                   <!-- У новичка доверие не «ноль процентов», а «пока не
                        считается»: ноль читался бы как плохая репутация,
