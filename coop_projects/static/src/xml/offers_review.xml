@@ -34,13 +34,24 @@
             <button type="button" t-att-class="{'on': this.state.filter === 'declined'}"
                     t-on-click="() => this.state.filter = 'declined'">Отклонённые</button>
           </div>
-          <label class="o_coop_rev_sort text-muted">Порядок
-            <select t-on-change="(ev) => this.state.sort = ev.target.value">
-              <option value="new" t-att-selected="this.state.sort === 'new'">сначала новые</option>
-              <option value="value" t-att-selected="this.state.sort === 'value'">по оценке</option>
-              <option value="trust" t-att-selected="this.state.sort === 'trust'">по доверию</option>
-            </select>
-          </label>
+          <Dropdown position="'bottom-end'" menuClass="'o_coop_rev_sort_menu'">
+            <button type="button" class="o_coop_rev_sort" t-att-aria-label="'Сортировка: ' + this.sortLabel">
+              <CoopIcon name="'arrows-sort'" size="16"/>
+              <span t-out="this.sortLabel"/>
+              <CoopIcon name="'chevron-down'" size="16"/>
+            </button>
+            <t t-set-slot="content">
+              <DropdownItem t-foreach="this.sortOptions" t-as="opt" t-key="opt.id"
+                            class="'o-dropdown-item-unstyled-button o_coop_rev_sort_item' + (opt.id === this.state.sort ? ' on' : '')"
+                            onSelected="() => this.state.sort = opt.id">
+                <span class="o_coop_rev_sort_text">
+                  <span class="o_coop_rev_sort_name" t-out="opt.label"/>
+                  <span class="o_coop_rev_sort_hint" t-out="opt.hint"/>
+                </span>
+                <CoopIcon t-if="opt.id === this.state.sort" name="'check'" size="16"/>
+              </DropdownItem>
+            </t>
+          </Dropdown>
         </div>
         <div class="o_coop_rev_cards o_coop_offers">
           <div t-foreach="this.offers" t-as="offer" t-key="offer.id"

@@ -9,9 +9,21 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
+import { Dropdown } from "@web/core/dropdown/dropdown";
+import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { CoopIcon } from "@coop_theme/js/icons";
+
+/** Сортировка заявок — кнопкой со списком, без подписи (владелец 14.11.2026). */
+const SORT_OPTIONS = [
+    { id: "new", label: "Новые", hint: "сначала свежие заявки" },
+    { id: "value", label: "Оценка", hint: "сначала с большей оценкой вклада" },
+    { id: "trust", label: "Доверие", hint: "сначала с большим доверием" },
+];
 
 export class CoopOffersReview extends Component {
     static template = "coop_projects.OffersReview";
+    static components = { Dropdown, DropdownItem, CoopIcon };
+    sortOptions = SORT_OPTIONS;
     props = useProps(standardFieldProps);
 
     setup() {
@@ -46,6 +58,10 @@ export class CoopOffersReview extends Component {
             new: list.filter((o) => o.state === "offered").length,
             declined: list.filter((o) => o.state === "declined").length,
         };
+    }
+
+    get sortLabel() {
+        return (SORT_OPTIONS.find((o) => o.id === this.state.sort) || SORT_OPTIONS[0]).label;
     }
 
     get offers() {
