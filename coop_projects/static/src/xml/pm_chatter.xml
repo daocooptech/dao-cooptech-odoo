@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<!-- Переписка проекта: вкладки «Лента / Заметки» вместо трёх кнопок движка
+     (pm_chatter.js). Поиск, вложения и подписчики — справа, как были. -->
+<t t-inherit="mail.Chatter" t-inherit-mode="extension">
+    <xpath expr="//div[hasclass('o-mail-Chatter-topbar')]/div[@t-else='']" position="before">
+        <div t-elif="this.coopPmTabs" class="o_coop_ch_tabs d-flex" role="tablist"
+             t-att-class="{ 'o_notes': this.state.coopTab === 'notes' }">
+            <button type="button" role="tab" class="o_coop_ch_tab"
+                    t-att-class="{ 'o_on': this.state.coopTab !== 'notes' }"
+                    t-att-aria-selected="this.state.coopTab !== 'notes' ? 'true' : 'false'"
+                    t-on-click="() => this.coopSetTab('feed')">
+                Лента <b t-out="this.coopTabCount('feed')"/>
+            </button>
+            <button type="button" role="tab" class="o_coop_ch_tab"
+                    t-att-class="{ 'o_on': this.state.coopTab === 'notes' }"
+                    t-att-aria-selected="this.state.coopTab === 'notes' ? 'true' : 'false'"
+                    t-on-click="() => this.coopSetTab('notes')">
+                <CoopIcon name="'lock'" size="13"/>Заметки <b t-out="this.coopTabCount('notes')"/>
+            </button>
+        </div>
+    </xpath>
+    <xpath expr="//t[@t-if='this.state.composerType']" position="attributes">
+        <attribute name="t-if">this.state.composerType and (!this.coopPmTabs or this.coopPmCanPost)</attribute>
+    </xpath>
+    <!-- Строка «Кому: подписчики / копия» — у проекта её заменяет подсказка
+         «получат N подписчиков» под полем. -->
+    <xpath expr="//Composer[@withMessageFields='true']" position="attributes">
+        <attribute name="withMessageFields">!this.coopPmTabs</attribute>
+    </xpath>
+</t>
+
+<!-- Кто увидит написанное — в строке кнопки, слева от вложений. -->
+<t t-inherit="mail.Composer" t-inherit-mode="extension">
+    <xpath expr="//div[hasclass('o-mail-Composer-footer')]//span[hasclass('flex-grow-1')]" position="before">
+        <span t-if="this.coopPmHint" class="o_coop_ch_hint">
+            <CoopIcon name="this.props.type === 'note' ? 'lock' : 'users'" size="12"/>
+            <t t-out="this.coopPmHint"/>
+        </span>
+    </xpath>
+</t>
+
+</templates>

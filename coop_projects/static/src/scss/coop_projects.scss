@@ -1413,3 +1413,41 @@ body.o_coop_pm_settings_open .o_form_view .o_coop_pm #coop_pm_settings { display
     }
   }
 }
+
+// Переписка проекта — «Лента / Заметки» (pm_chatter.js, образец WorkHeaderD).
+.o-mail-Chatter:has(.o_coop_ch_tabs) {
+  .o-mail-Chatter-topbar { border-bottom: 1px solid var(--coop-line); align-items: flex-end; }
+  .o_coop_ch_tabs { gap: 2px; }
+  .o_coop_ch_tab {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 10px; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px;
+    background: none; font: 500 13px/1.2 var(--font-display, inherit); color: var(--coop-slate);
+    white-space: nowrap;
+    &:hover { color: var(--coop-ink); }
+    &.o_on { border-bottom-color: var(--coop-ink); color: var(--coop-ink); font-weight: 700; }
+    b {
+      padding: 1px 6px; border-radius: 999px; background: var(--coop-surface);
+      font: 600 10.5px/1.3 var(--font-mono, monospace); color: var(--coop-slate);
+    }
+  }
+  .o-mail-Composer { padding-top: 10px !important; }
+  .o-mail-Composer-avatar, .o-mail-Composer-sidebarMain { display: none !important; }
+  // Колонка аватара в сетке поля пустеет — схлопываем её.
+  .o-mail-Composer.d-grid { grid-template-columns: 0 minmax(0, 1fr) !important; }
+  .o-mail-Composer-footer .d-flex.w-100 { flex-wrap: wrap; }
+  .o-mail-Composer-inputContainer { border-radius: 10px; border-color: var(--coop-line-strong) !important; }
+  .o-mail-Composer-footer .d-flex.w-100 > div.pt-1 { order: 3; }
+  .o_coop_ch_hint {
+    order: -1; display: inline-flex; align-items: center; gap: 4px; padding-top: .5rem;
+    font-size: 11px; color: var(--coop-slate); white-space: nowrap;
+    @media (max-width: 575.98px) { flex-basis: 100%; }
+  }
+}
+// Заметка — на тёплом фоне, чтобы не перепутать, куда пишешь.
+.o-mail-Chatter:has(.o_coop_ch_tabs.o_notes) {
+  .o-mail-Composer-inputContainer, .o-mail-Composer-inputContainer .o-mail-Composer-bg {
+    background: var(--coop-gold-tint) !important;
+  }
+  .o-mail-Composer-inputContainer { border-color: rgba(160, 110, 20, .35) !important; }
+  .o_coop_ch_hint { color: var(--coop-gold-text); }
+}

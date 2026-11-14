@@ -19,7 +19,7 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.3.24',
+    'version': '20.0.1.3.25',
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_resources', 'project', 'project_todo', 'hr_timesheet', 'mail'],
     'data': [
@@ -50,6 +50,8 @@
             'coop_projects/static/src/xml/project_summary.xml',
             'coop_projects/static/src/xml/task_create_button.xml',
             'coop_projects/static/src/js/pm_settings_toggle.js',
+            'coop_projects/static/src/js/pm_chatter.js',
+            'coop_projects/static/src/xml/pm_chatter.xml',
         ],
     },
     'installable': True,
