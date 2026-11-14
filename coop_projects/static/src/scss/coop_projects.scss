@@ -1014,6 +1014,26 @@
     dt { font-weight: 500; color: var(--coop-slate); }
     dd { text-align: right; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
   }
+  // Карта — последним блоком и невысокая (WorkHeaderD): 150 px.
+  .o_coop_pm_map iframe { height: 150px !important; width: 100%; border: 0; border-radius: var(--radius-card, 10px); }
+}
+// Шапка рабочей области (WorkHeaderD, задача 449): под названием одна
+// строка «заказчик · менеджер · сроки», значки и подписи вторичным цветом.
+.o_form_view .o_coop_pm_meta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+  margin-top: 4px; font-size: 13px; color: var(--coop-slate);
+  .o_field_widget { width: auto !important; }
+  .o_coop_pm_sep { color: var(--coop-slate-light); }
+}
+.o_form_view .o_coop_pm_gear { display: inline-flex; align-items: center; justify-content: center; min-width: 38px; }
+.o_form_view .oe_title ~ .btn, .o_form_view .o_coop_pm_gear ~ .btn { white-space: nowrap; }
+// Колонки — по ширине листа, а не окна: на широком экране справа стоит
+// переписка, лист сужается вдвое, и «Сводка» сбоку сжимала блоки до слова
+// в строке. Уже 900 px листа сводка встаёт над блоками.
+.o_form_view:has(.o_coop_pm) .o_form_sheet { container-type: inline-size; }
+@container (max-width: 900px) {
+  .o_coop_pm { grid-template-columns: minmax(0, 1fr) !important; }
+  .o_coop_pm .o_coop_pm_side { order: -1; }
 }
 .o_coop_rev {
   display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: var(--space-16, 16px);

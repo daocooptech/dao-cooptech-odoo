@@ -1,39 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-  <!-- Разбор заявок из управления проектом (владелец 14.11.2026: «он
-       должен быть в управлении проектом»). Кнопка среди кнопок-счётчиков
-       формы проекта, только команде сбора, из которого вырос проект; ведёт
-       на тот же канбан заявок, что и страница сбора. -->
+  <!-- Рабочая область «Управления проектом» по образцам дизайн-системы
+       WorkHeaderD (выбран владельцем 28.10.2026) и OffersReviewPage,
+       задача 449. Кусок 1 (14.11.2026): шапка минимальная, кнопок-счётчиков
+       нет (показатели — в «Сводке»), вкладок нет — отдельные блоки.
+
+       Приоритет 99: вид применяется последним. Он переносит содержимое
+       вкладок в блоки, и вид, применённый после него, не нашёл бы своих
+       целей внутри вкладок и уронил бы форму. -->
   <record id="view_project_project_form_offers" model="ir.ui.view">
-    <field name="name">project.project.form.coop.offers</field>
+    <field name="name">project.project.form.coop.workspace</field>
     <field name="model">project.project</field>
     <field name="inherit_id" ref="project.edit_project"/>
+    <field name="priority">99</field>
     <field name="arch" type="xml">
-      <!-- Первой в ряду: остальные кнопки уходят под «Ещё», а разбор
-           заявок должен быть на виду. -->
-      <xpath expr="//div[@name='button_box']/button[@name='action_view_tasks']"
-             position="before">
-        <field name="coop_offer_can" invisible="1"/>
-        <button name="action_coop_open_offers" type="object"
-                class="oe_stat_button" icon="fa-inbox"
-                invisible="not coop_offer_can">
-          <div class="o_stat_info">
-            <span class="o_stat_value">
-              <field name="coop_offer_new" nolabel="1"/>
-            </span>
-            <span class="o_stat_text">Заявки на вклады</span>
-          </div>
-        </button>
+
+      <!-- Кнопки-счётчики движка переносились в четыре строки и занимали
+           пол-экрана; в образце их нет — задачи, вехи, статус, табели
+           собраны в «Сводке» справа. -->
+      <xpath expr="//div[@name='button_box']" position="attributes">
+        <attribute name="invisible">1</attribute>
       </xpath>
 
-      <!-- Рабочее поле «Управления проектом» по образцу 395: блоки на
-           одной странице, как на кадре, — заявки на потребности, под ними
-           аналитика проекта с четырьмя переключателями. Команде сбора. -->
-      <xpath expr="//notebook" position="before">
-        <div class="o_coop_pm" invisible="not coop_offer_can">
+      <!-- Шапка: название, «В избранное», «Настройки проекта», главная
+           «Задача»; под названием — строка «заказчик · менеджер · сроки». -->
+      <xpath expr="//field[@name='is_favorite']" position="after">
+        <a href="#coop_pm_settings" class="btn btn-secondary o_coop_pm_gear ms-2"
+           title="Настройки проекта" aria-label="Настройки проекта">
+          <i class="oi" data-icon="settings"/>
+        </a>
+        <button name="action_coop_new_task" type="object" class="btn btn-primary ms-2"
+                icon="fa-plus" string="Задача"/>
+      </xpath>
+      <xpath expr="//div[hasclass('oe_title')]" position="inside">
+        <div class="o_coop_pm_meta">
+          <field name="partner_id" readonly="1" nolabel="1" invisible="not partner_id"
+                 options="{'no_open': True}"/>
+          <span class="o_coop_pm_sep" invisible="not partner_id">·</span>
+          <field name="user_id" readonly="1" nolabel="1" widget="many2one_avatar_user"
+                 invisible="not user_id"/>
+          <span class="o_coop_pm_sep" invisible="not user_id or not date_start">·</span>
+          <field name="date_start" readonly="1" nolabel="1" widget="daterange"
+                 options='{"end_date_field": "date", "always_range": True}'
+                 invisible="not date_start"/>
+        </div>
+      </xpath>
+
+      <!-- Блоки на месте вкладок. -->
+      <xpath expr="//sheet/notebook" position="before">
+        <div class="o_coop_pm">
           <div class="o_coop_pm_main">
             <div class="o_coop_pm_block">
+              <h3 class="o_coop_pm_title">Описание</h3>
+              <div id="coop_pm_description"/>
+            </div>
+            <div class="o_coop_pm_block" invisible="not coop_offer_can">
+              <field name="coop_offer_can" invisible="1"/>
               <h3 class="o_coop_pm_title">Заявки на потребности</h3>
               <p class="text-muted mb-2">
                 Утверждаете вы — инициатор. У потребности может быть свой
@@ -43,7 +66,7 @@
               </p>
               <field name="coop_offers_json" nolabel="1" widget="coop_offers_review"/>
             </div>
-            <div class="o_coop_pm_block">
+            <div class="o_coop_pm_block" invisible="not coop_offer_can">
               <h3 class="o_coop_pm_title">Аналитика проекта</h3>
               <notebook>
                 <page name="coop_an_money" string="Финансовые вклады"
@@ -64,6 +87,18 @@
                 </page>
               </notebook>
             </div>
+            <div class="o_coop_pm_block">
+              <h3 class="o_coop_pm_title">Сведения</h3>
+              <div id="coop_pm_facts"/>
+            </div>
+            <div class="o_coop_pm_block" id="coop_pm_settings">
+              <h3 class="o_coop_pm_title">Настройки проекта</h3>
+              <div id="coop_pm_settings_body"/>
+            </div>
+            <div class="o_coop_pm_block o_coop_pm_map" invisible="not google_map_iframe">
+              <h3 class="o_coop_pm_title">Карта</h3>
+              <div id="coop_pm_map"/>
+            </div>
           </div>
           <div class="o_coop_pm_side">
             <div class="o_coop_pm_block">
@@ -72,6 +107,31 @@
             </div>
           </div>
         </div>
+      </xpath>
+
+      <xpath expr="//div[@id='coop_pm_description']" position="inside">
+        <xpath expr="//page[@name='description']/field[@name='description']" position="move"/>
+      </xpath>
+      <xpath expr="//div[@id='coop_pm_facts']" position="inside">
+        <xpath expr="//sheet/group" position="move"/>
+      </xpath>
+      <xpath expr="//div[@id='coop_pm_settings_body']" position="inside">
+        <xpath expr="//page[@name='settings']/group" position="move"/>
+      </xpath>
+      <xpath expr="//div[@id='coop_pm_settings_body']" position="inside">
+        <xpath expr="//page[@name='settings']/group" position="move"/>
+      </xpath>
+      <xpath expr="//div[@id='coop_pm_settings_body']" position="inside">
+        <xpath expr="//page[@name='settings']/group" position="move"/>
+      </xpath>
+      <xpath expr="//div[@id='coop_pm_map']" position="inside">
+        <xpath expr="//page[@name='map']/field[@name='google_map_iframe']" position="move"/>
+      </xpath>
+
+      <!-- Вкладки опустели; «Выставление счетов» убрано — счета будут в
+           «Сводке» (кусок 2). -->
+      <xpath expr="//sheet/notebook" position="attributes">
+        <attribute name="invisible">1</attribute>
       </xpath>
     </field>
   </record>

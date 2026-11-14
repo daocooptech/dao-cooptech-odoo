@@ -164,6 +164,20 @@ class ProjectProject(models.Model):
             raise UserError(_('Заявки разбирает команда проекта.'))
         return source.action_open_offers()
 
+    def action_coop_new_task(self):
+        """Главная кнопка шапки «Задача» (образец WorkHeaderD, задача 449):
+        новая задача этого проекта."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Новая задача'),
+            'res_model': 'project.task',
+            'view_mode': 'form',
+            'views': [(False, 'form')],
+            'target': 'current',
+            'context': {'default_project_id': self.id},
+        }
+
     # Общие этапы задач: xml-id в coop_projects -> название.
     _COOP_TASK_STAGES = [
         ('task_stage_idea', 'Идея'),
