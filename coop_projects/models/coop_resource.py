@@ -205,7 +205,8 @@ class CoopResource(models.Model):
         partners = self.project_id.partner_id
         if self.need_manager_id:
             partners |= self.need_manager_id
-        return partners
+        # Менеджер проекта в управлении — он и только он (15.11.2026).
+        return self.project_id[:1]._coop_need_deciders(partners)
 
     @api.constrains('project_id', 'listing_type')
     def _check_project_need(self):

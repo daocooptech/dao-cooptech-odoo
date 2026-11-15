@@ -52,15 +52,43 @@ class ProjectProject(models.Model):
         'coop.project', string='Карточка проекта', compute='_compute_coop_offers')
 
     @api.depends('coop_project_id', 'coop_project_id.new_offer_count',
-                 'coop_project_id.coop_is_team')
+                 'coop_project_id.coop_is_team', 'user_id')
+    @api.depends_context('uid')
     def _compute_coop_offers(self):
-        """Заявки на вклады — кнопка в управлении проектом тем, кто вправе
-        их разбирать: команде сбора, из которого вырос проект."""
+        """Заявки на потребности разбирает менеджер проекта, и только он
+        (владелец 15.11.2026). Менеджера нет — как прежде, команда сбора."""
         for project in self:
-            sources = project.coop_project_id.filtered('coop_is_team')
+            if project.user_id:
+                sources = project.coop_project_id if (
+                    project.user_id == self.env.user) else project.coop_project_id.browse()
+            else:
+                sources = project.coop_project_id.filtered('coop_is_team')
             project.coop_offer_can = bool(sources)
             project.coop_offer_new = sum(sources.mapped('new_offer_count'))
             project.coop_card_id = project.coop_project_id[:1]
+
+    # «Сведения» и «Настройки проекта» правит только менеджер проекта
+    # (владелец 15.11.2026). Менеджера нет — как прежде, у кого есть права.
+    coop_is_manager = fields.Boolean(compute='_compute_coop_is_manager')
+    _COOP_FACTS = ('partner_id', 'partner_phone', 'partner_email', 'user_id',
+                   'date_start', 'date', 'tag_ids')
+
+    @api.depends('user_id')
+    @api.depends_context('uid')
+    def _compute_coop_is_manager(self):
+        for project in self:
+            project.coop_is_manager = (not project.user_id
+                                       or project.user_id == self.env.user)
+
+    def write(self, vals):
+        if not self.env.su and set(vals) & set(self._COOP_FACTS):
+            alien = self.filtered(lambda p: p.user_id and p.user_id != self.env.user)
+            if alien:
+                raise UserError(_(
+                    'Сведения проекта «%(project)s» меняет только менеджер '
+                    'проекта — %(manager)s.',
+                    project=alien[0].name, manager=alien[0].user_id.name))
+        return super().write(vals)
 
     # Фото и видео — с карточки сбора, той же каруселью, что на ней
     # (№ 455, владелец 15.11.2026: «блок описание есть но даже описания
@@ -182,7 +210,7 @@ class ProjectProject(models.Model):
                     'share': c.share_percent,
                 })
             project.coop_offers_json = {'needs': out_needs, 'offers': out_offers,
-                                        'can_decide': bool(team)}
+                                        'can_decide': project.coop_offer_can}
 
     # Вид потребности над её названием и значок в списке слева
     # (OffersReviewPage): подписи — как в образце, не «Материальный».

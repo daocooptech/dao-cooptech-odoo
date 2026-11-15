@@ -737,6 +737,21 @@ class CoopProject(models.Model):
                     ('project_id', '=', record.id),
                     ('need_manager_id', '=', user.partner_id.id)], limit=1))
 
+    def _coop_need_deciders(self, fallback):
+        """Кто утверждает заявки на потребности проекта.
+
+        Владелец 15.11.2026: «сделай что бы только менеджер проекта мог
+        редактировать сведения, утверждать заявки на потребности» и
+        «инициатор = менеджер проекта»: запуск ставит менеджером самого
+        инициатора, за организацию — её представителя (`project_id.user_id`).
+        Он и только он; ответственный за потребность больше не утверждает.
+        До запуска проекта в управлении нет — тогда как прежде (`fallback`:
+        инициатор и ответственный за потребность)."""
+        if not self:
+            return fallback
+        self.ensure_one()
+        return self.project_id.user_id.partner_id or fallback
+
     @api.depends_context('uid')
     @api.depends('partner_id', 'contribution_ids.state')
     def _compute_coop_is_team(self):
@@ -2011,17 +2026,7 @@ class CoopProjectContribution(models.Model):
         """
         self._check_members_only()
         for record in self:
-            deciders = record.project_id.partner_id
-            if record.need_id:
-                deciders = record.need_id._need_deciders()
-            allowed = (self.env.user.partner_id in deciders
-                       or any(self.env.user.coop_has_power('deal', partner)
-                              for partner in deciders))
-            if not allowed:
-                raise UserError(_(
-                    'Утверждать предложения по проекту «%s» может его '
-                    'инициатор, ответственный за потребность или тот, кому '
-                    'организация поручила сделки.') % record.project_id.name)
+            record._check_can_decide()
             record.write({
                 'state': 'accepted',
                 'accepted_on': fields.Date.context_today(record),
@@ -2072,7 +2077,39 @@ class CoopProjectContribution(models.Model):
             what=self.name, who=self.partner_id.name,
             count=len(others)))
 
+    def _check_can_decide(self):
+        """Вправе ли текущий пользователь принять или отклонить вклад.
+
+        Заявку на потребность после запуска решает только менеджер проекта
+        в управлении (владелец 15.11.2026); до запуска и вклад без
+        потребности — инициатор, ответственный за потребность или тот, кому
+        организация поручила сделки."""
+        self.ensure_one()
+        if self.env.su:
+            return
+        deciders = self.project_id.partner_id
+        if self.need_id:
+            deciders = self.need_id._need_deciders()
+        user = self.env.user
+        if user.partner_id in deciders or any(
+                user.coop_has_power('deal', partner) for partner in deciders):
+            return
+        if self.need_id and self.project_id.project_id.user_id:
+            raise UserError(_(
+                'Решать по заявкам на потребности проекта «%(project)s» '
+                'может только инициатор — менеджер проекта, %(manager)s.',
+                project=self.project_id.name,
+                manager=self.project_id.project_id.user_id.name))
+        raise UserError(_(
+            'Утверждать предложения по проекту «%s» может его '
+            'инициатор, ответственный за потребность или тот, кому '
+            'организация поручила сделки.') % self.project_id.name)
+
     def action_decline(self):
+        # Отклонить заявку на потребность — такое же решение, как принять:
+        # решает тот же человек (раньше проверки не было вовсе).
+        for record in self.filtered('need_id'):
+            record._check_can_decide()
         self.write({'state': 'declined'})
         for record in self:
             # Отказ извещают так же, как принятие: не зная о нём,

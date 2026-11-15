@@ -59,7 +59,10 @@ class CoopVacancy(models.Model):
         partners = self.coop_project_id.partner_id
         if self.need_manager_id:
             partners |= self.need_manager_id
-        return partners
+        if not self.coop_project_id:
+            return partners
+        # Менеджер проекта в управлении — он и только он (15.11.2026).
+        return self.coop_project_id._coop_need_deciders(partners)
 
     @api.model_create_multi
     def create(self, vals_list):

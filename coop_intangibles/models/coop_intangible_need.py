@@ -103,7 +103,8 @@ class CoopIntangibleNeed(models.Model):
         """Кто вправе закрыть: ответственный за строку и инициатор проекта."""
         self.ensure_one()
         deciders = self.manager_id | self.project_id.partner_id
-        return deciders
+        # Менеджер проекта в управлении — он и только он (15.11.2026).
+        return self.project_id[:1]._coop_need_deciders(deciders)
 
 
 class CoopProjectIntangible(models.Model):
