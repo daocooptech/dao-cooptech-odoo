@@ -1082,9 +1082,7 @@ export class CoopSidebar extends Component {
      * у «Сообщений» подразделов нет.
      */
     subsFor(item) {
-        // `nosub` — пункт внутри чужого приложения, чьи подразделы уже
-        // выезжают у своего пункта (coop_admin, «Участники узла»).
-        if (!item.actionId || item.nosub) {
+        if (!item.actionId) {
             return [];
         }
         const own = this.menus.getAll().find((menu) => menu.actionID === item.actionId);
