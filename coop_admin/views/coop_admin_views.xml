@@ -79,4 +79,14 @@
     </field>
   </record>
 
+  <!-- «Участники узла» — подраздел «Настроек узла», сразу после «Общих
+       настроек» (владелец 15.11.2026: «участники узла убери во внутрь
+       настроек узла»). Отдельного пункта в меню администратора больше нет
+       (`models/coop_sidebar_item.py`). Порядок 0, как у «Общих настроек»:
+       при равном порядке встаёт после них, перед «Пользователями и
+       компаниями». -->
+  <menuitem id="menu_coop_node_participants" name="Участники узла"
+            parent="base.menu_administration" action="base.action_res_users"
+            sequence="0" groups="base.group_erp_manager"/>
+
 </odoo>
