@@ -67,4 +67,12 @@
     </xpath>
   </t>
 
+  <!-- Справа от «Отправить» движок пишет «или нажмите CTRL + Enter».
+       Владелец 15.11: «справа появляется подсказка или нажмите контрл +
+       ввод, надо убрать её» — снята у всех полей ввода: лента проекта,
+       стены, переписка. Сочетание клавиш работает, как работало. -->
+  <t t-name="coop_theme.ComposerNoKeybindHint" t-inherit="mail.Composer" t-inherit-mode="extension">
+    <xpath expr="//span[@t-out='this.OR_PRESS_SEND_KEYBIND']" position="replace"/>
+  </t>
+
 </templates>
