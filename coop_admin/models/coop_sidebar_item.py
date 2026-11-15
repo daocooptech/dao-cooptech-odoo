@@ -29,6 +29,13 @@ ADMIN_ITEMS = [
 ]
 
 
+# Пункты без выезда подразделов у свёрнутого меню. «Участники узла» —
+# экран внутри приложения «Настройки», и выезд показывал те же подразделы,
+# что у «Настроек узла»: владелец 15.11.2026 — «почему два раза настройки
+# узла». Подразделы остаются у «Настроек узла».
+ADMIN_NO_FLY = {'Участники узла'}
+
+
 class CoopSidebarItem(models.Model):
     _inherit = 'coop.sidebar.item'
 
@@ -54,5 +61,6 @@ class CoopSidebarItem(models.Model):
                 'icon': icon,
                 'actionId': action.id,
                 'section': 'admin',
+                'nosub': name in ADMIN_NO_FLY,
             })
         return items
