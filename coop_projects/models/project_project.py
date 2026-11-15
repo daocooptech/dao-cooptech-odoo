@@ -463,9 +463,12 @@ class ProjectProject(models.Model):
         """
         kwargs['notify_skip_followers'] = True
         recipients = super()._notify_get_recipients(message, **kwargs)
+        # Писем из ленты нет вовсе: адресат без учётной записи (заказчик-
+        # организация, которого подставляло развёрнутое окно движка) уведомить
+        # во «Входящие» нельзя, а письмо у людей платформы без почты падает.
+        recipients = [r for r in recipients if r.get('uid') and not r.get('ushare')]
         for rdata in recipients:
-            if rdata.get('uid') and not rdata.get('ushare'):
-                rdata['notif'] = 'inbox'
+            rdata['notif'] = 'inbox'
         return recipients
 
 

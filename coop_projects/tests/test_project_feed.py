@@ -26,6 +26,11 @@ class TestProjectFeed(TransactionCase):
         message = self._post()
         self.assertFalse(message.notification_ids)
 
+    def test_partner_without_user_gets_no_mail(self):
+        customer = self.env['res.partner'].create({'name': 'Заказчик без учётной записи'})
+        message = self._post(partner_ids=customer.ids)
+        self.assertFalse(message.notification_ids)
+
     def test_mention_goes_to_inbox(self):
         message = self._post(partner_ids=self.mentioned.partner_id.ids)
         self.assertEqual(message.notification_ids.res_partner_id, self.mentioned.partner_id)

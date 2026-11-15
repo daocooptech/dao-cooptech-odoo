@@ -5,6 +5,7 @@ import { Chatter } from "@mail/chatter/web_portal_project/chatter";
 import { Composer } from "@mail/core/common/composer";
 import { Thread } from "@mail/core/common/thread";
 import { CoopIcon } from "@coop_theme/js/icons";
+import { composerActionsRegistry } from "@mail/core/common/composer_actions";
 
 /**
  * Переписка «Управления проектом» — две вкладки, «Лента» и «Заметки»
@@ -99,6 +100,22 @@ patch(Thread.prototype, {
     },
 });
 
+/**
+ * У поля ленты проекта нет «Развернуть» и «Готовых ответов» (владелец
+ * 15.11.2026). Развёрнутое окно движка само подставляло в адресаты
+ * заказчика проекта и слало ему письмо — мимо правила «уведомление —
+ * только отмеченным через @».
+ */
+for (const id of ["open-full-composer", "add-canned-response"]) {
+    if (composerActionsRegistry.contains(id)) {
+        const action = composerActionsRegistry.get(id);
+        const condition = action.condition;
+        action.condition = (params) =>
+            params.composer?.targetThread?.model !== PM_MODEL &&
+            (typeof condition === "function" ? condition(params) : condition ?? true);
+    }
+}
+
 patch(Composer, {
     components: { ...Composer.components, CoopIcon },
 });
@@ -130,12 +147,8 @@ patch(Composer.prototype, {
         if (!this.coopPm) {
             return "";
         }
-        if (this.props.type === "note") {
-            return "видят только участники проекта";
-        }
-        // Пост остаётся в ленте, рассылки подписчикам нет (владелец 15.11,
-        // `project_project._notify_get_recipients`): уведомление — только
-        // отмеченным через @.
-        return "уведомление получат только отмеченные через @";
+        // У ленты подсказки нет (владелец 15.11.2026: «убери пояснение, кто
+        // получит уведомление»); у заметки — кто её видит, как в образце.
+        return this.props.type === "note" ? "видят только участники проекта" : "";
     },
 });
