@@ -272,8 +272,44 @@ patch(Breadcrumbs.prototype, {
      * дальше как повезёт: пустой экран или петля перерисовки. Кнопка
      * возврата не стоит такой цены — не сосчиталась, значит её нет.
      */
+    /**
+     * Запись, у которой есть своя карточка-витрина (`coop_card_id`): проект
+     * в управлении, выросший из сбора вкладов. «Назад» ведёт на карточку,
+     * а не в каталог управления (владелец 15.11.2026, № 455: «кнопка назад
+     * ведёт в каталог проектов в модуле управление проектами … даже не
+     * так, на карточку проекта»). Пришли с самой карточки — обычный
+     * возврат к ней по следу.
+     */
+    get coopCardBack() {
+        if (!this.coopIsRecord) {
+            return null;
+        }
+        const root = this.env.model?.root;
+        const field = root?.fields?.coop_card_id;
+        const value = field && root.data?.coop_card_id;
+        const id = Array.isArray(value) ? value[0] : value?.id;
+        if (!id) {
+            return null;
+        }
+        // Скрытое поле движок читает без названия — тогда название самой
+        // записи: проект в управлении назван так же, как его сбор.
+        const name =
+            (Array.isArray(value) ? value[1] : value.display_name) ||
+            root.data.display_name ||
+            root.data.name ||
+            "";
+        if (this.coopParent && this.coopParent.name === name) {
+            return null;
+        }
+        return { model: field.relation, id, name };
+    },
+
     get coopBack() {
         try {
+            const card = this.coopCardBack;
+            if (card) {
+                return { label: card.name, title: `Назад: ${card.name}` };
+            }
             const parent = this.coopParent;
             if (parent) {
                 // «Я инициатор» и «Я участвую» — вкладки раздела «Проекты», а
@@ -297,6 +333,21 @@ patch(Breadcrumbs.prototype, {
     },
 
     async coopGoBack() {
+        const card = this.coopCardBack;
+        if (card) {
+            // Со сбросом следа: карточка — не вглубь, а наверх, и её
+            // собственный «Назад» ведёт в каталог её раздела.
+            await this.coopActionService.doAction(
+                {
+                    type: "ir.actions.act_window",
+                    res_model: card.model,
+                    res_id: card.id,
+                    views: [[false, "form"]],
+                },
+                { clearBreadcrumbs: true }
+            );
+            return;
+        }
         const parent = this.coopParent;
         if (parent) {
             try {

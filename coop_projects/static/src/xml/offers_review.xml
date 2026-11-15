@@ -110,10 +110,12 @@
                         t-on-click="() => this.write(offer)">
                   <CoopIcon name="'message-circle'" size="14"/> Написать
                 </button>
-                <button type="button" class="btn btn-secondary btn-sm"
-                        t-on-click="() => this.decline(offer)">Отклонить</button>
-                <button type="button" class="btn btn-primary btn-sm"
-                        t-on-click="() => this.accept(offer)">Принять</button>
+                <t t-if="this.data.can_decide">
+                  <button type="button" class="btn btn-secondary btn-sm"
+                          t-on-click="() => this.decline(offer)">Отклонить</button>
+                  <button type="button" class="btn btn-primary btn-sm"
+                          t-on-click="() => this.accept(offer)">Принять</button>
+                </t>
               </div>
               <span class="o_coop_offer_badge ok" t-elif="offer.state === 'accepted'">
                 <CoopIcon name="'circle-check'" size="14"/>

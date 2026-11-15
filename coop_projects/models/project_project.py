@@ -43,8 +43,15 @@ class ProjectProject(models.Model):
         string='Новых заявок', compute='_compute_coop_offers')
     coop_offer_can = fields.Boolean(
         string='Разбирает заявки', compute='_compute_coop_offers')
+    # Карточка сбора, из которого вырос проект: «Назад» со страницы
+    # управления ведёт на неё (владелец 15.11.2026, № 455: «кнопка назад
+    # ведёт в каталог проектов в модуле управление проектами … надо на
+    # карточку проекта»), и по ней же блоки «Заявки» и «Аналитика» видны
+    # каждому, кто открыл проект, а не одной команде.
+    coop_card_id = fields.Many2one(
+        'coop.project', string='Карточка проекта', compute='_compute_coop_offers')
 
-    @api.depends('coop_project_id.new_offer_count',
+    @api.depends('coop_project_id', 'coop_project_id.new_offer_count',
                  'coop_project_id.coop_is_team')
     def _compute_coop_offers(self):
         """Заявки на вклады — кнопка в управлении проектом тем, кто вправе
@@ -53,6 +60,7 @@ class ProjectProject(models.Model):
             sources = project.coop_project_id.filtered('coop_is_team')
             project.coop_offer_can = bool(sources)
             project.coop_offer_new = sum(sources.mapped('new_offer_count'))
+            project.coop_card_id = project.coop_project_id[:1]
 
     coop_offers_json = fields.Json(
         string='Заявки на потребности', compute='_compute_coop_offers_json')
@@ -90,7 +98,9 @@ class ProjectProject(models.Model):
         kinds = dict(contribution._fields['kind']._description_selection(self.env))
         forms = dict(contribution._fields['labour_form']._description_selection(self.env))
         for project in self:
-            source = project.coop_project_id.filtered('coop_is_team')[:1]
+            # Видят все, кто открыл проект (№ 455); разбирает — команда.
+            team = project.coop_project_id.filtered('coop_is_team')[:1]
+            source = team or project.coop_project_id[:1]
             if not source:
                 project.coop_offers_json = False
                 continue
@@ -153,7 +163,8 @@ class ProjectProject(models.Model):
                     'state': c.state,
                     'share': c.share_percent,
                 })
-            project.coop_offers_json = {'needs': out_needs, 'offers': out_offers}
+            project.coop_offers_json = {'needs': out_needs, 'offers': out_offers,
+                                        'can_decide': bool(team)}
 
     # Вид потребности над её названием и значок в списке слева
     # (OffersReviewPage): подписи — как в образце, не «Материальный».
