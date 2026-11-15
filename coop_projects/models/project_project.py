@@ -62,6 +62,24 @@ class ProjectProject(models.Model):
             project.coop_offer_new = sum(sources.mapped('new_offer_count'))
             project.coop_card_id = project.coop_project_id[:1]
 
+    # Фото и видео — с карточки сбора, той же каруселью, что на ней
+    # (№ 455, владелец 15.11.2026: «блок описание есть но даже описания
+    # нет, фото фото и тд»). Только смотреть: добавляют их на карточке.
+    coop_media_data = fields.Json(
+        string='Фото и видео', compute='_compute_coop_media_data')
+
+    @api.depends('coop_project_id')
+    @api.depends_context('uid')
+    def _compute_coop_media_data(self):
+        for project in self:
+            card = project.coop_project_id[:1]
+            data = dict(card.coop_media_data or {}) if card else {}
+            if not (data.get('photos') or data.get('videos')):
+                project.coop_media_data = False
+                continue
+            data['can_add'] = False
+            project.coop_media_data = data
+
     coop_offers_json = fields.Json(
         string='Заявки на потребности', compute='_compute_coop_offers_json')
     coop_summary = fields.Json(

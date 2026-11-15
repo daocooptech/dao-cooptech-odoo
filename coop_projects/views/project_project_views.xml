@@ -51,7 +51,13 @@
           <div class="o_coop_pm_main">
             <div class="o_coop_pm_block">
               <h3 class="o_coop_pm_title">Описание</h3>
-              <div id="coop_pm_description"/>
+              <!-- Фото и видео карточки сбора — как на ней (№ 455). -->
+              <div class="o_coop_pm_desc">
+                <div class="coop-gallery o_coop_pm_media" invisible="not coop_media_data">
+                  <field name="coop_media_data" widget="coop_media" nolabel="1" readonly="1"/>
+                </div>
+                <div id="coop_pm_description"/>
+              </div>
             </div>
             <!-- Видны всем, кто открыл проект, выросший из сбора (№ 455);
                  «Принять» и «Отклонить» — только команде (решение 287). -->
@@ -151,6 +157,13 @@
       </xpath>
       <xpath expr="//div[@id='coop_pm_facts']//field[@name='user_id']" position="attributes">
         <attribute name="readonly">1</attribute>
+      </xpath>
+      <!-- Заказчик движка — поле выбора со значком человека — повторял
+           наш «Заказчик» с лого второй строкой (владелец 15.11.2026,
+           № 455: «у заказчика поплыла верстка с лого и их 2»). Менять
+           заказчика — в «Настройках проекта». -->
+      <xpath expr="//div[@id='coop_pm_facts']//field[@name='partner_id'][@widget='res_partner_many2one']" position="attributes">
+        <attribute name="invisible">1</attribute>
       </xpath>
       <xpath expr="//div[@id='coop_pm_settings_body']" position="inside">
         <group string="Менеджер и теги">
