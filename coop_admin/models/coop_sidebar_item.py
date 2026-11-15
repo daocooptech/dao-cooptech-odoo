@@ -4,16 +4,20 @@ from odoo import api, models
 # Разделы, которые появляются во включённом режиме. Они не хранятся в
 # меню участника: полномочия — состояние, а не подписка, и меню не должно
 # помнить их между включениями. Выключил переключатель — пунктов нет.
+# Значки — контуры Tabler из `coop_theme/static/src/js/icons.js`, каждый не
+# занят другим пунктом меню (владелец 15.11.2026, № 456: в режиме
+# администратора вместо значков стоял текст — имена Material движок 20
+# шрифтом больше не рисует).
 ADMIN_ITEMS = [
-    ('Полномочия', 'security', 'coop_admin.action_coop_admin_grant'),
-    ('Участники узла', 'group', 'base.action_res_users'),
+    ('Полномочия', 'shield-check', 'coop_admin.action_coop_admin_grant'),
+    ('Участники узла', 'address-book', 'base.action_res_users'),
     # Сводный реестр членств по всей платформе: кто, где, на каком
     # основании, с какими полномочиями. Состав каждой организации виден
     # на её странице, а этот экран — взгляд узла целиком, и место ему
     # здесь. Решение владельца 16 сентября 2026.
-    ('Членство', 'badge', 'coop_base.action_coop_membership'),
-    ('Настройки узла', 'settings', 'base_setup.action_general_configuration'),
-    ('Модели и поля', 'database', 'base.action_model_model'),
+    ('Членство', 'id-badge-2', 'coop_base.action_coop_membership'),
+    ('Настройки узла', 'server', 'base_setup.action_general_configuration'),
+    ('Модели и поля', 'table', 'base.action_model_model'),
     ('Журнал действий', 'history', 'base.action_ir_logging'),
     # Справочники узла — правовые формы, специализации, сферы
     # деятельности, рубрики ресурсов, способы передачи. Пункт ведёт на
@@ -21,7 +25,7 @@ ADMIN_ITEMS = [
     # (`coop_base.menu_coop_reference_root`). Ссылка мягкая: `env.ref`
     # ниже с `raise_if_not_found=False`, и без `coop_orgs` пункт просто
     # не появится.
-    ('Справочники', 'book', 'coop_orgs.action_coop_legal_form'),
+    ('Справочники', 'list-details', 'coop_orgs.action_coop_legal_form'),
 ]
 
 

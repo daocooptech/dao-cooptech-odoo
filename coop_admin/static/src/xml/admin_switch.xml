@@ -36,12 +36,21 @@
       <t t-if="this.state.admin.length">
         <div class="o_coop_ext_title o_coop_admin_title">Администрирование</div>
         <nav aria-label="Администрирование">
+          <!-- Как пункты расширений: контур Tabler и подпись, которую
+               свёрнутое меню прячет и показывает всплывающей. Шрифтовой
+               `oi` в Odoo 20 пуст, а подпись без `o_coop_nav_label`
+               оставалась в узкой колонке обрезанным текстом
+               (владелец 15.11.2026, № 456). -->
           <a t-foreach="this.state.admin" t-as="item" t-key="item.label"
              href="#" class="o_coop_nav_item"
              t-att-class="{ 'active': this.isActive(item) }"
+             t-att-aria-label="item.label"
+             t-att-aria-current="this.isActive(item) ? 'page' : undefined"
+             t-on-mouseenter="(ev) => this.showFly(item, ev)"
+             t-on-focus="(ev) => this.showFly(item, ev)"
              t-on-click.prevent="() => this.open(item)">
-            <i class="oi oi-fw" t-att-data-icon="item.icon" role="img" aria-hidden="true"/>
-            <span t-out="item.label"/>
+            <CoopIcon name="item.icon" size="18"/>
+            <span class="o_coop_nav_label" t-out="item.label"/>
           </a>
         </nav>
       </t>
