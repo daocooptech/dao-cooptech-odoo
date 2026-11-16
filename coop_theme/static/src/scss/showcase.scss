@@ -46,6 +46,23 @@
   .o_form_statusbar {
     max-width: var(--coop-content-max);
   }
+  // Лист, полоса хода и лента — одной колонкой по центру (владелец
+  // 16–17.11.2026, № 455: «центровать рабочее поле везде»). Подложку
+  // центрует общее правило формы (`shell.scss`), но она шире витрины
+  // (1400 против 1214), и без этого лист стоял бы в ней со сдвигом влево.
+  // У ленты своё поле 16 с каждой стороны — её края совпадают с листом.
+  // На телефоне не трогаем: там лист выведен к краям отрицательными полями.
+  @media (min-width: 768px) {
+    .o_form_sheet,
+    .o_form_statusbar {
+      width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .o_form_renderer > .o-mail-Form-chatter:not(.o-aside) {
+      max-width: calc(var(--coop-content-max) + 2 * var(--formView-sheetBg-padding-x, 16px));
+    }
+  }
 
   .o_field_widget {
     width: auto;

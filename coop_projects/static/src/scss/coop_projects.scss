@@ -1159,28 +1159,7 @@
   white-space: nowrap;
 }
 
-// Карточка сбора — по центру рабочей области (владелец 16.11.2026, № 455:
-// «рабочее поле надо сделать по центру, я не просил его смещать влево»).
-// Движок прижимает подложку листа влево (`form_controller.scss`:
-// `max-width: 1400px; margin-right: auto`), и на 1920 лист в 1214 точек
-// стоял у левого края с пустыми 395 справа, а лента под ним шла во всю
-// ширину. Подложка — во всю ширину, лист, полоса хода и лента — одной
-// колонкой `--coop-content-max` по центру; у ленты своё поле 16 с каждой
-// стороны, поэтому её края совпадают с листом. На телефоне не трогаем:
-// там движок выводит лист к краям экрана отрицательными полями.
-@media (min-width: 768px) {
-  .o_form_view.o_coop_show.o_coop_wall_form {
-    .o_form_sheet_bg { max-width: none; }
-    .o_form_sheet,
-    .o_form_statusbar { width: 100%; margin-left: auto; margin-right: auto; }
-    .o-mail-Form-chatter:not(.o-aside) {
-      width: 100%;
-      max-width: calc(var(--coop-content-max) + 2 * var(--formView-sheetBg-padding-x, 16px));
-      margin-left: auto;
-      margin-right: auto;
-    }
-  }
-}
+// Карточка сбора по центру — общим правилом витрины (`showcase.scss`).
 
 // ── «Управление проектом»: разбор заявок и сводка (образец 395) ─────────
 .o_form_view .o_coop_pm {

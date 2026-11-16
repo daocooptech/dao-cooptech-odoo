@@ -5,6 +5,10 @@
   padding: 24px;
   max-width: 1200px;
   overflow-y: auto;
+  // По центру рабочей области, а не у левого края (владелец 17.11.2026).
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .o_coop_favorites_head {

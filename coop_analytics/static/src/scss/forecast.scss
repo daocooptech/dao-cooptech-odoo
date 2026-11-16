@@ -7,6 +7,10 @@
   --coop-fc-bad: var(--coop-error, #c0392b);
   --coop-fc-plan: var(--coop-ink, #14171a);
   max-width: 1180px;
+  // По центру рабочей области, а не у левого края (владелец 17.11.2026).
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
   padding: 0 0 32px;
   color: var(--coop-ink, #14171a);
 
