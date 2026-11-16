@@ -87,6 +87,14 @@ def trim_memberships(env):
     """
     Membership = env['coop.membership'].sudo()
     all_items = Membership.search([], order='id')
+    # Справочные членства из `coop_reference_data.xml` не снимаем. Снятое
+    # вместе с xml-id движок заводит заново при следующем `-u`, и если
+    # пару за это время завёл кто-то другой (приём вкладчиков в члены,
+    # решение 676), обновление падает на `coop_membership_open_uniq`
+    # (стенд 16.11.2026: Ковалёв — «Шукты»).
+    protected = set(env['ir.model.data'].sudo().search([
+        ('module', '=', 'coop_demo'), ('model', '=', 'coop.membership'),
+    ]).mapped('res_id'))
 
     # Двойники: оставляем самую раннюю запись пары.
     seen = set()
@@ -94,7 +102,8 @@ def trim_memberships(env):
     for membership in all_items:
         key = (membership.partner_id.id, membership.organization_id.id)
         if key in seen:
-            dupes |= membership
+            if membership.id not in protected:
+                dupes |= membership
         else:
             seen.add(key)
     if dupes:
@@ -126,7 +135,8 @@ def trim_memberships(env):
     for records in by_people.values():
         records.sort(key=weight)
         for membership in records[LIMIT_PER_PERSON:]:
-            extra |= membership
+            if membership.id not in protected:
+                extra |= membership
 
     # Организация без состава — хуже, чем человек с лишним членством:
     # у неё пустеет карточка и некому решать заявления.

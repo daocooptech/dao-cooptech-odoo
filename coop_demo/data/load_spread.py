@@ -272,7 +272,7 @@ def _hand_out(env, model, field, limit, picked=None):
     return relaid
 
 
-def _top_up_people(env, model, field, keep_for_organizations):
+def _top_up_people(env, model, field, keep_for_organizations, domain=None):
     """Отдать людям записи, которых у них нет, — из числа организаций.
 
     Перекладывание внутри людей не помогает, когда людям принадлежит
@@ -288,7 +288,7 @@ def _top_up_people(env, model, field, keep_for_organizations):
     if not people:
         return 0
     own_list = set(people.ids)
-    records = Model.search([], order='id')
+    records = Model.search(domain or [], order='id')
     for_people = {}
     to_organizations = []
     for entry in records:
@@ -454,12 +454,18 @@ def spread_all(env):
     # людей нечего — записей у них меньше, чем самих людей.
     total['skills_of_people'] = _top_up_people(
         env, 'coop.skill.offer', 'partner_id', keep_for_organizations=40)
+    # Карточки рабочих проектов (№ 455) не раздаём: их инициатор — заказчик
+    # проекта в управлении, и пересадка разорвала бы эту связь (а сбор
+    # инвестиций организации у человека запрещён проверкой модели).
+    own_cards = [('import_key', 'not =like', 'work-card#%')]
     total['projects_of_people'] = _top_up_people(
-        env, 'coop.project', 'partner_id', keep_for_organizations=70)
+        env, 'coop.project', 'partner_id', keep_for_organizations=70,
+        domain=own_cards)
     total['skills'] = _hand_out(env, 'coop.skill.offer', 'partner_id', SKILLS_COUNT)
     total['vacancies'] = _hand_out(env, 'coop.vacancy', 'partner_id', VACANCIES_COUNT,
                                 [('project_id', '=', False)])
-    total['projects'] = _hand_out(env, 'coop.project', 'partner_id', PROJECTS_COUNT)
+    total['projects'] = _hand_out(env, 'coop.project', 'partner_id', PROJECTS_COUNT,
+                                  own_cards)
     total['titles'] = dedupe_resource_titles(env)
     _logger.info('Выравнивание полок: %s', total)
     return total

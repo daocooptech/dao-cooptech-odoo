@@ -7,6 +7,7 @@ from ..data import rubrics
 from ..data import load_registries
 from ..data import load_project_updates
 from ..data import load_project_work
+from ..data import load_work_cards
 from ..data import load_market_mix
 from ..data import load_deal_specs
 from ..data import load_token_history
@@ -230,6 +231,9 @@ class CoopDemoLoader(models.AbstractModel):
             # 452, этап 3): закрытые задачи, сроки 2026, подзадачи,
             # зависимости, часы, вложения и проекты без сбора.
             load_project_work.load_project_work(self.env)
+            # Карточки сбора рабочим проектам (№ 455, кусок 3): страница
+            # проекта в управлении берёт заявки и аналитику с карточки.
+            load_work_cards.load_work_cards(self.env)
             # Состояния однобокого наполнения (замечание 11.10): задачи
             # проектов, биржа токенов, DEX, бартер.
             # История торгов токенов — свечам нужны месяцы сделок.
