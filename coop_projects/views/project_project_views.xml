@@ -184,6 +184,12 @@
       <xpath expr="//field[@name='is_favorite']" position="after">
         <field name="id" widget="coop_favorite_heart" nolabel="1" class="o_coop_pm_fav"/>
       </xpath>
+      <!-- Вид проекта — капсулой справа от названия, та же, что в строке
+           рубрики на карточке сбора (владелец 16.11.2026, № 455). -->
+      <xpath expr="//div[hasclass('oe_title')]" position="after">
+        <field name="coop_kind" readonly="1" nolabel="1" class="coop-pj_kind"
+               invisible="not coop_kind"/>
+      </xpath>
       <xpath expr="//div[@id='coop_pm_map']" position="inside">
         <xpath expr="//page[@name='map']/field[@name='google_map_iframe']" position="move"/>
       </xpath>

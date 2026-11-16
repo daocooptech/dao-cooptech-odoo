@@ -50,6 +50,18 @@ class ProjectProject(models.Model):
     # каждому, кто открыл проект, а не одной команде.
     coop_card_id = fields.Many2one(
         'coop.project', string='Карточка проекта', compute='_compute_coop_offers')
+    # Вид проекта — той же капсулой, что на карточке сбора (владелец
+    # 16.11.2026, № 455: таблетка вида — «на обеих» карточках, одинаковая).
+    # Через хранимую `coop_project_id`, а не `coop_card_id`: та не хранится,
+    # и пересчёт при смене вида искал бы проекты по полю без столбца.
+    coop_kind = fields.Selection(
+        lambda self: self.env['coop.project']._fields['kind'].selection,
+        string='Вид проекта', compute='_compute_coop_kind')
+
+    @api.depends('coop_project_id.kind')
+    def _compute_coop_kind(self):
+        for project in self:
+            project.coop_kind = project.coop_project_id[:1].kind
 
     @api.depends('coop_project_id', 'coop_project_id.new_offer_count',
                  'coop_project_id.coop_is_team', 'user_id')

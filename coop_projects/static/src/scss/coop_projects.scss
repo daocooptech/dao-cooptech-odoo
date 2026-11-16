@@ -1145,8 +1145,10 @@
 
 // Вид проекта — капсула справа в строке рубрики над названием
 // (владелец 12.11.2026). Тот же облик, что у метки роли в полосе
-// управления (`steps.scss`), только без значка.
-.coop-show_kicker .coop-pj_kind {
+// управления (`steps.scss`), только без значка. Та же капсула — справа от
+// названия на странице проекта в «Управлении проектами» (16.11.2026, № 455).
+.coop-show_kicker .coop-pj_kind,
+.o_form_view:has(.o_coop_pm) .coop-pj_kind {
   margin-left: auto;
   width: auto;
   padding: 3px 10px;
@@ -1155,6 +1157,29 @@
   color: var(--coop-teal-dark, #0e4f4a);
   font: 600 11px/1.2 'Manrope', sans-serif;
   white-space: nowrap;
+}
+
+// Карточка сбора — по центру рабочей области (владелец 16.11.2026, № 455:
+// «рабочее поле надо сделать по центру, я не просил его смещать влево»).
+// Движок прижимает подложку листа влево (`form_controller.scss`:
+// `max-width: 1400px; margin-right: auto`), и на 1920 лист в 1214 точек
+// стоял у левого края с пустыми 395 справа, а лента под ним шла во всю
+// ширину. Подложка — во всю ширину, лист, полоса хода и лента — одной
+// колонкой `--coop-content-max` по центру; у ленты своё поле 16 с каждой
+// стороны, поэтому её края совпадают с листом. На телефоне не трогаем:
+// там движок выводит лист к краям экрана отрицательными полями.
+@media (min-width: 768px) {
+  .o_form_view.o_coop_show.o_coop_wall_form {
+    .o_form_sheet_bg { max-width: none; }
+    .o_form_sheet,
+    .o_form_statusbar { width: 100%; margin-left: auto; margin-right: auto; }
+    .o-mail-Form-chatter:not(.o-aside) {
+      width: 100%;
+      max-width: calc(var(--coop-content-max) + 2 * var(--formView-sheetBg-padding-x, 16px));
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
 }
 
 // ── «Управление проектом»: разбор заявок и сводка (образец 395) ─────────
@@ -1243,12 +1268,15 @@
   align-items: flex-start !important;
   > .oe_title ~ * { margin-top: 4px; flex: 0 0 auto; }
   > .o_field_project_is_favorite { display: inline-flex; align-items: center; justify-content: center; height: 30px; min-width: 30px; }
+  // Капсула вида — по середине кнопок высотой 30 px, отступ от названия.
+  > .coop-pj_kind { margin: 9px 0 0 12px; }
   // На телефоне кнопкам рядом с названием места нет — «Добавить задачу»
   // уходила за край экрана (375 px): название во всю строку, кнопки под ним.
   @media (max-width: 767.98px) {
     flex-wrap: wrap;
     > .oe_title { flex: 1 0 100%; }
     > .oe_title ~ * { margin-top: var(--space-8, 8px); }
+    > .coop-pj_kind { margin: 13px auto 0 0; }
   }
 }
 // «Настройки проекта» — только по колёсику (владелец 14.11.2026), открывает
