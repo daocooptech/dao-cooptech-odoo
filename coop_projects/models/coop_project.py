@@ -1069,16 +1069,14 @@ class CoopProject(models.Model):
         ], limit=1))
 
     @api.model
-    def _coop_admit_contributors(self):
-        """Демо по решению 676: вкладчиков-нечленов — в члены.
+    def _coop_contributor_pairs(self):
+        """Пары (вкладчик, кооператив) по решению 676 → день первого вклада.
 
-        Выбор владельца 13.11.2026: вклады и паи остаются, а вкладчик
-        оформляется членом кооператива с датой вступления до первого
-        вклада. Открытое заявление принимается, прекращённого членства
-        нет — заводится новое. Вызывается миграцией и последним шагом
-        загрузки демо; повторный вызов ничего не меняет.
+        Один отбор на приём в члены и на чистку состава в демо
+        (`load_memberships.trim_memberships`): чистка, не знавшая этих пар,
+        снимала членства вкладчиков сверх предела, а приём заводил их снова —
+        каждая выкатка пересоздавала ~130 членств (№ 458).
         """
-        Membership = self.env['coop.membership'].sudo()
         contributions = self.env['coop.project.contribution'].sudo().search([
             ('project_id.kind', '=', 'cooperative'),
             ('project_id.partner_id.coop_is_cooperative', '=', True),
@@ -1093,8 +1091,21 @@ class CoopProject(models.Model):
             day = contribution.offered_on or fields.Date.context_today(self)
             if key not in first or day < first[key]:
                 first[key] = day
+        return first
+
+    @api.model
+    def _coop_admit_contributors(self):
+        """Демо по решению 676: вкладчиков-нечленов — в члены.
+
+        Выбор владельца 13.11.2026: вклады и паи остаются, а вкладчик
+        оформляется членом кооператива с датой вступления до первого
+        вклада. Открытое заявление принимается, прекращённого членства
+        нет — заводится новое. Вызывается миграцией и последним шагом
+        загрузки демо; повторный вызов ничего не меняет.
+        """
+        Membership = self.env['coop.membership'].sudo()
         admitted = 0
-        for (partner_id, org_id), day in first.items():
+        for (partner_id, org_id), day in self._coop_contributor_pairs().items():
             open_one = Membership.search([
                 ('partner_id', '=', partner_id),
                 ('organization_id', '=', org_id),

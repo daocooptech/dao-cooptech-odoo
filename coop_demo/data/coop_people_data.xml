@@ -38,8 +38,12 @@
 
     <!-- Новичок: сделок ещё нет, и доверие не «ноль процентов», а
          «пока не считается». Ноль читался бы как плохая репутация, хотя
-         человек просто ничего ещё не делал. -->
-    <record id="person_ivanova" model="res.partner">
+         человек просто ничего ещё не делал.
+         Без отслеживания: город переписывается каждым обновлением модуля,
+         а «Полный адрес в строку» движок считает до и после на разных
+         языках («Russian Federation → Российская Федерация») — по записи
+         в истории на каждую выкатку, к 16.11.2026 их было по 259. -->
+    <record id="person_ivanova" model="res.partner" context="{'mail_notrack': True}">
       <field name="name">Иванова Мария Петровна</field>
       <field name="is_company" eval="False"/>
       <field name="city">Красноярск</field>
@@ -48,7 +52,7 @@
       <field name="coop_skill_ids" eval="[(6, 0, [ref('coop_demo.skill_cheese')])]"/>
     </record>
 
-    <record id="person_gonchar" model="res.partner">
+    <record id="person_gonchar" model="res.partner" context="{'mail_notrack': True}">
       <field name="name">Гончаров Пётр Ильич</field>
       <field name="is_company" eval="False"/>
       <field name="city">Дербент</field>

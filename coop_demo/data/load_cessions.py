@@ -162,8 +162,12 @@ def _make_deferred_payments(Deal, Payment, rnd, today, target):
 
     ready = confirmed.filtered(lambda d: d.amount_due > 0 and usable(d))
 
-    # Заход второй: остаток есть, графика нет.
-    for deal in confirmed.filtered(lambda d: d.amount_due > 0 and not d.payment_ids):
+    # Заход второй: остаток есть, графика нет. Обмен и дар деньгами не
+    # платятся: `load_deal_specs.tidy_payment_schedules` снимает им платежи,
+    # и заведённый здесь график жил до конца прогона — 64 платежа заново
+    # в каждую выкатку (стенд 16.11.2026).
+    for deal in confirmed.filtered(lambda d: d.amount_due > 0 and not d.payment_ids
+                                   and d.way not in ('exchange', 'gift')):
         if len(ready) >= target:
             break
         Payment.create({

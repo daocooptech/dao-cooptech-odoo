@@ -37,7 +37,6 @@ def load_rights_history(env):
     if len(people) < 5:
         return 0
 
-    rnd = random.Random(20261109)
     now = fields.Datetime.now()
     rebuilt = 0
     resources = Resource.search([
@@ -47,6 +46,11 @@ def load_rights_history(env):
         history = Transfer.search([('resource_id', '=', resource.id)])
         if len(history) != 1 or history.kind != 'registered':
             continue
+        # Жребий — от самого ресурса, а не из общего генератора: вещь,
+        # которой история не выпала, тянула его заново в каждую выкатку,
+        # и журнал прав рос на сотни строк за прогон, пока история не
+        # доставалась всем (стенд 16.11.2026: +538, затем +217).
+        rnd = random.Random('%s-%s' % (20261109, resource.id))
         if (resource.ownership_kind != 'use'
                 and rnd.random() > SHARE_WITH_HISTORY):
             continue

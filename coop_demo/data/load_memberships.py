@@ -95,6 +95,28 @@ def trim_memberships(env):
     protected = set(env['ir.model.data'].sudo().search([
         ('module', '=', 'coop_demo'), ('model', '=', 'coop.membership'),
     ]).mapped('res_id'))
+    # Вкладчиков кооперативных проектов не снимаем и ставим первыми в
+    # предел: приём по решению 676 (последний шаг загрузки) заведёт их
+    # снова, и каждая выкатка пересоздавала ~130 членств (№ 458, стенд
+    # 16.11.2026). Пар на человека не больше пяти — предел они не ломают.
+    contributors = set()
+    if hasattr(env['coop.project'], '_coop_contributor_pairs'):
+        contributors = set(env['coop.project']._coop_contributor_pairs())
+    for membership in all_items:
+        if (membership.partner_id.id, membership.organization_id.id) in contributors:
+            protected.add(membership.id)
+    # И по одному держателю подписи и счетов в организации: снятого
+    # `load_staff` (решение 450, после чистки) назначает заново «Приказом
+    # о приёме» — 10 членств по кругу в каждую выкатку (16.11.2026).
+    duties = env['coop.power'].sudo().search([('code', 'in', ('sign', 'treasury'))])
+    holders = {}
+    for membership in all_items.filtered(
+            lambda m: m.state == 'active' and not m.partner_id.is_company
+            and m.power_ids & duties):
+        for power in membership.power_ids & duties:
+            key = (membership.organization_id.id, power.id)
+            holders.setdefault(key, []).append(membership.id)
+    protected.update(ids[0] for ids in holders.values())
 
     # Двойники: оставляем самую раннюю запись пары.
     seen = set()
@@ -122,7 +144,8 @@ def trim_memberships(env):
         # из-за границы. Снимается другое, рядовое.
         abroad = 'section_id' in membership._fields and membership.section_id.abroad
         main = 0 if membership.role in ('board', 'founder', 'staff') or abroad else 1
-        return (sort_order.get(membership.state, 4), main, membership.id)
+        kept = 0 if membership.id in protected else 1
+        return (kept, sort_order.get(membership.state, 4), main, membership.id)
 
     by_people = {}
     for membership in Membership.search([]):

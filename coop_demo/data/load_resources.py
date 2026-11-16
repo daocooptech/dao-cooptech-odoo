@@ -16,9 +16,15 @@ import logging
 import os
 import random
 
+from odoo.addons.coop_resources.models.coop_resource_tree import (
+    RENAMES, RENAMES_398)
+
 _logger = logging.getLogger(__name__)
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+# Прежнее название рубрики → нынешнее, после перестройки дерева.
+TREE_RENAMES = dict([(old, new) for old, new, _parent in RENAMES] + RENAMES_398)
+
+HERE =os.path.dirname(os.path.abspath(__file__))
 PHOTO_DIR = os.path.join(os.path.dirname(HERE), 'static', 'img', 'resources')
 
 TYPES = {
@@ -51,6 +57,16 @@ def _category(env, cache, name, parent=None):
     domain = [('name', '=', name),
               ('parent_id', '=', parent.id if parent else False)]
     record = env['coop.resource.category'].search(domain, limit=1)
+    # Рубрику уже перенесли или переименовали в девять разделов
+    # (`rebuild_category_tree`, задачи 396, 398) — берём её там. Иначе прогон
+    # заводил двойника по старой карте, чистка двойников оставляла его, а
+    # перестройка сливала обратно: 14 рубрик заново в каждую выкатку
+    # (16.11.2026).
+    for known in dict.fromkeys((name, TREE_RENAMES.get(name, name))):
+        if record:
+            break
+        record = env['coop.resource.category'].search(
+            [('name', '=', known)], order='id', limit=1)
     if not record:
         record = env['coop.resource.category'].create({
             'name': name,
