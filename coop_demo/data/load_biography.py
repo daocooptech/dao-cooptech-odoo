@@ -257,8 +257,12 @@ def enrich_showcase(env, login='dashkevich'):
     if own_ids < 4:
         # С картинкой и заполненные: полоса плиток без фотографий
         # выглядит сломанной.
+        # Без инвестиций: их привлекает только организация
+        # (`_check_investment_basis`), и выкатка 16.11.2026 упала, когда
+        # фото сбора (№ 455) вывели такой проект в первые с картинкой.
         projects = Project.search([('image_512', '!=', False),
-                                   ('partner_id', '!=', partner.id)],
+                                   ('partner_id', '!=', partner.id),
+                                   ('contribution_basis', '!=', 'investment')],
                                   limit=4 - own_ids)
         if projects:
             projects.write({'partner_id': partner.id})
