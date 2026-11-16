@@ -3,7 +3,7 @@ import logging
 from datetime import timedelta
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import AccessError, UserError, ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -1351,6 +1351,56 @@ class CoopProject(models.Model):
         self.ensure_one()
         return self.env['project.project']._coop_partner_users(
             self._project_followers())
+
+    # ── Лента новостей проекта ────────────────────────────────────────
+    #
+    # Владелец 14.11.2026 (№ 446): «надо сделать что бы на стену могли
+    # писать только участники проекта, поле кому убрать, просто стена
+    # должна быть». Первая запись «123» в «Общественной библиотеке»
+    # висела с красным крестиком: штатный чаттер подставил в «Кому»
+    # инициатора — АНО «Мастерская будущего» — и слал запись письмом, а
+    # почты у людей платформы нет. Стена писем не шлёт.
+
+    def message_post(self, **kwargs):
+        """Писать в ленту — только команде проекта: инициатор и принятые
+        вкладчики, за организацию — её члены с полномочием
+        (`_project_team_users`, тот же круг, что `coop_is_team`).
+
+        Проверяется пользователь запроса, а не `env.su`: поле ленты движок
+        публикует через `sudo()` (`/mail/message/post`), и проверка по
+        `su` пропускала бы любого. Служебные извещения (не `comment`) и
+        записи суперпользователя — загрузчики, кроны — как прежде.
+        """
+        if (kwargs.get('message_type') == 'comment'
+                and not self.env.user._is_superuser()):
+            user = self.env.user
+            if any(user not in project.sudo()._project_team_users()
+                   for project in self):
+                raise AccessError(_(
+                    'Писать в ленту проекта могут только его участники.'))
+        return super().message_post(**kwargs)
+
+    def _message_get_suggested_recipients_batch(self, *args, **kwargs):
+        """Строки «Кому» у ленты проекта нет — и адресатов она не предлагает.
+
+        Словарь по номерам записей: штатный
+        `_message_get_suggested_recipients` берёт из ответа `[self.id]`
+        (так же у карточки участника, `coop_base/models/res_partner.py`).
+        """
+        return {record.id: [] for record in self}
+
+    def _notify_get_recipients(self, message, **kwargs):
+        """Лента — не рассылка: то же правило, что у ленты «Управления
+        проектом» (`project.project._notify_get_recipients`, владелец
+        15.11.2026). Подписчикам — ничего, отмеченным через @ людям
+        платформы — во «Входящие», писем нет вовсе.
+        """
+        kwargs['notify_skip_followers'] = True
+        recipients = super()._notify_get_recipients(message, **kwargs)
+        recipients = [r for r in recipients if r.get('uid') and not r.get('ushare')]
+        for rdata in recipients:
+            rdata['notif'] = 'inbox'
+        return recipients
 
     @api.model
     def grant_project_access(self):

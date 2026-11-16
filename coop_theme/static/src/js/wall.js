@@ -84,15 +84,19 @@ patch(FormRenderer.prototype, {
  * только он сам, на странице организации — тот, кто правит её карточку.
  * Владелец 11.11.2026: «нельзя, убрать поле» — гостю поле публикации на
  * чужой странице не показывается (образец PersonPage: «у гостя нет поля
- * публикации»). Проекты и сообщества — общие стены, там поле остаётся.
- * Признаки берутся из записи формы; формы без них (не витрина) — как
- * раньше.
+ * публикации»). На стене проекта пишут только его участники — команда
+ * проекта, `coop_is_team` (владелец 14.11.2026, № 446); сообщества — общие
+ * стены, там поле остаётся. Признаки берутся из записи формы; формы без
+ * них (не витрина) — как раньше.
  */
 function coopWallIsMine(chatter) {
+    const data = (chatter.webChatterProps?.record || chatter.props?.record)?.data;
+    if (chatter.threadModel() === "coop.project") {
+        return !data || !("coop_is_team" in data) || Boolean(data.coop_is_team);
+    }
     if (chatter.threadModel() !== "res.partner") {
         return true;
     }
-    const data = (chatter.webChatterProps?.record || chatter.props?.record)?.data;
     if (!data || !("coop_is_self" in data || "coop_can_edit_card" in data)) {
         return true;
     }
@@ -150,6 +154,16 @@ patch(Chatter.prototype, {
  * настоящую переписку, где прежние слова верны.
  */
 patch(Composer.prototype, {
+    /**
+     * Поле публикации стены — без строки «Кому / Копия» (решение 239).
+     * В Odoo 20 строка живёт внутри поля ввода, и прежнее правило
+     * `wall.scss` её не ловило: на стене проекта стояло «Кому: АНО
+     * «Мастерская будущего»», и запись уходила письмом (№ 446).
+     */
+    get coopWallComposer() {
+        return WALL_MODELS.includes(this.thread?.model) && !this.props.composer.message;
+    },
+
     get placeholder() {
         if (WALL_MODELS.includes(this.thread?.model)) {
             return "Что у вас нового?";

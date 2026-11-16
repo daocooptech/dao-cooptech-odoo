@@ -75,4 +75,14 @@
     <xpath expr="//span[@t-out='this.OR_PRESS_SEND_KEYBIND']" position="replace"/>
   </t>
 
+  <!-- Стена — не переписка: строки «Кому / Копия» над полем публикации нет
+       (решение 239; владелец 14.11.2026, № 446: «поле кому убрать, просто
+       стена должна быть»). Строку добавляет `mail.ChatterComposer`;
+       условие движка сохранено, к нему — признак стены (js/wall.js). -->
+  <t t-name="coop_theme.ComposerWallNoRecipients" t-inherit="mail.Composer" t-inherit-mode="extension">
+    <xpath expr="//div[hasclass('py-1')][.//RecipientsInput]" position="attributes">
+      <attribute name="t-if">this.webComposerProps.withMessageFields and this.props.type === 'message' and !this.coopWallComposer</attribute>
+    </xpath>
+  </t>
+
 </templates>
