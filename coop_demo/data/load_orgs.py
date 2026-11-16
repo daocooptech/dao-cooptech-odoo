@@ -18,6 +18,7 @@
 по ней тут же начнут строиться группировки и правила.
 """
 import base64
+import collections
 import hashlib
 import json
 import logging
@@ -413,6 +414,12 @@ def give_services(env):
     # Примерно каждой третьей организации — одна-две услуги. Не всем:
     # услуги оказывает не всякий кооператив, и полка у всех подряд
     # выглядела бы одинаково выдуманной.
+    # Только у того, у кого останется своё: человек без предложения —
+    # повод для `load_spread._top_up_people` отдать ему услугу организации,
+    # и организация, оставшись пустой, получала здесь чужую снова — по 7–89
+    # предложений туда-обратно в каждую выкатку (16.11.2026).
+    left = collections.Counter(free.mapped('partner_id').ids)
+    free = free.filtered(lambda o: left[o.partner_id.id] > 1)
     given = 0
     stream = iter(free)
     for number, organization in enumerate(organizations):
@@ -423,10 +430,13 @@ def give_services(env):
         how_many = 1 + (number % 2)
         for _ in range(how_many):
             offer = next(stream, None)
+            while offer is not None and left[offer.partner_id.id] <= 1:
+                offer = next(stream, None)
             if offer is None:
                 _logger.info('Услуги организаций: отдано %s, предложения кончились',
                              given)
                 return given
+            left[offer.partner_id.id] -= 1
             with env.cr.savepoint():
                 offer.write({'partner_id': organization.id})
             given += 1

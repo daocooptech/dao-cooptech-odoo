@@ -125,6 +125,14 @@ def load_skills(env):
         values['import_key'] = key
         existing = Offer.search([('import_key', '=', key)], limit=1)
         if existing:
+            # Состояние не переписываем: публикацию решают ступени владельца
+            # (`load_verification`), и 19 навыков каждую выкатку
+            # публиковались здесь и снимались там (16.11.2026). Владельца —
+            # тоже: часть предложений отдана организациям как услуги
+            # (`load_orgs.give_services`), и возврат их людям по макету
+            # заставлял отдавать по 89 заново в каждую выкатку.
+            values.pop('state', None)
+            values.pop('partner_id', None)
             existing.write(values)
             updated += 1
         else:
@@ -496,6 +504,10 @@ def _fill_empty_specializations(env, Offer, Partner, Skill, skill_type):
             values['image_1920'] = photo or emblems.emblem(spec_name, spec_name)
             existing = Offer.search([('import_key', '=', key)], limit=1)
             if existing:
+                # Владельца и состояние не переписываем — как и выше в
+                # `load_skills`: их решают раздача и ступени.
+                values.pop('partner_id', None)
+                values.pop('state', None)
                 existing.write(values)
             else:
                 Offer.create(values)

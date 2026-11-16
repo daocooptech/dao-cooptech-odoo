@@ -68,6 +68,27 @@ from ..data import (emblems, load_attributes, load_biography, load_bounty,
 
 _logger = logging.getLogger(__name__)
 
+
+def _resource_tree_built(env):
+    """Девять разделов ресурсов уже стоят: прежних названий нет, новые есть.
+
+    Судим по самим рубрикам, а не по пометке: если загрузчик снова заведёт
+    рубрику по старой карте, дерево станет «не построенным» и перестройка
+    пройдёт ещё раз.
+    """
+    from odoo.addons.coop_resources.models import coop_resource_tree as tree
+    names = set(env['coop.resource.category'].sudo().search([]).mapped('name'))
+    old = ({o for o, n, _parent in tree.RENAMES if o != n}
+           | {o for o, n in tree.RENAMES_398 if o != n})
+    new = ({n for n, _parent, _copy in tree.NEW}
+           | {path[-1] for path in tree.TREE_398})
+    stale, missing = old & names, new - names
+    if stale or missing:
+        _logger.info('Дерево ресурсов не построено: прежние %s, нет %s',
+                     sorted(stale), sorted(missing))
+    return not (stale or missing)
+
+
 class CoopDemoLoader(models.AbstractModel):
     """Точка входа для наполнения каталогов из макета.
 
@@ -457,7 +478,12 @@ class CoopDemoLoader(models.AbstractModel):
         # перестройка переименует их и сольёт дубли. Идемпотентна.
         from odoo.addons.coop_resources.models.coop_resource_tree import (
             rebuild_category_tree)
-        rebuild_category_tree(self.env)
+        # Только пока дерево не построено: на построенном перестройка
+        # заново раскладывала ресурсы по своим словам, а `tidy_names`
+        # (задача 406, ниже и окончательно) возвращал их по своим — ~60
+        # ресурсов туда-обратно в каждую выкатку (16.11.2026).
+        if not _resource_tree_built(self.env):
+            rebuild_category_tree(self.env)
         # Земля и гаражи (задача 398): после перестройки — рубрики уже на месте.
         from ..data import load_land_garage
         load_land_garage.load_land_garage(self.env)

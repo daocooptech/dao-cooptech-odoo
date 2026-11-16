@@ -243,6 +243,11 @@ def _hand_out(env, model, field, limit, picked=None):
 
     records = Model.search(picked or [], order='id')
     human_ids = [entry for entry in records if entry[field] and entry[field].id in own_list]
+    # Витрину не обираем: `load_biography.enrich_showcase` добирает ей по
+    # четыре записи, и излишек, отданный здесь, она забирала обратно в
+    # следующую выкатку (16.11.2026).
+    showcase = env['res.users'].sudo().search(
+        [('login', '=', 'dashkevich')], limit=1).partner_id.id
     how_many = {i: 0 for i in ids}
     for entry in human_ids:
         how_many[entry[field].id] += 1
@@ -253,7 +258,7 @@ def _hand_out(env, model, field, limit, picked=None):
     relaid = 0
     for entry in human_ids:
         owner = entry[field].id
-        if how_many[owner] <= limit:
+        if how_many[owner] <= limit or owner == showcase:
             continue
         while queue:
             new = queue.pop(0)

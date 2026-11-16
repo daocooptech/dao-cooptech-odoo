@@ -26,6 +26,9 @@ _logger = logging.getLogger(__name__)
 # видно ни поиска, ни фильтров, ни постраничной навигации, каталогом не
 # считается: правило платформы — сто-двести примеров в каждом разделе.
 TARGET_DEFERRED = 170
+# Платёж, отложенный по договору: акт подписан, деньги позже. Такие
+# требования и продаются уступкой.
+DEFERRED = 'Оплата по договору с отсрочкой'
 TARGET_CESSIONS = 140
 
 # Состояния предложений в тех долях, в каких они встречаются в жизни:
@@ -68,6 +71,26 @@ def load_cessions(env, target_deferred=TARGET_DEFERRED, target=TARGET_CESSIONS):
 
     rnd = random.Random(20260906)
     today = fields.Date.context_today(Deal)
+
+    # Уступка продаёт неоплаченное требование. До 16.11.2026
+    # `tidy_payment_schedules` в конце каждой выкатки гасил отсрочку, и 77
+    # уступок остались на оплаченных сделках: последний платёж такой сделки
+    # снова откладываем.
+    for cession in Cession.search([('import_key', '=like', 'cessions#%')]):
+        deal = cession.deal_id
+        # Обмен и дар деньгами не платятся — там уступают требование
+        # поставки, а денежный платёж снимает `tidy_payment_schedules`.
+        if (not deal or deal.way in ('exchange', 'gift')
+                or deal.payment_ids.filtered(lambda p: p.state != 'paid')):
+            continue
+        payment = deal.payment_ids.sorted('due_on')[-1:]
+        if payment:
+            payment.write({
+                'name': DEFERRED,
+                'state': 'planned',
+                'paid_on': False,
+                'due_on': today + timedelta(days=7 + cession.id % 114),
+            })
 
     deferred = _make_deferred_payments(Deal, Payment, rnd, today, target_deferred)
     if not deferred:
@@ -172,7 +195,7 @@ def _make_deferred_payments(Deal, Payment, rnd, today, target):
             break
         Payment.create({
             'deal_id': deal.id,
-            'name': 'Оплата по договору с отсрочкой',
+            'name': DEFERRED,
             'due_on': today + timedelta(days=rnd.randint(7, 120)),
             'amount': deal.amount_due,
             'state': 'planned',
@@ -188,6 +211,11 @@ def _make_deferred_payments(Deal, Payment, rnd, today, target):
         if not payment:
             continue
         payment.write({
+            # По имени её узнаёт `load_deal_specs.tidy_payment_schedules` и
+            # не гасит: иначе он снова делал сделку оплаченной, а этот шаг
+            # снова возвращал отсрочку — 108 платежей туда-обратно в каждую
+            # выкатку, и уступки стояли на оплаченных долгах (16.11.2026).
+            'name': DEFERRED,
             'state': 'planned',
             'paid_on': False,
             'due_on': today + timedelta(days=rnd.randint(7, 120)),

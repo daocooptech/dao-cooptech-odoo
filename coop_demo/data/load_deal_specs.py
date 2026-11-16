@@ -19,6 +19,8 @@ from datetime import timedelta
 
 from odoo import fields
 
+from .load_cessions import DEFERRED
+
 _logger = logging.getLogger(__name__)
 
 AGREED = ('agreed', 'active', 'acceptance', 'done', 'disputed', 'cancelled')
@@ -268,6 +270,10 @@ def _tidy_money(deal, payments, Payment, today):
         open_.write({'state': 'cancelled'})
     elif deal.state == 'done' and open_:
         debt = open_[-1:] if _bucket(deal.id, 'debt') < 0.125 else open_.browse()
+        # Отсрочка по договору (`load_cessions.DEFERRED`) — не долг, который
+        # пора закрыть, а условие сделки; её и продают уступкой. Гасить её
+        # здесь значило каждую выкатку возвращать её и гасить снова.
+        debt |= open_.filtered(lambda p: p.name == DEFERRED)
         for payment in open_ - debt:
             payment.write({'state': 'paid',
                            'paid_on': _paid_on(deal, payment.due_on, payment.id, today)})

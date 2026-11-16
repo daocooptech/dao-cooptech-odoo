@@ -149,12 +149,16 @@ def _promote_project_initiators(env, add):
                 IDENTITY_METHODS[index % len(IDENTITY_METHODS)], index=index)
         raised += 1
 
-    # Вернуть в каталог потребности этих проектов.
+    # Вернуть в каталог потребности этих проектов — те, чей владелец сам
+    # может публиковать: потребность от организации без подтверждённого
+    # контакта `_demote_unpublishable` тут же снимает снова, и 76 таких
+    # ходили туда-обратно в каждую выкатку (16.11.2026).
     env['coop.resource'].sudo().search([
         ('project_id', 'in', live_ones.ids),
         ('listing_type', '=', 'request'),
         ('state', '=', 'draft'),
-    ]).write({'state': 'published'})
+    ]).filtered(lambda r: r.owner_id.coop_level_at_least('contact')).write(
+        {'state': 'published'})
     if raised:
         _logger.info('Личность подтверждена инициаторам живых проектов: %s',
                      raised)

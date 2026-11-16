@@ -17,12 +17,28 @@ import os
 import random
 
 from odoo.addons.coop_resources.models.coop_resource_tree import (
-    RENAMES, RENAMES_398)
+    DISSOLVE_398, RENAMES, RENAMES_398)
 
 _logger = logging.getLogger(__name__)
 
-# Прежнее название рубрики → нынешнее, после перестройки дерева.
+# Прежнее название рубрики → нынешнее, после перестройки дерева: сначала
+# переименования, затем расформирование (в указанную рубрику или в
+# родителя). «Оборудование для бизнеса» → «Прочее оборудование» →
+# «Оборудование и станки».
 TREE_RENAMES = dict([(old, new) for old, new, _parent in RENAMES] + RENAMES_398)
+_NEW_PARENT = {new: parent for _old, new, parent in RENAMES}
+TREE_RENAMES.update({name: into or _NEW_PARENT.get(name)
+                     for name, into in DISSOLVE_398
+                     if into or _NEW_PARENT.get(name)})
+
+
+def _current_name(name):
+    """Название рубрики в нынешнем дереве (цепочка переименований)."""
+    seen = set()
+    while TREE_RENAMES.get(name, name) != name and name not in seen:
+        seen.add(name)
+        name = TREE_RENAMES[name]
+    return name
 
 HERE =os.path.dirname(os.path.abspath(__file__))
 PHOTO_DIR = os.path.join(os.path.dirname(HERE), 'static', 'img', 'resources')
@@ -62,7 +78,7 @@ def _category(env, cache, name, parent=None):
     # заводил двойника по старой карте, чистка двойников оставляла его, а
     # перестройка сливала обратно: 14 рубрик заново в каждую выкатку
     # (16.11.2026).
-    for known in dict.fromkeys((name, TREE_RENAMES.get(name, name))):
+    for known in dict.fromkeys((name, _current_name(name))):
         if record:
             break
         record = env['coop.resource.category'].search(
@@ -887,6 +903,17 @@ def load_resources(env, extra=45):
             # кочевала бы от участника к участнику с каждой выкаткой.
             if not row['owner']:
                 values.pop('owner_id', None)
+            # Состояние и рубрику — тоже: публикацию решают ступени
+            # владельца (`load_verification`), рубрику уточняют перестройка
+            # дерева и `tidy_names`. Переписанные здесь, они каждую выкатку
+            # уходили туда-обратно — 17 снятий с публикации и 101 рубрика
+            # (16.11.2026).
+            values.pop('state', None)
+            if existing.category_id:
+                values.pop('category_id', None)
+                # Тип выводится из рубрики (`tidy_names`): 7 ресурсов
+                # каждую выкатку получали тип макета и тут же — обратно.
+                values.pop('resource_type', None)
             existing.write(values)
             updated += 1
         else:
