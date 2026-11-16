@@ -15,7 +15,11 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"   # rudoo20/
 NEW=0
 [ "${1:-}" = "--new" ] && { NEW=1; shift; }
 DB="${1:?база}"; shift
-LOG="${TMPDIR:-/tmp}/odoo_run_${DB}.log"
+# Журнал — рядом с odoo.log движка, не в %TEMP%: там Windows-Python движка
+# не может открыть даже новый файл (PermissionError, 16.11 — № 459), молча
+# пишет журнал в stdout, а сводка читала пустой файл и давала «ошибок 0».
+LOG="$ROOT/odoo_run_${DB}.log"
+OUT="$ROOT/odoo_run_${DB}.out"   # stdout и stderr движка — запасной журнал
 PSQL="$ROOT/pgsql17/bin/psql.exe"
 
 exists=$(PGPASSWORD=odoo "$PSQL" -h 127.0.0.1 -p 5433 -U odoo -d postgres -tAc \
@@ -65,14 +69,25 @@ fi
 # Журнал на диск — полный (info): по нему видно, что модули действительно
 # загрузились. В разговор из него идёт только выжимка ниже. Odoo журнал
 # дописывает — обнуляем, иначе посчитаем строки прошлого запуска.
-: > "$LOG"
+: > "$LOG"; : > "$OUT"
 # С --test-enable движок и при --no-http поднимает тестовый сервер на порту
 # из odoo.conf (8070) — открытые вкладки стенда стучатся в него и сыплют
 # в журнал «cursor already closed» (20.10: 84 «ошибки» при 0 упавших).
 "$ROOT/venv/Scripts/python.exe" "$ROOT/odoo/odoo-bin" -c "$ROOT/odoo.conf" \
     -d "$DB" --db-filter "^${DB}$" --stop-after-init --no-http --http-port 8099 \
-    --log-level=info --logfile "$LOG" "$@"
+    --log-level=info --logfile "$(cygpath -m "$LOG")" "$@" > "$OUT" 2>&1
 rc=$?
+
+# Файл журнала не открылся — движок пишет журнал в stdout («couldn't create
+# the logfile directory»): разбираем вывод. Пусто и там — сводке верить нельзя.
+if [ ! -s "$LOG" ]; then
+    if [ -s "$OUT" ]; then
+        echo "odoo_run: файл журнала пуст, разбираю вывод движка — $(head -1 "$OUT" | cut -c1-120)"
+        LOG="$OUT"
+    else
+        echo "odoo_run: журнал и вывод движка пусты (код $rc) — сводки нет."; exit 1
+    fi
+fi
 
 # Опечатку в имени модуля Odoo пропускает предупреждением и рапортует успех.
 # Трассировка — ошибка, только если она под записью ERROR/CRITICAL или вне
@@ -92,9 +107,9 @@ grep -E ' (FAIL|ERROR): Test' "$LOG" | sed 's/^.*: \(FAIL\|ERROR\): /odoo_run: �
 if [ "$errors" -gt 0 ]; then
     # Первые пять ошибок и первая трассировка — этого хватает для диагноза.
     bad_lines | cut -c1-300 | head -5
-    echo '--- первая трассировка:'
-    awk '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9:,]+ [0-9]+ [A-Z]+ /{lvl=$4}
+    trace=$(awk '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9:,]+ [0-9]+ [A-Z]+ /{lvl=$4}
          /^Traceback/ && lvl!="INFO" && lvl!="WARNING" && lvl!="DEBUG"{t=1}
-         t{print; n++} n>=25{exit}' "$LOG"
+         t{print; n++} n>=25{exit}' "$LOG")
+    [ -n "$trace" ] && printf -- '--- первая трассировка:\n%s\n' "$trace"
 fi
 [ "$rc" -eq 0 ] && [ "$errors" -eq 0 ] && [ "$loaded" -gt 0 ]
