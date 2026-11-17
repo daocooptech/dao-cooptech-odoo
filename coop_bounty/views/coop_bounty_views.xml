@@ -7,30 +7,31 @@
     <field name="arch" type="xml">
       <form string="Задача">
         <header>
-          <!-- Действия менеджера сообщества. Кнопки показываются по
+          <!-- Действия автора — того, кто вправе вести задачу: рабочей
+               группы платформы или организации проекта. Кнопки — по
                состоянию: набор «опубликовать / принять / вернуть» на
                черновике только сбивал бы с толку. -->
           <button name="action_publish" type="object" string="Опубликовать"
-                  class="btn-primary" invisible="(state != 'draft') or not coop_can_edit"
-                  groups="coop_bounty.group_coop_community_manager"/>
-          <button name="action_accept" type="object" string="Принять работу"
-                  class="btn-primary" invisible="(state != 'submitted') or not coop_can_edit"
-                  groups="coop_bounty.group_coop_community_manager"/>
+                  class="btn-primary" invisible="(state != 'draft') or not coop_can_edit"/>
+          <button name="action_accept" type="object" string="Принять результат"
+                  class="btn-primary" invisible="(state not in ('submitted', 'dispute')) or not coop_can_edit"/>
           <button name="action_return_for_revision" type="object"
-                  string="Вернуть на доработку" invisible="(state != 'submitted') or not coop_can_edit"
-                  groups="coop_bounty.group_coop_community_manager"/>
-          <button name="action_cancel" type="object" string="Отменить"
+                  string="Вернуть на доработку" invisible="(state not in ('submitted', 'dispute')) or not coop_can_edit"/>
+          <button name="action_cancel" type="object" string="Отменить задачу"
                   invisible="(state in ('accepted', 'cancelled')) or not coop_can_edit"
-                  groups="coop_bounty.group_coop_community_manager"/>
+                  confirm="Отменить задачу? У задачи платформы резерв вернётся в фонд."/>
           <button name="action_reset_to_draft" type="object" string="В черновик"
-                  invisible="(state != 'cancelled') or not coop_can_edit"
-                  groups="coop_bounty.group_coop_community_manager"/>
+                  invisible="(state != 'cancelled') or not coop_can_edit"/>
+
+          <!-- Спор разбирает администратор платформы (решение 194). -->
+          <button name="action_open_dispute_decision" type="object" string="Решить спор"
+                  class="btn-primary" invisible="state != 'dispute' or not is_arbiter"/>
 
           <!-- Действия участника. -->
           <button name="action_apply" type="object" string="Взять задачу"
                   class="btn-primary"
-                  invisible="state != 'published' or my_application_state != 'none'"/>
-          <button name="action_submit" type="object" string="Сдать работу"
+                  invisible="state != 'published' or my_application_state != 'none' or coop_can_edit"/>
+          <button name="action_submit" type="object" string="Сдать на проверку"
                   class="btn-primary"
                   invisible="state != 'assigned' or not is_mine"/>
 
@@ -39,6 +40,29 @@
         </header>
         <sheet>
           <field name="coop_can_edit" invisible="1"/>
+          <field name="payer_kind" invisible="1"/>
+          <field name="allows_share" invisible="1"/>
+          <field name="allows_money" invisible="1"/>
+          <field name="my_application_state" invisible="1"/>
+          <field name="is_mine" invisible="1"/>
+          <field name="is_arbiter" invisible="1"/>
+
+          <div class="alert alert-info" role="status" invisible="state != 'submitted'">
+            Результат сдан на проверку. Дней на ответ автору до спора:
+            <field name="days_to_dispute" class="d-inline"/>.
+          </div>
+          <div class="alert alert-danger" role="status" invisible="state != 'dispute'">
+            Автор не ответил за 7 дней после сдачи — открыт спор. Его разбирает
+            администратор платформы и записывает объяснение решения.
+          </div>
+          <div class="alert alert-secondary" role="status"
+               invisible="state != 'cancelled' or payer_kind != 'platform'">
+            Задача отменена. Резерв возвращён в фонд.
+          </div>
+          <div class="alert alert-info" role="status" invisible="my_application_state != 'applied'">
+            Ваша заявка подана — автор утвердит исполнителя.
+          </div>
+
           <!-- Фото и видео — две карусели (`coop_media`, задача 424). -->
           <div class="coop-gallery coop-media_block">
             <field name="coop_media_data" widget="coop_media" nolabel="1" readonly="1"/>
@@ -47,43 +71,73 @@
             <h1><field name="name" placeholder="Что нужно сделать" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/></h1>
           </div>
           <group>
-            <group>
-              <field name="reward_tokens" widget="coop_inline" readonly="not coop_can_edit"/>
-              <field name="payment_mode" widget="radio" readonly="not coop_can_edit"/>
-              <field name="reward_rub" invisible="payment_mode != 'rub_offset'"/>
-              <field name="payer_id" options="{'no_create': True}" widget="coop_inline" readonly="not coop_can_edit"/>
+            <group string="Кто платит">
+              <field name="payer_id" options="{'no_create': True}" widget="coop_inline"
+                     readonly="not coop_can_edit or state != 'draft'"/>
+              <field name="project_id" options="{'no_create': True}" widget="coop_inline"
+                     invisible="payer_kind == 'platform' and not project_id"
+                     readonly="not coop_can_edit or state != 'draft'"/>
+              <field name="fund_id" invisible="payer_kind != 'platform' or not fund_id"/>
+              <field name="fund_free" invisible="payer_kind != 'platform' or not fund_id"/>
+            </group>
+            <group string="Условия оплаты">
+              <!-- Решение 671 п. 7: у автора — набор галочек, у
+                   исполнителя — один выбор в заявке. Способы другого
+                   вида автора не показываются (решение 672). -->
+              <field name="allowed_method_ids" widget="many2many_checkboxes"
+                     domain="[('scope', 'in', ('both', payer_kind))]"
+                     invisible="not coop_can_edit or state != 'draft'"/>
+              <!-- Для чтения — метками: галочки показывают и неотмеченные
+                   способы, и по тексту не понять, какие допустимы. -->
+              <field name="allowed_method_ids" widget="many2many_tags" readonly="1"
+                     invisible="coop_can_edit and state == 'draft'"/>
+              <field name="reward_tokens" widget="coop_inline" invisible="not allows_money and state != 'draft'"
+                     readonly="not coop_can_edit or state != 'draft'"/>
+              <field name="share_percent" invisible="not allows_share"
+                     readonly="not coop_can_edit or state != 'draft'"/>
+              <field name="share_cap" invisible="not allows_share or not share_cap"/>
+              <field name="payment_mode" invisible="not payment_mode"/>
+            </group>
+            <group string="Сроки">
               <field name="coop_specialization_id" options="{'no_create': True}" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="deadline" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="submitted_on" invisible="not submitted_on"/>
+              <field name="dispute_on" invisible="not dispute_on"/>
+              <field name="accepted_on" invisible="state != 'accepted'"/>
             </group>
-            <group>
+            <group string="Участники">
               <field name="manager_id" readonly="1"/>
-              <field name="assignee_id" readonly="1"/>
-              <field name="accepted_on" readonly="1" invisible="state != 'accepted'"/>
+              <field name="assignee_id" readonly="1" invisible="not assignee_id"/>
               <field name="reward_transaction_id" readonly="1"
-                     invisible="state != 'accepted'"/>
-              <field name="my_application_state" invisible="1"/>
-              <field name="is_mine" invisible="1"/>
+                     invisible="not reward_transaction_id"/>
             </group>
           </group>
+          <div invisible="not allows_share" class="text-muted small mb-3">
+            Форму доли определяет организация по закону своей страны.
+          </div>
           <notebook>
             <page string="Описание" name="description">
-              <field name="description" placeholder="Опишите результат, а не процесс: по этому тексту исполнитель поймёт, когда работа считается выполненной." widget="coop_block" readonly="not coop_can_edit"/>
+              <field name="description" placeholder="Опишите результат, а не процесс: по этому тексту исполнитель поймёт, когда задача считается выполненной." widget="coop_block" readonly="not coop_can_edit"/>
             </page>
-            <page string="Заявки" name="applications">
+            <page string="Заявки" name="applications" invisible="not coop_can_edit">
               <field name="application_ids" nolabel="1" readonly="1">
                 <list>
                   <field name="create_date" string="Когда"/>
                   <field name="partner_id"/>
+                  <field name="method_id"/>
                   <field name="message"/>
-                  <field name="state"/>
+                  <field name="state" widget="badge"
+                         decoration-success="state == 'approved'"
+                         decoration-muted="state == 'rejected'"/>
                   <button name="action_approve" type="object" string="Утвердить"
-                          icon="check" invisible="state != 'applied'"
-                          groups="coop_bounty.group_coop_community_manager"/>
+                          icon="check" invisible="state != 'applied'"/>
                   <button name="action_reject" type="object" string="Отклонить"
-                          icon="close" invisible="state == 'rejected'"
-                          groups="coop_bounty.group_coop_community_manager"/>
+                          icon="close" invisible="state == 'rejected'"/>
                 </list>
               </field>
+            </page>
+            <page string="Решение по спору" name="dispute" invisible="not dispute_decision">
+              <field name="dispute_decision" nolabel="1"/>
             </page>
           </notebook>
         </sheet>
@@ -98,9 +152,13 @@
     <field name="arch" type="xml">
       <list string="Задачи">
         <field name="name"/>
+        <field name="payer_id" string="Кто платит" optional="show"/>
+        <field name="project_id" optional="hide"/>
         <field name="coop_specialization_id" optional="show"/>
-        <field name="reward_tokens" sum="Всего токенов"/>
-        <field name="payment_mode" optional="show"/>
+        <field name="allowed_method_ids" widget="many2many_tags" optional="show"/>
+        <field name="reward_tokens" sum="Всего"/>
+        <field name="share_percent" optional="hide"/>
+        <field name="payment_mode" optional="hide"/>
         <field name="deadline"/>
         <field name="assignee_id"/>
         <field name="application_count" string="Заявок"/>
@@ -108,6 +166,7 @@
                decoration-success="state == 'accepted'"
                decoration-info="state == 'published'"
                decoration-warning="state == 'submitted'"
+               decoration-danger="state == 'dispute'"
                decoration-muted="state in ('draft', 'cancelled')"/>
       </list>
     </field>
@@ -120,17 +179,15 @@
       <kanban default_group_by="state" quick_create="false">
         <field name="state"/>
         <field name="reward_tokens"/>
+        <field name="share_percent"/>
+        <field name="payer_kind"/>
         <field name="image_512"/>
         <templates>
           <t t-name="card">
-            <!-- Общая карточка каталога. В квадрате — исполнитель, если
-                 задача уже за кем-то закреплена: по лицу видно, свободна
-                 она или нет, раньше чем прочитан текст. Ничья задача
-                 показывает символ вознаграждения. -->
+            <!-- Общая карточка каталога. В квадрате — снимок задачи, без
+                 него исполнитель, если задача уже за кем-то закреплена:
+                 по лицу видно, свободна она или нет. -->
             <div class="o_coop_listing o_coop_bounty_card">
-              <!-- Снимок во всю ширину — общий вид карточки каталога.
-                   Своего снимка у записи может не быть; тогда лицом
-                   становится тот, с кем придётся иметь дело. -->
               <div class="o_coop_media">
                 <!-- Снимок задания по смыслу (решение 341) — первым. -->
                 <img t-if="record.image_512.raw_value" loading="lazy"
@@ -144,11 +201,19 @@
               <div class="o_coop_listing_body">
               <div class="o_coop_listing_title"><field name="name"/></div>
               <div class="o_coop_listing_meta">
-                <field name="coop_specialization_id"/>
+                <span t-if="record.payer_kind.raw_value == 'platform'">Платформа</span>
+                <span t-elif="record.project_id.raw_value"><field name="project_id"/></span>
+                <span t-else=""><field name="payer_id"/></span>
+                <span t-if="record.coop_specialization_id.raw_value"> · <field name="coop_specialization_id"/></span>
+              </div>
+              <div class="o_coop_bounty_methods mt-1">
+                <field name="allowed_method_ids" widget="many2many_tags"/>
               </div>
               <div class="mt-2 d-flex justify-content-between align-items-center">
                 <span class="o_coop_bounty_reward">
-                  <field name="reward_tokens"/> токенов
+                  <t t-if="record.reward_tokens.raw_value"><field name="reward_tokens"/> <t t-if="record.payer_kind.raw_value == 'platform'">токенов</t><t t-else="">₽</t></t>
+                  <t t-if="record.reward_tokens.raw_value and record.share_percent.raw_value"> · </t>
+                  <t t-if="record.share_percent.raw_value">доля <field name="share_percent"/> %</t>
                 </span>
                 <field name="assignee_id" widget="many2one_avatar_user"/>
               </div>
@@ -170,23 +235,36 @@
       <search string="Задачи">
         <field name="name"/>
         <field name="coop_specialization_id"/>
+        <field name="payer_id" string="Кто платит"/>
+        <field name="project_id"/>
         <field name="assignee_id"/>
         <filter name="open" string="Открытые" domain="[('state', '=', 'published')]"/>
         <filter name="in_progress" string="В работе"
                 domain="[('state', 'in', ('assigned', 'submitted'))]"/>
+        <filter name="dispute" string="Спор" domain="[('state', '=', 'dispute')]"/>
         <filter name="mine" string="Мои задачи"
                 domain="[('assignee_id.user_ids', 'in', [uid])]"/>
         <separator/>
-        <filter name="pay_offset" string="Цена в ₽, токены зачётом"
-                domain="[('payment_mode', '=', 'rub_offset')]"/>
-        <filter name="pay_tokens" string="Токенами"
-                domain="[('payment_mode', '=', 'tokens')]"/>
+        <filter name="platform" string="Платформа" domain="[('payer_kind', '=', 'platform')]"/>
+        <filter name="projects" string="Проекты" domain="[('payer_kind', '=', 'project')]"/>
+        <separator/>
+        <filter name="pay_offset" string="₽ с зачётом токенами"
+                domain="[('allowed_method_ids.code', '=', 'rub_offset')]"/>
+        <filter name="pay_tokens" string="Токены платформы"
+                domain="[('allowed_method_ids.code', '=', 'tokens')]"/>
+        <filter name="pay_rub" string="₽ от проекта"
+                domain="[('allowed_method_ids.code', '=', 'rub')]"/>
+        <filter name="pay_project_tokens" string="Токены проекта"
+                domain="[('allowed_method_ids.code', '=', 'project_tokens')]"/>
+        <filter name="pay_share" string="Доля в проекте"
+                domain="[('allowed_method_ids.code', '=', 'share')]"/>
         <separator/>
         <filter name="overdue" string="Просроченные"
                 domain="[('deadline', '&lt;', context_today().strftime('%Y-%m-%d')),
                          ('state', 'in', ('published', 'assigned', 'submitted'))]"/>
         <group>
           <filter name="by_state" string="По состоянию" context="{'group_by': 'state'}"/>
+          <filter name="by_payer" string="По автору" context="{'group_by': 'payer_id'}"/>
           <filter name="by_specialization" string="По специализации"
                   context="{'group_by': 'coop_specialization_id'}"/>
         </group>
@@ -195,18 +273,125 @@
   </record>
 
   <record id="action_coop_bounty_task" model="ir.actions.act_window">
-    <field name="name">Задачи рабочей группы</field>
+    <field name="name">Задачи за токены</field>
     <field name="res_model">coop.bounty.task</field>
     <field name="path">bounty</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="search_view_id" ref="view_coop_bounty_task_search"/>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Задач пока нет</p>
-      <p>Здесь рабочая группа размещает то, чем можно помочь проекту.
-         Участник берёт задачу, менеджер сообщества утверждает исполнителя
-         и принимает работу — после приёмки вознаграждение зачисляется
-         токенами в кошелёк.</p>
+      <p>Здесь платформа и проекты размещают задачи. Автор указывает, чем
+         готов заплатить, вы выбираете способ в заявке. Загляните позже.</p>
     </field>
+  </record>
+
+  <!-- ── Окно заявки ────────────────────────────────────────────────── -->
+
+  <record id="view_coop_bounty_apply_form" model="ir.ui.view">
+    <field name="name">coop.bounty.apply.form</field>
+    <field name="model">coop.bounty.apply</field>
+    <field name="arch" type="xml">
+      <form string="Заявка на задачу">
+        <field name="allowed_method_ids" invisible="1"/>
+        <field name="task_id" invisible="1"/>
+        <p class="text-muted">Автор допустил эти способы. Выберите один — он
+           закрепится за вами, когда автор вас утвердит.</p>
+        <group>
+          <field name="method_id" widget="radio" options="{'no_create': True}"/>
+          <field name="reward_tokens" string="Сумма, ₽" invisible="not method_code or method_code == 'share'"/>
+          <field name="share_percent" invisible="method_code != 'share'"/>
+          <field name="message" placeholder="Что у вас есть для этой задачи и когда сможете сдать"/>
+        </group>
+        <div class="alert alert-info" role="status" invisible="method_code != 'share'">
+          Форму доли определяет организация по закону своей страны; конкретную
+          форму мы не обещаем.
+        </div>
+        <footer>
+          <button name="action_confirm" type="object" string="Подать заявку" class="btn-primary"/>
+          <button string="Отмена" special="cancel" class="btn-secondary"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <!-- ── Решение по спору ───────────────────────────────────────────── -->
+
+  <record id="view_coop_bounty_dispute_form" model="ir.ui.view">
+    <field name="name">coop.bounty.dispute.form</field>
+    <field name="model">coop.bounty.dispute</field>
+    <field name="arch" type="xml">
+      <form string="Решение по спору">
+        <field name="task_id" invisible="1"/>
+        <group>
+          <field name="outcome" widget="radio"/>
+          <field name="decision" placeholder="Почему принято такое решение — его увидят обе стороны"/>
+        </group>
+        <footer>
+          <button name="action_confirm" type="object" string="Записать решение" class="btn-primary"/>
+          <button string="Отмена" special="cancel" class="btn-secondary"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <!-- ── Фонд задач платформы ───────────────────────────────────────── -->
+
+  <record id="view_coop_bounty_fund_list" model="ir.ui.view">
+    <field name="name">coop.bounty.fund.list</field>
+    <field name="model">coop.bounty.fund</field>
+    <field name="arch" type="xml">
+      <list string="Фонд задач платформы">
+        <field name="name"/>
+        <field name="date_start"/>
+        <field name="date_end"/>
+        <field name="amount"/>
+        <field name="reserved"/>
+        <field name="paid"/>
+        <field name="free"/>
+        <field name="task_count"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_coop_bounty_fund_form" model="ir.ui.view">
+    <field name="name">coop.bounty.fund.form</field>
+    <field name="model">coop.bounty.fund</field>
+    <field name="arch" type="xml">
+      <form string="Фонд задач платформы">
+        <sheet>
+          <div class="oe_title"><h1><field name="name"/></h1></div>
+          <p class="text-muted">Задачу платформы можно опубликовать, только
+             когда вся её сумма отложена в резерв. Отменили задачу — резерв
+             возвращается в фонд.</p>
+          <group>
+            <group string="Срок">
+              <field name="date_start"/>
+              <field name="date_end"/>
+            </group>
+            <group string="Токены">
+              <field name="amount"/>
+              <field name="reserved"/>
+              <field name="paid"/>
+              <field name="free"/>
+            </group>
+          </group>
+          <field name="task_ids" readonly="1">
+            <list>
+              <field name="name"/>
+              <field name="reward_tokens" sum="Всего"/>
+              <field name="assignee_id"/>
+              <field name="state" widget="badge"/>
+            </list>
+          </field>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_coop_bounty_fund" model="ir.actions.act_window">
+    <field name="name">Фонд задач платформы</field>
+    <field name="res_model">coop.bounty.fund</field>
+    <field name="view_mode">list,form</field>
   </record>
 
   <record id="action_coop_bounty_application" model="ir.actions.act_window">
@@ -215,11 +400,34 @@
     <field name="view_mode">list,form</field>
   </record>
 
+  <!-- ── Потолок и форма доли в карточке организации ───────────────── -->
+
+  <record id="view_coop_orgs_form_bounty_share" model="ir.ui.view">
+    <field name="name">res.partner.form.coop.bounty.share</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="coop_orgs.view_coop_orgs_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='coop_charter_url']/.." position="after">
+        <div invisible="not coop_can_edit_card and not coop_labor_share_cap">
+          <span class="o_coop_key">Потолок доли за труд, %</span>
+          <field name="coop_labor_share_cap" widget="coop_inline"
+                 readonly="not coop_can_edit_card" placeholder="без потолка"/></div>
+        <div invisible="not coop_can_edit_card and not coop_labor_share_form">
+          <span class="o_coop_key">Форма доли</span>
+          <field name="coop_labor_share_form" widget="coop_inline"
+                 readonly="not coop_can_edit_card" placeholder="не выбрана"/></div>
+      </xpath>
+    </field>
+  </record>
+
   <menuitem id="menu_coop_bounty_root" name="Помощь проекту" sequence="145"/>
   <menuitem id="menu_coop_bounty_task" name="Задачи"
             parent="menu_coop_bounty_root" action="action_coop_bounty_task" sequence="10"/>
   <menuitem id="menu_coop_bounty_application" name="Заявки"
             parent="menu_coop_bounty_root" action="action_coop_bounty_application"
             sequence="20" groups="coop_bounty.group_coop_community_manager"/>
+  <menuitem id="menu_coop_bounty_fund" name="Фонд задач"
+            parent="menu_coop_bounty_root" action="action_coop_bounty_fund"
+            sequence="30" groups="coop_bounty.group_coop_community_manager,coop_base.group_coop_platform"/>
 
 </odoo>

@@ -390,6 +390,7 @@ const SUBNAV_EXACT = {
     "Майнеры": "pick",
     // Помощь проекту.
     "Заявки": "clipboard-text",
+    "Фонд задач": "building-bank",
     // Сообщества.
     "Каталог сообществ": "friends",
     "Мои сообщества": "circles-relation",

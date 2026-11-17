@@ -70,6 +70,30 @@
   margin-top: 3px;
 }
 
+// Способы оплаты, допустимые автором (решение 671 п. 7): метками в строку,
+// пояснение способа — в подсказке.
+.coop-task-methods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.coop-task-method {
+  font-size: 12px;
+  line-height: 1.3;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--teal-tint, #e3f1ef);
+  color: var(--teal-dark, #0e4f4a);
+}
+
+.coop-task-legend {
+  color: var(--slate-light, #8f8f88);
+  font-size: 13px;
+  margin: -6px 0 16px;
+}
+
 .coop-task-desc {
   color: var(--slate, #4a4a44);
   font-size: 13.5px;

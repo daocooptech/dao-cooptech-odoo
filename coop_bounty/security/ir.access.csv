@@ -1,6 +1,14 @@
 id,name,model_id,group_id/id,operation,domain
 rule_bounty_task_user,Участник видит опубликованные задачи,coop.bounty.task,base.group_user,r,"[('state', 'not in', ('draft', 'cancelled'))]"
+rule_bounty_task_author,Задачу ведёт автор — организация с полномочием публикации,coop.bounty.task,base.group_user,cru,"[('payer_id', 'in', user.coop_publisher_partner_ids.ids)]"
 rule_bounty_task_manager,Менеджер сообщества ведёт все задачи,coop.bounty.task,coop_bounty.group_coop_community_manager,crud,
 coop_bounty_application_own,Свои заявки на задачи,coop.bounty.application,base.group_user,cr,"[('partner_id', '=', user.partner_id.id)]"
+coop_bounty_application_author,Заявки на свои задачи,coop.bounty.application,base.group_user,r,"[('task_id.payer_id', 'in', user.coop_publisher_partner_ids.ids)]"
 coop_bounty_application_admin,Заявки на задачи — администратор,coop.bounty.application,base.group_system,cr,
 coop_bounty_application_manager,Заявки на задачи — менеджер сообщества,coop.bounty.application,coop_bounty.group_coop_community_manager,crud,
+coop_bounty_method_user,Способы оплаты задач,coop.bounty.method,base.group_user,r,
+coop_bounty_fund_user,Фонд задач — остаток видит каждый,coop.bounty.fund,base.group_user,r,
+coop_bounty_fund_manager,Фонд задач ведёт менеджер сообщества,coop.bounty.fund,coop_bounty.group_coop_community_manager,crud,
+coop_bounty_fund_platform,Фонд задач ведёт рабочая группа платформы,coop.bounty.fund,coop_base.group_coop_platform,crud,
+coop_bounty_apply_user,Окно заявки на задачу,coop.bounty.apply,base.group_user,crud,
+coop_bounty_dispute_user,Окно решения по спору,coop.bounty.dispute,base.group_user,crud,

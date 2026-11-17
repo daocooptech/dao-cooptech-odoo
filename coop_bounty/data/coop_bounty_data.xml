@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+  <!-- Способы оплаты задачи (решения 515, 671 п. 7, 672). Справочник
+       кода: обновляется вместе с модулем, руками не правится. -->
+  <record id="method_rub_offset" model="coop.bounty.method">
+    <field name="name">₽ с зачётом токенами</field>
+    <field name="code">rub_offset</field>
+    <field name="scope">platform</field>
+    <field name="sequence">10</field>
+    <field name="note">Цена в рублях, расчёт — токенами платформы в зачёт цены. Токены — предоплата услуг платформы, в деньги не выводятся.</field>
+  </record>
+  <record id="method_tokens" model="coop.bounty.method">
+    <field name="name">Токены платформы</field>
+    <field name="code">tokens</field>
+    <field name="scope">platform</field>
+    <field name="sequence">20</field>
+    <field name="note">Их тратят на услуги платформы — продвижение, подписку; в деньги они не выводятся.</field>
+  </record>
+  <record id="method_rub" model="coop.bounty.method">
+    <field name="name">₽</field>
+    <field name="code">rub</field>
+    <field name="scope">project</field>
+    <field name="sequence">30</field>
+    <field name="note">Рубли от организации проекта.</field>
+  </record>
+  <record id="method_project_tokens" model="coop.bounty.method">
+    <field name="name">Токены проекта</field>
+    <field name="code">project_tokens</field>
+    <field name="scope">project</field>
+    <field name="sequence">40</field>
+    <field name="note">Право получить продукцию или услугу этого проекта. Это не токены платформы.</field>
+  </record>
+  <record id="method_share" model="coop.bounty.method">
+    <field name="name">Доля в проекте</field>
+    <field name="code">share</field>
+    <field name="scope">project</field>
+    <field name="sequence">50</field>
+    <field name="note">Доля в проекте в процентах. Форму доли определяет организация по закону своей страны.</field>
+  </record>
+
+  <!-- Спор через семь дней молчания автора (решение 671 п. 4). Раз в
+       сутки: срок считается днями, чаще проверять нечего. -->
+  <record id="cron_coop_bounty_dispute" model="ir.cron">
+    <field name="name">Задачи: открыть спор после 7 дней молчания автора</field>
+    <field name="model_id" ref="model_coop_bounty_task"/>
+    <field name="state">code</field>
+    <field name="code">model._cron_open_disputes()</field>
+    <field name="interval_number">1</field>
+    <field name="interval_type">days</field>
+    <field name="active" eval="True"/>
+  </record>
+
+</data>
+
+  <!-- Первый фонд задач платформы: 100 тыс. токенов на 3 месяца от
+       решения 671 (13.11.2026). Данные, а не код: следующий фонд заводит
+       рабочая группа, обновление модуля его не трогает. -->
+  <data noupdate="1">
+    <record id="fund_2026_11" model="coop.bounty.fund">
+      <field name="name">Фонд задач платформы, ноябрь 2026 — февраль 2027</field>
+      <field name="amount">100000</field>
+      <field name="date_start">2026-11-13</field>
+      <field name="date_end">2027-02-12</field>
+    </record>
+  </data>
+
+</odoo>

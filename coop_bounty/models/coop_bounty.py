@@ -1,24 +1,47 @@
 # -*- coding: utf-8 -*-
+from datetime import timedelta
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
+# Способы оплаты задачи (решения 515, 671 п. 7, 672). Один перечень на
+# автора, исполнителя и налоговый реестр: `tokens` читает coop_tax, и
+# значение менять нельзя.
+PAYMENT_METHODS = [
+    ('rub_offset', '₽ с зачётом токенами'),
+    ('tokens', 'Токены платформы'),
+    ('rub', '₽'),
+    ('project_tokens', 'Токены проекта'),
+    ('share', 'Доля в проекте'),
+]
+
+# Состояния, в которых сумма задачи платформы отложена в фонде.
+RESERVED_STATES = ('published', 'assigned', 'submitted', 'dispute')
+
+# Сколько дней автор может молчать после сдачи (решение 671 п. 4).
+DISPUTE_AFTER_DAYS = 7
+
 
 class CoopBountyTask(models.Model):
-    """Задание рабочей группы, которое может взять любой участник.
+    """Задача, которую может взять любой участник.
 
-    Устроено как на бирже фриланса и по образцу баунти: рабочая группа
-    публикует задачу с вознаграждением, участники подают заявки, менеджер
-    сообщества утверждает исполнителя, тот сдаёт работу, менеджер её
-    принимает — и только тогда токены зачисляются.
+    Автор — платформа или организация проекта — отмечает допустимые
+    способы оплаты, участники подают заявки и выбирают в них один способ,
+    автор утверждает исполнителя, тот сдаёт результат, автор принимает.
+    Задача платформы оплачивается из фонда и публикуется только после
+    резерва полной суммы; задачу проекта оплачивает сама организация —
+    рублями, своими токенами (правом требования продукции) или долей.
 
     Почему зачисление именно при приёмке, а не при сдаче. Между «я сделал»
-    и «работа принята» помещается всё, ради чего приёмка и существует;
-    зачислять раньше значит платить за заявление о работе, а не за работу.
+    и «результат принят» помещается всё, ради чего приёмка и существует;
+    зачислять раньше значит платить за заявление, а не за результат.
     Отменить зачисление потом нельзя — движения токенов не удаляются, они
-    и есть история.
+    и есть история. Молчание автора после сдачи — не приёмка: через семь
+    дней открывается спор, его разбирает администратор платформы
+    (решения 671 п. 4 и 194).
     """
     _name = 'coop.bounty.task'
-    _description = 'Задание за вознаграждение'
+    _description = 'Задача за вознаграждение'
     # Снимок по смыслу задания (решение 341). Прежде лицом карточки был
     # исполнитель, а у свободного задания — пустой квадрат: две трети
     # каталога без картинки.
@@ -29,33 +52,52 @@ class CoopBountyTask(models.Model):
     description = fields.Html(
         string='Что нужно сделать',
         help='Опишите результат, а не процесс: по этому тексту исполнитель '
-             'поймёт, когда работа считается выполненной.')
+             'поймёт, когда задача считается выполненной.')
 
     reward_tokens = fields.Integer(
-        string='Вознаграждение, токенов', required=True, tracking=True,
-        help='Зачисляется исполнителю в кошелёк после приёмки работы.')
-
-    # Решение 515: как платить, выбирает автор задачи. Разница налоговая:
-    # цена в рублях с зачётом токенами — денежный доход на дату зачёта
-    # (пп. 4 п. 1 ст. 223 НК), сразу токенами — натуральный (пп. 2 п. 1
-    # ст. 223), его НДФЛ удерживать не из чего, и он идёт в реестр.
-    payment_mode = fields.Selection([
-        ('rub_offset', 'Цена в ₽, токены зачётом'),
-        ('tokens', 'Токенами'),
-    ], string='Способ оплаты', default='rub_offset', required=True, tracking=True,
-        help='Цена в рублях, токены зачётом — исполнитель получает денежный '
-             'доход на дату зачёта. Токенами — доход в натуральной форме: '
-             'НДФЛ исчисляет тот, кто платит, и удерживает из ближайшей '
-             'денежной выплаты, а не удержанное сообщает в налоговую.')
+        string='Сумма, ₽', tracking=True,
+        help='Для токенов — столько же токенов: 1 токен = 1 ₽ (решение 249). '
+             'Токены проекта — право требования его продукции или услуги на '
+             'эту сумму. При оплате только долей сумма не нужна.')
     reward_rub = fields.Integer(
         string='Цена, ₽', compute='_compute_reward_rub',
         help='1 токен = 1 ₽ (решение 249).')
+
     payer_id = fields.Many2one(
-        'res.partner', string='Кто платит', tracking=True,
+        'res.partner', string='От чьего имени', tracking=True, index=True,
         default=lambda self: self.env.company.partner_id,
         domain=[('is_company', '=', True)],
-        help='Организация, от имени которой опубликована задача: она '
-             'выплачивает вознаграждение и по нему — налоговый агент.')
+        help='Платформа или организация проекта: она оплачивает задачу и '
+             'по ней — налоговый агент.')
+    payer_kind = fields.Selection([
+        ('platform', 'Платформа'),
+        ('project', 'Проект'),
+    ], string='Кто платит', compute='_compute_payer_kind', store=True, index=True)
+    project_id = fields.Many2one(
+        'coop.project', string='Проект', index=True, tracking=True,
+        help='Проект, для которого нужна задача. Платит организация проекта.')
+
+    # Решение 671 п. 7: автор даёт выбор, исполнитель выбирает, в чём ему
+    # удобнее принимать.
+    allowed_method_ids = fields.Many2many(
+        'coop.bounty.method', string='Допустимые способы оплаты',
+        help='Из них исполнитель выберет один в заявке.')
+    allows_share = fields.Boolean(compute='_compute_allows')
+    allows_money = fields.Boolean(compute='_compute_allows')
+    share_percent = fields.Float(
+        string='Доля в проекте, %', digits=(5, 2), tracking=True,
+        help='Форму доли определяет организация по закону своей страны.')
+    share_cap = fields.Float(
+        related='payer_id.coop_labor_share_cap', string='Потолок организации, %')
+    payment_mode = fields.Selection(
+        PAYMENT_METHODS, string='Выбранный способ', tracking=True, readonly=True,
+        help='Способ, который исполнитель выбрал в заявке; закрепляется, '
+             'когда автор утверждает исполнителя.')
+
+    fund_id = fields.Many2one(
+        'coop.bounty.fund', string='Фонд', readonly=True, index=True,
+        help='Фонд платформы, в котором отложена сумма задачи.')
+    fund_free = fields.Integer(related='fund_id.free', string='Свободно в фонде')
 
     coop_specialization_id = fields.Many2one(
         'coop.specialization', string='Специализация',
@@ -67,30 +109,38 @@ class CoopBountyTask(models.Model):
         ('published', 'Опубликовано'),
         ('assigned', 'В работе'),
         ('submitted', 'Сдано на проверку'),
+        ('dispute', 'Спор'),
         ('accepted', 'Принято'),
         ('cancelled', 'Отменено'),
     ], string='Состояние', default='draft', required=True, tracking=True, index=True)
 
     manager_id = fields.Many2one(
         'res.users', string='Разместил', default=lambda self: self.env.user,
-        tracking=True, help='Менеджер сообщества, отвечающий за задачу.')
+        tracking=True, help='Кто разместил задачу от имени автора.')
     assignee_id = fields.Many2one(
         'res.partner', string='Исполнитель', tracking=True, index=True,
-        help='Утверждается менеджером из числа подавших заявку.')
+        help='Утверждается автором из числа подавших заявку.')
 
     application_ids = fields.One2many(
         'coop.bounty.application', 'task_id', string='Заявки')
     application_count = fields.Integer(
         string='Заявок', compute='_compute_application_count')
 
+    submitted_on = fields.Date(string='Сдано', readonly=True)
+    days_to_dispute = fields.Integer(
+        string='Дней до спора', compute='_compute_days_to_dispute')
+    dispute_on = fields.Date(string='Спор открыт', readonly=True)
+    dispute_decision = fields.Text(
+        string='Объяснение решения', readonly=True, tracking=True,
+        help='Решение администратора платформы по спору — видно обеим сторонам.')
     accepted_on = fields.Date(string='Принято', readonly=True)
     reward_transaction_id = fields.Many2one(
         'coop.token.transaction', string='Начисление', readonly=True,
-        help='Движение токенов, которым выплачено вознаграждение.')
+        help='Движение токенов, которым выплачена задача платформы.')
 
     # Признаки для интерфейса. Считаются относительно текущего
     # пользователя, поэтому не хранимые: одна и та же задача выглядит
-    # по-разному для менеджера, исполнителя и постороннего.
+    # по-разному для автора, исполнителя и постороннего.
     my_application_state = fields.Selection([
         ('none', 'Заявки нет'),
         ('applied', 'Заявка подана'),
@@ -98,16 +148,41 @@ class CoopBountyTask(models.Model):
         ('rejected', 'Заявка отклонена'),
     ], string='Моя заявка', compute='_compute_my_application')
     is_mine = fields.Boolean(string='Я исполнитель', compute='_compute_my_application')
+    is_arbiter = fields.Boolean(compute='_compute_is_arbiter')
 
     @api.depends('reward_tokens')
     def _compute_reward_rub(self):
         for record in self:
             record.reward_rub = record.reward_tokens
 
+    @api.depends('payer_id')
+    def _compute_payer_kind(self):
+        platform = self.env.company.partner_id
+        for record in self:
+            record.payer_kind = 'platform' if (
+                not record.payer_id or record.payer_id == platform) else 'project'
+
+    @api.depends('allowed_method_ids')
+    def _compute_allows(self):
+        for record in self:
+            codes = set(record.allowed_method_ids.mapped('code'))
+            record.allows_share = 'share' in codes
+            record.allows_money = bool(codes - {'share'})
+
     @api.depends('application_ids')
     def _compute_application_count(self):
         for record in self:
             record.application_count = len(record.application_ids)
+
+    @api.depends('state', 'submitted_on')
+    def _compute_days_to_dispute(self):
+        today = fields.Date.context_today(self)
+        for record in self:
+            if record.state == 'submitted' and record.submitted_on:
+                left = (record.submitted_on + timedelta(days=DISPUTE_AFTER_DAYS) - today).days
+                record.days_to_dispute = max(left, 0)
+            else:
+                record.days_to_dispute = 0
 
     def _compute_my_application(self):
         me = self.env.user.partner_id
@@ -117,94 +192,215 @@ class CoopBountyTask(models.Model):
                 lambda a: a.partner_id == me)[:1]
             record.my_application_state = application.state if application else 'none'
 
-    # ── Действия менеджера сообщества ────────────────────────────────────
+    def _compute_is_arbiter(self):
+        arbiter = self._coop_is_arbiter()
+        for record in self:
+            record.is_arbiter = arbiter
+
+    @api.model
+    def _coop_is_arbiter(self):
+        """Спор разбирает администратор платформы (решение 194)."""
+        user = self.env.user
+        return user.has_group('coop_base.group_coop_platform') or user.has_group('base.group_system')
+
+    @api.onchange('project_id')
+    def _onchange_project_id(self):
+        if self.project_id and self.project_id.partner_id.is_company:
+            self.payer_id = self.project_id.partner_id
+
+    @api.onchange('payer_kind')
+    def _onchange_payer_kind(self):
+        # Способы другого вида автора не переносятся: токены платформы у
+        # проекта и доля у платформы недопустимы (решение 672).
+        self.allowed_method_ids = self.allowed_method_ids.filtered(
+            lambda m: m.scope in ('both', self.payer_kind))
+
+    def write(self, vals):
+        # Сумма опубликованной задачи платформы отложена в фонде: поменять
+        # её значит разойтись с резервом. Сначала — в черновик.
+        if 'reward_tokens' in vals:
+            locked = self.filtered(lambda t: t.payer_kind == 'platform'
+                                   and t.state in RESERVED_STATES
+                                   and t.reward_tokens != vals['reward_tokens'])
+            if locked:
+                raise UserError(_(
+                    'Сумму опубликованной задачи платформы не меняют: она уже '
+                    'отложена в фонде. Верните задачу в черновик.'))
+        return super().write(vals)
+
+    # ── Действия автора ─────────────────────────────────────────────────
+
+    def _coop_check_publishable(self):
+        self.ensure_one()
+        methods = self.allowed_method_ids
+        if not methods:
+            raise UserError(_(
+                'Отметьте хотя бы один способ оплаты: исполнитель выберет из них.'))
+        foreign = methods.filtered(lambda m: m.scope not in ('both', self.payer_kind))
+        if foreign:
+            raise UserError(_(
+                'Способ «%(method)s» недоступен для задач %(whom)s.',
+                method=foreign[0].name,
+                whom=_('платформы') if self.payer_kind == 'platform' else _('проектов')))
+        if self.allows_money and self.reward_tokens <= 0:
+            raise UserError(_('Укажите сумму: сколько получит исполнитель.'))
+        if self.allows_share:
+            if self.share_percent <= 0:
+                raise UserError(_('Укажите долю в проекте, %.'))
+            cap = self.payer_id.coop_labor_share_cap
+            if cap and self.share_percent > cap:
+                raise UserError(_(
+                    'Доля больше потолка организации (%(cap)s %%). Уменьшите '
+                    'долю, чтобы опубликовать.', cap=cap))
+
+    def _coop_reserve_fund(self):
+        """Отложить сумму задачи платформы в фонде (решение 671 п. 3)."""
+        self.ensure_one()
+        Fund = self.env['coop.bounty.fund'].sudo()
+        fund = self.fund_id or Fund._coop_current()
+        if not fund:
+            raise UserError(_(
+                'Фонда задач платформы на сегодня нет: задачу платформы '
+                'опубликовать не из чего.'))
+        if fund.free < self.reward_tokens:
+            raise UserError(_(
+                'Не хватает фонда: нужно %(need)s токенов, свободно %(free)s. '
+                'Уменьшите сумму.', need=self.reward_tokens, free=fund.free))
+        self.fund_id = fund
 
     def action_publish(self):
         for record in self:
             if record.state != 'draft':
                 raise UserError(_('Опубликовать можно только черновик.'))
-            if record.reward_tokens <= 0:
-                raise UserError(_(
-                    'У задачи без вознаграждения нет смысла: укажите, '
-                    'сколько токенов получит исполнитель.'))
+            record._coop_check_publishable()
+            if record.payer_kind == 'platform':
+                record._coop_reserve_fund()
             record.state = 'published'
         return True
 
     def action_accept(self):
-        """Принять работу и зачислить вознаграждение."""
+        """Принять результат и рассчитаться по выбранному способу."""
         for record in self:
-            if record.state != 'submitted':
-                raise UserError(_('Принять можно только сданную работу.'))
+            if record.state not in ('submitted', 'dispute'):
+                raise UserError(_('Принять можно только сданный результат.'))
             if not record.assignee_id:
                 raise UserError(_('У задачи нет исполнителя.'))
-            transaction = self.env['coop.token.transaction'].sudo().create({
-                'partner_id': record.assignee_id.id,
-                'amount': record.reward_tokens,
-                'kind': 'grant',
-                'description': _('Вознаграждение за задачу «%s»') % record.name,
-                'res_model': record._name,
-                'res_id': record.id,
-            })
-            record.write({
+            values = {
                 'state': 'accepted',
                 'accepted_on': fields.Date.context_today(record),
-                'reward_transaction_id': transaction.id,
-            })
-            record.message_post(body=_(
-                'Работа принята, начислено %(amount)s токенов.',
-                amount=record.reward_tokens))
+            }
+            if record.payer_kind == 'platform':
+                transaction = self.env['coop.token.transaction'].sudo().create({
+                    'partner_id': record.assignee_id.id,
+                    'amount': record.reward_tokens,
+                    'kind': 'grant',
+                    'description': _('Задача «%s»') % record.name,
+                    'res_model': record._name,
+                    'res_id': record.id,
+                })
+                values['reward_transaction_id'] = transaction.id
+                body = _('Результат принят, начислено %(amount)s токенов из фонда задач.',
+                         amount=record.reward_tokens)
+            else:
+                # Платформа не сторона расчётов участников: рубли, токены
+                # проекта и долю передаёт организация.
+                body = _('Результат принят. Расчёт способом «%(method)s» проводит %(payer)s.',
+                         method=dict(PAYMENT_METHODS).get(record.payment_mode, '—'),
+                         payer=record.payer_id.display_name)
+            record.write(values)
+            record.message_post(body=body)
         return True
 
     def action_return_for_revision(self):
         """Вернуть на доработку — без списаний и без потери исполнителя."""
         for record in self:
-            if record.state != 'submitted':
-                raise UserError(_('Вернуть можно только сданную работу.'))
-            record.state = 'assigned'
+            if record.state not in ('submitted', 'dispute'):
+                raise UserError(_('Вернуть можно только сданный результат.'))
+            record.write({'state': 'assigned', 'submitted_on': False})
         return True
 
     def action_cancel(self):
         for record in self:
             if record.state == 'accepted':
                 raise UserError(_(
-                    'Принятую работу отменить нельзя: вознаграждение уже '
-                    'начислено, а движения токенов не удаляются.'))
+                    'Принятую задачу отменить нельзя: расчёт уже проведён, а '
+                    'движения токенов не удаляются.'))
             record.state = 'cancelled'
+            if record.payer_kind == 'platform' and record.fund_id:
+                record.message_post(body=_('Задача отменена, резерв возвращён в фонд.'))
         return True
 
     def action_reset_to_draft(self):
         for record in self:
             if record.state == 'accepted':
                 raise UserError(_('Принятую задачу нельзя вернуть в черновик.'))
-            record.write({'state': 'draft', 'assignee_id': False})
+            record.write({'state': 'draft', 'assignee_id': False,
+                          'payment_mode': False, 'submitted_on': False})
         return True
 
     # ── Действия участника ───────────────────────────────────────────────
 
     def action_apply(self):
-        """Подать заявку на выполнение задачи."""
+        """Открыть окно заявки: исполнитель выбирает способ оплаты."""
         self.ensure_one()
         if self.state != 'published':
             raise UserError(_('Заявки принимаются только по опубликованным задачам.'))
         me = self.env.user.partner_id
-        existing = self.application_ids.filtered(lambda a: a.partner_id == me)
-        if existing:
+        if self.application_ids.filtered(lambda a: a.partner_id == me):
             raise UserError(_('Вы уже подали заявку по этой задаче.'))
-        self.env['coop.bounty.application'].sudo().create({
-            'task_id': self.id,
-            'partner_id': me.id,
-        })
-        self.message_post(body=_('Подана заявка: %s') % me.display_name)
-        return True
+        methods = self.allowed_method_ids
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Заявка на задачу «%s»') % self.name,
+            'res_model': 'coop.bounty.apply',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_task_id': self.id,
+                'default_method_id': methods.id if len(methods) == 1 else False,
+            },
+        }
 
     def action_submit(self):
-        """Сдать работу на проверку."""
+        """Сдать результат на проверку."""
         self.ensure_one()
         if self.state != 'assigned':
             raise UserError(_('Сдать можно только задачу, взятую в работу.'))
         if self.assignee_id != self.env.user.partner_id:
-            raise UserError(_('Сдать работу может только её исполнитель.'))
-        self.state = 'submitted'
+            raise UserError(_('Сдать результат может только исполнитель.'))
+        # Под sudo: вести задачу исполнитель не вправе, а сдать — да, и
+        # проверка выше пускает только его.
+        self.sudo().write({'state': 'submitted',
+                           'submitted_on': fields.Date.context_today(self)})
+        return True
+
+    # ── Спор ─────────────────────────────────────────────────────────────
+
+    def action_open_dispute_decision(self):
+        self.ensure_one()
+        if not self._coop_is_arbiter():
+            raise UserError(_('Спор разбирает администратор платформы.'))
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Решение по спору'),
+            'res_model': 'coop.bounty.dispute',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_task_id': self.id},
+        }
+
+    @api.model
+    def _cron_open_disputes(self):
+        """Автор молчит семь дней после сдачи — спор, не автоприёмка."""
+        today = fields.Date.context_today(self)
+        limit = today - timedelta(days=DISPUTE_AFTER_DAYS)
+        tasks = self.sudo().search([('state', '=', 'submitted'),
+                                    ('submitted_on', '<=', limit)])
+        for task in tasks:
+            task.write({'state': 'dispute', 'dispute_on': today})
+            task.message_post(body=_(
+                'Автор не ответил за %(days)s дней после сдачи — открыт спор. '
+                'Его разбирает администратор платформы.', days=DISPUTE_AFTER_DAYS))
         return True
 
 
@@ -212,8 +408,8 @@ class CoopBountyApplication(models.Model):
     """Заявка участника на выполнение задачи.
 
     Отдельной записью, а не полем «желающие» у задачи: у заявки есть своё
-    состояние и своя дата, и по отклонённым заявкам видно, кому уже
-    отказывали. Без этого менеджер сообщества каждый раз выбирает вслепую.
+    состояние, своя дата и свой выбранный способ оплаты, и по отклонённым
+    заявкам видно, кому уже отказывали.
     """
     _name = 'coop.bounty.application'
     _description = 'Заявка на задачу'
@@ -225,9 +421,12 @@ class CoopBountyApplication(models.Model):
     partner_id = fields.Many2one(
         'res.partner', string='Участник', required=True,
         ondelete='cascade', index=True)
+    method_id = fields.Many2one(
+        'coop.bounty.method', string='Выбранный способ',
+        help='Один из способов, допустимых автором задачи.')
     message = fields.Text(
-        string='Сопроводительное письмо',
-        help='Чем участник обосновывает, что справится.')
+        string='Сообщение автору',
+        help='Что у вас есть для этой задачи и когда сможете сдать.')
     state = fields.Selection([
         ('applied', 'Подана'),
         ('approved', 'Утверждена'),
@@ -239,31 +438,43 @@ class CoopBountyApplication(models.Model):
         'Участник уже подал заявку по этой задаче.',
     )
 
+    def _coop_check_author(self):
+        """Утверждает и отклоняет тот, кто вправе вести задачу."""
+        for record in self:
+            record.task_id.check_access('write')
+
     def action_approve(self):
         """Утвердить исполнителя.
 
         Остальные заявки по задаче отклоняются автоматически: исполнитель
         один, и оставлять чужие заявки в состоянии «подана» значит держать
-        людей в неведении.
+        людей в неведении. Выбранный в заявке способ закрепляется за
+        задачей.
         """
-        for record in self:
+        self._coop_check_author()
+        for record in self.sudo():
             if record.task_id.state not in ('published', 'assigned'):
                 raise UserError(_(
                     'Утвердить исполнителя можно только по опубликованной задаче.'))
             others = record.task_id.application_ids - record
             others.filtered(lambda a: a.state == 'applied').write({'state': 'rejected'})
             record.state = 'approved'
+            method = record.method_id or record.task_id.allowed_method_ids[:1]
             record.task_id.write({
                 'assignee_id': record.partner_id.id,
                 'state': 'assigned',
+                'payment_mode': method.code or False,
             })
             record.task_id.message_post(body=_(
-                'Исполнителем утверждён %s') % record.partner_id.display_name)
+                'Исполнителем утверждён %(who)s, способ оплаты — %(method)s.',
+                who=record.partner_id.display_name, method=method.name or '—'))
         return True
 
     def action_reject(self):
-        for record in self:
+        self._coop_check_author()
+        for record in self.sudo():
             record.state = 'rejected'
             if record.task_id.assignee_id == record.partner_id:
-                record.task_id.write({'assignee_id': False, 'state': 'published'})
+                record.task_id.write({'assignee_id': False, 'state': 'published',
+                                      'payment_mode': False})
         return True
