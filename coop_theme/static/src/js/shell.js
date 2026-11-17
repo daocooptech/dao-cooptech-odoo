@@ -303,6 +303,7 @@ const SUBNAV_EXACT = {
     "Продвижение": "speakerphone",
     // Проекты.
     "Каталог проектов": "layout-cards",
+    "Краудсорсинг": "list-details",
     "Я инициатор": "user-star",
     "Я участвую": "users-plus",
     "Управление проектами": "layout-kanban",
@@ -390,7 +391,8 @@ const SUBNAV_EXACT = {
     "Майнеры": "pick",
     // Помощь проекту.
     "Заявки": "clipboard-text",
-    "Фонд задач": "building-bank",
+    // Был «building-bank» — значок раздела «Организации».
+    "Фонд задач": "gift",
     "Подписка на задачи": "bell-search",
     // Сообщества.
     "Каталог сообществ": "friends",

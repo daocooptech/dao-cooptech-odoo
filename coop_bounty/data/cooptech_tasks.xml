@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Задачи нашего проекта из списка задач платформы (решение 690):
+       при каждом обновлении модуля список `cooptech_tasks.json` сверяется
+       с краудсорсингом — новые публикуются, ушедшие из списка снимаются.
+       Список снимает `tools/vault_tasks.py`. -->
+  <function model="coop.bounty.task" name="_coop_sync_cooptech_tasks"/>
+</odoo>

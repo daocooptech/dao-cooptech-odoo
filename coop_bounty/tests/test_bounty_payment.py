@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from ast import literal_eval
 from datetime import timedelta
 
 from odoo import fields
@@ -275,3 +276,69 @@ class TestBountyPublicPage(HttpCase):
         self.assertIn('Критерии приёмки', page.text)
         self.assertIn('Токен цеха', page.text)
         self.assertIn('/help-project/task/%s/apply' % task.id, page.text)
+
+
+@tagged('post_install', '-at_install')
+class TestCrowdCard(BountyCase):
+    """Краудсорсинг: каталог проектов, карточка, задачи из списка (№ 466)."""
+
+    def test_project_counts_and_catalog(self):
+        task = self.Task.create({
+            'name': 'Вывеска пекарни', 'payer_id': self.org.id, 'project_id': self.project.id,
+            'reward_tokens': 700, 'criterion_ids': CRITERIA,
+        })
+        action = self.env.ref('coop_bounty.action_coop_crowd_projects')
+        Project = self.env['coop.project']
+        self.assertNotIn(self.project, Project.search(literal_eval(action.domain)),
+                         'черновик задачи проект в каталог краудсорсинга не приводит')
+        task.action_publish()
+        self.project.invalidate_recordset()
+        self.assertEqual(self.project.coop_crowd_open_count, 1)
+        self.assertEqual(self.project.coop_crowd_open_tokens, 700)
+        self.assertIn(self.project, Project.search(literal_eval(action.domain)))
+        self._apply_and_approve(task, 'project_tokens')
+        self.project.invalidate_recordset()
+        self.assertEqual((self.project.coop_crowd_open_count, self.project.coop_crowd_work_count),
+                         (0, 1))
+        card = self.project.action_coop_crowd_card()
+        self.assertEqual(card['views'][0][0],
+                         self.env.ref('coop_bounty.view_coop_project_crowd_form').id)
+        self.assertEqual(task.action_coop_open_card()['res_id'], task.id)
+
+    def test_help_project_is_our_card(self):
+        action = self.env['coop.project']._coop_action_help_project()
+        ours = self.env.ref('coop_bounty.project_cooptech')
+        self.assertEqual(action['res_id'], ours.id)
+        self.assertEqual(action['name'], 'Помощь проекту')
+        self.assertTrue(ours.coop_is_cooptech)
+        self.assertFalse(self.project.coop_is_cooptech)
+
+    def test_sync_cooptech_tasks(self):
+        self.fund.amount = 200000
+        ours = self.env.ref('coop_bounty.project_cooptech')
+        Task = self.Task.sudo()
+        stale = Task.create({
+            'name': 'Сделанная задача из списка', 'project_id': ours.id,
+            'reward_tokens': 100, 'criterion_ids': CRITERIA,
+            'allowed_method_ids': [(6, 0, self.m['tokens'].ids)],
+            'coop_source_ref': 'vault:999999',
+        })
+        stale.action_publish()
+        self.Task._coop_sync_cooptech_tasks()
+        synced = Task.search([('coop_source_ref', '!=', False), ('project_id', '=', ours.id),
+                              ('id', '!=', stale.id)])
+        self.assertGreaterEqual(len(synced), 90, 'открытые задачи списка — в нашем проекте')
+        self.assertEqual(stale.state, 'cancelled', 'ушедшая из списка открытая задача снята')
+        published = synced.filtered(lambda t: t.state == 'published')
+        self.assertTrue(published)
+        for task in published[:10]:
+            self.assertEqual(task.payer_kind, 'platform')
+            self.assertEqual(task.allowed_method_ids.mapped('code'), ['tokens'])
+            self.assertTrue(task.criterion_ids)
+            self.assertTrue(task.fund_id)
+        count = len(synced)
+        self.Task._coop_sync_cooptech_tasks()
+        self.assertEqual(Task.search_count([('coop_source_ref', '!=', False),
+                                            ('project_id', '=', ours.id),
+                                            ('id', '!=', stale.id)]), count,
+                         'повторная сверка задач не плодит')

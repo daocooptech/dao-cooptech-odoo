@@ -10,12 +10,14 @@
 страны. Наш проект — ДАО КООПТЕХ — платит токенами услуг платформы из
 фонда задач.
 
-«Помощь проекту» на сайте — страница нашего проекта: его задачи из
-краудсорсинга и пожертвования.
+«Краудсорсинг» в кабинете — подраздел «Проектов»: каталог проектов с
+задачами и карточка проекта по краудсорсингу (токен, экономика токена,
+задачи). «Помощь проекту» в подвале кабинета — карточка нашего проекта;
+на сайте `/help-project` — его задачи и пожертвования.
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.3.0',
+    'version': '20.0.1.4.1',
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_tokens', 'coop_theme', 'coop_orgs', 'coop_deals',
                 'coop_profile', 'website', 'mail'],
@@ -26,6 +28,7 @@
         'views/coop_bounty_website.xml',
         'views/coop_bounty_task_page.xml',
         'security/ir.access.csv',
+        'data/cooptech_tasks.xml',
     ],
     'assets': {
         'web.assets_frontend': [

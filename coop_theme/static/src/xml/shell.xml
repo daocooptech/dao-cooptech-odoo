@@ -332,7 +332,8 @@
 
   <t t-name="coop_theme.Footer">
     <div class="o_coop_footer">
-      <a href="/help-project">помощь проекту</a>
+      <!-- Карточка нашего проекта в краудсорсинге, внутри кабинета (№ 466). -->
+      <a href="/odoo/help-project">помощь проекту</a>
       <a href="/">о платформе</a>
       <a href="#">правила</a>
       <a href="https://github.com/daocooptech/dao-cooptech-odoo" target="_blank" rel="noopener">разработчикам</a>

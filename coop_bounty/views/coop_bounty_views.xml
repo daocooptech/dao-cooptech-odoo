@@ -641,6 +641,198 @@
   </record>
 
 
+  <!-- ── Краудсорсинг: каталог проектов и карточка проекта (№ 466) ───────
+       Владелец 17.11.2026: «сделать новый пункт меню краудсорсинг, там
+       разместить все проекты, в том числе наш с задачами, такую карточку
+       проекта по краудсорсингу надо разместить в помощь проекту»; пункт —
+       подразделом «Проектов» после «Каталога проектов». -->
+
+  <record id="view_coop_project_crowd_kanban" model="ir.ui.view">
+    <field name="name">coop.project.kanban.crowd</field>
+    <field name="model">coop.project</field>
+    <field name="inherit_id" ref="coop_projects.view_coop_project_kanban"/>
+    <field name="mode">primary</field>
+    <field name="priority">90</field>
+    <field name="arch" type="xml">
+      <xpath expr="/kanban" position="attributes">
+        <attribute name="create">0</attribute>
+        <attribute name="class">o_coop_projects o_coop_crowd_projects</attribute>
+      </xpath>
+      <xpath expr="/kanban" position="inside">
+        <field name="coop_token_symbol"/>
+        <field name="coop_crowd_open_count"/>
+        <field name="coop_crowd_work_count"/>
+        <field name="coop_crowd_done_count"/>
+        <field name="coop_crowd_open_tokens"/>
+      </xpath>
+      <!-- Вместо шкалы сбора и «Участвовать» — то, ради чего сюда
+           приходят: сколько задач открыто и чем за них платят. -->
+      <xpath expr="//div[hasclass('o_coop_readiness')]" position="replace">
+        <div class="o_coop_crowd_token">
+          <field name="coop_token_name"/>
+          <span class="o_coop_crowd_symbol" t-if="record.coop_token_symbol.raw_value">
+            <t t-out="record.coop_token_symbol.value"/>
+          </span>
+        </div>
+        <ul class="o_coop_crowd_stats">
+          <li><b><t t-out="record.coop_crowd_open_count.value"/></b> открыто</li>
+          <li><b><t t-out="record.coop_crowd_work_count.value"/></b> в работе</li>
+          <li><b><t t-out="record.coop_crowd_done_count.value"/></b> принято</li>
+        </ul>
+      </xpath>
+      <xpath expr="//div[hasclass('o_coop_tile_act')]" position="replace">
+        <div class="o_coop_tile_act">
+          <span class="o_coop_bounty_reward" t-if="record.coop_crowd_open_tokens.raw_value">
+            <t t-out="record.coop_crowd_open_tokens.value + ' ' + (record.coop_token_symbol.value or 'токенов') + ' за открытые задачи'"/>
+          </span>
+        </div>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_coop_project_crowd_form" model="ir.ui.view">
+    <field name="name">coop.project.form.crowd</field>
+    <field name="model">coop.project</field>
+    <field name="priority">90</field>
+    <field name="arch" type="xml">
+      <form string="Краудсорсинг" class="o_coop_show o_coop_crowd_card"
+            create="0" edit="0" delete="0" duplicate="0">
+        <field name="coop_is_cooptech" invisible="1"/>
+        <sheet>
+          <!-- Шапка — та же витрина, что у страницы проекта (`ProjectPage`):
+               снимки, вид, название, строка каталога, город, инициатор. -->
+          <section class="coop-show_hero">
+            <div class="coop-gallery">
+              <field name="coop_media_data" widget="coop_media" nolabel="1" readonly="1"/>
+              <span class="coop-gallery_badge">
+                <field name="state" readonly="1" nolabel="1"/>
+              </span>
+            </div>
+            <div class="coop-show_info">
+              <div class="coop-show_kicker">
+                <span>Краудсорсинг</span>
+                <field name="kind" readonly="1" nolabel="1" class="coop-pj_kind"/>
+              </div>
+              <div class="oe_title">
+                <h1 class="coop-show_title"><field name="name" readonly="1" nolabel="1"/></h1>
+              </div>
+              <field name="summary" class="coop-pj_lead" readonly="1" nolabel="1"
+                     invisible="not summary"/>
+              <ul class="coop-show_meta">
+                <li class="coop-meta_city" invisible="not city">
+                  <field name="city" readonly="1" nolabel="1"/>
+                </li>
+              </ul>
+              <hr class="coop-show_rule"/>
+              <div class="coop-price">
+                <span class="coop-price_label">Оплата задач</span>
+                <span class="coop-price_value">
+                  <field name="coop_token_name" readonly="1" nolabel="1"/>
+                </span>
+                <span class="coop-price_note" invisible="not coop_token_symbol">
+                  <field name="coop_token_symbol" readonly="1" nolabel="1"/>
+                </span>
+              </div>
+              <ul class="o_coop_crowd_stats o_coop_crowd_stats_big">
+                <li><b><field name="coop_crowd_open_count" readonly="1" nolabel="1"/></b> открыто</li>
+                <li><b><field name="coop_crowd_work_count" readonly="1" nolabel="1"/></b> в работе</li>
+                <li><b><field name="coop_crowd_done_count" readonly="1" nolabel="1"/></b> принято</li>
+                <li><b><field name="coop_token_issued" readonly="1" nolabel="1"/></b> токенов начислено</li>
+              </ul>
+              <div class="coop-pj_owner">
+                <div class="coop-pj_who">
+                  <field name="partner_id" widget="many2one_avatar" nolabel="1" readonly="1"/>
+                  <span class="coop-pj_owner_note">инициатор</span>
+                </div>
+              </div>
+              <div class="coop-show_acts">
+                <button name="action_coop_crowd_tasks" type="object" string="Все задачи проекта"
+                        class="btn-primary"/>
+                <button name="action_coop_open_project_page" type="object"
+                        string="Страница проекта" class="btn-secondary"
+                        invisible="coop_is_cooptech"/>
+              </div>
+            </div>
+          </section>
+
+          <div class="o_coop_crowd_block">
+            <h2 class="o_coop_crowd_head">Экономика токена</h2>
+            <p class="text-muted">Проект раскрывает её сам — в рамках законов своей страны.</p>
+            <field name="coop_token_economy" readonly="1" nolabel="1"/>
+          </div>
+
+          <div class="o_coop_crowd_block">
+            <h2 class="o_coop_crowd_head">Задачи проекта</h2>
+            <!-- Плитка открывает полную карточку задачи в кабинете, а не
+                 окно поверх карточки проекта: там заявка, критерии, сдачи. -->
+            <field name="coop_bounty_task_ids" mode="kanban" readonly="1" nolabel="1">
+              <kanban action="action_coop_open_card" type="object" class="o_coop_crowd_tasks">
+                <field name="state"/>
+                <field name="reward_tokens"/>
+                <field name="token_unit"/>
+                <field name="coop_specialization_id"/>
+                <field name="deadline"/>
+                <field name="application_count"/>
+                <templates>
+                  <t t-name="card">
+                    <div class="o_coop_listing o_coop_bounty_card">
+                      <div class="o_coop_listing_body">
+                        <div class="o_coop_listing_title"><field name="name"/></div>
+                        <div class="o_coop_listing_meta">
+                          <span><field name="state"/></span>
+                          <span t-if="record.coop_specialization_id.raw_value"> · <field name="coop_specialization_id"/></span>
+                          <span t-if="record.application_count.raw_value"> · заявок: <t t-out="record.application_count.value"/></span>
+                        </div>
+                        <div class="mt-2 d-flex justify-content-between align-items-center">
+                          <span class="o_coop_bounty_reward">
+                            <t t-out="record.reward_tokens.value"/> <t t-out="record.token_unit.value"/>
+                          </span>
+                          <span class="text-muted small" t-if="record.deadline.raw_value">
+                            до <field name="deadline"/>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </t>
+                </templates>
+              </kanban>
+            </field>
+          </div>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_coop_crowd_projects" model="ir.actions.act_window">
+    <field name="name">Краудсорсинг</field>
+    <field name="res_model">coop.project</field>
+    <field name="path">crowdsourcing</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="domain">[('coop_bounty_task_ids', '!=', False)]</field>
+    <field name="context">{'bin_size': True, 'coop_catalog': True, 'coop_shelf_field': 'category_id'}</field>
+    <field name="view_ids" eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_coop_project_crowd_kanban')}),
+        (0, 0, {'view_mode': 'list', 'view_id': ref('coop_projects.view_coop_project_list')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('view_coop_project_crowd_form')})]"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Задач у проектов пока нет</p>
+      <p>Проекты ставят здесь задачи и платят за них своими токенами.</p>
+    </field>
+  </record>
+
+  <!-- «Помощь проекту» в подвале кабинета — карточка нашего проекта. -->
+  <record id="action_coop_help_project" model="ir.actions.server">
+    <field name="name">Помощь проекту</field>
+    <field name="model_id" ref="coop_projects.model_coop_project"/>
+    <field name="path">help-project</field>
+    <field name="state">code</field>
+    <field name="code">action = model._coop_action_help_project()</field>
+  </record>
+
+  <menuitem id="menu_coop_crowd_projects" name="Краудсорсинг"
+            parent="coop_projects.menu_coop_projects_root"
+            action="action_coop_crowd_projects" sequence="12"/>
+
   <menuitem id="menu_coop_bounty_root" name="Краудсорсинг" sequence="145"/>
   <menuitem id="menu_coop_bounty_task" name="Задачи"
             parent="menu_coop_bounty_root" action="action_coop_bounty_task" sequence="10"/>

@@ -407,7 +407,7 @@ def load_project_tasks(env, Task, methods, specializations):
         payer = project.partner_id
         if own_orgs and index % 5 == 1:
             payer = own_orgs[(index // 5) % len(own_orgs)]
-            project = Project.search([('partner_id', '=', payer.id)], limit=1)
+            project = _org_crowd_project(env, payer)
             name = '%s — %s' % (title, project.name if project else payer.name)
         else:
             name = '%s — «%s»' % (title, project.name)
@@ -647,9 +647,52 @@ def _demo_project_tokens(env):
     return projects
 
 
+def _org_crowd_project(env, org):
+    """Проект организации для её задач в краудсорсинге (решение 690).
+
+    У организаций витринного человека (ПК «Родник», ОАО «Вектор
+    Инжиниринг») проектов не было, и их задачи висели без проекта — а
+    без проекта задачу в краудсорсинге не опубликовать. Проект заводится
+    запущенным, с порогом 100 %: при пороге по умолчанию (70 %) запущенный
+    проект требует плана на неполный сбор, и на этом падала загрузка.
+    """
+    Project = env['coop.project'].sudo()
+    project = Project.search([('partner_id', '=', org.id)], order='id', limit=1)
+    if project:
+        return project
+    cooperative = (org.coop_legal_form_id.code in ('pk', 'spk', 'artel')
+                   or (org.name or '').startswith(('ПК ', 'СПК ')))
+    short = (org.name or '').split('«')[-1].rstrip('»') or org.name
+    try:
+        with env.cr.savepoint():
+            return Project.create({
+                'name': 'Развитие %s' % org.name,
+                'partner_id': org.id,
+                'kind': 'cooperative' if cooperative else 'commercial',
+                'state': 'running',
+                'funding_rule': 'threshold',
+                'funding_threshold': 100,
+                'fallback_plan': 'Задачи выполняются по мере сбора: сначала те, '
+                                 'на которые хватает собранного.',
+                'city': org.city,
+                'summary': 'Задачи %s в краудсорсинге: оплата токенами проекта.' % org.name,
+                'coop_token_name': 'Токен «%s»' % short,
+                'coop_token_symbol': ''.join(w[0] for w in short.split() if w[:1].isalpha())[:4].upper() or 'ТП',
+                'coop_token_economy': TOKEN_ECONOMY[org.id % len(TOKEN_ECONOMY)],
+            })
+    except Exception:
+        _logger.exception('Проект для задач «%s» не заведён', org.name)
+        return Project
+
+
 def _demo_tasks_to_projects(env, Task, methods):
     """Сгенерированные задачи «платформы» — задачами проектов (решение 690):
     у нашего проекта остаются только настоящие задачи."""
+    # Задачи организаций без проекта — в проект организации.
+    for task in Task.search([('payer_kind', '=', 'project'), ('project_id', '=', False)]):
+        project = _org_crowd_project(env, task.payer_id)
+        if project:
+            task.with_context(coop_bounty_skip_fund_lock=True).write({'project_id': project.id})
     names = {name for name, *_rest in more_tasks()} | {row[0] for row in EXTRA_PLATFORM}
     projects = _demo_project_tokens(env)
     if not projects:

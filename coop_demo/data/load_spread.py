@@ -462,7 +462,11 @@ def spread_all(env):
     # Карточки рабочих проектов (№ 455) не раздаём: их инициатор — заказчик
     # проекта в управлении, и пересадка разорвала бы эту связь (а сбор
     # инвестиций организации у человека запрещён проверкой модели).
-    own_cards = [('import_key', 'not =like', 'work-card#%')]
+    # Инвестиционные — тоже: их ведёт только организация. Раньше их не
+    # задевало случайно, по счёту; два проекта организаций для задач
+    # краудсорсинга (№ 466) сдвинули счёт, и загрузка упала на проверке.
+    own_cards = [('import_key', 'not =like', 'work-card#%'),
+                 ('contribution_basis', '!=', 'investment')]
     total['projects_of_people'] = _top_up_people(
         env, 'coop.project', 'partner_id', keep_for_organizations=70,
         domain=own_cards)

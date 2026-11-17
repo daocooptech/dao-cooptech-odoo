@@ -12,3 +12,72 @@
 }
 
 .o_coop_bounty_card { gap: 12px; }
+
+// ── Краудсорсинг: плитка проекта и карточка проекта (№ 466) ──────────────
+
+// Токен вместо шкалы сбора: им платят за задачи проекта.
+.o_coop_crowd_token {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 8px;
+  font: 600 13px/1.3 'Manrope', sans-serif;
+  color: var(--coop-ink);
+}
+
+.o_coop_crowd_symbol {
+  padding: 1px 8px;
+  border-radius: var(--coop-radius-pill);
+  background: var(--coop-teal-tint);
+  color: var(--coop-teal-dark);
+  font-size: 12px;
+}
+
+.o_coop_crowd_stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--coop-slate);
+  font-size: 13px;
+
+  b {
+    color: var(--coop-ink);
+    font-family: 'Manrope', sans-serif;
+  }
+}
+
+.o_coop_crowd_stats_big {
+  gap: 8px 24px;
+  margin: 12px 0;
+  font-size: 14px;
+
+  b { font-size: 20px; margin-right: 4px; }
+}
+
+.o_coop_crowd_projects .o_coop_tile_act .o_coop_bounty_reward {
+  font: 700 13px/1 'Manrope', sans-serif;
+  color: var(--coop-teal-dark);
+}
+
+.o_coop_crowd_card {
+  .o_coop_crowd_block {
+    margin-top: 32px;
+  }
+
+  .o_coop_crowd_head {
+    margin: 0 0 8px;
+    font: 700 20px/1.3 'Manrope', sans-serif;
+    color: var(--coop-ink);
+  }
+
+  // Задачи проекта — та же сетка плиток, что в каталогах.
+  .o_coop_crowd_tasks.o_kanban_renderer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+    padding: 0;
+  }
+}
