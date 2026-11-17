@@ -671,9 +671,6 @@
       <xpath expr="//div[hasclass('o_coop_readiness')]" position="replace">
         <div class="o_coop_crowd_token">
           <field name="coop_token_name"/>
-          <span class="o_coop_crowd_symbol" t-if="record.coop_token_symbol.raw_value">
-            <t t-out="record.coop_token_symbol.value"/>
-          </span>
         </div>
         <ul class="o_coop_crowd_stats">
           <li><b><t t-out="record.coop_crowd_open_count.value"/></b> открыто</li>
