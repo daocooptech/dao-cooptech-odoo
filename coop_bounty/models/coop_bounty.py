@@ -55,10 +55,9 @@ class CoopBountyTask(models.Model):
              'поймёт, когда задача считается выполненной.')
 
     reward_tokens = fields.Integer(
-        string='Сумма, ₽', tracking=True,
-        help='Для токенов — столько же токенов: 1 токен = 1 ₽ (решение 249). '
-             'Токены проекта — право требования его продукции или услуги на '
-             'эту сумму. При оплате только долей сумма не нужна.')
+        string='Сумма, токенов', tracking=True,
+        help='Сколько токенов своего проекта получит исполнитель (решение 690). '
+             'У нашего проекта — токены услуг платформы из фонда задач.')
     reward_rub = fields.Integer(
         string='Цена, ₽', compute='_compute_reward_rub',
         help='1 токен = 1 ₽ (решение 249).')
@@ -363,11 +362,19 @@ class CoopBountyTask(models.Model):
                 body = _('Результат принят, начислено %(amount)s токенов из фонда задач.',
                          amount=record.reward_tokens)
             else:
-                # Платформа не сторона расчётов участников: рубли, токены
-                # проекта и долю передаёт организация.
-                body = _('Результат принят. Расчёт способом «%(method)s» проводит %(payer)s.',
-                         method=dict(PAYMENT_METHODS).get(record.payment_mode, '—'),
-                         payer=record.payer_id.display_name)
+                # Токены проекта — учёт в узле (решения 668, 690); их
+                # экономику проект раскрывает сам.
+                project = record.project_id
+                if project:
+                    self.env['coop.project.token.move'].sudo().create({
+                        'project_id': project.id,
+                        'partner_id': record.assignee_id.id,
+                        'amount': record.reward_tokens,
+                        'task_id': record.id,
+                        'description': _('Задача «%s»') % record.name,
+                    })
+                body = _('Результат принят, начислено %(amount)s %(unit)s.',
+                         amount=record.reward_tokens, unit=record.token_unit)
             record.write(values)
             record.submission_ids.sudo().filtered(lambda s: s.state == 'review').write({
                 'state': 'accepted', 'reviewed_on': fields.Date.context_today(record)})

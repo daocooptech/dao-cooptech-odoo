@@ -183,11 +183,7 @@ TASKS = TASKS + more_tasks()
 
 # Наборы способов у задач платформы (решение 671 п. 7): оба способа,
 # только токены, только зачётом в рублях.
-PLATFORM_METHOD_SETS = [
-    lambda m: [m['rub_offset'].id, m['tokens'].id],
-    lambda m: [m['tokens'].id],
-    lambda m: [m['rub_offset'].id],
-]
+PLATFORM_METHOD_SETS = [lambda m: [m['tokens'].id]] * 3
 
 # Решения администратора по спорам, закрытым в пользу исполнителя
 # (решение 194: решение записывается с объяснением).
@@ -266,10 +262,8 @@ PROJECT_TEMPLATES = [
      'согласована.'),
 ]
 
-PROJECT_METHOD_SETS = [
-    ('rub',), ('project_tokens',), ('share',), ('rub', 'project_tokens'),
-    ('rub', 'share'), ('project_tokens', 'share'), ('rub', 'project_tokens', 'share'),
-]
+# Решение 690: задачи проекта — только его токенами.
+PROJECT_METHOD_SETS = [('project_tokens',)]
 PROJECT_STATES = ['published', 'published', 'published', 'draft', 'assigned',
                   'submitted', 'dispute', 'accepted', 'accepted', 'cancelled',
                   'published', 'dispute_resolved']
@@ -622,6 +616,73 @@ def load_bounty_flow(env, Task):
         })
 
 
+# ── Краудсорсинг (решение 690): токены проектов, задачи — проектам ───────
+
+TOKEN_ECONOMY = [
+    '<p>1 токен — право получить продукцию проекта на 1 ₽ по прайсу проекта. '
+    'Погашается продукцией до конца следующего сезона, в деньги не обменивается.</p>',
+    '<p>Токен учитывает вклад в проект. Когда проект оформит юрлицо, вклад '
+    'держателей оценивается и учитывается в уставном капитале — по закону '
+    'страны проекта.</p>',
+    '<p>1 токен — час услуг проекта по его прайсу. Действует год с начисления, '
+    'передаётся другим участникам платформы.</p>',
+]
+
+
+def _demo_project_tokens(env):
+    """Токены у демо-проектов — каждый описывает свой сам."""
+    projects = env['coop.project'].sudo().search(
+        [('partner_id.is_company', '=', True), ('state', 'in', ('gathering', 'running'))],
+        order='id', limit=40)
+    for index, project in enumerate(projects):
+        if project.coop_token_name:
+            continue
+        letters = ''.join(word[0] for word in project.name.replace('«', ' ').replace('»', ' ').split()
+                          if word[:1].isalpha())[:4].upper()
+        project.write({
+            'coop_token_name': 'Токен «%s»' % project.name,
+            'coop_token_symbol': letters or 'ТП',
+            'coop_token_economy': TOKEN_ECONOMY[index % len(TOKEN_ECONOMY)],
+        })
+    return projects
+
+
+def _demo_tasks_to_projects(env, Task, methods):
+    """Сгенерированные задачи «платформы» — задачами проектов (решение 690):
+    у нашего проекта остаются только настоящие задачи."""
+    names = {name for name, *_rest in more_tasks()} | {row[0] for row in EXTRA_PLATFORM}
+    projects = _demo_project_tokens(env)
+    if not projects:
+        return 0
+    method = methods['project_tokens']
+    moved = 0
+    for index, task in enumerate(Task.search([('payer_kind', '=', 'platform'),
+                                              ('name', 'in', list(names))], order='id')):
+        project = projects[index % len(projects)]
+        values = {'payer_id': project.partner_id.id, 'project_id': project.id, 'fund_id': False,
+                  'allowed_method_ids': [(6, 0, method.ids)]}
+        if task.payment_mode:
+            values['payment_mode'] = 'project_tokens'
+        task.with_context(coop_bounty_skip_fund_lock=True).write(values)
+        task.application_ids.write({'method_id': method.id})
+        moved += 1
+    # Бывшие задачи «только за долю» — без суммы; доля больше не способ
+    # оплаты (решение 690), сумма — в токенах проекта.
+    for task in Task.search([('payer_kind', '=', 'project'), ('reward_tokens', '=', 0)]):
+        task.write({'reward_tokens': (3 + (task.id * 7) % 38) * 100})
+
+    # Принятые задачи проектов — начисление их токенов, если его нет.
+    Move = env['coop.project.token.move'].sudo()
+    for task in Task.search([('payer_kind', '=', 'project'), ('state', '=', 'accepted'),
+                             ('project_id', '!=', False), ('assignee_id', '!=', False)]):
+        if not Move.search_count([('task_id', '=', task.id)]):
+            Move.create({'project_id': task.project_id.id, 'partner_id': task.assignee_id.id,
+                         'amount': task.reward_tokens, 'task_id': task.id,
+                         'date': task.accepted_on or fields.Date.context_today(task),
+                         'description': 'Задача «%s»' % task.name})
+    return moved
+
+
 def grant_admin_roles(env):
     """Выдать администратору стенда все роли платформы.
 
@@ -685,7 +746,8 @@ def load_bounty(env):
         [('coop_is_participant', '=', True), ('is_company', '=', False)],
         order='id', limit=8)
 
-    methods = {m.code: m for m in env['coop.bounty.method'].sudo().search([])}
+    methods = {m.code: m for m in env['coop.bounty.method'].sudo().with_context(
+        active_test=False).search([])}
     created = 0
     for index, (name, description, specialization, reward, state) in enumerate(TASKS):
         task = Task.search([('name', '=', name)], limit=1)
@@ -710,7 +772,8 @@ def load_bounty(env):
             # Состояние у существующей задачи не трогаем: её могли двигать
             # руками, показывая раздел, и откат этого при обновлении
             # модуля выглядел бы как потеря работы.
-            task.write({k: v for k, v in values.items() if k != 'state'})
+            task.write({k: v for k, v in values.items()
+                        if k not in ('state', 'allowed_method_ids')})
             continue
 
         task = Task.create(dict(values, state='draft',
@@ -741,6 +804,7 @@ def load_bounty(env):
 
     created += load_extra_platform_tasks(env, Task, manager, methods, specializations, people)
     created += load_project_tasks(env, Task, methods, specializations)
+    _demo_tasks_to_projects(env, Task, methods)
     load_bounty_flow(env, Task)
     # Просроченные — напоминание и снятие; сданные больше семи дней
     # назад — в спор: так, как это сделают задания по расписанию.

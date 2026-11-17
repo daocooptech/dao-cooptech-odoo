@@ -25,6 +25,7 @@ class CoopBountyMethod(models.Model):
     ], string='Для каких задач', required=True)
     note = fields.Char(string='Пояснение')
     sequence = fields.Integer(default=10)
+    active = fields.Boolean(default=True)
 
     _code_unique = models.Constraint('unique(code)', 'Способ с таким кодом уже есть.')
 

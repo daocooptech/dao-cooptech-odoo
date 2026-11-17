@@ -5,6 +5,7 @@
   <!-- Способы оплаты задачи (решения 515, 671 п. 7, 672). Справочник
        кода: обновляется вместе с модулем, руками не правится. -->
   <record id="method_rub_offset" model="coop.bounty.method">
+    <field name="active" eval="False"/>
     <field name="name">₽ с зачётом токенами</field>
     <field name="code">rub_offset</field>
     <field name="scope">platform</field>
@@ -19,6 +20,7 @@
     <field name="note">Их тратят на услуги платформы — продвижение, подписку; в деньги они не выводятся.</field>
   </record>
   <record id="method_rub" model="coop.bounty.method">
+    <field name="active" eval="False"/>
     <field name="name">₽</field>
     <field name="code">rub</field>
     <field name="scope">project</field>
@@ -33,6 +35,7 @@
     <field name="note">Право получить продукцию или услугу этого проекта. Это не токены платформы.</field>
   </record>
   <record id="method_share" model="coop.bounty.method">
+    <field name="active" eval="False"/>
     <field name="name">Доля в проекте</field>
     <field name="code">share</field>
     <field name="scope">project</field>
@@ -72,6 +75,18 @@
        решения 671 (13.11.2026). Данные, а не код: следующий фонд заводит
        рабочая группа, обновление модуля его не трогает. -->
   <data noupdate="1">
+    <!-- Наш проект в краудсорсинге (решение 690): его задачи — за токены
+         услуг платформы из фонда задач. Экономика токена — по решениям
+         515, 668. -->
+    <record id="project_cooptech" model="coop.project">
+      <field name="name">ДАО КООПТЕХ</field>
+      <field name="partner_id" ref="base.main_partner"/>
+      <field name="kind">dao</field>
+      <field name="coop_token_name">Токен услуг платформы</field>
+      <field name="coop_token_symbol">ТУП</field>
+      <field name="coop_token_economy" type="html"><p>Токен услуг платформы — предоплата услуг платформы ДАО КООПТЕХ: продвижение объявлений, подписка организаций. В деньги не выводится и у продавцов к оплате не принимается.</p><p>Задачи нашего проекта оплачиваются из фонда задач платформы: 100 000 токенов на три месяца; задача публикуется, только когда вся её сумма отложена в фонде.</p><p>Учёт токенов — в базе узла; в сети TON они не выпускаются. 1 токен = 1 ₽ по цене услуг.</p></field>
+    </record>
+
     <record id="fund_2026_11" model="coop.bounty.fund">
       <field name="name">Фонд задач платформы, ноябрь 2026 — февраль 2027</field>
       <field name="amount">100000</field>

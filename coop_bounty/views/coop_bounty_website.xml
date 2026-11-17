@@ -43,12 +43,12 @@
                 чем готов заплатить, а вы выбираете подходящий способ при
                 отклике. Условия видны до заявки.
               </p>
-              <p class="coop-task-legend">Открытые задачи платформы и проектов.
-                Токены платформы — предоплата её услуг (продвижение, подписка),
-                в деньги они не выводятся; токены проекта — право получить его
-                продукцию или услугу.</p>
+              <p class="coop-task-legend">Задачи нашего проекта — ДАО КООПТЕХ. Платим
+                токенами услуг платформы: это предоплата её услуг (продвижение,
+                подписка), в деньги они не выводятся.</p>
 
-              <t t-set="tasks" t-value="request.env['coop.bounty.task'].sudo().search([('state', '=', 'published')], order='deadline asc, id desc', limit=30)"/>
+              <!-- «Помощь проекту» — только наш проект (решение 690). -->
+              <t t-set="tasks" t-value="request.env['coop.bounty.task'].sudo().search([('state', '=', 'published'), ('payer_kind', '=', 'platform')], order='deadline asc, id desc', limit=30)"/>
 
               <div class="coop-task-list" t-if="tasks">
                 <article class="coop-task" t-foreach="tasks" t-as="task">
@@ -65,8 +65,7 @@
                       <span t-if="not task.deadline">без срока</span>
                     </div>
                     <div class="coop-task-methods">
-                      <span class="coop-task-method" t-foreach="task.allowed_method_ids" t-as="method"
-                            t-att-title="method.note"><t t-out="method.name"/></span>
+                      <span class="coop-task-method"><t t-out="task.payment_label"/></span>
                     </div>
                     <div class="coop-task-desc" t-if="task.description">
                       <t t-out="task.description"/>
@@ -75,8 +74,7 @@
                   <div class="coop-task-side">
                     <div class="coop-task-reward" t-if="task.allows_money">
                       <t t-out="task.reward_tokens" t-options="{'widget': 'integer'}"/>
-                      <span class="coop-task-unit" t-if="task.payer_kind == 'platform'">токенов</span>
-                      <span class="coop-task-unit" t-else="">₽</span>
+                      <span class="coop-task-unit"><t t-out="task.token_unit"/></span>
                     </div>
                     <div class="coop-task-reward" t-if="task.allows_share">
                       <t t-out="'%g' % task.share_percent"/>

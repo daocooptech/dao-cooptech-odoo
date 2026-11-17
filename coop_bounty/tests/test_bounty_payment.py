@@ -16,7 +16,8 @@ class BountyCase(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.Task = cls.env['coop.bounty.task']
-        cls.m = {m.code: m for m in cls.env['coop.bounty.method'].search([])}
+        cls.m = {m.code: m for m in cls.env['coop.bounty.method'].with_context(
+            active_test=False).search([])}
         cls.fund = cls.env['coop.bounty.fund'].create({
             'name': 'Фонд для проверки', 'amount': 1000,
             'date_start': fields.Date.today() - timedelta(days=1),
@@ -29,6 +30,9 @@ class BountyCase(TransactionCase):
             'name': 'Пекарня проверочная', 'is_company': True,
             'coop_labor_share_cap': 10, 'city': 'Тула',
         })
+        cls.project = cls.env['coop.project'].create({
+            'name': 'Пекарня — проверка', 'partner_id': cls.org.id,
+            'coop_token_name': 'Токен пекарни', 'coop_token_symbol': 'ХЛБ'})
         cls.person = cls.env['res.partner'].create({'name': 'Исполнитель проверочный'})
         cls.user = cls.env['res.users'].create({
             'name': 'Исполнитель проверочный', 'login': 'bounty_tester',
@@ -36,7 +40,7 @@ class BountyCase(TransactionCase):
             'group_ids': [(4, cls.env.ref('base.group_user').id)],
         })
 
-    def _platform_task(self, reward=300, codes=('rub_offset', 'tokens'), **extra):
+    def _platform_task(self, reward=300, codes=('tokens',), **extra):
         values = {
             'name': 'Задача платформы', 'reward_tokens': reward,
             'allowed_method_ids': [(6, 0, [self.m[c].id for c in codes])],
@@ -78,50 +82,39 @@ class TestBountyPayment(BountyCase):
             task.action_publish()
         self.assertEqual(task.state, 'draft')
 
-    def test_methods_required_and_scoped(self):
+    def test_platform_task_paid_in_platform_tokens(self):
         task = self._platform_task(codes=())
-        with self.assertRaises(UserError):
-            task.action_publish()
-        task.allowed_method_ids = [(6, 0, [self.m['share'].id])]
-        task.share_percent = 5
-        with self.assertRaises(UserError):
-            task.action_publish()
+        task.action_publish()
+        self.assertEqual(task.allowed_method_ids.mapped('code'), ['tokens'],
+                         'задача нашего проекта — токенами услуг платформы')
+        self.assertEqual(task.project_id, self.env.ref('coop_bounty.project_cooptech'))
 
-    def test_project_share_cap(self):
+    def test_project_task_needs_project_token(self):
+        bare = self.env['coop.project'].create({'name': 'Без токена', 'partner_id': self.org.id})
         task = self.Task.create({
-            'name': 'Логотип пекарни', 'payer_id': self.org.id,
-            'allowed_method_ids': [(6, 0, [self.m['share'].id])],
-            'share_percent': 15, 'criterion_ids': CRITERIA,
+            'name': 'Логотип пекарни', 'payer_id': self.org.id, 'project_id': bare.id,
+            'reward_tokens': 500, 'criterion_ids': CRITERIA,
         })
         self.assertEqual(task.payer_kind, 'project')
         self.assertEqual(task.city, 'Тула', 'город задачи проекта — город организации')
         with self.assertRaises(UserError):
             task.action_publish()
-        task.share_percent = 8
+        task.project_id = self.project
         task.action_publish()
-        self.assertEqual(task.state, 'published')
+        self.assertEqual(task.allowed_method_ids.mapped('code'), ['project_tokens'],
+                         'задачи проекта — только его токенами (решение 690)')
         self.assertFalse(task.fund_id, 'задача проекта фонд платформы не трогает')
 
-    def test_project_cannot_pay_platform_tokens(self):
+    def test_project_tokens_credited_on_accept(self):
         task = self.Task.create({
-            'name': 'Сайт пекарни', 'payer_id': self.org.id, 'reward_tokens': 5000,
-            'allowed_method_ids': [(6, 0, [self.m['tokens'].id])], 'criterion_ids': CRITERIA,
-        })
-        with self.assertRaises(UserError):
-            task.action_publish()
-
-    def test_executor_chooses_allowed_method(self):
-        task = self.Task.create({
-            'name': 'Фото продукции', 'payer_id': self.org.id, 'reward_tokens': 3000,
-            'allowed_method_ids': [(6, 0, [self.m['rub'].id, self.m['project_tokens'].id])],
-            'criterion_ids': CRITERIA,
+            'name': 'Фото продукции', 'payer_id': self.org.id, 'project_id': self.project.id,
+            'reward_tokens': 3000, 'criterion_ids': CRITERIA,
         })
         task.action_publish()
         with self.assertRaises(UserError):
             self.env['coop.bounty.apply'].with_user(self.user).create({
                 'task_id': task.id, 'method_id': self.m['share'].id}).action_confirm()
         self._apply_and_approve(task, 'project_tokens')
-        self.assertEqual(task.state, 'assigned')
         self.assertEqual(task.payment_mode, 'project_tokens')
         self._submit(task)
         task.criterion_ids.write({'done': True})
@@ -129,6 +122,10 @@ class TestBountyPayment(BountyCase):
         self.assertEqual(task.state, 'accepted')
         self.assertFalse(task.reward_transaction_id,
                          'токены платформы за задачу проекта не начисляются')
+        move = self.env['coop.project.token.move'].search([('task_id', '=', task.id)])
+        self.assertEqual(move.amount, 3000)
+        self.assertEqual(move.partner_id, self.person)
+        self.assertEqual(self.project.coop_token_issued, 3000)
 
     def test_silence_opens_dispute_and_admin_decides(self):
         task = self._platform_task(reward=200)
@@ -177,7 +174,7 @@ class TestBountyFlow(BountyCase):
     def test_submission_versions_and_return(self):
         task = self._platform_task()
         task.action_publish()
-        self._apply_and_approve(task, 'rub_offset')
+        self._apply_and_approve(task, 'tokens')
         with self.assertRaises(UserError):
             self.env['coop.bounty.submit'].with_user(self.user).create(
                 {'task_id': task.id}).action_confirm()
@@ -262,11 +259,12 @@ class TestBountyPublicPage(HttpCase):
     """Публичная страница задачи: открыта гостю, черновик скрыт."""
 
     def test_public_task_page(self):
-        methods = self.env['coop.bounty.method'].search([('code', '=', 'rub')])
         org = self.env['res.partner'].create({'name': 'Цех проверочный', 'is_company': True})
+        project = self.env['coop.project'].create({
+            'name': 'Цех — проверка', 'partner_id': org.id, 'coop_token_name': 'Токен цеха'})
         task = self.env['coop.bounty.task'].create({
-            'name': 'Задача для страницы', 'payer_id': org.id, 'reward_tokens': 1000,
-            'allowed_method_ids': [(6, 0, methods.ids)], 'criterion_ids': CRITERIA,
+            'name': 'Задача для страницы', 'payer_id': org.id, 'project_id': project.id,
+            'reward_tokens': 1000, 'criterion_ids': CRITERIA,
         })
         draft = self.url_open('/help-project/task/%s' % task.id)
         self.assertEqual(draft.status_code, 404)
@@ -275,4 +273,5 @@ class TestBountyPublicPage(HttpCase):
         self.assertEqual(page.status_code, 200)
         self.assertIn('Задача для страницы', page.text)
         self.assertIn('Критерии приёмки', page.text)
+        self.assertIn('Токен цеха', page.text)
         self.assertIn('/help-project/task/%s/apply' % task.id, page.text)

@@ -97,19 +97,16 @@
               <!-- Решение 671 п. 7: у автора — набор галочек, у
                    исполнителя — один выбор в заявке. Способы другого
                    вида автора не показываются (решение 672). -->
-              <field name="allowed_method_ids" widget="many2many_checkboxes"
-                     domain="[('scope', 'in', ('both', payer_kind))]"
-                     invisible="not coop_can_edit or state != 'draft'"/>
+              <!-- Решение 690: только токены своего проекта — способ
+                   ставится сам при публикации. -->
+              <field name="payment_label"/>
+              <field name="allowed_method_ids" invisible="1"/>
               <!-- Для чтения — метками: галочки показывают и неотмеченные
                    способы, и по тексту не понять, какие допустимы. -->
-              <field name="allowed_method_ids" widget="many2many_tags" readonly="1"
-                     invisible="coop_can_edit and state == 'draft'"/>
+
               <field name="reward_tokens" widget="coop_inline" invisible="not allows_money and state != 'draft'"
                      readonly="not coop_can_edit or state != 'draft'"/>
-              <field name="share_percent" invisible="not allows_share"
-                     readonly="not coop_can_edit or state != 'draft'"/>
-              <field name="share_cap" invisible="not allows_share or not share_cap"/>
-              <field name="payment_mode" invisible="not payment_mode"/>
+              <field name="payment_mode" invisible="1"/>
             </group>
             <group string="Сроки">
               <field name="coop_specialization_id" options="{'no_create': True}" widget="coop_inline" readonly="not coop_can_edit"/>
@@ -125,9 +122,6 @@
                      invisible="not reward_transaction_id"/>
             </group>
           </group>
-          <div invisible="not allows_share" class="text-muted small mb-3">
-            Форму доли определяет организация по закону своей страны.
-          </div>
           <notebook>
             <page string="Описание" name="description">
               <field name="description" placeholder="Опишите результат, а не процесс: по этому тексту исполнитель поймёт, когда задача считается выполненной." widget="coop_block" readonly="not coop_can_edit"/>
@@ -220,10 +214,8 @@
         <field name="payer_id" string="Кто платит" optional="show"/>
         <field name="project_id" optional="hide"/>
         <field name="coop_specialization_id" optional="show"/>
-        <field name="allowed_method_ids" widget="many2many_tags" optional="show"/>
-        <field name="reward_tokens" sum="Всего"/>
-        <field name="share_percent" optional="hide"/>
-        <field name="payment_mode" optional="hide"/>
+        <field name="payment_label" optional="show"/>
+        <field name="reward_tokens"/>
         <field name="deadline"/>
         <field name="assignee_id"/>
         <field name="application_count" string="Заявок"/>
@@ -272,14 +264,10 @@
                 <span t-if="record.coop_specialization_id.raw_value"> · <field name="coop_specialization_id"/></span>
                 <span t-if="record.city.raw_value"> · <field name="city"/></span>
               </div>
-              <div class="o_coop_bounty_methods mt-1">
-                <field name="allowed_method_ids" widget="many2many_tags"/>
-              </div>
+
               <div class="mt-2 d-flex justify-content-between align-items-center">
                 <span class="o_coop_bounty_reward">
-                  <t t-if="record.reward_tokens.raw_value"><field name="reward_tokens"/> <t t-if="record.payer_kind.raw_value == 'platform'">токенов</t><t t-else="">₽</t></t>
-                  <t t-if="record.reward_tokens.raw_value and record.share_percent.raw_value"> · </t>
-                  <t t-if="record.share_percent.raw_value">доля <field name="share_percent"/> %</t>
+                  <field name="reward_tokens"/> <field name="token_unit"/>
                 </span>
                 <field name="assignee_id" widget="many2one_avatar_user"/>
               </div>
@@ -311,19 +299,8 @@
         <filter name="mine" string="Мои задачи"
                 domain="[('assignee_id.user_ids', 'in', [uid])]"/>
         <separator/>
-        <filter name="platform" string="Платформа" domain="[('payer_kind', '=', 'platform')]"/>
+        <filter name="platform" string="Наш проект" domain="[('payer_kind', '=', 'platform')]"/>
         <filter name="projects" string="Проекты" domain="[('payer_kind', '=', 'project')]"/>
-        <separator/>
-        <filter name="pay_offset" string="₽ с зачётом токенами"
-                domain="[('allowed_method_ids.code', '=', 'rub_offset')]"/>
-        <filter name="pay_tokens" string="Токены платформы"
-                domain="[('allowed_method_ids.code', '=', 'tokens')]"/>
-        <filter name="pay_rub" string="₽ от проекта"
-                domain="[('allowed_method_ids.code', '=', 'rub')]"/>
-        <filter name="pay_project_tokens" string="Токены проекта"
-                domain="[('allowed_method_ids.code', '=', 'project_tokens')]"/>
-        <filter name="pay_share" string="Доля в проекте"
-                domain="[('allowed_method_ids.code', '=', 'share')]"/>
         <separator/>
         <filter name="overdue" string="Просроченные"
                 domain="[('deadline', '&lt;', context_today().strftime('%Y-%m-%d')),
@@ -339,15 +316,15 @@
   </record>
 
   <record id="action_coop_bounty_task" model="ir.actions.act_window">
-    <field name="name">Задачи за токены</field>
+    <field name="name">Задачи краудсорсинга</field>
     <field name="res_model">coop.bounty.task</field>
     <field name="path">bounty</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="search_view_id" ref="view_coop_bounty_task_search"/>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Задач пока нет</p>
-      <p>Здесь платформа и проекты размещают задачи. Автор указывает, чем
-         готов заплатить, вы выбираете способ в заявке. Загляните позже.</p>
+      <p>Здесь проекты размещают задачи и платят за них токенами своего
+         проекта. Экономику токена проект описывает сам. Загляните позже.</p>
     </field>
   </record>
 
@@ -363,7 +340,7 @@
         <p class="text-muted">Автор допустил эти способы. Выберите один — он
            закрепится за вами, когда автор вас утвердит.</p>
         <group>
-          <field name="method_id" widget="radio" options="{'no_create': True}"/>
+          <field name="method_id" invisible="1"/>
           <field name="reward_tokens" string="Сумма, ₽" invisible="not method_code or method_code == 'share'"/>
           <field name="share_percent" invisible="method_code != 'share'"/>
           <field name="proposed_deadline"/>
@@ -573,6 +550,30 @@
     </field>
   </record>
 
+  <!-- ── Токен проекта (решение 690) ─────────────────────────────────── -->
+
+  <record id="view_coop_project_form_crowd_token" model="ir.ui.view">
+    <field name="name">coop.project.form.crowd.token</field>
+    <field name="model">coop.project</field>
+    <field name="inherit_id" ref="coop_projects.view_coop_project_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//page[@name='description']" position="after">
+        <page string="Токен проекта" name="crowd_token">
+          <p class="text-muted">Задачи проекта в краудсорсинге оплачиваются только его
+             токенами. Экономику своего токена проект раскрывает сам — в рамках законов
+             своей страны.</p>
+          <group>
+            <field name="coop_token_name" placeholder="Например: токен на продукцию проекта"/>
+            <field name="coop_token_symbol"/>
+            <field name="coop_token_issued"/>
+          </group>
+          <field name="coop_token_economy"
+                 placeholder="Что даёт токен, чем обеспечен, как и когда погашается"/>
+        </page>
+      </xpath>
+    </field>
+  </record>
+
   <!-- ── Фонд задач платформы ───────────────────────────────────────── -->
 
   <record id="view_coop_bounty_fund_list" model="ir.ui.view">
@@ -639,27 +640,8 @@
     <field name="view_mode">list,form</field>
   </record>
 
-  <!-- ── Потолок и форма доли в карточке организации ───────────────── -->
 
-  <record id="view_coop_orgs_form_bounty_share" model="ir.ui.view">
-    <field name="name">res.partner.form.coop.bounty.share</field>
-    <field name="model">res.partner</field>
-    <field name="inherit_id" ref="coop_orgs.view_coop_orgs_form"/>
-    <field name="arch" type="xml">
-      <xpath expr="//field[@name='coop_charter_url']/.." position="after">
-        <div invisible="not coop_can_edit_card and not coop_labor_share_cap">
-          <span class="o_coop_key">Потолок доли за труд, %</span>
-          <field name="coop_labor_share_cap" widget="coop_inline"
-                 readonly="not coop_can_edit_card" placeholder="без потолка"/></div>
-        <div invisible="not coop_can_edit_card and not coop_labor_share_form">
-          <span class="o_coop_key">Форма доли</span>
-          <field name="coop_labor_share_form" widget="coop_inline"
-                 readonly="not coop_can_edit_card" placeholder="не выбрана"/></div>
-      </xpath>
-    </field>
-  </record>
-
-  <menuitem id="menu_coop_bounty_root" name="Помощь проекту" sequence="145"/>
+  <menuitem id="menu_coop_bounty_root" name="Краудсорсинг" sequence="145"/>
   <menuitem id="menu_coop_bounty_task" name="Задачи"
             parent="menu_coop_bounty_root" action="action_coop_bounty_task" sequence="10"/>
   <menuitem id="menu_coop_bounty_application" name="Заявки"
