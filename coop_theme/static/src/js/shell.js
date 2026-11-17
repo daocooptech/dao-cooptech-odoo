@@ -391,6 +391,7 @@ const SUBNAV_EXACT = {
     // Помощь проекту.
     "Заявки": "clipboard-text",
     "Фонд задач": "building-bank",
+    "Подписка на задачи": "bell-search",
     // Сообщества.
     "Каталог сообществ": "friends",
     "Мои сообщества": "circles-relation",

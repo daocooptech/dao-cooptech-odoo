@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Публичная страница задачи (№ 464, п. 1). Устроена как страница
+    «Помощь проекту»: тот же каркас лендинга, те же классы карточки
+    задачи. Порядок — как у витрины записи в дизайн-системе: шапка с
+    автором и условиями, «что нужно сделать», критерии приёмки, форма
+    заявки последней.
+  -->
+  <template id="coop_help_task_page" name="Задача за токены">
+    <t t-set="additional_title" t-value="task.name"/>
+    <t t-call="website.layout">
+      <div id="wrap" class="coop-landing coop-help coop-task-page">
+        <section class="landing-section">
+          <p class="coop-task-crumbs"><a href="/help-project">Помощь проекту</a> / Задачи</p>
+          <h1 class="coop-task-title"><t t-out="task.name"/></h1>
+          <div class="coop-task-meta">
+            <span t-if="task.payer_kind == 'platform'">Платформа</span>
+            <span t-elif="task.project_id"><t t-out="task.project_id.name"/></span>
+            <span t-else=""><t t-out="task.payer_id.name"/></span>
+            <span t-if="task.coop_specialization_id"> · <t t-out="task.coop_specialization_id.name"/></span>
+            <span t-if="task.city"> · <t t-out="task.city"/></span>
+            <span t-if="not task.city"> · удалённо</span>
+            <span t-if="task.deadline"> · до <t t-out="task.deadline" t-options="{'widget': 'date'}"/></span>
+          </div>
+
+          <div class="coop-task-state" t-if="task.state != 'published'">
+            <t t-if="task.state in ('assigned', 'submitted', 'dispute')">Исполнитель выбран — задача в работе.</t>
+            <t t-if="task.state == 'accepted'">Задача выполнена, результат принят.</t>
+          </div>
+
+          <div class="coop-task-terms">
+            <div class="coop-task-reward" t-if="task.allows_money">
+              <t t-out="task.reward_tokens" t-options="{'widget': 'integer'}"/>
+              <span class="coop-task-unit" t-if="task.payer_kind == 'platform'">токенов</span>
+              <span class="coop-task-unit" t-else="">₽</span>
+            </div>
+            <div class="coop-task-reward" t-if="task.allows_share">
+              <t t-out="'%g' % task.share_percent"/>
+              <span class="coop-task-unit">% доли</span>
+            </div>
+            <ul class="coop-task-method-notes">
+              <li t-foreach="task.allowed_method_ids" t-as="method">
+                <b><t t-out="method.name"/></b> — <t t-out="method.note"/>
+              </li>
+            </ul>
+          </div>
+
+          <h2 class="coop-task-h2">Что нужно сделать</h2>
+          <div class="coop-task-desc"><t t-out="task.description"/></div>
+
+          <t t-if="task.criterion_ids">
+            <h2 class="coop-task-h2">Критерии приёмки</h2>
+            <p class="coop-task-legend">По этим пунктам автор примет результат, а при
+              споре их проверит администратор платформы.</p>
+            <ol class="coop-task-criteria">
+              <li t-foreach="task.criterion_ids" t-as="point"><t t-out="point.name"/></li>
+            </ol>
+          </t>
+
+          <!-- ── Заявка ────────────────────────────────────────────── -->
+          <div id="apply" class="coop-task-apply" t-if="task.state == 'published'">
+            <h2 class="coop-task-h2">Взять задачу</h2>
+            <div class="coop-task-error" t-if="error"><t t-out="error"/></div>
+            <t t-if="guest">
+              <p>Заявку подают участники платформы. Войдите — и вернётесь сюда,
+                 к форме заявки.</p>
+              <a class="button" t-attf-href="/help-project/task/#{task.id}/apply">Войти и взять задачу</a>
+            </t>
+            <t t-elif="is_author">
+              <p>Это ваша задача — заявки на неё вы видите в кабинете.</p>
+              <a class="button" t-attf-href="/odoo/bounty/#{task.id}">Открыть в кабинете</a>
+            </t>
+            <t t-elif="my_application or applied">
+              <p class="coop-task-done">Ваша заявка подана — автор утвердит исполнителя.</p>
+            </t>
+            <form t-else="" method="post" t-attf-action="/help-project/task/#{task.id}/apply"
+                  class="coop-task-form">
+              <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+              <fieldset>
+                <legend>Способ оплаты</legend>
+                <p class="coop-task-legend">Автор допустил эти способы. Выберите один — он
+                   закрепится за вами, когда автор вас утвердит.</p>
+                <label class="coop-task-radio" t-foreach="task.allowed_method_ids" t-as="method">
+                  <input type="radio" name="method_id" t-att-value="method.id"
+                         t-att-checked="len(task.allowed_method_ids) == 1 or None" required="required"/>
+                  <t t-out="method.name"/>
+                </label>
+              </fieldset>
+              <label class="coop-task-field" t-foreach="task.question_ids" t-as="question">
+                <span><t t-out="question.name"/><t t-if="question.required"> *</t></span>
+                <textarea t-attf-name="answer_#{question.id}" rows="2"
+                          t-att-required="question.required or None"/>
+              </label>
+              <label class="coop-task-field">
+                <span>Сдам до</span>
+                <input type="date" name="proposed_deadline" t-att-min="today"/>
+              </label>
+              <label class="coop-task-field">
+                <span>Сообщение автору</span>
+                <textarea name="message" rows="3"
+                          placeholder="Что у вас есть для этой задачи и когда сможете сдать"/>
+              </label>
+              <p class="coop-task-legend" t-if="task.allows_share">Форму доли определяет
+                 организация по закону своей страны; конкретную форму мы не обещаем.</p>
+              <button type="submit" class="button">Подать заявку</button>
+            </form>
+          </div>
+        </section>
+      </div>
+    </t>
+  </template>
+
+</odoo>

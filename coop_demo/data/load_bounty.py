@@ -11,6 +11,7 @@
 которая всегда отказывает.
 """
 import logging
+import re
 from datetime import timedelta
 
 from odoo import fields
@@ -212,6 +213,10 @@ EXTRA_PLATFORM = [
     ('Собрать список ярмарок Поволжья на зиму', 'Аналитика, Data Science', 80, 'cancelled'),
     ('Перевести лендинг на узбекский', 'Переводчик', 200, 'cancelled'),
     ('Снять ролик о складчине в Казани', 'Журналистика, СМИ', 160, 'cancelled_assigned'),
+    ('Собрать каталог шаблонов договоров для кооперативов', 'Юрисконсульт', 190, 'overdue'),
+    ('Записать подкаст о паевых взносах', 'Журналистика, СМИ', 110, 'overdue'),
+    ('Перевести справку о спорах на английский', 'Переводчик', 130, 'dropped'),
+    ('Проверить страницу проекта на планшете', 'Тестирование', 70, 'dropped'),
 ]
 
 # Задачи проектов (решение 672): рубли, токены проекта, доля.
@@ -281,18 +286,32 @@ def _drive(task, state, index):
     """
     today = fields.Date.context_today(task)
     if state in ('submitted', 'accepted', 'dispute', 'dispute_resolved'):
+        if index % 4 == 0:
+            # Каждая четвёртая — со второй версией: первую вернули с замечаниями.
+            task._coop_do_submit(_link(task, 1), SUBMIT_NOTES[index % len(SUBMIT_NOTES)])
+            task._coop_do_return(RETURN_NOTES[index % len(RETURN_NOTES)])
+        task._coop_do_submit(_link(task, len(task.submission_ids) + 1),
+                             SUBMIT_NOTES[(index + 1) % len(SUBMIT_NOTES)])
         days = 8 + index % 22 if state.startswith('dispute') else index % 6
-        task.write({'state': 'submitted', 'submitted_on': today - timedelta(days=days)})
+        task.write({'submitted_on': today - timedelta(days=days)})
     if state == 'accepted':
+        task.criterion_ids.write({'done': True})
         task.action_accept()
+    elif state == 'dispute':
+        task.criterion_ids[:1].write({'done': True})
     elif state == 'dispute_resolved':
+        task.criterion_ids[:1].write({'done': True})
         task.write({'state': 'dispute', 'dispute_on': today - timedelta(days=index % 5),
                     'dispute_decision': DISPUTE_DECISIONS[index % len(DISPUTE_DECISIONS)]})
         task.message_post(body='Решение по спору — засчитать в пользу исполнителя: %s'
                           % task.dispute_decision)
-        task.action_accept()
+        task.with_context(coop_bounty_force_accept=True).action_accept()
     elif state == 'cancelled_assigned':
         task.action_cancel()
+    elif state == 'overdue':
+        task.write({'deadline': today - timedelta(days=2 + index % 3)})
+    elif state == 'dropped':
+        task.write({'deadline': today - timedelta(days=9 + index % 5)})
 
 
 def _apply(env, task, partner, index, message='Возьмусь, делал похожее.'):
@@ -331,6 +350,7 @@ def load_extra_platform_tasks(env, Task, manager, methods, specializations, peop
         task = Task.create({
             'name': name,
             'description': '<p>%s</p>' % DESCRIPTIONS[index % len(DESCRIPTIONS)],
+            'criterion_ids': _criteria(DESCRIPTIONS[index % len(DESCRIPTIONS)], index),
             'reward_tokens': reward,
             'coop_specialization_id': spec.id if spec else False,
             'manager_id': manager.id,
@@ -419,6 +439,7 @@ def load_project_tasks(env, Task, methods, specializations):
         task = Task.create({
             'name': name,
             'description': '<p>%s</p>' % description,
+            'criterion_ids': _criteria(description, index),
             'payer_id': payer.id,
             'project_id': project.id if project else False,
             'reward_tokens': (3 + (index * 7) % 38) * 1000 if set(codes) - {'share'} else 0,
@@ -446,6 +467,159 @@ def load_project_tasks(env, Task, methods, specializations):
         _apply(env, task, performers[index % len(performers)], index).action_approve()
         _drive(task, state, index)
     return created
+
+
+# ── Ход задачи (№ 464): критерии, вопросы, сдачи, отзывы, подписки ──────
+
+GENERIC_CRITERIA = [
+    'Результат приложен к сдаче или выложен по ссылке',
+    'Исходники переданы автору',
+    'Замечания автора учтены',
+    'Сделано к сроку, указанному в задаче',
+    'Автор может пользоваться результатом без исполнителя',
+]
+
+QUESTIONS = [
+    'Пришлите ссылку на похожий результат',
+    'Сколько часов в неделю готовы уделять задаче?',
+    'Чем будете пользоваться — программы, инструмент, материалы?',
+    'Делали ли задачи для кооперативов или проектов платформы?',
+]
+
+ANSWERS = [
+    'Похожее делал для сельхозкооператива весной, ссылку пришлю в ленту задачи.',
+    'Часов десять в неделю, по вечерам и в субботу.',
+    'Свои программы и инструмент, материалы — по договорённости.',
+    'Да, две задачи на платформе, обе приняты без замечаний.',
+    'Портфолио на странице профиля, последние задачи — сверху.',
+    'Могу начать с понедельника, промежуточный результат — через неделю.',
+]
+
+SUBMIT_NOTES = [
+    'Всё по критериям, исходники в архиве.',
+    'Сделал основное, по второму пункту — два варианта на выбор.',
+    'Готово, проверил на телефоне и компьютере.',
+    'Результат по ссылке, коротко описал, где что лежит.',
+    'Учёл замечания к прошлой версии, изменения отметил в описании.',
+]
+
+RETURN_NOTES = [
+    'Не хватает исходников — приложите, пожалуйста.',
+    'Второй пункт не выполнен: нужен вариант для тёмного фона.',
+    'Поправьте сроки в таблице — сейчас они расходятся с планом.',
+    'Результат хороший, но не учтены два замечания из ленты задачи.',
+]
+
+REVIEWS = {
+    '5': ['Сделано раньше срока и аккуратно, работать приятно.',
+          'Всё по критериям с первой версии, спасибо.',
+          'Отвечали быстро, условия понятные, оплатили сразу.'],
+    '4': ['Хороший результат, одна доработка по мелочи.',
+          'Всё сделано, немного затянули со сроком.'],
+    '3': ['Результат принят, но пришлось дважды напоминать.'],
+    '2': ['Сдано с опозданием, доработки заняли больше задачи.'],
+    '1': ['Результат пришлось переделывать почти целиком.'],
+}
+RATING_ROLL = ['5', '5', '5', '4', '5', '4', '3', '5', '4', '2', '5', '5', '4', '5', '3', '5', '5', '1', '4', '5']
+
+
+def _criteria(description, index):
+    """Критерии из «Готово, когда …» описания плюс один-два общих."""
+    points = []
+    text = description or ''
+    if 'Готово, когда' in text:
+        tail = text.split('Готово, когда', 1)[1].strip().rstrip('.')
+        if tail:
+            points.append(tail[0].upper() + tail[1:])
+    for shift in range(1 + index % 2):
+        points.append(GENERIC_CRITERIA[(index + shift * 2) % len(GENERIC_CRITERIA)])
+    return [(0, 0, {'name': name, 'sequence': (number + 1) * 10})
+            for number, name in enumerate(points)]
+
+
+def _link(task, version):
+    return 'https://cloud.daocoop.tech/s/t%sv%s' % (task.id, version)
+
+
+def load_bounty_flow(env, Task):
+    """Достроить ход у задач, заведённых до № 464: на сервере их 192.
+
+    Только там, где пусто: загрузчик идёт при каждой выкатке и не должен
+    ни дублировать записи, ни переписывать сделанное руками.
+    """
+    Submission = env['coop.bounty.submission'].sudo()
+    Review = env['coop.bounty.review'].sudo()
+    Answer = env['coop.bounty.answer'].sudo()
+    tasks = Task.search([], order='id')
+    for index, task in enumerate(tasks):
+        description = re.sub(r'<[^>]+>', '', str(task.description or ''))
+        if not task.criterion_ids:
+            task.write({'criterion_ids': _criteria(description, index)})
+        if task.state == 'accepted':
+            task.criterion_ids.filtered(lambda c: not c.done).write({'done': True})
+        if not task.question_ids and index % 3 == 0 and task.state in ('draft', 'published'):
+            task.write({'question_ids': [
+                (0, 0, {'name': QUESTIONS[(index + shift) % len(QUESTIONS)],
+                        'sequence': (shift + 1) * 10, 'required': shift == 0})
+                for shift in range(1 + index % 2)]})
+        for number, application in enumerate(task.application_ids):
+            if not application.proposed_deadline and task.deadline and (index + number) % 5:
+                application.proposed_deadline = task.deadline - timedelta(days=(index + number) % 6)
+            if task.question_ids and not application.answer_ids:
+                for shift, question in enumerate(task.question_ids):
+                    Answer.create({'application_id': application.id, 'question_id': question.id,
+                                   'question': question.name,
+                                   'answer': ANSWERS[(index + number + shift) % len(ANSWERS)]})
+        if task.state in ('submitted', 'dispute', 'accepted') and task.assignee_id \
+                and not task.submission_ids:
+            day = task.submitted_on or task.accepted_on
+            if index % 4 == 0:
+                Submission.create({'task_id': task.id, 'partner_id': task.assignee_id.id,
+                                   'version': 1, 'link': _link(task, 1),
+                                   'note': SUBMIT_NOTES[index % len(SUBMIT_NOTES)],
+                                   'state': 'returned', 'reviewed_on': day,
+                                   'review_note': RETURN_NOTES[index % len(RETURN_NOTES)]})
+            version = len(task.submission_ids) + 1
+            Submission.create({'task_id': task.id, 'partner_id': task.assignee_id.id,
+                               'version': version, 'link': _link(task, version),
+                               'note': SUBMIT_NOTES[(index + 1) % len(SUBMIT_NOTES)],
+                               'state': 'accepted' if task.state == 'accepted' else 'review',
+                               'reviewed_on': task.accepted_on if task.state == 'accepted' else False})
+        if task.state == 'accepted' and task.assignee_id and not task.review_ids:
+            # Автор отзывается чаще исполнителя — как в сделках.
+            for side, target, author, chance in (
+                    ('author', task.assignee_id, task.payer_id, index % 7),
+                    ('executor', task.payer_id, task.assignee_id, index % 3)):
+                if not chance:
+                    continue
+                rating = RATING_ROLL[(index + len(side)) % len(RATING_ROLL)]
+                bodies = REVIEWS[rating]
+                Review.create({'task_id': task.id, 'side': side, 'rating': rating,
+                               'author_id': author.id, 'target_id': target.id,
+                               'body': bodies[index % len(bodies)]})
+
+    # Подписки: часть участников и витринный человек.
+    Subscription = env['coop.bounty.subscription'].sudo()
+    specializations = env['coop.specialization'].sudo().search(
+        [('id', 'in', tasks.mapped('coop_specialization_id').ids)], order='id')
+    people = env['res.partner'].sudo().search(
+        [('coop_is_participant', '=', True), ('is_company', '=', False)], order='id', limit=60)
+    showcase = env['res.users'].sudo().search([('login', '=', 'dashkevich')], limit=1).partner_id
+    if showcase and showcase not in people:
+        people |= showcase
+    for index, person in enumerate(people):
+        if not specializations or Subscription.with_context(active_test=False).search_count(
+                [('partner_id', '=', person.id)]):
+            continue
+        chosen = specializations[index % len(specializations)]
+        if index % 2:
+            chosen |= specializations[(index * 7 + 3) % len(specializations)]
+        Subscription.create({
+            'partner_id': person.id,
+            'specialization_ids': [(6, 0, chosen.ids)] if index % 5 else [],
+            'city': person.city if index % 3 else False,
+            'active': bool(index % 9),
+        })
 
 
 def grant_admin_roles(env):
@@ -539,7 +713,8 @@ def load_bounty(env):
             task.write({k: v for k, v in values.items() if k != 'state'})
             continue
 
-        task = Task.create(dict(values, state='draft'))
+        task = Task.create(dict(values, state='draft',
+                                criterion_ids=_criteria(description, index)))
         created += 1
 
         if state == 'published':
@@ -566,9 +741,13 @@ def load_bounty(env):
 
     created += load_extra_platform_tasks(env, Task, manager, methods, specializations, people)
     created += load_project_tasks(env, Task, methods, specializations)
-    # Сданные больше семи дней назад — в спор, как это сделает задание
-    # по расписанию (решение 671 п. 4).
+    load_bounty_flow(env, Task)
+    # Просроченные — напоминание и снятие; сданные больше семи дней
+    # назад — в спор: так, как это сделают задания по расписанию.
+    Task._cron_executor_silence()
     Task._cron_open_disputes()
+    involved = Task.search([('state', '=', 'accepted')])
+    (involved.mapped('assignee_id') | involved.mapped('payer_id'))._coop_recompute_deal_stats()
 
     # Токены на балансы: без них продвижение объявления невозможно, и
     # кнопка в каталоге ресурсов всегда отказывала бы.

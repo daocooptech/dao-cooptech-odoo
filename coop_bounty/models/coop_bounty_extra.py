@@ -84,6 +84,17 @@ class CoopBountyApply(models.TransientModel):
     share_percent = fields.Float(related='task_id.share_percent')
     reward_tokens = fields.Integer(related='task_id.reward_tokens')
     message = fields.Text(string='Сообщение автору')
+    proposed_deadline = fields.Date(string='Сдам до')
+    answer_line_ids = fields.One2many('coop.bounty.apply.answer', 'wizard_id',
+                                      string='Вопросы автора')
+
+    @api.model
+    def default_get(self, fields_list):
+        values = super().default_get(fields_list)
+        task = self.env['coop.bounty.task'].browse(values.get('task_id'))
+        if task and 'answer_line_ids' in fields_list:
+            values['answer_line_ids'] = [(0, 0, {'question_id': q.id}) for q in task.question_ids]
+        return values
 
     def action_confirm(self):
         self.ensure_one()
@@ -95,11 +106,22 @@ class CoopBountyApply(models.TransientModel):
         me = self.env.user.partner_id
         if task.application_ids.filtered(lambda a: a.partner_id == me):
             raise UserError(_('Вы уже подали заявку по этой задаче.'))
+        missing = self.answer_line_ids.filtered(
+            lambda l: l.question_id.required and not (l.answer or '').strip())
+        if missing:
+            raise UserError(_('Ответьте на вопросы автора: %s') % '; '.join(missing.mapped('question')))
+        if self.proposed_deadline and self.proposed_deadline < fields.Date.context_today(self):
+            raise UserError(_('Срок сдачи не может быть в прошлом.'))
         self.env['coop.bounty.application'].sudo().create({
             'task_id': task.id,
             'partner_id': me.id,
             'method_id': self.method_id.id,
             'message': self.message,
+            'proposed_deadline': self.proposed_deadline,
+            'answer_ids': [(0, 0, {'question_id': l.question_id.id,
+                                   'question': l.question_id.name,
+                                   'answer': l.answer})
+                           for l in self.answer_line_ids if l.question_id],
         })
         task.sudo().message_post(body=_(
             'Подана заявка: %(who)s, способ — %(method)s.',
@@ -117,6 +139,8 @@ class CoopBountyDispute(models.TransientModel):
     _description = 'Решение по спору'
 
     task_id = fields.Many2one('coop.bounty.task', string='Задача', required=True)
+    criterion_ids = fields.One2many(related='task_id.criterion_ids', readonly=True)
+    submission_ids = fields.One2many(related='task_id.submission_ids', readonly=True)
     outcome = fields.Selection([
         ('assignee', 'Засчитать в пользу исполнителя'),
         ('revision', 'Вернуть на доработку'),
@@ -136,9 +160,9 @@ class CoopBountyDispute(models.TransientModel):
                                  outcome=dict(self._fields['outcome'].selection)[self.outcome],
                                  text=self.decision))
         if self.outcome == 'assignee':
-            task.action_accept()
+            task.with_context(coop_bounty_force_accept=True).action_accept()
         elif self.outcome == 'revision':
-            task.action_return_for_revision()
+            task._coop_do_return(self.decision)
         else:
             task.action_cancel()
         return {'type': 'ir.actions.act_window_close'}

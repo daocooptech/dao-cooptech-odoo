@@ -151,3 +151,112 @@
     text-align: left;
   }
 }
+
+// ── Страница задачи (№ 464) ─────────────────────────────────────────────
+// Рабочее поле по центру (решение 686).
+.coop-task-page .landing-section {
+  max-width: 820px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.coop-task-name a { color: inherit; text-decoration: none; }
+.coop-task-name a:hover { text-decoration: underline; }
+
+.coop-task-crumbs {
+  font-size: 13px;
+  color: var(--slate-light, #8f8f88);
+  margin: 0 0 8px;
+  a { color: inherit; }
+}
+
+.coop-task-title {
+  font: 700 26px/1.25 'Manrope', sans-serif;
+  margin: 0 0 6px;
+}
+
+.coop-task-state {
+  margin-top: 14px;
+  padding: 10px 14px;
+  border-radius: var(--radius, 10px);
+  background: var(--gold-tint, #f7ecd9);
+  font-size: 13.5px;
+}
+
+.coop-task-terms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px 28px;
+  align-items: flex-start;
+  margin: 20px 0 8px;
+  padding: 16px 18px;
+  border: 1px solid var(--line, #e6e6e1);
+  border-radius: var(--radius, 10px);
+}
+
+.coop-task-method-notes {
+  flex: 1 1 320px;
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13.5px;
+  color: var(--slate, #4a4a44);
+  li { margin-bottom: 4px; }
+}
+
+.coop-task-h2 {
+  font: 700 18px/1.3 'Manrope', sans-serif;
+  margin: 26px 0 8px;
+}
+
+.coop-task-criteria {
+  padding-left: 20px;
+  font-size: 14px;
+  li { margin-bottom: 6px; }
+}
+
+.coop-task-apply {
+  margin-top: 28px;
+  padding: 18px 20px;
+  border-radius: var(--radius, 10px);
+  background: var(--surface, #f2f2ee);
+}
+
+.coop-task-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  fieldset { border: 0; padding: 0; margin: 0; }
+  legend { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  textarea, input[type=date] {
+    width: 100%;
+    max-width: 100%;
+    border: 1px solid var(--line-strong, #d2d2cb);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font: inherit;
+    background: var(--white, #fff);
+  }
+  .button { align-self: flex-start; }
+}
+
+.coop-task-radio {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+.coop-task-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.coop-task-error {
+  color: #b42318;
+  margin-bottom: 10px;
+}
+
+.coop-task-done { font-weight: 600; }

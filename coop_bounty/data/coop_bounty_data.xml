@@ -54,6 +54,20 @@
 
 </data>
 
+  <data>
+    <!-- Исполнитель молчит после срока (№ 464): напоминание, через неделю —
+         задача снова открыта. Раз в сутки, как и спор. -->
+    <record id="cron_coop_bounty_executor_silence" model="ir.cron">
+      <field name="name">Задачи: напомнить о сроке и снять молчащего исполнителя</field>
+      <field name="model_id" ref="model_coop_bounty_task"/>
+      <field name="state">code</field>
+      <field name="code">model._cron_executor_silence()</field>
+      <field name="interval_number">1</field>
+      <field name="interval_type">days</field>
+      <field name="active" eval="True"/>
+    </record>
+  </data>
+
   <!-- Первый фонд задач платформы: 100 тыс. токенов на 3 месяца от
        решения 671 (13.11.2026). Данные, а не код: следующий фонд заводит
        рабочая группа, обновление модуля его не трогает. -->

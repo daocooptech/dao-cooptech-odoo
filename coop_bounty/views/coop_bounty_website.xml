@@ -53,7 +53,7 @@
               <div class="coop-task-list" t-if="tasks">
                 <article class="coop-task" t-foreach="tasks" t-as="task">
                   <div class="coop-task-main">
-                    <div class="coop-task-name"><t t-out="task.name"/></div>
+                    <div class="coop-task-name"><a t-attf-href="/help-project/task/#{task.id}"><t t-out="task.name"/></a></div>
                     <div class="coop-task-meta">
                       <span t-if="task.payer_kind == 'platform'">Платформа ·</span>
                       <span t-elif="task.project_id"><t t-out="task.project_id.name"/> ·</span>
@@ -82,10 +82,9 @@
                       <t t-out="'%g' % task.share_percent"/>
                       <span class="coop-task-unit">% доли</span>
                     </div>
-                    <!-- Ссылка ведёт в кабинет: взять задачу может только
-                         участник платформы, и предлагать кнопку гостю
-                         значит обещать то, что не сработает. -->
-                    <a class="button" t-attf-href="/odoo/action-coop_bounty.action_coop_bounty_task/#{task.id}">Взять задачу</a>
+                    <!-- Ссылка ведёт на страницу задачи (№ 464): там гость
+                         входит и возвращается к форме заявки. -->
+                    <a class="button" t-attf-href="/help-project/task/#{task.id}#apply">Взять задачу</a>
                   </div>
                 </article>
               </div>

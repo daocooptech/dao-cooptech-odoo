@@ -12,3 +12,24 @@ coop_bounty_fund_manager,Фонд задач ведёт менеджер соо�
 coop_bounty_fund_platform,Фонд задач ведёт рабочая группа платформы,coop.bounty.fund,coop_base.group_coop_platform,crud,
 coop_bounty_apply_user,Окно заявки на задачу,coop.bounty.apply,base.group_user,crud,
 coop_bounty_dispute_user,Окно решения по спору,coop.bounty.dispute,base.group_user,crud,
+coop_bounty_criterion_user,Критерии приёмки видит каждый,coop.bounty.criterion,base.group_user,r,
+coop_bounty_criterion_author,Критерии приёмки ведёт автор задачи,coop.bounty.criterion,base.group_user,crud,"[('task_id.payer_id', 'in', user.coop_publisher_partner_ids.ids)]"
+coop_bounty_criterion_manager,Критерии приёмки — менеджер сообщества,coop.bounty.criterion,coop_bounty.group_coop_community_manager,crud,
+coop_bounty_question_user,Вопросы к заявке видит каждый,coop.bounty.question,base.group_user,r,
+coop_bounty_question_author,Вопросы к заявке ведёт автор задачи,coop.bounty.question,base.group_user,crud,"[('task_id.payer_id', 'in', user.coop_publisher_partner_ids.ids)]"
+coop_bounty_question_manager,Вопросы к заявке — менеджер сообщества,coop.bounty.question,coop_bounty.group_coop_community_manager,crud,
+coop_bounty_answer_own,Свои ответы в заявках,coop.bounty.answer,base.group_user,r,"[('application_id.partner_id', '=', user.partner_id.id)]"
+coop_bounty_answer_author,Ответы в заявках на свои задачи,coop.bounty.answer,base.group_user,r,"[('application_id.task_id.payer_id', 'in', user.coop_publisher_partner_ids.ids)]"
+coop_bounty_answer_manager,Ответы в заявках — менеджер сообщества,coop.bounty.answer,coop_bounty.group_coop_community_manager,crud,
+coop_bounty_submission_own,Свои сдачи,coop.bounty.submission,base.group_user,r,"[('partner_id', '=', user.partner_id.id)]"
+coop_bounty_submission_author,Сдачи по своим задачам,coop.bounty.submission,base.group_user,r,"[('task_id.payer_id', 'in', user.coop_publisher_partner_ids.ids)]"
+coop_bounty_submission_platform,Сдачи — администратор платформы для спора,coop.bounty.submission,coop_base.group_coop_platform,r,
+coop_bounty_submission_manager,Сдачи — менеджер сообщества,coop.bounty.submission,coop_bounty.group_coop_community_manager,crud,
+coop_bounty_review_user,Отзывы по задачам видит каждый,coop.bounty.review,base.group_user,r,
+coop_bounty_review_manager,Отзывы по задачам — менеджер сообщества,coop.bounty.review,coop_bounty.group_coop_community_manager,crud,
+coop_bounty_subscription_own,Своя подписка на задачи,coop.bounty.subscription,base.group_user,crud,"[('partner_id', '=', user.partner_id.id)]"
+coop_bounty_subscription_manager,Подписки на задачи — менеджер сообщества,coop.bounty.subscription,coop_bounty.group_coop_community_manager,r,
+coop_bounty_submit_user,Окно сдачи результата,coop.bounty.submit,base.group_user,crud,
+coop_bounty_return_user,Окно возврата на доработку,coop.bounty.return,base.group_user,crud,
+coop_bounty_review_wizard_user,Окно отзыва по задаче,coop.bounty.review.wizard,base.group_user,crud,
+coop_bounty_apply_answer_user,Ответы в окне заявки,coop.bounty.apply.answer,base.group_user,crud,

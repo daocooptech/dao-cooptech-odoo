@@ -19,14 +19,16 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.1.0',
+    'version': '20.0.1.2.0',
     'license': 'LGPL-3',
-    'depends': ['coop_base', 'coop_tokens', 'coop_theme', 'coop_orgs', 'website', 'mail'],
+    'depends': ['coop_base', 'coop_tokens', 'coop_theme', 'coop_orgs', 'coop_deals',
+                'coop_profile', 'website', 'mail'],
     'data': [
         'security/coop_bounty_groups.xml',
         'data/coop_bounty_data.xml',
         'views/coop_bounty_views.xml',
         'views/coop_bounty_website.xml',
+        'views/coop_bounty_task_page.xml',
         'security/ir.access.csv',
     ],
     'assets': {

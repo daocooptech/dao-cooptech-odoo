@@ -35,6 +35,9 @@
                   class="btn-primary"
                   invisible="state != 'assigned' or not is_mine"/>
 
+          <button name="action_open_review" type="object" string="Оставить отзыв"
+                  class="btn-primary" invisible="not can_review"/>
+
           <field name="state" widget="statusbar"
                  statusbar_visible="draft,published,assigned,submitted,accepted"/>
         </header>
@@ -46,6 +49,8 @@
           <field name="my_application_state" invisible="1"/>
           <field name="is_mine" invisible="1"/>
           <field name="is_arbiter" invisible="1"/>
+          <field name="can_review" invisible="1"/>
+          <field name="reminded_on" invisible="1"/>
 
           <div class="alert alert-info" role="status" invisible="state != 'submitted'">
             Результат сдан на проверку. Дней на ответ автору до спора:
@@ -58,6 +63,13 @@
           <div class="alert alert-secondary" role="status"
                invisible="state != 'cancelled' or payer_kind != 'platform'">
             Задача отменена. Резерв возвращён в фонд.
+          </div>
+          <div class="alert alert-warning" role="status" invisible="state != 'assigned' or not reminded_on">
+            Срок прошёл, результата нет. Через неделю после срока задача снова
+            откроется для других, исполнитель будет снят.
+          </div>
+          <div class="alert alert-info" role="status" invisible="not can_review">
+            Результат принят. Оставьте отзыв — он идёт в уровень доверия.
           </div>
           <div class="alert alert-info" role="status" invisible="my_application_state != 'applied'">
             Ваша заявка подана — автор утвердит исполнителя.
@@ -77,6 +89,7 @@
               <field name="project_id" options="{'no_create': True}" widget="coop_inline"
                      invisible="payer_kind == 'platform' and not project_id"
                      readonly="not coop_can_edit or state != 'draft'"/>
+              <field name="city" invisible="payer_kind == 'platform'"/>
               <field name="fund_id" invisible="payer_kind != 'platform' or not fund_id"/>
               <field name="fund_free" invisible="payer_kind != 'platform' or not fund_id"/>
             </group>
@@ -119,12 +132,64 @@
             <page string="Описание" name="description">
               <field name="description" placeholder="Опишите результат, а не процесс: по этому тексту исполнитель поймёт, когда задача считается выполненной." widget="coop_block" readonly="not coop_can_edit"/>
             </page>
+            <!-- Критерии приёмки (№ 464): пишет автор до публикации, при
+                 приёмке отмечает выполненные; спор разбирают по ним. -->
+            <page string="Критерии приёмки" name="criteria">
+              <field name="criterion_ids" nolabel="1"
+                     readonly="not coop_can_edit or state not in ('draft', 'submitted', 'dispute')">
+                <list editable="bottom" create="state == 'draft'" delete="state == 'draft'">
+                  <field name="sequence" widget="handle"/>
+                  <field name="name" readonly="parent.state != 'draft'"/>
+                  <field name="done" widget="boolean_toggle"
+                         readonly="parent.state not in ('submitted', 'dispute')"/>
+                </list>
+              </field>
+            </page>
+            <page string="Вопросы к заявке" name="questions"
+                  invisible="not coop_can_edit and not question_ids">
+              <field name="question_ids" nolabel="1"
+                     readonly="not coop_can_edit or state != 'draft'">
+                <list editable="bottom">
+                  <field name="sequence" widget="handle"/>
+                  <field name="name"/>
+                  <field name="required"/>
+                </list>
+              </field>
+            </page>
+            <page string="Сдачи" name="submissions"
+                  invisible="not submission_ids or (not coop_can_edit and not is_mine and not is_arbiter)">
+              <field name="submission_ids" nolabel="1" readonly="1">
+                <list>
+                  <field name="version"/>
+                  <field name="create_date" string="Когда"/>
+                  <field name="link" widget="url"/>
+                  <field name="note"/>
+                  <field name="attachment_ids" widget="many2many_binary" string="Файлы"/>
+                  <field name="state" widget="badge"
+                         decoration-success="state == 'accepted'"
+                         decoration-warning="state == 'returned'"
+                         decoration-info="state == 'review'"/>
+                  <field name="review_note"/>
+                </list>
+              </field>
+            </page>
+            <page string="Отзывы" name="reviews" invisible="not review_ids">
+              <field name="review_ids" nolabel="1" readonly="1">
+                <list>
+                  <field name="side"/>
+                  <field name="author_id"/>
+                  <field name="rating" widget="badge"/>
+                  <field name="body"/>
+                </list>
+              </field>
+            </page>
             <page string="Заявки" name="applications" invisible="not coop_can_edit">
               <field name="application_ids" nolabel="1" readonly="1">
                 <list>
                   <field name="create_date" string="Когда"/>
                   <field name="partner_id"/>
                   <field name="method_id"/>
+                  <field name="proposed_deadline"/>
                   <field name="message"/>
                   <field name="state" widget="badge"
                          decoration-success="state == 'approved'"
@@ -205,6 +270,7 @@
                 <span t-elif="record.project_id.raw_value"><field name="project_id"/></span>
                 <span t-else=""><field name="payer_id"/></span>
                 <span t-if="record.coop_specialization_id.raw_value"> · <field name="coop_specialization_id"/></span>
+                <span t-if="record.city.raw_value"> · <field name="city"/></span>
               </div>
               <div class="o_coop_bounty_methods mt-1">
                 <field name="allowed_method_ids" widget="many2many_tags"/>
@@ -300,8 +366,17 @@
           <field name="method_id" widget="radio" options="{'no_create': True}"/>
           <field name="reward_tokens" string="Сумма, ₽" invisible="not method_code or method_code == 'share'"/>
           <field name="share_percent" invisible="method_code != 'share'"/>
+          <field name="proposed_deadline"/>
           <field name="message" placeholder="Что у вас есть для этой задачи и когда сможете сдать"/>
         </group>
+        <field name="answer_line_ids" nolabel="1" invisible="not answer_line_ids">
+          <list editable="bottom" create="0" delete="0">
+            <field name="question_id" column_invisible="1"/>
+            <field name="required" column_invisible="1"/>
+            <field name="question" readonly="1"/>
+            <field name="answer" required="required"/>
+          </list>
+        </field>
         <div class="alert alert-info" role="status" invisible="method_code != 'share'">
           Форму доли определяет организация по закону своей страны; конкретную
           форму мы не обещаем.
@@ -322,6 +397,21 @@
     <field name="arch" type="xml">
       <form string="Решение по спору">
         <field name="task_id" invisible="1"/>
+        <p class="text-muted">Решение — по критериям приёмки и последней сдаче.</p>
+        <field name="criterion_ids" nolabel="1" readonly="1">
+          <list>
+            <field name="name"/>
+            <field name="done" string="Автор отметил"/>
+          </list>
+        </field>
+        <field name="submission_ids" nolabel="1" readonly="1">
+          <list>
+            <field name="version"/>
+            <field name="link" widget="url"/>
+            <field name="note"/>
+            <field name="state"/>
+          </list>
+        </field>
         <group>
           <field name="outcome" widget="radio"/>
           <field name="decision" placeholder="Почему принято такое решение — его увидят обе стороны"/>
@@ -331,6 +421,155 @@
           <button string="Отмена" special="cancel" class="btn-secondary"/>
         </footer>
       </form>
+    </field>
+  </record>
+
+  <!-- ── Сдача, доработка, отзыв (№ 464) ────────────────────────────── -->
+
+  <record id="view_coop_bounty_submit_form" model="ir.ui.view">
+    <field name="name">coop.bounty.submit.form</field>
+    <field name="model">coop.bounty.submit</field>
+    <field name="arch" type="xml">
+      <form string="Сдать на проверку">
+        <field name="task_id" invisible="1"/>
+        <p class="text-muted">Приложите результат: ссылку, файлы или описание. После
+           сдачи у автора семь дней на ответ — потом откроется спор.</p>
+        <group>
+          <field name="link" widget="url" placeholder="https://…"/>
+          <field name="note" placeholder="Что сделано и где смотреть"/>
+          <field name="attachment_ids" widget="many2many_binary"/>
+        </group>
+        <footer>
+          <button name="action_confirm" type="object" string="Сдать на проверку" class="btn-primary"/>
+          <button string="Отмена" special="cancel" class="btn-secondary"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_bounty_return_form" model="ir.ui.view">
+    <field name="name">coop.bounty.return.form</field>
+    <field name="model">coop.bounty.return</field>
+    <field name="arch" type="xml">
+      <form string="Вернуть на доработку">
+        <field name="task_id" invisible="1"/>
+        <field name="criterion_ids" nolabel="1" readonly="1">
+          <list>
+            <field name="name"/>
+            <field name="done" string="Выполнено"/>
+          </list>
+        </field>
+        <group>
+          <field name="note" placeholder="Какие пункты не выполнены и что доработать"/>
+        </group>
+        <footer>
+          <button name="action_confirm" type="object" string="Вернуть на доработку" class="btn-primary"/>
+          <button string="Отмена" special="cancel" class="btn-secondary"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_bounty_review_wizard_form" model="ir.ui.view">
+    <field name="name">coop.bounty.review.wizard.form</field>
+    <field name="model">coop.bounty.review.wizard</field>
+    <field name="arch" type="xml">
+      <form string="Отзыв по задаче">
+        <field name="task_id" invisible="1"/>
+        <group>
+          <field name="target_id" readonly="1"/>
+          <field name="rating" widget="radio"/>
+          <field name="body" placeholder="Что получилось и что стоило бы сделать иначе. Необязательно."/>
+        </group>
+        <footer>
+          <button name="action_send" type="object" string="Отправить отзыв" class="btn-primary"/>
+          <button string="Отмена" special="cancel" class="btn-secondary"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_bounty_application_form" model="ir.ui.view">
+    <field name="name">coop.bounty.application.form</field>
+    <field name="model">coop.bounty.application</field>
+    <field name="arch" type="xml">
+      <form string="Заявка на задачу" create="0">
+        <sheet>
+          <group>
+            <group>
+              <field name="task_id" readonly="1"/>
+              <field name="partner_id" readonly="1"/>
+              <field name="state" readonly="1"/>
+            </group>
+            <group>
+              <field name="method_id" readonly="1"/>
+              <field name="proposed_deadline" readonly="1"/>
+            </group>
+          </group>
+          <field name="message" readonly="1"/>
+          <field name="answer_ids" readonly="1">
+            <list>
+              <field name="question"/>
+              <field name="answer"/>
+            </list>
+          </field>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- ── Подписка на задачи (№ 464) ─────────────────────────────────── -->
+
+  <record id="view_coop_bounty_subscription_form" model="ir.ui.view">
+    <field name="name">coop.bounty.subscription.form</field>
+    <field name="model">coop.bounty.subscription</field>
+    <field name="arch" type="xml">
+      <form string="Подписка на задачи">
+        <sheet>
+          <div class="oe_title"><h1>Подписка на новые задачи</h1></div>
+          <p class="text-muted">Когда публикуется задача по вашим специализациям и городу,
+             приходит уведомление в колокольчик. Задачи без города — удалённые — приходят
+             при любом городе.</p>
+          <group>
+            <field name="partner_id" invisible="1"/>
+            <field name="specialization_ids" widget="many2many_tags" options="{'no_create': True}"
+                   placeholder="все специализации"/>
+            <field name="city" placeholder="любой город"/>
+            <field name="by_email"/>
+            <field name="active" string="Подписка включена" widget="boolean_toggle"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_coop_bounty_my_subscription" model="ir.actions.server">
+    <field name="name">Подписка на задачи</field>
+    <field name="model_id" ref="model_coop_bounty_subscription"/>
+    <field name="state">code</field>
+    <field name="code">action = model.action_open_my_subscription()</field>
+  </record>
+
+  <!-- ── Выполненные задачи в профиле человека (№ 464) ─────────────── -->
+
+  <record id="view_coop_profile_form_bounty_done" model="ir.ui.view">
+    <field name="name">res.partner.profile.coop.bounty.done</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="coop_profile.view_coop_profile_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='coop_edu_courses']/../../.." position="after">
+        <div class="o_coop_infobox" invisible="not coop_bounty_done_count">
+          <div class="o_coop_infobox_head">Выполненные задачи</div>
+          <div class="o_coop_infobox_body">
+            <field name="coop_bounty_done_html" nolabel="1" readonly="1"/>
+            <div class="o_coop_infobox_add">
+              <button name="action_coop_bounty_done" type="object" class="btn btn-link p-0">
+                все — <field name="coop_bounty_done_count" class="d-inline"/>
+              </button>
+            </div>
+          </div>
+        </div>
+      </xpath>
     </field>
   </record>
 
@@ -426,6 +665,9 @@
   <menuitem id="menu_coop_bounty_application" name="Заявки"
             parent="menu_coop_bounty_root" action="action_coop_bounty_application"
             sequence="20" groups="coop_bounty.group_coop_community_manager"/>
+  <menuitem id="menu_coop_bounty_subscription" name="Подписка на задачи"
+            parent="menu_coop_bounty_root" action="action_coop_bounty_my_subscription"
+            sequence="15"/>
   <menuitem id="menu_coop_bounty_fund" name="Фонд задач"
             parent="menu_coop_bounty_root" action="action_coop_bounty_fund"
             sequence="30" groups="coop_bounty.group_coop_community_manager,coop_base.group_coop_platform"/>
