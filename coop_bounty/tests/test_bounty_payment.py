@@ -336,6 +336,8 @@ class TestCrowdCard(BountyCase):
             self.assertEqual(task.allowed_method_ids.mapped('code'), ['tokens'])
             self.assertTrue(task.criterion_ids)
             self.assertTrue(task.fund_id)
+            self.assertEqual(task.token_unit, 'COOP', 'сумма — число и тикер токена')
+        self.assertEqual(ours.coop_token_unit, 'COOP')
         count = len(synced)
         self.Task._coop_sync_cooptech_tasks()
         self.assertEqual(Task.search_count([('coop_source_ref', '!=', False),

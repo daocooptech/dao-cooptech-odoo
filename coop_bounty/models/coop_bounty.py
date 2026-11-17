@@ -359,8 +359,8 @@ class CoopBountyTask(models.Model):
                     'res_id': record.id,
                 })
                 values['reward_transaction_id'] = transaction.id
-                body = _('Результат принят, начислено %(amount)s токенов из фонда задач.',
-                         amount=record.reward_tokens)
+                body = _('Результат принят, начислено %(amount)s %(unit)s из фонда задач.',
+                         amount=record.reward_tokens, unit=record.token_unit)
             else:
                 # Токены проекта — учёт в узле (решения 668, 690); их
                 # экономику проект раскрывает сам.

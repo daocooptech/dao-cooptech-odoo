@@ -149,6 +149,9 @@ class CoopProjectToken(models.Model):
              'в рамках законов своей страны.')
     coop_token_issued = fields.Integer(string='Начислено за задачи, токенов',
                                        compute='_compute_coop_token_issued')
+    coop_token_unit = fields.Char(
+        string='Подпись суммы', compute='_compute_coop_token_unit',
+        help='Как подписывать суммы токенов проекта: тикер, как на биржах (120 COOP).')
 
     def _compute_coop_token_issued(self):
         Move = self.env['coop.project.token.move'].sudo()
@@ -222,6 +225,11 @@ class CoopProjectToken(models.Model):
         self.ensure_one()
         return self.coop_token_symbol or _('токенов проекта')
 
+    @api.depends('coop_token_symbol')
+    def _compute_coop_token_unit(self):
+        for project in self:
+            project.coop_token_unit = project._coop_token_unit()
+
 
 class CoopProjectTokenMove(models.Model):
     """Начисление токенов проекта за принятую задачу — учёт в узле."""
@@ -250,10 +258,14 @@ class CoopBountyTaskCrowd(models.Model):
 
     @api.depends('payer_kind', 'project_id.coop_token_name', 'project_id.coop_token_symbol')
     def _compute_payment_label(self):
+        # Сумма — число и тикер токена, как на биржах (владелец 17.11.2026):
+        # задачи платформы платятся токенами услуг платформы, тикер — у нашего проекта.
+        ours = self._coop_our_project()
+        platform_unit = (ours.sudo().coop_token_symbol if ours else '') or 'COOP'
         for task in self:
             if task.payer_kind == 'platform':
                 task.payment_label = _('Токены услуг платформы')
-                task.token_unit = _('токенов')
+                task.token_unit = platform_unit
             elif task.project_id:
                 task.payment_label = task.project_id.coop_token_name or (
                     _('Токены проекта «%s»') % task.project_id.name)

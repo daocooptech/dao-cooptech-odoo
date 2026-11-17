@@ -660,6 +660,7 @@
       </xpath>
       <xpath expr="/kanban" position="inside">
         <field name="coop_token_symbol"/>
+        <field name="coop_token_unit"/>
         <field name="coop_crowd_open_count"/>
         <field name="coop_crowd_work_count"/>
         <field name="coop_crowd_done_count"/>
@@ -683,7 +684,7 @@
       <xpath expr="//div[hasclass('o_coop_tile_act')]" position="replace">
         <div class="o_coop_tile_act">
           <span class="o_coop_bounty_reward" t-if="record.coop_crowd_open_tokens.raw_value">
-            <t t-out="record.coop_crowd_open_tokens.value + ' ' + (record.coop_token_symbol.value or 'токенов') + ' за открытые задачи'"/>
+            <t t-out="record.coop_crowd_open_tokens.value + ' ' + record.coop_token_unit.value + ' за открытые задачи'"/>
           </span>
         </div>
       </xpath>
@@ -737,7 +738,7 @@
                 <li><b><field name="coop_crowd_open_count" readonly="1" nolabel="1"/></b> открыто</li>
                 <li><b><field name="coop_crowd_work_count" readonly="1" nolabel="1"/></b> в работе</li>
                 <li><b><field name="coop_crowd_done_count" readonly="1" nolabel="1"/></b> принято</li>
-                <li><b><field name="coop_token_issued" readonly="1" nolabel="1"/></b> токенов начислено</li>
+                <li><b><field name="coop_token_issued" readonly="1" nolabel="1"/></b> <field name="coop_token_unit" nolabel="1"/> начислено</li>
               </ul>
               <div class="coop-pj_owner">
                 <div class="coop-pj_who">
