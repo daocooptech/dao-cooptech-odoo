@@ -249,7 +249,15 @@
       <div t-if="this.coopBottomPager" class="o_coop_pager o_coop_pager_bottom">
         <Pager t-props="this.env.config.pagerProps"/>
       </div>
+      <!-- Лента вместо пагинатора догружается — решение 688. -->
+      <CoopFeedLoader t-if="this.coopFeedLoader" pager="this.env.config.pagerProps"/>
     </xpath>
+  </t>
+
+  <t t-name="coop_theme.FeedLoader">
+    <div class="o_coop_feed_more" t-ref="this.tail" aria-live="polite">
+      <span t-if="this.state.loading">Загружаем ещё…</span>
+    </div>
   </t>
 
   <!--
