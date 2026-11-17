@@ -10,8 +10,12 @@
 Своя стена — та же, что даёт право править карточку
 (`coop_site_partner_ids`): своя страница и страницы организаций, на
 которые у человека есть полномочие. Запрещены только записи людей
-(`comment`): служебные извещения движка и записи от имени платформы
-(`sudo`) ложатся в ленту как прежде.
+(`comment`): служебные извещения движка и записи суперпользователя
+(загрузчики, кроны) ложатся в ленту как прежде.
+
+Проверяется пользователь запроса, а не `env.su` (№ 462, 17.11.2026):
+поле ленты движок публикует через `sudo()` (`/mail/message/post`), и
+проверка по `su` пропускала прямой запрос на чужую стену.
 """
 from odoo import _, models
 from odoo.exceptions import AccessError
@@ -21,7 +25,8 @@ class ResPartner(models.Model):
     _inherit = 'res.partner'
 
     def message_post(self, **kwargs):
-        if kwargs.get('message_type') == 'comment' and not self.env.su:
+        if (kwargs.get('message_type') == 'comment'
+                and not self.env.user._is_superuser()):
             mine = self.env.user.coop_site_partner_ids
             if any(record not in mine for record in self):
                 raise AccessError(_(

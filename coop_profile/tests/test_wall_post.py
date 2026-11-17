@@ -21,8 +21,16 @@ class TestWallPost(TransactionCase):
         with self.assertRaises(AccessError):
             page.with_user(self.guest).message_post(body='Чужая запись', message_type='comment')
 
+    def test_guest_blocked_through_sudo(self):
+        # Поле ленты публикует через `sudo()` (`/mail/message/post`), № 462.
+        page = self.me.partner_id
+        with self.assertRaises(AccessError):
+            page.with_user(self.guest).sudo().message_post(body='Мимо поля', message_type='comment')
+        page.with_user(self.me).sudo().message_post(body='Своё через поле', message_type='comment')
+
     def test_engine_notices_pass(self):
         page = self.me.partner_id
-        # Служебное извещение и запись от имени платформы — как прежде.
-        page.with_user(self.guest).sudo().message_post(body='От платформы', message_type='comment')
+        # Служебное извещение гостя и запись суперпользователя — как прежде.
+        page.with_user(self.guest).sudo().message_post(body='Извещение гостя')
+        page.message_post(body='От платформы', message_type='comment')
         page.message_post(body='Извещение', message_type='notification')
