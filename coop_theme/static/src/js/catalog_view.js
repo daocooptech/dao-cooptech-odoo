@@ -3,7 +3,7 @@
 import { registry } from "@web/core/registry";
 import { browser } from "@web/core/browser/browser";
 import { patch } from "@web/core/utils/patch";
-import { useLayoutEffect } from "@web/owl2/utils";
+import { useLayoutEffect, useSubEnv } from "@web/owl2/utils";
 import { kanbanView } from "@web/views/kanban/kanban_view";
 import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
 import { CoopCatalogKanbanRecord } from "@coop_theme/js/favorite";
@@ -220,6 +220,15 @@ export class CoopCatalogKanbanController extends KanbanController {
 
     setup() {
         super.setup();
+        // Пагинатор под плитками каталог рисует сам (с условиями полок и
+        // карты), общий нижний из `Layout` (`js/control_panel.js`, решение
+        // 687) здесь не нужен — иначе их было бы два. По шаблону, а не по
+        // классу: наследники со своим шаблоном (расширения —
+        // `coop_extensions.ExtensionKanbanView`) своего пагинатора не
+        // рисуют и остались бы без него вовсе.
+        useSubEnv({
+            coopOwnPager: this.constructor.template === "coop_theme.CatalogKanbanView",
+        });
         this.coopLayout = proxy(coopLayout);
         // Состояние полок держит сам каталог, а не общая переменная, в
         // которую писали полки. Общая переменная давала круг: запись из

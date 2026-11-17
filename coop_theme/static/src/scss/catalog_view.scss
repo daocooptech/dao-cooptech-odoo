@@ -252,8 +252,8 @@
 // меняется.
 //
 // `o_coop_filters_bar` — экраны с панелью «Фильтр» без плиток (каталог
-// расширений): строка та же, только пагинатор остаётся наверху — снизу
-// его у них нет (см. ниже).
+// расширений): строка та же. Пагинатор у них, как у всех списков, —
+// под записями (решение 687, `Layout` в `js/control_panel.js`).
 .o_control_panel.o_coop_catalog,
 .o_control_panel.o_coop_filters_bar {
 
@@ -563,12 +563,6 @@
 // переключать нечего.
 .o_control_panel.o_coop_catalog .o_cp_pager {
   display: none !important;
-}
-
-// …кроме экранов без плиток: пагинатора под записями у них нет, и без
-// верхнего листать было бы нечем.
-.o_control_panel.o_coop_filters_bar:not(.o_coop_catalog) .o_cp_pager {
-  display: flex !important;
 }
 
 // Панель «Фильтр» стоит сразу под строкой поиска, без ленты между
