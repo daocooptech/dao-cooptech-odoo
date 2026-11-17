@@ -637,11 +637,9 @@ def _demo_project_tokens(env):
     for index, project in enumerate(projects):
         if project.coop_token_name:
             continue
-        letters = ''.join(word[0] for word in project.name.replace('«', ' ').replace('»', ' ').split()
-                          if word[:1].isalpha())[:4].upper()
         project.write({
             'coop_token_name': 'Токен «%s»' % project.name,
-            'coop_token_symbol': letters or 'ТП',
+            'coop_token_symbol': project._coop_ticker_from(project.name),
             'coop_token_economy': TOKEN_ECONOMY[index % len(TOKEN_ECONOMY)],
         })
     return projects
@@ -677,7 +675,7 @@ def _org_crowd_project(env, org):
                 'city': org.city,
                 'summary': 'Задачи %s в краудсорсинге: оплата токенами проекта.' % org.name,
                 'coop_token_name': 'Токен «%s»' % short,
-                'coop_token_symbol': ''.join(w[0] for w in short.split() if w[:1].isalpha())[:4].upper() or 'ТП',
+                'coop_token_symbol': Project._coop_ticker_from(short),
                 'coop_token_economy': TOKEN_ECONOMY[org.id % len(TOKEN_ECONOMY)],
             })
     except Exception:

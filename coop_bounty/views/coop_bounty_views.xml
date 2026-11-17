@@ -564,7 +564,7 @@
              своей страны.</p>
           <group>
             <field name="coop_token_name" placeholder="Например: токен на продукцию проекта"/>
-            <field name="coop_token_symbol"/>
+            <field name="coop_token_symbol" placeholder="Например: BREAD"/>
             <field name="coop_token_issued"/>
           </group>
           <field name="coop_token_economy"

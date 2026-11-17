@@ -3,7 +3,7 @@ from ast import literal_eval
 from datetime import timedelta
 
 from odoo import fields
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tests import HttpCase, tagged
 from odoo.tests.common import TransactionCase
 
@@ -33,7 +33,7 @@ class BountyCase(TransactionCase):
         })
         cls.project = cls.env['coop.project'].create({
             'name': 'Пекарня — проверка', 'partner_id': cls.org.id,
-            'coop_token_name': 'Токен пекарни', 'coop_token_symbol': 'ХЛБ'})
+            'coop_token_name': 'Токен пекарни', 'coop_token_symbol': 'bread'})
         cls.person = cls.env['res.partner'].create({'name': 'Исполнитель проверочный'})
         cls.user = cls.env['res.users'].create({
             'name': 'Исполнитель проверочный', 'login': 'bounty_tester',
@@ -342,3 +342,14 @@ class TestCrowdCard(BountyCase):
                                             ('project_id', '=', ours.id),
                                             ('id', '!=', stale.id)]), count,
                          'повторная сверка задач не плодит')
+
+    def test_token_ticker_latin_unique(self):
+        self.assertEqual(self.project.coop_token_symbol, 'BREAD', 'тикер — заглавными')
+        self.assertEqual(self.env.ref('coop_bounty.project_cooptech').coop_token_symbol, 'COOP')
+        other = self.env['coop.project'].create({'name': 'Другой', 'partner_id': self.org.id})
+        for bad in ('ХЛБ', 'B', '1ABC', 'TOOLONGTICKER', 'BREAD'):
+            with self.assertRaises(ValidationError, msg=bad):
+                with self.env.cr.savepoint():
+                    other.coop_token_symbol = bad
+        self.assertEqual(self.env['coop.project']._coop_ticker_from('Пасека на паях — Тюмень'), 'PNPT')
+        self.assertEqual(self.env['coop.project']._coop_ticker_from('Пекарня'), 'PEK')

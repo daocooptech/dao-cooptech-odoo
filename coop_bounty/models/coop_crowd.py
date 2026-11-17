@@ -10,11 +10,12 @@
 """
 import json
 import logging
+import re
 
 from markupsafe import Markup
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tools.misc import file_path
 
 from .coop_bounty import RESERVED_STATES
@@ -31,6 +32,19 @@ CRITERIA_BY_SPECIALIZATION = {
     'Дизайн, графика': 'Экран сверен с дизайн-системой платформы',
     'Переводчик': 'Строки интерфейса вычитаны на экране, английских слов не осталось',
 }
+
+
+# Обозначение токена — как тикер на биржах и в ERC-20 (BTC, ETH, USDT):
+# латиница, заглавные буквы и цифры, начинается с буквы. Кириллица в
+# тикере не читается ни биржей, ни кошельком, ни сетью TON.
+TICKER_RE = re.compile(r'^[A-Z][A-Z0-9]{1,7}$')
+TRANSLIT = dict(zip('абвгдеёжзийклмнопрстуфхцчшщъыьэюя', [
+    'a', 'b', 'v', 'g', 'd', 'e', 'e', 'zh', 'z', 'i', 'y', 'k', 'l', 'm', 'n', 'o', 'p',
+    'r', 's', 't', 'u', 'f', 'kh', 'ts', 'ch', 'sh', 'shch', '', 'y', '', 'e', 'yu', 'ya']))
+
+
+def _latin(text):
+    return ''.join(TRANSLIT.get(char, char) for char in (text or '').lower())
 
 
 # Задачи, видные всем: черновик — дело автора, отменённая — уже не задача.
@@ -126,7 +140,9 @@ class CoopProjectToken(models.Model):
     coop_token_name = fields.Char(
         string='Токен проекта',
         help='Как проект называет свой токен. Им оплачиваются задачи проекта в краудсорсинге.')
-    coop_token_symbol = fields.Char(string='Обозначение', help='Коротко, до шести знаков.')
+    coop_token_symbol = fields.Char(
+        string='Тикер', help='Латиницей, 2–8 заглавных букв и цифр — как BTC, ETH, USDT. '
+                             'На платформе у каждого токена свой.')
     coop_token_economy = fields.Html(
         string='Экономика токена',
         help='Что даёт токен, чем обеспечен, как погашается. Проект раскрывает это сам — '
@@ -149,6 +165,58 @@ class CoopProjectToken(models.Model):
             else:
                 project.coop_token_issued = sum(Move.search(
                     [('project_id', '=', project.id)]).mapped('amount'))
+
+    @api.constrains('coop_token_symbol')
+    def _check_coop_token_symbol(self):
+        Project = self.sudo()
+        for project in self.filtered('coop_token_symbol'):
+            if not TICKER_RE.match(project.coop_token_symbol):
+                raise ValidationError(_(
+                    'Тикер токена «%s» — латиницей: 2–8 заглавных букв и цифр, первая — '
+                    'буква, как BTC, ETH, USDT.') % project.coop_token_symbol)
+            if Project.search_count([('id', '!=', project.id),
+                                     ('coop_token_symbol', '=', project.coop_token_symbol)]):
+                raise ValidationError(_(
+                    'Тикер %s уже занят другим проектом — выберите свой.')
+                    % project.coop_token_symbol)
+
+    @api.model
+    def _coop_normalize_symbol(self, vals):
+        if vals.get('coop_token_symbol'):
+            vals['coop_token_symbol'] = vals['coop_token_symbol'].strip().upper()
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            self._coop_normalize_symbol(vals)
+        return super().create(vals_list)
+
+    def write(self, vals):
+        self._coop_normalize_symbol(vals)
+        return super().write(vals)
+
+    @api.model
+    def _coop_ticker_from(self, name):
+        """Свободный тикер из названия: первые буквы слов латиницей.
+
+        «Пасека на паях — Тюмень» → PNPT; одно-два слова добираются буквами
+        первого: «Родник» → ROD. Занятый — с цифрой: ROD2.
+        """
+        words = re.findall(r'[a-z0-9]+', _latin(name))
+        if not words:
+            words = ['token']
+        ticker = ''.join(word[0] for word in words)[:4]
+        if len(ticker) < 3:
+            ticker = (words[0][:4 - len(ticker)] + ticker[1:])[:4]
+        ticker = ticker.upper()
+        if not ticker[0].isalpha():
+            ticker = 'T' + ticker[:7]
+        Project = self.sudo().with_context(active_test=False)
+        candidate, number = ticker, 1
+        while Project.search_count([('coop_token_symbol', '=', candidate)]):
+            number += 1
+            candidate = '%s%s' % (ticker[:8 - len(str(number))], number)
+        return candidate
 
     def _coop_token_unit(self):
         self.ensure_one()
