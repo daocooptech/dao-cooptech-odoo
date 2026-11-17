@@ -217,7 +217,7 @@ class ResPartnerBounty(models.Model):
                 partner.coop_bounty_done_count = 0
                 partner.coop_bounty_done_html = False
                 continue
-            domain = [('assignee_id', '=', partner.id), ('state', '=', 'accepted')]
+            domain = partner._coop_bounty_done_domain()
             partner.coop_bounty_done_count = Task.search_count(domain)
             rows = []
             for task in Task.search(domain, order='accepted_on desc, id desc', limit=5):
@@ -232,6 +232,13 @@ class ResPartnerBounty(models.Model):
                     task.name, author, mark))
             partner.coop_bounty_done_html = Markup('').join(rows) if rows else False
 
+    def _coop_bounty_done_domain(self):
+        """Выполненные задачи — принятые с ним исполнителем или с выплатой
+        ему: участник команды и сдавший результат постоянной задачи (№ 465)."""
+        self.ensure_one()
+        return ['|', ('payout_ids.partner_id', '=', self.id),
+                '&', ('assignee_id', '=', self.id), ('state', '=', 'accepted')]
+
     def action_coop_bounty_done(self):
         self.ensure_one()
         return {
@@ -239,7 +246,7 @@ class ResPartnerBounty(models.Model):
             'name': _('Выполненные задачи — %s') % self.display_name,
             'res_model': 'coop.bounty.task',
             'view_mode': 'list,form',
-            'domain': [('assignee_id', '=', self.id), ('state', '=', 'accepted')],
+            'domain': self._coop_bounty_done_domain(),
             'context': {'create': False},
         }
 
@@ -256,7 +263,8 @@ class ResPartnerBounty(models.Model):
         Review = self.env['coop.bounty.review'].sudo()
         for partner in self:
             done = Task.search_count([
-                ('state', '=', 'accepted'),
+                '|', ('payout_ids.partner_id', '=', partner.id),
+                '&', ('state', '=', 'accepted'),
                 '|', ('assignee_id', '=', partner.id), ('payer_id', '=', partner.id)])
             reviewed = Review.search_count([('target_id', '=', partner.id)])
             good = Review.search_count([('target_id', '=', partner.id), ('rating', 'in', POSITIVE)])

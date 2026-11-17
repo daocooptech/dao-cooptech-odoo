@@ -164,7 +164,7 @@ class CoopProjectToken(models.Model):
                 # Наш проект платит токенами услуг платформы — движениями
                 # кошелька, а не начислениями токенов проекта.
                 project.coop_token_issued = sum(Task.search(
-                    [('project_id', '=', project.id), ('state', '=', 'accepted')]).mapped('reward_tokens'))
+                    [('project_id', '=', project.id), ('paid_amount', '>', 0)]).mapped('paid_amount'))
             else:
                 project.coop_token_issued = sum(Move.search(
                     [('project_id', '=', project.id)]).mapped('amount'))

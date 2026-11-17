@@ -51,15 +51,20 @@ class CoopBountyFund(models.Model):
     free = fields.Integer(string='Свободно', compute='_compute_totals')
     task_count = fields.Integer(string='Задач', compute='_compute_totals')
 
-    @api.depends('amount', 'task_ids.state', 'task_ids.reward_tokens')
+    @api.depends('amount', 'task_ids.state', 'task_ids.reward_tokens', 'task_ids.paid_amount',
+                 'task_ids.is_recurring', 'task_ids.repeat_limit')
     def _compute_totals(self):
         # Под sudo: свободный остаток фонда видит каждый автор задачи
         # платформы, а задачи фонда в черновиках и отменённые — не каждый.
+        # Выплачено — по выплатам (№ 465): частичная приёмка платит меньше
+        # суммы, постоянная задача платит по каждому результату, а
+        # отменённая постоянная — за то, что успели принять.
         Task = self.env['coop.bounty.task'].sudo()
         for fund in self:
             tasks = Task.search([('fund_id', '=', fund.id)]) if fund.id else Task
-            reserved = sum(tasks.filtered(lambda t: t.state in RESERVED_STATES).mapped('reward_tokens'))
-            paid = sum(tasks.filtered(lambda t: t.state == 'accepted').mapped('reward_tokens'))
+            reserved = sum(max(t._coop_planned_total() - t.paid_amount, 0)
+                           for t in tasks if t.state in RESERVED_STATES)
+            paid = sum(tasks.mapped('paid_amount'))
             fund.reserved = reserved
             fund.paid = paid
             fund.free = fund.amount - reserved - paid
@@ -144,10 +149,14 @@ class CoopBountyDispute(models.TransientModel):
     submission_ids = fields.One2many(related='task_id.submission_ids', readonly=True)
     outcome = fields.Selection([
         ('assignee', 'Засчитать в пользу исполнителя'),
+        ('partial', 'Засчитать частично'),
         ('revision', 'Вернуть на доработку'),
         ('cancel', 'Отменить задачу'),
     ], string='Решение', required=True, default='assignee')
     decision = fields.Text(string='Объяснение решения', required=True)
+    partial_percent = fields.Integer(related='task_id.partial_percent')
+    dispute_by = fields.Selection(related='task_id.dispute_by')
+    dispute_reason = fields.Text(related='task_id.dispute_reason')
 
     def action_confirm(self):
         self.ensure_one()
@@ -156,16 +165,21 @@ class CoopBountyDispute(models.TransientModel):
             raise UserError(_('Спор разбирает администратор платформы.'))
         if task.state != 'dispute':
             raise UserError(_('По этой задаче спора нет.'))
+        if self.outcome == 'partial' and not task.partial_percent:
+            raise UserError(_('Частичной оплаты у задачи нет: засчитать можно полностью, '
+                              'вернуть на доработку или отменить.'))
         task.write({'dispute_decision': self.decision})
         task.message_post(body=_('Решение по спору — %(outcome)s: %(text)s',
                                  outcome=dict(self._fields['outcome'].selection)[self.outcome],
                                  text=self.decision))
         if self.outcome == 'assignee':
             task.with_context(coop_bounty_force_accept=True).action_accept()
+        elif self.outcome == 'partial':
+            task.with_context(coop_bounty_force_accept=True, coop_bounty_partial=True).action_accept()
         elif self.outcome == 'revision':
             task._coop_do_return(self.decision)
         else:
-            task.action_cancel()
+            task.with_context(coop_bounty_arbiter=True).action_cancel()
         return {'type': 'ir.actions.act_window_close'}
 
 

@@ -33,3 +33,12 @@ coop_bounty_submit_user,Окно сдачи результата,coop.bounty.sub
 coop_bounty_return_user,Окно возврата на доработку,coop.bounty.return,base.group_user,crud,
 coop_bounty_review_wizard_user,Окно отзыва по задаче,coop.bounty.review.wizard,base.group_user,crud,
 coop_bounty_apply_answer_user,Ответы в окне заявки,coop.bounty.apply.answer,base.group_user,crud,
+rule_bounty_task_executor,Исполнитель видит свои задачи в любом состоянии,coop.bounty.task,base.group_user,r,"['|', ('assignee_id', '=', user.partner_id.id), ('member_ids.partner_id', '=', user.partner_id.id)]"
+coop_bounty_payout_own,Свои выплаты по задачам,coop.bounty.payout,base.group_user,r,"[('partner_id', '=', user.partner_id.id)]"
+coop_bounty_payout_author,Выплаты по своим задачам,coop.bounty.payout,base.group_user,r,"[('task_id.payer_id', 'in', user.coop_publisher_partner_ids.ids)]"
+coop_bounty_payout_platform,Выплаты по задачам — администратор платформы,coop.bounty.payout,coop_base.group_coop_platform,r,
+coop_bounty_payout_manager,Выплаты по задачам — менеджер сообщества,coop.bounty.payout,coop_bounty.group_coop_community_manager,r,
+coop_bounty_member_user,Команды исполнителей видит каждый,coop.bounty.member,base.group_user,r,
+coop_bounty_member_author,Доли команды задаёт автор задачи,coop.bounty.member,base.group_user,ru,"[('task_id.payer_id', 'in', user.coop_publisher_partner_ids.ids)]"
+coop_bounty_member_manager,Команды исполнителей — менеджер сообщества,coop.bounty.member,coop_bounty.group_coop_community_manager,crud,
+coop_bounty_dispute_open_user,Окно спора исполнителя,coop.bounty.dispute.open,base.group_user,crud,

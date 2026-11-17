@@ -315,10 +315,12 @@ class CoopBountyTask(models.Model):
             raise UserError(_(
                 'Фонда задач платформы на сегодня нет: задачу платформы '
                 'опубликовать не из чего.'))
-        if fund.free < self.reward_tokens:
+        # У постоянной задачи — за все результаты сразу (№ 465).
+        need = self._coop_planned_total() - self.paid_amount
+        if fund.free < need:
             raise UserError(_(
                 'Не хватает фонда: нужно %(need)s токенов, свободно %(free)s. '
-                'Уменьшите сумму.', need=self.reward_tokens, free=fund.free))
+                'Уменьшите сумму.', need=need, free=fund.free))
         self.fund_id = fund
 
     def action_publish(self):
@@ -333,55 +335,52 @@ class CoopBountyTask(models.Model):
         return True
 
     def action_accept(self):
-        """Принять результат и рассчитаться по выбранному способу."""
+        """Принять результат и выплатить: одному, команде по долям или
+        частично — по шкале, заданной до публикации (№ 465)."""
+        partial = bool(self.env.context.get('coop_bounty_partial'))
         for record in self:
+            if record.is_recurring:
+                raise UserError(_('Постоянную задачу принимают по сдачам — каждый результат отдельно.'))
             if record.state not in ('submitted', 'dispute'):
                 raise UserError(_('Принять можно только сданный результат.'))
             if not record.assignee_id:
                 raise UserError(_('У задачи нет исполнителя.'))
+            if partial and not record.partial_percent:
+                raise UserError(_('Частичной оплаты у задачи нет: её задают до публикации.'))
             open_points = record.criterion_ids.filtered(lambda c: not c.done)
-            if open_points and not self.env.context.get('coop_bounty_force_accept'):
+            if open_points and not partial and not self.env.context.get('coop_bounty_force_accept'):
                 raise UserError(_(
                     'Отметьте выполненные критерии — принять можно, когда выполнены '
-                    'все. Не выполнено: %s. Иначе верните на доработку.',
+                    'все. Не выполнено: %s. Иначе верните на доработку или примите частично.',
                     '; '.join(open_points.mapped('name'))))
+            payouts = record._coop_pay(partial=partial)
+            paid = sum(payouts.mapped('amount'))
             values = {
                 'state': 'accepted',
                 'accepted_on': fields.Date.context_today(record),
+                'paid_amount': record.paid_amount + paid,
+                'accepted_partially': partial,
             }
-            if record.payer_kind == 'platform':
-                transaction = self.env['coop.token.transaction'].sudo().create({
-                    'partner_id': record.assignee_id.id,
-                    'amount': record.reward_tokens,
-                    'kind': 'grant',
-                    'description': _('Задача «%s»') % record.name,
-                    'res_model': record._name,
-                    'res_id': record.id,
-                })
-                values['reward_transaction_id'] = transaction.id
-                body = _('Результат принят, начислено %(amount)s %(unit)s из фонда задач.',
-                         amount=record.reward_tokens, unit=record.token_unit)
+            if len(payouts) == 1 and payouts.transaction_id:
+                values['reward_transaction_id'] = payouts.transaction_id.id
+            amount = '{:,}'.format(paid).replace(',', '\u00a0')
+            if partial:
+                body = _('Результат принят частично (%(percent)s %%), начислено %(amount)s %(unit)s.',
+                         percent=record.partial_percent, amount=amount, unit=record.token_unit)
             else:
-                # Токены проекта — учёт в узле (решения 668, 690); их
-                # экономику проект раскрывает сам.
-                project = record.project_id
-                if project:
-                    self.env['coop.project.token.move'].sudo().create({
-                        'project_id': project.id,
-                        'partner_id': record.assignee_id.id,
-                        'amount': record.reward_tokens,
-                        'task_id': record.id,
-                        'description': _('Задача «%s»') % record.name,
-                    })
                 body = _('Результат принят, начислено %(amount)s %(unit)s.',
-                         amount=record.reward_tokens, unit=record.token_unit)
+                         amount=amount, unit=record.token_unit)
+            if len(payouts) > 1:
+                body += ' ' + ', '.join('%s — %s' % (p.partner_id.display_name, p.amount)
+                                        for p in payouts)
             record.write(values)
             record.submission_ids.sudo().filtered(lambda s: s.state == 'review').write({
                 'state': 'accepted', 'reviewed_on': fields.Date.context_today(record)})
             record.message_post(body=body)
-            (record.assignee_id | record.payer_id).sudo()._coop_recompute_deal_stats()
+            executors = record._coop_executors()
+            (executors | record.payer_id).sudo()._coop_recompute_deal_stats()
             self.env['coop.notification'].sudo()._notify(
-                record.assignee_id,
+                executors,
                 _('Результат по задаче «%s» принят. Оставьте отзыв об авторе — он '
                   'идёт в уровень доверия.') % record.name,
                 record=record, kind='other')
@@ -419,7 +418,10 @@ class CoopBountyTask(models.Model):
                 raise UserError(_(
                     'Принятую задачу отменить нельзя: расчёт уже проведён, а '
                     'движения токенов не удаляются.'))
-            record.state = 'cancelled'
+            # Отмену администратором по спору исполнитель больше не оспаривает.
+            record.write({'state': 'cancelled',
+                          'cancelled_on': fields.Date.context_today(record),
+                          'cancel_by_arbiter': bool(self.env.context.get('coop_bounty_arbiter'))})
             if record.payer_kind == 'platform' and record.fund_id:
                 record.message_post(body=_('Задача отменена, резерв возвращён в фонд.'))
         return True
@@ -565,7 +567,7 @@ class CoopBountyTask(models.Model):
         tasks = self.sudo().search([('state', '=', 'submitted'),
                                     ('submitted_on', '<=', limit)])
         for task in tasks:
-            task.write({'state': 'dispute', 'dispute_on': today})
+            task.write({'state': 'dispute', 'dispute_on': today, 'dispute_by': 'silence'})
             task.message_post(body=_(
                 'Автор не ответил за %(days)s дней после сдачи — открыт спор. '
                 'Его разбирает администратор платформы.', days=DISPUTE_AFTER_DAYS))

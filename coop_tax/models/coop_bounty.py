@@ -21,14 +21,16 @@ class CoopBountyTask(models.Model):
             record.natural_ndfl = sum(record.natural_income_ids.mapped('ndfl_amount'))
             record.natural_currency_id = rub
 
-    def action_accept(self):
-        """Принятая задача, оплаченная токенами, — строка реестра (решение 515)."""
-        result = super().action_accept()
-        Income = self.env['coop.tax.natural.income'].sudo()
+    def _coop_on_payout(self, payout):
+        """Выплата токенами услуг платформы — строка реестра (решение 515).
+
+        По выплате, а не по задаче (№ 465): у команды доход у каждого свой,
+        частичная приёмка платит меньше суммы, постоянная задача — по
+        каждому принятому результату.
+        """
+        result = super()._coop_on_payout(payout)
+        task = payout.task_id
         # Исполнитель-организация — не НДФЛ (решение 553): реестр только людей.
-        for record in self.filtered(lambda t: t.state == 'accepted'
-                                    and t.payment_mode == 'tokens'
-                                    and not t.assignee_id.is_company
-                                    and t.payer_id and not t.natural_income_ids):
-            Income._coop_register_task(record)
+        if task.payment_mode == 'tokens' and task.payer_id and not payout.partner_id.is_company:
+            self.env['coop.tax.natural.income'].sudo()._coop_register_payout(payout)
         return result

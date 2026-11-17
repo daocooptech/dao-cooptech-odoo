@@ -84,19 +84,19 @@ class CoopTaxNaturalIncome(models.Model):
     # ── Начисление ───────────────────────────────────────────────────────
 
     @api.model
-    def _coop_register_task(self, task):
-        """Строка реестра по принятой задаче, оплаченной токенами."""
-        partner = task.assignee_id
-        date = task.accepted_on or fields.Date.context_today(self)
-        amount = task.reward_tokens * TOKEN_RUB
-        tax, rate = self._coop_ndfl(partner, task.payer_id, amount, date)
+    def _coop_register_payout(self, payout):
+        """Строка реестра по выплате токенами за задачу."""
+        task = payout.task_id
+        partner = payout.partner_id
+        amount = payout.amount * TOKEN_RUB
+        tax, rate = self._coop_ndfl(partner, task.payer_id, amount, payout.date)
         return self.create({
             'name': _('Вознаграждение за задачу «%s»') % task.name,
             'partner_id': partner.id,
             'agent_id': task.payer_id.id,
             'task_id': task.id,
-            'date': date,
-            'tokens': task.reward_tokens,
+            'date': payout.date,
+            'tokens': payout.amount,
             'amount': amount,
             'rate': rate or False,
             'ndfl_amount': tax,

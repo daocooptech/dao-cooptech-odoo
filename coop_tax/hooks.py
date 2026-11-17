@@ -258,8 +258,9 @@ def demo_natural_income(env):
             values['reported_on'] = report_day
         Income.create(values)
 
-    for task in tasks.filtered(lambda t: t.state == 'accepted' and t.payment_mode == 'tokens'):
-        Income._coop_register_task(task)
+    for task in tasks.filtered(lambda t: t.payment_mode == 'tokens'):
+        for payout in task.payout_ids.filtered(lambda p: not p.partner_id.is_company):
+            Income._coop_register_payout(payout)
     demo_natural_income_showcase(env)
 
 

@@ -847,6 +847,9 @@ def load_bounty(env):
     created += load_project_tasks(env, Task, methods, specializations)
     _demo_tasks_to_projects(env, Task, methods)
     load_bounty_flow(env, Task)
+    # Постоянные, командные, частичные и споры исполнителя (№ 465).
+    from .load_bounty_p2 import load_bounty_p2
+    created += load_bounty_p2(env, Task, manager, specializations)
     # Просроченные — напоминание и снятие; сданные больше семи дней
     # назад — в спор: так, как это сделают задания по расписанию.
     Task._cron_executor_silence()
