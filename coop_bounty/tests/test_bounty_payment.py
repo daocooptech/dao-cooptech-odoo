@@ -279,6 +279,17 @@ class TestBountyPublicPage(HttpCase):
         self.assertIn('Токен цеха', page.text)
         self.assertIn('/help-project/task/%s/apply' % task.id, page.text)
 
+    def test_help_page_shows_our_card(self):
+        """Гость по «Помощь проекту» видит карточку нашего проекта: токен
+        оплаты, счётчики задач и экономику токена (решение 691)."""
+        ours = self.env.ref('coop_bounty.project_cooptech')
+        page = self.url_open('/help-project')
+        self.assertEqual(page.status_code, 200)
+        self.assertIn(ours.name, page.text)
+        self.assertIn(ours.coop_token_name, page.text)
+        self.assertIn('Экономика токена', page.text)
+        self.assertIn('coop-help-stats', page.text)
+
 
 @tagged('post_install', '-at_install')
 class TestCrowdCard(BountyCase):
@@ -314,6 +325,23 @@ class TestCrowdCard(BountyCase):
         self.assertEqual(action['name'], 'Помощь проекту')
         self.assertTrue(ours.coop_is_cooptech)
         self.assertFalse(self.project.coop_is_cooptech)
+
+    def test_no_own_menu_tab(self):
+        """Своей вкладки у краудсорсинга нет (решение 691): подписка —
+        кнопкой над каталогом, фонд — в карточке нашего проекта."""
+        for xmlid in ('menu_coop_bounty_root', 'menu_coop_bounty_task',
+                      'menu_coop_bounty_subscription', 'menu_coop_bounty_fund',
+                      'menu_coop_bounty_application'):
+            self.assertFalse(self.env.ref('coop_bounty.%s' % xmlid, raise_if_not_found=False), xmlid)
+        self.assertTrue(self.env.ref('coop_bounty.menu_coop_crowd_projects'))
+        # Разметка как записана: кнопка фонда — только менеджерам, и
+        # собранный для текущего пользователя вид её бы не показал.
+        subscription = self.env.ref('coop_bounty.action_coop_bounty_my_subscription')
+        kanban = self.env.ref('coop_bounty.view_coop_project_crowd_kanban').arch_db
+        self.assertIn('name="%s"' % subscription.id, kanban)
+        fund = self.env.ref('coop_bounty.action_coop_bounty_fund')
+        form = self.env.ref('coop_bounty.view_coop_project_crowd_form').arch_db
+        self.assertIn('name="%s"' % fund.id, form)
 
     def test_sync_cooptech_tasks(self):
         self.fund.amount = 200000

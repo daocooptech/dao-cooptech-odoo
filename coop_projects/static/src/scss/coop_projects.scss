@@ -62,6 +62,39 @@
     color: var(--coop-ink, #14171a);
   }
 
+  // Портрет разместившего — как `.o_coop_res_owner` у ресурсов. Общее
+  // правило `.o_coop_tile_image img` растягивает картинку во всё поле,
+  // поэтому размер — с `!important`. Метка вида встаёт справа от него.
+  .o_coop_pj_poster {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 50%;
+    border: 2px solid var(--coop-white, #fff);
+    object-fit: cover;
+    box-shadow: 0 1px 3px rgba(20, 23, 26, .25);
+  }
+  // Справа сверху — сердечко (28px с отступом 8px): метка до него не
+  // доходит. На телефоне плитка в 166px, «Некоммерческий» рядом с
+  // портретом не помещается — там метка встаёт под портрет целиком.
+  .o_coop_pj_poster ~ .o_coop_kind {
+    top: 15px;
+    left: 50px;
+    max-width: calc(100% - 94px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  @media (max-width: 767.98px) {
+    .o_coop_pj_poster ~ .o_coop_kind {
+      top: 48px;
+      left: 8px;
+      max-width: calc(100% - 16px);
+    }
+  }
+
   // Вид проекта различается цветом, как в макете: кооперативный —
   // фирменным, коммерческий — золотым, некоммерческий — обводкой.
   // Парами токенов эталона (`o_coop_card_tag_*`): белое по `coop-gold`

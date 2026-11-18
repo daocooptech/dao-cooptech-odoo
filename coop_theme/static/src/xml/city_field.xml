@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!-- Штатное текстовое поле плюс `datalist`: браузер сам подсказывает
+       по мере ввода, без учёта регистра («сочи» → «Сочи»). -->
+  <t t-name="coop_theme.CityField" t-inherit="web.CharField" t-inherit-mode="primary">
+    <xpath expr="//input" position="attributes">
+      <attribute name="t-att-list">this.coopListId</attribute>
+    </xpath>
+    <xpath expr="//input" position="after">
+      <datalist t-att-id="this.coopListId">
+        <option t-foreach="this.coopCities" t-as="city" t-key="city" t-att-value="city"/>
+      </datalist>
+    </xpath>
+  </t>
+
+</templates>

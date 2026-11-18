@@ -22,11 +22,37 @@
           </section>
         </div>
 
+        <!-- Карточка нашего проекта в краудсорсинге — та же, что в кабинете
+             (`view_coop_project_crowd_form`), только для гостя: токен,
+             счётчики задач, экономика токена (решение 691). -->
+        <t t-set="project" t-value="request.env['coop.bounty.task'].sudo()._coop_our_project()"/>
+        <section class="landing-section coop-help-project" t-if="project">
+          <div class="coop-help-kicker">Краудсорсинг</div>
+          <h3 class="coop-help-name"><t t-out="project.name"/></h3>
+          <p class="coop-help-lead" t-if="project.summary"><t t-out="project.summary"/></p>
+          <div class="coop-help-token">
+            <span class="coop-help-token-label">Оплата задач</span>
+            <span class="coop-help-token-name"><t t-out="project.coop_token_name"/></span>
+            <span class="coop-help-token-symbol" t-if="project.coop_token_symbol"><t t-out="project.coop_token_symbol"/></span>
+          </div>
+          <ul class="coop-help-stats">
+            <li><b><t t-out="project.coop_crowd_open_count"/></b> открыто</li>
+            <li><b><t t-out="project.coop_crowd_work_count"/></b> в работе</li>
+            <li><b><t t-out="project.coop_crowd_done_count"/></b> принято</li>
+            <li><b><t t-out="project.coop_token_issued" t-options="{'widget': 'integer'}"/></b>
+                <t t-out="project.coop_token_unit"/> начислено</li>
+          </ul>
+        </section>
+
         <section class="landing-section coop-help-tabs">
           <ul class="nav nav-tabs" role="tablist">
             <li class="nav-item" role="presentation">
               <a class="nav-link active" data-bs-toggle="tab" href="#help-tasks"
                  role="tab">Взять задачу</a>
+            </li>
+            <li class="nav-item" role="presentation" t-if="project and project.coop_token_economy">
+              <a class="nav-link" data-bs-toggle="tab" href="#help-token"
+                 role="tab">Экономика токена</a>
             </li>
             <li class="nav-item" role="presentation">
               <a class="nav-link" data-bs-toggle="tab" href="#help-donate"
@@ -90,6 +116,15 @@
               <div class="coop-help-empty" t-if="not tasks">
                 <p>Задач пока нет. Загляните позже.</p>
               </div>
+            </div>
+
+            <!-- ── Экономика токена — как в карточке проекта в кабинете ── -->
+            <div class="tab-pane fade" id="help-token" role="tabpanel"
+                 t-if="project and project.coop_token_economy">
+              <p class="section-sub" style="margin:20px 0 16px">
+                Проект раскрывает её сам — в рамках законов своей страны.
+              </p>
+              <div class="coop-help-economy"><t t-out="project.coop_token_economy"/></div>
             </div>
 
             <!-- ── Пожертвования ─────────────────────────────────────── -->

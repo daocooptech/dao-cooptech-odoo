@@ -511,7 +511,7 @@
             <field name="partner_id" invisible="1"/>
             <field name="specialization_ids" widget="many2many_tags" options="{'no_create': True}"
                    placeholder="все специализации"/>
-            <field name="city" placeholder="любой город"/>
+            <field name="city" widget="coop_city" placeholder="любой город — начните вводить"/>
             <field name="by_email"/>
             <field name="active" string="Подписка включена" widget="boolean_toggle"/>
           </group>
@@ -659,6 +659,12 @@
         <attribute name="class">o_coop_projects o_coop_crowd_projects</attribute>
       </xpath>
       <xpath expr="/kanban" position="inside">
+        <!-- Подписка на новые задачи — кнопкой над плитками (решение 691,
+             уточнение 18.11): своей вкладки в меню у неё больше нет. -->
+        <header>
+          <button name="%(action_coop_bounty_my_subscription)d" type="action"
+                  string="Подписка на задачи" display="always"/>
+        </header>
         <field name="coop_token_symbol"/>
         <field name="coop_token_unit"/>
         <field name="coop_crowd_open_count"/>
@@ -749,6 +755,12 @@
                 <button name="action_coop_open_project_page" type="object"
                         string="Страница проекта" class="btn-secondary"
                         invisible="coop_is_cooptech"/>
+                <!-- Фонд задач платформы — из карточки нашего проекта,
+                     только менеджерам (решение 691, уточнение 18.11). -->
+                <button name="%(action_coop_bounty_fund)d" type="action"
+                        string="Фонд задач" class="btn-secondary"
+                        invisible="not coop_is_cooptech"
+                        groups="coop_bounty.group_coop_community_manager,coop_base.group_coop_platform"/>
               </div>
             </div>
           </section>
@@ -831,17 +843,10 @@
             parent="coop_projects.menu_coop_projects_root"
             action="action_coop_crowd_projects" sequence="12"/>
 
-  <menuitem id="menu_coop_bounty_root" name="Краудсорсинг" sequence="145"/>
-  <menuitem id="menu_coop_bounty_task" name="Задачи"
-            parent="menu_coop_bounty_root" action="action_coop_bounty_task" sequence="10"/>
-  <menuitem id="menu_coop_bounty_application" name="Заявки"
-            parent="menu_coop_bounty_root" action="action_coop_bounty_application"
-            sequence="20" groups="coop_bounty.group_coop_community_manager"/>
-  <menuitem id="menu_coop_bounty_subscription" name="Подписка на задачи"
-            parent="menu_coop_bounty_root" action="action_coop_bounty_my_subscription"
-            sequence="15"/>
-  <menuitem id="menu_coop_bounty_fund" name="Фонд задач"
-            parent="menu_coop_bounty_root" action="action_coop_bounty_fund"
-            sequence="30" groups="coop_bounty.group_coop_community_manager,coop_base.group_coop_platform"/>
+  <!-- Своей вкладки в меню у краудсорсинга нет (решение 691): плоский
+       список всех задач всех проектов (`/bounty`) убран, подписка —
+       кнопкой над каталогом, фонд — в карточке нашего проекта, заявки —
+       в карточке задачи. Пункты удаляет обновление модуля: записей
+       меню больше нет в данных. -->
 
 </odoo>

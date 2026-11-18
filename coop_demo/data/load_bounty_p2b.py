@@ -68,6 +68,26 @@ STAGED_DESCRIPTION = (
     'этап оплачивается сразу. %s.</p>')
 SILENT_AUTHOR = 'Этап сдан, автор не отвечает больше недели — разберите, пожалуйста.'
 
+# Сторона автора под dashkevich (№ 470): у его организаций до сих пор были
+# только задачи без конкурса и этапов, и «Подвести итог», «Принять
+# результат» по этапу и заявки со статусами под ним было не увидеть.
+SHOWCASE_LOGIN = 'dashkevich'
+AUTHOR_CONTEST = ('Логотип к десятилетию организации', 'Дизайн, графика', (1500, 800, 400), 5)
+AUTHOR_STAGED = ('Буклет о продукции: тексты, макет, подготовка к печати', 'Дизайн, графика',
+                 [('Тексты', 2500), ('Макет', 3500), ('Подготовка к печати', 1500)])
+AUTHOR_APPLIED = ('Описание продукции для маркетплейса', 'Журналистика, СМИ', 3000)
+APPLIED_DESCRIPTION = ('<p>%s: состав, преимущества и способ применения для карточки товара '
+                       'на маркетплейсе — двенадцать позиций.</p>')
+# Заявки — от людей разного статуса: автор видит его до утверждения.
+AUTHOR_APPLICANTS = [
+    # Тексты — без рода: заявитель подбирается по статусу, а не по имени.
+    ('npd', 'Карточки для маркетплейсов — моя основная работа третий год. Чек НПД пробью сразу.'),
+    ('ip', 'ИП на упрощёнке. Сделаю за неделю, акт подпишу со своей стороны.'),
+    ('nonresident', 'Живу в Ереване, пишу по-русски и по-английски. Могу сразу два варианта.'),
+    ('gph', 'Опыта с маркетплейсами немного, зато тексты о продукции своего кооператива '
+            'веду уже два года.'),
+]
+
 
 def _room(project, need):
     """Проект выделяет токены на задачи, если свободных не хватает."""
@@ -219,5 +239,112 @@ def load_bounty_p2b(env, Task, manager, specializations):
         elif outcome == 'cancelled':
             task.action_cancel()
         _backdate(task, 25 + index * 2, step=6)
+    created += _author_showcase(env, Task, manager, performers, method, spec, existing, today)
     _logger.info('Задачи П2, кусок 2: заведено %s', created)
+    return created
+
+
+def _status_of(partner):
+    """Статус заявителя так, как его увидит автор (coop_tax)."""
+    if 'coop_tax_resident' in partner._fields and not partner.coop_tax_resident:
+        return 'nonresident'
+    regime = partner.coop_tax_regime if 'coop_tax_regime' in partner._fields else False
+    if regime == 'npd':
+        return 'npd'
+    if regime in ('usn_income', 'usn_profit', 'patent'):
+        return 'ip'
+    return 'gph'
+
+
+def _author_showcase(env, Task, manager, performers, method, spec, existing, today):
+    """Конкурс ждёт итога, этап на приёмке, заявки разных статусов — у
+    организации dashkevich, чтобы сторону автора было видно под ним."""
+    user = env['res.users'].sudo().search([('login', '=', SHOWCASE_LOGIN)], limit=1)
+    if not user:
+        return 0
+    orgs = user.coop_publisher_partner_ids.filtered('is_company')
+    projects = env['coop.project'].sudo().search(
+        [('partner_id', 'in', orgs.ids), ('coop_token_name', '!=', False)], order='id')
+    if not projects:
+        return 0
+    # Заявители — не сам автор и не его организации.
+    crowd = [p for p in performers if p != user.partner_id and p not in orgs]
+    if len(crowd) < 20:
+        return 0
+    Submission = env['coop.bounty.submission'].sudo()
+    created = 0
+
+    def base(name, specialization, project, description, need):
+        _room(project, need)
+        return {'payer_id': project.partner_id.id, 'project_id': project.id,
+                'allowed_method_ids': [(6, 0, [method['project_tokens'].id])],
+                'name': name, 'coop_specialization_id': spec(specialization),
+                'manager_id': manager.id, 'description': description % name,
+                'criterion_ids': _criteria('Результат приложен, его можно проверить по ссылке')}
+
+    # Конкурс: приём работ закончился позавчера, итога ещё нет.
+    name, specialization, prizes, entries = AUTHOR_CONTEST
+    if name not in existing:
+        values = base(name, specialization, projects[0], CONTEST_DESCRIPTION, sum(prizes))
+        values.update(is_contest=True, reward_tokens=sum(prizes),
+                      deadline=today + timedelta(days=5),
+                      prize_ids=[(0, 0, {'place': n + 1, 'amount': amount})
+                                 for n, amount in enumerate(prizes)])
+        task = _create(Task, values)
+        if task:
+            created += 1
+            closed = today - timedelta(days=2)
+            for number, partner in enumerate(crowd[3:3 + entries]):
+                Submission.create({'task_id': task.id, 'partner_id': partner.id, 'version': 1,
+                                   'date': closed - timedelta(days=entries - number),
+                                   'link': _link(task, number + 1),
+                                   'note': SUBMIT_NOTES[number % len(SUBMIT_NOTES)]})
+            task.deadline = closed
+            Task._cron_contest_deadline()
+
+    # Этапная: первый этап принят и оплачен, второй сдан и ждёт приёмки.
+    name, specialization, stages = AUTHOR_STAGED
+    if name not in existing:
+        project = projects[1 % len(projects)]
+        values = base(name, specialization, project, STAGED_DESCRIPTION,
+                      sum(a for _n, a in stages))
+        values.update(reward_tokens=sum(a for _n, a in stages), deadline=today + timedelta(days=24),
+                      stage_ids=[(0, 0, {'name': stage, 'amount': amount, 'sequence': (n + 1) * 10})
+                                 for n, (stage, amount) in enumerate(stages)])
+        task = _create(Task, values)
+        if task:
+            created += 1
+            env['coop.bounty.application'].sudo().create({
+                'task_id': task.id, 'partner_id': crowd[9].id,
+                'method_id': task.allowed_method_ids[:1].id,
+                'message': 'Сделаю по этапам: сначала тексты, потом макет.'}).action_approve()
+            task._coop_do_submit(_link(task, 1), SUBMIT_NOTES[0])
+            task.action_accept()
+            task._coop_do_submit(_link(task, 2), SUBMIT_NOTES[1])
+            _backdate(task, 12, step=7)
+
+    # Обычная задача с заявками: статус каждого заявителя — до утверждения.
+    name, specialization, reward = AUTHOR_APPLIED
+    if name not in existing:
+        values = base(name, specialization, projects[0], APPLIED_DESCRIPTION, reward)
+        values.update(reward_tokens=reward, deadline=today + timedelta(days=10))
+        task = _create(Task, values)
+        if task:
+            created += 1
+            pool = crowd[12:]
+            for status, message in AUTHOR_APPLICANTS:
+                partner = next((p for p in pool if _status_of(p) == status), None)
+                if partner is None and status == 'nonresident':
+                    # Нерезидента среди людей нет — им становится один из
+                    # «физлиц»: живёт за границей больше 183 дней в году.
+                    partner = next((p for p in pool if _status_of(p) == 'gph'), None)
+                    if partner:
+                        partner.coop_tax_resident = False
+                if partner is None:
+                    continue
+                pool.remove(partner)
+                env['coop.bounty.application'].sudo().create({
+                    'task_id': task.id, 'partner_id': partner.id,
+                    'method_id': task.allowed_method_ids[:1].id, 'message': message})
+    _logger.info('Витрина автора под %s: заведено %s', SHOWCASE_LOGIN, created)
     return created
