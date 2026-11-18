@@ -161,3 +161,18 @@ class TestProjectVacancy(CoopProjectCase):
         self.assertEqual(deal.way, 'job')
         self.assertEqual(deal.party_a_id, stranger.partner_id)
         self.assertEqual(vacancy.state, 'closed')
+
+    def test_add_page(self):
+        """«Добавить вакансию» заводит черновик от своего имени на странице
+        добавления; заготовку «Новая вакансия» не публикуют (`VacancyAddPage`)."""
+        Vacancy = self.Vacancy.with_user(self.initiator)
+        action = Vacancy.action_new_vacancy()
+        draft = Vacancy.browse(action['res_id'])
+        self.assertEqual(draft.state, 'draft')
+        self.assertEqual(draft.partner_id, self.initiator.partner_id)
+        self.assertIn(self.initiator.partner_id, draft.coop_publisher_ids)
+        view = action['view_id']
+        self.assertEqual(view[0] if isinstance(view, (list, tuple)) else view,
+                         self.env.ref('coop_vacancies.view_coop_vacancy_add').id)
+        with self.assertRaises(UserError):
+            draft.action_publish()

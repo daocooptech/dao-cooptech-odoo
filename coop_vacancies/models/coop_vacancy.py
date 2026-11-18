@@ -8,6 +8,11 @@ from odoo.addons.coop_base.models.res_partner import PRODUCTION_KINDS
 
 _logger = logging.getLogger(__name__)
 
+# Имя пустого черновика, который заводит «Добавить вакансию»: название
+# обязательное, а запись нужна до первого нажатия клавиши (как у ресурса
+# и навыка — `DRAFT_NAME` в их модулях).
+DRAFT_NAME = 'Новая вакансия'
+
 # Как оформляется и чем оплачивается труд.
 #
 # Решение 416, п. 2 (26.09.2026): «ООО — рубли, кооператив — пай, ДАО —
@@ -244,6 +249,17 @@ class CoopVacancy(models.Model):
         ('declined', 'Отклик отклонён'),
     ], string='Мой отклик', compute='_compute_my_application')
     is_mine = fields.Boolean(string='Моя вакансия', compute='_compute_my_application')
+    # «Кто ищет» на странице добавления (`VacancyAddPage`, решение 625):
+    # свой профиль и организации, где у человека есть «Публикации».
+    coop_publisher_ids = fields.Many2many(
+        'res.partner', string='От чьего имени можно',
+        compute='_compute_coop_publisher_ids')
+
+    @api.depends_context('uid')
+    def _compute_coop_publisher_ids(self):
+        partners = self.env.user.coop_publisher_partner_ids
+        for record in self:
+            record.coop_publisher_ids = partners | record.partner_id
 
     # Карточка работодателя и проекта в боковой колонке витрины
     # (дизайн-система, `VacancyPage` + `OwnerCard`, решение 625) — теми же
@@ -504,10 +520,49 @@ class CoopVacancy(models.Model):
         реестром.
         """
         for record in self:
+            # Заготовку «Новая вакансия» в каталоге не найдут и не поймут.
+            if not record.name or record.name.strip() == DRAFT_NAME:
+                raise UserError(_(
+                    'Напишите, кто нужен. «%s» — это заготовка, по ней '
+                    'вакансию не найдут.') % DRAFT_NAME)
             record.partner_id.coop_require_level(
                 'identity', _('разместить вакансию'))
             record.state = 'published'
         return True
+
+    @api.model
+    def action_new_vacancy(self):
+        """«Добавить вакансию»: завести черновик и открыть страницу добавления.
+
+        Запись нужна сразу, как у объявления ресурса и навыка: поля
+        сохраняют себя сами, а сохранять себя поле может только в
+        существующую запись. Черновик никому не виден — в каталог выходят
+        только опубликованные.
+        """
+        draft = self.create({'state': 'draft', 'name': DRAFT_NAME})
+        action = self.env['ir.actions.act_window']._for_xml_id(
+            'coop_vacancies.action_coop_vacancy_add')
+        action['res_id'] = draft.id
+        return action
+
+    def action_save_draft(self):
+        """«Сохранить черновик»: запись уже сохранена — к своим вакансиям."""
+        action = self.env['ir.actions.act_window']._for_xml_id(
+            'coop_vacancies.action_coop_my_vacancies')
+        action['target'] = 'main'
+        return action
+
+    def action_done_editing(self):
+        """После публикации — на витрину вакансии, путь заново."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'coop.vacancy',
+            'res_id': self.id,
+            'view_mode': 'form',
+            'views': [(self.env.ref('coop_vacancies.view_coop_vacancy_form').id, 'form')],
+            'target': 'main',
+        }
 
     def action_close(self):
         self.write({'state': 'closed'})

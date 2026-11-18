@@ -306,13 +306,3 @@
     gap: 4px;
   }
 }
-
-// Строка «В каталоге» под ставкой и опытом — как будет на карточке.
-.coop-add_incat {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px;
-
-  .o_field_widget { width: auto; flex: none; font-weight: 600; }
-}

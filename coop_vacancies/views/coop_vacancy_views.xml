@@ -388,6 +388,265 @@
     </field>
   </record>
 
+  <!--
+    Страница «Добавить вакансию» по дизайн-системе (`VacancyAddPage`, решение
+    625): слева разделы с номерами, справа живая плитка каталога, готовность
+    и кнопки — как у страниц добавления ресурса и навыка. Черновик заводит
+    `action_new_vacancy`.
+  -->
+  <record id="view_coop_vacancy_add" model="ir.ui.view">
+    <field name="name">coop.vacancy.add</field>
+    <field name="model">coop.vacancy</field>
+    <!-- Ниже витрины: при равном приоритете «add» по алфавиту обогнал бы
+         «form», и каталог открывал бы вакансию формой ввода. -->
+    <field name="priority">30</field>
+    <field name="arch" type="xml">
+      <form string="Добавить вакансию" class="o_coop_add_form">
+        <sheet>
+          <field name="state" invisible="1"/>
+          <field name="write_date" invisible="1"/>
+          <field name="coop_publisher_ids" invisible="1"/>
+          <field name="employer_kind" invisible="1"/>
+          <field name="currency_id" invisible="1"/>
+          <div class="coop-add_header">
+            <h1>Добавить вакансию</h1>
+            <p class="coop-add_intro" invisible="state != 'draft'">
+              Черновик сохраняется сам — можно уйти и вернуться, он будет в
+              «Моих вакансиях». После публикации вакансия появится в каталоге
+              и на странице того, кто ищет.
+            </p>
+            <p class="coop-add_intro" invisible="state == 'draft'">
+              Правки видны в каталоге сразу после сохранения.
+            </p>
+          </div>
+          <div class="coop-add">
+            <div class="coop-add_main">
+
+              <section class="coop-add_sec" name="add_who">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 1, 'fields': ['name', 'coop_specialization_id', 'city'], 'empty': 'Новая вакансия'}"/>
+                  <div>
+                    <h2>Кто нужен</h2>
+                    <p>Как называют эту работу соискатели. По специализации и городу
+                      вакансию находят в каталоге и в подборе людей.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_top">
+                    <div>
+                      <div class="coop-photo">
+                        <field name="image_1920" widget="image" nolabel="1"/>
+                      </div>
+                      <div class="coop-photo_hint">Фото — первое, на что смотрят в каталоге</div>
+                    </div>
+                    <div class="d-flex flex-column gap-3">
+                      <div class="coop-add_field coop-add_title">
+                        <field name="name" nolabel="1" placeholder="Кто нужен"/>
+                      </div>
+                      <div class="coop-add_row">
+                        <div class="coop-add_field">
+                          <label for="coop_specialization_id" string="Специализация"/>
+                          <field name="coop_specialization_id" nolabel="1"
+                                 options="{'no_create': True, 'no_open': True}"/>
+                        </div>
+                        <div class="coop-add_field" name="add_city">
+                          <label for="city" string="Город"/>
+                          <field name="city" widget="coop_city" nolabel="1"
+                                 placeholder="Начните вводить город"/>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="partner_id" string="Кто ищет"/>
+                    <field name="partner_id" widget="badges_many2one" nolabel="1"
+                           domain="[('id', 'in', coop_publisher_ids)]"/>
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="project_id" string="Проект"/>
+                    <field name="project_id" nolabel="1"
+                           placeholder="Если работа нужна проекту — необязательно"
+                           options="{'no_create': True, 'no_open': True}"/>
+                  </div>
+                </div>
+              </section>
+
+              <section class="coop-add_sec" name="add_terms">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 2, 'fields': ['employment', 'experience_level']}"/>
+                  <div>
+                    <h2>Занятость и опыт</h2>
+                    <p>По ним вакансию отбирают в каталоге.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_field">
+                    <label for="employment" string="Занятость"/>
+                    <field name="employment" widget="badges_selection" nolabel="1"/>
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="experience_level" string="Опыт"/>
+                    <field name="experience_level" widget="badges_selection" nolabel="1"/>
+                  </div>
+                </div>
+              </section>
+
+              <section class="coop-add_sec" name="add_reward">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 3, 'any': True, 'fields': ['pay_from', 'pay_to', 'contribution_value', 'reward_note']}"/>
+                  <div>
+                    <h2>Чем вознаграждаете</h2>
+                    <p>Вид вознаграждения виден на карточке каталога до того, как
+                      человек прочтёт описание.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_field">
+                    <field name="reward_kind" widget="badges_selection" nolabel="1"/>
+                  </div>
+                  <!-- Сумма — при деньгах и при доле, как на витрине: доля
+                       бывает и вместе с оплатой («доля + 60 000 ₽»). -->
+                  <div class="coop-add_row" invisible="reward_kind in ('barter', 'volunteer')">
+                    <div class="coop-add_field">
+                      <label for="pay_from" string="Оплата от"/>
+                      <field name="pay_from" nolabel="1"/>
+                    </div>
+                    <div class="coop-add_field">
+                      <label for="pay_to" string="до"/>
+                      <field name="pay_to" nolabel="1"/>
+                    </div>
+                  </div>
+                  <div class="coop-add_field" invisible="reward_kind in ('barter', 'volunteer')">
+                    <label for="pay_period" string="Период"/>
+                    <field name="pay_period" widget="badges_selection" nolabel="1"/>
+                  </div>
+                  <div invisible="reward_kind != 'share'">
+                    <div class="coop-add_pair">
+                      <div class="coop-add_field">
+                        <label for="contribution_value" string="Оценка вклада"/>
+                        <field name="contribution_value" nolabel="1"/>
+                      </div>
+                      <div class="coop-add_field">
+                        <label for="share_percent" string="Доля, %"/>
+                        <field name="share_percent" nolabel="1" readonly="1"
+                               options="{'hide_trailing_zeros': true}"/>
+                      </div>
+                    </div>
+                    <p class="coop-add_help">
+                      Доля не вписывается, а считается: оценка вклада к сумме всех
+                      вкладов проекта. Пока проект не выбран или вкладов нет, доля
+                      неизвестна.
+                    </p>
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="reward_note" string="Уточнение к вознаграждению"/>
+                    <field name="reward_note" nolabel="1"
+                           placeholder="«оплата после испытательного», «доля обсуждается», «плюс жильё»"/>
+                  </div>
+                  <!-- Договор и выплата — решение 425: что допустимо, задаёт
+                       тот, кто ищет; у ДАО и прочих выбор закрыт. -->
+                  <div class="coop-add_row" invisible="not contract_kind">
+                    <div class="coop-add_field">
+                      <label for="contract_kind" string="Договор"/>
+                      <field name="contract_kind" nolabel="1"
+                             readonly="employer_kind == 'dao'"/>
+                    </div>
+                    <div class="coop-add_field">
+                      <label for="pay_method" string="Как выплачивается"/>
+                      <field name="pay_method" nolabel="1"
+                             readonly="employer_kind in ('dao', 'other') or contract_kind != 'civil'"/>
+                    </div>
+                  </div>
+                  <field name="pay_explain" readonly="1" nolabel="1" class="coop-add_help"
+                         invisible="not pay_explain"/>
+                  <div class="coop-add_help coop-add_incat">
+                    <span>В каталоге:</span>
+                    <field name="reward_display" readonly="1" nolabel="1"/>
+                  </div>
+                </div>
+              </section>
+
+              <section class="coop-add_sec" name="add_skills">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 4, 'fields': ['skill_ids']}"/>
+                  <div>
+                    <h2>Что потребуется</h2>
+                    <p>Умения и допуски — по ним вакансию предлагают подходящим людям.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_field">
+                    <field name="skill_ids" widget="many2many_tags" nolabel="1"
+                           placeholder="Например, монтаж щитов"
+                           options="{'no_create': True}"/>
+                  </div>
+                </div>
+              </section>
+
+              <section class="coop-add_sec" name="add_description">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 5, 'fields': ['description']}"/>
+                  <div>
+                    <h2>Что делать</h2>
+                    <p>По этому тексту человек решает, откликаться ли.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_field">
+                    <field name="description" nolabel="1"
+                           placeholder="Задача и условия. Конкретнее, чем «работа в дружном коллективе»."/>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <aside class="coop-add_aside">
+              <div class="coop-add_preview">
+                <span>Так увидят в каталоге</span>
+                <field name="id" widget="coop_vacancy_preview" nolabel="1"/>
+              </div>
+              <field name="id" widget="coop_add_ready" nolabel="1"
+                     options="{'items': [
+                       {'field': 'name', 'label': 'Кто нужен', 'required': True, 'empty': 'Новая вакансия', 'anchor': 'add_who'},
+                       {'field': 'image_1920', 'label': 'Фото', 'anchor': 'add_who'},
+                       {'field': 'coop_specialization_id', 'label': 'Специализация', 'anchor': 'add_who'},
+                       {'field': 'city', 'label': 'Город', 'required': True, 'anchor': 'add_who'},
+                       {'fields': ['pay_from', 'pay_to', 'contribution_value', 'reward_note'], 'label': 'Вознаграждение', 'anchor': 'add_reward'},
+                       {'field': 'skill_ids', 'label': 'Что потребуется', 'anchor': 'add_skills'},
+                       {'field': 'description', 'label': 'Что делать', 'anchor': 'add_description'}
+                     ]}"/>
+              <div class="coop-add_acts">
+                <button name="action_publish" type="object" string="Опубликовать"
+                        class="btn-primary" invisible="state != 'draft'"/>
+                <button name="action_save_draft" type="object" string="Сохранить черновик"
+                        class="btn-secondary" invisible="state != 'draft'"/>
+                <button name="action_done_editing" type="object" string="Готово"
+                        class="btn-primary" invisible="state == 'draft'"/>
+                <p class="coop-add_note" invisible="state != 'draft'">
+                  Опубликовать можно, когда заполнено помеченное «нужно».
+                </p>
+              </div>
+            </aside>
+          </div>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- Открывает уже заведённый черновик: номер подставляет `action_new_vacancy`. -->
+  <record id="action_coop_vacancy_add" model="ir.actions.act_window">
+    <field name="name">Добавить вакансию</field>
+    <field name="res_model">coop.vacancy</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="view_coop_vacancy_add"/>
+    <field name="target">current</field>
+  </record>
+
   <record id="view_coop_vacancy_search" model="ir.ui.view">
     <field name="name">coop.vacancy.search</field>
     <field name="model">coop.vacancy</field>
@@ -449,7 +708,7 @@
     <field name="name">Вакансии</field>
     <field name="res_model">coop.vacancy</field>
     <field name="path">vacancies</field>
-    <field name="context">{'bin_size': True,'coop_catalog': True, 'coop_create_label': 'Добавить вакансию', 'coop_shelf_field': 'coop_specialization_category_id'}</field>
+    <field name="context">{'bin_size': True,'coop_catalog': True, 'coop_create_label': 'Добавить вакансию', 'coop_create_method': 'action_new_vacancy', 'coop_shelf_field': 'coop_specialization_category_id'}</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('state', '=', 'published')]</field>
     <field name="search_view_id" ref="view_coop_vacancy_search"/>
@@ -473,7 +732,7 @@
       <p>Закрытая или черновая вакансия из каталога уходит, но остаётся
          здесь.</p>
     </field>
-    <field name="context">{'coop_create_label': 'Добавить вакансию'}</field>
+    <field name="context">{'coop_create_label': 'Добавить вакансию', 'coop_create_method': 'action_new_vacancy'}</field>
   </record>
 
   <!--

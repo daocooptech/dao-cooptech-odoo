@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!-- Плитка каталога по данным черновика — разметкой `view_coop_vacancy_kanban`. -->
+  <t t-name="coop_vacancies.VacancyPreview">
+    <div class="o_coop_vacancies o_coop_vac_preview">
+      <div class="o_kanban_record">
+        <div class="o_coop_vacancy">
+          <div class="o_coop_vac_photo o_coop_media">
+            <img t-if="this.image" t-att-src="this.image" alt=""/>
+            <img class="o_coop_media_logo" t-elif="this.owner" alt=""
+                 t-attf-src="/web/image/res.partner/{{ this.owner.id }}/image_512"/>
+            <span t-else="" class="o_coop_media_sign"/>
+            <img class="o_coop_vac_owner" t-if="this.owner" alt=""
+                 t-att-title="this.owner.display_name"
+                 t-attf-src="/web/image/res.partner/{{ this.owner.id }}/avatar_128"/>
+            <span t-if="this.data.reward_kind and this.data.reward_kind !== 'money'"
+                  t-attf-class="o_coop_vac_kind o_coop_vac_kind_{{ this.data.reward_kind }}"
+                  t-out="this.label('reward_kind')"/>
+            <span class="o_coop_locbar" t-if="this.data.city">
+              <i class="oi" data-icon="location_on" role="img" aria-label="Город"/>
+              <t t-out="this.data.city"/>
+            </span>
+          </div>
+          <div class="o_coop_vac_body">
+            <div class="o_coop_vac_name" t-out="this.title"/>
+            <div class="o_coop_vac_reward" t-if="this.data.reward_display" t-out="this.data.reward_display"/>
+            <div class="o_coop_vac_meta" t-if="this.meta" t-out="this.meta"/>
+          </div>
+        </div>
+      </div>
+    </div>
+  </t>
+
+</templates>

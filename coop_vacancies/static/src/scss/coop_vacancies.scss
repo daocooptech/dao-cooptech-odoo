@@ -303,3 +303,10 @@
         max-width: 100%;
     }
 }
+
+// ── Превью плитки на странице «Добавить вакансию» (`VacancyAddPage`) ──
+.o_coop_vac_preview {
+  pointer-events: none;
+
+  .o_kanban_record { width: 100%; }
+}

@@ -18,7 +18,7 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.0.6',
+    'version': '20.0.1.0.7',
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_people', 'coop_projects', 'coop_theme',
                 'hr_recruitment', 'hr_skills', 'project', 'mail'],
@@ -30,6 +30,8 @@
     'assets': {
         'web.assets_backend': [
             'coop_vacancies/static/src/scss/coop_vacancies.scss',
+            'coop_vacancies/static/src/js/vacancy_preview.js',
+            'coop_vacancies/static/src/xml/vacancy_preview.xml',
         ],
     },
     'installable': True,

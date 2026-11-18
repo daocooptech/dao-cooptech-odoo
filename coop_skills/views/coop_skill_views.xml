@@ -443,15 +443,15 @@
                     <label for="rate_kind" string="Ставка"/>
                     <field name="rate_kind" widget="badges_selection" nolabel="1"/>
                   </div>
-                  <div class="coop-add_pair" invisible="rate_kind == 'piece'">
+                  <div class="coop-add_row" invisible="rate_kind == 'piece'">
                     <div class="coop-add_field">
                       <label for="rate" string="Сумма"/>
                       <field name="rate" nolabel="1"/>
                     </div>
-                    <div class="coop-add_field">
-                      <label for="rate_period" string="Период"/>
-                      <field name="rate_period" widget="badges_selection" nolabel="1"/>
-                    </div>
+                  </div>
+                  <div class="coop-add_field" invisible="rate_kind == 'piece'">
+                    <label for="rate_period" string="Период"/>
+                    <field name="rate_period" widget="badges_selection" nolabel="1"/>
                   </div>
                   <div class="coop-add_pair">
                     <div class="coop-add_field">
