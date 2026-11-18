@@ -54,7 +54,7 @@
 
   <menuitem id="menu_coop_project_notes" name="Заметки"
             parent="menu_coop_projects_root" action="action_coop_notes"
-            sequence="25"/>
+            sequence="20"/>
 
   <!-- В форме заметки — к какому проекту платформы она относится. -->
   <record id="view_todo_form_coop_project" model="ir.ui.view">

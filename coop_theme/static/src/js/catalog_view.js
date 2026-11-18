@@ -18,7 +18,8 @@ import { CoopFilters, coopFiltersUi } from "@coop_theme/js/catalog_filters";
 import { CoopMap } from "@coop_theme/js/catalog_map";
 import { CoopShelves } from "@coop_theme/js/catalog_shelves";
 import { coopSort, parseOrder } from "@coop_theme/js/catalog_sort";
-import { proxy } from "@odoo/owl";
+import { onWillStart, proxy } from "@odoo/owl";
+import { useService } from "@web/core/utils/hooks";
 
 /**
  * Виды каталога в одном переключателе: плиткой, списком, на карте — три
@@ -555,6 +556,32 @@ patch(FormController.prototype, createLabelPatch());
 // даёт свой контроллер (`CoopCatalogKanbanController`), его геттер
 // перекрывает этот.
 patch(KanbanController.prototype, createLabelPatch());
+
+// «Управление проектами» — кнопкой слева от «Добавить проект» в том
+// подразделе «Проектов», где у человека есть свой проект (владелец
+// 19.11.2026). Подраздел называет действие (`coop_pm_section`), видна ли
+// кнопка — решает сервер (`coop.project.coop_pm_visible`).
+patch(KanbanController.prototype, {
+    setup() {
+        super.setup(...arguments);
+        this.coopPm = proxy({ visible: false });
+        // Из контекста самого экрана, не из `coopActionContext`: пока
+        // контроллер собирается, «текущее действие» у службы ещё прежнее,
+        // и «Я участвую» получала кнопку от «Я инициатор» (стенд, 19.11).
+        const section = this.props.context?.coop_pm_section;
+        if (section) {
+            const orm = useService("orm");
+            onWillStart(async () => {
+                this.coopPm.visible = await orm.call(
+                    "coop.project", "coop_pm_visible", [section]);
+            });
+        }
+    },
+
+    coopOpenPm() {
+        return this.actionService.doAction("coop_projects.action_coop_project_management");
+    },
+});
 
 /**
  * Своя страница добавления вместо штатного режима создания.

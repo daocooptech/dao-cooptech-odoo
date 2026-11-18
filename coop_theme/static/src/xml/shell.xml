@@ -289,6 +289,25 @@
          t-on-click.prevent="() => this.openFav()">
         Избранное <span class="o_coop_tab_count" t-out="this.state.fav.count"/>
       </a>
+      <a t-foreach="this.state.tabsAfter" t-as="tab" t-key="tab.id"
+         href="#" class="o_coop_tab"
+         t-att-class="{ 'active': tab.id === this.state.current }"
+         t-on-click.prevent="() => this.open(tab)">
+        <t t-out="tab.name"/>
+      </a>
+    </div>
+    <!-- Вкладки внутри подраздела («Мои проекты»: «Я инициатор», «Я
+         участвую» — владелец 19.11.2026). Видны и на большом экране:
+         меню слева их не показывает. -->
+    <div class="o_coop_tabs o_coop_tabs_page o_coop_subtabs" role="tablist"
+         t-if="this.state.subtabs.length">
+      <a t-foreach="this.state.subtabs" t-as="tab" t-key="tab.id"
+         href="#" class="o_coop_tab" role="tab"
+         t-att-class="{ 'active': tab.id === this.state.subCurrent }"
+         t-att-aria-selected="tab.id === this.state.subCurrent ? 'true' : 'false'"
+         t-on-click.prevent="() => this.open(tab)">
+        <t t-out="tab.name"/>
+      </a>
     </div>
     </div>
   </t>
@@ -326,6 +345,15 @@
           <span class="o_coop_subnav_label">Избранное</span>
           <span class="o_coop_subnav_count" t-out="this.state.fav.count"/>
         </a>
+        <a t-foreach="this.state.tabsAfter" t-as="tab" t-key="tab.id"
+           href="#" class="o_coop_subnav_item"
+           t-att-class="{ 'active': tab.id === this.state.current }"
+           t-att-title="this.ui.subCollapsed ? tab.name : undefined"
+           t-att-aria-current="tab.id === this.state.current ? 'page' : undefined"
+           t-on-click.prevent="() => this.open(tab)">
+          <CoopIcon name="this.icon(tab.name)" size="18"/>
+          <span class="o_coop_subnav_label" t-out="tab.name"/>
+        </a>
       </nav>
     </aside>
   </t>
@@ -350,6 +378,9 @@
           группа проверяет код модуля и ставит его. Пункт откроется сам, как
           только установка закончится, — нажимать «Подключить» ещё раз не нужно.
         </p>
+        </t>
+        <t t-elif="this.dev">
+        <p>Раздел в разработке.</p>
         </t>
         <t t-else="">
         <p>

@@ -44,7 +44,8 @@ export class CoopTabs extends Component {
         this.menus = useService("menu");
         this.action = usePlugin(ActionPlugin);
         this.orm = useService("orm");
-        this.state = proxy({ tabs: [], current: null, label: null, fav: null, section: null, known: false });
+        this.state = proxy({ tabs: [], tabsAfter: [], subtabs: [], subCurrent: null,
+                             current: null, label: null, fav: null, section: null, known: false });
         useBus(this.env.bus, "COOP_FAVORITE_CHANGED", () => this.refreshFav());
         // Строка вкладок рисуется раньше, чем открывается сам каталог, и
         // первый расчёт вкладки «Избранное» не находил действия — вкладка
@@ -139,6 +140,8 @@ export class CoopTabs extends Component {
             // выборки значит предлагать уйти туда, откуда человек только
             // что пришёл своим путём.
             this.state.tabs = [];
+            this.state.tabsAfter = [];
+            this.state.subtabs = [];
             this.state.current = null;
             this.state.label = label;
             // Только по своему пункту меню: «последнее выбранное
@@ -171,8 +174,10 @@ export class CoopTabs extends Component {
         // шапкой «Сделки / Мои сделки» (решение 479).
         const nested = (this.env.config?.breadcrumbs?.length || 0) > 1;
         const appId = own ? own.appID : nested ? this.menus.getCurrentApp()?.id : null;
+        this.state.subtabs = [];
         if (!appId) {
             this.state.tabs = [];
+            this.state.tabsAfter = [];
             this.state.section = null;
             this.state.known = false;
             return;
@@ -182,14 +187,34 @@ export class CoopTabs extends Component {
         const children = this.menus.getMenuAsTree(appId).childrenTree || [];
         // Вкладка показывается даже одна: она называет раздел, а
         // названия раздела в панели больше нет — оно дублировало её.
-        this.state.tabs = children;
+        this.splitTabs(this.menus.getMenu(appId)?.name, children);
         // Активную ищем среди самих вкладок, а не по всему меню: у
         // корневого пункта раздела и у первой вкладки одно и то же
         // действие, и по общему списку находился корневой — он в
         // строке вкладок не показан, и подсвечивать было нечего.
-        const active = children.find((tab) => tab.actionID === actionId);
+        // Вложенные пункты («Мои проекты» → «Я инициатор», «Я участвую»)
+        // подсвечивают своего родителя и встают вкладками на странице.
+        const active = children.find((tab) => coopTabHas(tab, actionId));
         this.state.current = active ? active.id : (children[0] || {}).id;
+        this.setSubtabs(active, actionId);
         this.refreshFav();
+    }
+
+    /** «Лента» в «Проектах» — после «Избранного» (владелец 19.11.2026). */
+    splitTabs(appName, children) {
+        const after = AFTER_FAV[appName] || [];
+        this.state.tabs = children.filter((tab) => !after.includes(tab.name));
+        this.state.tabsAfter = children.filter((tab) => after.includes(tab.name));
+    }
+
+    /** Вкладки внутри подраздела — его вложенные пункты меню (владелец
+     *  19.11.2026: «мои проекты - внутри две вкладки - я участвую, я
+     *  инициатор»). Один вложенный — не вкладки. */
+    setSubtabs(active, actionId) {
+        const subs = active?.childrenTree || [];
+        this.state.subtabs = subs.length > 1 ? subs : [];
+        const current = subs.find((tab) => tab.actionID === actionId) || subs[0];
+        this.state.subCurrent = current ? current.id : null;
     }
 
     /**
@@ -286,6 +311,15 @@ export class CoopTabs extends Component {
  * под одним значком и были повторами. Новому пункту — незанятый контур
  * из пакета Tabler (`icons.js`); занят ли он — поиском по модулям.
  */
+/** Подразделы, которые стоят после «Избранного», — по разделам. */
+const AFTER_FAV = { "Проекты": ["Лента"] };
+
+/** Пункт меню — это действие или пункт, вложенный в него. */
+function coopTabHas(tab, actionId) {
+    return tab.actionID === actionId
+        || (tab.childrenTree || []).some((child) => child.actionID === actionId);
+}
+
 const SUBNAV_EXACT = {
     // Люди.
     "Каталог людей": "user-search",
@@ -303,9 +337,13 @@ const SUBNAV_EXACT = {
     "Продвижение": "speakerphone",
     // Проекты.
     "Каталог проектов": "layout-cards",
+    // «Мои проекты» — со вкладками «Я инициатор» и «Я участвую» на
+    // странице (19.11.2026); у вкладок значков нет.
+    "Мои проекты": "user-star",
+    "Краудресурсинг": "stack-2",
+    "Краудфандинг": "chart-bar-popular",
     "Краудсорсинг": "list-details",
-    "Я инициатор": "user-star",
-    "Я участвую": "users-plus",
+    "Волонтёрство": "heart",
     "Управление проектами": "layout-kanban",
     "Дела": "checklist",
     "Заметки": "notes",
@@ -579,16 +617,18 @@ export class CoopSubnav extends CoopTabs {
         // разделы платформы.
         if (!app || NO_SUBNAV_APPS.includes(app.xmlid)) {
             this.state.tabs = [];
+            this.state.tabsAfter = [];
             this.state.current = null;
             this.state.fav = null;
             this.state.title = "";
             return;
         }
         const children = this.menus.getMenuAsTree(app.id).childrenTree || [];
-        this.state.tabs = children;
+        this.splitTabs(app.name, children);
         this.state.title = app.name;
         // Выборка («Мои друзья») — подразделы видны, ни один не выделен.
-        const active = this.screenLabel ? null : children.find((tab) => tab.actionID === own.actionID);
+        // Вложенный пункт («Я участвую») подсвечивает родителя («Мои проекты»).
+        const active = this.screenLabel ? null : children.find((tab) => coopTabHas(tab, own.actionID));
         this.state.current = active ? active.id : null;
         this.state.label = null;
         this.refreshFav();
@@ -599,7 +639,7 @@ export class CoopSubnav extends CoopTabs {
     get visible() {
         // Один подраздел — это сам раздел; «Избранное» к нему меню не
         // делает: у «Моей страницы» выходило «Моя страница · Избранное».
-        return this.state.tabs.length > 1;
+        return this.state.tabs.length + this.state.tabsAfter.length > 1;
     }
 
     icon(name) {
@@ -1319,6 +1359,9 @@ export class CoopSoon extends Component {
     setup() {
         this.label = this.props.action?.params?.label || this.props.action?.name || "Раздел";
         this.pending = Boolean(this.props.action?.params?.pending);
+        // Подраздел в разработке (краудфандинг, волонтёрство — владелец
+        // 19.11.2026), а не раздел макета, ещё не перенесённый на движок.
+        this.dev = Boolean(this.props.action?.params?.dev);
     }
 }
 

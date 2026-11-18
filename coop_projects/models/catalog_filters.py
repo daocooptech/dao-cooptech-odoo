@@ -1,5 +1,69 @@
 # -*- coding: utf-8 -*-
-from odoo import models
+from odoo import api, fields, models
+from odoo.fields import Domain
+
+# Тип проекта — по тому, чем собирают (владелец 19.11.2026: подразделы
+# «Проектов» — краудресурсинг, краудфандинг, краудсорсинг, волонтёрство;
+# «в каталог проектов… в фильтр добавить тип проекта»). Один проект может
+# быть сразу нескольких типов: собирает вклад и ставит задачи за токены.
+PROJECT_TYPES = [
+    ('crowdresourcing', 'Краудресурсинг'),
+    ('crowdfunding', 'Краудфандинг'),
+    ('crowdsourcing', 'Краудсорсинг'),
+    ('volunteering', 'Волонтёрство'),
+]
+
+# Чьи проекты считаются «моими» — то же условие, что у «Я инициатор».
+INITIATOR_DOMAIN = ['|', ('partner_id.user_ids', 'in', 'UID'),
+                    '&', ('author_id.user_ids', 'in', 'UID'),
+                    ('partner_id.is_company', '=', True)]
+
+
+class CoopProjectType(models.Model):
+    _inherit = 'coop.project'
+
+    coop_type = fields.Selection(
+        PROJECT_TYPES, string='Тип проекта',
+        compute='_compute_coop_type', search='_search_coop_type',
+        help='Чем проект собирает: вкладом любыми ресурсами, деньгами, '
+             'задачами за токены или помощью волонтёров.')
+
+    def _coop_type_domain(self, code):
+        """Условие типа. Краудресурсинг — у проекта есть потребности:
+        вклад трудом, техникой, материалами, деньгами (решение 183).
+        Краудсорсинг дописывает `coop_bounty`. Краудфандинг и волонтёрство
+        в разработке — проектов этих типов пока нет."""
+        if code == 'crowdresourcing':
+            return [('need_ids', '!=', False)]
+        return [('id', '=', 0)]
+
+    def _compute_coop_type(self):
+        for project in self:
+            project.coop_type = next(
+                (code for code, _label in PROJECT_TYPES
+                 if project.filtered_domain(self._coop_type_domain(code))),
+                False)
+
+    def _search_coop_type(self, operator, value):
+        # Odoo 19+ приводит «=» к «in»; «not in» движок строит отрицанием.
+        if operator != 'in':
+            return NotImplemented
+        return Domain.OR([self._coop_type_domain(code)
+                          for code in value if code] or [[('id', '=', 0)]])
+
+    @api.model
+    def coop_pm_visible(self, section):
+        """Видна ли кнопка «Управление проектами» в подразделе: у человека
+        есть свой проект этого подраздела (владелец 19.11.2026: «управление
+        проектами у нас появляется кнопкой в том разделе где пользователь
+        разместил проект, слева от добавить проект»)."""
+        uid = self.env.uid
+        mine = [(leaf[0], leaf[1], [uid]) if isinstance(leaf, tuple)
+                and leaf[2] == 'UID' else leaf for leaf in INITIATOR_DOMAIN]
+        domain = list(mine)
+        if section in dict(PROJECT_TYPES):
+            domain += [('coop_type', '=', section)]
+        return bool(self.search_count(domain, limit=1))
 
 
 class CoopProject(models.Model):
@@ -75,6 +139,27 @@ class CoopProject(models.Model):
                     'operator': '=', 'number': True, 'placeholder': 'Любой',
                     'counted': True, 'options': options,
                 })
+
+        # Тип проекта — вычисляемый, по группам не считается: счётчик —
+        # поиском на каждый тип. Пустые типы (в разработке) не показываем,
+        # как пустые состояния ниже.
+        type_base = without('coop_type')
+        type_counts = {code: self.search_count(type_base + [('coop_type', '=', code)])
+                       for code, _label in PROJECT_TYPES}
+        # В подразделе одного типа (краудресурсинг, краудсорсинг) отбор по
+        # типу ничего не даёт — блок только в каталогах без типа.
+        typed = any(isinstance(leaf, (list, tuple)) and leaf
+                    and leaf[0] == 'coop_type' for leaf in base)
+        blocks.append({
+            'code': 'coop_type', 'label': 'Тип проекта',
+            'hint': 'Чем проект собирает: вкладом любыми ресурсами, деньгами, '
+                    'задачами за токены или помощью волонтёров.',
+            'widget': 'select', 'field': 'coop_type', 'operator': '=',
+            'placeholder': 'Любой', 'counted': True,
+            'options': [{'value': code, 'label': label,
+                         'count': type_counts[code]}
+                        for code, label in PROJECT_TYPES if type_counts[code]],
+        }) if not typed else None
 
         kind_counts = counts('kind', without('kind'))
         blocks.append({

@@ -825,7 +825,7 @@
     <field name="res_model">coop.project</field>
     <field name="path">projects</field>
     <field name="view_mode">kanban,list,form</field>
-    <field name="context">{'bin_size': True,'coop_catalog': True, 'coop_create_label': 'Добавить проект', 'coop_shelf_field': 'category_id'}</field>
+    <field name="context">{'bin_size': True,'coop_catalog': True, 'coop_create_label': 'Добавить проект', 'coop_shelf_field': 'category_id', 'coop_pm_section': 'all'}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Проектов пока нет</p>
       <p>
@@ -835,6 +835,40 @@
         руками.
       </p>
     </field>
+  </record>
+
+  <!-- «Краудресурсинг» — вклады любыми ресурсами (владелец 19.11.2026,
+       решение 183): проекты с потребностями, тот же вид каталога. -->
+  <record id="action_coop_crowdresourcing" model="ir.actions.act_window">
+    <field name="name">Краудресурсинг</field>
+    <field name="res_model">coop.project</field>
+    <field name="path">crowdresourcing</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="domain">[('coop_type', '=', 'crowdresourcing')]</field>
+    <field name="context">{'bin_size': True,'coop_catalog': True, 'coop_create_label': 'Добавить проект', 'coop_shelf_field': 'category_id', 'coop_pm_section': 'crowdresourcing'}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Проектов со сбором вклада пока нет</p>
+      <p>
+        Краудресурсинг: проект собирает не только деньги, но труд, технику,
+        материалы и знания. Пай в кооперативном проекте и доля в
+        коммерческом складываются из стоимости вклада, а не вписываются
+        руками.
+      </p>
+    </field>
+  </record>
+
+  <!-- Краудфандинг и волонтёрство — «в разработке» (владелец 19.11.2026). -->
+  <record id="action_coop_crowdfunding" model="ir.actions.client">
+    <field name="name">Краудфандинг</field>
+    <field name="tag">coop_soon</field>
+    <field name="path">crowdfunding</field>
+    <field name="params" eval="{'label': 'Краудфандинг', 'dev': True}"/>
+  </record>
+  <record id="action_coop_volunteering" model="ir.actions.client">
+    <field name="name">Волонтёрство</field>
+    <field name="tag">coop_soon</field>
+    <field name="path">volunteering</field>
+    <field name="params" eval="{'label': 'Волонтёрство', 'dev': True}"/>
   </record>
 
   <record id="action_coop_project_category" model="ir.actions.act_window">
@@ -859,7 +893,7 @@
     <field name="res_model">coop.project</field>
     <field name="path">my-projects</field>
     <field name="view_mode">kanban,list,form</field>
-    <field name="context">{'bin_size': True,'coop_catalog': True, 'coop_create_label': 'Добавить проект'}</field>
+    <field name="context">{'bin_size': True,'coop_catalog': True, 'coop_create_label': 'Добавить проект', 'coop_pm_section': 'mine'}</field>
     <field name="domain">['|', ('partner_id.user_ids', 'in', [uid]), '&amp;', ('author_id.user_ids', 'in', [uid]), ('partner_id.is_company', '=', True)]</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Своих проектов пока нет</p>
@@ -889,13 +923,38 @@
 
   <menuitem id="menu_coop_projects_root" name="Проекты" sequence="18"
             web_icon="coop_projects,static/description/icon.png"/>
+  <!--
+    Подразделы «Проектов» — по списку владельца 19.11.2026: «1) каталог
+    проектов - вообще все проекты… 2) мои проекты - внутри две вкладки -
+    я участвую, я инициатор. 3) краудресурсинг - вклады любыми ресурсами
+    (было в каталоге проектов). 4) краудфандинг (раздел в разработке).
+    5) краудсорсинг (баунти). 6) волонтерство (в разработке). 7) Заметки.
+    8) Дела. 9) Избранное. 10) Лента». «Избранное» подставляет оболочка,
+    «Лента» встаёт за ним (`coop_theme/static/src/js/shell.js`,
+    `AFTER_FAV`). «Управление проектами» — кнопкой у «Добавить проект»
+    там, где у человека свой проект (`coop_pm_section` в контексте).
+  -->
   <menuitem id="menu_coop_projects" name="Каталог проектов"
             parent="menu_coop_projects_root" action="action_coop_projects" sequence="10"/>
-  <menuitem id="menu_coop_my_projects" name="Я инициатор"
+  <!-- Пункт с вложенными — вкладки на странице (`CoopTabs`, `subtabs`). -->
+  <menuitem id="menu_coop_my_projects_root" name="Мои проекты"
             parent="menu_coop_projects_root" action="action_coop_my_projects"
-            sequence="15"/>
+            sequence="12"/>
+  <menuitem id="menu_coop_my_projects" name="Я инициатор"
+            parent="menu_coop_my_projects_root" action="action_coop_my_projects"
+            sequence="10"/>
   <menuitem id="menu_coop_projects_participate" name="Я участвую"
-            parent="menu_coop_projects_root" action="action_coop_projects_participate"
+            parent="menu_coop_my_projects_root" action="action_coop_projects_participate"
+            sequence="20"/>
+  <menuitem id="menu_coop_crowdresourcing" name="Краудресурсинг"
+            parent="menu_coop_projects_root" action="action_coop_crowdresourcing"
+            sequence="13"/>
+  <menuitem id="menu_coop_crowdfunding" name="Краудфандинг"
+            parent="menu_coop_projects_root" action="action_coop_crowdfunding"
+            sequence="14"/>
+  <!-- 15 — «Краудсорсинг» (`coop_bounty`). -->
+  <menuitem id="menu_coop_volunteering" name="Волонтёрство"
+            parent="menu_coop_projects_root" action="action_coop_volunteering"
             sequence="16"/>
   <!--
     «Дела» в подразделах проектов (владелец 19.10.2026: «добавить дела в
@@ -961,12 +1020,11 @@
     <field name="view_id" ref="view_project_catalog_list"/>
     <field name="act_window_id" ref="action_coop_project_management"/>
   </record>
-  <menuitem id="menu_coop_project_management" name="Управление проектами"
-            parent="menu_coop_projects_root" action="action_coop_project_management"
-            sequence="18"/>
+  <!-- Пункта «Управление проектами» больше нет (владелец 19.11.2026) —
+       действие открывает кнопка рядом с «Добавить проект». -->
   <menuitem id="menu_coop_project_activities" name="Дела"
             parent="menu_coop_projects_root" action="action_coop_my_activities"
-            sequence="20"/>
+            sequence="22"/>
   <menuitem id="menu_coop_project_category" name="Темы"
             parent="menu_coop_projects_root" action="action_coop_project_category"
             sequence="90" groups="coop_base.group_coop_platform"/>

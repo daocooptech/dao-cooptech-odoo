@@ -304,6 +304,13 @@
   -->
   <t t-name="coop_theme.KanbanView" t-inherit="web.KanbanView.Buttons" t-inherit-mode="extension">
     <xpath expr="//button[hasclass('o-kanban-button-new')]" position="replace">
+      <!-- «Управление проектами» — слева от «Добавить проект», где у
+           человека свой проект (владелец 19.11.2026, `catalog_view.js`). -->
+      <button t-if="!this.env.inDialog and this.coopPm?.visible" type="button"
+              class="btn btn-secondary o_coop_pm_button"
+              t-on-click="() => this.coopOpenPm()">
+        Управление проектами
+      </button>
       <button t-if="!this.env.inDialog and this.canCreate" type="button"
               t-att-disabled="this.isNewButtonDisabled"
               class="btn btn-primary o-kanban-button-new" accesskey="c"

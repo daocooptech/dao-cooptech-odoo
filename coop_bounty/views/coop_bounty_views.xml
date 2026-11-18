@@ -819,7 +819,7 @@
     <field name="path">crowdsourcing</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('coop_bounty_task_ids', '!=', False)]</field>
-    <field name="context">{'bin_size': True, 'coop_catalog': True, 'coop_shelf_field': 'category_id'}</field>
+    <field name="context">{'bin_size': True, 'coop_catalog': True, 'coop_shelf_field': 'category_id', 'coop_pm_section': 'crowdsourcing'}</field>
     <field name="view_ids" eval="[(5, 0, 0),
         (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_coop_project_crowd_kanban')}),
         (0, 0, {'view_mode': 'list', 'view_id': ref('coop_projects.view_coop_project_list')}),
@@ -841,7 +841,7 @@
 
   <menuitem id="menu_coop_crowd_projects" name="Краудсорсинг"
             parent="coop_projects.menu_coop_projects_root"
-            action="action_coop_crowd_projects" sequence="12"/>
+            action="action_coop_crowd_projects" sequence="15"/>
 
   <!-- Своей вкладки в меню у краудсорсинга нет (решение 691): плоский
        список всех задач всех проектов (`/bounty`) убран, подписка —

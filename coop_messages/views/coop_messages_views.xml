@@ -107,7 +107,7 @@
 
   <menuitem id="menu_coop_project_feed" name="Лента"
             parent="coop_projects.menu_coop_projects_root"
-            action="action_coop_project_feed" sequence="17"/>
+            action="action_coop_project_feed" sequence="30"/>
 
 
   <!--

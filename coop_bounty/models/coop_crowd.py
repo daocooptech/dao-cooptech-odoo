@@ -57,6 +57,15 @@ class CoopProjectToken(models.Model):
     coop_bounty_task_ids = fields.One2many(
         'coop.bounty.task', 'project_id', string='Задачи краудсорсинга',
         domain=[('state', 'in', CROWD_VISIBLE)])
+
+    def _coop_type_domain(self, code):
+        """Тип «Краудсорсинг» (фильтр «Тип проекта», `coop_projects`) —
+        у проекта есть задачи за токены; то же условие, что у подраздела
+        «Краудсорсинг»."""
+        if code == 'crowdsourcing':
+            return [('coop_bounty_task_ids', '!=', False)]
+        return super()._coop_type_domain(code)
+
     coop_crowd_open_count = fields.Integer(string='Открыто задач',
                                            compute='_compute_coop_crowd_counts')
     coop_crowd_work_count = fields.Integer(string='В работе',

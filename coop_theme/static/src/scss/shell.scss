@@ -2013,6 +2013,12 @@ body.o_dark_mode .o_coop_loader_mark {
     display: none;
   }
 
+  // Вкладки внутри подраздела («Мои проекты») меню слева не заменяет —
+  // они остаются под заголовком (владелец 19.11.2026).
+  .o_coop_tabs_wrap:has(.o_coop_pagehead) .o_coop_tabs.o_coop_subtabs {
+    display: flex;
+  }
+
   .o_coop_pagehead {
     display: block;
     order: -1;
