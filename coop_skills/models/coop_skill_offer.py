@@ -6,6 +6,11 @@ from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
+# Имя пустого черновика, который заводит «Добавить навык». Поле название
+# обязательное, а запись нужна до того, как человек начнёт писать, — так
+# же, как у объявления ресурса (`coop_resources.DRAFT_NAME`).
+DRAFT_NAME = 'Новый навык'
+
 
 class CoopSkillOffer(models.Model):
     """Предложение навыка — то, что участник готов делать за вознаграждение.
@@ -175,6 +180,44 @@ class CoopSkillOffer(models.Model):
         for record in self:
             record.coop_is_mine = record.partner_id in mine
 
+    # ── Страница добавления (дизайн-система `SkillAddPage`, решение 625) ──
+    #
+    # «От чьего имени» — выбор из своего профиля и организаций, где у
+    # человека есть полномочие «Публикации». Выбрана организация — это уже
+    # услуга (`ServiceAddPage`): та же запись, другие подписи.
+    coop_publisher_ids = fields.Many2many(
+        'res.partner', string='От чьего имени можно',
+        compute='_compute_coop_publisher_ids')
+    partner_is_company = fields.Boolean(
+        related='partner_id.is_company', string='От имени организации')
+    # Опыт на странице добавления — годами и месяцами, как говорят люди;
+    # хранится по-прежнему числом месяцев.
+    experience_years = fields.Integer(
+        string='Опыт, лет', compute='_compute_experience_parts',
+        inverse='_inverse_experience_parts')
+    experience_rest_months = fields.Integer(
+        string='Опыт, месяцев сверх лет', compute='_compute_experience_parts',
+        inverse='_inverse_experience_parts')
+
+    @api.depends_context('uid')
+    def _compute_coop_publisher_ids(self):
+        partners = self.env.user.coop_publisher_partner_ids
+        for record in self:
+            record.coop_publisher_ids = partners | record.partner_id
+
+    @api.depends('experience_months')
+    def _compute_experience_parts(self):
+        for record in self:
+            months = max(record.experience_months or 0, 0)
+            record.experience_years = months // 12
+            record.experience_rest_months = months % 12
+
+    def _inverse_experience_parts(self):
+        for record in self:
+            years = max(record.experience_years or 0, 0)
+            months = max(record.experience_rest_months or 0, 0)
+            record.experience_months = years * 12 + months
+
     def _coop_require_mine(self):
         if self.env.su:
             return
@@ -313,10 +356,49 @@ class CoopSkillOffer(models.Model):
         """
         self._coop_require_mine()
         for record in self:
+            # Заготовку «Новый навык» в каталоге не найдут и не поймут.
+            if not record.name or record.name.strip() == DRAFT_NAME:
+                raise UserError(_(
+                    'Напишите, чем занимаетесь. «%s» — это заготовка, по ней '
+                    'вас не найдут.') % DRAFT_NAME)
             record.partner_id.coop_require_level(
                 'contact', _('опубликовать предложение навыка'))
         self.write({'state': 'published'})
         return True
+
+    @api.model
+    def action_new_offer(self):
+        """«Добавить навык»: завести черновик и открыть страницу добавления.
+
+        Запись нужна сразу, как у объявления ресурса
+        (`coop.resource.action_new_listing`): поля сохраняют себя сами, а
+        сохранять себя поле может только в существующую запись. Брошенный
+        черновик никому не виден — в каталог выходят только опубликованные.
+        """
+        draft = self.create({'state': 'draft', 'name': DRAFT_NAME})
+        action = self.env['ir.actions.act_window']._for_xml_id(
+            'coop_skills.action_coop_skill_add')
+        action['res_id'] = draft.id
+        return action
+
+    def action_save_draft(self):
+        """«Сохранить черновик»: запись уже сохранена — к своим предложениям."""
+        action = self.env['ir.actions.act_window']._for_xml_id(
+            'coop_skills.action_coop_my_skills')
+        action['target'] = 'main'
+        return action
+
+    def action_done_editing(self):
+        """После публикации — на витрину предложения, путь заново."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'coop.skill.offer',
+            'res_id': self.id,
+            'view_mode': 'form',
+            'views': [(self.env.ref('coop_skills.view_coop_skill_form').id, 'form')],
+            'target': 'main',
+        }
 
     def action_pause(self):
         self._coop_require_mine()

@@ -292,3 +292,27 @@
     padding: 12px 14px 14px;
   }
 }
+
+// ── Превью плитки на странице «Добавить навык» (`SkillAddPage`) ──────
+// Та же разметка, что у плитки каталога; метки — без виджета тегов,
+// поэтому строку задаём сами.
+.o_coop_skill_preview {
+  pointer-events: none;
+
+  .o_kanban_record { width: 100%; }
+
+  .o_coop_skill_chips {
+    display: flex;
+    gap: 4px;
+  }
+}
+
+// Строка «В каталоге» под ставкой и опытом — как будет на карточке.
+.coop-add_incat {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px;
+
+  .o_field_widget { width: auto; flex: none; font-weight: 600; }
+}

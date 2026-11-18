@@ -17,7 +17,7 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.0.3',
+    'version': '20.0.1.0.4',
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_people', 'coop_theme', 'hr_skills', 'mail'],
     'data': [
@@ -28,6 +28,8 @@
     'assets': {
         'web.assets_backend': [
             'coop_skills/static/src/scss/coop_skills.scss',
+            'coop_skills/static/src/js/skill_preview.js',
+            'coop_skills/static/src/xml/skill_preview.xml',
         ],
     },
     'installable': True,

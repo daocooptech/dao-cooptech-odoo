@@ -216,7 +216,8 @@
 }
 
 // Выбор из двух-четырёх — `Segmented` (виджет `badges_selection` движка).
-.o_coop_add_form .o_field_badges_selection > div {
+.o_coop_add_form .o_field_badges_selection > div,
+.o_coop_add_form .o_field_badges_many2one > div {
   display: inline-flex;
   flex-wrap: wrap;
   gap: 2px;

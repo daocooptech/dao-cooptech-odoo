@@ -307,6 +307,254 @@
     </field>
   </record>
 
+  <!--
+    Страница «Добавить навык» по дизайн-системе (`SkillAddPage`, решение
+    625): слева разделы с номерами, справа живая плитка каталога, готовность
+    и кнопки — как у страницы добавления ресурса. Выбрана организация в «От
+    чьего имени» — это «Добавить услугу» (`ServiceAddPage`): та же запись,
+    другие подписи. Черновик заводит `action_new_offer`.
+  -->
+  <record id="view_coop_skill_add" model="ir.ui.view">
+    <field name="name">coop.skill.offer.add</field>
+    <field name="model">coop.skill.offer</field>
+    <!-- Ниже витрины: при равном приоритете «add» по алфавиту обогнал бы
+         «form», и каталог открывал бы предложение формой ввода. -->
+    <field name="priority">30</field>
+    <field name="arch" type="xml">
+      <form string="Добавить навык" class="o_coop_add_form">
+        <sheet>
+          <field name="state" invisible="1"/>
+          <field name="write_date" invisible="1"/>
+          <field name="partner_is_company" invisible="1"/>
+          <field name="coop_publisher_ids" invisible="1"/>
+          <field name="currency_id" invisible="1"/>
+          <div class="coop-add_header">
+            <h1 invisible="partner_is_company">Добавить навык</h1>
+            <h1 invisible="not partner_is_company">Добавить услугу</h1>
+            <p class="coop-add_intro" invisible="state != 'draft' or partner_is_company">
+              Черновик сохраняется сам — можно уйти и вернуться, он будет в
+              «Моих предложениях». После публикации навык появится в каталоге
+              навыков и на вашей странице.
+            </p>
+            <p class="coop-add_intro" invisible="state != 'draft' or not partner_is_company">
+              Черновик сохраняется сам — можно уйти и вернуться, он будет в
+              «Моих предложениях». После публикации услуга появится в каталоге
+              навыков и на полке «Услуги» организации.
+            </p>
+            <p class="coop-add_intro" invisible="state == 'draft'">
+              Правки видны в каталоге сразу после сохранения.
+            </p>
+          </div>
+          <div class="coop-add">
+            <div class="coop-add_main">
+
+              <section class="coop-add_sec" name="add_who">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 1, 'fields': ['partner_id']}"/>
+                  <div>
+                    <h2>От чьего имени</h2>
+                    <p>Своё умение — от себя. Выберите организацию, от имени
+                      которой действуете, — и это станет её услугой.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_field">
+                    <field name="partner_id" widget="badges_many2one" nolabel="1"
+                           domain="[('id', 'in', coop_publisher_ids)]"/>
+                  </div>
+                </div>
+              </section>
+
+              <section class="coop-add_sec" name="add_what">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 2, 'fields': ['name', 'coop_specialization_id'], 'empty': 'Новый навык'}"/>
+                  <div>
+                    <h2 invisible="partner_is_company">Чем занимаетесь</h2>
+                    <h2 invisible="not partner_is_company">Какая услуга</h2>
+                    <p>Коротко и так, как называют это заказчики. По специализации
+                      навык найдут в каталоге и в подборе людей.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_top">
+                    <div>
+                      <div class="coop-photo">
+                        <field name="image_1920" widget="image" nolabel="1"/>
+                      </div>
+                      <div class="coop-photo_hint">Фото работы — первое, на что смотрят в каталоге</div>
+                    </div>
+                    <div class="d-flex flex-column gap-3">
+                      <div class="coop-add_field coop-add_title">
+                        <label for="name" string="Чем занимаетесь" invisible="partner_is_company"/>
+                        <label for="name" string="Название услуги" invisible="not partner_is_company"/>
+                        <field name="name" nolabel="1"
+                               placeholder="Например, Электромонтажник"/>
+                      </div>
+                      <div class="coop-add_row">
+                        <div class="coop-add_field">
+                          <label for="coop_specialization_id" string="Специализация"/>
+                          <field name="coop_specialization_id" nolabel="1"
+                                 options="{'no_create': True, 'no_open': True}"/>
+                        </div>
+                        <div class="coop-add_field">
+                          <label for="coop_specialization_category_id" string="Сфера деятельности"/>
+                          <field name="coop_specialization_category_id" nolabel="1" readonly="1"
+                                 options="{'no_open': True}"/>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="coop-add_sec" name="add_skills">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 3, 'fields': ['skill_ids']}"/>
+                  <div>
+                    <h2>Умения</h2>
+                    <p>Из чего складывается работа: конкретные операции и допуски.
+                      По ним ищут исполнителя.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_field">
+                    <field name="skill_ids" widget="many2many_tags" nolabel="1"
+                           placeholder="Например, монтаж щитов"
+                           options="{'no_create': True}"/>
+                  </div>
+                </div>
+              </section>
+
+              <section class="coop-add_sec" name="add_rate">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 4, 'any': True, 'fields': ['rate', 'experience_months']}"/>
+                  <div>
+                    <h2>Ставка и опыт</h2>
+                    <p>Ставку видно на карточке каталога. Сдельную работу так и
+                      отметьте — сумму обсудите с заказчиком.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_field">
+                    <label for="rate_kind" string="Ставка"/>
+                    <field name="rate_kind" widget="badges_selection" nolabel="1"/>
+                  </div>
+                  <div class="coop-add_pair" invisible="rate_kind == 'piece'">
+                    <div class="coop-add_field">
+                      <label for="rate" string="Сумма"/>
+                      <field name="rate" nolabel="1"/>
+                    </div>
+                    <div class="coop-add_field">
+                      <label for="rate_period" string="Период"/>
+                      <field name="rate_period" widget="badges_selection" nolabel="1"/>
+                    </div>
+                  </div>
+                  <div class="coop-add_pair">
+                    <div class="coop-add_field">
+                      <label for="experience_years" string="Опыт, лет"/>
+                      <field name="experience_years" nolabel="1"/>
+                    </div>
+                    <div class="coop-add_field">
+                      <label for="experience_rest_months" string="и месяцев"/>
+                      <field name="experience_rest_months" nolabel="1"/>
+                    </div>
+                  </div>
+                  <!-- Занятость и график — решение 661 п. 4: по ним отбирают
+                       в каталоге, и без них новое предложение в отбор не попадёт. -->
+                  <div class="coop-add_row">
+                    <div class="coop-add_field">
+                      <label for="employment" string="Занятость"/>
+                      <field name="employment" widget="badges_selection" nolabel="1"/>
+                    </div>
+                    <div class="coop-add_field">
+                      <label for="work_schedule" string="График"/>
+                      <field name="work_schedule" widget="badges_selection" nolabel="1"/>
+                    </div>
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <field name="ready_to_travel" nolabel="1"/>
+                    <label for="ready_to_travel" string="Готов к командировкам"/>
+                  </div>
+                  <div class="coop-add_help coop-add_incat">
+                    <span>В каталоге:</span>
+                    <field name="rate_display" readonly="1" nolabel="1"/>
+                    <span>·</span>
+                    <field name="experience_display" readonly="1" nolabel="1"/>
+                  </div>
+                </div>
+              </section>
+
+              <section class="coop-add_sec" name="add_description">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 5, 'fields': ['description', 'city']}"/>
+                  <div>
+                    <h2>Описание</h2>
+                    <p>Город виден на карточке, описание — на странице навыка.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_field">
+                    <field name="description" nolabel="1"
+                           placeholder="Что именно готовы делать, с каким оборудованием, какие есть допуски."/>
+                  </div>
+                  <div class="coop-add_row">
+                    <div class="coop-add_field" name="add_city">
+                      <label for="city" string="Город"/>
+                      <field name="city" widget="coop_city" nolabel="1"
+                             placeholder="Начните вводить город"/>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <aside class="coop-add_aside">
+              <div class="coop-add_preview">
+                <span>Так увидят в каталоге</span>
+                <field name="id" widget="coop_skill_preview" nolabel="1"/>
+              </div>
+              <field name="id" widget="coop_add_ready" nolabel="1"
+                     options="{'items': [
+                       {'field': 'name', 'label': 'Чем занимаетесь', 'required': True, 'empty': 'Новый навык', 'anchor': 'add_what'},
+                       {'field': 'image_1920', 'label': 'Фото работы', 'anchor': 'add_what'},
+                       {'field': 'coop_specialization_id', 'label': 'Специализация', 'anchor': 'add_what'},
+                       {'field': 'skill_ids', 'label': 'Умения', 'anchor': 'add_skills'},
+                       {'fields': ['rate', 'experience_months'], 'label': 'Ставка и опыт', 'anchor': 'add_rate'},
+                       {'field': 'city', 'label': 'Город', 'required': True, 'anchor': 'add_description'},
+                       {'field': 'description', 'label': 'Описание', 'anchor': 'add_description'}
+                     ]}"/>
+              <div class="coop-add_acts">
+                <button name="action_publish" type="object" string="Опубликовать"
+                        class="btn-primary" invisible="state != 'draft'"/>
+                <button name="action_save_draft" type="object" string="Сохранить черновик"
+                        class="btn-secondary" invisible="state != 'draft'"/>
+                <button name="action_done_editing" type="object" string="Готово"
+                        class="btn-primary" invisible="state == 'draft'"/>
+                <p class="coop-add_note" invisible="state != 'draft'">
+                  Опубликовать можно, когда заполнено помеченное «нужно».
+                </p>
+              </div>
+            </aside>
+          </div>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- Открывает уже заведённый черновик: номер подставляет `action_new_offer`. -->
+  <record id="action_coop_skill_add" model="ir.actions.act_window">
+    <field name="name">Добавить навык</field>
+    <field name="res_model">coop.skill.offer</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="view_coop_skill_add"/>
+    <field name="target">current</field>
+  </record>
+
   <record id="view_coop_skill_search" model="ir.ui.view">
     <field name="name">coop.skill.offer.search</field>
     <field name="model">coop.skill.offer</field>
@@ -356,7 +604,7 @@
     <field name="name">Навыки</field>
     <field name="res_model">coop.skill.offer</field>
     <field name="path">skills</field>
-    <field name="context">{'bin_size': True,'coop_catalog': True, 'coop_create_label': 'Добавить навык', 'coop_shelf_field': 'coop_specialization_category_id'}</field>
+    <field name="context">{'bin_size': True,'coop_catalog': True, 'coop_create_label': 'Добавить навык', 'coop_create_method': 'action_new_offer', 'coop_shelf_field': 'coop_specialization_category_id'}</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('state', '=', 'published')]</field>
     <field name="search_view_id" ref="view_coop_skill_search"/>
@@ -380,7 +628,7 @@
     <field name="path">my-skills</field>
     <field name="view_mode">list,kanban,form</field>
     <field name="domain">[('partner_id.user_ids', 'in', [uid])]</field>
-    <field name="context">{'coop_create_label': 'Добавить навык'}</field>
+    <field name="context">{'coop_create_label': 'Добавить навык', 'coop_create_method': 'action_new_offer'}</field>
     <field name="search_view_id" ref="view_coop_skill_search"/>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Вы пока ничего не предложили</p>

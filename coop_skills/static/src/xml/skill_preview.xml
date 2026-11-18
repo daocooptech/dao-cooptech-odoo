@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!-- Плитка каталога по данным черновика — разметкой `view_coop_skill_kanban`. -->
+  <t t-name="coop_skills.SkillPreview">
+    <div class="o_coop_skills o_coop_skill_preview">
+      <div class="o_kanban_record">
+        <div class="o_coop_skill">
+          <div class="o_coop_skill_photo o_coop_media">
+            <img t-if="this.image" t-att-src="this.image" alt=""/>
+            <img class="o_coop_media_logo" t-elif="this.owner" alt=""
+                 t-attf-src="/web/image/res.partner/{{ this.owner.id }}/image_512"/>
+            <span t-else="" class="o_coop_media_sign"/>
+            <img class="o_coop_skill_owner" t-if="this.owner" alt=""
+                 t-att-title="this.owner.display_name"
+                 t-attf-src="/web/image/res.partner/{{ this.owner.id }}/avatar_128"/>
+            <span class="o_coop_locbar" t-if="this.data.city">
+              <i class="oi" data-icon="location_on" role="img" aria-label="Город"/>
+              <t t-out="this.data.city"/>
+            </span>
+          </div>
+          <div class="o_coop_skill_body">
+            <div class="o_coop_skill_name" t-out="this.title"/>
+            <div class="o_coop_skill_rate" t-if="this.rate" t-out="this.rate"/>
+            <div class="o_coop_skill_meta" t-if="this.meta" t-out="this.meta"/>
+            <div class="o_coop_skill_chips" t-if="this.skills.length">
+              <span t-foreach="this.skills" t-as="skill" t-key="skill_index"
+                    class="o_tag" t-out="skill"/>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </t>
+
+</templates>
