@@ -108,21 +108,10 @@
     </field>
   </record>
 
-  <!-- На задаче, оплаченной токенами, — сколько НДФЛ и в каком он
-       состоянии: автор видит налог там же, где назначил способ оплаты. -->
-  <record id="view_coop_bounty_task_form_tax" model="ir.ui.view">
-    <field name="name">coop.bounty.task.form.tax</field>
-    <field name="model">coop.bounty.task</field>
-    <field name="inherit_id" ref="coop_bounty.view_coop_bounty_task_form"/>
-    <field name="arch" type="xml">
-      <xpath expr="//field[@name='payer_id']" position="after">
-        <field name="natural_currency_id" invisible="1"/>
-        <field name="natural_ndfl" invisible="not natural_income_ids"/>
-        <field name="natural_ndfl_state" invisible="not natural_income_ids"/>
-        <field name="natural_income_ids" invisible="1"/>
-      </xpath>
-    </field>
-  </record>
+  <!-- НДФЛ на карточке задачи не показываем (владелец 18.11.2026): строка
+       на выплату, а каждый видит только свои строки реестра — у команды и
+       постоянной задачи сумма у разных людей была разной. Налог — в
+       реестре «НДФЛ с натуральных доходов». -->
 
   <menuitem id="menu_coop_tax_natural_income" name="НДФЛ с натуральных доходов"
             parent="coop_wallet.menu_coop_wallet_root"
