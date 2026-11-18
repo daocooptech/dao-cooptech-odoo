@@ -47,7 +47,13 @@
             </div>
             <div class="o_coop_band_body">
               <group>
-                <field name="coop_member_since" readonly="1"/>
+                <!--
+                  Дата целиком, как в образце («14.09.2026»): без `numeric`
+                  движок в чтении пишет «7 окт.» — без года, и рядом с «с»
+                  это не читается датой (владелец 18.11.2026, № 469).
+                -->
+                <field name="coop_member_since" readonly="1"
+                       options="{'numeric': true}"/>
                 <field name="coop_verification_level" readonly="1"/>
               </group>
 
