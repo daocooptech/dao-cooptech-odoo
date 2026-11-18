@@ -403,7 +403,13 @@ patch(Breadcrumbs.prototype, {
         // приходят (владелец 18.11.2026, № 468: «не верный путь»). В
         // настройки входят из меню под аватаром со сброшенным следом —
         // над ними только шапка вкладки, как по образцу.
-        if (this.coopActionService?.currentController?.action?.context?.coop_settings) {
+        //
+        // Признак — из контекста самой записи, а не открытого действия:
+        // при загрузке страницы по адресу или F5 путь рисуется раньше, чем
+        // действие становится текущим, и проверка по нему пропускала путь
+        // (замер на сервере 18.11.2026).
+        if (root.context?.coop_settings ||
+                this.coopActionService?.currentController?.action?.context?.coop_settings) {
             return null;
         }
         return { model, resId };
