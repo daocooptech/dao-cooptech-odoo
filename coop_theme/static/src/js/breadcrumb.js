@@ -398,6 +398,14 @@ patch(Breadcrumbs.prototype, {
         if (!model || !resId || !coopIsPlatformModel(model) || !COOP_RUBRICS[model]) {
             return null;
         }
+        // Настройки — та же запись человека, но не его витрина: путь
+        // «Люди › Электромонтажник» вёл бы в каталог, из которого сюда не
+        // приходят (владелец 18.11.2026, № 468: «не верный путь»). В
+        // настройки входят из меню под аватаром со сброшенным следом —
+        // над ними только шапка вкладки, как по образцу.
+        if (this.coopActionService?.currentController?.action?.context?.coop_settings) {
+            return null;
+        }
         return { model, resId };
     },
 

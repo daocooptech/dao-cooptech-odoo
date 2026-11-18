@@ -21,7 +21,15 @@
       <form string="Настройки" create="false" duplicate="false"
             class="o_coop_profile o_coop_settings">
         <sheet>
-          <div class="oe_title">
+          <!--
+            Заголовок карточки — только на узком экране: на широком
+            название вкладки уже стоит шапкой страницы над полосами, и
+            второй такой же строкой ниже он только повторялся (владелец
+            18.11.2026, № 468: «два раза заголовок настройки»). На
+            телефоне шапки нет — там он единственный. См.
+            `coop_settings.scss`. Так на всех вкладках настроек.
+          -->
+          <div class="oe_title o_coop_settings_title">
             <h1>Настройки</h1>
           </div>
 
@@ -301,7 +309,7 @@
       <form string="Приватность" create="false" duplicate="false"
             class="o_coop_profile o_coop_settings">
         <sheet>
-          <div class="oe_title">
+          <div class="oe_title o_coop_settings_title">
             <h1>Приватность</h1>
           </div>
           <div class="o_coop_band">
@@ -418,7 +426,7 @@
       <form string="Язык и регион" create="false" duplicate="false"
             class="o_coop_profile o_coop_settings">
         <sheet>
-          <div class="oe_title">
+          <div class="oe_title o_coop_settings_title">
             <h1>Язык и регион</h1>
           </div>
           <div class="o_coop_band">
@@ -506,7 +514,7 @@
       <form string="Безопасность" create="false" duplicate="false"
             class="o_coop_profile o_coop_settings">
         <sheet>
-          <div class="oe_title">
+          <div class="oe_title o_coop_settings_title">
             <h1>Безопасность</h1>
           </div>
 
@@ -602,7 +610,7 @@
       <form string="Оформление" create="false" duplicate="false"
             class="o_coop_profile o_coop_settings">
         <sheet>
-          <div class="oe_title">
+          <div class="oe_title o_coop_settings_title">
             <h1>Оформление</h1>
           </div>
 
@@ -652,7 +660,7 @@
       <form string="Уведомления" create="false" duplicate="false"
             class="o_coop_profile o_coop_settings">
         <sheet>
-          <div class="oe_title">
+          <div class="oe_title o_coop_settings_title">
             <h1>Уведомления</h1>
           </div>
 
