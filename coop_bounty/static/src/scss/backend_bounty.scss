@@ -73,3 +73,31 @@
     padding: 0;
   }
 }
+
+// ── Списки в карточке задачи (№ 465) ──────────────────────────────────
+//
+// Имя участника и бейдж статуса переносятся, а не обрываются: обрывок
+// «Васильева Татьяна Ми…» ничего не говорит (тот же приём, что у меток
+// канбана в теме, замер 19.10). Ячейка — с классом `o_coop_wrap`.
+// Столбец-бейдж движок рисует своей ячейкой `o_badge_cell`, класс из вида
+// на неё не переносится — статус заявителя (coop_tax) указан по имени поля.
+// `!important` — как у самого движка для первого столбца: его правило
+// `td:not(…):not(…)…` с восемью отрицаниями весомее любого нашего класса.
+.o_list_renderer .o_list_table td.o_data_cell.o_coop_wrap,
+.o_list_renderer .o_list_table td.o_badge_cell[name="coop_executor_label"] {
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+
+  * {
+    white-space: normal !important;
+  }
+
+  .badge {
+    max-width: 100%;
+    white-space: normal !important;
+    overflow: visible;
+    text-overflow: clip;
+    text-align: start;
+    line-height: 1.3;
+  }
+}

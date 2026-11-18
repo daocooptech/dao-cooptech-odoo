@@ -18,6 +18,10 @@
     <t t-call="web.html_container">
       <t t-foreach="docs" t-as="pay">
         <t t-set="task" t-value="pay.task_id"/>
+        <!-- В списке статус — словом-бейджем, в акте — полной формулировкой. -->
+        <t t-set="who" t-value="{'org': 'организация', 'ip': 'индивидуальный предприниматель',
+                                 'npd': 'самозанятый, плательщик НПД',
+                                 'gph': 'физическое лицо, договор ГПХ'}.get(pay.executor_status, '')"/>
         <div class="article">
           <t t-call="coop_deals.report_platform_header"/>
           <div class="page">
@@ -30,7 +34,7 @@
               <strong t-field="pay.payer_id.name"/> (заказчик<t t-if="pay.payer_id.vat">, ИНН
               <span t-field="pay.payer_id.vat"/></t>), с одной стороны, и
               <strong t-field="pay.partner_id.name"/> (исполнитель —
-              <span t-field="pay.executor_status"/><t t-if="pay.partner_id.vat">, ИНН
+              <t t-out="who"/><t t-if="pay.partner_id.vat">, ИНН
               <span t-field="pay.partner_id.vat"/></t>), с другой стороны, составили
               настоящий акт о том, что результат по задаче «<span t-field="task.name"/>»
               выполнен и принят.

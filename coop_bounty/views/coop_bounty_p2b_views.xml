@@ -73,11 +73,43 @@
         <attribute name="column_invisible">not parent.is_recurring and not parent.is_contest</attribute>
       </xpath>
       <xpath expr="//page[@name='submissions']//field[@name='version']" position="after">
-        <field name="stage_id" column_invisible="not parent.stage_count"/>
-        <field name="place" column_invisible="not parent.is_contest" string="Место"/>
+        <field name="stage_id" column_invisible="not parent.stage_count" width="110px"/>
+        <field name="place" column_invisible="not parent.is_contest" string="Место" width="70px" class="o_coop_num"/>
       </xpath>
       <xpath expr="//page[@name='submissions']//field[@name='state']" position="attributes">
         <attribute name="decoration-muted">state == 'not_won'</attribute>
+        <attribute name="width">140px</attribute>
+      </xpath>
+      <!-- Служебные столбцы — узко, место — тексту: что сделано и замечания. -->
+      <xpath expr="//page[@name='submissions']//field[@name='date']" position="attributes">
+        <attribute name="width">90px</attribute>
+      </xpath>
+      <!-- У конкурса версия всегда первая, а замечаний нет: столбцы — тексту. -->
+      <xpath expr="//page[@name='submissions']//field[@name='version']" position="attributes">
+        <attribute name="width">60px</attribute>
+        <attribute name="class">o_coop_num</attribute>
+        <attribute name="column_invisible">parent.is_contest</attribute>
+      </xpath>
+      <xpath expr="//page[@name='submissions']//field[@name='review_note']" position="attributes">
+        <attribute name="column_invisible">parent.is_contest</attribute>
+      </xpath>
+      <xpath expr="//page[@name='submissions']//field[@name='link']" position="attributes">
+        <attribute name="width">130px</attribute>
+      </xpath>
+      <xpath expr="//page[@name='submissions']//field[@name='attachment_ids']" position="attributes">
+        <attribute name="width">80px</attribute>
+      </xpath>
+      <xpath expr="//page[@name='submissions']//field[@name='partner_id']" position="attributes">
+        <attribute name="width">200px</attribute>
+        <attribute name="class">o_coop_wrap</attribute>
+      </xpath>
+      <!-- Кнопки приёмки по сдаче — только у постоянной задачи: у остальных
+           пустой столбец забирал место у текста. -->
+      <xpath expr="//page[@name='submissions']//button[@name='action_accept_result']" position="attributes">
+        <attribute name="column_invisible">not parent.is_recurring</attribute>
+      </xpath>
+      <xpath expr="//page[@name='submissions']//button[@name='action_return_result']" position="attributes">
+        <attribute name="column_invisible">not parent.is_recurring</attribute>
       </xpath>
 
       <xpath expr="//page[@name='criteria']" position="after">
@@ -87,9 +119,8 @@
              призов: она резервируется при публикации.</p>
           <field name="prize_ids" nolabel="1" readonly="not coop_can_edit or state != 'draft'">
             <list editable="bottom" create="parent.state == 'draft'" delete="parent.state == 'draft'">
-              <field name="place" width="80px"/>
-              <field name="amount" sum="Всего"/>
-              <field name="token_unit" string=""/>
+              <field name="place" width="80px" class="o_coop_num"/>
+              <field name="amount" sum="Всего" width="120px" class="o_coop_num"/>
               <field name="winner_id" readonly="1"/>
             </list>
           </field>
@@ -104,13 +135,12 @@
                   decoration-info="is_current" decoration-muted="state == 'accepted'">
               <field name="sequence" widget="handle"/>
               <field name="name"/>
-              <field name="amount" sum="Всего"/>
-              <field name="token_unit" string=""/>
+              <field name="amount" sum="Всего" width="120px" class="o_coop_num"/>
               <field name="is_current" column_invisible="1"/>
-              <field name="state" widget="badge" readonly="1"
-                     decoration-success="state == 'accepted'" decoration-info="state == 'review'"/>
-              <field name="accepted_on" readonly="1" optional="show"/>
-              <field name="paid_amount" readonly="1" optional="show"/>
+              <field name="state" widget="badge" readonly="1" width="120px"
+                     decoration-success="state == 'accepted'" decoration-warning="state == 'review'"/>
+              <field name="accepted_on" readonly="1" optional="show" width="100px"/>
+              <field name="paid_amount" readonly="1" optional="show" width="110px" class="o_coop_num"/>
             </list>
           </field>
         </page>
@@ -125,8 +155,9 @@
       </xpath>
 
       <xpath expr="//page[@name='payouts']//field[@name='partial']" position="after">
-        <field name="stage_id" optional="show" column_invisible="not parent.stage_count"/>
-        <field name="prize_place" string="Место" optional="show" column_invisible="not parent.is_contest"/>
+        <field name="stage_id" optional="show" width="110px" column_invisible="not parent.stage_count"/>
+        <field name="prize_place" string="Место" optional="show" width="70px" class="o_coop_num"
+               column_invisible="not parent.is_contest"/>
       </xpath>
     </field>
   </record>
@@ -209,19 +240,18 @@
            платится: его приз остаётся в фонде или у проекта. Итог узнают все участники.</p>
         <field name="prize_ids" nolabel="1" readonly="1">
           <list>
-            <field name="place"/>
-            <field name="amount"/>
-            <field name="token_unit" string=""/>
+            <field name="place" width="80px" class="o_coop_num"/>
+            <field name="amount" width="120px" class="o_coop_num"/>
           </list>
         </field>
         <field name="line_ids" nolabel="1">
           <list editable="bottom" create="0" delete="0">
             <field name="submission_id" column_invisible="1"/>
-            <field name="partner_id" readonly="1"/>
-            <field name="date" readonly="1"/>
-            <field name="link" widget="url" readonly="1"/>
+            <field name="partner_id" readonly="1" width="190px"/>
+            <field name="date" readonly="1" width="90px"/>
+            <field name="link" widget="url" readonly="1" width="200px"/>
             <field name="note" readonly="1"/>
-            <field name="place" width="140px"/>
+            <field name="place" width="130px"/>
           </list>
         </field>
         <group invisible="not in_dispute">

@@ -1,28 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-  <!-- Статус исполнителя до утверждения и акт при приёмке (№ 465 п. 20). -->
+  <!-- Статус исполнителя до утверждения и акт при приёмке (№ 465 п. 20).
+       Статус и отметка — бейджами (дизайн-система, `Badge`): одно-два
+       слова, полное пояснение — в подсказке столбца. Числа — классом
+       `o_coop_num` (вправо, моноширинным: `Table`). -->
   <record id="view_coop_bounty_task_form_tax_status" model="ir.ui.view">
     <field name="name">coop.bounty.task.form.tax.status</field>
     <field name="model">coop.bounty.task</field>
     <field name="inherit_id" ref="coop_bounty.view_coop_bounty_task_form"/>
     <field name="priority">40</field>
     <field name="arch" type="xml">
-      <!-- Способ у задачи один — токены своего проекта (решение 690). -->
+      <!-- Заявки: столбцы без фиксированной ширины, кроме коротких, — место
+           забирает сообщение автору. Способ у задачи один (решение 690),
+           день подачи не нужен: важнее срок исполнителя. -->
       <xpath expr="//page[@name='applications']//field[@name='method_id']" position="attributes">
         <attribute name="column_invisible">1</attribute>
       </xpath>
+      <xpath expr="//page[@name='applications']//field[@name='create_date']" position="attributes">
+        <attribute name="column_invisible">1</attribute>
+      </xpath>
+      <xpath expr="//page[@name='applications']//field[@name='partner_id']" position="attributes">
+        <attribute name="class">o_coop_wrap</attribute>
+      </xpath>
       <xpath expr="//page[@name='applications']//field[@name='partner_id']" position="after">
-        <field name="coop_tax_note"/>
-        <field name="coop_tax_warning" decoration-warning="coop_tax_warning"/>
+        <field name="coop_tax_flag" column_invisible="1"/>
+        <field name="coop_executor_label" widget="badge" decoration-warning="coop_tax_flag"
+               class="o_coop_wrap"/>
       </xpath>
+      <!-- Кнопки в строке — значками, подпись — во всплывающей подсказке:
+           с подписями столбец кнопок забирал 250 точек у сообщения. -->
+      <xpath expr="//page[@name='applications']//button[@name='action_approve']" position="attributes">
+        <attribute name="string"></attribute>
+        <attribute name="title">Утвердить</attribute>
+      </xpath>
+      <xpath expr="//page[@name='applications']//button[@name='action_reject']" position="attributes">
+        <attribute name="string"></attribute>
+        <attribute name="title">Отклонить</attribute>
+      </xpath>
+      <xpath expr="//page[@name='applications']//field[@name='proposed_deadline']" position="attributes">
+        <attribute name="width">90px</attribute>
+      </xpath>
+      <xpath expr="//page[@name='applications']//field[@name='state']" position="attributes">
+        <attribute name="width">100px</attribute>
+      </xpath>
+
       <xpath expr="//field[@name='assignee_id']" position="after">
-        <field name="coop_executor_tax_note" invisible="not assignee_id or not coop_can_edit"/>
+        <field name="coop_executor_status" widget="badge" string="Статус"
+               invisible="not assignee_id or not coop_can_edit"/>
+        <field name="coop_executor_flag" widget="badge" decoration-warning="coop_executor_flag"
+               invisible="not coop_executor_flag or not coop_can_edit"/>
       </xpath>
+
       <xpath expr="//page[@name='payouts']//field[@name='date']" position="before">
-        <field name="act_number"/>
+        <field name="act_number" width="100px" class="o_coop_num"/>
+      </xpath>
+      <xpath expr="//page[@name='payouts']//field[@name='date']" position="attributes">
+        <attribute name="width">90px</attribute>
+      </xpath>
+      <xpath expr="//page[@name='payouts']//field[@name='partner_id']" position="attributes">
+        <attribute name="class">o_coop_wrap</attribute>
+      </xpath>
+      <xpath expr="//page[@name='payouts']//field[@name='amount']" position="attributes">
+        <attribute name="width">100px</attribute>
+        <attribute name="class">o_coop_num</attribute>
+      </xpath>
+      <!-- Тикер — в «Оплате» карточки; отдельный столбец забирал место у имени. -->
+      <xpath expr="//page[@name='payouts']//field[@name='token_unit']" position="attributes">
+        <attribute name="column_invisible">1</attribute>
+      </xpath>
+      <!-- «Частично» — только у задачи со шкалой частичной оплаты. -->
+      <xpath expr="//page[@name='payouts']//field[@name='partial']" position="attributes">
+        <attribute name="width">80px</attribute>
+        <attribute name="column_invisible">not parent.partial_percent</attribute>
       </xpath>
       <xpath expr="//page[@name='payouts']//field[@name='partial']" position="before">
-        <field name="executor_status" optional="show"/>
+        <field name="executor_status" string="Статус" widget="badge" width="110px" optional="show"/>
       </xpath>
       <xpath expr="//page[@name='payouts']//list" position="inside">
         <button name="action_print_act" type="object" string="Акт" icon="description"

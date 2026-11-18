@@ -13,12 +13,27 @@
 """
 from odoo import _, api, fields, models
 
+# Статус — одним-двумя словами, как бейдж (дизайн-система, `Badge`);
+# полная формулировка — в подсказке столбца и в акте.
 EXECUTOR_STATUS = [
-    ('org', 'организация'),
-    ('ip', 'индивидуальный предприниматель'),
-    ('npd', 'самозанятый (НПД)'),
-    ('gph', 'физическое лицо, договор ГПХ'),
+    ('org', 'Организация'),
+    ('ip', 'ИП'),
+    ('npd', 'Самозанятый'),
+    ('gph', 'Физлицо, ГПХ'),
 ]
+EXECUTOR_STATUS_HELP = (
+    'Из профиля исполнителя. Самозанятый — акт приёмки и чек НПД; ИП — акт, налог платит '
+    'сам; физлицо — договор ГПХ, НДФЛ не удерживается, агент сообщает о нём в налоговую; '
+    'организация — акт, НДФЛ нет.')
+TAX_FLAGS = [
+    ('nonresident', 'Нерезидент РФ'),
+    ('member', 'Член организации'),
+    ('both', 'Нерезидент, член организации'),
+]
+TAX_FLAG_HELP = (
+    'Нерезидент РФ — НДФЛ 30 % или по соглашению об избежании двойного налогообложения. '
+    'Член организации-автора — за работу по трудовому договору и трудовое участие токенами '
+    'платить нельзя (ч. 3 ст. 131 ТК, решение 668), только по договору ГПХ.')
 IP_REGIMES = ('usn_income', 'usn_profit', 'patent')
 
 
@@ -46,8 +61,11 @@ class CoopBountyTask(models.Model):
         related='natural_income_ids.state', string='Состояние НДФЛ')
     natural_currency_id = fields.Many2one(
         'res.currency', compute='_compute_natural_ndfl')
-    coop_executor_tax_note = fields.Char(
-        string='Статус исполнителя', compute='_compute_coop_executor_tax_note')
+    coop_executor_status = fields.Selection(
+        EXECUTOR_STATUS, string='Статус исполнителя', compute='_compute_coop_executor_status',
+        help=EXECUTOR_STATUS_HELP)
+    coop_executor_flag = fields.Selection(
+        TAX_FLAGS, string='Внимание', compute='_compute_coop_executor_status', help=TAX_FLAG_HELP)
 
     def _compute_natural_ndfl(self):
         rub = self.env.ref('base.RUB')
@@ -56,11 +74,12 @@ class CoopBountyTask(models.Model):
             record.natural_currency_id = rub
 
     @api.depends('assignee_id', 'payer_id')
-    def _compute_coop_executor_tax_note(self):
+    def _compute_coop_executor_status(self):
         Application = self.env['coop.bounty.application']
         for task in self:
-            task.coop_executor_tax_note = Application._coop_tax_texts(
-                task.assignee_id, task.payer_id)[0] if task.assignee_id else False
+            status, flag = Application._coop_tax_check(task.assignee_id, task.payer_id)
+            task.coop_executor_status = status
+            task.coop_executor_flag = flag
 
     def _coop_on_payout(self, payout):
         """Выплата — акт приёмки; токенами услуг платформы — ещё и строка
@@ -82,46 +101,45 @@ class CoopBountyTask(models.Model):
 class CoopBountyApplication(models.Model):
     _inherit = 'coop.bounty.application'
 
-    # Текстом, а не строкой: в списке заявок строка обрезается, текст переносится.
-    coop_tax_note = fields.Text(string='Статус и налог', compute='_compute_coop_tax_note')
-    coop_tax_warning = fields.Text(string='Внимание', compute='_compute_coop_tax_note')
+    coop_executor_status = fields.Selection(
+        EXECUTOR_STATUS, string='Статус', compute='_compute_coop_executor_status',
+        help=EXECUTOR_STATUS_HELP)
+    coop_tax_flag = fields.Selection(
+        TAX_FLAGS, string='Внимание', compute='_compute_coop_executor_status', help=TAX_FLAG_HELP)
+    # Одним бейджем: статус, а при отметке — и она, жёлтым. Отдельный столбец
+    # «Внимание» стоял пустым почти у всех и отнимал место у сообщения.
+    coop_executor_label = fields.Char(
+        string='Статус', compute='_compute_coop_executor_status',
+        help=EXECUTOR_STATUS_HELP + ' ' + TAX_FLAG_HELP)
 
     @api.depends('partner_id', 'task_id.payer_id')
-    def _compute_coop_tax_note(self):
+    def _compute_coop_executor_status(self):
+        statuses = dict(EXECUTOR_STATUS)
+        flags = {'nonresident': _('нерезидент РФ'), 'member': _('член организации'),
+                 'both': _('нерезидент, член организации')}
         for application in self:
-            note, warning = self._coop_tax_texts(application.partner_id, application.task_id.payer_id)
-            application.coop_tax_note = note
-            application.coop_tax_warning = warning
+            status, flag = self._coop_tax_check(application.partner_id, application.task_id.payer_id)
+            application.coop_executor_status = status
+            application.coop_tax_flag = flag
+            label = statuses.get(status, '')
+            application.coop_executor_label = (
+                '%s · %s' % (label, flags[flag]) if flag else label) or False
 
     @api.model
-    def _coop_tax_texts(self, partner, payer):
+    def _coop_tax_check(self, partner, payer):
         """Что автор должен знать об исполнителе до утверждения: статус —
-        и предупреждение, если оплата токенами упирается в закон."""
+        и отметка, если оплата токенами упирается в закон."""
         if not partner:
             return False, False
         person = partner.sudo()
         status = executor_status(person)
         if status == 'org':
-            note = _('Организация — акт приёмки, НДФЛ нет')
-        elif status == 'ip':
-            note = _('ИП, %s — акт приёмки, налог платит сам') % dict(
-                person._fields['coop_tax_regime'].selection)[person.coop_tax_regime]
-        elif status == 'npd':
-            note = _('Самозанятый — акт приёмки и чек НПД')
-        else:
-            note = _('Физлицо, договор ГПХ — акт приёмки; НДФЛ не удерживается, '
-                     'агент сообщает о нём в налоговую')
-        warnings = []
-        if status != 'org' and not person.coop_tax_resident:
-            warnings.append(_('не налоговый резидент РФ: НДФЛ 30 % или по соглашению '
-                              'об избежании двойного налогообложения'))
-        if status != 'org' and payer and self.env['coop.membership'].sudo().search_count(
-                [('partner_id', '=', person.id), ('organization_id', '=', payer.id)], limit=1):
-            warnings.append(_('состоит в организации-авторе: за работу по трудовому договору и '
-                              'трудовое участие токенами платить нельзя (ч. 3 ст. 131 ТК) — только '
-                              'по договору ГПХ, отдельно от трудовых обязанностей'))
-        warning = '; '.join(warnings)
-        return note, (warning[:1].upper() + warning[1:]) if warning else False
+            return status, False
+        nonresident = not person.coop_tax_resident
+        member = bool(payer) and bool(self.env['coop.membership'].sudo().search_count(
+            [('partner_id', '=', person.id), ('organization_id', '=', payer.id)], limit=1))
+        flag = 'both' if nonresident and member else 'nonresident' if nonresident else             'member' if member else False
+        return status, flag
 
 
 class CoopBountyPayout(models.Model):

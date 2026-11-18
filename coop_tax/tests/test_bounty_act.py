@@ -26,19 +26,15 @@ class TestBountyAct(CoopCase):
         return task
 
     def test_status_before_approval(self):
+        check = self.App._coop_tax_check
         self.person.write({'coop_tax_regime': 'npd', 'coop_tax_resident': True})
-        note, warning = self.App._coop_tax_texts(self.person, self.coop)
-        self.assertIn('Самозанятый', note)
-        self.assertFalse(warning)
+        self.assertEqual(check(self.person, self.coop), ('npd', False))
         self.person.write({'coop_tax_regime': 'none', 'coop_tax_resident': False})
-        note, warning = self.App._coop_tax_texts(self.person, self.coop)
-        self.assertIn('договор ГПХ', note)
-        self.assertIn('не налоговый резидент', warning.lower())
+        self.assertEqual(check(self.person, self.coop), ('gph', 'nonresident'))
         self.person.write({'coop_tax_regime': 'usn_income'})
-        self.assertIn('ИП', self.App._coop_tax_texts(self.person, self.coop)[0])
-        note, warning = self.App._coop_tax_texts(self.coop, self.person)
-        self.assertIn('Организация', note)
-        self.assertFalse(warning, 'у организации-исполнителя резидентство человека не спрашивают')
+        self.assertEqual(check(self.person, self.coop)[0], 'ip')
+        self.assertEqual(check(self.coop, self.person), ('org', False),
+                         'у организации-исполнителя резидентство человека не спрашивают')
 
     def test_act_on_payout(self):
         self.person.write({'coop_tax_regime': 'none', 'coop_tax_resident': True})
