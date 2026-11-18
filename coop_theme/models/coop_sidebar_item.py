@@ -45,10 +45,6 @@ MAIN_ITEMS = [
     ('Вакансии', 'work', 'coop_vacancies.action_coop_vacancies'),
     ('Ресурсы', 'deployed_code', 'coop_resources.action_coop_resources'),
     ('Проекты', 'rocket_launch', 'coop_projects.action_coop_projects'),
-    # Владелец 19.11.2026: «краудресурсинг вынести отдельным пунктом»
-    # (решение 183 — сбор вклада чем угодно); задачи за токены —
-    # его подраздел «Краудсорсинг». Значок — Tabler, незанятый.
-    ('Краудресурсинг', 'stack-2', 'coop_projects.action_coop_crowdresourcing'),
     ('Организации', 'account_balance', 'coop_orgs.action_coop_orgs'),
     ('Сообщества', 'forum', 'coop_communities.action_coop_communities'),
     ('Кошелёк', 'credit_card', 'coop_wallet.action_coop_my_wallet'),
@@ -659,21 +655,6 @@ class CoopSidebarItem(models.Model):
         known = set(items.filtered(lambda i: i.section == 'main').mapped('name'))
         missing = [v for v in defaults
                    if v['section'] == 'main' and v['name'] not in known]
-        # Новый раздел встаёт за своим соседом по списку. Номер по месту в
-        # списке — (место + 1) * 10 — у вошедших раньше уже занят
-        # следующим разделом, и новый уезжал бы за него («Краудресурсинг»
-        # за «Организации» вместо места за «Проектами», 19.11.2026).
-        order = [name for name, _icon, _xmlid in MAIN_ITEMS]
-        seq_by_name = {i.name: i.sequence
-                       for i in items.filtered(lambda i: i.section == 'main')}
-        for value in missing:
-            if value['name'] not in order:
-                continue
-            before = order[:order.index(value['name'])]
-            prev = next((n for n in reversed(before) if n in seq_by_name), None)
-            if prev:
-                value['sequence'] = seq_by_name[prev] + 1
-                seq_by_name[value['name']] = value['sequence']
 
         # Разделы, которые появляются по участию, дописываются здесь же, а
         # не при обновлении модуля. Причина простая: во время обновления

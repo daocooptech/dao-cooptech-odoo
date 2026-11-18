@@ -839,12 +839,9 @@
     <field name="code">action = model._coop_action_help_project()</field>
   </record>
 
-  <!-- Подраздел «Краудресурсинга» (владелец 19.11.2026: задачи за
-       токены — это краудсорсинг, функционал баунти; раздел планки —
-       «Краудресурсинг»). До 19.11 стоял в «Проектах». -->
   <menuitem id="menu_coop_crowd_projects" name="Краудсорсинг"
-            parent="coop_projects.menu_coop_crowdresourcing_root"
-            action="action_coop_crowd_projects" sequence="20"/>
+            parent="coop_projects.menu_coop_projects_root"
+            action="action_coop_crowd_projects" sequence="12"/>
 
   <!-- Своей вкладки в меню у краудсорсинга нет (решение 691): плоский
        список всех задач всех проектов (`/bounty`) убран, подписка —
