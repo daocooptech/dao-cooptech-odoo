@@ -318,13 +318,20 @@ class CoopBountyTaskP2(models.Model):
         """Зацепка для реестров: coop_tax пишет строку дохода в натуральной форме."""
         return True
 
-    def _coop_pay(self, partial=False, submission=None):
+    def _coop_pay_base(self):
+        """С какой суммы считается выплата: у этапной задачи — сумма этапа."""
+        self.ensure_one()
+        return self.reward_tokens
+
+    def _coop_pay(self, partial=False, submission=None, amount=None):
         """Провести выплаты: одному, команде по долям или сдавшему результат
         постоянной задачи. Задача платформы — токенами услуг платформы из
-        фонда задач, задача проекта — начислением токенов проекта."""
+        фонда задач, задача проекта — начислением токенов проекта.
+        `amount` — сумма явно (приз конкурса), иначе — `_coop_pay_base`."""
         self.ensure_one()
         factor = (self.partial_percent / 100.0) if partial else 1.0
-        total = int(round(self.reward_tokens * factor))
+        base = self._coop_pay_base() if amount is None else amount
+        total = int(round(base * factor))
         if submission:
             plan = [(submission.partner_id, 1.0)]
         elif self.member_ids:

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Акт приёмки результата по задаче за токены (№ 465 п. 20): один акт
+       на выплату — у команды у каждого свой, у этапной задачи — по этапу,
+       у конкурса — по призовому месту. Статус исполнителя — на день
+       выплаты, из самой выплаты, а не из профиля. -->
+  <record id="action_report_bounty_act" model="ir.actions.report">
+    <field name="name">Акт приёмки результата</field>
+    <field name="model">coop.bounty.payout</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">coop_tax.report_bounty_act</field>
+    <field name="print_report_name">'Акт %s' % (object.act_number or object.id)</field>
+    <field name="binding_model_id" ref="coop_bounty.model_coop_bounty_payout"/>
+    <field name="binding_type">report</field>
+  </record>
+
+  <template id="report_bounty_act">
+    <t t-call="web.html_container">
+      <t t-foreach="docs" t-as="pay">
+        <t t-set="task" t-value="pay.task_id"/>
+        <div class="article">
+          <t t-call="coop_deals.report_platform_header"/>
+          <div class="page">
+            <h2 class="mt-4">Акт приёмки результата № <span t-field="pay.act_number"/></h2>
+            <p class="text-muted">
+              Дата <span t-field="pay.date"/><t t-if="task.city">, город <span t-field="task.city"/></t>
+            </p>
+
+            <p>
+              <strong t-field="pay.payer_id.name"/> (заказчик<t t-if="pay.payer_id.vat">, ИНН
+              <span t-field="pay.payer_id.vat"/></t>), с одной стороны, и
+              <strong t-field="pay.partner_id.name"/> (исполнитель —
+              <span t-field="pay.executor_status"/><t t-if="pay.partner_id.vat">, ИНН
+              <span t-field="pay.partner_id.vat"/></t>), с другой стороны, составили
+              настоящий акт о том, что результат по задаче «<span t-field="task.name"/>»
+              выполнен и принят.
+            </p>
+            <p t-if="pay.stage_id">Принят этап «<span t-field="pay.stage_id.name"/>».</p>
+            <p t-if="pay.prize_place">Результат — работа на конкурс, занявшая
+              <t t-out="pay.prize_place"/>-е место.</p>
+            <p t-if="pay.partial">Результат принят частично — по шкале задачи
+              <t t-out="task.partial_percent"/> % суммы.</p>
+
+            <!-- Критерии — у приёмки результата целиком: конкурс решают местами,
+                 промежуточный этап — до проверки по критериям задачи. -->
+            <table class="table table-sm" t-if="task.criterion_ids and not pay.prize_place and not pay.stage_id">
+              <thead>
+                <tr><th>Критерий приёмки</th><th class="text-end">Выполнен</th></tr>
+              </thead>
+              <tbody>
+                <tr t-foreach="task.criterion_ids" t-as="point">
+                  <td><span t-field="point.name"/></td>
+                  <td class="text-end"><t t-if="point.done">да</t><t t-else="">нет</t></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <p t-if="pay.submission_id.link">Результат передан: <span t-field="pay.submission_id.link"/></p>
+            <p>
+              Вознаграждение исполнителя:
+              <strong><t t-out="'{:,}'.format(pay.amount).replace(',', ' ')"/> <t t-out="pay.token_unit"/></strong>
+              (<t t-out="task.payment_label"/>).
+            </p>
+
+            <t t-if="pay.payer_kind == 'platform'">
+              <p t-if="pay.executor_status == 'gph'">
+                Вознаграждение получено в натуральной форме. Налог в денежной форме не
+                удерживается: налоговый агент сообщает о неудержанном налоге в налоговый
+                орган и исполнителю (п. 5 ст. 226 НК РФ).
+              </p>
+              <p t-if="pay.executor_status == 'npd'">
+                Исполнитель — плательщик налога на профессиональный доход и формирует чек
+                на сумму вознаграждения.
+              </p>
+              <p t-if="pay.executor_status == 'ip'">
+                Исполнитель — индивидуальный предприниматель и уплачивает налог самостоятельно.
+              </p>
+            </t>
+            <p t-if="pay.payer_kind != 'platform' and pay.executor_status != 'org'">
+              Экономику токена и налоговые обязательства по вознаграждению заказчик
+              определяет по закону своей страны.
+            </p>
+            <p t-if="pay.executor_status != 'org' and not pay.executor_resident">
+              Исполнитель не является налоговым резидентом Российской Федерации.
+            </p>
+
+            <p class="mt-4">
+              Стороны претензий друг к другу не имеют. Приёмка подтверждена заказчиком в
+              информационной системе платформы, где хранится запись о времени и лице,
+              принявшем результат.
+            </p>
+
+            <div class="row mt-5">
+              <div class="col-6">
+                <p>Заказчик</p>
+                <p><strong t-field="pay.payer_id.name"/></p>
+                <p class="mt-4">____________________</p>
+              </div>
+              <div class="col-6">
+                <p>Исполнитель</p>
+                <p><strong t-field="pay.partner_id.name"/></p>
+                <p class="mt-4">____________________</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </t>
+    </t>
+  </template>
+</odoo>

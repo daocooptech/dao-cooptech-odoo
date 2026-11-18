@@ -33,7 +33,8 @@ class BountyCase(TransactionCase):
         })
         cls.project = cls.env['coop.project'].create({
             'name': 'Пекарня — проверка', 'partner_id': cls.org.id,
-            'coop_token_name': 'Токен пекарни', 'coop_token_symbol': 'bread'})
+            'coop_token_name': 'Токен пекарни', 'coop_token_symbol': 'bread',
+            'coop_bounty_token_limit': 50000})
         cls.person = cls.env['res.partner'].create({'name': 'Исполнитель проверочный'})
         cls.user = cls.env['res.users'].create({
             'name': 'Исполнитель проверочный', 'login': 'bounty_tester',
@@ -262,7 +263,8 @@ class TestBountyPublicPage(HttpCase):
     def test_public_task_page(self):
         org = self.env['res.partner'].create({'name': 'Цех проверочный', 'is_company': True})
         project = self.env['coop.project'].create({
-            'name': 'Цех — проверка', 'partner_id': org.id, 'coop_token_name': 'Токен цеха'})
+            'name': 'Цех — проверка', 'partner_id': org.id, 'coop_token_name': 'Токен цеха',
+            'coop_bounty_token_limit': 20000})
         task = self.env['coop.bounty.task'].create({
             'name': 'Задача для страницы', 'payer_id': org.id, 'project_id': project.id,
             'reward_tokens': 1000, 'criterion_ids': CRITERIA,

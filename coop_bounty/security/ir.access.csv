@@ -42,3 +42,11 @@ coop_bounty_member_user,Команды исполнителей видит ка�
 coop_bounty_member_author,Доли команды задаёт автор задачи,coop.bounty.member,base.group_user,ru,"[('task_id.payer_id', 'in', user.coop_publisher_partner_ids.ids)]"
 coop_bounty_member_manager,Команды исполнителей — менеджер сообщества,coop.bounty.member,coop_bounty.group_coop_community_manager,crud,
 coop_bounty_dispute_open_user,Окно спора исполнителя,coop.bounty.dispute.open,base.group_user,crud,
+coop_bounty_prize_user,Призовые места конкурса видит каждый,coop.bounty.prize,base.group_user,r,
+coop_bounty_prize_author,Призовые места ведёт автор конкурса,coop.bounty.prize,base.group_user,crud,"[('task_id.payer_id', 'in', user.coop_publisher_partner_ids.ids)]"
+coop_bounty_prize_manager,Призовые места — менеджер сообщества,coop.bounty.prize,coop_bounty.group_coop_community_manager,crud,
+coop_bounty_stage_user,Этапы задачи видит каждый,coop.bounty.stage,base.group_user,r,
+coop_bounty_stage_author,Этапы ведёт автор задачи,coop.bounty.stage,base.group_user,crud,"[('task_id.payer_id', 'in', user.coop_publisher_partner_ids.ids)]"
+coop_bounty_stage_manager,Этапы задачи — менеджер сообщества,coop.bounty.stage,coop_bounty.group_coop_community_manager,crud,
+coop_bounty_contest_result_user,Окно итога конкурса,coop.bounty.contest.result,base.group_user,crud,
+coop_bounty_contest_line_user,Работы в окне итога конкурса,coop.bounty.contest.line,base.group_user,crud,

@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Улучшения П2, второй кусок (№ 465): конкурс с призовыми местами,
+       этапы, резерв задачи проекта (решение 689). -->
+
+  <record id="view_coop_bounty_task_form_p2b" model="ir.ui.view">
+    <field name="name">coop.bounty.task.form.p2b</field>
+    <field name="model">coop.bounty.task</field>
+    <field name="inherit_id" ref="coop_bounty.view_coop_bounty_task_form"/>
+    <field name="priority">30</field>
+    <field name="arch" type="xml">
+      <xpath expr="//button[@name='action_accept']" position="attributes">
+        <attribute name="invisible">state not in ('submitted', 'dispute') or not coop_can_edit or is_contest</attribute>
+      </xpath>
+      <xpath expr="//button[@name='action_return_for_revision']" position="attributes">
+        <attribute name="invisible">state not in ('submitted', 'dispute') or not coop_can_edit or is_contest</attribute>
+      </xpath>
+      <xpath expr="//button[@name='action_apply']" position="attributes">
+        <attribute name="invisible">state != 'published' or my_application_state != 'none' or coop_can_edit or is_recurring or is_contest</attribute>
+      </xpath>
+      <xpath expr="//button[@name='action_submit']" position="after">
+        <button name="action_submit_contest" type="object" string="Прислать работу"
+                class="btn-primary" invisible="not can_submit_contest"/>
+        <button name="action_open_contest_result" type="object" string="Подвести итог"
+                class="btn-primary" invisible="not can_sum_up"/>
+      </xpath>
+
+      <xpath expr="//field[@name='reminded_on']" position="after">
+        <field name="is_contest" invisible="1"/>
+        <field name="can_submit_contest" invisible="1"/>
+        <field name="can_sum_up" invisible="1"/>
+        <field name="stage_count" invisible="1"/>
+      </xpath>
+
+      <xpath expr="//div[hasclass('alert-danger')]" position="before">
+        <div class="alert alert-info" role="status" invisible="not is_contest or state != 'published'">
+          Конкурс: работы присылают без заявки до <field name="deadline" class="d-inline" readonly="1"/>,
+          автор присуждает призовые места — они во вкладке «Призы». Прислано работ:
+          <field name="contest_entry_count" class="d-inline"/>.
+        </div>
+        <div class="alert alert-info" role="status"
+             invisible="not stage_count or state in ('draft', 'accepted', 'cancelled')">
+          <field name="stage_label" class="d-inline"/>. Принято этапов:
+          <field name="stage_done_count" class="d-inline"/> из
+          <field name="stage_count" class="d-inline"/>, каждый принятый оплачивается сразу.
+        </div>
+      </xpath>
+
+      <xpath expr="//field[@name='reward_tokens'][@widget='coop_inline']" position="attributes">
+        <attribute name="readonly">not coop_can_edit or state != 'draft' or is_contest or stage_count</attribute>
+      </xpath>
+      <xpath expr="//field[@name='reward_tokens'][@widget='coop_inline']" position="after">
+        <field name="reserve_label" invisible="not reserve_label"/>
+        <field name="is_contest" widget="boolean_toggle"
+               invisible="(state != 'draft' and not is_contest) or is_recurring or stage_count"
+               readonly="not coop_can_edit or state != 'draft'"/>
+      </xpath>
+      <xpath expr="//field[@name='partial_percent']" position="attributes">
+        <attribute name="invisible">is_contest or (state != 'draft' and not partial_percent)</attribute>
+      </xpath>
+      <xpath expr="//field[@name='is_recurring'][@widget='boolean_toggle']" position="attributes">
+        <attribute name="invisible">is_contest or stage_count or (state != 'draft' and not is_recurring)</attribute>
+      </xpath>
+      <xpath expr="//field[@name='executor_limit'][@widget='coop_inline']" position="attributes">
+        <attribute name="invisible">is_recurring or is_contest or (state != 'draft' and executor_limit &lt; 2)</attribute>
+      </xpath>
+
+      <!-- Работы конкурса видит каждый участник — свою; место — после итога. -->
+      <xpath expr="//page[@name='submissions']" position="attributes">
+        <attribute name="invisible">not submission_ids or (not coop_can_edit and not is_mine and not is_arbiter and not is_recurring and not is_contest)</attribute>
+      </xpath>
+      <xpath expr="//page[@name='submissions']//field[@name='partner_id']" position="attributes">
+        <attribute name="column_invisible">not parent.is_recurring and not parent.is_contest</attribute>
+      </xpath>
+      <xpath expr="//page[@name='submissions']//field[@name='version']" position="after">
+        <field name="stage_id" column_invisible="not parent.stage_count"/>
+        <field name="place" column_invisible="not parent.is_contest" string="Место"/>
+      </xpath>
+      <xpath expr="//page[@name='submissions']//field[@name='state']" position="attributes">
+        <attribute name="decoration-muted">state == 'not_won'</attribute>
+      </xpath>
+
+      <xpath expr="//page[@name='criteria']" position="after">
+        <page string="Призы" name="prizes" invisible="not is_contest">
+          <p class="text-muted" invisible="state != 'draft'">Одно, два или три места подряд с
+             первого; приз за место ниже не больше приза за место выше. Сумма задачи — сумма
+             призов: она резервируется при публикации.</p>
+          <field name="prize_ids" nolabel="1" readonly="not coop_can_edit or state != 'draft'">
+            <list editable="bottom" create="parent.state == 'draft'" delete="parent.state == 'draft'">
+              <field name="place" width="80px"/>
+              <field name="amount" sum="Всего"/>
+              <field name="token_unit" string=""/>
+              <field name="winner_id" readonly="1"/>
+            </list>
+          </field>
+        </page>
+        <page string="Этапы" name="stages"
+              invisible="is_contest or is_recurring or (state != 'draft' and not stage_ids) or (state == 'draft' and not coop_can_edit)">
+          <p class="text-muted" invisible="state != 'draft'">Крупную задачу можно разбить на
+             этапы — например макет, вёрстка, запуск. У каждого своя сумма, сдача и приёмка;
+             принятый этап оплачивается сразу. Сумма задачи — сумма этапов.</p>
+          <field name="stage_ids" nolabel="1" readonly="not coop_can_edit or state != 'draft'">
+            <list editable="bottom" create="parent.state == 'draft'" delete="parent.state == 'draft'"
+                  decoration-info="is_current" decoration-muted="state == 'accepted'">
+              <field name="sequence" widget="handle"/>
+              <field name="name"/>
+              <field name="amount" sum="Всего"/>
+              <field name="token_unit" string=""/>
+              <field name="is_current" column_invisible="1"/>
+              <field name="state" widget="badge" readonly="1"
+                     decoration-success="state == 'accepted'" decoration-info="state == 'review'"/>
+              <field name="accepted_on" readonly="1" optional="show"/>
+              <field name="paid_amount" readonly="1" optional="show"/>
+            </list>
+          </field>
+        </page>
+      </xpath>
+
+      <!-- У конкурса заявок нет: работы присылают сразу. -->
+      <xpath expr="//page[@name='applications']" position="attributes">
+        <attribute name="invisible">not coop_can_edit or is_contest</attribute>
+      </xpath>
+      <xpath expr="//page[@name='questions']" position="attributes">
+        <attribute name="invisible">is_contest or (not coop_can_edit and not question_ids)</attribute>
+      </xpath>
+
+      <xpath expr="//page[@name='payouts']//field[@name='partial']" position="after">
+        <field name="stage_id" optional="show" column_invisible="not parent.stage_count"/>
+        <field name="prize_place" string="Место" optional="show" column_invisible="not parent.is_contest"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_coop_bounty_task_list_p2b" model="ir.ui.view">
+    <field name="name">coop.bounty.task.list.p2b</field>
+    <field name="model">coop.bounty.task</field>
+    <field name="inherit_id" ref="coop_bounty.view_coop_bounty_task_list"/>
+    <field name="priority">30</field>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='reward_tokens']" position="after">
+        <field name="is_contest" optional="hide"/>
+        <field name="stage_count" optional="hide"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_coop_bounty_task_search_p2b" model="ir.ui.view">
+    <field name="name">coop.bounty.task.search.p2b</field>
+    <field name="model">coop.bounty.task</field>
+    <field name="inherit_id" ref="coop_bounty.view_coop_bounty_task_search"/>
+    <field name="priority">30</field>
+    <field name="arch" type="xml">
+      <xpath expr="//filter[@name='recurring']" position="before">
+        <filter name="contest" string="Конкурсы" domain="[('is_contest', '=', True)]"/>
+        <filter name="staged" string="С этапами" domain="[('stage_ids', '!=', False)]"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_coop_bounty_dispute_form_p2b" model="ir.ui.view">
+    <field name="name">coop.bounty.dispute.form.p2b</field>
+    <field name="model">coop.bounty.dispute</field>
+    <field name="inherit_id" ref="coop_bounty.view_coop_bounty_dispute_form"/>
+    <field name="priority">30</field>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='outcome']" position="before">
+        <field name="is_contest" invisible="1"/>
+        <div class="alert alert-info" role="status" colspan="2" invisible="not is_contest">
+          Спор по конкурсу решают итогом: кнопка «Подвести итог» в карточке — места, призы и
+          объяснение. Здесь — только отмена конкурса.
+        </div>
+      </xpath>
+    </field>
+  </record>
+
+  <!-- Окно сдачи у конкурса: работа не «на проверку», а на конкурс. -->
+  <record id="view_coop_bounty_submit_form_p2b" model="ir.ui.view">
+    <field name="name">coop.bounty.submit.form.p2b</field>
+    <field name="model">coop.bounty.submit</field>
+    <field name="inherit_id" ref="coop_bounty.view_coop_bounty_submit_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//p[hasclass('text-muted')]" position="attributes">
+        <attribute name="invisible">is_contest</attribute>
+      </xpath>
+      <xpath expr="//p[hasclass('text-muted')]" position="after">
+        <field name="is_contest" invisible="1"/>
+        <p class="text-muted" invisible="not is_contest">Приложите работу: ссылку, файлы или
+           описание. Присланную не меняют — после срока автор присуждает места, итог узнают
+           все участники.</p>
+      </xpath>
+      <xpath expr="//button[@name='action_confirm']" position="attributes">
+        <attribute name="invisible">is_contest</attribute>
+      </xpath>
+      <xpath expr="//button[@name='action_confirm']" position="after">
+        <button name="action_confirm" type="object" string="Прислать работу" class="btn-primary"
+                invisible="not is_contest"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_coop_bounty_contest_result_form" model="ir.ui.view">
+    <field name="name">coop.bounty.contest.result.form</field>
+    <field name="model">coop.bounty.contest.result</field>
+    <field name="arch" type="xml">
+      <form string="Итог конкурса">
+        <field name="task_id" invisible="1"/>
+        <field name="in_dispute" invisible="1"/>
+        <p class="text-muted">Отметьте места — подряд с первого. Не присуждённое место не
+           платится: его приз остаётся в фонде или у проекта. Итог узнают все участники.</p>
+        <field name="prize_ids" nolabel="1" readonly="1">
+          <list>
+            <field name="place"/>
+            <field name="amount"/>
+            <field name="token_unit" string=""/>
+          </list>
+        </field>
+        <field name="line_ids" nolabel="1">
+          <list editable="bottom" create="0" delete="0">
+            <field name="submission_id" column_invisible="1"/>
+            <field name="partner_id" readonly="1"/>
+            <field name="date" readonly="1"/>
+            <field name="link" widget="url" readonly="1"/>
+            <field name="note" readonly="1"/>
+            <field name="place" width="140px"/>
+          </list>
+        </field>
+        <group invisible="not in_dispute">
+          <field name="decision" placeholder="Почему места присуждены так — объяснение увидят все участники"/>
+        </group>
+        <footer>
+          <button name="action_confirm" type="object" string="Подвести итог" class="btn-primary"
+                  confirm="Подвести итог? Призы будут выплачены, итог уйдёт всем участникам."/>
+          <button string="Отмена" special="cancel" class="btn-secondary"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <!-- Резерв задач проекта (решение 689): вкладка «Токен проекта» и
+       карточка проекта по краудсорсингу. У нашего проекта резерв — фонд
+       задач платформы, поэтому строк нет. -->
+  <record id="view_coop_project_form_crowd_reserve" model="ir.ui.view">
+    <field name="name">coop.project.form.crowd.reserve</field>
+    <field name="model">coop.project</field>
+    <field name="inherit_id" ref="coop_bounty.view_coop_project_form_crowd_token"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='coop_token_issued']" position="after">
+        <field name="coop_is_cooptech" invisible="1"/>
+        <field name="coop_bounty_token_limit" invisible="coop_is_cooptech"/>
+        <field name="coop_bounty_blocked" invisible="coop_is_cooptech or not coop_bounty_token_limit"/>
+        <field name="coop_bounty_free" invisible="coop_is_cooptech or not coop_bounty_token_limit"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_coop_project_crowd_form_reserve" model="ir.ui.view">
+    <field name="name">coop.project.form.crowd.reserve.card</field>
+    <field name="model">coop.project</field>
+    <field name="inherit_id" ref="coop_bounty.view_coop_project_crowd_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//ul[hasclass('o_coop_crowd_stats_big')]" position="inside">
+        <li invisible="coop_is_cooptech or not coop_bounty_token_limit">
+          <b><field name="coop_bounty_blocked" readonly="1" nolabel="1"/></b>
+          <field name="coop_token_unit" nolabel="1"/> заблокировано под задачи
+        </li>
+      </xpath>
+    </field>
+  </record>
+</odoo>

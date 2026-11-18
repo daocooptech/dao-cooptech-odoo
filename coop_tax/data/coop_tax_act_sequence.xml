@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Номера актов приёмки по задачам за токены (№ 465 п. 20): год и
+       порядковый номер, сквозной по узлу. -->
+  <record id="seq_coop_bounty_act" model="ir.sequence">
+    <field name="name">Акты приёмки задач</field>
+    <field name="code">coop.bounty.act</field>
+    <field name="prefix">%(year)s-</field>
+    <field name="padding">5</field>
+    <field name="company_id" eval="False"/>
+  </record>
+</odoo>

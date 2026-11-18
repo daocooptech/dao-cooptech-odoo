@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Статус исполнителя до утверждения и акт при приёмке (№ 465 п. 20). -->
+  <record id="view_coop_bounty_task_form_tax_status" model="ir.ui.view">
+    <field name="name">coop.bounty.task.form.tax.status</field>
+    <field name="model">coop.bounty.task</field>
+    <field name="inherit_id" ref="coop_bounty.view_coop_bounty_task_form"/>
+    <field name="priority">40</field>
+    <field name="arch" type="xml">
+      <!-- Способ у задачи один — токены своего проекта (решение 690). -->
+      <xpath expr="//page[@name='applications']//field[@name='method_id']" position="attributes">
+        <attribute name="column_invisible">1</attribute>
+      </xpath>
+      <xpath expr="//page[@name='applications']//field[@name='partner_id']" position="after">
+        <field name="coop_tax_note"/>
+        <field name="coop_tax_warning" decoration-warning="coop_tax_warning"/>
+      </xpath>
+      <xpath expr="//field[@name='assignee_id']" position="after">
+        <field name="coop_executor_tax_note" invisible="not assignee_id or not coop_can_edit"/>
+      </xpath>
+      <xpath expr="//page[@name='payouts']//field[@name='date']" position="before">
+        <field name="act_number"/>
+      </xpath>
+      <xpath expr="//page[@name='payouts']//field[@name='partial']" position="before">
+        <field name="executor_status" optional="show"/>
+      </xpath>
+      <xpath expr="//page[@name='payouts']//list" position="inside">
+        <button name="action_print_act" type="object" string="Акт" icon="fa-file-text-o"
+                invisible="not act_number"/>
+      </xpath>
+    </field>
+  </record>
+</odoo>

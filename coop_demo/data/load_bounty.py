@@ -641,6 +641,7 @@ def _demo_project_tokens(env):
             'coop_token_name': 'Токен «%s»' % project.name,
             'coop_token_symbol': project._coop_ticker_from(project.name),
             'coop_token_economy': TOKEN_ECONOMY[index % len(TOKEN_ECONOMY)],
+            'coop_bounty_token_limit': 30000,
         })
     return projects
 
@@ -677,6 +678,7 @@ def _org_crowd_project(env, org):
                 'coop_token_name': 'Токен «%s»' % short,
                 'coop_token_symbol': Project._coop_ticker_from(short),
                 'coop_token_economy': TOKEN_ECONOMY[org.id % len(TOKEN_ECONOMY)],
+                'coop_bounty_token_limit': 30000,
             })
     except Exception:
         _logger.exception('Проект для задач «%s» не заведён', org.name)
@@ -781,6 +783,10 @@ def load_bounty(env):
         manager.write({'group_ids': [(4, manager_group.id)]})
 
     specializations = {s.name: s for s in env['coop.specialization'].sudo().search([])}
+    # Токены на задачи у проектов (решение 689): без них задачу проекта не
+    # опубликовать — сумма блокируется из выделенного.
+    token_projects = env['coop.project'].sudo().search([('coop_token_name', '!=', False)])
+    token_projects._coop_bounty_fit_limit(minimum=30000)
     # Исполнители берутся из каталога людей: задачу берёт участник, а не
     # абстрактный пользователь.
     people = Partner.search(
@@ -846,14 +852,20 @@ def load_bounty(env):
     created += load_extra_platform_tasks(env, Task, manager, methods, specializations, people)
     created += load_project_tasks(env, Task, methods, specializations)
     _demo_tasks_to_projects(env, Task, methods)
+    token_projects.search([('coop_token_name', '!=', False)])._coop_bounty_fit_limit()
     load_bounty_flow(env, Task)
     # Постоянные, командные, частичные и споры исполнителя (№ 465).
     from .load_bounty_p2 import load_bounty_p2
     created += load_bounty_p2(env, Task, manager, specializations)
+    # Конкурсы, этапы и резерв проекта (№ 465, кусок 2).
+    from .load_bounty_p2b import load_bounty_p2b
+    created += load_bounty_p2b(env, Task, manager, specializations)
     # Просроченные — напоминание и снятие; сданные больше семи дней
     # назад — в спор: так, как это сделают задания по расписанию.
     Task._cron_executor_silence()
     Task._cron_open_disputes()
+    # Задачи, переданные проектам уже опубликованными, — в пределах выделенного.
+    token_projects.search([('coop_token_name', '!=', False)])._coop_bounty_fit_limit()
     involved = Task.search([('state', '=', 'accepted')])
     (involved.mapped('assignee_id') | involved.mapped('payer_id'))._coop_recompute_deal_stats()
 
