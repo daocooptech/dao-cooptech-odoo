@@ -25,7 +25,7 @@
         <field name="executor_status" optional="show"/>
       </xpath>
       <xpath expr="//page[@name='payouts']//list" position="inside">
-        <button name="action_print_act" type="object" string="Акт" icon="fa-file-text-o"
+        <button name="action_print_act" type="object" string="Акт" icon="description"
                 invisible="not act_number"/>
       </xpath>
     </field>
