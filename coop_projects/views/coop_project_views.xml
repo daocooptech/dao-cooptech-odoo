@@ -837,6 +837,34 @@
     </field>
   </record>
 
+  <!--
+    «Краудресурсинг» — свой раздел планки (владелец 19.11.2026: «каталог
+    проектов — все виды проектов, а краудресурсинг вынести отдельным
+    пунктом и туда разместить то что мы сделали сейчас в каталоге
+    проектов»; задачи за токены — его подраздел «Краудсорсинг»).
+    Краудресурсинг по решению 183 — сбор вклада чем угодно: трудом,
+    техникой, материалами, деньгами. Здесь — проекты, которым вклад
+    можно внести сейчас: идёт сбор или у запущенного есть открытые
+    потребности. Вид каталога — тот же, что у «Каталога проектов».
+  -->
+  <record id="action_coop_crowdresourcing" model="ir.actions.act_window">
+    <field name="name">Сбор вкладов</field>
+    <field name="res_model">coop.project</field>
+    <field name="path">crowdresourcing</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="domain">['|', ('state', '=', 'gathering'), '&amp;', ('state', '=', 'running'), ('need_ids', 'any', [('state', '=', 'published')])]</field>
+    <field name="context">{'bin_size': True,'coop_catalog': True, 'coop_create_label': 'Добавить проект', 'coop_shelf_field': 'category_id'}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Сейчас никто не собирает вклад</p>
+      <p>
+        Краудресурсинг: проект собирает не только деньги, но труд, технику,
+        материалы и знания. Пай в кооперативном проекте и доля в
+        коммерческом складываются из стоимости вклада, а не вписываются
+        руками.
+      </p>
+    </field>
+  </record>
+
   <record id="action_coop_project_category" model="ir.actions.act_window">
     <field name="name">Темы проектов</field>
     <field name="res_model">coop.project.category</field>
@@ -891,6 +919,10 @@
             web_icon="coop_projects,static/description/icon.png"/>
   <menuitem id="menu_coop_projects" name="Каталог проектов"
             parent="menu_coop_projects_root" action="action_coop_projects" sequence="10"/>
+  <menuitem id="menu_coop_crowdresourcing_root" name="Краудресурсинг" sequence="19"/>
+  <menuitem id="menu_coop_crowdresourcing" name="Сбор вкладов"
+            parent="menu_coop_crowdresourcing_root"
+            action="action_coop_crowdresourcing" sequence="10"/>
   <menuitem id="menu_coop_my_projects" name="Я инициатор"
             parent="menu_coop_projects_root" action="action_coop_my_projects"
             sequence="15"/>
