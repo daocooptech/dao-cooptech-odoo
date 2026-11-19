@@ -574,6 +574,15 @@ patch(Breadcrumbs.prototype, {
                 );
                 return item ? { label: item.label, actionId: item.actionId } : null;
             }
+            // Запись, открытая ссылкой без раздела («Помощь проекту»): раздел
+            // — по первому экрану из адреса, как и в пути к её задачам. По
+            // модели вышло бы «Проекты», а задачи той же карточки идут от
+            // «Краудсорсинга» (владелец 19.11.2026: «да, исправить»).
+            const head = window.location.pathname.split("/").filter(Boolean)[1];
+            const byPath = COOP_CRUMB_ROOT_BY_PATH[head];
+            if (byPath) {
+                return { label: byPath.label, actionId: byPath.action };
+            }
             const section = this.coopSection;
             if (section) {
                 return { label: section.name, menu: section };
