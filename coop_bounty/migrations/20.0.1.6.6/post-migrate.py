@@ -14,8 +14,6 @@
 import logging
 
 from odoo import SUPERUSER_ID, api
-from odoo.tools.binary import BinaryBytes
-from odoo.tools.misc import file_path
 
 _logger = logging.getLogger(__name__)
 
@@ -41,12 +39,6 @@ DESCRIPTION = """
 и 15 человек на платформе.</p>
 """
 
-SCREENS = [
-    ('09-grafiki-analitika.png', 'Аналитика'),
-    ('17-tsifrovye-aktivy.png', 'Цифровые активы'),
-    ('13-kalendar-sobytiy.png', 'Календарь событий'),
-    ('18-mezhdunarodnye-sdelki.png', 'Международные сделки'),
-]
 
 
 def migrate(cr, version):
@@ -57,19 +49,4 @@ def migrate(cr, version):
     card.description = DESCRIPTION
     if card.project_id:
         card.project_id.description = DESCRIPTION
-    # Фото без подписи положило демо 17.11 — стройка и леса из общего
-    # набора, к платформе отношения не имеют. Экраны — с подписями, по
-    # ним же повторный прогон узнаёт, что они уже лежат.
-    Media = env['coop.media']
-    mine = Media.search([('res_model', '=', 'coop.project'), ('res_id', '=', card.id)])
-    mine.filtered(lambda media: not media.name).unlink()
-    have = set(mine.exists().mapped('name'))
-    for sequence, (name, caption) in enumerate(SCREENS, start=1):
-        if caption in have:
-            continue
-        # В Odoo 20 двоичное поле принимает BinaryValue, а не байты/base64.
-        with open(file_path(f'coop_bounty/static/img/cooptech/{name}'), 'rb') as image:
-            data = BinaryBytes(image.read(), filename=name)
-        Media.create({'res_model': 'coop.project', 'res_id': card.id, 'kind': 'photo',
-                      'sequence': sequence * 10, 'name': caption, 'image_1920': data})
-    _logger.info('Карточка нашего проекта: описание и %s экрана', len(SCREENS))
+    # Фото — в переносе 20.0.1.6.7 (владелец заменил экраны снимками).
