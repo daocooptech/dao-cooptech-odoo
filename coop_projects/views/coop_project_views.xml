@@ -864,6 +864,14 @@
     <field name="path">crowdfunding</field>
     <field name="params" eval="{'label': 'Краудфандинг', 'dev': True}"/>
   </record>
+  <!-- Краудинвестинг — «в разработке» (владелец 19.11.2026: «добавить пункт
+       Краудинвестинг после Краудресурсинга — раздел пока в разработке»). -->
+  <record id="action_coop_crowdinvesting" model="ir.actions.client">
+    <field name="name">Краудинвестинг</field>
+    <field name="tag">coop_soon</field>
+    <field name="path">crowdinvesting</field>
+    <field name="params" eval="{'label': 'Краудинвестинг', 'dev': True}"/>
+  </record>
   <record id="action_coop_volunteering" model="ir.actions.client">
     <field name="name">Волонтёрство</field>
     <field name="tag">coop_soon</field>
@@ -948,6 +956,11 @@
             sequence="20"/>
   <menuitem id="menu_coop_crowdresourcing" name="Краудресурсинг"
             parent="menu_coop_projects_root" action="action_coop_crowdresourcing"
+            sequence="13"/>
+  <!-- Тот же номер, что у «Краудресурсинга»: меню идут по номеру, затем по
+       id, а id у этой записи больше — встаёт сразу за ним. -->
+  <menuitem id="menu_coop_crowdinvesting" name="Краудинвестинг"
+            parent="menu_coop_projects_root" action="action_coop_crowdinvesting"
             sequence="13"/>
   <menuitem id="menu_coop_crowdfunding" name="Краудфандинг"
             parent="menu_coop_projects_root" action="action_coop_crowdfunding"
