@@ -57,7 +57,9 @@
                       t-att-value="option.value"
                       t-att-selected="this.isSelected(block, option)">
                 <t t-out="option.label"/>
-                <t t-if="option.count"> · <t t-out="option.count"/></t>
+                <!-- Ноль тоже: пустые варианты приходят только туда, где их
+                     показывают нарочно («Тип проекта» — все типы всегда). -->
+                <t t-if="option.count or option.count === 0"> · <t t-out="option.count"/></t>
               </option>
             </select>
           </div>

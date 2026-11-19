@@ -8,6 +8,9 @@ from odoo.fields import Domain
 # быть сразу нескольких типов: собирает вклад и ставит задачи за токены.
 PROJECT_TYPES = [
     ('crowdresourcing', 'Краудресурсинг'),
+    # Владелец 19.11.2026: пункт «Краудинвестинг» после «Краудресурсинга»,
+    # раздел в разработке, и в фильтр «Тип проекта».
+    ('crowdinvesting', 'Краудинвестинг'),
     ('crowdfunding', 'Краудфандинг'),
     ('crowdsourcing', 'Краудсорсинг'),
     ('volunteering', 'Волонтёрство'),
@@ -25,14 +28,14 @@ class CoopProjectType(models.Model):
     coop_type = fields.Selection(
         PROJECT_TYPES, string='Тип проекта',
         compute='_compute_coop_type', search='_search_coop_type',
-        help='Чем проект собирает: вкладом любыми ресурсами, деньгами, '
+        help='Чем проект собирает: вкладом любыми ресурсами, инвестициями, деньгами, '
              'задачами за токены или помощью волонтёров.')
 
     def _coop_type_domain(self, code):
         """Условие типа. Краудресурсинг — у проекта есть потребности:
         вклад трудом, техникой, материалами, деньгами (решение 183).
-        Краудсорсинг дописывает `coop_bounty`. Краудфандинг и волонтёрство
-        в разработке — проектов этих типов пока нет."""
+        Краудсорсинг дописывает `coop_bounty`. Краудинвестинг, краудфандинг
+        и волонтёрство в разработке — проектов этих типов пока нет."""
         if code == 'crowdresourcing':
             return [('need_ids', '!=', False)]
         return [('id', '=', 0)]
@@ -141,8 +144,9 @@ class CoopProject(models.Model):
                 })
 
         # Тип проекта — вычисляемый, по группам не считается: счётчик —
-        # поиском на каждый тип. Пустые типы (в разработке) не показываем,
-        # как пустые состояния ниже.
+        # поиском на каждый тип. Все типы видны всегда, и пустые — со
+        # счётчиком 0 (владелец 19.11.2026: «все типы всегда»): по списку
+        # видно, какие подразделы есть, даже если проектов в них пока нет.
         type_base = without('coop_type')
         type_counts = {code: self.search_count(type_base + [('coop_type', '=', code)])
                        for code, _label in PROJECT_TYPES}
@@ -152,13 +156,13 @@ class CoopProject(models.Model):
                     and leaf[0] == 'coop_type' for leaf in base)
         blocks.append({
             'code': 'coop_type', 'label': 'Тип проекта',
-            'hint': 'Чем проект собирает: вкладом любыми ресурсами, деньгами, '
+            'hint': 'Чем проект собирает: вкладом любыми ресурсами, инвестициями, деньгами, '
                     'задачами за токены или помощью волонтёров.',
             'widget': 'select', 'field': 'coop_type', 'operator': '=',
             'placeholder': 'Любой', 'counted': True,
             'options': [{'value': code, 'label': label,
                          'count': type_counts[code]}
-                        for code, label in PROJECT_TYPES if type_counts[code]],
+                        for code, label in PROJECT_TYPES],
         }) if not typed else None
 
         kind_counts = counts('kind', without('kind'))
