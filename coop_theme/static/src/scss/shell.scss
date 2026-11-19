@@ -2019,27 +2019,44 @@ body.o_dark_mode .o_coop_loader_mark {
     display: flex;
   }
 
+  // С 19.11.2026 заголовок — последнее звено пути, а не строка крупным
+  // кеглем над ним (владелец: «сделать везде путь, заголовок тогда уходит
+  // в путь и не занимает много места»). Набор — как у пути на страницах
+  // записей (`breadcrumb.scss`): раздел Manrope 500 12,5 серым, название
+  // 600 12,5 цветом текста, между ними тот же уголок, текст→текст 20.
+  // Не влезает — переносится, без многоточия.
   .o_coop_pagehead {
-    display: block;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
     order: -1;
     flex: 1 0 100%;
     min-width: 0;
-    margin: 0 0 4px;
+    margin: 0;
   }
 
   .o_coop_pagehead_crumbs {
-    margin-bottom: 6px;
+    margin: 0;
     font: 500 12.5px/1.4 'Manrope', sans-serif;
     color: var(--coop-slate);
   }
 
-  .o_coop_pagehead_title {
+  // Через родителя: `.o_web_client h1` весомее одного класса и ставил 700.
+  .o_coop_pagehead .o_coop_pagehead_title {
     margin: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font: 700 24px/1.25 'Manrope', sans-serif;
+    font: 600 12.5px/1.4 'Manrope', sans-serif;
     color: var(--coop-ink);
+  }
+
+  .o_coop_pagehead_crumbs + .o_coop_pagehead_title::before {
+    content: "";
+    display: inline-block;
+    width: 12px;
+    height: 1.4em;
+    margin: 0 4px;
+    vertical-align: top;
+    background-color: var(--coop-slate-light, #8a8a80);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 6l6 6l-6 6'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
   }
 
   // Вне каталога заголовок стоит в строке пути вместе с кнопками
