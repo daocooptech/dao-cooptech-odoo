@@ -128,6 +128,13 @@ def _models(env):
 
 def _records(env, model):
     domain = [('create_uid', '=', SUPERUSER_ID)]
+    # Наш проект «ДАО КООПТЕХ» — не демо: у него экраны платформы
+    # (владелец 19.11.2026: «нужно вставить правдивое описание»), а добор
+    # клал ему стройку и леса из общего набора.
+    if model == 'coop.project':
+        ours = env.ref('coop_bounty.project_cooptech', raise_if_not_found=False)
+        if ours:
+            domain.append(('id', '!=', ours.id))
     return env[model].sudo().with_context(active_test=False).search(domain, order='id')
 
 
