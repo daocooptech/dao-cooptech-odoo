@@ -83,8 +83,25 @@ patch(Breadcrumbs.prototype, {
      * перезагрузки путь собирается из адреса и начинается с него.
      */
     get coopCrumbRoot() {
-        const first = (this.props.breadcrumbs || [])[0];
-        return (first && COOP_CRUMB_ROOT[first.name]) || null;
+        const list = this.props.breadcrumbs || [];
+        const first = list[0];
+        if (!first) {
+            return null;
+        }
+        if (COOP_CRUMB_ROOT[first.name]) {
+            return COOP_CRUMB_ROOT[first.name];
+        }
+        // Путь от записи, открытой не из раздела, а ссылкой («Помощь
+        // проекту» в подвале): первое звено — одно имя, «ДАО КООПТЕХ ›
+        // Задачи», и не понять, проект это, организация или управление
+        // проектом (владелец 19.11.2026). Раздел берётся по первому экрану
+        // цепочки — в Odoo 20 он первым стоит в адресе
+        // (`/nn20/help-project/580/bounty`). Одно звено путь и так прячет.
+        if (list.length > 1) {
+            const head = window.location.pathname.split("/").filter(Boolean)[1];
+            return COOP_CRUMB_ROOT_BY_PATH[head] || null;
+        }
+        return null;
     },
 
     coopOpenCrumbRoot(root = this.coopCrumbRoot) {
@@ -684,6 +701,11 @@ const COOP_TAB_ROOT = { "Я инициатор": "Проекты", "Я учас�
 // Экраны без пункта меню и раздел, с которого их путь начинается.
 const COOP_CRUMB_ROOT = {
     "Управление проектами": { label: "Проекты", action: "coop_projects.action_coop_projects" },
+};
+
+// То же по первому экрану цепочки из адреса — для путей, начатых с записи.
+const COOP_CRUMB_ROOT_BY_PATH = {
+    "help-project": { label: "Краудсорсинг", action: "coop_bounty.action_coop_crowd_projects" },
 };
 
 const COOP_RUBRICS = {
