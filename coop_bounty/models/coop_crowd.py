@@ -116,8 +116,13 @@ class CoopProjectToken(models.Model):
         """Все задачи проекта списком — оттуда карточка задачи."""
         self.ensure_one()
         action = self.env['ir.actions.act_window']._for_xml_id('coop_bounty.action_coop_bounty_task')
+        # Имя проекта в заголовке не повторяется: проект стоит в пути
+        # перед заголовком, в той же строке (владелец 19.11.2026: «два
+        # раза путь»). `display_name` — то, что движок пишет в путь
+        # следующего экрана; без него там было «Задачи краудсорсинга».
         action.update({
-            'name': _('Задачи — %s') % self.name,
+            'name': _('Задачи'),
+            'display_name': _('Задачи'),
             'domain': [('project_id', '=', self.id)],
             'context': {'default_project_id': self.id, 'search_default_open': 1},
         })
