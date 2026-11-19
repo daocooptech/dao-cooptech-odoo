@@ -66,6 +66,25 @@
     <xpath expr="//li[hasclass('o_back_button')]" position="after">
       <t t-if="this.coopTrail" t-call="coop_theme.TrailTail"/>
     </xpath>
+    <!--
+      Путь целиком, без «…» (владелец 19.11.2026: «путь попробуй
+      полностью пропиши»): «Проекты › Управление проектами › MVP DAO
+      COOPTECH › Задачи». Длинное звено обрезается многоточием само.
+      Раздел в начале — когда путь начался с экрана без пункта меню.
+    -->
+    <xpath expr="//li[@t-if='collapsedBreadcrumbs.length']" position="replace">
+      <li t-if="this.coopCrumbRoot" class="breadcrumb-item d-inline-flex min-w-0"
+          t-on-click.prevent="() => this.coopOpenCrumbRoot()">
+        <a href="#" class="text-truncate" t-out="this.coopCrumbRoot.label"/>
+      </li>
+      <t t-foreach="collapsedBreadcrumbs.slice().reverse()" t-as="crumb" t-key="crumb.jsId">
+        <li class="breadcrumb-item d-inline-flex min-w-0" t-on-click.prevent="crumb.onSelected">
+          <a t-att-href="crumb.url" class="text-truncate">
+            <t t-call="web.Breadcrumb.Name" breadcrumb="crumb"/>
+          </a>
+        </li>
+      </t>
+    </xpath>
 
     <xpath expr="//ol[hasclass('breadcrumb')]" position="after">
       <t t-if="this.coopIsPersonPage and this.coopTrail" t-call="coop_theme.Trail"/>
@@ -107,6 +126,7 @@
     -->
     <xpath expr="//div[hasclass('o_last_breadcrumb_item')][hasclass('gap-2')]" position="attributes">
       <attribute name="t-if">!this.coopIsPersonPage and !this.coopTrail</attribute>
+      <attribute name="t-att-class">{ o_coop_last_shown: this.coopShowLast }</attribute>
     </xpath>
 
     <!--
@@ -135,11 +155,24 @@
     <xpath expr="//div[hasclass('o_last_breadcrumb_item')][hasclass('fs-4')]" position="before">
       <t t-call="coop_theme.BackButton"/>
       <t t-if="this.coopTrail" t-call="coop_theme.Trail"/>
+      <!-- Запись экрана без пункта меню по прямой ссылке — путь
+           достраивается (`coopLoneRoot`, владелец 19.11.2026). -->
+      <ol t-if="this.coopLoneRoot" class="breadcrumb o_coop_trail flex-nowrap text-nowrap lh-sm">
+        <li class="breadcrumb-item d-inline-flex min-w-0"
+            t-on-click.prevent="() => this.coopOpenCrumbRoot(this.coopLoneRoot)">
+          <a href="#" class="text-truncate" t-out="this.coopLoneRoot.label"/>
+        </li>
+        <li class="breadcrumb-item d-inline-flex min-w-0 o_back_button"
+            t-on-click.prevent="() => this.coopOpenLoneScreen()">
+          <a href="#" class="text-truncate" t-out="this.coopLoneRoot.screen"/>
+        </li>
+      </ol>
     </xpath>
 
     <!-- Имя записи — последним звеном пути, а не отдельно крупно. -->
     <xpath expr="//div[hasclass('o_last_breadcrumb_item')][hasclass('fs-4')]" position="attributes">
       <attribute name="t-if">!this.coopTrail</attribute>
+      <attribute name="t-att-class">{ o_coop_last_shown: this.coopLoneRoot }</attribute>
     </xpath>
 
   </t>

@@ -76,6 +76,53 @@ patch(Breadcrumbs.prototype, {
             });
     },
 
+    /**
+     * Раздел в начале пути, когда путь начинается с экрана без пункта
+     * меню (владелец 19.11.2026: «путь попробуй полностью пропиши»).
+     * «Управление проектами» открывается кнопкой в «Проектах», а после
+     * перезагрузки путь собирается из адреса и начинается с него.
+     */
+    get coopCrumbRoot() {
+        const first = (this.props.breadcrumbs || [])[0];
+        return (first && COOP_CRUMB_ROOT[first.name]) || null;
+    },
+
+    coopOpenCrumbRoot(root = this.coopCrumbRoot) {
+        return this.coopActionService.doAction(root.action, { clearBreadcrumbs: true });
+    },
+
+    /**
+     * Запись, открытая по ссылке или после обновления страницы: движок
+     * восстанавливает одно звено — её имя, и тема прятала путь целиком.
+     * Для экранов без пункта меню путь достраивается: «Проекты ›
+     * Управление проектами › MVP DAO COOPTECH».
+     */
+    get coopLoneRoot() {
+        const list = this.props.breadcrumbs || [];
+        if (list.length !== 1 || !list[0].isFormView || this.coopTrail) {
+            return null;
+        }
+        const action = this.coopActionService.currentController?.action;
+        const root = action && COOP_CRUMB_ROOT[action.name];
+        return root ? { ...root, screen: action.name, screenAction: action.id } : null;
+    },
+
+    coopOpenLoneScreen() {
+        return this.coopActionService.doAction(this.coopLoneRoot.screenAction,
+                                               { clearBreadcrumbs: true });
+    },
+
+    /**
+     * Имя открытой записи — последним звеном и на странице записи движка
+     * (проект, задача): без него путь обрывался на «Управление проектами ›»,
+     * и было не понять, чей это проект. У записей платформы имя и так в
+     * пути (`coopTrail`).
+     */
+    get coopShowLast() {
+        const last = (this.props.breadcrumbs || []).at(-1);
+        return Boolean(last?.isFormView) && !this.coopTrail;
+    },
+
     /** Ближайший предок в пути, если он есть. */
     get coopParent() {
         const list = this.props.breadcrumbs || [];
@@ -633,6 +680,11 @@ patch(Breadcrumbs.prototype, {
  */
 // Вкладки «Моих проектов»: в пути стоит раздел, а не вкладка.
 const COOP_TAB_ROOT = { "Я инициатор": "Проекты", "Я участвую": "Проекты" };
+
+// Экраны без пункта меню и раздел, с которого их путь начинается.
+const COOP_CRUMB_ROOT = {
+    "Управление проектами": { label: "Проекты", action: "coop_projects.action_coop_projects" },
+};
 
 const COOP_RUBRICS = {
     "coop.resource": { fields: ["category_id"], tree: "coop.resource.category" },
