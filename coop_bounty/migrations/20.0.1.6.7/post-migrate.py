@@ -19,7 +19,7 @@ _logger = logging.getLogger(__name__)
 
 PHOTOS = [
     ('01-gorod-budushchego.jpg', 'Город будущего — The Venus Project'),
-    ('02-detsentralizatsiya.jpg', 'Централизованная и децентрализованная сеть'),
+    ('02-detsentralizatsiya.jpg', 'Децентрализованная сеть'),
     ('03-chelovek.jpg', 'Страница человека'),
     ('04-organizatsiya.jpg', 'Страница организации'),
     ('05-proekt.jpg', 'Страница проекта'),

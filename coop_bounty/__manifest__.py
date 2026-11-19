@@ -17,7 +17,7 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.6.7',
+    'version': '20.0.1.6.8',
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_tokens', 'coop_theme', 'coop_orgs', 'coop_deals',
                 'coop_profile', 'website', 'mail'],
