@@ -366,62 +366,43 @@
   }
 
   // Вкладки подраздела («Мои проекты»: «Я инициатор», «Я участвую») —
-  // полосой под путём, в один ряд с кнопками, одной рамкой: вкладки слева,
-  // кнопки справа. Образец — полоса действий на странице проекта
-  // (`.o_form_statusbar`: рамка 1, скругление 10, отступы 8 / 16). Владелец
-  // 19.11.2026: «вкладки сделать в один уровень с кнопками, убрать
-  // полоску… верстку верхней части как на 2 картинке» (снимок карточки).
-  // Рамка — из двух половин (вкладки и кнопки — разные элементы панели),
-  // промежуток панели между ними снят отрицательным полем. Только на
-  // большом экране: на узком пути нет (`shell.scss`, ≤ 900).
+  // две кнопки под поиском, над карточками; путь и кнопки создания — одной
+  // строкой над поиском (правило выше). Владелец 19.11.2026, набросок
+  // поверх снимка: «две кнопки под поиском, путь и кнопки в один ряд»,
+  // и «везде фон серый, белую рамку убрать» — утренняя полоса в белой
+  // рамке отменена. Кнопки — как поле поиска (серый фон, рамка 1,
+  // скругление 8, высота 35); выбранная — бирюзовой рамкой, как выбранный
+  // вид в переключателе. Только на большом экране: на узком пути нет
+  // (`shell.scss`, ≤ 900).
   @media (min-width: 901px) {
-  .o_control_panel_main:has(.o_coop_pagehead):has(.o_coop_subtabs) {
-    .o_coop_pagehead {
-      flex: 0 0 100%;
-    }
+  .o_control_panel_main:has(.o_coop_pagehead):has(.o_coop_subtabs) .o_coop_subtabs {
+    order: 6;
+    flex: 0 0 100%;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    border: 0;
 
-    // Пустая распорка движка вставала в ряд полосы и сдвигала её на
-    // промежуток панели (12) от левого края пути.
-    .o_control_panel_breadcrumbs > .me-auto {
-      display: none;
-    }
-
-    .o_coop_subtabs {
-      order: 0;
-      flex: 1 1 auto;
-      align-self: stretch;
+    .o_coop_tab {
+      display: flex;
       align-items: center;
-      gap: 4px;
-      margin: 0 -12px 0 0;
-      padding: 8px 0 8px 8px;
-      border: 1px solid var(--coop-line, #e6e6e1);
-      border-right: 0;
-      border-radius: 10px 0 0 10px;
-      background: var(--coop-white, #fff);
-
-      .o_coop_tab {
-        margin: 0;
-        padding: 5px 12px;
-        border: 1px solid transparent;
-        border-radius: 999px;
-        font: 500 12.5px/1.4 'Manrope', sans-serif;
-      }
-
-      .o_coop_tab.active {
-        font-weight: 600;
-        border-color: var(--coop-line, #e6e6e1);
-        background: var(--coop-paper, #fbfbf9);
-      }
+      justify-content: center;
+      flex: 0 0 auto;
+      min-width: 200px;
+      height: 35px;
+      margin: 0;
+      padding: 0 16px;
+      border: 1px solid var(--coop-line-strong, #d2d2cb);
+      border-radius: 8px;
+      background: var(--coop-surface, #f2f2ee);
+      color: var(--coop-slate, #4a4a44);
+      font: 500 12.5px/1.4 'Manrope', sans-serif;
     }
 
-    .o_control_panel_main_buttons {
-      align-self: stretch;
-      align-items: center;
-      padding: 8px !important;
-      border: 1px solid var(--coop-line, #e6e6e1);
-      border-left: 0;
-      border-radius: 0 10px 10px 0;
-      background: var(--coop-white, #fff);
+    .o_coop_tab.active {
+      font-weight: 600;
+      color: var(--coop-ink, #14171a);
+      border-color: var(--coop-teal, #146b64);
     }
   }
   }
@@ -1336,4 +1317,13 @@
   margin: 16px 0 18px;
   font: 400 12.5px/1.55 'Manrope', sans-serif;
   color: var(--coop-slate, #4a4a44);
+}
+
+// Панель «Фильтр» — вровень с кнопками вкладок под поиском (набросок
+// владельца 19.11.2026): поднята на высоту ряда вкладок (35) и нижний
+// отступ панели управления (8). Своё верхнее поле (12) правило заменяет.
+@media (min-width: 901px) {
+  .o_view_controller:has(.o_control_panel .o_coop_pagehead):has(.o_control_panel .o_coop_subtabs) .o_content > .o_coop_filters {
+    margin-top: -43px;
+  }
 }
