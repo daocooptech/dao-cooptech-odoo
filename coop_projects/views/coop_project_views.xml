@@ -934,7 +934,7 @@
     `AFTER_FAV`). «Управление проектами» — кнопкой у «Добавить проект»
     там, где у человека свой проект (`coop_pm_section` в контексте).
   -->
-  <menuitem id="menu_coop_projects" name="Каталог проектов"
+  <menuitem id="menu_coop_projects" name="Все проекты"
             parent="menu_coop_projects_root" action="action_coop_projects" sequence="10"/>
   <!-- Пункт с вложенными — вкладки на странице (`CoopTabs`, `subtabs`). -->
   <menuitem id="menu_coop_my_projects_root" name="Мои проекты"
