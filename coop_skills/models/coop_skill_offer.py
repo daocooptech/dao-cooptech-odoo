@@ -81,7 +81,21 @@ class CoopSkillOffer(models.Model):
     skill_ids = fields.Many2many(
         'hr.skill', 'coop_skill_offer_skill_rel', 'offer_id', 'skill_id',
         string='Умения',
+        domain=lambda self: self._coop_work_skill_domain(),
         help='Из чего складывается работа: конкретные операции и допуски.')
+
+    @api.model
+    def _coop_work_skill_domain(self):
+        """Умения услуги — работы, а не языки и личные качества.
+
+        Справочник `hr.skill` общий с движком: в нём и «Языки», и «Гибкие
+        навыки» из данных `hr_skills`, и подсказка «Умений» в «Добавить
+        услугу» предлагала языки (владелец 19.11.2026: «выпадает список
+        языков, это не логично», № 476).
+        """
+        types = [self.env.ref(xmlid, raise_if_not_found=False)
+                 for xmlid in ('hr_skills.hr_skill_type_lang', 'hr_skills.hr_skill_type_softskill')]
+        return [('skill_type_id', 'not in', [t.id for t in types if t])]
 
     city = fields.Char(string='Город', index=True)
     ready_to_travel = fields.Boolean(
