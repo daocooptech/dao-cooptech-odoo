@@ -43,6 +43,7 @@ export class CoopFilters extends Component {
 
     setup() {
         this.orm = useService("orm");
+        this.menus = useService("menu");
         this.notification = usePlugin(NotificationPlugin);
         this.groupId = null;
         // Раскрытие общее с кнопкой в строке каталога — см. `coopFiltersUi`.
@@ -127,6 +128,40 @@ export class CoopFilters extends Component {
         // Роутер при старте убирает чужие параметры из адреса; возвращаем
         // на то же место записи истории, без лишнего шага «назад».
         router.replaceState({ coop_f: this.encodeState() });
+    }
+
+    /**
+     * Вкладки подраздела («Мои проекты»: «Я инициатор», «Я участвую») —
+     * первым блоком панели, переключателем `Segmented` во всю ширину.
+     * Владелец 23.11.2026: «в идеале эти две кнопки убрать в фильтр в самый
+     * верх»; под поиском их больше нет (`catalog_view.scss`). Вкладки — это
+     * вложенные пункты меню, как у строки вкладок (`shell.js`, `setSubtabs`).
+     */
+    get roleTabs() {
+        try {
+            const actionId = this.env.config?.actionId;
+            if (!actionId) {
+                return [];
+            }
+            const all = this.menus.getAll();
+            const own = all.find((menu) => menu.actionID === actionId && menu.id !== menu.appID);
+            const parent = own && all.find((menu) => (menu.children || []).includes(own.id));
+            if (!parent || parent.id === parent.appID) {
+                return [];
+            }
+            const tabs = (parent.children || []).map((id) => this.menus.getMenu(id)).filter(Boolean);
+            return tabs.length > 1
+                ? tabs.map((tab) => ({ ...tab, on: tab.actionID === actionId }))
+                : [];
+        } catch {
+            return [];
+        }
+    }
+
+    openRoleTab(tab) {
+        if (!tab.on) {
+            this.menus.selectMenu(tab);
+        }
     }
 
     /** Порядок — такое же условие отбора, как остальные, и стоит там же.

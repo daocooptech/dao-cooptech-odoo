@@ -18,6 +18,16 @@
                   t-on-click="() => this.toggleOpen()">×</button>
         </div>
 
+        <!-- Вкладки подраздела — первым блоком (`roleTabs`, 23.11.2026). -->
+        <div class="o_coop_field o_coop_filters_roles" t-if="this.roleTabs.length">
+          <div class="coop-seg coop-seg_block" role="tablist">
+            <button t-foreach="this.roleTabs" t-as="tab" t-key="tab.id" type="button"
+                    role="tab" class="coop-seg_item" t-att-class="{ 'coop-seg_on': tab.on }"
+                    t-att-aria-selected="tab.on ? 'true' : 'false'"
+                    t-on-click="() => this.openRoleTab(tab)" t-out="tab.name"/>
+          </div>
+        </div>
+
         <!--
           Раздел, у которого набор полей ещё не описан, показывает не
           пустую карточку с заголовком «Фильтр», а прямую строку о том,

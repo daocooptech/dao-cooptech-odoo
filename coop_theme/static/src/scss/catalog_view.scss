@@ -365,48 +365,6 @@
     }
   }
 
-  // Вкладки подраздела («Мои проекты»: «Я инициатор», «Я участвую») —
-  // две кнопки под поиском, над карточками; путь и кнопки создания — одной
-  // строкой над поиском (правило выше). Владелец 19.11.2026, набросок
-  // поверх снимка: «две кнопки под поиском, путь и кнопки в один ряд»,
-  // и «везде фон серый, белую рамку убрать» — утренняя полоса в белой
-  // рамке отменена. Кнопки — как поле поиска (серый фон, рамка 1,
-  // скругление 8, высота 35); выбранная — бирюзовой рамкой, как выбранный
-  // вид в переключателе. Только на большом экране: на узком пути нет
-  // (`shell.scss`, ≤ 900).
-  @media (min-width: 901px) {
-  .o_control_panel_main:has(.o_coop_pagehead):has(.o_coop_subtabs) .o_coop_subtabs {
-    order: 6;
-    flex: 0 0 100%;
-    gap: 12px;
-    margin: 0;
-    padding: 0;
-    border: 0;
-
-    .o_coop_tab {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex: 0 0 auto;
-      min-width: 200px;
-      height: 35px;
-      margin: 0;
-      padding: 0 16px;
-      border: 1px solid var(--coop-line-strong, #d2d2cb);
-      border-radius: 8px;
-      background: var(--coop-surface, #f2f2ee);
-      color: var(--coop-slate, #4a4a44);
-      font: 500 12.5px/1.4 'Manrope', sans-serif;
-    }
-
-    .o_coop_tab.active {
-      font-weight: 600;
-      color: var(--coop-ink, #14171a);
-      border-color: var(--coop-teal, #146b64);
-    }
-  }
-  }
-
   // Каталог, открытый из записи (задачи проекта): путь и заголовок —
   // одной строкой, путь первым, заголовок — его последним звеном и
   // набран так же, как последнее звено пути на страницах записей
@@ -1319,11 +1277,3 @@
   color: var(--coop-slate, #4a4a44);
 }
 
-// Панель «Фильтр» — вровень с кнопками вкладок под поиском (набросок
-// владельца 19.11.2026): поднята на высоту ряда вкладок (35) и нижний
-// отступ панели управления (8). Своё верхнее поле (12) правило заменяет.
-@media (min-width: 901px) {
-  .o_view_controller:has(.o_control_panel .o_coop_pagehead):has(.o_control_panel .o_coop_subtabs) .o_content > .o_coop_filters {
-    margin-top: -43px;
-  }
-}
