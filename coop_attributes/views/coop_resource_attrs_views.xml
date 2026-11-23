@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!--
+    Характеристики рубрики в карточке объявления и в «Добавить» (№ 483).
+    Набор полей зависит от рубрики: у квартиры комнаты и этаж, у машины
+    пробег и коробка. Раньше поле было только в фильтре, а карточка у
+    всех разделов показывала одни и те же общие поля.
+  -->
+  <record id="view_coop_resource_form_attrs" model="ir.ui.view">
+    <field name="name">coop.resource.form.attrs</field>
+    <field name="model">coop.resource</field>
+    <field name="inherit_id" ref="coop_resources.view_coop_resource_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//section[.//field[@name='description']]" position="before">
+        <section class="coop-show_block coop-attrs" name="attrs"
+                 invisible="not attrs_facts and not coop_can_edit or not category_id">
+          <h2>Характеристики</h2>
+          <field name="attrs_facts" nolabel="1" readonly="1"
+                 invisible="coop_can_edit"/>
+          <field name="attrs" nolabel="1" columns="2"
+                 invisible="not coop_can_edit"/>
+        </section>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_coop_resource_add_attrs" model="ir.ui.view">
+    <field name="name">coop.resource.add.attrs</field>
+    <field name="model">coop.resource</field>
+    <field name="inherit_id" ref="coop_resources.view_coop_resource_add"/>
+    <field name="arch" type="xml">
+      <!-- На всю ширину под фото и названием: в колонке рядом с фото
+           поля в два ряда сжимались до 60 точек. -->
+      <xpath expr="//section[@name='add_what']/div[hasclass('coop-add_sec_body')]" position="inside">
+        <div class="coop-add_field coop-attrs" invisible="not category_id">
+          <label for="attrs" string="Параметры"/>
+          <field name="attrs" nolabel="1" columns="2"/>
+        </div>
+      </xpath>
+    </field>
+  </record>
+</odoo>

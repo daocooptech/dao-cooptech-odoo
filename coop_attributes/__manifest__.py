@@ -22,13 +22,19 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.0.2',
+    'version': '20.0.1.0.3',
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_resources'],
     'data': [
         'views/coop_attribute_views.xml',
+        'views/coop_resource_attrs_views.xml',
         'security/ir.access.csv',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'coop_attributes/static/src/scss/resource_attrs.scss',
+        ],
+    },
     'installable': True,
     'auto_install': False,
 }

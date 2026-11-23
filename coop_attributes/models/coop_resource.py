@@ -2,6 +2,8 @@
 import logging
 import re
 
+from markupsafe import Markup
+
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 from odoo.tools import SQL
@@ -135,6 +137,67 @@ class CoopResource(models.Model):
         copy=True,
         help='Набор полей зависит от рубрики: у автомобиля пробег и '
              'коробка, у металлопроката марка стали и толщина.')
+
+    # Витрина показывает только заполненное, как «О квартире» у Авито:
+    # стандартный виджет характеристик выводит и пустые строки, и у
+    # объявления с двумя значениями из двенадцати карточка читалась бы
+    # как недозаполненная анкета (владелец 23.11.2026, № 483).
+    attrs_facts = fields.Html(
+        string='Характеристики (витрина)',
+        compute='_compute_attrs_facts', sanitize=False)
+
+    @api.depends('attrs', 'category_id')
+    def _compute_attrs_facts(self):
+        for record in self:
+            items = []
+            # Значение поля на записи — словарь «ключ → значение», где у
+            # меток уже склеенная строка и нет подписей вариантов. Формат
+            # чтения отдаёт описание вместе со значением — его и берём.
+            field = record._fields['attrs']
+            props = field.convert_to_read(
+                record.attrs._values if record.attrs else {}, record,
+                use_display_name=False) if record.id else []
+            for prop in props or []:
+                text = record._coop_attr_text(prop)
+                if text:
+                    items.append(Markup(
+                        '<div><dt>%s</dt><dd>%s</dd></div>')
+                        % (prop.get('string') or '', text))
+            record.attrs_facts = (
+                Markup('<dl class="coop-show_facts coop-attrs_facts">%s</dl>')
+                % Markup('').join(items)) if items else False
+
+    @staticmethod
+    def _coop_attr_text(prop):
+        """Значение характеристики словами; пустое — пустая строка."""
+        value = prop.get('value')
+        kind = prop.get('type')
+        if value in (None, False, '', []) and kind != 'boolean':
+            return ''
+        if kind == 'boolean':
+            # «Нет» у флажка — не ответ, а незаполненное поле: продавец
+            # мог просто не дойти до него. Показываем только «да».
+            return 'да' if value else ''
+        if kind == 'selection':
+            labels = dict(prop.get('selection') or [])
+            text = labels.get(value, '')
+        elif kind == 'tags':
+            labels = {t[0]: t[1] for t in prop.get('tags') or []}
+            text = ', '.join(labels[v] for v in value if v in labels)
+        elif kind == 'float':
+            text = ('%g' % value).replace('.', ',')
+        elif kind == 'integer':
+            # Разряды — только с пяти знаков: «120 000 км», но «1990», а
+            # не «1 990» в годе постройки.
+            text = ('{:,}'.format(value).replace(',', ' ')
+                    if abs(value) >= 10000 else str(value))
+        elif kind == 'date':
+            text = fields.Date.to_date(value).strftime('%d.%m.%Y')
+        else:
+            text = str(value)
+        if text and prop.get('suffix'):
+            text = '%s %s' % (text, prop['suffix'])
+        return text
 
     @api.constrains('attrs')
     def _check_attrs_types(self):

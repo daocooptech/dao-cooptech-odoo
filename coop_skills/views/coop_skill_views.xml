@@ -637,9 +637,31 @@
     </field>
   </record>
 
+  <!--
+    «Услуги» — предложения от имени организации (та же запись, что навык;
+    добавляются через «Добавить услугу»). Отдельного раздела пока нет —
+    владелец 23.11.2026: «разместим в навыки, вторым пунктом, после
+    каталога навыков».
+  -->
+  <record id="action_coop_services" model="ir.actions.act_window">
+    <field name="name">Услуги</field>
+    <field name="res_model">coop.skill.offer</field>
+    <field name="path">services</field>
+    <field name="context">{'bin_size': True,'coop_catalog': True, 'coop_create_label': 'Добавить услугу', 'coop_create_method': 'action_new_offer', 'coop_shelf_field': 'coop_specialization_category_id'}</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="domain">[('state', '=', 'published'), ('partner_id.is_company', '=', True)]</field>
+    <field name="search_view_id" ref="view_coop_skill_search"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Услуг пока нет</p>
+      <p>Здесь организации показывают, какие работы берут и на каких условиях.</p>
+    </field>
+  </record>
+
   <menuitem id="menu_coop_skills_root" name="Навыки" sequence="40"/>
   <menuitem id="menu_coop_skills" name="Каталог навыков"
             parent="menu_coop_skills_root" action="action_coop_skills" sequence="10"/>
+  <menuitem id="menu_coop_services" name="Услуги"
+            parent="menu_coop_skills_root" action="action_coop_services" sequence="15"/>
   <menuitem id="menu_coop_my_skills" name="Мои предложения"
             parent="menu_coop_skills_root" action="action_coop_my_skills" sequence="20"/>
 

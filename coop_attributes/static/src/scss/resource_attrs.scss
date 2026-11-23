@@ -1,0 +1,14 @@
+// Характеристики в карточке и в «Добавить» (№ 483).
+// Набор полей задаёт справочник «Характеристики», а не объявление:
+// правка описания прямо в карточке (карандаш, «Добавить свойство»,
+// перетаскивание) у админа переписала бы рубрику для всех её объявлений.
+.coop-attrs {
+  .o_field_property_add,
+  .o_field_property_open_popover,
+  .o_field_property_label [data-icon="drag_indicator"] {
+    display: none !important;
+  }
+  .o_field_property_group_label:empty {
+    display: none;
+  }
+}

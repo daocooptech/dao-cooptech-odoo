@@ -331,6 +331,7 @@ const SUBNAV_EXACT = {
     "Лента": "news",
     // Навыки.
     "Каталог навыков": "tool",
+    "Услуги": "rosette-discount-check",
     "Мои предложения": "user-bolt",
     // Вакансии.
     "Каталог вакансий": "list-search",
