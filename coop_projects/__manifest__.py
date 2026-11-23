@@ -49,6 +49,8 @@
             'coop_projects/static/src/js/project_summary.js',
             'coop_projects/static/src/xml/project_summary.xml',
             'coop_projects/static/src/xml/task_create_button.xml',
+            'coop_projects/static/src/js/task_control_panel.js',
+            'coop_projects/static/src/xml/task_control_panel.xml',
             'coop_projects/static/src/js/pm_settings_toggle.js',
             'coop_projects/static/src/js/pm_chatter.js',
             'coop_projects/static/src/xml/pm_chatter.xml',

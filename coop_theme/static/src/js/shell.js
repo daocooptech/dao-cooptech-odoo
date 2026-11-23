@@ -36,6 +36,9 @@ import { render } from "@web/owl2/utils";
  * собственное меню, а по разделам платформы ходят слева, минуя её, — и
  * на «Навыках» вкладки показывали подразделы «Ресурсов».
  */
+// Экраны без пункта меню и раздел над их заголовком.
+const COOP_SCREEN_SECTION = { "Управление проектами": "Проекты" };
+
 export class CoopTabs extends Component {
     static template = "coop_theme.Tabs";
     props = useProps();
@@ -286,7 +289,9 @@ export class CoopTabs extends Component {
 
     /** Раздел над заголовком — когда он не повторяет сам заголовок. */
     get pageSection() {
-        const section = this.state.section;
+        // Экран без пункта меню — раздел тот же, что в пути его записей
+        // («Проекты › Управление проектами», `breadcrumb.js`, № 480).
+        const section = this.state.section || COOP_SCREEN_SECTION[this.pageTitle] || null;
         return section && section !== this.pageTitle ? section : null;
     }
 

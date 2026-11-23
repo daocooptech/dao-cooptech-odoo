@@ -104,6 +104,41 @@ patch(Breadcrumbs.prototype, {
         return null;
     },
 
+    /**
+     * Имя звена в пути. Вкладка «Моих проектов» («Я инициатор») стоит в
+     * пути именем подраздела: «Проекты › Мои проекты › …» (№ 480, находка
+     * 19.11.2026).
+     */
+    coopCrumbName(crumb) {
+        if (crumb && crumb === (this.props?.breadcrumbs || []).at(-1) && this.coopFromOwnCard) {
+            // Проект в управлении, открытый со своей карточки: имя проекта
+            // уже стоит звеном перед ним — звено называется по кнопке
+            // («… › Подготовка к сезону › Управление проектом»), а не
+            // вторым названием того же проекта (№ 480, находка 19.11.2026).
+            return "Управление проектом";
+        }
+        return COOP_TAB_NAME[crumb?.name] || crumb?.name;
+    },
+
+    /** Предыдущее звено пути — карточка-витрина открытой записи. */
+    get coopFromOwnCard() {
+        try {
+            const root = this.env.model?.root;
+            const value = root?.fields?.coop_card_id && root.data?.coop_card_id;
+            const parent = this.coopParent;
+            if (!value || !parent) {
+                return false;
+            }
+            // Скрытое поле движок читает без названия — тогда по адресу звена.
+            const id = Array.isArray(value) ? value[0] : value.id;
+            const name = Array.isArray(value) ? value[1] : value.display_name;
+            return (Boolean(name) && parent.name === name) ||
+                Boolean(id && parent.url?.endsWith(`/${id}`));
+        } catch {
+            return false;
+        }
+    },
+
     coopOpenCrumbRoot(root = this.coopCrumbRoot) {
         return this.coopActionService.doAction(root.action, { clearBreadcrumbs: true });
     },
@@ -121,7 +156,9 @@ patch(Breadcrumbs.prototype, {
         }
         const action = this.coopActionService.currentController?.action;
         const root = action && COOP_CRUMB_ROOT[action.name];
-        return root ? { ...root, screen: action.name, screenAction: action.id } : null;
+        return root
+            ? { ...root, screen: COOP_TAB_NAME[action.name] || action.name, screenAction: action.id }
+            : null;
     },
 
     coopOpenLoneScreen() {
@@ -706,10 +743,16 @@ patch(Breadcrumbs.prototype, {
  */
 // Вкладки «Моих проектов»: в пути стоит раздел, а не вкладка.
 const COOP_TAB_ROOT = { "Я инициатор": "Проекты", "Я участвую": "Проекты" };
+// …а звеном пути вкладка стоит именем подраздела.
+const COOP_TAB_NAME = { "Я инициатор": "Мои проекты", "Я участвую": "Мои проекты" };
 
-// Экраны без пункта меню и раздел, с которого их путь начинается.
+// Экраны без пункта меню (и вкладки подраздела) и раздел, с которого их
+// путь начинается.
+const COOP_PROJECTS_ROOT = { label: "Проекты", action: "coop_projects.action_coop_projects" };
 const COOP_CRUMB_ROOT = {
-    "Управление проектами": { label: "Проекты", action: "coop_projects.action_coop_projects" },
+    "Управление проектами": COOP_PROJECTS_ROOT,
+    "Я инициатор": COOP_PROJECTS_ROOT,
+    "Я участвую": COOP_PROJECTS_ROOT,
 };
 
 // То же по первому экрану цепочки из адреса — для путей, начатых с записи.

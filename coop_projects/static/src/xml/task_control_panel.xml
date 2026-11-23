@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <!--
+    Панель экранов задач («Мои задачи», «Все задачи», «Список дел»,
+    «Заметки») — с шапкой темы, как у остальных экранов (№ 480, владелец
+    19.11.2026: «сделать везде путь»).
+
+    Движок собирает `project.ProjectTaskControlPanel` из `web.ControlPanel`
+    в момент своей загрузки — раньше правок `coop_theme`, и на этих экранах
+    вместо пути «Проекты › Мои задачи» стояло крупное «Мои задачи».
+    Наследник, загруженный после темы, получает панель уже с её правками.
+  -->
+  <t t-name="coop_projects.ProjectTaskControlPanel" t-inherit="project.ProjectTaskControlPanel"
+     t-inherit-mode="primary"/>
+</templates>

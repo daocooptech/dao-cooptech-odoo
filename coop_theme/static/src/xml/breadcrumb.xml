@@ -57,6 +57,13 @@
     </ol>
   </t>
 
+  <!-- Вкладка «Я инициатор» звеном пути — «Мои проекты» (`coopCrumbName`). -->
+  <t t-name="coop_theme.BreadcrumbName" t-inherit="web.Breadcrumb.Name" t-inherit-mode="extension">
+    <xpath expr="//t[@t-out='breadcrumb.name']" position="attributes">
+      <attribute name="t-out">this.coopCrumbName ? this.coopCrumbName(breadcrumb) : breadcrumb.name</attribute>
+    </xpath>
+  </t>
+
   <t t-name="coop_theme.Breadcrumbs" t-inherit="web.Breadcrumbs" t-inherit-mode="extension">
 
     <!--
