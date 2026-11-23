@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-from odoo import fields
+from odoo import fields, http
 from odoo.addons.auth_signup.controllers.main import AuthSignupHome
 from odoo.exceptions import UserError
 from odoo.http import request
+
+from ..models.ir_http import coop_entry_url
 
 # Язык платформы по умолчанию. Решение владельца: если человек не выбрал
 # язык при регистрации, платформа говорит с ним по-русски.
@@ -37,9 +39,26 @@ class CoopAuthSignupHome(AuthSignupHome):
         в значении `True`. Умолчание — не отправлять: узел без почты
         должен работать, а не выглядеть сломанным.
         """
+        # Уже вошедшему форма регистрации ни к чему — туда же, куда и
+        # с формы входа (см. `web_login`).
+        if request.httprequest.method == 'GET' and request.session.uid:
+            return request.redirect(coop_entry_url(), 303)
         if not self._coop_signup_mail_enabled():
             request.update_context(coop_skip_signup_mail=True)
         return super().web_auth_signup(*args, **kw)
+
+    @http.route()
+    def web_login(self, redirect=None, **kw):
+        """Без страницы «Вы уже вошли в систему» (владелец 20.11).
+
+        Штатно вошедший, открывший `/web/login` без `redirect`, видит
+        форму входа с этой плашкой — тупик, из которого не уйти. Участника
+        ведём на его страницу, прочих — на лендинг. С `redirect` движок
+        сам уводит по нему, это не трогаем.
+        """
+        if request.httprequest.method == 'GET' and request.session.uid and not redirect:
+            return request.redirect(coop_entry_url(), 303)
+        return super().web_login(redirect=redirect, **kw)
 
     def _coop_signup_mail_enabled(self):
         value = request.env['ir.config_parameter'].sudo().get_str('coop.signup_send_email') or 'False'

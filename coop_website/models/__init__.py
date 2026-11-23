@@ -4,3 +4,4 @@ from . import mail_template
 from . import res_users
 from . import website
 from . import coop_contact
+from . import ir_http
