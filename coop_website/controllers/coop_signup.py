@@ -66,8 +66,10 @@ class CoopAuthSignupHome(AuthSignupHome):
             return DEFAULT_LANG
         return installed[0] if installed else 'en_US'
 
-    def _prepare_signup_values(self, qcontext):
-        values = super()._prepare_signup_values(qcontext)
+    def _prepare_signup_values(self, qcontext, **kwargs):
+        # `**kwargs` — движок 20.0 передаёт `validate_email=…`; без него
+        # регистрация падала с 500 у всех (14.11–22.11).
+        values = super()._prepare_signup_values(qcontext, **kwargs)
         installed = [code for code, _name in request.env['res.lang'].sudo().get_installed()]
         chosen = qcontext.get('lang')
         values['lang'] = chosen if chosen in installed else self._coop_default_lang()
