@@ -38,8 +38,15 @@
           <div class="o_coop_legal_head">
           <group>
             <group string="Что выбрано">
-              <field name="economic_model_id"
+              <field name="economic_form_id"
                      options="{'no_create': True, 'no_open': True}"/>
+              <field name="economic_model_id"
+                     context="{'coop_regime_only': True}"
+                     domain="[('form_id', '=', economic_form_id)]"
+                     invisible="not economic_form_id"
+                     options="{'no_create': True, 'no_open': True}"/>
+              <field name="legal_summary" string="О режиме" readonly="1"
+                     invisible="not economic_model_id"/>
               <field name="economic_scheme_applicable" invisible="1"/>
               <field name="economic_scheme_id"
                      invisible="not economic_scheme_applicable"
@@ -54,10 +61,6 @@
           </div>
 
           <div class="o_coop_legal_page">
-
-          <div class="text-muted mb-3" invisible="not economic_model_id">
-            <field name="legal_summary" readonly="1" nolabel="1"/>
-          </div>
 
           <!-- Предупреждение отдельно и заметно: оно заполняется только
                там, где выбор чаще всего оказывается ошибкой, и
@@ -129,7 +132,9 @@
     <field name="inherit_id" ref="coop_projects.view_coop_project_list"/>
     <field name="arch" type="xml">
       <field name="city" position="after">
-        <field name="economic_model_id" optional="show"/>
+        <field name="economic_form_id" optional="show"/>
+        <field name="economic_model_id" optional="show"
+               context="{'coop_regime_only': True}"/>
       </field>
     </field>
   </record>
@@ -140,6 +145,7 @@
     <field name="inherit_id" ref="coop_projects.view_coop_project_search"/>
     <field name="arch" type="xml">
       <field name="city" position="after">
+        <field name="economic_form_id"/>
         <field name="economic_model_id"/>
       </field>
     </field>

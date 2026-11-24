@@ -11,12 +11,16 @@
 Правки в тексте доезжают до участника при следующем обновлении модуля.
 """
 import logging
+import re
 
 from odoo import api, fields, models
 
 from ..data import legal_content, legal_rows
 
 _logger = logging.getLogger(__name__)
+
+# Хвост режима в названии строки: «ООО на УСН «доходы»» → «ООО».
+REGIME_TAIL = re.compile(r' на (УСН|АУСН|ЕСХН|ОСНО|НПД|ПСН|патент).*$| \(НПД\)$')
 
 
 class CoopEconomicLoader(models.AbstractModel):
@@ -45,8 +49,30 @@ class CoopEconomicLoader(models.AbstractModel):
         _logger.info('Уклады кооперативов: %s', len(by_key))
         return by_key
 
+    def _load_form_names(self):
+        """Формы без режима: имя — название первой строки без хвоста режима."""
+        Form = self.env['coop.economic.form'].sudo()
+        by_key = {}
+        for _key, card_key, _regime, name, _summary in legal_rows.ROWS:
+            if card_key in by_key:
+                continue
+            values = {
+                'key': card_key,
+                'name': REGIME_TAIL.sub('', name),
+                'sequence': (len(by_key) + 1) * 10,
+            }
+            form = Form.with_context(active_test=False).search(
+                [('key', '=', card_key)], limit=1)
+            if form:
+                form.write(values)
+            else:
+                form = Form.create(values)
+            by_key[card_key] = form
+        return by_key
+
     def _load_rows(self, schemes):
         Form = self.env['coop.economic.model'].sudo()
+        forms = self._load_form_names()
         # Формы платформы ищем по коду один раз: искать внутри цикла
         # значит шестьдесят четыре лишних запроса на каждой установке.
         base_forms = {
@@ -65,6 +91,7 @@ class CoopEconomicLoader(models.AbstractModel):
                 'name': name,
                 'summary': summary,
                 'sequence': (order + 1) * 10,
+                'form_id': forms[card_key].id,
                 'form_group': card['group'],
                 'form_name': card['form_name'],
                 'regime': regime_key,

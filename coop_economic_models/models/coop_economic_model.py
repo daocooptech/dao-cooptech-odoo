@@ -53,6 +53,28 @@ TAX_REGIMES = [
 ]
 
 
+class CoopEconomicForm(models.Model):
+    """Форма собственности без налогового режима.
+
+    Владелец 14.11.2026: режим — отдельным пунктом, чтобы не нагромождать
+    форму. Допустимые сочетания по-прежнему держит `coop.economic.model`:
+    здесь только первая половина выбора, режим выбирается из строк формы.
+    """
+    _name = 'coop.economic.form'
+    _description = 'Форма собственности'
+    _order = 'sequence, name'
+
+    key = fields.Char(string='Ключ', required=True, index=True)
+    name = fields.Char(string='Название', required=True, translate=True)
+    sequence = fields.Integer(default=100)
+    active = fields.Boolean(default=True)
+    model_ids = fields.One2many(
+        'coop.economic.model', 'form_id', string='Налоговые режимы')
+
+    _key_uniq = models.Constraint('unique(key)',
+                                  'Ключ формы собственности должен быть уникальным.')
+
+
 class CoopEconomicModel(models.Model):
     _name = 'coop.economic.model'
     _description = 'Форма собственности и налоговый режим'
@@ -66,6 +88,9 @@ class CoopEconomicModel(models.Model):
     sequence = fields.Integer(default=100)
     active = fields.Boolean(default=True)
 
+    form_id = fields.Many2one(
+        'coop.economic.form', string='Форма собственности',
+        ondelete='restrict', index=True)
     form_group = fields.Selection(
         FORM_GROUPS, string='Группа', required=True, index=True)
     form_name = fields.Char(
@@ -257,10 +282,15 @@ class CoopEconomicModel(models.Model):
                     'предел работников заполнять бессмысленно.',
                     name=record.name))
 
-    @api.depends('name', 'summary')
+    @api.depends('name', 'regime')
+    @api.depends_context('coop_regime_only')
     def _compute_display_name(self):
+        """С ключом `coop_regime_only` — только режим: форма стоит рядом своим полем."""
+        regimes = dict(self._fields['regime']._description_selection(self.env))
+        only = self.env.context.get('coop_regime_only')
         for record in self:
-            record.display_name = record.name
+            record.display_name = (
+                regimes.get(record.regime) if only else record.name)
 
 
 class CoopEconomicScheme(models.Model):

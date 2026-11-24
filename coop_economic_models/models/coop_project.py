@@ -25,11 +25,15 @@ class CoopProject(models.Model):
     _inherit = 'coop.project'
 
     economic_model_id = fields.Many2one(
-        'coop.economic.model', string='Форма собственности', index=True,
+        'coop.economic.model', string='Налоговый режим', index=True,
         tracking=True,
-        help='Правовая форма и налоговый режим проекта. От них зависит, '
+        help='Режим из тех, что доступны выбранной форме. От связки зависит, '
              'кто принимает решения, сколько уходит в бюджет и чем '
              'отвечают участники.')
+    economic_form_id = fields.Many2one(
+        'coop.economic.form', string='Форма собственности', index=True,
+        compute='_compute_economic_form_id', store=True, readonly=False,
+        help='Правовая форма проекта. Налоговый режим — следующим полем.')
     economic_scheme_id = fields.Many2one(
         'coop.economic.scheme', string='Уклад', tracking=True,
         help='Как внутри кооператива распределяется результат. '
@@ -79,6 +83,34 @@ class CoopProject(models.Model):
         for record in self:
             record.economic_scheme_applicable = (
                 record.economic_model_id.form_group in COOPERATIVE_GROUPS)
+
+    @api.depends('economic_model_id.form_id')
+    def _compute_economic_form_id(self):
+        for record in self:
+            # Режим ещё не выбран — выбранная форма остаётся.
+            record.economic_form_id = (
+                record.economic_model_id.form_id or record.economic_form_id)
+
+    @api.onchange('economic_form_id')
+    def _onchange_economic_form_id(self):
+        """Режим чужой формы снимается; единственный возможный — ставится сам."""
+        for record in self:
+            form = record.economic_form_id
+            if record.economic_model_id.form_id == form:
+                continue
+            options = form.model_ids
+            record.economic_model_id = options if len(options) == 1 else False
+            record._onchange_legal_form()
+
+    @api.constrains('economic_form_id', 'economic_model_id')
+    def _check_economic_form(self):
+        for record in self:
+            model = record.economic_model_id
+            if model and model.form_id != record.economic_form_id:
+                raise ValidationError(_(
+                    'Режим «%(regime)s» не относится к форме «%(form)s».',
+                    regime=model.with_context(coop_regime_only=True).display_name,
+                    form=record.economic_form_id.name or 'не выбрана'))
 
     @api.onchange('economic_model_id')
     def _onchange_legal_form(self):

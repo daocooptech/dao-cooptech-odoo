@@ -39,3 +39,9 @@
   overflow: visible;
   text-overflow: clip;
 }
+
+// При правке поле сжималось до 211 px в ячейке 388 и режим «УСН „доходы
+// минус расходы“» (230 px) обрезался — растягиваем до ячейки (№ 447).
+.o_coop_legal_head .o_wrap_input > .o_field_many2one {
+  width: 100%;
+}
