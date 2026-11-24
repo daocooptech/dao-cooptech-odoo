@@ -338,7 +338,7 @@ const SUBNAV_EXACT = {
     "Мои вакансии": "briefcase-2",
     "Мои отклики": "send",
     // Ресурсы.
-    "Каталог ресурсов": "packages",
+    "Материальные": "packages",
     "Мои ресурсы": "box",
     "Продвижение": "speakerphone",
     // Проекты.
@@ -450,8 +450,7 @@ const SUBNAV_EXACT = {
     "Формы собственности": "building-community",
     "Уклады кооперативов": "scale",
     // Нематериальные активы.
-    "Каталог НМА": "brain",
-    "Мои НМА": "copyright",
+    "Нематериальные активы": "brain",
     "Лицензии": "license",
     // Сделки.
     "Мои сделки": "clipboard-check",
@@ -461,10 +460,8 @@ const SUBNAV_EXACT = {
     "Уступки требований": "transfer",
     "Архив уступок": "archive-off",
     // Цифровые активы.
-    "Каталог ЦФА": "certificate",
-    "Мои выпуски": "file-certificate",
-    "Мои ЦФА": "certificate-2",
-    "Операторы": "building-arch",
+    "Цифровые активы": "certificate",
+    "Операторы ЦФА": "building-arch",
     // Образование.
     "Каталог курсов": "books",
     "Мои курсы": "backpack",

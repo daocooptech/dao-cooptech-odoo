@@ -1064,13 +1064,18 @@
   </record>
 
   <menuitem id="menu_coop_resources_root" name="Ресурсы" sequence="60"/>
-  <!-- 10.11.2026 владелец переименовал в «Материальные» и в тот же вечер
-       вернул: «верни каталог ресурсов вместо материальных». -->
-  <menuitem id="menu_coop_resources" name="Каталог ресурсов"
+  <!-- Владелец 24.11.2026: «вместо пункта каталог ресурсов сделать
+       материальные, а мои ресурсы перенести вниз»; внутри «Моих» — вкладки
+       «Материальные | НМА | ЦФА | Выпуски», последние три кладут модули НМА
+       и ЦФА. (10.11 «Материальные» уже были и в тот же вечер вернулись.) -->
+  <menuitem id="menu_coop_resources" name="Материальные"
             parent="menu_coop_resources_root" action="action_coop_resources" sequence="10"/>
   <menuitem id="menu_coop_my_resources" name="Мои ресурсы"
             parent="menu_coop_resources_root" action="action_coop_my_resources"
-            sequence="15"/>
+            sequence="30"/>
+  <menuitem id="menu_coop_my_resources_goods" name="Материальные"
+            parent="menu_coop_my_resources" action="action_coop_my_resources"
+            sequence="10"/>
   <menuitem id="menu_coop_promotion" name="Продвижение"
             parent="menu_coop_resources_root" action="action_coop_promotion" sequence="20"/>
   <!--
