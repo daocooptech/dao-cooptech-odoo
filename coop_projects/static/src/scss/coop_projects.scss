@@ -1534,3 +1534,28 @@ body.o_coop_pm_settings_open .o_form_view .o_coop_pm #coop_pm_settings { display
   .o-mail-Composer-inputContainer { border-color: rgba(160, 110, 20, .35) !important; }
   .o_coop_ch_hint { color: var(--coop-gold-text); }
 }
+
+// ── Страница «Добавить проект» (`ProjectAddPage`) ──
+.o_coop_pj_preview {
+  pointer-events: none;
+
+  .o_kanban_record { width: 100%; }
+}
+.o_coop_add_form .coop-add_needs {
+  .o_list_renderer { overflow-x: auto; }
+  .o_list_table { min-width: 620px; }
+  // Пустые строки, которыми движок добивает список, здесь не нужны.
+  .o_list_table tbody > tr:not(.o_data_row):not(:has(.o_field_x2many_list_row_add)) { display: none; }
+}
+.coop-add_total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--coop-line);
+  font: 600 13.5px/1.4 'Manrope', sans-serif;
+  color: var(--coop-ink);
+
+  .o_field_widget { width: auto; font-weight: 700; }
+}

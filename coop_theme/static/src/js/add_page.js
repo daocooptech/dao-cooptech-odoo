@@ -115,3 +115,86 @@ registry.category("fields").add("coop_add_ready", {
         items: options.items || [],
     }),
 });
+
+let choiceSeq = 0;
+
+/**
+ * Карточки выбора — `ChoiceCards` дизайн-системы: вариант и строка о том,
+ * что он означает. Пояснения — в `options.notes` вида; `options.blocked` —
+ * имя строкового поля с вариантами через запятую, которых сейчас выбрать
+ * нельзя (их считает сервер).
+ */
+export class CoopChoiceCards extends Component {
+    static template = "coop_theme.ChoiceCards";
+    props = useProps({
+        ...standardFieldProps,
+        notes: t.object(),
+        blocked: t.string().optional(),
+    });
+
+    setup() {
+        this.group = `coop_choice_${choiceSeq++}`;
+    }
+
+    get label() {
+        return this.props.record.fields[this.props.name].string;
+    }
+
+    get items() {
+        const { record, name, notes, blocked } = this.props;
+        const off = ((blocked && record.data[blocked]) || "").split(",");
+        return record.fields[name].selection.map(([value, label]) => ({
+            value,
+            label,
+            note: notes[value],
+            on: record.data[name] === value,
+            off: off.includes(value) && record.data[name] !== value,
+        }));
+    }
+
+    pick(value) {
+        this.props.record.update({ [this.props.name]: value });
+    }
+}
+
+registry.category("fields").add("coop_choice_cards", {
+    component: CoopChoiceCards,
+    supportedTypes: ["selection"],
+    extractProps: ({ options }) => ({
+        notes: options.notes || {},
+        blocked: options.blocked,
+    }),
+});
+
+/** Ползунок для процента: границы — те же, что проверяет модель. */
+export class CoopRange extends Component {
+    static template = "coop_theme.Range";
+    props = useProps({
+        ...standardFieldProps,
+        min: t.number(),
+        max: t.number(),
+        step: t.number(),
+    });
+
+    get label() {
+        return this.props.record.fields[this.props.name].string;
+    }
+
+    get value() {
+        return this.props.record.data[this.props.name] || this.props.min;
+    }
+
+    set(ev) {
+        this.props.record.update({ [this.props.name]: Number(ev.target.value) });
+    }
+}
+
+registry.category("fields").add("coop_range", {
+    component: CoopRange,
+    supportedTypes: ["integer"],
+    extractProps: ({ options }) => ({
+        min: options.min || 0,
+        max: options.max || 100,
+        step: options.step || 1,
+    }),
+});

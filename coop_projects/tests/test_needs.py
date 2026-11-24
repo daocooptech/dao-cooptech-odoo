@@ -7,6 +7,9 @@
 момент»: если отклонение отвалится, откликнувшиеся так и останутся
 висеть в ожидании, и никакой ошибки об этом не скажет.
 """
+from datetime import timedelta
+
+from odoo import fields
 from odoo.exceptions import UserError, ValidationError
 from odoo.tests import tagged
 
@@ -175,3 +178,43 @@ class TestProjectNeeds(CoopProjectCase):
         need_seen = need.with_user(giver)
         self.assertFalse(need_seen.need_can_join)
         self.assertEqual(need_seen.need_join_note, 'сбор закрыт')
+
+    def test_add_page(self):
+        """«Добавить проект»: черновик, строки ждут сбора и выходят с ним."""
+        Project = self.Project.with_user(self.initiator)
+        action = Project.action_new_project()
+        draft = Project.browse(action['res_id'])
+        self.assertEqual(draft.state, 'draft')
+        self.assertEqual(draft.partner_id, self.initiator.partner_id)
+        self.assertIn(self.initiator.partner_id, draft.coop_publisher_ids)
+        view = action['view_id']
+        self.assertEqual(view[0] if isinstance(view, (list, tuple)) else view,
+                         self.env.ref('coop_projects.view_coop_project_add').id)
+        self.assertIn('investment', draft.coop_basis_blocked)
+        row = {'listing_type': 'request', 'state': 'draft'}
+        draft.write({'need_ids': [
+            (0, 0, dict(row, name='Доски', resource_type='material', price=60000)),
+            (0, 0, dict(row, name='Сварщик', resource_type='labour', price=40000)),
+        ]})
+        self.assertEqual(draft.required_total, 100000)
+        draft.need_ids.filtered(lambda n: n.name == 'Сварщик').unlink()
+        self.assertEqual(draft.required_total, 60000)
+        need = draft.need_ids
+        self.assertEqual(need.owner_id, self.initiator.partner_id)
+        draft.date_deadline = fields.Date.today() + timedelta(days=30)
+        draft.fallback_plan = 'Первая очередь.'
+        with self.assertRaises(UserError):
+            draft.action_open_from_add()
+        draft.name = 'Навес для инструмента'
+        draft.action_open_from_add()
+        self.assertEqual(draft.state, 'gathering')
+        self.assertEqual(need.state, 'published')
+        self.assertEqual(draft.required_total, 60000)
+
+    def test_add_page_empty_needs(self):
+        """Убрали последнюю строку идеи — «Нужно» обнуляется."""
+        project = self._make_project(required=0)
+        need = self._make_need(project)
+        self.assertEqual(project.required_total, 50000)
+        need.unlink()
+        self.assertEqual(project.required_total, 0)

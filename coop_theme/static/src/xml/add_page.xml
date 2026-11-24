@@ -44,4 +44,32 @@
     </div>
   </t>
 
+  <!-- Карточки выбора с пояснением — `ChoiceCards`. -->
+  <t t-name="coop_theme.ChoiceCards">
+    <div class="coop-choice" role="radiogroup" t-att-aria-label="this.label">
+      <label t-foreach="this.items" t-as="item" t-key="item.value" class="coop-choice_item"
+             t-att-class="{ 'coop-choice_on': item.on, 'coop-choice_off': item.off }">
+        <input type="radio" t-att-name="this.group" t-att-checked="item.on"
+               t-att-disabled="this.props.readonly or item.off"
+               t-on-change="() => this.pick(item.value)"/>
+        <span class="coop-choice_text">
+          <b t-out="item.label"/>
+          <span t-if="item.note" t-out="item.note"/>
+        </span>
+        <span class="coop-choice_dot" aria-hidden="true"/>
+      </label>
+    </div>
+  </t>
+
+  <!-- Ползунок с границами из модели. -->
+  <t t-name="coop_theme.Range">
+    <div class="coop-range">
+      <input type="range" t-att-min="this.props.min" t-att-max="this.props.max"
+             t-att-step="this.props.step" t-att-value="this.value" t-att-id="this.props.id"
+             t-att-disabled="this.props.readonly" t-att-aria-label="this.label"
+             t-on-input="(ev) => this.set(ev)"/>
+      <output><t t-out="this.value"/> %</output>
+    </div>
+  </t>
+
 </templates>

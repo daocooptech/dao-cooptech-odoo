@@ -203,6 +203,11 @@ MIN_DAYS = 14
 MAX_DAYS = 180
 DEFAULT_DAYS = 60
 
+# Имя пустого черновика, который заводит «Добавить проект»: название
+# обязательное, а запись нужна до первого нажатия клавиши (как у ресурса,
+# навыка и вакансии).
+DRAFT_NAME = 'Новый проект'
+
 CONTRIBUTION_BASIS = [
     ('donation', 'Пожертвование или целевой взнос'),
     ('prepay', 'Поддержка — предоплата за вознаграждение'),
@@ -449,8 +454,13 @@ class CoopProject(models.Model):
         """Сумма оценок потребностей проекта — для «Нужно». Модули с
         другими видами потребностей (нематериальные) добавляют свои."""
         self.ensure_one()
+        # У идеи строки ещё черновики: в каталог они выйдут с открытием
+        # сбора (`ProjectAddPage`), а «Нужно всего» видно сразу.
+        counted = self.NEED_COUNTED
+        if self.state == 'draft':
+            counted += ('draft',)
         return sum(self.need_ids.filtered(
-            lambda n: n.state in self.NEED_COUNTED).mapped('price'))
+            lambda n: n.state in counted).mapped('price'))
 
     @api.depends('need_ids.price', 'need_ids.state')
     def _compute_required_total(self):
@@ -464,6 +474,33 @@ class CoopProject(models.Model):
     # потребность видит их, даже если сам ещё не вкладчик: разбирает он.
     coop_offers_visible = fields.Boolean(
         string='Видны отклики', compute='_compute_coop_offers_visible')
+    # «Кто собирает» на странице добавления (`ProjectAddPage`, решение 625):
+    # свой профиль и организации, где у человека есть «Публикации».
+    coop_publisher_ids = fields.Many2many(
+        'res.partner', string='От чьего имени можно',
+        compute='_compute_coop_publisher_ids')
+    # Основания, которых этому проекту выбрать нельзя, — через запятую:
+    # страница добавления их не предлагает, а не отказывает при сохранении.
+    coop_basis_blocked = fields.Char(
+        string='Недоступные основания', compute='_compute_coop_basis_blocked')
+
+    @api.depends_context('uid')
+    @api.depends('partner_id')
+    def _compute_coop_publisher_ids(self):
+        partners = self.env.user.coop_publisher_partner_ids
+        for record in self:
+            record.coop_publisher_ids = partners | record.partner_id
+
+    @api.depends('kind', 'partner_id')
+    def _compute_coop_basis_blocked(self):
+        for record in self:
+            blocked = []
+            if not record._coop_donation_allowed():
+                blocked.append('donation')
+            if not record._coop_investment_allowed():
+                blocked.append('investment')
+            record.coop_basis_blocked = ','.join(blocked)
+
     # «Управление проектом» — рабочая кухня команды, не витрина: кнопку
     # видят только участники (владелец 12.11.2026). Круг тот же, что у
     # управления и ленты, — `_project_team_users`.
@@ -905,6 +942,11 @@ class CoopProject(models.Model):
         чужой труд, и знать, кто его собирает, вправе каждый вкладчик.
         """
         for record in self:
+            # Заготовку «Новый проект» в каталоге не найдут и не поймут.
+            if not record.name or record.name.strip() == DRAFT_NAME:
+                raise UserError(_(
+                    'Напишите название проекта. «%s» — это заготовка, по '
+                    'ней проект не найдут.') % DRAFT_NAME)
             record.partner_id.coop_require_level(
                 'identity', _('открыть сбор по проекту'))
             if not record.required_total:
@@ -925,8 +967,71 @@ class CoopProject(models.Model):
                     'не срок, а его отсутствие.',
                     min=MIN_DAYS, max=MAX_DAYS, name=record.name, days=days))
             record.date_start = today
+            # Строки — раньше состояния: иначе «Нужно» на миг считалось бы
+            # без них.
+            record._coop_publish_needs()
             record.state = 'gathering'
         return True
+
+    def _coop_publish_needs(self):
+        """Строки идеи выходят в каталог спроса вместе с открытием сбора."""
+        for record in self:
+            for need in record.need_ids.filtered(lambda n: n.state == 'draft'):
+                need.write({
+                    'state': 'published',
+                    'owner_id': record.partner_id.id,
+                    'city': need.city or record.city,
+                })
+
+    @api.model
+    def action_new_project(self):
+        """«Добавить проект»: завести черновик и открыть страницу добавления.
+
+        Запись нужна сразу, как у ресурса, навыка и вакансии: строки
+        потребностей и снимок сохраняются только в существующую запись.
+        Идею никто, кроме инициатора, не видит.
+        """
+        draft = self.create({
+            'state': 'draft',
+            'name': DRAFT_NAME,
+            'city': self.env.user._coop_acting_partner().city or False,
+        })
+        return draft.action_edit_project()
+
+    def action_edit_project(self):
+        """Вернуться к заполнению идеи на странице добавления."""
+        self.ensure_one()
+        action = self.env['ir.actions.act_window']._for_xml_id(
+            'coop_projects.action_coop_project_add')
+        action['res_id'] = self.id
+        return action
+
+    def action_open_from_add(self):
+        """«Открыть сбор» со страницы добавления — и сразу на витрину."""
+        self.ensure_one()
+        if not self.date_deadline:
+            raise UserError(_('Укажите, до какого дня собираем.'))
+        self.action_open_gathering()
+        return self.action_done_editing()
+
+    def action_save_idea(self):
+        """«Сохранить идею»: запись уже сохранена — к своим проектам."""
+        action = self.env['ir.actions.act_window']._for_xml_id(
+            'coop_projects.action_coop_my_projects')
+        action['target'] = 'main'
+        return action
+
+    def action_done_editing(self):
+        """На витрину проекта, путь заново."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'coop.project',
+            'res_id': self.id,
+            'view_mode': 'form',
+            'views': [(self.env.ref('coop_projects.view_coop_project_form').id, 'form')],
+            'target': 'main',
+        }
 
     @api.constrains('contribution_basis', 'kind', 'partner_id')
     def _check_investment_basis(self):
@@ -950,6 +1055,10 @@ class CoopProject(models.Model):
                     'Инвестиции привлекает организация, а не человек от '
                     'своего имени. Выберите предоплату или пожертвование '
                     'либо разместите проект от имени организации.'))
+
+    def _coop_investment_allowed(self):
+        self.ensure_one()
+        return self.kind in ('commercial', 'dao') and self.partner_id.is_company
 
     def _coop_donation_allowed(self):
         self.ensure_one()
@@ -982,6 +1091,10 @@ class CoopProject(models.Model):
         if (self.contribution_basis == 'donation'
                 and not self._coop_donation_allowed()):
             self.contribution_basis = 'prepay'
+        elif (self.contribution_basis == 'investment'
+                and not self._coop_investment_allowed()):
+            self.contribution_basis = (
+                'donation' if self._coop_donation_allowed() else 'prepay')
 
     @api.constrains('contribution_basis', 'kind', 'partner_id')
     def _check_donation_basis(self):

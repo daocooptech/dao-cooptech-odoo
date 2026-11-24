@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!-- Плитка каталога по данным черновика — разметкой `view_coop_project_kanban`. -->
+  <t t-name="coop_projects.ProjectPreview">
+    <div class="o_coop_projects o_coop_pj_preview">
+      <div class="o_kanban_record">
+        <div class="o_coop_tile">
+          <div class="o_coop_tile_image o_coop_media">
+            <img t-if="this.image" t-att-src="this.image" alt=""/>
+            <img class="o_coop_media_logo" t-elif="this.owner" alt=""
+                 t-attf-src="/web/image/res.partner/{{ this.owner.id }}/image_512"/>
+            <span t-else="" class="o_coop_media_sign"/>
+            <img class="o_coop_pj_poster" t-if="this.image and this.owner" alt=""
+                 t-attf-src="/web/image/res.partner/{{ this.owner.id }}/avatar_128"/>
+            <span t-attf-class="o_coop_badge o_coop_kind o_coop_kind_{{ this.data.kind }}"
+                  t-out="this.kind"/>
+            <span class="o_coop_loc" t-if="this.data.city">
+              <i class="oi" data-icon="location_on" aria-hidden="true"/>
+              <t t-out="this.data.city"/>
+            </span>
+          </div>
+          <div class="o_coop_tile_body">
+            <div class="o_coop_tile_name" t-out="this.title"/>
+            <div class="o_coop_tile_desc" t-out="this.data.summary or ''"/>
+            <div class="o_coop_readiness">
+              <div class="o_coop_readiness_bar">
+                <div class="o_coop_readiness_fill" style="width: 0%"/>
+                <div class="o_coop_readiness_mark" t-if="this.mark"
+                     t-attf-style="left: {{ this.mark }}%"/>
+              </div>
+              <div class="o_coop_readiness_pct">0%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </t>
+
+</templates>

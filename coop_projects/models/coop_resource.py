@@ -92,6 +92,35 @@ class CoopResource(models.Model):
     need_join_note = fields.Char(
         string='Участие', compute='_compute_need_join_note')
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Строка проекта — от имени того, кто его собирает, и в его городе.
+
+        На странице добавления (`ProjectAddPage`) хозяина у строки не
+        спрашивают: он у проекта уже выбран.
+        """
+        for vals in vals_list:
+            project = self.env['coop.project'].browse(vals.get('project_id') or [])
+            if not project:
+                continue
+            vals.setdefault('owner_id', project.partner_id.id)
+            vals.setdefault('city', project.city)
+            vals.setdefault('currency_id', project.currency_id.id)
+            if vals.get('resource_type') in ('labour', 'financial'):
+                vals.setdefault('condition', 'na')
+        return super().create(vals_list)
+
+    def unlink(self):
+        """Убрали последнюю строку идеи — «Нужно» снова ноль.
+
+        Иначе сумма осталась бы от прежних строк: проект без перечня
+        держит вписанное руками (решение 652).
+        """
+        ideas = self.project_id.filtered(lambda p: p.state == 'draft')
+        result = super().unlink()
+        ideas.exists().filtered(lambda p: not p.need_ids).required_total = 0.0
+        return result
+
     @api.depends('price', 'project_id.required_total')
     def _compute_need_share(self):
         for record in self:

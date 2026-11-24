@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Страница «Добавить проект» по дизайн-системе (`ProjectAddPage`, решение
+    625): слева разделы с номерами, справа живая плитка каталога, готовность
+    и кнопки. Черновик заводит `action_new_project`. Виды потребностей — по
+    решению 632: оборудование внутри материальных.
+  -->
+  <record id="view_coop_project_add" model="ir.ui.view">
+    <field name="name">coop.project.add</field>
+    <field name="model">coop.project</field>
+    <!-- Ниже витрины: при равном приоритете «add» обогнал бы «form». -->
+    <field name="priority">30</field>
+    <field name="arch" type="xml">
+      <form string="Добавить проект" class="o_coop_add_form">
+        <sheet>
+          <field name="state" invisible="1"/>
+          <field name="write_date" invisible="1"/>
+          <field name="coop_publisher_ids" invisible="1"/>
+          <field name="coop_basis_blocked" invisible="1"/>
+          <field name="currency_id" invisible="1"/>
+          <div class="coop-add_header">
+            <h1>Новый проект</h1>
+            <p class="coop-add_intro" invisible="state != 'draft'">
+              Черновик сохраняется сам — можно уйти и вернуться, он будет в
+              «Моих проектах». Пока сбор не открыт, в каталоге идеи не видно.
+            </p>
+            <p class="coop-add_intro" invisible="state == 'draft'">
+              Правки видны в каталоге сразу после сохранения.
+            </p>
+          </div>
+          <div class="coop-add">
+            <div class="coop-add_main">
+              <section class="coop-add_sec" name="add_about">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 1, 'fields': ['name', 'summary', 'category_id', 'city'], 'empty': 'Новый проект'}"/>
+                  <div>
+                    <h2>О проекте</h2>
+                    <p>Название и одна строка — то, что увидят в каталоге. По теме и городу проект находят.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_top">
+                    <div>
+                      <div class="coop-photo">
+                        <field name="image_1920" widget="image" nolabel="1"/>
+                      </div>
+                      <div class="coop-photo_hint">Обложка — первое, на что смотрят в каталоге</div>
+                    </div>
+                    <div class="d-flex flex-column gap-3">
+                  <div class="coop-add_field coop-add_title">
+                    <field name="name" nolabel="1" placeholder="Название проекта"/>
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="summary" string="Коротко о проекте"/>
+                    <field name="summary" nolabel="1" placeholder="Одна строка, которую видно в каталоге"/>
+                  </div>
+                    </div>
+                  </div>
+                  <div class="coop-add_row">
+                  <div class="coop-add_field">
+                    <label for="category_id" string="Тема"/>
+                    <field name="category_id" nolabel="1" options="{'no_create': True, 'no_open': True}"/>
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="subcategory_id" string="Раздел"/>
+                    <field name="subcategory_id" nolabel="1" options="{'no_create': True, 'no_open': True}"/>
+                  </div>
+                  </div>
+                  <div class="coop-add_field" name="add_city">
+                    <label for="city" string="Город"/>
+                    <field name="city" nolabel="1" widget="coop_city" placeholder="Начните вводить город"/>
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="partner_id" string="Кто собирает"/>
+                    <field name="partner_id" nolabel="1" widget="badges_many2one" domain="[('id', 'in', coop_publisher_ids)]"/>
+                  </div>
+                </div>
+              </section>
+
+              <section class="coop-add_sec" name="add_kind">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 2, 'fields': ['kind']}"/>
+                  <div>
+                    <h2>Вид проекта</h2>
+                    <p>Как принимаются решения и что получает участник за вклад.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_field">
+                    <field name="kind" nolabel="1" widget="coop_choice_cards"
+                           options="{'notes': {
+                             'cooperative': 'Участники получают пай',
+                             'commercial': 'Участники получают долю',
+                             'nonprofit': 'Без долей и паёв',
+                             'dao': 'Участники получают долю'}}"/>
+                  </div>
+                </div>
+              </section>
+
+              <section class="coop-add_sec" name="add_needs">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 3, 'fields': ['need_ids']}"/>
+                  <div>
+                    <h2>Что нужно проекту</h2>
+                    <p>Каждая строка выйдет в каталог спроса, когда вы откроете сбор. От суммы строк считаются готовность, паи и доли.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_needs">
+                    <field name="need_ids" nolabel="1" readonly="state != 'draft'"
+                           context="{'default_listing_type': 'request', 'default_state': 'draft'}">
+                      <list editable="bottom">
+                        <control>
+                          <create name="add_need" string="Добавить потребность"/>
+                        </control>
+                        <field name="listing_type" column_invisible="1"/>
+                        <field name="state" column_invisible="1"/>
+                        <field name="currency_id" column_invisible="1"/>
+                        <field name="resource_type" string="Вид" width="112px"/>
+                        <field name="name" string="Что именно"/>
+                        <field name="category_id" string="Рубрика" width="112px"
+                               options="{'no_create': True, 'no_open': True}"/>
+                        <field name="ownership_kind" string="Передаётся" width="118px"/>
+                        <field name="price" string="Оценка" width="96px"
+                               options="{'hide_trailing_zeros': true}"/>
+                      </list>
+                    </field>
+                    <div class="coop-add_total">
+                      <span>Нужно всего</span>
+                      <field name="required_total" nolabel="1" readonly="1"
+                             options="{'hide_trailing_zeros': true}"/>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="coop-add_sec" name="add_fund">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 4, 'fields': ['date_deadline', 'fallback_plan']}"/>
+                  <div>
+                    <h2>Сбор</h2>
+                    <p>Сколько собираем и что будет, когда срок выйдет.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_field">
+                    <label for="date_deadline" string="Собираем до"/>
+                    <field name="date_deadline" nolabel="1" />
+                  </div>
+                  <p class="coop-add_help">От двух недель до полугода с открытия сбора.</p>
+                  <div class="coop-add_field">
+                    <label for="funding_rule" string="Правило закрытия"/>
+                    <field name="funding_rule" nolabel="1" widget="coop_choice_cards"
+                           options="{'notes': {
+                             'all_or_nothing': 'Не собрали сто процентов — сбор не удался',
+                             'threshold': 'Собрали больше порога — запускаемся на собранное',
+                             'keep_all': 'Запуск при любом сборе, но каждого вкладчика спросим: вернуть или оставить проекту'}}"/>
+                  </div>
+                  <div class="coop-add_field" invisible="funding_rule != 'threshold'">
+                    <label for="funding_threshold" string="Порог"/>
+                    <field name="funding_threshold" nolabel="1" widget="coop_range" options="{'min': 50, 'max': 100, 'step': 5}"/>
+                  </div>
+                  <div class="coop-add_field" invisible="funding_rule == 'all_or_nothing' or (funding_rule == 'threshold' and funding_threshold == 100)">
+                    <label for="fallback_plan" string="Что сделаем, если соберём не всё"/>
+                    <field name="fallback_plan" nolabel="1" placeholder="Что именно получит вкладчик при неполном сборе"/>
+                  </div>
+                </div>
+              </section>
+
+              <section class="coop-add_sec" name="add_money">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 5, 'fields': ['contribution_basis', 'payment_route']}"/>
+                  <div>
+                    <h2>Деньги</h2>
+                    <p>Платформа получателем денег не бывает ни в каком варианте.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_field">
+                    <label for="contribution_basis" string="Основание денежного вклада"/>
+                    <field name="contribution_basis" nolabel="1" widget="coop_choice_cards"
+                           options="{'blocked': 'coop_basis_blocked', 'notes': {
+                             'donation': 'Возвращать не нужно, но и потратить на другое нельзя',
+                             'prepay': 'Вкладчик получает вознаграждение или деньги назад',
+                             'share': 'Возврат — при выходе из кооператива, по уставу',
+                             'investment': 'Заём, доля или ЦФА — коммерческому проекту и ДАО организации'}}"/>
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="payment_route" string="Кто держит деньги"/>
+                    <field name="payment_route" nolabel="1" widget="coop_choice_cards"/>
+                  </div>
+                </div>
+              </section>
+
+              <section class="coop-add_sec" name="add_description">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 6, 'fields': ['description']}"/>
+                  <div>
+                    <h2>Описание</h2>
+                    <p>По этому тексту человек решает, участвовать ли.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_field">
+                    <field name="description" nolabel="1" placeholder="Что делаете, для кого, кто в команде и что будет в итоге"/>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <aside class="coop-add_aside">
+              <div class="coop-add_preview">
+                <span>Так увидят в каталоге</span>
+                <field name="id" widget="coop_project_preview" nolabel="1"/>
+              </div>
+              <field name="id" widget="coop_add_ready" nolabel="1"
+                     options="{'title': 'Готово к сбору', 'items': [
+                       {'field': 'name', 'label': 'Название', 'required': True, 'empty': 'Новый проект', 'anchor': 'add_about'},
+                       {'field': 'image_1920', 'label': 'Обложка', 'anchor': 'add_about'},
+                       {'field': 'summary', 'label': 'Коротко о проекте', 'anchor': 'add_about'},
+                       {'field': 'category_id', 'label': 'Тема', 'anchor': 'add_about'},
+                       {'field': 'city', 'label': 'Город', 'anchor': 'add_about'},
+                       {'field': 'required_total', 'label': 'Что нужно проекту', 'required': True, 'anchor': 'add_needs'},
+                       {'field': 'date_deadline', 'label': 'Срок сбора', 'required': True, 'anchor': 'add_fund'},
+                       {'field': 'description', 'label': 'Описание', 'anchor': 'add_description'}
+                     ]}"/>
+              <div class="coop-add_acts">
+                <button name="action_open_from_add" type="object" string="Открыть сбор"
+                        class="btn-primary" invisible="state != 'draft'"/>
+                <button name="action_save_idea" type="object" string="Сохранить идею"
+                        class="btn-secondary" invisible="state != 'draft'"/>
+                <button name="action_done_editing" type="object" string="Готово"
+                        class="btn-primary" invisible="state == 'draft'"/>
+                <p class="coop-add_note" invisible="state != 'draft'">
+                  Открыть сбор можно, когда заполнено помеченное «нужно».
+                </p>
+              </div>
+            </aside>
+          </div>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- Открывает уже заведённый черновик: номер подставляет `action_new_project`. -->
+  <record id="action_coop_project_add" model="ir.actions.act_window">
+    <field name="name">Добавить проект</field>
+    <field name="res_model">coop.project</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="view_coop_project_add"/>
+    <field name="target">current</field>
+  </record>
+
+</odoo>
