@@ -41,11 +41,12 @@ MAIN_ITEMS = [
     # экран платформы был достижим только там, где его не ищут.
     ('Сообщения', 'chat_bubble', 'coop_messages.action_coop_messages'),
     ('Люди', 'group', 'coop_people.action_coop_people'),
+    # После «Людей» — владелец 24.11.2026.
+    ('Организации', 'account_balance', 'coop_orgs.action_coop_orgs'),
     ('Навыки', 'build', 'coop_skills.action_coop_skills'),
     ('Вакансии', 'work', 'coop_vacancies.action_coop_vacancies'),
     ('Ресурсы', 'deployed_code', 'coop_resources.action_coop_resources'),
     ('Проекты', 'rocket_launch', 'coop_projects.action_coop_projects'),
-    ('Организации', 'account_balance', 'coop_orgs.action_coop_orgs'),
     ('Сообщества', 'forum', 'coop_communities.action_coop_communities'),
     ('Кошелёк', 'credit_card', 'coop_wallet.action_coop_my_wallet'),
     # «Сделки» — сразу за «Кошельком» (решение 89; предложение архитектора

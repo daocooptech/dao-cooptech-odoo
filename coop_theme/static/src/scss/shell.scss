@@ -2027,12 +2027,6 @@ body.o_dark_mode .o_coop_loader_mark {
     order: 20;
     flex: 1 0 100%;
     min-width: 0;
-
-    @media (max-width: 575px) {
-      flex-wrap: nowrap;
-
-      .coop-seg_item { flex: 1 1 auto; padding: 6px 2px; font-size: 12px; }
-    }
   }
 
   // С 19.11.2026 заголовок — последнее звено пути, а не строка крупным
@@ -2274,4 +2268,14 @@ body.o_dark_mode .o_coop_loader_mark {
 // ссылок платформы и выделялся бирюзовым среди чернильных соседей.
 .o-dropdown--menu a.dropdown-item:not(:hover):not(.active) {
   color: var(--coop-ink);
+}
+
+// «Мои ресурсы» на телефоне: три вкладки одной строкой, во всю ширину.
+@media (max-width: 767px) {
+  .coop-seg.o_coop_subtabs_wide {
+    flex: 1 0 100%;
+    flex-wrap: nowrap;
+
+    .coop-seg_item { flex: 1 1 auto; padding: 6px 2px; font-size: 12px; }
+  }
 }

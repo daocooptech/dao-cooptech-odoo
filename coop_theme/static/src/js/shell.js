@@ -467,6 +467,7 @@ const SUBNAV_EXACT = {
     // Цифровые активы.
     "Цифровые активы": "certificate",
     "Мои ЦФА": "certificate-2",
+    "Операторы ЦФА": "building-arch",
     // Образование.
     "Каталог курсов": "books",
     "Мои курсы": "backpack",
