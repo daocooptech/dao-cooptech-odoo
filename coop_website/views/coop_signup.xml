@@ -9,10 +9,10 @@
     переключателя нет, это незаметно, но человек может прийти по ссылке с
     любой страницы и получить язык, которого не выбирал.
 
-    Поле стоит последним, после паролей: язык — не препятствие к
-    регистрации, а настройка, и умолчание уже проставлено.
+    Поле стоит после пароля, перед согласием (эталон `SignupPage`): язык —
+    не препятствие к регистрации, а настройка, и умолчание уже проставлено.
   -->
-  <template id="coop_signup_lang" inherit_id="auth_signup.fields"
+  <template id="coop_signup_lang" inherit_id="auth_signup.fields" priority="20"
             name="ДАО КООПТЕХ: язык платформы при регистрации">
     <xpath expr="//div[hasclass('field-confirm_password')]" position="after">
       <div class="mb-3 field-lang" t-if="coop_langs and len(coop_langs) > 1">
@@ -45,7 +45,7 @@
     Согласие и Политику. Без отметки учётная запись не заводится —
     проверка в `do_signup`.
   -->
-  <template id="coop_signup_consent" inherit_id="auth_signup.fields"
+  <template id="coop_signup_consent" inherit_id="auth_signup.fields" priority="18"
             name="ДАО КООПТЕХ: согласие на обработку ПДн при регистрации">
     <xpath expr="//div[hasclass('field-confirm_password')]" position="after">
       <div class="mb-3 form-check field-pd-consent">
@@ -57,6 +57,129 @@
         </label>
       </div>
     </xpath>
+  </template>
+
+  <!--
+    Страница регистрации по дизайн-системе (№ 377, `SignupPage`): слева
+    бренд-панель, справа форма. Раскладка своя: у движка карточка шириной
+    300 px внутри шапки сайта.
+  -->
+  <template id="signup_layout" name="ДАО КООПТЕХ: раскладка регистрации">
+    <t t-call="website.layout" no_header="True" no_footer="True" additional_title="additional_title">
+      <div class="coop-signup">
+        <aside class="coop-signup_brand">
+          <a href="/" class="coop-signup_logo">
+            <img src="/coop_theme/static/src/img/cooptech-logo.png" alt=""/>
+            <span>DAO COOPTECH</span>
+          </a>
+          <p class="coop-signup_slogan">Децентрализованная социально-экономическая платформа</p>
+          <ul>
+            <li>Ресурсы, навыки и услуги — напрямую между людьми и организациями</li>
+            <li>Проекты, в которые вкладываются деньгами, вещами и трудом</li>
+            <li>Сообщества, совместные закупки и сделки — в одном месте</li>
+          </ul>
+        </aside>
+        <div class="coop-signup_main">
+          <div class="coop-signup_form" t-out="0"/>
+        </div>
+      </div>
+    </t>
+  </template>
+
+  <template id="coop_signup_page" inherit_id="auth_signup.signup" priority="100"
+            name="ДАО КООПТЕХ: страница регистрации">
+    <xpath expr="//t[@t-call='web.login_layout']" position="attributes">
+      <attribute name="t-call">coop_website.signup_layout</attribute>
+    </xpath>
+    <xpath expr="//form" position="before">
+      <header t-if="not message">
+        <div class="coop-signup_step">Шаг 1 из 2</div>
+        <h1>Учётная запись</h1>
+      </header>
+    </xpath>
+    <xpath expr="//form" position="attributes">
+      <attribute name="class" add="coop-signup_account" separator=" "/>
+    </xpath>
+    <xpath expr="//label[@for='name']" position="replace">
+      <label for="name" class="form-label">Как вас зовут</label>
+    </xpath>
+    <xpath expr="//input[@name='name']" position="attributes">
+      <attribute name="placeholder">Имя и фамилия</attribute>
+    </xpath>
+    <xpath expr="//label[@for='login']" position="replace">
+      <label for="login" class="form-label">Электронная почта</label>
+    </xpath>
+    <xpath expr="//t[@t-call='auth_signup.fields']" position="attributes">
+      <attribute name="coop_signup">True</attribute>
+    </xpath>
+    <xpath expr="//button[@type='submit']" position="replace">
+      <button type="submit" class="btn btn-primary mb-1">Зарегистрироваться</button>
+    </xpath>
+    <xpath expr="//div[hasclass('oe_login_buttons')]/a" position="replace">
+      <p class="coop-signup_login">Уже есть учётная запись? <a t-attf-href="/web/login?{{ keep_query() }}">Войти</a></p>
+    </xpath>
+  </template>
+
+  <template id="coop_signup_password" inherit_id="auth_signup.fields" priority="30"
+            name="ДАО КООПТЕХ: один пароль с индикатором надёжности">
+    <xpath expr="//div[hasclass('field-confirm_password')]" position="attributes">
+      <attribute name="t-if">not coop_signup</attribute>
+    </xpath>
+    <xpath expr="(//div[hasclass('field-password')])[1]" position="inside">
+      <div class="coop-signup_meter" t-if="coop_signup" aria-live="polite">
+        <span class="coop-signup_bar"><i/><i/><i/><i/></span>
+        <small class="coop-signup_hint">Не короче 8 знаков, лучше с цифрами и разными буквами</small>
+      </div>
+    </xpath>
+  </template>
+
+  <template id="signup_about" name="ДАО КООПТЕХ: расскажите о себе">
+    <t t-set="additional_title">Расскажите о себе</t>
+    <t t-call="coop_website.signup_layout">
+      <header>
+        <div class="coop-signup_step">Шаг 2 из 2</div>
+        <h1>Расскажите о себе</h1>
+        <p>Так вас проще найти и позвать. Всё можно заполнить и потом, на своей странице.</p>
+      </header>
+      <form class="coop-signup_about" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+        <div class="mb-3">
+          <div class="form-label">Фото</div>
+          <label class="coop-signup_photo">
+            <img t-attf-src="/web/image/res.partner/{{ partner.id }}/avatar_128" alt="" width="64" height="64"/>
+            <span>Выбрать фото<small>JPEG, PNG, WebP или GIF, до 8 МБ</small></span>
+            <input type="file" name="photo" class="visually-hidden" accept="image/jpeg,image/png,image/webp,image/gif"/>
+          </label>
+        </div>
+        <div class="mb-3">
+          <label for="city" class="form-label">Город</label>
+          <input type="text" name="city" id="city" class="form-control" maxlength="100" list="coop_signup_cities"
+                 autocomplete="address-level2" t-att-value="city"/>
+          <datalist id="coop_signup_cities">
+            <option t-foreach="cities" t-as="city_name" t-att-value="city_name"/>
+          </datalist>
+        </div>
+        <div class="mb-3">
+          <label for="about" class="form-label">Чем занимаетесь</label>
+          <textarea name="about" id="about" class="form-control" rows="3" t-att-maxlength="about_limit" t-out="about"/>
+        </div>
+        <fieldset class="mb-3">
+          <legend class="form-label">Что вам интересно</legend>
+          <div class="coop-signup_interests">
+            <label t-foreach="interests" t-as="row">
+              <input type="checkbox" t-att-value="row[0]" t-att-data-label="row[2]" t-att-data-url="row[3]"/>
+              <span t-out="row[1]"/>
+            </label>
+          </div>
+          <p class="coop-signup_start d-none">Начните с раздела <span/></p>
+        </fieldset>
+        <p class="alert alert-danger" t-if="error" role="alert" t-out="error"/>
+        <div class="coop-signup_buttons">
+          <button type="submit" class="btn btn-primary">Перейти на мою страницу</button>
+          <a t-att-href="home_url" class="btn btn-link">Пропустить</a>
+        </div>
+      </form>
+    </t>
   </template>
 
 </odoo>

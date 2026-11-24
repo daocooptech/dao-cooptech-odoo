@@ -1,0 +1,151 @@
+// Регистрация по дизайн-системе (`SignupPage`, № 377). Публичная часть
+// светлая; токены `--coop-*` кабинета сюда не попадают — объявлены здесь.
+.coop-signup {
+  --coop-ink: #14171a;
+  --coop-slate: #4a4a44;
+  --coop-line: #e6e6e1;
+  --coop-line-strong: #d2d2cb;
+  --coop-paper: #fbfbf9;
+  --coop-white: #ffffff;
+  --coop-teal: #146b64;
+  --coop-teal-dark: #0e4f4a;
+  --coop-teal-tint: #e3efed;
+  --coop-gold: #c98a2b;
+  --coop-error: #b3413a;
+
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  min-height: 100vh;
+  background: var(--coop-paper);
+  color: var(--coop-ink);
+  font: 400 14px/1.5 'Inter', sans-serif;
+
+  a { color: var(--coop-teal); }
+  h1 { margin: 0; font: 700 24px/1.25 'Manrope', sans-serif; color: var(--coop-ink); }
+  header { margin-bottom: 18px; }
+  header p { margin: 6px 0 0; font-size: 13.5px; color: var(--coop-slate); }
+
+  // Движок держит форму регистрации в 300 px.
+  .coop-signup_form form { max-width: none; margin: 0; padding: 0; }
+
+  .form-label { margin-bottom: 4px; font-size: 12.5px; font-weight: 500; color: var(--coop-ink); }
+  .form-control, .form-select {
+    font-size: 14px;
+    color: var(--coop-ink);
+    background-color: var(--coop-white);
+    border-color: var(--coop-line-strong);
+    border-radius: 7px;
+    &:focus { border-color: var(--coop-teal-dark); box-shadow: 0 0 0 2px var(--coop-teal-tint); }
+  }
+  .input-group .form-control { border-radius: 7px 0 0 7px; }
+  .input-group .btn {
+    border-color: var(--coop-line-strong) !important;
+    border-radius: 0 7px 7px 0;
+    background: var(--coop-white);
+  }
+  .form-check-input { border-color: #8f8f88; }
+  .form-check-input:checked { background-color: var(--coop-teal); border-color: var(--coop-teal); }
+  .btn-primary {
+    padding: 9px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    background: var(--coop-ink);
+    border-color: var(--coop-ink);
+    border-radius: 7px;
+    &:disabled { opacity: .45; }
+  }
+}
+.coop-signup_brand {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 48px;
+  color: #eef2f0;
+  background: #14171a;
+
+  .coop-signup_logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font: 700 18px/1.2 'Manrope', sans-serif;
+    color: #fff;
+    text-decoration: none;
+    // Знак — белым по чёрной подложке: подложка растворяется в панели.
+    img { height: 28px; width: auto; mix-blend-mode: lighten; }
+  }
+  .coop-signup_slogan { margin: 28px 0 20px; font: 700 26px/1.25 'Manrope', sans-serif; }
+  ul { margin: 0; padding: 0; list-style: none; }
+  li { padding: 10px 0; border-top: 1px solid #2b2e31; color: #d2d2cb; }
+}
+.coop-signup_main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  min-width: 0;
+}
+.coop-signup_form { width: 100%; max-width: 440px; }
+.coop-signup_step { margin-bottom: 4px; font-size: 12.5px; color: var(--coop-slate); }
+.coop-signup_login { margin: 10px 0 0; text-align: center; font-size: 13.5px; }
+
+.coop-signup_bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  margin: 6px 0 4px;
+  i { height: 4px; border-radius: 2px; background: var(--coop-line); }
+}
+.coop-signup_hint { font-size: 12.5px; color: var(--coop-slate); }
+.coop-signup_meter[data-level="1"] i:nth-child(-n+1) { background: var(--coop-error); }
+.coop-signup_meter[data-level="2"] i:nth-child(-n+2) { background: var(--coop-gold); }
+.coop-signup_meter[data-level="3"] i:nth-child(-n+3) { background: var(--coop-teal); }
+.coop-signup_meter[data-level="4"] i { background: var(--coop-teal); }
+
+.coop-signup_photo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  cursor: pointer;
+  background: var(--coop-white);
+  border: 1px dashed var(--coop-line-strong);
+  border-radius: 10px;
+  img { flex: none; border-radius: 50%; object-fit: cover; }
+  small { display: block; color: var(--coop-slate); }
+  &:focus-within { outline: 2px solid var(--coop-teal-dark); }
+}
+.coop-signup_interests {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  label { position: relative; }
+  input { position: absolute; opacity: 0; }
+  span {
+    display: block;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    background: var(--coop-white);
+    border: 1px solid var(--coop-line-strong);
+    border-radius: 999px;
+  }
+  input:checked + span { color: var(--coop-teal-dark); background: var(--coop-teal-tint); border-color: var(--coop-teal); }
+  input:focus-visible + span { outline: 2px solid var(--coop-teal-dark); outline-offset: 2px; }
+}
+.coop-signup_start { margin: 10px 0 0; font-size: 13.5px; color: var(--coop-slate); }
+.coop-signup_buttons { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-top: 4px; }
+
+@media (max-width: 800px) {
+  .coop-signup { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; }
+  .coop-signup_brand {
+    padding: 20px 24px;
+    .coop-signup_slogan { margin: 12px 0 0; font-size: 16px; }
+    ul { display: none; }
+  }
+  .coop-signup_main { align-items: flex-start; padding: 24px 16px; }
+}
+
+// Уголок движка «в кабинет» — на втором шаге человек уже вошёл, но кабинета
+// ещё не видел; переход есть кнопками страницы.
+body:has(.coop-signup) .o_frontend_to_backend_nav { display: none !important; }

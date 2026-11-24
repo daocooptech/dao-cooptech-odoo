@@ -1,14 +1,35 @@
 # -*- coding: utf-8 -*-
 from odoo import fields, http
 from odoo.addons.auth_signup.controllers.main import AuthSignupHome
+from odoo.addons.web.controllers.utils import is_user_internal
 from odoo.exceptions import UserError
 from odoo.http import request
+from odoo.tools.binary import BinaryBytes
+from odoo.tools.mimetypes import guess_mimetype
 
-from ..models.ir_http import coop_entry_url
+from ..models.ir_http import COOP_HOME, coop_entry_url
 
 # Язык платформы по умолчанию. Решение владельца: если человек не выбрал
 # язык при регистрации, платформа говорит с ним по-русски.
 DEFAULT_LANG = 'ru_RU'
+
+# Второй шаг регистрации — «Расскажите о себе» (№ 377, `SignupPage`).
+ABOUT_URL = '/web/signup/about'
+ABOUT_LIMIT = 280
+PHOTO_LIMIT = 8 * 1024 * 1024
+PHOTO_TYPES = ('image/jpeg', 'image/png', 'image/webp', 'image/gif')
+
+# «Что вам интересно»: с какого раздела начать. Не хранится — только
+# подсказка на этой странице.
+INTERESTS = [
+    ('resources', 'Вещи и сырьё', 'Ресурсы', '/odoo/resources'),
+    ('skills', 'Навыки и услуги', 'Навыки', '/odoo/skills'),
+    ('vacancies', 'Работа', 'Вакансии', '/odoo/vacancies'),
+    ('projects', 'Проекты', 'Проекты', '/odoo/projects'),
+    ('orgs', 'Организации', 'Организации', '/odoo/orgs'),
+    ('people', 'Знакомства', 'Люди', '/odoo/people'),
+    ('communities', 'Сообщества', 'Сообщества', '/odoo/communities'),
+]
 
 
 class CoopAuthSignupHome(AuthSignupHome):
@@ -45,7 +66,66 @@ class CoopAuthSignupHome(AuthSignupHome):
             return request.redirect(coop_entry_url(), 303)
         if not self._coop_signup_mail_enabled():
             request.update_context(coop_skip_signup_mail=True)
-        return super().web_auth_signup(*args, **kw)
+        # На странице один пароль с показом (эталон `SignupPage`), движок
+        # ждёт два. Форма сброса пароля своё второе поле сохраняет.
+        if request.httprequest.method == 'POST':
+            request.params.setdefault('confirm_password', request.params.get('password'))
+        response = super().web_auth_signup(*args, **kw)
+        # Шаг 2 — только новому участнику и только если он не шёл по
+        # ссылке на конкретную страницу.
+        if (request.httprequest.method == 'POST' and not request.params.get('redirect')
+                and response.status_code in (302, 303)
+                and request.session.uid and is_user_internal(request.session.uid)):
+            return request.redirect(ABOUT_URL, 303)
+        return response
+
+    @http.route(ABOUT_URL, type='http', auth='user', website=True, sitemap=False, methods=['GET', 'POST'])
+    def coop_signup_about(self, **post):
+        if not is_user_internal(request.session.uid):
+            return request.redirect(coop_entry_url(), 303)
+        partner = request.env.user.partner_id
+        qcontext = {
+            'partner': partner,
+            'city': partner.city or '',
+            'about': partner.coop_about or '',
+            'about_limit': ABOUT_LIMIT,
+            'cities': request.env['res.partner'].coop_city_suggestions(),
+            'interests': INTERESTS,
+            'home_url': COOP_HOME,
+        }
+        if request.httprequest.method == 'POST':
+            qcontext['city'] = (post.get('city') or '').strip()
+            qcontext['about'] = (post.get('about') or '').strip()
+            try:
+                vals = self._coop_about_values(qcontext, post.get('photo'))
+            except UserError as error:
+                qcontext['error'] = error.args[0]
+            else:
+                # Пустое поле ничего не стирает: шаг можно пропустить.
+                # `sudo` — запись только в свою карточку и только этих полей.
+                if vals:
+                    partner.sudo().write(vals)
+                return request.redirect(COOP_HOME, 303)
+        return request.render('coop_website.signup_about', qcontext)
+
+    def _coop_about_values(self, qcontext, photo):
+        if len(qcontext['about']) > ABOUT_LIMIT:
+            raise UserError('«Чем занимаетесь» — не длиннее %d знаков.' % ABOUT_LIMIT)
+        vals = {}
+        if qcontext['city']:
+            vals['city'] = qcontext['city'][:100]
+        if qcontext['about']:
+            vals['coop_about'] = qcontext['about']
+        if photo:
+            data = photo.read(PHOTO_LIMIT + 1)
+            if len(data) > PHOTO_LIMIT:
+                raise UserError('Фото больше 8 МБ — выберите файл поменьше.')
+            # SVG под `sudo` движок пропустил бы как есть — берём только снимки.
+            if data:
+                if guess_mimetype(data) not in PHOTO_TYPES:
+                    raise UserError('Фото — только JPEG, PNG, WebP или GIF.')
+                vals['image_1920'] = BinaryBytes(data)
+        return vals
 
     @http.route()
     def web_login(self, redirect=None, **kw):
