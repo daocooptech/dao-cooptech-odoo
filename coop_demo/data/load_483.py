@@ -717,6 +717,8 @@ def _fill(env, category):
     options = {a.code: {o.name: o.code for o in a.option_ids}
                for a in Attribute.search([('value_type', 'in',
                                            ('selection', 'tags'))])}
+    options['__tags__'] = set(Attribute.search(
+        [('value_type', '=', 'tags')]).mapped('code'))
     filled = 0
     roots = [c.id for c in (category(n) for n in ASSIGN) if c]
     leaf_ids = env['coop.resource.category'].sudo().search(
@@ -726,9 +728,9 @@ def _fill(env, category):
         full_name = resource.category_id.complete_name
         definition = {d.get('name'): d for d in
                       (resource.category_id.attribute_definition or [])}
-        current = _current(resource)
+        current, repaired = _raw(env, resource, definition, options)
         rnd = random.Random(resource.id * 7919 + 483)
-        new = {}
+        new = dict.fromkeys(repaired)
         merged = dict(current)
         # Площадь, названная в заголовке, главнее придуманной.
         said = re.search(r'(\d+(?:[.,]\d+)?)\s*м²', _title(resource.name))
@@ -759,6 +761,37 @@ def _fill(env, category):
     return filled
 
 
+def _raw(env, resource, definition, options):
+    """Значения как лежат в базе.
+
+    Чтение поля через ORM отдаёт метки подписями («Во двор, На улицу»), и
+    запись обратно кладёт в базу строку вместо списка ключей — движок
+    такую метку не показывает. Так испортились «Окна», «Парковка», «Тип
+    лифта» при повторных прогонах загрузчиков (замер 24.11). Читаем
+    сырой JSON и чиним подписи в ключи.
+    """
+    env.cr.execute('SELECT attrs FROM coop_resource WHERE id = %s',
+                   (resource.id,))
+    row = env.cr.fetchone()
+    value = (row and row[0]) or {}
+    out, repaired = {}, []
+    for code, item in value.items():
+        if item in (None, False, '', []):
+            continue
+        kind = (definition.get(code) or {}).get('type')
+        if kind == 'tags' and isinstance(item, str):
+            labels = [x.strip() for x in item.split(',')]
+            known = set(options.get(code, {}).values())
+            codes = [x if x in known else options.get(code, {}).get(x)
+                     for x in labels]
+            item = [c for c in codes if c]
+            repaired.append(code)
+            if not item:
+                continue
+        out[code] = item
+    return out, repaired
+
+
 REMOTE_KINDS = ('Обучение', 'IT и разработка', 'Тексты и переводы',
                 'Консультирование', 'Бухгалтерия', 'Юридические', 'Дизайн',
                 'Маркетинг')
@@ -774,6 +807,18 @@ def _agree(cur, resource, branch, rnd, options):
     if cur.get('flat_market') == opt('flat_market', 'Новостройка') and \
             int(cur.get('build_year') or 0) < 2019:
         fix['build_year'] = rnd.randint(2019, 2026)
+    # «Черновая отделка» и «Чистовая» вместе — неправда.
+    rough = opt('renovation', 'Черновая отделка')
+    if cur.get('renovation') == rough and cur.get('finishing') == \
+            opt('finishing', 'Чистовая'):
+        fix['finishing'] = opt('finishing', rnd.choice(['Без отделки',
+                                                        'Предчистовая']))
+    elif cur.get('renovation') in (opt('renovation', 'Косметический'),
+                                   opt('renovation', 'Евроремонт'),
+                                   opt('renovation', 'Дизайнерский')) and \
+            cur.get('finishing') and \
+            cur['finishing'] != opt('finishing', 'Чистовая'):
+        fix['finishing'] = opt('finishing', 'Чистовая')
     # Лифта нет — нет и его типа; тип — списком вариантов, не строкой.
     if cur.get('elevator_count') == opt('elevator_count', 'Нет'):
         if cur.get('elevator_kind'):
@@ -882,8 +927,7 @@ def _value(code, resource, branch, rnd, options, cur):
     if code == 'area_m2' and branch.startswith(SB):
         return float(rnd.choice([10, 20, 30, 50, 80, 120]))
     if opts:
-        value_type = 'tags' if code in ('windows', 'parking', 'leisure',
-                                        'house_parking') else 'selection'
+        value_type = 'tags' if code in options.get('__tags__', ())             else 'selection'
         labels = list(opts)
         if value_type == 'tags':
             return [opts[x] for x in rnd.sample(labels, rnd.randint(1, min(2, len(labels))))]
