@@ -300,7 +300,7 @@
          участвую» — владелец 19.11.2026). Видны и на большом экране:
          меню слева их не показывает. -->
     <div class="o_coop_tabs o_coop_tabs_page o_coop_subtabs" role="tablist"
-         t-if="this.state.subtabs.length">
+         t-if="this.state.subtabs.length and !this.state.subWide">
       <a t-foreach="this.state.subtabs" t-as="tab" t-key="tab.id"
          href="#" class="o_coop_tab" role="tab"
          t-att-class="{ 'active': tab.id === this.state.subCurrent }"
@@ -308,6 +308,15 @@
          t-on-click.prevent="() => this.open(tab)">
         <t t-out="tab.name"/>
       </a>
+    </div>
+    <!-- «Мои ресурсы»: над каталогом, во всю рабочую область (24.11.2026). -->
+    <div class="coop-seg coop-seg_block o_coop_subtabs_wide" role="tablist"
+         t-if="this.state.subtabs.length and this.state.subWide">
+      <button t-foreach="this.state.subtabs" t-as="tab" t-key="tab.id" type="button"
+              class="coop-seg_item" role="tab"
+              t-att-class="{ 'coop-seg_on': tab.id === this.state.subCurrent }"
+              t-att-aria-selected="tab.id === this.state.subCurrent ? 'true' : 'false'"
+              t-on-click="() => this.open(tab)" t-out="tab.name"/>
     </div>
     </div>
   </t>

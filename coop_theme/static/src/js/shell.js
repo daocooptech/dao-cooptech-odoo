@@ -39,6 +39,10 @@ import { render } from "@web/owl2/utils";
 // Экраны без пункта меню и раздел над их заголовком.
 const COOP_SCREEN_SECTION = { "Управление проектами": "Проекты" };
 
+/** Подразделы, чьи вкладки стоят над каталогом во всю рабочую область, а не
+ *  первым блоком «Фильтра» (владелец 24.11.2026, «Мои ресурсы»). */
+export const COOP_WIDE_SUBTABS = ["coop_resources.menu_coop_my_resources"];
+
 export class CoopTabs extends Component {
     static template = "coop_theme.Tabs";
     props = useProps();
@@ -47,7 +51,7 @@ export class CoopTabs extends Component {
         this.menus = useService("menu");
         this.action = usePlugin(ActionPlugin);
         this.orm = useService("orm");
-        this.state = proxy({ tabs: [], tabsAfter: [], subtabs: [], subCurrent: null,
+        this.state = proxy({ tabs: [], tabsAfter: [], subtabs: [], subWide: false, subCurrent: null,
                              current: null, label: null, fav: null, section: null, known: false });
         useBus(this.env.bus, "COOP_FAVORITE_CHANGED", () => this.refreshFav());
         // Строка вкладок рисуется раньше, чем открывается сам каталог, и
@@ -216,6 +220,7 @@ export class CoopTabs extends Component {
     setSubtabs(active, actionId) {
         const subs = active?.childrenTree || [];
         this.state.subtabs = subs.length > 1 ? subs : [];
+        this.state.subWide = COOP_WIDE_SUBTABS.includes(active?.xmlid);
         const current = subs.find((tab) => tab.actionID === actionId) || subs[0];
         this.state.subCurrent = current ? current.id : null;
     }
@@ -461,6 +466,7 @@ const SUBNAV_EXACT = {
     "Архив уступок": "archive-off",
     // Цифровые активы.
     "Цифровые активы": "certificate",
+    "Мои ЦФА": "certificate-2",
     // Образование.
     "Каталог курсов": "books",
     "Мои курсы": "backpack",

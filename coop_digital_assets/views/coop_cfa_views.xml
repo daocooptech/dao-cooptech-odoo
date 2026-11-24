@@ -371,7 +371,7 @@
     <field name="name">Мои ЦФА</field>
     <field name="res_model">coop.cfa.holding</field>
     <field name="view_mode">list</field>
-    <field name="context">{'coop_section': 1, 'coop_filters': 1}</field>
+    <field name="context">{'coop_section': 1}</field>
     <field name="domain">[('is_mine', '=', True)]</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Цифровых активов нет</p>
@@ -383,17 +383,17 @@
   </record>
 
   <!-- Владелец 24.11.2026: ЦФА — подкаталог «Ресурсов», сразу за НМА;
-       выпуски и купленное — вкладки «Моих ресурсов»; операторы из меню
+       свои выпуски — вкладка «Моих ресурсов», купленное — в «Кошельке»; операторы из меню
        убраны: платформа сама оператор, справочник — для поля выпуска. -->
   <menuitem id="menu_coop_cfa_root" name="Цифровые активы"
             parent="coop_resources.menu_coop_resources_root"
             action="action_coop_cfa_issue" sequence="17"/>
-  <menuitem id="menu_coop_my_cfa_issue" name="Выпуски"
+  <menuitem id="menu_coop_my_cfa_issue" name="Финансовые"
             parent="coop_resources.menu_coop_my_resources"
-            action="action_coop_my_cfa_issue" sequence="40"/>
-  <menuitem id="menu_coop_cfa_holding" name="ЦФА"
-            parent="coop_resources.menu_coop_my_resources"
-            action="action_coop_cfa_holding" sequence="30"/>
+            action="action_coop_my_cfa_issue" sequence="30"/>
+  <menuitem id="menu_coop_cfa_holding" name="Мои ЦФА"
+            parent="coop_wallet.menu_coop_wallet_root"
+            action="action_coop_cfa_holding" sequence="17"/>
 
   <!-- Аналитика проекта, вкладка «ЦФА» (№ 395). -->
   <record id="view_coop_project_form_cfa_analytics" model="ir.ui.view">

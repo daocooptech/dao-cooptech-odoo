@@ -6,6 +6,7 @@ import { coopSort, coopSortOptionsFor, setCoopSort } from "@coop_theme/js/catalo
 import { Component, onMounted, onWillStart, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { router } from "@web/core/browser/router";
 import { CoopIcon } from "@coop_theme/js/icons";
+import { COOP_WIDE_SUBTABS } from "@coop_theme/js/shell";
 
 /**
  * Панель фильтров каталога — та же, что в макете.
@@ -150,7 +151,8 @@ export class CoopFilters extends Component {
             const same = all.filter((menu) => menu.actionID === actionId && menu.id !== menu.appID);
             const own = same.find((menu) => !(menu.children || []).length) || same[0];
             const parent = own && all.find((menu) => (menu.children || []).includes(own.id));
-            if (!parent || parent.id === parent.appID) {
+            if (!parent || parent.id === parent.appID
+                || COOP_WIDE_SUBTABS.includes(parent.xmlid)) {
                 return [];
             }
             const tabs = (parent.children || []).map((id) => this.menus.getMenu(id)).filter(Boolean);
