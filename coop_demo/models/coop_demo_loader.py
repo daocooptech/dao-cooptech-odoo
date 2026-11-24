@@ -145,6 +145,9 @@ class CoopDemoLoader(models.AbstractModel):
         load_communities.load_communities(self.env)
         # Характеристики после ресурсов: значения проставляются уже
         # заведённым объявлениям, и рубрики к этому моменту есть.
+        # Рубрики ничьим объявлениям (хвост 483): набор висит на рубрике.
+        from ..data import load_483_tail
+        load_483_tail.load_rubrics(self.env)
         load_attributes.load_attributes(self.env)
         # Биография после людей и членства: заполняется тем, кто уже
         # состоит на платформе.
@@ -490,6 +493,8 @@ class CoopDemoLoader(models.AbstractModel):
         # Пустые листья дерева (задача 399).
         from ..data import load_empty_leaves
         load_empty_leaves.load_empty_leaves(self.env)
+        # И ещё раз: на новой базе дерево построено только сейчас.
+        load_483_tail.load_rubrics(self.env)
         # Характеристики по веткам дерева (задача 399).
         from ..data import load_branch_attributes
         load_branch_attributes.load_branch_attributes(self.env)
@@ -508,8 +513,12 @@ class CoopDemoLoader(models.AbstractModel):
         tidy_names.tidy_all(self.env)
         # Условия вакансий (483) — после имён: «на неполный день» из
         # названия задаёт занятость и график.
+        # Услуги организаций (хвост 483) — до полей по профессии.
+        load_483_tail.load_services(self.env)
         from ..data import load_483_work
         load_483_work.load_483_work(self.env)
+        # Единицы, опт, занятость в названии — последними.
+        load_483_tail.load_tail(self.env)
         # Готовность без перебора в десятки раз — после цен и вкладов.
         from ..data import fit_readiness
         fit_readiness.fit_readiness(self.env)
