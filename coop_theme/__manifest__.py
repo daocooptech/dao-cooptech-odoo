@@ -46,6 +46,7 @@
             'coop_theme/static/src/scss/form_save.scss',
             'coop_theme/static/src/scss/shell.scss',
             'coop_theme/static/src/js/clipboard_http.js',
+            'coop_theme/static/src/js/many2one_all.js',
             'coop_theme/static/src/js/node_path.js',
             'coop_theme/static/src/js/brand.js',
             'coop_theme/static/src/js/boot.js',

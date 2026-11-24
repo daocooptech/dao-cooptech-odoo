@@ -367,6 +367,207 @@
       <field name="sequence">20</field>
     </record>
 
+    <!-- ── Остальные формы ст. 50 ГК (№ 487). Владелец 25.11.2026 — только
+         нужные сети: без госкорпораций, публично-правовых компаний,
+         адвокатских и нотариальных палат и партий. ── -->
+    <record id="legal_form_pt" model="coop.legal.form">
+      <field name="name">Полное товарищество</field>
+      <field name="short_name">ПТ</field>
+      <field name="code">pt</field>
+      <field name="group_id" ref="legal_group_commercial"/>
+      <field name="law">ст. 69–81 ГК РФ</field>
+      <field name="has_members" eval="True"/>
+      <field name="is_cooperative" eval="False"/>
+      <field name="sequence">90</field>
+    </record>
+
+    <record id="legal_form_kt" model="coop.legal.form">
+      <field name="name">Товарищество на вере (коммандитное товарищество)</field>
+      <field name="short_name">КТ</field>
+      <field name="code">kt</field>
+      <field name="group_id" ref="legal_group_commercial"/>
+      <field name="law">ст. 82–86 ГК РФ</field>
+      <field name="has_members" eval="True"/>
+      <field name="is_cooperative" eval="False"/>
+      <field name="sequence">100</field>
+    </record>
+
+    <record id="legal_form_gup" model="coop.legal.form">
+      <field name="name">Государственное унитарное предприятие</field>
+      <field name="short_name">ГУП</field>
+      <field name="code">gup</field>
+      <field name="group_id" ref="legal_group_commercial"/>
+      <field name="law">ст. 113 ГК РФ</field>
+      <field name="has_members" eval="False"/>
+      <field name="is_cooperative" eval="False"/>
+      <field name="sequence">110</field>
+    </record>
+
+    <record id="legal_form_mup" model="coop.legal.form">
+      <field name="name">Муниципальное унитарное предприятие</field>
+      <field name="short_name">МУП</field>
+      <field name="code">mup</field>
+      <field name="group_id" ref="legal_group_commercial"/>
+      <field name="law">ст. 113 ГК РФ</field>
+      <field name="has_members" eval="False"/>
+      <field name="is_cooperative" eval="False"/>
+      <field name="sequence">120</field>
+    </record>
+
+    <record id="legal_form_zhk" model="coop.legal.form">
+      <field name="name">Жилищный кооператив</field>
+      <field name="short_name">ЖК</field>
+      <field name="code">zhk</field>
+      <field name="group_id" ref="legal_group_cooperative"/>
+      <field name="law">ст. 123.2 ГК РФ</field>
+      <field name="has_members" eval="True"/>
+      <field name="is_cooperative" eval="True"/>
+      <field name="sequence">65</field>
+    </record>
+
+    <record id="legal_form_ovs" model="coop.legal.form">
+      <field name="name">Общество взаимного страхования</field>
+      <field name="short_name">ОВС</field>
+      <field name="code">ovs</field>
+      <field name="group_id" ref="legal_group_cooperative"/>
+      <field name="law">ст. 50, 123.2 ГК РФ</field>
+      <field name="has_members" eval="True"/>
+      <field name="is_cooperative" eval="True"/>
+      <field name="sequence">120</field>
+    </record>
+
+    <record id="legal_form_fprok" model="coop.legal.form">
+      <field name="name">Фонд проката</field>
+      <field name="short_name">Фонд проката</field>
+      <field name="code">fprok</field>
+      <field name="group_id" ref="legal_group_cooperative"/>
+      <field name="law">ст. 50, 123.2 ГК РФ</field>
+      <field name="has_members" eval="True"/>
+      <field name="is_cooperative" eval="True"/>
+      <field name="sequence">130</field>
+    </record>
+
+    <record id="legal_form_od" model="coop.legal.form">
+      <field name="name">Общественное движение</field>
+      <field name="short_name">ОД</field>
+      <field name="code">od</field>
+      <field name="group_id" ref="legal_group_nonprofit"/>
+      <field name="law">ст. 123.7-1 ГК РФ, ФЗ от 19.05.1995 № 82-ФЗ</field>
+      <field name="has_members" eval="True"/>
+      <field name="is_cooperative" eval="False"/>
+      <field name="sequence">65</field>
+    </record>
+
+    <record id="legal_form_tos" model="coop.legal.form">
+      <field name="name">Территориальное общественное самоуправление</field>
+      <field name="short_name">ТОС</field>
+      <field name="code">tos</field>
+      <field name="group_id" ref="legal_group_nonprofit"/>
+      <field name="law">ст. 50 ГК РФ</field>
+      <field name="has_members" eval="True"/>
+      <field name="is_cooperative" eval="False"/>
+      <field name="sequence">66</field>
+    </record>
+
+    <record id="legal_form_prof" model="coop.legal.form">
+      <field name="name">Профсоюзная организация</field>
+      <field name="short_name">Профсоюз</field>
+      <field name="code">prof</field>
+      <field name="group_id" ref="legal_group_nonprofit"/>
+      <field name="law">ст. 50 ГК РФ</field>
+      <field name="has_members" eval="True"/>
+      <field name="is_cooperative" eval="False"/>
+      <field name="sequence">67</field>
+    </record>
+
+    <record id="legal_form_sro" model="coop.legal.form">
+      <field name="name">Саморегулируемая организация</field>
+      <field name="short_name">СРО</field>
+      <field name="code">sro</field>
+      <field name="group_id" ref="legal_group_nonprofit"/>
+      <field name="law">ст. 50, 123.8 ГК РФ</field>
+      <field name="has_members" eval="True"/>
+      <field name="is_cooperative" eval="False"/>
+      <field name="sequence">52</field>
+    </record>
+
+    <record id="legal_form_tpp" model="coop.legal.form">
+      <field name="name">Торгово-промышленная палата</field>
+      <field name="short_name">ТПП</field>
+      <field name="code">tpp</field>
+      <field name="group_id" ref="legal_group_nonprofit"/>
+      <field name="law">ст. 50, 123.8 ГК РФ</field>
+      <field name="has_members" eval="True"/>
+      <field name="is_cooperative" eval="False"/>
+      <field name="sequence">54</field>
+    </record>
+
+    <record id="legal_form_kazak" model="coop.legal.form">
+      <field name="name">Казачье общество</field>
+      <field name="short_name">Казачье общество</field>
+      <field name="code">kazak</field>
+      <field name="group_id" ref="legal_group_nonprofit"/>
+      <field name="law">ст. 123.15 ГК РФ, ФЗ от 05.12.2005 № 154-ФЗ</field>
+      <field name="has_members" eval="True"/>
+      <field name="is_cooperative" eval="False"/>
+      <field name="sequence">100</field>
+    </record>
+
+    <record id="legal_form_kmns" model="coop.legal.form">
+      <field name="name">Община коренных малочисленных народов</field>
+      <field name="short_name">Община КМН</field>
+      <field name="code">kmns</field>
+      <field name="group_id" ref="legal_group_nonprofit"/>
+      <field name="law">ст. 123.16 ГК РФ</field>
+      <field name="has_members" eval="True"/>
+      <field name="is_cooperative" eval="False"/>
+      <field name="sequence">110</field>
+    </record>
+
+    <record id="legal_form_ro" model="coop.legal.form">
+      <field name="name">Религиозная организация</field>
+      <field name="short_name">РО</field>
+      <field name="code">ro</field>
+      <field name="group_id" ref="legal_group_nonprofit"/>
+      <field name="law">ст. 123.26–123.28 ГК РФ</field>
+      <field name="has_members" eval="True"/>
+      <field name="is_cooperative" eval="False"/>
+      <field name="sequence">120</field>
+    </record>
+
+    <record id="legal_form_lfond" model="coop.legal.form">
+      <field name="name">Личный фонд</field>
+      <field name="short_name">Личный фонд</field>
+      <field name="code">lfond</field>
+      <field name="group_id" ref="legal_group_nonprofit"/>
+      <field name="law">ст. 123.20-4 ГК РФ</field>
+      <field name="has_members" eval="False"/>
+      <field name="is_cooperative" eval="False"/>
+      <field name="sequence">25</field>
+    </record>
+
+    <record id="legal_form_gu" model="coop.legal.form">
+      <field name="name">Государственное учреждение</field>
+      <field name="short_name">ГУ</field>
+      <field name="code">gu</field>
+      <field name="group_id" ref="legal_group_nonprofit"/>
+      <field name="law">ст. 123.21, 123.22 ГК РФ</field>
+      <field name="has_members" eval="False"/>
+      <field name="is_cooperative" eval="False"/>
+      <field name="sequence">130</field>
+    </record>
+
+    <record id="legal_form_mu" model="coop.legal.form">
+      <field name="name">Муниципальное учреждение</field>
+      <field name="short_name">МУ</field>
+      <field name="code">mu</field>
+      <field name="group_id" ref="legal_group_nonprofit"/>
+      <field name="law">ст. 123.21, 123.22 ГК РФ</field>
+      <field name="has_members" eval="False"/>
+      <field name="is_cooperative" eval="False"/>
+      <field name="sequence">140</field>
+    </record>
+
   </data>
 
   <!-- Правки справочника для баз, где он уже загружен: записи выше под

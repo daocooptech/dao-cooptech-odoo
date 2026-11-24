@@ -26,7 +26,7 @@ FORM_PROFILE = {
     'pk': 'pk', 'artel': 'pk',
     'spk': 'agri', 'sppk': 'agri', 'skpk': 'agri',
     'kpk': 'credit',
-    'zhsk': 'housing', 'gsk': 'housing',
+    'zhsk': 'housing', 'gsk': 'housing', 'zhk': 'housing',
 }
 
 # Ассоциированный член — институт закона о сельхозкооперации (решение 679).

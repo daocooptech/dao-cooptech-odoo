@@ -38,9 +38,9 @@
           <div class="o_coop_legal_head">
           <group>
             <group string="Что выбрано">
-              <field name="economic_form_id"
+              <field name="economic_form_id" widget="coop_many2one_all"
                      options="{'no_create': True, 'no_open': True}"/>
-              <field name="economic_model_id"
+              <field name="economic_model_id" widget="coop_many2one_all"
                      context="{'coop_regime_only': True}"
                      domain="[('form_id', '=', economic_form_id)]"
                      invisible="not economic_form_id"

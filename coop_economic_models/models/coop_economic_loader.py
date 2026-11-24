@@ -16,6 +16,7 @@ import re
 from odoo import api, fields, models
 
 from ..data import legal_content, legal_rows
+from .coop_economic_model import FORM_GROUPS
 
 _logger = logging.getLogger(__name__)
 
@@ -53,13 +54,16 @@ class CoopEconomicLoader(models.AbstractModel):
         """Формы без режима: имя — название первой строки без хвоста режима."""
         Form = self.env['coop.economic.form'].sudo()
         by_key = {}
+        groups = [code for code, _label in FORM_GROUPS]
         for _key, card_key, _regime, name, _summary in legal_rows.ROWS:
             if card_key in by_key:
                 continue
             values = {
                 'key': card_key,
                 'name': REGIME_TAIL.sub('', name),
-                'sequence': (len(by_key) + 1) * 10,
+                # Родственные формы — рядом: список показывается целиком.
+                'sequence': (groups.index(legal_content.FORM_CARDS[card_key]['group'])
+                             * 1000 + (len(by_key) + 1) * 10),
             }
             form = Form.with_context(active_test=False).search(
                 [('key', '=', card_key)], limit=1)

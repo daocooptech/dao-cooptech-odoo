@@ -44,7 +44,7 @@
                   </div>
                   <div class="coop-add_field">
                     <label for="form_id" string="Правовая форма"/>
-                    <field name="form_id" nolabel="1" domain="[('group_id.code', '=', group_code), ('code', '!=', 'platform')]"
+                    <field name="form_id" nolabel="1" widget="coop_many2one_all" domain="[('group_id.code', '=', group_code), ('code', '!=', 'platform')]"
                            options="{'no_create': True, 'no_open': True}"/>
                   </div>
                 </div>

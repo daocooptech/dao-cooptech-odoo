@@ -333,6 +333,36 @@ def _members(env, org):
         ('partner_id.is_company', '=', False)]).partner_id
 
 
+# Формы, которых до № 487 у проектов не было: проект организации такой
+# формы стоял на чужой.
+LATE_FORMS = ('zao', 'oao', 'artel', 'zhsk', 'gsk', 'skpk', 'union', 'soyuz',
+              'tszh', 'tsn', 'snt', 'uchrezhdenie')
+
+
+def align_economic_forms(env):
+    """Форма проекта — по форме инициатора, где справочник её догнал.
+
+    Только демо-проекты и только там, где режим не той формы."""
+    Card = env['coop.project'].sudo().with_context(tracking_disable=True)
+    Model = env['coop.economic.model'].sudo()
+    done = 0
+    for card in Card.search(DEMO + [
+            ('partner_id.coop_legal_form_id.code', 'in', LATE_FORMS)]):
+        form = card.partner_id.coop_legal_form_id
+        if card.economic_model_id.legal_form_id == form:
+            continue
+        models = Model.search([('legal_form_id', '=', form.id)], order='id')
+        if models:
+            model = models[card.id % len(models)]
+            values = {'economic_model_id': model.id}
+            if card.economic_scheme_id not in model.scheme_ids:
+                values['economic_scheme_id'] = False
+            card.write(values)
+            done += 1
+    _logger.info('Форма проекта по форме инициатора: %s', done)
+    return done
+
+
 def _economic_model(env, card, seed):
     """Экономическая модель — по правовой форме инициатора, у людей — по виду."""
     if card.economic_model_id:
