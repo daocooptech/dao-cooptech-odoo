@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Страница «Добавить организацию» по дизайн-системе (`OrgAddPage`, решение
+    625): слева разделы с номерами, справа живая плитка каталога, готовность
+    и кнопка. Организация появляется только по «Создать организацию».
+  -->
+  <record id="view_coop_org_add" model="ir.ui.view">
+    <field name="name">coop.org.add.form</field>
+    <field name="model">coop.org.add</field>
+    <field name="arch" type="xml">
+      <form string="Добавить организацию" class="o_coop_add_form">
+        <sheet>
+          <field name="inn_lookup" invisible="1"/>
+          <field name="card_label" invisible="1"/>
+          <div class="coop-add_header">
+            <h1>Новая организация</h1>
+            <p class="coop-add_intro">
+              Организация появится в каталоге, когда вы нажмёте «Создать
+              организацию». Вы станете её уполномоченным и сможете
+              действовать от её имени.
+            </p>
+          </div>
+          <div class="coop-add">
+            <div class="coop-add_main">
+              <section class="coop-add_sec" name="add_kind">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 1, 'fields': ['group_code', 'form_id']}"/>
+                  <div>
+                    <h2>Какая организация</h2>
+                    <p>От правовой формы зависят правила: кто состоит, кто решает и что делят.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_field">
+                    <field name="group_code" nolabel="1" widget="coop_choice_cards"
+                           options="{'notes': {
+                             'cooperative': 'Состав — пайщики',
+                             'commercial': 'Состав — сотрудники',
+                             'nonprofit': 'Состав — участники',
+                             'decentralized': 'Состав — участники'}}"/>
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="form_id" string="Правовая форма"/>
+                    <field name="form_id" nolabel="1" domain="[('group_id.code', '=', group_code), ('code', '!=', 'platform')]"
+                           options="{'no_create': True, 'no_open': True}"/>
+                  </div>
+                </div>
+              </section>
+
+              <section class="coop-add_sec" name="add_details">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 2, 'fields': ['name', 'inn', 'ogrn']}"/>
+                  <div>
+                    <h2>Реквизиты</h2>
+                    <p>По ИНН организацию узнают в сделках и документах.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_pair o_coop_org_inn">
+                    <div class="coop-add_field">
+                      <label for="inn" string="ИНН"/>
+                      <field name="inn" nolabel="1" placeholder="10 или 12 цифр"/>
+                    </div>
+                    <button name="action_fill_by_inn" type="object" class="btn btn-secondary"
+                            string="Заполнить по ИНН" invisible="not inn_lookup"/>
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="name" string="Название"/>
+                    <field name="name" nolabel="1" placeholder="Как в уставе: ПК «Родник»"/>
+                  </div>
+                  <div class="coop-add_row">
+                  <div class="coop-add_field">
+                    <label for="kpp" string="КПП"/>
+                    <field name="kpp" nolabel="1" />
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="ogrn" string="ОГРН"/>
+                    <field name="ogrn" nolabel="1" />
+                  </div>
+                  </div>
+                  <div class="coop-add_row">
+                  <div class="coop-add_field">
+                    <label for="registered_on" string="Зарегистрирована"/>
+                    <field name="registered_on" nolabel="1" />
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="okved_id" string="Вид деятельности (ОКВЭД)"/>
+                    <field name="okved_id" nolabel="1" options="{'no_create': True, 'no_open': True}"/>
+                  </div>
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="charter_url" string="Устав"/>
+                    <field name="charter_url" nolabel="1" placeholder="Ссылка на действующую редакцию"/>
+                  </div>
+                </div>
+              </section>
+
+              <section class="coop-add_sec" name="add_contacts">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 3, 'fields': ['image_1920', 'city', 'phone']}"/>
+                  <div>
+                    <h2>Знак и контакты</h2>
+                    <p>Знак и город видны на карточке каталога.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_top">
+                    <div>
+                      <div class="coop-photo">
+                        <field name="image_1920" widget="image" nolabel="1"/>
+                      </div>
+                      <div class="coop-photo_hint">Знак организации</div>
+                    </div>
+                    <div class="d-flex flex-column gap-3">
+                  <div class="coop-add_field">
+                    <label for="city" string="Город"/>
+                    <field name="city" nolabel="1" widget="coop_city" placeholder="Начните вводить город"/>
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="street" string="Адрес"/>
+                    <field name="street" nolabel="1" placeholder="Улица, дом"/>
+                  </div>
+                    </div>
+                  </div>
+                  <div class="coop-add_row">
+                  <div class="coop-add_field">
+                    <label for="phone" string="Телефон"/>
+                    <field name="phone" nolabel="1" />
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="email" string="Почта"/>
+                    <field name="email" nolabel="1" />
+                  </div>
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="website" string="Сайт"/>
+                    <field name="website" nolabel="1" />
+                  </div>
+                </div>
+              </section>
+
+              <section class="coop-add_sec" name="add_about">
+                <div class="coop-add_sec_head">
+                  <field name="id" widget="coop_add_step" nolabel="1"
+                         options="{'num': 4, 'fields': ['specialization_id', 'about']}"/>
+                  <div>
+                    <h2>Чем занимается</h2>
+                    <p>По этому вас находят и решают, работать ли с вами.</p>
+                  </div>
+                </div>
+                <div class="coop-add_sec_body">
+                  <div class="coop-add_row">
+                  <div class="coop-add_field">
+                    <label for="specialization_id" string="Специализация"/>
+                    <field name="specialization_id" nolabel="1" options="{'no_create': True, 'no_open': True}"/>
+                  </div>
+                  <div class="coop-add_field" invisible="not specialization_id">
+                    <label for="category_id" string="Сфера"/>
+                    <field name="category_id" nolabel="1" readonly="1" options="{'no_create': True, 'no_open': True}"/>
+                  </div>
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="about" string="Описание"/>
+                    <field name="about" nolabel="1" placeholder="Что делаете, для кого и чем отличаетесь"/>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <aside class="coop-add_aside">
+              <div class="coop-add_preview">
+                <span>Так увидят в каталоге</span>
+                <field name="id" widget="coop_org_preview" nolabel="1"/>
+              </div>
+              <field name="id" widget="coop_add_ready" nolabel="1"
+                     options="{'title': 'Готово к созданию', 'items': [
+                       {'field': 'form_id', 'label': 'Правовая форма', 'required': True, 'anchor': 'add_kind'},
+                       {'field': 'name', 'label': 'Название', 'required': True, 'anchor': 'add_details'},
+                       {'field': 'inn', 'label': 'ИНН', 'anchor': 'add_details'},
+                       {'field': 'okved_id', 'label': 'Вид деятельности', 'anchor': 'add_details'},
+                       {'field': 'image_1920', 'label': 'Знак', 'anchor': 'add_contacts'},
+                       {'field': 'city', 'label': 'Город', 'anchor': 'add_contacts'},
+                       {'field': 'about', 'label': 'Описание', 'anchor': 'add_about'}
+                     ]}"/>
+              <div class="coop-add_acts">
+                <button name="action_create_org" type="object" string="Создать организацию"
+                        class="btn-primary"/>
+                <p class="coop-add_note">
+                  Создать можно, когда заполнено помеченное «нужно».
+                </p>
+              </div>
+            </aside>
+          </div>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- Запись подставляет `action_new_org`. -->
+  <record id="action_coop_org_add" model="ir.actions.act_window">
+    <field name="name">Добавить организацию</field>
+    <field name="res_model">coop.org.add</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="view_coop_org_add"/>
+    <field name="target">current</field>
+  </record>
+
+</odoo>

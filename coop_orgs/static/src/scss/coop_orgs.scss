@@ -262,3 +262,23 @@
     .o_list_button button { width: 100%; min-height: 44px; }
   }
 }
+
+// ── Страница «Добавить организацию» (`OrgAddPage`) ──
+.o_coop_org_preview {
+  pointer-events: none;
+
+  .o_kanban_record { width: 100%; }
+  .o_coop_org_logo > img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+.o_coop_org_inn {
+  display: flex;
+  flex-wrap: wrap;
+
+  .coop-add_field { flex: 1 1 200px; }
+}

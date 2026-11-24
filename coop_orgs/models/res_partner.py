@@ -484,6 +484,11 @@ class ResPartner(models.Model):
             self.message_subscribe(partner_ids=me.ids)
         return True
 
+    @api.model
+    def action_coop_new_org(self):
+        """«Добавить организацию» каталога — страница добавления."""
+        return self.env['coop.org.add'].action_new_org()
+
     coop_org_is_following = fields.Boolean(
         string='Я подписан на организацию', compute='_compute_org_following')
 

@@ -15,7 +15,7 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.1.4',
+    'version': '20.0.1.1.5',
     'license': 'LGPL-3',
     # Карточка организации показывает её владения — ресурсы,
     # потребности, проекты, вакансии, — поэтому модуль стоит поверх
@@ -25,12 +25,15 @@
     'data': [
         'data/coop_okved_data.xml',
         'views/coop_section_views.xml', 'views/coop_orgs_views.xml',
+        'views/coop_org_add_views.xml',
         'views/org_note_views.xml', 'views/coop_contribute_join_views.xml',
         'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_backend': [
             'coop_orgs/static/src/scss/coop_orgs.scss',
+            'coop_orgs/static/src/js/org_preview.js',
+            'coop_orgs/static/src/xml/org_preview.xml',
         ],
     },
     'installable': True,

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!-- Плитка каталога по введённому — разметкой `view_coop_orgs_kanban`. -->
+  <t t-name="coop_orgs.OrgPreview">
+    <div class="o_coop_orgs o_coop_org_preview">
+      <div class="o_kanban_record">
+        <div class="o_coop_org">
+          <div class="o_coop_org_logo o_coop_media">
+            <img t-if="this.image" t-att-src="this.image" alt=""/>
+            <span t-else="" class="o_coop_media_sign"/>
+            <span class="o_coop_locbar" t-if="this.data.city">
+              <i class="oi" data-icon="location_on" role="img" aria-label="Город"/>
+              <t t-out="this.data.city"/>
+            </span>
+          </div>
+          <div class="o_coop_org_text">
+            <div class="o_coop_org_name" t-out="this.title"/>
+            <div class="o_coop_org_kind_line" t-if="this.data.card_label">
+              <span class="o_coop_badge" t-out="this.data.card_label"/>
+            </div>
+            <div class="o_coop_org_spec" t-out="this.okved"/>
+          </div>
+        </div>
+      </div>
+    </div>
+  </t>
+
+</templates>
