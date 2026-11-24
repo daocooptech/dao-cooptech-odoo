@@ -82,10 +82,11 @@ def load_empty_leaves(env):
         if not category:
             continue
         for name, city, method, price, unit in rows:
-            if Resource.search_count([('name', '=', name), ('city', '=', city),
-                                      # № 483: рубрику могли раздробить —
-                                      # запись уже в её подрубрике.
-                                      ('category_id', 'child_of', category.id)]):
+            # По началу названия, без рубрики и города: рубрику правят
+            # `load_483` и `tidy_catalogs`, к названию дописывается хвост —
+            # и «Ищу самосвал…» заводился заново каждую выкатку (№ 483).
+            if Resource.with_context(active_test=False).search_count(
+                    [('name', '=like', name + '%')]):
                 continue
             owner = owners[rnd.randrange(len(owners))]
             wanted = name.startswith(('Ищу', 'Нужен'))

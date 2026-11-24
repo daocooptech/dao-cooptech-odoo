@@ -88,6 +88,18 @@ def _prints():
     return table
 
 
+def _file_prints():
+    """Путь → отпечаток: у одинаковых файлов разные пути, отпечаток один."""
+    table = {}
+    for dirpath, _dirs, names in os.walk(IMG_DIR):
+        for name in names:
+            if name.lower().endswith(('.jpg', '.jpeg', '.png')):
+                path = os.path.join(dirpath, name)
+                with open(path, 'rb') as fh:
+                    table[os.path.normpath(path)] = hashlib.sha1(fh.read()).hexdigest()
+    return table
+
+
 def _good_photos(env, model, field):
     """Номер записи → отпечаток снимка, который у неё стоит.
 
@@ -144,6 +156,7 @@ def _pick(name, specialization):
 def ensure_photos(env):
     """Проставить и переклеить снимки во всех каталогах."""
     ours = _prints()
+    prints = _file_prints()
     total = {'placed': 0, 'reglued': 0, 'with_mark': 0}
 
     for model, field, spec_field, reglue in CATALOGS:
@@ -186,10 +199,14 @@ def ensure_photos(env):
                     # совпадать с отпечатком файла. Метка переживает
                     # пережатие, а отпечаток — нет, и без неё каждый
                     # прогон переклеивал полторы сотни записей заново.
-                    if from_where and from_where in fit:
+                    # Сверка по содержимому: один снимок лежит в наборах
+                    # под двумя именами. Метке верим, пока под ней не лежит
+                    # чужой файл набора: загрузчик менял снимок, а метка
+                    # оставалась прежней (№ 483: у «Швеи» — коровы).
+                    if print_one in {prints.get(os.path.normpath(p)) for p in fit}:
                         continue
-                    if_ours = ours.get(print_one)
-                    if if_ours and if_ours in fit:
+                    if from_where and print_one not in ours and                             os.path.basename(from_where) in {
+                                os.path.basename(p) for p in fit}:
                         continue
 
                 path, photo = _pick(record.name, specialization)

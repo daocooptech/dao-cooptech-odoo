@@ -223,7 +223,6 @@ def _fill_values(env, by_code):
     случайных числах ничего не покажет.
     """
     Resource = env['coop.resource'].sudo()
-    rnd = random.Random(20260903)
     filled = 0
 
     for resource in Resource.search([('category_id', '!=', False)]):
@@ -231,6 +230,12 @@ def _fill_values(env, by_code):
         codes = [item.get('name') for item in definition]
         if not codes:
             continue
+        # Только пустые: раньше каждая выкатка переписывала значения всем, и
+        # тем, кто заполнил сам (№ 483, 24.11.2026). Жребий — свой у записи:
+        # общий сдвигался от любого нового объявления.
+        if any(v not in (None, False, '', []) for v in (resource.attrs or {}).values()):
+            continue
+        rnd = random.Random(20260903 + resource.id)
         values = {}
         for code in codes:
             value = _value_for(code, resource, rnd, by_code)

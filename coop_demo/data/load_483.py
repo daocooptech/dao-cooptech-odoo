@@ -740,6 +740,8 @@ def _fill(env, category):
                 new['area_m2'] = merged['area_m2'] = area
         for code in definition:
             have = merged.get(code)
+            if have is False and definition[code].get('type') == 'boolean':
+                continue
             if have not in (None, False, '', []) and \
                     not _implausible(code, have, merged, options):
                 continue
@@ -776,9 +778,12 @@ def _raw(env, resource, definition, options):
     value = (row and row[0]) or {}
     out, repaired = {}, []
     for code, item in value.items():
-        if item in (None, False, '', []):
-            continue
         kind = (definition.get(code) or {}).get('type')
+        # «Нет» у флажка — тоже ответ: иначе жребий перекидывал его заново
+        # в каждую выкатку.
+        if item in (None, '', []) and item is not False or (
+                item is False and kind != 'boolean'):
+            continue
         if kind == 'tags' and isinstance(item, str):
             labels = [x.strip() for x in item.split(',')]
             known = set(options.get(code, {}).values())

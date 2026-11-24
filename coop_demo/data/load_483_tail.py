@@ -14,6 +14,8 @@ import re
 
 from odoo.fields import Command
 
+from . import tidy_catalogs
+
 _logger = logging.getLogger(__name__)
 
 P = 'Недвижимость / '
@@ -110,6 +112,7 @@ def load_rubrics(env):
             placed += 1
         else:
             unknown.add(resource.name)
+    tidy_catalogs.move_misplaced(env)
     _logger.info('483: рубрика поставлена у %s, не нашлось: %s',
                  placed, sorted(unknown)[:10])
     return placed
@@ -174,7 +177,7 @@ def unit_for(branch, name, current):
 
 # Дороже этого за малую меру — значит, продают крупной: «4 500 ₽ / десяток».
 DEAR = {'десяток': 250, 'л': 250, 'банка': 800, 'кг': 1500}
-PACKS = (('мёд', 'банка 3 л'), ('картофел', 'мешок'), ('шерст', 'мешок'),
+PACKS = (('сыр из', 'головка'), ('мёд', 'банка 3 л'), ('картофел', 'мешок'), ('шерст', 'мешок'),
          ('молок', 'фляга'), ('варень', 'набор'), ('соленья', 'набор'))
 
 
@@ -419,5 +422,8 @@ def fill_bare(env):
 
 
 def load_tail(env):
+    tidy_catalogs.drop_repeats(env)
+    tidy_catalogs.move_misplaced(env)
     fill_bare(env)
+    tidy_catalogs.fix_prices(env)
     return fix_units(env), fix_totals(env), fix_vacancies(env)

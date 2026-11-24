@@ -877,6 +877,10 @@ def load_resources(env, extra=45):
             ], limit=1)
         if existing:
             values.pop('name', None)
+            # Цену и единицу правит `tidy_catalogs` (№ 483), снимок —
+            # `ensure_photos`: не возвращаем их в каждую выкатку.
+            for key in ('price', 'price_kind', 'price_unit_label', 'image_1920'):
+                values.pop(key, None)
             # Владельца у найденной не переписываем: иначе запись
             # кочевала бы от участника к участнику с каждой выкаткой.
             if not row['owner']:

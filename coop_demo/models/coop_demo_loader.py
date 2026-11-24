@@ -515,6 +515,8 @@ class CoopDemoLoader(models.AbstractModel):
         # названия задаёт занятость и график.
         # Услуги организаций (хвост 483) — до полей по профессии.
         load_483_tail.load_services(self.env)
+        from ..data import tidy_catalogs
+        tidy_catalogs.fix_services(self.env)
         from ..data import load_483_work
         load_483_work.load_483_work(self.env)
         # Единицы, опт, занятость в названии — последними.

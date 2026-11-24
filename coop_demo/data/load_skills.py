@@ -131,9 +131,9 @@ def load_skills(env):
             # тоже: часть предложений отдана организациям как услуги
             # (`load_orgs.give_services`), и возврат их людям по макету
             # заставлял отдавать по 89 заново в каждую выкатку.
-            values.pop('state', None)
-            values.pop('partner_id', None)
-            existing.write(values)
+            # Остальное — тоже: название, ставку и снимок правят шаги ниже
+            # (`tidy_catalogs`, `ensure_photos`), и возврат по макету ставил
+            # швее снимок коров (№ 483). Заведённое не переписываем.
             updated += 1
         else:
             Offer.create(values)
@@ -506,9 +506,8 @@ def _fill_empty_specializations(env, Offer, Partner, Skill, skill_type):
             if existing:
                 # Владельца и состояние не переписываем — как и выше в
                 # `load_skills`: их решают раздача и ступени.
-                values.pop('partner_id', None)
-                values.pop('state', None)
-                existing.write(values)
+                # Прочее — тоже: снимок и ставку правят шаги ниже (№ 483).
+                pass
             else:
                 Offer.create(values)
                 created += 1

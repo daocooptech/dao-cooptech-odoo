@@ -254,6 +254,10 @@ def load_vacancies(env, extra=45):
             # Занятость и оплату, которой нет в макете, дописывает
             # `load_483_work` — не возвращаем их в каждую выкатку.
             values.pop('employment', None)
+            # Название и снимок — тоже: их правят `tidy_names`,
+            # `load_483_tail` и `ensure_photos` (№ 483).
+            values.pop('name', None)
+            values.pop('image_1920', None)
             for key in ('pay_from', 'pay_to'):
                 if not values[key]:
                     values.pop(key)
