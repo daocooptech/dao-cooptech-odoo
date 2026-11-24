@@ -452,7 +452,7 @@
   </record>
 
   <!-- Владелец 24.11.2026: НМА — подкаталог «Ресурсов», «Мои НМА» —
-       вкладка «Моих ресурсов», «Лицензии» — пункт после операторов ЦФА. -->
+       вкладка «Моих ресурсов», «Лицензии» — пункт после «Моих ресурсов». -->
   <menuitem id="menu_coop_intangibles_root" name="Нематериальные активы"
             parent="coop_resources.menu_coop_resources_root"
             action="action_coop_intangibles" sequence="16"/>

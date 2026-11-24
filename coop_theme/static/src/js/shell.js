@@ -461,7 +461,6 @@ const SUBNAV_EXACT = {
     "Архив уступок": "archive-off",
     // Цифровые активы.
     "Цифровые активы": "certificate",
-    "Операторы ЦФА": "building-arch",
     // Образование.
     "Каталог курсов": "books",
     "Мои курсы": "backpack",

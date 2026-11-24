@@ -383,7 +383,8 @@
   </record>
 
   <!-- Владелец 24.11.2026: ЦФА — подкаталог «Ресурсов», сразу за НМА;
-       выпуски и купленное — вкладки «Моих ресурсов», операторы — пункт. -->
+       выпуски и купленное — вкладки «Моих ресурсов»; операторы из меню
+       убраны: платформа сама оператор, справочник — для поля выпуска. -->
   <menuitem id="menu_coop_cfa_root" name="Цифровые активы"
             parent="coop_resources.menu_coop_resources_root"
             action="action_coop_cfa_issue" sequence="17"/>
@@ -393,9 +394,6 @@
   <menuitem id="menu_coop_cfa_holding" name="ЦФА"
             parent="coop_resources.menu_coop_my_resources"
             action="action_coop_cfa_holding" sequence="30"/>
-  <menuitem id="menu_coop_cfa_operator" name="Операторы ЦФА"
-            parent="coop_resources.menu_coop_resources_root"
-            action="action_coop_cfa_operator" sequence="40"/>
 
   <!-- Аналитика проекта, вкладка «ЦФА» (№ 395). -->
   <record id="view_coop_project_form_cfa_analytics" model="ir.ui.view">
