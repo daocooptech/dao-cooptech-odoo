@@ -496,7 +496,7 @@ def _values(record, rnd):
     text = ' '.join([title] + [n.lower() for n in record.skill_ids.mapped('name')])
     # В умениях буквы бывают и кириллицей.
     named = [c for c, rx in (('B', 'b|в'), ('C', 'c|с'), ('CE', 'ce|се'), ('D', 'd|д'))
-             if re.search(r'категори[яи] (%s)' % rx, text)]
+             if re.search(r'категори[яи] (%s)\b' % rx, text)]
     if named and record.coop_specialization_id.name == 'Водитель':
         out['w_licence'] = [_slug(c) for c in named]
         fit = {'B': ['Легковой', 'Лёгкий коммерческий'],
@@ -564,7 +564,7 @@ def _fill_vacancy_terms(env):
         if not vacancy.work_schedule:
             values['work_schedule'] = (
                 'rotation' if 'вахт' in text else
-                'shift' if re.search(r'смен(ами|ы|а|у)', text) else
+                'shift' if re.search(r'\bсмен(ами|ы|а|у)\b', text) else
                 'fixed' if 'на полный день' in title and 'вахт' not in text else
                 'flexible' if remote or once or part else
                 rnd.choice(['fixed', 'fixed', 'shift', 'shift', 'flexible']))

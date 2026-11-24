@@ -11,6 +11,11 @@ def migrate(cr, version):
             UPDATE %s SET attrs = NULL WHERE coop_specialization_id IN (
                 SELECT id FROM coop_specialization WHERE name = 'Водитель')
         """ % table)
+    # График, названный в тексте словами «сменами», «смены 2/2».
+    cr.execute("""
+        UPDATE coop_vacancy SET work_schedule = NULL, work_hours = NULL
+         WHERE description ~* '(сменами|смены [0-9]|смены в )'
+    """)
     env = api.Environment(cr, SUPERUSER_ID, {"tracking_disable": True})
     env.invalidate_all()
     load_483_work.load_483_work(env)
