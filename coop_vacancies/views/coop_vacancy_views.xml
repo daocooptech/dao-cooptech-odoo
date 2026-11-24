@@ -257,11 +257,11 @@
                   </div>
                   <div invisible="not benefit_ids">
                     <dt>Что получают</dt>
-                    <dd><field name="benefit_ids" widget="many2many_tags" readonly="1" nolabel="1"/></dd>
+                    <dd><field name="benefit_text" readonly="1" nolabel="1"/></dd>
                   </div>
                   <div invisible="not audience_ids">
                     <dt>Подходит для</dt>
-                    <dd><field name="audience_ids" widget="many2many_tags" readonly="1" nolabel="1"/></dd>
+                    <dd><field name="audience_text" readonly="1" nolabel="1"/></dd>
                   </div>
                 </dl>
                 <p class="coop-price_note" invisible="not reward_note_shown">

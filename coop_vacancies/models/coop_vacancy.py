@@ -200,6 +200,17 @@ class CoopVacancy(models.Model):
         'coop.vacancy.term', 'coop_vacancy_audience_rel', 'vacancy_id',
         'term_id', string='Подходит для',
         domain=[('kind', '=', 'audience')])
+    # На плашке витрины — словами: метка обрезалась по ширине плашки.
+    benefit_text = fields.Char(
+        string='Что получают', compute='_compute_terms_text')
+    audience_text = fields.Char(
+        string='Кому подходит', compute='_compute_terms_text')
+
+    @api.depends('benefit_ids.name', 'audience_ids.name')
+    def _compute_terms_text(self):
+        for record in self:
+            record.benefit_text = ', '.join(record.benefit_ids.mapped('name'))
+            record.audience_text = ', '.join(record.audience_ids.mapped('name'))
 
     # ── Вознаграждение ───────────────────────────────────────────────────
     reward_kind = fields.Selection([

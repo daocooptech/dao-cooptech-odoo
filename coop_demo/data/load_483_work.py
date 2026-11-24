@@ -315,6 +315,8 @@ SETS = {
 # не спрашивают.
 ALLOWED = {
     ('Тракторист', 'w_licence'): ['B', 'C', 'Тракторные (Гостехнадзор)'],
+    ('Водитель', 'w_vehicle'): ['Легковой', 'Лёгкий коммерческий', 'Грузовой до 10 т',
+                                'Фура', 'Автобус'],
     ('Водитель', 'w_licence'): ['B', 'BE', 'C', 'CE', 'D', 'M'],
     ('Охранник, контролёр', 'w_licence'): ['B'],
     ('Ветеринар', 'w_animals'): ['Коровы', 'Козы и овцы', 'Свиньи', 'Птица', 'Лошади',
@@ -490,6 +492,18 @@ def _values(record, rnd):
                 codes, min(len(codes), rnd.choice([1, 2, 2, 3])))))
             value = [c for c in codes if c in value]      # порядок справочника
         out[code] = value
+    # Категории, названные в умениях, — и есть права: транспорт под них.
+    text = ' '.join([title] + [n.lower() for n in record.skill_ids.mapped('name')])
+    # В умениях буквы бывают и кириллицей.
+    named = [c for c, rx in (('B', 'b|в'), ('C', 'c|с'), ('CE', 'ce|се'), ('D', 'd|д'))
+             if re.search(r'категори[яи] (%s)' % rx, text)]
+    if named and record.coop_specialization_id.name == 'Водитель':
+        out['w_licence'] = [_slug(c) for c in named]
+        fit = {'B': ['Легковой', 'Лёгкий коммерческий'],
+               'C': ['Грузовой до 10 т'], 'CE': ['Фура'], 'D': ['Автобус']}
+        out['w_vehicle'] = [_slug(rnd.choice(fit[c])) for c in named]
+        if 'CE' not in named and out.get('w_route') == _slug('Международные'):
+            out['w_route'] = _slug('По области')
     # Права — под транспорт: фура без CE и автобус без D не бывают.
     if out.get('w_route') == _slug('Международные'):
         out['w_vehicle'] = [_slug('Фура')]
@@ -500,6 +514,13 @@ def _values(record, rnd):
         if vehicle in vehicles:
             out['w_licence'] = list(dict.fromkeys(
                 (out.get('w_licence') or []) + [vehicles[vehicle]]))
+    if record.coop_specialization_id.name == 'Водитель':
+        # Легковая категория есть у любого водителя; опасный груз — грузовик.
+        licences = (out.get('w_licence') or []) + ['b']
+        out['w_licence'] = [c for c in ('b', 'be', 'c', 'ce', 'd', 'm')
+                            if c in licences]
+        if not {'c', 'ce'} & set(out['w_licence']):
+            out.pop('w_adr', None)
     if out.get('w_acc_area') and _slug('Весь учёт') in out['w_acc_area']:
         out['w_acc_area'] = [_slug('Весь учёт')]
     if not out.get('w_vehicle') or _slug('Фура') not in out['w_vehicle']:
