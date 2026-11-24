@@ -83,7 +83,9 @@ def load_empty_leaves(env):
             continue
         for name, city, method, price, unit in rows:
             if Resource.search_count([('name', '=', name), ('city', '=', city),
-                                      ('category_id', '=', category.id)]):
+                                      # № 483: рубрику могли раздробить —
+                                      # запись уже в её подрубрике.
+                                      ('category_id', 'child_of', category.id)]):
                 continue
             owner = owners[rnd.randrange(len(owners))]
             wanted = name.startswith(('Ищу', 'Нужен'))
