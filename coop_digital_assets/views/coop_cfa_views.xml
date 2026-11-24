@@ -382,7 +382,11 @@
     </field>
   </record>
 
-  <menuitem id="menu_coop_cfa_root" name="Цифровые активы" sequence="135"/>
+  <!-- Владелец 24.11.2026: ЦФА — подкаталог «Ресурсов», сразу за НМА;
+       третий уровень — вкладки на странице, как «Мои проекты». -->
+  <menuitem id="menu_coop_cfa_root" name="Цифровые активы"
+            parent="coop_resources.menu_coop_resources_root"
+            action="action_coop_cfa_issue" sequence="17"/>
   <menuitem id="menu_coop_cfa_issue" name="Каталог ЦФА"
             parent="menu_coop_cfa_root" action="action_coop_cfa_issue" sequence="10"/>
   <menuitem id="menu_coop_my_cfa_issue" name="Мои выпуски"

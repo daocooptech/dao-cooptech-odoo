@@ -149,6 +149,25 @@
     min-width: 0;
     padding: 6px 8px;
   }
+
+  // Три вкладки и больше («Каталог НМА | Мои НМА | Лицензии», 24.11.2026)
+  // в 188 точках в одну строку не встают: подпись переносится внутри
+  // своей кнопки, ряд остаётся один.
+  &:has(.coop-seg_item:nth-child(3)) .coop-seg_item {
+    padding: 5px 4px;
+    white-space: normal;
+    line-height: 1.2;
+    text-align: center;
+  }
+
+  // Четыре и больше («Каталог ЦФА | Мои выпуски | Мои ЦФА | Операторы») —
+  // два ряда по два: длинное слово внутри кнопки не переносится.
+  &:has(.coop-seg_item:nth-child(4)) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    .coop-seg_item { white-space: nowrap; padding: 6px 6px; }
+  }
 }
 
 .o_coop_filters_none {

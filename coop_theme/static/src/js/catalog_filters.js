@@ -144,7 +144,11 @@ export class CoopFilters extends Component {
                 return [];
             }
             const all = this.menus.getAll();
-            const own = all.find((menu) => menu.actionID === actionId && menu.id !== menu.appID);
+            // У подраздела с вкладками («Нематериальные активы» в «Ресурсах»,
+            // 24.11.2026) то же действие, что у первой вкладки, — берём
+            // нижний пункт, без вложенных, иначе вкладок не найти.
+            const same = all.filter((menu) => menu.actionID === actionId && menu.id !== menu.appID);
+            const own = same.find((menu) => !(menu.children || []).length) || same[0];
             const parent = own && all.find((menu) => (menu.children || []).includes(own.id));
             if (!parent || parent.id === parent.appID) {
                 return [];

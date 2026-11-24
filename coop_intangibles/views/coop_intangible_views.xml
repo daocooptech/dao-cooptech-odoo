@@ -451,8 +451,11 @@
     </field>
   </record>
 
+  <!-- Владелец 24.11.2026: НМА — подкаталог «Ресурсов», третий уровень —
+       вкладки на странице (`CoopTabs`, `subtabs`), как «Мои проекты». -->
   <menuitem id="menu_coop_intangibles_root" name="Нематериальные активы"
-            sequence="140"/>
+            parent="coop_resources.menu_coop_resources_root"
+            action="action_coop_intangibles" sequence="16"/>
   <menuitem id="menu_coop_intangibles" name="Каталог НМА"
             parent="menu_coop_intangibles_root"
             action="action_coop_intangibles" sequence="10"/>
