@@ -385,3 +385,17 @@ class TestCrowdCard(BountyCase):
                     other.coop_token_symbol = bad
         self.assertEqual(self.env['coop.project']._coop_ticker_from('Пасека на паях — Тюмень'), 'PNPT')
         self.assertEqual(self.env['coop.project']._coop_ticker_from('Пекарня'), 'PEK')
+
+    def test_token_by_choice(self):
+        """Токен — по выбору: без него вкладки нет, с названием — есть."""
+        self.assertTrue(self.project.coop_has_token)
+        other = self.env['coop.project'].create({'name': 'Без токена', 'partner_id': self.org.id})
+        self.assertFalse(other.coop_has_token)
+        other.coop_has_token = True
+        self.assertTrue(other.coop_has_token)
+        other.coop_token_name = 'Токен другого'
+        self.assertTrue(other.coop_has_token)
+        self.env['coop.project.token.move'].create({
+            'project_id': self.project.id, 'partner_id': self.person.id, 'amount': 10})
+        with self.assertRaises(ValidationError):
+            self.project.coop_has_token = False

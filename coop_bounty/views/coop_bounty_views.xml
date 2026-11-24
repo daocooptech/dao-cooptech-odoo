@@ -558,7 +558,7 @@
     <field name="inherit_id" ref="coop_projects.view_coop_project_form"/>
     <field name="arch" type="xml">
       <xpath expr="//page[@name='description']" position="after">
-        <page string="Токен проекта" name="crowd_token">
+        <page string="Токен проекта" name="crowd_token" invisible="not coop_has_token">
           <p class="text-muted">Задачи проекта в краудсорсинге оплачиваются только его
              токенами. Экономику своего токена проект раскрывает сам — в рамках законов
              своей страны.</p>
@@ -570,6 +570,39 @@
           <field name="coop_token_economy"
                  placeholder="Что даёт токен, чем обеспечен, как и когда погашается"/>
         </page>
+      </xpath>
+      <!-- Включает токен инициатор; остальным видна только сама вкладка. -->
+      <xpath expr="//page[@name='description']//field[@name='need_count']" position="before">
+        <field name="coop_has_token" widget="boolean_toggle" invisible="not coop_can_edit"/>
+      </xpath>
+    </field>
+  </record>
+
+  <!-- То же на странице «Добавить проект» (`ProjectAddPage`). -->
+  <record id="view_coop_project_add_crowd_token" model="ir.ui.view">
+    <field name="name">coop.project.add.crowd.token</field>
+    <field name="model">coop.project</field>
+    <field name="inherit_id" ref="coop_projects.view_coop_project_add"/>
+    <field name="arch" type="xml">
+      <xpath expr="//section[@name='add_money']//div[hasclass('coop-add_sec_body')]" position="inside">
+        <div class="d-flex align-items-center gap-2">
+          <field name="coop_has_token" widget="boolean_toggle" nolabel="1"/>
+          <label for="coop_has_token" string="Проект выпускает токен"/>
+        </div>
+        <p class="coop-add_help" invisible="coop_has_token">
+          Необязательно. Токеном проект оплачивает задачи в краудсорсинге.
+        </p>
+        <div class="coop-add_row" invisible="not coop_has_token">
+          <div class="coop-add_field">
+            <label for="coop_token_name" string="Название токена"/>
+            <field name="coop_token_name" nolabel="1"
+                   placeholder="Например: токен на продукцию проекта"/>
+          </div>
+          <div class="coop-add_field">
+            <label for="coop_token_symbol" string="Тикер"/>
+            <field name="coop_token_symbol" nolabel="1" placeholder="Например: BREAD"/>
+          </div>
+        </div>
       </xpath>
     </field>
   </record>

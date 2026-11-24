@@ -151,6 +151,12 @@ class CoopProjectToken(models.Model):
         action['name'] = _('Помощь проекту')
         return action
 
+    # Токен — по выбору проекта, и вкладка «Токен проекта» есть только там,
+    # где он выпущен (владелец 24.11.2026): у остальных она стояла пустой.
+    coop_has_token = fields.Boolean(
+        string='Проект выпускает токен', compute='_compute_coop_has_token',
+        store=True, readonly=False, index=True,
+        help='Свой токен нужен, чтобы оплачивать задачи в краудсорсинге.')
     coop_token_name = fields.Char(
         string='Токен проекта',
         help='Как проект называет свой токен. Им оплачиваются задачи проекта в краудсорсинге.')
@@ -166,6 +172,20 @@ class CoopProjectToken(models.Model):
     coop_token_unit = fields.Char(
         string='Подпись суммы', compute='_compute_coop_token_unit',
         help='Как подписывать суммы токенов проекта: тикер, как на биржах (120 COOP).')
+
+    @api.depends('coop_token_name')
+    def _compute_coop_has_token(self):
+        for project in self:
+            project.coop_has_token = bool(
+                project.coop_token_name) or project.coop_has_token
+
+    @api.constrains('coop_has_token')
+    def _check_coop_has_token(self):
+        for project in self:
+            if not project.coop_has_token and project.coop_token_issued:
+                raise ValidationError(_(
+                    'Токены проекта «%s» уже начислены за задачи — отказаться '
+                    'от токена нельзя.') % project.name)
 
     def _compute_coop_token_issued(self):
         Move = self.env['coop.project.token.move'].sudo()
@@ -318,8 +338,8 @@ class CoopBountyTaskCrowd(models.Model):
                 raise UserError(_('Укажите проект: задачи краудсорсинга оплачиваются токенами проекта.'))
             if not self.project_id.coop_token_name:
                 raise UserError(_(
-                    'Сначала опишите токен проекта «%s» — название и экономику токена, '
-                    'вкладка «Токен проекта» в карточке проекта.') % self.project_id.name)
+                    'Сначала опишите токен проекта «%s»: включите «Проект выпускает '
+                    'токен» в карточке проекта и заполните вкладку «Токен проекта».') % self.project_id.name)
         method = self.env['coop.bounty.method'].sudo().search([('code', '=', code)], limit=1)
         self.write({'allowed_method_ids': [(6, 0, method.ids)], 'share_percent': 0})
         return super()._coop_check_publishable()
