@@ -20,6 +20,7 @@
 человек» пропускаются.
 """
 import logging
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ def load_project_follows(env, login='dashkevich'):
         return 0
     Project = env['coop.project'].sudo()
     Follower = env['mail.followers'].sudo()
-    projects = Project.search([])
+    projects = Project.search(DEMO + [])
     if not projects:
         return 0
 
@@ -50,7 +51,7 @@ def load_project_follows(env, login='dashkevich'):
         add(project.id, project.partner_id.id)
 
     for contribution in env['coop.project.contribution'].sudo().search(
-            [('state', 'not in', GONE)]):
+            DEMO + [('state', 'not in', GONE)]):
         add(contribution.project_id.id, contribution.partner_id.id)
 
     showcase = env['res.users'].sudo().search(

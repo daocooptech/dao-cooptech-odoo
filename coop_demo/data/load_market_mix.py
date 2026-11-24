@@ -19,6 +19,7 @@ import random
 from datetime import datetime, timedelta
 
 from . import load_project_tasks
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -77,7 +78,7 @@ def _mix_tasks(env):
         # Только проекты на общих этапах платформы: свой канбан (доска
         # «MVP DAO COOPTECH») не демо, его карточки не переоткрываем —
         # 10.11 и 14.11 так ушли в «Идею» сотня сделанных задач.
-        tops = Task.search([
+        tops = Task.search(DEMO + [
             ('project_id.stage_id', '=', stage.id),
             ('project_id.type_ids', 'in', list(stages.values())),
             ('parent_id', '=', False), ('state', '=', '1_done')])

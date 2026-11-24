@@ -37,6 +37,7 @@
 """
 import logging
 import random
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -622,7 +623,7 @@ def dedupe_resource_titles(env):
     """
     Resource = env['coop.resource'].sudo().with_context(active_test=False,
                                                         tracking_disable=True)
-    records = Resource.search([], order='id')
+    records = Resource.search(DEMO + [], order='id')
     taken = set()
     by_name = {}
     for record in records:

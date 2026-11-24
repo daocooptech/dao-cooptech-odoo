@@ -26,6 +26,7 @@ import logging
 import random
 
 from odoo import fields
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -71,7 +72,7 @@ def load_intangible_needs(env):
         _logger.info('Потребности в НМА: активов нет, пропуск')
         return
 
-    projects = Project.search([('state', 'in', OPEN_STATES)], limit=600)
+    projects = Project.search(DEMO + [('state', 'in', OPEN_STATES)], limit=600)
     have = set(Need.search([('project_id', 'in', projects.ids)]).mapped('project_id').ids)
 
     made = closed = cancelled = 0
@@ -124,8 +125,8 @@ def shrink_intangible_needs(env):
         [('need_intangible_id', '!=', False)]).mapped('need_intangible_id').ids)
     drop = Need.browse()
     reprice = []
-    for project in Need.search([]).mapped('project_id'):
-        rows = Need.search([('project_id', '=', project.id)], order='id')
+    for project in Need.search(DEMO + []).mapped('project_id'):
+        rows = Need.search(DEMO + [('project_id', '=', project.id)], order='id')
         names, kept, cancelled_kept = set(), 0, False
         base = resources_total(project)
         for need in rows:

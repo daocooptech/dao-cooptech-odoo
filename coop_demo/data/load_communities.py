@@ -22,6 +22,7 @@ import json
 import logging
 import os
 import random
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -234,11 +235,11 @@ def _project_for(Project, name, city):
     key = name if name in PROJECT_WORDS else name.split(' — ')[0]
     for word in PROJECT_WORDS.get(key, []):
         same_city = Project.search(
-            [('name', 'ilike', word), ('city', '=', city)], limit=1, order='id')
+            DEMO + [('name', 'ilike', word), ('city', '=', city)], limit=1, order='id')
         if same_city:
             return same_city
     for word in PROJECT_WORDS.get(key, []):
-        project = Project.search([('name', 'ilike', word)], limit=1, order='id')
+        project = Project.search(DEMO + [('name', 'ilike', word)], limit=1, order='id')
         if project:
             return project
     return Project.browse()

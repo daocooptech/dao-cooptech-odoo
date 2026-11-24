@@ -12,6 +12,7 @@ import datetime
 import logging
 import random
 import re
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -91,7 +92,7 @@ def fill_resource_terms(env):
     Term = env['coop.resource.term'].sudo()
     # Строки, заведённые до наполнения, — у всех объявлений со способами.
     env['coop.resource'].sudo().with_context(active_test=False).search(
-        [('method_ids', '!=', False), ('term_ids', '=', False)])._coop_sync_terms()
+        DEMO + [('method_ids', '!=', False), ('term_ids', '=', False)])._coop_sync_terms()
     empty = Term.search([]).filtered(lambda t: not (t.price or t.deposit or t.min_term
                                                     or t.note or t.price_unit_label))
     filled = 0
@@ -283,7 +284,7 @@ def fill_project_terms(env):
                              ('project_directions', '=', False)]):
         resource = term.resource_id
         rnd = random.Random('project-scope:%s' % resource.id)
-        near = Project.search([('city', '=', resource.city),
+        near = Project.search(DEMO + [('city', '=', resource.city),
                                ('state', 'in', ('gathering', 'running'))],
                               order='id', limit=12) if resource.city else Project
         vals = {}

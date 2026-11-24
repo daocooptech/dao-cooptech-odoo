@@ -39,6 +39,7 @@ from odoo import fields
 
 from . import load_intangible_needs, load_media_gallery, load_project_deals
 from . import load_project_needs, load_projects
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -160,7 +161,7 @@ def load_work_cards(env):
     Card = env['coop.project'].sudo().with_context(tracking_disable=True)
     linked = set(Card.with_context(active_test=False).search(
         [('project_id', '!=', False)]).mapped('project_id').ids)
-    work = Task.search([('id', 'not in', list(linked)),
+    work = Task.search(DEMO + [('id', 'not in', list(linked)),
                         ('partner_id', '!=', False)], order='id')
 
     people = env['res.partner'].sudo().search([

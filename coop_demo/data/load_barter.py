@@ -20,6 +20,7 @@ import logging
 import random
 import re
 from datetime import date, datetime, timedelta
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -355,7 +356,7 @@ def load_barter(env, login='dashkevich'):
 
     # Вещи из «Ресурсов» — со снимком и владельцем.
     Resource = env['coop.resource'].sudo()
-    resources = Resource.search([('state', '=', 'published'), ('listing_type', '=', 'offer'),
+    resources = Resource.search(DEMO + [('state', '=', 'published'), ('listing_type', '=', 'offer'),
                                  ('resource_type', 'in', ('material',)),
                                  ('owner_id', '!=', False), ('image_1920', '!=', False)])
     # Только вещи с собственным названием: шаблонные «Сдам бетономешалку на

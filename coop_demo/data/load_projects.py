@@ -26,6 +26,7 @@ from .dao_projects import (DAO_FROM_MOCKUP, DAO_PROJECTS, IT_SUBCATEGORIES,
                            MOCKUP_CATEGORY_FIX)
 
 from odoo import fields
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -309,7 +310,7 @@ def load_projects(env, extra=100):
                 with open(photo, 'rb') as fh:
                     values['image_1920'] = base64.b64encode(fh.read()).decode()
 
-        project = Project.search([('import_key', '=', key)], limit=1)
+        project = Project.search(DEMO + [('import_key', '=', key)], limit=1)
         if project:
             # «Нужно» у проекта со вкладами не переписываем: вклады
             # построены под него один раз, а шаг по порядковому номеру
@@ -478,7 +479,7 @@ def repair_scales(env):
     # миллионов, и тридцать шесть это щедрый запас.
     limit = REQUIRED_STEPS[-1] * 3
     projects = env['coop.project'].sudo().search(
-        [('required_total', '>', limit)])
+        DEMO + [('required_total', '>', limit)])
     fixed = 0
     for project in projects:
         key = project.import_key or ''

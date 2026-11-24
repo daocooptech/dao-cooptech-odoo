@@ -19,6 +19,7 @@ import random
 from odoo.addons.coop_demo.data.load_484 import erp_category_ids, from_erp
 from odoo.addons.coop_resources.models.coop_resource_tree import (
     DISSOLVE_398, RENAMES, RENAMES_398)
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -712,7 +713,7 @@ def _fill_making(env):
         categories = Category.search([('name', '=', section)])
         if not categories:
             continue
-        goods = Resource.search([('category_id', 'in', categories.ids)])
+        goods = Resource.search(DEMO + [('category_id', 'in', categories.ids)])
         if not goods:
             continue
 
@@ -721,10 +722,10 @@ def _fill_making(env):
         # запросов, а не двадцать пять тысяч.
         materials = Resource
         for word in material_words:
-            materials |= Resource.search([('name', 'ilike', word)], limit=4)
+            materials |= Resource.search(DEMO + [('name', 'ilike', word)], limit=4)
         equipment = Resource
         for word in equipment_words:
-            equipment |= Resource.search([('name', 'ilike', word)], limit=4)
+            equipment |= Resource.search(DEMO + [('name', 'ilike', word)], limit=4)
 
         for item in goods:
             if (item.material_ids or item.equipment_ids
@@ -759,7 +760,7 @@ def _fill_making(env):
 
     # Производитель — сам владелец-организация: состав карточки приходит
     # из её ERP, и «второго» из чужих рук там взяться неоткуда (№ 484).
-    goods = Resource.search([
+    goods = Resource.search(DEMO + [
         ('resource_type', '=', 'material'),
         ('manufacturer_ids', '=', False),
     ])

@@ -12,6 +12,7 @@
 допускают.
 """
 import logging
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -124,7 +125,7 @@ def _promote_project_initiators(env, add):
     владельце.
     """
     Project = env['coop.project'].sudo()
-    live_ones = Project.search([('state', 'in', ('gathering', 'running'))])
+    live_ones = Project.search(DEMO + [('state', 'in', ('gathering', 'running'))])
     raised = 0
     for index, who in enumerate(live_ones.mapped('partner_id')):
         if who.coop_level_at_least('identity'):
@@ -153,7 +154,7 @@ def _promote_project_initiators(env, add):
     # может публиковать: потребность от организации без подтверждённого
     # контакта `_demote_unpublishable` тут же снимает снова, и 76 таких
     # ходили туда-обратно в каждую выкатку (16.11.2026).
-    env['coop.resource'].sudo().search([
+    env['coop.resource'].sudo().search(DEMO + [
         ('project_id', 'in', live_ones.ids),
         ('listing_type', '=', 'request'),
         ('state', '=', 'draft'),

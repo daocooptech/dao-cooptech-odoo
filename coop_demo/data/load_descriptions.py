@@ -26,6 +26,7 @@
 import logging
 import random
 import re
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -628,7 +629,7 @@ def fill_resource_descriptions(env):
     Resource = env['coop.resource'].sudo().with_context(
         active_test=False, tracking_disable=True, mail_notrack=True)
     filled = 0
-    for record in Resource.search([]):
+    for record in Resource.search(DEMO + []):
         current = record.description or ''
         if MARK not in current and len(_plain(current)) >= MIN_LENGTH:
             continue
@@ -683,7 +684,7 @@ def words_from_links(env):
         return out
 
     filled = 0
-    for record in Resource.search(['|', ('material_ids', '!=', False),
+    for record in Resource.search(DEMO + ['|', ('material_ids', '!=', False),
                                    ('equipment_ids', '!=', False)]):
         material = ids(record.material_ids, MATERIAL_KINDS)
         equipment = ids(record.equipment_ids, EQUIPMENT_KINDS)

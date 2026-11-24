@@ -20,6 +20,7 @@ import random
 from datetime import timedelta
 
 from odoo import fields
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -102,7 +103,7 @@ def load_project_updates(env):
         return 0
 
     Report = env['project.update'].sudo()
-    projects = env['coop.project'].sudo().search([
+    projects = env['coop.project'].sudo().search(DEMO + [
         ('project_id', '!=', False),
         ('state', 'in', ('running', 'done', 'frozen', 'cancelled')),
     ], order='id')
@@ -181,7 +182,7 @@ def repair_authors(env):
     Report = env['project.update'].sudo()
     admins = env.ref('base.user_admin') | env.ref('base.user_root')
     fixed = 0
-    projects = env['coop.project'].sudo().search([('project_id', '!=', False)])
+    projects = env['coop.project'].sudo().search(DEMO + [('project_id', '!=', False)])
     by_managed = {p.project_id.id: p for p in projects}
     for report in Report.search([('user_id', 'in', admins.ids)]):
         project = by_managed.get(report.project_id.id)
@@ -208,7 +209,7 @@ def densify(env):
     rnd = random.Random(20260924)
     today = fields.Date.today()
     built = 0
-    projects = env['coop.project'].sudo().search([
+    projects = env['coop.project'].sudo().search(DEMO + [
         ('project_id', '!=', False), ('state', 'in', tuple(TARGET))],
         order='id')
     for project in projects:
@@ -260,7 +261,7 @@ def load_management_updates(env):
     Report = env['project.update'].sudo()
     Project = env['project.project'].sudo().with_context(active_test=False)
     reported = set(Report.search([]).project_id.ids)
-    projects = Project.search([('is_template', '=', False),
+    projects = Project.search(DEMO + [('is_template', '=', False),
                                ('id', 'not in', list(reported))], order='id')
     rnd = random.Random(20261114)
     today = fields.Date.today()

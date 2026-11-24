@@ -13,6 +13,7 @@
 import logging
 import random
 from datetime import date, timedelta
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -73,11 +74,11 @@ def load_project_notes(env):
             ('user_ids', 'in', user.ids), ('project_id', '=', False)]).mapped('name')
         if any(n in free_names or any(n.startswith(p) for p in prefixes) for n in existing):
             continue
-        projects = Project.search([
+        projects = Project.search(DEMO + [
             '|', ('partner_id', '=', user.partner_id.id),
             ('contribution_ids.partner_id', '=', user.partner_id.id)], limit=8)
         if not projects:
-            projects = Project.search([], limit=5, offset=rnd.randint(0, 40))
+            projects = Project.search(DEMO + [], limit=5, offset=rnd.randint(0, 40))
         count = 30 if user == main else rnd.randint(2, 4)
         for vals in _notes_for(rnd, user, projects, count):
             done, archived = vals.pop('_done'), vals.pop('_archived')

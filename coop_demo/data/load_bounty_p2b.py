@@ -13,6 +13,7 @@ from odoo import fields
 
 from .load_bounty import RETURN_NOTES, SUBMIT_NOTES, _link, _performers
 from .load_bounty_p2 import _backdate, _create, _criteria
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -128,7 +129,7 @@ def load_bounty_p2b(env, Task, manager, specializations):
         active_test=False).search([])}
     ours = env.ref('coop_bounty.project_cooptech', raise_if_not_found=False)
     projects = env['coop.project'].sudo().search(
-        [('coop_token_name', '!=', False), ('partner_id.is_company', '=', True)]
+        DEMO + [('coop_token_name', '!=', False), ('partner_id.is_company', '=', True)]
         + ([('id', '!=', ours.id)] if ours else []), order='id', limit=12)
     if not projects:
         return 0
@@ -264,7 +265,7 @@ def _author_showcase(env, Task, manager, performers, method, spec, existing, tod
         return 0
     orgs = user.coop_publisher_partner_ids.filtered('is_company')
     projects = env['coop.project'].sudo().search(
-        [('partner_id', 'in', orgs.ids), ('coop_token_name', '!=', False)], order='id')
+        DEMO + [('partner_id', 'in', orgs.ids), ('coop_token_name', '!=', False)], order='id')
     if not projects:
         return 0
     # Заявители — не сам автор и не его организации.

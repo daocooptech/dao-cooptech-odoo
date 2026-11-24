@@ -18,6 +18,7 @@ import random
 from odoo import fields
 
 from . import load_wallets
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -1382,7 +1383,7 @@ def _contribution_cases(env):
     Contribution = env['coop.project.contribution'].sudo()
     Project = env['coop.project'].sudo()
     Partner = env['res.partner'].sudo()
-    projects = Project.search([('state', '=', 'gathering')], limit=80)
+    projects = Project.search(DEMO + [('state', '=', 'gathering')], limit=80)
     people = Partner.search([('coop_is_participant', '=', True),
                              ('is_company', '=', False)], limit=60)
     if not projects or not people:
@@ -1445,7 +1446,7 @@ def _project_state_cases(env):
         # собранные — а после того, как в каталог пришли ДАО-проекты с
         # высокой готовностью, отменёнными оказались девять из двадцати.
         order = 'readiness asc' if state == 'cancelled' else 'readiness desc'
-        pool = Project.search([('state', '=', 'gathering')], order=order)
+        pool = Project.search(DEMO + [('state', '=', 'gathering')], order=order)
         for project in pool:
             if created >= need:
                 break

@@ -14,6 +14,7 @@
 import logging
 import random
 from datetime import datetime, timedelta
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -55,7 +56,7 @@ def load_deal_leads(env, target=TARGET):
         ('partner_id.coop_is_participant', '=', True),
         ('partner_id.is_company', '=', False),
         ('partner_id.name', 'not in', TEST_NAMES)], order='id')
-    listings = env['coop.resource'].sudo().search([
+    listings = env['coop.resource'].sudo().search(DEMO + [
         ('state', '=', 'published')], order='id')
     if not people or not listings:
         return 0

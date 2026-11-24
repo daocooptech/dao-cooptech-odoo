@@ -23,6 +23,7 @@ import random
 from datetime import timedelta
 
 from odoo import fields
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -279,7 +280,7 @@ def load_messages(env, login='dashkevich'):
         made['channels'] += 1
 
     # ── Проекты ───────────────────────────────────────────────────────
-    projects = env['coop.project'].sudo().search([], order='id', limit=30)
+    projects = env['coop.project'].sudo().search(DEMO + [], order='id', limit=30)
     if have('project'):
         projects = projects.browse()
     for index, project in enumerate(projects):

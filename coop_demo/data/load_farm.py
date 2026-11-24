@@ -29,6 +29,7 @@
 import logging
 import random
 from datetime import date, datetime, timedelta
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -258,7 +259,7 @@ def _farm(env, people, showcase):
     Project = env['coop.project'].sudo()
     by_state = {}
     for state in ('gathering', 'running', 'done', 'cancelled', 'frozen'):
-        by_state[state] = list(Project.search([('state', '=', state)], order='id'))
+        by_state[state] = list(Project.search(DEMO + [('state', '=', state)], order='id'))
     mine_projects = [p for p in by_state['running'] if showcase and p.partner_id == showcase]
     prices = {}
     made = 0

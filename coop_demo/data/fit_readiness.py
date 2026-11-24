@@ -19,6 +19,7 @@
 """
 import collections
 import logging
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -34,7 +35,7 @@ def _base(name):
 def fix_need_prices(env):
     Resource = env['coop.resource'].sudo().with_context(
         active_test=False, tracking_disable=True, mail_notrack=True)
-    needs = Resource.search([('project_id', '!=', False), ('listing_type', '=', 'request')])
+    needs = Resource.search(DEMO + [('project_id', '!=', False), ('listing_type', '=', 'request')])
     priced = collections.defaultdict(list)
     by_type = collections.defaultdict(list)
     for need in needs:
@@ -61,7 +62,7 @@ def _target(project):
 def fit_overfunded(env):
     Project = env['coop.project'].sudo().with_context(
         active_test=False, tracking_disable=True, mail_notrack=True)
-    projects = Project.search([('readiness', '>', LIMIT)])
+    projects = Project.search(DEMO + [('readiness', '>', LIMIT)])
     fitted = 0
     for project in projects:
         accepted = project.contribution_ids.filtered(lambda c: c.state == 'accepted')

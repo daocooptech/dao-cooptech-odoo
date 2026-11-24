@@ -15,6 +15,7 @@
 import logging
 import random
 from datetime import date, datetime, timedelta
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -55,7 +56,7 @@ def load_profits(env):
         tracking_disable=True, mail_create_nolog=True,
         mail_notrack=True, coop_skip_profit_notify=True)
     projects = env['coop.project'].sudo().search(
-        [('kind', 'in', ['commercial', 'dao'])], order='id')
+        DEMO + [('kind', 'in', ['commercial', 'dao'])], order='id')
     now = datetime.utcnow()
     made = 0
     for project in projects:

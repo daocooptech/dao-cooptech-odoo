@@ -22,6 +22,7 @@ import random
 from datetime import timedelta
 
 from odoo import fields
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -88,7 +89,7 @@ def load_project_tasks(env, per_project=None):
     Stage = env['project.task.type'].sudo()
     Collect = env['coop.project'].sudo()
 
-    collects = Collect.search([('project_id', '!=', False)], order='id')
+    collects = Collect.search(DEMO + [('project_id', '!=', False)], order='id')
     if not collects:
         _logger.warning('Проектов в управлении нет — задачи не завожу')
         return 0
@@ -196,7 +197,7 @@ def _spread_project_stages(env):
         return 0
 
     moved = 0
-    for collect in Collect.search([('project_id', '!=', False)]):
+    for collect in Collect.search(DEMO + [('project_id', '!=', False)]):
         if collect.state in ('cancelled', 'failed', 'frozen'):
             key = 'stopped'
         elif collect.state == 'done':

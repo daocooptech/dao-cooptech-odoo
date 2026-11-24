@@ -28,6 +28,7 @@ from datetime import datetime, time, timedelta
 from odoo import fields
 
 from . import load_project_tasks
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -302,7 +303,7 @@ def _repair_fee_tasks(env, rnd, stages):
     today = fields.Date.today()
     fixed = 0
     for collect in env['coop.project'].sudo().search(
-            [('project_id', '!=', False)], order='id'):
+            DEMO + [('project_id', '!=', False)], order='id'):
         project = collect.project_id
         tasks = Task.search([('project_id', '=', project.id),
                              ('parent_id', '=', False)], order='sequence, id')
@@ -380,11 +381,11 @@ def _drop_system_user(env):
     Project = env['project.project'].sudo().with_context(active_test=False)
     # Руководителем проекта организации вставал системный пользователь:
     # у организации нет своего входа. Ставим её представителя.
-    for project in Project.search([('user_id', '=', system.id)]):
+    for project in Project.search(DEMO + [('user_id', '=', system.id)]):
         lead = (project.partner_id.user_ids
                 or Project._coop_partner_users(project.partner_id))[:1]
         project.user_id = lead.id or False
-    projects = Project.search([('allowed_internal_user_ids', 'in', system.id)])
+    projects = Project.search(DEMO + [('allowed_internal_user_ids', 'in', system.id)])
     if projects:
         projects.write({'allowed_internal_user_ids': [(3, system.id)]})
     if tasks or projects:
@@ -402,9 +403,9 @@ def _archive_stubs(env):
     """
     Project = env['project.project'].sudo()
     linked = env['coop.project'].sudo().search(
-        [('project_id', '!=', False)]).project_id
+        DEMO + [('project_id', '!=', False)]).project_id
     internal = env['res.company'].sudo().search([]).internal_project_id
-    stubs = Project.search([
+    stubs = Project.search(DEMO + [
         ('id', 'not in', (linked | internal).ids),
         ('partner_id', '=', False),
         ('task_ids', '=', False),

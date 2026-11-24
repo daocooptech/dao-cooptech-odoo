@@ -12,6 +12,7 @@
 """
 import logging
 import random
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -174,7 +175,7 @@ def age_listings(env):
                          ('coop.project', 'coop_project')):
         if model not in env:
             continue
-        ids = env[model].sudo().search([]).ids
+        ids = env[model].sudo().search(DEMO).ids
         if not ids:
             continue
         # Распределение смещено к свежему: старых объявлений в живом
@@ -260,7 +261,7 @@ def enrich_showcase(env, login='dashkevich'):
         # Без инвестиций: их привлекает только организация
         # (`_check_investment_basis`), и выкатка 16.11.2026 упала, когда
         # фото сбора (№ 455) вывели такой проект в первые с картинкой.
-        projects = Project.search([('image_512', '!=', False),
+        projects = Project.search(DEMO + [('image_512', '!=', False),
                                    ('partner_id', '!=', partner.id),
                                    ('contribution_basis', '!=', 'investment')],
                                   limit=4 - own_ids)
@@ -319,7 +320,7 @@ def enrich_showcase(env, login='dashkevich'):
     own_list = Resource.search_count([('owner_id', '=', partner.id),
                                   ('listing_type', '=', 'offer')])
     if not own_list:
-        resources = Resource.search([
+        resources = Resource.search(DEMO + [
             ('listing_type', '=', 'offer'),
             ('state', '=', 'published'),
             ('image_512', '!=', False),

@@ -28,6 +28,7 @@
 import logging
 import random
 from datetime import datetime, timedelta
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -122,7 +123,7 @@ def _product(env, company, resource, rnd):
 
 
 def _offers(env, org):
-    return env['coop.resource'].sudo().with_context(active_test=False).search([
+    return env['coop.resource'].sudo().with_context(active_test=False).search(DEMO + [
         ('owner_id', '=', org.id), ('listing_type', '=', 'offer')], order='id', limit=12)
 
 

@@ -12,6 +12,7 @@
 """
 import logging
 import random
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -225,7 +226,7 @@ def _fill_values(env, by_code):
     Resource = env['coop.resource'].sudo()
     filled = 0
 
-    for resource in Resource.search([('category_id', '!=', False)]):
+    for resource in Resource.search(DEMO + [('category_id', '!=', False)]):
         definition = resource.category_id.attribute_definition or []
         codes = [item.get('name') for item in definition]
         if not codes:

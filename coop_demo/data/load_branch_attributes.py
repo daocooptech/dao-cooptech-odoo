@@ -15,6 +15,7 @@ import logging
 import random
 
 from .load_attributes import _slug
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -276,7 +277,7 @@ def _fill(env, category):
         cat = category(full_name)
         if not cat:
             continue
-        for resource in Resource.search([('category_id', '=', cat.id)]):
+        for resource in Resource.search(DEMO + [('category_id', '=', cat.id)]):
             definition = [d.get('name') for d in
                           (resource.category_id.attribute_definition or [])]
             current = _current(resource)

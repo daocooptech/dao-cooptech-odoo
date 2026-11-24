@@ -16,6 +16,7 @@ import random
 from datetime import timedelta
 
 from odoo import fields
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ def load_promotions(env, target=TARGET):
     Resource = env['coop.resource'].sudo()
 
     slots = Slot.search([], order='page, position')
-    resources = Resource.search([('state', '=', 'published')], order='id')
+    resources = Resource.search(DEMO + [('state', '=', 'published')], order='id')
     if not slots or not resources:
         _logger.warning('Нет мест или объявлений — продвижение не наполняю')
         return

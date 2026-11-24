@@ -17,6 +17,7 @@ import random
 from datetime import timedelta
 
 from odoo import fields
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -238,7 +239,7 @@ def _contribute_to_projects(env, assets, rnd):
     реестра с проектами остаётся словами в описании модуля.
     """
     Contribution = env['coop.project.contribution'].sudo()
-    projects = env['coop.project'].sudo().search([], limit=60)
+    projects = env['coop.project'].sudo().search(DEMO + [], limit=60)
     if not projects:
         return
     for asset in assets:

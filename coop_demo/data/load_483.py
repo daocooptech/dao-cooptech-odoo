@@ -29,6 +29,7 @@ import re
 
 from .load_attributes import _slug
 from .load_branch_attributes import _current, _ensure_options
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -723,7 +724,7 @@ def _fill(env, category):
     roots = [c.id for c in (category(n) for n in ASSIGN) if c]
     leaf_ids = env['coop.resource.category'].sudo().search(
         [('id', 'child_of', roots)]).ids
-    for resource in Resource.search([('category_id', 'in', leaf_ids)]):
+    for resource in Resource.search(DEMO + [('category_id', 'in', leaf_ids)]):
         # Ветка — собственная рубрика объявления: у листа свои списки.
         full_name = resource.category_id.complete_name
         definition = {d.get('name'): d for d in

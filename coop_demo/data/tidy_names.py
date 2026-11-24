@@ -22,6 +22,7 @@
 import collections
 import logging
 import re
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -331,7 +332,7 @@ def fix_resource_rubrics(env):
         return 0
     Resource = env['coop.resource'].sudo().with_context(
         active_test=False, tracking_disable=True, mail_notrack=True)
-    records = Resource.search([], order='id')
+    records = Resource.search(DEMO + [], order='id')
     cache = {}
     moved = 0
     # 1. Явная таблица — когда сам лист в другом корне.

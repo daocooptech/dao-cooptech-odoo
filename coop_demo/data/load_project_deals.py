@@ -16,6 +16,7 @@ import random
 from datetime import timedelta
 
 from odoo import fields
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -67,7 +68,7 @@ def load_project_deals(env, target=TARGET_DEALS):
     today = fields.Date.context_today(Deal)
 
     existing = Deal.search_count([('project_id', '!=', False)])
-    projects = Project.search([('state', 'in', ('gathering', 'running', 'done'))],
+    projects = Project.search(DEMO + [('state', 'in', ('gathering', 'running', 'done'))],
                               order='id', limit=500)
     orgs = Partner.search([('is_company', '=', True)], order='id', limit=300)
     if not projects or len(orgs) < 2:
@@ -122,7 +123,7 @@ def spread_recent_money(env, target=RECENT_MONEY):
     if recent >= target:
         return 0
     rnd = random.Random(20261111)
-    pool = Contribution.search([
+    pool = Contribution.search(DEMO + [
         ('kind', '=', 'money'), ('state', '=', 'accepted'),
         ('project_id.state', 'in', ('gathering', 'running')),
         '|', ('accepted_on', '=', False), ('accepted_on', '<', border)], limit=400)
@@ -156,7 +157,7 @@ def link_cfa_to_projects(env):
     for position, issue in enumerate(free):
         if position % 2:
             continue
-        projects = Project.search([('partner_id', '=', issue.issuer_id.id)], order='id')
+        projects = Project.search(DEMO + [('partner_id', '=', issue.issuer_id.id)], order='id')
         if not projects:
             continue
         issue.project_id = projects[position // 2 % len(projects)]

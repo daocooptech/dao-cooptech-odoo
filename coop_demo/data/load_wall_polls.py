@@ -31,6 +31,7 @@
 import logging
 import random
 from datetime import datetime, timedelta
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -198,7 +199,7 @@ def load_wall_polls(env, login='dashkevich'):
             author = community.partner_id or rnd.choice(people)
             walls.append(('coop.community', community, author, COMMUNITY_POLLS))
     if 'coop.project' in env:
-        projects = env['coop.project'].sudo().search([])
+        projects = env['coop.project'].sudo().search(DEMO + [])
         for project in rnd.sample(list(projects), k=min(20, len(projects))):
             author = project.partner_id or project.author_id or rnd.choice(people)
             walls.append(('coop.project', project, author, PROJECT_POLLS))

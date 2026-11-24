@@ -13,6 +13,7 @@
 import logging
 import random
 import re
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -58,7 +59,7 @@ def move_misplaced(env):
     Category = env['coop.resource.category'].sudo()
     Resource = env['coop.resource'].sudo().with_context(
         active_test=False, tracking_disable=True, mail_notrack=True)
-    records = Resource.search([('category_id', '!=', False)])
+    records = Resource.search(DEMO + [('category_id', '!=', False)])
     moved = 0
     for words, full in MISPLACED:
         category = Category.search([('complete_name', '=', full)], limit=1)
@@ -212,7 +213,7 @@ def fix_prices(env):
         active_test=False, tracking_disable=True, mail_notrack=True,
         coop_no_price_sync=True)
     fixed = 0
-    for resource in Resource.search([('listing_type', '=', 'offer')]):
+    for resource in Resource.search(DEMO + [('listing_type', '=', 'offer')]):
         if resource.write_uid.id > 2:
             continue
         rate = RATE.get(resource.currency_id.name)
@@ -262,7 +263,7 @@ def fix_prices(env):
     for start, price in (('Инвестиции в кооперативный склад', 5000000),
                          ('Кредитная линия для малого бизнеса', 2000000),
                          ('Сдам дачу на лето', 45000)):
-        for resource in Resource.search([('name', '=like', start + '%'), ('price', '>', 0),
+        for resource in Resource.search(DEMO + [('name', '=like', start + '%'), ('price', '>', 0),
                                          ('price', '<', 1000), ('listing_type', '=', 'offer')]):
             if resource.write_uid.id > 2:
                 continue
@@ -439,7 +440,7 @@ def fix_services(env):
 def drop_repeats(env):
     """«Ищу самосвал…» заводился в каждую выкатку: остаётся самая ранняя."""
     Resource = env['coop.resource'].sudo().with_context(active_test=False)
-    copies = Resource.search([('name', '=like', 'Ищу самосвал для вывоза грунта на месяц%'),
+    copies = Resource.search(DEMO + [('name', '=like', 'Ищу самосвал для вывоза грунта на месяц%'),
                               ('is_project_need', '=', False)], order='id')[1:]
     used = env['coop.deal'].sudo().search([('resource_id', 'in', copies.ids)]).resource_id
     used |= env['coop.project.contribution'].sudo().search(

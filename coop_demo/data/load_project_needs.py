@@ -28,6 +28,7 @@ from datetime import timedelta
 from odoo import fields
 
 from . import real_offers, rubrics
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -261,10 +262,10 @@ def load_project_needs(env, target=TARGET_NEEDS):
     # ничего: ДАО-проекты завелись без единой потребности и без вакансий,
     # и сбор у них было нечем наполнять. Пропускаем не наполнение
     # целиком, а те проекты, у которых уже что-то есть.
-    projects = Collect.search([
+    projects = Collect.search(DEMO + [
         ('state', 'in', ('gathering', 'running', 'done'))], order='id')
     Vacancy = env['coop.vacancy'].sudo() if 'coop.vacancy' in env else None
-    have_needs = set(Resource.search([
+    have_needs = set(Resource.search(DEMO + [
         ('project_id', 'in', projects.ids)]).mapped('project_id').ids)
     if Vacancy is not None:
         have_needs |= set(Vacancy.search([
@@ -1038,7 +1039,7 @@ def diversify_project_needs(env, min_needs=4, max_needs=12):
     Partner = env['res.partner'].sudo()
 
     projects = Collect.search(
-        [('state', 'in', ('gathering', 'running'))], order='id')
+        DEMO + [('state', 'in', ('gathering', 'running'))], order='id')
     if not projects:
         _logger.info('Разброс потребностей: проектов в сборе или запуске нет')
         return 0
@@ -1050,7 +1051,7 @@ def diversify_project_needs(env, min_needs=4, max_needs=12):
         if not project.required_total:
             continue
 
-        existing = Resource.search([
+        existing = Resource.search(DEMO + [
             ('project_id', '=', project.id),
             ('listing_type', '=', 'request'),
         ])
@@ -1305,7 +1306,7 @@ def link_offers_to_resources(env):
         tracking_disable=True, mail_notrack=True)
     Resource = env['coop.resource'].sudo().with_context(
         tracking_disable=True, mail_create_nolog=True, mail_notrack=True)
-    offers = Contribution.search([
+    offers = Contribution.search(DEMO + [
         ('need_id', '!=', False), ('kind', 'in', TOPIC_KINDS)], order='id')
     cache, used, done = {}, {}, set()
     made = linked = kept = renamed = 0
@@ -1323,7 +1324,7 @@ def link_offers_to_resources(env):
             key = (base.lower(), who.id)
             res = cache.get(key)
             if res is None:
-                res = Resource.search([
+                res = Resource.search(DEMO + [
                     ('owner_id', '=', who.id), ('listing_type', '=', 'offer')],
                     order='id').filtered(lambda r: _on_topic(r.name, base))[:1]
                 if not res:
@@ -1379,7 +1380,7 @@ def set_ownership_kinds(env):
     у своей потребности. Безвреден при повторном запуске.
     """
     Resource = env['coop.resource'].sudo()
-    rows = Resource.search([('ownership_kind', '=', 'property')])
+    rows = Resource.search(DEMO + [('ownership_kind', '=', 'property')])
     rows = rows.filtered(lambda r: any(
         w in (r.name or '').lower() for w in USE_WORDS)
         or any(t in (r.price_unit_label or '').lower()
@@ -1388,7 +1389,7 @@ def set_ownership_kinds(env):
         rows.write({'ownership_kind': 'use'})
     Contribution = env['coop.project.contribution'].sudo()
     moved = 0
-    for contribution in Contribution.search([('need_id', '!=', False)]):
+    for contribution in Contribution.search(DEMO + [('need_id', '!=', False)]):
         if contribution.ownership_kind != contribution.need_id.ownership_kind:
             contribution.ownership_kind = contribution.need_id.ownership_kind
             moved += 1
@@ -1457,7 +1458,7 @@ def fill_offer_notes(env):
     if 'note' not in Contribution._fields:
         return 0
     filled = 0
-    for offer in Contribution.search([('need_id', '!=', False), ('note', '=', False)]):
+    for offer in Contribution.search(DEMO + [('need_id', '!=', False), ('note', '=', False)]):
         rnd = random.Random(offer.id * 7919)
         if rnd.random() < 0.25:
             continue

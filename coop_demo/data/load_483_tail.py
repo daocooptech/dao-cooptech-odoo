@@ -15,6 +15,7 @@ import re
 from odoo.fields import Command
 
 from . import tidy_catalogs
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -101,7 +102,7 @@ def load_rubrics(env):
     leaves = {}
     placed, unknown = 0, set()
     # В корне «Сырья» набора нет: корень — не раздел, а папка разделов.
-    for resource in Resource.search([
+    for resource in Resource.search(DEMO + [
             '|', ('category_id', '=', False),
             ('category_id.complete_name', '=', S[:-3])]):
         full = rubric_for(resource.name)
@@ -266,7 +267,7 @@ def fix_totals(env):
     fixed = 0
     for resource in env['coop.resource'].sudo().with_context(
             active_test=False, tracking_disable=True, mail_notrack=True,
-            coop_no_price_sync=True).search([('price_unit_label', '!=', False)]):
+            coop_no_price_sync=True).search(DEMO + [('price_unit_label', '!=', False)]):
         unit = resource.price_unit_label
         if not unit or resource.write_uid.id > 2 or not is_total(resource.name, unit):
             continue

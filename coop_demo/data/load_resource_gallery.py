@@ -20,6 +20,7 @@ import os
 import re
 
 from odoo.addons.coop_demo.data.load_resources import PHOTO_DIR
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -50,7 +51,7 @@ def load_resource_gallery(env):
     Attachment = env['ir.attachment'].sudo()
     Image = env['coop.resource.image'].sudo()
     resources = env['coop.resource'].sudo().with_context(active_test=False).search(
-        [('image_ids', '=', False)], order='id')
+        DEMO + [('image_ids', '=', False)], order='id')
     cache = {}
     created = skipped = 0
     for resource in resources:

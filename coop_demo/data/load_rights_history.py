@@ -18,6 +18,7 @@ import random
 from datetime import timedelta
 
 from odoo import fields
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -39,7 +40,7 @@ def load_rights_history(env):
 
     now = fields.Datetime.now()
     rebuilt = 0
-    resources = Resource.search([
+    resources = Resource.search(DEMO + [
         ('listing_type', '=', 'offer'), ('resource_type', '=', 'material'),
         ('state', '=', 'published'), ('owner_id', '!=', False)], order='id')
     for resource in resources:

@@ -19,6 +19,7 @@ import re
 
 from . import emblems
 from .load_483_work import BY_TITLE
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -74,7 +75,7 @@ def _ensure_projects(env):
     Collect = env['coop.project'].sudo()
     projects = []
     for name, total, token in DEMO_PROJECTS:
-        collect = Collect.search([
+        collect = Collect.search(DEMO + [
             ('name', 'ilike', token),
             ('project_id', '!=', False),
         ], limit=1, order='id')
@@ -86,7 +87,7 @@ def _ensure_projects(env):
             project.coop_contribution_total = collect.contribution_total
             projects.append(project)
             continue
-        project = Project.search([('name', '=', name)], limit=1)
+        project = Project.search(DEMO + [('name', '=', name)], limit=1)
         if not project:
             project = Project.create({'name': name})
         if not project.coop_contribution_total:

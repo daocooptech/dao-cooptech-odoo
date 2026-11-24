@@ -18,6 +18,7 @@ dashkevich (ему пишут и звонят), половина — его со
 import logging
 import random
 from datetime import datetime, timedelta
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -76,9 +77,9 @@ def load_inquiries(env, target=TARGET):
         ('partner_id.is_company', '=', False),
         ('partner_id.name', 'not in', TEST_NAMES),
         ('id', '!=', me.id)], order='id')
-    mine = env['coop.resource'].sudo().search([
+    mine = env['coop.resource'].sudo().search(DEMO + [
         ('state', '=', 'published'), ('owner_id', '=', me.partner_id.id)], order='id')
-    others = env['coop.resource'].sudo().search([
+    others = env['coop.resource'].sudo().search(DEMO + [
         ('state', '=', 'published'), ('owner_id', '!=', me.partner_id.id),
         ('owner_id.is_company', '=', False)], order='id')
     if not people or not mine or not others:

@@ -17,6 +17,7 @@ import random
 from datetime import datetime, time, timedelta
 
 from odoo import fields
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -77,7 +78,7 @@ def load_tokens(env, target=TARGET_CLAIMS):
     rnd = random.Random(20260906)
     today = fields.Date.context_today(Claim)
 
-    resources = Resource.search([
+    resources = Resource.search(DEMO + [
         ('state', '=', 'published'),
         ('listing_type', '=', 'offer'),
         ('owner_id.coop_verified', '=', True),
@@ -418,13 +419,13 @@ def _grant_project_shares(env):
         # Начисленное по прежней шкале обнуляем: `_grant_shares` не
         # трогает вклад, у которого доли уже есть, и без сброса
         # пересчёта не случится.
-        regrant = Contribution.search([
+        regrant = Contribution.search(DEMO + [
             ('state', '=', 'accepted'), ('project_id', 'in', projects.ids)])
         regrant.write({'share_tokens': 0, 'share_factor_used': 0})
         _logger.info('Ставки обновлены у %s проектов, к пересчёту вкладов: %s',
                      len(projects), len(regrant))
 
-    accepted = Contribution.search([
+    accepted = Contribution.search(DEMO + [
         ('state', '=', 'accepted'), ('share_tokens', '=', 0)])
     for project in accepted.mapped('project_id'):
         project.action_setup_share_rates()

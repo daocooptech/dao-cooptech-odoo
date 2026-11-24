@@ -15,6 +15,7 @@ import re
 from datetime import timedelta
 
 from odoo import fields
+from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
 
@@ -364,7 +365,7 @@ def load_extra_platform_tasks(env, Task, manager, methods, specializations, peop
 def load_project_tasks(env, Task, methods, specializations):
     """Задачи проектов: платит организация проекта, не платформа."""
     Project = env['coop.project'].sudo()
-    projects = Project.search([('partner_id.is_company', '=', True),
+    projects = Project.search(DEMO + [('partner_id.is_company', '=', True),
                                ('state', 'in', ('gathering', 'running'))],
                               order='id', limit=30)
     people = env['res.partner'].sudo().search(
@@ -632,7 +633,7 @@ TOKEN_ECONOMY = [
 def _demo_project_tokens(env):
     """Токены у демо-проектов — каждый описывает свой сам."""
     projects = env['coop.project'].sudo().search(
-        [('partner_id.is_company', '=', True), ('state', 'in', ('gathering', 'running'))],
+        DEMO + [('partner_id.is_company', '=', True), ('state', 'in', ('gathering', 'running'))],
         order='id', limit=40)
     for index, project in enumerate(projects):
         if project.coop_token_name:
@@ -656,7 +657,7 @@ def _org_crowd_project(env, org):
     проект требует плана на неполный сбор, и на этом падала загрузка.
     """
     Project = env['coop.project'].sudo()
-    project = Project.search([('partner_id', '=', org.id)], order='id', limit=1)
+    project = Project.search(DEMO + [('partner_id', '=', org.id)], order='id', limit=1)
     if project:
         return project
     cooperative = (org.coop_legal_form_id.code in ('pk', 'spk', 'artel')
@@ -785,7 +786,7 @@ def load_bounty(env):
     specializations = {s.name: s for s in env['coop.specialization'].sudo().search([])}
     # Токены на задачи у проектов (решение 689): без них задачу проекта не
     # опубликовать — сумма блокируется из выделенного.
-    token_projects = env['coop.project'].sudo().search([('coop_token_name', '!=', False)])
+    token_projects = env['coop.project'].sudo().search(DEMO + [('coop_token_name', '!=', False)])
     token_projects._coop_bounty_fit_limit(minimum=30000)
     # Исполнители берутся из каталога людей: задачу берёт участник, а не
     # абстрактный пользователь.
