@@ -16,6 +16,7 @@ import logging
 import os
 import random
 
+from odoo.addons.coop_demo.data.load_484 import erp_category_ids, from_erp
 from odoo.addons.coop_resources.models.coop_resource_tree import (
     DISSOLVE_398, RENAMES, RENAMES_398)
 
@@ -703,9 +704,8 @@ def _fill_making(env):
     выглядит сгенерированным, потому что он такой и есть.
     """
     Resource = env['coop.resource'].sudo()
-    Partner = env['res.partner'].sudo()
     Category = env['coop.resource.category'].sudo()
-    rnd = random.Random(20260922)
+    allowed = erp_category_ids(env)
 
     made = 0
     for section, (material_words, equipment_words) in MADE_OF_BY_SECTION.items():
@@ -727,7 +727,8 @@ def _fill_making(env):
             equipment |= Resource.search([('name', 'ilike', word)], limit=4)
 
         for item in goods:
-            if item.material_ids or item.equipment_ids:
+            if (item.material_ids or item.equipment_ids
+                    or not from_erp(item, allowed)):
                 continue
             # Жребий — свой у каждого изделия: с общим генератором его ход
             # сдвигался от уже заполненного, и каждый -u coop_demo
@@ -756,39 +757,16 @@ def _fill_making(env):
                 item.write(values)
                 made += 1
 
-    # Производители. Ставим владельца-организацию и иногда второго:
-    # кооперация тем и живёт, что одно изделие собирают из разных рук, и
-    # каталог, где у каждого изделия ровно один производитель, этого не
-    # показывает.
-    companies = Partner.search([
-        ('coop_is_participant', '=', True), ('is_company', '=', True)],
-        order='id')
-    # Производитель бывает у вещи и у станка. У труда и у денег его нет:
-    # труд не производят, а выполняют. Поставить там производителя —
-    # значит приучить читателя не верить этому полю.
+    # Производитель — сам владелец-организация: состав карточки приходит
+    # из её ERP, и «второго» из чужих рук там взяться неоткуда (№ 484).
     goods = Resource.search([
-        ('resource_type', 'in', ('material',)),
+        ('resource_type', '=', 'material'),
         ('manufacturer_ids', '=', False),
     ])
-
     named = 0
-    for item in goods:
-        # Свой жребий и свой «второй» по номеру изделия, а не по месту в
-        # выборке: выборка — только те, у кого производителя ещё нет, и с
-        # каждым прогоном она другая.
-        rnd = random.Random(20260923 + item.id)
-        makers = []
-        if item.owner_id and item.owner_id.is_company:
-            makers.append(item.owner_id.id)
-        # Второй производитель у каждого третьего — и только если есть
-        # кому им быть.
-        if companies and rnd.random() < 0.33:
-            other = companies[item.id % len(companies)]
-            if other.id not in makers:
-                makers.append(other.id)
-        if makers:
-            item.manufacturer_ids = [(6, 0, makers)]
-            named += 1
+    for item in goods.filtered(lambda r: from_erp(r, allowed)):
+        item.manufacturer_ids = [(6, 0, item.owner_id.ids)]
+        named += 1
 
     _logger.info('Ресурсы: состав у %s, производители у %s', made, named)
 
