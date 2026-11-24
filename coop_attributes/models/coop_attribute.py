@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
+from odoo.tools import SQL
+
+
+def _attrs_models(env):
+    """Модели, у записей которых лежат значения характеристик."""
+    return [env[name] for name in (
+        'coop.resource', 'coop.vacancy', 'coop.skill.offer')
+        if name in env and 'attrs' in env[name]._fields]
 
 # Типы значений. Список ровно повторяет то, что понимает штатный
 # механизм свойств Odoo: тип, которого там нет, нечем ни хранить, ни
@@ -100,10 +108,14 @@ class CoopAttribute(models.Model):
         self.ensure_one()
         if not self.code:
             return 0
-        self.env['coop.resource'].flush_model(['attrs'])
-        self.env.cr.execute(
-            'SELECT count(*) FROM coop_resource WHERE attrs ? %s', (self.code,))
-        return self.env.cr.fetchone()[0]
+        total = 0
+        for model in _attrs_models(self.env):
+            model.flush_model(['attrs'])
+            self.env.cr.execute(SQL(
+                'SELECT count(*) FROM %s WHERE attrs ? %s',
+                SQL.identifier(model._table), self.code))
+            total += self.env.cr.fetchone()[0]
+        return total
 
     def write(self, vals):
         """Ключ не меняется после того, как им начали пользоваться.
@@ -197,13 +209,17 @@ class CoopAttributeOption(models.Model):
         code = self.attribute_id.code
         if not code or not self.code:
             return 0
-        self.env['coop.resource'].flush_model(['attrs'])
-        self.env.cr.execute(
-            """SELECT count(*) FROM coop_resource
-                WHERE attrs -> %s = to_jsonb(%s::text)
-                   OR attrs -> %s @> to_jsonb(ARRAY[%s]::text[])""",
-            (code, self.code, code, self.code))
-        return self.env.cr.fetchone()[0]
+        total = 0
+        for model in _attrs_models(self.env):
+            model.flush_model(['attrs'])
+            self.env.cr.execute(SQL(
+                """SELECT count(*) FROM %s
+                    WHERE attrs -> %s = to_jsonb(%s::text)
+                       OR attrs -> %s @> to_jsonb(ARRAY[%s]::text[])""",
+                SQL.identifier(model._table),
+                code, self.code, code, self.code))
+            total += self.env.cr.fetchone()[0]
+        return total
 
     def unlink(self):
         """Вариант, который уже выбран в объявлениях, не удаляем.
@@ -241,8 +257,17 @@ class CoopAttributeAssignment(models.Model):
     attribute_id = fields.Many2one(
         'coop.attribute', string='Характеристика', required=True,
         index=True, ondelete='cascade')
+    # Ровно одно из трёх: рубрика ресурсов, сфера деятельности или
+    # специализация. Набор специализации общий у вакансии и у предложения
+    # навыка: «Категория прав» спрашивает одно и то же с двух сторон.
     category_id = fields.Many2one(
-        'coop.resource.category', string='Рубрика', required=True,
+        'coop.resource.category', string='Рубрика',
+        index=True, ondelete='cascade')
+    specialization_category_id = fields.Many2one(
+        'coop.specialization.category', string='Сфера деятельности',
+        index=True, ondelete='cascade')
+    specialization_id = fields.Many2one(
+        'coop.specialization', string='Специализация',
         index=True, ondelete='cascade')
     sequence = fields.Integer(default=10)
     is_required = fields.Boolean(string='Обязательна при публикации')
@@ -254,3 +279,42 @@ class CoopAttributeAssignment(models.Model):
         'unique(attribute_id, category_id)',
         'Эта характеристика уже привязана к рубрике.',
     )
+    _uniq_spec_category = models.Constraint(
+        'unique(attribute_id, specialization_category_id)',
+        'Эта характеристика уже привязана к сфере деятельности.',
+    )
+    _uniq_spec = models.Constraint(
+        'unique(attribute_id, specialization_id)',
+        'Эта характеристика уже привязана к специализации.',
+    )
+    _one_owner = models.Constraint(
+        'check(num_nonnulls(category_id, specialization_category_id, '
+        'specialization_id) = 1)',
+        'Характеристику привязывают к чему-то одному: рубрике, сфере или '
+        'специализации.',
+    )
+
+    def _definition_item(self):
+        """Словарь описания свойства для движка."""
+        self.ensure_one()
+        attribute = self.attribute_id
+        # Снятые с обращения варианты описанию нужны: иначе подпись
+        # выбранного раньше значения стёрлась бы при первой правке.
+        options = self.with_context(active_test=False).option_ids \
+            or attribute.with_context(active_test=False).option_ids
+        item = {
+            'name': attribute.code,
+            'string': attribute.name,
+            'type': attribute.value_type,
+        }
+        if attribute.unit:
+            item['suffix'] = attribute.unit
+        if attribute.value_type == 'selection':
+            item['selection'] = [[o.code, o.name] for o in options]
+        elif attribute.value_type == 'tags':
+            # У метки третьим идёт номер цвета: движок проверяет длину.
+            item['tags'] = [[o.code, o.name, index % 11]
+                            for index, o in enumerate(options)]
+        if attribute.show_on_card:
+            item['view_in_cards'] = True
+        return item

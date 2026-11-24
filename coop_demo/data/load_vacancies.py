@@ -15,8 +15,10 @@ import base64
 import json
 import logging
 import os
+import re
 
 from . import emblems
+from .load_483_work import BY_TITLE
 
 _logger = logging.getLogger(__name__)
 
@@ -119,10 +121,28 @@ def _extra_rows(rows, extra):
         extras.append(row)
     return extras
 
+
+def _titles_by_description(rows):
+    """Заголовок — по описанию, первому владельцу этого текста.
+
+    У доборных строк заголовок стоял жребием: «Пекарь» с описанием
+    сортировки вторсырья, «Кузнец» в медицине (№ 483). Описание, снимок,
+    умения и специализация при этом верные — правим заголовок.
+    """
+    first = {}
+    for row in rows:
+        own = first.setdefault(row['description'], row)
+        if own is row or not row['description']:
+            continue
+        base, dash, city = row['name'].partition(' — ')
+        row['name'] = own['name'].partition(' — ')[0] + dash + city
+    return rows
+
+
 def load_vacancies(env, extra=45):
     with open(os.path.join(HERE, 'vacancies.json'), encoding='utf-8') as fh:
         rows = json.load(fh)
-    rows = rows + _extra_rows(rows, extra)
+    rows = _titles_by_description(rows + _extra_rows(rows, extra))
 
     Vacancy = env['coop.vacancy'].sudo()
     Partner = env['res.partner'].sudo()
@@ -170,7 +190,11 @@ def load_vacancies(env, extra=45):
                 skills[name] = skill
             skill_ids.append(skill.id)
 
-        specialization = specializations.get(row['specialization'])
+        title = row['name'].lower()
+        specialization = next(
+            (specializations[name] for rx, name in BY_TITLE
+             if re.search(rx, title) and name in specializations),
+            specializations.get(row['specialization']))
         reward_kind = REWARD.get(row['reward_kind'], 'money')
 
         values = {
@@ -227,6 +251,12 @@ def load_vacancies(env, extra=45):
             # (`load_spread._hand_out`) и витрине, и возврат по макету
             # заставлял перекладывать их заново в каждую выкатку.
             values.pop('partner_id', None)
+            # Занятость и оплату, которой нет в макете, дописывает
+            # `load_483_work` — не возвращаем их в каждую выкатку.
+            values.pop('employment', None)
+            for key in ('pay_from', 'pay_to'):
+                if not values[key]:
+                    values.pop(key)
             existing.with_context(tracking_disable=True).write(values)
             updated += 1
         else:

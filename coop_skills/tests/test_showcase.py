@@ -78,7 +78,7 @@ class TestSkillShowcase(TransactionCase):
         arch = self._arch()
         labels = [dt.text for dt in arch.xpath("//dl[contains(@class, 'coop-show_facts')]/div/dt")]
         self.assertEqual(labels, ['Ставка', 'Опыт', 'Командировки', 'Город',
-                                  'Занятость', 'График'])
+                                  'Занятость', 'График', 'Образование'])
 
     def test_single_message_button(self):
         """«Написать» — одна, в карточке человека, не дублем в шапке."""

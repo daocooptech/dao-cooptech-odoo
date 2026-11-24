@@ -33,8 +33,9 @@ class CoopSkillOffer(models.Model):
             'options': [{'value': c.id, 'label': c.name} for c in categories],
         })
         category = chosen('coop_specialization_category_id')
-        specs = self.env['coop.specialization'].sudo().search(
-            [('category_id', '=', int(category))]) if category else []
+        specs = self.env['coop.specialization'].sudo()
+        if category:
+            specs = specs.search([('category_id', '=', int(category))])
         # Сфера из одной специализации — бывший «Рабочий персонал»
         # (владелец 24.09.2026): «Сварщик» → «Сварщик». Выбирать там
         # нечего, и второй список читается как повтор.
@@ -42,7 +43,7 @@ class CoopSkillOffer(models.Model):
             blocks.append({
                 'code': 'spec', 'label': 'Подкатегория',
                 'widget': 'select', 'field': 'coop_specialization_id',
-                'operator': '=', 'number': True, 'placeholder': 'Любая',
+                'operator': '=', 'number': True, 'placeholder': 'Любая', 'reload': True,
                 'options': [{'value': s.id, 'label': s.name} for s in specs],
             })
         blocks.append({
@@ -56,12 +57,22 @@ class CoopSkillOffer(models.Model):
         # Решение 661 п. 4: занятость и график — два отбора.
         for code, label, hint in (
                 ('employment', 'Занятость', 'Полная, частичная или разовая работа.'),
-                ('work_schedule', 'График', 'Как удобно работать.')):
+                ('work_schedule', 'График', 'Как удобно работать.'),
+                ('education', 'Образование', 'По диплому или аттестату.')):
             blocks.append({
                 'code': code, 'label': label, 'hint': hint,
                 'widget': 'select', 'field': code, 'operator': '=',
-                'placeholder': 'Любой' if code == 'work_schedule' else 'Любая',
+                'placeholder': {'work_schedule': 'Любой', 'education': 'Любое'}.get(code, 'Любая'),
                 'options': [{'value': v, 'label': l}
                             for v, l in self._fields[code].selection],
             })
+
+        # Поля профессии — когда специализация определена: выбрана сама
+        # или в сфере она одна.
+        chosen_spec = chosen('coop_specialization_id')
+        spec = (specs.browse(int(chosen_spec)).exists() if chosen_spec
+                else specs if len(specs) == 1 else specs.browse())
+        if spec:
+            blocks = self._coop_attr_merge(blocks, self._coop_attr_blocks(
+                domain, spec.attribute_definition))
         return blocks

@@ -59,6 +59,8 @@
               <field name="assignment_ids">
                 <list editable="bottom">
                   <field name="category_id"/>
+                  <field name="specialization_category_id"/>
+                  <field name="specialization_id"/>
                   <field name="sequence"/>
                   <field name="is_required"/>
                 </list>

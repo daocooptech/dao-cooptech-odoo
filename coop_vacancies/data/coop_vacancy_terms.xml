@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+  <record id="term_1" model="coop.vacancy.term">
+    <field name="name">Проживание</field>
+    <field name="kind">benefit</field>
+    <field name="sequence">10</field>
+  </record>
+  <record id="term_2" model="coop.vacancy.term">
+    <field name="name">Питание</field>
+    <field name="kind">benefit</field>
+    <field name="sequence">20</field>
+  </record>
+  <record id="term_3" model="coop.vacancy.term">
+    <field name="name">Проезд</field>
+    <field name="kind">benefit</field>
+    <field name="sequence">30</field>
+  </record>
+  <record id="term_4" model="coop.vacancy.term">
+    <field name="name">Спецодежда</field>
+    <field name="kind">benefit</field>
+    <field name="sequence">40</field>
+  </record>
+  <record id="term_5" model="coop.vacancy.term">
+    <field name="name">Медицинская страховка</field>
+    <field name="kind">benefit</field>
+    <field name="sequence">50</field>
+  </record>
+  <record id="term_6" model="coop.vacancy.term">
+    <field name="name">Обучение</field>
+    <field name="kind">benefit</field>
+    <field name="sequence">60</field>
+  </record>
+  <record id="term_7" model="coop.vacancy.term">
+    <field name="name">Инструмент и материалы</field>
+    <field name="kind">benefit</field>
+    <field name="sequence">70</field>
+  </record>
+  <record id="term_8" model="coop.vacancy.term">
+    <field name="name">Членство в кооперативе</field>
+    <field name="kind">benefit</field>
+    <field name="sequence">80</field>
+  </record>
+  <record id="term_9" model="coop.vacancy.term">
+    <field name="name">От 14 лет</field>
+    <field name="kind">audience</field>
+    <field name="sequence">90</field>
+  </record>
+  <record id="term_10" model="coop.vacancy.term">
+    <field name="name">От 16 лет</field>
+    <field name="kind">audience</field>
+    <field name="sequence">100</field>
+  </record>
+  <record id="term_11" model="coop.vacancy.term">
+    <field name="name">Старше 45 лет</field>
+    <field name="kind">audience</field>
+    <field name="sequence">110</field>
+  </record>
+  <record id="term_12" model="coop.vacancy.term">
+    <field name="name">Студенты</field>
+    <field name="kind">audience</field>
+    <field name="sequence">120</field>
+  </record>
+  <record id="term_13" model="coop.vacancy.term">
+    <field name="name">Пенсионеры</field>
+    <field name="kind">audience</field>
+    <field name="sequence">130</field>
+  </record>
+  <record id="term_14" model="coop.vacancy.term">
+    <field name="name">Люди с нарушениями здоровья</field>
+    <field name="kind">audience</field>
+    <field name="sequence">140</field>
+  </record>
+</odoo>

@@ -209,6 +209,7 @@
                     <field name="coop_specialization_id" options="{'no_create': True}" widget="coop_inline"/>
                     <field name="employment" widget="coop_inline"/>
                     <field name="work_schedule" widget="coop_inline"/>
+                    <field name="education" widget="coop_inline"/>
                   </group>
                   <group string="Ставка и опыт">
                     <field name="rate_kind" widget="coop_inline"/>
@@ -261,7 +262,17 @@
                     <dt>График</dt>
                     <dd><field name="work_schedule" readonly="1" nolabel="1"/></dd>
                   </div>
+                  <div invisible="not education">
+                    <dt>Образование</dt>
+                    <dd><field name="education" readonly="1" nolabel="1"/></dd>
+                  </div>
                 </dl>
+              </section>
+              <section class="coop-show_block coop-attrs" name="attrs"
+                       invisible="not attrs_facts and not coop_can_edit or not coop_specialization_id">
+                <h2>По профессии</h2>
+                <field name="attrs_facts" nolabel="1" readonly="1" invisible="coop_can_edit"/>
+                <field name="attrs" nolabel="1" columns="2" invisible="not coop_can_edit"/>
               </section>
               <notebook class="coop-show_tabs"/>
             </div>
@@ -405,6 +416,14 @@
                         </div>
                       </div>
                     </div>
+                  </div>
+                  <div class="coop-add_field coop-attrs" invisible="not coop_specialization_id">
+                    <label for="attrs" string="По профессии"/>
+                    <field name="attrs" nolabel="1" columns="2"/>
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="education" string="Образование"/>
+                    <field name="education" widget="badges_selection" nolabel="1"/>
                   </div>
                 </div>
               </section>

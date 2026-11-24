@@ -30,7 +30,8 @@ class CoopSkillOffer(models.Model):
     """
     _name = 'coop.skill.offer'
     _description = 'Предложение навыка'
-    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin', 'coop.media.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin', 'coop.media.mixin',
+                'coop.attrs.mixin']
     _coop_page_view = 'coop_skills.view_coop_skill_form'
     _coop_role_field = 'partner_id'
     _coop_role_text = 'Ваше объявление'
@@ -97,6 +98,18 @@ class CoopSkillOffer(models.Model):
                  for xmlid in ('hr_skills.hr_skill_type_lang', 'hr_skills.hr_skill_type_softskill')]
         return [('skill_type_id', 'not in', [t.id for t in types if t])]
 
+    attrs = fields.Properties(
+        string='Характеристики',
+        definition='coop_specialization_id.attribute_definition', copy=True,
+        help='Набор полей зависит от специализации: у водителя категории '
+             'прав, у сварщика виды сварки (№ 483).')
+
+    education = fields.Selection([
+        ('school', 'Среднее'),
+        ('vocational', 'Среднее профессиональное'),
+        ('unfinished', 'Неоконченное высшее'),
+        ('higher', 'Высшее'),
+    ], string='Образование', index=True)
     city = fields.Char(string='Город', index=True)
     ready_to_travel = fields.Boolean(
         string='Готов к командировкам', default=False,

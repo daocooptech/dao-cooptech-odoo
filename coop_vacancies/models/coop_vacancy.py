@@ -99,7 +99,8 @@ class CoopVacancy(models.Model):
     """
     _name = 'coop.vacancy'
     _description = 'Вакансия'
-    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin', 'coop.media.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'coop.page.mixin', 'coop.media.mixin',
+                'coop.attrs.mixin']
     _coop_page_view = 'coop_vacancies.view_coop_vacancy_form'
     _coop_role_field = 'partner_id'
     _coop_role_text = 'Ваша вакансия'
@@ -140,6 +141,13 @@ class CoopVacancy(models.Model):
         'hr.skill', 'coop_vacancy_skill_rel', 'vacancy_id', 'skill_id',
         string='Что потребуется')
 
+
+    attrs = fields.Properties(
+        string='Характеристики',
+        definition='coop_specialization_id.attribute_definition', copy=True,
+        help='Набор полей зависит от специализации: у водителя категории '
+             'прав, у сварщика виды сварки (№ 483).')
+
     city = fields.Char(string='Город', index=True)
 
     employment = fields.Selection([
@@ -154,6 +162,44 @@ class CoopVacancy(models.Model):
         ('junior', 'От года'),
         ('senior', 'От трёх лет'),
     ], string='Требуемый опыт', required=True, default='junior', index=True)
+
+    # ── Условия по образцу Авито «Работа» (№ 483, 24.11.2026) ────────────
+    # Не обязательны: у старой вакансии их нет, и в отбор она не попадёт.
+    work_schedule = fields.Selection([
+        ('fixed', 'Фиксированный'),
+        ('flexible', 'Гибкий'),
+        ('shift', 'Сменный'),
+        ('rotation', 'Вахта'),
+    ], string='График', index=True)
+    work_format = fields.Selection([
+        ('onsite', 'На месте'),
+        ('remote', 'Удалённо'),
+        ('hybrid', 'Гибрид'),
+        ('travel', 'Разъездной'),
+    ], string='Формат работы', index=True)
+    work_hours = fields.Selection([
+        ('4', 'До 4 часов'),
+        ('6', '6 часов'),
+        ('8', '8 часов'),
+        ('12', '12 часов'),
+        ('24', 'Сутки'),
+        ('free', 'По договорённости'),
+    ], string='Рабочих часов в день')
+    pay_frequency = fields.Selection([
+        ('day', 'Каждый день'),
+        ('week', 'Раз в неделю'),
+        ('twice', 'Дважды в месяц'),
+        ('month', 'Раз в месяц'),
+        ('result', 'После приёмки'),
+    ], string='Частота выплат', index=True)
+    benefit_ids = fields.Many2many(
+        'coop.vacancy.term', 'coop_vacancy_benefit_rel', 'vacancy_id',
+        'term_id', string='Что получают работники',
+        domain=[('kind', '=', 'benefit')])
+    audience_ids = fields.Many2many(
+        'coop.vacancy.term', 'coop_vacancy_audience_rel', 'vacancy_id',
+        'term_id', string='Подходит для',
+        domain=[('kind', '=', 'audience')])
 
     # ── Вознаграждение ───────────────────────────────────────────────────
     reward_kind = fields.Selection([
@@ -700,6 +746,23 @@ class CoopVacancy(models.Model):
             'res_id': self.hr_job_id.id,
             'view_mode': 'form',
         }
+
+
+class CoopVacancyTerm(models.Model):
+    """Что получают работники и кому подходит — списки Авито «Работа»."""
+    _name = 'coop.vacancy.term'
+    _description = 'Условие вакансии'
+    _order = 'kind, sequence, id'
+
+    name = fields.Char(string='Название', required=True)
+    kind = fields.Selection([
+        ('benefit', 'Что получают работники'),
+        ('audience', 'Подходит для'),
+    ], string='Вид', required=True, index=True)
+    sequence = fields.Integer(default=10)
+
+    _name_uniq = models.Constraint(
+        'unique(kind, name)', 'Такое условие уже есть.')
 
 
 class CoopVacancyApplication(models.Model):

@@ -13,3 +13,5 @@ rule_vacancy_application,"Отклик виден откликнувшемуся
       "
 rule_vacancy_application_system,Администратор узла видит все отклики,coop.vacancy.application,base.group_system,crud,
 access_vacancy_apply_user,Окно отклика — участник,coop.vacancy.apply,base.group_user,crud,
+access_coop_vacancy_term_user,Условия вакансии — чтение,coop.vacancy.term,base.group_user,r,
+access_coop_vacancy_term_system,Условия вакансии — администратор,coop.vacancy.term,base.group_system,crud,

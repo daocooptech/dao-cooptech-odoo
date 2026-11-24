@@ -231,6 +231,22 @@
                     <dt>Опыт</dt>
                     <dd><field name="experience_level" readonly="1" nolabel="1"/></dd>
                   </div>
+                  <div invisible="not work_schedule">
+                    <dt>График</dt>
+                    <dd><field name="work_schedule" readonly="1" nolabel="1"/></dd>
+                  </div>
+                  <div invisible="not work_format">
+                    <dt>Формат</dt>
+                    <dd><field name="work_format" readonly="1" nolabel="1"/></dd>
+                  </div>
+                  <div invisible="not work_hours">
+                    <dt>Часов в день</dt>
+                    <dd><field name="work_hours" readonly="1" nolabel="1"/></dd>
+                  </div>
+                  <div invisible="not pay_frequency">
+                    <dt>Выплаты</dt>
+                    <dd><field name="pay_frequency" readonly="1" nolabel="1"/></dd>
+                  </div>
                   <div>
                     <dt>Вознаграждение</dt>
                     <dd><field name="reward_kind" readonly="1" nolabel="1"/></dd>
@@ -239,6 +255,14 @@
                     <dt>Доля</dt>
                     <dd><field name="share_percent" readonly="1" nolabel="1" options="{'hide_trailing_zeros': true}"/> %</dd>
                   </div>
+                  <div invisible="not benefit_ids">
+                    <dt>Что получают</dt>
+                    <dd><field name="benefit_ids" widget="many2many_tags" readonly="1" nolabel="1"/></dd>
+                  </div>
+                  <div invisible="not audience_ids">
+                    <dt>Подходит для</dt>
+                    <dd><field name="audience_ids" widget="many2many_tags" readonly="1" nolabel="1"/></dd>
+                  </div>
                 </dl>
                 <p class="coop-price_note" invisible="not reward_note_shown">
                   <field name="reward_note_shown" readonly="1" nolabel="1"/>
@@ -246,6 +270,12 @@
                 <p class="coop-price_note" invisible="not pay_explain">
                   <field name="pay_explain" readonly="1" nolabel="1"/>
                 </p>
+              </section>
+              <section class="coop-show_block coop-attrs" name="attrs"
+                       invisible="not attrs_facts and not coop_can_edit or not coop_specialization_id">
+                <h2>По профессии</h2>
+                <field name="attrs_facts" nolabel="1" readonly="1" invisible="coop_can_edit"/>
+                <field name="attrs" nolabel="1" columns="2" invisible="not coop_can_edit"/>
               </section>
               <!-- Условия правит только автор; остальным те же значения
                    видны в шапке и фактах словами. -->
@@ -263,6 +293,12 @@
             <group string="Условия">
               <field name="employment" widget="coop_inline" readonly="not coop_can_edit"/>
               <field name="experience_level" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="work_schedule" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="work_format" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="work_hours" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="pay_frequency" widget="coop_inline" readonly="not coop_can_edit"/>
+              <field name="benefit_ids" widget="many2many_tags" options="{'no_create': True, 'no_create_edit': True}" readonly="not coop_can_edit"/>
+              <field name="audience_ids" widget="many2many_tags" options="{'no_create': True, 'no_create_edit': True}" readonly="not coop_can_edit"/>
               <field name="reward_kind" widget="coop_inline" readonly="not coop_can_edit"/>
               <label for="pay_from" string="Оплата"
                      invisible="reward_kind in ('barter', 'volunteer')"/>
@@ -489,6 +525,34 @@
                   <div class="coop-add_field">
                     <label for="experience_level" string="Опыт"/>
                     <field name="experience_level" widget="badges_selection" nolabel="1"/>
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="work_schedule" string="График"/>
+                    <field name="work_schedule" widget="badges_selection" nolabel="1"/>
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="work_format" string="Формат работы"/>
+                    <field name="work_format" widget="badges_selection" nolabel="1"/>
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="work_hours" string="Рабочих часов в день"/>
+                    <field name="work_hours" widget="badges_selection" nolabel="1"/>
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="pay_frequency" string="Частота выплат"/>
+                    <field name="pay_frequency" widget="badges_selection" nolabel="1"/>
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="benefit_ids" string="Что получают работники"/>
+                    <field name="benefit_ids" widget="many2many_tags" nolabel="1" options="{'no_create': True, 'no_create_edit': True}"/>
+                  </div>
+                  <div class="coop-add_field">
+                    <label for="audience_ids" string="Подходит для"/>
+                    <field name="audience_ids" widget="many2many_tags" nolabel="1" options="{'no_create': True, 'no_create_edit': True}"/>
+                  </div>
+                  <div class="coop-add_field coop-attrs" invisible="not coop_specialization_id">
+                    <label for="attrs" string="По профессии"/>
+                    <field name="attrs" nolabel="1" columns="2"/>
                   </div>
                 </div>
               </section>

@@ -506,6 +506,10 @@ class CoopDemoLoader(models.AbstractModel):
         # названия, а копии различаются содержанием.
         from ..data import tidy_names
         tidy_names.tidy_all(self.env)
+        # Условия вакансий (483) — после имён: «на неполный день» из
+        # названия задаёт занятость и график.
+        from ..data import load_483_work
+        load_483_work.load_483_work(self.env)
         # Готовность без перебора в десятки раз — после цен и вкладов.
         from ..data import fit_readiness
         fit_readiness.fit_readiness(self.env)
