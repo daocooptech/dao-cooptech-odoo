@@ -563,6 +563,8 @@
              токенами. Экономику своего токена проект раскрывает сам — в рамках законов
              своей страны.</p>
           <group>
+            <field name="coop_token_kind" required="coop_has_token"/>
+            <field name="coop_token_kind_note" invisible="not coop_token_kind"/>
             <field name="coop_token_name" placeholder="Например: токен на продукцию проекта"/>
             <field name="coop_token_symbol" placeholder="Например: BREAD"/>
             <field name="coop_token_issued"/>
@@ -592,6 +594,13 @@
         <p class="coop-add_help" invisible="coop_has_token">
           Необязательно. Токеном проект оплачивает задачи в краудсорсинге.
         </p>
+        <div class="coop-add_field" invisible="not coop_has_token">
+          <label for="coop_token_kind" string="Вид токена"/>
+          <field name="coop_token_kind" nolabel="1" required="coop_has_token"/>
+          <p class="coop-add_help" invisible="not coop_token_kind">
+            <field name="coop_token_kind_note" nolabel="1" readonly="1"/>
+          </p>
+        </div>
         <div class="coop-add_row" invisible="not coop_has_token">
           <div class="coop-add_field">
             <label for="coop_token_name" string="Название токена"/>
@@ -769,6 +778,9 @@
                 <span class="coop-price_note" invisible="not coop_token_symbol">
                   <field name="coop_token_symbol" readonly="1" nolabel="1"/>
                 </span>
+                <span class="coop-price_note" invisible="not coop_token_kind">
+                  <field name="coop_token_kind" readonly="1" nolabel="1"/>
+                </span>
               </div>
               <ul class="o_coop_crowd_stats o_coop_crowd_stats_big">
                 <li><b><field name="coop_crowd_open_count" readonly="1" nolabel="1"/></b> открыто</li>
@@ -801,6 +813,8 @@
           <div class="o_coop_crowd_block">
             <h2 class="o_coop_crowd_head">Экономика токена</h2>
             <p class="text-muted">Проект раскрывает её сам — в рамках законов своей страны.</p>
+            <p invisible="not coop_token_kind"><field name="coop_token_kind" readonly="1" nolabel="1" class="d-inline"/>:
+              <field name="coop_token_kind_note" readonly="1" nolabel="1" class="d-inline"/></p>
             <field name="coop_token_economy" readonly="1" nolabel="1"/>
           </div>
 

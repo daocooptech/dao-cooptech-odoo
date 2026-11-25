@@ -184,3 +184,9 @@ class TestTaskTokens(BountyCase):
         # Система и список платформы не выпускают.
         self._platform_task()
         self.assertEqual(self.fund.amount, 1000)
+
+    def test_token_kind_has_note(self):
+        """У каждого из семи видов токена — пояснение (решение 702)."""
+        for kind, _label in self.project._fields['coop_token_kind'].selection:
+            self.project.coop_token_kind = kind
+            self.assertTrue(self.project.coop_token_kind_note, kind)

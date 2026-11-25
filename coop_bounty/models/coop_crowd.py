@@ -37,6 +37,26 @@ CRITERIA_BY_SPECIALIZATION = {
 # Обозначение токена — как тикер на биржах и в ERC-20 (BTC, ETH, USDT):
 # латиница, заглавные буквы и цифры, начинается с буквы. Кириллица в
 # тикере не читается ни биржей, ни кошельком, ни сетью TON.
+# Вид токена проекта (решение 702): автор выбирает один из семи.
+TOKEN_KINDS = [
+    ('claim', 'Право требования'),
+    ('utility', 'Утилитарный'),
+    ('share', 'Токен-доля'),
+    ('certificate', 'Сертификат на долю'),
+    ('profit', 'Право на прибыль'),
+    ('debt', 'Долговой'),
+    ('asset', 'Обеспеченный активом'),
+]
+TOKEN_KIND_NOTES = {
+    'claim': 'Товар или услуга проекта в будущем',
+    'utility': 'Доступ, скидки и оплата услуг внутри проекта',
+    'share': 'Часть проекта или юрлица',
+    'certificate': 'Обязательство выделить долю, когда появится юрлицо',
+    'profit': 'Процент прибыли или выручки без доли в собственности',
+    'debt': 'Возврат суммы с процентом к сроку',
+    'asset': 'Требование, за которым стоит вещь, партия или имущество',
+}
+
 TICKER_RE = re.compile(r'^[A-Z][A-Z0-9]{1,7}$')
 TRANSLIT = dict(zip('абвгдеёжзийклмнопрстуфхцчшщъыьэюя', [
     'a', 'b', 'v', 'g', 'd', 'e', 'e', 'zh', 'z', 'i', 'y', 'k', 'l', 'm', 'n', 'o', 'p',
@@ -163,6 +183,11 @@ class CoopProjectToken(models.Model):
     coop_token_symbol = fields.Char(
         string='Тикер', help='Латиницей, 2–8 заглавных букв и цифр — как BTC, ETH, USDT. '
                              'На платформе у каждого токена свой.')
+    coop_token_kind = fields.Selection(
+        TOKEN_KINDS, string='Вид токена', index=True,
+        help='Что токен даёт держателю. Один вид на проект.')
+    coop_token_kind_note = fields.Char(
+        string='Что даёт держателю', compute='_compute_coop_token_kind_note')
     coop_token_economy = fields.Html(
         string='Экономика токена',
         help='Что даёт токен, чем обеспечен, как погашается. Проект раскрывает это сам — '
@@ -263,6 +288,11 @@ class CoopProjectToken(models.Model):
     def _compute_coop_token_unit(self):
         for project in self:
             project.coop_token_unit = project._coop_token_unit()
+
+    @api.depends('coop_token_kind')
+    def _compute_coop_token_kind_note(self):
+        for project in self:
+            project.coop_token_kind_note = TOKEN_KIND_NOTES.get(project.coop_token_kind, False)
 
 
 class CoopProjectTokenMove(models.Model):

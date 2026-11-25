@@ -627,7 +627,19 @@ TOKEN_ECONOMY = [
     'страны проекта.</p>',
     '<p>1 токен — час услуг проекта по его прайсу. Действует год с начисления, '
     'передаётся другим участникам платформы.</p>',
+    '<p>Токен даёт доступ к мастерской и оборудованию проекта: 1 токен — 10 минут '
+    'по записи. Держателям от 500 токенов — скидка 10 % на услуги.</p>',
+    '<p>Токен — доля в проекте: доля держателя считается от всех начисленных токенов. '
+    'Передача — с согласия остальных держателей.</p>',
+    '<p>Держатели делят 10 % чистой прибыли проекта раз в квартал — пропорционально '
+    'токенам на руках. Доли в собственности токен не даёт.</p>',
+    '<p>1 токен — долг проекта на 1 ₽, возврат через 18 месяцев с начисления, 9 % '
+    'годовых. Выпуск — через оператора ЦФА.</p>',
+    '<p>За токенами стоит партия продукции на складе проекта: 1 токен — 1 кг. Остаток '
+    'партии сверяется каждый месяц.</p>',
 ]
+# Вид токена по тому же порядку, что и описания (решение 702).
+TOKEN_KINDS = ['claim', 'certificate', 'claim', 'utility', 'share', 'profit', 'debt', 'asset']
 
 
 def _demo_project_tokens(env):
@@ -642,9 +654,41 @@ def _demo_project_tokens(env):
             'coop_token_name': 'Токен «%s»' % project.name,
             'coop_token_symbol': project._coop_ticker_from(project.name),
             'coop_token_economy': TOKEN_ECONOMY[index % len(TOKEN_ECONOMY)],
+            'coop_token_kind': TOKEN_KINDS[index % len(TOKEN_KINDS)],
             'coop_bounty_token_limit': 30000,
         })
     return projects
+
+
+def fill_token_kinds(env):
+    """Вид токена демо-проектам, заведённым до поля (решение 702).
+
+    Где токены уже начислены, описание остаётся прежним и вид берётся по
+    нему; остальным достаются по кругу все семь видов.
+    """
+    Project = env['coop.project'].sudo().with_context(active_test=False)
+    projects = Project.search(DEMO + [
+        ('coop_token_name', '!=', False), ('coop_token_kind', '=', False)], order='id')
+    by_mark = [('Погашается продукцией', 'claim'), ('оформит юрлицо', 'certificate'),
+               ('час услуг', 'claim')]
+    free = 0
+    for project in projects:
+        text = project.coop_token_economy or ''
+        kind = next((kind for mark, kind in by_mark if mark in text), False)
+        if kind and not project.coop_token_issued:
+            index = free % len(TOKEN_ECONOMY)
+            # Долю и прибыль дают только коммерческий проект и ДАО (633):
+            # другому достаётся утилитарный, очередь не сдвигается.
+            if TOKEN_KINDS[index] in ('share', 'profit') and project.kind not in ('commercial', 'dao'):
+                index = TOKEN_KINDS.index('utility')
+            else:
+                free += 1
+            project.write({'coop_token_kind': TOKEN_KINDS[index],
+                           'coop_token_economy': TOKEN_ECONOMY[index]})
+        elif kind:
+            project.coop_token_kind = kind
+    _logger.info('Вид токена: %s проектов, без вида %s', len(projects),
+                 len(projects.filtered(lambda p: not p.coop_token_kind)))
 
 
 def _org_crowd_project(env, org):
@@ -679,6 +723,7 @@ def _org_crowd_project(env, org):
                 'coop_token_name': 'Токен «%s»' % short,
                 'coop_token_symbol': Project._coop_ticker_from(short),
                 'coop_token_economy': TOKEN_ECONOMY[org.id % len(TOKEN_ECONOMY)],
+                'coop_token_kind': TOKEN_KINDS[org.id % len(TOKEN_KINDS)],
                 'coop_bounty_token_limit': 30000,
             })
     except Exception:
