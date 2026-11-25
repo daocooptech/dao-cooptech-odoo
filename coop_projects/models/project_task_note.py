@@ -62,6 +62,24 @@ class ProjectTask(models.Model):
             note.coop_space_label = (
                 note[field].sudo().display_name if field else 'Личное')
 
+    def _coop_catalog_filters(self, domain):
+        """Панель «Фильтр» у заметок и задач: чьё и закреплённое."""
+        return [{
+            'code': 'space', 'label': 'Пространство',
+            'hint': 'Личное, проект, организация или группа.',
+            'widget': 'select', 'field': 'coop_space', 'operator': '=',
+            'placeholder': 'Любое',
+            'options': [{'value': code, 'label': label}
+                        for code, label in self._fields['coop_space'].selection],
+        }, {
+            'code': 'pinned', 'label': 'Закреплённые',
+            'hint': 'Только закреплённые заметки.',
+            'widget': 'select', 'field': 'coop_pinned', 'operator': '=',
+            'placeholder': 'Все',
+            'options': [{'value': True, 'label': 'Закреплённые'},
+                        {'value': False, 'label': 'Остальные'}],
+        }]
+
     def action_coop_pin(self):
         for note in self:
             note.coop_pinned = not note.coop_pinned

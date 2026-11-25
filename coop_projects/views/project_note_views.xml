@@ -15,7 +15,7 @@
     <field name="model">project.task</field>
     <field name="priority">900</field>
     <field name="arch" type="xml">
-      <kanban class="o_coop_notes_board" records_draggable="false"
+      <kanban class="o_coop_notes_board" js_class="coop_notes_kanban" records_draggable="false"
               group_create="0" default_order="coop_pinned desc, write_date desc, id desc">
         <field name="color"/>
         <field name="coop_pinned"/>
@@ -33,7 +33,7 @@
           <t t-name="card">
             <div t-att-class="'o_coop_note o_coop_note_c' + (record.color.raw_value || 0)">
               <div class="o_coop_note_title">
-                <i t-if="record.coop_pinned.raw_value" class="fa fa-thumb-tack me-1" title="Закреплена"/>
+                <span t-if="record.coop_pinned.raw_value" class="o_coop_note_pin" title="Закреплена"/>
                 <field name="name"/>
               </div>
               <div class="o_coop_note_text"><field name="coop_excerpt"/></div>
@@ -72,7 +72,7 @@
     <field name="context">{
       'default_project_id': False,
       'default_coop_kind': 'note',
-      'coop_search': 1,
+      'coop_filters': 1,
       'coop_create_label': 'Добавить заметку',
       'show_todo_mail_helper': True,
       'show_task_options': False,

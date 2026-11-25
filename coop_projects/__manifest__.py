@@ -19,7 +19,7 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.3.42',
+    'version': '20.0.1.3.43',
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_resources', 'coop_skills', 'project', 'project_todo', 'hr_timesheet', 'mail'],
     'data': [
@@ -42,6 +42,8 @@
     'assets': {
         'web.assets_backend': [
             'coop_projects/static/src/scss/coop_projects.scss',
+            'coop_projects/static/src/js/notes_board.js',
+            'coop_projects/static/src/xml/notes_board.xml',
             'coop_projects/static/src/js/readiness_ring.js',
             'coop_projects/static/src/xml/readiness_ring.xml',
             'coop_projects/static/src/js/project_preview.js',

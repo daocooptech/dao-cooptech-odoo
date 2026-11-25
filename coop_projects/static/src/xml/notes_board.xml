@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <!-- Доска заметок и панель «Фильтр» справа — как каталог расширений. -->
+  <t t-name="coop_projects.NotesKanbanView" t-inherit="web.KanbanView" t-inherit-mode="primary">
+    <xpath expr="//div[@t-ref='this.rootRef']" position="attributes">
+      <attribute name="t-attf-class">{{ this.className }} {{ this.hasSelectedRecords ? 'o_kanban_selection_active' : 'o_kanban_selection_available' }} o_coop_notes_catalog</attribute>
+    </xpath>
+    <xpath expr="//t[@t-elif='this.model.couldNotLoadRootOffline']" position="after">
+      <CoopFilters t-key="'coop_filters'"
+                   resModel="this.props.resModel" baseDomain="this.coopBaseDomain"/>
+    </xpath>
+  </t>
+</templates>
