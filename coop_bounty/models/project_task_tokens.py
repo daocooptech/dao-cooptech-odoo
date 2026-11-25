@@ -18,11 +18,12 @@
 Допэмиссия токена происходит в момент создания задачи (владелец
 25.11.2026): на сумму оценки растёт фонд задач нашего проекта или
 «Токены на задачи» остальных. Оценку сменили — эмиссия меняется на
-разницу, так выпущено ровно под задачи.
+разницу, так выпущено ровно под задачи. Задачу отменили, убрали в архив
+или удалили — выпущенное под неё изымается; вернули — выпускается снова.
 """
 import re
 
-from odoo import _, api, fields, models
+from odoo import SUPERUSER_ID, _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
 from .coop_bounty_p2 import _tokens
@@ -43,6 +44,65 @@ class CoopBountyTaskWork(models.Model):
     work_task_id = fields.Many2one(
         'project.task', string='Задача в управлении проектом', index=True,
         ondelete='set null', readonly=True, copy=False)
+    coop_emission = fields.Boolean(
+        string='С допэмиссией', readonly=True, copy=False,
+        help='Задача создана человеком прямо в краудсорсинге: токены под неё выпущены '
+             'в момент создания. Задачи с доски выпускают на доске.')
+    coop_tokens_emitted = fields.Integer(
+        string='Выпущено под задачу', readonly=True, copy=False)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        tasks = super().create(vals_list)
+        # Система (загрузчики, список платформы) не выпускает, приёмка с
+        # доски — тоже: под задачу доски выпущено при её создании.
+        if self.env.uid != SUPERUSER_ID and not self.env.context.get('coop_no_emission'):
+            fresh = tasks.filtered(lambda t: not t.coop_source_ref and not t.work_task_id)
+            fresh.sudo().coop_emission = True
+            fresh._coop_crowd_emit()
+        return tasks
+
+    def write(self, vals):
+        result = super().write(vals)
+        if {'reward_tokens', 'state', 'prize_ids', 'stage_ids', 'is_recurring', 'repeat_limit',
+                'is_contest', 'payer_id', 'project_id'} & set(vals):
+            self._coop_crowd_emit()
+        return result
+
+    def action_publish(self):
+        # Призы конкурса правят и отдельными строками — до резерва сверить.
+        self._coop_crowd_emit()
+        return super().action_publish()
+
+    def unlink(self):
+        self._coop_crowd_emit(gone=True)
+        return super().unlink()
+
+    def _coop_crowd_emit(self, gone=False):
+        """Выпущено ровно под задачу: у живой — её сумма, у отменённой — то,
+        что успели выплатить."""
+        for task in self.sudo().filtered('coop_emission'):
+            if task.state == 'accepted':
+                continue
+            target = task.paid_amount if gone or task.state == 'cancelled'                 else task._coop_planned_total()
+            delta = target - task.coop_tokens_emitted
+            if not delta:
+                continue
+            if task.payer_kind == 'platform':
+                fund = task.fund_id or self.env['coop.bounty.fund'].sudo()._coop_current()
+                if not fund:
+                    continue
+                fund.amount += delta
+            elif task.project_id.coop_has_token:
+                task.project_id.coop_bounty_token_limit += delta
+            else:
+                continue
+            task.coop_tokens_emitted = target
+            if not gone:
+                task.message_post(body=(
+                    _('Допэмиссия под задачу: %(amount)s %(unit)s.') if delta > 0
+                    else _('Изъято %(amount)s %(unit)s.')) % {
+                        'amount': _tokens(abs(delta)), 'unit': task.token_unit})
 
 
 class ProjectTaskTokens(models.Model):
@@ -62,6 +122,8 @@ class ProjectTaskTokens(models.Model):
     coop_tokens_emitted = fields.Integer(
         string='Выпущено под задачу', readonly=True, copy=False,
         help='Допэмиссия токена проекта в момент создания задачи.')
+    coop_tokens_withdrawn = fields.Integer(
+        string='Изъято при отмене', readonly=True, copy=False)
     coop_tokens_paid_on = fields.Date(string='Когда начислено', readonly=True, copy=False)
     coop_contribution_id = fields.Many2one(
         'coop.project.contribution', string='Учтено вкладом', readonly=True, copy=False,
@@ -170,6 +232,8 @@ class ProjectTaskTokens(models.Model):
         result = super().write(vals)
         if rated:
             self._coop_tokens_emit(rated)
+        if {'state', 'stage_id', 'active'} & set(vals):
+            self._coop_tokens_withdraw()
         if 'user_ids' in vals and not self.env.su:
             for task in self:
                 if task.id in before and set(before[task.id]) != set(task.user_ids.ids):
@@ -197,20 +261,58 @@ class ProjectTaskTokens(models.Model):
             delta = task.coop_tokens - before.get(task.id, 0)
             if not card or not delta or task.coop_contribution_id:
                 continue
+            if not task.active or task.state == '1_canceled':
+                # Отменённой не выпускаем; вернут — выпустят новую оценку.
+                if task.coop_tokens_withdrawn:
+                    task.coop_tokens_withdrawn = task.coop_tokens
+                continue
             # Изъять можно не больше, чем под эту задачу выпущено.
             delta = max(delta, -task.coop_tokens_emitted)
             if not delta:
                 continue
-            if card == ours:
-                fund = self.env['coop.bounty.fund'].sudo()._coop_current()
-                if not fund:
-                    continue
-                fund.amount += delta
-            else:
-                card.coop_bounty_token_limit += delta
+            if not task._coop_tokens_supply(card, ours, delta):
+                continue
             task.coop_tokens_emitted += delta
             task.message_post(body=_('Допэмиссия под задачу: %(amount)s %(unit)s.',
                                      amount=_tokens(delta), unit=card._coop_token_unit()))
+
+    def _coop_tokens_supply(self, card, ours, delta):
+        """Изменить выпущенное у проекта; False — фонда на сегодня нет."""
+        if card != ours:
+            card.coop_bounty_token_limit += delta
+            return True
+        fund = self.env['coop.bounty.fund'].sudo()._coop_current()
+        if fund:
+            fund.amount += delta
+        return bool(fund)
+
+    def _coop_tokens_withdraw(self, gone=False):
+        """Отменённая задача возвращает выпущенное, ожившая — выпускает снова."""
+        ours = self.env['coop.bounty.task']._coop_our_project()
+        for task in self.sudo():
+            card = task.project_id.coop_project_id[:1]
+            if not card or task.coop_tokens_paid:
+                continue
+            dead = gone or not task.active or task.state == '1_canceled'
+            if dead and task.coop_tokens_emitted:
+                delta = -task.coop_tokens_emitted
+                text = _('Задача отменена, изъято %(amount)s %(unit)s.')
+            elif not dead and task.coop_tokens_withdrawn:
+                delta = task.coop_tokens_withdrawn
+                text = _('Задача возвращена, допэмиссия %(amount)s %(unit)s.')
+            else:
+                continue
+            if not task._coop_tokens_supply(card, ours, delta):
+                continue
+            if gone:
+                continue
+            task.write({'coop_tokens_emitted': max(delta, 0), 'coop_tokens_withdrawn': max(-delta, 0)})
+            task.message_post(body=text % {
+                'amount': _tokens(abs(delta)), 'unit': card._coop_token_unit()})
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_coop_tokens(self):
+        self._coop_tokens_withdraw(gone=True)
 
     # ── Начисление ───────────────────────────────────────────────────────
 
@@ -304,7 +406,7 @@ class ProjectTaskTokens(models.Model):
             bounty.write({'state': 'draft'})
             bounty.write({'reward_tokens': need})
         else:
-            bounty = Bounty.with_context(mail_create_nolog=True).create({
+            bounty = Bounty.with_context(mail_create_nolog=True, coop_no_emission=True).create({
                 'name': NUMBER_RE.sub('', self.name),
                 'payer_id': self.env.company.partner_id.id,
                 'project_id': card.id,

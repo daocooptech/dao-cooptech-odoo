@@ -134,3 +134,53 @@ class TestTaskTokens(BountyCase):
         old = self._task(tokens=300)
         old.with_context(coop_no_emission=False).coop_tokens = 100
         self.assertEqual(self.project.coop_bounty_token_limit, 50400)
+
+    def test_cancel_withdraws(self):
+        limit = lambda: self.project.coop_bounty_token_limit
+        task = self._task(tokens=700, emission=True)
+        task.write({'state': '1_canceled'})
+        self.assertEqual((limit(), task.coop_tokens_emitted), (50000, 0))
+        task.coop_tokens = 900
+        task.write({'state': '01_in_progress'})
+        self.assertEqual((limit(), task.coop_tokens_emitted), (50900, 900))
+        task.active = False
+        self.assertEqual(limit(), 50000)
+        task.active = True
+        self.assertEqual(limit(), 50900)
+        task.unlink()
+        self.assertEqual(limit(), 50000)
+        # Под прежнюю задачу не выпускали — изымать нечего; оплаченная не трогается.
+        self._task(tokens=300).write({'state': '1_canceled'})
+        paid = self._task(tokens=200, emission=True)
+        paid.write({'state': '1_done'})
+        paid.write({'state': '1_canceled'})
+        self.assertEqual(limit(), 50200)
+        _ours, work = self._ours()
+        own = self._task(tokens=5000, project=work, emission=True)
+        own.write({'state': '1_canceled'})
+        self.assertEqual(self.fund.amount, 1000)
+
+    def test_crowd_emission(self):
+        self.boss.group_ids = [(4, self.env.ref('coop_bounty.group_coop_community_manager').id)]
+        values = {'name': 'Задача платформы', 'reward_tokens': 5000,
+                  'payer_id': self.env.company.partner_id.id,
+                  'allowed_method_ids': [(6, 0, [self.m['tokens'].id])],
+                  'criterion_ids': [(0, 0, {'name': 'Готово'})]}
+        Crowd = self.Task.with_user(self.boss)
+        task = Crowd.create(values)
+        self.assertEqual((self.fund.amount, task.coop_tokens_emitted), (6000, 5000))
+        task.reward_tokens = 4000
+        self.assertEqual(self.fund.amount, 5000)
+        task.action_publish()
+        self.fund.invalidate_recordset()
+        self.assertEqual((self.fund.reserved, self.fund.free), (4000, 1000))
+        task.action_cancel()
+        self.assertEqual(self.fund.amount, 1000)
+        own = Crowd.create(dict(values, payer_id=self.org.id, project_id=self.project.id,
+                                allowed_method_ids=[(6, 0, [self.m['project_tokens'].id])]))
+        self.assertEqual(self.project.coop_bounty_token_limit, 55000)
+        own.unlink()
+        self.assertEqual(self.project.coop_bounty_token_limit, 50000)
+        # Система и список платформы не выпускают.
+        self._platform_task()
+        self.assertEqual(self.fund.amount, 1000)
