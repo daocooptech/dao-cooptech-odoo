@@ -12,6 +12,7 @@ from odoo import fields
 from odoo.exceptions import UserError
 
 from .load_bounty import RETURN_NOTES, SUBMIT_NOTES, _link, _performers
+from .removed_bounty import REMOVED
 from .demo_only import DEMO
 
 _logger = logging.getLogger(__name__)
@@ -164,7 +165,7 @@ def load_bounty_p2(env, Task, manager, specializations):
     projects = env['coop.project'].sudo().search(
         DEMO + [('coop_token_name', '!=', False), ('partner_id.is_company', '=', True)]
         + ([('id', '!=', ours.id)] if ours else []), order='id', limit=12)
-    existing = set(Task.search([]).mapped('name'))
+    existing = set(Task.search([]).mapped('name')) | REMOVED
     today = fields.Date.context_today(Task)
     spec = lambda name: specializations.get(name).id if specializations.get(name) else False
 

@@ -12,6 +12,7 @@ from datetime import timedelta
 from odoo import fields
 
 from .load_bounty import RETURN_NOTES, SUBMIT_NOTES, _link, _performers
+from .removed_bounty import REMOVED
 from .load_bounty_p2 import _backdate, _create, _criteria
 from .demo_only import DEMO
 
@@ -133,7 +134,7 @@ def load_bounty_p2b(env, Task, manager, specializations):
         + ([('id', '!=', ours.id)] if ours else []), order='id', limit=12)
     if not projects:
         return 0
-    existing = set(Task.search([]).mapped('name'))
+    existing = set(Task.search([]).mapped('name')) | REMOVED
     today = fields.Date.context_today(Task)
     Submission = env['coop.bounty.submission'].sudo()
     spec = lambda name: specializations.get(name).id if specializations.get(name) else False

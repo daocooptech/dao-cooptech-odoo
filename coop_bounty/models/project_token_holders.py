@@ -40,11 +40,12 @@ class CoopProjectTokenHolder(models.Model):
              UNION ALL
             SELECT 2 * min(t.id) + 1, d.res_id, t.partner_id, sum(t.amount)::int
               FROM coop_token_transaction t
+              JOIN coop_bounty_task b
+                ON b.id = t.res_id AND t.res_model = 'coop.bounty.task'
               JOIN ir_model_data d
                 ON d.module = 'coop_bounty' AND d.name = 'project_cooptech'
                AND d.model = 'coop.project'
-             WHERE t.kind = 'grant'
-               AND t.res_model IN ('coop.bounty.task', 'project.task')
+             WHERE t.kind = 'grant' AND b.project_id = d.res_id
              GROUP BY d.res_id, t.partner_id
             HAVING sum(t.amount) > 0
         )""")

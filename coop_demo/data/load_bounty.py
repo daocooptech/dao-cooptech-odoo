@@ -14,6 +14,7 @@ import logging
 import re
 from datetime import timedelta
 
+from .removed_bounty import REMOVED, purge_platform_tasks
 from odoo import fields
 from .demo_only import DEMO
 
@@ -872,6 +873,7 @@ def load_bounty(env):
     # имеют — он их не создаёт, а получает вместе с модулем.
     Task = env['coop.bounty.task'].sudo()
     Partner = env['res.partner'].sudo()
+    purge_platform_tasks(env)
     manager_group = env.ref('coop_bounty.group_coop_community_manager')
 
     # Менеджер сообщества — отдельная учётная запись рабочей группы. Роль
@@ -907,6 +909,8 @@ def load_bounty(env):
         active_test=False).search([])}
     created = 0
     for index, (name, description, specialization, reward, state) in enumerate(TASKS):
+        if name in REMOVED:
+            continue
         task = Task.search([('name', '=', name)], limit=1)
         values = {
             'name': name,
