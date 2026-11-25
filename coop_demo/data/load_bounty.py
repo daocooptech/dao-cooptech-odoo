@@ -691,6 +691,70 @@ def fill_token_kinds(env):
                  len(projects.filtered(lambda p: not p.coop_token_kind)))
 
 
+TOKEN_BATCHES = [
+    ('Ящик овощей, 10 кг', 250, 40), ('Набор продукции недели', 400, 25),
+    ('Абонемент на месяц', 600, 20), ('Час работы мастера', 120, 60),
+    ('Выезд специалиста', 350, 30), ('Место на занятии', 90, 48),
+    ('Банка мёда, 1 кг', 180, 50), ('Доставка по городу', 70, 80),
+]
+
+
+def fill_token_terms(env):
+    """Партии, талоны и разблокировка у демо-проектов (решение 703)."""
+    import random
+    Project = env['coop.project'].sudo()
+    Batch = env['coop.project.token.batch'].sudo()
+    Move = env['coop.project.token.move'].sudo()
+    today = fields.Date.today()
+    if Batch.search_count([]):
+        return
+    rng = random.Random(703)
+    projects = Project.search(DEMO + [('coop_token_kind', '!=', False)], order='id')
+    for index, project in enumerate(projects.filtered(
+            lambda p: p.coop_token_kind in ('share', 'certificate', 'profit'))):
+        if index % 4 == 3:
+            continue
+        cliff, months = rng.choice([(3, 12), (0, 6), (6, 24), (1, 10), (12, 0)])
+        project.write({'coop_vest': True, 'coop_vest_cliff': cliff, 'coop_vest_months': months})
+        Move.search([('project_id', '=', project.id)]).write(
+            {'vest_cliff': cliff, 'vest_months': months})
+    for project in projects.filtered(lambda p: p.coop_token_kind == 'claim'):
+        for name, price, quantity in rng.sample(TOKEN_BATCHES, rng.randint(3, 5)):
+            start = today - timedelta(days=rng.randint(-20, 150))
+            Batch.create({
+                'project_id': project.id, 'name': name, 'price': price,
+                'quantity': rng.choice([quantity, quantity // 2, 5]),
+                'date_from': start, 'date_to': start + timedelta(days=rng.choice([30, 60, 120, 240]))})
+        partners = Move.search([('project_id', '=', project.id)]).partner_id
+        for partner in partners:
+            for _n in range(rng.randint(1, 4)):
+                batch = rng.choice(project.coop_batch_ids)
+                have = project._coop_holder_balance(partner)[1]
+                first = min(Move.search([('project_id', '=', project.id),
+                                         ('partner_id', '=', partner.id),
+                                         ('amount', '>', 0)]).mapped('date'))
+                taken = max(batch.date_from, first)
+                if batch.left <= 0 or have < batch.price or taken > min(today, batch.date_to):
+                    continue
+                taken += timedelta(days=rng.randint(0, (min(today, batch.date_to) - taken).days))
+                ticket = env['coop.project.token.ticket'].sudo().create({
+                    'batch_id': batch.id, 'partner_id': partner.id, 'taken_on': taken,
+                    'number': '%s-%04d' % (batch.number, len(batch.ticket_ids) + 1)})
+                Move.create({
+                    'project_id': project.id, 'partner_id': partner.id, 'amount': -batch.price,
+                    'date': taken, 'ticket_id': ticket.id,
+                    'description': 'Талон %s: %s' % (ticket.number, batch.name)})
+                fate = rng.random()
+                if fate < 0.5:
+                    last = min(today, batch.date_to)
+                    ticket.write({'state': 'used', 'used_on': taken + timedelta(
+                        days=rng.randint(0, (last - taken).days))})
+                elif fate < 0.6:
+                    ticket.action_cancel()
+    _logger.info('Партий %s, талонов %s', Batch.search_count([]),
+                 env['coop.project.token.ticket'].sudo().search_count([]))
+
+
 def _org_crowd_project(env, org):
     """Проект организации для её задач в краудсорсинге (решение 690).
 

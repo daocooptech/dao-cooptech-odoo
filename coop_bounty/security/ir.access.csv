@@ -50,3 +50,9 @@ coop_bounty_stage_author,Этапы ведёт автор задачи,coop.boun
 coop_bounty_stage_manager,Этапы задачи — менеджер сообщества,coop.bounty.stage,coop_bounty.group_coop_community_manager,crud,
 coop_bounty_contest_result_user,Окно итога конкурса,coop.bounty.contest.result,base.group_user,crud,
 coop_bounty_contest_line_user,Работы в окне итога конкурса,coop.bounty.contest.line,base.group_user,crud,
+coop_token_batch_user,Партии токенов видит каждый,coop.project.token.batch,base.group_user,r,
+coop_token_batch_owner,Партии ведёт инициатор проекта,coop.project.token.batch,base.group_user,cud,"[('project_id.partner_id', 'in', user.coop_publisher_partner_ids.ids)]"
+coop_token_batch_admin,Партии — администратор узла,coop.project.token.batch,base.group_system,crud,
+coop_token_ticket_own,Свои талоны,coop.project.token.ticket,base.group_user,r,"[('partner_id', 'in', user.coop_actor_partner_ids.ids)]"
+coop_token_ticket_owner,Талоны своего проекта,coop.project.token.ticket,base.group_user,r,"[('project_id.partner_id', 'in', user.coop_publisher_partner_ids.ids)]"
+coop_token_ticket_admin,Талоны — администратор узла,coop.project.token.ticket,base.group_system,r,

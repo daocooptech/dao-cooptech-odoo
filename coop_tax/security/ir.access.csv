@@ -8,3 +8,6 @@ rule_payout_limit_admin,Лимит кооперативных выплат — �
 rule_labor_payout_own,Свои выплаты за трудовое участие,coop.tax.labor.payout,base.group_user,r,"[('partner_id', '=', user.partner_id.id)]"
 rule_labor_payout_agent,Выплаты членам своего кооператива — счета,coop.tax.labor.payout,base.group_user,cru,"[('cooperative_id', 'in', user.coop_treasury_partner_ids.ids)]"
 rule_labor_payout_admin,Выплаты за трудовое участие — администратор,coop.tax.labor.payout,base.group_system,crud,
+rule_payout_member_own,Своё участие в кооперативе,coop.tax.payout.member,base.group_user,r,"[('partner_id', 'in', user.coop_actor_partner_ids.ids)]"
+rule_payout_member_agent,Участие членов своего кооператива — счета,coop.tax.payout.member,base.group_user,crud,"[('limit_id.cooperative_id', 'in', user.coop_treasury_partner_ids.ids)]"
+rule_payout_member_admin,Участие членов — администратор,coop.tax.payout.member,base.group_system,crud,

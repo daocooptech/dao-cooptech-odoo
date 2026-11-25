@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from odoo.exceptions import UserError, ValidationError
+from odoo import fields
+from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests import tagged
 
 from .test_bounty_payment import BountyCase
@@ -190,3 +191,53 @@ class TestTaskTokens(BountyCase):
         for kind, _label in self.project._fields['coop_token_kind'].selection:
             self.project.coop_token_kind = kind
             self.assertTrue(self.project.coop_token_kind_note, kind)
+
+    def _accrue(self, amount, date, **extra):
+        return self.Move.create(dict({
+            'project_id': self.project.id, 'partner_id': self.person.id,
+            'amount': amount, 'date': date}, **extra))
+
+    def test_vesting_by_months(self):
+        """12 000: три месяца закрыто, потом по тысяче в месяц (703)."""
+        self.project.write({'coop_token_kind': 'share', 'coop_vest': True,
+                            'coop_vest_cliff': 3, 'coop_vest_months': 12})
+        move = self._accrue(12000, '2026-01-10')
+        for day, expected in (('2026-04-09', 0), ('2026-04-10', 0), ('2026-05-10', 1000),
+                              ('2027-04-09', 11000), ('2027-04-10', 12000), ('2028-01-01', 12000)):
+            self.assertEqual(move._coop_unlocked(fields.Date.to_date(day)), expected, day)
+        # Настройка сменилась — прежнее начисление по прежнему сроку.
+        self.project.coop_vest = False
+        self.assertEqual(move._coop_unlocked(fields.Date.to_date('2026-05-10')), 1000)
+
+    def test_batch_take_use_cancel(self):
+        self.project.coop_token_kind = 'claim'
+        self._accrue(500, fields.Date.today())
+        batch = self.env['coop.project.token.batch'].create({
+            'project_id': self.project.id, 'name': 'Каравай', 'quantity': 2, 'price': 200,
+            'date_to': fields.Date.today()})
+        mine = batch.with_user(self.user)
+        mine.action_take()
+        mine.action_take()
+        self.assertEqual((batch.left, self.project._coop_holder_balance(self.person)), (0, (100, 100)))
+        with self.assertRaises(UserError):
+            mine.action_take()
+        # Начисленное не уменьшается оттого, что токены погашены.
+        self.project.invalidate_recordset()
+        self.assertEqual(self.project.coop_token_issued, 500)
+        first, second = batch.ticket_ids.sorted('number')
+        with self.assertRaises(AccessError):
+            first.with_user(self.user).action_use()
+        first.action_use()
+        second.action_cancel()
+        self.assertEqual(first.state, 'used')
+        self.assertEqual(self.project._coop_holder_balance(self.person), (300, 300))
+        with self.assertRaises(UserError):
+            second.action_cancel()
+        with self.assertRaises(UserError):
+            batch.price = 10
+
+    def test_batch_only_for_claim(self):
+        self.project.coop_token_kind = 'utility'
+        with self.assertRaises(ValidationError):
+            self.env['coop.project.token.batch'].create({
+                'project_id': self.project.id, 'name': 'Каравай', 'date_to': fields.Date.today()})

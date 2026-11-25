@@ -226,7 +226,7 @@ class CoopProjectToken(models.Model):
                     [('project_id', '=', project.id), ('paid_amount', '>', 0)]).mapped('paid_amount'))
             else:
                 project.coop_token_issued = sum(Move.search(
-                    [('project_id', '=', project.id)]).mapped('amount'))
+                    [('project_id', '=', project.id), ('ticket_id', '=', False)]).mapped('amount'))
 
     @api.constrains('coop_token_symbol')
     def _check_coop_token_symbol(self):

@@ -35,6 +35,7 @@ def post_init_hook(env):
     demo_natural_income(env)
     demo_payout_limits(env)
     demo_payout_divisor(env)
+    demo_payout_members(env)
     demo_labor_payouts(env)
 
 
@@ -86,6 +87,47 @@ def demo_payout_divisor(env):
             'base_turnover': round(members * rng.uniform(40000, 900000), -2)
             if turnover else 0,
         })
+
+
+def demo_payout_members(env):
+    """Участие членов по годам (решение 703): сумма строк равна базам.
+
+    Где за год уже начислено вручную, участие только справочно: второй
+    раз не начисляется.
+    """
+    Member = env['coop.tax.payout.member'].sudo()
+    for limit in env['coop.tax.payout.limit'].sudo().search([], order='id').filtered(
+            lambda rec: rec.distribute_total and not rec.member_ids):
+        rng = random.Random('member-%s' % limit.id)
+        end = '%s-12-31' % limit.year
+        accounts = env['coop.share.account'].sudo().search([
+            ('cooperative_id', '=', limit.cooperative_id.id),
+            '|', ('joined_on', '=', False), ('joined_on', '<=', end)])
+        if not accounts:
+            continue
+        hours = [0.0 if rng.random() < 0.15 else rng.uniform(0.4, 1.8) for _a in accounts]
+        trade = [0.0 if rng.random() < 0.15 else rng.uniform(0.3, 2.4) for _a in accounts]
+        hours = hours if sum(hours) else [1.0] * len(accounts)
+        trade = trade if sum(trade) else [1.0] * len(accounts)
+        Member.create([{
+            'limit_id': limit.id, 'account_id': account.id,
+            'labor_hours': round(limit.base_labor_hours * h / sum(hours), 1),
+            'turnover': round(limit.base_turnover * t / sum(trade), 2),
+            'shares': max(sum(account.move_ids.filtered(
+                lambda m: m.state == 'confirmed' and str(m.date) <= end
+                and m.kind in ('share', 'extra', 'in_kind', 'return')).mapped('amount')), 0.0),
+        } for account, h, t in zip(accounts, hours, trade)])
+        limit.distribute_basis = 'Протокол общего собрания № %s от %02d.%02d.%s' % (
+            rng.randint(1, 6), rng.randint(5, 28), rng.randint(3, 5), limit.year + 1)
+        # Часть последних лет — начислено по участию и ждёт проведения.
+        if limit.year >= 2024 and not limit.accrued and rng.random() < 0.4 \
+                and any(line.amount > 0 for line in limit.member_ids):
+            requested = env['coop.share.move'].sudo().search_count([
+                ('kind', '=', 'accrual'), ('state', '!=', 'declined'),
+                ('account_id.cooperative_id', '=', limit.cooperative_id.id),
+                ('coop_result_year', '=', limit.year)])
+            if not requested:
+                limit.action_accrue_members()
 
 
 def demo_labor_payouts(env, login='dashkevich'):

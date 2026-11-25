@@ -3,7 +3,7 @@
 доходы 10 000 000, расходы 8 000 000, УСН 600 000, чистая прибыль
 1 400 000 — потолок 280 000 от прибыли и 1 400 000 от доходов после
 обязательных платежей (20 % от 9 400 000 упирается в прибыль)."""
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tests import tagged
 
 from odoo.addons.coop_base.tests.common import CoopCase
@@ -91,3 +91,31 @@ class TestPayoutLimit(CoopCase):
         with self.assertRaises(ValidationError):
             limit.write({'distribute_total': 100_000, 'pct_labor': 40, 'pct_share': 60})
         limit.write({'distribute_total': 100_000, 'pct_labor': 50, 'pct_share': 50})
+
+    def test_patronazh(self):
+        """Оборот 100 тыс. из 2 млн при 100 тыс. к распределению — 5 000 (703)."""
+        limit = self._limit('net_profit')
+        other = self._make_person('Второй пайщик пробы', 'patron_two').partner_id
+        wallet = self.env['coop.wallet'].search([('partner_id', '=', other.id)], limit=1) \
+            or self.env['coop.wallet'].create({'partner_id': other.id})
+        second = self.env['coop.share.account'].create(
+            {'wallet_id': wallet.id, 'cooperative_id': self.coop.id})
+        limit.write({'distribute_total': 100_000, 'pct_turnover': 100})
+        limit.action_collect_members()
+        self.assertEqual(limit.member_ids.account_id, self.account | second)
+        mine = limit.member_ids.filtered(lambda l: l.account_id == self.account)
+        mine.turnover = 100_000
+        (limit.member_ids - mine).turnover = 1_900_000
+        self.assertEqual((limit.base_turnover, mine.amount), (2_000_000, 5_000))
+        with self.assertRaises(UserError):
+            limit.action_accrue_members()  # без протокола
+        limit.distribute_basis = 'Протокол № 4'
+        limit.action_accrue_members()
+        self.assertEqual((mine.move_id.state, mine.move_id.amount, mine.move_id.coop_result_year),
+                         ('requested', 5_000, 2025))
+        with self.assertRaises(UserError):
+            limit.action_accrue_members()
+        with self.assertRaises(UserError):
+            mine.turnover = 1
+        with self.assertRaises(UserError):
+            limit.distribute_total = 50_000

@@ -76,6 +76,30 @@
               <field name="per_share_rub"/>
             </group>
           </group>
+          <group string="Участие членов">
+            <field name="distribute_basis" placeholder="Протокол общего собрания № 4 от 20.04.2026"
+                   readonly="not coop_can_edit or coop_accrued_lines"/>
+          </group>
+          <field name="coop_can_edit" invisible="1"/>
+          <field name="coop_accrued_lines" invisible="1"/>
+          <div class="mb-2" invisible="not coop_can_edit or coop_accrued_lines">
+            <button name="action_collect_members" type="object" string="Собрать участие"
+                    class="btn-secondary me-2"/>
+            <button name="action_accrue_members" type="object" string="Начислить по участию"
+                    class="btn-primary" invisible="not member_ids"
+                    confirm="Начислить каждому по участию? После этого распределение не меняется."/>
+          </div>
+          <field name="member_ids" nolabel="1" readonly="not coop_can_edit or coop_accrued_lines">
+            <list editable="bottom" create="0">
+              <field name="partner_id"/>
+              <field name="labor_hours" sum="Труд"/>
+              <field name="turnover" sum="Оборот"/>
+              <field name="shares" string="Пай" readonly="1" sum="Паи"/>
+              <field name="amount" sum="Причитается"/>
+              <field name="move_state" string="Начисление" widget="badge" decoration-success="move_state == 'confirmed'"/>
+              <field name="currency_id" column_invisible="True"/>
+            </list>
+          </field>
           <field name="currency_id" invisible="1"/>
           <div class="o_coop_note">
             Кооперативные выплаты «не должны превышать 20 процентов от
