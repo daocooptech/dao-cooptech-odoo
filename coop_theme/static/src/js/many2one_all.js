@@ -4,10 +4,19 @@
 // нашёл в списке форм акционерных обществ. Справочник форм невелик —
 // показываем весь.
 import { registry } from "@web/core/registry";
+import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
 import { Many2One } from "@web/views/fields/many2one/many2one";
 import { buildM2OFieldDescription, Many2OneField } from "@web/views/fields/many2one/many2one_field";
 
+class Many2XAutocompleteAll extends Many2XAutocomplete {
+    // Показано всё — «Искать больше…» предлагать нечего.
+    addSearchMoreSuggestion() {
+        return false;
+    }
+}
+
 class Many2OneAll extends Many2One {
+    static components = { ...Many2One.components, Many2XAutocomplete: Many2XAutocompleteAll };
     get many2XAutocompleteProps() {
         return { ...super.many2XAutocompleteProps, searchLimit: 200 };
     }

@@ -259,6 +259,7 @@ class CoopDemoLoader(models.AbstractModel):
             # проекта в управлении берёт заявки и аналитику с карточки.
             load_work_cards.load_work_cards(self.env)
             load_work_cards.align_economic_forms(self.env)
+            load_work_cards.fill_late_forms(self.env)
             # Состояния однобокого наполнения (замечание 11.10): задачи
             # проектов, биржа токенов, DEX, бартер.
             # История торгов токенов — свечам нужны месяцы сделок.

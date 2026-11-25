@@ -363,6 +363,45 @@ def align_economic_forms(env):
     return done
 
 
+# Формы без проектов (№ 487): первые демо-проекты людей, которым форма
+# подходит по делу. ГУП, МУП и учреждения — заказчики, проектов у них нет.
+FORM_SAMPLES = {
+    'rental_fund': ('Пункт проката техники', 'Библиотека инструментов'),
+    'housing_coop': ('Модульный дом из бруса', 'Модульные дома для многодетных семей'),
+    'tsn': ('Соседский коворкинг',),
+    'snt': ('Строительство бани на участке',),
+    'territorial_self_gov': ('Детская площадка', 'Фестиваль соседских огородов'),
+    'public_movement': ('Раздельный сбор мусора', 'Сбор гуманитарной помощи в приют'),
+    'trade_union': ('Гильдия разработчиков на подряд',),
+    'limited_partnership': ('Ветропарк для малых хозяйств',),
+    'general_partnership': ('Гончарная мастерская',),
+    'personal_fund': ('Реставрация исторического здания',),
+    'kfh_legal': ('Тепличный комбинат',),
+    'simple_partnership': ('Мельница на паях',),
+}
+
+
+def fill_late_forms(env):
+    """По одному-два проекта каждой форме, у которой их нет."""
+    Card = env['coop.project'].sudo().with_context(tracking_disable=True)
+    done = 0
+    for form in env['coop.economic.form'].sudo().search(
+            [('key', 'in', list(FORM_SAMPLES))]):
+        if Card.search_count([('economic_form_id', '=', form.id),
+                              ('partner_id.is_company', '=', False)]):
+            continue
+        for name in FORM_SAMPLES[form.key]:
+            card = Card.search(DEMO + [
+                ('name', '=', name), ('partner_id.is_company', '=', False)],
+                order='id', limit=1)
+            if card and form.model_ids:
+                card.write({'economic_model_id': form.model_ids[0].id,
+                            'economic_scheme_id': False})
+                done += 1
+    _logger.info('Формы без проектов: заполнено %s', done)
+    return done
+
+
 def _economic_model(env, card, seed):
     """Экономическая модель — по правовой форме инициатора, у людей — по виду."""
     if card.economic_model_id:
