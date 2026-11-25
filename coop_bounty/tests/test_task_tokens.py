@@ -24,8 +24,9 @@ class TestTaskTokens(BountyCase):
         cls.project.project_id = cls.work
         cls.Move = cls.env['coop.project.token.move']
 
-    def _task(self, tokens=300, users=None, project=None, name='Испечь хлеб'):
-        return self.env['project.task'].with_user(self.boss).create({
+    def _task(self, tokens=300, users=None, project=None, name='Испечь хлеб', emission=False):
+        return self.env['project.task'].with_user(self.boss).with_context(
+            coop_no_emission=not emission).create({
             'name': name, 'project_id': (project or self.work).id,
             'coop_tokens': tokens, 'user_ids': [(6, 0, (users or self.user).ids)]})
 
@@ -114,3 +115,22 @@ class TestTaskTokens(BountyCase):
         self.fund.invalidate_recordset()
         self.assertEqual((bounty.state, bounty.paid_amount, self.fund.reserved), ('accepted', 400, 0))
         self.assertEqual(self.Task.search_count([('coop_source_ref', '=', 'vault:99901')]), 1)
+
+    def test_emission_on_create(self):
+        task = self._task(tokens=700, emission=True)
+        self.assertEqual((self.project.coop_bounty_token_limit, task.coop_tokens_emitted), (50700, 700))
+        task.coop_tokens = 1000
+        self.assertEqual(self.project.coop_bounty_token_limit, 51000)
+        task.coop_tokens = 400
+        self.assertEqual((self.project.coop_bounty_token_limit, task.coop_tokens_emitted), (50400, 400))
+        _ours, work = self._ours()
+        ours_task = self._task(tokens=5000, project=work, emission=True)
+        self.assertEqual(self.fund.amount, 6000)
+        ours_task.write({'state': '1_done'})
+        self.assertEqual(ours_task.coop_tokens_paid, 5000)
+        self.fund.invalidate_recordset()
+        self.assertEqual(self.fund.free, 1000)
+        # Оценка прежней задачи, под которую не выпускали, фонд не уменьшает.
+        old = self._task(tokens=300)
+        old.with_context(coop_no_emission=False).coop_tokens = 100
+        self.assertEqual(self.project.coop_bounty_token_limit, 50400)

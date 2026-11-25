@@ -24,7 +24,8 @@ def load_task_tokens(env):
     ours = env['coop.bounty.task']._coop_our_project()
     today = fields.Date.context_today(env['project.task'])
     Task = env['project.task'].sudo().with_context(
-        tracking_disable=True, mail_create_nolog=True, mail_notrack=True)
+        tracking_disable=True, mail_create_nolog=True, mail_notrack=True,
+        coop_no_emission=True)
     cards = env['coop.project'].sudo().search(
         [('coop_has_token', '=', True), ('project_id', '!=', False)]) - ours
     rated = paid = 0

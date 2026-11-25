@@ -14,6 +14,11 @@
 Наш проект платит токенами услуг платформы из фонда задач — через задачу
 краудсорсинга, с реестром дохода и актом; остальные — своими токенами, в
 пределах «Токенов на задачи».
+
+Допэмиссия токена происходит в момент создания задачи (владелец
+25.11.2026): на сумму оценки растёт фонд задач нашего проекта или
+«Токены на задачи» остальных. Оценку сменили — эмиссия меняется на
+разницу, так выпущено ровно под задачи.
 """
 import re
 
@@ -54,6 +59,9 @@ class ProjectTaskTokens(models.Model):
         help='Сколько токенов проекта получит исполнитель, когда менеджер примет задачу. '
              'Ставит автор задачи. Исполнителей несколько — поровну.')
     coop_tokens_paid = fields.Integer(string='Начислено токенов', readonly=True, copy=False)
+    coop_tokens_emitted = fields.Integer(
+        string='Выпущено под задачу', readonly=True, copy=False,
+        help='Допэмиссия токена проекта в момент создания задачи.')
     coop_tokens_paid_on = fields.Date(string='Когда начислено', readonly=True, copy=False)
     coop_contribution_id = fields.Many2one(
         'coop.project.contribution', string='Учтено вкладом', readonly=True, copy=False,
@@ -132,6 +140,7 @@ class ProjectTaskTokens(models.Model):
             # проекта; системный пользователь исполнителем не бывает.
             author = task.create_uid.filtered(lambda u: u.id != 1 and u.active and not u.share)
             task.user_ids = task.parent_id.user_ids or author or task.project_id.user_id
+        tasks._coop_tokens_emit({})
         for task in tasks:
             if task.state == '1_done':
                 task._coop_tokens_accept()
@@ -157,7 +166,10 @@ class ProjectTaskTokens(models.Model):
         if 'project_id' in vals and self.filtered(
                 lambda t: t.coop_tokens_paid and t.project_id.id != vals['project_id']):
             raise UserError(_('За задачу уже начислены токены проекта — в другой не переносят.'))
+        rated = {task.id: task.coop_tokens for task in self} if 'coop_tokens' in vals else {}
         result = super().write(vals)
+        if rated:
+            self._coop_tokens_emit(rated)
         if 'user_ids' in vals and not self.env.su:
             for task in self:
                 if task.id in before and set(before[task.id]) != set(task.user_ids.ids):
@@ -172,6 +184,33 @@ class ProjectTaskTokens(models.Model):
                 if task.state == '1_done':
                     task._coop_tokens_accept()
         return result
+
+    # ── Допэмиссия ───────────────────────────────────────────────────────
+
+    def _coop_tokens_emit(self, before):
+        """Выпустить токены под задачу — на оценку или на её изменение."""
+        if self.env.context.get('coop_no_emission'):
+            return
+        ours = self.env['coop.bounty.task']._coop_our_project()
+        for task in self.sudo():
+            card = task._coop_token_card()
+            delta = task.coop_tokens - before.get(task.id, 0)
+            if not card or not delta or task.coop_contribution_id:
+                continue
+            # Изъять можно не больше, чем под эту задачу выпущено.
+            delta = max(delta, -task.coop_tokens_emitted)
+            if not delta:
+                continue
+            if card == ours:
+                fund = self.env['coop.bounty.fund'].sudo()._coop_current()
+                if not fund:
+                    continue
+                fund.amount += delta
+            else:
+                card.coop_bounty_token_limit += delta
+            task.coop_tokens_emitted += delta
+            task.message_post(body=_('Допэмиссия под задачу: %(amount)s %(unit)s.',
+                                     amount=_tokens(delta), unit=card._coop_token_unit()))
 
     # ── Начисление ───────────────────────────────────────────────────────
 
@@ -298,7 +337,7 @@ class ProjectTaskTokens(models.Model):
                 continue
             bounty = task._coop_token_crowd()
             if bounty and bounty.state in ('draft', 'published'):
-                task.with_context(tracking_disable=True).coop_tokens = bounty.reward_tokens
+                task.with_context(tracking_disable=True, coop_no_emission=True).coop_tokens = bounty.reward_tokens
                 done += 1
         return done
 
@@ -359,6 +398,8 @@ class ProjectProjectTokens(models.Model):
                      for name, row in sorted(rows.items(), key=lambda item: -item[1][1])]
             project.coop_an_tokens = analytics_html(
                 stats=[(_('Начислено, %s') % unit, _tokens(sum(paid.mapped('coop_tokens_paid')))),
+                       (_('Выпущено под задачи, %s') % unit,
+                        _tokens(sum(tasks.mapped('coop_tokens_emitted')))),
                        (_('Задач оплачено'), str(len(paid))),
                        (_('Ждут приёмки'), str(len(waits))),
                        (_('Оценка открытых задач, %s') % unit,
