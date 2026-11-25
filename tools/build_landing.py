@@ -89,6 +89,22 @@ def localize(text):
     return text
 
 
+def add_parts(markup):
+    """Разделы, которых в макете нет: «Стань совладельцем социальной сети»
+    (№ 477) — перед «Кому это», со ссылкой в меню страницы. Появится в
+    макете — вставка пропускается."""
+    if 'id="sovladelec"' in markup:
+        return markup
+    with open(os.path.join(HERE, 'landing_parts', 'sovladelec.html'), encoding='utf-8') as fh:
+        part = fh.read()
+    for mark, text in (('<section class="sec" id="kto">', part),
+                       ('<a href="#kto">', '<a href="#sovladelec">Совладение</a>\n')):
+        if mark not in markup:
+            sys.exit('Некуда вставить раздел: «%s»' % mark)
+        markup = markup.replace(mark, text + mark, 1)
+    return markup
+
+
 def main():
     if len(sys.argv) < 2:
         sys.exit(__doc__)
@@ -103,7 +119,7 @@ def main():
     logic = script[script.index('class Component'):].strip()
 
     blobs = sorted(set(re.findall(r'/_blob/([0-9a-f]{32})', html)))
-    markup, logic = localize(markup), localize(logic)
+    markup, logic = localize(add_parts(markup)), localize(logic)
     markup, found = MARK_RE.subn(MARK, markup)
     if not found:
         sys.exit('В макете не найден знак платформы (<span class="mark">)')
