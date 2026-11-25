@@ -1698,23 +1698,14 @@ body.o_coop_pm_settings_open .o_form_view .o_coop_pm #coop_pm_settings { display
 
   justify-content: flex-start;
 
-  .o_coop_note_author {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  // Аватар и имя автора — в одну строку.
+  // Лица автора и соавторов — одним рядом.
   .o_field_many2one_avatar_user,
-  .o_field_many2one_avatar_user > div {
+  .o_field_many2many_avatar_user,
+  .o_field_many2many_avatar_user > div {
     display: flex;
+    flex-direction: row;
     align-items: center;
-    gap: 6px;
-    min-width: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    gap: 4px;
   }
 }
 

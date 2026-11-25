@@ -42,6 +42,10 @@ class ProjectTask(models.Model):
     # цвет — штатное поле `color`, текст — без разметки.
     coop_pinned = fields.Boolean(string='Закреплена', index=True)
     coop_excerpt = fields.Text(string='Текст', compute='_compute_coop_excerpt')
+    coop_coauthor_ids = fields.Many2many(
+        'res.users', string='Соавторы', compute='_compute_coop_coauthors',
+        inverse='_inverse_coop_coauthors',
+        help='Кого автор добавил в заметку: видят её и правят вместе с ним.')
     coop_space_label = fields.Char(string='Чья', compute='_compute_coop_space_label')
 
     @api.depends('description')
@@ -53,6 +57,18 @@ class ProjectTask(models.Model):
             text = html.unescape(re.sub(r'<[^>]+>', '', text))
             note.coop_excerpt = '\n'.join(
                 line.strip() for line in text.splitlines() if line.strip())[:600]
+
+    @api.depends('user_ids', 'create_uid')
+    def _compute_coop_coauthors(self):
+        for note in self:
+            note.coop_coauthor_ids = note.user_ids - note.create_uid
+
+    def _inverse_coop_coauthors(self):
+        # Автор остаётся среди участников: без него личная заметка пропала
+        # бы у него самого (доступ к личному — по участникам).
+        for note in self:
+            author = note.create_uid or self.env.user
+            note.user_ids = note.coop_coauthor_ids | author
 
     @api.depends(lambda self: ['coop_space', *self._coop_space_fields().values()])
     def _compute_coop_space_label(self):
@@ -126,6 +142,12 @@ class ProjectTask(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        # Ответственных у заметки в форме нет — автор сам её участник, иначе
+        # личная заметка была бы не видна ему самому.
+        for vals in vals_list:
+            kind = vals.get('coop_kind', self.env.context.get('default_coop_kind', 'note'))
+            if kind == 'note' and not vals.get('project_id') and not vals.get('user_ids')                     and not self.env.context.get('default_user_ids'):
+                vals['user_ids'] = [(4, self.env.uid)]
         records = super().create(vals_list)
         records._coop_check_space()
         return records

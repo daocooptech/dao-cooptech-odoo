@@ -61,3 +61,11 @@ class TestSpaces(CoopProjectCase):
         self.assertFalse(self._sees(self.other, note))
         note.coop_space = 'personal'
         self.assertFalse(note.coop_community_id)
+
+    def test_note_author_is_member(self):
+        note = self.env['project.task'].with_user(self.other).create({
+            'name': 'Без соавторов', 'project_id': False, 'coop_kind': 'note'})
+        self.assertEqual(note.user_ids, self.other)
+        self.assertTrue(self._sees(self.other, note))
+        note.with_user(self.other).coop_coauthor_ids = self.initiator
+        self.assertEqual(note.user_ids, self.other | self.initiator)
