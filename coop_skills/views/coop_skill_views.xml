@@ -350,7 +350,7 @@
             <p class="coop-add_intro" invisible="state != 'draft' or not partner_is_company">
               Черновик сохраняется сам — можно уйти и вернуться, он будет в
               «Моих предложениях». После публикации услуга появится в каталоге
-              навыков и на полке «Услуги» организации.
+              услуг и на полке «Услуги» организации.
             </p>
             <p class="coop-add_intro" invisible="state == 'draft'">
               Правки видны в каталоге сразу после сохранения.
@@ -365,8 +365,10 @@
                          options="{'num': 1, 'fields': ['partner_id']}"/>
                   <div>
                     <h2>От чьего имени</h2>
-                    <p>Своё умение — от себя. Выберите организацию, от имени
-                      которой действуете, — и это станет её услугой.</p>
+                    <p invisible="partner_is_company">Навык — только у человека. Услугу
+                      организации добавляют в «Услугах».</p>
+                    <p invisible="not partner_is_company">Услуга — только у организации.
+                      Своё умение добавляют в «Навыках».</p>
                   </div>
                 </div>
                 <div class="coop-add_sec_body">
@@ -380,7 +382,7 @@
               <section class="coop-add_sec" name="add_what">
                 <div class="coop-add_sec_head">
                   <field name="id" widget="coop_add_step" nolabel="1"
-                         options="{'num': 2, 'fields': ['name', 'coop_specialization_id'], 'empty': 'Новый навык'}"/>
+                         options="{'num': 2, 'fields': ['name', 'coop_specialization_id'], 'empty': 'Новый навык|Новая услуга'}"/>
                   <div>
                     <h2 invisible="partner_is_company">Чем занимаетесь</h2>
                     <h2 invisible="not partner_is_company">Какая услуга</h2>
@@ -402,7 +404,7 @@
                         <label for="name" string="Название услуги" invisible="not partner_is_company"/>
                         <field name="name" nolabel="1"
                                placeholder="Например, Электромонтажник"
-                               widget="coop_draft_name" options="{'draft': 'Новый навык'}"/>
+                               widget="coop_draft_name" options="{'draft': 'Новый навык|Новая услуга'}"/>
                       </div>
                       <div class="coop-add_row">
                         <div class="coop-add_field">
@@ -540,7 +542,7 @@
               </div>
               <field name="id" widget="coop_add_ready" nolabel="1"
                      options="{'items': [
-                       {'field': 'name', 'label': 'Чем занимаетесь', 'required': True, 'empty': 'Новый навык', 'anchor': 'add_what'},
+                       {'field': 'name', 'label': 'Чем занимаетесь', 'required': True, 'empty': 'Новый навык|Новая услуга', 'anchor': 'add_what'},
                        {'field': 'image_1920', 'label': 'Фото работы', 'anchor': 'add_what'},
                        {'field': 'coop_specialization_id', 'label': 'Специализация', 'anchor': 'add_what'},
                        {'field': 'skill_ids', 'label': 'Умения', 'anchor': 'add_skills'},
@@ -626,7 +628,7 @@
     <field name="path">skills</field>
     <field name="context">{'bin_size': True,'coop_catalog': True, 'coop_create_label': 'Добавить навык', 'coop_create_method': 'action_new_offer', 'coop_shelf_field': 'coop_specialization_category_id'}</field>
     <field name="view_mode">kanban,list,form</field>
-    <field name="domain">[('state', '=', 'published')]</field>
+    <field name="domain">[('state', '=', 'published'), ('partner_id.is_company', '=', False)]</field>
     <field name="search_view_id" ref="view_coop_skill_search"/>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Предложений навыка пока нет</p>
@@ -647,7 +649,7 @@
     <field name="res_model">coop.skill.offer</field>
     <field name="path">my-skills</field>
     <field name="view_mode">list,kanban,form</field>
-    <field name="domain">[('partner_id.user_ids', 'in', [uid])]</field>
+    <field name="domain">[('coop_is_mine', '=', True)]</field>
     <field name="context">{'coop_create_label': 'Добавить навык', 'coop_create_method': 'action_new_offer'}</field>
     <field name="search_view_id" ref="view_coop_skill_search"/>
     <field name="help" type="html">
@@ -667,7 +669,7 @@
     <field name="name">Услуги</field>
     <field name="res_model">coop.skill.offer</field>
     <field name="path">services</field>
-    <field name="context">{'bin_size': True,'coop_catalog': True, 'coop_create_label': 'Добавить услугу', 'coop_create_method': 'action_new_offer', 'coop_shelf_field': 'coop_specialization_category_id'}</field>
+    <field name="context">{'bin_size': True,'coop_catalog': True, 'coop_create_label': 'Добавить услугу', 'coop_create_method': 'action_new_service', 'coop_shelf_field': 'coop_specialization_category_id'}</field>
     <field name="view_mode">kanban,list,form</field>
     <field name="domain">[('state', '=', 'published'), ('partner_id.is_company', '=', True)]</field>
     <field name="search_view_id" ref="view_coop_skill_search"/>

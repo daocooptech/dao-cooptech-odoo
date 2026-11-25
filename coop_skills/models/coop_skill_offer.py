@@ -10,6 +10,8 @@ _logger = logging.getLogger(__name__)
 # обязательное, а запись нужна до того, как человек начнёт писать, — так
 # же, как у объявления ресурса (`coop_resources.DRAFT_NAME`).
 DRAFT_NAME = 'Новый навык'
+SERVICE_DRAFT_NAME = 'Новая услуга'
+DRAFT_NAMES = (DRAFT_NAME, SERVICE_DRAFT_NAME)
 
 
 class CoopSkillOffer(models.Model):
@@ -198,7 +200,8 @@ class CoopSkillOffer(models.Model):
     # объявление, стадии тоже»). Не по праву записи: администратор
     # платформы правит всё, но чужое объявление его не делает.
     coop_is_mine = fields.Boolean(
-        string='Моё предложение', compute='_compute_coop_is_mine')
+        string='Моё предложение', compute='_compute_coop_is_mine',
+        search='_search_coop_is_mine')
 
     @api.depends_context('uid')
     @api.depends('partner_id')
@@ -206,6 +209,11 @@ class CoopSkillOffer(models.Model):
         mine = self.env.user.coop_publisher_partner_ids
         for record in self:
             record.coop_is_mine = record.partner_id in mine
+
+    def _search_coop_is_mine(self, operator, value):
+        if operator != 'in' or True not in value:
+            return NotImplemented
+        return [('partner_id', 'in', self.env.user.coop_publisher_partner_ids.ids)]
 
     # ── Страница добавления (дизайн-система `SkillAddPage`, решение 625) ──
     #
@@ -229,8 +237,12 @@ class CoopSkillOffer(models.Model):
     @api.depends_context('uid')
     def _compute_coop_publisher_ids(self):
         partners = self.env.user.coop_publisher_partner_ids
+        # Навык бывает только у человека, услуга — только у организации
+        # (решение 692): выбор стороны не переводит одно в другое.
         for record in self:
-            record.coop_publisher_ids = partners | record.partner_id
+            company = record.partner_id.is_company
+            record.coop_publisher_ids = partners.filtered(
+                lambda p: p.is_company == company) | record.partner_id
 
     @api.depends('experience_months')
     def _compute_experience_parts(self):
@@ -384,10 +396,10 @@ class CoopSkillOffer(models.Model):
         self._coop_require_mine()
         for record in self:
             # Заготовку «Новый навык» в каталоге не найдут и не поймут.
-            if not record.name or record.name.strip() == DRAFT_NAME:
+            if not record.name or record.name.strip() in DRAFT_NAMES:
                 raise UserError(_(
                     'Напишите, чем занимаетесь. «%s» — это заготовка, по ней '
-                    'вас не найдут.') % DRAFT_NAME)
+                    'вас не найдут.') % (record.name or DRAFT_NAME).strip())
             record.partner_id.coop_require_level(
                 'contact', _('опубликовать предложение навыка'))
         self.write({'state': 'published'})
@@ -402,11 +414,44 @@ class CoopSkillOffer(models.Model):
         сохранять себя поле может только в существующую запись. Брошенный
         черновик никому не виден — в каталог выходят только опубликованные.
         """
-        draft = self.create({'state': 'draft', 'name': DRAFT_NAME})
+        # Навык — всегда от себя, даже когда человек действует от имени
+        # организации: у организаций навыков нет, есть услуги (692).
+        return self._coop_add_action(self.env.user.partner_id, DRAFT_NAME)
+
+    @api.model
+    def action_new_service(self):
+        """«Добавить услугу»: то же, но только от имени организации."""
+        user = self.env.user
+        orgs = user.coop_publisher_partner_ids.filtered('is_company')
+        acting = user._coop_acting_partner()
+        org = acting if acting in orgs else orgs[:1]
+        if not org:
+            raise UserError(_(
+                'Услугу размещает организация, а вы ни в одной не можете '
+                'публиковать. Добавьте организацию или попросите у её '
+                'руководителя полномочие «Публикации». Своё умение '
+                'размещают в «Навыках».'))
+        return self._coop_add_action(org, SERVICE_DRAFT_NAME)
+
+    def _coop_add_action(self, partner, name):
+        draft = self.create({
+            'state': 'draft', 'name': name, 'partner_id': partner.id})
         action = self.env['ir.actions.act_window']._for_xml_id(
             'coop_skills.action_coop_skill_add')
         action['res_id'] = draft.id
+        if partner.is_company:
+            action['name'] = _('Добавить услугу')
         return action
+
+    def write(self, vals):
+        # Сменить сторону можно среди своих: навык не становится услугой.
+        if vals.get('partner_id') and not self.env.su:
+            company = self.env['res.partner'].browse(vals['partner_id']).is_company
+            if any(record.partner_id.is_company != company for record in self):
+                raise UserError(_(
+                    'Навык бывает только у человека, услуга — только у '
+                    'организации. Добавьте новое предложение.'))
+        return super().write(vals)
 
     def action_save_draft(self):
         """«Сохранить черновик»: запись уже сохранена — к своим предложениям."""

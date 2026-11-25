@@ -41,7 +41,7 @@ export function isFilled(record, name, empty) {
     }
     if (typeof value === "string") {
         const text = value.trim();
-        return Boolean(text) && text !== empty;
+        return Boolean(text) && !(empty || "").split("|").includes(text);
     }
     return Boolean(value);
 }

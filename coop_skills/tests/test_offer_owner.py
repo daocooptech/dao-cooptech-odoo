@@ -59,3 +59,27 @@ class TestOfferOwner(TransactionCase):
             draft.name = 'Кровельщик'
             draft.action_publish()
         self.assertEqual(draft.state, 'published')
+
+    def test_skill_person_service_org(self):
+        """Навык — только у человека, услуга — только у организации (692)."""
+        org = self.env['res.partner'].create({'name': 'Артель 692', 'is_company': True})
+        publish = self.owner.partner_id | org
+        Offer = self.env['coop.skill.offer'].with_user(self.owner)
+        with self.assertRaises(UserError):
+            Offer.action_new_service()
+        users_cls = type(self.env['res.users'])
+        with patch.object(users_cls, '_compute_coop_partner_ids',
+                          lambda users: [u.update({
+                              'coop_actor_partner_ids': publish,
+                              'coop_publisher_partner_ids': publish,
+                              'coop_treasury_partner_ids': publish,
+                              'coop_site_partner_ids': publish}) for u in users]):
+            self.env.invalidate_all()
+            skill = Offer.browse(Offer.action_new_offer()['res_id'])
+            self.assertEqual(skill.partner_id, self.owner.partner_id)
+            self.assertEqual(skill.coop_publisher_ids, self.owner.partner_id)
+            with self.assertRaises(UserError):
+                skill.partner_id = org
+            service = Offer.sudo().create({'name': 'Новая услуга', 'partner_id': org.id})
+            self.assertEqual(service.with_user(self.owner).coop_publisher_ids, org)
+        self.env.invalidate_all()

@@ -27,9 +27,14 @@ export class CoopDraftName extends CharField {
         this.selectionStart = this.shown.length;
     }
 
+    /** Заготовок может быть несколько: «Новый навык|Новая услуга». */
+    get drafts() {
+        return (this.props.draft || "").split("|");
+    }
+
     get shown() {
         const value = this.props.record.data[this.props.name] || "";
-        return value.trim() === this.props.draft ? "" : value;
+        return this.drafts.includes(value.trim()) ? "" : value;
     }
 
     get formattedValue() {
@@ -38,7 +43,7 @@ export class CoopDraftName extends CharField {
 
     /** Стёрли всё — снова заготовка: без имени черновик не сохранить. */
     parse(value) {
-        return super.parse(value) || this.props.draft || "";
+        return super.parse(value) || this.drafts[0];
     }
 }
 

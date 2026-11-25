@@ -27,7 +27,7 @@ export class CoopSkillPreview extends Component {
 
     get title() {
         const name = (this.data.name || "").trim();
-        if (name && name !== "Новый навык") {
+        if (name && !["Новый навык", "Новая услуга"].includes(name)) {
             return name;
         }
         return this.isService ? "Название услуги" : "Чем занимаетесь";

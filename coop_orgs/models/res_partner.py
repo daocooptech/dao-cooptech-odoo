@@ -446,7 +446,7 @@ class ResPartner(models.Model):
     def action_coop_org_services(self):
         self.ensure_one()
         return self._coop_holdings_action(
-            'coop_skills.action_coop_skills',
+            'coop_skills.action_coop_services',
             [('partner_id', '=', self.id), ('state', '=', 'published')],
             _('Услуги — %s') % self.display_name)
 
