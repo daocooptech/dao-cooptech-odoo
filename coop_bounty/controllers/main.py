@@ -12,6 +12,8 @@ from odoo import _, fields, http
 from odoo.exceptions import AccessError, UserError
 from odoo.http import request
 
+from ..models.ir_http import coop_inside
+
 # Черновики и отменённые наружу не показываем: первые ещё не задачи,
 # вторые уже не задачи.
 HIDDEN_STATES = ('draft', 'cancelled')
@@ -29,6 +31,13 @@ class CoopBountyWebsite(http.Controller):
                 website=True, sitemap=False)
     def task_page(self, task_id, **kw):
         task = self._task(task_id)
+        # Участнику — карточка задачи внутри платформы (№ 471); путь — через
+        # карточку проекта, списка всех задач в меню нет (решение 691).
+        inside = coop_inside(
+            '/odoo/crowdsourcing/%s/coop.bounty.task/%s' % (task.project_id.id, task.id)
+            if task.project_id else '/odoo/bounty/%s' % task.id)
+        if inside:
+            return inside
         user = request.env.user
         guest = user._is_public()
         mine = task.application_ids.filtered(

@@ -290,6 +290,19 @@ class TestBountyPublicPage(HttpCase):
         self.assertIn('Экономика токена', page.text)
         self.assertIn('coop-help-stats', page.text)
 
+    def test_member_stays_inside(self):
+        """Вошедший с публичных адресов попадает внутрь платформы (№ 471)."""
+        task = self.env['coop.bounty.task'].search([('state', '=', 'published')], limit=1)
+        self.authenticate('admin', 'admin')
+        page = self.url_open('/help-project', allow_redirects=False)
+        self.assertEqual(page.status_code, 303)
+        self.assertTrue(page.headers['Location'].endswith('/odoo/help-project'))
+        if task:
+            page = self.url_open('/help-project/task/%s' % task.id, allow_redirects=False)
+            self.assertEqual(page.status_code, 303)
+            self.assertTrue(page.headers['Location'].endswith('/%s' % task.id))
+            self.assertIn('/odoo/', page.headers['Location'])
+
 
 @tagged('post_install', '-at_install')
 class TestCrowdCard(BountyCase):

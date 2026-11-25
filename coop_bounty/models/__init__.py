@@ -7,3 +7,4 @@ from . import coop_bounty_p2
 from . import coop_bounty_p2b
 from . import project_task_tokens
 from . import project_token_terms
+from . import ir_http

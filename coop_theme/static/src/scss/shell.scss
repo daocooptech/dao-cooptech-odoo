@@ -2013,60 +2013,12 @@ body.o_dark_mode .o_coop_loader_mark {
     display: none;
   }
 
-  // Вкладки внутри подраздела в панели не стоят: в каталоге они первым
-  // блоком панели «Фильтр» (`catalog_filters.xml`), а мелкие «Мои задачи |
-  // Все задачи» в строке пути владелец 23.11.2026 велел убрать. Было с
-  // 19.11 — серыми кнопками под поиском.
-  .o_coop_tabs_wrap:has(.o_coop_pagehead) .o_coop_tabs.o_coop_subtabs {
-    display: none;
-  }
-
   // «Мои ресурсы»: вкладки под поиском, над каталогом и панелью «Фильтр»
   // вместе (владелец 24.11.2026: «растянуть на всю рабочую область»).
   .o_coop_subtabs_wide {
     order: 20;
     flex: 1 0 100%;
     min-width: 0;
-  }
-
-  // С 19.11.2026 заголовок — последнее звено пути, а не строка крупным
-  // кеглем над ним (владелец: «сделать везде путь, заголовок тогда уходит
-  // в путь и не занимает много места»). Набор — как у пути на страницах
-  // записей (`breadcrumb.scss`): раздел Manrope 500 12,5 серым, название
-  // 600 12,5 цветом текста, между ними тот же уголок, текст→текст 20.
-  // Не влезает — переносится, без многоточия.
-  .o_coop_pagehead {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    order: -1;
-    flex: 1 0 100%;
-    min-width: 0;
-    margin: 0;
-  }
-
-  .o_coop_pagehead_crumbs {
-    margin: 0;
-    font: 500 12.5px/1.4 'Manrope', sans-serif;
-    color: var(--coop-slate);
-  }
-
-  // Через родителя: `.o_web_client h1` весомее одного класса и ставил 700.
-  .o_coop_pagehead .o_coop_pagehead_title {
-    margin: 0;
-    font: 600 12.5px/1.4 'Manrope', sans-serif;
-    color: var(--coop-ink);
-  }
-
-  .o_coop_pagehead_crumbs + .o_coop_pagehead_title::before {
-    content: "";
-    display: inline-block;
-    width: 12px;
-    height: 1.4em;
-    margin: 0 4px;
-    vertical-align: top;
-    background-color: var(--coop-slate-light, #8a8a80);
-    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 6l6 6l-6 6'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
   }
 
   // Вне каталога заголовок стоит в строке пути вместе с кнопками
@@ -2148,9 +2100,78 @@ body.o_dark_mode .o_coop_loader_mark {
   display: contents;
 }
 
+// ── Путь вместо заголовка и вкладки подраздела — на всех ширинах ─────────
+//
+// На узком экране (≤ 900) с 25.11.2026 — как на большом (№ 482, владелец:
+// путь вверху, вкладки подраздела только в шторке «Фильтра»). Вкладки
+// раздела на узком остаются: меню подразделов слева там нет.
+// Вкладки внутри подраздела в панели не стоят: в каталоге они первым
+// блоком панели «Фильтр» (`catalog_filters.xml`), а мелкие «Мои задачи |
+// Все задачи» в строке пути владелец 23.11.2026 велел убрать. Было с
+// 19.11 — серыми кнопками под поиском.
+.o_coop_tabs_wrap:has(.o_coop_pagehead) .o_coop_tabs.o_coop_subtabs {
+  display: none;
+}
+
+// С 19.11.2026 заголовок — последнее звено пути, а не строка крупным
+// кеглем над ним (владелец: «сделать везде путь, заголовок тогда уходит
+// в путь и не занимает много места»). Набор — как у пути на страницах
+// записей (`breadcrumb.scss`): раздел Manrope 500 12,5 серым, название
+// 600 12,5 цветом текста, между ними тот же уголок, текст→текст 20.
+// Не влезает — переносится, без многоточия.
+.o_coop_pagehead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  order: -1;
+  flex: 1 0 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+.o_coop_pagehead_crumbs {
+  margin: 0;
+  font: 500 12.5px/1.4 'Manrope', sans-serif;
+  color: var(--coop-slate);
+}
+
+// Через родителя: `.o_web_client h1` весомее одного класса и ставил 700.
+.o_coop_pagehead .o_coop_pagehead_title {
+  margin: 0;
+  font: 600 12.5px/1.4 'Manrope', sans-serif;
+  color: var(--coop-ink);
+}
+
+.o_coop_pagehead_crumbs + .o_coop_pagehead_title::before {
+  content: "";
+  display: inline-block;
+  width: 12px;
+  height: 1.4em;
+  margin: 0 4px;
+  vertical-align: top;
+  background-color: var(--coop-slate-light, #8a8a80);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 6l6 6l-6 6'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
+}
+
+// Имя выборки на узком — уже в пути, вкладкой рядом его не повторяем.
 @media (max-width: 900px) {
-  .o_coop_pagehead {
+  .o_coop_tabs_wrap:has(.o_coop_pagehead) .o_coop_tabs:has(.o_coop_tab_label) {
     display: none;
+  }
+
+  // Вне каталога путь, кнопка создания и вкладки раздела лежат в одной
+  // строке без переноса — путь во всю ширину выталкивал кнопку и вкладки
+  // за край. Путь с кнопкой — первой строкой, вкладки — второй.
+  .o_control_panel:not(.o_coop_catalog) .o_control_panel_breadcrumbs:has(.o_coop_pagehead) {
+    flex-wrap: wrap;
+
+    .o_coop_pagehead {
+      flex: 1 1 0;
+    }
+
+    .o_coop_tabs {
+      flex: 0 0 100%;
+    }
   }
 }
 
