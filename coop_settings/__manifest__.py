@@ -20,16 +20,18 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.1.4',
+    'version': '20.0.1.1.5',
     'license': 'LGPL-3',
-    # auth_totp — двухфакторная проверка во вкладке «Безопасность».
+    # auth_totp — двухфакторная проверка во вкладке «Безопасность»;
+    # auth_passkey — вход по ключу доступа там же (№ 302).
     'depends': ['coop_base', 'coop_theme', 'coop_people', 'coop_profile', 'coop_deals',
-                'coop_orgs', 'coop_wallet', 'auth_totp', 'mail'],
+                'coop_orgs', 'coop_wallet', 'auth_totp', 'auth_passkey', 'mail'],
     'data': [
         'data/coop_residency_data.xml',
         'data/coop_notification_data.xml',
         'views/coop_settings_views.xml',
         'views/coop_residency_views.xml',
+        'views/coop_settings_key_dialogs.xml',
     ],
     'assets': {
         'web.assets_backend': [

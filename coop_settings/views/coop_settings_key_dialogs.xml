@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Окна движка, которые открываются из «Настроек → Безопасность» (№ 302):
+  проверка пароля, новый ключ API, показ ключа, новый ключ доступа. В
+  русском переводе движка этих строк нет — подписи заменены здесь.
+-->
+<odoo>
+
+  <record id="view_coop_identitycheck_form" model="ir.ui.view">
+    <field name="name">coop.identitycheck.form</field>
+    <field name="model">res.users.identitycheck</field>
+    <field name="inherit_id" ref="base.res_users_identitycheck_view_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//form" position="attributes">
+        <attribute name="string">Подтвердите, что это вы</attribute>
+      </xpath>
+      <xpath expr="//div[@invisible=&quot;auth_method != 'password'&quot;]/h3" position="replace">
+        <h3 class="fw-normal">Сначала подтвердите, что это вы: введите <span class="fw-bolder">свой</span> пароль.</h3>
+      </xpath>
+      <xpath expr="//field[@name='password']" position="attributes">
+        <attribute name="placeholder">Ваш пароль</attribute>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_coop_identitycheck_form_passkey" model="ir.ui.view">
+    <field name="name">coop.identitycheck.form.passkey</field>
+    <field name="model">res.users.identitycheck</field>
+    <field name="inherit_id" ref="auth_passkey.res_users_identitycheck_view_form_passkey"/>
+    <field name="arch" type="xml">
+      <xpath expr="//div[@invisible=&quot;auth_method != 'webauthn'&quot;]" position="replace">
+        <div invisible="auth_method != 'webauthn'">
+          <h3><strong>Подтвердите вход ключом доступа</strong></h3>
+          <p class="mb-0 mt-3">Или выберите другой способ:</p>
+          <button type="object" name="action_use_password" class="btn btn-link">Ввести пароль</button>
+        </div>
+      </xpath>
+      <xpath expr="//footer/button[@name='run_check'][not(@id)]" position="attributes">
+        <attribute name="string">Ключ доступа</attribute>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_coop_apikey_description_form" model="ir.ui.view">
+    <field name="name">coop.apikey.description.form</field>
+    <field name="model">res.users.apikeys.description</field>
+    <field name="inherit_id" ref="base.form_res_users_key_description"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='name']" position="attributes">
+        <attribute name="string">Название ключа — только по нему вы его и узнаете</attribute>
+        <attribute name="placeholder">например, «Доска задач»</attribute>
+      </xpath>
+      <xpath expr="//field[@name='duration']" position="attributes">
+        <attribute name="string">Действует</attribute>
+      </xpath>
+      <xpath expr="//button[@name='make_key']" position="attributes">
+        <attribute name="string">Создать ключ</attribute>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_coop_apikey_show_form" model="ir.ui.view">
+    <field name="name">coop.apikey.show.form</field>
+    <field name="model">res.users.apikeys.show</field>
+    <field name="inherit_id" ref="base.form_res_users_key_show"/>
+    <field name="arch" type="xml">
+      <xpath expr="//sheet/h3" position="replace">
+        <h3 class="fw-bold">Сохраните ключ</h3>
+      </xpath>
+      <xpath expr="//sheet/p" position="replace">
+        <p>
+          Больше он показан не будет. Скопируйте его и храните надёжно:
+          ключ даёт полный доступ к вашей учётной записи, как пароль.
+        </p>
+      </xpath>
+      <xpath expr="//div[@id='rpc_key_card']//strong" position="replace">
+        <strong>Как обратиться к платформе из программы (Python):</strong>
+      </xpath>
+    </field>
+  </record>
+
+  <!-- Карточки ключей в списке: без значка «RPC» — это слово программиста. -->
+  <record id="view_coop_apikeys_kanban" model="ir.ui.view">
+    <field name="name">coop.apikeys.kanban</field>
+    <field name="model">res.users.apikeys</field>
+    <field name="inherit_id" ref="base.res_users_apikeys_view_kanban"/>
+    <field name="arch" type="xml">
+      <xpath expr="//t[@t-name='card']" position="replace">
+        <t t-name="card" class="flex-row">
+          <div>
+            <field name="name" class="fw-bold fs-5"/>
+            <small class="d-block">Создан: <field name="create_date"/></small>
+            <small class="d-block" invisible="expiration_date == False">Действует до: <field name="expiration_date"/></small>
+            <small class="d-block" invisible="expiration_date != False">Бессрочный</small>
+          </div>
+          <button name="remove" type="object" string="Удалить"
+                  class="btn btn-secondary ms-auto mb-auto my-auto"
+                  confirm="Удалить ключ? Программы, которые им пользуются, потеряют доступ."/>
+        </t>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_coop_passkey_kanban" model="ir.ui.view">
+    <field name="name">coop.passkey.kanban</field>
+    <field name="model">auth.passkey.key</field>
+    <field name="inherit_id" ref="auth_passkey.auth_passkey_key_view_kanban"/>
+    <field name="arch" type="xml">
+      <xpath expr="//t[@t-name='menu']" position="replace">
+        <t t-name="menu">
+          <a role="menuitem" type="object" name="action_rename_passkey" class="dropdown-item">Переименовать</a>
+          <a role="menuitem" type="object" name="action_delete_passkey" class="dropdown-item">Удалить</a>
+        </t>
+      </xpath>
+      <xpath expr="//t[@t-name='card']" position="replace">
+        <t t-name="card">
+          <div>
+            <field name="name" class="fw-bold fs-5"/>
+            <field name="create_date" class="ms-2 text-muted"/>
+          </div>
+          <small>Последний вход: <field name="write_date"/></small>
+        </t>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_coop_passkey_rename_form" model="ir.ui.view">
+    <field name="name">coop.passkey.rename.form</field>
+    <field name="model">auth.passkey.key</field>
+    <field name="inherit_id" ref="auth_passkey.auth_passkey_key_rename"/>
+    <field name="arch" type="xml">
+      <xpath expr="//button[@special='save']" position="attributes">
+        <attribute name="string">Сохранить</attribute>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_coop_passkey_create_form" model="ir.ui.view">
+    <field name="name">coop.passkey.create.form</field>
+    <field name="model">auth.passkey.key.create</field>
+    <field name="inherit_id" ref="auth_passkey.auth_passkey_key_create_view_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='name']" position="attributes">
+        <attribute name="string">Название ключа</attribute>
+        <attribute name="placeholder">например, «Телефон»</attribute>
+      </xpath>
+      <xpath expr="//button[@name='make_key']" position="attributes">
+        <attribute name="string">Создать</attribute>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

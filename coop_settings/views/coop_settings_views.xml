@@ -563,6 +563,42 @@
 
           <div class="o_coop_band">
             <div class="o_coop_band_head">
+              <span>Ключи доступа</span>
+            </div>
+            <div class="o_coop_band_body">
+              <div class="text-muted">
+                Вход без пароля — отпечатком, лицом или ПИН-кодом этого
+                устройства. Ключ хранится на устройстве, платформа видит
+                только его открытую часть.
+              </div>
+              <field name="auth_passkey_key_ids" nolabel="1" mode="kanban"
+                     invisible="not auth_passkey_key_ids"
+                     class="o_auth_passkey_kanban_view"/>
+              <button name="action_create_passkey" type="object"
+                      string="Добавить ключ доступа" class="btn-secondary"/>
+            </div>
+          </div>
+
+          <div class="o_coop_band">
+            <div class="o_coop_band_head">
+              <span>Ключи API</span>
+            </div>
+            <div class="o_coop_band_body">
+              <div class="text-muted">
+                Для своих программ и обмена с другими сервисами: ключ
+                заменяет пароль при обращении к платформе из программы.
+                Показывается один раз — сохраните его сразу.
+              </div>
+              <field name="api_key_ids" nolabel="1" mode="kanban"
+                     invisible="not api_key_ids"
+                     class="o_base_api_keys_kanban_view"/>
+              <button name="api_key_wizard" type="object"
+                      string="Создать ключ API" class="btn-secondary"/>
+            </div>
+          </div>
+
+          <div class="o_coop_band">
+            <div class="o_coop_band_head">
               <span>Активные сеансы</span>
             </div>
             <div class="o_coop_band_body">

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import _, api, fields, models
+from odoo.addons.base.models.res_users import check_identity
 
 
 class ResUsers(models.Model):
@@ -36,6 +37,31 @@ class ResUsers(models.Model):
         for user in self:
             user.coop_currency_rub_only = user.partner_id._coop_rub_only()
 
+    # Окно движка «Изменить мои настройки» закрыто (№ 302): всё, что в нём
+    # было, — во вкладках «Настроек». Его просит меню движка и прямая
+    # ссылка; обе ведут в «Настройки → Аккаунт».
+    def action_get(self):
+        return self.env['res.partner'].action_coop_open_settings()
+
+    # Мастера ключей — с русским заголовком: у движка он строкой в коде,
+    # мимо перевода. Сперва движок может вернуть проверку пароля
+    # (`check_identity`) — её заголовок не трогаем. Пометка `check_identity`
+    # и у переопределения: без неё движок после ввода пароля отказывается
+    # вызывать метод (`run_check` проверяет её у вызываемого).
+    @check_identity
+    def api_key_wizard(self):
+        action = super().api_key_wizard()
+        if action.get('res_model') == 'res.users.apikeys.description':
+            action['name'] = _('Новый ключ API')
+        return action
+
+    @check_identity
+    def action_create_passkey(self):
+        action = super().action_create_passkey()
+        if action.get('res_model') == 'auth.passkey.key.create':
+            action['name'] = _('Новый ключ доступа')
+        return action
+
     @api.model
     def action_coop_open_user_settings(self, view_xmlid, name):
         """Открыть вкладку настроек учётной записи.
@@ -61,3 +87,23 @@ class ResUsers(models.Model):
         return self.action_coop_open_user_settings(
             'coop_settings.view_coop_settings_region_form',
             'Язык и регион')
+
+
+class ResUsersApikeysDescription(models.TransientModel):
+    """Сроки ключа API — по-русски: у движка подписи строками в коде."""
+
+    _inherit = 'res.users.apikeys.description'
+
+    _COOP_DURATION_LABELS = {
+        '1': 'Сутки', '30': 'Месяц', '365': 'Год', '0': 'Бессрочно'}
+
+    def _selection_duration(self):
+        return [(value, _(self._COOP_DURATION_LABELS.get(value, label)))
+                for value, label in super()._selection_duration()]
+
+    @check_identity
+    def make_key(self):
+        action = super().make_key()
+        if action.get('res_model') == 'res.users.apikeys.show':
+            action['name'] = _('Ключ API создан')
+        return action

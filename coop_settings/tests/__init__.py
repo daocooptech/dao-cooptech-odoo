@@ -5,3 +5,4 @@ from . import test_safe
 from . import test_money_settings
 from . import test_citizenships
 from . import test_fed_name
+from . import test_settings_one_place

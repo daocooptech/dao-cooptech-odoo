@@ -95,3 +95,25 @@
   font-size: 12px;
   color: var(--coop-slate-light, #8f8f88);
 }
+
+// Ключи API и ключи доступа (№ 302) — карточки столбиком во всю полосу.
+// Сетка канбана движка делит ширину на колонки по ширине карточки, и
+// единственный ключ вставал в первую узкую колонку: имя и даты
+// переносились по словам.
+.o_coop_settings :is(.o_base_api_keys_kanban_view, .o_auth_passkey_kanban_view) {
+  .o_kanban_renderer {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 640px;
+    padding: 0;
+  }
+  // Карточке движок ставит классы-утилиты (`flex-grow-1`,
+  // `flex-shrink-0` — с !important) и ширину 150 точек: перебить можно
+  // только так же, замерено на стенде 26.11 — 150 → 640.
+  .o_kanban_renderer .o_kanban_record {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    margin: 0;
+  }
+}
