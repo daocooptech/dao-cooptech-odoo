@@ -9,6 +9,9 @@ Odoo 20 нет, старый `note` слит в To-Do. Заметка — лич
 по нему. Меню — «Моя страница → Заметки»
 и «Задачи» (решение 705, пункты — в `coop_profile`).
 """
+import html
+import re
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
@@ -34,6 +37,38 @@ class ProjectTask(models.Model):
     ], string='Пространство', default='personal', required=True, index=True,
         help='Личное видите только вы и исполнители, остальное — участники '
              'проекта, организации или группы.')
+
+    # Вид «заметки на доске» (владелец 26.11.2026): закреплённые первыми,
+    # цвет — штатное поле `color`, текст — без разметки.
+    coop_pinned = fields.Boolean(string='Закреплена', index=True)
+    coop_excerpt = fields.Text(string='Текст', compute='_compute_coop_excerpt')
+    coop_space_label = fields.Char(string='Чья', compute='_compute_coop_space_label')
+
+    @api.depends('description')
+    def _compute_coop_excerpt(self):
+        for note in self:
+            # Своё, а не `html2plaintext`: тот склеивает пункты списка в строку.
+            text = re.sub(r'<li[^>]*>', '\n• ', str(note.description or ''))
+            text = re.sub(r'</(p|div|li|ul|ol|h[1-6])>|<br[^>]*>', '\n', text)
+            text = html.unescape(re.sub(r'<[^>]+>', '', text))
+            note.coop_excerpt = '\n'.join(
+                line.strip() for line in text.splitlines() if line.strip())[:600]
+
+    @api.depends(lambda self: ['coop_space', *self._coop_space_fields().values()])
+    def _compute_coop_space_label(self):
+        fields_by_space = self._coop_space_fields()
+        for note in self:
+            field = fields_by_space.get(note.coop_space)
+            note.coop_space_label = (
+                note[field].sudo().display_name if field else 'Личное')
+
+    def action_coop_pin(self):
+        for note in self:
+            note.coop_pinned = not note.coop_pinned
+
+    def action_coop_to_task(self):
+        """Заметка становится задачей: текст, пространство и люди те же."""
+        self.write({'coop_kind': 'task', 'coop_pinned': False})
 
     @api.model
     def _coop_space_fields(self):

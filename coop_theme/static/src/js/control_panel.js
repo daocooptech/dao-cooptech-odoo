@@ -67,6 +67,11 @@ export function coopHideSearch(env) {
     if (!COOP_SEARCH_ONLY_VIEWS.includes(env.config?.viewType)) {
         return false;
     }
+    // Отбор на экране нужен, а по умолчанию он не задан — поиск просит само
+    // действие (`coop_search`): у «Заметок» отбирают по пространству (№ 353).
+    if (env.searchModel?.globalContext?.coop_search) {
+        return false;
+    }
     return !coopIsCatalogScreen(env) && !coopHasDefaultFilter(env);
 }
 
