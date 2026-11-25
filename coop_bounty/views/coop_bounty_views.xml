@@ -563,11 +563,13 @@
              токенами. Экономику своего токена проект раскрывает сам — в рамках законов
              своей страны.</p>
           <group>
-            <field name="coop_token_kind" required="coop_has_token"/>
+            <field name="coop_token_kind" required="coop_has_token"
+                   readonly="coop_holder_count and coop_token_kind"/>
             <field name="coop_token_kind_note" invisible="not coop_token_kind"/>
             <field name="coop_token_name" placeholder="Например: токен на продукцию проекта"/>
             <field name="coop_token_symbol" placeholder="Например: BREAD"/>
             <field name="coop_token_issued"/>
+            <field name="coop_holder_count"/>
           </group>
           <field name="coop_token_economy"
                  placeholder="Что даёт токен, чем обеспечен, как и когда погашается"/>
@@ -787,6 +789,7 @@
                 <li><b><field name="coop_crowd_work_count" readonly="1" nolabel="1"/></b> в работе</li>
                 <li><b><field name="coop_crowd_done_count" readonly="1" nolabel="1"/></b> принято</li>
                 <li><b><field name="coop_token_issued" readonly="1" nolabel="1"/></b> <field name="coop_token_unit" nolabel="1"/> начислено</li>
+                <li><b><field name="coop_holder_count" readonly="1" nolabel="1"/></b> держателей</li>
               </ul>
               <div class="coop-pj_owner">
                 <div class="coop-pj_who">
@@ -816,6 +819,17 @@
             <p invisible="not coop_token_kind"><field name="coop_token_kind" readonly="1" nolabel="1" class="d-inline"/>:
               <field name="coop_token_kind_note" readonly="1" nolabel="1" class="d-inline"/></p>
             <field name="coop_token_economy" readonly="1" nolabel="1"/>
+          </div>
+
+          <!-- Список видят держатели и инициатор (решение 704). -->
+          <div class="o_coop_crowd_block" invisible="not coop_holder_ids">
+            <h2 class="o_coop_crowd_head">Держатели</h2>
+            <field name="coop_holder_ids" readonly="1" nolabel="1">
+              <list create="0" edit="0" delete="0">
+                <field name="partner_id" widget="many2one_avatar"/>
+                <field name="amount"/>
+              </list>
+            </field>
           </div>
 
           <div class="o_coop_crowd_block">

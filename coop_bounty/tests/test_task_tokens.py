@@ -241,3 +241,21 @@ class TestTaskTokens(BountyCase):
         with self.assertRaises(ValidationError):
             self.env['coop.project.token.batch'].create({
                 'project_id': self.project.id, 'name': 'Каравай', 'date_to': fields.Date.today()})
+
+    def test_holders_and_kind_lock(self):
+        """Держателей видят держатели и инициатор; вид после начисления — тот же."""
+        self.project.coop_token_kind = 'utility'
+        self.project.coop_token_kind = 'claim'
+        self.Move.create({'project_id': self.project.id, 'partner_id': self.person.id, 'amount': 40})
+        with self.assertRaises(ValidationError):
+            self.project.coop_token_kind = 'debt'
+        self.project.coop_token_kind = 'claim'
+        Holder = self.env['coop.project.token.holder']
+        domain = [('project_id', '=', self.project.id)]
+        self.assertEqual(Holder.with_user(self.user).search(domain).mapped('amount'), [40])
+        self.assertFalse(Holder.with_user(self.mate).search(domain))
+        self.env.invalidate_all()
+        self.project.sudo().state = 'frozen'
+        seen = self.project.with_user(self.mate).read(['coop_holder_count', 'coop_holder_ids'])[0]
+        self.assertEqual(seen['coop_holder_count'], 1)
+        self.assertEqual(seen['coop_holder_ids'], [])

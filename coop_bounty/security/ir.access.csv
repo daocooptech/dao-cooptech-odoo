@@ -56,3 +56,6 @@ coop_token_batch_admin,Партии — администратор узла,coop
 coop_token_ticket_own,Свои талоны,coop.project.token.ticket,base.group_user,r,"[('partner_id', 'in', user.coop_actor_partner_ids.ids)]"
 coop_token_ticket_owner,Талоны своего проекта,coop.project.token.ticket,base.group_user,r,"[('project_id.partner_id', 'in', user.coop_publisher_partner_ids.ids)]"
 coop_token_ticket_admin,Талоны — администратор узла,coop.project.token.ticket,base.group_system,r,
+coop_token_holder_peer,Держателей видят держатели,coop.project.token.holder,base.group_user,r,"[('project_id.coop_holder_ids.partner_id', 'in', user.coop_actor_partner_ids.ids)]"
+coop_token_holder_owner,Держателей своего проекта видит инициатор,coop.project.token.holder,base.group_user,r,"[('project_id.partner_id', 'in', user.coop_publisher_partner_ids.ids)]"
+coop_token_holder_admin,Держатели — администратор узла,coop.project.token.holder,base.group_system,r,
