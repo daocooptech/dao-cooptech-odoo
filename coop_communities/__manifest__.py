@@ -20,12 +20,13 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.0.1',
+    'version': '20.0.1.0.2',
     'license': 'LGPL-3',
     'depends': ['coop_base', 'coop_projects', 'mail'],
     'data': [
         'data/mail_subtypes.xml',
         'views/coop_community_views.xml',
+        'views/community_note_views.xml',
         'security/ir.access.csv',
     ],
     'assets': {

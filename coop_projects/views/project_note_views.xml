@@ -2,29 +2,30 @@
 <odoo>
   <!--
     Заметки — на штатных To-Do (задача 426, владелец 12.11.2026):
-    «Проекты → Заметки» и вкладка «Заметки» на странице проекта (только
-    свои). Действие своё: переименовать движковое «To-dos» нельзя — его
+    «Моя страница → Заметки» и «Задачи» (решение 705, пункты меню — в
+    `coop_profile`) и вкладка «Заметки» на странице проекта. Действие своё: переименовать движковое «To-dos» нельзя — его
     перевод лежит поверх имени.
   -->
   <record id="action_coop_notes" model="ir.actions.act_window">
     <field name="name">Заметки</field>
     <field name="res_model">project.task</field>
     <field name="path">notes</field>
-    <field name="domain">[('user_ids', 'in', [uid]), ('project_id', '=', False), ('parent_id', '=', False), ('is_template', '=', False)]</field>
+    <field name="domain">[('coop_kind', '=', 'note'), '|', ('user_ids', 'in', [uid]), ('coop_space', '!=', 'personal'), ('project_id', '=', False), ('parent_id', '=', False), ('is_template', '=', False)]</field>
     <field name="view_mode">kanban,list,form,calendar</field>
     <field name="search_view_id" ref="project_todo.project_task_view_todo_search"/>
     <field name="context">{
       'search_default_open_tasks': 1,
       'list_view_ref': 'project_todo.project_task_view_todo_tree',
       'default_project_id': False,
+      'default_coop_kind': 'note',
+      'coop_create_label': 'Добавить заметку',
       'show_todo_mail_helper': True,
       'show_task_options': False,
     }</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Заметок пока нет</p>
-      <p>Заметки и дела видите только вы, пока не добавите в них других
-        людей. Заметку можно привязать к проекту — она появится на его
-        странице во вкладке «Заметки».</p>
+      <p>Личную заметку видите только вы и те, кого вы в неё добавили.
+        Заметку проекта, организации или группы видят их участники.</p>
     </field>
   </record>
   <record id="action_coop_notes_kanban" model="ir.actions.act_window.view">
@@ -52,9 +53,53 @@
     <field name="act_window_id" ref="action_coop_notes"/>
   </record>
 
-  <menuitem id="menu_coop_project_notes" name="Заметки"
-            parent="menu_coop_projects_root" action="action_coop_notes"
-            sequence="20"/>
+  <record id="action_coop_tasks" model="ir.actions.act_window">
+    <field name="name">Задачи</field>
+    <field name="res_model">project.task</field>
+    <field name="path">todo</field>
+    <field name="domain">[('coop_kind', '=', 'task'), '|', ('user_ids', 'in', [uid]), ('coop_space', '!=', 'personal'), ('project_id', '=', False), ('parent_id', '=', False), ('is_template', '=', False)]</field>
+    <field name="view_mode">kanban,list,form,calendar</field>
+    <field name="search_view_id" ref="project_todo.project_task_view_todo_search"/>
+    <field name="context">{
+      'search_default_open_tasks': 1,
+      'list_view_ref': 'project_todo.project_task_view_todo_tree',
+      'default_project_id': False,
+      'default_coop_kind': 'task',
+      'coop_create_label': 'Добавить задачу',
+      'show_todo_mail_helper': True,
+      'show_task_options': False,
+    }</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Задач пока нет</p>
+      <p>Личную задачу видите только вы и её исполнители.
+        Задачу проекта, организации или группы видят их участники.</p>
+    </field>
+  </record>
+  <record id="action_coop_tasks_kanban" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">kanban</field>
+    <field name="view_id" ref="project_todo.project_task_view_todo_kanban"/>
+    <field name="act_window_id" ref="action_coop_tasks"/>
+  </record>
+  <record id="action_coop_tasks_list" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">list</field>
+    <field name="view_id" ref="project_todo.project_task_view_todo_tree"/>
+    <field name="act_window_id" ref="action_coop_tasks"/>
+  </record>
+  <record id="action_coop_tasks_form" model="ir.actions.act_window.view">
+    <field name="sequence">3</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="project_todo.project_task_view_todo_form"/>
+    <field name="act_window_id" ref="action_coop_tasks"/>
+  </record>
+  <record id="action_coop_tasks_calendar" model="ir.actions.act_window.view">
+    <field name="sequence">4</field>
+    <field name="view_mode">calendar</field>
+    <field name="view_id" ref="project_todo.project_task_view_todo_calendar"/>
+    <field name="act_window_id" ref="action_coop_tasks"/>
+  </record>
+
 
   <!-- В форме заметки — к какому проекту платформы она относится. -->
   <record id="view_todo_form_coop_project" model="ir.ui.view">
@@ -62,9 +107,20 @@
     <field name="model">project.task</field>
     <field name="inherit_id" ref="project_todo.project_task_view_todo_form"/>
     <field name="arch" type="xml">
+      <xpath expr="//h1/field[@name='name']" position="attributes">
+        <attribute name="placeholder">Название</attribute>
+      </xpath>
+      <xpath expr="//field[@name='user_ids']" position="after">
+        <field name="coop_kind"/>
+        <field name="coop_space"/>
+      </xpath>
       <xpath expr="//field[@name='date_deadline']" position="after">
         <field name="coop_project_id" options="{'no_create': True}"
-               placeholder="Без проекта"/>
+               placeholder="Без проекта" invisible="coop_space == 'project'"/>
+        <!-- Тот же проект, но выбор — только из тех, где человек в команде. -->
+        <field name="coop_project_id" options="{'no_create': True}"
+               invisible="coop_space != 'project'" required="coop_space == 'project'"
+               domain="['|', ('partner_id.user_ids', 'in', [uid]), ('contribution_ids', 'any', [('partner_id.user_ids', 'in', [uid]), ('state', '=', 'accepted')])]"/>
       </xpath>
     </field>
   </record>
@@ -74,6 +130,7 @@
     <field name="inherit_id" ref="project_todo.project_task_view_todo_tree"/>
     <field name="arch" type="xml">
       <xpath expr="//field[@name='name']" position="after">
+        <field name="coop_space" optional="show"/>
         <field name="coop_project_id" optional="show"/>
       </xpath>
     </field>
@@ -86,8 +143,15 @@
       <xpath expr="//field[@name='name']" position="after">
         <field name="coop_project_id"/>
       </xpath>
+      <xpath expr="//filter[@name='open_tasks']" position="before">
+        <filter name="space_personal" string="Личное" domain="[('coop_space', '=', 'personal')]"/>
+        <filter name="space_project" string="Проекты" domain="[('coop_space', '=', 'project')]"/>
+        <separator/>
+      </xpath>
       <xpath expr="//search" position="inside">
         <group>
+          <filter name="by_coop_space" string="Пространство"
+                  context="{'group_by': 'coop_space'}"/>
           <filter name="by_coop_project" string="Проект платформы"
                   context="{'group_by': 'coop_project_id'}"/>
         </group>
@@ -95,7 +159,7 @@
     </field>
   </record>
 
-  <!-- Вкладка «Заметки» на странице проекта — только свои. -->
+  <!-- Вкладка «Заметки» на странице проекта — свои и общие команды. -->
   <record id="view_coop_project_form_notes" model="ir.ui.view">
     <field name="name">coop.project.form.notes</field>
     <field name="model">coop.project</field>
@@ -108,12 +172,12 @@
             <button name="action_coop_new_note" type="object"
                     class="btn btn-primary btn-sm" string="+ Заметка"/>
             <button name="action_coop_notes" type="object"
-                    class="btn btn-secondary btn-sm" string="Все мои заметки по проекту"
+                    class="btn btn-secondary btn-sm" string="Все заметки по проекту"
                     invisible="not coop_note_count"/>
           </div>
           <p class="text-muted" invisible="coop_note_count">
-            Своих заметок по проекту пока нет. Их видите только вы, пока не
-            добавите в заметку других людей.
+            Заметок по проекту пока нет. Личную видите только вы, заметку с
+            пространством «Проект» — вся команда.
           </p>
           <field name="coop_note_ids" nolabel="1" readonly="1"
                  invisible="not coop_note_count"

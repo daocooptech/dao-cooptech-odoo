@@ -1013,7 +1013,8 @@
     нельзя — его русский перевод «Мои активности» лежит поверх имени.
   -->
   <record id="action_coop_my_activities" model="ir.actions.act_window">
-    <field name="name">Мои дела</field>
+    <field name="name">Дела</field>
+    <field name="path">activities</field>
     <field name="res_model">mail.activity</field>
     <field name="view_mode">list,kanban,calendar</field>
     <field name="search_view_id" ref="mail.mail_activity_view_search"/>
@@ -1071,9 +1072,6 @@
   </record>
   <!-- Пункта «Управление проектами» больше нет (владелец 19.11.2026) —
        действие открывает кнопка рядом с «Добавить проект». -->
-  <menuitem id="menu_coop_project_activities" name="Дела"
-            parent="menu_coop_projects_root" action="action_coop_my_activities"
-            sequence="22"/>
   <menuitem id="menu_coop_project_category" name="Темы"
             parent="menu_coop_projects_root" action="action_coop_project_category"
             sequence="90" groups="coop_base.group_coop_platform"/>

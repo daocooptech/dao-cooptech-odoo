@@ -29,3 +29,4 @@ rule_community_member_moderate,Модератор ведёт состав сво
                                              ('role', 'in', ('owner', 'moderator'))])]
       "
 rule_community_member_admin,Администратор узла ведёт весь состав,coop.community.member,base.group_system,crud,
+rule_coop_space_community,Заметки и задачи группы — её участники (решение 696),project.task,base.group_user,cru,"[('project_id', '=', False), ('parent_id', '=', False), ('coop_space', '=', 'community'), ('coop_community_id.member_ids', 'any', [('partner_id', '=', user.partner_id.id), ('state', '=', 'active')])]"

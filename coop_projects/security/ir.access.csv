@@ -19,3 +19,4 @@ access_coop_contribution_counter,Окно другой ставки — учас
 access_coop_project_contribute,Окно вклада — участник,coop.project.contribute,base.group_user,crud,
 rule_coop_task_own,Задачи: свои и своего проекта,project.task,,crud,
 rule_project_need_closed_read,Закрытые потребности проекта видны в его смете (решение 652),coop.resource,base.group_user,r,"[('project_id', '!=', False), ('listing_type', '=', 'request'), ('state', '=', 'closed')]"
+rule_coop_space_project,Заметки и задачи проекта — его команда (решение 696),project.task,base.group_user,cru,"[('project_id', '=', False), ('parent_id', '=', False), ('coop_space', '=', 'project'), '|', ('coop_project_id.partner_id', 'in', user.coop_actor_partner_ids.ids), ('coop_project_id.contribution_ids', 'any', [('partner_id', 'in', user.coop_actor_partner_ids.ids), ('state', '=', 'accepted')])]"

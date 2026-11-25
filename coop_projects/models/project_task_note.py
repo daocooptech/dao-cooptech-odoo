@@ -6,9 +6,11 @@
 Odoo 20 нет, старый `note` слит в To-Do. Заметка — личная задача
 `project.task` без проекта движка; здесь к ней добавлена ссылка на
 проект платформы, чтобы на странице проекта были видны свои заметки
-по нему. Меню — «Проекты → Заметки» (владелец 12.11.2026).
+по нему. Меню — «Моя страница → Заметки»
+и «Задачи» (решение 705, пункты — в `coop_profile`).
 """
-from odoo import api, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 
 
 class ProjectTask(models.Model):
@@ -18,19 +20,83 @@ class ProjectTask(models.Model):
         'coop.project', string='Проект платформы', index='btree_not_null',
         ondelete='set null',
         help='К какому проекту платформы относится заметка.')
+    coop_kind = fields.Selection([
+        ('note', 'Заметка'),
+        ('task', 'Задача'),
+    ], string='Вид', default='note', required=True, index=True,
+        help='Заметка — текст для памяти, задача — то, что надо сделать к сроку.')
+    # Видимость — по пространству (решение 696), а не по ссылке на проект:
+    # ссылка на проект была и у личных заметок, и читать их команда
+    # проекта не должна.
+    coop_space = fields.Selection([
+        ('personal', 'Личное'),
+        ('project', 'Проект'),
+    ], string='Пространство', default='personal', required=True, index=True,
+        help='Личное видите только вы и исполнители, остальное — участники '
+             'проекта, организации или группы.')
+
+    @api.model
+    def _coop_space_fields(self):
+        """Пространство → поле с его записью; модули дописывают свои."""
+        return {'project': 'coop_project_id'}
+
+    @api.model
+    def _coop_team_domain(self):
+        """Проекты, где человек в команде: тот же круг, что у ленты."""
+        mine = self.env.user.coop_actor_partner_ids.ids
+        return ['|', ('partner_id', 'in', mine),
+                ('contribution_ids', 'any', [
+                    ('partner_id', 'in', mine), ('state', '=', 'accepted')])]
+
+    def _coop_space_member(self):
+        """Состоит ли человек в пространстве записи."""
+        self.ensure_one()
+        if self.coop_space == 'project':
+            domain = self._coop_team_domain()
+            return bool(self.env['coop.project'].sudo().search_count(
+                [('id', '=', self.coop_project_id.id)] + domain, limit=1))
+        return True
+
+    def _coop_check_space(self):
+        fields_by_space = self._coop_space_fields()
+        for note in self:
+            field = fields_by_space.get(note.coop_space)
+            if not field:
+                continue
+            if not note[field]:
+                raise UserError(_('Укажите, чьё это пространство: «%s».',
+                                  note._fields[field].string))
+            if not self.env.su and not note._coop_space_member():
+                raise UserError(_(
+                    'Вести записи «%s» могут только участники — вы в нём не состоите.',
+                    note[field].sudo().display_name))
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        records._coop_check_space()
+        return records
+
+    def write(self, vals):
+        result = super().write(vals)
+        if 'coop_space' in vals or any(
+                f in vals for f in self._coop_space_fields().values()):
+            self._coop_check_space()
+        return result
 
 
 class CoopProject(models.Model):
     _inherit = 'coop.project'
 
     coop_note_ids = fields.Many2many(
-        'project.task', string='Мои заметки', compute='_compute_coop_notes')
+        'project.task', string='Заметки по проекту', compute='_compute_coop_notes')
     coop_note_count = fields.Integer(
         string='Заметок', compute='_compute_coop_notes')
 
     def _coop_note_domain(self):
         return [('coop_project_id', 'in', self.ids),
-                ('user_ids', 'in', [self.env.uid]),
+                '|', ('user_ids', 'in', [self.env.uid]),
+                ('coop_space', '=', 'project'),
                 ('project_id', '=', False), ('parent_id', '=', False)]
 
     @api.depends_context('uid')

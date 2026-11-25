@@ -12,11 +12,11 @@
       <button t-if="!this.state.taskTemplates.length or this.offlinePlugin.isOffline()" type="button"
               t-att-data-available-offline="this.isNewButtonAvailableOffline"
               t-att-class="this.props.newButtonClasses" t-att-data-hotkey="this.props.hotkey"
-              t-on-click.stop="this.props.onCreate" data-bounce-button="">Добавить задачу</button>
+              t-on-click.stop="this.props.onCreate" data-bounce-button=""><t t-out="this.props.context?.coop_create_label || 'Добавить задачу'"/></button>
     </xpath>
     <xpath expr="//Dropdown/button" position="replace">
       <button t-attf-class="{{ this.props.newButtonClasses }} o-dropdown-caret"
-              t-att-data-hotkey="this.props.hotkey" data-bounce-button="">Добавить задачу</button>
+              t-att-data-hotkey="this.props.hotkey" data-bounce-button=""><t t-out="this.props.context?.coop_create_label || 'Добавить задачу'"/></button>
     </xpath>
     <xpath expr="//DropdownItem[@onSelected='this.props.onCreate']" position="replace">
       <DropdownItem tag="'button'" class="'o-task-template btn btn-link'" onSelected="this.props.onCreate">

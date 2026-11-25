@@ -879,5 +879,16 @@
   <menuitem id="menu_coop_my_page" name="Моя страница"
             parent="menu_coop_profile_root" action="action_coop_my_page"
             sequence="10"/>
+  <!-- «Дела» человека — подразделами его страницы (решение 705).
+       «Доски» — следующим куском № 353. -->
+  <menuitem id="menu_coop_my_notes" name="Заметки"
+            parent="menu_coop_profile_root" action="coop_projects.action_coop_notes"
+            sequence="20"/>
+  <menuitem id="menu_coop_my_tasks" name="Задачи"
+            parent="menu_coop_profile_root" action="coop_projects.action_coop_tasks"
+            sequence="30"/>
+  <menuitem id="menu_coop_my_activities" name="Дела"
+            parent="menu_coop_profile_root" action="coop_projects.action_coop_my_activities"
+            sequence="40"/>
 
 </odoo>

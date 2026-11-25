@@ -15,6 +15,8 @@ from odoo.exceptions import UserError
 class ProjectTask(models.Model):
     _inherit = 'project.task'
 
+    coop_space = fields.Selection(
+        selection_add=[('org', 'Организация')], ondelete={'org': 'set default'})
     coop_org_id = fields.Many2one(
         'res.partner', string='Организация', index='btree_not_null',
         ondelete='set null', domain=[('is_company', '=', True)],
@@ -30,13 +32,27 @@ class ProjectTask(models.Model):
             note.coop_deadline_day = note.date_deadline and fields.Datetime.context_timestamp(
                 note, note.date_deadline).date()
 
+    @api.model
+    def _coop_space_fields(self):
+        return dict(super()._coop_space_fields(), org='coop_org_id')
+
     @api.model_create_multi
     def create(self, vals_list):
         records = super().create(vals_list)
+        # Организация без пространства — заметка организации: так её
+        # заводили до решения 696 и заводят загрузчики.
+        records.filtered(
+            lambda n: n.coop_org_id and n.coop_space == 'personal').coop_space = 'org'
         records._coop_check_org_member()
         return records
 
     def write(self, vals):
+        # Доступ организации смотрит на `coop_org_id`: сменили пространство —
+        # организация снимается, иначе состав продолжал бы видеть личное.
+        if 'coop_space' in vals and vals['coop_space'] != 'org':
+            vals = dict(vals, coop_org_id=False)
+        elif 'coop_org_id' in vals and 'coop_space' not in vals:
+            vals = dict(vals, coop_space='org' if vals['coop_org_id'] else 'personal')
         result = super().write(vals)
         if 'coop_org_id' in vals:
             self._coop_check_org_member()
@@ -89,7 +105,7 @@ class ResPartner(models.Model):
         action['name'] = _('Заметки: %s') % self.name
         action['domain'] = self._coop_org_note_domain()
         action['context'] = dict(
-            self.env.context, default_coop_org_id=self.id,
+            self.env.context, default_coop_org_id=self.id, default_coop_space='org',
             default_project_id=False, search_default_open_tasks=1,
             list_view_ref='project_todo.project_task_view_todo_tree',
             show_task_options=False)
@@ -108,6 +124,7 @@ class ResPartner(models.Model):
             'view_mode': 'form',
             'views': [(self.env.ref('project_todo.project_task_view_todo_form').id, 'form')],
             'target': 'current',
-            'context': {'default_coop_org_id': self.id, 'default_project_id': False,
+            'context': {'default_coop_org_id': self.id, 'default_coop_space': 'org',
+                        'default_project_id': False,
                         'default_user_ids': [(6, 0, [self.env.uid])]},
         }
