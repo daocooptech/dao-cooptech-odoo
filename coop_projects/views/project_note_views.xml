@@ -38,9 +38,11 @@
               </div>
               <div class="o_coop_note_text"><field name="coop_excerpt"/></div>
               <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+              <!-- Внизу — кто написал (владелец 26.11.2026: «вместо
+                   ответственных авторы», название организации лишнее). -->
               <div class="o_coop_note_foot">
-                <field name="coop_space_label" class="o_coop_note_space"/>
-                <field name="user_ids" widget="many2many_avatar_user" readonly="True"/>
+                <field name="create_uid" widget="many2one_avatar_user" readonly="True"/>
+                <span class="o_coop_note_author" t-out="record.create_uid.value"/>
               </div>
             </div>
           </t>
