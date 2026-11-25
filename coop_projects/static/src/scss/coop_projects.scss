@@ -457,6 +457,9 @@
         th[data-name="need_share_percent"],
         th[data-name="need_share_ratio"] { width: 90px !important; }
         th[data-name="need_offer_count"] { width: 100px !important; }
+        th[data-name="need_match_count"] { width: 150px !important; }
+        th[data-name="need_match_count"] > div { flex-direction: row !important; }
+        th[data-name="need_match_count"], td[name="need_match_count"] { text-align: left !important; }
     }
 
     // ── На телефоне ────────────────────────────────────────────────
@@ -611,12 +614,18 @@
 
         // «Передаётся» и заметка — под названием, во всю ширину.
         [data-name="ownership_kind"], td[name="ownership_kind"],
+        [data-name="need_match_count"], td[name="need_match_count"],
         [data-name="note"], td[name="note"] {
             grid-column: 1 / -1;
             text-align: left !important;
             padding-top: 0 !important;
             white-space: normal !important;
         }
+
+        // «Подходят» на телефоне — подписью у самого числа, без строки в шапке.
+        th[data-name="need_match_count"] { display: none !important; }
+        td[name="need_match_count"]:not(:has(a)) { display: none !important; }
+        td[name="need_match_count"] a::before { content: 'Подходят: '; }
 
         td[name="ownership_kind"] {
             color: var(--coop-slate, #4a4a44);
@@ -1558,4 +1567,60 @@ body.o_coop_pm_settings_open .o_form_view .o_coop_pm #coop_pm_settings { display
   color: var(--coop-ink);
 
   .o_field_widget { width: auto; font-weight: 700; }
+}
+
+// Окно подбора на трудовую потребность (№ 474).
+.o_coop_match {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .o_coop_match_spec {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-width: 420px;
+    font-size: 12.5px;
+    color: var(--coop-slate);
+  }
+
+  .o_coop_rev_filters {
+    display: inline-flex;
+    align-self: flex-start;
+    background: var(--coop-surface, #f2f2ee);
+    border-radius: 7px;
+    padding: 2px;
+    button {
+      border: 0;
+      background: transparent;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font: 600 11px/1.4 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+      color: var(--coop-slate);
+      &.on { background: var(--coop-white, #fff); color: var(--coop-ink); }
+    }
+  }
+
+  .o_coop_rev_cards { display: flex; flex-direction: column; gap: 8px; }
+
+  .o_coop_match_rate {
+    font: 600 13px/1.3 'JetBrains Mono', monospace;
+    color: var(--coop-ink);
+  }
+
+  @media (max-width: 575px) {
+    .o_coop_offer .o_coop_offer_head { grid-template-columns: 40px minmax(0, 1fr); }
+    .o_coop_offer .o_coop_offer_value { grid-column: 2; align-items: flex-start; white-space: normal; }
+  }
+}
+
+.o_field_coop_need_matches { display: block; width: 100%; }
+
+// Расчёт отклика по ставке — целиком: во второй половине ставка инициатора.
+.o_list_table td.o_data_cell.o_coop_rate_note {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  min-width: 190px;
 }

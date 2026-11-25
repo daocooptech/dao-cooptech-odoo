@@ -564,7 +564,8 @@
                     <div class="d-flex flex-column gap-3">
                       <div class="coop-add_field coop-add_title">
                         <field name="name" nolabel="1"
-                               placeholder="Например, Пельмени домашней лепки, 1 кг"/>
+                               placeholder="Например, Пельмени домашней лепки, 1 кг"
+                               widget="coop_draft_name" options="{'draft': 'Новое объявление'}"/>
                       </div>
                       <div class="coop-add_row">
                         <div class="coop-add_field">

@@ -202,12 +202,29 @@
                каталог ресурс»). Деньгам выбор не нужен: сумма и есть
                вклад. -->
           <field name="my_resource_ids" invisible="1"/>
-          <field name="resource_id" invisible="kind == 'money'"
+          <field name="resource_id" invisible="kind == 'money' or skill_offer_id"
                  options="{'no_create': True, 'no_open': True}"
                  domain="[('id', 'in', my_resource_ids)]"
                  placeholder="Выберите из «Моих ресурсов»"/>
+          <!-- Отклик навыком или услугой (№ 474): ставка — из своего
+               предложения, вклад — ставка на количество. -->
+          <field name="my_skill_ids" invisible="1"/>
+          <field name="skill_offer_id" invisible="kind != 'labour'" context="{'coop_with_rate': True}"
+                 options="{'no_create': True, 'no_open': True}"
+                 domain="[('id', 'in', my_skill_ids)]"
+                 placeholder="Выберите из «Моих предложений»"/>
+          <label for="labour_rate" invisible="not labour_period"/>
+          <div class="d-flex gap-1" invisible="not labour_period">
+            <field name="labour_rate" readonly="1" force_save="1" class="oe_inline"/>
+            <field name="labour_period" readonly="1" force_save="1" class="oe_inline"/>
+          </div>
+          <label for="labour_qty" invisible="not labour_period"/>
+          <div class="d-flex gap-1" invisible="not labour_period">
+            <field name="labour_qty" class="oe_inline" options="{'hide_trailing_zeros': true}"/>
+            <field name="labour_unit" class="oe_inline"/>
+          </div>
           <field name="name" placeholder="Смена экскаваторщика, месяц аренды склада, комплект досок"/>
-          <field name="value"/>
+          <field name="value" readonly="labour_period" force_save="1"/>
           <field name="note" placeholder="Необязательно"/>
         </group>
         <!-- Чем считается принятый вклад — зависит от вида проекта.
@@ -522,6 +539,10 @@
                 <list class="o_coop_needs_list" create="false" delete="false">
                   <field name="need_can_join" column_invisible="1"/>
                   <field name="name" string="Ресурс"/>
+                  <!-- Место «Передаётся» у материальных: правые колонки
+                       списков стоят одна под другой. -->
+                  <field name="need_match_count" string="Подходят" widget="coop_need_match"
+                         column_invisible="not parent.coop_offers_visible"/>
                   <!-- Где вклад не принимается — «сбор закрыт» (владелец
                        28.10.2026): пустая колонка читалась как поломка. -->
                   <field name="need_join_note" nolabel="1"
@@ -700,6 +721,7 @@
               <!-- Кнопки ведения вкладов — инициатору и тем, кто правит проект.
                    На чужом проекте их не видно (владелец
                    12.11.2026): сервер всё равно откажет. -->
+              <field name="coop_has_rates" invisible="1"/>
               <field name="contribution_ids">
                 <!-- На виду — кто, что, во сколько оценено, пай или доля и
                      состояние; остальное включается значком настройки
@@ -712,6 +734,12 @@
                        объявление, видно, какое именно. -->
                   <field name="resource_id" optional="hide"
                          options="{'no_open': True}"/>
+                  <field name="skill_offer_id" optional="hide"
+                         options="{'no_open': True}"/>
+                  <field name="is_mine" column_invisible="1"/>
+                  <field name="counter_rate" column_invisible="1"/>
+                  <field name="rate_note" optional="show" class="o_coop_rate_note"
+                         column_invisible="not parent.coop_has_rates"/>
                   <field name="value" sum="Собрано"/>
                   <field name="share_percent" readonly="1"
                          string="Пай, %" options="{'hide_trailing_zeros': true}"
@@ -734,6 +762,12 @@
                          decoration-muted="state in ('declined', 'expired',
                                                      'withdrawn', 'released',
                                                      'consumed')"/>
+                  <button name="action_counter_agree" type="object"
+                          string="Согласиться" class="btn-primary btn-sm"
+                          invisible="state != 'offered' or not is_mine or not counter_rate"/>
+                  <button name="action_counter_refuse" type="object"
+                          string="Оставить свою" class="btn-secondary btn-sm"
+                          invisible="state != 'offered' or not is_mine or not counter_rate"/>
                   <button name="action_accept" type="object" string="Принять"
                           icon="check" invisible="state != 'offered'
                                      or not parent.coop_can_edit"/>

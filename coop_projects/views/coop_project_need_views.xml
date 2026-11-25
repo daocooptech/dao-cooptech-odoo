@@ -42,6 +42,9 @@
         <group string="Потребность проекта" invisible="not project_id">
           <group>
             <field name="project_id" readonly="1"/>
+            <field name="need_specialization_id" readonly="not coop_can_edit"
+                   invisible="resource_type != 'labour'"
+                   options="{'no_create': True, 'no_open': True}"/>
             <field name="need_manager_id" readonly="not coop_can_edit"/>
           </group>
           <group>

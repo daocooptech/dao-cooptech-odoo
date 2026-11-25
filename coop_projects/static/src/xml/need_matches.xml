@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <t t-name="coop_projects.NeedMatch">
+    <a t-if="this.visible" href="#" class="o_coop_offers"
+       title="Люди с навыком и организации с услугой той же специализации"
+       t-on-click="this.open" t-out="this.label"/>
+  </t>
+
+  <t t-name="coop_projects.NeedMatches">
+    <div class="o_coop_match">
+      <label class="o_coop_match_spec">
+        <span>Кто нужен</span>
+        <select class="form-select" t-on-change="(ev) => this.setSpec(ev)">
+          <option value="0" t-att-selected="!this.spec">Выберите специализацию</option>
+          <option t-foreach="this.state.specs" t-as="spec" t-key="spec.id"
+                  t-att-value="spec.id" t-att-selected="spec.id === this.spec"
+                  t-out="spec.name"/>
+        </select>
+      </label>
+      <t t-if="this.spec">
+        <div class="o_coop_rev_filters">
+          <button type="button" t-att-class="{'on': this.tab === 'people'}"
+                  t-on-click="() => this.state.tab = 'people'">Люди <t t-out="this.people.length"/></button>
+          <button type="button" t-att-class="{'on': this.tab === 'orgs'}"
+                  t-on-click="() => this.state.tab = 'orgs'">Организации <t t-out="this.orgs.length"/></button>
+        </div>
+        <div class="o_coop_rev_cards o_coop_offers">
+          <div t-foreach="this.offers" t-as="offer" t-key="offer.id" class="o_coop_offer">
+            <div class="o_coop_offer_head">
+              <img class="o_coop_offer_ava" loading="lazy" t-att-alt="offer.partner"
+                   t-att-src="'/web/image/res.partner/' + offer.partner_id + '/avatar_128'"/>
+              <div class="o_coop_offer_who">
+                <a href="#" class="o_coop_offer_name" t-out="offer.partner"
+                   t-on-click.prevent="() => this.openOffer(offer)"/>
+                <span t-out="this.meta(offer)"/>
+                <span>доверие <t t-out="offer.trust"/> % · сделок <t t-out="offer.deals"/></span>
+              </div>
+              <div class="o_coop_offer_value">
+                <span class="o_coop_match_rate" t-out="offer.rate"/>
+                <span class="o_coop_offer_badge ok" t-if="offer.status === 'answered'">
+                  <CoopIcon name="'circle-check'" size="14"/> Откликнулся
+                </span>
+                <span class="o_coop_offer_badge" t-elif="offer.status === 'invited'">Приглашение отправлено</span>
+                <button t-elif="this.data.can_invite" type="button"
+                        class="btn btn-secondary btn-sm" t-att-disabled="this.state.busy"
+                        t-on-click="() => this.invite(offer)">Пригласить</button>
+              </div>
+            </div>
+          </div>
+          <div class="text-muted" t-if="!this.offers.length">
+            <t t-if="this.tab === 'orgs'">Организаций с такой услугой пока нет.</t>
+            <t t-else="">Людей с таким навыком пока нет.</t>
+          </div>
+        </div>
+      </t>
+      <div class="text-muted" t-else="">Укажите специализацию — покажем, кто подходит.</div>
+    </div>
+  </t>
+
+</templates>

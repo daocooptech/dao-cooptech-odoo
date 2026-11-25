@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Окно «Подходят» из строки трудовой потребности (№ 474): люди с
+       навыком и организации с услугой той же специализации. -->
+  <record id="view_coop_need_match_form" model="ir.ui.view">
+    <field name="name">coop.resource.need.match</field>
+    <field name="model">coop.resource</field>
+    <field name="priority">99</field>
+    <field name="arch" type="xml">
+      <form string="Подходят" create="false" edit="false" delete="false">
+        <field name="need_matches_json" widget="coop_need_matches" nolabel="1"/>
+        <footer>
+          <button string="Закрыть" special="cancel" class="btn-secondary"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_coop_contribution_counter_form" model="ir.ui.view">
+    <field name="name">coop.contribution.counter.form</field>
+    <field name="model">coop.contribution.counter</field>
+    <field name="arch" type="xml">
+      <form string="Другая ставка">
+        <field name="contribution_id" invisible="1"/>
+        <field name="currency_id" invisible="1"/>
+        <group>
+          <field name="own_note" readonly="1"/>
+          <label for="rate"/>
+          <div class="d-flex gap-1">
+            <field name="rate" class="oe_inline"/>
+            <field name="labour_period" readonly="1" class="oe_inline"/>
+          </div>
+          <field name="total" readonly="1"/>
+        </group>
+        <div class="alert alert-info" role="status">
+          Откликнувшийся согласится или останется при своей ставке. Принять
+          отклик можно в любом случае.
+        </div>
+        <footer>
+          <button name="action_propose" type="object" string="Предложить ставку"
+                  class="btn-primary"/>
+          <button string="Отмена" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+</odoo>

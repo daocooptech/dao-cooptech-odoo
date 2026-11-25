@@ -92,7 +92,7 @@
       </xpath>
       <!-- Свой ресурс из каталога — для вещей; актив выбирается своим полем. -->
       <xpath expr="//field[@name='resource_id']" position="attributes">
-        <attribute name="invisible">kind in ('money', 'intangible')</attribute>
+        <attribute name="invisible">kind in ('money', 'intangible') or skill_offer_id</attribute>
       </xpath>
     </field>
   </record>

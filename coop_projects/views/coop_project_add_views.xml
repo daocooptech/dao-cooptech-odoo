@@ -51,7 +51,8 @@
                     </div>
                     <div class="d-flex flex-column gap-3">
                   <div class="coop-add_field coop-add_title">
-                    <field name="name" nolabel="1" placeholder="Название проекта"/>
+                    <field name="name" nolabel="1" placeholder="Название проекта"
+                           widget="coop_draft_name" options="{'draft': 'Новый проект'}"/>
                   </div>
                   <div class="coop-add_field">
                     <label for="summary" string="Коротко о проекте"/>
@@ -124,6 +125,9 @@
                         <field name="resource_type" string="Вид" width="112px"/>
                         <field name="name" string="Что именно"/>
                         <field name="category_id" string="Рубрика" width="112px"
+                               options="{'no_create': True, 'no_open': True}"/>
+                        <field name="need_specialization_id" string="Кто нужен" width="128px"
+                               invisible="resource_type != 'labour'"
                                options="{'no_create': True, 'no_open': True}"/>
                         <field name="ownership_kind" string="Передаётся" width="118px"/>
                         <field name="price" string="Оценка" width="96px"

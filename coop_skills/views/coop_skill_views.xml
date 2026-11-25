@@ -401,7 +401,8 @@
                         <label for="name" string="Чем занимаетесь" invisible="partner_is_company"/>
                         <label for="name" string="Название услуги" invisible="not partner_is_company"/>
                         <field name="name" nolabel="1"
-                               placeholder="Например, Электромонтажник"/>
+                               placeholder="Например, Электромонтажник"
+                               widget="coop_draft_name" options="{'draft': 'Новый навык'}"/>
                       </div>
                       <div class="coop-add_row">
                         <div class="coop-add_field">

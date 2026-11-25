@@ -478,7 +478,8 @@
                     </div>
                     <div class="d-flex flex-column gap-3">
                       <div class="coop-add_field coop-add_title">
-                        <field name="name" nolabel="1" placeholder="Кто нужен"/>
+                        <field name="name" nolabel="1" placeholder="Кто нужен"
+                               widget="coop_draft_name" options="{'draft': 'Новая вакансия'}"/>
                       </div>
                       <div class="coop-add_row">
                         <div class="coop-add_field">

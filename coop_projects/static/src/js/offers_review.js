@@ -168,6 +168,22 @@ export class CoopOffersReview extends Component {
         });
     }
 
+    openSkill(offer) {
+        this.action.doAction({
+            type: "ir.actions.act_window", res_model: "coop.skill.offer",
+            res_id: offer.skill_id, views: [[false, "form"]],
+        });
+    }
+
+    /** «Другая ставка» (решение 697): ответ откликнувшегося — во вкладах. */
+    async counter(offer) {
+        const action = await this.orm.call(
+            "coop.project.contribution", "action_open_counter", [[offer.id]]);
+        await this.action.doAction(action, {
+            onClose: () => this.props.record.load(),
+        });
+    }
+
     pick(id) {
         this.state.need = id;
     }

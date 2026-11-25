@@ -96,7 +96,8 @@
                      t-att-src="'/web/image/coop.resource/' + res.id + '/image_512'"/>
                 <span class="o_coop_rev_res_name" t-out="res.name"/>
               </button>
-              <p class="o_coop_offer_what"><b t-out="offer.name"/><t t-if="offer.labour_form"> · <t t-out="offer.labour_form"/></t></p>
+              <p class="o_coop_offer_what"><a t-if="offer.skill_id" href="#" t-on-click.prevent="() => this.openSkill(offer)"><b t-out="offer.name"/></a><b t-else="" t-out="offer.name"/><t t-if="offer.labour_form"> · <t t-out="offer.labour_form"/></t></p>
+              <p class="o_coop_offer_what" t-if="offer.rate_note" t-out="offer.rate_note"/>
               <p class="o_coop_offer_note" t-if="offer.note" t-out="offer.note"/>
             </div>
             <div class="o_coop_offer_foot">
@@ -111,6 +112,10 @@
                   <CoopIcon name="'message-circle'" size="14"/> Написать
                 </button>
                 <t t-if="this.data.can_decide">
+                  <button t-if="offer.rate_note" type="button" class="btn btn-secondary btn-sm"
+                          t-on-click="() => this.counter(offer)">
+                    <t t-if="offer.countered">Изменить ставку</t><t t-else="">Другая ставка</t>
+                  </button>
                   <button type="button" class="btn btn-secondary btn-sm"
                           t-on-click="() => this.decline(offer)">Отклонить</button>
                   <button type="button" class="btn btn-primary btn-sm"
