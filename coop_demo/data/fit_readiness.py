@@ -63,6 +63,10 @@ def fit_overfunded(env):
     Project = env['coop.project'].sudo().with_context(
         active_test=False, tracking_disable=True, mail_notrack=True)
     projects = Project.search(DEMO + [('readiness', '>', LIMIT)])
+    # Наш проект — настоящие вклады (№ 485): их оценка не подгоняется.
+    ours = env.ref('coop_bounty.project_cooptech', raise_if_not_found=False)
+    if ours:
+        projects -= ours
     fitted = 0
     for project in projects:
         accepted = project.contribution_ids.filtered(lambda c: c.state == 'accepted')

@@ -106,6 +106,8 @@ def main(vault):
             'waiting': data['state'] == 'ждёт ответа',
             'specialization': specialization(name + ' ' + summary),
             'weight': weight(name, path.stat().st_size),
+            # Оценку поставил автор (решение 549, № 485) — она и есть сумма.
+            'tokens': int(data['tokens']) if data.get('tokens', '').isdigit() else 0,
         })
     # Ступени суммы — по квантилям размера, потом общий масштаб под фонд.
     ordered = sorted(rows, key=lambda row: row['weight'])
@@ -118,6 +120,7 @@ def main(vault):
             row['reward'] = max(100, int(row['reward'] * scale) // 100 * 100)
     for row in rows:
         del row['weight']
+        row['reward'] = row.pop('tokens') or row['reward']
     rows.sort(key=lambda row: row['ref'])
     out = Path(__file__).resolve().parent.parent / 'coop_bounty' / 'data' / 'cooptech_tasks.json'
     out.write_text(json.dumps(rows, ensure_ascii=False, indent=1) + '\n', encoding='utf-8',

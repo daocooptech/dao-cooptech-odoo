@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Токены за задачи в управлении проектом (№ 485): оценку ставит автор
+       при создании, исполнитель обязателен — ему и начисляется. -->
+  <record id="view_task_form_coop_tokens" model="ir.ui.view">
+    <field name="name">project.task.form.coop.tokens</field>
+    <field name="model">project.task</field>
+    <field name="inherit_id" ref="project.view_task_form2"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='user_ids'][hasclass('o_task_user_field')]" position="attributes">
+        <attribute name="string">Исполнители</attribute>
+        <attribute name="required">not project_id or coop_token_on</attribute>
+      </xpath>
+      <xpath expr="//field[@name='user_ids'][hasclass('o_task_user_field')]" position="after">
+        <field name="coop_token_on" invisible="1"/>
+        <field name="coop_token_manager" invisible="1"/>
+        <field name="coop_token_can_set" invisible="1"/>
+        <field name="coop_token_waits" invisible="1"/>
+        <label for="coop_tokens" invisible="not coop_token_on"/>
+        <div class="d-flex align-items-baseline flex-wrap" invisible="not coop_token_on">
+          <field name="coop_tokens" nolabel="1" class="oe_inline me-1" style="width: 5rem"
+                 readonly="not coop_token_can_set"
+                 required="coop_token_on and not parent_id and not id"/>
+          <field name="coop_token_unit" nolabel="1" readonly="1" class="oe_inline"/>
+        </div>
+        <label for="coop_token_state" invisible="not coop_token_on or not coop_token_state"/>
+        <div class="d-flex align-items-center flex-wrap"
+             invisible="not coop_token_on or not coop_token_state">
+          <field name="coop_token_state" nolabel="1" readonly="1" class="oe_inline me-2"/>
+          <button name="action_coop_tokens_accept" type="object" class="btn btn-secondary btn-sm"
+                  string="Принять и начислить"
+                  invisible="not coop_token_waits or not coop_token_manager"/>
+        </div>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_task_quick_create_coop_tokens" model="ir.ui.view">
+    <field name="name">project.task.form.quick.coop.tokens</field>
+    <field name="model">project.task</field>
+    <field name="inherit_id" ref="project.quick_create_task_form"/>
+    <field name="arch" type="xml">
+      <field name="user_ids" position="attributes">
+        <attribute name="string">Исполнители</attribute>
+        <attribute name="required">coop_token_on</attribute>
+      </field>
+      <field name="user_ids" position="after">
+        <field name="coop_token_on" invisible="1"/>
+        <field name="coop_tokens" invisible="not coop_token_on" required="coop_token_on"/>
+      </field>
+    </field>
+  </record>
+
+  <!-- Рабочая область проекта (приоритет 99) собирает вкладки «Аналитики»;
+       наша встаёт после неё. -->
+  <record id="view_project_project_form_coop_tokens" model="ir.ui.view">
+    <field name="name">project.project.form.coop.tokens</field>
+    <field name="model">project.project</field>
+    <field name="inherit_id" ref="coop_projects.view_project_project_form_offers"/>
+    <field name="arch" type="xml">
+      <xpath expr="//page[@name='coop_an_money']" position="after">
+        <page name="coop_an_tokens" string="Токены за задачи" invisible="not coop_an_tokens">
+          <field name="coop_an_tokens" nolabel="1"/>
+        </page>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>
