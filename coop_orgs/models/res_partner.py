@@ -2,6 +2,9 @@
 from odoo.exceptions import UserError, ValidationError
 from odoo import _, api, fields, models
 
+# Артели: производственный кооператив и сельхозпроизводственный.
+ARTEL_KINDS = ('production', 'agri_production')
+
 
 class ResPartner(models.Model):
     """Организация как участник платформы.
@@ -70,6 +73,47 @@ class ResPartner(models.Model):
             if not 0 <= record.coop_indivisible_fund_percent <= 100:
                 raise ValidationError(_(
                     'Доля в неделимый фонд — от 0 до 100 %.'))
+
+    # Решение 511 (26.10.2026, «оба пути»): основа кооперативных выплат —
+    # пункт устава. Потребительский кооператив делит по обороту, считая и
+    # работы по ГПХ (ст. 1 3085-1, устав); артель — по личному трудовому
+    # участию (ст. 12 41-ФЗ), по паям — не более 50 %. Значение следует за
+    # видом кооператива, ручной выбор держится, пока допустим.
+    coop_payout_basis = fields.Selection([
+        ('turnover', 'По обороту и работам'),
+        ('labor', 'По трудовому участию'),
+    ], string='Основа кооперативных выплат',
+        compute='_compute_coop_payout_basis', store=True, readonly=False,
+        help='Как устав делит итог года между членами. Потребительский '
+             'кооператив — по участию в обороте, включая работы по '
+             'договорам подряда; артель — по личному трудовому участию.')
+
+    @api.depends('coop_cooperative_kind')
+    def _compute_coop_payout_basis(self):
+        for partner in self:
+            allowed = partner._coop_payout_bases_allowed()
+            if partner.coop_payout_basis not in allowed:
+                partner.coop_payout_basis = allowed[0] if allowed else False
+
+    def _coop_payout_bases_allowed(self):
+        self.ensure_one()
+        kind = self.coop_cooperative_kind
+        if not kind:
+            return ()
+        return ('labor',) if kind in ARTEL_KINDS else ('turnover',)
+
+    @api.constrains('coop_payout_basis', 'coop_cooperative_kind')
+    def _check_coop_payout_basis(self):
+        for partner in self:
+            basis = partner.coop_payout_basis
+            if basis and basis not in partner._coop_payout_bases_allowed():
+                raise ValidationError(_(
+                    'По личному трудовому участию делит только артель '
+                    '(ст. 12 41-ФЗ); потребительский кооператив — по '
+                    'обороту, с работами по ГПХ (решение 511).')
+                    if basis == 'labor' else _(
+                    'Артель делит итог года по личному трудовому участию '
+                    '(ст. 12 41-ФЗ), не по обороту (решение 511).'))
 
     coop_charter_url = fields.Char(
         string='Устав',
