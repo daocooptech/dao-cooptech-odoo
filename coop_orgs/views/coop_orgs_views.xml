@@ -300,6 +300,12 @@
                   <field name="coop_cooperative_kind" widget="coop_inline"
                          readonly="not coop_can_edit_card"
                          invisible="not coop_cooperative_kind"/>
+                  <!-- Банк и МФО (решение 509): лицензия ЦБ, не форма. От
+                       неё — право выдавать денежный заём гражданам. -->
+                  <field name="coop_finance_license" widget="coop_inline"
+                         readonly="not coop_can_edit_card"
+                         placeholder="Банк или МФО?"
+                         invisible="coop_is_cooperative or (not coop_finance_license and not coop_can_edit_card)"/>
                 </div>
 
                 <!-- То же, что у человека: короткая заметка, а не статья

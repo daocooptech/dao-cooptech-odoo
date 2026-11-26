@@ -16,7 +16,7 @@
     'author': 'ДАО КООПТЕХ',
     'website': 'https://github.com/daocooptech/dao-cooptech',
     'category': 'Cooperative',
-    'version': '20.0.1.2.6',
+    'version': '20.0.1.2.7',
     'license': 'LGPL-3',
     'depends': [
         'base',

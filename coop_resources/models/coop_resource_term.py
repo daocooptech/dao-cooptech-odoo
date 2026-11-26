@@ -527,6 +527,19 @@ class CoopResource(models.Model):
                 if offer and not (term.months > 0 and term.pay_every):
                     problems.append(_('«%(method)s»: укажите срок в месяцах и как часто платить — без '
                                       'порядка и сроков платежей договор не заключён.', method=name))
+            # Решение 509: денежный заём гражданину — только КПК, СКПК, банк,
+            # МФО. Деньги «в аренду» и «на время, с возвратом» — заём; на
+            # время организациям и проектам — заём юрлицу, его давать можно.
+            # Остальным — отсрочка, рассрочка, аванс, зачёт за товар.
+            if (offer and company and self.resource_type == 'financial'
+                    and (term.code == 'rent'
+                         or (term.code == 'free' and term.free_mode == 'loan'
+                             and term.free_to not in ('org', 'project')))
+                    and not self.owner_id._coop_can_lend_money()):
+                problems.append(_('«%(method)s»: денежный заём гражданам выдают только кредитный '
+                                  'кооператив, банк или МФО. Предложите товар с отсрочкой или '
+                                  'рассрочкой, аванс или зачёт — или давайте на время только '
+                                  'организациям и проектам.', method=name))
             if term.code == 'leasing' and offer and term.lessor == 'self' and not term.seller_name:
                 problems.append(_('«%(method)s»: лизингодатель покупает вещь у продавца — укажите продавца '
                                   'или сдайте свою вещь через «Аренду».', method=name))
