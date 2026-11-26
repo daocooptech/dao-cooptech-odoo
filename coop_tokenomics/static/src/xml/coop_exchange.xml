@@ -139,18 +139,11 @@
           <div class="o_coop_dex_score" t-if="this.currentRow">
             <div class="o_coop_dex_scoreline" t-on-click="this.toggleScore">
               <span class="o_coop_dex_scoreval" t-out="this.currentRow.score"/>
-              <span class="o_coop_dex_scoremax">из 40</span>
+              <span class="o_coop_dex_scoremax">из 30</span>
               <span class="o_coop_dex_scorename">надёжность выпуска</span>
               <span class="o_coop_dex_link" t-out="this.state.showScore ? 'свернуть' : 'из чего сложилась'"/>
             </div>
             <div class="o_coop_dex_scoreparts" t-if="this.state.showScore">
-              <div class="o_coop_dex_part">
-                <span>Доверие поставщика</span>
-                <b t-out="this.currentRow.score_parts.trust"/>
-                <span class="o_coop_dex_partnote">
-                  уровень <t t-out="this.currentRow.issuer_trust"/> по завершённым сделкам
-                </span>
-              </div>
               <div class="o_coop_dex_part">
                 <span>Залог</span>
                 <b t-out="this.currentRow.score_parts.deposit"/>
@@ -497,7 +490,7 @@
       </div>
       <div class="o_coop_dex_num">
         <span class="o_coop_dex_scorepill"
-              t-att-class="{ 'o_coop_up': m.score &gt;= 28, 'o_coop_down': m.score &lt; 18 }"
+              t-att-class="{ 'o_coop_up': m.score &gt;= 21, 'o_coop_down': m.score &lt; 14 }"
               t-out="m.score"/>
       </div>
     </div>

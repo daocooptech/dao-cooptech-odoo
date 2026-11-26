@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+from datetime import timedelta
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
@@ -229,6 +230,11 @@ class CoopDeal(models.Model):
     can_review = fields.Boolean(
         string='Можно оставить отзыв', compute='_compute_can_review',
         help='Сделка завершена, я её сторона и ещё не оценивал.')
+    reviews_opened_on = fields.Date(
+        string='Отзывы раскрыты', readonly=True, copy=False,
+        help='Когда отзывы стали видны всем: обе стороны написали свой '
+             'или прошло 14 дней после закрытия (решение 490). От этой '
+             'даты считаются 14 дней на оспаривание (491).')
     reviews_visible = fields.Boolean(
         string='Отзывы раскрыты', compute='_compute_reviews_visible', store=True,
         help='Оба отзыва показываются одновременно — когда написаны оба. '
@@ -284,9 +290,11 @@ class CoopDeal(models.Model):
             record.amount_paid = paid
             record.amount_due = max(0, (record.amount or 0) - paid)
 
-    @api.depends('review_ids.deal_id', 'review_ids.side')
+    @api.depends('review_ids.deal_id', 'review_ids.side', 'reviews_opened_on')
     def _compute_reviews_visible(self):
-        """Раскрываем, когда высказались обе стороны.
+        """Раскрываем, когда высказались обе стороны — или когда вторая
+        молчит 14 дней после закрытия сделки (решение 490, дату ставит
+        суточное задание `_cron_open_single_reviews`).
 
         По сторонам, а не по авторам. От лица организации действует
         человек, которому она поручила дела, и автором отзыва стоит он —
@@ -297,7 +305,31 @@ class CoopDeal(models.Model):
         """
         for record in self:
             sides = set(record.review_ids.mapped('side'))
-            record.reviews_visible = {'a', 'b'} <= sides
+            record.reviews_visible = bool(
+                {'a', 'b'} <= sides or record.reviews_opened_on)
+
+    @api.model
+    def _cron_open_single_reviews(self):
+        """Раскрыть одиночные отзывы через 14 дней после закрытия (490).
+
+        Вторая сторона промолчала — написанный отзыв, хороший или плохой,
+        не должен прятаться навсегда. Раскрывается и идёт в доверие как
+        обычный (313).
+        """
+        today = fields.Date.context_today(self)
+        deals = self.sudo().search([
+            ('state', '=', 'done'),
+            ('reviews_visible', '=', False),
+            ('review_ids', '!=', False),
+            ('closed_on', '<=', today - timedelta(days=REVIEW_DAYS)),
+        ])
+        for deal in deals:
+            deal.reviews_opened_on = today
+            (deal.party_a_id | deal.party_b_id)._coop_recompute_deal_stats()
+            deal._notify_other(_(
+                'Отзыв по сделке %s раскрыт: вторая сторона не оставила '
+                'свой за %s дней.') % (deal._coop_label(), REVIEW_DAYS))
+        return len(deals)
 
     @api.depends('state', 'reviews_visible', 'review_ids.rating')
     def _compute_outcome(self):
@@ -865,6 +897,11 @@ class CoopDealPayment(models.Model):
         return True
 
 
+# Через столько дней после закрытия одиночный отзыв раскрывается (490),
+# столько же после раскрытия его можно оспорить (491).
+REVIEW_DAYS = 14
+
+
 class CoopDealReview(models.Model):
     """Двусторонний отзыв по сделке.
 
@@ -901,6 +938,55 @@ class CoopDealReview(models.Model):
     body = fields.Text(string='Отзыв')
     visible = fields.Boolean(
         related='deal_id.reviews_visible', store=True, string='Раскрыт')
+    # Оспаривание (решение 491): тот, о ком отозвались, 14 дней после
+    # раскрытия. Текст отзыва остаётся, рядом — что оспорено и почему.
+    disputed_on = fields.Date(string='Оспорен', readonly=True, copy=False)
+    disputed_by_id = fields.Many2one(
+        'res.partner', string='Кто оспорил', readonly=True, copy=False)
+    dispute_reason = fields.Text(string='Почему оспорен', readonly=True, copy=False)
+    can_dispute = fields.Boolean(compute='_compute_can_dispute')
+
+    @api.depends_context('uid')
+    @api.depends('visible', 'disputed_on', 'target_id', 'deal_id.reviews_opened_on')
+    def _compute_can_dispute(self):
+        mine = self.env.user.coop_actor_partner_ids
+        today = fields.Date.context_today(self)
+        for record in self:
+            opened = record.deal_id.reviews_opened_on
+            record.can_dispute = bool(
+                record.visible and not record.disputed_on
+                and record.target_id in mine and opened
+                and today <= opened + timedelta(days=REVIEW_DAYS))
+
+    def action_dispute(self):
+        self.ensure_one()
+        if not self.can_dispute:
+            raise UserError(_(
+                'Оспорить отзыв может тот, о ком он написан, в течение %s '
+                'дней после раскрытия.') % REVIEW_DAYS)
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Оспорить отзыв'),
+            'res_model': 'coop.deal.review.dispute.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_review_id': self.id},
+        }
+
+    def _coop_dispute(self, reason):
+        self.ensure_one()
+        if not self.can_dispute:
+            raise UserError(_(
+                'Оспорить отзыв может тот, о ком он написан, в течение %s '
+                'дней после раскрытия.') % REVIEW_DAYS)
+        self.sudo().with_context(coop_review_dispute=True).write({
+            'disputed_on': fields.Date.context_today(self),
+            'disputed_by_id': self.target_id.id,
+            'dispute_reason': reason,
+        })
+        self.deal_id._notify_other(_(
+            'Отзыв по сделке %s оспорен: %s') % (self.deal_id._coop_label(), reason))
+        return True
 
     _one_per_side = models.Constraint(
         'unique(deal_id, side)',
@@ -965,7 +1051,12 @@ class CoopDealReview(models.Model):
             # оценили, об этом даже не знает. Извещаем не оценкой, а
             # самим фактом: оценку он увидит, когда ответит своей, и это
             # ровно то, ради чего отзывы раскрываются одновременно.
-            record.target_id.sudo()._coop_recompute_deal_stats()
+            deal = record.deal_id
+            if deal.reviews_visible and not deal.reviews_opened_on:
+                deal.sudo().reviews_opened_on = fields.Date.context_today(record)
+            # В доверие идут только раскрытые отзывы (490): раскрылись оба —
+            # пересчитать обе стороны.
+            (deal.party_a_id | deal.party_b_id).sudo()._coop_recompute_deal_stats()
             if record.deal_id.reviews_visible:
                 record.deal_id._notify_other(_(
                     'Отзывы по сделке %s раскрыты: обе стороны оценили '
@@ -977,7 +1068,10 @@ class CoopDealReview(models.Model):
         return records
 
     def write(self, vals):
-        if set(vals) - {'visible'}:
+        allowed = {'visible'}
+        if self.env.context.get('coop_review_dispute'):
+            allowed |= {'disputed_on', 'disputed_by_id', 'dispute_reason'}
+        if set(vals) - allowed:
             raise UserError(_(
                 'Отзыв не переписывают: он часть истории сделки. Если '
                 'обстоятельства изменились, скажите об этом ответом.'))

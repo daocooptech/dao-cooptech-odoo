@@ -51,3 +51,20 @@ class CoopDealReviewWizard(models.TransientModel):
             'body': self.body,
         })
         return {'type': 'ir.actions.act_window_close'}
+
+
+class CoopDealReviewDisputeWizard(models.TransientModel):
+    """Оспорить отзыв (решение 491): только причина — кто и о ком,
+    известно по самому отзыву. Текст отзыва не удаляется."""
+    _name = 'coop.deal.review.dispute.wizard'
+    _description = 'Оспорить отзыв'
+
+    review_id = fields.Many2one(
+        'coop.deal.review', string='Отзыв', required=True, readonly=True)
+    review_body = fields.Text(related='review_id.body', string='Что написано')
+    reason = fields.Text(string='Почему не согласны', required=True)
+
+    def action_send(self):
+        self.ensure_one()
+        self.review_id._coop_dispute(self.reason)
+        return {'type': 'ir.actions.act_window_close'}

@@ -43,11 +43,15 @@ class ResPartner(models.Model):
             ])
             # Считаем отзывы о человеке, а не сделки с отзывом: у сделки
             # их два, и каждый относится к своей стороне.
+            # Только раскрытые (решение 490): скрытый отзыв ещё ждёт
+            # ответа второй стороны или 14 дней.
             with_review = Review.search_count([
                 ('target_id', '=', partner.id),
+                ('visible', '=', True),
             ])
             good = Review.search_count([
                 ('target_id', '=', partner.id),
+                ('visible', '=', True),
                 ('rating', 'in', POSITIVE),
             ])
             partner.coop_deals_done = finished_count

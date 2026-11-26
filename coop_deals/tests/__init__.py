@@ -4,3 +4,4 @@ from . import test_deal_responsible
 from . import test_deal_spec
 from . import test_resource_showcase
 from . import test_outside_445
+from . import test_review_490

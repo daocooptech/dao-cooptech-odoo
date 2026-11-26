@@ -128,6 +128,28 @@
     </field>
   </record>
 
+  <!-- Оспорить отзыв (решение 491): только причина, текст отзыва остаётся. -->
+  <record id="view_coop_deal_review_dispute_wizard_form" model="ir.ui.view">
+    <field name="name">coop.deal.review.dispute.wizard.form</field>
+    <field name="model">coop.deal.review.dispute.wizard</field>
+    <field name="arch" type="xml">
+      <form string="Оспорить отзыв">
+        <field name="review_id" invisible="1"/>
+        <group>
+          <field name="review_body" readonly="1"/>
+          <field name="reason" placeholder="Что в отзыве не так и чем это подтверждается"/>
+        </group>
+        <div class="alert alert-info" role="status">
+          Отзыв не удаляется: рядом с ним все увидят, что он оспорен, и вашу причину.
+        </div>
+        <footer>
+          <button name="action_send" type="object" string="Оспорить" class="btn-primary"/>
+          <button string="Отмена" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
   <record id="view_coop_deal_form" model="ir.ui.view">
     <field name="name">coop.deal.form</field>
     <field name="model">coop.deal</field>
@@ -325,13 +347,18 @@
                   <field name="rating"/>
                   <field name="body"/>
                   <field name="visible" widget="boolean_toggle" readonly="1"/>
+                  <field name="disputed_on" optional="show"/>
+                  <field name="dispute_reason" optional="show"/>
+                  <field name="can_dispute" column_invisible="1"/>
+                  <button name="action_dispute" type="object" string="Оспорить"
+                          class="btn-link" invisible="not can_dispute"/>
                 </list>
               </field>
               <div class="alert alert-info" role="status">
                 Оба отзыва показываются одновременно — когда написаны оба.
-                Если открывать сразу, второй пишется с оглядкой на первый,
-                а то и в отместку, и обе оценки перестают значить
-                что-либо.
+                Вторая сторона молчит 14 дней после закрытия — написанный
+                раскрывается сам. О ком отозвались, тот может оспорить отзыв
+                в течение 14 дней после раскрытия; текст остаётся.
               </div>
             </page>
             <page string="Спор" name="dispute" invisible="state != 'disputed' and not dispute_resolved_on">
@@ -425,6 +452,10 @@
                decoration-danger="rating in ('1', '2')"/>
         <field name="body"/>
         <field name="visible" widget="boolean" string="Раскрыт"/>
+        <field name="disputed_on" optional="show"/>
+        <field name="can_dispute" column_invisible="1"/>
+        <button name="action_dispute" type="object" string="Оспорить"
+                class="btn-link" invisible="not can_dispute"/>
       </list>
     </field>
   </record>
