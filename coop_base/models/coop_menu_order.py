@@ -91,6 +91,20 @@ BELOW_ORDER = [
     'base.menu_administration',
 ]
 
+# Решение 493 (владелец 26.11.2026 — «делай»): штатный раздел, у которого
+# есть наш двойник, не стоит в меню вторым — его пункты переезжают внутрь
+# нашего, а корень скрывается. Переносим здесь, а не XML: модули с нашими
+# разделами от складского, событийного и т. п. модулей движка не зависят,
+# а `apply` идёт после каждого обновления — если движок при своём
+# обновлении вернёт пункты на место, следующий проход перенесёт их снова.
+MERGE = [
+    ('stock.menu_stock_root', 'coop_warehouse.menu_coop_warehouse_root'),
+    ('event.event_main_menu', 'coop_events.menu_coop_events_root'),
+    ('base.menu_administration', 'coop_settings.menu_coop_settings_root'),
+]
+# Пункты движка встают после наших (у наших — до сотни), в своём порядке.
+MERGE_OFFSET = 100
+
 BELOW_START = 900
 BELOW_STEP = 10
 # Пункты, которых нет ни в одном списке, уезжают в самый конец: это
@@ -137,9 +151,54 @@ class CoopMenuOrder(models.AbstractModel):
             placed.add(menu.id)
             sequence += BELOW_STEP
 
+        self._merge_twins()
+
         rest = Menu.search([('parent_id', '=', False), ('id', 'not in', list(placed))])
         rest.write({'sequence': UNLISTED})
 
         _LOG = 'Порядок меню: по макету %s, ниже %s, прочих %s'
         _logger.info(_LOG, len(placed) - len(BELOW_ORDER), len(BELOW_ORDER), len(rest))
         return True
+
+    @api.model
+    def _merge_twins(self):
+        """Пункты штатного раздела — в наш двойник, штатный корень скрыть.
+
+        Группы корня движка переходят на пункты, у которых своих нет: их
+        закрывал корень («Управление складом» — складским, «Настройки» —
+        администраторам), а наш корень виден всем.
+        """
+        moved = 0
+        # «Технические возможности» в движке есть у каждого внутреннего
+        # пользователя (в отладке): пункт с этой группой под корнем
+        # «Настроек» требовал ещё и прав администратора, а под нашим
+        # корнем остался бы открыт всем. Группы меню складываются по «или»,
+        # «и» даёт только вложенность: пункту — группы корня, его
+        # подпунктам без своих групп — прежняя «только в отладке».
+        no_one = self.env.ref('base.group_no_one', raise_if_not_found=False)
+        for engine_xmlid, ours_xmlid in MERGE:
+            engine = self.env.ref(engine_xmlid, raise_if_not_found=False)
+            ours = self.env.ref(ours_xmlid, raise_if_not_found=False)
+            if not engine or not ours or engine == ours:
+                continue
+            engine = engine.sudo().with_context(active_test=False)
+            for child in engine.child_id:
+                # Сдвиг — один раз, при переезде: под нашим корнем пункт
+                # больше не трогается, пока движок не вернёт его к себе.
+                vals = {'parent_id': ours.id,
+                        'sequence': MERGE_OFFSET + child.sequence}
+                if not child.group_ids and engine.group_ids:
+                    vals['group_ids'] = [(6, 0, engine.group_ids.ids)]
+                elif no_one and no_one in child.group_ids and engine.group_ids:
+                    own = child.group_ids
+                    for sub in child.with_context(active_test=False).child_id:
+                        if not sub.group_ids:
+                            sub.group_ids = [(6, 0, own.ids)]
+                    vals['group_ids'] = [(6, 0, engine.group_ids.ids)]
+                child.write(vals)
+                moved += 1
+            if engine.active:
+                engine.active = False
+        if moved:
+            _logger.info('Двойники меню: перенесено пунктов движка %s', moved)
+        return moved

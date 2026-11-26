@@ -475,6 +475,11 @@ else
         start_service start || true
         exit 1
     fi
+    # Двойники меню (493): обновлённые модули вернули свои пункты под
+    # штатные корни — переносим в наши разделы снова.
+    if ! run "$ODOO_HOME/venv/bin/python" "$ODOO_HOME/odoo/odoo-bin" shell             -c "$CONF" -d "$DB" --no-http             < "$ODOO_HOME/coop-addons/deploy/menu_order.py"; then
+        say "ВНИМАНИЕ: порядок меню не применён — поправит суточное задание"
+    fi
 fi
 
 # Схема базы сошлась с кодом — откатывать код больше незачем.
