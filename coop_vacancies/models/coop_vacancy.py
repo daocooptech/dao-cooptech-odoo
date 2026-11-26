@@ -20,21 +20,20 @@ DRAFT_NAME = 'Новая вакансия'
 # налогом. Решение 425 (27.09.2026, по заключению юриста — Матчасть,
 # «Вознаграждение за труд в кооперативе — рубли, ГПХ, пай»): «в пай» как
 # форма зарплаты, назначенная работодателем, незаконна в любом кооперативе
-# (ст. 131 ТК). Поэтому у вакансии два поля. Договор — трудовой, подряд или
-# услуги, трудовое участие члена артели (только производственный
-# кооператив). Способ выплаты — деньгами; деньгами, а остаток после налога
-# пайщик по своему заявлению вносит в пай (кооператив, договор подряда);
-# долей дохода по трудовому участию (артель); токенами (ДАО).
+# (ст. 131 ТК). Решение 510 (26.10.2026): подряд в вакансиях не бывает —
+# ровная сумма по подряду похожа на трудовой договор (ст. 15, 19.1 ТК), а
+# работа с результатом и приёмкой оформляется задачей. Поэтому договор у
+# вакансии — трудовой или трудовое участие члена артели (только
+# производственный кооператив); выплата — деньгами или долей дохода по
+# трудовому участию. ДАО платит токенами, а зарплата — только рублями,
+# поэтому ДАО ищет людей задачами, не вакансиями.
 CONTRACTS = [
     ('labour', 'Трудовой договор'),
-    ('civil', 'Договор подряда или услуг'),
     ('artel', 'Трудовое участие в артели'),
 ]
 PAY_METHODS = [
     ('rub', 'Деньгами'),
-    ('rub_share', 'Деньгами, остаток — в пай по желанию пайщика'),
     ('artel', 'Доля дохода по трудовому участию'),
-    ('tokens', 'Токенами'),
 ]
 # Форма ДАО в справочнике помечена кооперативной, поэтому проверяется
 # первой: иначе вакансии ДАО получали кооперативный способ выплаты.
@@ -62,24 +61,20 @@ class ResPartner(models.Model):
     def _coop_contracts_allowed(self):
         """Какие договоры открыты работодателю.
 
-        ДАО платит токенами — только по договору подряда: зарплата по
-        трудовому договору выплачивается рублями (ст. 131 ТК).
+        ДАО платит токенами, а зарплата по трудовому договору — только
+        рублями (ст. 131 ТК); подряд — задачей (решение 510). Платной
+        вакансии у ДАО нет.
         """
         kind = self._coop_employer_kind()
         if kind == 'dao':
-            return ('civil',)
+            return ()
         if kind == 'production':
-            return ('labour', 'civil', 'artel')
-        return ('labour', 'civil')
+            return ('labour', 'artel')
+        return ('labour',)
 
     def _coop_pay_methods_allowed(self, contract):
-        kind = self._coop_employer_kind()
-        if kind == 'dao':
-            return ('tokens',)
         if contract == 'artel':
             return ('artel',)
-        if contract == 'civil' and kind in ('coop', 'production'):
-            return ('rub', 'rub_share')
         return ('rub',)
 
 
@@ -266,17 +261,15 @@ class CoopVacancy(models.Model):
     contract_kind = fields.Selection(
         CONTRACTS, string='Договор', compute='_compute_contract_kind',
         store=True, readonly=False, index=True,
-        help='Постоянная должность — трудовой договор, разовая работа с '
-             'результатом — подряд или услуги. Трудовое участие без трудового '
+        help='В вакансии — трудовой договор. Трудовое участие без трудового '
              'договора — только для членов производственного кооператива '
-             '(артели).')
+             '(артели). Разовая работа с результатом — не вакансия, а задача '
+             'с приёмкой (решение 510).')
     pay_method = fields.Selection(
         PAY_METHODS, string='Как выплачивается', compute='_compute_pay_method',
         store=True, readonly=False, index=True,
-        help='Зарплата по трудовому договору — только деньгами. По договору '
-             'подряда с кооперативом пайщик может своим заявлением внести '
-             'сумму после налога в дополнительный паевой взнос. Артель платит '
-             'долю дохода по трудовому участию, ДАО — токенами.')
+        help='Зарплата по трудовому договору — только деньгами. Артель '
+             'платит долю дохода по трудовому участию.')
     employer_kind = fields.Selection([
         ('dao', 'ДАО'),
         ('production', 'Производственный кооператив'),
@@ -395,10 +388,7 @@ class CoopVacancy(models.Model):
             allowed = record.partner_id._coop_contracts_allowed()
             if record.contract_kind in allowed:
                 continue
-            if 'labour' in allowed and record.employment in ('full', 'part'):
-                record.contract_kind = 'labour'
-            else:
-                record.contract_kind = 'civil'
+            record.contract_kind = allowed[0] if allowed else False
 
     @api.depends('contract_kind', 'partner_id.coop_legal_form_id', 'partner_id.coop_cooperative_kind')
     def _compute_pay_method(self):
@@ -433,26 +423,25 @@ class CoopVacancy(models.Model):
                          'кооператив платит страховые взносы.')
                 if record.partner_id.coop_cooperative_kind == 'agri_production':
                     text += ' ' + _('В сельхозартели условия не хуже Трудового кодекса.')
-            elif pay == 'tokens':
-                text = _('Не трудовой договор: работа по заданию, оплата токенами '
-                         'после приёмки.')
-            elif contract == 'civil':
-                text = _('Не трудовой договор: без отпуска, работа по заданию, оплата '
-                         'после приёмки. Физлицу — за вычетом НДФЛ, самозанятому и ИП — '
-                         'полной суммой, налог они платят сами.')
-                if pay == 'rub_share':
-                    text += ' ' + _('Пайщик по своему заявлению может внести сумму '
-                                    'после налога в дополнительный паевой взнос — '
-                                    'она вернётся при выходе из кооператива, по уставу.')
             record.pay_explain = text
 
-    @api.constrains('contract_kind', 'pay_method', 'partner_id')
+    @api.constrains('contract_kind', 'pay_method', 'partner_id', 'state', 'reward_kind', 'employment')
     def _check_contract_and_pay(self):
         contracts, methods = dict(CONTRACTS), dict(PAY_METHODS)
         for record in self:
             partner = record.partner_id
             if not partner:
                 continue
+            # Доля в проекте — вклад трудом в проект, а не зарплата: такая
+            # потребность проекта ДАО остаётся вакансией.
+            if (record.state == 'published' and record.reward_kind == 'money'
+                    and record._pay_applies()
+                    and not partner._coop_contracts_allowed()):
+                raise UserError(_(
+                    '«%(who)s» платит токенами, а зарплата по трудовому договору — '
+                    'только рублями. Работу с результатом разместите задачей: '
+                    'там приёмка и оплата токенами после неё.',
+                    who=partner.display_name))
             if record.contract_kind:
                 allowed = partner._coop_contracts_allowed()
                 if record.contract_kind not in allowed:
@@ -511,17 +500,11 @@ class CoopVacancy(models.Model):
                 # Договор и способ выплаты — прямо в строке каталога
                 # (решение 425, формулировки юриста): соискатель видит их
                 # до отклика.
-                contract, pay = record.contract_kind, record.pay_method
+                contract = record.contract_kind
                 if contract == 'labour':
                     line = '%s до вычета НДФЛ · трудовой договор' % line
                 elif contract == 'artel':
                     line = 'трудовое участие в артели, ориентир %s' % line
-                elif pay == 'tokens':
-                    line = '%s токенами · договор подряда' % line
-                elif pay == 'rub_share':
-                    line = '%s · договор подряда, остаток — в пай по желанию' % line
-                elif contract == 'civil':
-                    line = '%s · договор подряда' % line
                 parts.append(line)
 
             if record.reward_kind == 'share':

@@ -24,6 +24,8 @@ from .demo_only import DEMO
 _logger = logging.getLogger(__name__)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+# Ключи строк каталога, перенесённых в задачи (решение 510).
+MOVED_TO_TASKS_PARAM = 'coop_demo.vacancies_moved_to_tasks_510'
 PHOTO_DIR = os.path.join(os.path.dirname(HERE), 'static', 'img', 'vacancies')
 
 EMPLOYMENT = {
@@ -160,8 +162,14 @@ def load_vacancies(env, extra=45):
         ('coop_is_participant', '=', True), ('is_company', '=', True)], order='id')
 
     created = updated = 0
+    # Подрядные вакансии перенесены в задачи (решение 510, миграция
+    # coop_demo 20.0.1.0.64): их строки каталога не пересоздаём.
+    moved = set(json.loads(env['ir.config_parameter'].sudo().get_str(
+        MOVED_TO_TASKS_PARAM) or '[]'))
 
     for index, row in enumerate(rows):
+        if 'vacancies.json#%s' % index in moved:
+            continue
         # Кто ищет. Организацию и человека находим по имени из макета;
         # вакансии от проекта закрепляем за инициатором — организацией, а
         # сам проект ставим отдельным полем.
@@ -276,11 +284,10 @@ def spread_contracts(env):
     """Договор и способ выплаты у вакансий кооперативов — с разбросом.
 
     Решение 425: в каталоге должны быть видны все сочетания. Постоянная
-    работа — трудовой договор, проектная — подряд; у артели большая часть
-    постоянных мест — трудовое участие членов, у производственного и
-    сельхозпроизводственного кооператива — каждое третье; по подряду у
-    кооператива половина — «остаток в пай по желанию пайщика». ДАО — токены
-    по подряду, это выставляет сам расчёт. Проходит по всем вакансиям, а не
+    работа — трудовой договор; у артели большая часть постоянных мест —
+    трудовое участие членов, у производственного и
+    сельхозпроизводственного кооператива — каждое третье. Подряда в
+    вакансиях нет — он задачей (решение 510). Проходит по всем вакансиям, а не
     только по каталогу-источнику: часть их заводят другие загрузчики.
     Пишет без отслеживания — иначе у каждой вакансии в ленте осталась бы
     смена договора от бота.
@@ -297,9 +304,6 @@ def spread_contracts(env):
         if kind == 'production' and steady and (
                 (form == 'artel' and seed % 4) or seed % 3 == 0):
             values = {'contract_kind': 'artel', 'pay_method': 'artel'}
-        elif not steady or seed % 7 == 3:
-            values = {'contract_kind': 'civil',
-                      'pay_method': 'rub_share' if seed % 2 else 'rub'}
         else:
             values = {'contract_kind': 'labour', 'pay_method': 'rub'}
         if (vacancy.contract_kind, vacancy.pay_method) != (

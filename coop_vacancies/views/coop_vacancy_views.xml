@@ -322,15 +322,15 @@
               <field name="reward_note" widget="coop_inline" options="{'wrap': True}" readonly="not coop_can_edit"/>
               <!-- Договор и способ выплаты (решение 425, по заключению
                    юриста): выбирает работодатель, соискатель видит до
-                   отклика. Что допустимо — от того, кто ищет: трудовое
-                   участие только у артели, «в пай по желанию» только у
-                   кооператива по подряду, ДАО — токенами по подряду. -->
+                   отклика. Договор — трудовой, у артели ещё трудовое
+                   участие; подряда в вакансиях нет — он задачей
+                   (решение 510). Способ выплаты следует из договора. -->
               <field name="employer_kind" invisible="1"/>
               <field name="contract_kind" widget="coop_inline" options="{'wrap': True}"
                      readonly="not coop_can_edit or employer_kind == 'dao'"
                      invisible="not contract_kind"/>
               <field name="pay_method" widget="coop_inline" options="{'wrap': True}"
-                     readonly="not coop_can_edit or employer_kind in ('dao', 'other') or contract_kind != 'civil'"
+                     readonly="1"
                      invisible="not contract_kind"/>
               <field name="pay_explain" readonly="1" nolabel="1" colspan="2"
                      class="text-muted"
@@ -622,7 +622,7 @@
                     <div class="coop-add_field">
                       <label for="pay_method" string="Как выплачивается"/>
                       <field name="pay_method" nolabel="1"
-                             readonly="employer_kind in ('dao', 'other') or contract_kind != 'civil'"/>
+                             readonly="1"/>
                     </div>
                   </div>
                   <field name="pay_explain" readonly="1" nolabel="1" class="coop-add_help"
@@ -733,15 +733,8 @@
         <separator/>
         <filter name="contract_labour" string="Трудовой договор"
                 domain="[('contract_kind', '=', 'labour')]"/>
-        <filter name="contract_civil" string="Договор подряда"
-                domain="[('contract_kind', '=', 'civil')]"/>
         <filter name="contract_artel" string="Трудовое участие в артели"
                 domain="[('contract_kind', '=', 'artel')]"/>
-        <separator/>
-        <filter name="pay_rub_share" string="Можно внести в пай"
-                domain="[('pay_method', '=', 'rub_share')]"/>
-        <filter name="pay_tokens" string="Платят токенами"
-                domain="[('pay_method', '=', 'tokens')]"/>
         <separator/>
         <filter name="full" string="Полная занятость"
                 domain="[('employment', '=', 'full')]"/>
