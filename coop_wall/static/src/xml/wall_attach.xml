@@ -8,13 +8,20 @@
     </xpath>
   </t>
 
-  <!-- Выбранная запись — над вложениями черновика, с «Открепить». -->
+  <!-- Выбранная запись — в подвале поля, над вложениями черновика, с
+       «Открепить». Не перед подвалом: поле — сетка, и блок вставал узкой
+       ячейкой над аватаром (владелец 26.11, снимок). -->
   <t t-name="coop_wall.ComposerRec" t-inherit="mail.Composer" t-inherit-mode="extension">
-    <xpath expr="//div[hasclass('o-mail-Composer-footer')]" position="before">
+    <xpath expr="//div[hasclass('o-mail-Composer-footer')]/AttachmentList" position="before">
       <div t-if="this.coopRec.card" class="o_coop_rec_picked">
         <CoopRecCard rec="this.coopRec.card"/>
-        <button type="button" class="btn btn-link btn-sm o_coop_rec_unpick"
-                aria-label="Открепить запись" t-on-click="() => this.coopUnpick()">Открепить</button>
+        <!-- Крестиком: словом кнопка забирала у карточки половину ширины
+             телефона (375 px — карточке оставалось 179). -->
+        <button type="button" class="btn btn-secondary btn-sm o_coop_rec_unpick"
+                title="Открепить запись" aria-label="Открепить запись"
+                t-on-click="() => this.coopUnpick()">
+          <i class="oi oi-fw" data-icon="close" aria-hidden="true"/>
+        </button>
       </div>
     </xpath>
   </t>

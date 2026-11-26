@@ -7,9 +7,8 @@
 Прикрепить запись из каталогов» (26.11).
 
 К посту — одна запись. Что уместно, решает стена: у проекта — его задачи,
-ресурсы сметы, сделки и мероприятия инициатора; у человека и организации —
-их объявления, сделки, мероприятия и документы; у сообщества — его
-мероприятия. Искать и прикреплять — только то, что видно автору; карточку
+ресурсы сметы, сделки и мероприятия инициатора и документы; у человека, организации и
+сообщества — их объявления, сделки, мероприятия и документы. Искать и прикреплять — только то, что видно автору; карточку
 каждый видит по своим правам, кому запись закрыта — «запись вам не видна».
 """
 from odoo import _, api, fields, models
@@ -47,6 +46,31 @@ def _parties(page):
     return ['|', ('party_a_id', '=', page.id), ('party_b_id', '=', page.id)]
 
 
+def _project_docs(page):
+    # Документ проекта — приложенный к самому проекту или к его сделкам
+    # (у `coop.document` связь с записью — `res_model`/`res_id`).
+    deals = page.env['coop.deal'].sudo().search(
+        [('project_id', '=', page.id)]).ids if 'coop.deal' in page.env else []
+    return ['|', '&', ('res_model', '=', 'coop.project'), ('res_id', '=', page.id),
+            '&', ('res_model', '=', 'coop.deal'), ('res_id', 'in', deals or [0])]
+
+
+def _as_partner(domain):
+    # Сообщество прикрепляет то же, что человек и организация (владелец
+    # 26.11), — от своей карточки контакта.
+    return lambda page: domain(page.partner_id)
+
+
+PARTNER_SOURCES = [
+    ('resource', 'Объявления', 'coop.resource',
+     lambda p: [('owner_id', '=', p.id)]),
+    ('deal', 'Сделки', 'coop.deal', _parties),
+    ('event', 'Мероприятия', 'coop.event',
+     lambda p: [('organizer_id', '=', p.id)]),
+    ('doc', 'Документы', 'coop.document', _parties),
+]
+
+
 # Стена → [(вид, подпись, модель, домен от страницы)]. Порядок — порядок
 # отборов в окне выбора.
 SOURCES = {
@@ -57,18 +81,17 @@ SOURCES = {
         ('event', 'Мероприятия', 'coop.event',
          lambda p: [('organizer_id', '=', p.partner_id.id)]),
         ('deal', 'Сделки', 'coop.deal', lambda p: [('project_id', '=', p.id)]),
+        ('doc', 'Документы', 'coop.document', _project_docs),
     ],
-    'res.partner': [
-        ('resource', 'Объявления', 'coop.resource',
-         lambda p: [('owner_id', '=', p.id)]),
-        ('deal', 'Сделки', 'coop.deal', _parties),
-        ('event', 'Мероприятия', 'coop.event',
-         lambda p: [('organizer_id', '=', p.id)]),
-        ('doc', 'Документы', 'coop.document', _parties),
-    ],
+    'res.partner': PARTNER_SOURCES,
     'coop.community': [
+        (kind, label, target, _as_partner(domain))
+        for kind, label, target, domain in PARTNER_SOURCES
+        if kind != 'event'
+    ] + [
         ('event', 'Мероприятия', 'coop.event',
-         lambda p: [('community_id', '=', p.id)]),
+         lambda p: ['|', ('community_id', '=', p.id),
+                    ('organizer_id', '=', p.partner_id.id or 0)]),
     ],
 }
 

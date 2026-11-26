@@ -190,6 +190,13 @@
     font: 700 11.5px/1 'JetBrains Mono', ui-monospace, monospace;
     color: var(--coop-slate, #4a4a44);
   }
+
+  // Число задач под полосой — шрифтом чисел, как подпись процента.
+  .o_coop_tile_tasks {
+    margin-top: 4px;
+    font: 500 11.5px/1.3 'JetBrains Mono', ui-monospace, monospace;
+    color: var(--coop-slate, #4a4a44);
+  }
 }
 
 // Строчный вид: снимок слева узкой колонкой, всё остальное в строку.

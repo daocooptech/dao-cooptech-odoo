@@ -60,6 +60,17 @@
                     <t t-out="Math.round(record.task_completion_percentage.raw_value * 100)"/>%
                   </div>
                 </div>
+                <!-- Число задач словом, как на наброске «Управления проектами»
+                     (холст ленты, 14.11): владелец 26.11 — «добавить
+                     количество задач». -->
+                <t t-set="n" t-value="record.task_count.raw_value or 0"/>
+                <div class="o_coop_tile_tasks">
+                  <t t-out="n"/>
+                  <t t-if="n % 10 === 1 and n % 100 !== 11"> задача</t>
+                  <t t-elif="[2, 3, 4].includes(n % 10) and ![12, 13, 14].includes(n % 100)"> задачи</t>
+                  <t t-else=""> задач</t>
+                  <t t-if="n"> · закрыто <t t-out="record.closed_task_count.raw_value or 0"/></t>
+                </div>
                 <div class="o_coop_tile_act">
                   <button name="action_view_tasks" type="object" context="{'coop_tasks_named': True}"
                           class="btn o_coop_btn o_coop_tile_contribute">Задачи</button>
