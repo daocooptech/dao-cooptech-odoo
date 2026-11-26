@@ -1,0 +1,64 @@
+// Прикреплённая запись (№ 454) — LinkCard дизайн-системы (`.coop-link`
+// в coop_theme/showcase.scss) со значком слева.
+
+.o_coop_rec {
+  margin-top: 8px;
+}
+.o_coop_rec_icon {
+  flex: none;
+  font-size: 20px;
+  color: var(--coop-slate);
+}
+.o_coop_rec_hidden {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px dashed var(--coop-line-strong, var(--coop-line));
+  border-radius: var(--coop-radius-item);
+  font-size: 13px;
+  color: var(--coop-slate);
+}
+.o_coop_rec_picked {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+
+  .coop-link {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+.o_coop_attach {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.o_coop_attach_hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--coop-slate);
+}
+.o_coop_attach_list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 420px;
+  overflow-y: auto;
+}
+.o_coop_attach_item {
+  all: unset;
+  display: block;
+  cursor: pointer;
+  border-radius: var(--coop-radius-item);
+
+  &:focus-visible {
+    outline: 2px solid var(--coop-teal);
+  }
+}
+.o_coop_attach_none {
+  margin: 8px 0;
+  color: var(--coop-slate);
+}

@@ -4,3 +4,4 @@ from . import coop_wall_comment
 from . import coop_wall_poll
 from . import mail_message
 from . import coop_wall_thanks
+from . import wall_attach

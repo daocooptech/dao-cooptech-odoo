@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+  <!-- Прикреплённая запись в посте — под текстом, как опрос и репост (№ 454). -->
+  <t t-name="coop_wall.MessageRec" t-inherit="mail.Message" t-inherit-mode="extension">
+    <xpath expr="//div[hasclass('o-mail-Message-textContent')]" position="after">
+      <CoopRecCard t-if="this.message.coop_rec" rec="this.message.coop_rec"/>
+    </xpath>
+  </t>
+
+  <!-- Выбранная запись — над вложениями черновика, с «Открепить». -->
+  <t t-name="coop_wall.ComposerRec" t-inherit="mail.Composer" t-inherit-mode="extension">
+    <xpath expr="//div[hasclass('o-mail-Composer-footer')]" position="before">
+      <div t-if="this.coopRec.card" class="o_coop_rec_picked">
+        <CoopRecCard rec="this.coopRec.card"/>
+        <button type="button" class="btn btn-link btn-sm o_coop_rec_unpick"
+                aria-label="Открепить запись" t-on-click="() => this.coopUnpick()">Открепить</button>
+      </div>
+    </xpath>
+  </t>
+
+  <t t-name="coop_wall.RecCard">
+    <div t-if="this.props.rec.hidden" class="o_coop_rec_hidden">
+      <i class="oi" data-icon="lock" aria-hidden="true"/>
+      <span>Прикреплённая запись вам не видна</span>
+    </div>
+    <a t-else="" class="coop-link o_coop_rec" t-att-href="this.props.rec.url">
+      <i class="oi o_coop_rec_icon" t-att-data-icon="this.props.rec.icon" aria-hidden="true"/>
+      <span class="coop-link_body">
+        <b t-out="this.props.rec.title"/>
+        <span t-out="this.props.rec.meta"/>
+      </span>
+      <span t-if="this.props.rec.side" class="coop-link_side" t-out="this.props.rec.side"/>
+    </a>
+  </t>
+
+  <t t-name="coop_wall.AttachDialog">
+    <Dialog title="'Прикрепить запись'" size="'md'" footer="false">
+      <div class="o_coop_attach">
+        <p class="o_coop_attach_hint">Из каталогов этой ленты — то, что видно вам.</p>
+        <input type="search" class="form-control" placeholder="Найти по названию"
+               aria-label="Поиск записи для прикрепления"
+               t-att-value="this.state.query" t-on-input="this.onQuery"/>
+        <div class="o_coop_chips" t-if="this.state.kinds.length > 2">
+          <button t-foreach="this.state.kinds" t-as="kind" t-key="kind.id" type="button"
+                  class="o_coop_chip" t-att-class="{ 'o_coop_chip_on': this.state.kind === kind.id }"
+                  t-att-aria-pressed="this.state.kind === kind.id ? 'true' : 'false'"
+                  t-on-click="() => this.pickKind(kind)" t-out="kind.label"/>
+        </div>
+        <div class="o_coop_attach_list">
+          <button t-foreach="this.state.found" t-as="rec" t-key="rec.model + rec.id" type="button"
+                  class="o_coop_attach_item" t-att-aria-label="'Прикрепить: ' + rec.title"
+                  t-on-click="() => this.choose(rec)">
+            <span class="coop-link">
+              <i class="oi o_coop_rec_icon" t-att-data-icon="rec.icon" aria-hidden="true"/>
+              <span class="coop-link_body">
+                <b t-out="rec.title"/>
+                <span t-out="rec.meta"/>
+              </span>
+              <span t-if="rec.side" class="coop-link_side" t-out="rec.side"/>
+            </span>
+          </button>
+          <p t-if="!this.state.busy and !this.state.found.length" class="o_coop_attach_none">
+            Ничего не нашлось.
+          </p>
+        </div>
+      </div>
+    </Dialog>
+  </t>
+</templates>
