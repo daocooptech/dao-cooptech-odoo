@@ -40,6 +40,9 @@ export class CoopInlineField extends Component {
         // 21 сентября 2026 — «в проектах название включает очень мало
         // символов, из-за этого не видно название полностью».
         wrap: t.boolean().optional(),
+        // Значения выбора, которых в этой карточке не предлагать: у
+        // организации нет самозанятости и патента (решение 704).
+        exclude: t.array().optional(),
         rows: t.number().optional(),
     });
 
@@ -170,7 +173,8 @@ export class CoopInlineField extends Component {
     }
 
     get selectionOptions() {
-        return this.field.selection || [];
+        const exclude = this.props.exclude || [];
+        return (this.field.selection || []).filter(([key]) => !exclude.includes(key));
     }
 
     get canEdit() {
@@ -337,6 +341,7 @@ export const coopInlineField = {
         placeholder: attrs.placeholder,
         wrap: options.wrap === true || options.wrap === "true",
         rows: options.rows ? Number(options.rows) : undefined,
+        exclude: Array.isArray(options.exclude) ? options.exclude : undefined,
     }),
 };
 

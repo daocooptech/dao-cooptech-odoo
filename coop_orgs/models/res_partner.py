@@ -5,6 +5,15 @@ from odoo import _, api, fields, models
 # Артели: производственный кооператив и сельхозпроизводственный.
 ARTEL_KINDS = ('production', 'agri_production')
 
+# Публичные документы организации (решение 704): поле карточки → вид
+# документа в разделе «Документы».
+PUBLIC_DOCS = {
+    'charter': ('coop_charter_doc_id', 'charter'),
+    'fees': ('coop_fees_rules_doc_id', 'regulation'),
+    'profit': ('coop_profit_rules_doc_id', 'regulation'),
+    'report': ('coop_report_doc_id', 'report'),
+}
+
 
 class ResPartner(models.Model):
     """Организация как участник платформы.
@@ -115,10 +124,15 @@ class ResPartner(models.Model):
                     'Артель делит итог года по личному трудовому участию '
                     '(ст. 12 41-ФЗ), не по обороту (решение 511).'))
 
-    coop_charter_url = fields.Char(
-        string='Устав',
-        help='Ссылка на действующую редакцию устава. Для кооператива это '
-             'не формальность: правила приёма, голосования и распределения '
+    # Решение 704: устав, положения и отчётность — файлами в «Документах»
+    # организации, карточка ссылается на документ платформы, а не на
+    # чужой сайт: у файла есть отпечаток и редакции, и он не пропадёт
+    # вместе с сайтом.
+    coop_charter_doc_id = fields.Many2one(
+        'coop.document', string='Устав', ondelete='set null',
+        domain="[('party_a_id', '=', id), ('is_public', '=', True)]",
+        help='Действующая редакция устава. Для кооператива это не '
+             'формальность: правила приёма, голосования и распределения '
              'записаны там, а не на платформе.')
 
     # ── Условия вступления (задача 445, решения 677 и 679) ────────────────
@@ -127,13 +141,42 @@ class ResPartner(models.Model):
     # плюсы и подводные камни от вступления, документы кооператива (устав,
     # положение о программе и тд)». Документы — ссылками, как и устав:
     # кооператив держит действующие редакции у себя.
-    coop_fees_rules_url = fields.Char(
-        string='Положение о взносах',
+    coop_fees_rules_doc_id = fields.Many2one(
+        'coop.document', string='Положение о взносах', ondelete='set null',
+        domain="[('party_a_id', '=', id), ('is_public', '=', True)]",
         help='Размер и порядок вступительного и паевого взносов, возврат '
              'пая при выходе.')
-    coop_profit_rules_url = fields.Char(
-        string='Положение о распределении прибыли')
-    coop_report_url = fields.Char(string='Последняя отчётность')
+    coop_profit_rules_doc_id = fields.Many2one(
+        'coop.document', string='Положение о распределении прибыли',
+        ondelete='set null',
+        domain="[('party_a_id', '=', id), ('is_public', '=', True)]")
+    coop_report_doc_id = fields.Many2one(
+        'coop.document', string='Последняя отчётность', ondelete='set null',
+        domain="[('party_a_id', '=', id), ('is_public', '=', True)]")
+
+    def _coop_put_public_doc(self, slot, name, data, file_name, signed_on=None, number=False):
+        """Положить публичный документ в «Документы» организации и
+        сослаться на него из карточки (решение 704). `data` — base64."""
+        self.ensure_one()
+        field, kind = PUBLIC_DOCS[slot]
+        if isinstance(data, bytes):
+            data = data.decode()
+        doc = self.env['coop.document'].sudo().create({
+            'name': name,
+            'kind': kind,
+            'is_public': True,
+            'party_a_id': self.id,
+            'res_model': 'res.partner',
+            'res_id': self.id,
+            'res_label': self.name,
+            'signed_on': signed_on or fields.Date.context_today(self),
+            'number': number,
+            'file': data,
+            'file_name': file_name,
+            'state': 'signed',
+        })
+        self.sudo()[field] = doc
+        return doc
     coop_entrance_fee = fields.Float(
         string='Вступительный взнос, ₽', digits=(16, 2),
         help='Не возвращается при выходе. Ноль — размер задан уставом.')
@@ -383,7 +426,7 @@ class ResPartner(models.Model):
         if not self.coop_join_open:
             return 'closed', _('Сейчас не принимает заявления: %s.') % (
                 self.coop_join_closed_note or _('причина не указана'))
-        if not self.coop_charter_url:
+        if not self.coop_charter_doc_id:
             return 'no_charter', _(
                 'Устав не выложен на платформе, без него заявление не '
                 'подаём. Подпишитесь — узнаете, когда появится.')

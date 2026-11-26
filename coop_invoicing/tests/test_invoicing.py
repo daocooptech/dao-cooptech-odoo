@@ -2,6 +2,7 @@ from unittest.mock import patch
 
 from datetime import date
 
+from odoo import fields
 from odoo.exceptions import AccessError, UserError
 from odoo.tests import TransactionCase, tagged
 
@@ -143,6 +144,19 @@ class TestCoopInvoicing(TransactionCase):
         self.assertTrue(self.deal.with_user(self.keeper).coop_can_invoice)
         with self.assertRaises(UserError):
             self.deal.with_user(self.member).action_coop_create_invoice()
+
+    def test_regime_chosen_in_card_704(self):
+        # Решение 704: в карточке строка «НДС» без таблицы — выбор пишет
+        # режим с сегодняшнего дня, прежняя история остаётся.
+        self._regime('2026-01-01', 'exempt_145')
+        self.seller.with_user(self.keeper).coop_vat_regime = 'usn_5'
+        today = fields.Date.context_today(self.seller)
+        self.assertEqual(self.seller._coop_vat_regime_at(today), 'usn_5')
+        self.assertEqual(self.seller._coop_vat_regime_at(date(2026, 1, 2)), 'exempt_145')
+        with self.assertRaises((UserError, AccessError)):
+            self.seller.with_user(self.member).coop_vat_regime = 'general_22'
+        self.seller.coop_tax_regime = 'ausn'
+        self.assertEqual(self.seller.coop_tax_regime, 'ausn')
 
     def test_treasury_opens_invoicing_dashboard(self):
         # Панель «Выставления счетов» движок открывает только с «Basic».

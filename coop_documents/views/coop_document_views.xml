@@ -149,6 +149,7 @@
           <group>
             <group string="Что это">
               <field name="kind"/>
+              <field name="is_public"/>
               <field name="number" placeholder="№ 14"/>
               <field name="signed_on"/>
             </group>
@@ -381,6 +382,9 @@
     <!-- `coop_section` — вкладки раздела над списком (`coop_theme`,
          `coopHasTabs`): «Недавние», «Жду подписи», «Корзина» и остальные. -->
     <field name="context">{'coop_section': 1, 'coop_filters': 1, 'coop_create_label': 'Загрузить', 'coop_create_method': 'action_open_upload'}</field>
+    <!-- Решение 704: чужие публичные документы (уставы, положения) видны
+         по ссылке из карточки организации, но в свой раздел не попадают. -->
+    <field name="domain">['|', ('is_public', '=', False), ('is_mine', '=', True)]</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiley_face">Документов пока нет</p>
       <p>Акты, договоры и закрывающие. У каждого считается отпечаток, и

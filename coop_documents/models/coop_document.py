@@ -40,6 +40,11 @@ class CoopDocument(models.Model):
         ('act', 'Акт приёма-передачи'),
         ('closing', 'Закрывающий документ'),
         ('protocol', 'Протокол'),
+        # Публичные документы организации (решение 704): их открывает
+        # каждый по ссылке из карточки.
+        ('charter', 'Устав'),
+        ('regulation', 'Положение'),
+        ('report', 'Отчётность'),
         ('other', 'Прочее'),
     ], string='Вид', default='act', required=True, index=True, tracking=True)
 
@@ -92,6 +97,27 @@ class CoopDocument(models.Model):
         tracking=True)
 
     note = fields.Text(string='Пояснение')
+
+    # Решение 704: устав, положения и отчётность организации — на платформе,
+    # карточка ссылается на них. Читает такой документ каждый участник, но
+    # в его собственный раздел «Документы» он не попадает (`is_mine`).
+    is_public = fields.Boolean(
+        string='Публичный', index=True, tracking=True,
+        help='Виден всем участникам платформы — по ссылке из карточки '
+             'организации. Править может только сторона документа.')
+    is_mine = fields.Boolean(compute='_compute_is_mine', search='_search_is_mine')
+
+    @api.depends_context('uid')
+    def _compute_is_mine(self):
+        mine = self.env.user.coop_actor_partner_ids
+        for record in self:
+            record.is_mine = record.party_a_id in mine or record.party_b_id in mine
+
+    def _search_is_mine(self, operator, value):
+        if operator != 'in':
+            return NotImplemented
+        ids = self.env.user.coop_actor_partner_ids.ids
+        return ['|', ('party_a_id', 'in', ids), ('party_b_id', 'in', ids)]
 
     @api.depends('signed_on')
     def _compute_year(self):

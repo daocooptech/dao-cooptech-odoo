@@ -11,8 +11,12 @@ class ResPartner(models.Model):
 
     coop_vat_regime_ids = fields.One2many(
         'coop.vat.regime', 'organization_id', string='Режим НДС')
+    # Решение 704: в карточке режим выбирают прямо в строке «НДС», без
+    # таблицы с датами. История остаётся — по ней счета и УПД берут режим
+    # на дату отгрузки; выбор пишет строку с сегодняшнего дня.
     coop_vat_regime = fields.Selection(
-        VAT_REGIMES, string='Режим НДС сейчас', compute='_compute_coop_vat_regime')
+        VAT_REGIMES, string='Режим НДС сейчас', compute='_compute_coop_vat_regime',
+        inverse='_inverse_coop_vat_regime')
     coop_can_edit_vat = fields.Boolean(compute='_compute_coop_can_edit_vat')
     # Своя компания Odoo для учёта организации. Заводится при первом
     # счёте, а не у всех сразу: у дара и обмена бухгалтерии нет, и
@@ -27,6 +31,35 @@ class ResPartner(models.Model):
         today = fields.Date.context_today(self)
         for partner in self:
             partner.coop_vat_regime = partner._coop_vat_regime_at(today)
+
+    def write(self, vals):
+        # Режим НДС из карточки (решение 704) меняет держатель «Бухгалтерии
+        # и счетов»; права на запись карточки у него может не быть — после
+        # проверки полномочия пишется от имени системы.
+        if 'coop_vat_regime' in vals and not self.env.su:
+            for partner in self:
+                if not partner.coop_can_edit_vat:
+                    raise UserError(_('Режим НДС меняет тот, у кого полномочие '
+                                      '«Бухгалтерия и счета» в этой организации.'))
+            super(ResPartner, self.sudo()).write({'coop_vat_regime': vals['coop_vat_regime']})
+            vals = {k: v for k, v in vals.items() if k != 'coop_vat_regime'}
+            if not vals:
+                return True
+        return super().write(vals)
+
+    def _inverse_coop_vat_regime(self):
+        today = fields.Date.context_today(self)
+        for partner in self:
+            regime = partner.coop_vat_regime
+            if not regime or regime == partner._coop_vat_regime_at(today):
+                continue
+            rows = partner.sudo().coop_vat_regime_ids
+            same_day = rows.filtered(lambda r: r.date_from == today)
+            if same_day:
+                same_day.regime = partner.coop_vat_regime
+            else:
+                rows.create({'organization_id': partner.id, 'date_from': today,
+                             'regime': partner.coop_vat_regime})
 
     @api.depends_context('uid')
     def _compute_coop_can_edit_vat(self):

@@ -13,6 +13,7 @@ from markupsafe import Markup, escape
 
 from odoo import fields, http
 from odoo.http import request
+from odoo.http.stream import content_disposition
 
 KINDS = {'contract': 'Договор', 'act': 'Акт приёма-передачи', 'closing': 'Закрывающий документ',
          'protocol': 'Протокол', 'other': 'Документ'}
@@ -56,7 +57,7 @@ class CoopDocumentsController(http.Controller):
         _log_once(doc.sudo(), 'opened')
         return request.make_response(data, [
             ('Content-Type', mime),
-            ('Content-Disposition', http.content_disposition(name, disposition_type='inline')),
+            ('Content-Disposition', content_disposition(name, disposition_type='inline')),
         ])
 
     @http.route('/coop/document/<int:doc_id>/download', type='http', auth='user')
@@ -68,7 +69,7 @@ class CoopDocumentsController(http.Controller):
         doc.sudo()._coop_log('downloaded')
         return request.make_response(data, [
             ('Content-Type', mime),
-            ('Content-Disposition', http.content_disposition(name)),
+            ('Content-Disposition', content_disposition(name)),
         ])
 
     @http.route('/coop/documents/zip', type='http', auth='user')
@@ -94,7 +95,7 @@ class CoopDocumentsController(http.Controller):
         docs.sudo()._coop_log('downloaded', note='архивом')
         return request.make_response(buffer.getvalue(), [
             ('Content-Type', 'application/zip'),
-            ('Content-Disposition', http.content_disposition(
+            ('Content-Disposition', content_disposition(
                 'Документы %s.zip' % fields.Date.today().strftime('%d.%m.%Y'))),
         ])
 
@@ -180,7 +181,7 @@ class CoopDocumentsController(http.Controller):
         data, name, mime = _content(share.document_id)
         return request.make_response(data, [
             ('Content-Type', mime),
-            ('Content-Disposition', http.content_disposition(
+            ('Content-Disposition', content_disposition(
                 name, disposition_type='attachment' if download else 'inline')),
         ])
 

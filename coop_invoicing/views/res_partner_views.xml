@@ -2,7 +2,7 @@
 <odoo>
 
   <!--
-    Режим НДС — отдельной справкой рядом с реквизитами: это не выписка из
+    Налоги — отдельной справкой рядом с реквизитами: это не выписка из
     реестра и не то, что организация о себе рассказала, а её налоговое
     положение, от которого зависят счета и УПД по её сделкам. История
     видна всем (контрагенту важно, выставят ли ему счёт-фактуру), правит
@@ -18,15 +18,16 @@
           <div class="o_coop_infobox_head">Налоги</div>
           <div class="o_coop_infobox_body">
             <field name="coop_can_edit_vat" invisible="1"/>
-            <div><span class="o_coop_key">НДС сейчас</span>
-              <field name="coop_vat_regime" readonly="1" placeholder="не указан"/></div>
-            <field name="coop_vat_regime_ids" nolabel="1" readonly="not coop_can_edit_vat">
-              <list editable="bottom" create="coop_can_edit_vat" delete="coop_can_edit_vat">
-                <field name="date_from"/>
-                <field name="regime"/>
-                <field name="note" optional="show"/>
-              </list>
-            </field>
+            <!-- Решение 704: строками, как «Реквизиты», без таблицы и дат.
+                 История режимов НДС живёт под капотом — по ней счета и УПД
+                 берут режим на дату отгрузки. -->
+            <div><span class="o_coop_key">Система налогообложения</span>
+              <field name="coop_tax_regime" widget="coop_inline"
+                     options="{'exclude': ['none', 'npd', 'patent']}"
+                     readonly="not coop_can_edit_vat" placeholder="не указана"/></div>
+            <div><span class="o_coop_key">НДС</span>
+              <field name="coop_vat_regime" widget="coop_inline"
+                     readonly="not coop_can_edit_vat" placeholder="не указан"/></div>
             <field name="coop_rsbu_enabled" invisible="1"/>
             <div invisible="not coop_rsbu_enabled"><span class="o_coop_key">Учёт в РСБУ-слое</span>
               с <field name="coop_rsbu_start_date" readonly="1"/></div>

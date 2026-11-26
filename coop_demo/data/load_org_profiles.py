@@ -285,7 +285,6 @@ def load_org_profiles(env, specializations, marks):
                 'coop_kpp': False if individual else _kpp(_inn(seed, individual, region_of(city))),
                 'coop_registered_on': '%04d-%02d-%02d' % (
                     2000 + seed % 24, (seed % 12) + 1, (seed * 3 % 27) + 1),
-                'coop_charter_url': '%s/charter.pdf' % _domain(name, seed),
                 'street': '%s, %d' % (STREETS[seed % len(STREETS)], (seed * 7) % 90 + 1),
                 'zip': '%06d' % (100000 + seed * 137 % 500000),
                 'phone': '+7 (%03d) %03d-%02d-%02d' % (

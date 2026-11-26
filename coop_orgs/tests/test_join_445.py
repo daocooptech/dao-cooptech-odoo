@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """Заявление пайщика в три шага (задача 445, решения 677–679)."""
+import base64
+
 from odoo.exceptions import UserError
 from odoo.tests import tagged
 
@@ -14,14 +16,16 @@ class TestJoin445(CoopCase):
         super().setUpClass()
         Form = cls.env['coop.legal.form']
         cls.po = cls._make_org('Потребобщество 445')
-        cls.po.write({
-            'coop_legal_form_id': Form.search([('code', '=', 'po')], limit=1).id,
-            'coop_charter_url': 'https://po445.example/charter.pdf'})
+        cls.po.coop_legal_form_id = Form.search([('code', '=', 'po')], limit=1)
+        cls._charter(cls.po)
         cls.spk = cls._make_org('Сельхозкооператив 445')
-        cls.spk.write({
-            'coop_legal_form_id': Form.search([('code', '=', 'spk')], limit=1).id,
-            'coop_charter_url': 'https://spk445.example/charter.pdf'})
+        cls.spk.coop_legal_form_id = Form.search([('code', '=', 'spk')], limit=1)
+        cls._charter(cls.spk)
         cls.applicant = cls._make_person('Заявитель 445')
+
+    @staticmethod
+    def _charter(org):
+        org._coop_put_public_doc('charter', 'Устав', base64.b64encode(b'%PDF-1.4 445'), 'charter.pdf')
 
     def _wizard(self, org):
         return self.env['coop.org.join'].with_user(self.applicant).with_context(
@@ -63,8 +67,8 @@ class TestJoin445(CoopCase):
 
     def test_nabor_zakryt(self):
         org = self._make_org('Кооператив с закрытым набором 445')
+        self._charter(org)
         org.write({'coop_legal_form_id': self.po.coop_legal_form_id.id,
-                   'coop_charter_url': 'https://x445.example/charter.pdf',
                    'coop_join_open': False,
                    'coop_join_closed_note': 'набор до марта'})
         wizard = self._wizard(org)

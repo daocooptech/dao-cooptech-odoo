@@ -93,8 +93,9 @@
                   </div>
                   </div>
                   <div class="coop-add_field">
-                    <label for="charter_url" string="Устав"/>
-                    <field name="charter_url" nolabel="1" placeholder="Ссылка на действующую редакцию"/>
+                    <label for="charter_file" string="Устав"/>
+                    <field name="charter_file" filename="charter_file_name" nolabel="1"/>
+                    <field name="charter_file_name" invisible="1"/>
                   </div>
                 </div>
               </section>

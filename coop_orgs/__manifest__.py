@@ -15,13 +15,14 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.1.10',
+    'version': '20.0.1.1.11',
     'license': 'LGPL-3',
     # Карточка организации показывает её владения — ресурсы,
     # потребности, проекты, вакансии, — поэтому модуль стоит поверх
     # тех разделов, откуда они берутся.
     'depends': ['coop_base', 'coop_theme', 'coop_resources',
-                'coop_projects', 'coop_vacancies', 'coop_skills', 'contacts', 'mail'],
+                'coop_projects', 'coop_vacancies', 'coop_skills', 'coop_documents',
+                'contacts', 'mail'],
     'data': [
         'data/coop_okved_data.xml',
         'views/coop_section_views.xml', 'views/coop_orgs_views.xml',

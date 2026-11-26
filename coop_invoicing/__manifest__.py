@@ -17,10 +17,10 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.9.1',
+    'version': '20.0.1.9.2',
     'license': 'LGPL-3',
     'depends': [
-        'coop_base', 'coop_orgs', 'coop_deals',
+        'coop_base', 'coop_orgs', 'coop_deals', 'coop_settings',
         'account', 'l10n_ru', 'l10n_ru_doc', 'l10n_ru_upd_xml', 'l10n_ru_contract',
         'docx_report', 'rsbu_vat',
     ],

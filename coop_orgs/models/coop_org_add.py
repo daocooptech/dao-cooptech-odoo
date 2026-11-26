@@ -58,7 +58,9 @@ class CoopOrgAdd(models.TransientModel):
     okved_id = fields.Many2one(
         'coop.okved', string='Вид деятельности (ОКВЭД)',
         domain=[('parent_id', '!=', False)])
-    charter_url = fields.Char(string='Устав')
+    # Решение 704: устав — файлом, он ляжет в «Документы» организации.
+    charter_file = fields.Binary(string='Устав', attachment=False)
+    charter_file_name = fields.Char(string='Имя файла устава')
     image_1920 = fields.Image(string='Знак', max_width=1920, max_height=1920)
     city = fields.Char(string='Город')
     street = fields.Char(string='Адрес')
@@ -194,7 +196,6 @@ class CoopOrgAdd(models.TransientModel):
             'coop_ogrn': self.ogrn,
             'coop_registered_on': self.registered_on,
             'coop_okved_id': self.okved_id.id,
-            'coop_charter_url': self.charter_url,
             'image_1920': self.image_1920,
             'city': self.city,
             'street': self.street,
@@ -208,6 +209,10 @@ class CoopOrgAdd(models.TransientModel):
         # Под sudo: заводить контакты участнику не положено, а организацию
         # он заводит этой страницей — с проверками выше.
         org = Partner.sudo().create(values)
+        if self.charter_file:
+            org._coop_put_public_doc(
+                'charter', _('Устав'), self.charter_file,
+                self.charter_file_name or 'charter.pdf')
         self.env['coop.membership'].sudo().create({
             'partner_id': me.id,
             'organization_id': org.id,

@@ -2,3 +2,4 @@
 from . import test_join_445
 from . import test_org_add
 from . import test_payout_basis_511
+from . import test_public_docs_704

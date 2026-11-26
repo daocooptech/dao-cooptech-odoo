@@ -62,6 +62,41 @@ def load_vat_regimes(env):
     return len(orgs)
 
 
+AGRI_KINDS = ('agri_consumer', 'agri_production')
+
+
+def _tax_system_for(org, vat, rnd):
+    """Система налогообложения, согласованная с режимом НДС (решение 704)."""
+    usn = 'usn_income' if rnd.random() < 0.6 else 'usn_profit'
+    if vat == 'not_payer':
+        return 'ausn'
+    if vat in ('usn_5', 'usn_7'):
+        return usn
+    if vat == 'general_22':
+        return 'osno'
+    # Освобождены по ст. 145 НК или режим НДС не указан: сельхозкооперативы
+    # — чаще на ЕСХН, остальные — на упрощёнке, немногие на общем режиме.
+    if org.coop_cooperative_kind in AGRI_KINDS and rnd.random() < 0.7:
+        return 'eshn'
+    return 'osno' if rnd.random() < 0.1 else usn
+
+
+def load_tax_systems(env):
+    """У каждой организации — система налогообложения (решение 704)."""
+    Partner = env['res.partner'].sudo().with_context(tracking_disable=True)
+    if 'coop_tax_regime' not in Partner._fields:
+        return 0
+    orgs = Partner.search([('is_company', '=', True), ('coop_tax_regime', 'in', (False, 'none'))],
+                          order='id')
+    today = date.today()
+    for org in orgs:
+        rnd = random.Random(20261126 + org.id)
+        vat = org._coop_vat_regime_at(today) if 'coop_vat_regime_ids' in Partner._fields else False
+        org.coop_tax_regime = _tax_system_for(org, vat, rnd)
+    _logger.info('Системы налогообложения: заданы у %s организаций', len(orgs))
+    return len(orgs)
+
+
 def load_companies(env):
     """Компания учёта у каждой организации с режимом НДС (решение 450).
 

@@ -204,16 +204,17 @@ class CoopJoinWizard(models.TransientModel):
                 + Markup('<h5>Взносы</h5>')
                 + _ul([_('Вступительный: %s') % fee(org.coop_entrance_fee),
                        _('Обязательный паевой: %s') % fee(org.coop_min_share_fee)]))
+            # Документы — на платформе (решение 704), ссылка на их страницу.
             rows = [
-                (_('Устав'), org.coop_charter_url),
-                (_('Положение о взносах и возврате пая'), org.coop_fees_rules_url),
-                (_('Положение о распределении прибыли'), org.coop_profit_rules_url),
-                (_('Последняя отчётность'), org.coop_report_url),
+                (_('Устав'), org.coop_charter_doc_id),
+                (_('Положение о взносах и возврате пая'), org.coop_fees_rules_doc_id),
+                (_('Положение о распределении прибыли'), org.coop_profit_rules_doc_id),
+                (_('Последняя отчётность'), org.coop_report_doc_id),
             ]
             items = []
-            for title, url in rows:
-                if url:
-                    href = url if '://' in url else 'https://' + url
+            for title, doc in rows:
+                if doc:
+                    href = '/odoo/documents/%d' % doc.id
                     items.append(Markup(
                         '<li class="d-flex justify-content-between gap-2 py-2 border-bottom">'
                         '<span>%s</span><a href="%s" target="_blank" '

@@ -88,6 +88,10 @@ def _spread_folders(env, documents, rnd):
     made = 0
     by_owner = {}
     for document in documents:
+        # Устав и положения (решение 704) — не в личные полки: их
+        # открывают все, и «Налоговая» у чужого устава сбивает с толку.
+        if 'is_public' in document._fields and document.is_public:
+            continue
         by_owner.setdefault(document.party_a_id, env['coop.document'].sudo())
         by_owner[document.party_a_id] |= document
 
