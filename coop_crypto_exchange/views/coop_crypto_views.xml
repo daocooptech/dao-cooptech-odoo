@@ -289,7 +289,7 @@
 
   <!-- Пулы проектов (решения 434–436): сбор под свой проект с долей
        выручки и потолком. Форма — открыть пул для своего проекта; экран —
-       client action. Вид «в рублях» — ЦФА, учебный выпуск. -->
+       client action. Вид «в рублях» — ЦФА оператора. -->
   <record id="view_coop_farm_pool_form" model="ir.ui.view">
     <field name="name">coop.farm.pool.form</field>
     <field name="model">coop.farm.pool</field>

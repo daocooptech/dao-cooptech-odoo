@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
   <!-- Пулы проектов (решения 434–436), js/dex_farm.js. Сбор под проект с
-       долей выручки и потолком; два вида — в монете и в рублях (ЦФА,
-       учебный выпуск). «Доходности», «% годовых» и рублёвой шапки нет.
+       долей выручки и потолком; два вида — в монете и в рублях (ЦФА);
+       оферта — от оператора-лицензиата (494). «Доходности», «% годовых» и рублёвой шапки нет.
        Свои классы — o_coop_fm_*; вкладки и общие — o_coop_dx_*. -->
   <t t-name="coop_crypto_exchange.DexFarm">
     <div class="o_coop_dx o_coop_fm">
@@ -27,6 +27,14 @@
         <div class="o_coop_fm_kinds o_coop_dx_seg">
           <button t-att-class="{ 'o_coop_dx_seg_on': this.state.kind === 'coin' }" t-on-click="() => this.setKind('coin')">В монете · <t t-out="this.kindCount('coin')"/></button>
           <button t-att-class="{ 'o_coop_dx_seg_on': this.state.kind === 'rub' }" t-on-click="() => this.setKind('rub')">В рублях — ЦФА · <t t-out="this.kindCount('rub')"/></button>
+        </div>
+        <div class="o_coop_dx_muted o_coop_fm_offer" t-if="this.state.kind === 'coin'">
+          Оферта пула — от <b t-out="this.state.data.operator"/>, доверительного управляющего цифровой валютой:
+          вы передаёте монету оператору, он даёт её проекту и отвечает перед вами как кредитор.
+        </div>
+        <div class="o_coop_dx_muted o_coop_fm_offer" t-else="">
+          ЦФА выпускает <b t-out="this.state.data.operator"/> — оператор информационной системы из реестра
+          Банка России. Взнос — только рублями.
         </div>
 
         <div class="o_coop_fm_stats">

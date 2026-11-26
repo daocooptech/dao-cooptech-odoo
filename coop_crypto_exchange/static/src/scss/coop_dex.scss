@@ -567,17 +567,9 @@ $dx-down: #c0392b;
   cursor: pointer;
 }
 
-// Вид пула: в монете / в рублях (учебные ЦФА).
+// Вид пула: в монете / в рублях (ЦФА).
 .o_coop_fm_kinds { align-self: flex-start; }
-.o_coop_fm_training {
-  padding: 8px 12px;
-  border: 1px dashed var(--coop-gold, #b08a2e);
-  border-radius: 10px;
-  font-size: 12.5px;
-  color: var(--coop-slate, #4a4a44);
-  .fa { color: var(--coop-gold, #b08a2e); margin-right: 4px; }
-}
-.o_coop_fm_training_tag { color: var(--coop-gold, #b08a2e); font-weight: 600; }
+.o_coop_fm_offer { font-size: 12.5px; line-height: 1.45; margin-top: -4px; }
 .o_coop_fm_late { color: $dx-down; font-weight: 600; font-size: 11.5px; }
 .o_coop_fm_warnnum { color: var(--coop-gold, #b08a2e); }
 .o_coop_fm_badnum { color: $dx-down; }
