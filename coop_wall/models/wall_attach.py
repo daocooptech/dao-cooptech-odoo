@@ -17,6 +17,17 @@ from odoo.exceptions import UserError
 
 from .coop_wall_comment import WALL_MODELS
 
+# Вид записи в карточке — словом платформы, а не описанием модели движка
+# (у `project.task` оно английское — «Task», видно на сервере 26.11).
+NAMES = {
+    'task': 'Задача',
+    'need': 'Ресурс сметы',
+    'resource': 'Объявление',
+    'event': 'Мероприятие',
+    'deal': 'Сделка',
+    'doc': 'Документ',
+}
+
 ICONS = {
     'task': 'checklist',
     'need': 'inventory_2',
@@ -149,7 +160,7 @@ class MailMessage(models.Model):
 
     @api.model
     def _coop_rec_card(self, record, kind, label):
-        meta = [record._description or label]
+        meta = [NAMES.get(kind) or label or record._description]
         state = record._fields.get('state')
         if state is not None and state.type == 'selection' and record.state:
             meta.append(dict(state._description_selection(self.env)).get(
