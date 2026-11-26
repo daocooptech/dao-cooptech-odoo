@@ -58,3 +58,56 @@ class CoopWarehouseOffer(models.Model):
                   'domain': [('is_mine', '=', True)]},
              ]},
         ]
+
+
+class CoopWarehouse(models.Model):
+    """Панель фильтров «Моих складов» (№ 438).
+
+    Набор — вид хранения, город, единица и свободное место; быстрый
+    отбор — склады со свободным местом и выставленные на биржу.
+    """
+    _inherit = 'coop.warehouse'
+
+    def _coop_catalog_filters(self, domain):
+        base = list(self.env.context.get('coop_base_domain') or [])
+
+        def without(*fields_):
+            return base + [leaf for leaf in domain or []
+                           if not (isinstance(leaf, (list, tuple)) and leaf
+                                   and leaf[0] in fields_)]
+
+        # Без sudo: считать ровно то, что человеку покажет каталог.
+        def counts(field, dom):
+            return dict(self._read_group(dom, [field], ['__count']))
+
+        def select(code, label, field, placeholder, hint=None):
+            got = counts(field, without(field))
+            block = {'code': code, 'label': label, 'widget': 'select',
+                     'field': field, 'operator': '=',
+                     'placeholder': placeholder, 'counted': True,
+                     'options': [{'value': v, 'label': t, 'count': got.get(v, 0)}
+                                 for v, t in self._fields[field].selection
+                                 if got.get(v)]}
+            if hint:
+                block['hint'] = hint
+            return block
+
+        cities = sorted(c for c in counts('city', base) if c)
+        return [
+            select('storage', 'Вид хранения', 'storage_kind', 'Любой'),
+            {'code': 'city', 'label': 'Город',
+             'widget': 'text', 'field': 'city', 'operator': 'ilike',
+             'placeholder': 'Начните вводить город',
+             'options': [{'value': c, 'label': c} for c in cities]},
+            select('unit', 'Единица объёма', 'capacity_unit', 'Любая',
+                   'Свободное место ниже сравнивается в выбранной единице.'),
+            {'code': 'free', 'label': 'Свободно',
+             'widget': 'range', 'field': 'free'},
+            {'code': 'quick', 'label': 'Быстрый отбор', 'widget': 'quick',
+             'options': [
+                 {'value': 'has_free', 'label': 'Есть свободное место',
+                  'domain': [('free', '>', 0)]},
+                 {'value': 'on_market', 'label': 'Выставлены на биржу',
+                  'domain': [('offer_ids.state', '=', 'published')]},
+             ]},
+        ]
