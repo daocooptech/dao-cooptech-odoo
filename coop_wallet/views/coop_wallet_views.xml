@@ -439,6 +439,8 @@
               <field name="date"/>
               <field name="name"/>
               <field name="kind"/>
+              <field name="share_kind" optional="show"/>
+              <field name="redeem_from" optional="hide"/>
               <field name="basis"/>
               <field name="valuation_basis" optional="hide"/>
               <field name="amount" sum="Итого"/>

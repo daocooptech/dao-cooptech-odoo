@@ -26,6 +26,9 @@
             <dl>
               <dt>Кооперативные выплаты за всё время</dt><dd t-out="this.rub(d.blocks.shares.accrued)"/>
               <dt>Выплачено на руки</dt><dd t-out="this.rub(d.blocks.shares.paid_out)"/>
+              <t t-if="d.blocks.shares.savings">
+                <dt>Сбережения в КПК — долг кооператива, не пай</dt><dd t-out="this.rub(d.blocks.shares.savings)"/>
+              </t>
               <dt>Закрыто потребностей через кооперативы</dt>
               <dd><t t-out="d.blocks.shares.needs_count"/> сд. на <t t-out="this.rub(d.blocks.shares.needs_sum)"/></dd>
             </dl>
@@ -187,6 +190,20 @@
                 <dd><t t-if="s.needs_count"><t t-out="s.needs_count"/> сд. на <t t-out="this.rub(s.needs_sum)"/></t>
                     <t t-else="">сделок с кооперативом пока нет</t></dd>
               </dl>
+              <!-- Решение 512: по строке на вид пая, только факт. -->
+              <div class="o_coop_pf_kinds" t-if="s.kinds.length">
+                <div class="o_coop_pf_kind" t-foreach="s.kinds" t-as="k" t-key="k.key">
+                  <div class="o_coop_pf_kind_head">
+                    <b><t t-out="k.label"/><span class="o_coop_pf_muted" t-if="k.note"> — <t t-out="k.note"/></span></b>
+                    <span class="o_coop_pf_num" t-out="this.rub(k.balance)"/>
+                  </div>
+                  <div class="o_coop_pf_kind_facts">
+                    <span t-if="k.contributed">Внесено <t t-out="this.rub(k.contributed)"/></span>
+                    <span t-if="k.accrued"><t t-out="k.accrued_label"/> <t t-out="this.rub(k.accrued)"/></span>
+                    <span t-if="k.paid_out">Выплачено <t t-out="this.rub(k.paid_out)"/></span>
+                  </div>
+                </div>
+              </div>
               <p class="o_coop_pf_muted" t-if="s.charter_note" t-out="s.charter_note"/>
               <p t-foreach="s.waiting" t-as="w" t-key="w_index" class="o_coop_pf_wait"
                  t-att-class="{ o_coop_pf_late: w.late }">

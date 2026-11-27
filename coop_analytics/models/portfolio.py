@@ -146,11 +146,43 @@ class CoopPortfolio(models.AbstractModel):
         return out
 
     # ── пай ──────────────────────────────────────────────────────────
+    # Решение 512: по строке на вид пая — что внесено, что начислено по
+    # факту, что выплачено и что осталось. Прогноза нет (решение 421).
+    KIND_ROWS = (
+        ('main', 'Обязательный пай', 'Кооперативные выплаты', ''),
+        ('extra', 'Дополнительный пай', 'Дивиденды', ''),
+        ('increment', 'Приращённый пай', 'Приращено', ''),
+        ('premises', 'Пай за помещение', 'Начислено', 'до перехода собственности'),
+        ('savings', 'Сбережения в КПК', 'Компенсация', 'долг кооператива перед вами, не пай'),
+    )
+
+    def _share_kinds(self, acc):
+        done = acc.move_ids.filtered(lambda m: m.state == 'confirmed' and m.kind != 'entry')
+        rows = []
+        for key, label, accrued_label, note in self.KIND_ROWS:
+            moves = done.filtered(lambda m: m.share_kind == key)
+            if not moves:
+                continue
+            if key == 'increment':
+                dates = [d for d in moves.mapped('redeem_from') if d]
+                note = 'гасится с %s года' % min(dates).year if dates else 'срок погашения не назначен'
+            rows.append({
+                'key': key, 'label': label, 'accrued_label': accrued_label, 'note': note,
+                'contributed': sum(moves.filtered(
+                    lambda m: m.kind in ('share', 'extra', 'in_kind', 'savings_in')).mapped('amount')),
+                'accrued': sum(moves.filtered(
+                    lambda m: m.kind in ('accrual', 'savings_interest')).mapped('amount')),
+                'paid_out': -sum(moves.filtered(
+                    lambda m: m.kind in ('payout', 'return', 'savings_out')).mapped('amount')),
+                'balance': sum(moves.mapped('amount')),
+            })
+        return rows
+
     def _shares(self, me, today, overdue):
         Account = self.env['coop.share.account'].sudo()
         Deal = self.env['coop.deal'].sudo()
         rows, requested = [], []
-        total_balance = total_accrued = total_paid = 0.0
+        total_balance = total_accrued = total_paid = total_savings = 0.0
         accounts = Account.search([('partner_id', '=', me.id)], order='joined_on')
         # Действующие — первыми, возвращённые — в конце.
         rank = {'open': 0, 'closing': 1, 'closed': 2}
@@ -188,6 +220,7 @@ class CoopPortfolio(models.AbstractModel):
                                              'note': 'ждёт решения %s дн.' % days})
             if acc.state != 'closed':
                 total_balance += acc.balance
+                total_savings += acc.savings
             total_accrued += acc.accrued
             total_paid += acc.paid_out
             rows.append({
@@ -198,10 +231,12 @@ class CoopPortfolio(models.AbstractModel):
                 'accrued': acc.accrued, 'paid_out': acc.paid_out, 'charter_note': acc.charter_note or '',
                 'needs_count': len(deals), 'needs_sum': sum(deals.mapped('amount')),
                 'review_days': coop.coop_share_review_days or 30, 'waiting': waiting,
+                'kinds': self._share_kinds(acc), 'savings': acc.savings,
             })
         return {
             'rows': rows, 'requested': requested,
             'totals': {'balance': total_balance, 'accrued': total_accrued, 'paid_out': total_paid,
+                       'savings': total_savings,
                        # По номеру, а не по названию: одноимённые — разные.
                        'cooperatives': len({r['cooperative_id'] for r in rows if r['state'] != 'closed'}),
                        'needs_count': sum(r['needs_count'] for r in rows),

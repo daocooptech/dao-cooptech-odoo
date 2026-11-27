@@ -63,7 +63,7 @@ from ..data import (emblems, load_attributes, load_biography, load_bounty,
                     load_notifications,
                     load_spread,
                     load_descriptions,
-                    load_vacancies, load_verification, load_wallets,
+                    load_vacancies, load_verification, load_wallets, load_share_kinds,
                     load_warehouses)
 
 
@@ -297,6 +297,8 @@ class CoopDemoLoader(models.AbstractModel):
         # История кошельков его организаций за год (владелец 19.10.2026:
         # «полноценный пример аналитики») — тоже после сделок.
         load_wallets.fill_org_history(self.env)
+        # Виды пая в портфеле (решение 512).
+        load_share_kinds.load_share_kinds(self.env)
         # Договор и способ выплаты у вакансий кооперативов (решение 425) —
         # когда все вакансии, из каталога и из потребностей проектов, уже
         # заведены.

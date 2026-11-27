@@ -3,6 +3,8 @@ from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 from odoo.tools.misc import format_amount
 
+from odoo.addons.coop_wallet.models.coop_share import SAVINGS_KINDS
+
 from .ndfl import ndfl
 
 PAID = ('payout', 'return')
@@ -194,7 +196,8 @@ class CoopShareAccount(models.Model):
         if self.cooperative_id.coop_ndfl_share_base != 'excess':
             return gross
         before = self._coop_confirmed_before(move)
-        balance = sum(before.filtered(lambda m: m.kind != 'entry').mapped('amount'))
+        balance = sum(before.filtered(
+            lambda m: m.kind != 'entry' and m.kind not in SAVINGS_KINDS).mapped('amount'))
         contributed = sum(before.filtered(
             lambda m: m.kind in ('share', 'extra', 'in_kind')).mapped('amount'))
         paid = before.filtered(lambda m: m.kind in PAID)

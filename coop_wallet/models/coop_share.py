@@ -2,6 +2,13 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
+# Сбережения в КПК — не пай, а долг кооператива перед членом по договору
+# передачи личных сбережений (решение 512): в размер пая не входят.
+SAVINGS_KINDS = ('savings_in', 'savings_interest', 'savings_out')
+# Пай за помещение — у жилищных и гаражных кооперативов: квартира или
+# бокс переходят в собственность после полной выплаты пая.
+PREMISES_FORMS = ('zhsk', 'zhk', 'gsk')
+
 
 class CoopShareAccount(models.Model):
     """Паевой счёт в одном кооперативе.
@@ -68,6 +75,11 @@ class CoopShareAccount(models.Model):
         string='Вступительный взнос', currency_field='currency_id',
         compute='_compute_totals', store=True,
         help='Невозвратный: в пай не входит и при выходе не возвращается.')
+    savings = fields.Monetary(
+        string='Сбережения', currency_field='currency_id',
+        compute='_compute_totals', store=True,
+        help='Личные сбережения, переданные кредитному кооперативу по '
+             'договору. Это долг кооператива перед вами, а не пай.')
 
     state = fields.Selection([
         ('open', 'Действующий'),
@@ -100,7 +112,10 @@ class CoopShareAccount(models.Model):
     @api.depends('move_ids.amount', 'move_ids.kind', 'move_ids.state')
     def _compute_totals(self):
         for record in self:
-            confirmed = record.move_ids.filtered(lambda m: m.state == 'confirmed')
+            done = record.move_ids.filtered(lambda m: m.state == 'confirmed')
+            record.savings = sum(done.filtered(
+                lambda m: m.kind in SAVINGS_KINDS).mapped('amount'))
+            confirmed = done.filtered(lambda m: m.kind not in SAVINGS_KINDS)
             record.entry_fee = sum(confirmed.filtered(
                 lambda m: m.kind == 'entry').mapped('amount'))
             record.contributed = sum(confirmed.filtered(
@@ -170,7 +185,27 @@ class CoopShareMove(models.Model):
         ('accrual', 'Начисление по итогам работы'),
         ('payout', 'Выплата на руки'),
         ('return', 'Возврат пая при выходе'),
+        ('savings_in', 'Передача личных сбережений'),
+        ('savings_interest', 'Компенсация за сбережения'),
+        ('savings_out', 'Возврат сбережений'),
     ], string='Вид', required=True, default='share', index=True)
+
+    # Решение 512: в портфеле — строки по видам пая с фактом начислений.
+    share_kind = fields.Selection([
+        ('main', 'Обязательный пай'),
+        ('extra', 'Дополнительный пай'),
+        ('increment', 'Приращённый пай'),
+        ('premises', 'Пай за помещение'),
+        ('savings', 'Сбережения в КПК'),
+    ], string='Вид пая', compute='_compute_share_kind', store=True, readonly=False,
+        precompute=True, index=True,
+        help='К какому паю относится движение. Начисление по '
+             'дополнительному паю — дивиденды по нему; приращённый пай — '
+             'начисление, оставленное в паевом фонде до срока погашения.')
+    redeem_from = fields.Date(
+        string='Гасится с',
+        help='Для приращённого пая: с какой даты кооператив его выплачивает '
+             '(по решению общего собрания).')
 
     amount = fields.Monetary(
         string='Сумма', currency_field='currency_id', required=True,
@@ -199,6 +234,21 @@ class CoopShareMove(models.Model):
         help='Считается по порядку дат. Хранить отдельно нельзя: '
              'вставленная задним числом операция сдвинет весь столбец.')
 
+    @api.depends('kind', 'account_id.cooperative_id.coop_legal_form_id')
+    def _compute_share_kind(self):
+        for record in self:
+            if record.kind in SAVINGS_KINDS:
+                record.share_kind = 'savings'
+            elif record.share_kind == 'increment':
+                # Приращённым пай делает решение собрания — его не угадать.
+                continue
+            elif record.kind == 'extra':
+                record.share_kind = 'extra'
+            elif record.account_id.cooperative_id.coop_legal_form_id.code in PREMISES_FORMS:
+                record.share_kind = 'premises'
+            else:
+                record.share_kind = 'main'
+
     _amount_not_zero = models.Constraint(
         'check(amount != 0)',
         'Движение на ноль не имеет смысла.',
@@ -213,6 +263,7 @@ class CoopShareMove(models.Model):
             # Вступительный взнос в пай не входит (решение 427).
             earlier = record.account_id.move_ids.filtered(
                 lambda m: m.state == 'confirmed' and m.kind != 'entry'
+                and (m.kind in SAVINGS_KINDS) == (record.kind in SAVINGS_KINDS)
                 and (m.date or fields.Date.today(), m.id)
                 <= (record.date or fields.Date.today(), record.id))
             record.balance_after = sum(earlier.mapped('amount'))

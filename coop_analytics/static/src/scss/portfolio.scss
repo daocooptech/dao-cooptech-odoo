@@ -214,6 +214,30 @@
     header { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
     p { margin: 8px 0 0; font-size: 12px; }
   }
+  // Решение 512: виды пая внутри карточки кооператива.
+  .o_coop_pf_kinds {
+    margin-top: 10px;
+    border-top: 1px solid var(--coop-line, #e6e6e1);
+  }
+  .o_coop_pf_kind {
+    padding: 7px 0;
+    border-bottom: 1px solid var(--coop-line, #e6e6e1);
+    font-size: 12.5px;
+  }
+  .o_coop_pf_kind_head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    b { font-weight: 600; }
+  }
+  .o_coop_pf_kind_facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 12px;
+    margin-top: 2px;
+    color: var(--coop-slate, #5f5f59);
+  }
   .o_coop_pf_badge {
     flex: none;
     align-self: flex-start;
