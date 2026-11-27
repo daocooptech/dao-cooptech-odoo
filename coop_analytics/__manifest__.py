@@ -21,7 +21,7 @@
     'author': 'ДАО КООПТЕХ',
     'website': 'https://daocooptech.ru',
     'category': 'Cooperative',
-    'version': '20.0.1.1.2',
+    'version': '20.0.1.1.3',
     'license': 'LGPL-3',
     'depends': ['board', 'spreadsheet_dashboard', 'coop_theme', 'coop_deals', 'coop_wallet',
                 'coop_projects', 'coop_matching', 'coop_crypto_exchange', 'coop_tokenomics',

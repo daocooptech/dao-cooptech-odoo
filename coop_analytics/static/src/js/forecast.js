@@ -15,6 +15,7 @@ import { CoopTabs } from "@coop_theme/js/shell";
  * задаётся здесь же — на месяц или сразу на несколько вперёд.
  */
 
+const ROWS = 10;
 const nf = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 });
 
 export class CoopForecast extends Component {
@@ -97,11 +98,28 @@ export class CoopForecast extends Component {
         }
         return max;
     }
-    h(metric, v) {
-        return `height: ${Math.max(0, ((v || 0) / this.scale(metric)) * 100).toFixed(1)}%`;
+    // BlockChart (дизайн-система): клеток в столбце — ROWS; факт — залитые
+    // клетки (без плана — чернильные, план выполнен — бирюзовые, нет —
+    // охра), тренд — клетки контуром над фактом, план — черта поперёк.
+    count(metric, v) {
+        if (!v || v <= 0) {
+            return 0;
+        }
+        return Math.max(1, Math.min(ROWS, Math.round((v / this.scale(metric)) * ROWS)));
+    }
+    cells(metric, m) {
+        const fact = this.count(metric, m.fact);
+        const trend = !m.past && m.forecast !== null ? this.count(metric, m.forecast) : 0;
+        const tone = m.done === true ? "o_coop_fc_c_done" : m.done === false ? "o_coop_fc_c_miss" : "o_coop_fc_c_fact";
+        const out = [];
+        for (let r = 0; r < ROWS; r++) {
+            out.push(r < fact ? tone : r < trend ? "o_coop_fc_c_trend" : "");
+        }
+        return out;
     }
     planTop(metric, v) {
-        return `bottom: ${Math.min(100, ((v || 0) / this.scale(metric)) * 100).toFixed(1)}%`;
+        const k = Math.min(ROWS, Math.round(((v || 0) / this.scale(metric)) * ROWS));
+        return `bottom: calc(${((k / ROWS) * 100).toFixed(2)}% - 1px)`;
     }
     colClass(metric, m) {
         return {

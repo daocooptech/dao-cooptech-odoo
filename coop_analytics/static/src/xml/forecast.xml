@@ -63,9 +63,9 @@
             <div class="o_coop_fc_chart">
               <div class="o_coop_fc_col" t-foreach="m.months" t-as="c" t-key="c.key"
                    t-att-class="this.colClass(m, c)" t-att-title="this.colTitle(m, c)">
-                <div class="o_coop_fc_bars">
-                  <i t-if="c.forecast !== null and !c.past" class="o_coop_fc_b_trend" t-att-style="this.h(m, c.forecast)"/>
-                  <i t-if="c.fact" class="o_coop_fc_b_fact" t-att-style="this.h(m, c.fact)"/>
+                <!-- BlockChart дизайн-системы: столбец из клеток снизу вверх. -->
+                <div class="o_coop_fc_cells">
+                  <i t-foreach="this.cells(m, c)" t-as="k" t-key="k_index" t-att-class="k"/>
                   <em t-if="c.plan !== null and c.plan !== undefined" class="o_coop_fc_plan" t-att-style="this.planTop(m, c.plan)"/>
                 </div>
                 <span t-out="c.label"/>
