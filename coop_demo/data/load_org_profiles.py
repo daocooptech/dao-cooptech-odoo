@@ -358,3 +358,35 @@ def fill_org_contacts(env):
     if filled:
         _logger.info('Организации: контакты дописаны у %s', filled)
     return filled
+
+
+# Организации, у которых специализации не было (владелец 27.11: у всех).
+# Род занятий — по названию и виду кооператива.
+SPEC_BY_NAME = {
+    'Кооператив «Борозда»': 'Агроном, зоотехник',
+    'Кооператив «Взаимопомощь»': 'Бухгалтерия',
+    'ООО «Заречье»': 'Продавец',
+    'ПК «Родник»': 'Инженер-технолог',
+    'СПК «Пойма»': 'Агроном, зоотехник',
+    'ТСЖ «Веретено»': 'Слесарь, сантехник',
+    'АНО «Пасека»': 'Пчеловодство, животноводство',
+    'ПК Регион-Орск': 'Логистика, ВЭД',
+    'ПК «Пробный стенд»': 'Инженер-технолог',
+}
+
+
+def fill_specializations(env):
+    """У каждой организации, кроме самой платформы, — специализация."""
+    Partner = env['res.partner'].sudo().with_context(tracking_disable=True)
+    Spec = env['coop.specialization'].sudo()
+    own = [r.id for r in (env.ref('base.main_partner', raise_if_not_found=False),
+                          env.ref('coop_demo.org_platform', raise_if_not_found=False)) if r]
+    orgs = Partner.search([('is_company', '=', True), ('id', 'not in', own),
+                           ('coop_specialization_id', '=', False)], order='id')
+    fallback = Spec.search([('name', '=', 'Разное')], limit=1)
+    for org in orgs:
+        spec = Spec.search([('name', '=', SPEC_BY_NAME.get(org.name, ''))], limit=1) or fallback
+        if spec:
+            org.coop_specialization_id = spec
+    _logger.info('Специализации: дописаны у %s организаций', len(orgs))
+    return orgs

@@ -6,8 +6,8 @@
 Разброс — как на живой площадке: большинство на упрощёнке ниже порога и
 освобождено от НДС, часть на АУСН, часть на УСН с НДС 5 % или 7 %, часть
 на общем режиме; у некоторых с июля режим сменился после превышения
-порога в 20 млн ₽; у немногих режим не указан — так виден и отказ
-выставить счёт, пока он не задан.
+порога в 20 млн ₽. Режим указан у всех (владелец 27.11): пустой
+вид — у новой организации, которая его ещё не выбрала.
 
 Счета — по исполняемым и завершённым сделкам продажи, услуг и работ, где
 продавец организация с режимом: в её компании учёта, во всех состояниях
@@ -28,8 +28,6 @@ YEAR_START = date(2026, 1, 1)
 def _regimes_for(rnd):
     """Список (с даты, режим, основание) для одной организации."""
     roll = rnd.random()
-    if roll < 0.03:
-        return []
     if roll < 0.50:
         return [(YEAR_START, 'exempt_145', 'УСН, доход за 2025 год до 20 млн ₽')]
     if roll < 0.60:
@@ -48,8 +46,11 @@ def _regimes_for(rnd):
 def load_vat_regimes(env):
     Partner = env['res.partner'].sudo()
     Regime = env['coop.vat.regime'].sudo()
+    # Все организации, кроме самой платформы: про неё — только правда.
+    own = [r.id for r in (env.ref('base.main_partner', raise_if_not_found=False),
+                          env.ref('coop_demo.org_platform', raise_if_not_found=False)) if r]
     orgs = Partner.search([
-        ('is_company', '=', True), ('coop_is_participant', '=', True),
+        ('is_company', '=', True), ('id', 'not in', own),
         ('coop_vat_regime_ids', '=', False)], order='id')
     rows = []
     for org in orgs:
@@ -59,7 +60,7 @@ def load_vat_regimes(env):
     if rows:
         Regime.create(rows)
     _logger.info('Режимы НДС: заведены у %s организаций', len(orgs))
-    return len(orgs)
+    return orgs
 
 
 AGRI_KINDS = ('agri_consumer', 'agri_production')
@@ -95,6 +96,14 @@ def load_tax_systems(env):
         org.coop_tax_regime = _tax_system_for(org, vat, rnd)
     _logger.info('Системы налогообложения: заданы у %s организаций', len(orgs))
     return len(orgs)
+
+
+def align_tax_systems(orgs):
+    """Система налогообложения заново — у тех, кому только что дан режим НДС."""
+    today = date.today()
+    for org in orgs.with_context(tracking_disable=True):
+        rnd = random.Random(20261126 + org.id)
+        org.coop_tax_regime = _tax_system_for(org, org._coop_vat_regime_at(today), rnd)
 
 
 def load_companies(env):

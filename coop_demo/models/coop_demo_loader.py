@@ -125,6 +125,7 @@ class CoopDemoLoader(models.AbstractModel):
         # сразу, чтобы загрузчики ниже искали организации по уже
         # однозначным названиям.
         load_orgs.unique_org_names(self.env)
+        load_org_profiles.fill_specializations(self.env)
         load_orgs.repair_empty_logos(self.env)
         load_org_profiles.load_org_profiles(self.env, specializations, marks)
         load_org_profiles.fill_org_contacts(self.env)
