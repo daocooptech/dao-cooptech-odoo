@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Решение 704, владелец 27.11.2026: «все данные должны быть на страницах
+    организаций». «Моя страница» организации открывается формой страницы
+    (`coop_profile`), а реквизиты с документами и налоги жили только в
+    карточке каталога. Те же блоки — под «Контактами», только у
+    организаций. Здесь, а не в `coop_orgs`: модуль видит и страницу, и
+    налоги.
+  -->
+  <record id="view_coop_profile_form_org_blocks" model="ir.ui.view">
+    <field name="name">coop.profile.form.org.blocks</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="coop_profile.view_coop_profile_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//div[hasclass('o_coop_infobox')][.//field[@name='coop_contact_line_ids']]" position="after">
+              <div class="o_coop_infobox" invisible="not is_company">
+                <div class="o_coop_infobox_head">Реквизиты</div>
+                <div class="o_coop_infobox_body">
+                  <div><span class="o_coop_key">ИНН</span>
+                    <field name="coop_inn" widget="coop_inline" readonly="not coop_can_edit_card" placeholder="не указан"/></div>
+                  <div><span class="o_coop_key">КПП</span>
+                    <field name="coop_kpp" widget="coop_inline" readonly="not coop_can_edit_card" placeholder="нет"/></div>
+                  <div><span class="o_coop_key">ОГРН</span>
+                    <field name="coop_ogrn" widget="coop_inline" readonly="not coop_can_edit_card" placeholder="не указан"/></div>
+                  <div><span class="o_coop_key">Зарегистрирована</span>
+                    <field name="coop_registered_on" widget="coop_inline" readonly="not coop_can_edit_card" placeholder="не указано"/></div>
+                  <div><span class="o_coop_key">Устав</span>
+                    <field name="coop_charter_doc_id" readonly="1"/>
+                    <span class="text-muted" invisible="coop_charter_doc_id">нет</span></div>
+                  <div invisible="not coop_has_members"><span class="o_coop_key">В неделимый фонд, %</span>
+                    <field name="coop_indivisible_fund_percent" widget="coop_inline"
+                           readonly="not coop_can_edit_card" placeholder="0"/></div>
+                  <!-- Решение 511: основа выплат следует за видом
+                       кооператива — у ПО оборот, у артели труд. -->
+                  <div invisible="not coop_is_cooperative"><span class="o_coop_key">Основа выплат</span>
+                    <field name="coop_payout_basis" widget="coop_inline"
+                           readonly="not coop_can_edit_card" placeholder="по уставу"/></div>
+                  <!-- Условия вступления — их читает нечлен в заявлении
+                       (задача 445). Только у кооперативов: паёв нет
+                       нигде больше. -->
+                  <div invisible="not coop_is_cooperative"><span class="o_coop_key">Положение о взносах</span>
+                    <field name="coop_fees_rules_doc_id" readonly="1"/>
+                    <span class="text-muted" invisible="coop_fees_rules_doc_id">нет</span></div>
+                  <div invisible="not coop_is_cooperative"><span class="o_coop_key">Положение о прибыли</span>
+                    <field name="coop_profit_rules_doc_id" readonly="1"/>
+                    <span class="text-muted" invisible="coop_profit_rules_doc_id">нет</span></div>
+                  <div invisible="not coop_is_cooperative"><span class="o_coop_key">Отчётность</span>
+                    <field name="coop_report_doc_id" readonly="1"/>
+                    <span class="text-muted" invisible="coop_report_doc_id">нет</span></div>
+                  <div invisible="not coop_is_cooperative"><span class="o_coop_key">Вступительный взнос, ₽</span>
+                    <field name="coop_entrance_fee" widget="coop_inline" readonly="not coop_can_edit_card"
+                           placeholder="по уставу"/></div>
+                  <div invisible="not coop_is_cooperative"><span class="o_coop_key">Паевой взнос, ₽</span>
+                    <field name="coop_min_share_fee" widget="coop_inline" readonly="not coop_can_edit_card"
+                           placeholder="по уставу"/></div>
+                  <div invisible="not coop_is_cooperative or not coop_can_edit_card"><span class="o_coop_key">Принимает заявления</span>
+                    <field name="coop_join_open" readonly="not coop_can_edit_card"/></div>
+                  <div invisible="not coop_is_cooperative or coop_join_open"><span class="o_coop_key">Почему не принимает</span>
+                    <field name="coop_join_closed_note" widget="coop_inline" readonly="not coop_can_edit_card"
+                           placeholder="не указано"/></div>
+                  <!-- Вид деятельности стоит среди реквизитов, а не в
+                       блоке «На платформе»: это выписка, а не то, что
+                       организация о себе рассказала. -->
+                  <div><span class="o_coop_key">Вид деятельности</span>
+                    <field name="coop_okved_id" widget="coop_inline" readonly="not coop_can_edit_card"
+                           placeholder="не указан"/></div>
+                  <div><span class="o_coop_key">Код ОКВЭД</span>
+                    <field name="coop_okved_code" widget="coop_inline" readonly="not coop_can_edit_card" placeholder="не указан"/></div>
+                </div>
+              </div>
+
+              <div class="o_coop_infobox" invisible="not is_company">
+                <div class="o_coop_infobox_head">Налоги</div>
+                <div class="o_coop_infobox_body">
+                  <field name="coop_can_edit_vat" invisible="1"/>
+                  <!-- Решение 704: строками, как «Реквизиты», без таблицы и дат.
+                       История режимов НДС живёт под капотом — по ней счета и УПД
+                       берут режим на дату отгрузки. -->
+                  <div><span class="o_coop_key">Система налогообложения</span>
+                    <field name="coop_tax_regime" widget="coop_inline"
+                           options="{'exclude': ['none', 'npd', 'patent']}"
+                           readonly="not coop_can_edit_vat" placeholder="не указана"/></div>
+                  <div><span class="o_coop_key">НДС</span>
+                    <field name="coop_vat_regime" widget="coop_inline"
+                           readonly="not coop_can_edit_vat" placeholder="не указан"/></div>
+                  <field name="coop_rsbu_enabled" invisible="1"/>
+                  <div invisible="not coop_rsbu_enabled"><span class="o_coop_key">Учёт в РСБУ-слое</span>
+                    с <field name="coop_rsbu_start_date" readonly="1"/></div>
+                  <button name="action_coop_rsbu_start" type="object" string="Начать учёт в РСБУ"
+                          class="btn-secondary" invisible="not coop_can_edit_vat or coop_rsbu_enabled"/>
+                </div>
+              </div>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

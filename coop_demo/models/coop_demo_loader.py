@@ -130,6 +130,7 @@ class CoopDemoLoader(models.AbstractModel):
         load_org_profiles.fill_org_contacts(self.env)
         # Условия вступления кооперативов (задача 445): документы, взносы,
         # закрытый набор, нет устава.
+        load_public_docs.forms_by_prefix(self.env)
         load_join_terms.load_join_terms(self.env)
         load_public_docs.load_charters(self.env)
         # Состав организаций — до каталогов: правила доступа смотрят на

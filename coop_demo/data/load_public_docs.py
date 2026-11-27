@@ -212,6 +212,29 @@ def put_docs(org, slots):
     return made
 
 
+# Форма по началу названия — у демо-организаций, заведённых без формы.
+PREFIX_FORMS = {'АНО': 'ano', 'ООО': 'ooo', 'ПК': 'pk', 'СПК': 'spk', 'ТСЖ': 'tszh',
+                'ПО': 'po', 'АО': 'ao', 'СНТ': 'snt', 'ЖСК': 'zhsk', 'КПК': 'kpk'}
+
+
+def forms_by_prefix(env):
+    """Правовая форма организациям без неё — по названию: «ПК «Родник»»
+    без формы не получал ни устава, ни кооперативных строк (27.11)."""
+    Form = env['coop.legal.form'].sudo()
+    orgs = env['res.partner'].sudo().search([
+        ('is_company', '=', True), ('coop_is_participant', '=', True),
+        ('coop_legal_form_id', '=', False)])
+    fixed = env['res.partner']
+    for org in orgs:
+        code = PREFIX_FORMS.get((org.name or '').split(' ')[0])
+        form = code and Form.search([('code', '=', code)], limit=1)
+        if form:
+            org.coop_legal_form_id = form
+            fixed |= org
+    _logger.info('Правовая форма по названию: %s организаций', len(fixed))
+    return fixed
+
+
 def load_charters(env):
     """Устав у организаций с правовой формой, кроме ИП и кооперативов
     (у кооперативов документы заводит `load_join_terms`)."""
