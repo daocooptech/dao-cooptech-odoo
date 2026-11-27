@@ -4,7 +4,7 @@
   <!--
     Решение 704, владелец 27.11.2026: «все данные должны быть на страницах
     организаций». «Моя страница» организации открывается формой страницы
-    (`coop_profile`), а реквизиты с документами и налоги жили только в
+    (`coop_profile`), а реквизиты с документами, «На платформе» и налоги жили только в
     карточке каталога. Те же блоки — под «Контактами», только у
     организаций. Здесь, а не в `coop_orgs`: модуль видит и страницу, и
     налоги.
@@ -68,6 +68,19 @@
                            placeholder="не указан"/></div>
                   <div><span class="o_coop_key">Код ОКВЭД</span>
                     <field name="coop_okved_code" widget="coop_inline" readonly="not coop_can_edit_card" placeholder="не указан"/></div>
+                </div>
+              </div>
+
+              <div class="o_coop_infobox" invisible="not is_company">
+                <div class="o_coop_infobox_head">На платформе</div>
+                <div class="o_coop_infobox_body">
+                  <div><span class="o_coop_key">Специализация</span>
+                    <field name="coop_specialization_id" widget="coop_inline" readonly="not coop_can_edit_card"
+                           placeholder="не указана"/></div>
+                  <div><span class="o_coop_key">Сфера</span>
+                    <field name="coop_specialization_category_id" readonly="1"/></div>
+                  <div><span class="o_coop_key">Участник</span>
+                    <field name="coop_is_participant" readonly="not coop_can_edit_card"/></div>
                 </div>
               </div>
 
