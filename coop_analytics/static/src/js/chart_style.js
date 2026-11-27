@@ -68,7 +68,7 @@ function tokens() {
 // на всех графиках экрана.
 const assigned = new Map();
 
-function toneFor(label) {
+export function toneFor(label) {
     for (const [re, tone] of TONE_BY_LABEL) {
         if (re.test(label || "")) {
             return tone;

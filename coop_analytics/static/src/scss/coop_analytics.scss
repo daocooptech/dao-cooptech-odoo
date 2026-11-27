@@ -281,6 +281,10 @@
 }
 .o_graph_renderer, .o_pivot_buttons {
   .o_coop_viewswitch {
+    // Ряд кнопок движка растягивает детей по высоте — выбранная кнопка
+    // была ниже остальных (владелец 27.11.2026: «вёрстка кнопок кривая»).
+    align-self: center;
+    align-items: center;
     display: inline-flex;
     gap: 2px;
     padding: 2px;
@@ -290,6 +294,10 @@
   .o_coop_viewswitch_btn {
     display: inline-flex;
     align-items: center;
+    height: 30px;
+    line-height: 1;
+    // У сводной движка своё правило для .active (отступ 16 снизу).
+    margin: 0 !important;
     gap: 6px;
     padding: 5px 12px;
     border: 1px solid transparent;
@@ -444,4 +452,79 @@
 // 27.11.2026). Виджет — во всю ширину колонки, без прокрутки.
 .o-dashboard-action > .o_view_controller .o_content > .o_renderer {
   min-width: 0 !important;
+}
+
+// ── Простая «Сводная» — Table дизайн-системы (js/pivot_table.js) ────
+.o_coop_pt {
+  margin: 0 16px 16px;
+  overflow-x: auto;
+  border: 1px solid var(--coop-line, #e6e6e1);
+  border-radius: 12px;
+  background: var(--coop-white, #ffffff);
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    color: var(--coop-ink, #14171a);
+  }
+  th, td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--coop-line, #e6e6e1);
+    text-align: left;
+    white-space: nowrap;
+  }
+  thead th {
+    background: var(--coop-surface, #f2f2ee);
+    color: var(--coop-slate, #4a4a44);
+    font-weight: 500;
+    font-size: 12.5px;
+  }
+  tbody th { font-weight: 500; }
+  tbody tr:hover > * { background: var(--coop-surface, #f2f2ee); }
+  .o_coop_pt_num {
+    text-align: right;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  thead .o_coop_pt_num { font-family: inherit; }
+  td.o_coop_pt_num { cursor: pointer; }
+  .o_coop_pt_empty { color: var(--coop-line-strong, #d2d2cb); cursor: default; }
+  .o_coop_pt_total { font-weight: 700; }
+  td.o_coop_pt_total { position: relative; min-width: 120px; padding-bottom: 12px; }
+  // Дорожка шкалы — чтобы полоска читалась шкалой, а не подчёркиванием.
+  tbody td.o_coop_pt_total::after {
+    content: "";
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 5px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--coop-surface, #f2f2ee);
+  }
+  .o_coop_pt_dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 1px;
+    margin-right: 6px;
+    vertical-align: 0;
+  }
+  // Полоска величины у «Всего»: месяцы сравниваются на глаз.
+  .o_coop_pt_bar {
+    position: absolute;
+    right: 10px;
+    bottom: 5px;
+    max-width: calc(100% - 20px);
+    height: 3px;
+    border-radius: 2px;
+    z-index: 1;
+    background: var(--coop-ink, #14171a);
+    opacity: .85;
+  }
+  tfoot th, tfoot td {
+    border-bottom: 0;
+    border-top: 2px solid var(--coop-line-strong, #d2d2cb);
+    font-weight: 700;
+  }
 }
