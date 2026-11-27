@@ -455,8 +455,16 @@
 }
 
 // ── Простая «Сводная» — Table дизайн-системы (js/pivot_table.js) ────
+.o_coop_pt_keys {
+  margin: 0 16px 8px;
+  font-size: 12.5px;
+  color: var(--coop-slate, #4a4a44);
+  b { color: var(--coop-ink, #14171a); font-weight: 600; }
+}
 .o_coop_pt {
   margin: 0 16px 16px;
+  // Прокрутка — только вбок и только если таблица не влезает; первый
+  // столбец при этом стоит на месте.
   overflow-x: auto;
   border: 1px solid var(--coop-line, #e6e6e1);
   border-radius: 12px;
@@ -503,5 +511,59 @@
     border-bottom: 0;
     border-top: 2px solid var(--coop-line-strong, #d2d2cb);
     font-weight: 700;
+  }
+}
+
+// Несколько мер в клетке: первая — крупно, остальные — мелко серым под ней.
+// Первый столбец не уезжает при прокрутке вбок.
+.o_coop_pt {
+  .o_coop_pt_main { display: block; }
+  .o_coop_pt_sub {
+    display: block;
+    margin-top: 2px;
+    font-size: 11.5px;
+    font-weight: 400;
+    color: var(--coop-slate-light, #8f8f88);
+  }
+  tbody th, tfoot th, thead th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--coop-white, #ffffff);
+  }
+  thead th:first-child { z-index: 3; background: var(--coop-surface, #f2f2ee); }
+  tfoot th, tfoot td { background: var(--coop-white, #ffffff); }
+}
+
+// Меры — переключателями (js/measure_chips.js): все видны сразу.
+.o_coop_measures {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-self: center;
+  gap: 6px;
+  .o_coop_measures_label {
+    margin-right: 2px;
+    font-size: 12.5px;
+    color: var(--coop-slate, #4a4a44);
+  }
+  .o_coop_measure {
+    height: 30px;
+    padding: 0 12px;
+    border: 1px solid var(--coop-line-strong, #d2d2cb);
+    border-radius: 999px;
+    background: var(--coop-white, #ffffff);
+    color: var(--coop-slate, #4a4a44);
+    font-size: 13px;
+    line-height: 1;
+    &:hover:not(:disabled) { border-color: var(--coop-ink, #14171a); color: var(--coop-ink, #14171a); }
+    &.active {
+      border-color: var(--coop-teal, #146b64);
+      background: var(--coop-teal-tint, #e3efed);
+      color: var(--coop-teal-dark, #0e4f4a);
+      font-weight: 600;
+    }
+    &:disabled { opacity: .45; cursor: not-allowed; }
+    &.active:disabled { opacity: 1; cursor: default; }
   }
 }
