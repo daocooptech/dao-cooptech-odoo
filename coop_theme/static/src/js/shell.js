@@ -55,6 +55,12 @@ export const COOP_WIDE_SUBTABS = [
     "coop_analytics.menu_coop_an_sec_tasks",
     "coop_analytics.menu_coop_an_sec_timesheets",
     "coop_analytics.menu_coop_an_sec_events",
+    "coop_analytics.menu_coop_settings_analytics",
+    // «Настройки» режима администратора: вкладки на списках (28.11.2026).
+    "coop_admin.menu_coop_settings_membership_root",
+    "coop_base.menu_coop_reference_root",
+    "coop_admin.menu_coop_node_participants",
+    "coop_federation.menu_coop_fed_root",
 ];
 
 export class CoopTabs extends Component {
@@ -314,8 +320,16 @@ export class CoopTabs extends Component {
         return section && section !== this.pageTitle ? section : null;
     }
 
+    /** Пункт-папка без своего экрана («Пользователи и компании»,
+     *  «Федерация», «Справочники») открывает свой первый пункт: движок на
+     *  такой пункт не делает ничего (владелец 28.11.2026: «почему
+     *  пользователи и компании не открываются»). */
     open(tab) {
-        this.menus.selectMenu(tab);
+        let target = tab;
+        while (target && !target.actionID && target.children?.length) {
+            target = this.menus.getMenu(target.children[0]);
+        }
+        this.menus.selectMenu(target && target.actionID ? target : tab);
     }
 }
 
@@ -587,6 +601,10 @@ const SUBNAV_BY_XMLID = {
     "coop_analytics.menu_coop_an_sec_tasks": "bookmarks",
     "coop_analytics.menu_coop_an_sec_timesheets": "address-book",
     "coop_analytics.menu_coop_an_sec_events": "microphone",
+    "coop_analytics.menu_coop_settings_analytics": "chart-bar",
+    "coop_base.menu_coop_reference_root": "table",
+    "coop_admin.menu_coop_settings_models": "server",
+    "coop_admin.menu_coop_settings_companies": "building-bank",
 };
 
 export function subnavIcon(name, xmlid) {

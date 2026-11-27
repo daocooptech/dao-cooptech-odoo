@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Пункты режима администратора — в «Настройках», а не блоком левой
+    планки (владелец 28.11.2026: «пункты меню которые появляются при
+    переключении на режим админа тоже перенести в настройки», дерево
+    согласовано). Видны по `base.group_system` — его даёт включённый режим
+    (`models/res_users.py`). «Настройки узла» отдельным пунктом не нужны:
+    это тот же экран, что «Общие настройки».
+
+    Действия «Членства», «Подтверждений» и «Моделей и полей» — свои: у
+    штатных уже есть пункты («Кооператив», «Технический»), и панель по
+    общему действию выделяла бы чужой раздел.
+  -->
+  <record id="action_coop_settings_membership" model="ir.actions.act_window">
+    <field name="name">Членство</field>
+    <field name="res_model">coop.membership</field>
+    <field name="path">settings-membership</field>
+    <field name="view_mode">list,form</field>
+    <field name="context">{'search_default_active': 1}</field>
+  </record>
+  <record id="action_coop_settings_verification" model="ir.actions.act_window">
+    <field name="name">Подтверждения</field>
+    <field name="res_model">coop.verification</field>
+    <field name="path">settings-verification</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <record id="action_coop_settings_models" model="ir.actions.act_window">
+    <field name="name">Модели и поля</field>
+    <field name="res_model">ir.model</field>
+    <field name="path">settings-models</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <menuitem id="menu_coop_settings_grants" name="Полномочия"
+            parent="coop_settings.menu_coop_settings_root" action="action_coop_admin_grant"
+            groups="base.group_system" sequence="180"/>
+  <menuitem id="menu_coop_settings_membership_root" name="Членство"
+            parent="coop_settings.menu_coop_settings_root" action="action_coop_settings_membership"
+            groups="base.group_system" sequence="181"/>
+  <menuitem id="menu_coop_settings_membership" name="Членство"
+            parent="menu_coop_settings_membership_root" action="action_coop_settings_membership"
+            sequence="10"/>
+  <menuitem id="menu_coop_settings_verification" name="Подтверждения"
+            parent="menu_coop_settings_membership_root" action="action_coop_settings_verification"
+            sequence="20"/>
+  <!-- Справочники — целиком, со своими вкладками; корнем больше не стоят. -->
+  <record id="coop_base.menu_coop_reference_root" model="ir.ui.menu">
+    <field name="parent_id" ref="coop_settings.menu_coop_settings_root"/>
+    <field name="sequence">182</field>
+  </record>
+  <menuitem id="menu_coop_settings_models" name="Модели и поля"
+            parent="coop_settings.menu_coop_settings_root" action="action_coop_settings_models"
+            groups="base.group_system" sequence="183"/>
+
+  <!--
+    Папка движка «Пользователи и компании» разобрана (владелец 28.11.2026,
+    «как предлагаешь»): «Пользователи» в ней — тот же экран, что «Участники
+    узла», и подсветка уходила на них. Теперь «Участники узла» — вкладками
+    «Участники | Роли», а компании учёта организаций — своим пунктом.
+  -->
+  <record id="base.menu_users" model="ir.ui.menu">
+    <field name="active" eval="False"/>
+  </record>
+  <menuitem id="menu_coop_node_participants_list" name="Участники"
+            parent="menu_coop_node_participants" action="base.action_res_users" sequence="10"/>
+  <menuitem id="menu_coop_node_roles" name="Роли"
+            parent="menu_coop_node_participants" action="base_user_role.action_res_users_role_tree"
+            sequence="20"/>
+  <record id="action_coop_settings_companies" model="ir.actions.act_window">
+    <field name="name">Компании учёта</field>
+    <field name="res_model">res.company</field>
+    <field name="path">settings-companies</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <menuitem id="menu_coop_settings_companies" name="Компании учёта"
+            parent="coop_settings.menu_coop_settings_root" action="action_coop_settings_companies"
+            groups="base.group_erp_manager" sequence="179"/>
+
+</odoo>

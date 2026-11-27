@@ -303,6 +303,57 @@
             action="action_coop_an_rep_events" sequence="20"/>
 
   <!--
+    Настройки дашбордов — «Настройки → Аналитика» (решение 708, кусок 4):
+    списки дашбордов, разделов и ссылок для доступа из скрытого штатного
+    приложения «Панели управления». Рабочей группе и администратору;
+    рабочая группа получает права управления дашбордами движка.
+  -->
+  <record id="coop_base.group_coop_platform" model="res.groups">
+    <field name="implied_ids" eval="[Command.link(ref('spreadsheet_dashboard.group_dashboard_manager'))]"/>
+  </record>
+
+  <record id="action_coop_an_cfg_dashboards" model="ir.actions.act_window">
+    <field name="name">Панели управления</field>
+    <field name="res_model">spreadsheet.dashboard</field>
+    <field name="path">settings-dashboards</field>
+    <field name="view_mode">list,form</field>
+    <field name="context">{'search_default_groupby_dashboard_group_id': True}</field>
+  </record>
+  <record id="action_coop_an_cfg_sections" model="ir.actions.act_window">
+    <field name="name">Разделы</field>
+    <field name="res_model">spreadsheet.dashboard.group</field>
+    <field name="path">settings-dashboard-sections</field>
+    <field name="view_mode">list</field>
+  </record>
+  <record id="action_coop_an_cfg_shares" model="ir.actions.act_window">
+    <field name="name">Ссылки для доступа</field>
+    <field name="res_model">spreadsheet.dashboard.share</field>
+    <field name="path">settings-dashboard-links</field>
+    <field name="view_mode">list</field>
+  </record>
+
+  <menuitem id="menu_coop_settings_analytics" name="Аналитика"
+            parent="coop_settings.menu_coop_settings_root" action="action_coop_an_cfg_dashboards"
+            groups="coop_base.group_coop_platform,base.group_system" sequence="60"/>
+  <menuitem id="menu_coop_settings_an_dashboards" name="Панели управления"
+            parent="menu_coop_settings_analytics" action="action_coop_an_cfg_dashboards" sequence="10"/>
+  <menuitem id="menu_coop_settings_an_sections" name="Разделы"
+            parent="menu_coop_settings_analytics" action="action_coop_an_cfg_sections" sequence="20"/>
+  <menuitem id="menu_coop_settings_an_shares" name="Ссылки для доступа"
+            parent="menu_coop_settings_analytics" action="action_coop_an_cfg_shares" sequence="30"/>
+
+  <!--
+    «Продажи → Отчет» движка повторяет «Аналитика → Продажи» (тот же
+    отчёт sale.report) — скрыт (владелец 28.11.2026, перенос пунктов
+    режима администратора). «Отчет» складов и закупок оставлен: у складов
+    там рабочие экраны (наличие, остатки, история), закупок в «Аналитике»
+    нет.
+  -->
+  <record id="sale.menu_sale_report" model="ir.ui.menu">
+    <field name="active" eval="False"/>
+  </record>
+
+  <!--
     Штатное приложение «Панели управления» (дашборды, «Моя панель»,
     «Конфигурация») повторяет «Аналитику» — скрыто словом владельца
     27.11.2026 (задача 494). Дашборды открываются из разделов «Аналитики».

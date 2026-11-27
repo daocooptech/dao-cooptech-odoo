@@ -22,14 +22,15 @@
 """,
     'author': 'ДАО КООПТЕХ',
     'category': 'Cooperative',
-    'version': '20.0.1.1.4',
+    'version': '20.0.1.2.1',
     'license': 'LGPL-3',
     # Кошелёк — ради справочника сетей: решение о полномочиях переедет
     # в блокчейн, и запись о транзакции ссылается на ту же сеть, что
     # и остальные операции узла.
-    'depends': ['coop_base', 'coop_theme', 'coop_wallet', 'coop_profile', 'mail'],
+    'depends': ['coop_base', 'coop_theme', 'coop_wallet', 'coop_profile', 'coop_settings', 'base_user_role', 'mail'],
     'data': [
         'views/coop_admin_views.xml',
+        'views/coop_admin_settings_menus.xml',
         'views/login_as_views.xml',
         'security/ir.access.csv',
     ],
