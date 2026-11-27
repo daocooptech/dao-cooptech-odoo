@@ -21,7 +21,7 @@
     'author': 'ДАО КООПТЕХ',
     'website': 'https://daocooptech.ru',
     'category': 'Cooperative',
-    'version': '20.0.1.1.3',
+    'version': '20.0.1.1.4',
     'license': 'LGPL-3',
     'depends': ['board', 'spreadsheet_dashboard', 'coop_theme', 'coop_deals', 'coop_wallet',
                 'coop_projects', 'coop_matching', 'coop_crypto_exchange', 'coop_tokenomics',
@@ -37,6 +37,8 @@
     'assets': {
         'web.assets_backend': [
             'coop_analytics/static/src/scss/coop_analytics.scss',
+            'coop_analytics/static/src/js/chart_style.js',
+            'coop_analytics/static/src/js/graph_style.js',
             'coop_analytics/static/src/js/board_tabs.js',
             'coop_analytics/static/src/xml/board_tabs.xml',
             'coop_analytics/static/src/scss/portfolio.scss',
