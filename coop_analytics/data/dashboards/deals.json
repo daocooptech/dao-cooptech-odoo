@@ -10,16 +10,15 @@
  "chartOdooMenusReferences": {
   "3ae8a78d-ca7b-5f2a-9cba-b08c30305194": "coop_analytics.menu_coop_analytics_deals",
   "3ee5f8f2-f0cc-5400-9c21-192ebcc50ba9": "coop_analytics.menu_coop_analytics_deals",
-  "975519e7-93df-518c-8ec1-cf4f3de56c85": "coop_analytics.menu_coop_analytics_deals",
+  "7f70631b-9d85-51f5-80b4-035ca422d9fa": "coop_analytics.menu_coop_analytics_deals",
   "a0118262-d860-507b-9881-344fd3f81a8e": "coop_analytics.menu_coop_analytics_deals",
-  "b5e69ac0-8e17-50d9-a6bd-cfa67b36cd2e": "coop_analytics.menu_coop_analytics_deals",
   "bb48a581-80e1-52d6-b857-3852ac5065c9": "coop_analytics.menu_coop_analytics_deals",
   "c7fd0e6b-50bc-5ac1-a1b3-3babd2da897c": "coop_analytics.menu_coop_analytics_deals",
   "cc99b973-d4de-5303-951e-1da5248fde0c": "coop_analytics.menu_coop_analytics_deals",
   "d064e9c3-634e-5a94-83d6-114407280e2a": "coop_analytics.menu_coop_analytics_deals",
   "d5236733-d57b-5390-bcba-34791104f4da": "coop_analytics.menu_coop_analytics_deals",
-  "d5e82af0-9403-5c26-9336-840945aaf759": "coop_analytics.menu_coop_analytics_deals",
-  "dc815f56-cd31-52a0-a2f5-bd6427c404cf": "coop_analytics.menu_coop_analytics_deals"
+  "dc815f56-cd31-52a0-a2f5-bd6427c404cf": "coop_analytics.menu_coop_analytics_deals",
+  "e559d23b-ab49-567d-8b28-9b09541cb23e": "coop_analytics.menu_coop_analytics_deals"
  },
  "customTableStyles": {},
  "formats": {
@@ -51,7 +50,7 @@
  ],
  "listNextId": 1,
  "lists": {},
- "pivotNextId": 10,
+ "pivotNextId": 9,
  "pivots": {
   "1": {
    "columns": [],
@@ -295,24 +294,35 @@
    "columns": [],
    "context": {},
    "domain": [
+    "|",
     [
-     "target_id.coop_is_me",
+     "party_a_id.coop_is_me",
      "=",
      true
+    ],
+    [
+     "party_b_id.coop_is_me",
+     "=",
+     true
+    ],
+    [
+     "state",
+     "=",
+     "cancelled"
     ]
    ],
    "fieldMatching": {
     "b62e49ba-61d1-54c5-a6da-68fa83b3477b": {
-     "chain": "deal_id.signed_on",
+     "chain": "signed_on",
      "offset": 0,
      "type": "date"
     },
     "e311161d-7073-5b3a-acc4-235ec896a436": {
-     "chain": "deal_id.subject",
+     "chain": "subject",
      "type": "selection"
     },
     "ff409c15-6b86-59b7-b6e7-018fdce3a667": {
-     "chain": "deal_id.city",
+     "chain": "city",
      "type": "char"
     }
    },
@@ -324,8 +334,8 @@
      "id": "__count"
     }
    ],
-   "model": "coop.deal.review",
-   "name": "отзывы обо мне",
+   "model": "coop.deal",
+   "name": "отменённые",
    "rows": [],
    "sortedColumn": null,
    "type": "ODOO"
@@ -334,32 +344,35 @@
    "columns": [],
    "context": {},
    "domain": [
+    "|",
     [
-     "target_id.coop_is_me",
+     "party_a_id.coop_is_me",
      "=",
      true
     ],
     [
-     "rating",
-     "in",
-     [
-      "4",
-      "5"
-     ]
+     "party_b_id.coop_is_me",
+     "=",
+     true
+    ],
+    [
+     "state",
+     "=",
+     "cancelled"
     ]
    ],
    "fieldMatching": {
     "b62e49ba-61d1-54c5-a6da-68fa83b3477b": {
-     "chain": "deal_id.signed_on",
-     "offset": 0,
+     "chain": "signed_on",
+     "offset": -1,
      "type": "date"
     },
     "e311161d-7073-5b3a-acc4-235ec896a436": {
-     "chain": "deal_id.subject",
+     "chain": "subject",
      "type": "selection"
     },
     "ff409c15-6b86-59b7-b6e7-018fdce3a667": {
-     "chain": "deal_id.city",
+     "chain": "city",
      "type": "char"
     }
    },
@@ -371,38 +384,13 @@
      "id": "__count"
     }
    ],
-   "model": "coop.deal.review",
-   "name": "хорошие отзывы",
+   "model": "coop.deal",
+   "name": "отменённые — прошлый период",
    "rows": [],
    "sortedColumn": null,
    "type": "ODOO"
   },
   "7": {
-   "columns": [],
-   "context": {},
-   "domain": [
-    [
-     "coop_is_me",
-     "=",
-     true
-    ]
-   ],
-   "fieldMatching": {},
-   "formulaId": "7",
-   "id": "7",
-   "measures": [
-    {
-     "fieldName": "coop_trust",
-     "id": "coop_trust"
-    }
-   ],
-   "model": "res.partner",
-   "name": "доверие",
-   "rows": [],
-   "sortedColumn": null,
-   "type": "ODOO"
-  },
-  "8": {
    "columns": [],
    "context": {},
    "domain": [
@@ -441,8 +429,8 @@
      "type": "char"
     }
    },
-   "formulaId": "8",
-   "id": "8",
+   "formulaId": "7",
+   "id": "7",
    "measures": [
     {
      "fieldName": "__count",
@@ -467,7 +455,7 @@
    },
    "type": "ODOO"
   },
-  "9": {
+  "8": {
    "columns": [],
    "context": {},
    "domain": [
@@ -498,8 +486,8 @@
      "type": "char"
     }
    },
-   "formulaId": "9",
-   "id": "9",
+   "formulaId": "8",
+   "id": "8",
    "measures": [
     {
      "fieldName": "__count",
@@ -545,10 +533,9 @@
     "A11:G11": 1,
     "A28:G28": 1,
     "A45:C45": 1,
-    "A62:C62": 1,
+    "A62:G62": 1,
     "A79:C79": 1,
     "E45:G45": 1,
-    "E62:G62": 1,
     "E79:G79": 1
    },
    "cells": {
@@ -557,11 +544,10 @@
     "A45": "Что передаётся",
     "A62": "Сделки по городам",
     "A79": "Каким образом",
-    "A80": "=PIVOT(8, 10, FALSE, FALSE)",
-    "E45": "Оценки, которые мне поставили",
-    "E62": "Чем закончились",
+    "A80": "=PIVOT(7, 10, FALSE, FALSE)",
+    "E45": "Чем закончились",
     "E79": "Состояния сделок",
-    "E80": "=PIVOT(9, 10, FALSE, FALSE)"
+    "E80": "=PIVOT(8, 10, FALSE, FALSE)"
    },
    "colNumber": 7,
    "cols": {
@@ -706,20 +692,23 @@
     {
      "col": 0,
      "data": {
-      "baseline": "Data!B7",
-      "baselineColorDown": "#b3413a",
-      "baselineColorUp": "#146b64",
-      "baselineMode": "text",
+      "baseline": "Data!C6",
+      "baselineColorDown": "#146b64",
+      "baselineColorUp": "#b3413a",
+      "baselineDescr": {
+       "text": "к прошлому"
+      },
+      "baselineMode": "difference",
       "humanize": false,
       "keyValue": "Data!B6",
       "title": {
        "bold": true,
-       "text": "Отзывов обо мне"
+       "text": "Отменено"
       },
       "type": "scorecard"
      },
      "height": 96,
-     "id": "975519e7-93df-518c-8ec1-cf4f3de56c85",
+     "id": "e559d23b-ab49-567d-8b28-9b09541cb23e",
      "offset": {
       "x": 303,
       "y": 118
@@ -731,35 +720,19 @@
     {
      "col": 0,
      "data": {
-      "dataRange": "Data!B8",
-      "sectionRule": {
-       "colors": {
-        "lowerColor": "#b3413a",
-        "middleColor": "#c98a2b",
-        "upperColor": "#146b64"
-       },
-       "lowerInflectionPoint": {
-        "operator": "<=",
-        "type": "number",
-        "value": "40"
-       },
-       "rangeMax": "100",
-       "rangeMin": "0",
-       "upperInflectionPoint": {
-        "operator": "<=",
-        "type": "number",
-        "value": "70"
-       }
-      },
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
+      "baselineMode": "text",
+      "humanize": false,
+      "keyValue": "Data!B7",
       "title": {
        "bold": true,
-       "fontSize": 14,
-       "text": "Доверие, %"
+       "text": "Средняя сделка"
       },
-      "type": "gauge"
+      "type": "scorecard"
      },
      "height": 96,
-     "id": "d5e82af0-9403-5c26-9336-840945aaf759",
+     "id": "7f70631b-9d85-51f5-80b4-035ca422d9fa",
      "offset": {
       "x": 606,
       "y": 118
@@ -999,54 +972,71 @@
       "dataSets": [],
       "fieldMatching": {
        "b62e49ba-61d1-54c5-a6da-68fa83b3477b": {
-        "chain": "deal_id.signed_on",
+        "chain": "signed_on",
         "offset": 0,
         "type": "date"
        },
        "e311161d-7073-5b3a-acc4-235ec896a436": {
-        "chain": "deal_id.subject",
+        "chain": "subject",
         "type": "selection"
        },
        "ff409c15-6b86-59b7-b6e7-018fdce3a667": {
-        "chain": "deal_id.city",
+        "chain": "city",
         "type": "char"
        }
       },
-      "legendPosition": "none",
+      "legendPosition": "right",
       "metaData": {
        "cumulatedStart": false,
        "groupBy": [
-        "rating"
+        "outcome"
        ],
        "measure": "__count",
-       "mode": "bar",
+       "mode": "pie",
        "order": null,
-       "resModel": "coop.deal.review"
+       "resModel": "coop.deal"
       },
       "searchParams": {
        "comparison": null,
        "context": {},
        "domain": [
+        "|",
         [
-         "target_id.coop_is_me",
+         "party_a_id.coop_is_me",
          "=",
          true
+        ],
+        [
+         "party_b_id.coop_is_me",
+         "=",
+         true
+        ],
+        [
+         "state",
+         "not in",
+         [
+          "lead",
+          "draft"
+         ]
+        ],
+        [
+         "outcome",
+         "!=",
+         false
         ]
        ],
        "groupBy": [
-        "rating"
+        "outcome"
        ],
        "orderBy": []
       },
-      "stacked": true,
       "title": {
        "text": ""
       },
-      "type": "odoo_bar",
-      "verticalAxisPosition": "left"
+      "type": "odoo_pie"
      },
      "height": 345,
-     "id": "b5e69ac0-8e17-50d9-a6bd-cfa67b36cd2e",
+     "id": "cc99b973-d4de-5303-951e-1da5248fde0c",
      "offset": {
       "x": 460,
       "y": 1086
@@ -1129,86 +1119,7 @@
      },
      "row": 0,
      "tag": "chart",
-     "width": 440
-    },
-    {
-     "col": 0,
-     "data": {
-      "dataSets": [],
-      "fieldMatching": {
-       "b62e49ba-61d1-54c5-a6da-68fa83b3477b": {
-        "chain": "signed_on",
-        "offset": 0,
-        "type": "date"
-       },
-       "e311161d-7073-5b3a-acc4-235ec896a436": {
-        "chain": "subject",
-        "type": "selection"
-       },
-       "ff409c15-6b86-59b7-b6e7-018fdce3a667": {
-        "chain": "city",
-        "type": "char"
-       }
-      },
-      "legendPosition": "right",
-      "metaData": {
-       "cumulatedStart": false,
-       "groupBy": [
-        "outcome"
-       ],
-       "measure": "__count",
-       "mode": "pie",
-       "order": null,
-       "resModel": "coop.deal"
-      },
-      "searchParams": {
-       "comparison": null,
-       "context": {},
-       "domain": [
-        "|",
-        [
-         "party_a_id.coop_is_me",
-         "=",
-         true
-        ],
-        [
-         "party_b_id.coop_is_me",
-         "=",
-         true
-        ],
-        [
-         "state",
-         "not in",
-         [
-          "lead",
-          "draft"
-         ]
-        ],
-        [
-         "outcome",
-         "!=",
-         false
-        ]
-       ],
-       "groupBy": [
-        "outcome"
-       ],
-       "orderBy": []
-      },
-      "title": {
-       "text": ""
-      },
-      "type": "odoo_pie"
-     },
-     "height": 345,
-     "id": "cc99b973-d4de-5303-951e-1da5248fde0c",
-     "offset": {
-      "x": 460,
-      "y": 1494
-     },
-     "row": 0,
-     "tag": "chart",
-     "width": 440
+     "width": 900
     }
    ],
    "formats": {},
@@ -1245,7 +1156,6 @@
     "A62": 1,
     "A79": 1,
     "E45": 1,
-    "E62": 1,
     "E79": 1
    },
    "tables": []
@@ -1258,22 +1168,21 @@
     "A3": "Сумма сделок",
     "A4": "Оплачено",
     "A5": "Завершено",
-    "A6": "Отзывов обо мне",
-    "A7": "Из них хороших",
-    "A8": "Уровень доверия",
+    "A6": "Отменено",
+    "A7": "Средняя сделка",
     "B1": "Сейчас",
     "B2": "=PIVOT.VALUE(1,\"__count\")",
     "B3": "=PIVOT.VALUE(1,\"amount\")",
     "B4": "=PIVOT.VALUE(1,\"amount_paid\")",
     "B5": "=PIVOT.VALUE(3,\"__count\")",
     "B6": "=PIVOT.VALUE(5,\"__count\")",
-    "B7": "=IFERROR(CONCATENATE(ROUND(PIVOT.VALUE(6,\"__count\")/B6*100,0),\"% хороших\"),\"\")",
-    "B8": "=PIVOT.VALUE(7,\"coop_trust\")",
+    "B7": "=IFERROR(Data!B3/Data!B2,0)",
     "C1": "Прошлый период",
     "C2": "=IFERROR(IF((PIVOT.VALUE(2,\"__count\"))=0,\"\",(PIVOT.VALUE(2,\"__count\"))),\"\")",
     "C3": "=IFERROR(IF((PIVOT.VALUE(2,\"amount\"))=0,\"\",(PIVOT.VALUE(2,\"amount\"))),\"\")",
     "C4": "=IFERROR(IF((PIVOT.VALUE(2,\"amount_paid\"))=0,\"\",(PIVOT.VALUE(2,\"amount_paid\"))),\"\")",
-    "C5": "=IFERROR(IF((PIVOT.VALUE(4,\"__count\"))=0,\"\",(PIVOT.VALUE(4,\"__count\"))),\"\")"
+    "C5": "=IFERROR(IF((PIVOT.VALUE(4,\"__count\"))=0,\"\",(PIVOT.VALUE(4,\"__count\"))),\"\")",
+    "C6": "=IFERROR(IF((PIVOT.VALUE(6,\"__count\"))=0,\"\",(PIVOT.VALUE(6,\"__count\"))),\"\")"
    },
    "colNumber": 3,
    "cols": {
@@ -1297,11 +1206,12 @@
     "B4": 2,
     "B5": 1,
     "B6": 1,
-    "B8": 1,
+    "B7": 2,
     "C2": 1,
     "C3": 2,
     "C4": 2,
-    "C5": 1
+    "C5": 1,
+    "C6": 1
    },
    "headerGroups": {
     "COL": [],

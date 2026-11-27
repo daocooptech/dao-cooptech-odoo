@@ -5,5 +5,10 @@
     <xpath expr="//ControlPanel" position="before">
       <div class="o_coop_board_tabs o_coop_dash_tabs"><CoopTabs/></div>
     </xpath>
+    <!-- Дашборд раздела открывается один (`coop_single` в параметрах
+         действия, решение 708): списка дашбордов слева нет. -->
+    <xpath expr="//t[@t-if='!this.uiService.isSmall']" position="attributes">
+      <attribute name="t-if">!this.uiService.isSmall and !this.props.action.params?.coop_single</attribute>
+    </xpath>
   </t>
 </templates>

@@ -6,7 +6,7 @@
     `spreadsheet_dashboard`. Файлы собирает tools/build_dashboards.py: руками
     их не правят, при обновлении модуля они перезаливаются целиком.
 
-    «Мои деньги» и «Мои сделки и доверие» — только своё: отбор по
+    «Мои деньги», «Мои сделки» и «Доверие» — только своё: отбор по
     `coop_is_me` стоит в самих источниках, а не только в правилах записей —
     администратору правила открывают всё, и его «Мои деньги» были бы
     деньгами всей платформы. «Проекты» и «Биржа» — общая картина платформы.
@@ -27,11 +27,20 @@
   </record>
 
   <record id="dashboard_deals" model="spreadsheet.dashboard">
-    <field name="name">Мои сделки и доверие</field>
+    <field name="name">Мои сделки</field>
     <field name="spreadsheet_binary_data" type="bytes" file="coop_analytics/data/dashboards/deals.json"/>
     <field name="dashboard_group_id" ref="dashboard_group_platform"/>
     <field name="group_ids" eval="[Command.set([ref('base.group_user')])]"/>
     <field name="sequence">20</field>
+    <field name="is_published">True</field>
+  </record>
+
+  <record id="dashboard_trust" model="spreadsheet.dashboard">
+    <field name="name">Доверие</field>
+    <field name="spreadsheet_binary_data" type="bytes" file="coop_analytics/data/dashboards/trust.json"/>
+    <field name="dashboard_group_id" ref="dashboard_group_platform"/>
+    <field name="group_ids" eval="[Command.set([ref('base.group_user')])]"/>
+    <field name="sequence">25</field>
     <field name="is_published">True</field>
   </record>
 
@@ -53,17 +62,6 @@
     <field name="is_published">True</field>
   </record>
 
-  <!-- Вкладка «Дашборды» раздела: штатный экран дашбордов. -->
-  <record id="action_coop_an_dashboards" model="ir.actions.client">
-    <field name="name">Дашборды</field>
-    <field name="tag">action_spreadsheet_dashboard</field>
-    <field name="path">analytics-dashboards</field>
-    <field name="context">{'coop_section': 1}</field>
-  </record>
-
-  <menuitem id="menu_coop_analytics_dashboards" name="Дашборды"
-            parent="menu_coop_analytics_root" action="action_coop_an_dashboards" sequence="11"/>
-
   <!--
     Штатные дашборды Odoo — организациям (решение 707). Движок открывает
     «Продажи», «Товар», «Показатели склада» и «События» только
@@ -84,10 +82,230 @@
     <field name="group_ids" eval="[Command.set([ref('event.group_event_user')])]"/>
   </record>
 
+
+  <!--
+    Меню «Аналитики» по разделам (решение 708, кусок 2 задачи 494): у
+    раздела вкладки «Дашборд | Отчёт» — вложенные пункты меню, панель
+    рисует их вкладками на странице (как «Мои проекты»). Дашборд
+    открывается один, без списка дашбордов слева (`coop_single`,
+    static/src/dashboards/dashboard_tabs.xml), — третьего уровня меню нет.
+    Разделы организаций видны тем, кому открыт их дашборд (группы — как у
+    записей дашбордов выше и у движка).
+  -->
+  <record id="action_coop_an_dash_money" model="ir.actions.client">
+    <field name="name">Мои деньги</field>
+    <field name="tag">action_spreadsheet_dashboard</field>
+    <field name="path">analytics-money-dashboard</field>
+    <field name="params" eval="{'dashboard_id': ref('dashboard_money'), 'coop_single': True}"/>
+    <field name="context">{'coop_section': 1}</field>
+  </record>
+  <record id="action_coop_an_dash_deals" model="ir.actions.client">
+    <field name="name">Мои сделки</field>
+    <field name="tag">action_spreadsheet_dashboard</field>
+    <field name="path">analytics-deals-dashboard</field>
+    <field name="params" eval="{'dashboard_id': ref('dashboard_deals'), 'coop_single': True}"/>
+    <field name="context">{'coop_section': 1}</field>
+  </record>
+  <record id="action_coop_an_dash_trust" model="ir.actions.client">
+    <field name="name">Доверие</field>
+    <field name="tag">action_spreadsheet_dashboard</field>
+    <field name="path">analytics-trust</field>
+    <field name="params" eval="{'dashboard_id': ref('dashboard_trust'), 'coop_single': True}"/>
+    <field name="context">{'coop_section': 1}</field>
+  </record>
+  <record id="action_coop_an_dash_projects" model="ir.actions.client">
+    <field name="name">Проекты</field>
+    <field name="tag">action_spreadsheet_dashboard</field>
+    <field name="path">analytics-projects</field>
+    <field name="params" eval="{'dashboard_id': ref('dashboard_projects'), 'coop_single': True}"/>
+    <field name="context">{'coop_section': 1}</field>
+  </record>
+  <record id="action_coop_an_dash_exchange" model="ir.actions.client">
+    <field name="name">Биржа</field>
+    <field name="tag">action_spreadsheet_dashboard</field>
+    <field name="path">analytics-dex-dashboard</field>
+    <field name="params" eval="{'dashboard_id': ref('dashboard_exchange'), 'coop_single': True}"/>
+    <field name="context">{'coop_section': 1}</field>
+  </record>
+  <record id="action_coop_an_dash_sales" model="ir.actions.client">
+    <field name="name">Продажи</field>
+    <field name="tag">action_spreadsheet_dashboard</field>
+    <field name="path">analytics-sales</field>
+    <field name="params" eval="{'dashboard_id': ref('spreadsheet_dashboard_sale.spreadsheet_dashboard_sales'), 'coop_single': True}"/>
+    <field name="context">{'coop_section': 1}</field>
+  </record>
+  <record id="action_coop_an_dash_product" model="ir.actions.client">
+    <field name="name">Товары</field>
+    <field name="tag">action_spreadsheet_dashboard</field>
+    <field name="path">analytics-products</field>
+    <field name="params" eval="{'dashboard_id': ref('spreadsheet_dashboard_sale.spreadsheet_dashboard_product'), 'coop_single': True}"/>
+    <field name="context">{'coop_section': 1}</field>
+  </record>
+  <record id="action_coop_an_dash_invoicing" model="ir.actions.client">
+    <field name="name">Счета</field>
+    <field name="tag">action_spreadsheet_dashboard</field>
+    <field name="path">analytics-invoicing</field>
+    <field name="params" eval="{'dashboard_id': ref('spreadsheet_dashboard_account.dashboard_invoicing'), 'coop_single': True}"/>
+    <field name="context">{'coop_section': 1}</field>
+  </record>
+  <record id="action_coop_an_dash_stock" model="ir.actions.client">
+    <field name="name">Склад</field>
+    <field name="tag">action_spreadsheet_dashboard</field>
+    <field name="path">analytics-stock</field>
+    <field name="params" eval="{'dashboard_id': ref('spreadsheet_dashboard_stock_account.spreadsheet_dashboard_warehouse_metrics'), 'coop_single': True}"/>
+    <field name="context">{'coop_section': 1}</field>
+  </record>
+  <record id="action_coop_an_dash_tasks" model="ir.actions.client">
+    <field name="name">Задачи</field>
+    <field name="tag">action_spreadsheet_dashboard</field>
+    <field name="path">analytics-tasks</field>
+    <field name="params" eval="{'dashboard_id': ref('spreadsheet_dashboard_hr_timesheet.spreadsheet_dashboard_tasks'), 'coop_single': True}"/>
+    <field name="context">{'coop_section': 1}</field>
+  </record>
+  <record id="action_coop_an_dash_timesheets" model="ir.actions.client">
+    <field name="name">Табели</field>
+    <field name="tag">action_spreadsheet_dashboard</field>
+    <field name="path">analytics-timesheets</field>
+    <field name="params" eval="{'dashboard_id': ref('spreadsheet_dashboard_sale_timesheet.spreadsheet_dashboard_timesheet'), 'coop_single': True}"/>
+    <field name="context">{'coop_section': 1}</field>
+  </record>
+  <record id="action_coop_an_dash_events" model="ir.actions.client">
+    <field name="name">Мероприятия</field>
+    <field name="tag">action_spreadsheet_dashboard</field>
+    <field name="path">analytics-events</field>
+    <field name="params" eval="{'dashboard_id': ref('spreadsheet_dashboard_event_sale.spreadsheet_dashboard_events'), 'coop_single': True}"/>
+    <field name="context">{'coop_section': 1}</field>
+  </record>
+
+  <!--
+    Отчёты разделов организаций — свои действия, а не штатные: у штатного
+    действия свой пункт в меню приложения («Продажи › Отчёт»), панель
+    находила его и рисовала путь приложения без вкладок «Дашборд | Отчёт».
+    Модели, отборы и поиск — как у штатных отчётов движка.
+  -->
+  <record id="action_coop_an_rep_sales" model="ir.actions.act_window">
+    <field name="name">Продажи</field>
+    <field name="res_model">sale.report</field>
+    <field name="path">analytics-sales-report</field>
+    <field name="view_mode">graph,pivot,list</field>
+    <field name="search_view_id" ref="sale.view_order_product_search"/>
+    <field name="domain">[('state', '!=', 'cancel')]</field>
+    <field name="context">{'search_default_Sales': 1, 'group_by': [], 'search_default_filter_order_date': 1}</field>
+  </record>
+  <record id="action_coop_an_rep_invoicing" model="ir.actions.act_window">
+    <field name="name">Счета</field>
+    <field name="res_model">account.invoice.report</field>
+    <field name="path">analytics-invoicing-report</field>
+    <field name="view_mode">graph,pivot</field>
+    <field name="search_view_id" ref="account.view_account_invoice_report_search"/>
+    <field name="context">{'search_default_current': 1, 'search_default_customer': 1, 'group_by': ['invoice_date:month']}</field>
+  </record>
+  <record id="action_coop_an_rep_stock" model="ir.actions.act_window">
+    <field name="name">Склад</field>
+    <field name="res_model">stock.move</field>
+    <field name="path">analytics-stock-report</field>
+    <field name="view_mode">pivot,graph,list</field>
+    <field name="search_view_id" ref="stock.view_move_search"/>
+    <field name="context">{'search_default_done': 1, 'pivot_measures': ['product_qty', '__count__']}</field>
+  </record>
+  <record id="action_coop_an_rep_tasks" model="ir.actions.act_window">
+    <field name="name">Задачи</field>
+    <field name="res_model">report.project.task.user</field>
+    <field name="path">analytics-tasks-report</field>
+    <field name="view_mode">graph,pivot</field>
+    <field name="search_view_id" ref="project.view_task_project_user_search"/>
+    <field name="domain">[('has_template_ancestor', '=', False), ('has_project_template', '=', False)]</field>
+    <field name="context">{'group_by': [], 'graph_measure': '__count__'}</field>
+  </record>
+  <record id="action_coop_an_rep_timesheets" model="ir.actions.act_window">
+    <field name="name">Табели</field>
+    <field name="res_model">timesheets.analysis.report</field>
+    <field name="path">analytics-timesheets-report</field>
+    <field name="view_mode">pivot,graph</field>
+    <field name="search_view_id" ref="hr_timesheet.hr_timesheet_report_search"/>
+    <field name="domain">[('project_id', '!=', False)]</field>
+    <field name="context">{}</field>
+  </record>
+  <record id="action_coop_an_rep_events" model="ir.actions.act_window">
+    <field name="name">Мероприятия</field>
+    <field name="res_model">event.registration</field>
+    <field name="path">analytics-events-report</field>
+    <field name="view_mode">graph,pivot,list</field>
+    <field name="search_view_id" ref="event.view_registration_search"/>
+    <field name="context">{'search_default_taken': 1, 'search_default_group_event': 1}</field>
+  </record>
+
+  <menuitem id="menu_coop_an_sec_money" name="Деньги" parent="menu_coop_analytics_root"
+            action="action_coop_an_dash_money" sequence="20"/>
+  <menuitem id="menu_coop_an_tab_money_dash" name="Дашборд" parent="menu_coop_an_sec_money"
+            action="action_coop_an_dash_money" sequence="10"/>
+  <menuitem id="menu_coop_analytics_money" name="Отчёт" parent="menu_coop_an_sec_money"
+            action="action_coop_an_money" sequence="20"/>
+  <menuitem id="menu_coop_an_sec_deals" name="Сделки" parent="menu_coop_analytics_root"
+            action="action_coop_an_dash_deals" sequence="30"/>
+  <menuitem id="menu_coop_an_tab_deals_dash" name="Дашборд" parent="menu_coop_an_sec_deals"
+            action="action_coop_an_dash_deals" sequence="10"/>
+  <menuitem id="menu_coop_analytics_deals" name="Отчёт" parent="menu_coop_an_sec_deals"
+            action="action_coop_an_deals" sequence="20"/>
+  <menuitem id="menu_coop_an_sec_trust" name="Доверие" parent="menu_coop_analytics_root"
+            action="action_coop_an_dash_trust" sequence="35"/>
+  <menuitem id="menu_coop_an_sec_projects" name="Проекты" parent="menu_coop_analytics_root"
+            action="action_coop_an_dash_projects" sequence="40"/>
+  <menuitem id="menu_coop_an_tab_projects_dash" name="Дашборд" parent="menu_coop_an_sec_projects"
+            action="action_coop_an_dash_projects" sequence="10"/>
+  <menuitem id="menu_coop_analytics_contrib" name="Мои вклады" parent="menu_coop_an_sec_projects"
+            action="action_coop_an_contributions" sequence="20"/>
+  <menuitem id="menu_coop_an_sec_dex" name="Биржа" parent="menu_coop_analytics_root"
+            action="action_coop_an_dash_exchange" sequence="50"/>
+  <menuitem id="menu_coop_an_tab_dex_dash" name="Дашборд" parent="menu_coop_an_sec_dex"
+            action="action_coop_an_dash_exchange" sequence="10"/>
+  <menuitem id="menu_coop_analytics_dex" name="Отчёт" parent="menu_coop_an_sec_dex"
+            action="action_coop_an_dex" sequence="20"/>
+  <menuitem id="menu_coop_an_sec_courses" name="Обучение" parent="menu_coop_analytics_root"
+            action="action_coop_an_courses" sequence="60"/>
+  <menuitem id="menu_coop_an_sec_sales" name="Продажи" parent="menu_coop_analytics_root"
+            action="action_coop_an_dash_sales" sequence="70" groups="sales_team.group_sale_salesman"/>
+  <menuitem id="menu_coop_an_tab_sales_dash" name="Дашборд" parent="menu_coop_an_sec_sales"
+            action="action_coop_an_dash_sales" sequence="10"/>
+  <menuitem id="menu_coop_an_tab_sales_product" name="Товары" parent="menu_coop_an_sec_sales"
+            action="action_coop_an_dash_product" sequence="20"/>
+  <menuitem id="menu_coop_an_tab_sales_report" name="Отчёт" parent="menu_coop_an_sec_sales"
+            action="action_coop_an_rep_sales" sequence="30"/>
+  <menuitem id="menu_coop_an_sec_invoicing" name="Счета" parent="menu_coop_analytics_root"
+            action="action_coop_an_dash_invoicing" sequence="71" groups="account.group_account_readonly,account.group_account_invoice"/>
+  <menuitem id="menu_coop_an_tab_invoicing_dash" name="Дашборд" parent="menu_coop_an_sec_invoicing"
+            action="action_coop_an_dash_invoicing" sequence="10"/>
+  <menuitem id="menu_coop_an_tab_invoicing_report" name="Отчёт" parent="menu_coop_an_sec_invoicing"
+            action="action_coop_an_rep_invoicing" sequence="20"/>
+  <menuitem id="menu_coop_an_sec_stock" name="Склад" parent="menu_coop_analytics_root"
+            action="action_coop_an_dash_stock" sequence="72" groups="stock.group_stock_user"/>
+  <menuitem id="menu_coop_an_tab_stock_dash" name="Дашборд" parent="menu_coop_an_sec_stock"
+            action="action_coop_an_dash_stock" sequence="10"/>
+  <menuitem id="menu_coop_an_tab_stock_report" name="Отчёт" parent="menu_coop_an_sec_stock"
+            action="action_coop_an_rep_stock" sequence="20"/>
+  <menuitem id="menu_coop_an_sec_tasks" name="Задачи" parent="menu_coop_analytics_root"
+            action="action_coop_an_dash_tasks" sequence="73" groups="hr_timesheet.group_hr_timesheet_approver"/>
+  <menuitem id="menu_coop_an_tab_tasks_dash" name="Дашборд" parent="menu_coop_an_sec_tasks"
+            action="action_coop_an_dash_tasks" sequence="10"/>
+  <menuitem id="menu_coop_an_tab_tasks_report" name="Отчёт" parent="menu_coop_an_sec_tasks"
+            action="action_coop_an_rep_tasks" sequence="20"/>
+  <menuitem id="menu_coop_an_sec_timesheets" name="Табели" parent="menu_coop_analytics_root"
+            action="action_coop_an_dash_timesheets" sequence="74" groups="hr_timesheet.group_hr_timesheet_approver"/>
+  <menuitem id="menu_coop_an_tab_timesheets_dash" name="Дашборд" parent="menu_coop_an_sec_timesheets"
+            action="action_coop_an_dash_timesheets" sequence="10"/>
+  <menuitem id="menu_coop_an_tab_timesheets_report" name="Отчёт" parent="menu_coop_an_sec_timesheets"
+            action="action_coop_an_rep_timesheets" sequence="20"/>
+  <menuitem id="menu_coop_an_sec_events" name="Мероприятия" parent="menu_coop_analytics_root"
+            action="action_coop_an_dash_events" sequence="75" groups="event.group_event_user"/>
+  <menuitem id="menu_coop_an_tab_events_dash" name="Дашборд" parent="menu_coop_an_sec_events"
+            action="action_coop_an_dash_events" sequence="10"/>
+  <menuitem id="menu_coop_an_tab_events_report" name="Отчёт" parent="menu_coop_an_sec_events"
+            action="action_coop_an_rep_events" sequence="20"/>
+
   <!--
     Штатное приложение «Панели управления» (дашборды, «Моя панель»,
     «Конфигурация») повторяет «Аналитику» — скрыто словом владельца
-    27.11.2026 (задача 494). Дашборды открываются из «Аналитики → Дашборды».
+    27.11.2026 (задача 494). Дашборды открываются из разделов «Аналитики».
   -->
   <record id="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" model="ir.ui.menu">
     <field name="active" eval="False"/>

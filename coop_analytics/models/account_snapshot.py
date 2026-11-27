@@ -45,7 +45,9 @@ class CoopAccountSnapshot(models.Model):
     followers = fields.Integer(string='Подписчиков')
     activity = fields.Integer(string='Действий за 30 дней')
     deals = fields.Integer(string='Сделок')
-    trust = fields.Integer(string='Уровень доверия, %')
+    # Среднее, а не сумма: снимки идут по дням, и за месяц сумма давала бы
+    # «2 400 %» на графике доверия (дашборд «Доверие»).
+    trust = fields.Integer(string='Уровень доверия, %', aggregator='avg')
     projects = fields.Integer(string='Проектов')
     communities = fields.Integer(string='Сообществ')
     coops = fields.Integer(string='Кооперативов')

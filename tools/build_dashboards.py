@@ -379,26 +379,22 @@ def money():
 
 
 def deals():
-    d = Dashboard('deals', 'Мои сделки и доверие', 'coop_analytics.menu_coop_analytics_deals')
+    # «Мои сделки и доверие» разнесены на два дашборда (№ 496, решение 708):
+    # «Сделки» — ход и деньги сделок, «Доверие» — уровень и отзывы.
+    d = Dashboard('deals', 'Мои сделки', 'coop_analytics.menu_coop_analytics_deals')
     period = d.date_filter('period')
     city = d.city_filter()
     subject = d.selection_filter('subject', 'Что передаётся', 'coop.deal', 'subject')
     m = 'coop.deal'
     pairs = {period: ('signed_on', 'date'), city: ('city', 'char'),
              subject: ('subject', 'selection')}
-    rpairs = {period: ('deal_id.signed_on', 'date'), city: ('deal_id.city', 'char'),
-              subject: ('deal_id.subject', 'selection')}
     mine = ['|', ['party_a_id.coop_is_me', '=', True], ['party_b_id.coop_is_me', '=', True]]
     live = mine + [['state', 'not in', ['lead', 'draft']]]
 
     allp, all0 = both(d, 'сделки', m, live, ['__count', 'amount', 'amount_paid'], pairs)
     done, done0 = both(d, 'завершённые', m, live + [['state', '=', 'done']], ['__count'], pairs)
-    rev = d.pivot('отзывы обо мне', 'coop.deal.review', [['target_id.coop_is_me', '=', True]],
-                  ['__count'], match(rpairs, 0))
-    good = d.pivot('хорошие отзывы', 'coop.deal.review',
-                   [['target_id.coop_is_me', '=', True], ['rating', 'in', ['4', '5']]],
-                   ['__count'], match(rpairs, 0))
-    trust = d.pivot('доверие', 'res.partner', [['coop_is_me', '=', True]], ['coop_trust'], {})
+    gone, gone0 = both(d, 'отменённые', m, mine + [['state', '=', 'cancelled']], ['__count'],
+                       pairs)
 
     k_cnt, b_cnt = d.value('Сделок', '=PIVOT.VALUE(%s,"__count")' % allp, INT,
                            '=PIVOT.VALUE(%s,"__count")' % all0)
@@ -408,20 +404,18 @@ def deals():
                              '=PIVOT.VALUE(%s,"amount_paid")' % all0)
     k_done, b_done = d.value('Завершено', '=PIVOT.VALUE(%s,"__count")' % done, INT,
                              '=PIVOT.VALUE(%s,"__count")' % done0)
-    k_rev, _ = d.value('Отзывов обо мне', '=PIVOT.VALUE(%s,"__count")' % rev, INT)
-    k_good, _ = d.value('Из них хороших',
-                        '=IFERROR(CONCATENATE(ROUND(PIVOT.VALUE(%s,"__count")/%s*100,0),'
-                        '"%% хороших"),"")' % (good, k_rev[5:]), None)
-    k_trust, _ = d.value('Уровень доверия', '=PIVOT.VALUE(%s,"coop_trust")' % trust, INT)
+    k_gone, b_gone = d.value('Отменено', '=PIVOT.VALUE(%s,"__count")' % gone, INT,
+                             '=PIVOT.VALUE(%s,"__count")' % gone0)
+    k_avg, _ = d.value('Средняя сделка', '=IFERROR(%s/%s,0)' % (k_sum, k_cnt), MONEY)
     d.cards([
         ('Сделок', k_cnt, b_cnt, 'difference'),
         ('Сумма сделок', k_sum, b_sum, 'percentage'),
         ('Оплачено', k_paid, b_paid, 'percentage'),
         ('Завершено', k_done, b_done, 'difference'),
-        ('Отзывов обо мне', k_rev, k_good, 'text'),
-        ('Доверие, %', k_trust, None, 'gauge'),
+        ('Отменено', k_gone, b_gone, 'difference', True),
+        ('Средняя сделка', k_avg, None, 'text'),
     ])
-    mt, rmt = match(pairs, 0), match(rpairs, 0)
+    mt = match(pairs, 0)
     # Воронка — первым этапом обращения (владелец 08.10.2026: «обращения
     # попадают в аналитику как этап, самый первый этап, так же как и у
     # организаций лид»). Период — по «дате в воронке»: у обращения и
@@ -437,19 +431,60 @@ def deals():
                      legend='top')))
     d.section(('Что передаётся',
                chart('odoo_pie', m, live, ['subject'], 'amount', mt, legend='right')),
-              ('Оценки, которые мне поставили',
-               chart('odoo_bar', 'coop.deal.review', [['target_id.coop_is_me', '=', True]],
-                     ['rating'], '__count', rmt)))
-    d.section(('Сделки по городам',
-               chart('odoo_bar', m, live, ['city'], 'amount', mt, order='DESC')),
               ('Чем закончились',
                chart('odoo_pie', m, live + [['outcome', '!=', False]], ['outcome'], '__count',
                      mt, legend='right')))
+    d.section(('Сделки по городам',
+               chart('odoo_bar', m, live, ['city'], 'amount', mt, order='DESC')))
     by_way = d.pivot('Каким образом', m, live, ['__count', 'amount'], mt, rows=['way'],
                      sorted_by='amount')
     by_state = d.pivot('Состояние', m, mine, ['__count', 'amount'], mt, rows=['state'],
                        sorted_by='__count')
     d.tables(('Каким образом', by_way), ('Состояния сделок', by_state))
+    return d
+
+
+def trust():
+    d = Dashboard('trust', 'Доверие', 'coop_analytics.menu_coop_analytics_deals')
+    period = d.date_filter('period')
+    r = 'coop.deal.review'
+    rpairs = {period: ('create_date', 'datetime')}
+    spairs = {period: ('date', 'date')}
+    about = [['target_id.coop_is_me', '=', True]]
+
+    rev = d.pivot('отзывы обо мне', r, about, ['__count'], match(rpairs, 0))
+    good = d.pivot('хорошие отзывы', r, about + [['rating', 'in', ['4', '5']]],
+                   ['__count'], match(rpairs, 0))
+    left, left0 = both(d, 'мои отзывы', r, [['author_id.coop_is_me', '=', True]], ['__count'],
+                       rpairs)
+    level = d.pivot('доверие', 'res.partner', [['coop_is_me', '=', True]], ['coop_trust'], {})
+
+    k_trust, _ = d.value('Уровень доверия', '=PIVOT.VALUE(%s,"coop_trust")' % level, INT)
+    k_rev, _ = d.value('Отзывов обо мне', '=PIVOT.VALUE(%s,"__count")' % rev, INT)
+    k_good, _ = d.value('Из них хороших',
+                        '=IFERROR(CONCATENATE(ROUND(PIVOT.VALUE(%s,"__count")/%s*100,0),'
+                        '"%% хороших"),"")' % (good, k_rev[5:]), None)
+    k_left, b_left = d.value('Я оценил', '=PIVOT.VALUE(%s,"__count")' % left, INT,
+                             '=PIVOT.VALUE(%s,"__count")' % left0)
+    d.cards([
+        ('Доверие, %', k_trust, None, 'gauge'),
+        ('Отзывов обо мне', k_rev, k_good, 'text'),
+        ('Я оценил', k_left, b_left, 'difference'),
+    ])
+    rmt = match(rpairs, 0)
+    d.section(('Уровень доверия по месяцам',
+               chart('odoo_line', 'coop.account.snapshot', [['partner_id.coop_is_me', '=', True]],
+                     ['date:month'], 'trust', match(spairs, 0))))
+    d.section(('Оценки, которые мне поставили',
+               chart('odoo_bar', r, about, ['rating'], '__count', rmt)),
+              ('Отзывы по месяцам',
+               chart('odoo_bar', r, about, ['create_date:month', 'rating'], '__count', rmt,
+                     legend='top')))
+    by_author = d.pivot('Кто оценил', r, about, ['__count'], rmt, rows=['author_id'],
+                        sorted_by='__count')
+    by_side = d.pivot('В какой роли', r, about, ['__count'], rmt, rows=['side'],
+                      sorted_by='__count')
+    d.tables(('Кто оценил', by_author), ('В какой роли меня оценили', by_side))
     return d
 
 
@@ -577,7 +612,7 @@ def exchange():
     return d
 
 
-DASHBOARDS = [money, deals, projects, exchange]
+DASHBOARDS = [money, deals, trust, projects, exchange]
 
 
 def main():

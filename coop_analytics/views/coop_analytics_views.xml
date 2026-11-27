@@ -371,15 +371,7 @@
             parent="menu_coop_analytics_root" action="action_coop_an_account" sequence="14"/>
   <menuitem id="menu_coop_analytics_activity" name="Активность"
             parent="menu_coop_analytics_root" action="action_coop_an_activity" sequence="15"/>
-  <menuitem id="menu_coop_analytics_money" name="Деньги"
-            parent="menu_coop_analytics_root" action="action_coop_an_money" sequence="20"/>
-  <menuitem id="menu_coop_analytics_deals" name="Сделки"
-            parent="menu_coop_analytics_root" action="action_coop_an_deals" sequence="30"/>
-  <menuitem id="menu_coop_analytics_contrib" name="Вклады в проекты"
-            parent="menu_coop_analytics_root" action="action_coop_an_contributions" sequence="40"/>
-  <menuitem id="menu_coop_analytics_dex" name="Биржа"
-            parent="menu_coop_analytics_root" action="action_coop_an_dex" sequence="50"/>
-  <menuitem id="menu_coop_analytics_courses" name="Обучение"
-            parent="menu_coop_analytics_root" action="action_coop_an_courses" sequence="60"/>
+  <!-- Разделы «Деньги» … «Обучение» с вкладками «Дашборд | Отчёт» —
+       data/coop_analytics_dashboards.xml: им нужны записи дашбордов. -->
 
 </odoo>

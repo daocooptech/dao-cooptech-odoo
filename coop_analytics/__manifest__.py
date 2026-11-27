@@ -21,10 +21,12 @@
     'author': 'ДАО КООПТЕХ',
     'website': 'https://daocooptech.ru',
     'category': 'Cooperative',
-    'version': '20.0.1.2.1',
+    'version': '20.0.1.3.0',
     'license': 'LGPL-3',
     'depends': ['board', 'spreadsheet_dashboard', 'spreadsheet_dashboard_sale',
-                'spreadsheet_dashboard_stock_account', 'spreadsheet_dashboard_event_sale', 'coop_theme', 'coop_deals', 'coop_wallet',
+                'spreadsheet_dashboard_stock_account', 'spreadsheet_dashboard_event_sale',
+                'spreadsheet_dashboard_account', 'spreadsheet_dashboard_hr_timesheet',
+                'spreadsheet_dashboard_sale_timesheet', 'coop_theme', 'coop_deals', 'coop_wallet',
                 'coop_projects', 'coop_matching', 'coop_crypto_exchange', 'coop_tokenomics',
                 'coop_digital_assets',
                 'coop_education', 'coop_people', 'coop_profile', 'coop_wall'],
@@ -39,11 +41,6 @@
         'web.assets_backend': [
             'coop_analytics/static/src/scss/coop_analytics.scss',
             'coop_analytics/static/src/js/chart_style.js',
-            'coop_analytics/static/src/js/measure_chips.js',
-            'coop_analytics/static/src/js/view_switch.js',
-            'coop_analytics/static/src/js/graph_style.js',
-            'coop_analytics/static/src/js/pivot_table.js',
-            'coop_analytics/static/src/xml/graph_panel.xml',
             'coop_analytics/static/src/js/board_tabs.js',
             'coop_analytics/static/src/xml/board_tabs.xml',
             'coop_analytics/static/src/scss/portfolio.scss',
@@ -52,6 +49,15 @@
             'coop_analytics/static/src/scss/forecast.scss',
             'coop_analytics/static/src/js/forecast.js',
             'coop_analytics/static/src/xml/forecast.xml',
+        ],
+        # Графики и сводная в 20 — ленивым пакетом: в основном их модулей ещё
+        # нет, заплатки там падают на `graph_renderer` / `pivot_renderer`.
+        'web.assets_backend_lazy': [
+            'coop_analytics/static/src/js/measure_chips.js',
+            'coop_analytics/static/src/js/view_switch.js',
+            'coop_analytics/static/src/js/graph_style.js',
+            'coop_analytics/static/src/js/pivot_table.js',
+            'coop_analytics/static/src/xml/graph_panel.xml',
         ],
         # Экран дашбордов грузится лениво, своим бандлом — вкладки над ним туда же.
         'spreadsheet.o_spreadsheet': [

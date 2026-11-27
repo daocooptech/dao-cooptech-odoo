@@ -41,7 +41,21 @@ const COOP_SCREEN_SECTION = { "Управление проектами": "Про
 
 /** Подразделы, чьи вкладки стоят над каталогом во всю рабочую область, а не
  *  первым блоком «Фильтра» (владелец 24.11.2026, «Мои ресурсы»). */
-export const COOP_WIDE_SUBTABS = ["coop_resources.menu_coop_my_resources"];
+// «Мои ресурсы» и разделы «Аналитики» («Дашборд | Отчёт», решение 708):
+// у дашборда и графика нет панели «Фильтр», куда уходят вкладки подраздела.
+export const COOP_WIDE_SUBTABS = [
+    "coop_resources.menu_coop_my_resources",
+    "coop_analytics.menu_coop_an_sec_money",
+    "coop_analytics.menu_coop_an_sec_deals",
+    "coop_analytics.menu_coop_an_sec_projects",
+    "coop_analytics.menu_coop_an_sec_dex",
+    "coop_analytics.menu_coop_an_sec_sales",
+    "coop_analytics.menu_coop_an_sec_invoicing",
+    "coop_analytics.menu_coop_an_sec_stock",
+    "coop_analytics.menu_coop_an_sec_tasks",
+    "coop_analytics.menu_coop_an_sec_timesheets",
+    "coop_analytics.menu_coop_an_sec_events",
+];
 
 export class CoopTabs extends Component {
     static template = "coop_theme.Tabs";
@@ -533,7 +547,6 @@ const SUBNAV_EXACT = {
     "Активность": "activity",
     "Деньги": "cash-banknote",
     "Сделки": "heart-handshake",
-    "Вклады в проекты": "pig-money",
     // CRM.
     "Продажи": "filter",
     "Отчеты": "chart-histogram",
@@ -561,8 +574,23 @@ const SUBNAV_EXACT = {
     "Узел сети": "router",
 };
 
-export function subnavIcon(name) {
-    return SUBNAV_EXACT[(name || "").trim()] || "layout-list";
+/**
+ * Значок по самому пункту меню — когда имя занято другим разделом: «Продажи»
+ * в «Аналитике» и в CRM, а значки меню не повторяются (№ 457, 14.11).
+ */
+const SUBNAV_BY_XMLID = {
+    "coop_analytics.menu_coop_an_sec_projects": "pig-money",
+    "coop_analytics.menu_coop_an_sec_trust": "mood-smile",
+    "coop_analytics.menu_coop_an_sec_sales": "basket",
+    "coop_analytics.menu_coop_an_sec_invoicing": "file-certificate",
+    "coop_analytics.menu_coop_an_sec_stock": "folder-open",
+    "coop_analytics.menu_coop_an_sec_tasks": "bookmarks",
+    "coop_analytics.menu_coop_an_sec_timesheets": "address-book",
+    "coop_analytics.menu_coop_an_sec_events": "microphone",
+};
+
+export function subnavIcon(name, xmlid) {
+    return SUBNAV_BY_XMLID[xmlid] || SUBNAV_EXACT[(name || "").trim()] || "layout-list";
 }
 
 /**
@@ -655,8 +683,8 @@ export class CoopSubnav extends CoopTabs {
         return this.state.tabs.length + this.state.tabsAfter.length > 1;
     }
 
-    icon(name) {
-        return subnavIcon(name);
+    icon(name, xmlid) {
+        return subnavIcon(name, xmlid);
     }
 
     toggleCollapsed() {

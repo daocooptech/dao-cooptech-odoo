@@ -343,7 +343,7 @@
            t-att-title="this.ui.subCollapsed ? tab.name : undefined"
            t-att-aria-current="tab.id === this.state.current ? 'page' : undefined"
            t-on-click.prevent="() => this.open(tab)">
-          <CoopIcon name="this.icon(tab.name)" size="18"/>
+          <CoopIcon name="this.icon(tab.name, tab.xmlid)" size="18"/>
           <span class="o_coop_subnav_label" t-out="tab.name"/>
         </a>
         <a t-if="this.state.fav" href="#" class="o_coop_subnav_item"
@@ -360,7 +360,7 @@
            t-att-title="this.ui.subCollapsed ? tab.name : undefined"
            t-att-aria-current="tab.id === this.state.current ? 'page' : undefined"
            t-on-click.prevent="() => this.open(tab)">
-          <CoopIcon name="this.icon(tab.name)" size="18"/>
+          <CoopIcon name="this.icon(tab.name, tab.xmlid)" size="18"/>
           <span class="o_coop_subnav_label" t-out="tab.name"/>
         </a>
       </nav>

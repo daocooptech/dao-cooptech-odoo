@@ -1,0 +1,753 @@
+{
+ "borders": {
+  "1": {
+   "bottom": {
+    "color": "#d2d2cb",
+    "style": "thin"
+   }
+  }
+ },
+ "chartOdooMenusReferences": {
+  "3a20f1b2-bd7c-5118-ad25-5a4bd044d2a0": "coop_analytics.menu_coop_analytics_deals",
+  "4c5c9b24-9072-589d-9f09-ec84790368b0": "coop_analytics.menu_coop_analytics_deals",
+  "56f0c4e4-2cdc-53a7-9e87-839ecd4103dd": "coop_analytics.menu_coop_analytics_deals",
+  "5c1ba5a0-5d16-59de-89d3-c3d6c5035f72": "coop_analytics.menu_coop_analytics_deals",
+  "6c096afd-b94f-5959-8e15-5b9cac7615ea": "coop_analytics.menu_coop_analytics_deals",
+  "b9163c20-6899-5bb4-84b8-86a0ea7f4e6d": "coop_analytics.menu_coop_analytics_deals"
+ },
+ "customTableStyles": {},
+ "formats": {
+  "1": "#,##0"
+ },
+ "globalFilters": [
+  {
+   "defaultValue": "last_12_months",
+   "id": "25fef4d6-5cb6-5bbe-860a-37cb33bc6b73",
+   "label": "Период",
+   "type": "date"
+  }
+ ],
+ "listNextId": 1,
+ "lists": {},
+ "pivotNextId": 8,
+ "pivots": {
+  "1": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    [
+     "target_id.coop_is_me",
+     "=",
+     true
+    ]
+   ],
+   "fieldMatching": {
+    "25fef4d6-5cb6-5bbe-860a-37cb33bc6b73": {
+     "chain": "create_date",
+     "offset": 0,
+     "type": "datetime"
+    }
+   },
+   "formulaId": "1",
+   "id": "1",
+   "measures": [
+    {
+     "fieldName": "__count",
+     "id": "__count"
+    }
+   ],
+   "model": "coop.deal.review",
+   "name": "отзывы обо мне",
+   "rows": [],
+   "sortedColumn": null,
+   "type": "ODOO"
+  },
+  "2": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    [
+     "target_id.coop_is_me",
+     "=",
+     true
+    ],
+    [
+     "rating",
+     "in",
+     [
+      "4",
+      "5"
+     ]
+    ]
+   ],
+   "fieldMatching": {
+    "25fef4d6-5cb6-5bbe-860a-37cb33bc6b73": {
+     "chain": "create_date",
+     "offset": 0,
+     "type": "datetime"
+    }
+   },
+   "formulaId": "2",
+   "id": "2",
+   "measures": [
+    {
+     "fieldName": "__count",
+     "id": "__count"
+    }
+   ],
+   "model": "coop.deal.review",
+   "name": "хорошие отзывы",
+   "rows": [],
+   "sortedColumn": null,
+   "type": "ODOO"
+  },
+  "3": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    [
+     "author_id.coop_is_me",
+     "=",
+     true
+    ]
+   ],
+   "fieldMatching": {
+    "25fef4d6-5cb6-5bbe-860a-37cb33bc6b73": {
+     "chain": "create_date",
+     "offset": 0,
+     "type": "datetime"
+    }
+   },
+   "formulaId": "3",
+   "id": "3",
+   "measures": [
+    {
+     "fieldName": "__count",
+     "id": "__count"
+    }
+   ],
+   "model": "coop.deal.review",
+   "name": "мои отзывы",
+   "rows": [],
+   "sortedColumn": null,
+   "type": "ODOO"
+  },
+  "4": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    [
+     "author_id.coop_is_me",
+     "=",
+     true
+    ]
+   ],
+   "fieldMatching": {
+    "25fef4d6-5cb6-5bbe-860a-37cb33bc6b73": {
+     "chain": "create_date",
+     "offset": -1,
+     "type": "datetime"
+    }
+   },
+   "formulaId": "4",
+   "id": "4",
+   "measures": [
+    {
+     "fieldName": "__count",
+     "id": "__count"
+    }
+   ],
+   "model": "coop.deal.review",
+   "name": "мои отзывы — прошлый период",
+   "rows": [],
+   "sortedColumn": null,
+   "type": "ODOO"
+  },
+  "5": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    [
+     "coop_is_me",
+     "=",
+     true
+    ]
+   ],
+   "fieldMatching": {},
+   "formulaId": "5",
+   "id": "5",
+   "measures": [
+    {
+     "fieldName": "coop_trust",
+     "id": "coop_trust"
+    }
+   ],
+   "model": "res.partner",
+   "name": "доверие",
+   "rows": [],
+   "sortedColumn": null,
+   "type": "ODOO"
+  },
+  "6": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    [
+     "target_id.coop_is_me",
+     "=",
+     true
+    ]
+   ],
+   "fieldMatching": {
+    "25fef4d6-5cb6-5bbe-860a-37cb33bc6b73": {
+     "chain": "create_date",
+     "offset": 0,
+     "type": "datetime"
+    }
+   },
+   "formulaId": "6",
+   "id": "6",
+   "measures": [
+    {
+     "fieldName": "__count",
+     "id": "__count"
+    }
+   ],
+   "model": "coop.deal.review",
+   "name": "Кто оценил",
+   "rows": [
+    {
+     "fieldName": "author_id"
+    }
+   ],
+   "sortedColumn": {
+    "domain": [],
+    "measure": "__count",
+    "order": "desc"
+   },
+   "type": "ODOO"
+  },
+  "7": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    [
+     "target_id.coop_is_me",
+     "=",
+     true
+    ]
+   ],
+   "fieldMatching": {
+    "25fef4d6-5cb6-5bbe-860a-37cb33bc6b73": {
+     "chain": "create_date",
+     "offset": 0,
+     "type": "datetime"
+    }
+   },
+   "formulaId": "7",
+   "id": "7",
+   "measures": [
+    {
+     "fieldName": "__count",
+     "id": "__count"
+    }
+   ],
+   "model": "coop.deal.review",
+   "name": "В какой роли",
+   "rows": [
+    {
+     "fieldName": "side"
+    }
+   ],
+   "sortedColumn": {
+    "domain": [],
+    "measure": "__count",
+    "order": "desc"
+   },
+   "type": "ODOO"
+  }
+ },
+ "revisionId": "START_REVISION",
+ "settings": {
+  "locale": {
+   "code": "ru_RU",
+   "dateFormat": "dd.mm.yyyy",
+   "decimalSeparator": ",",
+   "formulaArgSeparator": ";",
+   "name": "Russian",
+   "thousandsSeparator": " ",
+   "timeFormat": "hh:mm:ss",
+   "weekStart": 1
+  }
+ },
+ "sheets": [
+  {
+   "areGridLinesVisible": false,
+   "borders": {
+    "A24:C24": 1,
+    "A41:C41": 1,
+    "A7:G7": 1,
+    "E24:G24": 1,
+    "E41:G41": 1
+   },
+   "cells": {
+    "A24": "Оценки, которые мне поставили",
+    "A41": "Кто оценил",
+    "A42": "=PIVOT(6, 10, FALSE, FALSE)",
+    "A7": "Уровень доверия по месяцам",
+    "E24": "Отзывы по месяцам",
+    "E41": "В какой роли меня оценили",
+    "E42": "=PIVOT(7, 10, FALSE, FALSE)"
+   },
+   "colNumber": 7,
+   "cols": {
+    "0": {
+     "size": 250
+    },
+    "1": {
+     "size": 110
+    },
+    "2": {
+     "size": 80
+    },
+    "3": {
+     "size": 20
+    },
+    "4": {
+     "size": 250
+    },
+    "5": {
+     "size": 110
+    },
+    "6": {
+     "size": 80
+    }
+   },
+   "comments": {},
+   "conditionalFormats": [],
+   "dataValidationRules": [],
+   "figures": [
+    {
+     "col": 0,
+     "data": {
+      "dataRange": "Data!B2",
+      "sectionRule": {
+       "colors": {
+        "lowerColor": "#b3413a",
+        "middleColor": "#c98a2b",
+        "upperColor": "#146b64"
+       },
+       "lowerInflectionPoint": {
+        "operator": "<=",
+        "type": "number",
+        "value": "40"
+       },
+       "rangeMax": "100",
+       "rangeMin": "0",
+       "upperInflectionPoint": {
+        "operator": "<=",
+        "type": "number",
+        "value": "70"
+       }
+      },
+      "title": {
+       "bold": true,
+       "fontSize": 14,
+       "text": "Доверие, %"
+      },
+      "type": "gauge"
+     },
+     "height": 96,
+     "id": "3a20f1b2-bd7c-5118-ad25-5a4bd044d2a0",
+     "offset": {
+      "x": 0,
+      "y": 12
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "baseline": "Data!B4",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
+      "baselineMode": "text",
+      "humanize": false,
+      "keyValue": "Data!B3",
+      "title": {
+       "bold": true,
+       "text": "Отзывов обо мне"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "5c1ba5a0-5d16-59de-89d3-c3d6c5035f72",
+     "offset": {
+      "x": 303,
+      "y": 12
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "baseline": "Data!C5",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
+      "baselineDescr": {
+       "text": "к прошлому"
+      },
+      "baselineMode": "difference",
+      "humanize": false,
+      "keyValue": "Data!B5",
+      "title": {
+       "bold": true,
+       "text": "Я оценил"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "56f0c4e4-2cdc-53a7-9e87-839ecd4103dd",
+     "offset": {
+      "x": 606,
+      "y": 12
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "cumulatedStart": false,
+      "cumulative": false,
+      "dataSets": [],
+      "fieldMatching": {
+       "25fef4d6-5cb6-5bbe-860a-37cb33bc6b73": {
+        "chain": "date",
+        "offset": 0,
+        "type": "date"
+       }
+      },
+      "fillArea": true,
+      "legendPosition": "none",
+      "metaData": {
+       "cumulatedStart": false,
+       "groupBy": [
+        "date:month"
+       ],
+       "measure": "trust",
+       "mode": "line",
+       "order": null,
+       "resModel": "coop.account.snapshot"
+      },
+      "searchParams": {
+       "comparison": null,
+       "context": {},
+       "domain": [
+        [
+         "partner_id.coop_is_me",
+         "=",
+         true
+        ]
+       ],
+       "groupBy": [
+        "date:month"
+       ],
+       "orderBy": []
+      },
+      "stacked": true,
+      "title": {
+       "text": ""
+      },
+      "type": "odoo_line",
+      "verticalAxisPosition": "left"
+     },
+     "height": 345,
+     "id": "6c096afd-b94f-5959-8e15-5b9cac7615ea",
+     "offset": {
+      "x": 0,
+      "y": 178
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 900
+    },
+    {
+     "col": 0,
+     "data": {
+      "dataSets": [],
+      "fieldMatching": {
+       "25fef4d6-5cb6-5bbe-860a-37cb33bc6b73": {
+        "chain": "create_date",
+        "offset": 0,
+        "type": "datetime"
+       }
+      },
+      "legendPosition": "none",
+      "metaData": {
+       "cumulatedStart": false,
+       "groupBy": [
+        "rating"
+       ],
+       "measure": "__count",
+       "mode": "bar",
+       "order": null,
+       "resModel": "coop.deal.review"
+      },
+      "searchParams": {
+       "comparison": null,
+       "context": {},
+       "domain": [
+        [
+         "target_id.coop_is_me",
+         "=",
+         true
+        ]
+       ],
+       "groupBy": [
+        "rating"
+       ],
+       "orderBy": []
+      },
+      "stacked": true,
+      "title": {
+       "text": ""
+      },
+      "type": "odoo_bar",
+      "verticalAxisPosition": "left"
+     },
+     "height": 345,
+     "id": "b9163c20-6899-5bb4-84b8-86a0ea7f4e6d",
+     "offset": {
+      "x": 0,
+      "y": 586
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 440
+    },
+    {
+     "col": 0,
+     "data": {
+      "dataSets": [],
+      "fieldMatching": {
+       "25fef4d6-5cb6-5bbe-860a-37cb33bc6b73": {
+        "chain": "create_date",
+        "offset": 0,
+        "type": "datetime"
+       }
+      },
+      "legendPosition": "top",
+      "metaData": {
+       "cumulatedStart": false,
+       "groupBy": [
+        "create_date:month",
+        "rating"
+       ],
+       "measure": "__count",
+       "mode": "bar",
+       "order": null,
+       "resModel": "coop.deal.review"
+      },
+      "searchParams": {
+       "comparison": null,
+       "context": {},
+       "domain": [
+        [
+         "target_id.coop_is_me",
+         "=",
+         true
+        ]
+       ],
+       "groupBy": [
+        "create_date:month",
+        "rating"
+       ],
+       "orderBy": []
+      },
+      "stacked": true,
+      "title": {
+       "text": ""
+      },
+      "type": "odoo_bar",
+      "verticalAxisPosition": "left"
+     },
+     "height": 345,
+     "id": "4c5c9b24-9072-589d-9f09-ec84790368b0",
+     "offset": {
+      "x": 460,
+      "y": 586
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 440
+    }
+   ],
+   "formats": {},
+   "headerGroups": {
+    "COL": [],
+    "ROW": []
+   },
+   "id": "sheet1",
+   "isVisible": true,
+   "merges": [],
+   "name": "Dashboard",
+   "rowNumber": 54,
+   "rows": {
+    "23": {
+     "size": 40
+    },
+    "40": {
+     "size": 40
+    },
+    "6": {
+     "size": 40
+    }
+   },
+   "styles": {
+    "A24": 1,
+    "A41": 1,
+    "A7": 1,
+    "E24": 1,
+    "E41": 1
+   },
+   "tables": []
+  },
+  {
+   "areGridLinesVisible": true,
+   "borders": {},
+   "cells": {
+    "A2": "Уровень доверия",
+    "A3": "Отзывов обо мне",
+    "A4": "Из них хороших",
+    "A5": "Я оценил",
+    "B1": "Сейчас",
+    "B2": "=PIVOT.VALUE(5,\"coop_trust\")",
+    "B3": "=PIVOT.VALUE(1,\"__count\")",
+    "B4": "=IFERROR(CONCATENATE(ROUND(PIVOT.VALUE(2,\"__count\")/B3*100,0),\"% хороших\"),\"\")",
+    "B5": "=PIVOT.VALUE(3,\"__count\")",
+    "C1": "Прошлый период",
+    "C5": "=IFERROR(IF((PIVOT.VALUE(4,\"__count\"))=0,\"\",(PIVOT.VALUE(4,\"__count\"))),\"\")"
+   },
+   "colNumber": 3,
+   "cols": {
+    "0": {
+     "size": 220
+    },
+    "1": {
+     "size": 140
+    },
+    "2": {
+     "size": 140
+    }
+   },
+   "comments": {},
+   "conditionalFormats": [],
+   "dataValidationRules": [],
+   "figures": [],
+   "formats": {
+    "B2": 1,
+    "B3": 1,
+    "B5": 1,
+    "C5": 1
+   },
+   "headerGroups": {
+    "COL": [],
+    "ROW": []
+   },
+   "id": "4aa6ba75-4541-54b0-a9a3-9e2267e45fd5",
+   "isVisible": true,
+   "merges": [],
+   "name": "Data",
+   "rowNumber": 20,
+   "rows": {},
+   "styles": {
+    "A1": 2,
+    "B1": 2,
+    "C1": 2
+   },
+   "tables": []
+  },
+  {
+   "areGridLinesVisible": true,
+   "borders": {},
+   "cells": {
+    "A1": "Алтайский край",
+    "A10": "Ишим",
+    "A11": "Казань",
+    "A12": "Калининград",
+    "A13": "Кемерово",
+    "A14": "Краснодар",
+    "A15": "Красноярск",
+    "A16": "Курск",
+    "A17": "Магнитогорск",
+    "A18": "Москва",
+    "A19": "Нижний Новгород",
+    "A2": "Архангельск",
+    "A20": "Нижний Тагил",
+    "A21": "Новосибирск",
+    "A22": "Омск",
+    "A23": "Пермь",
+    "A24": "Псков",
+    "A25": "Ростов-на-Дону",
+    "A26": "Самара",
+    "A27": "Санкт-Петербург",
+    "A28": "Сочи",
+    "A29": "Тобольск",
+    "A3": "Владивосток",
+    "A30": "Тула",
+    "A31": "Тюмень",
+    "A32": "Уфа",
+    "A33": "Хабаровск",
+    "A34": "Челябинск",
+    "A35": "Ярославль",
+    "A4": "Волгоград",
+    "A5": "Вологда",
+    "A6": "Воронеж",
+    "A7": "Дербент",
+    "A8": "Екатеринбург",
+    "A9": "Иркутск"
+   },
+   "colNumber": 1,
+   "cols": {
+    "0": {
+     "size": 200
+    }
+   },
+   "comments": {},
+   "conditionalFormats": [],
+   "dataValidationRules": [],
+   "figures": [],
+   "formats": {},
+   "headerGroups": {
+    "COL": [],
+    "ROW": []
+   },
+   "id": "f9759189-b1fb-532f-9d78-d554207a7a34",
+   "isVisible": true,
+   "merges": [],
+   "name": "Lists",
+   "rowNumber": 40,
+   "rows": {},
+   "styles": {},
+   "tables": []
+  }
+ ],
+ "styles": {
+  "1": {
+   "bold": true,
+   "fontSize": 14,
+   "textColor": "#14171a"
+  },
+  "2": {
+   "bold": true
+  }
+ },
+ "uniqueFigureIds": true,
+ "version": "18.4.14"
+}
