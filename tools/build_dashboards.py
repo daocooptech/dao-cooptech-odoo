@@ -23,9 +23,15 @@ OUT = os.path.join(HERE, '..', 'coop_analytics', 'data', 'dashboards')
 NS = uuid.UUID('6f1c4d2e-5b7a-4c3e-9a41-2d0c7e1b8f53')
 
 VERSION = '18.4.14'
-BRAND = '#146b64'
-CARD_BG = '#EEF6F5'
-GOOD, BAD = '#00A04A', '#DC6965'
+# Цвета — токены дизайн-системы (владелец 27.11.2026: «графики по дизайн
+# системе»). Фон плиток и графиков в файл не пишется: без него движок
+# берёт фон своей темы, светлой или тёмной. Серии графиков красит
+# dashboards/dashboard_chart_style.js — по смыслу подписи и из токенов
+# текущей темы.
+INK = '#14171a'
+LINE_STRONG = '#d2d2cb'
+GOOD, BAD = '#146b64', '#b3413a'   # coop-teal, coop-error
+GAUGE = ('#b3413a', '#c98a2b', '#146b64')   # coop-error, coop-gold, coop-teal
 
 # Столбцы лица: две половины по 440 пикселей и зазор между ними. Всего 900:
 # тема держит основную колонку в 1214 пикселей, из них 200 — список
@@ -159,11 +165,11 @@ class Dashboard:
             fid = self.uid('card:' + title)
             if mode == 'gauge':
                 data = {
-                    'type': 'gauge', 'background': CARD_BG, 'dataRange': key,
-                    'title': {'text': title, 'bold': True, 'color': '#434343', 'fontSize': 14},
+                    'type': 'gauge', 'dataRange': key,
+                    'title': {'text': title, 'bold': True, 'fontSize': 14},
                     'sectionRule': {
-                        'colors': {'lowerColor': '#cc0000', 'middleColor': '#f1c232',
-                                   'upperColor': '#6aa84f'},
+                        'colors': {'lowerColor': GAUGE[0], 'middleColor': GAUGE[1],
+                                   'upperColor': GAUGE[2]},
                         'rangeMin': '0', 'rangeMax': '100',
                         'lowerInflectionPoint': {'type': 'number', 'value': '40', 'operator': '<='},
                         'upperInflectionPoint': {'type': 'number', 'value': '70', 'operator': '<='},
@@ -171,8 +177,8 @@ class Dashboard:
                 }
             else:
                 data = {
-                    'type': 'scorecard', 'background': CARD_BG, 'keyValue': key,
-                    'title': {'text': title, 'bold': True, 'color': '#434343'},
+                    'type': 'scorecard', 'keyValue': key,
+                    'title': {'text': title, 'bold': True},
                     'baselineColorUp': BAD if up_is_bad else GOOD,
                     'baselineColorDown': GOOD if up_is_bad else BAD,
                     'baselineMode': mode or 'difference', 'humanize': False,
@@ -226,7 +232,7 @@ class Dashboard:
 
     # ── сборка ────────────────────────────────────────────────────────
     def build(self):
-        styles = {'1': {'textColor': BRAND, 'bold': True, 'fontSize': 16},
+        styles = {'1': {'textColor': INK, 'bold': True, 'fontSize': 14},
                   '2': {'bold': True}}
         data_cells = dict(self.data_cells)
         data_cells.update({'B1': 'Сейчас', 'C1': 'Прошлый период'})
@@ -241,7 +247,8 @@ class Dashboard:
             'version': VERSION,
             'sheets': [
                 {'id': 'sheet1', 'name': 'Dashboard', 'colNumber': len(COLS),
-                 'rowNumber': max(self.row + 2, 50),
+                 # Без пустого хвоста: высота листа — высота экрана.
+                 'rowNumber': self.row + 1,
                  'rows': self.rows,
                  'cols': {str(i): {'size': s} for i, s in enumerate(COLS)},
                  'merges': [], 'cells': self.cells, 'styles': self.styles,
@@ -268,7 +275,7 @@ class Dashboard:
             ],
             'styles': styles,
             'formats': formats,
-            'borders': {'1': {'bottom': {'style': 'thin', 'color': '#CCCCCC'}}},
+            'borders': {'1': {'bottom': {'style': 'thin', 'color': LINE_STRONG}}},
             'revisionId': 'START_REVISION',
             'uniqueFigureIds': True,
             'settings': {'locale': {'name': 'Russian', 'code': 'ru_RU',
@@ -291,7 +298,7 @@ def chart(kind, model, domain, group_by, measure, matching, legend='none', stack
     mode = kind.split('_', 1)[1]
     meta = {'groupBy': group_by, 'measure': measure, 'order': order, 'resModel': model,
             'mode': mode, 'cumulatedStart': bool(extra.get('cumulatedStart'))}
-    data = {'type': kind, 'title': {'text': ''}, 'background': '#FFFFFF',
+    data = {'type': kind, 'title': {'text': ''},
             'legendPosition': legend, 'metaData': meta,
             'searchParams': {'comparison': None, 'context': {}, 'domain': domain,
                              'groupBy': group_by, 'orderBy': []},

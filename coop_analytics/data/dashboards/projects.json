@@ -2,7 +2,7 @@
  "borders": {
   "1": {
    "bottom": {
-    "color": "#CCCCCC",
+    "color": "#d2d2cb",
     "style": "thin"
    }
   }
@@ -470,10 +470,9 @@
     {
      "col": 0,
      "data": {
-      "background": "#EEF6F5",
       "baseline": "Data!C2",
-      "baselineColorDown": "#DC6965",
-      "baselineColorUp": "#00A04A",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
       "baselineDescr": {
        "text": "к прошлому"
       },
@@ -482,7 +481,6 @@
       "keyValue": "Data!B2",
       "title": {
        "bold": true,
-       "color": "#434343",
        "text": "Проектов"
       },
       "type": "scorecard"
@@ -500,10 +498,9 @@
     {
      "col": 0,
      "data": {
-      "background": "#EEF6F5",
       "baseline": "Data!C3",
-      "baselineColorDown": "#DC6965",
-      "baselineColorUp": "#00A04A",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
       "baselineDescr": {
        "text": "к прошлому"
       },
@@ -512,7 +509,6 @@
       "keyValue": "Data!B3",
       "title": {
        "bold": true,
-       "color": "#434343",
        "text": "Нужно собрать"
       },
       "type": "scorecard"
@@ -530,10 +526,9 @@
     {
      "col": 0,
      "data": {
-      "background": "#EEF6F5",
       "baseline": "Data!C4",
-      "baselineColorDown": "#DC6965",
-      "baselineColorUp": "#00A04A",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
       "baselineDescr": {
        "text": "к прошлому"
       },
@@ -542,7 +537,6 @@
       "keyValue": "Data!B4",
       "title": {
        "bold": true,
-       "color": "#434343",
        "text": "Собрано"
       },
       "type": "scorecard"
@@ -560,10 +554,9 @@
     {
      "col": 0,
      "data": {
-      "background": "#EEF6F5",
       "baseline": "Data!C5",
-      "baselineColorDown": "#DC6965",
-      "baselineColorUp": "#00A04A",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
       "baselineDescr": {
        "text": "к прошлому"
       },
@@ -572,7 +565,6 @@
       "keyValue": "Data!B5",
       "title": {
        "bold": true,
-       "color": "#434343",
        "text": "Готовность"
       },
       "type": "scorecard"
@@ -590,10 +582,9 @@
     {
      "col": 0,
      "data": {
-      "background": "#EEF6F5",
       "baseline": "Data!C6",
-      "baselineColorDown": "#DC6965",
-      "baselineColorUp": "#00A04A",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
       "baselineDescr": {
        "text": "к прошлому"
       },
@@ -602,7 +593,6 @@
       "keyValue": "Data!B6",
       "title": {
        "bold": true,
-       "color": "#434343",
        "text": "Вкладов принято"
       },
       "type": "scorecard"
@@ -620,10 +610,9 @@
     {
      "col": 0,
      "data": {
-      "background": "#EEF6F5",
       "baseline": "Data!C7",
-      "baselineColorDown": "#DC6965",
-      "baselineColorUp": "#00A04A",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
       "baselineDescr": {
        "text": "к прошлому"
       },
@@ -632,7 +621,6 @@
       "keyValue": "Data!B7",
       "title": {
        "bold": true,
-       "color": "#434343",
        "text": "Вкладчиков"
       },
       "type": "scorecard"
@@ -650,7 +638,6 @@
     {
      "col": 0,
      "data": {
-      "background": "#FFFFFF",
       "dataSets": [],
       "fieldMatching": {
        "1042f829-e0b4-548d-ba31-26d74ef85364": {
@@ -722,7 +709,6 @@
     {
      "col": 0,
      "data": {
-      "background": "#FFFFFF",
       "dataSets": [],
       "fieldMatching": {
        "1042f829-e0b4-548d-ba31-26d74ef85364": {
@@ -792,7 +778,6 @@
     {
      "col": 0,
      "data": {
-      "background": "#FFFFFF",
       "dataSets": [],
       "fieldMatching": {
        "1042f829-e0b4-548d-ba31-26d74ef85364": {
@@ -860,7 +845,6 @@
     {
      "col": 0,
      "data": {
-      "background": "#FFFFFF",
       "dataSets": [],
       "fieldMatching": {
        "1042f829-e0b4-548d-ba31-26d74ef85364": {
@@ -930,7 +914,6 @@
     {
      "col": 0,
      "data": {
-      "background": "#FFFFFF",
       "dataSets": [],
       "fieldMatching": {
        "1042f829-e0b4-548d-ba31-26d74ef85364": {
@@ -1005,7 +988,7 @@
    "isVisible": true,
    "merges": [],
    "name": "Dashboard",
-   "rowNumber": 76,
+   "rowNumber": 75,
    "rows": {
     "10": {
      "size": 40
@@ -1171,8 +1154,8 @@
  "styles": {
   "1": {
    "bold": true,
-   "fontSize": 16,
-   "textColor": "#146b64"
+   "fontSize": 14,
+   "textColor": "#14171a"
   },
   "2": {
    "bold": true

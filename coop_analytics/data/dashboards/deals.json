@@ -2,7 +2,7 @@
  "borders": {
   "1": {
    "bottom": {
-    "color": "#CCCCCC",
+    "color": "#d2d2cb",
     "style": "thin"
    }
   }
@@ -594,10 +594,9 @@
     {
      "col": 0,
      "data": {
-      "background": "#EEF6F5",
       "baseline": "Data!C2",
-      "baselineColorDown": "#DC6965",
-      "baselineColorUp": "#00A04A",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
       "baselineDescr": {
        "text": "к прошлому"
       },
@@ -606,7 +605,6 @@
       "keyValue": "Data!B2",
       "title": {
        "bold": true,
-       "color": "#434343",
        "text": "Сделок"
       },
       "type": "scorecard"
@@ -624,10 +622,9 @@
     {
      "col": 0,
      "data": {
-      "background": "#EEF6F5",
       "baseline": "Data!C3",
-      "baselineColorDown": "#DC6965",
-      "baselineColorUp": "#00A04A",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
       "baselineDescr": {
        "text": "к прошлому"
       },
@@ -636,7 +633,6 @@
       "keyValue": "Data!B3",
       "title": {
        "bold": true,
-       "color": "#434343",
        "text": "Сумма сделок"
       },
       "type": "scorecard"
@@ -654,10 +650,9 @@
     {
      "col": 0,
      "data": {
-      "background": "#EEF6F5",
       "baseline": "Data!C4",
-      "baselineColorDown": "#DC6965",
-      "baselineColorUp": "#00A04A",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
       "baselineDescr": {
        "text": "к прошлому"
       },
@@ -666,7 +661,6 @@
       "keyValue": "Data!B4",
       "title": {
        "bold": true,
-       "color": "#434343",
        "text": "Оплачено"
       },
       "type": "scorecard"
@@ -684,10 +678,9 @@
     {
      "col": 0,
      "data": {
-      "background": "#EEF6F5",
       "baseline": "Data!C5",
-      "baselineColorDown": "#DC6965",
-      "baselineColorUp": "#00A04A",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
       "baselineDescr": {
        "text": "к прошлому"
       },
@@ -696,7 +689,6 @@
       "keyValue": "Data!B5",
       "title": {
        "bold": true,
-       "color": "#434343",
        "text": "Завершено"
       },
       "type": "scorecard"
@@ -714,16 +706,14 @@
     {
      "col": 0,
      "data": {
-      "background": "#EEF6F5",
       "baseline": "Data!B7",
-      "baselineColorDown": "#DC6965",
-      "baselineColorUp": "#00A04A",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
       "baselineMode": "text",
       "humanize": false,
       "keyValue": "Data!B6",
       "title": {
        "bold": true,
-       "color": "#434343",
        "text": "Отзывов обо мне"
       },
       "type": "scorecard"
@@ -741,13 +731,12 @@
     {
      "col": 0,
      "data": {
-      "background": "#EEF6F5",
       "dataRange": "Data!B8",
       "sectionRule": {
        "colors": {
-        "lowerColor": "#cc0000",
-        "middleColor": "#f1c232",
-        "upperColor": "#6aa84f"
+        "lowerColor": "#b3413a",
+        "middleColor": "#c98a2b",
+        "upperColor": "#146b64"
        },
        "lowerInflectionPoint": {
         "operator": "<=",
@@ -764,7 +753,6 @@
       },
       "title": {
        "bold": true,
-       "color": "#434343",
        "fontSize": 14,
        "text": "Доверие, %"
       },
@@ -783,7 +771,6 @@
     {
      "col": 0,
      "data": {
-      "background": "#FFFFFF",
       "dataSets": [],
       "fieldMatching": {
        "b62e49ba-61d1-54c5-a6da-68fa83b3477b": {
@@ -857,7 +844,6 @@
     {
      "col": 0,
      "data": {
-      "background": "#FFFFFF",
       "dataSets": [],
       "fieldMatching": {
        "b62e49ba-61d1-54c5-a6da-68fa83b3477b": {
@@ -936,7 +922,6 @@
     {
      "col": 0,
      "data": {
-      "background": "#FFFFFF",
       "dataSets": [],
       "fieldMatching": {
        "b62e49ba-61d1-54c5-a6da-68fa83b3477b": {
@@ -1011,7 +996,6 @@
     {
      "col": 0,
      "data": {
-      "background": "#FFFFFF",
       "dataSets": [],
       "fieldMatching": {
        "b62e49ba-61d1-54c5-a6da-68fa83b3477b": {
@@ -1074,7 +1058,6 @@
     {
      "col": 0,
      "data": {
-      "background": "#FFFFFF",
       "dataSets": [],
       "fieldMatching": {
        "b62e49ba-61d1-54c5-a6da-68fa83b3477b": {
@@ -1151,7 +1134,6 @@
     {
      "col": 0,
      "data": {
-      "background": "#FFFFFF",
       "dataSets": [],
       "fieldMatching": {
        "b62e49ba-61d1-54c5-a6da-68fa83b3477b": {
@@ -1238,7 +1220,7 @@
    "isVisible": true,
    "merges": [],
    "name": "Dashboard",
-   "rowNumber": 93,
+   "rowNumber": 92,
    "rows": {
     "10": {
      "size": 40
@@ -1406,8 +1388,8 @@
  "styles": {
   "1": {
    "bold": true,
-   "fontSize": 16,
-   "textColor": "#146b64"
+   "fontSize": 14,
+   "textColor": "#14171a"
   },
   "2": {
    "bold": true

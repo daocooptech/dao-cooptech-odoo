@@ -2,7 +2,7 @@
  "borders": {
   "1": {
    "bottom": {
-    "color": "#CCCCCC",
+    "color": "#d2d2cb",
     "style": "thin"
    }
   }
@@ -514,10 +514,9 @@
     {
      "col": 0,
      "data": {
-      "background": "#EEF6F5",
       "baseline": "Data!C2",
-      "baselineColorDown": "#DC6965",
-      "baselineColorUp": "#00A04A",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
       "baselineDescr": {
        "text": "к прошлому"
       },
@@ -526,7 +525,6 @@
       "keyValue": "Data!B2",
       "title": {
        "bold": true,
-       "color": "#434343",
        "text": "Пришло"
       },
       "type": "scorecard"
@@ -544,10 +542,9 @@
     {
      "col": 0,
      "data": {
-      "background": "#EEF6F5",
       "baseline": "Data!C3",
-      "baselineColorDown": "#00A04A",
-      "baselineColorUp": "#DC6965",
+      "baselineColorDown": "#146b64",
+      "baselineColorUp": "#b3413a",
       "baselineDescr": {
        "text": "к прошлому"
       },
@@ -556,7 +553,6 @@
       "keyValue": "Data!B3",
       "title": {
        "bold": true,
-       "color": "#434343",
        "text": "Ушло"
       },
       "type": "scorecard"
@@ -574,10 +570,9 @@
     {
      "col": 0,
      "data": {
-      "background": "#EEF6F5",
       "baseline": "Data!C4",
-      "baselineColorDown": "#DC6965",
-      "baselineColorUp": "#00A04A",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
       "baselineDescr": {
        "text": "к прошлому"
       },
@@ -586,7 +581,6 @@
       "keyValue": "Data!B4",
       "title": {
        "bold": true,
-       "color": "#434343",
        "text": "Сальдо"
       },
       "type": "scorecard"
@@ -604,10 +598,9 @@
     {
      "col": 0,
      "data": {
-      "background": "#EEF6F5",
       "baseline": "Data!C5",
-      "baselineColorDown": "#DC6965",
-      "baselineColorUp": "#00A04A",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
       "baselineDescr": {
        "text": "к прошлому"
       },
@@ -616,7 +609,6 @@
       "keyValue": "Data!B5",
       "title": {
        "bold": true,
-       "color": "#434343",
        "text": "Операций"
       },
       "type": "scorecard"
@@ -634,10 +626,9 @@
     {
      "col": 0,
      "data": {
-      "background": "#EEF6F5",
       "baseline": "Data!C6",
-      "baselineColorDown": "#DC6965",
-      "baselineColorUp": "#00A04A",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
       "baselineDescr": {
        "text": "к прошлому"
       },
@@ -646,7 +637,6 @@
       "keyValue": "Data!B6",
       "title": {
        "bold": true,
-       "color": "#434343",
        "text": "Средняя операция"
       },
       "type": "scorecard"
@@ -664,7 +654,6 @@
     {
      "col": 0,
      "data": {
-      "background": "#FFFFFF",
       "dataSets": [],
       "fieldMatching": {
        "5e8cf146-1636-5917-adc6-689a356465f0": {
@@ -734,7 +723,6 @@
     {
      "col": 0,
      "data": {
-      "background": "#FFFFFF",
       "cumulatedStart": true,
       "cumulative": true,
       "dataSets": [],
@@ -805,7 +793,6 @@
     {
      "col": 0,
      "data": {
-      "background": "#FFFFFF",
       "dataSets": [],
       "fieldMatching": {
        "5e8cf146-1636-5917-adc6-689a356465f0": {
@@ -878,7 +865,7 @@
    "isVisible": true,
    "merges": [],
    "name": "Dashboard",
-   "rowNumber": 61,
+   "rowNumber": 60,
    "rows": {
     "10": {
      "size": 40
@@ -1034,8 +1021,8 @@
  "styles": {
   "1": {
    "bold": true,
-   "fontSize": 16,
-   "textColor": "#146b64"
+   "fontSize": 14,
+   "textColor": "#14171a"
   },
   "2": {
    "bold": true

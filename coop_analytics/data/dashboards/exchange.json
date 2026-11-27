@@ -2,7 +2,7 @@
  "borders": {
   "1": {
    "bottom": {
-    "color": "#CCCCCC",
+    "color": "#d2d2cb",
     "style": "thin"
    }
   }
@@ -435,10 +435,9 @@
     {
      "col": 0,
      "data": {
-      "background": "#EEF6F5",
       "baseline": "Data!C2",
-      "baselineColorDown": "#DC6965",
-      "baselineColorUp": "#00A04A",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
       "baselineDescr": {
        "text": "к прошлому"
       },
@@ -447,7 +446,6 @@
       "keyValue": "Data!B2",
       "title": {
        "bold": true,
-       "color": "#434343",
        "text": "Сделок на бирже"
       },
       "type": "scorecard"
@@ -465,10 +463,9 @@
     {
      "col": 0,
      "data": {
-      "background": "#EEF6F5",
       "baseline": "Data!C3",
-      "baselineColorDown": "#DC6965",
-      "baselineColorUp": "#00A04A",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
       "baselineDescr": {
        "text": "к прошлому"
       },
@@ -477,7 +474,6 @@
       "keyValue": "Data!B3",
       "title": {
        "bold": true,
-       "color": "#434343",
        "text": "Оборот биржи"
       },
       "type": "scorecard"
@@ -495,15 +491,13 @@
     {
      "col": 0,
      "data": {
-      "background": "#EEF6F5",
-      "baselineColorDown": "#DC6965",
-      "baselineColorUp": "#00A04A",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
       "baselineMode": "difference",
       "humanize": false,
       "keyValue": "Data!B4",
       "title": {
        "bold": true,
-       "color": "#434343",
        "text": "Пулов открыто"
       },
       "type": "scorecard"
@@ -521,15 +515,13 @@
     {
      "col": 0,
      "data": {
-      "background": "#EEF6F5",
-      "baselineColorDown": "#DC6965",
-      "baselineColorUp": "#00A04A",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
       "baselineMode": "difference",
       "humanize": false,
       "keyValue": "Data!B5",
       "title": {
        "bold": true,
-       "color": "#434343",
        "text": "Доля выручки пулам, средняя"
       },
       "type": "scorecard"
@@ -547,10 +539,9 @@
     {
      "col": 0,
      "data": {
-      "background": "#EEF6F5",
       "baseline": "Data!C6",
-      "baselineColorDown": "#DC6965",
-      "baselineColorUp": "#00A04A",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
       "baselineDescr": {
        "text": "к прошлому"
       },
@@ -559,7 +550,6 @@
       "keyValue": "Data!B6",
       "title": {
        "bold": true,
-       "color": "#434343",
        "text": "Мои обмены"
       },
       "type": "scorecard"
@@ -577,10 +567,9 @@
     {
      "col": 0,
      "data": {
-      "background": "#EEF6F5",
       "baseline": "Data!C7",
-      "baselineColorDown": "#DC6965",
-      "baselineColorUp": "#00A04A",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
       "baselineDescr": {
        "text": "к прошлому"
       },
@@ -589,7 +578,6 @@
       "keyValue": "Data!B7",
       "title": {
        "bold": true,
-       "color": "#434343",
        "text": "Мой оборот"
       },
       "type": "scorecard"
@@ -607,7 +595,6 @@
     {
      "col": 0,
      "data": {
-      "background": "#FFFFFF",
       "dataSets": [],
       "fieldMatching": {
        "3f362a12-faf7-5162-9151-5a225e8f6f95": {
@@ -662,7 +649,6 @@
     {
      "col": 0,
      "data": {
-      "background": "#FFFFFF",
       "dataSets": [],
       "fieldMatching": {
        "3f362a12-faf7-5162-9151-5a225e8f6f95": {
@@ -721,7 +707,6 @@
     {
      "col": 0,
      "data": {
-      "background": "#FFFFFF",
       "dataSets": [],
       "fieldMatching": {
        "641643e4-5cfe-5678-b835-50eae2c32430": {
@@ -789,7 +774,6 @@
     {
      "col": 0,
      "data": {
-      "background": "#FFFFFF",
       "dataSets": [],
       "fieldMatching": {
        "03eec0af-b46e-542b-9ada-65555e3f4db7": {
@@ -848,7 +832,6 @@
     {
      "col": 0,
      "data": {
-      "background": "#FFFFFF",
       "cumulatedStart": false,
       "cumulative": false,
       "dataSets": [],
@@ -911,7 +894,7 @@
    "isVisible": true,
    "merges": [],
    "name": "Dashboard",
-   "rowNumber": 76,
+   "rowNumber": 75,
    "rows": {
     "10": {
      "size": 40
@@ -1073,8 +1056,8 @@
  "styles": {
   "1": {
    "bold": true,
-   "fontSize": 16,
-   "textColor": "#146b64"
+   "fontSize": 14,
+   "textColor": "#14171a"
   },
   "2": {
    "bold": true

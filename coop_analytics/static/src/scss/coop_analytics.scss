@@ -162,21 +162,81 @@
   }
 }
 
-// Готовые дашборды (слой 2). Таблица дашборда растягивается на высоту
-// родителя, а тема платформы ведёт страницу общей прокруткой, без высоты
-// у экрана: дашборд сжимался до одной строки в 21 пиксель. Высота — до
-// низа окна, прокрутка — внутри таблицы, как у движка. На телефоне свой
-// вид (фигуры столбиком), его не трогаем.
+// Готовые дашборды (слой 2) — часть страницы, а не страница в странице
+// (владелец 27.11.2026: «куча прокруток»). Высоту окна таблицы ставит
+// dashboards/dashboard_fit.js — высота всего листа, масштаб по ширине;
+// прокрутка одна, у страницы. До высоты из скрипта — 480, чтобы экран не
+// схлопывался. На телефоне свой вид (фигуры столбиком), его не трогаем.
+//
+// Фон листа движок красит цветом своей верхней панели — у нас это
+// чернильный цвет боковой полосы, и дашборд стоял на чёрном. Фон — цвет
+// страницы, в обеих темах.
 .o_spreadsheet_dashboard_action {
+  --os-canvas-background-color: var(--coop-paper, #fbfbf9);
+
   > .o_content:not(.o_mobile_dashboard) {
-    height: calc(100vh - 170px);
-    min-height: 480px;
+    height: auto;
+    overflow: visible;
   }
 
   .o_renderer {
     flex: 1 1 auto;
-    height: 100%;
+    min-height: 480px;
     min-width: 0;
+  }
+
+  // Лист вписан целиком — прокручивать внутри нечего, полосы движка
+  // остались бы пустыми дорожками.
+  > .o_content:not(.o_mobile_dashboard) .o-dashboard-grid .o-scrollbar {
+    display: none;
+  }
+  // Графики (Chart.js) рисуются токенами текущей темы
+  // (dashboards/dashboard_chart_style.js) — фильтр тёмной темы движка
+  // поверх них искажал цвета. Плитки и шкалу рисует сам движок, им фильтр
+  // оставлен.
+  .o-figure-wrapper.os-theme-dependant:has(canvas.o-figure-canvas:not(.o-scorecard):not(.o-gauge-chart)) {
+    filter: none;
+  }
+
+  // Список дашбордов — как меню раздела (токены `coop-nav-*`). Движок
+  // красил пункты чёрным, выбранный — голубым: в тёмной теме слов было не
+  // видно (владелец 27.11.2026).
+  .o_spreadsheet_dashboard_search_panel {
+    color: var(--coop-ink, #14171a);
+
+    .o_search_panel_section_header {
+      color: var(--coop-slate, #4a4a44);
+    }
+
+    .o_search_panel_category_value {
+      color: var(--coop-ink, #14171a);
+      background: transparent;
+      border: 1px solid transparent !important;
+      border-radius: 8px;
+      white-space: normal;
+
+      &:hover {
+        background: var(--coop-surface, #f2f2ee);
+      }
+
+      &.active {
+        background: var(--coop-nav-active, #ffffff);
+        border-color: var(--coop-line, #e6e6e1) !important;
+        color: var(--coop-ink, #14171a);
+        font-weight: 600;
+      }
+
+      // Название целиком, переносом, а не «Мои сделки и дов…» (владелец
+      // 27.11.2026: «не все слова в меню входят целиком»).
+      .o_dashboard_name {
+        color: inherit;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+        overflow-wrap: anywhere;
+        line-height: 1.3;
+      }
+    }
   }
 }
 
