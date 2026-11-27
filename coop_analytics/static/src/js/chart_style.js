@@ -305,6 +305,9 @@ export function restyle(config, { pieToBars = false } = {}) {
         // — его цвета) заменяет штатная Chart.js.
         const labelsOptions = { ...(legend.labels || {}) };
         delete labelsOptions.generateLabels;
+        // Расшифровка — над графиком, словами, слева (образец «Сделки»).
+        legend.position = "top";
+        legend.align = "start";
         legend.labels = {
             ...labelsOptions,
             color: t.slate,

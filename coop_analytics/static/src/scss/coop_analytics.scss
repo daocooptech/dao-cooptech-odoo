@@ -271,3 +271,117 @@
     }
   }
 }
+
+// ── Панель отчёта «График» — по образцу «Сделки» (xml/graph_panel.xml) ──
+// Переключатель вида с подписями (ViewSwitch); на графике он — в ряду с
+// мерой, а штатный в панели управления скрыт, чтобы не было двух.
+.o_action:has(.o_graph_renderer) .o_control_panel .o_cp_switch_buttons {
+  display: none !important;
+}
+.o_graph_renderer {
+  .o_coop_viewswitch {
+    display: inline-flex;
+    gap: 2px;
+    padding: 2px;
+    border-radius: 10px;
+    background: var(--coop-surface, #f2f2ee);
+  }
+  .o_coop_viewswitch_btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--coop-slate, #4a4a44);
+    font-size: 13px;
+    &:hover { color: var(--coop-ink, #14171a); }
+    &.active {
+      background: var(--coop-white, #ffffff);
+      border-color: var(--coop-line, #e6e6e1);
+      color: var(--coop-ink, #14171a);
+      font-weight: 600;
+    }
+  }
+  // «Мера: Сумма» — поле выбора, как в образце, а не тёмная кнопка.
+  .o_report_measures {
+    background: var(--coop-white, #ffffff) !important;
+    border: 1px solid var(--coop-line-strong, #d2d2cb) !important;
+    color: var(--coop-ink, #14171a) !important;
+    font-weight: 500;
+    &::before {
+      content: "Мера: ";
+      color: var(--coop-slate, #4a4a44);
+      font-weight: 400;
+    }
+  }
+
+  .o_coop_graph_head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 12px;
+    margin: 0 16px;
+    padding: 14px 16px 4px;
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-bottom: 0;
+    border-radius: 12px 12px 0 0;
+    background: var(--coop-white, #ffffff);
+  }
+  .o_coop_graph_total {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    span {
+      font: 500 10.5px/1.2 'JetBrains Mono', ui-monospace, monospace;
+      text-transform: uppercase;
+      letter-spacing: .02em;
+      color: var(--coop-slate, #4a4a44);
+    }
+    b { font: 700 22px/1.2 'JetBrains Mono', ui-monospace, monospace; color: var(--coop-ink, #14171a); }
+  }
+  .o_coop_graph_steps {
+    display: inline-flex;
+    gap: 14px;
+    button {
+      padding: 2px 0;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      background: none;
+      color: var(--coop-slate, #4a4a44);
+      font-size: 13px;
+      &.active { color: var(--coop-ink, #14171a); border-bottom-color: var(--coop-ink, #14171a); font-weight: 600; }
+    }
+  }
+  // График и подпись — продолжение той же карточки.
+  .o_graph_canvas_container {
+    margin: 0 16px;
+    border: 1px solid var(--coop-line, #e6e6e1) !important;
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+    background: var(--coop-white, #ffffff) !important;
+  }
+  .o_coop_graph_note {
+    margin: 0 16px 16px;
+    padding: 4px 16px 14px;
+    border: 1px solid var(--coop-line, #e6e6e1);
+    border-top: 0;
+    border-radius: 0 0 12px 12px;
+    background: var(--coop-white, #ffffff);
+    font-size: 12px;
+    color: var(--coop-slate, #4a4a44);
+  }
+}
+
+// На «Сводной» и «Списке» тех же отчётов переключатель — штатный, в панели
+// управления; подписи — как у переключателя на графике.
+.o_cp_switch_buttons:has(.o_switch_view.o_graph) .o_switch_view {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  &::after {
+    content: attr(data-tooltip);
+    font-size: 13px;
+  }
+}

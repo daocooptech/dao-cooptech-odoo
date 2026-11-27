@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!--
+    Панель отчёта «График» — по образцу «Сделки» дизайн-системы
+    (AnalyticsDealsPage; владелец 27.11.2026: «что за куча кнопок
+    невпопад»). В ряду: мера слева, переключатель вида с подписями справа.
+    Накопление, сортировка и тип графика убраны: в образце их нет, тип
+    графика задаёт сам отчёт.
+  -->
+  <t t-inherit="web.GraphView.Buttons" t-inherit-mode="extension">
+    <xpath expr="//div[@aria-label='Graph actions']" position="replace">
+      <nav class="ms-auto o_coop_viewswitch" role="toolbar" aria-label="Вид отчёта"
+           t-if="this.coopViews().length > 1">
+        <button t-foreach="this.coopViews()" t-as="v" t-key="v.type" type="button"
+                class="o_coop_viewswitch_btn" t-att-class="{ active: v.active }"
+                t-attf-class="o_{{v.type}}"
+                t-on-click="() => this.coopSwitchView(v.type)">
+          <i class="oi oi-fw" t-att-data-icon="v.icon"/>
+          <span t-out="this.coopViewName(v)"/>
+        </button>
+      </nav>
+    </xpath>
+  </t>
+
+  <!-- Над графиком — итог за период и шаг; под ним — что показано. -->
+  <t t-inherit="web.GraphRenderer" t-inherit-mode="extension">
+    <xpath expr="//div[hasclass('o_graph_canvas_container')]" position="before">
+      <header class="o_coop_graph_head" t-if="this.model.hasData() and this.model.metaData.mode !== 'pie'">
+        <div class="o_coop_graph_total">
+          <span t-out="this.coopTotalLabel()"/>
+          <b t-out="this.coopTotal()"/>
+        </div>
+        <nav class="o_coop_graph_steps" t-if="this.coopDateGroup()" aria-label="Шаг">
+          <button t-foreach="this.coopSteps" t-as="s" t-key="s.id" type="button"
+                  t-att-class="{ active: this.coopDateGroup().interval === s.id }"
+                  t-on-click="() => this.coopSetStep(s.id)" t-out="s.label"/>
+        </nav>
+      </header>
+    </xpath>
+    <xpath expr="//div[hasclass('o_graph_canvas_container')]" position="after">
+      <p class="o_coop_graph_note" t-if="this.model.hasData()" t-out="this.coopCaption()"/>
+    </xpath>
+  </t>
+
+</templates>
