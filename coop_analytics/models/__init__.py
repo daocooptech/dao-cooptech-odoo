@@ -6,3 +6,4 @@ from . import market_fill
 from . import portfolio
 from . import forecast
 from . import dashboard_ru
+from . import menu_modules
