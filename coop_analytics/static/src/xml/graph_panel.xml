@@ -1,16 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-  <!--
-    Панель отчёта «График» — по образцу «Сделки» дизайн-системы
-    (AnalyticsDealsPage; владелец 27.11.2026: «что за куча кнопок
-    невпопад»). В ряду: мера слева, переключатель вида с подписями справа.
-    Накопление, сортировка и тип графика убраны: в образце их нет, тип
-    графика задаёт сам отчёт.
-  -->
-  <t t-inherit="web.GraphView.Buttons" t-inherit-mode="extension">
-    <xpath expr="//div[@aria-label='Graph actions']" position="replace">
-      <nav class="ms-auto o_coop_viewswitch" role="toolbar" aria-label="Вид отчёта"
+  <!-- Переключатель вида с подписями (ViewSwitch) — у графика и сводной. -->
+  <t t-name="coop_analytics.ViewSwitch">
+    <nav class="ms-auto o_coop_viewswitch" role="toolbar" aria-label="Вид отчёта"
            t-if="this.coopViews().length > 1">
         <button t-foreach="this.coopViews()" t-as="v" t-key="v.type" type="button"
                 class="o_coop_viewswitch_btn" t-att-class="{ active: v.active }"
@@ -20,6 +13,26 @@
           <span t-out="this.coopViewName(v)"/>
         </button>
       </nav>
+  </t>
+
+  <!--
+    Панель отчёта «График» — по образцу «Сделки» дизайн-системы
+    (AnalyticsDealsPage; владелец 27.11.2026: «что за куча кнопок
+    невпопад»). В ряду: мера слева, переключатель вида с подписями справа.
+    Накопление, сортировка и тип графика убраны: в образце их нет, тип
+    графика задаёт сам отчёт.
+  -->
+  <t t-inherit="web.GraphView.Buttons" t-inherit-mode="extension">
+    <xpath expr="//div[@aria-label='Graph actions']" position="replace">
+      <t t-call="coop_analytics.ViewSwitch"/>
+    </xpath>
+  </t>
+
+  <!-- Сводная — так же: мера слева, переключатель справа; разворот осей,
+       «развернуть всё» и выгрузка убраны, как и на графике. -->
+  <t t-inherit="web.PivotView.Buttons" t-inherit-mode="extension">
+    <xpath expr="//div[@aria-label='Pivot settings']" position="replace">
+      <t t-call="coop_analytics.ViewSwitch"/>
     </xpath>
   </t>
 

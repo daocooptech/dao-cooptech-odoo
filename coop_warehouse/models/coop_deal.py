@@ -21,8 +21,11 @@ class CoopDeal(models.Model):
              'сданный другим объём.')
     warehouse_offer_id = fields.Many2one(
         'coop.warehouse.offer', string='Объявление на бирже', index=True)
+    # Не мера отчётов: у складов разные единицы (паллеты, м², м³), и сумма
+    # по сделкам ничего не значит (владелец 27.11.2026: «что такое объём
+    # места?» в мерах «Сделок»).
     warehouse_volume = fields.Float(
-        string='Объём места', digits=(12, 1),
+        string='Объём места', digits=(12, 1), aggregator=None,
         help='Сколько места занято по этой сделке, в единице учёта склада.')
     warehouse_terms = fields.Selection(
         TERM_KINDS, string='Условие по складу')

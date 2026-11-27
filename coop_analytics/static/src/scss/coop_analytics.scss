@@ -275,10 +275,11 @@
 // ── Панель отчёта «График» — по образцу «Сделки» (xml/graph_panel.xml) ──
 // Переключатель вида с подписями (ViewSwitch); на графике он — в ряду с
 // мерой, а штатный в панели управления скрыт, чтобы не было двух.
-.o_action:has(.o_graph_renderer) .o_control_panel .o_cp_switch_buttons {
+.o_action:has(.o_graph_renderer) .o_control_panel .o_cp_switch_buttons,
+.o_action:has(.o_pivot_buttons .o_coop_viewswitch) .o_control_panel .o_cp_switch_buttons {
   display: none !important;
 }
-.o_graph_renderer {
+.o_graph_renderer, .o_pivot_buttons {
   .o_coop_viewswitch {
     display: inline-flex;
     gap: 2px;
@@ -304,12 +305,17 @@
       font-weight: 600;
     }
   }
-  // «Мера: Сумма» — поле выбора, как в образце, а не тёмная кнопка.
+  // Выбор меры — поле, как в образце, а не тёмная кнопка.
   .o_report_measures {
     background: var(--coop-white, #ffffff) !important;
     border: 1px solid var(--coop-line-strong, #d2d2cb) !important;
     color: var(--coop-ink, #14171a) !important;
     font-weight: 500;
+  }
+}
+.o_graph_renderer {
+  // «Мера: Сумма».
+  .o_report_measures {
     &::before {
       content: "Мера: ";
       color: var(--coop-slate, #4a4a44);
@@ -384,4 +390,58 @@
     content: attr(data-tooltip);
     font-size: 13px;
   }
+}
+
+// ── Сводная — как Table дизайн-системы ──────────────────────────────
+// Шапка на `coop-surface`, текст `coop-slate`; строки белые, между ними
+// `coop-line`; числа вправо и моноширинным; без полосатой заливки и без
+// значков разворота (заголовок по-прежнему разворачивается щелчком).
+.o_pivot {
+  margin-bottom: 16px;
+  // Широкая сводная прокручивается внутри себя, а не всей страницей.
+  overflow-x: auto;
+  > table {
+    width: auto;
+    min-width: 60%;
+    border: 1px solid var(--coop-line, #e6e6e1) !important;
+    border-radius: 12px;
+    border-collapse: separate !important;
+    border-spacing: 0;
+    overflow: hidden;
+    background: var(--coop-white, #ffffff);
+    font-size: 12.5px;
+    color: var(--coop-ink, #14171a);
+  }
+  th, td {
+    padding: 7px 10px !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--coop-line, #e6e6e1) !important;
+    background: var(--coop-white, #ffffff) !important;
+  }
+  thead th {
+    background: var(--coop-surface, #f2f2ee) !important;
+    color: var(--coop-slate, #4a4a44) !important;
+    font-weight: 500 !important;
+  }
+  tbody tr:last-child > * { border-bottom: 0 !important; }
+  tbody tr:hover > * { background: var(--coop-surface, #f2f2ee) !important; }
+  .o_pivot_header_cell_opened > .oi,
+  .o_pivot_header_cell_closed > .oi,
+  th > .oi[data-icon] {
+    display: none;
+  }
+  .o_pivot_cell_value {
+    text-align: right;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .o_pivot_measure_row { text-align: right !important; }
+}
+
+// «Моя панель»: модуль board ставит каждому виджету минимальную ширину
+// 1200 точек — у каждого графика была своя прокрутка (владелец
+// 27.11.2026). Виджет — во всю ширину колонки, без прокрутки.
+.o-dashboard-action > .o_view_controller .o_content > .o_renderer {
+  min-width: 0 !important;
 }

@@ -26,11 +26,12 @@
     <field name="model">coop.deal</field>
     <field name="priority">90</field>
     <field name="arch" type="xml">
+      <!-- Как в образце «Сделки»: месяцы — строками, состояния — столбцами,
+           одна мера, итог справа. -->
       <pivot string="Сделки">
-        <field name="subject" type="row"/>
+        <field name="signed_on" interval="month" type="row"/>
         <field name="state" type="col"/>
         <field name="amount" type="measure"/>
-        <field name="amount_paid" type="measure"/>
       </pivot>
     </field>
   </record>

@@ -4,22 +4,21 @@
 Штатная панель `board` хранит у каждого участника свою разметку
 (`ir.ui.view.custom`), а тем, кто её не настраивал, показывает общий вид
 `board.board_my_dash_view`. Этот общий вид и становится панелью по
-умолчанию: деньги и сделки слева, вклады, биржа и обучение справа, колонки
-поровну — в узкой правой графики сжимались до нечитаемого. Настроил
+умолчанию: одна колонка, по графику в строке (владелец 27.11.2026: «у
+каждого графика прокрутка, а может их сделать по 1 графику в строку?» —
+в двух колонках графики не помещались и прокручивались). Настроил
 панель под себя — дальше она его, по умолчанию её не перетирает.
 """
 from xml.sax.saxutils import escape
 
 from odoo import api, models
 
-# (действие, подпись, вид) — по колонкам.
+# (действие, подпись, вид) — по колонкам; колонка одна.
 DEFAULT_COLUMNS = [
     [
         ('coop_analytics.action_coop_an_account', 'Мой аккаунт', 'kanban'),
         ('coop_analytics.action_coop_an_money', 'Деньги по месяцам', 'graph'),
         ('coop_analytics.action_coop_an_deals', 'Сделки по месяцам', 'graph'),
-    ],
-    [
         ('coop_analytics.action_coop_an_activity', 'Моя активность по месяцам', 'graph'),
         ('coop_analytics.action_coop_an_contributions', 'Мои вклады в проекты', 'graph'),
         ('coop_analytics.action_coop_an_dex', 'Обмены на бирже', 'graph'),
@@ -49,6 +48,6 @@ class Board(models.AbstractModel):
                                  'context="{}" domain="%s"/>' % (act.id, title, mode,
                                                                escape(domain)))
             columns.append('<column>%s</column>' % ''.join(items))
-        view.sudo().arch = ('<form string="Моя панель"><board style="1-1">%s</board></form>'
+        view.sudo().arch = ('<form string="Моя панель"><board style="1">%s</board></form>'
                             % ''.join(columns))
         return True

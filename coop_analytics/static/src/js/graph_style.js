@@ -4,6 +4,7 @@ import { GraphRenderer } from "@web/views/graph/graph_renderer";
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
 import { restyle } from "@coop_analytics/js/chart_style";
+import { coopViewSwitch } from "@coop_analytics/js/view_switch";
 
 const nf = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 });
 const STEP_NOUN = { day: "день", week: "неделя", month: "месяц", quarter: "квартал", year: "год" };
@@ -29,19 +30,7 @@ patch(GraphRenderer.prototype, {
         return restyle(super.getChartConfig());
     },
 
-    // ── переключатель вида ────────────────────────────────────────────
-    coopViews() {
-        return this.env.config?.viewSwitcherEntries || [];
-    },
-    coopViewName(view) {
-        // В образце — «Сводная», без «таблицы».
-        return view.type === "pivot" ? "Сводная" : view.name;
-    },
-    coopSwitchView(type) {
-        if (!this.coopViews().find((v) => v.type === type)?.active) {
-            this.coopAction.switchView(type);
-        }
-    },
+    ...coopViewSwitch,
 
     // ── итог и шаг ────────────────────────────────────────────────────
     coopMeasure() {
