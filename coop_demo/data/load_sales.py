@@ -208,56 +208,96 @@ def load_sales(env, login='dashkevich', target=SO_TARGET):
         holders = _holders(env, org, 'sales_team.group_sale_salesman')
         if not offers or not holders:
             continue
-        company = org.coop_company_id
         count = rnd.randint(8, 14) if org in showcase else rnd.choice((0, 1, 1, 2, 2, 3))
         for number in range(count):
             xmlid = _key(env, 'so', org, number)
             if _have(env, xmlid):
                 continue
-            client = clients[rnd.randrange(len(clients))]
-            if client == org or client.user_ids & holders:
-                continue
-            state = _sale_state(rnd)
-            moment = _when(rnd, today, state)
-            seller = holders[rnd.randrange(len(holders))]
-            lines = []
-            for resource in rnd.sample(list(offers), k=min(len(offers), rnd.randint(1, 3))):
-                product = _product(env, company, resource, rnd)
-                lines.append((0, 0, {
-                    'product_id': product.id,
-                    'product_uom_qty': rnd.choice((1, 2, 3, 5, 10, 12, 20, 50)),
-                    'price_unit': product.list_price,
-                }))
-            try:
-                with env.cr.savepoint():
-                    order = env['sale.order'].sudo().with_company(company).create({
-                        'partner_id': client.id,
-                        'company_id': company.id,
-                        'user_id': seller.id,
-                        'team_id': _team(env, company).id,
-                        'order_line': lines,
-                        'note': rnd.choice(SO_NOTES) or False,
-                        'client_order_ref': rnd.random() < 0.4 and 'Заявка № %s' % rnd.randint(100, 9999) or False,
-                    })
-                    _no_vat(org, order, moment)
-                    if state == 'sent':
-                        order.write({'state': 'sent'})
-                    elif state in ('sale', 'invoiced'):
-                        order.with_context(mail_notrack=True).action_confirm()
-                        if state == 'invoiced':
-                            invoice = order._create_invoices()
-                            if rnd.random() < 0.8:
-                                invoice.action_post()
-                        if rnd.random() < 0.3:
-                            order.action_lock()
-                    elif state == 'cancel':
-                        order.with_context(disable_cancel_warning=True).action_cancel()
-                    _mark(env, xmlid, order)
-                    _date_sale(env, order, moment)
-                    made += 1
-            except Exception as exc:  # noqa: BLE001 — одна неудача не роняет загрузку
-                _logger.warning('Продажи: заказ %s не заведён: %s', xmlid, _flat(exc))
+            if _one_sale(env, org, xmlid, rnd, clients, holders, offers, today):
+                made += 1
     _logger.info('Продажи: заказов заведено %s', made)
+    return made
+
+
+def _one_sale(env, org, xmlid, rnd, clients, holders, offers, today):
+    """Один заказ продажи организации `org` под ключом `xmlid`; True — заведён."""
+    company = org.coop_company_id
+    client = clients[rnd.randrange(len(clients))]
+    if client == org or client.user_ids & holders:
+        return False
+    state = _sale_state(rnd)
+    moment = _when(rnd, today, state)
+    seller = holders[rnd.randrange(len(holders))]
+    lines = []
+    for resource in rnd.sample(list(offers), k=min(len(offers), rnd.randint(1, 3))):
+        product = _product(env, company, resource, rnd)
+        lines.append((0, 0, {
+            'product_id': product.id,
+            'product_uom_qty': rnd.choice((1, 2, 3, 5, 10, 12, 20, 50)),
+            'price_unit': product.list_price,
+        }))
+    try:
+        with env.cr.savepoint():
+            order = env['sale.order'].sudo().with_company(company).create({
+                'partner_id': client.id,
+                'company_id': company.id,
+                'user_id': seller.id,
+                'team_id': _team(env, company).id,
+                'order_line': lines,
+                'note': rnd.choice(SO_NOTES) or False,
+                'client_order_ref': rnd.random() < 0.4 and 'Заявка № %s' % rnd.randint(100, 9999) or False,
+            })
+            _no_vat(org, order, moment)
+            if state == 'sent':
+                order.write({'state': 'sent'})
+            elif state in ('sale', 'invoiced'):
+                order.with_context(mail_notrack=True).action_confirm()
+                if state == 'invoiced':
+                    invoice = order._create_invoices()
+                    if rnd.random() < 0.8:
+                        invoice.action_post()
+                if rnd.random() < 0.3:
+                    order.action_lock()
+            elif state == 'cancel':
+                order.with_context(disable_cancel_warning=True).action_cancel()
+            _mark(env, xmlid, order)
+            _date_sale(env, order, moment)
+            return True
+    except Exception as exc:  # noqa: BLE001 — одна неудача не роняет загрузку
+        _logger.warning('Продажи: заказ %s не заведён: %s', xmlid, _flat(exc))
+        return False
+
+
+SHOWCASE_SO_TARGET = 150
+
+
+def load_showcase_sales(env, login='dashkevich', target=SHOWCASE_SO_TARGET):
+    """Дашборды «Продажи», «Товар», «Выставление счетов» у организаций
+    dashkevich (решение 707): у витрины — 150 заказов за год, часть со
+    счетами. Ключи `coop_demo.sow_<орг>_<n>`, повторяемо."""
+    if 'sale.order' not in env:
+        return 0
+    showcase = _showcase(env, login).filtered(lambda o: o in _orgs(env))
+    clients = env['res.partner'].sudo().search([('coop_is_participant', '=', True)], order='id')
+    today = datetime.now().replace(second=0, microsecond=0)
+    made = 0
+    for org in showcase:
+        offers = _offers(env, org)
+        holders = _holders(env, org, 'sales_team.group_sale_salesman')
+        if not offers or not holders:
+            continue
+        have = env['sale.order'].sudo().search_count([('company_id', '=', org.coop_company_id.id)])
+        rnd = random.Random(20261127 + org.id)
+        number = 0
+        while have < target and number < target * 2:
+            xmlid = _key(env, 'sow', org, number)
+            number += 1
+            if _have(env, xmlid):
+                continue
+            if _one_sale(env, org, xmlid, rnd, clients, holders, offers, today):
+                have += 1
+                made += 1
+    _logger.info('Продажи витрины: заказов заведено %s', made)
     return made
 
 
@@ -275,6 +315,9 @@ def _date_sale(env, order, moment):
                    'invoice_date_due = %s WHERE id = %s',
                    (day, day, day + timedelta(days=10), move.id))
         cr.execute('UPDATE account_move_line SET date = %s WHERE move_id = %s', (day, move.id))
+        # Заказ создаёт суперпользователь — продавцом счёта ставим продавца заказа.
+        cr.execute('UPDATE account_move SET invoice_user_id = %s WHERE id = %s',
+                   (order.user_id.id or None, move.id))
     order.invalidate_recordset()
 
 

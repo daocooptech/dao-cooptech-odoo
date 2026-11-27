@@ -64,4 +64,33 @@
   <menuitem id="menu_coop_analytics_dashboards" name="Дашборды"
             parent="menu_coop_analytics_root" action="action_coop_an_dashboards" sequence="11"/>
 
+  <!--
+    Штатные дашборды Odoo — организациям (решение 707). Движок открывает
+    «Продажи», «Товар», «Показатели склада» и «События» только
+    администраторам разделов; у нас — пользователям этих разделов: такие
+    группы есть только у участников организаций. Остальные три штатных
+    («Выставление счетов», «Проект», «Расписания») уже открыты так же.
+  -->
+  <record id="spreadsheet_dashboard_sale.spreadsheet_dashboard_sales" model="spreadsheet.dashboard">
+    <field name="group_ids" eval="[Command.set([ref('sales_team.group_sale_salesman')])]"/>
+  </record>
+  <record id="spreadsheet_dashboard_sale.spreadsheet_dashboard_product" model="spreadsheet.dashboard">
+    <field name="group_ids" eval="[Command.set([ref('sales_team.group_sale_salesman')])]"/>
+  </record>
+  <record id="spreadsheet_dashboard_stock_account.spreadsheet_dashboard_warehouse_metrics" model="spreadsheet.dashboard">
+    <field name="group_ids" eval="[Command.set([ref('stock.group_stock_user')])]"/>
+  </record>
+  <record id="spreadsheet_dashboard_event_sale.spreadsheet_dashboard_events" model="spreadsheet.dashboard">
+    <field name="group_ids" eval="[Command.set([ref('event.group_event_user')])]"/>
+  </record>
+
+  <!--
+    Штатное приложение «Панели управления» (дашборды, «Моя панель»,
+    «Конфигурация») повторяет «Аналитику» — скрыто словом владельца
+    27.11.2026 (задача 494). Дашборды открываются из «Аналитики → Дашборды».
+  -->
+  <record id="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" model="ir.ui.menu">
+    <field name="active" eval="False"/>
+  </record>
+
 </odoo>
