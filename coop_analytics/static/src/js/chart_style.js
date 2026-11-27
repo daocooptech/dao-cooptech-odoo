@@ -213,7 +213,15 @@ function pieToBlocks(config) {
     config.data.datasets = (config.data.datasets || []).slice(0, 1);
 }
 
+// Оформляются только столбцы, линии и круг. Карту, плитки, воронку и
+// прочие типы движка не трогаем: у них свои шкалы и данные, и правка
+// роняла дашборд («Выставление счетов», карта — object is not extensible).
+const STYLED = ["bar", "line", "pie", "doughnut"];
+
 export function restyle(config, { pieToBars = false } = {}) {
+    if (!config || !STYLED.includes(config.type)) {
+        return config;
+    }
     const t = tokens();
     const pie = ["pie", "doughnut"].includes(config.type);
     if (pie && pieToBars) {
