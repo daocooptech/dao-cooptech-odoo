@@ -39,6 +39,10 @@
     <field name="res_model">coop.deal</field>
     <field name="path">analytics-deals</field>
     <field name="context">{'coop_section': 1}</field>
+    <!-- Только заключённые: сделки без даты заключения (обращения,
+         переговоры, черновики) шли столбцом «Нет» больше всех месяцев
+         вместе (владелец 27.11.2026: «да, убрать»). -->
+    <field name="domain">[('signed_on', '!=', False)]</field>
     <field name="view_mode">graph,pivot,list</field>
     <field name="view_ids" eval="[(5, 0, 0),
            (0, 0, {'sequence': 10, 'view_mode': 'graph', 'view_id': ref('view_coop_an_deal_graph')}),
