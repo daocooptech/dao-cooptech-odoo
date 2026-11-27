@@ -16,7 +16,7 @@ const MONTHS = {
  * строки и столбцы — по одному полю (владелец 27.11.2026: «как этим
  * пользоваться вообще»). Шапка в одну строку с цветом состояния, как на
  * графике; месяцы в именительном; суммы без копеек, пустое — прочерк;
- * итог — строкой внизу; у «Всего» — полоска величины. Сложную сводную
+ * итог — строкой внизу. Сложную сводную
  * (несколько мер, вложенные разбивки) рисует движок (xml/graph_panel.xml).
  */
 patch(PivotRenderer.prototype, {
@@ -63,10 +63,5 @@ patch(PivotRenderer.prototype, {
         const measure = this.model.metaData.measures[cell.measure];
         const money = measure?.type === "monetary";
         return nf.format(cell.value) + (money ? " ₽" : "");
-    },
-    coopBar(row) {
-        const total = row.subGroupMeasurements.at(-1)?.value || 0;
-        const max = Math.max(1, ...this.coopRows().map((r) => r.subGroupMeasurements.at(-1)?.value || 0));
-        return `width: ${Math.max(0, Math.round((total / max) * 100))}%`;
     },
 });

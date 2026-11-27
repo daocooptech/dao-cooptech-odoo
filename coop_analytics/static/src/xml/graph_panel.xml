@@ -61,7 +61,6 @@
                 <td t-att-class="{ o_coop_pt_num: true, o_coop_pt_empty: cell.value === undefined, o_coop_pt_total: cell_last }"
                     t-on-click="() => this.onOpenView(cell)">
                   <t t-out="this.coopValue(cell)"/>
-                  <i t-if="cell_last" class="o_coop_pt_bar" t-att-style="this.coopBar(row)"/>
                 </td>
               </t>
             </tr>
