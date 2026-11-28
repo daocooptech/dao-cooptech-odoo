@@ -234,6 +234,23 @@ class CoopEvent(models.Model):
         self.write({'state': 'held'})
         return True
 
+    @api.model
+    def _cron_hold_past(self):
+        """Кончившиеся события — «Состоялось» (№ 489).
+
+        Кончилось — по окончанию, а без него — по началу: у встречи без
+        указанного конца другого признака нет. Берём только «Идёт запись»
+        и «Запись закрыта»; черновик и отменённое не трогаем.
+        """
+        now = fields.Datetime.now()
+        past = self.sudo().search([
+            ('state', 'in', ('open', 'closed')),
+            '|', ('date_end', '<', now),
+            '&', ('date_end', '=', False), ('date_start', '<', now),
+        ])
+        past.write({'state': 'held'})
+        return len(past)
+
     def action_cancel(self):
         """Отменить событие — записавшиеся узнают из ленты."""
         for record in self:

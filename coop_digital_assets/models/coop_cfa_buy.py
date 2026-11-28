@@ -14,6 +14,18 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 
+def _rub(value):
+    """Сумма в тексте: «50 000», копейки — только если есть (№ 336).
+
+    В извещение и ленту сумма уходит строкой, и «50000.0 ₽» читается как
+    ошибка ввода.
+    """
+    value = round(value or 0, 2)
+    if value == int(value):
+        return '{:,.0f}'.format(value).replace(',', ' ')
+    return '{:,.2f}'.format(value).replace(',', ' ').replace('.', ',')
+
+
 class CoopCfaBuy(models.TransientModel):
     _name = 'coop.cfa.buy'
     _description = 'Приобретение цифрового актива'
@@ -68,7 +80,7 @@ class CoopCfaBuy(models.TransientModel):
         body = _('Приобретение «%(what)s»: %(how_many)s ед. на %(amount)s ₽ '
                  'от %(who)s.',
                  what=issue.display_name, how_many=self.quantity,
-                 amount=self.total, who=me.display_name)
+                 amount=_rub(self.total), who=me.display_name)
         self.env['coop.notification']._notify(
             issue.issuer_id, body, record=issue, kind='other')
         issue.sudo().message_post(body=body)

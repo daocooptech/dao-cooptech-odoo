@@ -21,6 +21,18 @@ import logging
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
+
+def _rub(value):
+    """Сумма в тексте: «50 000», копейки — только если есть (№ 336).
+
+    В извещение и ленту сумма уходит строкой, и «50000.0 ₽» читается как
+    ошибка ввода.
+    """
+    value = round(value or 0, 2)
+    if value == int(value):
+        return '{:,.0f}'.format(value).replace(',', ' ')
+    return '{:,.2f}'.format(value).replace(',', ' ').replace('.', ',')
+
 _logger = logging.getLogger(__name__)
 
 
@@ -161,7 +173,7 @@ class CoopVacancyApplication(models.Model):
         self.contribution_id = contribution.id
         self._close_vacancy_after_accept(
             {'need_accepted_id': contribution.id},
-            _('труд учтён вкладом на %s ₽') % value)
+            _('труд учтён вкладом на %s ₽') % _rub(value))
 
     def _accept_non_member(self, project):
         """Утверждён нечлен: без модуля сделок оформить нечем."""

@@ -5,6 +5,18 @@ from datetime import timedelta
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
+
+def _rub(value):
+    """Сумма в тексте: «50 000», копейки — только если есть (№ 336).
+
+    В извещение и ленту сумма уходит строкой, и «50000.0 ₽» читается как
+    ошибка ввода.
+    """
+    value = round(value or 0, 2)
+    if value == int(value):
+        return '{:,.0f}'.format(value).replace(',', ' ')
+    return '{:,.2f}'.format(value).replace(',', ' ').replace('.', ',')
+
 _logger = logging.getLogger(__name__)
 
 # Сколько мест в блоке и на сколько страниц они продаются — объявлено
@@ -231,7 +243,7 @@ class CoopPromotion(models.Model):
         resource.message_post(body=_(
             'Объявление занимает место «%(slot)s» до %(until)s. '
             'Списано %(total)s ₽.',
-            slot=slot.name, until=fields.Datetime.to_string(end), total=total))
+            slot=slot.name, until=fields.Datetime.to_string(end), total=_rub(total)))
         self.env['coop.resource']._recompute_catalog_rank()
         return promotion
 

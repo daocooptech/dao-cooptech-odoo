@@ -2220,7 +2220,7 @@ class CoopProjectContribution(models.Model):
                 _('Ваш вклад в проект «%(project)s» принят: '
                   '%(what)s, оценка %(how_many)s ₽.',
                   project=record.project_id.name, what=record.name,
-                  how_many=record.value),
+                  how_many=_money(record.value)),
                 record=record.project_id, kind='project')
         return True
 

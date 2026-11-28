@@ -4,6 +4,18 @@ from datetime import timedelta
 from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, UserError
 
+
+def _rub(value):
+    """Сумма в тексте: «50 000», копейки — только если есть (№ 336).
+
+    В извещение и ленту сумма уходит строкой, и «50000.0 ₽» читается как
+    ошибка ввода.
+    """
+    value = round(value or 0, 2)
+    if value == int(value):
+        return '{:,.0f}'.format(value).replace(',', ' ')
+    return '{:,.2f}'.format(value).replace(',', ' ').replace('.', ',')
+
 from .coop_wall_comment import WALL_MODELS
 
 # Пороги — предложение экономиста (Матчасть, 24 сентября 2026). Цифры
@@ -308,7 +320,7 @@ class CoopWallThanks(models.Model):
                 raise UserError(_("Автор не указал СБП."))
             if not RUB_MIN <= amount <= RUB_MAX:
                 raise UserError(_("Подарок рублями — от %(lo)s до %(hi)s ₽.",
-                                  lo=RUB_MIN, hi=RUB_MAX))
+                                  lo=_rub(RUB_MIN), hi=_rub(RUB_MAX)))
             month = self.sudo().search([
                 ('sender_id', '=', me.id), ('recipient_id', '=', author.id),
                 ('channel', '=', 'sbp'),
@@ -318,7 +330,7 @@ class CoopWallThanks(models.Model):
             if sum(month.mapped('amount')) + amount > RUB_MONTH:
                 raise UserError(_(
                     "Одному автору — не больше %(hi)s ₽ подарков за месяц.",
-                    hi=RUB_MONTH))
+                    hi=_rub(RUB_MONTH)))
         elif channel == 'token':
             network = next((n for n in self._coop_networks(author)
                             if n['id'] == network_id), None)

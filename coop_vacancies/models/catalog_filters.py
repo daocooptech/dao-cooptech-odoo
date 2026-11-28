@@ -58,6 +58,9 @@ class CoopVacancy(models.Model):
         specs = self.env['coop.specialization'].sudo()
         if category:
             specs = specs.search([('category_id', '=', int(category))])
+        # Сфера из одной специализации («Сварщик» → «Сварщик») — второй
+        # список читается как повтор, как было в навыках (№ 278).
+        if category and len(specs) > 1:
             blocks.append({
                 'code': 'spec', 'label': 'Подкатегория',
                 'widget': 'select', 'field': 'coop_specialization_id',

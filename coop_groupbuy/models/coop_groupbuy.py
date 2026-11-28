@@ -44,6 +44,18 @@ import secrets
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
+
+def _rub(value):
+    """Сумма в тексте: «50 000», копейки — только если есть (№ 336).
+
+    В извещение и ленту сумма уходит строкой, и «50000.0 ₽» читается как
+    ошибка ввода.
+    """
+    value = round(value or 0, 2)
+    if value == int(value):
+        return '{:,.0f}'.format(value).replace(',', ' ')
+    return '{:,.2f}'.format(value).replace(',', ' ').replace('.', ',')
+
 _logger = logging.getLogger(__name__)
 
 
@@ -466,13 +478,13 @@ class CoopGroupBuy(models.Model):
             record.message_post(body=_(
                 'Сбор закрыт: %(got)s %(unit)s по цене %(price)s ₽.',
                 got=record.total_quantity, unit=record.unit_label,
-                price=record.current_price))
+                price=_rub(record.current_price)))
             record._post_to_community(_(
                 'Закупка «%(name)s» набралась: %(got)s %(unit)s, '
                 '%(people)s участников, цена %(price)s ₽ за %(unit)s.',
                 name=record.name, got=record.total_quantity,
                 unit=record.unit_label, people=record.participant_count,
-                price=record.current_price))
+                price=_rub(record.current_price)))
         return True
 
     def action_delivering(self):

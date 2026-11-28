@@ -15,6 +15,18 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 
+def _rub(value):
+    """Сумма в тексте: «50 000», копейки — только если есть (№ 336).
+
+    В извещение и ленту сумма уходит строкой, и «50000.0 ₽» читается как
+    ошибка ввода.
+    """
+    value = round(value or 0, 2)
+    if value == int(value):
+        return '{:,.0f}'.format(value).replace(',', ' ')
+    return '{:,.2f}'.format(value).replace(',', ' ').replace('.', ',')
+
+
 class CoopContributeWizard(models.TransientModel):
     _name = 'coop.project.contribute'
     _description = 'Вклад в проект'
@@ -202,7 +214,7 @@ class CoopContributeWizard(models.TransientModel):
         # не знает: вкладчик ждёт ответа, проект стоит недособранным.
         body = _('Вклад в проект «%(project)s»: %(what)s на %(how_many)s ₽ '
                  'от %(who)s.',
-                 project=project.name, what=self.name, how_many=self.value,
+                 project=project.name, what=self.name, how_many=_rub(self.value),
                  who=me.display_name)
         if self.note:
             body = '%s %s' % (body, self.note)

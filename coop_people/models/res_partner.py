@@ -304,6 +304,9 @@ class ResPartnerCatalogFilters(models.Model):
         if sphere:
             specs = self.env['coop.specialization'].sudo().search(
                 [('category_id', '=', int(sphere))], order='name')
+        # Сфера из одной специализации — второй список повторял бы первый
+        # (№ 278, как в навыках).
+        if sphere and len(specs) > 1:
             spec_counts = counts('coop_specialization_ids',
                                  without('coop_specialization_ids'))
             blocks.append({

@@ -640,7 +640,13 @@ export class CoopSubnav extends CoopTabs {
         // 12.10.2026). Вкладкам это не мешало: они рождаются заново с
         // каждым экраном, а меню живёт в оболочке. Пересчитываем, когда
         // экран уже дорисован.
-        useBus(this.env.bus, "ACTION_MANAGER:UI-UPDATED", () => this.refresh());
+        // Пункты после перехода рисуются заново, и «курсор ушёл» от старого
+        // пункта может не прийти — плашку снимаем сами.
+        useBus(this.env.bus, "ACTION_MANAGER:UI-UPDATED", () => {
+            this.hideTip();
+            this.refresh();
+        });
+        this.state.tip = null;
     }
 
     /** Открытое действие — у службы действий, а не из события. */
@@ -709,7 +715,31 @@ export class CoopSubnav extends CoopTabs {
         return subnavIcon(name, xmlid);
     }
 
+    /**
+     * Имя подраздела у свёрнутого меню — плашкой планки (№ 331): значок
+     * без подписи не угадать. Развёрнутому меню подписи и так видны, на
+     * узком экране плашек нет вовсе.
+     */
+    showTip(label, ev) {
+        if (!this.ui.subCollapsed || browser.innerWidth <= 900) {
+            return;
+        }
+        const rect = ev.currentTarget.getBoundingClientRect();
+        this.state.tip = {
+            label,
+            top: Math.round(Math.max(8, Math.min(rect.top, browser.innerHeight - 52))),
+            left: Math.round(rect.right),
+        };
+    }
+
+    hideTip() {
+        if (this.state.tip) {
+            this.state.tip = null;
+        }
+    }
+
     toggleCollapsed() {
+        this.hideTip();
         this.ui.subCollapsed = !this.ui.subCollapsed;
         coopSaveMenuState(this.orm2, { sub_collapsed: this.ui.subCollapsed });
         coopShellChanged(this.env);
