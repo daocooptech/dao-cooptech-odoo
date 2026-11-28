@@ -55,6 +55,8 @@ export const COOP_WIDE_SUBTABS = [
     "coop_analytics.menu_coop_an_sec_tasks",
     "coop_analytics.menu_coop_an_sec_timesheets",
     "coop_analytics.menu_coop_an_sec_events",
+    "coop_analytics.menu_coop_an_sec_crm",
+    "coop_analytics.menu_coop_an_sec_shares",
     "coop_analytics.menu_coop_settings_analytics",
     // «Настройки» режима администратора: вкладки на списках (28.11.2026).
     "coop_admin.menu_coop_settings_membership_root",
@@ -601,6 +603,8 @@ const SUBNAV_BY_XMLID = {
     "coop_analytics.menu_coop_an_sec_tasks": "bookmarks",
     "coop_analytics.menu_coop_an_sec_timesheets": "address-book",
     "coop_analytics.menu_coop_an_sec_events": "microphone",
+    "coop_analytics.menu_coop_an_sec_crm": "chart-funnel",
+    "coop_analytics.menu_coop_an_sec_shares": "users-plus",
     "coop_analytics.menu_coop_settings_analytics": "chart-bar",
     "coop_base.menu_coop_reference_root": "table",
     "coop_admin.menu_coop_settings_models": "server",

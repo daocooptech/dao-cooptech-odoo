@@ -235,6 +235,94 @@
     <field name="context">{'search_default_taken': 1, 'search_default_group_event': 1}</field>
   </record>
 
+  <!--
+    CRM и Пайщики — дашборды организаций (кусок 5 задачи 494, выбор
+    владельца 28.11). CRM — пользователям продаж, как «Продажи»; Пайщики —
+    правлению, ревизии и администратору: чьи счета видно, решают правила
+    записей `coop_wallet` (правлению — счета своего кооператива).
+  -->
+  <record id="dashboard_group_orgs" model="spreadsheet.dashboard.group">
+    <field name="name">Организация</field>
+    <field name="sequence">5</field>
+  </record>
+  <record id="dashboard_crm" model="spreadsheet.dashboard">
+    <field name="name">CRM</field>
+    <field name="spreadsheet_binary_data" type="bytes" file="coop_analytics/data/dashboards/crm.json"/>
+    <field name="dashboard_group_id" ref="dashboard_group_orgs"/>
+    <field name="group_ids" eval="[Command.set([ref('sales_team.group_sale_salesman')])]"/>
+    <field name="sequence">10</field>
+    <field name="is_published">True</field>
+  </record>
+  <record id="dashboard_shares" model="spreadsheet.dashboard">
+    <field name="name">Пайщики</field>
+    <field name="spreadsheet_binary_data" type="bytes" file="coop_analytics/data/dashboards/shares.json"/>
+    <field name="dashboard_group_id" ref="dashboard_group_orgs"/>
+    <field name="group_ids" eval="[Command.set([ref('coop_base.group_coop_board'), ref('coop_base.group_coop_audit'), ref('base.group_system')])]"/>
+    <field name="sequence">20</field>
+    <field name="is_published">True</field>
+  </record>
+
+  <record id="action_coop_an_dash_crm" model="ir.actions.client">
+    <field name="name">CRM</field>
+    <field name="tag">action_spreadsheet_dashboard</field>
+    <field name="path">analytics-crm</field>
+    <field name="params" eval="{'dashboard_id': ref('dashboard_crm'), 'coop_single': True}"/>
+    <field name="context">{'coop_section': 1}</field>
+  </record>
+  <record id="action_coop_an_dash_shares" model="ir.actions.client">
+    <field name="name">Пайщики</field>
+    <field name="tag">action_spreadsheet_dashboard</field>
+    <field name="path">analytics-shares</field>
+    <field name="params" eval="{'dashboard_id': ref('dashboard_shares'), 'coop_single': True}"/>
+    <field name="context">{'coop_section': 1}</field>
+  </record>
+  <!-- Отчёт CRM — виды и поиск штатного «Анализа воронки», с проигранными. -->
+  <record id="action_coop_an_rep_crm" model="ir.actions.act_window">
+    <field name="name">CRM</field>
+    <field name="res_model">crm.lead</field>
+    <field name="path">analytics-crm-report</field>
+    <field name="view_mode">graph,pivot,list</field>
+    <field name="search_view_id" ref="crm.crm_opportunity_report_view_search"/>
+    <field name="context">{'active_test': False, 'search_default_filter_opportunity': 1}</field>
+    <field name="view_ids"
+           eval="[(5, 0, 0),
+                  (0, 0, {'view_mode': 'graph', 'view_id': ref('crm.crm_opportunity_report_view_graph')}),
+                  (0, 0, {'view_mode': 'pivot', 'view_id': ref('crm.crm_opportunity_report_view_pivot')}),
+                  (0, 0, {'view_mode': 'list', 'view_id': ref('crm.crm_lead_view_tree_opportunity_reporting')})]"/>
+  </record>
+  <record id="view_coop_an_shares_pivot" model="ir.ui.view">
+    <field name="name">coop.share.account.pivot.analytics</field>
+    <field name="model">coop.share.account</field>
+    <field name="arch" type="xml">
+      <pivot string="Пайщики">
+        <field name="cooperative_id" type="row"/>
+        <field name="state" type="col"/>
+        <field name="balance" type="measure"/>
+      </pivot>
+    </field>
+  </record>
+  <record id="view_coop_an_shares_graph" model="ir.ui.view">
+    <field name="name">coop.share.account.graph.analytics</field>
+    <field name="model">coop.share.account</field>
+    <field name="arch" type="xml">
+      <graph string="Пайщики" type="bar">
+        <field name="cooperative_id"/>
+        <field name="balance" type="measure"/>
+      </graph>
+    </field>
+  </record>
+  <record id="action_coop_an_rep_shares" model="ir.actions.act_window">
+    <field name="name">Пайщики</field>
+    <field name="res_model">coop.share.account</field>
+    <field name="path">analytics-shares-report</field>
+    <field name="view_mode">pivot,graph,list</field>
+    <field name="view_ids"
+           eval="[(5, 0, 0),
+                  (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_coop_an_shares_pivot')}),
+                  (0, 0, {'view_mode': 'graph', 'view_id': ref('view_coop_an_shares_graph')}),
+                  (0, 0, {'view_mode': 'list', 'view_id': ref('coop_wallet.view_coop_share_account_list')})]"/>
+  </record>
+
   <menuitem id="menu_coop_an_sec_money" name="Деньги" parent="menu_coop_analytics_root"
             action="action_coop_an_dash_money" sequence="20"/>
   <menuitem id="menu_coop_an_tab_money_dash" name="Дашборд" parent="menu_coop_an_sec_money"
@@ -301,6 +389,20 @@
             action="action_coop_an_dash_events" sequence="10"/>
   <menuitem id="menu_coop_an_tab_events_report" name="Отчёт" parent="menu_coop_an_sec_events"
             action="action_coop_an_rep_events" sequence="20"/>
+
+  <menuitem id="menu_coop_an_sec_crm" name="CRM" parent="menu_coop_analytics_root"
+            action="action_coop_an_dash_crm" sequence="76" groups="sales_team.group_sale_salesman"/>
+  <menuitem id="menu_coop_an_tab_crm_dash" name="Дашборд" parent="menu_coop_an_sec_crm"
+            action="action_coop_an_dash_crm" sequence="10"/>
+  <menuitem id="menu_coop_an_tab_crm_report" name="Отчёт" parent="menu_coop_an_sec_crm"
+            action="action_coop_an_rep_crm" sequence="20"/>
+  <menuitem id="menu_coop_an_sec_shares" name="Пайщики" parent="menu_coop_analytics_root"
+            action="action_coop_an_dash_shares" sequence="77"
+            groups="coop_base.group_coop_board,coop_base.group_coop_audit,base.group_system"/>
+  <menuitem id="menu_coop_an_tab_shares_dash" name="Дашборд" parent="menu_coop_an_sec_shares"
+            action="action_coop_an_dash_shares" sequence="10"/>
+  <menuitem id="menu_coop_an_tab_shares_report" name="Отчёт" parent="menu_coop_an_sec_shares"
+            action="action_coop_an_rep_shares" sequence="20"/>
 
   <!--
     Настройки дашбордов — «Настройки → Аналитика» (решение 708, кусок 4):

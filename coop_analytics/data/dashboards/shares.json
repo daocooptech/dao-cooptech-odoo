@@ -1,0 +1,1090 @@
+{
+ "borders": {
+  "1": {
+   "bottom": {
+    "color": "#d2d2cb",
+    "style": "thin"
+   }
+  }
+ },
+ "chartOdooMenusReferences": {
+  "414d2b93-a87f-55ec-8c60-e44db159842c": "coop_analytics.menu_coop_an_tab_shares_report",
+  "4536680c-3dcd-57f7-808f-5e68ef0dd6eb": "coop_analytics.menu_coop_an_tab_shares_report",
+  "6ec12952-43f1-547c-80d8-78e4ab0c6331": "coop_analytics.menu_coop_an_tab_shares_report",
+  "77b36ef2-456d-5be1-a572-2cca8fa07d91": "coop_analytics.menu_coop_an_tab_shares_report",
+  "7ad7b789-3a26-556c-b18c-28f069ff8d74": "coop_analytics.menu_coop_an_tab_shares_report",
+  "86506777-5a23-59c4-b6d9-953488549252": "coop_analytics.menu_coop_an_tab_shares_report",
+  "868e629e-b843-574e-8827-a57ac86cbe29": "coop_analytics.menu_coop_an_tab_shares_report",
+  "bdee21d7-2fa4-50eb-bc7d-ee48429f65f8": "coop_analytics.menu_coop_an_tab_shares_report",
+  "c1bfeb97-e63e-511e-9358-631e4e008423": "coop_analytics.menu_coop_an_tab_shares_report",
+  "ccf86284-7844-594b-8e36-ebd09942cbfb": "coop_analytics.menu_coop_an_tab_shares_report",
+  "dce4209a-7f10-5f1e-b8ad-c1c9e39fccaa": "coop_analytics.menu_coop_an_tab_shares_report"
+ },
+ "customTableStyles": {},
+ "formats": {
+  "1": "#,##0",
+  "2": "#,##0[$ ₽]"
+ },
+ "globalFilters": [
+  {
+   "id": "238f773c-9fe3-50f1-9052-33e1f292536a",
+   "label": "Вступили",
+   "type": "date"
+  },
+  {
+   "defaultValueDisplayNames": [],
+   "id": "7da15a19-bdaa-5b78-9804-d0baed295098",
+   "label": "Кооператив",
+   "modelName": "res.partner",
+   "type": "relation"
+  },
+  {
+   "id": "aedc44ba-0bca-57bc-bc9d-d61a03618496",
+   "label": "Состояние счёта",
+   "resModel": "coop.share.account",
+   "selectionField": "state",
+   "type": "selection"
+  }
+ ],
+ "listNextId": 1,
+ "lists": {},
+ "pivotNextId": 6,
+ "pivots": {
+  "1": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    "|",
+    [
+     "cooperative_id.coop_member_ids",
+     "any",
+     [
+      [
+       "partner_id.coop_is_me",
+       "=",
+       true
+      ],
+      [
+       "state",
+       "=",
+       "active"
+      ],
+      [
+       "role",
+       "in",
+       [
+        "board",
+        "audit"
+       ]
+      ]
+     ]
+    ],
+    [
+     "partner_id.coop_is_mine",
+     "=",
+     false
+    ]
+   ],
+   "fieldMatching": {
+    "238f773c-9fe3-50f1-9052-33e1f292536a": {
+     "chain": "joined_on",
+     "offset": 0,
+     "type": "date"
+    },
+    "7da15a19-bdaa-5b78-9804-d0baed295098": {
+     "chain": "cooperative_id",
+     "type": "many2one"
+    },
+    "aedc44ba-0bca-57bc-bc9d-d61a03618496": {
+     "chain": "state",
+     "type": "selection"
+    }
+   },
+   "formulaId": "1",
+   "id": "1",
+   "measures": [
+    {
+     "fieldName": "__count",
+     "id": "__count"
+    },
+    {
+     "aggregator": "count_distinct",
+     "fieldName": "partner_id",
+     "id": "partner_id:count_distinct"
+    },
+    {
+     "aggregator": "count_distinct",
+     "fieldName": "cooperative_id",
+     "id": "cooperative_id:count_distinct"
+    },
+    {
+     "fieldName": "balance",
+     "id": "balance"
+    },
+    {
+     "fieldName": "contributed",
+     "id": "contributed"
+    },
+    {
+     "fieldName": "accrued",
+     "id": "accrued"
+    },
+    {
+     "fieldName": "paid_out",
+     "id": "paid_out"
+    },
+    {
+     "fieldName": "entry_fee",
+     "id": "entry_fee"
+    }
+   ],
+   "model": "coop.share.account",
+   "name": "счета",
+   "rows": [],
+   "sortedColumn": null,
+   "type": "ODOO"
+  },
+  "2": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    "|",
+    [
+     "cooperative_id.coop_member_ids",
+     "any",
+     [
+      [
+       "partner_id.coop_is_me",
+       "=",
+       true
+      ],
+      [
+       "state",
+       "=",
+       "active"
+      ],
+      [
+       "role",
+       "in",
+       [
+        "board",
+        "audit"
+       ]
+      ]
+     ]
+    ],
+    [
+     "partner_id.coop_is_mine",
+     "=",
+     false
+    ],
+    [
+     "state",
+     "=",
+     "closing"
+    ]
+   ],
+   "fieldMatching": {
+    "238f773c-9fe3-50f1-9052-33e1f292536a": {
+     "chain": "joined_on",
+     "offset": 0,
+     "type": "date"
+    },
+    "7da15a19-bdaa-5b78-9804-d0baed295098": {
+     "chain": "cooperative_id",
+     "type": "many2one"
+    },
+    "aedc44ba-0bca-57bc-bc9d-d61a03618496": {
+     "chain": "state",
+     "type": "selection"
+    }
+   },
+   "formulaId": "2",
+   "id": "2",
+   "measures": [
+    {
+     "fieldName": "__count",
+     "id": "__count"
+    },
+    {
+     "fieldName": "balance",
+     "id": "balance"
+    }
+   ],
+   "model": "coop.share.account",
+   "name": "к возврату",
+   "rows": [],
+   "sortedColumn": null,
+   "type": "ODOO"
+  },
+  "3": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    "|",
+    [
+     "cooperative_id.coop_member_ids",
+     "any",
+     [
+      [
+       "partner_id.coop_is_me",
+       "=",
+       true
+      ],
+      [
+       "state",
+       "=",
+       "active"
+      ],
+      [
+       "role",
+       "in",
+       [
+        "board",
+        "audit"
+       ]
+      ]
+     ]
+    ],
+    [
+     "partner_id.coop_is_mine",
+     "=",
+     false
+    ]
+   ],
+   "fieldMatching": {
+    "238f773c-9fe3-50f1-9052-33e1f292536a": {
+     "chain": "joined_on",
+     "offset": 0,
+     "type": "date"
+    },
+    "7da15a19-bdaa-5b78-9804-d0baed295098": {
+     "chain": "cooperative_id",
+     "type": "many2one"
+    },
+    "aedc44ba-0bca-57bc-bc9d-d61a03618496": {
+     "chain": "state",
+     "type": "selection"
+    }
+   },
+   "formulaId": "3",
+   "id": "3",
+   "measures": [
+    {
+     "fieldName": "balance",
+     "id": "balance"
+    }
+   ],
+   "model": "coop.share.account",
+   "name": "Фонд кооператива",
+   "rows": [
+    {
+     "fieldName": "cooperative_id"
+    }
+   ],
+   "sortedColumn": {
+    "domain": [],
+    "measure": "balance",
+    "order": "desc"
+   },
+   "type": "ODOO"
+  },
+  "4": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    "|",
+    [
+     "cooperative_id.coop_member_ids",
+     "any",
+     [
+      [
+       "partner_id.coop_is_me",
+       "=",
+       true
+      ],
+      [
+       "state",
+       "=",
+       "active"
+      ],
+      [
+       "role",
+       "in",
+       [
+        "board",
+        "audit"
+       ]
+      ]
+     ]
+    ],
+    [
+     "partner_id.coop_is_mine",
+     "=",
+     false
+    ]
+   ],
+   "fieldMatching": {
+    "238f773c-9fe3-50f1-9052-33e1f292536a": {
+     "chain": "joined_on",
+     "offset": 0,
+     "type": "date"
+    },
+    "7da15a19-bdaa-5b78-9804-d0baed295098": {
+     "chain": "cooperative_id",
+     "type": "many2one"
+    },
+    "aedc44ba-0bca-57bc-bc9d-d61a03618496": {
+     "chain": "state",
+     "type": "selection"
+    }
+   },
+   "formulaId": "4",
+   "id": "4",
+   "measures": [
+    {
+     "aggregator": "count_distinct",
+     "fieldName": "partner_id",
+     "id": "partner_id:count_distinct"
+    },
+    {
+     "fieldName": "balance",
+     "id": "balance"
+    }
+   ],
+   "model": "coop.share.account",
+   "name": "Кооператив",
+   "rows": [
+    {
+     "fieldName": "cooperative_id"
+    }
+   ],
+   "sortedColumn": {
+    "domain": [],
+    "measure": "balance",
+    "order": "desc"
+   },
+   "type": "ODOO"
+  },
+  "5": {
+   "columns": [],
+   "context": {},
+   "domain": [
+    "|",
+    [
+     "cooperative_id.coop_member_ids",
+     "any",
+     [
+      [
+       "partner_id.coop_is_me",
+       "=",
+       true
+      ],
+      [
+       "state",
+       "=",
+       "active"
+      ],
+      [
+       "role",
+       "in",
+       [
+        "board",
+        "audit"
+       ]
+      ]
+     ]
+    ],
+    [
+     "partner_id.coop_is_mine",
+     "=",
+     false
+    ],
+    [
+     "state",
+     "!=",
+     "closed"
+    ]
+   ],
+   "fieldMatching": {
+    "238f773c-9fe3-50f1-9052-33e1f292536a": {
+     "chain": "joined_on",
+     "offset": 0,
+     "type": "date"
+    },
+    "7da15a19-bdaa-5b78-9804-d0baed295098": {
+     "chain": "cooperative_id",
+     "type": "many2one"
+    },
+    "aedc44ba-0bca-57bc-bc9d-d61a03618496": {
+     "chain": "state",
+     "type": "selection"
+    }
+   },
+   "formulaId": "5",
+   "id": "5",
+   "measures": [
+    {
+     "fieldName": "balance",
+     "id": "balance"
+    },
+    {
+     "fieldName": "accrued",
+     "id": "accrued"
+    }
+   ],
+   "model": "coop.share.account",
+   "name": "Пайщик",
+   "rows": [
+    {
+     "fieldName": "partner_id"
+    }
+   ],
+   "sortedColumn": {
+    "domain": [],
+    "measure": "balance",
+    "order": "desc"
+   },
+   "type": "ODOO"
+  }
+ },
+ "revisionId": "START_REVISION",
+ "settings": {
+  "locale": {
+   "code": "ru_RU",
+   "dateFormat": "dd.mm.yyyy",
+   "decimalSeparator": ",",
+   "formulaArgSeparator": ";",
+   "name": "Russian",
+   "thousandsSeparator": " ",
+   "timeFormat": "hh:mm:ss",
+   "weekStart": 1
+  }
+ },
+ "sheets": [
+  {
+   "areGridLinesVisible": false,
+   "borders": {
+    "A16:G16": 1,
+    "A33:C33": 1,
+    "A50:C50": 1,
+    "E33:G33": 1,
+    "E50:G50": 1
+   },
+   "cells": {
+    "A16": "Вступили по месяцам",
+    "A33": "Паевой фонд — 15 крупнейших кооперативов",
+    "A50": "Кооперативы по паевому фонду",
+    "A51": "=PIVOT(4, 10, FALSE, FALSE)",
+    "E33": "Состояние счетов",
+    "E50": "Крупнейшие паи",
+    "E51": "=PIVOT(5, 10, FALSE, FALSE)"
+   },
+   "colNumber": 7,
+   "cols": {
+    "0": {
+     "size": 250
+    },
+    "1": {
+     "size": 110
+    },
+    "2": {
+     "size": 80
+    },
+    "3": {
+     "size": 20
+    },
+    "4": {
+     "size": 250
+    },
+    "5": {
+     "size": 110
+    },
+    "6": {
+     "size": 80
+    }
+   },
+   "comments": {},
+   "conditionalFormats": [],
+   "dataValidationRules": [],
+   "figures": [
+    {
+     "col": 0,
+     "data": {
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
+      "baselineMode": "difference",
+      "humanize": false,
+      "keyValue": "Data!B2",
+      "title": {
+       "bold": true,
+       "text": "Пайщиков"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "414d2b93-a87f-55ec-8c60-e44db159842c",
+     "offset": {
+      "x": 0,
+      "y": 12
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
+      "baselineMode": "difference",
+      "humanize": false,
+      "keyValue": "Data!B4",
+      "title": {
+       "bold": true,
+       "text": "Паевой фонд"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "77b36ef2-456d-5be1-a572-2cca8fa07d91",
+     "offset": {
+      "x": 303,
+      "y": 12
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
+      "baselineMode": "difference",
+      "humanize": false,
+      "keyValue": "Data!B3",
+      "title": {
+       "bold": true,
+       "text": "Кооперативов"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "7ad7b789-3a26-556c-b18c-28f069ff8d74",
+     "offset": {
+      "x": 606,
+      "y": 12
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
+      "baselineMode": "difference",
+      "humanize": false,
+      "keyValue": "Data!B5",
+      "title": {
+       "bold": true,
+       "text": "Паевые взносы"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "ccf86284-7844-594b-8e36-ebd09942cbfb",
+     "offset": {
+      "x": 0,
+      "y": 118
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
+      "baselineMode": "difference",
+      "humanize": false,
+      "keyValue": "Data!B6",
+      "title": {
+       "bold": true,
+       "text": "Начислено"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "bdee21d7-2fa4-50eb-bc7d-ee48429f65f8",
+     "offset": {
+      "x": 303,
+      "y": 118
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
+      "baselineMode": "difference",
+      "humanize": false,
+      "keyValue": "Data!B7",
+      "title": {
+       "bold": true,
+       "text": "Выплачено"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "4536680c-3dcd-57f7-808f-5e68ef0dd6eb",
+     "offset": {
+      "x": 606,
+      "y": 118
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "baseline": "Data!B10",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
+      "baselineMode": "text",
+      "humanize": false,
+      "keyValue": "Data!B9",
+      "title": {
+       "bold": true,
+       "text": "К возврату"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "6ec12952-43f1-547c-80d8-78e4ab0c6331",
+     "offset": {
+      "x": 0,
+      "y": 224
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
+      "baselineMode": "difference",
+      "humanize": false,
+      "keyValue": "Data!B8",
+      "title": {
+       "bold": true,
+       "text": "Вступительные взносы"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "86506777-5a23-59c4-b6d9-953488549252",
+     "offset": {
+      "x": 303,
+      "y": 224
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "dataSets": [],
+      "fieldMatching": {
+       "238f773c-9fe3-50f1-9052-33e1f292536a": {
+        "chain": "joined_on",
+        "offset": 0,
+        "type": "date"
+       },
+       "7da15a19-bdaa-5b78-9804-d0baed295098": {
+        "chain": "cooperative_id",
+        "type": "many2one"
+       },
+       "aedc44ba-0bca-57bc-bc9d-d61a03618496": {
+        "chain": "state",
+        "type": "selection"
+       }
+      },
+      "legendPosition": "top",
+      "metaData": {
+       "cumulatedStart": false,
+       "groupBy": [
+        "joined_on:month",
+        "state"
+       ],
+       "measure": "__count",
+       "mode": "bar",
+       "order": null,
+       "resModel": "coop.share.account"
+      },
+      "searchParams": {
+       "comparison": null,
+       "context": {},
+       "domain": [
+        "|",
+        [
+         "cooperative_id.coop_member_ids",
+         "any",
+         [
+          [
+           "partner_id.coop_is_me",
+           "=",
+           true
+          ],
+          [
+           "state",
+           "=",
+           "active"
+          ],
+          [
+           "role",
+           "in",
+           [
+            "board",
+            "audit"
+           ]
+          ]
+         ]
+        ],
+        [
+         "partner_id.coop_is_mine",
+         "=",
+         false
+        ]
+       ],
+       "groupBy": [
+        "joined_on:month",
+        "state"
+       ],
+       "orderBy": []
+      },
+      "stacked": true,
+      "title": {
+       "text": ""
+      },
+      "type": "odoo_bar",
+      "verticalAxisPosition": "left"
+     },
+     "height": 345,
+     "id": "dce4209a-7f10-5f1e-b8ad-c1c9e39fccaa",
+     "offset": {
+      "x": 0,
+      "y": 385
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 900
+    },
+    {
+     "col": 0,
+     "data": {
+      "aggregated": false,
+      "dataSets": [
+       {
+        "dataRange": "Data!E1:E15"
+       }
+      ],
+      "dataSetsHaveTitle": false,
+      "labelRange": "Data!D1:D15",
+      "legendPosition": "none",
+      "stacked": false,
+      "title": {
+       "text": ""
+      },
+      "type": "bar",
+      "verticalAxisPosition": "left"
+     },
+     "height": 345,
+     "id": "868e629e-b843-574e-8827-a57ac86cbe29",
+     "offset": {
+      "x": 0,
+      "y": 793
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 440
+    },
+    {
+     "col": 0,
+     "data": {
+      "dataSets": [],
+      "fieldMatching": {
+       "238f773c-9fe3-50f1-9052-33e1f292536a": {
+        "chain": "joined_on",
+        "offset": 0,
+        "type": "date"
+       },
+       "7da15a19-bdaa-5b78-9804-d0baed295098": {
+        "chain": "cooperative_id",
+        "type": "many2one"
+       },
+       "aedc44ba-0bca-57bc-bc9d-d61a03618496": {
+        "chain": "state",
+        "type": "selection"
+       }
+      },
+      "legendPosition": "right",
+      "metaData": {
+       "cumulatedStart": false,
+       "groupBy": [
+        "state"
+       ],
+       "measure": "__count",
+       "mode": "pie",
+       "order": null,
+       "resModel": "coop.share.account"
+      },
+      "searchParams": {
+       "comparison": null,
+       "context": {},
+       "domain": [
+        "|",
+        [
+         "cooperative_id.coop_member_ids",
+         "any",
+         [
+          [
+           "partner_id.coop_is_me",
+           "=",
+           true
+          ],
+          [
+           "state",
+           "=",
+           "active"
+          ],
+          [
+           "role",
+           "in",
+           [
+            "board",
+            "audit"
+           ]
+          ]
+         ]
+        ],
+        [
+         "partner_id.coop_is_mine",
+         "=",
+         false
+        ]
+       ],
+       "groupBy": [
+        "state"
+       ],
+       "orderBy": []
+      },
+      "title": {
+       "text": ""
+      },
+      "type": "odoo_pie"
+     },
+     "height": 345,
+     "id": "c1bfeb97-e63e-511e-9358-631e4e008423",
+     "offset": {
+      "x": 460,
+      "y": 793
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 440
+    }
+   ],
+   "formats": {},
+   "headerGroups": {
+    "COL": [],
+    "ROW": []
+   },
+   "id": "sheet1",
+   "isVisible": true,
+   "merges": [],
+   "name": "Dashboard",
+   "rowNumber": 63,
+   "rows": {
+    "15": {
+     "size": 40
+    },
+    "32": {
+     "size": 40
+    },
+    "49": {
+     "size": 40
+    }
+   },
+   "styles": {
+    "A16": 1,
+    "A33": 1,
+    "A50": 1,
+    "E33": 1,
+    "E50": 1
+   },
+   "tables": []
+  },
+  {
+   "areGridLinesVisible": true,
+   "borders": {},
+   "cells": {
+    "A10": "Счетов к возврату",
+    "A2": "Пайщиков",
+    "A3": "Кооперативов",
+    "A4": "Паевой фонд",
+    "A5": "Паевые взносы",
+    "A6": "Начислено",
+    "A7": "Выплачено",
+    "A8": "Вступительные взносы",
+    "A9": "К возврату",
+    "B1": "Сейчас",
+    "B10": "=IFERROR(CONCATENATE(PIVOT.VALUE(2,\"__count\"),\" счетов\"),\"\")",
+    "B2": "=PIVOT.VALUE(1,\"partner_id:count_distinct\")",
+    "B3": "=PIVOT.VALUE(1,\"cooperative_id:count_distinct\")",
+    "B4": "=PIVOT.VALUE(1,\"balance\")",
+    "B5": "=PIVOT.VALUE(1,\"contributed\")",
+    "B6": "=PIVOT.VALUE(1,\"accrued\")",
+    "B7": "=PIVOT.VALUE(1,\"paid_out\")",
+    "B8": "=PIVOT.VALUE(1,\"entry_fee\")",
+    "B9": "=PIVOT.VALUE(2,\"balance\")",
+    "C1": "Прошлый период",
+    "D1": "=PIVOT(3, 15, FALSE, FALSE)"
+   },
+   "colNumber": 5,
+   "cols": {
+    "0": {
+     "size": 220
+    },
+    "1": {
+     "size": 140
+    },
+    "2": {
+     "size": 140
+    },
+    "3": {
+     "size": 140
+    },
+    "4": {
+     "size": 140
+    }
+   },
+   "comments": {},
+   "conditionalFormats": [],
+   "dataValidationRules": [],
+   "figures": [],
+   "formats": {
+    "B2": 1,
+    "B3": 1,
+    "B4": 2,
+    "B5": 2,
+    "B6": 2,
+    "B7": 2,
+    "B8": 2,
+    "B9": 2
+   },
+   "headerGroups": {
+    "COL": [],
+    "ROW": []
+   },
+   "id": "cdb87852-9472-50d9-962d-45c87a2fe72e",
+   "isVisible": true,
+   "merges": [],
+   "name": "Data",
+   "rowNumber": 20,
+   "rows": {},
+   "styles": {
+    "A1": 2,
+    "B1": 2,
+    "C1": 2
+   },
+   "tables": []
+  },
+  {
+   "areGridLinesVisible": true,
+   "borders": {},
+   "cells": {
+    "A1": "Алтайский край",
+    "A10": "Ишим",
+    "A11": "Казань",
+    "A12": "Калининград",
+    "A13": "Кемерово",
+    "A14": "Краснодар",
+    "A15": "Красноярск",
+    "A16": "Курск",
+    "A17": "Магнитогорск",
+    "A18": "Москва",
+    "A19": "Нижний Новгород",
+    "A2": "Архангельск",
+    "A20": "Нижний Тагил",
+    "A21": "Новосибирск",
+    "A22": "Омск",
+    "A23": "Пермь",
+    "A24": "Псков",
+    "A25": "Ростов-на-Дону",
+    "A26": "Самара",
+    "A27": "Санкт-Петербург",
+    "A28": "Сочи",
+    "A29": "Тобольск",
+    "A3": "Владивосток",
+    "A30": "Тула",
+    "A31": "Тюмень",
+    "A32": "Уфа",
+    "A33": "Хабаровск",
+    "A34": "Челябинск",
+    "A35": "Ярославль",
+    "A4": "Волгоград",
+    "A5": "Вологда",
+    "A6": "Воронеж",
+    "A7": "Дербент",
+    "A8": "Екатеринбург",
+    "A9": "Иркутск"
+   },
+   "colNumber": 1,
+   "cols": {
+    "0": {
+     "size": 200
+    }
+   },
+   "comments": {},
+   "conditionalFormats": [],
+   "dataValidationRules": [],
+   "figures": [],
+   "formats": {},
+   "headerGroups": {
+    "COL": [],
+    "ROW": []
+   },
+   "id": "1c9e3d9d-88d8-5bd4-a1de-6780d6787548",
+   "isVisible": true,
+   "merges": [],
+   "name": "Lists",
+   "rowNumber": 40,
+   "rows": {},
+   "styles": {},
+   "tables": []
+  }
+ ],
+ "styles": {
+  "1": {
+   "bold": true,
+   "fontSize": 14,
+   "textColor": "#14171a"
+  },
+  "2": {
+   "bold": true
+  }
+ },
+ "uniqueFigureIds": true,
+ "version": "18.4.14"
+}

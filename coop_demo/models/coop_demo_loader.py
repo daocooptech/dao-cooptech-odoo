@@ -38,6 +38,8 @@ from ..data import load_sales
 from ..data import load_showcase_stock
 from ..data import load_showcase_timesheets
 from ..data import load_showcase_events
+from ..data import load_showcase_crm
+from ..data import load_showcase_shares
 from ..data import load_org_notes
 from ..data import load_deal_leads
 from ..data import load_deal_activities
@@ -478,6 +480,8 @@ class CoopDemoLoader(models.AbstractModel):
         load_showcase_stock.load_showcase_stock(self.env)
         load_showcase_timesheets.load_showcase_timesheets(self.env)
         load_showcase_events.load_showcase_events(self.env)
+        load_showcase_crm.load_showcase_crm(self.env)
+        load_showcase_shares.load_showcase_shares(self.env)
         load_sales.load_purchases(self.env)
         # Общие заметки организаций (решение 655, задача 428).
         load_org_notes.load_org_notes(self.env)

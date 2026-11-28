@@ -1,0 +1,1186 @@
+{
+ "borders": {
+  "1": {
+   "bottom": {
+    "color": "#d2d2cb",
+    "style": "thin"
+   }
+  }
+ },
+ "chartOdooMenusReferences": {
+  "107135a2-ab11-5cbc-a4ee-48fcb1ee463e": "coop_analytics.menu_coop_an_tab_crm_report",
+  "4ca500ab-e63d-581a-bfad-980fd8517fcf": "coop_analytics.menu_coop_an_tab_crm_report",
+  "5afcc19a-935a-50dd-81bb-0bf9144bd1ac": "coop_analytics.menu_coop_an_tab_crm_report",
+  "618aa582-fab1-5482-8ae0-005fda6a58d1": "coop_analytics.menu_coop_an_tab_crm_report",
+  "8346a275-e601-5f70-9902-047ce1b7aa52": "coop_analytics.menu_coop_an_tab_crm_report",
+  "8c4982f2-7f50-5e00-b351-e96c50ba9ed3": "coop_analytics.menu_coop_an_tab_crm_report",
+  "b40911be-f894-5352-a6f4-3ffa59ce4e1d": "coop_analytics.menu_coop_an_tab_crm_report",
+  "b4e222b7-c1c4-527d-b2e0-9eab8eba4406": "coop_analytics.menu_coop_an_tab_crm_report",
+  "e471ebcd-a368-5e51-af74-3448847ecff4": "coop_analytics.menu_coop_an_tab_crm_report",
+  "efd8cf09-b321-58f9-8405-77b9f1f7be1d": "coop_analytics.menu_coop_an_tab_crm_report",
+  "f1e0fb10-7a4c-51ed-a53c-d720cab22611": "coop_analytics.menu_coop_an_tab_crm_report"
+ },
+ "customTableStyles": {},
+ "formats": {
+  "1": "#,##0",
+  "2": "#,##0[$ ₽]",
+  "3": "0[$ %]"
+ },
+ "globalFilters": [
+  {
+   "defaultValue": "last_12_months",
+   "id": "9d59f7c8-f08d-5410-9b6a-43a93ce0cafa",
+   "label": "Период",
+   "type": "date"
+  },
+  {
+   "id": "ed0ca95b-a935-5357-8f71-664f8e292160",
+   "label": "Город",
+   "rangesOfAllowedValues": [
+    "Lists!A1:A35"
+   ],
+   "type": "text"
+  },
+  {
+   "defaultValueDisplayNames": [],
+   "id": "aea02e3d-1126-55af-af00-8b168d1736e9",
+   "label": "Источник",
+   "modelName": "utm.source",
+   "type": "relation"
+  },
+  {
+   "defaultValueDisplayNames": [],
+   "id": "f713deba-60c3-5685-b330-b88189a86ff1",
+   "label": "Команда продаж",
+   "modelName": "crm.team",
+   "type": "relation"
+  }
+ ],
+ "listNextId": 1,
+ "lists": {},
+ "pivotNextId": 9,
+ "pivots": {
+  "1": {
+   "columns": [],
+   "context": {
+    "active_test": false
+   },
+   "domain": [],
+   "fieldMatching": {
+    "9d59f7c8-f08d-5410-9b6a-43a93ce0cafa": {
+     "chain": "create_date",
+     "offset": 0,
+     "type": "datetime"
+    },
+    "aea02e3d-1126-55af-af00-8b168d1736e9": {
+     "chain": "source_id",
+     "type": "many2one"
+    },
+    "ed0ca95b-a935-5357-8f71-664f8e292160": {
+     "chain": "city",
+     "type": "char"
+    },
+    "f713deba-60c3-5685-b330-b88189a86ff1": {
+     "chain": "team_id",
+     "type": "many2one"
+    }
+   },
+   "formulaId": "1",
+   "id": "1",
+   "measures": [
+    {
+     "fieldName": "__count",
+     "id": "__count"
+    },
+    {
+     "fieldName": "expected_revenue",
+     "id": "expected_revenue"
+    }
+   ],
+   "model": "crm.lead",
+   "name": "лиды",
+   "rows": [],
+   "sortedColumn": null,
+   "type": "ODOO"
+  },
+  "2": {
+   "columns": [],
+   "context": {
+    "active_test": false
+   },
+   "domain": [],
+   "fieldMatching": {
+    "9d59f7c8-f08d-5410-9b6a-43a93ce0cafa": {
+     "chain": "create_date",
+     "offset": -1,
+     "type": "datetime"
+    },
+    "aea02e3d-1126-55af-af00-8b168d1736e9": {
+     "chain": "source_id",
+     "type": "many2one"
+    },
+    "ed0ca95b-a935-5357-8f71-664f8e292160": {
+     "chain": "city",
+     "type": "char"
+    },
+    "f713deba-60c3-5685-b330-b88189a86ff1": {
+     "chain": "team_id",
+     "type": "many2one"
+    }
+   },
+   "formulaId": "2",
+   "id": "2",
+   "measures": [
+    {
+     "fieldName": "__count",
+     "id": "__count"
+    },
+    {
+     "fieldName": "expected_revenue",
+     "id": "expected_revenue"
+    }
+   ],
+   "model": "crm.lead",
+   "name": "лиды — прошлый период",
+   "rows": [],
+   "sortedColumn": null,
+   "type": "ODOO"
+  },
+  "3": {
+   "columns": [],
+   "context": {
+    "active_test": false
+   },
+   "domain": [
+    [
+     "won_status",
+     "=",
+     "won"
+    ]
+   ],
+   "fieldMatching": {
+    "9d59f7c8-f08d-5410-9b6a-43a93ce0cafa": {
+     "chain": "create_date",
+     "offset": 0,
+     "type": "datetime"
+    },
+    "aea02e3d-1126-55af-af00-8b168d1736e9": {
+     "chain": "source_id",
+     "type": "many2one"
+    },
+    "ed0ca95b-a935-5357-8f71-664f8e292160": {
+     "chain": "city",
+     "type": "char"
+    },
+    "f713deba-60c3-5685-b330-b88189a86ff1": {
+     "chain": "team_id",
+     "type": "many2one"
+    }
+   },
+   "formulaId": "3",
+   "id": "3",
+   "measures": [
+    {
+     "fieldName": "__count",
+     "id": "__count"
+    },
+    {
+     "fieldName": "expected_revenue",
+     "id": "expected_revenue"
+    }
+   ],
+   "model": "crm.lead",
+   "name": "выигранные",
+   "rows": [],
+   "sortedColumn": null,
+   "type": "ODOO"
+  },
+  "4": {
+   "columns": [],
+   "context": {
+    "active_test": false
+   },
+   "domain": [
+    [
+     "won_status",
+     "=",
+     "won"
+    ]
+   ],
+   "fieldMatching": {
+    "9d59f7c8-f08d-5410-9b6a-43a93ce0cafa": {
+     "chain": "create_date",
+     "offset": -1,
+     "type": "datetime"
+    },
+    "aea02e3d-1126-55af-af00-8b168d1736e9": {
+     "chain": "source_id",
+     "type": "many2one"
+    },
+    "ed0ca95b-a935-5357-8f71-664f8e292160": {
+     "chain": "city",
+     "type": "char"
+    },
+    "f713deba-60c3-5685-b330-b88189a86ff1": {
+     "chain": "team_id",
+     "type": "many2one"
+    }
+   },
+   "formulaId": "4",
+   "id": "4",
+   "measures": [
+    {
+     "fieldName": "__count",
+     "id": "__count"
+    },
+    {
+     "fieldName": "expected_revenue",
+     "id": "expected_revenue"
+    }
+   ],
+   "model": "crm.lead",
+   "name": "выигранные — прошлый период",
+   "rows": [],
+   "sortedColumn": null,
+   "type": "ODOO"
+  },
+  "5": {
+   "columns": [],
+   "context": {
+    "active_test": false
+   },
+   "domain": [
+    [
+     "won_status",
+     "=",
+     "lost"
+    ]
+   ],
+   "fieldMatching": {
+    "9d59f7c8-f08d-5410-9b6a-43a93ce0cafa": {
+     "chain": "create_date",
+     "offset": 0,
+     "type": "datetime"
+    },
+    "aea02e3d-1126-55af-af00-8b168d1736e9": {
+     "chain": "source_id",
+     "type": "many2one"
+    },
+    "ed0ca95b-a935-5357-8f71-664f8e292160": {
+     "chain": "city",
+     "type": "char"
+    },
+    "f713deba-60c3-5685-b330-b88189a86ff1": {
+     "chain": "team_id",
+     "type": "many2one"
+    }
+   },
+   "formulaId": "5",
+   "id": "5",
+   "measures": [
+    {
+     "fieldName": "__count",
+     "id": "__count"
+    }
+   ],
+   "model": "crm.lead",
+   "name": "проигранные",
+   "rows": [],
+   "sortedColumn": null,
+   "type": "ODOO"
+  },
+  "6": {
+   "columns": [],
+   "context": {
+    "active_test": false
+   },
+   "domain": [
+    [
+     "won_status",
+     "=",
+     "lost"
+    ]
+   ],
+   "fieldMatching": {
+    "9d59f7c8-f08d-5410-9b6a-43a93ce0cafa": {
+     "chain": "create_date",
+     "offset": -1,
+     "type": "datetime"
+    },
+    "aea02e3d-1126-55af-af00-8b168d1736e9": {
+     "chain": "source_id",
+     "type": "many2one"
+    },
+    "ed0ca95b-a935-5357-8f71-664f8e292160": {
+     "chain": "city",
+     "type": "char"
+    },
+    "f713deba-60c3-5685-b330-b88189a86ff1": {
+     "chain": "team_id",
+     "type": "many2one"
+    }
+   },
+   "formulaId": "6",
+   "id": "6",
+   "measures": [
+    {
+     "fieldName": "__count",
+     "id": "__count"
+    }
+   ],
+   "model": "crm.lead",
+   "name": "проигранные — прошлый период",
+   "rows": [],
+   "sortedColumn": null,
+   "type": "ODOO"
+  },
+  "7": {
+   "columns": [],
+   "context": {
+    "active_test": false
+   },
+   "domain": [
+    [
+     "won_status",
+     "=",
+     "won"
+    ]
+   ],
+   "fieldMatching": {
+    "9d59f7c8-f08d-5410-9b6a-43a93ce0cafa": {
+     "chain": "create_date",
+     "offset": 0,
+     "type": "datetime"
+    },
+    "aea02e3d-1126-55af-af00-8b168d1736e9": {
+     "chain": "source_id",
+     "type": "many2one"
+    },
+    "ed0ca95b-a935-5357-8f71-664f8e292160": {
+     "chain": "city",
+     "type": "char"
+    },
+    "f713deba-60c3-5685-b330-b88189a86ff1": {
+     "chain": "team_id",
+     "type": "many2one"
+    }
+   },
+   "formulaId": "7",
+   "id": "7",
+   "measures": [
+    {
+     "fieldName": "__count",
+     "id": "__count"
+    },
+    {
+     "fieldName": "expected_revenue",
+     "id": "expected_revenue"
+    }
+   ],
+   "model": "crm.lead",
+   "name": "Менеджер",
+   "rows": [
+    {
+     "fieldName": "user_id"
+    }
+   ],
+   "sortedColumn": {
+    "domain": [],
+    "measure": "expected_revenue",
+    "order": "desc"
+   },
+   "type": "ODOO"
+  },
+  "8": {
+   "columns": [],
+   "context": {
+    "active_test": false
+   },
+   "domain": [],
+   "fieldMatching": {
+    "9d59f7c8-f08d-5410-9b6a-43a93ce0cafa": {
+     "chain": "create_date",
+     "offset": 0,
+     "type": "datetime"
+    },
+    "aea02e3d-1126-55af-af00-8b168d1736e9": {
+     "chain": "source_id",
+     "type": "many2one"
+    },
+    "ed0ca95b-a935-5357-8f71-664f8e292160": {
+     "chain": "city",
+     "type": "char"
+    },
+    "f713deba-60c3-5685-b330-b88189a86ff1": {
+     "chain": "team_id",
+     "type": "many2one"
+    }
+   },
+   "formulaId": "8",
+   "id": "8",
+   "measures": [
+    {
+     "fieldName": "__count",
+     "id": "__count"
+    },
+    {
+     "fieldName": "expected_revenue",
+     "id": "expected_revenue"
+    }
+   ],
+   "model": "crm.lead",
+   "name": "Источник",
+   "rows": [
+    {
+     "fieldName": "source_id"
+    }
+   ],
+   "sortedColumn": {
+    "domain": [],
+    "measure": "__count",
+    "order": "desc"
+   },
+   "type": "ODOO"
+  }
+ },
+ "revisionId": "START_REVISION",
+ "settings": {
+  "locale": {
+   "code": "ru_RU",
+   "dateFormat": "dd.mm.yyyy",
+   "decimalSeparator": ",",
+   "formulaArgSeparator": ";",
+   "name": "Russian",
+   "thousandsSeparator": " ",
+   "timeFormat": "hh:mm:ss",
+   "weekStart": 1
+  }
+ },
+ "sheets": [
+  {
+   "areGridLinesVisible": false,
+   "borders": {
+    "A11:G11": 1,
+    "A28:G28": 1,
+    "A45:C45": 1,
+    "A62:G62": 1,
+    "A79:C79": 1,
+    "E45:G45": 1,
+    "E79:G79": 1
+   },
+   "cells": {
+    "A11": "Воронка: открытые лиды по этапам",
+    "A28": "Лиды по месяцам — чем закончились",
+    "A45": "Откуда приходят",
+    "A62": "Лиды по городам",
+    "A79": "Лучшие менеджеры — выиграно",
+    "A80": "=PIVOT(7, 10, FALSE, FALSE)",
+    "E45": "Почему проиграли",
+    "E79": "Источники лидов",
+    "E80": "=PIVOT(8, 10, FALSE, FALSE)"
+   },
+   "colNumber": 7,
+   "cols": {
+    "0": {
+     "size": 250
+    },
+    "1": {
+     "size": 110
+    },
+    "2": {
+     "size": 80
+    },
+    "3": {
+     "size": 20
+    },
+    "4": {
+     "size": 250
+    },
+    "5": {
+     "size": 110
+    },
+    "6": {
+     "size": 80
+    }
+   },
+   "comments": {},
+   "conditionalFormats": [],
+   "dataValidationRules": [],
+   "figures": [
+    {
+     "col": 0,
+     "data": {
+      "baseline": "Data!C2",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
+      "baselineDescr": {
+       "text": "к прошлому"
+      },
+      "baselineMode": "difference",
+      "humanize": false,
+      "keyValue": "Data!B2",
+      "title": {
+       "bold": true,
+       "text": "Лидов"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "8346a275-e601-5f70-9902-047ce1b7aa52",
+     "offset": {
+      "x": 0,
+      "y": 12
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "baseline": "Data!C3",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
+      "baselineDescr": {
+       "text": "к прошлому"
+      },
+      "baselineMode": "percentage",
+      "humanize": false,
+      "keyValue": "Data!B3",
+      "title": {
+       "bold": true,
+       "text": "Ожидаемая выручка"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "5afcc19a-935a-50dd-81bb-0bf9144bd1ac",
+     "offset": {
+      "x": 303,
+      "y": 12
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "baseline": "Data!C7",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
+      "baselineDescr": {
+       "text": "к прошлому"
+      },
+      "baselineMode": "difference",
+      "humanize": false,
+      "keyValue": "Data!B7",
+      "title": {
+       "bold": true,
+       "text": "Конверсия"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "b40911be-f894-5352-a6f4-3ffa59ce4e1d",
+     "offset": {
+      "x": 606,
+      "y": 12
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "baseline": "Data!C4",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
+      "baselineDescr": {
+       "text": "к прошлому"
+      },
+      "baselineMode": "difference",
+      "humanize": false,
+      "keyValue": "Data!B4",
+      "title": {
+       "bold": true,
+       "text": "Выиграно"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "b4e222b7-c1c4-527d-b2e0-9eab8eba4406",
+     "offset": {
+      "x": 0,
+      "y": 118
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "baseline": "Data!C5",
+      "baselineColorDown": "#b3413a",
+      "baselineColorUp": "#146b64",
+      "baselineDescr": {
+       "text": "к прошлому"
+      },
+      "baselineMode": "percentage",
+      "humanize": false,
+      "keyValue": "Data!B5",
+      "title": {
+       "bold": true,
+       "text": "Выручка выигранных"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "e471ebcd-a368-5e51-af74-3448847ecff4",
+     "offset": {
+      "x": 303,
+      "y": 118
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "baseline": "Data!C6",
+      "baselineColorDown": "#146b64",
+      "baselineColorUp": "#b3413a",
+      "baselineDescr": {
+       "text": "к прошлому"
+      },
+      "baselineMode": "difference",
+      "humanize": false,
+      "keyValue": "Data!B6",
+      "title": {
+       "bold": true,
+       "text": "Проиграно"
+      },
+      "type": "scorecard"
+     },
+     "height": 96,
+     "id": "efd8cf09-b321-58f9-8405-77b9f1f7be1d",
+     "offset": {
+      "x": 606,
+      "y": 118
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 293
+    },
+    {
+     "col": 0,
+     "data": {
+      "dataSets": [],
+      "fieldMatching": {
+       "9d59f7c8-f08d-5410-9b6a-43a93ce0cafa": {
+        "chain": "create_date",
+        "offset": 0,
+        "type": "datetime"
+       },
+       "aea02e3d-1126-55af-af00-8b168d1736e9": {
+        "chain": "source_id",
+        "type": "many2one"
+       },
+       "ed0ca95b-a935-5357-8f71-664f8e292160": {
+        "chain": "city",
+        "type": "char"
+       },
+       "f713deba-60c3-5685-b330-b88189a86ff1": {
+        "chain": "team_id",
+        "type": "many2one"
+       }
+      },
+      "legendPosition": "none",
+      "metaData": {
+       "cumulatedStart": false,
+       "groupBy": [
+        "stage_id"
+       ],
+       "measure": "expected_revenue",
+       "mode": "bar",
+       "order": null,
+       "resModel": "crm.lead"
+      },
+      "searchParams": {
+       "comparison": null,
+       "context": {
+        "active_test": false
+       },
+       "domain": [
+        [
+         "won_status",
+         "=",
+         "pending"
+        ]
+       ],
+       "groupBy": [
+        "stage_id"
+       ],
+       "orderBy": []
+      },
+      "stacked": true,
+      "title": {
+       "text": ""
+      },
+      "type": "odoo_bar",
+      "verticalAxisPosition": "left"
+     },
+     "height": 345,
+     "id": "4ca500ab-e63d-581a-bfad-980fd8517fcf",
+     "offset": {
+      "x": 0,
+      "y": 270
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 900
+    },
+    {
+     "col": 0,
+     "data": {
+      "dataSets": [],
+      "fieldMatching": {
+       "9d59f7c8-f08d-5410-9b6a-43a93ce0cafa": {
+        "chain": "create_date",
+        "offset": 0,
+        "type": "datetime"
+       },
+       "aea02e3d-1126-55af-af00-8b168d1736e9": {
+        "chain": "source_id",
+        "type": "many2one"
+       },
+       "ed0ca95b-a935-5357-8f71-664f8e292160": {
+        "chain": "city",
+        "type": "char"
+       },
+       "f713deba-60c3-5685-b330-b88189a86ff1": {
+        "chain": "team_id",
+        "type": "many2one"
+       }
+      },
+      "legendPosition": "top",
+      "metaData": {
+       "cumulatedStart": false,
+       "groupBy": [
+        "create_date:month",
+        "won_status"
+       ],
+       "measure": "__count",
+       "mode": "bar",
+       "order": null,
+       "resModel": "crm.lead"
+      },
+      "searchParams": {
+       "comparison": null,
+       "context": {
+        "active_test": false
+       },
+       "domain": [],
+       "groupBy": [
+        "create_date:month",
+        "won_status"
+       ],
+       "orderBy": []
+      },
+      "stacked": true,
+      "title": {
+       "text": ""
+      },
+      "type": "odoo_bar",
+      "verticalAxisPosition": "left"
+     },
+     "height": 345,
+     "id": "f1e0fb10-7a4c-51ed-a53c-d720cab22611",
+     "offset": {
+      "x": 0,
+      "y": 678
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 900
+    },
+    {
+     "col": 0,
+     "data": {
+      "dataSets": [],
+      "fieldMatching": {
+       "9d59f7c8-f08d-5410-9b6a-43a93ce0cafa": {
+        "chain": "create_date",
+        "offset": 0,
+        "type": "datetime"
+       },
+       "aea02e3d-1126-55af-af00-8b168d1736e9": {
+        "chain": "source_id",
+        "type": "many2one"
+       },
+       "ed0ca95b-a935-5357-8f71-664f8e292160": {
+        "chain": "city",
+        "type": "char"
+       },
+       "f713deba-60c3-5685-b330-b88189a86ff1": {
+        "chain": "team_id",
+        "type": "many2one"
+       }
+      },
+      "legendPosition": "right",
+      "metaData": {
+       "cumulatedStart": false,
+       "groupBy": [
+        "source_id"
+       ],
+       "measure": "__count",
+       "mode": "pie",
+       "order": null,
+       "resModel": "crm.lead"
+      },
+      "searchParams": {
+       "comparison": null,
+       "context": {
+        "active_test": false
+       },
+       "domain": [],
+       "groupBy": [
+        "source_id"
+       ],
+       "orderBy": []
+      },
+      "title": {
+       "text": ""
+      },
+      "type": "odoo_pie"
+     },
+     "height": 345,
+     "id": "8c4982f2-7f50-5e00-b351-e96c50ba9ed3",
+     "offset": {
+      "x": 0,
+      "y": 1086
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 440
+    },
+    {
+     "col": 0,
+     "data": {
+      "dataSets": [],
+      "fieldMatching": {
+       "9d59f7c8-f08d-5410-9b6a-43a93ce0cafa": {
+        "chain": "create_date",
+        "offset": 0,
+        "type": "datetime"
+       },
+       "aea02e3d-1126-55af-af00-8b168d1736e9": {
+        "chain": "source_id",
+        "type": "many2one"
+       },
+       "ed0ca95b-a935-5357-8f71-664f8e292160": {
+        "chain": "city",
+        "type": "char"
+       },
+       "f713deba-60c3-5685-b330-b88189a86ff1": {
+        "chain": "team_id",
+        "type": "many2one"
+       }
+      },
+      "legendPosition": "right",
+      "metaData": {
+       "cumulatedStart": false,
+       "groupBy": [
+        "lost_reason_id"
+       ],
+       "measure": "__count",
+       "mode": "pie",
+       "order": null,
+       "resModel": "crm.lead"
+      },
+      "searchParams": {
+       "comparison": null,
+       "context": {
+        "active_test": false
+       },
+       "domain": [
+        [
+         "won_status",
+         "=",
+         "lost"
+        ]
+       ],
+       "groupBy": [
+        "lost_reason_id"
+       ],
+       "orderBy": []
+      },
+      "title": {
+       "text": ""
+      },
+      "type": "odoo_pie"
+     },
+     "height": 345,
+     "id": "618aa582-fab1-5482-8ae0-005fda6a58d1",
+     "offset": {
+      "x": 460,
+      "y": 1086
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 440
+    },
+    {
+     "col": 0,
+     "data": {
+      "dataSets": [],
+      "fieldMatching": {
+       "9d59f7c8-f08d-5410-9b6a-43a93ce0cafa": {
+        "chain": "create_date",
+        "offset": 0,
+        "type": "datetime"
+       },
+       "aea02e3d-1126-55af-af00-8b168d1736e9": {
+        "chain": "source_id",
+        "type": "many2one"
+       },
+       "ed0ca95b-a935-5357-8f71-664f8e292160": {
+        "chain": "city",
+        "type": "char"
+       },
+       "f713deba-60c3-5685-b330-b88189a86ff1": {
+        "chain": "team_id",
+        "type": "many2one"
+       }
+      },
+      "legendPosition": "none",
+      "metaData": {
+       "cumulatedStart": false,
+       "groupBy": [
+        "city"
+       ],
+       "measure": "expected_revenue",
+       "mode": "bar",
+       "order": "DESC",
+       "resModel": "crm.lead"
+      },
+      "searchParams": {
+       "comparison": null,
+       "context": {
+        "active_test": false
+       },
+       "domain": [],
+       "groupBy": [
+        "city"
+       ],
+       "orderBy": []
+      },
+      "stacked": true,
+      "title": {
+       "text": ""
+      },
+      "type": "odoo_bar",
+      "verticalAxisPosition": "left"
+     },
+     "height": 345,
+     "id": "107135a2-ab11-5cbc-a4ee-48fcb1ee463e",
+     "offset": {
+      "x": 0,
+      "y": 1494
+     },
+     "row": 0,
+     "tag": "chart",
+     "width": 900
+    }
+   ],
+   "formats": {},
+   "headerGroups": {
+    "COL": [],
+    "ROW": []
+   },
+   "id": "sheet1",
+   "isVisible": true,
+   "merges": [],
+   "name": "Dashboard",
+   "rowNumber": 92,
+   "rows": {
+    "10": {
+     "size": 40
+    },
+    "27": {
+     "size": 40
+    },
+    "44": {
+     "size": 40
+    },
+    "61": {
+     "size": 40
+    },
+    "78": {
+     "size": 40
+    }
+   },
+   "styles": {
+    "A11": 1,
+    "A28": 1,
+    "A45": 1,
+    "A62": 1,
+    "A79": 1,
+    "E45": 1,
+    "E79": 1
+   },
+   "tables": []
+  },
+  {
+   "areGridLinesVisible": true,
+   "borders": {},
+   "cells": {
+    "A2": "Лидов",
+    "A3": "Ожидаемая выручка",
+    "A4": "Выиграно",
+    "A5": "Выручка выигранных",
+    "A6": "Проиграно",
+    "A7": "Конверсия",
+    "B1": "Сейчас",
+    "B2": "=PIVOT.VALUE(1,\"__count\")",
+    "B3": "=PIVOT.VALUE(1,\"expected_revenue\")",
+    "B4": "=PIVOT.VALUE(3,\"__count\")",
+    "B5": "=PIVOT.VALUE(3,\"expected_revenue\")",
+    "B6": "=PIVOT.VALUE(5,\"__count\")",
+    "B7": "=IFERROR(Data!B4/(Data!B4+Data!B6)*100,0)",
+    "C1": "Прошлый период",
+    "C2": "=IFERROR(IF((PIVOT.VALUE(2,\"__count\"))=0,\"\",(PIVOT.VALUE(2,\"__count\"))),\"\")",
+    "C3": "=IFERROR(IF((PIVOT.VALUE(2,\"expected_revenue\"))=0,\"\",(PIVOT.VALUE(2,\"expected_revenue\"))),\"\")",
+    "C4": "=IFERROR(IF((PIVOT.VALUE(4,\"__count\"))=0,\"\",(PIVOT.VALUE(4,\"__count\"))),\"\")",
+    "C5": "=IFERROR(IF((PIVOT.VALUE(4,\"expected_revenue\"))=0,\"\",(PIVOT.VALUE(4,\"expected_revenue\"))),\"\")",
+    "C6": "=IFERROR(IF((PIVOT.VALUE(6,\"__count\"))=0,\"\",(PIVOT.VALUE(6,\"__count\"))),\"\")",
+    "C7": "=IFERROR(IF((IFERROR(Data!C4/(Data!C4+Data!C6)*100,0))=0,\"\",(IFERROR(Data!C4/(Data!C4+Data!C6)*100,0))),\"\")"
+   },
+   "colNumber": 3,
+   "cols": {
+    "0": {
+     "size": 220
+    },
+    "1": {
+     "size": 140
+    },
+    "2": {
+     "size": 140
+    }
+   },
+   "comments": {},
+   "conditionalFormats": [],
+   "dataValidationRules": [],
+   "figures": [],
+   "formats": {
+    "B2": 1,
+    "B3": 2,
+    "B4": 1,
+    "B5": 2,
+    "B6": 1,
+    "B7": 3,
+    "C2": 1,
+    "C3": 2,
+    "C4": 1,
+    "C5": 2,
+    "C6": 1,
+    "C7": 3
+   },
+   "headerGroups": {
+    "COL": [],
+    "ROW": []
+   },
+   "id": "b38237e1-befd-5806-8995-19c0f7529960",
+   "isVisible": true,
+   "merges": [],
+   "name": "Data",
+   "rowNumber": 20,
+   "rows": {},
+   "styles": {
+    "A1": 2,
+    "B1": 2,
+    "C1": 2
+   },
+   "tables": []
+  },
+  {
+   "areGridLinesVisible": true,
+   "borders": {},
+   "cells": {
+    "A1": "Алтайский край",
+    "A10": "Ишим",
+    "A11": "Казань",
+    "A12": "Калининград",
+    "A13": "Кемерово",
+    "A14": "Краснодар",
+    "A15": "Красноярск",
+    "A16": "Курск",
+    "A17": "Магнитогорск",
+    "A18": "Москва",
+    "A19": "Нижний Новгород",
+    "A2": "Архангельск",
+    "A20": "Нижний Тагил",
+    "A21": "Новосибирск",
+    "A22": "Омск",
+    "A23": "Пермь",
+    "A24": "Псков",
+    "A25": "Ростов-на-Дону",
+    "A26": "Самара",
+    "A27": "Санкт-Петербург",
+    "A28": "Сочи",
+    "A29": "Тобольск",
+    "A3": "Владивосток",
+    "A30": "Тула",
+    "A31": "Тюмень",
+    "A32": "Уфа",
+    "A33": "Хабаровск",
+    "A34": "Челябинск",
+    "A35": "Ярославль",
+    "A4": "Волгоград",
+    "A5": "Вологда",
+    "A6": "Воронеж",
+    "A7": "Дербент",
+    "A8": "Екатеринбург",
+    "A9": "Иркутск"
+   },
+   "colNumber": 1,
+   "cols": {
+    "0": {
+     "size": 200
+    }
+   },
+   "comments": {},
+   "conditionalFormats": [],
+   "dataValidationRules": [],
+   "figures": [],
+   "formats": {},
+   "headerGroups": {
+    "COL": [],
+    "ROW": []
+   },
+   "id": "e1b33b2a-13fb-5de6-bb32-aad49650984c",
+   "isVisible": true,
+   "merges": [],
+   "name": "Lists",
+   "rowNumber": 40,
+   "rows": {},
+   "styles": {},
+   "tables": []
+  }
+ ],
+ "styles": {
+  "1": {
+   "bold": true,
+   "fontSize": 14,
+   "textColor": "#14171a"
+  },
+  "2": {
+   "bold": true
+  }
+ },
+ "uniqueFigureIds": true,
+ "version": "18.4.14"
+}

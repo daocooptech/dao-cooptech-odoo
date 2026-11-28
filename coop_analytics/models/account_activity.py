@@ -96,6 +96,24 @@ class ResPartner(models.Model):
         for partner in self:
             partner.coop_is_me = partner == me
 
+    # «Моё» — я и организации, от чьего имени я действую
+    # (`coop_actor_partner_ids`). «Пайщики» отсекают по нему личные паи и
+    # паи своих организаций там, где ты не в правлении (замер 28.11).
+    coop_is_mine = fields.Boolean(compute='_compute_coop_is_mine',
+                                  search='_search_coop_is_mine')
+
+    def _compute_coop_is_mine(self):
+        mine = self.env.user.coop_actor_partner_ids
+        for partner in self:
+            partner.coop_is_mine = partner in mine
+
+    def _search_coop_is_mine(self, operator, value):
+        if operator in ('in', 'not in'):
+            positive = (True in value) == (operator == 'in')
+        else:
+            positive = (operator == '=') == bool(value)
+        return [('id', 'in' if positive else 'not in', self.env.user.coop_actor_partner_ids.ids)]
+
     def _search_coop_is_me(self, operator, value):
         # Odoo 19 приводит ('coop_is_me', '=', True) к ('coop_is_me', 'in', [True]):
         # разбираем оба вида, иначе «это я» находит всех, кроме меня.

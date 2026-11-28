@@ -81,6 +81,7 @@ class Dashboard:
         self.menu_refs = {}
         self.row = 0                # следующая свободная строка лица
         self.data_row = 1
+        self.data_cols = 3          # столбцы листа Data: подпись, сейчас, прошлое
 
     # ── идентификаторы ────────────────────────────────────────────────
     def uid(self, name):
@@ -115,7 +116,8 @@ class Dashboard:
         return f['id']
 
     # ── источники ─────────────────────────────────────────────────────
-    def pivot(self, name, model, domain, measures, matching, rows=None, sorted_by=None):
+    def pivot(self, name, model, domain, measures, matching, rows=None, sorted_by=None,
+              context=None):
         pid = str(len(self.pivots) + 1)
         ms = []
         for m in measures:
@@ -126,7 +128,7 @@ class Dashboard:
             ms.append(item)
         self.pivots[pid] = {
             'type': 'ODOO', 'id': pid, 'formulaId': pid, 'name': name, 'model': model,
-            'domain': domain, 'context': {}, 'measures': ms,
+            'domain': domain, 'context': context or {}, 'measures': ms,
             'columns': [],
             'rows': [r if isinstance(r, dict) else {'fieldName': r} for r in (rows or [])],
             'sortedColumn': ({'measure': sorted_by, 'order': 'desc', 'domain': []}
@@ -134,6 +136,24 @@ class Dashboard:
             'fieldMatching': matching,
         }
         return pid
+
+    def top(self, pid, size=15):
+        """График «первые N» — по раскладке сводной на листе Data.
+
+        У графика движка (`odoo_bar`) нет предела числа столбцов: 91
+        кооператив — 91 столбик (владелец 28.11: «фонд — топ-15»). Сводная
+        `=PIVOT(id, N)` раскладывается на листе Data двумя столбцами —
+        подпись и мера, — по ним строится обычный столбчатый график.
+        """
+        col = self.data_cols
+        self.data_cols += 2
+        lab, val = col_letter(col), col_letter(col + 1)
+        self.data_cells['%s1' % lab] = '=PIVOT(%s, %d, FALSE, FALSE)' % (pid, size)
+        return {'type': 'bar', 'title': {'text': ''}, 'legendPosition': 'none',
+                'dataSets': [{'dataRange': 'Data!%s1:%s%d' % (val, val, size)}],
+                'labelRange': 'Data!%s1:%s%d' % (lab, lab, size),
+                'dataSetsHaveTitle': False, 'aggregated': False, 'stacked': False,
+                'verticalAxisPosition': 'left'}
 
     def value(self, label, formula, fmt, previous=None):
         """Строка на листе Data: подпись, текущее значение, прошлый период."""
@@ -256,9 +276,10 @@ class Dashboard:
                  'conditionalFormats': [], 'dataValidationRules': [], 'tables': [],
                  'figures': self.figures, 'areGridLinesVisible': False, 'isVisible': True,
                  'headerGroups': {'ROW': [], 'COL': []}, 'comments': {}},
-                {'id': self.uid('sheet:data'), 'name': 'Data', 'colNumber': 3,
+                {'id': self.uid('sheet:data'), 'name': 'Data', 'colNumber': self.data_cols,
                  'rowNumber': max(self.data_row + 5, 20), 'rows': {},
-                 'cols': {'0': {'size': 220}, '1': {'size': 140}, '2': {'size': 140}},
+                 'cols': {str(i): {'size': 220 if i == 0 else 140}
+                          for i in range(self.data_cols)},
                  'merges': [], 'cells': data_cells,
                  'styles': {'A1': 2, 'B1': 2, 'C1': 2}, 'formats': data_formats, 'borders': {},
                  'conditionalFormats': [], 'dataValidationRules': [], 'tables': [],
@@ -293,14 +314,14 @@ class Dashboard:
 
 
 def chart(kind, model, domain, group_by, measure, matching, legend='none', stacked=True,
-          order=None, **extra):
+          order=None, context=None, **extra):
     """График движка по модели: odoo_bar, odoo_line, odoo_pie."""
     mode = kind.split('_', 1)[1]
     meta = {'groupBy': group_by, 'measure': measure, 'order': order, 'resModel': model,
             'mode': mode, 'cumulatedStart': bool(extra.get('cumulatedStart'))}
     data = {'type': kind, 'title': {'text': ''},
             'legendPosition': legend, 'metaData': meta,
-            'searchParams': {'comparison': None, 'context': {}, 'domain': domain,
+            'searchParams': {'comparison': None, 'context': context or {}, 'domain': domain,
                              'groupBy': group_by, 'orderBy': []},
             'dataSets': [], 'fieldMatching': matching}
     if kind != 'odoo_pie':
@@ -321,10 +342,11 @@ def match(pairs, offset=None):
     return out
 
 
-def both(d, name, model, domain, measures, pairs):
+def both(d, name, model, domain, measures, pairs, context=None):
     """Две сводные: за выбранный период и за предыдущий такой же."""
-    return (d.pivot(name, model, domain, measures, match(pairs, 0)),
-            d.pivot(name + ' — прошлый период', model, domain, measures, match(pairs, -1)))
+    return (d.pivot(name, model, domain, measures, match(pairs, 0), context=context),
+            d.pivot(name + ' — прошлый период', model, domain, measures, match(pairs, -1),
+                    context=context))
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -612,7 +634,139 @@ def exchange():
     return d
 
 
-DASHBOARDS = [money, deals, trust, projects, exchange]
+def crm():
+    # CRM организации (кусок 5, выбор владельца 28.11). Проигранные лиды
+    # движок убирает в архив — без `active_test` их не видно ни в
+    # «Проиграно», ни в конверсии.
+    d = Dashboard('crm', 'CRM', 'coop_analytics.menu_coop_an_tab_crm_report')
+    period = d.date_filter('period')
+    city = d.city_filter()
+    source = d.relation_filter('source', 'Источник', 'utm.source')
+    team = d.relation_filter('team', 'Команда продаж', 'crm.team')
+    m = 'crm.lead'
+    ctx = {'active_test': False}
+    pairs = {period: ('create_date', 'datetime'), city: ('city', 'char'),
+             source: ('source_id', 'many2one'), team: ('team_id', 'many2one')}
+    allp, all0 = both(d, 'лиды', m, [], ['__count', 'expected_revenue'], pairs, ctx)
+    won, won0 = both(d, 'выигранные', m, [['won_status', '=', 'won']],
+                     ['__count', 'expected_revenue'], pairs, ctx)
+    lost, lost0 = both(d, 'проигранные', m, [['won_status', '=', 'lost']], ['__count'],
+                       pairs, ctx)
+    k_cnt, b_cnt = d.value('Лидов', '=PIVOT.VALUE(%s,"__count")' % allp, INT,
+                           '=PIVOT.VALUE(%s,"__count")' % all0)
+    k_exp, b_exp = d.value('Ожидаемая выручка', '=PIVOT.VALUE(%s,"expected_revenue")' % allp,
+                           MONEY, '=PIVOT.VALUE(%s,"expected_revenue")' % all0)
+    k_won, b_won = d.value('Выиграно', '=PIVOT.VALUE(%s,"__count")' % won, INT,
+                           '=PIVOT.VALUE(%s,"__count")' % won0)
+    k_rev, b_rev = d.value('Выручка выигранных', '=PIVOT.VALUE(%s,"expected_revenue")' % won,
+                           MONEY, '=PIVOT.VALUE(%s,"expected_revenue")' % won0)
+    k_lost, b_lost = d.value('Проиграно', '=PIVOT.VALUE(%s,"__count")' % lost, INT,
+                             '=PIVOT.VALUE(%s,"__count")' % lost0)
+    k_conv, b_conv = d.value(
+        'Конверсия', '=IFERROR(%s/(%s+%s)*100,0)' % (k_won, k_won, k_lost), PCT,
+        '=IFERROR(%s/(%s+%s)*100,0)' % (b_won, b_won, b_lost))
+    d.cards([
+        ('Лидов', k_cnt, b_cnt, 'difference'),
+        ('Ожидаемая выручка', k_exp, b_exp, 'percentage'),
+        ('Конверсия', k_conv, b_conv, 'difference'),
+        ('Выиграно', k_won, b_won, 'difference'),
+        ('Выручка выигранных', k_rev, b_rev, 'percentage'),
+        ('Проиграно', k_lost, b_lost, 'difference', True),
+    ])
+    mt = match(pairs, 0)
+    pending = [['won_status', '=', 'pending']]
+    d.section(('Воронка: открытые лиды по этапам',
+               chart('odoo_bar', m, pending, ['stage_id'], 'expected_revenue', mt,
+                     context=ctx)))
+    d.section(('Лиды по месяцам — чем закончились',
+               chart('odoo_bar', m, [], ['create_date:month', 'won_status'], '__count', mt,
+                     legend='top', context=ctx)))
+    d.section(('Откуда приходят',
+               chart('odoo_pie', m, [], ['source_id'], '__count', mt, legend='right',
+                     context=ctx)),
+              ('Почему проиграли',
+               chart('odoo_pie', m, [['won_status', '=', 'lost']], ['lost_reason_id'],
+                     '__count', mt, legend='right', context=ctx)))
+    d.section(('Лиды по городам',
+               chart('odoo_bar', m, [], ['city'], 'expected_revenue', mt, order='DESC',
+                     context=ctx)))
+    by_user = d.pivot('Менеджер', m, [['won_status', '=', 'won']],
+                      ['__count', 'expected_revenue'], mt, rows=['user_id'],
+                      sorted_by='expected_revenue', context=ctx)
+    by_src = d.pivot('Источник', m, [], ['__count', 'expected_revenue'], mt,
+                     rows=['source_id'], sorted_by='__count', context=ctx)
+    d.tables(('Лучшие менеджеры — выиграно', by_user), ('Источники лидов', by_src))
+    return d
+
+
+def shares():
+    # Пайщики и паевой фонд — правлению, ревизии и администратору (кусок 5).
+    # Чьи счета видно, решают правила записей: правлению — счета своего
+    # кооператива. Период по умолчанию не задан: фонд — на сегодня, а не
+    # «вступившие за год».
+    d = Dashboard('shares', 'Пайщики', 'coop_analytics.menu_coop_an_tab_shares_report')
+    period = d.date_filter('period', label='Вступили', default=None)
+    coop = d.relation_filter('coop', 'Кооператив', 'res.partner')
+    state = d.selection_filter('state', 'Состояние счёта', 'coop.share.account', 'state')
+    m = 'coop.share.account'
+    pairs = {period: ('joined_on', 'date'), coop: ('cooperative_id', 'many2one'),
+             state: ('state', 'selection')}
+    mt = match(pairs, 0)
+    # Правилам `coop_wallet` правление видит и счета своего кооператива, и
+    # свои паи (и паи своих организаций) в других — те здесь лишние: «Кооперативов: 10» у
+    # правления одного (замер 28.11). Свой счёт остаётся только там, где
+    # ты в правлении или ревизии; администратору видно всё остальное.
+    base = ['|', ['cooperative_id.coop_member_ids', 'any',
+                  [['partner_id.coop_is_me', '=', True], ['state', '=', 'active'],
+                   ['role', 'in', ['board', 'audit']]]],
+            ['partner_id.coop_is_mine', '=', False]]
+    allp = d.pivot('счета', m, base, ['__count', 'partner_id:count_distinct',
+                                   'cooperative_id:count_distinct', 'balance', 'contributed',
+                                   'accrued', 'paid_out', 'entry_fee'], mt)
+    back = d.pivot('к возврату', m, base + [['state', '=', 'closing']], ['__count', 'balance'], mt)
+
+    def v(label, field, fmt):
+        return d.value(label, '=PIVOT.VALUE(%s,"%s")' % (allp, field), fmt)[0]
+
+    k_ppl = v('Пайщиков', 'partner_id:count_distinct', INT)
+    k_coop = v('Кооперативов', 'cooperative_id:count_distinct', INT)
+    k_fund = v('Паевой фонд', 'balance', MONEY)
+    k_in = v('Паевые взносы', 'contributed', MONEY)
+    k_acc = v('Начислено', 'accrued', MONEY)
+    k_out = v('Выплачено', 'paid_out', MONEY)
+    k_fee = v('Вступительные взносы', 'entry_fee', MONEY)
+    k_back, _ = d.value('К возврату', '=PIVOT.VALUE(%s,"balance")' % back, MONEY)
+    k_backn, _ = d.value('Счетов к возврату',
+                         '=IFERROR(CONCATENATE(PIVOT.VALUE(%s,"__count")," счетов"),"")'
+                         % back, None)
+    d.cards([
+        ('Пайщиков', k_ppl, None, None),
+        ('Паевой фонд', k_fund, None, None),
+        ('Кооперативов', k_coop, None, None),
+        ('Паевые взносы', k_in, None, None),
+        ('Начислено', k_acc, None, None),
+        ('Выплачено', k_out, None, None),
+        ('К возврату', k_back, k_backn, 'text'),
+        ('Вступительные взносы', k_fee, None, None),
+    ])
+    d.section(('Вступили по месяцам',
+               chart('odoo_bar', m, base, ['joined_on:month', 'state'], '__count', mt,
+                     legend='top')))
+    fund = d.pivot('Фонд кооператива', m, base, ['balance'], mt, rows=['cooperative_id'],
+                   sorted_by='balance')
+    d.section(('Паевой фонд — 15 крупнейших кооперативов', d.top(fund, 15)),
+              ('Состояние счетов',
+               chart('odoo_pie', m, base, ['state'], '__count', mt, legend='right')))
+    by_coop = d.pivot('Кооператив', m, base, ['partner_id:count_distinct', 'balance'], mt,
+                      rows=['cooperative_id'], sorted_by='balance')
+    by_ppl = d.pivot('Пайщик', m, base + [['state', '!=', 'closed']], ['balance', 'accrued'], mt,
+                     rows=['partner_id'], sorted_by='balance')
+    d.tables(('Кооперативы по паевому фонду', by_coop), ('Крупнейшие паи', by_ppl))
+    return d
+
+
+DASHBOARDS = [money, deals, trust, projects, exchange, crm, shares]
+
 
 
 def main():
